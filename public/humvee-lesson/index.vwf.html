@@ -15,9 +15,19 @@
 
 <html>
   <head>
-
+  	<script type="text/javascript">
+      vwf_view.calledMethod = function (nodeId, methodName, methodParameters, methodValue) {
+        switch(methodName) {
+          case "honkHorn":
+            $('#honk')[0].play();
+            break;
+        }
+      }
+    </script>
   </head>
   <body>
-
+  	<audio id='honk'>
+      <source src="honk.wav"></source>
+    </audio>
   </body>
 </html>

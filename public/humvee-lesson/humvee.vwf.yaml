@@ -16,12 +16,1188 @@ extends: http://vwf.example.com/node3.vwf
 source: humvee.dae
 type: model/vnd.collada+xml
 children:
+  interiorCamera:
+    extends: http://vwf.example.com/camera.vwf
   bone2: 
     extends: http://vwf.example.com/node3.vwf 
     children: 
       Scene: 
         extends: http://vwf.example.com/node3.vwf 
         children: 
+          ParkingBrake: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              Untitled_034: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj1: 
+                    extends: http://vwf.example.com/node3.vwf 
+          WaitToStart: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              Untitled_033: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj2: 
+                    extends: http://vwf.example.com/node3.vwf 
+          AirFan: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 2
+              animationRate: 2
+            children: 
+              Untitled_032: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj3: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 2
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.translateBy([0, 0, -1 * time], 0);
+              }
+          GearShift: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements:  
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 2
+              controlValue: 0.25
+              animationTime: 0.25
+            children: 
+              Untitled_031: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj4: 
+                    extends: http://vwf.example.com/node3.vwf 
+              rear:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              neutral:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+              drive:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 2
+              second:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 3
+              first:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 4
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.translateBy([1 * (time - 0.5) * 8, 0, 0], 0);
+              }
+          HighLowSelector: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 3
+              controlValue: 1
+              animationTime: 0.5
+            children: 
+              Untitled_030: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj5: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 0
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 1
+                  sequence: 1
+                  animationTime: 0.5
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 2
+                  sequence: 2
+                  animationTime: 1
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.translateBy([1 * (time - 0.5) * 6, 0, 0], 0);
+              }
+          EmergencyBrake: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements:  
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 2
+              animationRate: 2
+            children: 
+              Untitled_029: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj6: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0, 1, 0, time * 45], 0, "rotated");
+              }
+          Accelerator: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              animationRate: 3
+              controlScale: 2
+              controlMomentary: true
+            children: 
+              Untitled_028: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj7: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0, 1, 0, time * 10], 0, "rotated");
+              }
+          Brake: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              animationRate: 3
+              controlScale: 2
+              controlMomentary: true
+            children: 
+              Untitled_027: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj8: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0, 1, 0, time * 10], 0, "rotated");
+              }
+          SteeringWheel: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlValue: 1
+              animationTime: 0.5
+              linkedControls: ["TirePassFront", "TireDriverFront"]
+            children: 
+              Horn: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_026: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj9: 
+                        extends: http://vwf.example.com/node3.vwf 
+                methods: 
+                  honkHorn:
+                scripts:
+                - |
+                  this.pointerUp = function( pointerInfo, pickInfo ) {
+                    this.honkHorn();
+                  }
+              Untitled_025: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj10: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+                  controlValue: 1
+                  animationTime: 0.5
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 2
+                  controlValue: 2
+                  animationTime: 1
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0.942, 0, 0.335, (time - 0.5) * -720], 0, "rotated");
+              }
+          TurnSignal: 
+            extends: http://vwf.example.com/node3.vwf
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 3
+              controlValue: 1
+              animationTime: 0.5
+            children: 
+              Untitled_024: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj11: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+                  controlValue: 1
+                  animationTime: 0.5
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 2
+                  controlValue: 2
+                  animationTime: 1
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0.942, 0, 0.335, (time - 0.5) * 60], 0, "rotated");
+              }
+          Ignition: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 3
+            children: 
+              Untitled_023: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj12: 
+                    extends: http://vwf.example.com/node3.vwf 
+              stop:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              run:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+                  controlType: "detent"
+              start:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+                  controlType: "spring"
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([-1, 0, 0, time * 70], 0, "rotated");
+              }
+          Switch03: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              Untitled_022: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj13: 
+                    extends: http://vwf.example.com/node3.vwf 
+          Switch02: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              Untitled_021: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj14: 
+                    extends: http://vwf.example.com/node3.vwf 
+          Switch01: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              Untitled_020: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj15: 
+                    extends: http://vwf.example.com/node3.vwf 
+          AirTemp: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 3
+              controlValue: 2
+              animationTime: 0.5
+            children: 
+              Untitled_019: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj16: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 0
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 1
+                  sequence: 1
+                  animationTime: 0.25
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 2
+                  sequence: 2
+                  animationTime: 0.5
+              delta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 3
+                  sequence: 3
+                  animationTime: 0.75
+              epsilon:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 4
+                  sequence: 4
+                  animationTime: 1
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.translateBy([0, 1 * (time - 0.5) * 2, 0], 0);
+              }
+          SpeedNeedle: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 3
+            children: 
+              Untitled_018: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj17: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 0
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 1
+                  sequence: 1
+                  animationTime: 0.25
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 2
+                  sequence: 2
+                  animationTime: 0.5
+              delta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 3
+                  sequence: 3
+                  animationTime: 0.75
+              epsilon:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 4
+                  sequence: 4
+                  animationTime: 1
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0.986, 0, 0.164, time * -240], 0, "rotated");
+              }
+          VoltMeter: 
+            extends: http://vwf.example.com/node3.vwf
+            implements:
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 3
+              controlValue: 2
+              animationTime: 0.5
+            children: 
+              Untitled_017: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj18: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 0
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 1
+                  sequence: 1
+                  animationTime: 0.25
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 2
+                  sequence: 2
+                  animationTime: 0.5
+              delta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 3
+                  sequence: 3
+                  animationTime: 0.75
+              epsilon:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 4
+                  sequence: 4
+                  animationTime: 1
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0.986, 0, 0.164, (time - 0.5) * -72], 0, "rotated");
+              }
+          TempNeedle: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 3
+              controlValue: 2
+              animationTime: 0.5
+            children: 
+              Untitled_016: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj19: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 0
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 1
+                  sequence: 1
+                  animationTime: 0.25
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 2
+                  sequence: 2
+                  animationTime: 0.5
+              delta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 3
+                  sequence: 3
+                  animationTime: 0.75
+              epsilon:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 4
+                  sequence: 4
+                  animationTime: 1
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0.986, 0, 0.164, (time - 0.5) * -72], 0, "rotated");
+              }
+          OilNeedle: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 3
+              controlValue: 4
+              animationTime: 1
+            children: 
+              Untitled_015: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj20: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 0
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 1
+                  sequence: 1
+                  animationTime: 0.25
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 2
+                  sequence: 2
+                  animationTime: 0.55
+              delta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 3
+                  sequence: 3
+                  animationTime: 0.8
+              epsilon:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 4
+                  sequence: 4
+                  animationTime: 1
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0.986, 0, 0.164, (time - 0.55) * -90], 0, "rotated");
+              }
+          FuelNeedle: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 3
+              controlValue: 4
+              animationTime: 1
+            children: 
+              Untitled_014: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj21: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 0
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 1
+                  sequence: 1
+                  animationTime: 0.25
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 2
+                  sequence: 2
+                  animationTime: 0.5
+              delta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 3
+                  sequence: 3
+                  animationTime: 0.75
+              epsilon:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 4
+                  sequence: 4
+                  animationTime: 1
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0.986, 0, 0.164, (time - 0.5) * -80], 0, "rotated");
+              }
+          DoorPassFront: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 2
+            children: 
+              Untitled_013: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj22: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+                  animationTime: 0.125
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0, 0, 1, time * 360], 0, "rotated");
+              }
+          DoorPassRear: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 2
+            children: 
+              Untitled_012: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj23: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+                  animationTime: 0.125
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0, 0, 1, time * 360], 0, "rotated");
+              }
+          Omni002: 
+            extends: http://vwf.example.com/node3.vwf 
+          WiperPass: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              animationTime: 0
+              controlValue: 0
+              controlScale: 2
+              linkedControls: ["WiperDriver"]
+            children: 
+              Untitled_011: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj24: 
+                    extends: http://vwf.example.com/node3.vwf  
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 0
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 1
+                  sequence: 1
+                  animationTime: 0.125
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 2
+                  sequence: 2
+                  animationTime: 0.25
+              delta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 3
+                  sequence: 3
+                  animationTime: 0.375
+              epsilon:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 4
+                  sequence: 4
+                  animationTime: 0.5
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([-1, 0, 0, (time - 0.125) * 360], 0, "rotated");
+              }
+          WiperDriver: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              animationTime: 0
+              controlValue: 0
+              controlScale: 2
+              linkedControls: ["WiperPass"]
+            children: 
+              Untitled_010: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj25: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 0
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 1
+                  sequence: 1
+                  animationTime: 0.125
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 2
+                  sequence: 2
+                  animationTime: 0.25
+              delta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 3
+                  sequence: 3
+                  animationTime: 0.375
+              epsilon:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 4
+                  sequence: 4
+                  animationTime: 0.5
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([-1, 0, 0, (time - 0.125) * 360], 0, "rotated");
+              }
+          GunMount: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 2
+            children: 
+              GunMountHatch01: 
+                extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/animation.vwf
+                - http://vwf.example.com/node3/animation.vwf
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlScale: 2
+                children: 
+                  GunMountHatch02: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    implements: 
+                    - http://vwf.example.com/animation.vwf
+                    - http://vwf.example.com/node3/animation.vwf
+                    - http://vwf.example.com/control.vwf
+                    properties:
+                      controlScale: 2
+                    children: 
+                      Untitled_009: 
+                        extends: http://vwf.example.com/node3.vwf 
+                        children: 
+                          glgeObj26: 
+                            extends: http://vwf.example.com/node3.vwf 
+                      alpha:
+                        implements:
+                        - http://vwf.example.com/animation/position.vwf
+                        - http://vwf.example.com/control/position.vwf
+                        properties:
+                          sequence: 0
+                      beta:
+                        implements:
+                        - http://vwf.example.com/animation/position.vwf
+                        - http://vwf.example.com/control/position.vwf
+                        properties:
+                          sequence: 1
+                          animationTime: 0.161
+                      gamma:
+                        implements:
+                        - http://vwf.example.com/animation/position.vwf
+                        - http://vwf.example.com/control/position.vwf
+                        properties:
+                          sequence: 2
+                          animationTime: 0.322
+                      delta:
+                        implements:
+                        - http://vwf.example.com/animation/position.vwf
+                        - http://vwf.example.com/control/position.vwf
+                        properties:
+                          sequence: 3
+                          animationTime: 0.483
+                    scripts:
+                    - |
+                      this.animationUpdate = function(time, duration) {
+                        if(!this.initialTransform) {
+                          this.initialTransform = this.transform;
+                        }
+                        this.transform = this.initialTransform;
+                        this.rotateBy([0, 1, 0, time * 360], 0, "rotated");
+                      }
+                  Untitled_008: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj27: 
+                        extends: http://vwf.example.com/node3.vwf 
+                  alpha:
+                    implements:
+                    - http://vwf.example.com/animation/position.vwf
+                    - http://vwf.example.com/control/position.vwf
+                    properties:
+                      sequence: 0
+                  beta:
+                    implements:
+                    - http://vwf.example.com/animation/position.vwf
+                    - http://vwf.example.com/control/position.vwf
+                    properties:
+                      sequence: 1
+                      animationTime: 0.167
+                  gamma:
+                    implements:
+                    - http://vwf.example.com/animation/position.vwf
+                    - http://vwf.example.com/control/position.vwf
+                    properties:
+                      sequence: 2
+                      animationTime: 0.333
+                  delta:
+                    implements:
+                    - http://vwf.example.com/animation/position.vwf
+                    - http://vwf.example.com/control/position.vwf
+                    properties:
+                      sequence: 3
+                      animationTime: 0.5
+                scripts:
+                - |
+                  this.animationUpdate = function(time, duration) {
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
+                    }
+                    this.transform = this.initialTransform; 
+                    this.rotateBy([1, 0, 0, time * 360], 0, "rotated");
+                  }
+              Untitled_007: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj28: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 2
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0, 0, 1, time * 360], 0, "rotated");
+              }
           DoorDriverFront: 
             extends: http://vwf.example.com/node3.vwf 
             implements: 
@@ -58,8 +1234,345 @@ children:
                 this.transform = this.initialTransform;
                 this.rotateBy([0, 0, -1, time * 360], 0, "rotated");
               }
+          RearHatch: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 2
+            children: 
+              Untitled_005: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj30: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+                  animationTime: 0.125
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0, -1, 0, time * 360], 0, "rotated");
+              }
+          SpareMount: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 2
+            children: 
+              SpareTire: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj31: 
+                    extends: http://vwf.example.com/node3.vwf 
+              Untitled_004: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj32: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+                  animationTime: 0.125
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0, 0, 1, time * 360], 0, "rotated");
+              }
+          DoorDriverRear: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 2
+            children: 
+              Untitled_003: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj33: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+                  animationTime: 0.125
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0, 0, -1, time * 360], 0, "rotated");
+              }
+          TireDriverRear: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              glgeObj34: 
+                extends: http://vwf.example.com/node3.vwf 
+          TirePassRear: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              glgeObj35: 
+                extends: http://vwf.example.com/node3.vwf 
+          TirePassFront: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 3
+              animationRate: 1.5
+              controlValue: 1
+              animationTime: 0.5
+              linkedControls: ["SteeringWheel", "TireDriverFront"]
+            children: 
+              glgeObj36: 
+                extends: http://vwf.example.com/node3.vwf
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 0
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 1
+                  sequence: 1
+                  animationTime: 0.5
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 2
+                  sequence: 2
+                  animationTime: 1
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0, 0, 1, (time - 0.5) * 60], 0, "rotated");
+              }
+          TireDriverFront: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 3
+              animationRate: 1.5
+              controlValue: 1
+              animationTime: 0.5
+              linkedControls: ["SteeringWheel", "TirePassFront"]
+            children: 
+              glgeObj37: 
+                extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 0
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 1
+                  sequence: 1
+                  animationTime: 0.5
+              gamma:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  controlValue: 2
+                  sequence: 2
+                  animationTime: 1
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0, 0, 1, (time - 0.5) * 60], 0, "rotated");
+              }
           HumveeBody: 
             extends: http://vwf.example.com/node3.vwf 
             children: 
               glgeObj38: 
                 extends: http://vwf.example.com/node3.vwf 
+          HoodLatchPass: 
+            extends: http://vwf.example.com/node3.vwf
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 2
+              linkedControls: ["Hood", "HoodLatchDriver"]
+            children: 
+              Untitled_002: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj39: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+                  animationTime: 0.125
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([-1, 0, 0, time * 360], 0, "rotated");
+              }
+          HoodLatchDriver: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 2
+              linkedControls: ["HoodLatchPass", "Hood"]
+            children: 
+              Untitled_001: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj40: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+                  animationTime: 0.125
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([1, 0, 0, time * 360], 0, "rotated");
+              }
+          Hood: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 2
+              linkedControls: ["HoodLatchPass", "HoodLatchDriver"]
+            children: 
+              Untitled: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj41: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+                  animationTime: 0.125
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0, -1, 0, time * 360], 0, "rotated");
+              }
+          Ground: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              glgeObj42: 
+                extends: http://vwf.example.com/node3.vwf 
+          Omni001: 
+            extends: http://vwf.example.com/node3.vwf 
+          EnvironmentAmbientLight: 
+            extends: http://vwf.example.com/node3.vwf 
