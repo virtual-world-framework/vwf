@@ -374,64 +374,74 @@ define( function() {
 
         name: [ /* nodeID */ ],
 
-        /// Prototype calls prototyping() on each model. The first model to return a non-undefined value
-        /// dictates the return value.
+        /// Return a node's prototype.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
         /// 
         /// @returns {ID}
+        ///   The ID of the node's prototype, or `undefined` if called on the proto-prototype,
+        ///   `node.vwf`.
 
         prototype: [ /* nodeID */ ],
 
-        /// Prototypes returns a list of all the prototype ids for a given node id.
+        /// Return a node's prototype, its prototype, etc. up to and including `node.vwf`.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
+        /// @param {Boolean} [includeBehaviors]
+        ///   If set, also include the node's and prototypes' behaviors.
         /// 
         /// @returns {ID[]}
+        ///   An array of IDs of the node's prototypes.
 
         prototypes: [ /* nodeID, includeBehaviors */ ],
 
-        /// Behaviors returns a list of all the behavior ids for a given node id.
+        /// Return a node's behaviors.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
         /// 
         /// @returns {ID[]}
+        ///   An array of IDs of the node's behaviors. An empty array is returned if the node
+        ///   doesn't have any behaviors.
 
         behaviors: [ /* nodeID */ ],
 
-        /// Returns an array of node ids for all of the parents for the given child node id.
+        /// Return a node's parent, grandparent, its parent, etc.
         /// 
         /// @param {ID} nodeID
         /// 
         /// @returns {ID[]}
+        ///   An array of IDs of the node's ancestors. An empty array is returned for global,
+        ///   top-level nodes that don't have a parent.
 
         ancestors: [ /* nodeID */ ],
 
-        /// Parent calls parenting() on each model. The first model to return a non-undefined value
-        /// dictates the return value.
+        /// Return a node's parent.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
         /// 
         /// @returns {ID}
+        ///   The ID of the node's parent, or `undefined` for the application root node or other
+        ///   global, top-level nodes.
 
         parent: [ /* nodeID */ ],
 
-        /// Children calls childrening() on each model. The return value is the union of the non-undefined
-        /// results.
+        /// Return a node's children.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
         /// 
         /// @returns {ID[]}
+        ///   An array of IDs of the node's children. An empty array is returned if the node
+        ///   doesn't have any children.
 
         children: [ /* nodeID */ ],
 
@@ -442,6 +452,8 @@ define( function() {
         /// @param {ID} nodeID
         /// 
         /// @returns {ID[]}
+        ///   An array of IDs of the node's descendants. An empty array is returned if the node
+        ///   doesn't have any children.
 
         descendants: [ /* nodeID */ ],
 
@@ -505,7 +517,8 @@ define( function() {
         /// @function
         /// 
         /// @param {ID} nodeID
-        ///   The reference node. Relative patterns are resolved with respect to this node.
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
         /// @param {String} matchPattern
         ///   The search pattern.
         /// @param {Function} [callback]
@@ -523,7 +536,8 @@ define( function() {
         /// @function
         /// 
         /// @param {ID} nodeID
-        ///   The reference node. Relative patterns are resolved with respect to this node.
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
         /// @param {String} matchPattern
         ///   The search pattern.
         /// @param {ID} testID
