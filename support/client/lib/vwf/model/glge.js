@@ -375,6 +375,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             //       there, too
             function notifyDriverOfPrototypeAndBehaviorProps() {
                 var ptPropValue;
+				var protos = getPrototypes.call( this, kernel, childExtendsID );
                 protos.forEach( function( prototypeID ) {
                     for ( var propertyName in kernel.getProperties( prototypeID ) ) {
                         ptPropValue = kernel.getProperty( childExtendsID, propertyName );
