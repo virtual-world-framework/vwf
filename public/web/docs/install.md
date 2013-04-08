@@ -137,9 +137,25 @@ Or (for Red Hat/Fedora)
 
 	# yum install ruby rubygems
 
-Or (for OSX with Boo)
+Or (for OSX with Homebrew)
 
-	# boo install ruby rubygems
+	Make sure you have the Command Line Tools for XCode installed: https://developer.apple.com/downloads/index.action
+	
+	# ruby -e "$(curl -fsSkL raw.github.com/mxcl/homebrew/go)"
+	# brew install automake
+	The script explains what it will do and then pauses before it does it
+	
+	# \curl -L https://get.rvm.io | bash -s stable --ruby
+	# source ~/.rvm/scripts/rvm
+	This installs RVM which is a version manager for Ruby.
+	
+	# rvm install 1.9.3-head
+	# rvm use ruby-1.9.3-head
+	# rvm rubygems current
+	This adds Ruby 1.9.3 to your machine and sets 1.9.3 as the default Ruby version.
+
+	# brew install git
+	This installs git if you do not have it already on your machine.
 
 *3.2 Extract VWF from TAR File*
 
