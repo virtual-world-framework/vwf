@@ -1802,12 +1802,12 @@ var useLegacyID = [  // TODO: fix static ID references and remove
     require.toUrl( "dummy" ).indexOf( "../lib/" ) != 0;
 
 useLegacyID = childURI &&
-    ( childURI == "index.vwf" || childURI == "appscene-vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
+    ( childURI == "index.vwf" || childURI == "appscene.vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
     childURI != "http://vwf.example.com/node.vwf";
     
 useLegacyID = useLegacyID ||
     // work around model/glge creating a camera on a not-initialized application node
-    nodeID == this.find("", "/")[0] && ! this.models.object.objects[nodeID] && childName == "camera";
+    nodeID == this.find("", "/")[0] && childName == "camera";
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 var childID = childComponent.id;
@@ -1917,8 +1917,17 @@ if ( ! childComponent.source ) {
 
                 function( series_callback_async /* ( err, results ) */ ) {
 
-                    // Call creatingNode() on each model. The node is considered to be constructed after
-                    // each model has run.
+                    // As a special case, since many kernel functions delegate to vwf/model/object,
+                    // call it first so that those functions will be available to the other drivers.
+                    // vwf/model/object is the last model driver, so relying on the normal order for
+                    // `creatingNode` would prevent other drivers from asking about prototypes and
+                    // other node information in their `creatingNode` handlers.
+
+                    vwf.models.object.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                        childComponent.source, childComponent.type, childURI, childName );  // TODO: return node metadata to the kernel and use vwf/model/object just as a property store?
+
+                    // Call creatingNode() on each model. The node is considered to be constructed
+                    // after each model has run.
 
                     async.forEachSeries( vwf.models, function( model, each_callback_async /* ( err ) */ ) {
 

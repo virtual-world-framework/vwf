@@ -39,6 +39,14 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                 childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
 
+            // The kernel calls vwf/model/object's `creatingNode` twice: once as a special case
+            // before the other drivers, and once in the normal order as the last driver. Ignore the
+            // second call.
+
+            if ( this.objects[childID] ) {  // TODO: return node metadata to the kernel and use vwf/model/object just as a property store?
+                return;
+            }
+
             var parent = nodeID != 0 && this.objects[nodeID];
 
             var child = this.objects[childID] = {
