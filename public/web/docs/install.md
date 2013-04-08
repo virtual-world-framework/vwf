@@ -42,9 +42,11 @@ Click through to *Finish* to close Cygwin setup. Save setup.exe for later since 
 
 *1.1 Shell Command*
 
+Please make sure your HTTP_PROXY and HTTPS_PROXY environment variable are set in cygwin. Please make sure your git http proxy are also set (ie. git config --global http.proxy http://yourproxy.com)
+
 Perform the following shell command at a user shell prompt within Cygwin:
 
-	bash -x <( (curl http://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_windows.sh)) optProxyAddress
+	curl -k https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_windows.sh | bash -x
 
 --------------------------
 

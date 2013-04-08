@@ -24,7 +24,7 @@
 set -e
 
 # Install RubyGems for Cygwin
-curl -O http://production.cf.rubygems.org/rubygems/rubygems-2.0.3.tgz --proxy $1
+curl -O http://production.cf.rubygems.org/rubygems/rubygems-2.0.3.tgz 
 tar xzf rubygems-2.0.3.tgz
 cd rubygems-2.0.3
 ruby setup.rb install
@@ -34,7 +34,6 @@ gem install bundler --no-ri --no-rdoc
 if [ -d "vwf" ];then
 rm -rf vwf
 fi
-git config --global http.proxy $1
 git clone http://www.github.com/virtual-world-framework/vwf  --recursive
 
 # Download and Install Ruby Gems Referenced by VWF
