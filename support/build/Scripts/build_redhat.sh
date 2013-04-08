@@ -26,7 +26,14 @@ sudo yum list updates
 sudo yum -y update
 
 # Install prerequisites on a new system
-sudo yum -y install gcc-c++ gcc java ruby rubygems git ruby-devel
+sudo yum -y install gcc-c++ gcc java rubygems git ruby-devel
+wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p392.tar.gz
+tar xvzf ruby-1.9.3-p392.tar.gz
+cd ruby-1.9.3-p392
+./configure
+make
+make install
+cd ..
 
 # Upgrade RubyGems to the latest version and push upgrade to any Ruby Gems on the system
 sudo gem update --system
@@ -38,7 +45,7 @@ sudo gem install bundler
 if [ -d "/var/www/vwf" ];then
 sudo rm -rf /var/www/vwf
 fi
-sudo git clone http://github.com/virtual-world-framework/vwf /var/www/vwf
+sudo git clone http://github.com/virtual-world-framework/vwf /var/www/vwf --recursive
 
 # Download and Install Ruby Gems Referenced by VWF
 cd /var/www/vwf
