@@ -393,7 +393,7 @@ define( function() {
         /// 
         /// @returns {ID[]}
 
-        prototypes: [ /* nodeID */ ],
+        prototypes: [ /* nodeID, includeBehaviors */ ],
 
         /// Behaviors returns a list of all the behavior ids for a given node id.
         /// 

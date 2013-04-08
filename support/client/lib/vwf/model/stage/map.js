@@ -212,8 +212,8 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- prototypes ---------------------------------------------------------------------------
 
-        prototypes: function( node ) {
-            return this.kernel.prototypes( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        prototypes: function( node, includeBehaviors ) {
+            return this.kernel.prototypes( this.model_to_kernel[this.object_id(node)] || node, includeBehaviors ); // TODO remap return value
         },
 
         // -- behaviors ----------------------------------------------------------------------------
