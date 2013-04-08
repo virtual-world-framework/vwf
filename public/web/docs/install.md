@@ -107,7 +107,7 @@ Perform the following shell command at a user shell prompt:
 
 Perform the following shell command at a user shell prompt:
 
-	sudo bash -x <( (curl http://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_redhat.sh)) optProxyAddress
+	sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_debian.sh | bash -x
 
 --------------------------
 
@@ -143,9 +143,9 @@ Or (for OSX with Boo)
 
 *3.2 Extract VWF from TAR File*
 
-Download and extract the contents of the vwf.tar to your development directory.
+Download the contents of the GitHub Master VWF Baseline to your local directory:
 
-	$ tar -xvzf vwf.tar
+	$ sudo git clone http://www.github.com/virtual-world-framework/vwf --recursive
 
 *3.3 Install the Gems*
 
@@ -155,7 +155,9 @@ Launch a terminal window and cd to your VWF development directory:
 
 Then enter these commands:
 
-	# gem install bundler
+	# sudo gem install rubygems-update
+	# sudo update_rubygems 
+	# sudo gem install bundler
 
 On Debian-based systems, RubyGems is not automatically added to the path. Find the following lines in bash:
 
@@ -177,15 +179,15 @@ And update them to:
 
 Now you can install the RubyGems to the system (as root):
 
-	# bundle install
+	# sudo bundle install
 
 *3.4 Build the Server*
 
-    # bundle exec rake build
+    # sudo bundle exec rake build
 
 *3.5 Launch the Server*
 
-	# bundle exec thin start
+	# sudo bundle exec thin start
 
 *3.6 Connect*
 
