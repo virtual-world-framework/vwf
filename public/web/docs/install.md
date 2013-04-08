@@ -99,7 +99,7 @@ Linux Installations
 
 Perform the following shell command at a user shell prompt:
 
-	sudo bash -x <( (curl http://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_debian.sh)) optProxyAddress
+	sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_debian.sh | bash -x
 
 --------------------------
 
@@ -107,7 +107,7 @@ Perform the following shell command at a user shell prompt:
 
 Perform the following shell command at a user shell prompt:
 
-	sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_debian.sh | bash -x
+	sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_redhat.sh | bash -x
 
 --------------------------
 
