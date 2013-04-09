@@ -24,7 +24,7 @@
 					
 				}
 				geo.verticesNeedUpdate = true;
-				debugger;
+				
 			}
 			this.settingProperty = function(prop,val)
 			{
@@ -40,7 +40,6 @@
 				if(prop == 'amount')
 				{
 					return this.amount;
-					
 				}
 				if(prop == 'type')
 				{

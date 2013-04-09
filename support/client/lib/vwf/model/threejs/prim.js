@@ -44,16 +44,20 @@
 					this.restoreMesh();   
 				}
 				this.GetMesh().geometry.dirtyMesh = true;
+				this.GetMesh().castShadow = true;
+				this.GetMesh().receiveShadow = true;
 			}
 			
 			this.dirtyStack = function(rebuild)
 			{
 				this.updateStack(rebuild);
 			}
-			this.gettingProperty = function(protoname)
+			this.gettingProperty = function(propertyName)
 			{
-				if(protoname == 'radius')
-					return 0;
+				if(propertyName == 'type')
+				{	
+					return 'Primitive';
+				}
 				
 			}
 			this.updateStack = function(rebuild)

@@ -1,7 +1,7 @@
 var maxObjects = 1; 
 var maxDepth = 16;
-
-var drawSceneManagerRegions = true;
+var batchAtLevel = 4;
+var drawSceneManagerRegions = false;
 
 function SceneManager(scene)
 {
@@ -35,15 +35,32 @@ SceneManager.prototype.rebuild = function(mo,md)
 	for(var i =0; i < children.length; i++)
 		this.root.addChild(children[i]);
 }
+SceneManager.prototype.show = function()
+{
+	drawSceneManagerRegions = true;
+	this.rebuild(maxObjects,maxDepth)
+}
+SceneManager.prototype.hide = function()
+{
+	drawSceneManagerRegions = false;
+	this.rebuild(maxObjects,maxDepth)
+}
 SceneManager.prototype.addToRoot = function(child)
 {
-	this.root.childObjects.push(child);
+	this.specialCaseObjects.push(child);
 }
 SceneManager.prototype.CPUPick = function(o,d,opts)
 {
 	//console.profile("PickProfile");
 
 	var hitlist = this.root.CPUPick(o,d,opts || new THREE.CPUPickOptions());
+	
+	for(var i = 0; i < this.specialCaseObjects.length; i++)
+	{
+		var childhits = this.specialCaseObjects[i].CPUPick(o,d,opts|| new THREE.CPUPickOptions());
+		if(childhits)
+			hitlist = hitlist.concat(childhits);
+	}
 	
 	//sort the hits by priority and distance
 	hitlist = hitlist.sort(function(a,b){
@@ -57,16 +74,30 @@ SceneManager.prototype.CPUPick = function(o,d,opts)
 	//console.profileEnd();
 	return hitlist[0];
 }
+SceneManager.prototype.FrustrumCast = function(f,opts)
+{
+	//console.profile("PickProfile");
+
+	var hitlist = this.root.FrustrumCast(f,opts || new THREE.CPUPickOptions());
+	for(var i = 0; i < this.specialCaseObjects.length; i++)
+	{
+		var childhits = this.specialCaseObjects[i].FrustrumCast(f,opts || new THREE.CPUPickOptions());
+		if(childhits)
+			hitlist = hitlist.concat(childhits);
+	}
 	
+	return hitlist;
+}	
 SceneManager.prototype.initialize = function(scene)
 {
 	this.min = [-130,-130,-120];
 	this.max = [130,130,140];
-	
-	
+	this.BatchManagers = [];
+	this.specialCaseObjects = [];
 	THREE.Object3D.prototype.add_internal = THREE.Object3D.prototype.add;
 	THREE.Object3D.prototype.add = function(child,SceneManagerIgnore)
 	{
+		
 		this.add_internal(child);
 		if(SceneManagerIgnore)
 			return;
@@ -166,6 +197,11 @@ function SceneManagerRegion(min, max, depth,scene,order)
 		this.mesh.renderDepth = this.depth * 8 + this.order;
 		this.scene.add(this.mesh,true);
 	}
+	if(this.depth <= batchAtLevel)
+	{
+		this.RenderBatchManager = new THREE.RenderBatchManager(scene,GUID());
+		_SceneManager.BatchManagers.push(this.RenderBatchManager);
+	}
 }
 SceneManagerRegion.prototype.deinitialize = function()
 {
@@ -175,12 +211,13 @@ SceneManagerRegion.prototype.deinitialize = function()
 	{
 		this.childRegions[i].deinitialize();
 	}
+	if(this.RenderBatchManager)
+	{
+		_SceneManager.BatchManagers.splice(_SceneManager.BatchManagers.indexOf(this.RenderBatchManager),1);
+		this.RenderBatchManager.deinitialize();
+	}
 }
-SceneManagerRegion.prototype.addChild= function(child)
-{
-	
-	this.distributeObject(child);
-}
+
 
 SceneManagerRegion.prototype.getChildren = function()
 {
@@ -212,6 +249,12 @@ SceneManagerRegion.prototype.removeChild= function(child)
 		removed = true;
 		this.childCount--;
 		this.childObjects.splice(this.childObjects.indexOf(child),1);
+		
+		if(this.depth <= batchAtLevel)
+		{
+			this.RenderBatchManager.remove(child);
+		}
+		
 	}
 	else
 	{
@@ -256,6 +299,21 @@ SceneManagerRegion.prototype.completelyContains = function(object)
 	if(box.min[2] > this.min[2] && box.max[2] < this.max[2])
 		return true;
 	return false;	
+}
+SceneManagerRegion.prototype.addChild= function(child)
+{
+	//sort the children down into sub nodes
+	var added = this.distributeObject(child);
+	
+	//
+	if(this.depth == batchAtLevel && added)
+	{
+		this.RenderBatchManager.add(child);
+	}
+	if(this.depth >= 0 && this.depth <= batchAtLevel && !added)
+	{
+		this.RenderBatchManager.add(child);
+	}
 }
 SceneManagerRegion.prototype.distributeObject = function(object)
 {
@@ -306,6 +364,7 @@ SceneManagerRegion.prototype.distributeObject = function(object)
 			}.bind(object)
 		}
 	}
+	return added;
 }
 SceneManagerRegion.prototype.updateObject = function(object)
 {
@@ -405,7 +464,7 @@ SceneManagerRegion.prototype.CPUPick = function(o,d,opts)
 		return hits;
 		
 	//reject this node if the ray does not intersect it's bounding box
-	if(this.testBounds(o,d).length == 0)
+	if(this.testBoundsRay(o,d).length == 0)
 		return hits;
 	
 	//the the opts specify a max dist
@@ -436,53 +495,212 @@ SceneManagerRegion.prototype.CPUPick = function(o,d,opts)
 }
 
 //Test a ray against an octree region
-SceneManagerRegion.prototype.intersectFrustrum = function(frustrum)
+SceneManagerRegion.prototype.FrustrumCast = function(frustrum,opts)
 {
 	
 	var hits = [];
 	//if no faces, can be no hits. 
 	//remember, faces is all faces in this node AND its children
-	if(this.faces.length == 0)
+	if(this.getChildCount().length == 0)
+		return hits;
+		
+	//reject this node if the ray does not intersect it's bounding box
+	if(this.testBoundsFrustrum(frustrum).length == 0)
 		return hits;
 	
-	//if the node is split, then we test the non distributed faces, which are not in any children
-	var facelist = this.faces;
-	if(this.isSplit)
-	   facelist = this.facesNotDistributed;
+	//the the opts specify a max dist
+	//if the start is not in me, and im to far, don't bother with my children or my objcts
+	if(opts.maxDist > 0 && this.r + MATH.distanceVec3(o,this.c) > opts.maxDist)
+	{
+		if(!this.contains(o))
+			return hits;
+	}	
 	
 	//check either this nodes faces, or the not distributed faces. for a leaf, this will just loop all faces,
 	//for a non leaf, this will iterate over the faces that for some reason are not in children, which SHOULD be none
-	for(var i = 0; i < facelist.length; i++)
+	for(var i = 0; i < this.childRegions.length; i++)
 	{
-		var facehits = facelist[i].intersectFrustrum(frustrum);
-		if(facehits)
-			hits.push(facehits);
+		var childhits = this.childRegions[i].FrustrumCast(frustrum,opts);
+		if(childhits)
+			hits = hits.concat(childhits);
 	}
-	
-	//reject this node if the ray does not intersect it's bounding box
-	if(this.testBoundsFrustrum(frustrum).length == 0)
+	for(var i = 0; i < this.childObjects.length; i++)
 	{
-		//console.log('region rejected');
-		return hits;
-	}
-	
-	//if the node is split, concat the hits from all children
-	if(this.isSplit)
-	{
-		for(var i = 0; i < this.children.length; i++)
-		{
-			var childhits = this.children[i].intersectFrustrum(frustrum);
-			if(childhits)
-			{
-				for(var j = 0; j < childhits.length; j++)
-				    hits.push(childhits[j]);
-			}
-		}
+		var childhits = this.childObjects[i].FrustrumCast(frustrum,opts);
+		if(childhits)
+			hits = hits.concat(childhits);
 	}
 	return hits;
 }
 
-SceneManagerRegion.prototype.testBounds = BoundingBoxRTAS.prototype.intersect;
+SceneManagerRegion.prototype.testBoundsRay = BoundingBoxRTAS.prototype.intersect;
+SceneManagerRegion.prototype.intersect = BoundingBoxRTAS.prototype.intersect;
 SceneManagerRegion.prototype.testBoundsFrustrum = BoundingBoxRTAS.prototype.intersectFrustrum;
 
 _SceneManager = new SceneManager();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+THREE.RenderBatchManager = function(scene,name)
+{
+	this.scene = scene;
+	this.name = name;
+	this.objects = [];
+	
+	this.prerender = function()
+	{
+		if(this.dirty)
+		 this.build();
+		delete this.dirty;
+	}
+	this.prerenderhandle = this.prerender.bind(this);
+	$(document).bind('prerender',this.prerenderhandle);
+}
+
+THREE.RenderBatchManager.prototype.add = function(child)
+{
+	if(this.objects.indexOf(child) != -1)
+		return;
+		
+	this.objects.push(child)
+//	console.log('adding ' + child.name + ' to batch' + this.name);  
+	this.dirty = true;
+}
+
+THREE.RenderBatchManager.prototype.remove = function(child)
+{
+	if(this.objects.indexOf(child) == -1)
+		return;
+	
+//	console.log('removing ' + child.name + ' from batch' + this.name);  
+	this.objects.splice(this.objects.indexOf(child),1);
+	this.dirty = true;
+}
+
+THREE.RenderBatchManager.prototype.build = function()
+{
+	console.log('Building batch' + this.name); 
+	if(this.objects.length == 0) return;
+	
+	//first, reset all the parents, so that we can get the world matrix
+	for(var i =0; i < this.objects.length; i++)
+	{
+		//if(!this.objects[i].parent && this.objects[i].parentBatchBack)
+			//this.objects[i].parentBatchBack.add_internal(this.objects[i]);
+		this.objects[i].visible = false;	
+	}
+	
+	//do the merge:
+	if(this.mesh)
+		this.scene.remove_internal(this.mesh);
+	this.mesh = null;
+    var geo = new THREE.Geometry();
+	this.mesh = new THREE.Mesh(geo,this.objects[0].material);
+	this.scene.add_internal(this.mesh);
+	
+	for(var i =0; i < this.objects.length; i++)
+	{
+		var tg = this.objects[i].geometry;
+		var matrix = this.objects[i].matrixWorld.clone();
+		var normalMatrix = new THREE.Matrix3();
+		normalMatrix.getInverse(matrix);
+		normalMatrix.transpose();
+		//normalMatrix.elements[3] = normalMatrix.elements[7] = normalMatrix.elements[11] = 0;
+		if(tg)
+		{	
+			
+			for(var j = 0; j < tg.faces.length; j++)
+			{
+				var face = tg.faces[j];
+				var newface;
+				if(face.d !== undefined)
+					newface = new THREE.Face4();
+				else
+					newface = new THREE.Face3();
+					
+				newface.a = face.a + geo.vertices.length;	
+				newface.b = face.b + geo.vertices.length;
+				newface.c = face.c + geo.vertices.length;
+				if(face.d !== undefined)
+					newface.d = face.d + geo.vertices.length;
+
+				newface.materialIndex = face.materialIndex;
+				newface.centroid.copy( face.centroid );
+				newface.normal.copy(face.normal);		
+				newface.normal.applyMatrix3( normalMatrix ).normalize();
+				for(var k = 0; k < face.vertexNormals.length; k++)
+					newface.vertexNormals.push(face.vertexNormals[k].clone().applyMatrix3(normalMatrix).normalize());
+				
+				geo.faces.push(newface);
+			
+			}
+			for(var j = 0; j < tg.vertices.length; j++)
+			{
+				geo.vertices.push(tg.vertices[j].clone().applyMatrix4(matrix));
+			}
+			
+			for(var j = 0; j < tg.normals.length; j++)
+			{
+				geo.normals.push(tg.normals[j].clone().applyMatrix4(matrix));
+			}
+			
+			
+			var uvs2 = tg.faceVertexUvs[ 0 ];
+			
+			for ( u = 0, il = uvs2.length; u < il; u ++ ) {
+
+				var uv = uvs2[ u ], uvCopy = [];
+
+				for ( var j = 0, jl = uv.length; j < jl; j ++ ) {
+
+					uvCopy.push( new THREE.Vector2( uv[ j ].x, uv[ j ].y ) );
+
+				}
+
+				geo.faceVertexUvs[0].push( uvCopy );
+
+			}
+
+	
+		}
+	}
+	
+	for(var i =0; i < this.objects.length; i++)
+	{
+		if(this.objects[i].parent)
+		{
+			//this.objects[i].parentBatchBack = this.objects[i].parent;
+			//this.objects[i].parent.remove_internal(this.objects[i]);
+		}
+	}
+}
+
+THREE.RenderBatchManager.prototype.deinitialize = function(child)
+{
+	$(document).unbind('prerender',this.prerenderhandle);
+	if(this.mesh)
+		this.scene.remove_internal(this.mesh);
+}

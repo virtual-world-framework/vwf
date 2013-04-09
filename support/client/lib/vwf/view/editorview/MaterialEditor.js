@@ -465,12 +465,13 @@ function MaterialEditor()
 	{
 		try{
 			
-			if(node && this.isOpen())
+			if(node)
 			{
 				this.currentMaterial = vwf.getProperty(node.id,'materialDef');
 				if(!this.currentMaterial)
 					return;
-				this.BuildGUI();
+				if(this.isOpen())	
+					this.BuildGUI();
 			}else
 			{
 				this.hide();
@@ -607,9 +608,10 @@ function MapBrowser()
 	//}
 	this.show = function()
 	{
-		this.BuildGUI();
+		
 		$('#MapBrowser').dialog('open');
 		$('#MapBrowser').dialog('option','position','center');
+		this.BuildGUI();
 		this.open =true;
 	}
 	

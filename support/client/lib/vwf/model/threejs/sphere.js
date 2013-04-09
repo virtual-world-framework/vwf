@@ -2,8 +2,8 @@
 		function sphere(childID, childSource, childName)
 		{
 			this.radius = 1;
-			this.rsegs = 5;
-			this.ssegs = 5;
+			this.rsegs = 10;
+			this.ssegs = 10;
 			this.EditorData = {};
 			this.EditorData.radius = {displayname:'Radius',property:'radius',type:'slider',min:0,max:10,step:.01};
 			this.EditorData.rsegs = {displayname:'R Segments',property:'rsegs',type:'slider',min:3,max:16};
@@ -51,10 +51,7 @@
 				{	
 					return this.EditorData;
 				}
-				if(propertyName == 'type')
-				{	
-					return 'Sphere-subDriver';
-				}
+				
 			}
 			this.BuildMesh = function(mat)
 			{

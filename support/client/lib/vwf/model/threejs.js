@@ -342,8 +342,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					node.type= childExtendsID;
 					node.sceneID= this.state.sceneRootID;
 
-					node.threeObject = new THREE.Object3D();
-					node.threeObject.add(node.getRoot());
+					//node.threeObject = new THREE.Object3D();
+					node.threeObject=(node.getRoot());
 					threeParent.add(node.threeObject);
 				} 
 				else
@@ -3449,5 +3449,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			return node;
 			
 		}
+		//preload common drivers
+		
+		this.factories['vwf/model/threejs/cylinder.js'] = this.loadSubDriver('vwf/model/threejs/cylinder.js');
+		this.factories['vwf/model/threejs/box.js'] = this.loadSubDriver('vwf/model/threejs/box.js');
+		this.factories['vwf/model/threejs/sphere.js'] = this.loadSubDriver('vwf/model/threejs/sphere.js');
+		this.factories['vwf/model/threejs/cone.js'] = this.loadSubDriver('vwf/model/threejs/cone.js');
+		this.factories['vwf/model/threejs/plane.js'] = this.loadSubDriver('vwf/model/threejs/plane.js');
+		
+		this.factories['vwf/model/threejs/prim.js'] = this.loadSubDriver('vwf/model/threejs/prim.js');
+		this.factories['vwf/model/threejs/modifier.js'] = this.loadSubDriver('vwf/model/threejs/modifier.js');
+		this.factories['vwf/model/threejs/materialdef.js'] = this.loadSubDriver('vwf/model/threejs/materialdef.js');
 	}
 });

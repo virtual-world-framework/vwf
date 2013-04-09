@@ -207,7 +207,7 @@ function pointInFrustrum(point,frustrum)
 
 }
 
-face.prototype.intersectFrustrum = function(frustrum)
+face.prototype.intersectFrustrum = function(frustrum,opts)
 {
 	if(pointInFrustrum(this.v0,frustrum)||pointInFrustrum(this.v0,frustrum)||pointInFrustrum(this.v0,frustrum))
 	{
@@ -326,14 +326,21 @@ SimpleFaceListRTAS.prototype.intersect = function(origin,direction,opts)
 	return intersects;
 }
 //Intersect a frustrum with a list of faces
-SimpleFaceListRTAS.prototype.intersectFrustrum = function(frustrum)
+SimpleFaceListRTAS.prototype.intersectFrustrum = function(frustrum,opts)
 {
 	var intersects = [];
     for(var i =0; i < this.faces.length; i++)
 	{
-		var intersect = this.faces[i].intersectFrustrum(frustrum);
+		var intersect = this.faces[i].intersectFrustrum(frustrum,opts);
 		if(intersect)
-		intersects.push(intersect);
+		{
+			intersects.push(intersect);
+			if(opts && opts.OneHitPerMesh)
+			{
+				
+				return intersects;
+			}
+		}
 	}
 	return intersects;
 }
@@ -406,7 +413,7 @@ BoundingBoxRTAS.prototype.transformBy = function(matrix)
 	return new  BoundingBoxRTAS(min2,max2);
 }
 
-BoundingBoxRTAS.prototype.intersectFrustrum = function(frustrum)
+BoundingBoxRTAS.prototype.intersectFrustrum = function(frustrum,opts)
 {
 	var p0 = [this.min[0],this.min[1],this.min[2]];
 	var p1 = [this.min[0],this.min[1],this.max[2]];
@@ -646,7 +653,7 @@ OctreeRegion.prototype.intersect = function(o,d,opts)
 }
 
 //Test a ray against an octree region
-OctreeRegion.prototype.intersectFrustrum = function(frustrum)
+OctreeRegion.prototype.intersectFrustrum = function(frustrum,opts)
 {
 	
 	var hits = [];
@@ -664,9 +671,16 @@ OctreeRegion.prototype.intersectFrustrum = function(frustrum)
 	//for a non leaf, this will iterate over the faces that for some reason are not in children, which SHOULD be none
 	for(var i = 0; i < facelist.length; i++)
 	{
-		var facehits = facelist[i].intersectFrustrum(frustrum);
+		var facehits = facelist[i].intersectFrustrum(frustrum,opts);
 		if(facehits)
+		{
 			hits.push(facehits);
+			if(opts && opts.OneHitPerMesh)
+			{
+				
+				return hits;
+			}
+		}
 	}
 	
 	//reject this node if the ray does not intersect it's bounding box
@@ -681,11 +695,18 @@ OctreeRegion.prototype.intersectFrustrum = function(frustrum)
 	{
 		for(var i = 0; i < this.children.length; i++)
 		{
-			var childhits = this.children[i].intersectFrustrum(frustrum);
+			var childhits = this.children[i].intersectFrustrum(frustrum,opts);
 			if(childhits)
 			{
 				for(var j = 0; j < childhits.length; j++)
+				{
 				    hits.push(childhits[j]);
+					if(opts && opts.OneHitPerMesh)
+					{
+						
+						return hits;
+					}
+				}
 			}
 		}
 	}
@@ -789,9 +810,9 @@ OctreeRTAS.prototype.intersect = function(o,d,opts)
 {
 	return this.root.intersect(o,d,opts);
 }
-OctreeRTAS.prototype.intersectFrustrum = function(frustrum)
+OctreeRTAS.prototype.intersectFrustrum = function(frustrum,opts)
 {
-	return this.root.intersectFrustrum(frustrum);
+	return this.root.intersectFrustrum(frustrum,opts);
 }
 //Generate either an octree of a face list to test rays.
 //note: the max faces can make big performance difference here.
@@ -908,14 +929,14 @@ THREE.Geometry.prototype.CPUPick = function(origin,direction,options)
 
 }
 //Do the actuall intersection with the mesh;
-THREE.Geometry.prototype.FrustrumCast = function(frustrum)
+THREE.Geometry.prototype.FrustrumCast = function(frustrum,opts)
 {
 	  if(this.InvisibleToCPUPick)
 		return null;
 	  
 	  //allow a picking mesh that differs from the visible mesh
 	  if(this.PickGeometry)
-		return this.PickGeometry.FrustrumCast(frustrum);
+		return this.PickGeometry.FrustrumCast(frustrum,opts);
 		
       //if for some reason dont have good bounds, generate	 
 	  if(!this.BoundingSphere || !this.BoundingBox || this.dirtyMesh)
@@ -925,7 +946,7 @@ THREE.Geometry.prototype.FrustrumCast = function(frustrum)
 	   	
 	 var intersections = [];
 	 //try to reject based on bounding box.
-	 var bbhit = this.BoundingBox.intersectFrustrum(frustrum); 
+	 var bbhit = this.BoundingBox.intersectFrustrum(frustrum,opts); 
 	
 	 if(bbhit.length > 0)
 	 {
@@ -936,7 +957,7 @@ THREE.Geometry.prototype.FrustrumCast = function(frustrum)
 			
 		 }
 		 //do actual mesh intersection
-		 intersections = this.RayTraceAccelerationStructure.intersectFrustrum(frustrum); 		 
+		 intersections = this.RayTraceAccelerationStructure.intersectFrustrum(frustrum,opts); 		 
 	 }
 	  
 	  this.dirtyMesh = false;
@@ -981,7 +1002,7 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 		return null;
 	  if(options.UserRenderBatches && this.isBatched)
 		return null;
-	  if(this.InvisibleToCPUPick || this.visible == false)
+	  if(this.InvisibleToCPUPick)
 		return null;
 
 		
@@ -1101,9 +1122,9 @@ function Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr)
 	}
 }
 
-THREE.Object3D.prototype.FrustrumCast = function(frustrum)
+THREE.Object3D.prototype.FrustrumCast = function(frustrum,opts)
 {
-	  if(this.InvisibleToCPUPick || this.visible == false)
+	  if(this.InvisibleToCPUPick)
 		return null;
 
 	
@@ -1140,7 +1161,7 @@ THREE.Object3D.prototype.FrustrumCast = function(frustrum)
 			  var tfrustrum = frustrum.transformBy(mat);
 	  
 			//collide with the mesh
-			ret = this.geometry.FrustrumCast(tfrustrum);
+			ret = this.geometry.FrustrumCast(tfrustrum,opts);
 			if(ret.length)
 				mat2 = this.getModelMatrix().slice(0);
 			for(var i = 0; i < ret.length; i++)

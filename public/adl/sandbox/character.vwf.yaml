@@ -349,7 +349,7 @@ scripts:
                 motionvec = MATH.toUnitVec3(motionvec);
                 var testpos = MATH.subVec3(finalt,MATH.scaleVec3(motionvec,-.15));
                 
-                var intersectfront = _SceneManager.CPUPick(MATH.addVec3(testpos,[0,0,1]),motionvec,{filter:function(o){return o.isAvatar != true;},maxDist: 2,ignore:[this.skin,_Editor.GetMoveGizmo()]});
+                var intersectfront = _SceneManager.CPUPick(MATH.addVec3(testpos,[0,0,1]),motionvec,{filter:function(o){return o.isAvatar != true;},maxDist: 2000,ignore:[this.skin,_Editor.GetMoveGizmo()]});
                 if(intersectfront)
                 {
                     if(intersectfront.distance < .3)
@@ -371,11 +371,12 @@ scripts:
                 }
                 var falldist = 1000;
                
-                var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,1.7]),[0,0,-1],{filter:function(o){ return o.isAvatar != true;},maxDist: 2,ignore:[this.skin,_Editor.GetMoveGizmo()]});
+                var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,1.7]),[0,0,-1],{filter:function(o){ return o.isAvatar != true;},maxDist: 2000,ignore:[this.skin,_Editor.GetMoveGizmo()]});
               
-               
+                
                 falldist = intersect?intersect.distance:falldist;
-                if( falldist)
+                
+                if(falldist && intersect)
                 {
                    
                     var zdiff = standing - falldist;
@@ -386,17 +387,20 @@ scripts:
                        zmove = this.originalvelocity[2] - 1.0/24; 
                        
                        finalt = MATH.addVec3(finalt, [0,0,zmove]);
+                      
                     }   
                     else if(zdiff > .33 )
                     {   
                       
                        finalt = [originalpos2[0],originalpos2[1],originalpos2[2]];
-                       
+                        
                     }
                     else
                     {
                         finalt = MATH.addVec3(finalt, [0,0,zmove/3]);
+                        
                     }
+                    
                 }
                 this.skin.PickPriority = 1;
                 
@@ -406,7 +410,7 @@ scripts:
             if(this.inMotion('jump') && this.jumpcounter > 10)
             {
                 this.skin.PickPriority = -1;
-                var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,2]),[0,0,-1],{filter:function(o){return o.isAvatar != true;},maxDist: 2,ignore:[this.skin,_Editor.GetMoveGizmo()]});
+                var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,2]),[0,0,-1],{filter:function(o){return o.isAvatar != true;},maxDist: 2000,ignore:[this.skin,_Editor.GetMoveGizmo()]});
                 if(intersect)
                 {
                     
@@ -433,7 +437,7 @@ scripts:
         this.originalvelocity = MATH.subVec3(finalt,originalpos);
         //permenantly clamp to z=0 plane
         if(finalt[2] < 0)
-            finalt = [finalt,finalt,0];
+            finalt = [finalt[0],finalt[1],0];
         //every 2 seconds, update the position and rotation that tend to run out of sync
         //note that we could change the update mechanism to avoid getting out of sync
         if(this.updatecounter > 180 && document["PlayerNumber"] == this.PlayerNumber)
@@ -452,6 +456,7 @@ scripts:
         this.skin.PickPriority = 1;
         this.tbak = finalt;
         this.translation = finalt;
+      
         this.rotation = backupr;
     }
     this.tick = function()

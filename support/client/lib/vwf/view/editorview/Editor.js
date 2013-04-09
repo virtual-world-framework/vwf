@@ -86,7 +86,7 @@ function Editor()
 	$('#StatusCameraLocation').text('[0,0,0]');		
 	var _CopiedNodes = [];
 	//	$('#vwf-root').mousedown(function(e){
-	var mousedown = function(e)
+	var mousedown_Gizmo = function(e)
 	{	
 		
 		$('#index-vwf').focus();
@@ -196,11 +196,7 @@ function Editor()
 			}
 		}
 	}.bind(this);
-	//$('#vwf-root').mousewheel(function(event, delta, deltaX, deltaY) {
-	var mousewheel = 	function(event, delta, deltaX, deltaY){
-		//if(MoveGizmo)
-		//updateGizmoSize();	
-	}.bind(this);
+	
 	
 	this.GetUniqueName = function(newname)
 	{	
@@ -217,10 +213,7 @@ function Editor()
 		}
 		return newname+count;
 	}
-	var click=function(e)
-	{
-		
-	}.bind(this);
+	
 	this.ThreeJSPick = function(campos,ray, options)
     {
 	//	var now = performance.now();
@@ -323,7 +316,7 @@ function Editor()
 			$('#ContextMenu').css('z-index','-1');
 		}
 	}
-	var mouseup = function(e){ 		
+	var mouseup_Gizmo = function(e){ 		
 		
 		
 		if(e.button == 2 && !MouseMoved)
@@ -399,7 +392,7 @@ function Editor()
 					
 					var frustrum = new Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr);	
 					
-					var hits = this.FrustrumCast(frustrum);
+					var hits = _SceneManager.FrustrumCast(frustrum,{OneHitPerMesh:true});
 					var vwfhits = [];
 					for(var i = 0; i < hits.length; i++)
 					{
@@ -444,9 +437,7 @@ function Editor()
 			document.AxisSelected = -1;
 			$('#StatusAxis').text('Axis: -1');
 			updateGizmoOrientation(true);
-		}
-		
-		
+		}	
 	}.bind(this);
 	this.GetAllLeafMeshes = function(threeObject,list)
 	{
@@ -513,7 +504,7 @@ function Editor()
 		
 	}.bind(this);
 	//	$('#vwf-root').keyup(function(e){
-	var keyup = function(e)
+	var keyup_Gizmo = function(e)
 	{
 		if(e.keyCode == 17)
 		{
@@ -526,7 +517,7 @@ function Editor()
 			$('#index-vwf').css('cursor','default');
 		}
 	}.bind(this);
-	var keydown = function(e)
+	var keydown_Gizmo = function(e)
 	{
 		////console.log(e);
 
@@ -874,7 +865,7 @@ function Editor()
 		return MATH.transposeMat4(rmat);
 	}
 	this.waitingForSet = [];
-	var mousemove = function(e)
+	var mousemove_Gizmo = function(e)
 	{
 		if(this.waitingForSet.length > 0) return; 
 		MouseMoved = true;
@@ -1424,14 +1415,13 @@ function Editor()
 			translation[2] += .001;
 			var BoxProto = { 
 				
-			extends: type+'.vwf',
+			extends: type+'2.vwf',
 			properties: {
-			NotProto: ""
 				}
 			};
+			BoxProto.type = 'subDriver/threejs';
+			BoxProto.source = 'vwf/model/threejs/' + type + '.js';
 			var proto = BoxProto;
-			proto.NotProto = "NOT!";
-			proto.properties.NotProto = "NOT!";
 			proto.properties.size = size;
 			proto.properties.translation = translation;
 			proto.properties.scale = [1,1,1];
@@ -2973,16 +2963,69 @@ function Editor()
 		$('#ContextMenu').hide();
 	}
 	
+	this.mousedown = function(e)
+	{
+		if(this.activeTool && this.activeTool.mousedown)
+			this.activeTool.mousedown(e);
+	}
+	this.mouseup = function(e)
+	{
+		if(this.activeTool && this.activeTool.mouseup)
+			this.activeTool.mouseup(e);
+	}
+	this.click = function(e)
+	{
+		if(this.activeTool && this.activeTool.click)
+			this.activeTool.click(e);
+	}
+	this.mousemove = function(e)
+	{
+		if(this.activeTool && this.activeTool.mousemove)
+			this.activeTool.mousemove(e);
+	}
+	this.mousewheel = function(e)
+	{
+		if(this.activeTool && this.activeTool.mousewheel)
+			this.activeTool.mousewheel(e);
+	}
+	this.keyup = function(e)
+	{
+		if(this.activeTool && this.activeTool.keyup)
+			this.activeTool.keyup(e);
+	}
+	this.keydown = function(e)
+	{
+		if(this.activeTool && this.activeTool.keydown)
+			this.activeTool.keydown(e);
+	}
+	this.tools = {};
+
+	this.addTool = function(name,tool)
+	{
+		this.tools[name] = tool;
+	}
+	this.addTool('Gizmo',{
+		mousedown:mousedown_Gizmo,
+		mouseup:mouseup_Gizmo,
+		mousemove:mousemove_Gizmo,
+		click:null,
+		mousewheel:null,
+		keydown:keydown_Gizmo,
+		keyup:keyup_Gizmo
+	});
+	
+	this.setActiveTool = function(str)
+	{
+		this.activeTool = this.tools[str];
+	}
+	this.setActiveTool('Gizmo');
+	
 	this.GetSelectionBounds = function(){return SelectionBounds;};
 	this.findscene = findscene;
 	this.findcamera = findcamera;
 	this.findviewnode =findviewnode;
-	this.mousedown = mousedown;
-	this.mousemove =mousemove;
-	this.mousewheel =mousewheel;
-	this.mouseup =mouseup;
 	this.DeleteSelection =DeleteSelection;
-	this.keydown =keydown ;
+	
 	this.intersectLinePlane =intersectLinePlane;
 	this.GetCameraCenterRay =GetCameraCenterRay;
 	this.GetWorldPickRay =GetWorldPickRay;
@@ -3030,13 +3073,12 @@ function Editor()
 	this.GetSelectedVWFNode = GetSelectedVWFNode;
 	this.SelectObject = SelectObject;
 	this.Copy = Copy;
-	this.click=click;
 	this.Paste = Paste;
 	this.Duplicate = Duplicate;
 	this.CreateModifier = CreateModifier;
 	this.GetRotationMatrix = GetRotationMatrix;
 	this.updateBoundsAndGizmoLoc = updateBoundsAndGizmoLoc;
-	this.keyup = keyup;
+	
 	this.GetSelectMode = function(){return SelectMode;}
 	this.getViewProjection = getViewProjection;
 	
