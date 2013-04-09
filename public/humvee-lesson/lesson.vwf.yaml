@@ -31,20 +31,21 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Use WASD to navigate to the vehicle door."
-        scripts:
-        - |
-          this.entering = function() {
-            this.logger.info( "Step: Walk to Vehicle" );
-            this.parent.parent.parent.keyUp = this.events.add( function() {
-              var trans = this.parent.parent.parent.camera.translation;
-              if( trans[0] > -55 && trans[0] < 45 && trans[1] > -200 && trans[1] < -100 && trans[2] > 35 && trans[2] < 95 )
-              {
-                this.logger.info( "Step: Walk to Vehicle - Completed" );
-                this.completed();                    
-                this.parent.parent.parent.keyUp = this.parent.parent.parent.events.flush( this );
+            scripts:
+            - |
+              this.entering = function() {
+                this.logger.info( "Step: Walk to Vehicle" );
+                var app = this.parent.parent.parent.parent;
+                app.keyUp = this.events.add( function() {
+                  var trans = app.camera.translation;
+                  if( trans[0] > -55 && trans[0] < 45 && trans[1] > -200 && trans[1] < -100 && trans[2] > 35 && trans[2] < 95 )
+                  {
+                    app.keyUp = app.events.flush( this );
+                    this.logger.info( "Step: Walk to Vehicle - Completed" );
+                    this.completed();
+                  }
+                }, this );
               }
-            }, this );
-          }
       openDoor:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
@@ -54,20 +55,21 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Click on the door to open it."
-        scripts:
-        - |
-          this.entering = function() {
-            this.logger.info( "Step: Open Door" );
-            var humveeDoor = this.find( "/humvee/bone2/Scene/DoorDriverFront" )[ 0 ];
-            humveeDoor.pointerClick = humveeDoor.events.add( function() {
-              if(this.parent.parent.parent.humvee.bone2.Scene.DoorDriverFront.controlValue == 0)
-              {
-                humveeDoor.pointerClick = humveeDoor.events.flush( this );
-                this.logger.info( "Step: Open Door - Completed" );
-                this.completed();
+            scripts:
+            - |
+              this.entering = function() {
+                this.logger.info( "Step: Open Door" );
+                var humveeDoor = this.find( "/humvee/bone2/Scene/DoorDriverFront" )[ 0 ];
+                humveeDoor.pointerClick = humveeDoor.events.add( function() {
+                  var app = this.parent.parent.parent.parent;
+                  if(app.humvee.bone2.Scene.DoorDriverFront.controlValue == 0)
+                  {
+                    humveeDoor.pointerClick = humveeDoor.events.flush( this );
+                    this.logger.info( "Step: Open Door - Completed" );
+                    this.completed();
+                  }
+                }, this );
               }
-            }, this );
-          }
       jumpIn:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
@@ -77,77 +79,174 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Click on the vehicle's driver seat to jump in."
-        scripts:
-        - |
-          this.entering = function() {
-            this.logger.info( "Step: Jump In" );
-            var humvee = this.find( "/humvee/bone2/Scene/HumveeBody" )[ 0 ];
-            humvee.pointerClick = humvee.events.add( function() {
-              humvee.pointerClick = humvee.events.flush( this );
-              this.logger.info( "Step: Jump In - Completed" );
-              this.completed();
-            }, this );
-          }
+            scripts:
+            - |
+              this.entering = function() {
+                this.logger.info( "Step: Jump In" );
+                var humvee = this.find( "/humvee/bone2/Scene/HumveeBody" )[ 0 ];
+                humvee.pointerClick = humvee.events.add( function() {
+                  humvee.pointerClick = humvee.events.flush( this );
+                  this.logger.info( "Step: Jump In - Completed" );
+                  this.completed();
+                }, this );
+              }
       closeDoor:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
           text: "1.4 Close vehicle door"
           cameraPoseRef: /lesson/cameraPose14
         children:
-          openDoorInstructions:
+          closeDoorInstructions:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Click on the door to close it."
-        scripts:
-        - |
-          this.entering = function() {
-            this.logger.info( "Step: Close Door" );
-            var humveeDoor = this.find( "/humvee/bone2/Scene/DoorDriverFront" )[ 0 ];
-            humveeDoor.pointerClick = humveeDoor.events.add( function() {
-              humveeDoor.pointerClick = humveeDoor.events.flush( this );
-              this.logger.info( "Step: Close Door - Completed" );
-              this.completed();
-            }, this );
-          }
-    scripts:
-    - |
-      this.entering = function() {
-        
-      }
+            scripts:
+            - |
+              this.entering = function() {
+                this.logger.info( "Step: Close Door" );
+                var humveeDoor = this.find( "/humvee/bone2/Scene/DoorDriverFront" )[ 0 ];
+                humveeDoor.pointerClick = humveeDoor.events.add( function() {
+                  humveeDoor.pointerClick = humveeDoor.events.flush( this );
+                  this.logger.info( "Step: Close Door - Completed" );
+                  this.completed();
+                }, this );
+              }
   startEngine:
+    # Move rotary ignition switch to run
+    # Wait for wait to start lamp above the switch goes out
+    # Turn the switch to the start position to engage the starter to crank the engine
+    # Once the engine starts, release the switch and it will automatically return to the run position
+    # Check engine oil pressure, coolant temperature, volt meter, and a fuel gauges for proper readings
     extends: http://vwf.example.com/lesson/task.vwf
     properties:
       text: "2.0 Start the Engine"
       cameraPoseRef: /lesson/cameraPose2
     children:
-      turnKey:
+      moveIgnitionToRun:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
-          text: "2.1 Turn the key"
-      shiftGear:
+          text: "2.1 Move ignition to RUN"
+        children:
+          runIgnitionInstructions:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "Click on the rotary ignition switch to the left of the steering wheel to move it to RUN position."
+            scripts:
+            - |
+              this.entering = function() {
+                this.logger.info( "Step: Set Ignition to Run" );
+                var ignition = this.find( "/humvee/bone2/Scene/Ignition" )[ 0 ];
+                ignition.pointerClick = ignition.events.add( function() {
+                  ignition.pointerClick = ignition.events.flush( this );
+                  this.logger.info( "Step: Set Ignition to Run - Completed" );
+                  this.completed();
+                }, this );
+              }
+          waitForLightInstructions:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "Wait for the 'wait to start' lamp above the switch to go out."    
+            scripts:
+            - |
+              this.entering = function() {
+                this.logger.info( "Step: Wait for Light" );
+                this.in(3).completed();                
+                this.logger.info( "Step: Wait for Light - Completed" );
+              }
+      moveIgnitionToStart:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
-          text: "2.2 Shift gear into drive"
-    scripts:
-    - |
-      this.entering = function() {
-        
-      }
+          text: "2.2 Move ignition to START"
+        children:
+          startIgnitionInstructions:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "Drag the rotary ignition switch to START position. Release the switch, and it will automatically return to the RUN position."
+            scripts:
+            - |
+              this.entering = function() {
+                this.logger.info( "Step: Set Ignition to Start" );
+                var ignition = this.find( "/humvee/bone2/Scene/Ignition" )[ 0 ];
+                ignition.pointerUp = ignition.events.add( function() {
+                  ignition.pointerUp = ignition.events.flush( this );
+                  this.logger.info( "Step: Set Ignition to Start - Completed" );
+                  this.completed();
+                }, this );
+              }
+          checkGauges:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "Check the engine oil pressure, coolant temperature, volt meter, and fuel gauges for proper readings."
+            scripts:
+            - |
+              this.entering = function() {
+                this.logger.info( "Step: Set Ignition to Start" );
+                this.in(5).completed();
+              }
   driveVehicle:
+    # With parking break applied, move the transmission range selector from the N to the D position.
+    # Release the parking break and ensure brake warning light goes out
+    # Move vehicle forward
     extends: http://vwf.example.com/lesson/task.vwf
     properties:
       text: "3.0 Drive Vehicle"
       cameraPoseRef: /lesson/cameraPose3
     children:
-      pressGas:
+      moveToDrive:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
-          text: "3.1 Press gas pedal."
-    scripts:
-    - |
-      this.entering = function() {
-        
-      }
+          text: "3.1 Move transmission to drive"
+        children:
+          moveToDriveInstructions:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "With parking break applied, move the transmission range selector from the N to the D position." 
+            scripts:
+            - |
+              this.entering = function() {
+                this.logger.info( "Step: Move Gear Shift to Drive" );
+                var gearShift = this.find( "/humvee/bone2/Scene/GearShift" )[ 0 ];
+                gearShift.pointerClick = gearShift.events.add( function() {
+                  gearShift.pointerClick = gearShift.events.flush( this );
+                  this.logger.info( "Step: Move Gear Shift to Drive - Completed" );
+                  this.completed();
+                }, this );
+              }
+      releaseBrake:
+        extends: http://vwf.example.com/lesson/task.vwf
+        properties:
+          text: "3.2 Release parking break"
+        children:
+          releaseBrakeInstructions:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "Release the parking break and ensure brake warning light goes out." 
+            scripts:
+            - |
+              this.entering = function() {
+                this.logger.info( "Step: Release Parking Brake" );
+                var parkingBrake = this.find( "/humvee/bone2/Scene/EmergencyBrake" )[ 0 ];
+                parkingBrake.pointerClick = parkingBrake.events.add( function() {
+                  parkingBrake.pointerClick = parkingBrake.events.flush( this );
+                  this.logger.info( "Step: Release Parking Brake - Completed" );
+                  this.completed();
+                }, this );
+              }
+      moveVehicle:
+        extends: http://vwf.example.com/lesson/task.vwf
+        properties:
+          text: "3.3 Drive vehicle forward"
+          cameraPoseRef: /lesson/cameraPose33
+        children:
+          moveVehicleInstructions:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "" 
+            scripts:
+            - |
+              this.entering = function() {
+                // UPDATE
+              }
   cameraPose1:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -158,6 +257,8 @@ children:
   cameraPose2:
     extends: http://vwf.example.com/node3.vwf
   cameraPose3:
+    extends: http://vwf.example.com/node3.vwf
+  cameraPose33:
     extends: http://vwf.example.com/node3.vwf
 scripts:
 - |
@@ -170,7 +271,12 @@ scripts:
     this.cameraPose2.transform = [-0.2800654172897339,0.9599801301956177,0,0,
       -0.9599801301956177,-0.2800654172897339,0,0,
       0,0,1,0,
-      9.367589950561523,-10.260942459106445,66.83444213867188,1];
+      -18.140365600585938,-33.80816650390625,69.4345932006836,1];
 
-    this.cameraPose3.transform = this.cameraPose2.transform;
+    this.cameraPose3.transform = [0.9015761017799377,0.43261784315109253,0,0,
+      -0.43261784315109253,0.9015761017799377,0,0,
+      0,0,1,0,
+      -21.921772003173828,-45.81437301635742,63.3342170715332,1];
+
+    this.cameraPose33.transform = this.cameraPose2.transform;
   }

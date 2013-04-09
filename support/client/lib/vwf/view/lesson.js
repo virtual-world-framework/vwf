@@ -255,6 +255,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 {
                     htmlParent = htmlParent.substring(0, htmlParent.lastIndexOf('_'));
                 }
+                if( $('#div--' + htmlParent).html() != "" ) $('#div--' + htmlParent).append("<br />");
                 $('#div--' + htmlParent).append(lessonSteps[step] + "<br />");
             }
         }
