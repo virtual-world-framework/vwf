@@ -53,6 +53,9 @@ properties:
   controlDisabled: false
 methods:
   mouseInit: 
+  animateControlToPosition:
+    parameters:
+      - position
   controlTick:
   processLinkedControls:
 events:
@@ -167,9 +170,7 @@ scripts:
         return a.sequence - b.sequence;
       });
       if(this.controlMomentary) {
-        this.controlPlaying = true;
-        this.controlDirection = 1;
-        this.controlTick(this.positions[this.positions.length-1]);
+        this.animateControlToPosition(this.positions[this.positions.length-1]);
       }
     }
   }
@@ -177,9 +178,7 @@ scripts:
   this.pointerUp = function( pointerInfo, pickInfo ) {
     if(!this.controlDisabled) {
       if(this.controlMomentary) {
-        this.controlPlaying = true;
-        this.controlDirection = -1;
-        this.controlTick(this.positions[0]);
+        this.animateControlToPosition(this.positions[0]);
       }
       else {
         for(var i=0; i<this.positions.length; i++) {
@@ -188,17 +187,14 @@ scripts:
               if(!((i + this.controlDirection) >= 0 && (i + this.controlDirection) < this.positions.length)) {
                 this.controlDirection = this.controlDirection * -1;
               }
-              this.controlPlaying = true;
-              this.controlTick(this.positions[i + this.controlDirection]);
+              this.animateControlToPosition(this.positions[i + this.controlDirection]);
             }
             else if(i+1 < this.positions.length && this.controlValue > this.positions[i].controlValue && this.controlValue < this.positions[i+1].controlValue) {
               if(this.controlDirection == 1) {
-                this.controlPlaying = true;
-                this.controlTick(this.positions[i + 1]);
+                this.animateControlToPosition(this.positions[i + 1]);
               }
               else {
-                this.controlPlaying = true;
-                this.controlTick(this.positions[i]);
+                this.animateControlToPosition(this.positions[i]);
               }
             }
           }
@@ -215,15 +211,11 @@ scripts:
               }
               switch(nearPosition.controlType) {
                 case 1:
-                  this.controlPlaying = true;
-                  this.controlDirection = this.controlValue < nearPosition.controlValue ? 1 : -1;
-                  this.controlTick(nearPosition);
+                  this.animateControlToPosition(nearPosition);
                   break;
                 case -1:
                   if(farPosition.controlType != -1) {
-                    this.controlPlaying = true;
-                    this.controlDirection = this.controlValue < farPosition.controlValue ? 1 : -1;
-                    this.controlTick(farPosition);
+                    this.animateControlToPosition(farPosition);
                   }
               }
               break;
@@ -275,6 +267,14 @@ scripts:
       this.processLinkedControls();
       this.input.previous.pointerInfo = pointerInfo;
       this.input.previous.pickInfo = pickInfo;
+    }
+  }
+
+  this.animateControlToPosition = function(position) {
+    if(!this.controlPlaying) {
+      this.controlPlaying = true;
+      this.controlDirection = this.controlValue < position.controlValue ? 1 : -1;
+      this.controlTick(position);
     }
   }
 

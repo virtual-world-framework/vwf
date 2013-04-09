@@ -550,6 +550,19 @@ children:
           }
           else if(initialControlValue == this.run.controlValue && this.controlValue > (this.start.controlValue - 0.1)) {
             this.parent.started = true;
+            
+            // If engine started, set gauges to max position
+            this.parent.VoltMeter.animateControlToPosition(this.parent.VoltMeter.epsilon);
+            this.parent.TempNeedle.animateControlToPosition(this.parent.TempNeedle.epsilon);
+            this.parent.OilNeedle.animateControlToPosition(this.parent.OilNeedle.epsilon);
+            this.parent.FuelNeedle.animateControlToPosition(this.parent.FuelNeedle.epsilon);
+          }
+          else if(this.controlValue == 0) {
+            // If engine stopped, reset gauges to controlValue zero
+            this.parent.VoltMeter.animateControlToPosition(this.parent.VoltMeter.alpha);
+            this.parent.TempNeedle.animateControlToPosition(this.parent.TempNeedle.alpha);
+            this.parent.OilNeedle.animateControlToPosition(this.parent.OilNeedle.alpha);
+            this.parent.FuelNeedle.animateControlToPosition(this.parent.FuelNeedle.alpha);
           }
         }
       }, this);
@@ -715,8 +728,8 @@ children:
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
-      controlValue: 2
-      animationTime: 0.5
+      controlValue: 0
+      animationTime: 0
     children: 
       Untitled_017: 
         extends: http://vwf.example.com/node3.vwf 
@@ -779,8 +792,8 @@ children:
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
-      controlValue: 2
-      animationTime: 0.5
+      controlValue: 0
+      animationTime: 0
     children: 
       Untitled_016: 
         extends: http://vwf.example.com/node3.vwf 
@@ -843,8 +856,8 @@ children:
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
-      controlValue: 4
-      animationTime: 1
+      controlValue: 0
+      animationTime: 0
     children: 
       Untitled_015: 
         extends: http://vwf.example.com/node3.vwf 
@@ -907,8 +920,8 @@ children:
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
-      controlValue: 4
-      animationTime: 1
+      controlValue: 0
+      animationTime: 0
     children: 
       Untitled_014: 
         extends: http://vwf.example.com/node3.vwf 

@@ -24,24 +24,16 @@
 set -e
 
 # Install RubyGems for Cygwin
-<<<<<<< HEAD
-curl -s http://production.cf.rubygems.org/rubygems/rubygems-1.8.24.tgz --proxy $1 | tar xz
-cd rubygems-1.8.24
-ruby setup.rb install 
-gem install bundler 
-=======
-curl -O http://production.cf.rubygems.org/rubygems/rubygems-2.0.3.tgz --proxy $1
+curl -O http://production.cf.rubygems.org/rubygems/rubygems-2.0.3.tgz 
 tar xzf rubygems-2.0.3.tgz
 cd rubygems-2.0.3
 ruby setup.rb install
 gem install bundler --no-ri --no-rdoc
->>>>>>> origin/development
 
 # Download the latest VWF Master Branch Baseline to the local system
 if [ -d "vwf" ];then
 rm -rf vwf
 fi
-git config --global http.proxy $1
 git clone http://www.github.com/virtual-world-framework/vwf  --recursive
 
 # Download and Install Ruby Gems Referenced by VWF
