@@ -128,6 +128,15 @@ SceneManager.prototype.initialize = function(scene)
 			_SceneManager.removeChild(meshes[i]);
 		}
 	}
+	THREE.Object3D.prototype.setStatic = function(_static)
+	{
+		this._static = _static;
+		this.sceneManagerUpdate();
+	}
+	THREE.Object3D.prototype.isStatic = function()
+	{
+		return this._static || (this.parent && this.parent.isStatic());
+	}
 	THREE.Object3D.prototype.sceneManagerUpdate = function()
 	{
 		for(var i =0; i <  this.children.length; i++)
@@ -252,6 +261,7 @@ SceneManagerRegion.prototype.removeChild= function(child)
 		
 		if(this.depth <= batchAtLevel)
 		{
+			
 			this.RenderBatchManager.remove(child);
 		}
 		
@@ -305,7 +315,8 @@ SceneManagerRegion.prototype.addChild= function(child)
 	//sort the children down into sub nodes
 	var added = this.distributeObject(child);
 	
-	//
+	if(child.isStatic())
+	{
 	if(this.depth == batchAtLevel && added)
 	{
 		this.RenderBatchManager.add(child);
@@ -313,6 +324,7 @@ SceneManagerRegion.prototype.addChild= function(child)
 	if(this.depth >= 0 && this.depth <= batchAtLevel && !added)
 	{
 		this.RenderBatchManager.add(child);
+	}
 	}
 }
 SceneManagerRegion.prototype.distributeObject = function(object)
@@ -368,15 +380,39 @@ SceneManagerRegion.prototype.distributeObject = function(object)
 }
 SceneManagerRegion.prototype.updateObject = function(object)
 {
-	
+	//the object has not crossed  into a new region, so no need to search up
 	if(this.completelyContains(object))
 	{
 		if(this.childObjects.indexOf(object) != -1)
 			this.removeChild(object)
 		
-			this.addChild(object);
-				
+		
+		this.addChild(object);
+		
+		//search up for the lowest level batch manager I fit in
+		var p = this;
+		var found = false;
+		while(!found && p)
+		{
+			if(p.RenderBatchManager)
+			{
+				found = true;
+				break;
+			}
+			p = p.parent;
+		
+		}
+		
+		//remove me from my old batch, if any
+		if(object.RenderBatchManager)
+			object.RenderBatchManager.remove(object);
+		
+		//add to the correct batch, if I'm static
+		if(object.isStatic())	
+			p.RenderBatchManager.add(object);	
+		
 	}
+	//the object has left the region, search up.
 	else
 	{
 		//if dont have parent, then at top level and cannot toss up
@@ -585,7 +621,9 @@ THREE.RenderBatchManager.prototype.add = function(child)
 	if(this.objects.indexOf(child) != -1)
 		return;
 		
-	this.objects.push(child)
+	this.objects.push(child);
+	child.visible = false;
+	child.RenderBatchManager = this;
 //	console.log('adding ' + child.name + ' to batch' + this.name);  
 	this.dirty = true;
 }
@@ -595,6 +633,8 @@ THREE.RenderBatchManager.prototype.remove = function(child)
 	if(this.objects.indexOf(child) == -1)
 		return;
 	
+	child.visible = true;
+	child.RenderBatchManager = null;
 //	console.log('removing ' + child.name + ' from batch' + this.name);  
 	this.objects.splice(this.objects.indexOf(child),1);
 	this.dirty = true;
@@ -602,23 +642,17 @@ THREE.RenderBatchManager.prototype.remove = function(child)
 
 THREE.RenderBatchManager.prototype.build = function()
 {
-	console.log('Building batch' + this.name); 
-	if(this.objects.length == 0) return;
-	
-	//first, reset all the parents, so that we can get the world matrix
-	for(var i =0; i < this.objects.length; i++)
-	{
-		//if(!this.objects[i].parent && this.objects[i].parentBatchBack)
-			//this.objects[i].parentBatchBack.add_internal(this.objects[i]);
-		this.objects[i].visible = false;	
-	}
+	console.log('Building batch' + this.name + ' : objects = ' + this.objects.length); 
 	
 	//do the merge:
 	if(this.mesh)
 		this.scene.remove_internal(this.mesh);
+	
+	if(this.objects.length == 0) return;	
+	
 	this.mesh = null;
     var geo = new THREE.Geometry();
-	this.mesh = new THREE.Mesh(geo,this.objects[0].material);
+	this.mesh = new THREE.Mesh(geo,this.objects[0].material.clone());
 	this.scene.add_internal(this.mesh);
 	
 	for(var i =0; i < this.objects.length; i++)
@@ -688,14 +722,7 @@ THREE.RenderBatchManager.prototype.build = function()
 		}
 	}
 	
-	for(var i =0; i < this.objects.length; i++)
-	{
-		if(this.objects[i].parent)
-		{
-			//this.objects[i].parentBatchBack = this.objects[i].parent;
-			//this.objects[i].parent.remove_internal(this.objects[i]);
-		}
-	}
+	
 }
 
 THREE.RenderBatchManager.prototype.deinitialize = function(child)
