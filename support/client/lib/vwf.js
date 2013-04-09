@@ -281,8 +281,8 @@
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [
-                    { library: "vwf/view/glge", parameters: "#vwf-root", active: false },
-                    { library: "vwf/view/threejs", parameters: "#vwf-root", active: false },
+                    { library: "vwf/view/glge", parameters: {"application-root":"#vwf-root"}, active: false },
+                    { library: "vwf/view/threejs", parameters: {"application-root":"#vwf-root"}, active: false },
                     { library: "vwf/view/document", active: true },
                     { library: "vwf/view/editor", active: true },
                     { library: "vwf/view/lesson", active: false},
@@ -356,7 +356,13 @@
                             requireArray[libraryName].active = true;
                             initializers[libraryType][libraryName].active = true;
                             if(userLibraries[libraryType][libraryName] && userLibraries[libraryType][libraryName] != "") {
-                                initializers[libraryType][libraryName].parameters = userLibraries[libraryType][libraryName];
+                                if(typeof initializers[libraryType][libraryName].parameters == "object") {
+                                    initializers[libraryType][libraryName].parameters = $.extend({}, initializers[libraryType][libraryName].parameters,
+                                        userLibraries[libraryType][libraryName]);
+                                }
+                                else {
+                                    initializers[libraryType][libraryName].parameters = userLibraries[libraryType][libraryName];
+                                }
                             }
                             if(requireArray[libraryName].linkedLibraries) {
                                 for(var i=0; i<requireArray[libraryName].linkedLibraries.length; i++) {
