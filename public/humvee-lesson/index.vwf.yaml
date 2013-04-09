@@ -15,181 +15,21 @@
 extends: http://vwf.example.com/navscene.vwf
 properties:
   ambientColor: [ 183, 183, 183 ]
+  backgroundColor: [ 83, 157, 194 ]
   navmode: "walk"
   translationSpeed: 10.0
 children:
-  humvee:
+  flat_terrain:
     extends: http://vwf.example.com/node3.vwf
-    source: humvee.DAE
+    source: terrain.dae
     type: model/vnd.collada+xml
-    children:
-      bone2: 
-        extends: http://vwf.example.com/node3.vwf 
-        children: 
-          Scene: 
-            extends: http://vwf.example.com/node3.vwf 
-            children: 
-              DoorDriverFront: 
-                extends: http://vwf.example.com/node3.vwf 
-                implements: 
-                - http://vwf.example.com/control.vwf
-                properties:
-                  controlType: rotate
-                  controlMode: continuous
-                  transformIncrement: -45
-                  transformAxis: [0, 0, 1]
-                  transformDuration: 1
-                  maxValue: 1
-                  dragSpeed: 5
-              HumveeBody: 
-                extends: http://vwf.example.com/node3.vwf 
-                children: 
-                  glgeObj38: 
-                    extends: http://vwf.example.com/node3.vwf 
+    properties:
+      translation: [ -500, 1000, 0 ]
+      scale: [ 0.001, 0.001, 0.000001 ]
+  humvee:
+    includes: humvee.vwf
   lesson:
-    extends: http://vwf.example.com/lesson/task.vwf
-    properties:
-      scenePath: /
-    children:
-      enterVehicle:
-        extends: http://vwf.example.com/lesson/task.vwf
-        properties:
-          text: "1.0 Enter the Vehicle"
-          cameraPoseRef: /cameraPose1
-        children:
-          walkToVehicle:
-            extends: http://vwf.example.com/lesson/task.vwf
-            properties:
-              text: "1.1 Walk to the vehicle"
-            children:
-              walkInstructions:
-                extends: http://vwf.example.com/lesson/task.vwf
-                properties:
-                  text: "Use WASD to navigate to the vehicle door."
-            scripts:
-            - |
-              this.entering = function() {
-                this.logger.info( "Step: Walk to Vehicle" );
-                this.parent.parent.parent.keyUp = this.events.add( function() {
-                  var trans = this.parent.parent.parent.camera.translation;
-                  if( trans[0] > -65 && trans[0] < -25 && trans[1] > -200 && trans[1] < -100 && trans[2] > 35 && trans[2] < 95 )
-                  {
-                    this.logger.info( "Step: Walk to Vehicle - Completed" );
-                    this.completed();                    
-                    this.parent.parent.parent.keyUp = this.parent.parent.parent.events.flush( this );
-                  }
-                }, this );
-              }
-          openDoor:
-            extends: http://vwf.example.com/lesson/task.vwf
-            properties:
-              text: "1.2 Open vehicle door"
-            children:
-              openDoorInstructions:
-                extends: http://vwf.example.com/lesson/task.vwf
-                properties:
-                  text: "Click on the door to open it."
-            scripts:
-            - |
-              this.entering = function() {
-                this.logger.info( "Step: Open Door" );
-                var humveeDoor = this.find( "/humvee/bone2/Scene/DoorDriverFront" )[ 0 ];
-                humveeDoor.pointerClick = humveeDoor.events.add( function() {
-                  humveeDoor.pointerClick = humveeDoor.events.flush( this );
-                  this.logger.info( "Step: Open Door - Completed" );
-                  this.completed();
-                }, this );
-              }
-          jumpIn:
-            extends: http://vwf.example.com/lesson/task.vwf
-            properties:
-              text: "1.3 Jump into the driver's seat"
-            children:
-              jumpInInstructions:
-                extends: http://vwf.example.com/lesson/task.vwf
-                properties:
-                  text: "Click on the vehicle's driver seat to jump in."
-            scripts:
-            - |
-              this.entering = function() {
-                this.logger.info( "Step: Jump In" );
-                var humvee = this.find( "/humvee/bone2/Scene/HumveeBody" )[ 0 ];
-                humvee.pointerClick = humvee.events.add( function() {
-                  humvee.pointerClick = humvee.events.flush( this );
-                  this.logger.info( "Step: Jump In - Completed" );
-                  this.completed();
-                }, this );
-              }
-          closeDoor:
-            extends: http://vwf.example.com/lesson/task.vwf
-            properties:
-              text: "1.4 Close vehicle door"
-              cameraPoseRef: /cameraPose14
-            children:
-              openDoorInstructions:
-                extends: http://vwf.example.com/lesson/task.vwf
-                properties:
-                  text: "Click on the door to close it."
-            scripts:
-            - |
-              this.entering = function() {
-                this.logger.info( "Step: Close Door" );
-                var humveeDoor = this.find( "/humvee/bone2/Scene/DoorDriverFront" )[ 0 ];
-                humveeDoor.pointerClick = humveeDoor.events.add( function() {
-                  humveeDoor.pointerClick = humveeDoor.events.flush( this );
-                  this.logger.info( "Step: Close Door - Completed" );
-                  this.completed();
-                }, this );
-              }
-        scripts:
-        - |
-          this.entering = function() {
-            
-          }
-      startEngine:
-        extends: http://vwf.example.com/lesson/task.vwf
-        properties:
-          text: "2.0 Start the Engine"
-          cameraPoseRef: /cameraPose2
-        children:
-          turnKey:
-            extends: http://vwf.example.com/lesson/task.vwf
-            properties:
-              text: "2.1 Turn the key"
-          shiftGear:
-            extends: http://vwf.example.com/lesson/task.vwf
-            properties:
-              text: "2.2 Shift gear into drive"
-        scripts:
-        - |
-          this.entering = function() {
-            
-          }
-      driveVehicle:
-        extends: http://vwf.example.com/lesson/task.vwf
-        properties:
-          text: "3.0 Drive Vehicle"
-          cameraPoseRef: /cameraPose3
-        children:
-          pressGas:
-            extends: http://vwf.example.com/lesson/task.vwf
-            properties:
-              text: "3.1 Press gas pedal."
-        scripts:
-        - |
-          this.entering = function() {
-            
-          }
-  cameraPose1:
-    extends: http://vwf.example.com/node3.vwf
-    properties:
-      translation: [ -45, -380, 74 ]
-  cameraPose14:
-    extends: http://vwf.example.com/node3.vwf
-  cameraPose2:
-    extends: http://vwf.example.com/node3.vwf
-  cameraPose3:
-    extends: http://vwf.example.com/node3.vwf
+    includes: lesson.vwf
   dir1:
     extends: http://vwf.example.com/light.vwf
     properties:
@@ -207,18 +47,7 @@ children:
 scripts:
 - |
   this.initialize = function() {
-    this.camera.translation = this.cameraPose1.translation;
+    this.camera.translation = this.lesson.cameraPose1.translation;
+    this.camera.rotation = this.lesson.cameraPose1.rotation;
     this.camera.far = 3000;
-
-    this.cameraPose14.transform = [-0.8957634568214417,0.44452738761901855,0,0,
-      -0.44452738761901855,-0.8957634568214417,0,0,
-      0,0,1,0,
-      -14.165600776672363,-7.067508220672607,66.83444213867188,1];
-
-    this.cameraPose2.transform = [-0.2800654172897339,0.9599801301956177,0,0,
-      -0.9599801301956177,-0.2800654172897339,0,0,
-      0,0,1,0,
-      9.367589950561523,-10.260942459106445,66.83444213867188,1];
-
-    this.cameraPose3.transform = this.cameraPose2.transform;
   }

@@ -437,7 +437,7 @@ children:
           ic40Channel: 
             extends: http://vwf.example.com/node3.vwf
             implements:
-            - http://vwf.example.com/control.vwf
+            - http://vwf.example.com/control-old.vwf
             properties: 
               controlType: rotate
               controlMode: continuous
@@ -459,7 +459,7 @@ children:
           ic40Down: 
             extends: http://vwf.example.com/node3.vwf 
             implements:
-            - http://vwf.example.com/control.vwf
+            - http://vwf.example.com/control-old.vwf
             properties:
               controlType: translate
               controlMode: momentary
@@ -480,7 +480,7 @@ children:
           ic40P0: 
             extends: http://vwf.example.com/node3.vwf 
             implements:
-            - http://vwf.example.com/control.vwf
+            - http://vwf.example.com/control-old.vwf
             properties:
               controlType: translate
               controlMode: momentary
@@ -496,7 +496,7 @@ children:
           ic40P1: 
             extends: http://vwf.example.com/node3.vwf 
             implements:
-            - http://vwf.example.com/control.vwf
+            - http://vwf.example.com/control-old.vwf
             properties:
               controlType: translate
               controlMode: momentary
@@ -512,7 +512,7 @@ children:
           ic40P2: 
             extends: http://vwf.example.com/node3.vwf 
             implements:
-            - http://vwf.example.com/control.vwf
+            - http://vwf.example.com/control-old.vwf
             properties:
               controlType: translate
               controlMode: momentary
@@ -528,7 +528,7 @@ children:
           ic40P3: 
             extends: http://vwf.example.com/node3.vwf 
             implements:
-            - http://vwf.example.com/control.vwf
+            - http://vwf.example.com/control-old.vwf
             properties:
               controlType: translate
               controlMode: momentary
@@ -544,7 +544,7 @@ children:
           ic40PTT: 
             extends: http://vwf.example.com/node3.vwf 
             implements:
-            - http://vwf.example.com/control.vwf
+            - http://vwf.example.com/control-old.vwf
             properties:
               controlType: translate
               controlMode: momentary
@@ -557,7 +557,7 @@ children:
           ic40Red: 
             extends: http://vwf.example.com/node3.vwf 
             implements:
-            - http://vwf.example.com/control.vwf
+            - http://vwf.example.com/control-old.vwf
             properties:
               controlType: translate
               controlMode: momentary
@@ -573,7 +573,7 @@ children:
           ic40Up: 
             extends: http://vwf.example.com/node3.vwf 
             implements:
-            - http://vwf.example.com/control.vwf
+            - http://vwf.example.com/control-old.vwf
             properties:
               controlType: translate
               controlMode: momentary
@@ -589,7 +589,7 @@ children:
           ic40Volume: 
             extends: http://vwf.example.com/node3.vwf 
             implements:
-            - http://vwf.example.com/control.vwf
+            - http://vwf.example.com/control-old.vwf
             properties:
               rotation: [ 0, 0, 1, 0 ]
               controlType: rotate
@@ -642,6 +642,280 @@ children:
                   playing: false
                   looping: false
                   speed: 1
+                children:
+                  ic40_MicrophonePort:
+                    extends: http://vwf.example.com/node3.vwf
+                    children:
+                      bone6:
+                        extends: http://vwf.example.com/node3.vwf
+                        children:
+                          glgeObj1:
+                            extends: http://vwf.example.com/mesh.vwf
+                  ic40_SpeakerPort:
+                    extends: http://vwf.example.com/node3.vwf
+                    children:
+                      bone8:
+                        extends: http://vwf.example.com/node3.vwf
+                        children:
+                          glgeObj2:
+                            extends: http://vwf.example.com/mesh.vwf
+                  ic40Channel:
+                    extends: http://vwf.example.com/node3.vwf
+                    implements:
+                    - http://vwf.example.com/control-old.vwf
+                    properties: 
+                      controlType: rotate
+                      controlMode: continuous
+                      transformIncrement: -18
+                      transformAxis: [0, 0, 1]
+                      maxValue: 15
+                      dragSpeed: 20
+                    scripts:
+                    - |
+                        this.pointerUp = function( pointerInfo, pickInfo ) {
+                          this.parent.parent.parent.parent.channel = this.controlValue;
+                        }
+                        this.pointerMove = function( pointerInfo, pickInfo ) {
+                          this.parent.parent.parent.parent.channel = this.controlValue;
+                        }
+                  ic40Down:
+                    extends: http://vwf.example.com/node3.vwf
+                    implements:
+                    - http://vwf.example.com/control-old.vwf
+                    properties:
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0.03, 0, 0 ]
+                    scripts:
+                    - |
+                        this.pointerUp = function() {
+                          this.parent.parent.parent.parent.down();
+                        }
+                  ic40Monitor:
+                    extends: http://vwf.example.com/node3.vwf
+                    children:
+                      glgeObj5:
+                        extends: http://vwf.example.com/mesh.vwf
+                  ic40P0:
+                    extends: http://vwf.example.com/node3.vwf
+                    implements:
+                    - http://vwf.example.com/control-old.vwf
+                    properties:
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0, 0.03, 0 ]
+                    scripts:
+                    - |
+                        this.pointerUp = function() {
+                          this.parent.parent.parent.parent.p0();
+                        }                
+                  ic40P1:
+                    extends: http://vwf.example.com/node3.vwf
+                    implements:
+                    - http://vwf.example.com/control-old.vwf
+                    properties:
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0, 0.03, 0 ]
+                    scripts:
+                    - |
+                        this.pointerUp = function() {
+                          this.parent.parent.parent.parent.p1();
+                        }                  
+                  ic40P2:
+                    extends: http://vwf.example.com/node3.vwf
+                    implements:
+                    - http://vwf.example.com/control-old.vwf
+                    properties:
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0, 0.03, 0 ]
+                    scripts:
+                    - |
+                        this.pointerUp = function() {
+                          this.parent.parent.parent.parent.p2();
+                        }                  
+                  ic40P3:
+                    extends: http://vwf.example.com/node3.vwf
+                    implements:
+                    - http://vwf.example.com/control-old.vwf
+                    properties:
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0, 0.03, 0 ]
+                    scripts:
+                    - |
+                        this.pointerUp = function() {
+                          this.parent.parent.parent.parent.p3();
+                        }                  
+                  ic40PTT:
+                    extends: http://vwf.example.com/node3.vwf
+                    implements:
+                    - http://vwf.example.com/control-old.vwf
+                    properties:
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0.04, 0, 0 ]
+                    scripts:
+                    - |
+                        this.pointerUp = function() {
+                          this.parent.parent.parent.parent.ptt();
+                        }                  
+                  ic40Red:
+                    extends: http://vwf.example.com/node3.vwf
+                    implements:
+                    - http://vwf.example.com/control-old.vwf
+                    properties:
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0, 0, -0.02 ]
+                    scripts:
+                    - |
+                        this.pointerUp = function() {
+                          this.parent.parent.parent.parent.red();
+                        }                 
+                  ic40Up:
+                    extends: http://vwf.example.com/node3.vwf
+                    implements:
+                    - http://vwf.example.com/control-old.vwf
+                    properties:
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0.04, 0, 0 ]
+                    scripts:
+                    - |
+                        this.pointerUp = function() {
+                          this.parent.parent.parent.parent.up();
+                        }
+                  ic40Volume:
+                    extends: http://vwf.example.com/node3.vwf
+                    implements:
+                    - http://vwf.example.com/control-old.vwf
+                    properties:
+                      rotation: [0, 0, 1, 0]
+                      controlType: rotate
+                      controlMode: positions
+                      transformIncrement: 12
+                      transformAxis: [0, 0, 1]
+                    scripts:  
+                    - | 
+                        this.pointerUp = function()  {
+                          if ( this.parent.parent.parent.parent.volume == 0 ) {
+                            this.parent.parent.parent.parent.volume = 1;
+                          } else {
+                            this.parent.parent.parent.parent.volume = 0;
+                          }                            
+                        }
+                  LCD:
+                    extends: http://vwf.example.com/node3.vwf
+                    children:
+                      glgeObj14:
+                        extends: http://vwf.example.com/mesh.vwf
+                        children:
+                          material:
+                            extends: http://vwf.example.com/material.vwf
+                            properties:
+                              texture: 
+                  LCD_Back:
+                    extends: http://vwf.example.com/node3.vwf
+                    children:
+                      glgeObj15:
+                        extends: http://vwf.example.com/mesh.vwf
+                  BeltClip_1:
+                    extends: http://vwf.example.com/node3.vwf
+                    properties: 
+                      playing: false
+                      looping: false
+                      speed: 1
+                    scripts:
+                    - |
+                        this.pointerUp = function() {
+                          this.playing = !this.playing 
+                        }               
+                    children:
+                      BeltClip:
+                        extends: http://vwf.example.com/node3.vwf
+                        children:
+                          bone25:
+                            extends: http://vwf.example.com/node3.vwf
+                            children:
+                              glgeObj16:
+                                extends: http://vwf.example.com/mesh.vwf
+                      BeltClipBase:
+                        extends: http://vwf.example.com/node3.vwf
+                        children:
+                          bone27:
+                            extends: http://vwf.example.com/node3.vwf
+                            children:
+                              glgeObj17:
+                                extends: http://vwf.example.com/mesh.vwf
+                      BeltClip_Latch:
+                        extends: http://vwf.example.com/node3.vwf
+                        properties: 
+                          playing: false
+                          looping: false
+                          speed: 1
+                        scripts:
+                        - |
+                            this.pointerUp = function() {
+                              this.playing = !this.playing 
+                            }                      
+                        children:
+                          BeltClipTab:
+                            extends: http://vwf.example.com/node3.vwf
+                            children:
+                              bone30:
+                                extends: http://vwf.example.com/node3.vwf
+                                children:
+                                  glgeObj18:
+                                    extends: http://vwf.example.com/mesh.vwf
+                  Battery:
+                    extends: http://vwf.example.com/node3.vwf
+                    properties: 
+                      playing: false
+                      looping: false
+                      speed: 1
+                    scripts:
+                    - |
+                        this.pointerUp = function() {
+                          this.playing = !this.playing 
+                        }                 
+                    children:
+                      ic40Battery:
+                        extends: http://vwf.example.com/node3.vwf
+                        children:
+                          bone33:
+                            extends: http://vwf.example.com/node3.vwf
+                            children:
+                              glgeObj19:
+                                extends: http://vwf.example.com/mesh.vwf
+                  BatteryLatch:
+                    extends: http://vwf.example.com/node3.vwf
+                    properties: 
+                      playing: false
+                      looping: false
+                      speed: 1
+                    scripts:
+                    - |
+                        this.pointerUp = function() {
+                          this.playing = !this.playing 
+                        }                    
+                    children:
+                      ic40BatteryLatch:
+                        extends: http://vwf.example.com/node3.vwf
+                        children:
+                          glgeObj20:
+                            extends: http://vwf.example.com/mesh.vwf
+                  ic40Radio:
+                    extends: http://vwf.example.com/node3.vwf
+                    children:
+                      bone37:
+                        extends: http://vwf.example.com/node3.vwf
+                        children:
+                          glgeObj21:
+                            extends: http://vwf.example.com/mesh.vwf
+              ic40Antennae:
+                extends: http://vwf.example.com/node3.vwf
                 scripts:
                 - |
                     this.pointerUp = function() {

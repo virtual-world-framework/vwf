@@ -21,21 +21,7 @@ methods:
   switchCameraView: 
 children:
   humvee:
-    extends: humvee.vwf
-    scripts:
-    - |
-      this.initialize = function() {
-        var initNode = function( nd ) { 
-          if ( Object.getPrototypeOf( nd ).children ) { 
-            Object.getPrototypeOf( nd ).children.forEach( function( child ) { 
-              this.children.create( child.name, { extends: child.id }, function( newNode ) {
-                initNode( newNode );
-              } );
-            }, nd );
-          }
-        }; 
-        initNode( this );
-      } //@ sourceURL=humvee.initialize.vwf
+    includes: humvee.vwf
   dir1:
     extends: http://vwf.example.com/light.vwf
     implements:

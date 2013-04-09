@@ -21,10 +21,20 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
     return view.load( module, {
 
-        initialize: function( rootSelector ) {
+        initialize: function( options ) {
             if (!vwf) return;
-
-            this.rootSelector = rootSelector;
+            
+            this.pickInterval = 10;
+            
+            if(typeof options == "object") {
+                this.rootSelector = options["application-root"];
+                if(options["experimental-pick-interval"]) {
+                    this.pickInterval = options["experimental-pick-interval"];
+                }
+            }
+            else {
+                this.rootSelector = options;
+            }
             this.canvasQuery = undefined;
  
             this.lastPick = undefined;
@@ -203,7 +213,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             time = time || 0;
             window.requestAnimationFrame( renderScene );
             sceneNode.frameCount++;
-            if((time - lastPickTime) > 10) {
+            if((time - lastPickTime) > self.pickInterval) {
                 var newPick = mousePick.call( this, mouse, sceneNode );
                 self.lastPick = newPick;
                 if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY)) {

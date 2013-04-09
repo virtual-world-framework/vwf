@@ -311,6 +311,24 @@ node.uri = childURI; // TODO: move to vwf/model/object
             var child = this.nodes[childID];
             var scriptText = "this.initialize && this.initialize()";
 
+var scriptText = " \
+    \
+    var initializers = [], node = this;\n\
+    \n\
+    while ( node ) {\n\
+        if ( node.hasOwnProperty( 'initialize' ) && node.initialize ) {\n\
+            initializers.unshift( { func: node.initialize, id: node.id } );\n\
+        }\n\
+        node = Object.getPrototypeOf( node );\n\
+    }\n\
+    \n\
+    initializers.forEach( function( initialize ) {\n\
+        // this.logger.warn( 'initializing', this.id, 'from', initialize.id );\n\
+        initialize.func.call( this );\n\
+    }, this );\n\
+    \
+";
+
             try {
                 return ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
             } catch ( e ) {
@@ -697,6 +715,8 @@ proxy.id = behavior.id; // TODO: move to vwf/model/object
 
         proxy.source = behavior.source;
         proxy.type = behavior.type;
+
+        proxy.initialize = behavior.initialize;
 
         proxy.properties = Object.create( prototype.properties || Object.prototype, {
             node: { value: proxy } // for proxy.properties accessors (non-enumerable)  // TODO: hide this better

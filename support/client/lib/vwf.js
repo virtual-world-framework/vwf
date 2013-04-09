@@ -325,21 +325,24 @@
                             userLibraries[libraryType] = {};
                         }
                         Object.keys(configLibraries[libraryType]).forEach(function(libraryName) {
-                            if(!userLibraries[libraryType][libraryName] || configLibraries[libraryType][libraryName]) {
-                                var disabled = false;
-                                if(requireArray[libraryName].disabledBy) {
-                                    for(var i=0; i<requireArray[libraryName].disabledBy.length; i++) {
-                                        Object.keys(userLibraries).forEach(function(userLibraryType) {
-                                            Object.keys(userLibraries[userLibraryType]).forEach(function(userLibraryName) {
-                                                if(requireArray[libraryName].disabledBy[i] == userLibraryName) {
-                                                    disabled = true;
-                                                }
-                                            })
+                            var disabled = false;
+                            if(requireArray[libraryName].disabledBy) {
+                                for(var i=0; i<requireArray[libraryName].disabledBy.length; i++) {
+                                    Object.keys(userLibraries).forEach(function(userLibraryType) {
+                                        Object.keys(userLibraries[userLibraryType]).forEach(function(userLibraryName) {
+                                            if(requireArray[libraryName].disabledBy[i] == userLibraryName) {
+                                                disabled = true;
+                                            }
                                         })
-                                    }
+                                    })
                                 }
-                                if(!disabled) {
-                                    userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];   
+                            }
+                            if(!disabled) {
+                                if(userLibraries[libraryType][libraryName] == undefined) {
+                                    userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];
+                                }
+                                else if(typeof userLibraries[libraryType][libraryName] == "object" && typeof configLibraries[libraryType][libraryName] == "object") {
+                                    userLibraries[libraryType][libraryName] = $.extend({}, configLibraries[libraryType][libraryName], userLibraries[libraryType][libraryName]);
                                 }
                             }
                         });
@@ -1283,6 +1286,37 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 },
 
+                // Rudimentary support for `{ includes: prototype }`, which absorbs a prototype
+                // descriptor into the node descriptor before creating the node.
+
+                // Notes:
+                // 
+                //   - Only supports one level, so `{ includes: prototype }` won't work if the
+                //     prototype also contains a `includes` directive).
+                //   - Only works with prototype URIs, so `{ includes: { ... descriptor ... } }`
+                //     won't work.
+                //   - Loads the prototype on each reference, so unlike real prototypes, multiple
+                //     references to the same prototype cause multiple network loads.
+                // 
+                // Also see the `mergeDescriptors` limitations.
+
+                function( series_callback_async /* ( err, results ) */ ) {
+
+                    if ( componentIsDescriptor( nodeComponent ) && nodeComponent.includes && componentIsURI( nodeComponent.includes ) ) {
+
+                        var prototypeURI = nodeComponent.includes;
+
+                        loadComponent( prototypeURI, function( prototypeDescriptor ) /* async */ {
+                            nodeComponent = mergeDescriptors( nodeComponent, prototypeDescriptor ); // modifies prototypeDescriptor
+                            series_callback_async( undefined, undefined );
+                        } );
+
+                    } else {
+                        series_callback_async( undefined, undefined );
+                    }
+
+                },
+
                 // If nodeComponent is a descriptor, construct and get the ID.
 
                 function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is a descriptor or an ID
@@ -1846,6 +1880,28 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
             var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
 
             async.series( [
+
+                // Rudimentary support for `{ includes: prototype }`, which absorbs a prototype
+                // descriptor into the child descriptor before creating the child.
+
+                // See the notes in `createNode` and the `mergeDescriptors` limitations.
+
+                function( series_callback_async /* ( err, results ) */ ) {
+
+                    if ( componentIsDescriptor( childComponent ) && childComponent.includes && componentIsURI( childComponent.includes ) ) {
+
+                        var prototypeURI = childComponent.includes;
+
+                        loadComponent( prototypeURI, function( prototypeDescriptor ) /* async */ {
+                            childComponent = mergeDescriptors( childComponent, prototypeDescriptor ); // modifies prototypeDescriptor
+                            series_callback_async( undefined, undefined );
+                        } );
+
+                    } else {
+                        series_callback_async( undefined, undefined );
+                    }
+
+                },
 
                 function( series_callback_async /* ( err, results ) */ ) {
 
@@ -2972,15 +3028,27 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// 
         /// @see {@link module:vwf/api/kernel.prototypes}
 
-        this.prototypes = function( nodeID ) {
+        this.prototypes = function( nodeID, includeBehaviors ) {
 
             var prototypes = [];
+
+            if ( includeBehaviors ) {
+                var b = [].concat( this.behaviors( nodeID ) );
+                Array.prototype.push.apply( prototypes, b.reverse() );
+            }
 
             nodeID = this.prototype( nodeID );
 
             while ( nodeID ) {
+
                 prototypes.push( nodeID );
                 nodeID = this.prototype( nodeID );
+
+                if ( nodeID && includeBehaviors ) {
+                    var b = [].concat( this.behaviors( nodeID ) );
+                    Array.prototype.push.apply( prototypes, b.reverse() );
+                }
+
             }
 
             return prototypes;
@@ -3989,7 +4057,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             }
 
             var matches_type = ! type || this.uri( nodeID ) == type ||
-                this.prototypes( nodeID ).some( function( prototypeID ) {
+                this.prototypes( nodeID, true ).some( function( prototypeID ) {
                     return this.uri( prototypeID ) == type;
             }, this );
 
@@ -4020,6 +4088,93 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             }
 
         }
+
+        /// Merge two component descriptors into a single descriptor for a combined component. A
+        /// component created from the combined descriptor will behave in the same way as a
+        /// component created from `nodeDescriptor` that extends a component created from
+        /// `prototypeDescriptor`.
+        ///
+        /// Warning: this implementation modifies `prototypeDescriptor`.
+        ///
+        /// @name module:vwf~mergeDescriptors
+        ///
+        /// @param {Object} nodeDescriptor
+        ///   A descriptor representing a node extending `prototypeDescriptor`.
+        /// @param {Object} prototypeDescriptor
+        ///   A descriptor representing a prototype for `nodeDescriptor`.
+
+        // Limitations:
+        // 
+        //   - Doesn't merge children from the prototype with like-named children in the node.
+        //   - Doesn't merge property setters and getters from the prototype when the node provides
+        //     an initializing value.
+        //   - Methods from the prototype descriptor are lost with no way to invoke them if the node
+        //     overrides them.
+        //   - Scripts from both the prototype and the node are retained, but if both define an
+        //     `initialize` function, the node's `initialize` will overwrite `initialize` in
+        //     the prototype.
+        //   - The prototype doesn't carry its location with it, so relative paths will load with
+        //     respect to the location of the node.
+
+        var mergeDescriptors = function( nodeDescriptor, prototypeDescriptor ) {
+
+            if ( nodeDescriptor.implements ) {
+                prototypeDescriptor.implements = ( prototypeDescriptor.implements || [] ).
+                    concat( nodeDescriptor.implements );
+            }
+
+            if ( nodeDescriptor.source ) {
+                prototypeDescriptor.source = nodeDescriptor.source;
+                prototypeDescriptor.type = nodeDescriptor.type;
+            }
+
+            if ( nodeDescriptor.properties ) {
+
+                prototypeDescriptor.properties = prototypeDescriptor.properties || {};
+
+                for ( var propertyName in nodeDescriptor.properties ) {
+                    prototypeDescriptor.properties[propertyName] = nodeDescriptor.properties[propertyName];
+                }
+
+            }
+
+            if ( nodeDescriptor.methods ) {
+
+                prototypeDescriptor.methods = prototypeDescriptor.methods || {};
+
+                for ( var methodName in nodeDescriptor.methods ) {
+                    prototypeDescriptor.methods[methodName] = nodeDescriptor.methods[methodName];
+                }
+
+            }
+
+            if ( nodeDescriptor.events ) {
+
+                prototypeDescriptor.events = prototypeDescriptor.events || {};
+
+                for ( var eventName in nodeDescriptor.events ) {
+                    prototypeDescriptor.events[eventName] = nodeDescriptor.events[eventName];
+                }
+
+            }
+
+            if ( nodeDescriptor.children ) {
+
+                prototypeDescriptor.children = prototypeDescriptor.children || {};
+
+                for ( var childName in nodeDescriptor.children ) {
+                    prototypeDescriptor.children[childName] = nodeDescriptor.children[childName];
+                }
+
+            }
+
+            if ( nodeDescriptor.scripts ) {
+                prototypeDescriptor.scripts = ( prototypeDescriptor.scripts || [] ).
+                    concat( nodeDescriptor.scripts );
+            }
+
+            return prototypeDescriptor;
+        };
 
         // == Private variables ====================================================================
 

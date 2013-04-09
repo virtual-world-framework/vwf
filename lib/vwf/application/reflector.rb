@@ -473,7 +473,7 @@ public
     end
 
     def pause
-      if playing && ! paused
+      if playing
         @pause_time = Time.now
       end
     end
