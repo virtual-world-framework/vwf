@@ -560,26 +560,6 @@ children:
                 }
                 this.transform = this.initialTransform;
                 this.rotateBy([-1, 0, 0, time * 70], 0, "rotated");
-                // If engine started, set gauges
-                // From start back to run position, time decreases from 1 to 0.5
-                // Use the time variable to calculate the appropriate delta to use for animating gauges
-                // Gauge controlValues when running: VoltMeter, TempNeedle --> 2; OilNeedle, FuelNeedle --> 4
-                if(this.controlValue == this.start.controlValue)
-                {
-                  var delta = 1 - time;
-                  this.parent.VoltMeter.controlValue = delta * 4;
-                  this.parent.TempNeedle.controlValue = delta * 4;
-                  this.parent.OilNeedle.controlValue = delta * 8;
-                  this.parent.FuelNeedle.controlValue = delta * 8;
-                }
-                // If engine stopped, reset gauges to controlValue zero
-                else if(this.controlValue == this.run.controlValue && time < 0.5)
-                {
-                  this.parent.VoltMeter.controlValue = time * 4;
-                  this.parent.TempNeedle.controlValue = time * 4;
-                  this.parent.OilNeedle.controlValue = time * 8;
-                  this.parent.FuelNeedle.controlValue = time * 8;
-                }
               }
               this.pointerDown = function() {
                 initialControlValue = this.controlValue;
@@ -593,6 +573,19 @@ children:
                   }
                   else if(initialControlValue == this.run.controlValue && this.controlValue > (this.start.controlValue - 0.1)) {
                     this.parent.parent.parent.started = true;
+                    
+                    // If engine started, set gauges to max position
+                    this.parent.VoltMeter.animateControlToPosition(this.parent.VoltMeter.epsilon);
+                    this.parent.TempNeedle.animateControlToPosition(this.parent.TempNeedle.epsilon);
+                    this.parent.OilNeedle.animateControlToPosition(this.parent.OilNeedle.epsilon);
+                    this.parent.FuelNeedle.animateControlToPosition(this.parent.FuelNeedle.epsilon);
+                  }
+                  else if(this.controlValue == 0) {
+                    // If engine stopped, reset gauges to controlValue zero
+                    this.parent.VoltMeter.animateControlToPosition(this.parent.VoltMeter.alpha);
+                    this.parent.TempNeedle.animateControlToPosition(this.parent.TempNeedle.alpha);
+                    this.parent.OilNeedle.animateControlToPosition(this.parent.OilNeedle.alpha);
+                    this.parent.FuelNeedle.animateControlToPosition(this.parent.FuelNeedle.alpha);
                   }
                 }
               }, this);
@@ -811,6 +804,7 @@ children:
                 if(!this.initialTransform) {
                   this.initialTransform = this.transform;
                 }
+                console.info("voltmeter animationUpdate", time);
                 this.transform = this.initialTransform;
                 this.rotateBy([0.986, 0, 0.164, (time - 0.5) * -72], 0, "rotated");
               }
