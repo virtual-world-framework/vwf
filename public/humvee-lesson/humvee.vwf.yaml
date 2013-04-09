@@ -560,6 +560,26 @@ children:
                 }
                 this.transform = this.initialTransform;
                 this.rotateBy([-1, 0, 0, time * 70], 0, "rotated");
+                // If engine started, set gauges
+                // From start back to run position, time decreases from 1 to 0.5
+                // Use the time variable to calculate the appropriate delta to use for animating gauges
+                // Gauge controlValues when running: VoltMeter, TempNeedle --> 2; OilNeedle, FuelNeedle --> 4
+                if(this.controlValue == this.start.controlValue)
+                {
+                  var delta = 1 - time;
+                  this.parent.VoltMeter.controlValue = delta * 4;
+                  this.parent.TempNeedle.controlValue = delta * 4;
+                  this.parent.OilNeedle.controlValue = delta * 8;
+                  this.parent.FuelNeedle.controlValue = delta * 8;
+                }
+                // If engine stopped, reset gauges to controlValue zero
+                else if(this.controlValue == this.run.controlValue && time < 0.5)
+                {
+                  this.parent.VoltMeter.controlValue = time * 4;
+                  this.parent.TempNeedle.controlValue = time * 4;
+                  this.parent.OilNeedle.controlValue = time * 8;
+                  this.parent.FuelNeedle.controlValue = time * 8;
+                }
               }
               this.pointerDown = function() {
                 initialControlValue = this.controlValue;
@@ -738,8 +758,8 @@ children:
             - http://vwf.example.com/control.vwf
             properties:
               controlScale: 3
-              controlValue: 2
-              animationTime: 0.5
+              controlValue: 0
+              animationTime: 0
             children: 
               Untitled_017: 
                 extends: http://vwf.example.com/node3.vwf 
@@ -802,8 +822,8 @@ children:
             - http://vwf.example.com/control.vwf
             properties:
               controlScale: 3
-              controlValue: 2
-              animationTime: 0.5
+              controlValue: 0
+              animationTime: 0
             children: 
               Untitled_016: 
                 extends: http://vwf.example.com/node3.vwf 
@@ -866,8 +886,8 @@ children:
             - http://vwf.example.com/control.vwf
             properties:
               controlScale: 3
-              controlValue: 4
-              animationTime: 1
+              controlValue: 0
+              animationTime: 0
             children: 
               Untitled_015: 
                 extends: http://vwf.example.com/node3.vwf 
@@ -930,8 +950,8 @@ children:
             - http://vwf.example.com/control.vwf
             properties:
               controlScale: 3
-              controlValue: 4
-              animationTime: 1
+              controlValue: 0
+              animationTime: 0
             children: 
               Untitled_014: 
                 extends: http://vwf.example.com/node3.vwf 
