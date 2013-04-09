@@ -317,18 +317,23 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //       there, too
             function notifyDriverOfPrototypeAndBehaviorProps() {
                 var ptPropValue;
+                var protos = getPrototypes.call( this, kernel, childExtendsID );
                 protos.forEach( function( prototypeID ) {
                     for ( var propertyName in kernel.getProperties( prototypeID ) ) {
+                        //console.info( " 1    getting "+propertyName+" of: " + childExtendsID  );
                         ptPropValue = kernel.getProperty( childExtendsID, propertyName );
-                        if ( ptPropValue ) {
+                        if ( ptPropValue !== undefined && childID !== undefined ) {
+                            //console.info( " 1    setting "+propertyName+" of: " + nodeID + " to " + ptPropValue );
                             self.settingProperty( childID, propertyName, ptPropValue );
                         }
                     }
                 } );
                 childImplementsIDs.forEach( function( behaviorID ) {
-                    ptPropValue = kernel.getProperty( childExtendsID, propertyName );
                     for ( var propertyName in kernel.getProperties( behaviorID ) ) {
-                        if ( ptPropValue ) {
+                        //console.info( "     2    getting "+propertyName+" of: " + behaviorID  );
+                        ptPropValue = kernel.getProperty( behaviorID, propertyName );
+                        if ( ptPropValue !== undefined && childID !== undefined ) {
+                            //console.info( "     2    setting "+propertyName+" of: " + nodeID + " to " + ptPropValue );
                             self.settingProperty( childID, propertyName, ptPropValue );
                         }
                     }
