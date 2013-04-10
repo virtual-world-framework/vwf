@@ -55,7 +55,7 @@
 
           asyncTest( "Property inheritance kernel", function() {
 
-            createFixtureDerivedBase( function( derivedID, baseID ) {
+            createFixtureDerivedBase( function( derivedID, baseID, cleanup ) {
 
               equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived property in derived" );
               equal( vwf.getProperty( derivedID, "base" ), "base", "base property inherited by derived" );
@@ -72,7 +72,9 @@
               equal( vwf.getProperty( baseID, "derived" ), undefined, "derived property unchanged in base" );
               equal( vwf.getProperty( baseID, "base" ), "base", "base property unchanged in base" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -81,7 +83,7 @@
 
           asyncTest( "Property inheritance JavaScript direct", function() {
 
-            createFixtureDerivedBase( function( derivedID, baseID ) {
+            createFixtureDerivedBase( function( derivedID, baseID, cleanup ) {
 
               equal( vwf.execute( derivedID, "this.derived" ), "derived", "derived property in derived" );
               equal( vwf.execute( derivedID, "this.base" ), "base", "base property inherited by derived" );
@@ -98,7 +100,9 @@
               equal( vwf.execute( baseID, "this.derived" ), undefined, "derived property unchanged in base" );
               equal( vwf.execute( baseID, "this.base" ), "base", "base property unchanged in base" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -107,7 +111,7 @@
 
           asyncTest( "Property inheritance JavaScript collection", function() {
 
-            createFixtureDerivedBase( function( derivedID, baseID ) {
+            createFixtureDerivedBase( function( derivedID, baseID, cleanup ) {
 
               equal( vwf.execute( derivedID, "this.properties.derived" ), "derived", "derived property in derived" );
               equal( vwf.execute( derivedID, "this.properties.base" ), "base", "base property inherited by derived" );
@@ -124,7 +128,9 @@
               equal( vwf.execute( baseID, "this.properties.derived" ), undefined, "derived property unchanged in base" );
               equal( vwf.execute( baseID, "this.properties.base" ), "base", "base property unchanged in base" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -133,7 +139,7 @@
 
           asyncTest( "Direct and collection properties", function() {
 
-            createFixtureDerivedBase( function( derivedID, baseID ) {
+            createFixtureDerivedBase( function( derivedID, baseID, cleanup ) {
 
               vwf.execute( derivedID, "this.properties.derived = { derived: 1 }" );
               strictEqual( vwf.execute( derivedID, "this.derived" ), vwf.execute( derivedID, "this.properties.derived" ), "derived property in collection appears on node" );
@@ -158,7 +164,9 @@
               notStrictEqual( vwf.execute( derivedID, "this.base" ), vwf.execute( baseID, "this.base" ), "updated property on derived node no longer inherits base property on node" );
               notStrictEqual( vwf.execute( derivedID, "this.properties.base" ), vwf.execute( baseID, "this.properties.base" ), "updated property on derived collection no longer inherits base property on collection" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -191,7 +199,10 @@
 
               }, function( derivedID ) {
 
-                callback( derivedID, baseID );
+                callback( derivedID, baseID, function() {
+                  vwf.deleteNode( derivedID );
+                  vwf.deleteNode( baseID );
+                } );
 
               } );
 
