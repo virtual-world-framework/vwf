@@ -157,6 +157,13 @@
 
         this.private = {}; // for debugging
 
+        /// The application root ID.
+        /// 
+        /// @name module:vwf~applicationID
+
+        var applicationID = undefined;
+        var pendingApplicationID = undefined;
+
         /// Components describe the objects that make up the simulation. They may also serve as
         /// prototype objects for further derived components. External components are identified by
         /// URIs. Once loaded, we save a mapping here from its URI to the node ID of its prototype so
@@ -1081,7 +1088,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Global node and descendant deltas.
 
                 nodes: [  // TODO: all global objects
-                    require( "vwf/utility" ).transform( this.getNode( this.find("", "/")[0], full ), require( "vwf/utility" ).transforms.transit ),
+                    require( "vwf/utility" ).transform( this.getNode( applicationID, full ), require( "vwf/utility" ).transforms.transit ),
                 ],
 
                 // Message queue.
@@ -1380,6 +1387,12 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             this.models.forEach( function( model ) {
                 model.deletingNode && model.deletingNode( nodeID );
             } );
+
+            // Clear the root ID if the application root node is deleted.
+
+            if ( nodeID === applicationID ) {
+                applicationID = undefined;
+            }
 
             // Call deletedNode() on each view. The view is being notified that a node has been
             // deleted.
@@ -1807,7 +1820,7 @@ useLegacyID = childURI &&
     
 useLegacyID = useLegacyID ||
     // work around model/glge creating a camera on a not-initialized application node
-    nodeID == this.find("", "/")[0] && childName == "camera";
+    nodeID == applicationID && childName == "camera";
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 var childID = childComponent.id;
@@ -1826,6 +1839,14 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                     ( this.configuration["randomize-ids"] ? "-" + ( "0" + Math.floor( this.random( nodeID ) * 100 ) ).slice( -2 ) : "" ) +
                     ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
 }
+            }
+
+            // Record the application root ID. The application is the first (global) node created.
+            // The application node is recognized here but recorded as pending. Then, after its
+            // dependencies are loaded, it is registered just as its `creatingNode` calls are sent.
+
+            if ( ! applicationID && ! pendingApplicationID ) {
+                pendingApplicationID = childID;
             }
 
             var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
@@ -1916,6 +1937,14 @@ if ( ! childComponent.source ) {
                 },
 
                 function( series_callback_async /* ( err, results ) */ ) {
+
+                    // Register the node as the application root if it was recognized as such
+                    // earlier.  // TODO: this would be better if made more explicit from the caller (possibly using a special `childName` marker, but that would require the "this is the application" annotation to pass through `createNode`; since `createNode` and `createChild` should probably merge to simplify the patches: and includes: support, this can wait)
+
+                    if ( childID === pendingApplicationID ) {
+                        applicationID = childID;
+                        pendingApplicationID = undefined;
+                    }
 
                     // As a special case, since many kernel functions delegate to vwf/model/object,
                     // call it first so that those functions will be available to the other drivers.
@@ -2942,6 +2971,17 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return this.moniker_;
         };
 
+        // -- application --------------------------------------------------------------------------
+
+        /// @name module:vwf.application
+        /// 
+        /// @see {@link module:vwf/api/kernel.application}
+
+        this.application = function( initializedOnly ) {
+            return applicationID && ( ! initializedOnly || this.models.object.initialized( applicationID ) ) ?
+                applicationID : undefined;
+        };
+
         // -- intrinsics ---------------------------------------------------------------------------
 
         /// @name module:vwf.intrinsics
@@ -3129,7 +3169,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             // the reference.
 
             var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
-                "index-vwf", nodeID, resolverWithInitializedOnly, this );  // TODO: application root id instead of "index-vwf"
+                this.application( initializedOnly ), nodeID, resolverWithInitializedOnly, this );
 
             // Return the result, either by invoking the callback when provided, or returning the
             // array directly.
@@ -3180,7 +3220,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             // the reference.
 
             var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
-                "index-vwf", nodeID, resolverWithInitializedOnly, this );  // TODO: application root id instead of "index-vwf"
+                this.application( initializedOnly ), nodeID, resolverWithInitializedOnly, this );
 
             // Search for the test node in the result.
 

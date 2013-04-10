@@ -332,6 +332,22 @@ define( function() {
 
         moniker: [],
 
+        /// Return the application root node.
+        /// 
+        /// @function
+        /// 
+        /// @param {Boolean} [initializedOnly]
+        ///   If set, only return the application node if the application has completed
+        ///   initialization. Drivers that manage application code should set `initializedOnly`
+        ///   since applications should never have access to uninitialized parts of the application
+        ///   graph.
+        /// 
+        /// @returns {ID}
+        ///   The ID of the application root. `application` may return `undefined` if the entire
+        ///   application has been deleted.
+
+        application: [ /* initializedOnly */ ],
+
         /// Return the node's intrinsic state. This consists of:
         /// 
         ///   source -- the URI of the node's data blob

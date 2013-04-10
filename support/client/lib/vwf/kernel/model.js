@@ -431,6 +431,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             case "client":
             case "moniker":
 
+            case "application":
+
             case "intrinsics":
             case "uri":
             case "name":

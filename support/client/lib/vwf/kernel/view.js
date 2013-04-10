@@ -183,6 +183,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             case "client":
             case "moniker":
 
+            case "application":
+
             case "intrinsics":
             case "uri":
             case "name":

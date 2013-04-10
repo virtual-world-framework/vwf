@@ -29,14 +29,14 @@ $sw.on('transform', function (event) {
         if(event.scale < 1) scale = -1;
         else scale = 1;
 
-        vwf_view.kernel.fireEvent( "index-vwf", "touchZoom", [ scale, true ]);
+        vwf_view.kernel.fireEvent( vwf_view.kernel.application(), "touchZoom", [ scale, true ]);
     }
     else
     {
         if(event.scale < 1) scale = -0.1;
         else scale = 0.1;
 
-        vwf_view.kernel.fireEvent( "index-vwf", "touchZoom", [ scale, false ]);
+        vwf_view.kernel.fireEvent( vwf_view.kernel.application(), "touchZoom", [ scale, false ]);
     }
 });
 
