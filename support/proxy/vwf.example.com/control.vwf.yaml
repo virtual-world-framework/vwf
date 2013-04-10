@@ -271,11 +271,9 @@ scripts:
   }
 
   this.animateControlToPosition = function(position) {
-    if(!this.controlPlaying) {
-      this.controlPlaying = true;
-      this.controlDirection = this.controlValue < position.controlValue ? 1 : -1;
-      this.controlTick(position);
-    }
+    this.controlPlaying = true;
+    this.controlDirection = this.controlValue < position.controlValue ? 1 : -1;
+    this.controlTick(position);
   }
 
   this.controlTick = function (nextPosition) {
