@@ -125,8 +125,14 @@ SceneManager.prototype.initialize = function(scene)
 		GetAllLeafMeshes(child,meshes);		
 		for(var i =0; i < meshes.length; i++)
 		{
-			_SceneManager.removeChild(meshes[i]);
+			meshes[i].sceneManagerDelete();
+			//_SceneManager.removeChild(meshes[i]);
 		}
+	}
+	THREE.Mesh.prototype.materialUpdated = function()
+	{
+		if(this.RenderBatchManager)
+			this.RenderBatchManager.materialUpdated(this);
 	}
 	THREE.Object3D.prototype.setStatic = function(_static)
 	{
@@ -259,7 +265,7 @@ SceneManagerRegion.prototype.removeChild= function(child)
 		this.childCount--;
 		this.childObjects.splice(this.childObjects.indexOf(child),1);
 		
-		if(this.depth <= batchAtLevel)
+		if(this.RenderBatchManager)
 		{
 			
 			this.RenderBatchManager.remove(child);
@@ -291,7 +297,38 @@ SceneManagerRegion.prototype.desplit = function()
 	}
 	this.childObjects = children;
 	for(var j = 0; j < children.length; j++)
+	{
 		children[j].sceneManagerNode = this;
+		//this.updateObject(children[j]);
+		
+		
+		if(children[j].isStatic())
+		{
+			
+				//search up for the lowest level batch manager I fit in
+				var p = this;
+				var found = false;
+				while(!found && p)
+				{
+					if(p.RenderBatchManager)
+					{
+						found = true;
+						break;
+					}
+					p = p.parent;
+				
+				}
+				
+				//remove me from my old batch, if any
+				if(children[j].RenderBatchManager)
+					children[j].RenderBatchManager.remove(children[j]);
+				
+				//add to the correct batch, if I'm static
+			    p.RenderBatchManager.add(children[j]);	
+			
+		}
+		
+	}
 	
 	this.childRegions = [];
 }
@@ -372,7 +409,10 @@ SceneManagerRegion.prototype.distributeObject = function(object)
 			}.bind(object)
 			object.sceneManagerDelete = function()
 			{
-				this.sceneManagerNode.removeChild(this);
+				
+				if(this.RenderBatchManager)
+					this.RenderBatchManager.remove(this);
+				_SceneManager.removeChild(this);
 			}.bind(object)
 		}
 	}
@@ -389,28 +429,30 @@ SceneManagerRegion.prototype.updateObject = function(object)
 		
 		this.addChild(object);
 		
-		//search up for the lowest level batch manager I fit in
-		var p = this;
-		var found = false;
-		while(!found && p)
+		if(!this.RenderBatchManager)
 		{
-			if(p.RenderBatchManager)
+			//search up for the lowest level batch manager I fit in
+			var p = this;
+			var found = false;
+			while(!found && p)
 			{
-				found = true;
-				break;
+				if(p.RenderBatchManager)
+				{
+					found = true;
+					break;
+				}
+				p = p.parent;
+			
 			}
-			p = p.parent;
-		
+			
+			//remove me from my old batch, if any
+			if(object.RenderBatchManager)
+				object.RenderBatchManager.remove(object);
+			
+			//add to the correct batch, if I'm static
+			if(object.isStatic())	
+				p.RenderBatchManager.add(object);	
 		}
-		
-		//remove me from my old batch, if any
-		if(object.RenderBatchManager)
-			object.RenderBatchManager.remove(object);
-		
-		//add to the correct batch, if I'm static
-		if(object.isStatic())	
-			p.RenderBatchManager.add(object);	
-		
 	}
 	//the object has left the region, search up.
 	else
@@ -475,7 +517,17 @@ SceneManagerRegion.prototype.split = function()
 	var objectsBack = this.childObjects;
 	this.childObjects = [];
 	for(var i = 0; i < objectsBack.length; i++)
-	    this.distributeObject(objectsBack[i]);
+	{
+	   if(this.RenderBatchManager)
+		  this.RenderBatchManager.remove(objectsBack[i]);
+	   var added = this.distributeObject(objectsBack[i]);
+	   if(!added)
+	   {
+		   if(this.RenderBatchManager)
+				if(objectsBack[i].isStatic())
+					this.RenderBatchManager.add(objectsBack[i]);
+	   }
+	}
 	
 	this.isSplit = true;	
 }
@@ -595,52 +647,48 @@ _SceneManager = new SceneManager();
 
 
 
-
-
-
-
-
-THREE.RenderBatchManager = function(scene,name)
+THREE.RenderBatch = function(material,scene)
 {
-	this.scene = scene;
-	this.name = name;
 	this.objects = [];
-	
-	this.prerender = function()
+	this.material = material;
+	this.dirty = false;
+	this.scene = scene;
+}
+THREE.RenderBatch.prototype.addObject = function(object)
+{
+	if(this.objects.indexOf(object) == -1)
 	{
-		if(this.dirty)
-		 this.build();
-		delete this.dirty;
+		this.objects.push(object);
+		this.dirty = true;
 	}
-	this.prerenderhandle = this.prerender.bind(this);
-	$(document).bind('prerender',this.prerenderhandle);
-}
-
-THREE.RenderBatchManager.prototype.add = function(child)
-{
-	if(this.objects.indexOf(child) != -1)
-		return;
-		
-	this.objects.push(child);
-	child.visible = false;
-	child.RenderBatchManager = this;
-//	console.log('adding ' + child.name + ' to batch' + this.name);  
-	this.dirty = true;
-}
-
-THREE.RenderBatchManager.prototype.remove = function(child)
-{
-	if(this.objects.indexOf(child) == -1)
-		return;
 	
-	child.visible = true;
-	child.RenderBatchManager = null;
-//	console.log('removing ' + child.name + ' from batch' + this.name);  
-	this.objects.splice(this.objects.indexOf(child),1);
-	this.dirty = true;
 }
-
-THREE.RenderBatchManager.prototype.build = function()
+THREE.RenderBatch.prototype.removeObject = function(object)
+{
+	if(this.objects.indexOf(object) != -1)
+	{
+		this.objects.splice(this.objects.indexOf(object),1);
+		this.dirty = true;
+	}
+	
+}
+THREE.RenderBatch.prototype.update = function()
+{
+	if(this.dirty)
+		this.build();
+	this.dirty = false;	
+}
+THREE.RenderBatch.prototype.checkSuitability = function(object)
+{
+	
+	return compareMaterials(this.material,object.material);
+}
+THREE.RenderBatch.prototype.deinitialize = function()
+{
+	if(this.mesh)
+		this.scene.remove_internal(this.mesh);
+}
+THREE.RenderBatch.prototype.build = function()
 {
 	console.log('Building batch' + this.name + ' : objects = ' + this.objects.length); 
 	
@@ -653,6 +701,8 @@ THREE.RenderBatchManager.prototype.build = function()
 	this.mesh = null;
     var geo = new THREE.Geometry();
 	this.mesh = new THREE.Mesh(geo,this.objects[0].material.clone());
+	this.mesh.castShadow=true;
+	this.mesh.receiveShadow=true;
 	this.scene.add_internal(this.mesh);
 	
 	for(var i =0; i < this.objects.length; i++)
@@ -717,17 +767,188 @@ THREE.RenderBatchManager.prototype.build = function()
 				geo.faceVertexUvs[0].push( uvCopy );
 
 			}
-
-	
 		}
 	}
-	
-	
+	geo.computeBoundingSphere();
+	geo.computeBoundingBox();
 }
 
+function compareMaterials(m1,m2)
+{
+	
+	var delta = 0;
+	delta += Math.abs(m1.color.r - m2.color.r);
+	delta += Math.abs(m1.color.g - m2.color.g);
+	delta += Math.abs(m1.color.b - m2.color.b);
+	
+	delta += Math.abs(m1.ambient.r - m2.ambient.r);
+	delta += Math.abs(m1.ambient.g - m2.ambient.g);
+	delta += Math.abs(m1.ambient.b - m2.ambient.b);
+	
+	delta += Math.abs(m1.emissive.r - m2.emissive.r);
+	delta += Math.abs(m1.emissive.g - m2.emissive.g);
+	delta += Math.abs(m1.emissive.b - m2.emissive.b);
+	
+	delta += Math.abs(m1.specular.r - m2.specular.r);
+	delta += Math.abs(m1.specular.g - m2.specular.g);
+	delta += Math.abs(m1.specular.b - m2.specular.b);
+	
+	delta += Math.abs(m1.opacity - m2.opacity);
+	
+	delta += Math.abs(m1.transparent - m2.transparent);
+	
+	delta += Math.abs(m1.shininess - m2.shininess);
+	
+	delta += Math.abs(m1.reflectivity - m2.reflectivity);
+	delta += Math.abs(m1.alphaTest - m2.alphaTest);	
+	delta += Math.abs(m1.bumpScale - m2.bumpScale);	
+	delta += Math.abs(m1.normalScale.x - m2.normalScale.x);
+	delta += Math.abs(m1.normalScale.y - m2.normalScale.y);
+	
+		var mapnames = ['map','bumpMap','lightMap','normalMap','specularMap','envMap'];
+        for(var i =0; i < mapnames.length; i++)
+        {
+				var mapname = mapnames[i];
+				
+				
+				
+				
+				
+				if(m1[mapname] && !m2[mapname])
+				{
+					delta += 1000;
+				}
+				if(!m1[mapname] && m2[mapname])
+				{
+					delta += 1000;
+				}
+				if(m1[mapname] && m2[mapname])
+				{
+					if(m1[mapname].image.src.toString() != m2[mapname].image.src.toString())
+						delta += 1000;
+				
+				
+               
+                delta += m1[mapname].wrapS != m1[mapname].wrapS;
+				delta += m1[mapname].wrapT != m1[mapname].wrapT;
+                delta += Math.abs(m1[mapname].mapping.constructor != m2[mapname].mapping.constructor) * 1000;	
+				delta += Math.abs(m1[mapname].repeat.x - m2[mapname].repeat.x);
+				delta += Math.abs(m1[mapname].repeat.y - m2[mapname].repeat.y);
+				delta += Math.abs(m1[mapname].offset.x - m2[mapname].offset.x);
+				delta += Math.abs(m1[mapname].offset.y - m2[mapname].offset.y);
+				}
+			
+        }
+   		
+	if(delta < .001)
+		return true;
+	return false;	
+
+
+}
+
+
+THREE.RenderBatchManager = function(scene,name)
+{
+	this.scene = scene;
+	this.name = name;
+	this.objects = [];
+	this.batches = [];
+	this.prerender = function()
+	{
+		if(this.dirty)
+		 this.update();
+		delete this.dirty;
+	}
+	this.prerenderhandle = this.prerender.bind(this);
+	$(document).bind('prerender',this.prerenderhandle);
+}
+
+THREE.RenderBatchManager.prototype.update = function(child)
+{
+	
+	if(this.dirty)
+		for(var i =0; i < this.batches.length; i++)
+			this.batches[i].update(); 
+	this.dirty = false;		
+}
+
+THREE.RenderBatchManager.prototype.add = function(child)
+{
+	
+	//if(this.objects.indexOf(child) != -1)
+	//	return;
+		
+	if(child.RenderBatchManager)
+		child.RenderBatchManager.remove(child);
+	
+	this.objects.push(child);
+	child.visible = false;
+	child.RenderBatchManager = this;
+	
+	var added = false;
+	for(var i = 0; i < this.batches.length; i++)
+	{
+		if(this.batches[i].checkSuitability(child))
+		{
+			this.batches[i].addObject(child);
+			added = true;
+		}
+	}
+	if(!added)
+	{
+		var newbatch = new THREE.RenderBatch(child.material.clone(),this.scene);
+		newbatch.addObject(child);
+		this.batches.push(newbatch);
+	}
+	
+//	console.log('adding ' + child.name + ' to batch' + this.name);  
+	this.dirty = true;
+}
+
+THREE.RenderBatchManager.prototype.remove = function(child)
+{
+	
+	if(this.objects.indexOf(child) == -1)
+		return;
+	
+	child.visible = true;
+	child.RenderBatchManager = null;
+//	console.log('removing ' + child.name + ' from batch' + this.name);  
+	this.objects.splice(this.objects.indexOf(child),1);
+	
+	var indexToDelete = [];
+	for(var i = 0; i < this.batches.length; i++)
+	{
+		this.batches[i].removeObject(child);
+		if(this.batches[i].objects.length == 0)
+			indexToDelete.push(i);
+	}
+	for(var i = 0; i < indexToDelete.length; i++)
+	{
+		this.batches[indexToDelete[i]].deinitialize();
+		this.batches.splice(indexToDelete[i],1);
+	}
+	this.dirty = true;
+}
+
+THREE.RenderBatchManager.prototype.materialUpdated = function(child)
+{
+	if(this.objects.indexOf(child) == -1)
+	{
+		console.log('Should have never got here. Updating material in batch taht does not contain object');
+		return;
+	}
+	this.remove(child);
+	this.add(child);
+}
 THREE.RenderBatchManager.prototype.deinitialize = function(child)
 {
 	$(document).unbind('prerender',this.prerenderhandle);
 	if(this.mesh)
 		this.scene.remove_internal(this.mesh);
+	for(var i = 0; i < this.batches.length; i++)
+	{
+		this.batches[i].deinitialize();
+	}	
 }

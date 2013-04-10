@@ -420,6 +420,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if(detectWebGL() && getURLParameter('disableWebGL') == 'null')
             {
                 sceneNode.renderer = new THREE.WebGLRenderer({canvas:mycanvas,antialias:true});
+				sceneNode.renderer.autoUpdateScene = false;
 				sceneNode.renderer.setSize($('#index-vwf').width(),$('#index-vwf').height());
 				sceneNode.renderer.shadowMapEnabled = true;
 				sceneNode.renderer.setClearColor({r:0,g:0,b:0},1.0);

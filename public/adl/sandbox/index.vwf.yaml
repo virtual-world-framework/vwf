@@ -31,6 +31,7 @@ properties:
             this.sun.position.z = value[2];      
             this.sun.position.normalize();
             this.sun.position.multiplyScalar(100);
+            this.sun.updateMatrixWorld(true);
   sunIntensity: 
     value: .5
     set: |
@@ -257,6 +258,7 @@ scripts:
        this.groundplane.name = 'GroundPlane';
        window._dSun = this.sun;
        
+       this.sun.updateMatrixWorld(true);
        this.CreateSky(vwf.getProperty(this.id,'skyTexture') || 'white');
        /*findscene().setAmbientColor('rgb(200,200,200)');
        

@@ -349,7 +349,7 @@ scripts:
                 motionvec = MATH.toUnitVec3(motionvec);
                 var testpos = MATH.subVec3(finalt,MATH.scaleVec3(motionvec,-.15));
                 
-                var intersectfront = _SceneManager.CPUPick(MATH.addVec3(testpos,[0,0,1]),motionvec,{filter:function(o){return o.isAvatar != true;},maxDist: 2000,ignore:[this.skin,_Editor.GetMoveGizmo()]});
+                var intersectfront = _SceneManager.CPUPick(MATH.addVec3(testpos,[0,0,1]),motionvec,{filter:function(o){return o.isAvatar != true;},maxDist: 100,ignore:[this.skin,_Editor.GetMoveGizmo()]});
                 if(intersectfront)
                 {
                     if(intersectfront.distance < .3)
@@ -371,7 +371,7 @@ scripts:
                 }
                 var falldist = 1000;
                
-                var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,1.7]),[0,0,-1],{filter:function(o){ return o.isAvatar != true;},maxDist: 2000,ignore:[this.skin,_Editor.GetMoveGizmo()]});
+                var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,1.7]),[0,0,-1],{filter:function(o){ return o.isAvatar != true;},maxDist: 100,ignore:[this.skin,_Editor.GetMoveGizmo()]});
               
                 
                 falldist = intersect?intersect.distance:falldist;
@@ -410,7 +410,7 @@ scripts:
             if(this.inMotion('jump') && this.jumpcounter > 10)
             {
                 this.skin.PickPriority = -1;
-                var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,2]),[0,0,-1],{filter:function(o){return o.isAvatar != true;},maxDist: 2000,ignore:[this.skin,_Editor.GetMoveGizmo()]});
+                var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,2]),[0,0,-1],{filter:function(o){return o.isAvatar != true;},maxDist: 100,ignore:[this.skin,_Editor.GetMoveGizmo()]});
                 if(intersect)
                 {
                     

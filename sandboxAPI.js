@@ -674,7 +674,7 @@ function SaveState(URL,dirname,data,response)
 					//overwriting the state;
 					//check that the owner property of hte state did not change
 					var asset = JSON.parse(data);
-					global.log(asset);
+					//global.log(asset);
 					var storedOwner = asset[asset.length-1].owner;
 			
 					CheckOwner(storedOwner,dirname+'/state',function(e){

@@ -106,7 +106,7 @@ function Editor()
 				if(vwf.views[0].lastPick.object)
 				if(vwf.views[0].lastPick.object == MoveGizmo.children[i])
 				
-				axis = i;
+				axis = MoveGizmo.allChildren.indexOf(MoveGizmo.children[i]);
 			}			
 			
 			document.AxisSelected = axis;
@@ -177,21 +177,21 @@ function Editor()
 			}
 			
 			$('#StatusAxis').text('Axis: '+axis);
-			for(var i =0; i < MoveGizmo.children.length;i++)
+			for(var i =0; i < MoveGizmo.allChildren.length;i++)
 			{
-				if(MoveGizmo.children[i].material)
+				if(MoveGizmo.allChildren[i].material)
 				{
-					var c = MoveGizmo.children[i].material.originalColor;
-					MoveGizmo.children[i].material.color.setRGB(c.r,c.g,c.b);
-					MoveGizmo.children[i].material.emissive.setRGB(c.r,c.g,c.b);
+					var c = MoveGizmo.allChildren[i].material.originalColor;
+					MoveGizmo.allChildren[i].material.color.setRGB(c.r,c.g,c.b);
+					MoveGizmo.allChildren[i].material.emissive.setRGB(c.r,c.g,c.b);
 				}
 			}
 			if(axis >= 0)
 			{
-				if(MoveGizmo.children[axis].material)
+				if(MoveGizmo.allChildren[axis].material)
 				{
-					MoveGizmo.children[axis].material.color.setRGB(1,1,1);
-					MoveGizmo.children[axis].material.emissive.setRGB(1,1,1);
+					MoveGizmo.allChildren[axis].material.color.setRGB(1,1,1);
+					MoveGizmo.allChildren[axis].material.emissive.setRGB(1,1,1);
 				}
 			}
 		}
@@ -425,13 +425,13 @@ function Editor()
 		}
 		if(MoveGizmo)
 		{
-			for(var i =0; i < MoveGizmo.children.length;i++)
+			for(var i =0; i < MoveGizmo.allChildren.length;i++)
 			{
-				if(MoveGizmo.children[i].material)
+				if(MoveGizmo.allChildren[i].material)
 				{
-					var c = MoveGizmo.children[i].material.originalColor;
-					MoveGizmo.children[i].material.color.setRGB(c.r,c.g,c.b);
-					MoveGizmo.children[i].material.emissive.setRGB(c.r,c.g,c.b);
+					var c = MoveGizmo.allChildren[i].material.originalColor;
+					MoveGizmo.allChildren[i].material.color.setRGB(c.r,c.g,c.b);
+					MoveGizmo.allChildren[i].material.emissive.setRGB(c.r,c.g,c.b);
 				}
 			}
 			document.AxisSelected = -1;
@@ -1947,16 +1947,16 @@ function Editor()
 	}.bind(this);
 	this.hideMoveGizmo = function()
 	{
-			MoveGizmo.visible=false;
-			for(var i =0; i < MoveGizmo.children.length; i++)
+			
+			while(MoveGizmo.children.length)
 			{ 
-				MoveGizmo.children[i].visible = false;
+				MoveGizmo.remove(MoveGizmo.children[MoveGizmo.children.length-1])
 			}
 	}
 	this.showMoveGizmo = function()
 	{
 			
-			MoveGizmo.visible=true;
+			
 			SetGizmoMode(GizmoMode);
 			
 			
@@ -2028,9 +2028,10 @@ function Editor()
                 cubeZ.position.set(.15,.15,5.00);
                 
                 MoveGizmo = new THREE.Object3D();
-                MoveGizmo.add(cubeX,true);
-                MoveGizmo.add(cubeY,true);
-                MoveGizmo.add(cubeZ,true);
+				MoveGizmo.allChildren = [];
+                MoveGizmo.allChildren.push(cubeX);
+                MoveGizmo.allChildren.push(cubeY);
+                MoveGizmo.allChildren.push(cubeZ);
 				
 				cubeX.geometry.setPickGeometry(new THREE.CubeGeometry( 10.00, 1.80, 1.80 ));
 				cubeY.geometry.setPickGeometry(new THREE.CubeGeometry( 1.80, 10.00, 1.80 ));
@@ -2049,77 +2050,77 @@ function Editor()
                     new THREE.MeshLambertMaterial( { color: 0x0000FF, emissive:0x0000FF} )
                 );
                 
-				MoveGizmo.add(rotx,true);
+				MoveGizmo.allChildren.push(rotx);
 				
 				roty.rotation.x = Math.PI/2;
-                MoveGizmo.add(roty,true);
+                MoveGizmo.allChildren.push(roty);
 				rotx.rotation.y = Math.PI/2;
-                MoveGizmo.add(rotz,true);
+                MoveGizmo.allChildren.push(rotz);
 				rotz.rotation.z = 90;
 				
 		
 		
-		MoveGizmo.add(BuildBox([.5,.5,.5],[10.25,0,0],red),true);//scale x		
-		MoveGizmo.add(BuildBox([.5,.5,.5],[0,10.25,0],green),true);//scale y
-		MoveGizmo.add(BuildBox([.5,.5,.5],[0,0,10.25],blue),true);//scale z
-		MoveGizmo.add(BuildBox([.85,.85,.85],[9.25,0,0],red),true);//scale xyz
-		MoveGizmo.add(BuildBox([.85,.85,.85],[0,9.25,0],green),true);//scale xyz
-		MoveGizmo.add(BuildBox([.85,.85,.85],[0,0,9.25],blue),true);//scale xyz
-		MoveGizmo.add(BuildBox([1.50,1.50,.30],[.75,.75,.15],[75,75,0,1]),true);//movexy
+		MoveGizmo.allChildren.push(BuildBox([.5,.5,.5],[10.25,0,0],red));//scale x		
+		MoveGizmo.allChildren.push(BuildBox([.5,.5,.5],[0,10.25,0],green));//scale y
+		MoveGizmo.allChildren.push(BuildBox([.5,.5,.5],[0,0,10.25],blue));//scale z
+		MoveGizmo.allChildren.push(BuildBox([.85,.85,.85],[9.25,0,0],red));//scale xyz
+		MoveGizmo.allChildren.push(BuildBox([.85,.85,.85],[0,9.25,0],green));//scale xyz
+		MoveGizmo.allChildren.push(BuildBox([.85,.85,.85],[0,0,9.25],blue));//scale xyz
+		MoveGizmo.allChildren.push(BuildBox([1.50,1.50,.30],[.75,.75,.15],[75,75,0,1]));//movexy
 	//	MoveGizmo.children[MoveGizmo.children.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( 8, 8, .30 ));
-		MoveGizmo.add(BuildBox([1.50,.30,1.50],[.75,.15,.75],[75,0,75,1]),true);//movexz
+		MoveGizmo.allChildren.push(BuildBox([1.50,.30,1.50],[.75,.15,.75],[75,0,75,1]));//movexz
 	//	MoveGizmo.children[MoveGizmo.children.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( 8, .30, 8 ));
-		MoveGizmo.add(BuildBox([.30,1.50,1.50],[.15,.75,.75],[0,75,75,1]),true);//moveyz
+		MoveGizmo.allChildren.push(BuildBox([.30,1.50,1.50],[.15,.75,.75],[0,75,75,1]));//moveyz
 	//	MoveGizmo.children[MoveGizmo.children.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( .30, 8, 8 ));
 		
 		
-		MoveGizmo.add(BuildRing(12,.7,[0,0,1],30,[1,1,1,1],90,450),true);//rotate z
+		MoveGizmo.allChildren.push(BuildRing(12,.7,[0,0,1],30,[1,1,1,1],90,450));//rotate z
 		
-		MoveGizmo.add(BuildRing(7,0.5,[1,0,0],37,red,0,370),true);//rotate x
-		MoveGizmo.add(BuildRing(7,0.5,[0,1,0],37,green,0,370),true);//rotate y
-		MoveGizmo.add(BuildRing(7,0.5,[0,0,1],37,blue,0,370),true);//rotate z
+		MoveGizmo.allChildren.push(BuildRing(7,0.5,[1,0,0],37,red,0,370));//rotate x
+		MoveGizmo.allChildren.push(BuildRing(7,0.5,[0,1,0],37,green,0,370));//rotate y
+		MoveGizmo.allChildren.push(BuildRing(7,0.5,[0,0,1],37,blue,0,370));//rotate z
 		
-		MoveGizmo.add(BuildBox([5,5,5],[0,0,0],[1,1,1,1]),true);//scale uniform
-		MoveGizmo.add(BuildBox([0.30,5,5],[5,0,0],red),true);//scale uniform
-		MoveGizmo.add(BuildBox([5,.30,5],[0,5,0],green),true);//scale uniform
-		MoveGizmo.add(BuildBox([5,5,.30],[0,0,5],blue),true);//scale uniform
-		MoveGizmo.add(BuildBox([.30,5,5],[-5,0,0],red),true);//scale uniform
-		MoveGizmo.add(BuildBox([5,.30,5],[0,-5,0],green),true);//scale uniform
-		MoveGizmo.add(BuildBox([5,5,.30],[0,0,-5],blue),true);//scale uniform		
+		MoveGizmo.allChildren.push(BuildBox([5,5,5],[0,0,0],[1,1,1,1]));//scale uniform
+		MoveGizmo.allChildren.push(BuildBox([0.30,5,5],[5,0,0],red));//scale uniform
+		MoveGizmo.allChildren.push(BuildBox([5,.30,5],[0,5,0],green));//scale uniform
+		MoveGizmo.allChildren.push(BuildBox([5,5,.30],[0,0,5],blue));//scale uniform
+		MoveGizmo.allChildren.push(BuildBox([.30,5,5],[-5,0,0],red));//scale uniform
+		MoveGizmo.allChildren.push(BuildBox([5,.30,5],[0,-5,0],green));//scale uniform
+		MoveGizmo.allChildren.push(BuildBox([5,5,.30],[0,0,-5],blue));//scale uniform		
 				
 
-		MoveGizmo.children[0].name = 'XRotation';
-		MoveGizmo.children[1].name = 'YRotation';
-		MoveGizmo.children[2].name = 'ZRotation';
+		MoveGizmo.allChildren[0].name = 'XRotation';
+		MoveGizmo.allChildren[1].name = 'YRotation';
+		MoveGizmo.allChildren[2].name = 'ZRotation';
 		
-		MoveGizmo.children[3].name = 'XMovement';
-		MoveGizmo.children[4].name = 'YMovement';
-		MoveGizmo.children[5].name = 'ZMovement';				
+		MoveGizmo.allChildren[3].name = 'XMovement';
+		MoveGizmo.allChildren[4].name = 'YMovement';
+		MoveGizmo.allChildren[5].name = 'ZMovement';				
 		
-		MoveGizmo.children[6].name = 'XScale';	
-		MoveGizmo.children[7].name = 'YScale';	
-		MoveGizmo.children[8].name = 'ZScale';	
+		MoveGizmo.allChildren[6].name = 'XScale';	
+		MoveGizmo.allChildren[7].name = 'YScale';	
+		MoveGizmo.allChildren[8].name = 'ZScale';	
 		
-		MoveGizmo.children[9].name = 'XYScale';	
-		MoveGizmo.children[10].name = 'YZScale';	
-		MoveGizmo.children[11].name = 'ZXScale';	
+		MoveGizmo.allChildren[9].name = 'XYScale';	
+		MoveGizmo.allChildren[10].name = 'YZScale';	
+		MoveGizmo.allChildren[11].name = 'ZXScale';	
 		
-		MoveGizmo.children[12].name = 'XYMove';	
-		MoveGizmo.children[13].name = 'YZMove';	
-		MoveGizmo.children[14].name = 'ZXMove';	
+		MoveGizmo.allChildren[12].name = 'XYMove';	
+		MoveGizmo.allChildren[13].name = 'YZMove';	
+		MoveGizmo.allChildren[14].name = 'ZXMove';	
 		
-		MoveGizmo.children[15].name = 'SwapCoords';	
-		MoveGizmo.children[16].name = 'XRotate';	
-		MoveGizmo.children[17].name = 'YRotate';	
-		MoveGizmo.children[18].name = 'ZRotate';	
+		MoveGizmo.allChildren[15].name = 'SwapCoords';	
+		MoveGizmo.allChildren[16].name = 'XRotate';	
+		MoveGizmo.allChildren[17].name = 'YRotate';	
+		MoveGizmo.allChildren[18].name = 'ZRotate';	
 		
-		MoveGizmo.children[19].name = 'ScaleUniform';	
-		MoveGizmo.children[20].name = 'XScale1';	
-		MoveGizmo.children[21].name = 'YScale1';	
-		MoveGizmo.children[22].name = 'ZScale1';	
-		MoveGizmo.children[23].name = 'XScale2';	
-		MoveGizmo.children[24].name = 'YScale2';	
-		MoveGizmo.children[25].name = 'ZScale2';	
+		MoveGizmo.allChildren[19].name = 'ScaleUniform';	
+		MoveGizmo.allChildren[20].name = 'XScale1';	
+		MoveGizmo.allChildren[21].name = 'YScale1';	
+		MoveGizmo.allChildren[22].name = 'ZScale1';	
+		MoveGizmo.allChildren[23].name = 'XScale2';	
+		MoveGizmo.allChildren[24].name = 'YScale2';	
+		MoveGizmo.allChildren[25].name = 'ZScale2';	
 		MoveGizmo.name = "MoveGizmo";
 		
 		
@@ -2139,71 +2140,19 @@ function Editor()
 		findscene().add(movegizhead,true);
 		MoveGizmo.matrixAutoUpdate = false;
 		
-		for(var i =0; i < MoveGizmo.children.length; i++)
+		for(var i =0; i < MoveGizmo.allChildren.length; i++)
 		{
-			MoveGizmo.children[i].material.originalColor = new THREE.Color();
-			var c = MoveGizmo.children[i].material.color;
-			MoveGizmo.children[i].material.originalColor.setRGB(c.r,c.g,c.b);
-			MoveGizmo.children[i].renderDepth = -10000 - i;
-			MoveGizmo.children[i].material.depthTest = false;
-			MoveGizmo.children[i].material.depthWrite = false;
-			MoveGizmo.children[i].material.transparent = true;
-			MoveGizmo.children[i].PickPriority = 10;
+			MoveGizmo.allChildren[i].material.originalColor = new THREE.Color();
+			var c = MoveGizmo.allChildren[i].material.color;
+			MoveGizmo.allChildren[i].material.originalColor.setRGB(c.r,c.g,c.b);
+			MoveGizmo.allChildren[i].renderDepth = -10000 - i;
+			MoveGizmo.allChildren[i].material.depthTest = false;
+			MoveGizmo.allChildren[i].material.depthWrite = false;
+			MoveGizmo.allChildren[i].material.transparent = true;
+			MoveGizmo.allChildren[i].PickPriority = 10;
 		}		
 		
 		SetGizmoMode(Move);
-/* 		var red = [1,.55,.55,1];
-		var green = [.55,1,.55,1];
-		var blue = [.55,.55,1,1];
-		
-		MoveGizmo = new MATH.Group();
-		MoveGizmo.addChild(BuildBox([1,.030,.030],[.5,0,0],red));               //move x
-		MoveGizmo.children[0].getMesh().setPickMesh(BuildBox([1,.20,.20],[.5,0,0],red).getMesh());
-		MoveGizmo.addChild(BuildBox([.030,1,.030],[0,.5,0],green));//move y
-		MoveGizmo.children[1].getMesh().setPickMesh(BuildBox([.2,1,.20],[0,.5,0],red).getMesh());
-		MoveGizmo.addChild(BuildBox([.030,.030,1],[0,0,.5],blue));//move z
-		MoveGizmo.children[2].getMesh().setPickMesh(BuildBox([.2,.20,1],[0,0,.5],red).getMesh());
-		MoveGizmo.addChild(BuildRing([0,1.070,0],[0,1,0],[1,0,0],6,red,25,62));//rotate x
-		MoveGizmo.addChild(BuildRing([0,0,1.070],[0,0,1],[0,1,0],6,green,25,62));//rotate y
-		MoveGizmo.addChild(BuildRing([0,1.070,0],[0,1,0],[0,0,-1],6,blue,25,62));//rotate z
-		MoveGizmo.addChild(BuildBox([.05,.05,.05],[1.025,0,0],red));//scale x
-		MoveGizmo.addChild(BuildBox([.05,.05,.05],[0,1.025,0],green));//scale y
-		MoveGizmo.addChild(BuildBox([.05,.05,.05],[0,0,1.025],blue));//scale z
-		MoveGizmo.addChild(BuildBox([.085,.085,.085],[.925,0,0],red));//scale xyz
-		MoveGizmo.addChild(BuildBox([.085,.085,.085],[0,.925,0],green));//scale xyz
-		MoveGizmo.addChild(BuildBox([.085,.085,.085],[0,0,.925],blue));//scale xyz
-		MoveGizmo.addChild(BuildBox([.150,.150,.030],[.075,.075,.015],[.75,.75,25,1]));//movexy
-		MoveGizmo.children[12].getMesh().setPickMesh(BuildBox([.50,.50,.030],[.25,.25,.015],red).getMesh());
-		MoveGizmo.addChild(BuildBox([.150,.030,.150],[.075,.015,.075],[.75,.25,.75,1]));//movexz
-		MoveGizmo.children[13].getMesh().setPickMesh(BuildBox([.50,.030,.5],[.25,.015,.25],red).getMesh());
-		MoveGizmo.addChild(BuildBox([.030,.150,.150],[.015,.075,.075],[.25,.75,.75,1]));//moveyz
-		MoveGizmo.children[14].getMesh().setPickMesh(BuildBox([.030,.50,.5],[.015,.25,.25],red).getMesh());
-		MoveGizmo.addChild(BuildRing([0,.170,0],[0,.240,0],[0,0,-1],4,[1,1,1,1],90,450));//rotate z
-		
-		MoveGizmo.addChild(BuildRing([0,1.050,0],[0,1,0],[1,0,0],37,red,0,370));//rotate x
-		MoveGizmo.addChild(BuildRing([0,0,1.050],[0,0,1],[0,1,0],37,green,0,370));//rotate y
-		MoveGizmo.addChild(BuildRing([0,1.050,0],[0,1,0],[0,0,-1],37,blue,0,370));//rotate z
-		
-		MoveGizmo.children[16].getMesh().setPickMesh(BuildRing([0,1.120,0],[0,.9,0],[1,0,0],37,red,0,370).getMesh());//rotate x
-		MoveGizmo.children[17].getMesh().setPickMesh(BuildRing([0,0,1.120],[0,0,.9],[0,1,0],37,green,0,370).getMesh());//rotate y
-		MoveGizmo.children[18].getMesh().setPickMesh(BuildRing([0,1.120,0],[0,.9,0],[0,0,-1],37,blue,0,370).getMesh());//rotate z
-		
-		MoveGizmo.addChild(BuildBox([.5,.5,.5],[0,0,0],[1,1,1,1]));//scale uniform
-		MoveGizmo.addChild(BuildBox([.030,.5,.5],[.5,0,0],red));//scale uniform
-		MoveGizmo.addChild(BuildBox([.5,.030,.5],[0,.5,0],green));//scale uniform
-		MoveGizmo.addChild(BuildBox([.5,.5,.030],[0,0,.5],blue));//scale uniform
-		MoveGizmo.addChild(BuildBox([.030,.5,.5],[-.5,0,0],red));//scale uniform
-		MoveGizmo.addChild(BuildBox([.5,.030,.5],[0,-.5,0],green));//scale uniform
-		MoveGizmo.addChild(BuildBox([.5,.5,.030],[0,0,-.5],blue));//scale uniform
-		for(var i=0; i < MoveGizmo.children.length;i++){
-			MoveGizmo.children[i].setZtransparent(true); MoveGizmo.children[i].setDepthTest(false);
-			
-			MoveGizmo.children[i].PickPriority = Infinity;
-			MoveGizmo.children[i].RenderPriority = 1000+i;
-			MoveGizmo.children[i].setCastShadows(false);
-		}
-		MoveGizmo.InvisibleToCPUPick = false;
-		findscene().addChild(MoveGizmo); */
 		
 	}.bind(this);
 	var SetGizmoMode = function(type)
@@ -2214,14 +2163,14 @@ function Editor()
 		if(type == Move)
 		{
 			$('#StatusTransform').text('Move');	
-			for(var i=0; i < MoveGizmo.children.length;i++){
+			for(var i=0; i < MoveGizmo.allChildren.length;i++){
 				if((i>=0 && i <=2) || (i>=12 && i<=14))
 				{
-					MoveGizmo.children[i].visible = true;
+					MoveGizmo.add(MoveGizmo.allChildren[i],true);
 				}
 				else
 				{
-					MoveGizmo.children[i].visible = false;
+					MoveGizmo.remove(MoveGizmo.allChildren[i],true);
 				}
 				GizmoMode = Move;
 			}
@@ -2229,14 +2178,14 @@ function Editor()
 		if(type == Rotate)
 		{
 			$('#StatusTransform').text('Rotate');	
-			for(var i=0; i < MoveGizmo.children.length;i++){
+			for(var i=0; i < MoveGizmo.allChildren.length;i++){
 				if(i>=16 && i <=18)
 				{
-					MoveGizmo.children[i].visible = true;
+					MoveGizmo.add(MoveGizmo.allChildren[i],true);
 				}
 				else
 				{
-					MoveGizmo.children[i].visible = false;
+					MoveGizmo.remove(MoveGizmo.allChildren[i],true);
 				}
 				GizmoMode = Rotate;
 			}
@@ -2245,14 +2194,14 @@ function Editor()
 		{
 			$('#StatusTransform').text('Scale');
 			//SetCoordSystem(LocalCoords);			
-			for(var i=0; i < MoveGizmo.children.length;i++){
+			for(var i=0; i < MoveGizmo.allChildren.length;i++){
 				if(i>=19 && i <=25)
 				{
-					MoveGizmo.children[i].visible = true;
+					MoveGizmo.add(MoveGizmo.allChildren[i],true);
 				}
 				else
 				{
-					MoveGizmo.children[i].visible = false;
+					MoveGizmo.remove(MoveGizmo.allChildren[i],true);
 				}
 				GizmoMode = Scale;
 			}
@@ -2260,14 +2209,14 @@ function Editor()
 		if(type == Multi)
 		{
 			$('#StatusTransform').text('Multi');	
-			for(var i=0; i < MoveGizmo.children.length;i++){
+			for(var i=0; i < MoveGizmo.allChildren.length;i++){
 				if(i <=15)
 				{
-					MoveGizmo.children[i].visible = true;
+					MoveGizmo.add(MoveGizmo.allChildren[i],true);
 				}
 				else
 				{
-					MoveGizmo.children[i].visible = false;
+					MoveGizmo.remove(MoveGizmo.allChildren[i],true);
 				}
 				
 				GizmoMode = Multi;

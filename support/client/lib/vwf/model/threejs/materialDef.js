@@ -170,6 +170,7 @@
 					for(var i =0; i < list.length; i++)
 					{
 						this.setMaterialByDef(list[i].material || new THREE.MeshPhongMaterial,propval);
+						list[i].materialUpdated();
 					}
 					if(this.dirtyStack && needRebuild)
 					{

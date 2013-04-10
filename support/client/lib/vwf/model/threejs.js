@@ -44,6 +44,17 @@
 		return ret.slice(0);	
 	}
 	
+	function matComp(m1,m2)
+	{
+		
+		for(var i =0; i < 16; i++)
+		{
+			if(m1[i] != m2[i])
+				return false;
+		}
+		return true;	
+	}
+	
 	
 define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function( module, model, utility, Color ) {
 
@@ -525,17 +536,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
                         }
 						
-						if(threeObject instanceof THREE.ParticleSystem)
-						{	
-							threeObject.updateTransform(transform);
-						}
-						
+						if(!matComp(transform,threeObject.matrix.elements))
+						{
+							if(threeObject instanceof THREE.ParticleSystem)
+							{	
+								threeObject.updateTransform(transform);
+							}
 						
                             threeObject.matrixAutoUpdate = false;
                             threeObject.matrix.elements = matCpy(transform);
                             threeObject.updateMatrixWorld(true);      
 							threeObject.sceneManagerUpdate();							
-                                                    
+                        }                            
                     
                     }
                     if(propertyName == 'lookAt')
@@ -605,6 +617,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         //debugger;
                         threeObject.receiveShadow = true;
+                    }
+					if(propertyName == 'isStatic')
+                    {
+                        //debugger;
+                        threeObject.setStatic(propertyValue);
                     }
                     //This can be a bit confusing, as the node has a material property, and a material child node. 
                     //setting the property does this, but the code in the component is ambigious
