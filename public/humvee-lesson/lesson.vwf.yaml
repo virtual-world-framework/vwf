@@ -59,10 +59,10 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Open Door" );
-                var humveeDoor = this.find( "/humvee/bone2/Scene/DoorDriverFront" )[ 0 ];
+                var humveeDoor = this.find( "/humvee/DoorDriverFront" )[ 0 ];
                 humveeDoor.pointerClick = humveeDoor.events.add( function() {
                   var app = this.parent.parent.parent.parent;
-                  if(app.humvee.bone2.Scene.DoorDriverFront.controlValue == 0)
+                  if(app.humvee.DoorDriverFront.controlValue == 0)
                   {
                     humveeDoor.pointerClick = humveeDoor.events.flush( this );
                     this.logger.info( "Step: Open Door - Completed" );
@@ -83,7 +83,7 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Jump In" );
-                var humvee = this.find( "/humvee/bone2/Scene/HumveeBody" )[ 0 ];
+                var humvee = this.find( "/humvee/HumveeBody" )[ 0 ];
                 humvee.pointerClick = humvee.events.add( function() {
                   humvee.pointerClick = humvee.events.flush( this );
                   this.logger.info( "Step: Jump In - Completed" );
@@ -104,7 +104,7 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Close Door" );
-                var humveeDoor = this.find( "/humvee/bone2/Scene/DoorDriverFront" )[ 0 ];
+                var humveeDoor = this.find( "/humvee/DoorDriverFront" )[ 0 ];
                 humveeDoor.pointerClick = humveeDoor.events.add( function() {
                   humveeDoor.pointerClick = humveeDoor.events.flush( this );
                   this.logger.info( "Step: Close Door - Completed" );
@@ -135,7 +135,7 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Set Ignition to Run" );
-                var ignition = this.find( "/humvee/bone2/Scene/Ignition" )[ 0 ];
+                var ignition = this.find( "/humvee/Ignition" )[ 0 ];
                 ignition.pointerClick = ignition.events.add( function() {
                   ignition.pointerClick = ignition.events.flush( this );
                   this.logger.info( "Step: Set Ignition to Run - Completed" );
@@ -166,7 +166,7 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Set Ignition to Start" );
-                var ignition = this.find( "/humvee/bone2/Scene/Ignition" )[ 0 ];
+                var ignition = this.find( "/humvee/Ignition" )[ 0 ];
                 ignition.pointerUp = ignition.events.add( function() {
                   ignition.pointerUp = ignition.events.flush( this );
                   this.logger.info( "Step: Set Ignition to Start - Completed" );
@@ -205,7 +205,7 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Move Gear Shift to Drive" );
-                var gearShift = this.find( "/humvee/bone2/Scene/GearShift" )[ 0 ];
+                var gearShift = this.find( "/humvee/GearShift" )[ 0 ];
                 gearShift.pointerClick = gearShift.events.add( function() {
                   gearShift.pointerClick = gearShift.events.flush( this );
                   this.logger.info( "Step: Move Gear Shift to Drive - Completed" );
@@ -225,7 +225,7 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Release Parking Brake" );
-                var parkingBrake = this.find( "/humvee/bone2/Scene/EmergencyBrake" )[ 0 ];
+                var parkingBrake = this.find( "/humvee/EmergencyBrake" )[ 0 ];
                 parkingBrake.pointerClick = parkingBrake.events.add( function() {
                   parkingBrake.pointerClick = parkingBrake.events.flush( this );
                   this.logger.info( "Step: Release Parking Brake - Completed" );
