@@ -353,8 +353,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					node.type= childExtendsID;
 					node.sceneID= this.state.sceneRootID;
 
-					//node.threeObject = new THREE.Object3D();
-					node.threeObject=(node.getRoot());
+					node.threeObject = new THREE.Object3D();
+					node.threeObject.add(node.getRoot());
 					threeParent.add(node.threeObject);
 				} 
 				else

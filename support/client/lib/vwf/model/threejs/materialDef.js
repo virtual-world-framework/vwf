@@ -169,6 +169,8 @@
 					GetAllLeafMeshes(this.getRoot(),list);
 					for(var i =0; i < list.length; i++)
 					{
+						if(!(list[i].material instanceof THREE.MeshPhongMaterial))
+							list[i].material =  new THREE.MeshPhongMaterial();
 						this.setMaterialByDef(list[i].material || new THREE.MeshPhongMaterial,propval);
 						list[i].materialUpdated();
 					}

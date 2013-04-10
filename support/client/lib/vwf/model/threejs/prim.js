@@ -121,11 +121,12 @@
 					mat = this.rootnode.children[0].material;
 				else
 					mat =  new THREE.MeshPhongMaterial();
-				while(this.rootnode.children.length > 0)
-				{
-					this.rootnode.remove(this.rootnode.children[this.rootnode.children.length-1]);
-				}
+				
+				if(this.mesh)
+					this.rootnode.remove(this.mesh);
+				
 				var mesh = this.BuildMesh(mat);
+				this.mesh = mesh;
 				mesh.castShadows = true;
 				mesh.receiveShadows = true;
 				this.rootnode.add(mesh);
