@@ -87,7 +87,7 @@ properties:
       }
       // Calculate the start and stop times that makes the new time work.
       this.animationStartTime$ =
-        ( this.animationPauseTime$ || this.time ) -
+        ( this.animationPauseTime$ != null ? this.animationPauseTime$ : this.time ) -
         ( rate >= 0 ? value : value - duration ) / rate;
       this.animationStopTime$ =
         this.animationStartTime$ +
@@ -105,8 +105,8 @@ properties:
         rate = this.animationRate;
       // Calculate the time from the start and current/pause times.
       var value = (
-        ( this.animationPauseTime$ || this.time ) -
-        ( this.animationStartTime$ || this.time )
+        ( this.animationPauseTime$ != null ? this.animationPauseTime$ : this.time ) -
+        ( this.animationStartTime$ != null ? this.animationStartTime$ : this.time )
       ) * rate + ( rate >= 0 ? 0 : duration );
       // If changed since last seen, update and fire the changed event.
       if ( value !== this.animationTimeUpdated ) {
