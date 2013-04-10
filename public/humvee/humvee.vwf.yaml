@@ -34,37 +34,31 @@ children:
               switch(value) {
                 case true:
                   this.braked = value;
-                  this.bone2.Scene.Circle.material.color = "#ff0000";
-                  this.bone2.Scene.Text.material.emit = 1;
+                  this.Circle.material.color = "#ff0000";
+                  this.Text.material.emit = 1;
                   break;
                 case false:
                   this.braked = value;
-                  this.bone2.Scene.Circle.material.color = "#bb0000";
-                  this.bone2.Scene.Text.material.emit = 0.1;
+                  this.Circle.material.color = "#bb0000";
+                  this.Text.material.emit = 0.1;
                   break;
               }
             value: true
         children:
-          bone2: 
+          Circle: 
             extends: http://vwf.example.com/node3.vwf 
             children: 
-              Scene: 
-                extends: http://vwf.example.com/node3.vwf 
-                children: 
-                  Circle: 
-                    extends: http://vwf.example.com/node3.vwf 
-                    children: 
-                      material:
-                        extends: http://vwf.example.com/material.vwf
-                        properties:
-                          color: "#bb0000" 
-                  Text: 
-                    extends: http://vwf.example.com/node3.vwf 
-                    children: 
-                      material:
-                        extends: http://vwf.example.com/material.vwf
-                        properties:
-                          emit: 0.1
+              material:
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "#bb0000" 
+          Text: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material:
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  emit: 0.1
       Untitled_034: 
         extends: http://vwf.example.com/node3.vwf 
         children: 
@@ -84,37 +78,31 @@ children:
               switch(value) {
                 case true:
                   this.waiting = value;
-                  this.bone2.Scene.Circle.material.color = "#ff0000";
-                  this.bone2.Scene.Text.material.emit = 1;
+                  this.Circle.material.color = "#ff0000";
+                  this.Text.material.emit = 1;
                   break;
                 case false:
                   this.waiting = value;
-                  this.bone2.Scene.Circle.material.color = "#bb0000";
-                  this.bone2.Scene.Text.material.emit = 0.1;
+                  this.Circle.material.color = "#bb0000";
+                  this.Text.material.emit = 0.1;
                   break;
               }
             value: false
         children:
-          bone2: 
+          Circle: 
+            extends: http://vwf.example.com/node3.vwf 
+            children:
+              material:
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "#bb0000" 
+          Text: 
             extends: http://vwf.example.com/node3.vwf 
             children: 
-              Scene: 
-                extends: http://vwf.example.com/node3.vwf 
-                children: 
-                  Circle: 
-                    extends: http://vwf.example.com/node3.vwf 
-                    children:
-                      material:
-                        extends: http://vwf.example.com/material.vwf
-                        properties:
-                          color: "#bb0000" 
-                  Text: 
-                    extends: http://vwf.example.com/node3.vwf 
-                    children: 
-                      material:
-                        extends: http://vwf.example.com/material.vwf
-                        properties:
-                          emit: 0.1
+              material:
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  emit: 0.1
       Untitled_033: 
         extends: http://vwf.example.com/node3.vwf 
         children: 
