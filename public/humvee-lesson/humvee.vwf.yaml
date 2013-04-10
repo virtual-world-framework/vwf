@@ -542,9 +542,9 @@ children:
             this.parent.started = true;
             
             // If engine started, set gauges to max position
-            this.parent.VoltMeter.animateControlToPosition(this.parent.VoltMeter.epsilon);
-            this.parent.TempNeedle.animateControlToPosition(this.parent.TempNeedle.epsilon);
-            this.parent.OilNeedle.animateControlToPosition(this.parent.OilNeedle.epsilon);
+            this.parent.VoltMeter.animateControlToPosition(this.parent.VoltMeter.gamma);
+            this.parent.TempNeedle.animateControlToPosition(this.parent.TempNeedle.gamma);
+            this.parent.OilNeedle.animateControlToPosition(this.parent.OilNeedle.delta);
             this.parent.FuelNeedle.animateControlToPosition(this.parent.FuelNeedle.epsilon);
           }
           else if(this.controlValue == 0) {
