@@ -273,9 +273,12 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
         // -- parent -------------------------------------------------------------------------------
 
-        parent: function( nodeID ) {
+        parent: function( nodeID, initializedOnly ) {
+
             var object = this.objects[nodeID];
-            return object.parent && object.parent.id || 0;
+
+            return ! initializedOnly || object.initialized ?
+                object.parent && object.parent.id || 0 : undefined;
         },
 
         // -- children -----------------------------------------------------------------------------
@@ -333,6 +336,12 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
         exists: function( nodeID ) {
             return !! this.objects[nodeID];
+        },
+
+        // -- initialized --------------------------------------------------------------------------
+
+        initialized: function( nodeID ) {
+            return this.objects[nodeID].initialized;
         },
 
     } );

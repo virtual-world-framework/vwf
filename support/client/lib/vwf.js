@@ -3030,15 +3030,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// 
         /// @see {@link module:vwf/api/kernel.ancestors}
 
-        this.ancestors = function( nodeID ) {
+        this.ancestors = function( nodeID, initializedOnly ) {
 
             var ancestors = [];
 
-            nodeID = this.parent( nodeID );
+            nodeID = this.parent( nodeID, initializedOnly );
 
             while ( nodeID && nodeID !== 0 ) {
                 ancestors.push( nodeID );
-                nodeID = this.parent( nodeID );
+                nodeID = this.parent( nodeID, initializedOnly );
             }
 
             return ancestors;
@@ -3050,8 +3050,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// 
         /// @see {@link module:vwf/api/kernel.parent}
 
-        this.parent = function( nodeID ) {
-            return this.models.object.parent( nodeID );
+        this.parent = function( nodeID, initializedOnly ) {
+            return this.models.object.parent( nodeID, initializedOnly );
         };
 
         // -- children -----------------------------------------------------------------------------
@@ -3097,9 +3097,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// @name module:vwf.find
         ///
         /// @param {ID} nodeID
-        ///   The reference node. Relative patterns are resolved with respect to this node.
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
         /// @param {String} matchPattern
         ///   The search pattern.
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
         /// @param {Function} [callback]
         ///   A callback to receive the search results. If callback is provided, find invokes
         ///   callback( matchID ) for each match. Otherwise the result is returned as an array.
@@ -3109,9 +3114,25 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// 
         /// @see {@link module:vwf/api/kernel.find}
 
-        this.find = function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
+        this.find = function( nodeID, matchPattern, initializedOnly, callback /* ( matchID ) */ ) {
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
+            // Interpret `find( nodeID, matchPattern, callback )` as
+            // `find( nodeID, matchPattern, undefined, callback )`. (`initializedOnly` was added in
+            // 0.6.8.)
+
+            if ( typeof initializedOnly == "function" || initializedOnly instanceof Function ) {
+                callback = initializedOnly;
+                initializedOnly = undefined;
+            }
+
+            // Evaluate the expression, using the application as the root and the provided node as
+            // the reference.
+
+            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
+                "index-vwf", nodeID, resolverWithInitializedOnly, this );  // TODO: application root id instead of "index-vwf"
+
+            // Return the result, either by invoking the callback when provided, or returning the
+            // array directly.
 
             if ( callback ) {
 
@@ -3122,7 +3143,12 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             } else {  // TODO: future iterator proxy
 
                 return matchIDs;
+            }
 
+            // Wrap `xpathResolver` to pass `initializedOnly` through.
+
+            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
+                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
             }
 
         };
@@ -3132,24 +3158,41 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// @name module:vwf.test
         /// 
         /// @param {ID} nodeID
-        ///   The reference node. Relative patterns are resolved with respect to this node.
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
         /// @param {String} matchPattern
         ///   The search pattern.
         /// @param {ID} testID
         ///   A node to test against the pattern.
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
         /// 
         /// @returns {Boolean}
         ///   true when testID matches the pattern.
         /// 
-        /// @see {@link module:vwf/api/kernel.createNode}
+        /// @see {@link module:vwf/api/kernel.test}
 
-        this.test = function( nodeID, matchPattern, testID ) {
+        this.test = function( nodeID, matchPattern, testID, initializedOnly ) {
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
+            // Evaluate the expression, using the application as the root and the provided node as
+            // the reference.
+
+            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
+                "index-vwf", nodeID, resolverWithInitializedOnly, this );  // TODO: application root id instead of "index-vwf"
+
+            // Search for the test node in the result.
 
             return matchIDs.some( function( matchID ) {
                 return matchID == testID;
             } );
+
+            // Wrap `xpathResolver` to pass `initializedOnly` through.
+
+            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
+                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
+            }
 
         };
 
@@ -3881,10 +3924,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// @param {Object} step
         /// @param {ID} contextID
         /// @param {Boolean} [resolveAttributes]
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
         /// 
         /// @returns {ID[]}
 
-        var xpathResolver = function( step, contextID, resolveAttributes ) {
+        var xpathResolver = function( step, contextID, resolveAttributes, initializedOnly ) {
 
             var resultIDs = [];
 
@@ -3895,15 +3942,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                 case "ancestor-or-self":
                     resultIDs.push( contextID );
-                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID ) );
+                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID, initializedOnly ) );
                     break;
 
                 case "ancestor":
-                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID ) );
+                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID, initializedOnly ) );
                     break;
 
                 case "parent":
-                    var parentID = this.parent( contextID );
+                    var parentID = this.parent( contextID, initializedOnly );
                     parentID && resultIDs.push( parentID );
                     break;
 
