@@ -884,6 +884,9 @@ THREE.RenderBatchManager.prototype.add = function(child)
 	
 	this.objects.push(child);
 	child.visible = false;
+//	child.parentBack = child.parent;
+//	child.updateMatrixWorld(true);
+//	child.parent.remove_internal(child);
 	child.RenderBatchManager = this;
 	
 	var added = false;
@@ -913,6 +916,7 @@ THREE.RenderBatchManager.prototype.remove = function(child)
 		return;
 	
 	child.visible = true;
+//	child.parentBack.add_internal(child);
 	child.RenderBatchManager = null;
 //	console.log('removing ' + child.name + ' from batch' + this.name);  
 	this.objects.splice(this.objects.indexOf(child),1);

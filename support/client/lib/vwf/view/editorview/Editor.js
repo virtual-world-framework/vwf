@@ -2492,11 +2492,11 @@ function Editor()
 	{
 		return this.SelectedVWFID;
 	}
-	this.CallCreateNodeCallback = function(e)
+	this.CallCreateNodeCallback = function(e,p)
 	{
 		try
 		{
-			this.createNodeCallback(e);
+			this.createNodeCallback(e,p);
 			
 		}catch(e)
 		{
@@ -2513,16 +2513,20 @@ function Editor()
 			count = 1;
 		this.toSelect = count;	
 		this.tempSelect = [];
-		this.SetCreateNodeCallback(function(e){
+		this.expectedParent = vwf.parent(_Editor.GetSelectedVWFID());
+		this.SetCreateNodeCallback(function(e,p){
 				
-				_Editor.tempSelect.push(e);
-				_Editor.toSelect--;
-				
-				
-				if(_Editor.toSelect == 0 )
+				if(p == this.expectedParent)
 				{
-					_Editor.createNodeCallback = null;
-					_Editor.SelectObject(_Editor.tempSelect,Add);
+					_Editor.tempSelect.push(e);
+					_Editor.toSelect--;
+					
+					
+					if(_Editor.toSelect == 0 )
+					{
+						_Editor.createNodeCallback = null;
+						_Editor.SelectObject(_Editor.tempSelect,Add);
+					}
 				}
 		});
 	}

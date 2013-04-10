@@ -95,7 +95,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		   {
 				if(window._Editor.createNodeCallback != null)
 				{
-					window._Editor.CallCreateNodeCallback(childID);
+					window._Editor.CallCreateNodeCallback(childID,nodeID);
 				}
 		   }
 		
