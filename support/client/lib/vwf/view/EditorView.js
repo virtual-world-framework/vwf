@@ -48,6 +48,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/PrimitiveEditor.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/Notifier.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/PainterTool.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/AlignTool.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/UserManager.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/DataManager.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/ScriptEditor.js"></script>');

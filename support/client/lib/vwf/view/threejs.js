@@ -269,7 +269,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             sceneNode.frameCount++;
 				var now = ( performance !== undefined && performance.now !== undefined ) ? performance.now() : time;
 			var timepassed = now - sceneNode.lastTime;
-			
+			if(_SceneManager)
+				_SceneManager.update(timepassed);
 			var pss = GetParticleSystems(sceneNode.threeScene);
 			for(var i in pss)
 			{

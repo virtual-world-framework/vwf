@@ -88,12 +88,46 @@ SceneManager.prototype.FrustrumCast = function(f,opts)
 	
 	return hitlist;
 }	
+SceneManager.prototype.update = function(dt)
+{
+	if(!this.initialized) return;
+	for(var i =0; i < this.BatchManagers.length; i++)
+	{
+		this.BatchManagers[i].update();
+	}
+	var removelist = [];
+	for(var i =0; i < this.tempDebatchList.length; i++)
+	{
+		
+		this.tempDebatchList[i].updateCount -= .5;
+		if(this.tempDebatchList[i].updateCount < 0)
+		{
+			
+			removelist.push(i);
+			delete this.tempDebatchList[i]._static;
+			console.log('Rebatching ' + this.tempDebatchList[i].name);
+			this.tempDebatchList[i].sceneManagerUpdate();
+		}
+	}
+	for(var i =0; i < removelist.length; i++)
+	{
+		this.tempDebatchList.splice(removelist[i],1);
+	}
+	for(var i =0; i < this.particleSystemList.length; i++)
+	{
+		this.particleSystemList[i].update(dt);
+	}
+}
+
 SceneManager.prototype.initialize = function(scene)
 {
 	this.min = [-130,-130,-120];
 	this.max = [130,130,140];
 	this.BatchManagers = [];
 	this.specialCaseObjects = [];
+	this.tempDebatchList = [];
+	this.particleSystemList = [];
+	this.initialized = true;
 	THREE.Object3D.prototype.add_internal = THREE.Object3D.prototype.add;
 	THREE.Object3D.prototype.add = function(child,SceneManagerIgnore)
 	{
@@ -131,6 +165,20 @@ SceneManager.prototype.initialize = function(scene)
 	}
 	THREE.Mesh.prototype.materialUpdated = function()
 	{
+		if(!this.updateCount)
+			this.updateCount = 1;
+		this.updateCount++;	
+		if(this.updateCount == 100)
+		{
+			console.log(this.name + ' is not static, debatching');
+			this._static = false;
+			if(this.RenderBatchManager)
+				this.RenderBatchManager.remove(this);
+			
+			_SceneManager.tempDebatchList.push(this);	
+			return;	
+		}	
+				
 		if(this.RenderBatchManager)
 			this.RenderBatchManager.materialUpdated(this);
 	}
@@ -141,7 +189,9 @@ SceneManager.prototype.initialize = function(scene)
 	}
 	THREE.Object3D.prototype.isStatic = function()
 	{
-		return this._static || (this.parent && this.parent.isStatic());
+		if(this._static != undefined)
+			return this._static;
+		return (this.parent && this.parent.isStatic());
 	}
 	THREE.Object3D.prototype.sceneManagerUpdate = function()
 	{
@@ -402,7 +452,17 @@ SceneManagerRegion.prototype.distributeObject = function(object)
 			{
 				if(this.SceneManagerIgnore)
 					return;
-					
+				
+				if(!this.updateCount)
+					this.updateCount = 1;
+				this.updateCount++;	
+				if(this.updateCount == 100 && this.isStatic())
+				{
+					console.log(this.name + ' is not static, debatching');
+					this._static = false;
+					_SceneManager.tempDebatchList.push(this);
+				}	
+				
 				this.updateMatrixWorld();
 				this.tempbounds = object.GetBoundingBox().transformBy(this.getModelMatrix());
 				this.sceneManagerNode.updateObject(this);
@@ -854,17 +914,10 @@ THREE.RenderBatchManager = function(scene,name)
 	this.name = name;
 	this.objects = [];
 	this.batches = [];
-	this.prerender = function()
-	{
-		if(this.dirty)
-		 this.update();
-		delete this.dirty;
-	}
-	this.prerenderhandle = this.prerender.bind(this);
-	$(document).bind('prerender',this.prerenderhandle);
+	
 }
 
-THREE.RenderBatchManager.prototype.update = function(child)
+THREE.RenderBatchManager.prototype.update = function()
 {
 	
 	if(this.dirty)
@@ -882,11 +935,11 @@ THREE.RenderBatchManager.prototype.add = function(child)
 	if(child.RenderBatchManager)
 		child.RenderBatchManager.remove(child);
 	
+	
+	
 	this.objects.push(child);
 	child.visible = false;
-//	child.parentBack = child.parent;
-//	child.updateMatrixWorld(true);
-//	child.parent.remove_internal(child);
+
 	child.RenderBatchManager = this;
 	
 	var added = false;
@@ -895,6 +948,9 @@ THREE.RenderBatchManager.prototype.add = function(child)
 		if(this.batches[i].checkSuitability(child))
 		{
 			this.batches[i].addObject(child);
+			if(!child.reBatchCount)
+				child.reBatchCount = 0;
+			child.reBatchCount++;	
 			added = true;
 		}
 	}
@@ -916,7 +972,6 @@ THREE.RenderBatchManager.prototype.remove = function(child)
 		return;
 	
 	child.visible = true;
-//	child.parentBack.add_internal(child);
 	child.RenderBatchManager = null;
 //	console.log('removing ' + child.name + ' from batch' + this.name);  
 	this.objects.splice(this.objects.indexOf(child),1);
@@ -948,7 +1003,7 @@ THREE.RenderBatchManager.prototype.materialUpdated = function(child)
 }
 THREE.RenderBatchManager.prototype.deinitialize = function(child)
 {
-	$(document).unbind('prerender',this.prerenderhandle);
+	
 	if(this.mesh)
 		this.scene.remove_internal(this.mesh);
 	for(var i = 0; i < this.batches.length; i++)
