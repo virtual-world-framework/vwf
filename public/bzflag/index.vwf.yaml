@@ -160,7 +160,6 @@ scripts:
         source: "models/bolt.dae",
         type: "model/vnd.collada+xml",
         properties: {
-          scale: 100,
           visible: false
         }
       },
