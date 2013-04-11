@@ -13,8 +13,6 @@
 
 --- 
 extends: appscene.vwf
-source: physics.xml
-type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
   gravity: [ 0, 0, -50.8, 0 ]
@@ -66,6 +64,3 @@ children:
       color: [ 255, 255, 255 ]
       castShadows: false 
       translation: [ 60, 85, 70 ]
-      glge-constantAttenuation: 1.5
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.00001
