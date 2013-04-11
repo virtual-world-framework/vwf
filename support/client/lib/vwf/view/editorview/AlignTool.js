@@ -51,6 +51,64 @@ function AlignTool()
 			"</div>"
 		);
 		
+		this.xDisplay = new THREE.Mesh(new THREE.PlaneGeometry(10,10,10,10),new THREE.MeshPhongMaterial());
+		this.yDisplay = new THREE.Mesh(new THREE.PlaneGeometry(10,10,10,10),new THREE.MeshPhongMaterial());
+		this.zDisplay = new THREE.Mesh(new THREE.PlaneGeometry(10,10,10,10),new THREE.MeshPhongMaterial());
+		
+		this.xDisplay.rotation.y = Math.PI/2;
+		this.yDisplay.rotation.x = Math.PI/2;
+		
+		this.xDisplay.updateMatrixWorld(true);
+		this.yDisplay.updateMatrixWorld(true);
+		this.zDisplay.updateMatrixWorld(true);
+		
+		this.xDisplay.material.side = 2
+		this.xDisplay.material.transparent = true
+		this.xDisplay.material.opacity = .3
+		this.xDisplay.material.color.g = 0;
+		this.xDisplay.material.color.b = 0;
+		this.xDisplay.material.color.r = 1;
+		this.xDisplay.material.needsUpdate = true
+		this.xDisplay.material.ambient.g = 0;
+		this.xDisplay.material.ambient.b = 0;
+		this.xDisplay.material.ambient.r = 1;
+		
+		this.yDisplay.material.side = 2
+		this.yDisplay.material.transparent = true
+		this.yDisplay.material.opacity = .3
+		this.yDisplay.material.color.g = 1;
+		this.yDisplay.material.color.b = 0;
+		this.yDisplay.material.color.r = 0;
+		this.yDisplay.material.needsUpdate = true
+		this.yDisplay.material.ambient.g = 1;
+		this.yDisplay.material.ambient.b = 0;
+		this.yDisplay.material.ambient.r = 0;
+		
+		this.zDisplay.material.side = 2
+		this.zDisplay.material.transparent = true
+		this.zDisplay.material.opacity = .3
+		this.zDisplay.material.color.g = 0;
+		this.zDisplay.material.color.b = 1;
+		this.zDisplay.material.color.r = 0;
+		this.zDisplay.material.needsUpdate = true
+		this.zDisplay.material.ambient.g = 0;
+		this.zDisplay.material.ambient.b = 1;
+		this.zDisplay.material.ambient.r = 0;
+		
+		this.xDisplay.material.map = THREE.ImageUtils.loadTexture('./textures/grid2.gif');
+		this.yDisplay.material.map = THREE.ImageUtils.loadTexture('./textures/grid2.gif');
+		this.zDisplay.material.map = THREE.ImageUtils.loadTexture('./textures/grid2.gif');
+	
+		
+		this.xDisplay.visible = false;
+		this.yDisplay.visible = false;
+		this.zDisplay.visible = false;
+		//this.zDisplay.material.depthTest = false;
+		this.zDisplay.material.depthWrite = false;
+		//this.xDisplay.material.depthTest = false;
+		this.xDisplay.material.depthWrite = false;
+		//this.yDisplay.material.depthTest = false;
+		this.yDisplay.material.depthWrite = false;
 		$('#AlignToolGUI input').change(function()
 		{	
 			_AlignTool.updateDisplay();
@@ -120,7 +178,9 @@ function AlignTool()
 		tbounds.max[1] = tbounds.max[1] * target.matrixWorld.elements[5];
 		tbounds.max[2] = tbounds.max[2] * target.matrixWorld.elements[10];
 		var tcenter = this.tcenter.clone();
-		
+		this.xDisplay.position = tcenter.clone();
+		this.yDisplay.position = tcenter.clone();
+		this.zDisplay.position = tcenter.clone();
 		var xFrom = $('#AlignToolGUI').find('#XFrom :checked').next().text();
 		var xTo = $('#AlignToolGUI').find('#XTo :checked').next().text();
 		
@@ -151,6 +211,8 @@ function AlignTool()
 			
 			if(alignX)
 			{
+				this.xDisplay.visible = true;
+
 				spos.x = tcenter.x
 				if(xFrom == 'Center' && xTo == 'Max')
 				{
@@ -191,11 +253,16 @@ function AlignTool()
 					spos.x += sbounds.min[0];
 					spos.x += tbounds.max[0];
 				}
+				
+			}else
+			{
+				this.xDisplay.visible = false;
 			}
 			
 			if(alignY)
 			{
 				spos.y = tcenter.y;
+				this.yDisplay.visible = true;
 				if(yFrom == 'Center' && yTo == 'Max')
 				{
 					spos.y -= tbounds.min[1];
@@ -235,11 +302,17 @@ function AlignTool()
 					spos.y += sbounds.min[1];
 					spos.y += tbounds.max[1];
 				}
+				
+			}
+			else
+			{
+				this.yDisplay.visible = false;
 			}
 			
 			if(alignZ)
 			{
 				spos.z = tcenter.z;
+				this.zDisplay.visible = true;
 				if(zFrom == 'Center' && zTo == 'Max')
 				{
 					spos.z -= tbounds.min[2];
@@ -279,9 +352,28 @@ function AlignTool()
 					spos.z += sbounds.min[2];
 					spos.z += tbounds.max[2];
 				}
+				
+			}else
+			{
+				this.zDisplay.visible = false;
 			}
-	
 			
+			if(zTo == 'Max')
+					this.zDisplay.position.z += tbounds.max[2];
+			if(zTo == 'Min')
+					this.zDisplay.position.z += tbounds.min[2];	
+			if(yTo == 'Max')
+					this.yDisplay.position.y += tbounds.max[1];
+			if(yTo == 'Min')
+					this.yDisplay.position.y += tbounds.min[1];	
+			if(xTo == 'Max')
+					this.xDisplay.position.x += tbounds.max[0];
+			if(xTo == 'Min')
+					this.xDisplay.position.x += tbounds.min[0];			
+					
+			this.xDisplay.updateMatrixWorld(true);
+			this.yDisplay.updateMatrixWorld(true);
+			this.zDisplay.updateMatrixWorld(true);
 			vwf_view.kernel.setProperty(this.sourceNodeIDs[i],'translation',[spos.x,spos.y,spos.z]);
 		}
 	}
@@ -327,6 +419,9 @@ function AlignTool()
 		_Editor.addTool('AlignTool',this);
 		_Editor.setActiveTool('AlignTool');
 		_AlignTool.open =true;
+		_dScene.add(this.xDisplay,true);
+		_dScene.add(this.yDisplay,true);
+		_dScene.add(this.zDisplay,true);
 		
 	}
 	this.hide = function()
@@ -335,6 +430,9 @@ function AlignTool()
 		if(this.backcolor)
 			$('#AlignToolGUI_PickTarget').css('background',this.backcolor);
 		this.pickMode = "";	
+		_dScene.remove(this.xDisplay,true);
+		_dScene.remove(this.yDisplay,true);
+		_dScene.remove(this.zDisplay,true);
 	}
 	this.isOpen = function()
 	{
