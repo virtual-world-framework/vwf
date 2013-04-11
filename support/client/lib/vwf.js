@@ -1139,7 +1139,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
 			if(this.tickable.nodeIDs.indexOf(nodeID) > -1)
 			{	
-				this.tickable.nodeIDs.splice(this.tickable.nodeIDs.indexOf(nodeID));
+				this.tickable.nodeIDs.splice(this.tickable.nodeIDs.indexOf(nodeID),1);
 			}
             this.logger.groupEnd();
         };
