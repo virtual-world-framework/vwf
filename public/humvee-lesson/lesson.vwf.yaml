@@ -196,6 +196,7 @@ children:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
           text: "3.1 Move transmission to drive"
+          cameraPoseRef: /lesson/cameraPose31
         children:
           moveToDriveInstructions:
             extends: http://vwf.example.com/lesson/task.vwf
@@ -211,7 +212,7 @@ children:
                   this.logger.info( "Step: Move Gear Shift to Drive - Completed" );
                   this.completed();
                 }, this );
-              }
+              } //@ sourceURL=moveToDriveTask.vwf
       releaseBrake:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
@@ -231,7 +232,7 @@ children:
                   this.logger.info( "Step: Release Parking Brake - Completed" );
                   this.completed();
                 }, this );
-              }
+              } //@ sourceURL=releaseBreakTask.vwf
       moveVehicle:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
@@ -246,7 +247,7 @@ children:
             - |
               this.entering = function() {
                 // UPDATE
-              }
+              } //@ sourceURL=drivingTask.vwf
   cameraPose1:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -258,6 +259,8 @@ children:
     extends: http://vwf.example.com/node3.vwf
   cameraPose3:
     extends: http://vwf.example.com/node3.vwf
+  cameraPose31:
+    extends: http://vwf.example.com/node3.vwf
   cameraPose33:
     extends: http://vwf.example.com/node3.vwf
 scripts:
@@ -266,17 +269,29 @@ scripts:
     this.cameraPose14.transform = [-0.8957634568214417,0.44452738761901855,0,0,
       -0.44452738761901855,-0.8957634568214417,0,0,
       0,0,1,0,
-      -14.165600776672363,-7.067508220672607,66.83444213867188,1];
+      -14.165600776672363,-7.067508220672607,75,1];
 
-    this.cameraPose2.transform = [-0.2800654172897339,0.9599801301956177,0,0,
-      -0.9599801301956177,-0.2800654172897339,0,0,
+    this.cameraPose2.transform = [ 
+      -0.4162047505378723,0.9092690348625183,0,0,
+      -0.9092690348625183,-0.4162047505378723,0,0,
       0,0,1,0,
-      -18.140365600585938,-33.80816650390625,69.4345932006836,1];
+      -6.781380653381348,-22.743375778198242,76.43529510498047,1 ];
 
     this.cameraPose3.transform = [0.9015761017799377,0.43261784315109253,0,0,
       -0.43261784315109253,0.9015761017799377,0,0,
       0,0,1,0,
       -21.921772003173828,-45.81437301635742,63.3342170715332,1];
 
-    this.cameraPose33.transform = this.cameraPose2.transform;
-  }
+    // changing transmission and brake
+    this.cameraPose31.transform = [ 0.8790436387062073,0.4767311215400696,-0.000013773170394415502,0,
+    -0.43207061290740967,0.7966820001602173,-0.42261648178100586,0,
+    -0.20146524906158447, 0.37150758504867554,0.9063078165054321,0,
+    -13.254499435424805,-45.380226135253906,86.13629150390625,1 ];
+
+    // driving position
+    this.cameraPose33.transform = [ 0.045417796820402145,0.9989691972732544,0,0,
+      -0.9989691972732544,0.045417796820402145,0,0,
+      0,0,1,0,
+      -14.136186599731445,-42.1671028137207,88.4365005493164,1 ];
+
+  } //@ sourceURL=humvee-lesson.vwf
