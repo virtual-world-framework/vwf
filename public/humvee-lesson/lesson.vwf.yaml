@@ -60,11 +60,11 @@ children:
               this.entering = function() {
                 this.logger.info( "Step: Open Door" );
                 var humveeDoor = this.find( "/humvee/DoorDriverFront" )[ 0 ];
-                humveeDoor.pointerClick = humveeDoor.events.add( function() {
+                humveeDoor.pointerUp = humveeDoor.events.add( function() {
                   var app = this.parent.parent.parent.parent;
                   if(app.humvee.DoorDriverFront.controlValue == 0)
                   {
-                    humveeDoor.pointerClick = humveeDoor.events.flush( this );
+                    humveeDoor.pointerUp = humveeDoor.events.flush( this );
                     this.logger.info( "Step: Open Door - Completed" );
                     this.completed();
                   }
@@ -105,8 +105,8 @@ children:
               this.entering = function() {
                 this.logger.info( "Step: Close Door" );
                 var humveeDoor = this.find( "/humvee/DoorDriverFront" )[ 0 ];
-                humveeDoor.pointerClick = humveeDoor.events.add( function() {
-                  humveeDoor.pointerClick = humveeDoor.events.flush( this );
+                humveeDoor.pointerUp = humveeDoor.events.add( function() {
+                  humveeDoor.pointerUp = humveeDoor.events.flush( this );
                   this.logger.info( "Step: Close Door - Completed" );
                   this.completed();
                 }, this );
@@ -136,8 +136,8 @@ children:
               this.entering = function() {
                 this.logger.info( "Step: Set Ignition to Run" );
                 var ignition = this.find( "/humvee/Ignition" )[ 0 ];
-                ignition.pointerClick = ignition.events.add( function() {
-                  ignition.pointerClick = ignition.events.flush( this );
+                ignition.pointerUp = ignition.events.add( function() {
+                  ignition.pointerUp = ignition.events.flush( this );
                   this.logger.info( "Step: Set Ignition to Run - Completed" );
                   this.completed();
                 }, this );
@@ -201,14 +201,14 @@ children:
           moveToDriveInstructions:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
-              text: "With parking break applied, move the transmission range selector from the N to the D position." 
+              text: "With parking break applied, click and drag the transmission range selector from the N to the D position." 
             scripts:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Move Gear Shift to Drive" );
                 var gearShift = this.find( "/humvee/GearShift" )[ 0 ];
-                gearShift.pointerClick = gearShift.events.add( function() {
-                  gearShift.pointerClick = gearShift.events.flush( this );
+                gearShift.pointerUp = gearShift.events.add( function() {
+                  gearShift.pointerUp = gearShift.events.flush( this );
                   this.logger.info( "Step: Move Gear Shift to Drive - Completed" );
                   this.completed();
                 }, this );
@@ -221,14 +221,14 @@ children:
           releaseBrakeInstructions:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
-              text: "Release the parking break and ensure brake warning light goes out." 
+              text: "Click the parking brake to release it, and ensure brake warning light goes out." 
             scripts:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Release Parking Brake" );
                 var parkingBrake = this.find( "/humvee/EmergencyBrake" )[ 0 ];
-                parkingBrake.pointerClick = parkingBrake.events.add( function() {
-                  parkingBrake.pointerClick = parkingBrake.events.flush( this );
+                parkingBrake.pointerUp = parkingBrake.events.add( function() {
+                  parkingBrake.pointerUp = parkingBrake.events.flush( this );
                   this.logger.info( "Step: Release Parking Brake - Completed" );
                   this.completed();
                 }, this );
