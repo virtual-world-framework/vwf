@@ -28,7 +28,6 @@ properties:
   texture:
     set: |
       this.texture = value;
-    value: 
 
   ## Color
   ## 
@@ -38,7 +37,6 @@ properties:
   color: 
     set: |
       this.color = value;
-    value: 
 
   ## Specular color
   ## 
@@ -48,7 +46,6 @@ properties:
   specColor:
     set: |
       this.specColor = value;
-    value: 
 
   ## Reflective value
   ## 
@@ -58,7 +55,6 @@ properties:
   reflect:
     set: |
       this.reflect = value;
-    value: 
 
   ## Shininess value
   ## 
@@ -68,7 +64,6 @@ properties:
   shininess:
     set: |
       this.shininess = value;
-    value: 
 
   ## Specular value
   ## 
@@ -78,7 +73,6 @@ properties:
   specular:
     set: |
       this.specular = value;
-    value: 
 
   ## Emit
   ## 
@@ -88,7 +82,6 @@ properties:
   emit:
     set: |
       this.emit = value;
-    value: 
 
   ## Alpha value
   ## 
@@ -98,7 +91,6 @@ properties:
   alpha:
     set: |
       this.alpha = value;
-    value: 
 
   ## Ambient value
   ## 
@@ -108,7 +100,6 @@ properties:
   ambient: 
     set: |
       this.ambient = value;
-    value: 
 
   ## Binary alpha
   ## 
@@ -118,4 +109,3 @@ properties:
   binaryAlpha:
     set: |
       this.binaryAlpha = value;
-    value:

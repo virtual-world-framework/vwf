@@ -270,7 +270,6 @@ properties:
   vertices: 
     set: |
       this.logger.info( "WARNING: node3 vertices cannot be set" )
-    value: 
 
   ## Vertex indices of 3D node
   ## 
@@ -280,7 +279,6 @@ properties:
   vertexIndices: 
     set: |
       this.logger.info( "WARNING: node3 vertexIndices cannot be set" )
-    value: 
 
   ## Speed value
   ## 
