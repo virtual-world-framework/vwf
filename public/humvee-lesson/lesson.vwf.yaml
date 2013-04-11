@@ -232,7 +232,7 @@ children:
                   this.logger.info( "Step: Release Parking Brake - Completed" );
                   this.completed();
                 }, this );
-              } //@ sourceURL=releaseBreakTask.vwf
+              } //@ sourceURL=releaseBrakeTask.vwf
       moveVehicle:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
@@ -247,7 +247,12 @@ children:
             - |
               this.entering = function() {
                 // UPDATE
-              } //@ sourceURL=drivingTask.vwf
+              } //@ sourceURL=moveVehicleTask.vwf
+        scripts:
+        - |
+          this.cameraTransformComplete = function() {
+            // Switch cameras here
+          } //@ sourceURL=moveVehicleTask.vwf
   cameraPose1:
     extends: http://vwf.example.com/node3.vwf
     properties:
