@@ -365,6 +365,7 @@ scripts:
               this.logger.info( " quaternion: [ " + Array.prototype.slice.call( this.activeCameraComp.quaternion ) + " ]" );              
               this.logger.info( "   rotation: [ " + Array.prototype.slice.call( this.activeCameraComp.rotation ) + " ]" );
               this.logger.info( "  transform: [ " + Array.prototype.slice.call( this.activeCameraComp.transform )  + " ]" );
+              this.logger.info( "  worldTransform: [ " + Array.prototype.slice.call( this.activeCameraComp.worldTransform )  + " ]" );
               this.logger.enabled = temp;
               break;
             case 88: // x
