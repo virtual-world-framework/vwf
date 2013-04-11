@@ -358,7 +358,13 @@ function AlignTool()
 				this.zDisplay.visible = false;
 			}
 			
-			if(zTo == 'Max')
+					
+					
+			
+			vwf_view.kernel.setProperty(this.sourceNodeIDs[i],'translation',[spos.x,spos.y,spos.z]);
+		}
+		
+		if(zTo == 'Max')
 					this.zDisplay.position.z += tbounds.max[2];
 			if(zTo == 'Min')
 					this.zDisplay.position.z += tbounds.min[2];	
@@ -369,13 +375,11 @@ function AlignTool()
 			if(xTo == 'Max')
 					this.xDisplay.position.x += tbounds.max[0];
 			if(xTo == 'Min')
-					this.xDisplay.position.x += tbounds.min[0];			
+					this.xDisplay.position.x += tbounds.min[0];	
 					
-			this.xDisplay.updateMatrixWorld(true);
+					this.xDisplay.updateMatrixWorld(true);
 			this.yDisplay.updateMatrixWorld(true);
 			this.zDisplay.updateMatrixWorld(true);
-			vwf_view.kernel.setProperty(this.sourceNodeIDs[i],'translation',[spos.x,spos.y,spos.z]);
-		}
 	}
 	this.PickTarget = function()
 	{	
