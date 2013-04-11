@@ -516,6 +516,7 @@ children:
           controlType: "spring"
     methods:
       finishWait: 
+      startEngine:
     scripts:
     - |
       var initialControlValue;
@@ -538,6 +539,7 @@ children:
           }
           else if(initialControlValue == this.run.controlValue && this.controlValue > (this.start.controlValue - 0.1)) {
             this.parent.started = true;
+            this.startEngine();
             
             // If engine started, set gauges to max position
             this.parent.VoltMeter.animateControlToPosition(this.parent.VoltMeter.gamma);

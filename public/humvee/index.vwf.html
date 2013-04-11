@@ -43,6 +43,9 @@
           case "honkHorn":
             $('#honk')[0].play();
             break;
+          case "startEngine":
+            $('#ignition')[0].play();
+            break;
         }
       }
 
@@ -57,6 +60,9 @@
     </div>
     <audio id='honk'>
       <source src="honk.wav"></source>
+    </audio>
+    <audio id='ignition'>
+      <source src="ignition.wav"></source>
     </audio>
     <script type="text/javascript">
       $('#wrapper').appendTo('#vwf-root');
