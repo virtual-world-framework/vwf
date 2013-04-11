@@ -8,7 +8,10 @@ function PainterTool()
 	$('#PainterToolGUI').append("<div id='PainterToolGUIDelete'></div>");
 	$('#PainterToolGUI').append("<div id='PainterToolGUIStop'></div>");
 	$('#PainterToolGUI').append("<div id='PainterToolGUIPick'></div>");
+	$('#PainterToolGUI').append("<input type='checkbox' id='PainterToolGUIActivteTool'></input><label for='PainterToolGUIActivteTool'/>");
+	$('#PainterToolGUI').append("<div id='PainterToolGUIPick'></div>");
 
+	$('#PainterToolGUIActivteTool').button({label:'Active'});
 	$('#PainterToolGUIPick').button({label:'Pick Object'});
 	$('#PainterToolGUIBuild').button({label:'Start Build'});
 	$('#PainterToolGUIDelete').button({label:'Start Delete'});
@@ -20,6 +23,25 @@ function PainterTool()
 		
 	$('#paintertoolclose').click(function(){_PainterTool.hide()});
 	
+	$('#PainterToolGUIActivteTool').change(function(e){
+		
+		
+		var checked = ($(this).next().attr('aria-pressed'));
+		if(checked == 'true')
+		{
+			_Editor.addTool('Painter',_PainterTool);
+			_Editor.setActiveTool('Painter');
+		}
+		else
+		{
+			
+			_Editor.setActiveTool('Gizmo');
+		}
+	})
+	
+	$('#PainterToolGUIPick').click(function(){
+		_PainterTool.currentClickCallback = _PainterTool.selectObject;
+	})
 	
 	$('#PainterToolGUIPick').click(function(){
 		_PainterTool.currentClickCallback = _PainterTool.selectObject;
@@ -31,12 +53,22 @@ function PainterTool()
 				_Notifier.alert('there is no source object selected');
 		}
 		_PainterTool.currentClickCallback = _PainterTool.createObject;
+		
 	});
 	$('#PainterToolGUIDelete').click(function(){
 		_PainterTool.currentClickCallback = _PainterTool.deleteObject;
 	});
 	$('#PainterToolGUIStop').click(function(){
 		_PainterTool.currentClickCallback = null;
+	});
+	
+	$(document).bind('sidePanelClosed',function()
+	{
+	
+		_Editor.setActiveTool('Gizmo');
+		var checked = ($('#PainterToolGUIActivteTool').next().attr('aria-pressed'));
+		if(checked == 'true')
+			$('#PainterToolGUIActivteTool').click();
 	});
 	
 	this.deleteObject = function(e)
@@ -62,6 +94,7 @@ function PainterTool()
 	}
 	this.createObject = function(e)
 	{
+		
 		if(e.button != 0) return;
 		
 		var c = _Editor.findcamera();
@@ -70,8 +103,13 @@ function PainterTool()
 		
 		if(pick && pick.object)
 		{
-			
+			if(pick.object.name == 'GroundPlane')
+				return;
+				
 			var t = _DataManager.getCleanNodePrototype(this.nodeProto);
+			if(!t.properties)
+				t.properties = {};
+			t.properties.owner = _UserManager.GetCurrentUserName();
 			var pos = new THREE.Vector3();
 			pos.getPositionFromMatrix(pick.object.matrixWorld);
 			var bounds = pick.object.getBoundingBox();
@@ -187,8 +225,7 @@ function PainterTool()
 		//$('#PainterToolGUI').dialog('option','position',[1282,40]);
 		
 		_Editor.SelectObject();
-		_Editor.addTool('Painter',this);
-		_Editor.setActiveTool('Painter');
+		
 		
 		
 		showSidePanel();
@@ -205,7 +242,11 @@ function PainterTool()
 					$('#sidepanel').data('jsp').reinitialise();
 		if(!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible'))
 				hideSidePanel();});
-		_Editor.setActiveTool('Gizmo');
+		
+		var checked = ($('#PainterToolGUIActivteTool').next().attr('aria-pressed'));
+		if(checked == 'true')
+			$('#PainterToolGUIActivteTool').click();
+			
 	}
 	this.isOpen = function()
 	{

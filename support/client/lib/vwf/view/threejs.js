@@ -267,7 +267,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         function renderScene(time) {
             requestAnimFrame( renderScene );
             sceneNode.frameCount++;
-				var now = ( performance !== undefined && performance.now !== undefined ) ? performance.now() : time;
+				var now = ( window.performance !== undefined && window.performance.now !== undefined ) ? window.performance.now() : time;
 			var timepassed = now - sceneNode.lastTime;
 			if(_SceneManager)
 				_SceneManager.update(timepassed);

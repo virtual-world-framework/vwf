@@ -52,7 +52,6 @@ scripts:
             //this.parent.players.push(PlayerNumber); 
             document[PlayerNumber +'link'] = this;
             _UserManager.PlayerCreated(PlayerNumber,this.id);
-           
         }
         
        
@@ -89,6 +88,7 @@ scripts:
          // if(!this.mesh)
            
           this.mesh.children[0].children[0].position.z = -.85
+          this.mesh.children[0].children[0].updateMatrixWorld(true);
           this.skin = this.mesh.children[0].children[0].children[1];
           this.skin.isAvatar = true;
           this.jumpcounter = 0.0;

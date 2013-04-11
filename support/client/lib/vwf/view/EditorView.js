@@ -510,7 +510,17 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			_Editor.CloseGroup();
 		});
 		
+		$('#MenuAlign').click(function(e){
+			_AlignTool.show();
+		});
 		
+		$('#MenuBlockPainter').click(function(e){
+			_PainterTool.show();
+		});
+		
+		$('#MenuSnapMove').click(function(e){
+			_SnapMoveTool.show();
+		});
 		
 		$('#MenuViewToggleAO').click(function(e){
 			if(_Editor.findscene().getFilter2d())
@@ -810,11 +820,11 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		createIcon('../vwf/view/editorview/images/icons/inventory.png','MenuInventory','Show Inventory Window');
 		
 		createPanelShowHide();
-		$('body *').not(':has(input)').not('input').disableSelection();
-		$('#vwf-root').enableSelection();
-		$('#vwf-root').parent().enableSelection();
-		$('#vwf-root').parent().parent().enableSelection();
-		$('#index-vwf').enableSelection();
+	//	$('body *').not(':has(input)').not('input').disableSelection();
+	//	$('#vwf-root').enableSelection();
+	//	$('#vwf-root').parent().enableSelection();
+	//	$('#vwf-root').parent().parent().enableSelection();
+	//	$('#index-vwf').enableSelection();
 		$('#MenuCameraOrbiticon').css('background','#9999FF');
 		$('#MenuMoveicon').css('background',"#9999FF");
 		$('#MenuWorldicon').css('background',"#9999FF");
@@ -824,7 +834,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		document.addEventListener("touchmove", touchHandler, true);
 		document.addEventListener("touchend", touchHandler, true);
 		document.addEventListener("touchcancel", touchHandler, true); 
-		$('* :not(input)').disableSelection();
+	//	$('* :not(input)').disableSelection();
 		$('#sidepanel').css('height',$(window).height() - ($('#statusbar').height() + $('#toolbar').height()+$('#smoothmenu1').height()) + 'px')
 		
 		$('#sidepanel').jScrollPane();
@@ -990,9 +1000,11 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		{
 			window.clearInterval(window.sizeTimeoutHandle);
 			sizeWindowTimer();
+			
 			window.sizeTimeoutHandle = null;
 			
 		});
+		$(document).trigger('sidePanelClosed');
 	}
 	function showSidePanel()
 	{

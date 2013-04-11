@@ -122,9 +122,9 @@ function AlignTool()
 		var zFrom = $('#AlignToolGUI').find('#ZFrom :checked').next().text();
 		var zTo = $('#AlignToolGUI').find('#ZTo :checked').next().text();
 		
-		var alignX = $( "#AlignX" ).is(':checked');
-		var alignY = $( "#AlignY" ).is(':checked');
-		var alignZ = $( "#AlignZ" ).is(':checked');
+		var alignX = $( "#AlignX" ).next().attr('aria-pressed');
+		var alignY = $( "#AlignY" ).next().attr('aria-pressed');
+		var alignZ = $( "#AlignZ" ).next().attr('aria-pressed');
 		
 		for(var i = 0; i < this.sourceNodeIDs.length; i++)
 		{
@@ -266,7 +266,7 @@ function AlignTool()
 			}
 	
 			
-			vwf.setProperty(this.sourceNodeIDs[i],'translation',[spos.x,spos.y,spos.z]);
+			vwf_view.kernel.setProperty(this.sourceNodeIDs[i],'translation',[spos.x,spos.y,spos.z]);
 		}
 	}
 	this.PickTarget = function()
