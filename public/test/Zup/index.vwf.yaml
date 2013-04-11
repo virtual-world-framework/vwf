@@ -17,7 +17,7 @@ properties:
   navmode: none
   counter: 0
 methods:
-  tick: 
+  move:
 children:
   zup:
     extends: http://vwf.example.com/node3.vwf
@@ -45,12 +45,14 @@ scripts:
         this.zup.translation = [0,0,0];
         this.zup.translation = [0,0,0];
         this.counter = 0;
+        this.future(0.053).move();
     }
-    this.tick = function()
+    this.move = function()
     {
-        this.zup.translation = [0,0,Math.sin(this.counter/30)];
+        this.zup.translation = [0,0,Math.sin(this.time/1.6)];
         this.counter ++;
         this.zup.rotation = [1,0,0,0];
-        //this.camera.rotation = [0,0,1,(Math.sin(this.counter/30)-.5)*9];
+        //this.camera.rotation = [0,0,1,(Math.sin(this.time/1.6)-.5)*9];
+        this.future(0.053).move();
     }
     

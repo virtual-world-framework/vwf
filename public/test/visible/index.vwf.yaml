@@ -15,9 +15,9 @@
 extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
-  counter: 0
+  duckVisible: true
 methods:
-  tick: 
+  flip:
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -48,17 +48,9 @@ scripts:
         this.camera.translation = [0,-600,50];
         this.dir1.translation = [0,-100,0];
         this.duck.translation = [0,0,0];
-
+        this.future( 1.6 ).flip();
     }
-    this.tick = function()
-    {
-        if(this.counter == 0)
-            this.duck.visible = true;
-        if(this.counter == 30)
-            this.duck.visible = false;   
-        
-        this.counter++;  
-        if(this.counter == 60)            
-            this.counter = 0;
-          
+    this.flip = function() {
+        this.duck.visible = this.duckVisible = !this.duckVisible;
+        this.future( 1.6 ).flip();
     }
