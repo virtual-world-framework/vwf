@@ -2225,8 +2225,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     function isPrototype( nodeID, childID ) {
         var ptID;
-        if ( ( nodeID == 0 && childID != this.state.sceneRootID ) || this.state.prototypes[ nodeID ] !== undefined ) {
-            if ( nodeID != 0 || childID != this.state.sceneRootID ) {
+        if ( ( nodeID == 0 && childID != this.kernel.application() ) || this.state.prototypes[ nodeID ] !== undefined ) {
+            if ( nodeID != 0 || childID != this.kernel.application() ) {
                 ptID = nodeID ? nodeID : childID;
                 if ( this.state.prototypes[ ptID ] !== undefined ) {
                     ptID = childID;

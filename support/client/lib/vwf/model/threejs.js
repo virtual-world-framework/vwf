@@ -59,7 +59,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
             this.state.prototypes = {}; 
             this.state.kernel = this.kernel.kernel.kernel;
-            this.state.sceneRootID = this.kernel.find("", "/")[0];;
 
 
             // shouldn't this just be vwf time? 			
@@ -123,8 +122,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var kernel = this.kernel.kernel.kernel;
             
             var protos = getPrototypes.call( this, kernel, childExtendsID );
-            if ( isSceneDefinition.call(this, protos) && childID == this.state.sceneRootID )
+            if ( isSceneDefinition.call(this, protos) && childID == this.kernel.application() )
             {
+                this.state.sceneRootID = childID;
+
                 var sceneNode = CreateThreeJSSceneNode(nodeID, childID, childExtendsID);
                 this.state.scenes[childID] = sceneNode;
                 
@@ -1288,8 +1289,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
     function ifPrototypeGetId( nodeID, childID ) {
         var ptID;
-        if ( ( nodeID == 0 && childID != this.state.sceneRootID ) || this.state.prototypes[ nodeID ] !== undefined ) {
-            if ( nodeID != 0 || childID != this.state.sceneRootID ) {
+        if ( ( nodeID == 0 && childID != this.kernel.application() ) || this.state.prototypes[ nodeID ] !== undefined ) {
+            if ( nodeID != 0 || childID != this.kernel.application() ) {
                 ptID = nodeID ? nodeID : childID;
                 if ( this.state.prototypes[ ptID ] !== undefined ) {
                     ptID = childID;
