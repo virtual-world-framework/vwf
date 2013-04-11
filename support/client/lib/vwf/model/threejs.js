@@ -322,7 +322,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     for ( var propertyName in kernel.getProperties( prototypeID ) ) {
                         //console.info( " 1    getting "+propertyName+" of: " + childExtendsID  );
                         ptPropValue = kernel.getProperty( childExtendsID, propertyName );
-                        if ( ptPropValue !== undefined && childID !== undefined ) {
+                        if ( ptPropValue !== undefined && ptPropValue !== null && childID !== undefined && childID !== null) {
                             //console.info( " 1    setting "+propertyName+" of: " + nodeID + " to " + ptPropValue );
                             self.settingProperty( childID, propertyName, ptPropValue );
                         }
@@ -332,7 +332,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     for ( var propertyName in kernel.getProperties( behaviorID ) ) {
                         //console.info( "     2    getting "+propertyName+" of: " + behaviorID  );
                         ptPropValue = kernel.getProperty( behaviorID, propertyName );
-                        if ( ptPropValue !== undefined && childID !== undefined ) {
+                        if ( ptPropValue !== undefined && ptPropValue !== null && childID !== undefined && childID !== null) {
                             //console.info( "     2    setting "+propertyName+" of: " + nodeID + " to " + ptPropValue );
                             self.settingProperty( childID, propertyName, ptPropValue );
                         }
