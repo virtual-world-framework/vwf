@@ -22,6 +22,8 @@ properties:
 children:
   interiorCamera:
     extends: http://vwf.example.com/camera.vwf
+    properties:
+      worldTransform: [ 0.04541779309511185,0.9989691376686096,0,0,-0.9989691376686096,0.04541779309511185,0,0,0,0,1,0,-14.136186599731445,-42.1671028137207,88.4365005493164,1 ]
   ParkingBrake: 
     extends: http://vwf.example.com/node3.vwf 
     children: 
