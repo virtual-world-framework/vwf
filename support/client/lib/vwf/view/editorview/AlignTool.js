@@ -103,14 +103,22 @@ function AlignTool()
 		
 		for(var i = 0; i < this.sourceNodeIDs.length; i++)
 		{
-			vwf.setProperty(this.sourceNodeIDs[i],'transform',this.sourceBackupTransform[this.sourceNodeIDs[i]]);
+			vwf_view.kernel.setProperty(this.sourceNodeIDs[i],'transform',this.sourceBackupTransform[this.sourceNodeIDs[i]]);
 		}
 	
 	}
 	this.updateDisplay = function()
 	{
-		var target = _Editor.findviewnode(this.targetNodeID);
+		var target = this.target;//_Editor.findviewnode(this.targetNodeID);
 		var tbounds = target.GetBoundingBox(true);
+		
+		tbounds=tbounds.clone();
+		tbounds.min[0] = tbounds.min[0] * target.matrixWorld.elements[0];
+		tbounds.min[1] = tbounds.min[1] * target.matrixWorld.elements[5];
+		tbounds.min[2] = tbounds.min[2] * target.matrixWorld.elements[10];
+		tbounds.max[0] = tbounds.max[0] * target.matrixWorld.elements[0];
+		tbounds.max[1] = tbounds.max[1] * target.matrixWorld.elements[5];
+		tbounds.max[2] = tbounds.max[2] * target.matrixWorld.elements[10];
 		var tcenter = this.tcenter.clone();
 		
 		var xFrom = $('#AlignToolGUI').find('#XFrom :checked').next().text();
@@ -122,14 +130,22 @@ function AlignTool()
 		var zFrom = $('#AlignToolGUI').find('#ZFrom :checked').next().text();
 		var zTo = $('#AlignToolGUI').find('#ZTo :checked').next().text();
 		
-		var alignX = $( "#AlignX" ).next().attr('aria-pressed');
-		var alignY = $( "#AlignY" ).next().attr('aria-pressed');
-		var alignZ = $( "#AlignZ" ).next().attr('aria-pressed');
+		var alignX = $( "#AlignX" ).attr('checked') != undefined
+		var alignY = $( "#AlignY" ).attr('checked') != undefined
+		var alignZ = $( "#AlignZ" ).attr('checked') != undefined
 		
 		for(var i = 0; i < this.sourceNodeIDs.length; i++)
 		{
 			var source = _Editor.findviewnode(this.sourceNodeIDs[i])
 			var sbounds = source.GetBoundingBox(true);
+			sbounds=sbounds.clone();
+			
+			sbounds.min[0] = sbounds.min[0] * source.matrixWorld.elements[0];
+			sbounds.min[1] = sbounds.min[1] * source.matrixWorld.elements[5];
+			sbounds.min[2] = sbounds.min[2] * source.matrixWorld.elements[10];
+			sbounds.max[0] = sbounds.max[0] * source.matrixWorld.elements[0];
+			sbounds.max[1] = sbounds.max[1] * source.matrixWorld.elements[5];
+			sbounds.max[2] = sbounds.max[2] * source.matrixWorld.elements[10];
 			var scenter = this.scenter[i].clone();
 			var spos = scenter.clone();
 			
@@ -304,9 +320,7 @@ function AlignTool()
 		
 		$('#AlignToolGUI').dialog('open');
 		
-		$( "#AlignX" ).removeAttr('checked');
-		$( "#AlignY" ).removeAttr('checked');
-		$( "#AlignZ" ).removeAttr('checked');
+		
 		$('#AlignToolGUI_PickTarget').click();
 		$('#AlignToolGUI_PickTargetID').text('No Target Selected');
 		//_Editor.SelectObject();
@@ -330,13 +344,27 @@ function AlignTool()
 	{
 		if(this.pickMode == 'Pick')
 		{
-		
+			
 			var c = _Editor.findcamera();
 			var campos = [c.position.x,c.position.y,c.position.z];
-			var pick = _Editor.ThreeJSPick(campos,_Editor.GetWorldPickRay(e),{filter:function(o){ return o.isAvatar != true;}});
+			var pick = _Editor.ThreeJSPick(campos,_Editor.GetWorldPickRay(e),{filter:function(o){ 
+				
+				 if(o.isAvatar != true)
+					if(o.parent)
+						if(o.parent.name != 'MoveGizmo')
+							return true;
+				return false;
+				 
+				}});
 			if(pick.object)
 				this.protoBounds = pick.object.getBoundingBox();
 			var vwfnode;
+			var picknode = pick.object;
+			if(!pick.object)
+			{
+				console.log('No node selected');
+				return;
+			}
 			
 			while(pick && pick.object && !pick.object.vwfID)
 				pick.object = pick.object.parent;
@@ -344,22 +372,18 @@ function AlignTool()
 				vwfnode = pick.object.vwfID;
 			
 			console.log(vwfnode);
-			$('#AlignToolGUI_PickTargetID').text(vwfnode);
-			if(!vwfnode)
-			{
-				console.log('No node selected');
-				return;
-			}
+			
+			
 			
 			//put everything back where it was, to allow picking new target from list of source obhects
 			this.Cancel();
 			
-			this.targetNodeID = vwfnode;
+			this.targetNodeID = vwfnode || picknode.name;
 			
-			var target = _Editor.findviewnode(this.targetNodeID);
+			this.target = _Editor.findviewnode(this.targetNodeID) || picknode;
 			
-			this.tcenter = new THREE.Vector3().getPositionFromMatrix(target.matrixWorld);
-			
+			this.tcenter = new THREE.Vector3().getPositionFromMatrix(this.target.matrixWorld);
+			$('#AlignToolGUI_PickTargetID').text(this.targetNodeID);
 			
 			this.updateDisplay();
 			this.pickMode = '';
