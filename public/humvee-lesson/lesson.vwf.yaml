@@ -60,11 +60,10 @@ children:
               this.entering = function() {
                 this.logger.info( "Step: Open Door" );
                 var humveeDoor = this.find( "/humvee/DoorDriverFront" )[ 0 ];
-                humveeDoor.pointerUp = humveeDoor.events.add( function() {
-                  var app = this.parent.parent.parent.parent;
-                  if(app.humvee.DoorDriverFront.controlValue == 0)
+                humveeDoor.controlValueUpdated = humveeDoor.events.add( function() {
+                  if(humveeDoor.controlValue == humveeDoor.open.controlValue)
                   {
-                    humveeDoor.pointerUp = humveeDoor.events.flush( this );
+                    humveeDoor.controlValueUpdated = humveeDoor.events.flush( this );
                     this.logger.info( "Step: Open Door - Completed" );
                     this.completed();
                   }
@@ -105,10 +104,13 @@ children:
               this.entering = function() {
                 this.logger.info( "Step: Close Door" );
                 var humveeDoor = this.find( "/humvee/DoorDriverFront" )[ 0 ];
-                humveeDoor.pointerUp = humveeDoor.events.add( function() {
-                  humveeDoor.pointerUp = humveeDoor.events.flush( this );
-                  this.logger.info( "Step: Close Door - Completed" );
-                  this.completed();
+                humveeDoor.controlValueUpdated = humveeDoor.events.add( function() {
+                  if(humveeDoor.controlValue == humveeDoor.close.controlValue)
+                  {
+                    humveeDoor.controlValueUpdated = humveeDoor.events.flush( this );
+                    this.logger.info( "Step: Close Door - Completed" );
+                    this.completed();
+                  }
                 }, this );
               }
   startEngine:
@@ -136,10 +138,13 @@ children:
               this.entering = function() {
                 this.logger.info( "Step: Set Ignition to Run" );
                 var ignition = this.find( "/humvee/Ignition" )[ 0 ];
-                ignition.pointerUp = ignition.events.add( function() {
-                  ignition.pointerUp = ignition.events.flush( this );
-                  this.logger.info( "Step: Set Ignition to Run - Completed" );
-                  this.completed();
+                ignition.controlValueUpdated = ignition.events.add( function() {
+                  if(ignition.controlValue == ignition.run.controlValue)
+                  {
+                    ignition.controlValueUpdated = ignition.events.flush( this );
+                    this.logger.info( "Step: Set Ignition to Run - Completed" );
+                    this.completed();
+                  }
                 }, this );
               }
           waitForLightInstructions:
@@ -167,10 +172,13 @@ children:
               this.entering = function() {
                 this.logger.info( "Step: Set Ignition to Start" );
                 var ignition = this.find( "/humvee/Ignition" )[ 0 ];
-                ignition.pointerUp = ignition.events.add( function() {
-                  ignition.pointerUp = ignition.events.flush( this );
-                  this.logger.info( "Step: Set Ignition to Start - Completed" );
-                  this.completed();
+                ignition.controlValueUpdated = ignition.events.add( function() {
+                  if(ignition.controlValue > 0.9)
+                  {
+                    ignition.controlValueUpdated = ignition.events.flush( this );
+                    this.logger.info( "Step: Set Ignition to Start - Completed" );
+                    this.completed();
+                  }
                 }, this );
               }
           checkGauges:
@@ -207,10 +215,13 @@ children:
               this.entering = function() {
                 this.logger.info( "Step: Move Gear Shift to Drive" );
                 var gearShift = this.find( "/humvee/GearShift" )[ 0 ];
-                gearShift.pointerUp = gearShift.events.add( function() {
-                  gearShift.pointerUp = gearShift.events.flush( this );
-                  this.logger.info( "Step: Move Gear Shift to Drive - Completed" );
-                  this.completed();
+                gearShift.controlValueUpdated = gearShift.events.add( function() {
+                  if(gearShift.controlValue == gearShift.drive.controlValue )
+                  {
+                    gearShift.controlValueUpdated = gearShift.events.flush( this );
+                    this.logger.info( "Step: Move Gear Shift to Drive - Completed" );
+                    this.completed();
+                  }
                 }, this );
               } //@ sourceURL=moveToDriveTask.vwf
       releaseBrake:
@@ -227,10 +238,13 @@ children:
               this.entering = function() {
                 this.logger.info( "Step: Release Parking Brake" );
                 var parkingBrake = this.find( "/humvee/EmergencyBrake" )[ 0 ];
-                parkingBrake.pointerUp = parkingBrake.events.add( function() {
-                  parkingBrake.pointerUp = parkingBrake.events.flush( this );
-                  this.logger.info( "Step: Release Parking Brake - Completed" );
-                  this.completed();
+                parkingBrake.controlValueUpdated = parkingBrake.events.add( function() {
+                  if(parkingBrake.controlValue == parkingBrake.release.controlValue )
+                  {
+                    parkingBrake.controlValueUpdated = parkingBrake.events.flush( this );
+                    this.logger.info( "Step: Release Parking Brake - Completed" );
+                    this.completed();
+                  }
                 }, this );
               } //@ sourceURL=releaseBrakeTask.vwf
       moveVehicle:

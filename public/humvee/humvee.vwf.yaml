@@ -15,11 +15,15 @@
 extends: http://vwf.example.com/node3.vwf
 source: humvee.dae
 type: model/vnd.collada+xml
+implements: 
+- drive.vwf
 properties:
   started: false
 children:
   interiorCamera:
     extends: http://vwf.example.com/camera.vwf
+    properties:
+      worldTransform: [ 0.04541779309511185,0.9989691376686096,0,0,-0.9989691376686096,0.04541779309511185,0,0,0,0,1,0,-14.136186599731445,-42.1671028137207,88.4365005493164,1 ]
   ParkingBrake: 
     extends: http://vwf.example.com/node3.vwf 
     children: 
@@ -271,13 +275,13 @@ children:
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
-      alpha:
+      engage:
         implements:
         - http://vwf.example.com/animation/position.vwf
         - http://vwf.example.com/control/position.vwf
         properties:
           sequence: 0
-      beta:
+      release:
         implements:
         - http://vwf.example.com/animation/position.vwf
         - http://vwf.example.com/control/position.vwf
@@ -293,10 +297,10 @@ children:
         this.rotateBy([0, 1, 0, time * 45], 0, "rotated");
       }
       this.controlValueUpdated = this.events.add(function(controlValue) {
-        if(this.controlValue == this.children.alpha.controlValue) {
+        if(this.controlValue == this.children.engage.controlValue) {
           this.parent.ParkingBrake.brake.braked = true;
         }
-        else if(this.controlValue == this.children.beta.controlValue) {
+        else if(this.controlValue == this.children.release.controlValue) {
           this.parent.ParkingBrake.brake.braked = false;
         }
       }, this);
@@ -1327,13 +1331,13 @@ children:
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
-      alpha:
+      close:
         implements:
         - http://vwf.example.com/animation/position.vwf
         - http://vwf.example.com/control/position.vwf
         properties:
           sequence: 0
-      beta:
+      open:
         implements:
         - http://vwf.example.com/animation/position.vwf
         - http://vwf.example.com/control/position.vwf
