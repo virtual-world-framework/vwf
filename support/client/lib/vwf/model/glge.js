@@ -122,8 +122,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     pendingLoads: 0,
                 };
 				
-				sceneNode.glgeScene.addChild(BuildAxis());
-				
                 if ( sceneNode.glgeScene.camera ) {
                         sceneNode.camera.glgeCameras[ sceneNode.camera.defaultCamID ] = sceneNode.glgeScene.camera;
                 } else {
