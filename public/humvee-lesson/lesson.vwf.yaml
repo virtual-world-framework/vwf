@@ -251,7 +251,7 @@ children:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
           text: "3.3 Drive vehicle forward"
-          cameraPoseRef: /lesson/cameraPose33
+          cameraPoseRef: /lesson/driveLocalPosition
         children:
           moveVehicleInstructions:
             extends: http://vwf.example.com/lesson/task.vwf
@@ -266,6 +266,8 @@ children:
         - |
           this.cameraTransformComplete = function() {
             // Switch cameras here
+            var hv = this.find( "/humvee" )[ 0 ];
+            hv.mode = "drive";
           } //@ sourceURL=moveVehicleTask.vwf
   cameraPose1:
     extends: http://vwf.example.com/node3.vwf
@@ -280,7 +282,7 @@ children:
     extends: http://vwf.example.com/node3.vwf
   cameraPose31:
     extends: http://vwf.example.com/node3.vwf
-  cameraPose33:
+  driveLocalPosition:
     extends: http://vwf.example.com/node3.vwf
 scripts:
 - |
@@ -308,9 +310,13 @@ scripts:
     -13.254499435424805,-45.380226135253906,86.13629150390625,1 ];
 
     // driving position
-    this.cameraPose33.transform = [ 0.045417796820402145,0.9989691972732544,0,0,
+    this.driveLocalPosition.transform = [ 0.045417796820402145,0.9989691972732544,0,0,
       -0.9989691972732544,0.045417796820402145,0,0,
       0,0,1,0,
       -14.136186599731445,-42.1671028137207,88.4365005493164,1 ];
 
+  } 
+  this.entering = function() {
+    var hv = this.find( "/humvee" )[ 0 ];
+    hv.mode = "normal";    
   } //@ sourceURL=humvee-lesson.vwf
