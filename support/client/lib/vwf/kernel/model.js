@@ -431,16 +431,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             case "client":
             case "moniker":
 
-                return function() {
-                    return this.kernel[kernelFunctionName]();
-                };
+            case "application":
 
             case "intrinsics":
-
-                return function( nodeID, result ) {
-                    return this.kernel[kernelFunctionName]( nodeID, result );
-                };
-
             case "uri":
             case "name":
 
@@ -453,20 +446,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             case "children":
             case "descendants":
 
-                return function( nodeID ) {
-                    return this.kernel[kernelFunctionName]( nodeID );
-                };
-
             case "find":
-
-                return function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
-                    return this.kernel[kernelFunctionName]( nodeID, matchPattern, callback );
-                };
-
             case "test":
 
-                return function( nodeID, matchPattern, testID ) {
-                    return this.kernel[kernelFunctionName]( nodeID, matchPattern, testID );
+                return function() {
+                    return this.kernel[kernelFunctionName].apply( this.kernel, arguments );
                 };
 
         }

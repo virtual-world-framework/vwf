@@ -86,7 +86,7 @@ And then connect a script to the login button that will call your createUser fun
 	    $( "#main" ).show();
 	    $( "#loginDialog" ).modal( "hide" );
 	    var view = this;
-	    vwf_view.kernel.callMethod( "index-vwf", "createUser", [ userName, function() { ... } ] );
+	    vwf_view.kernel.callMethod( vwf_view.kernel.application(), "createUser", [ userName, function() { ... } ] );
 	  }
 	});
 

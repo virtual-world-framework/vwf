@@ -242,11 +242,11 @@ node.uri = childURI; // TODO: move to vwf/model/object
             Object.defineProperty( node, "find", {
                 value: function( matchPattern, callback /* ( match ) */ ) { // "this" is node
                     if ( callback ) {
-                        self.kernel.find( this.id, matchPattern, function( matchID ) {
+                        self.kernel.find( this.id, matchPattern, true, function( matchID ) {
                             callback.call( node, self.nodes[matchID] );
                         } );
                     } else {  // TODO: future iterator proxy
-                        var findResults = self.kernel.find( this.id, matchPattern );
+                        var findResults = self.kernel.find( this.id, matchPattern, true );
                         if ( findResults )
                             return findResults.map( function( matchID ) {
                                 return self.nodes[matchID];
@@ -257,7 +257,7 @@ node.uri = childURI; // TODO: move to vwf/model/object
 
             Object.defineProperty( node, "test", {
                 value: function( matchPattern, testNode ) { // "this" is node
-                    return self.kernel.test( this.id, matchPattern, testNode.id );
+                    return self.kernel.test( this.id, matchPattern, testNode.id, true );
                 }
             } );
 

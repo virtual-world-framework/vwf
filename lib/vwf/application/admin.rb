@@ -124,8 +124,8 @@ class VWF::Application::Admin < Sinatra::Base
   end
 
   get "/config" do
-    if(File.exists?("public#{ env["vwf.root"] }/index.vwf.config.yaml"))
-      config = File.read("public#{ env["vwf.root"] }/index.vwf.config.yaml")
+    if(File.exists?("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.config.yaml"))
+      config = File.read("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.config.yaml")
       config = YAML.load(config)
       config.to_json
     end

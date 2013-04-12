@@ -50,7 +50,7 @@ define( [ "module" ], function( module ) {
                 // Reset the context if it's an absolute path.
 
                 if ( steps.absolute ) {
-                    contextIDs = [ rootID ];
+                    contextIDs = rootID ? [ rootID ] : [];
                 }
 
                 // Resolve each step.
@@ -63,8 +63,8 @@ define( [ "module" ], function( module ) {
 
                         step.predicates && step.predicates.forEach( function( predicate ) {
 
-                            stepIDs = stepIDs.filter( function( step_id ) {
-                                return this.resolve( predicate, rootID, step_id, function( step, id ) {
+                            stepIDs = stepIDs.filter( function( stepID ) {
+                                return this.resolve( predicate, rootID, stepID, function( step, id ) {
                                     return callback.call( this, step, id, true );
                                 }, thisArg ).length;
                             }, this );

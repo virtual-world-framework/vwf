@@ -38,8 +38,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             this.state.prototypes = {}; 
             this.state.kernel = this.kernel;
 
-            this.state.sceneRootID = this.kernel.find("", "/")[0];
-
         },
 
 
@@ -99,8 +97,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 }
             }
 
-            
-            if ( prototypes && isGlgeSceneDefinition.call( this, prototypes ) && childID == this.state.sceneRootID ) {
+            if ( prototypes && isGlgeSceneDefinition.call( this, prototypes ) && childID == this.kernel.application() ) {
+
+                this.state.sceneRootID = childID;
 
                 var sceneNode = this.state.scenes[childID] = {
                     glgeDocument: new GLGE.Document(),

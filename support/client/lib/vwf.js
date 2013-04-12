@@ -157,6 +157,13 @@
 
         this.private = {}; // for debugging
 
+        /// The application root ID.
+        /// 
+        /// @name module:vwf~applicationID
+
+        var applicationID = undefined;
+        var pendingApplicationID = undefined;
+
         /// Components describe the objects that make up the simulation. They may also serve as
         /// prototype objects for further derived components. External components are identified by
         /// URIs. Once loaded, we save a mapping here from its URI to the node ID of its prototype so
@@ -1115,7 +1122,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Global node and descendant deltas.
 
                 nodes: [  // TODO: all global objects
-                    require( "vwf/utility" ).transform( this.getNode( this.find("", "/")[0], full ), require( "vwf/utility" ).transforms.transit ),
+                    require( "vwf/utility" ).transform( this.getNode( applicationID, full ), require( "vwf/utility" ).transforms.transit ),
                 ],
 
                 // Message queue.
@@ -1414,6 +1421,12 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             this.models.forEach( function( model ) {
                 model.deletingNode && model.deletingNode( nodeID );
             } );
+
+            // Clear the root ID if the application root node is deleted.
+
+            if ( nodeID === applicationID ) {
+                applicationID = undefined;
+            }
 
             // Call deletedNode() on each view. The view is being notified that a node has been
             // deleted.
@@ -1805,46 +1818,12 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // of the descriptor. An existing ID is used when synchronizing to state drawn from
             // another client or to a previously-saved state.
 
-var useLegacyID = [  // TODO: fix static ID references and remove
-    // use the legacy ID scheme except for nodes with these names, ...
-    // "...",
-    "material",
-    "material1",
-    "material2",
-    "material3",
-    "material4", 
-    "media", 
-    "plane", 
-    "border", 
-    "button", 
-    "window", 
-    "controlBar", 
-    "titlebar", 
-    "closeButton", 
-    "minButton", 
-    "maxButton", 
-    "glgeObj1",
-    "bone1",
-    "bone3",
-    "Scene",
-    "Tank",
-    "playerModel",
-    "laserModel",
-    "laserParticle"
-].indexOf( childName ) < 0 && [
-    // ... or with these URIs, ...
-    "http://vwf.example.com/node.vwf",
-].indexOf( childURI ) < 0 &&
-    // ... but not for tests
-    require.toUrl( "dummy" ).indexOf( "../lib/" ) != 0;
-
-useLegacyID = childURI &&
-    ( childURI == "index.vwf" || childURI == "appscene-vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
+var useLegacyID = childURI &&
+    ( childURI == "index.vwf" || childURI == "appscene.vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
     childURI != "http://vwf.example.com/node.vwf";
     
 useLegacyID = useLegacyID ||
-    // work around model/glge creating a camera on a not-initialized application node
-    nodeID == this.find("", "/")[0] && ! this.models.object.objects[nodeID] && childName == "camera";
+    nodeID == applicationID && childName == "camera"; // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 var childID = childComponent.id;
@@ -1863,6 +1842,14 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                     ( this.configuration["randomize-ids"] ? "-" + ( "0" + Math.floor( this.random( nodeID ) * 100 ) ).slice( -2 ) : "" ) +
                     ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
 }
+            }
+
+            // Record the application root ID. The application is the first (global) node created.
+            // The application node is recognized here but recorded as pending. Then, after its
+            // dependencies are loaded, it is registered just as its `creatingNode` calls are sent.
+
+            if ( ! applicationID && ! pendingApplicationID ) {
+                pendingApplicationID = childID;
             }
 
             var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
@@ -1954,8 +1941,25 @@ if ( ! childComponent.source ) {
 
                 function( series_callback_async /* ( err, results ) */ ) {
 
-                    // Call creatingNode() on each model. The node is considered to be constructed after
-                    // each model has run.
+                    // Register the node as the application root if it was recognized as such
+                    // earlier.  // TODO: this would be better if made more explicit from the caller (possibly using a special `childName` marker, but that would require the "this is the application" annotation to pass through `createNode`; since `createNode` and `createChild` should probably merge to simplify the patches: and includes: support, this can wait)
+
+                    if ( childID === pendingApplicationID ) {
+                        applicationID = childID;
+                        pendingApplicationID = undefined;
+                    }
+
+                    // As a special case, since many kernel functions delegate to vwf/model/object,
+                    // call it first so that those functions will be available to the other drivers.
+                    // vwf/model/object is the last model driver, so relying on the normal order for
+                    // `creatingNode` would prevent other drivers from asking about prototypes and
+                    // other node information in their `creatingNode` handlers.
+
+                    vwf.models.object.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                        childComponent.source, childComponent.type, childURI, childName );  // TODO: return node metadata to the kernel and use vwf/model/object just as a property store?
+
+                    // Call creatingNode() on each model. The node is considered to be constructed
+                    // after each model has run.
 
                     async.forEachSeries( vwf.models, function( model, each_callback_async /* ( err ) */ ) {
 
@@ -2970,6 +2974,17 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return this.moniker_;
         };
 
+        // -- application --------------------------------------------------------------------------
+
+        /// @name module:vwf.application
+        /// 
+        /// @see {@link module:vwf/api/kernel.application}
+
+        this.application = function( initializedOnly ) {
+            return applicationID && ( ! initializedOnly || this.models.object.initialized( applicationID ) ) ?
+                applicationID : undefined;
+        };
+
         // -- intrinsics ---------------------------------------------------------------------------
 
         /// @name module:vwf.intrinsics
@@ -3058,15 +3073,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// 
         /// @see {@link module:vwf/api/kernel.ancestors}
 
-        this.ancestors = function( nodeID ) {
+        this.ancestors = function( nodeID, initializedOnly ) {
 
             var ancestors = [];
 
-            nodeID = this.parent( nodeID );
+            nodeID = this.parent( nodeID, initializedOnly );
 
             while ( nodeID && nodeID !== 0 ) {
                 ancestors.push( nodeID );
-                nodeID = this.parent( nodeID );
+                nodeID = this.parent( nodeID, initializedOnly );
             }
 
             return ancestors;
@@ -3078,8 +3093,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// 
         /// @see {@link module:vwf/api/kernel.parent}
 
-        this.parent = function( nodeID ) {
-            return this.models.object.parent( nodeID );
+        this.parent = function( nodeID, initializedOnly ) {
+            return this.models.object.parent( nodeID, initializedOnly );
         };
 
         // -- children -----------------------------------------------------------------------------
@@ -3125,9 +3140,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// @name module:vwf.find
         ///
         /// @param {ID} nodeID
-        ///   The reference node. Relative patterns are resolved with respect to this node.
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
         /// @param {String} matchPattern
         ///   The search pattern.
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
         /// @param {Function} [callback]
         ///   A callback to receive the search results. If callback is provided, find invokes
         ///   callback( matchID ) for each match. Otherwise the result is returned as an array.
@@ -3137,9 +3157,25 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// 
         /// @see {@link module:vwf/api/kernel.find}
 
-        this.find = function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
+        this.find = function( nodeID, matchPattern, initializedOnly, callback /* ( matchID ) */ ) {
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
+            // Interpret `find( nodeID, matchPattern, callback )` as
+            // `find( nodeID, matchPattern, undefined, callback )`. (`initializedOnly` was added in
+            // 0.6.8.)
+
+            if ( typeof initializedOnly == "function" || initializedOnly instanceof Function ) {
+                callback = initializedOnly;
+                initializedOnly = undefined;
+            }
+
+            // Evaluate the expression, using the application as the root and the provided node as
+            // the reference.
+
+            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
+                this.application( initializedOnly ), nodeID, resolverWithInitializedOnly, this );
+
+            // Return the result, either by invoking the callback when provided, or returning the
+            // array directly.
 
             if ( callback ) {
 
@@ -3150,7 +3186,12 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             } else {  // TODO: future iterator proxy
 
                 return matchIDs;
+            }
 
+            // Wrap `xpathResolver` to pass `initializedOnly` through.
+
+            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
+                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
             }
 
         };
@@ -3160,24 +3201,41 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// @name module:vwf.test
         /// 
         /// @param {ID} nodeID
-        ///   The reference node. Relative patterns are resolved with respect to this node.
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
         /// @param {String} matchPattern
         ///   The search pattern.
         /// @param {ID} testID
         ///   A node to test against the pattern.
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
         /// 
         /// @returns {Boolean}
         ///   true when testID matches the pattern.
         /// 
-        /// @see {@link module:vwf/api/kernel.createNode}
+        /// @see {@link module:vwf/api/kernel.test}
 
-        this.test = function( nodeID, matchPattern, testID ) {
+        this.test = function( nodeID, matchPattern, testID, initializedOnly ) {
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
+            // Evaluate the expression, using the application as the root and the provided node as
+            // the reference.
+
+            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
+                this.application( initializedOnly ), nodeID, resolverWithInitializedOnly, this );
+
+            // Search for the test node in the result.
 
             return matchIDs.some( function( matchID ) {
                 return matchID == testID;
             } );
+
+            // Wrap `xpathResolver` to pass `initializedOnly` through.
+
+            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
+                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
+            }
 
         };
 
@@ -3909,10 +3967,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// @param {Object} step
         /// @param {ID} contextID
         /// @param {Boolean} [resolveAttributes]
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
         /// 
         /// @returns {ID[]}
 
-        var xpathResolver = function( step, contextID, resolveAttributes ) {
+        var xpathResolver = function( step, contextID, resolveAttributes, initializedOnly ) {
 
             var resultIDs = [];
 
@@ -3923,15 +3985,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                 case "ancestor-or-self":
                     resultIDs.push( contextID );
-                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID ) );
+                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID, initializedOnly ) );
                     break;
 
                 case "ancestor":
-                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID ) );
+                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID, initializedOnly ) );
                     break;
 
                 case "parent":
-                    var parentID = this.parent( contextID );
+                    var parentID = this.parent( contextID, initializedOnly );
                     parentID && resultIDs.push( parentID );
                     break;
 
