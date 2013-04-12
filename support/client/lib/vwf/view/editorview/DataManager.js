@@ -3,8 +3,9 @@
 //sandbox API.
 
 
-var PersistanceServer = '';
-function DataManager()
+window.PersistanceServer = '';
+define({
+	initialize:function()
 {
 	
 	//if(localStorage) throw "No localStorage available";
@@ -701,7 +702,7 @@ function DataManager()
 	{
 		localStorage[this.datahandle] = JSON.stringify(this.rawdata);
 	}
+	PersistanceServer = _DataManager.getCurrentSession();
 }
+});
 
-_DataManager = new DataManager();
-PersistanceServer = _DataManager.getCurrentSession();

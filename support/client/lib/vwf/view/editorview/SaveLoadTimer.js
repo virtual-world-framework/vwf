@@ -1,0 +1,18 @@
+define({
+	initialize:function()
+	{
+		if(_DataManager.getClientCount() == 1)
+		{
+			_DataManager.loadFromServer();
+		}
+	
+		window.setTimeout(function(){_DataManager.saveTimer();},60000);		
+		window.onbeforeunload = function(){
+			if(_DataManager.getClientCount() == 1)
+			{
+				_DataManager.saveToServer();
+				return "Are you sure you want to leave this VWF world?";
+			}		
+		};
+	}
+});

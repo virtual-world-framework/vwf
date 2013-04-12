@@ -1,4 +1,5 @@
-function GlobalInventoryManager()
+define({
+	initialize:function()
 {
 	
 	$('#sidepanel').append("<div id='GlobalInventoryManager' class='ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
@@ -460,6 +461,6 @@ function GlobalInventoryManager()
     this.itemViewer.getSession().setMode("ace/mode/json");
 	this.itemViewer.setPrintMarginColumn(false);
 	this.itemViewer.setFontSize('15px');
-}
-_GlobalInventoryManager = new GlobalInventoryManager();
-_GlobalInventoryManager.hide();
+	_GlobalInventoryManager.hide();
+}});
+

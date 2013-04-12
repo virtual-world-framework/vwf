@@ -118,7 +118,15 @@ SceneManager.prototype.update = function(dt)
 		this.particleSystemList[i].update(dt);
 	}
 }
-
+SceneManager.prototype.getTexture = function(src)
+{
+	
+	if(!this.textureList)
+		this.textureList = {};
+	if(!this.textureList[src])
+		this.textureList[src]  = THREE.ImageUtils.loadTexture(src);
+	return this.textureList[src];	
+}
 SceneManager.prototype.initialize = function(scene)
 {
 	this.min = [-130,-130,-120];
@@ -127,6 +135,8 @@ SceneManager.prototype.initialize = function(scene)
 	this.specialCaseObjects = [];
 	this.tempDebatchList = [];
 	this.particleSystemList = [];
+	if(!this.textureList)
+		this.textureList = {};
 	this.initialized = true;
 	THREE.Object3D.prototype.add_internal = THREE.Object3D.prototype.add;
 	THREE.Object3D.prototype.add = function(child,SceneManagerIgnore)

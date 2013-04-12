@@ -25,7 +25,8 @@ insertAtCaret: function(textToInsert){
 }
 });
 
-function ScriptEditor()
+define({
+	initialize:function()
 {
 
 
@@ -974,7 +975,9 @@ function ScriptEditor()
 	this.methodEditor.setFontSize('15px');
 	this.eventEditor.setPrintMarginColumn(false);
 	this.eventEditor.setFontSize('15px');
+	$('#ScriptEditor').hide();
+	$('#ScriptEditor').css('height','405px');
 }
-_ScriptEditor = new ScriptEditor();
-$('#ScriptEditor').hide();
-$('#ScriptEditor').css('height','405px');
+});
+
+

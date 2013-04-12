@@ -1,4 +1,5 @@
-function hierarchyManager()
+define({
+	initialize:function()
 {
 	
 	$('#sidepanel').append("<div id='hierarchyManager' class='ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
@@ -367,7 +368,6 @@ function hierarchyManager()
 		}
 	}
 	$(document).bind('selectionChanged',this.SelectionChanged.bind(this));
-	
-}
-HierarchyManager = new hierarchyManager();
-HierarchyManager.hide();
+	this.hide();
+}});
+

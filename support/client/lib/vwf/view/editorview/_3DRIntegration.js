@@ -191,8 +191,11 @@ Base64DecodeEnumerator.prototype =
     }
 };
 
-function _3DRIntegration()
+define(["vwf/view/editorview/Editor"],function(Editor){
+	return {
+	initialize:function()
 {
+	
 	$(document.body).append("<div id='ModelLibrary'></div>");
 	$(document.body).append("<div id='ModelDetails'></div>");
 	$('#ModelLibrary').append("<div id='ModelSearchResults'></div>");
@@ -285,14 +288,14 @@ function _3DRIntegration()
 			// return;
 		// }
 		
-		if(_Editor)
+		if(Editor)
 		{
-		pos = _Editor.GetInsertPoint();
+		pos = Editor.GetInsertPoint();
 		}
 		
-		pos[0] = _Editor.SnapTo(pos[0],_Editor.MoveSnap);
-		pos[1] = _Editor.SnapTo(pos[1],_Editor.MoveSnap);
-		pos[2] = _Editor.SnapTo(pos[2],_Editor.MoveSnap);
+		pos[0] = Editor.SnapTo(pos[0],Editor.MoveSnap);
+		pos[1] = Editor.SnapTo(pos[1],Editor.MoveSnap);
+		pos[2] = Editor.SnapTo(pos[2],Editor.MoveSnap);
 		
 		
 		if(_ModelLibrary.MetadataCache[pid].AnonymousDownloadAvailable)
@@ -311,7 +314,7 @@ function _3DRIntegration()
 					  DisplayName:_ModelLibrary.MetadataCache[pid].Title
 					  }
                     };
-		proto.properties.DisplayName = _Editor.GetUniqueName(proto.properties.DisplayName);			
+		proto.properties.DisplayName = Editor.GetUniqueName(proto.properties.DisplayName);			
 		//vwf_view.kernel.createNode(proto , null);
 		//vwf_view.kernel.createChild('index-vwf',GUID(),proto,null,null); 
 		vwf_view.kernel.createChild('index-vwf',_ModelLibrary.MetadataCache[pid].Title,proto,null,null);
@@ -461,5 +464,4 @@ function _3DRIntegration()
 		_Notifier.startWait('Searching...');
 	}
 	$('#ModelSearchButton').click(function(){_ModelLibrary.Search3DR()});
-}
-_ModelLibrary = new _3DRIntegration();
+}}});

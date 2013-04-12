@@ -1,9 +1,6 @@
-function PrimitiveEditor()
-{
-	
-	
-		
-	
+define({
+	initialize:function()
+	{
 	$(document.body).append("<div id='ShareWithDialog'> <select id='ShareWithNames'/> </div>");
 	$('#ShareWithDialog').dialog({title:"Share With User",autoOpen:false,moveable:false,modal:true,resizable:false,open:function()
 	{
@@ -779,5 +776,4 @@ function PrimitiveEditor()
 	$('#ScaleZ').change(this.scaleChanged.bind(this));
 	$('#RotationW').hide();
 }
-_PrimitiveEditor = new PrimitiveEditor();
-_PrimitiveEditor.hide();
+});

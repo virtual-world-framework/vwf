@@ -350,7 +350,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
             var node = this.nodes[nodeID];
 
-            return node.parent && node.parent.id || 0;
+            return node && node.parent && node.parent.id || 0;
         },
 
         // -- childrening --------------------------------------------------------------------------

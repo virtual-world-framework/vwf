@@ -104,7 +104,8 @@
 
 						if((currentmat[mapname] && currentmat[mapname].image && !currentmat[mapname].image.src.toString().endsWith(value.layers[i].src)) || !currentmat[mapname])
 						{
-							currentmat[mapname] = THREE.ImageUtils.loadTexture(value.layers[i].src);
+							currentmat[mapname] = _SceneManager.getTexture(value.layers[i].src);
+							//currentmat[mapname] = THREE.ImageUtils.loadTexture(value.layers[i].src);
 							
 						}
 						if(value.layers[i].mapInput == 0)

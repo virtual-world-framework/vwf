@@ -1,4 +1,5 @@
-function InventoryManager()
+define({
+	initialize:function()
 {
 	
 	$('#sidepanel').append("<div id='InventoryManager' class='ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
@@ -390,6 +391,6 @@ function InventoryManager()
     this.itemViewer.getSession().setMode("ace/mode/json");
 	this.itemViewer.setPrintMarginColumn(false);
 	this.itemViewer.setFontSize('15px');
-}
-_InventoryManager = new InventoryManager();
-_InventoryManager.hide();
+	this.hide();
+}});
+

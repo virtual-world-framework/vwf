@@ -167,6 +167,7 @@ scripts:
       
       var div = this.nametag;
       var pos = this.tbak;
+      if(!pos) return;
       pos = [pos[0],pos[1],pos[2]+1.620,1];
          
       var screen = MATH.mulMat4Vec4(viewprojection,pos);

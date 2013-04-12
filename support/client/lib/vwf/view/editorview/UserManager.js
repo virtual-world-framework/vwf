@@ -1,7 +1,5 @@
-
-
-
-function UserManager()
+define({
+	initialize:function()
 {
 	this.currentUsername = null;
 	$('#sidepanel').append("<div id='UserProfileWindow' class='ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
@@ -486,7 +484,7 @@ function UserManager()
 	}
 	}});
 	$('#SetProfileAvatar').val($("#SetProfileAvatar option:first").val());
-}
-_UserManager = new UserManager();
-$('#UserProfileWindow').hide();
-$('#Players').hide();
+	$('#UserProfileWindow').hide();
+	$('#Players').hide();
+}});
+
