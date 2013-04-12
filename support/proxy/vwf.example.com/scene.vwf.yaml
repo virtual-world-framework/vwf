@@ -38,11 +38,13 @@ properties:
           var cam = this.getChild( value );
           if ( cam ) {
              this.activeCameraComp = cam;
+             this.lastActiveCamera = this.activeCamera;
              this.activeCamera = value;
           }
         }        
       } else {
         if ( this.activeCamera != value ) {
+          this.lastActiveCamera = this.activeCamera;
           this.activeCamera = value;
           if ( this.getChild ) {
             var temp = this.getChild( value );
@@ -66,12 +68,19 @@ properties:
 
   backgroundColor: [ 0, 0, 0 ]
 
+methods:
+  getActiveCameraComp:
+  getChild:
+  getActiveCamera:
+  lastActiveCameraID:
+
 scripts:
 - |
     this.activeCameraComp = undefined;
     var scene = this;
     this.initialize = function() {
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
+      this.lastActiveCamera = this.activeCamera;
     }
     this.getChild = function( childName, startingNode ) {
       if(!startingNode) {
@@ -91,6 +100,12 @@ scripts:
       }
       //console.info( "WARNING: SCENE.getChild   CHILD NOT FOUND: " + childName );
       return undefined;
+    }
+    this.getActiveCameraComp = function() {
+      return this.activeCameraComp;
+    }
+    this.lastActiveCameraID = function() {
+      return this.lastActiveCamera;
     }
     this.getActiveCamera = function() {
       if ( !this.activeCameraComp ) {
