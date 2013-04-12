@@ -26,10 +26,6 @@ children:
     extends: http://vwf.example.com/node3.vwf
     source: landscape.dae
     type: model/vnd.collada+xml
-    properties:
-      rotation: [ 1, 0, 0, 0 ]
-      translation: [0,0,-100]
-      scale: [.001,.001,.001]
   dir1:
     extends: http://vwf.example.com/light.vwf
     implements:

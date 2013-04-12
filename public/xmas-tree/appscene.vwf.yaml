@@ -14,6 +14,7 @@
 --- 
 extends: http://vwf.example.com/physics2.vwf
 properties:
+  nodesCreated: 
   createCube: true
   cubesCreated: 0
   spheresCreated: 0
@@ -37,7 +38,6 @@ properties:
         this.tossSphereStrength = value;
       }   
     value: 250
-  nodesCreated: 
 methods:
   clear:
 scripts:
@@ -59,6 +59,7 @@ scripts:
         "mass": 400, 
         "linVelocityDamping": [ 1, 1, 1, 0 ], 
         "restitution": 0.10, 
+        "private": null,
         } 
       };
     var sphere = { 
@@ -73,12 +74,13 @@ scripts:
         "mass": 100, 
         "linVelocityDamping": [ 0.99, 0.99, 0.99, 0 ], 
         "restitution": 0.10, 
+        "private": null,
         } 
       };
     this.initialize = function() {
       this.nodesCreated = [];
-    }
-    this.keyDown = this.events.add( function( keyInfo ) {
+    }  
+    this.keyDown = function( keyInfo ) {
       var key = undefined;
       for ( var kd in keyInfo.keysDown ) {
         key = keyInfo.keysDown[kd];
@@ -86,27 +88,7 @@ scripts:
           this.createObject();
         }
       }
-    }, this );   
-    this.pointerDown = function( pointerInfo, pickInfo ) {
-      mouseIsDown = true;
-      mouseDownTime = this.time;
     }
-    this.pointerUp = function( pointerInfo, pickInfo ) {
-      mouseIsDown = false;
-      var now =  this.time;
-      //if ( now - mouseDownTime < 700 ) {
-      //  this.createObject();
-      //}
-      mouseDownTime = -1;
-    }
-    this.getCameraLook = function() {
-        var trans = goog.vec.Mat4.multVec4(
-          this.activeCameraComp.rotationMatrix,
-          goog.vec.Vec4.createFromValues( 1, 1, 1, 1 ),
-          goog.vec.Vec3.create()
-        );
-        return trans;      
-    } 
     this.clear = function(){
       if ( this.nodesCreated ) {
         var node;
@@ -171,4 +153,4 @@ scripts:
           }
         }
       }
-    }  //@ sourceURL=appScene.vwf
+    } //@ sourceURL=appscene.vwf

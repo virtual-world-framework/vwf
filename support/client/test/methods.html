@@ -55,7 +55,7 @@
 
           asyncTest( "Method invocation kernel", function() {
 
-            createFixture( function( nodeID ) {
+            createFixture( function( nodeID, cleanup ) {
 
               equal( vwf.callMethod( nodeID, "empty1" ), undefined, "Empty" );
               equal( vwf.callMethod( nodeID, "empty2" ), undefined, "Empty, as body" );
@@ -72,7 +72,9 @@
               equal( vwf.callMethod( nodeID, "oneParameter", [ "a" ] ), "a", "One parameter" );
               deepEqual( vwf.callMethod( nodeID, "twoParameters", [ "a", "b" ] ), [ "a", "extra", "b" ], "Two parameters" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -81,7 +83,7 @@
 
           asyncTest( "Method invocation JavaScript", function() {
 
-            createFixture( function( nodeID ) {
+            createFixture( function( nodeID, cleanup ) {
 
               equal( vwf.execute( nodeID, "this.empty1()" ), undefined, "Empty" );
               equal( vwf.execute( nodeID, "this.empty2()" ), undefined, "Empty, as body" );
@@ -98,7 +100,9 @@
               equal( vwf.execute( nodeID, "this.oneParameter( 'a' )" ), "a", "One parameter" );
               deepEqual( vwf.execute( nodeID, "this.twoParameters( 'a', 'b' )" ), [ "a", "extra", "b" ], "Two parameters" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -107,7 +111,7 @@
 
           asyncTest( "Method inheritance kernel", function() {
 
-            createFixtureDerivedBase( function( derivedID, baseID ) {
+            createFixtureDerivedBase( function( derivedID, baseID, cleanup ) {
 
               equal( vwf.callMethod( derivedID, "derived" ), "derived-" + derivedID, "derived method in derived" );
               equal( vwf.callMethod( derivedID, "base" ), "base-" + derivedID, "base method invoked on derived" );
@@ -115,7 +119,9 @@
               equal( vwf.callMethod( baseID, "derived" ), undefined, "derived method not visible in base" );
               equal( vwf.callMethod( baseID, "base" ), "base-" + baseID, "base method in base" );
               
+              cleanup();
               start();
+
             } );
 
           } );
@@ -124,7 +130,7 @@
 
           asyncTest( "Method inheritance JavaScript direct", function() {
 
-            createFixtureDerivedBase( function( derivedID, baseID ) {
+            createFixtureDerivedBase( function( derivedID, baseID, cleanup ) {
 
               equal( vwf.execute( derivedID, "this.derived()" ), "derived-" + derivedID, "derived method in derived" );
               equal( vwf.execute( derivedID, "this.base()" ), "base-" + derivedID, "base method invoked on derived" );
@@ -132,7 +138,9 @@
               equal( vwf.execute( baseID, "this.derived && this.derived()" ), undefined, "derived method not visible in base" );
               equal( vwf.execute( baseID, "this.base()" ), "base-" + baseID, "base method in base" );
               
+              cleanup();
               start();
+
             } );
 
           } );
@@ -141,7 +149,7 @@
 
           asyncTest( "Method inheritance JavaScript collection", function() {
 
-            createFixtureDerivedBase( function( derivedID, baseID ) {
+            createFixtureDerivedBase( function( derivedID, baseID, cleanup ) {
 
               equal( vwf.execute( derivedID, "this.methods.derived()" ), "derived-" + derivedID, "derived method in derived" );
               equal( vwf.execute( derivedID, "this.methods.base()" ), "base-" + derivedID, "base method invoked on derived" );
@@ -149,7 +157,9 @@
               equal( vwf.execute( baseID, "this.methods.derived && this.methods.derived()" ), undefined, "derived method not visible in base" );
               equal( vwf.execute( baseID, "this.methods.base()" ), "base-" + baseID, "base method in base" );
               
+              cleanup();
               start();
+
             } );
 
           } );
@@ -186,7 +196,9 @@
 
             }, undefined, function( nodeID ) {
 
-                callback( nodeID );
+                callback( nodeID, function() {
+                  vwf.deleteNode( nodeID );
+                } );
 
             } );
 
@@ -210,7 +222,10 @@
 
               }, function( derivedID ) {
 
-                callback( derivedID, baseID );
+                callback( derivedID, baseID, function() {
+                  vwf.deleteNode( derivedID );
+                  vwf.deleteNode( baseID );
+                } );
 
               } );
 

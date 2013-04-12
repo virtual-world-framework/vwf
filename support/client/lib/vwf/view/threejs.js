@@ -18,9 +18,20 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
     return view.load( module, {
 
-        initialize: function( rootSelector ) {
+        initialize: function( options ) {
+
+            this.pickInterval = 10;
+
+            if(typeof options == "object") {
+                this.rootSelector = options["application-root"];
+                if(options["experimental-pick-interval"]) {
+                    this.pickInterval = options["experimental-pick-interval"];
+                }
+            }
+            else {
+                this.rootSelector = options;
+            }
            
-            this.rootSelector = rootSelector;
             this.height = 600;
             this.width = 800;
             this.canvasQuery = null;
@@ -85,6 +96,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         function initScene( sceneNode ) {
     
         var self = this;
+        var lastPickTime = 0;
         var requestAnimFrame, cancelAnimFrame;
         (function() {
             var lastTime = 0;
@@ -153,14 +165,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 sceneNode.axes.updateMatrix();
             }
 
-            // Every tenth frame do a pick calculation
+            // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
             // Note: this is a costly operation and should be optimized if possible
-            if(sceneNode.frameCount > 10)
+            if((now - lastPickTime) > self.pickInterval)
             {
-                
                 sceneNode.frameCount = 0;
             
-                
                 var newPick = ThreeJSPick.call( self, mycanvas, sceneNode );
                 
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
@@ -185,7 +195,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     view.kernel.dispatchEvent( pickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                     hovering = true;
                 }
-                
+                lastPickTime = now;
             }
 
             renderer.render(scene,sceneNode.camera.threeJScameras[sceneNode.camera.ID]);

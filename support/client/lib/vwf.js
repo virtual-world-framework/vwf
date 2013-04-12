@@ -120,9 +120,6 @@
 
         this.now = 0;
 
-        //time slicing and keying off the sim clock, issue ticks at a set rate.
-        this.lastTick = 0;
-
         /// The moniker of the client responsible for an action. Will be falsy for actions
         /// originating in the server, such as time ticks.
         /// 
@@ -159,6 +156,13 @@
         /// @private
 
         this.private = {}; // for debugging
+
+        /// The application root ID.
+        /// 
+        /// @name module:vwf~applicationID
+
+        var applicationID = undefined;
+        var pendingApplicationID = undefined;
 
         /// Components describe the objects that make up the simulation. They may also serve as
         /// prototype objects for further derived components. External components are identified by
@@ -281,8 +285,8 @@
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [
-                    { library: "vwf/view/glge", parameters: "#vwf-root", active: false },
-                    { library: "vwf/view/threejs", parameters: "#vwf-root", active: false },
+                    { library: "vwf/view/glge", parameters: {"application-root":"#vwf-root"}, active: false },
+                    { library: "vwf/view/threejs", parameters: {"application-root":"#vwf-root"}, active: false },
                     { library: "vwf/view/document", active: true },
                     { library: "vwf/view/editor", active: true },
                     { library: "vwf/view/lesson", active: false},
@@ -325,21 +329,24 @@
                             userLibraries[libraryType] = {};
                         }
                         Object.keys(configLibraries[libraryType]).forEach(function(libraryName) {
-                            if(!userLibraries[libraryType][libraryName] || configLibraries[libraryType][libraryName]) {
-                                var disabled = false;
-                                if(requireArray[libraryName].disabledBy) {
-                                    for(var i=0; i<requireArray[libraryName].disabledBy.length; i++) {
-                                        Object.keys(userLibraries).forEach(function(userLibraryType) {
-                                            Object.keys(userLibraries[userLibraryType]).forEach(function(userLibraryName) {
-                                                if(requireArray[libraryName].disabledBy[i] == userLibraryName) {
-                                                    disabled = true;
-                                                }
-                                            })
+                            var disabled = false;
+                            if(requireArray[libraryName].disabledBy) {
+                                for(var i=0; i<requireArray[libraryName].disabledBy.length; i++) {
+                                    Object.keys(userLibraries).forEach(function(userLibraryType) {
+                                        Object.keys(userLibraries[userLibraryType]).forEach(function(userLibraryName) {
+                                            if(requireArray[libraryName].disabledBy[i] == userLibraryName) {
+                                                disabled = true;
+                                            }
                                         })
-                                    }
+                                    })
                                 }
-                                if(!disabled) {
-                                    userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];   
+                            }
+                            if(!disabled) {
+                                if(userLibraries[libraryType][libraryName] == undefined) {
+                                    userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];
+                                }
+                                else if(typeof userLibraries[libraryType][libraryName] == "object" && typeof configLibraries[libraryType][libraryName] == "object") {
+                                    userLibraries[libraryType][libraryName] = $.extend({}, configLibraries[libraryType][libraryName], userLibraries[libraryType][libraryName]);
                                 }
                             }
                         });
@@ -353,7 +360,13 @@
                             requireArray[libraryName].active = true;
                             initializers[libraryType][libraryName].active = true;
                             if(userLibraries[libraryType][libraryName] && userLibraries[libraryType][libraryName] != "") {
-                                initializers[libraryType][libraryName].parameters = userLibraries[libraryType][libraryName];
+                                if(typeof initializers[libraryType][libraryName].parameters == "object") {
+                                    initializers[libraryType][libraryName].parameters = $.extend({}, initializers[libraryType][libraryName].parameters,
+                                        userLibraries[libraryType][libraryName]);
+                                }
+                                else {
+                                    initializers[libraryType][libraryName].parameters = userLibraries[libraryType][libraryName];
+                                }
                             }
                             if(requireArray[libraryName].linkedLibraries) {
                                 for(var i=0; i<requireArray[libraryName].linkedLibraries.length; i++) {
@@ -905,15 +918,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 if ( this.now != fields.time ) {
                     this.client_ = undefined; // clear after the previous action
                     this.now = fields.time;
-					var time = fields.time - this.lastTick;
-					while(time > 0)
-					{	
-						this.tick();
-						time -= .053;
-					}
-					//save the leftovers
-					this.lastTick = fields.time - time;
-                    
+                    this.tick();
                 }
 
                 // Perform the action.
@@ -928,17 +933,10 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // Advance time to the most recent time received from the server. Tick if the time
             // advanced.
 
-            if ( queue.ready() && queue.time - this.lastTick > .053 ) {
+            if ( queue.ready() && this.now != queue.time ) {
                 this.client_ = undefined; // clear after the previous action
                 this.now = queue.time;
-				var time = queue.time - this.lastTick;
-					while(time > 0)
-					{	
-						this.tick();
-						time -= .053;
-					}
-					//save the leftovers
-					this.lastTick = queue.time - time;
+                this.tick();
             }
             
         };
@@ -1124,7 +1122,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Global node and descendant deltas.
 
                 nodes: [  // TODO: all global objects
-                    require( "vwf/utility" ).transform( this.getNode( this.find("", "/")[0], full ), require( "vwf/utility" ).transforms.transit ),
+                    require( "vwf/utility" ).transform( this.getNode( applicationID, full ), require( "vwf/utility" ).transforms.transit ),
                 ],
 
                 // Message queue.
@@ -1283,6 +1281,37 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 },
 
+                // Rudimentary support for `{ includes: prototype }`, which absorbs a prototype
+                // descriptor into the node descriptor before creating the node.
+
+                // Notes:
+                // 
+                //   - Only supports one level, so `{ includes: prototype }` won't work if the
+                //     prototype also contains a `includes` directive).
+                //   - Only works with prototype URIs, so `{ includes: { ... descriptor ... } }`
+                //     won't work.
+                //   - Loads the prototype on each reference, so unlike real prototypes, multiple
+                //     references to the same prototype cause multiple network loads.
+                // 
+                // Also see the `mergeDescriptors` limitations.
+
+                function( series_callback_async /* ( err, results ) */ ) {
+
+                    if ( componentIsDescriptor( nodeComponent ) && nodeComponent.includes && componentIsURI( nodeComponent.includes ) ) {
+
+                        var prototypeURI = nodeComponent.includes;
+
+                        loadComponent( prototypeURI, function( prototypeDescriptor ) /* async */ {
+                            nodeComponent = mergeDescriptors( nodeComponent, prototypeDescriptor ); // modifies prototypeDescriptor
+                            series_callback_async( undefined, undefined );
+                        } );
+
+                    } else {
+                        series_callback_async( undefined, undefined );
+                    }
+
+                },
+
                 // If nodeComponent is a descriptor, construct and get the ID.
 
                 function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is a descriptor or an ID
@@ -1392,6 +1421,12 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             this.models.forEach( function( model ) {
                 model.deletingNode && model.deletingNode( nodeID );
             } );
+
+            // Clear the root ID if the application root node is deleted.
+
+            if ( nodeID === applicationID ) {
+                applicationID = undefined;
+            }
 
             // Call deletedNode() on each view. The view is being notified that a node has been
             // deleted.
@@ -1783,46 +1818,12 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // of the descriptor. An existing ID is used when synchronizing to state drawn from
             // another client or to a previously-saved state.
 
-var useLegacyID = [  // TODO: fix static ID references and remove
-    // use the legacy ID scheme except for nodes with these names, ...
-    // "...",
-    "material",
-    "material1",
-    "material2",
-    "material3",
-    "material4", 
-    "media", 
-    "plane", 
-    "border", 
-    "button", 
-    "window", 
-    "controlBar", 
-    "titlebar", 
-    "closeButton", 
-    "minButton", 
-    "maxButton", 
-    "glgeObj1",
-    "bone1",
-    "bone3",
-    "Scene",
-    "Tank",
-    "playerModel",
-    "laserModel",
-    "laserParticle"
-].indexOf( childName ) < 0 && [
-    // ... or with these URIs, ...
-    "http://vwf.example.com/node.vwf",
-].indexOf( childURI ) < 0 &&
-    // ... but not for tests
-    require.toUrl( "dummy" ).indexOf( "../lib/" ) != 0;
-
-useLegacyID = childURI &&
-    ( childURI == "index.vwf" || childURI == "appscene-vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
+var useLegacyID = childURI &&
+    ( childURI == "index.vwf" || childURI == "appscene.vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
     childURI != "http://vwf.example.com/node.vwf";
     
 useLegacyID = useLegacyID ||
-    // work around model/glge creating a camera on a not-initialized application node
-    nodeID == this.find("", "/")[0] && ! this.models.object.objects[nodeID] && childName == "camera";
+    nodeID == applicationID && childName == "camera"; // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 var childID = childComponent.id;
@@ -1843,9 +1844,39 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
 }
             }
 
+            // Record the application root ID. The application is the first (global) node created.
+            // The application node is recognized here but recorded as pending. Then, after its
+            // dependencies are loaded, it is registered just as its `creatingNode` calls are sent.
+
+            if ( ! applicationID && ! pendingApplicationID ) {
+                pendingApplicationID = childID;
+            }
+
             var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
 
             async.series( [
+
+                // Rudimentary support for `{ includes: prototype }`, which absorbs a prototype
+                // descriptor into the child descriptor before creating the child.
+
+                // See the notes in `createNode` and the `mergeDescriptors` limitations.
+
+                function( series_callback_async /* ( err, results ) */ ) {
+
+                    if ( componentIsDescriptor( childComponent ) && childComponent.includes && componentIsURI( childComponent.includes ) ) {
+
+                        var prototypeURI = childComponent.includes;
+
+                        loadComponent( prototypeURI, function( prototypeDescriptor ) /* async */ {
+                            childComponent = mergeDescriptors( childComponent, prototypeDescriptor ); // modifies prototypeDescriptor
+                            series_callback_async( undefined, undefined );
+                        } );
+
+                    } else {
+                        series_callback_async( undefined, undefined );
+                    }
+
+                },
 
                 function( series_callback_async /* ( err, results ) */ ) {
 
@@ -1910,8 +1941,25 @@ if ( ! childComponent.source ) {
 
                 function( series_callback_async /* ( err, results ) */ ) {
 
-                    // Call creatingNode() on each model. The node is considered to be constructed after
-                    // each model has run.
+                    // Register the node as the application root if it was recognized as such
+                    // earlier.  // TODO: this would be better if made more explicit from the caller (possibly using a special `childName` marker, but that would require the "this is the application" annotation to pass through `createNode`; since `createNode` and `createChild` should probably merge to simplify the patches: and includes: support, this can wait)
+
+                    if ( childID === pendingApplicationID ) {
+                        applicationID = childID;
+                        pendingApplicationID = undefined;
+                    }
+
+                    // As a special case, since many kernel functions delegate to vwf/model/object,
+                    // call it first so that those functions will be available to the other drivers.
+                    // vwf/model/object is the last model driver, so relying on the normal order for
+                    // `creatingNode` would prevent other drivers from asking about prototypes and
+                    // other node information in their `creatingNode` handlers.
+
+                    vwf.models.object.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                        childComponent.source, childComponent.type, childURI, childName );  // TODO: return node metadata to the kernel and use vwf/model/object just as a property store?
+
+                    // Call creatingNode() on each model. The node is considered to be constructed
+                    // after each model has run.
 
                     async.forEachSeries( vwf.models, function( model, each_callback_async /* ( err ) */ ) {
 
@@ -2926,6 +2974,17 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return this.moniker_;
         };
 
+        // -- application --------------------------------------------------------------------------
+
+        /// @name module:vwf.application
+        /// 
+        /// @see {@link module:vwf/api/kernel.application}
+
+        this.application = function( initializedOnly ) {
+            return applicationID && ( ! initializedOnly || this.models.object.initialized( applicationID ) ) ?
+                applicationID : undefined;
+        };
+
         // -- intrinsics ---------------------------------------------------------------------------
 
         /// @name module:vwf.intrinsics
@@ -2972,15 +3031,27 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// 
         /// @see {@link module:vwf/api/kernel.prototypes}
 
-        this.prototypes = function( nodeID ) {
+        this.prototypes = function( nodeID, includeBehaviors ) {
 
             var prototypes = [];
+
+            if ( includeBehaviors ) {
+                var b = [].concat( this.behaviors( nodeID ) );
+                Array.prototype.push.apply( prototypes, b.reverse() );
+            }
 
             nodeID = this.prototype( nodeID );
 
             while ( nodeID ) {
+
                 prototypes.push( nodeID );
                 nodeID = this.prototype( nodeID );
+
+                if ( nodeID && includeBehaviors ) {
+                    var b = [].concat( this.behaviors( nodeID ) );
+                    Array.prototype.push.apply( prototypes, b.reverse() );
+                }
+
             }
 
             return prototypes;
@@ -3002,15 +3073,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// 
         /// @see {@link module:vwf/api/kernel.ancestors}
 
-        this.ancestors = function( nodeID ) {
+        this.ancestors = function( nodeID, initializedOnly ) {
 
             var ancestors = [];
 
-            nodeID = this.parent( nodeID );
+            nodeID = this.parent( nodeID, initializedOnly );
 
             while ( nodeID && nodeID !== 0 ) {
                 ancestors.push( nodeID );
-                nodeID = this.parent( nodeID );
+                nodeID = this.parent( nodeID, initializedOnly );
             }
 
             return ancestors;
@@ -3022,8 +3093,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// 
         /// @see {@link module:vwf/api/kernel.parent}
 
-        this.parent = function( nodeID ) {
-            return this.models.object.parent( nodeID );
+        this.parent = function( nodeID, initializedOnly ) {
+            return this.models.object.parent( nodeID, initializedOnly );
         };
 
         // -- children -----------------------------------------------------------------------------
@@ -3069,9 +3140,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// @name module:vwf.find
         ///
         /// @param {ID} nodeID
-        ///   The reference node. Relative patterns are resolved with respect to this node.
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
         /// @param {String} matchPattern
         ///   The search pattern.
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
         /// @param {Function} [callback]
         ///   A callback to receive the search results. If callback is provided, find invokes
         ///   callback( matchID ) for each match. Otherwise the result is returned as an array.
@@ -3081,9 +3157,25 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// 
         /// @see {@link module:vwf/api/kernel.find}
 
-        this.find = function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
+        this.find = function( nodeID, matchPattern, initializedOnly, callback /* ( matchID ) */ ) {
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
+            // Interpret `find( nodeID, matchPattern, callback )` as
+            // `find( nodeID, matchPattern, undefined, callback )`. (`initializedOnly` was added in
+            // 0.6.8.)
+
+            if ( typeof initializedOnly == "function" || initializedOnly instanceof Function ) {
+                callback = initializedOnly;
+                initializedOnly = undefined;
+            }
+
+            // Evaluate the expression, using the application as the root and the provided node as
+            // the reference.
+
+            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
+                this.application( initializedOnly ), nodeID, resolverWithInitializedOnly, this );
+
+            // Return the result, either by invoking the callback when provided, or returning the
+            // array directly.
 
             if ( callback ) {
 
@@ -3094,7 +3186,12 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             } else {  // TODO: future iterator proxy
 
                 return matchIDs;
+            }
 
+            // Wrap `xpathResolver` to pass `initializedOnly` through.
+
+            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
+                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
             }
 
         };
@@ -3104,24 +3201,41 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// @name module:vwf.test
         /// 
         /// @param {ID} nodeID
-        ///   The reference node. Relative patterns are resolved with respect to this node.
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
         /// @param {String} matchPattern
         ///   The search pattern.
         /// @param {ID} testID
         ///   A node to test against the pattern.
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
         /// 
         /// @returns {Boolean}
         ///   true when testID matches the pattern.
         /// 
-        /// @see {@link module:vwf/api/kernel.createNode}
+        /// @see {@link module:vwf/api/kernel.test}
 
-        this.test = function( nodeID, matchPattern, testID ) {
+        this.test = function( nodeID, matchPattern, testID, initializedOnly ) {
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
+            // Evaluate the expression, using the application as the root and the provided node as
+            // the reference.
+
+            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
+                this.application( initializedOnly ), nodeID, resolverWithInitializedOnly, this );
+
+            // Search for the test node in the result.
 
             return matchIDs.some( function( matchID ) {
                 return matchID == testID;
             } );
+
+            // Wrap `xpathResolver` to pass `initializedOnly` through.
+
+            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
+                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
+            }
 
         };
 
@@ -3853,10 +3967,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// @param {Object} step
         /// @param {ID} contextID
         /// @param {Boolean} [resolveAttributes]
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
         /// 
         /// @returns {ID[]}
 
-        var xpathResolver = function( step, contextID, resolveAttributes ) {
+        var xpathResolver = function( step, contextID, resolveAttributes, initializedOnly ) {
 
             var resultIDs = [];
 
@@ -3867,15 +3985,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                 case "ancestor-or-self":
                     resultIDs.push( contextID );
-                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID ) );
+                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID, initializedOnly ) );
                     break;
 
                 case "ancestor":
-                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID ) );
+                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID, initializedOnly ) );
                     break;
 
                 case "parent":
-                    var parentID = this.parent( contextID );
+                    var parentID = this.parent( contextID, initializedOnly );
                     parentID && resultIDs.push( parentID );
                     break;
 
@@ -3989,7 +4107,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             }
 
             var matches_type = ! type || this.uri( nodeID ) == type ||
-                this.prototypes( nodeID ).some( function( prototypeID ) {
+                this.prototypes( nodeID, true ).some( function( prototypeID ) {
                     return this.uri( prototypeID ) == type;
             }, this );
 
@@ -4020,6 +4138,93 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             }
 
         }
+
+        /// Merge two component descriptors into a single descriptor for a combined component. A
+        /// component created from the combined descriptor will behave in the same way as a
+        /// component created from `nodeDescriptor` that extends a component created from
+        /// `prototypeDescriptor`.
+        ///
+        /// Warning: this implementation modifies `prototypeDescriptor`.
+        ///
+        /// @name module:vwf~mergeDescriptors
+        ///
+        /// @param {Object} nodeDescriptor
+        ///   A descriptor representing a node extending `prototypeDescriptor`.
+        /// @param {Object} prototypeDescriptor
+        ///   A descriptor representing a prototype for `nodeDescriptor`.
+
+        // Limitations:
+        // 
+        //   - Doesn't merge children from the prototype with like-named children in the node.
+        //   - Doesn't merge property setters and getters from the prototype when the node provides
+        //     an initializing value.
+        //   - Methods from the prototype descriptor are lost with no way to invoke them if the node
+        //     overrides them.
+        //   - Scripts from both the prototype and the node are retained, but if both define an
+        //     `initialize` function, the node's `initialize` will overwrite `initialize` in
+        //     the prototype.
+        //   - The prototype doesn't carry its location with it, so relative paths will load with
+        //     respect to the location of the node.
+
+        var mergeDescriptors = function( nodeDescriptor, prototypeDescriptor ) {
+
+            if ( nodeDescriptor.implements ) {
+                prototypeDescriptor.implements = ( prototypeDescriptor.implements || [] ).
+                    concat( nodeDescriptor.implements );
+            }
+
+            if ( nodeDescriptor.source ) {
+                prototypeDescriptor.source = nodeDescriptor.source;
+                prototypeDescriptor.type = nodeDescriptor.type;
+            }
+
+            if ( nodeDescriptor.properties ) {
+
+                prototypeDescriptor.properties = prototypeDescriptor.properties || {};
+
+                for ( var propertyName in nodeDescriptor.properties ) {
+                    prototypeDescriptor.properties[propertyName] = nodeDescriptor.properties[propertyName];
+                }
+
+            }
+
+            if ( nodeDescriptor.methods ) {
+
+                prototypeDescriptor.methods = prototypeDescriptor.methods || {};
+
+                for ( var methodName in nodeDescriptor.methods ) {
+                    prototypeDescriptor.methods[methodName] = nodeDescriptor.methods[methodName];
+                }
+
+            }
+
+            if ( nodeDescriptor.events ) {
+
+                prototypeDescriptor.events = prototypeDescriptor.events || {};
+
+                for ( var eventName in nodeDescriptor.events ) {
+                    prototypeDescriptor.events[eventName] = nodeDescriptor.events[eventName];
+                }
+
+            }
+
+            if ( nodeDescriptor.children ) {
+
+                prototypeDescriptor.children = prototypeDescriptor.children || {};
+
+                for ( var childName in nodeDescriptor.children ) {
+                    prototypeDescriptor.children[childName] = nodeDescriptor.children[childName];
+                }
+
+            }
+
+            if ( nodeDescriptor.scripts ) {
+                prototypeDescriptor.scripts = ( prototypeDescriptor.scripts || [] ).
+                    concat( nodeDescriptor.scripts );
+            }
+
+            return prototypeDescriptor;
+        };
 
         // == Private variables ====================================================================
 

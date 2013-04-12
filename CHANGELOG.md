@@ -2,8 +2,122 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
-
+0.6.6
+----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change.
+
+- CHG: Remove unneeded lines from humvee-lesson. Refs #1684.
+- NEW: Add lesson sequence for 'entering vehicle' task component. Fixes #1689.
+- CHG: Fix bugs relating to instruction and progress bar progression for multiple levels of tasks. Refs #1684.
+- CHG: Update lesson view driver to allow for multiple levels of tasks. Create test/lesson application to show down to five levels. Fixes #1708.
+- NEW: This commit fixes #1719 - moved the 7z package to our own production servers and reference the download from this location.
+- NEW: Add configuration file to lesson application to pull in lesson view driver. Fixes #1709.
+- CHG: Update lesson cookbook recipe to use lesson view driver instead of the html overlay. Fixes # 1709.
+- CHG: Add comments for event cookbook recipe. Hide link to events recipe until it's completed.
+- CHG: Trap the WebSocketError from em-websocket when the connection is closing. References #1209, #1640, #1710.
+- CHG: Fixes null reference crash on method serialization
+- CHG: Fix missing image files error, and remove dependency on jquery file. Refs #1639.
+- CHG: Task #1706 css/js path for documentation referencing incorrect relative path. Missing image files for JQuery UI.
+- CHG: Add lesson view driver to autogenerate the lesson UI. Update lesson and humvee-lesson app to use the new driver, and add a driver configuration file to each. Fixes #1608 and #1639.
+- CHG: Updating rack to the currently supported rails version for servers running rails applications with VWF.
+- NEW: Add humvee lesson template for GameTech tutorial.
+- CHG: Update .gitignore after the switch from Ruby 1.8.7 to 1.9.3. For the Windows stand-alone build. 
+- CHG: Added support to kernel to serialize methods in getNode. This commit fixes #1659
+- CHG: Reset progress bar width on start lesson.
+
+----------------------------------
+0.6.5
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+- CHG: Separate requesting the config file from the initialize call, so apps will still work even if the request fails
+- CHG: Fix tests broken by calling loadConfiguration in index.html instead of initialize
+- CHG: Fix tests broken by moving the application parameter parsing out of the kernel
+- CHG: Add driver config file for xmas-tree app
+- NEW: Add touch driver to driver configuration options
+- NEW*: Add ability to load configuration files to specify necessary drivers. Add sample configuration file in physics.
+- CHG*: Move searching the query string for an application specification out of the kernel and into index.html
+- CHG*:  Use "library" instead of "driver" to describe javascripts loaded before initialize
+- NEW: Add comments to loadDriverConfiguration
+- NEW: Move the driver configuration logic inside the kernel. Only the URL parsing stays in index.html.
+- NEW*: Add threejs driver to driver configuration options
+- CHG: Change index.html to keep a list of drivers in the correct order, with specific drivers enabled or disabled in the list based on URL parameters
+- CHG: Fix adl/hwmvee game to work with driver configuration changes
+- CHG: Update catalog page to use new URL parameters for selecting drivers
+- CHG: Update index.html to use URL parameters to determine what drivers to load
+- CHG: Rename google earth driver to google-earth.js
+- CHG: Change connected parameter to google-earth for loading the google earth driver
+- CHG: Update the lesson cookbook recipe with full UI information. Fixes #1599.
+- NEW: Update to downloads page for automated zip distribution of master branch builds.
+- CHG: Tweak the logging and debugging recipe. Fixes #1602.
+- NEW: Add first draft of the logging and debugging recipe to the cookbook.
+- NEW: Add progress bar and navigation buttons to lesson UI.
+- CHG: Switch the Gemfile source from `https` to `http`.
+- CHG: Make lesson/task move the camera's world transform to the proper place. It has been moving its transform to the cameraPose's transform, instead of moving it's worldTransform to the cameraPose's worldTransform - fixes #1456
+- CHG: Add check in node3.worldTransformTo for when parent is not a node3 fixes #1447
+- NEW: Add transformBy, worldTransformBy, and worldTransformTo to node3
+- NEW: Also added public/test/transformTo so we can regression test future changes
+- NEW: Add basic UI to a lesson to show task instructions. Update lesson recipe to match. Refs #1603 and #1599 and fixes #1627.
+- CHG: Switch the Windows standalone build to Ruby 1.9.3. Fixes the `illegal switch in RUBYOPT: -"` error when launching `run.bat`. Bundler 1.3 is not compatible with Ruby 1.8 on Windows. Fixes #1630, references #1559.
+- CHG: Allow subdirectory files in vwf.example.com to generate source files for jsdoc. 
+- NEW: Add first draft of lesson recipe.
+
+----------------------------------
+0.6.4.1
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+- CHG: Update to application.rb file to fix fatal crash caused by eventmachine
+
+----------------------------------
+0.6.4
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+- CHG: Switch `source` from :rubygems to "https://rubygems.org".
+- NEW: Add compliance page to the website to define what it means to use the framework.
+- CHG: Fix part of lesson synch problem by making taskIndex a property
+- NEW: Add first draft of complex transformation recipe to cookbook.
+- CHG: Change task property for scene node to be scenePath. This avoids replication problems w/ node properties
+- CHG*: Add scene property to task component. It need only be set on the top node, and it will recursively cascade to all its children tasks.
+- CHG: Update pitfalls doc
+- NEW: Add chat and sound recipes to the cookbook.
+- CHG: Update OrientationCubeYUp.dae to convert -Y to Z.
+- CHG: Update OrientationCubeYUp.dae to convert -Y to Z.
+- NEW: Add OrientationCubeYUp.dae.
+- CHG: Update lesson to work with new lesson/task component
+- CHG: Add comments to task component
+- CHG: Have task component use methods instead of events where appropriate
+- NEW: Add two new cookbook templates for complex transforms and event system.
+- CHG: Update login dialog to select an existing user or create a new one. Allow for multiplayer persistence.
+- CHG: Fix documentation menu spacing issue for IE8 and correct typo in FAQ page.
+- CHG*:  Add transformTo to node3
+- CHG:  Add event handling pitfall to Pitfalls page
+- CHG:  Add to-do comment to lesson app
+
+0.6.3
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+- CHG: Add note that driver-level queries w/ an absolute path do not require a nodeId as the first parameter - undefined may be passed instead.
+- NEW: Rename hammer.js directory to touch to match driver name.
+- NEW: Add hammer.js library, touch component, and view driver.
+- NEW: Update navscene applications to use touch interface as well.
+- CHG: Increase max nesting in json parse for bzflag persistence.
+- NEW: Lesson and Instruction components for a simple linear lesson
+- CHG: Fix errors in query documentation - there are still more to be fixed
+- CHG: Revert lesson recipe that inadvertently got checked in mid-progress
+- CHG: Add error check for case when "find()" returns no results. Previously, this had errored out because find() tried to call map() directly on the results
+- NEW: First draft of lesson cookbook recipe (not fully functional, yet)
+- CHG: Change lesson and instruction components
+- CHG: Added a lesson application to test
+- NEW: Updated information for VWF branches, and provided link to VWF Forum topic posting on branching.
+- NEW: Updated expected dates for cookbook recipes
+- NEW: Add Pitfalls link to the left side of doc web pages
+- NEW: Add pitfalls.md for documentation of best practices and pitfalls to avoid
+- CHG: Fix google earth bug to use cameraData from model on application load if available.
+- CHG: Update module declaration and comment style for JSDoc 3.
+
 0.6.2
 ----------------------------------------------------------------------------------------------------
 - BUG: Fix bug that overrides the glge color with vwf color.
