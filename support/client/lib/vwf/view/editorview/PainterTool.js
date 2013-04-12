@@ -22,16 +22,23 @@ function PainterTool()
 	$('#PainterToolGUItitle').prepend('<img class="headericon" src="../vwf/view/editorview/images/icons/inventory.png" />');	
 	$('#PainterToolGUI').css('border-bottom','5px solid #444444')
 	$('#PainterToolGUI').css('border-left','2px solid #444444')
-		
+	$('#PainterToolGUITexture').attr('src','./vwfDataManager.svc/texture?UID=checker.jpg');
 	$('#paintertoolclose').click(function(){_PainterTool.hide()});
 	
+	this.display = new THREE.Mesh(new THREE.CubeGeometry(1,1,1),new THREE.MeshLambertMaterial());
+	
+	this.display.InvisibleToCPUPick = true;
+	this.display.material.wireframe = false;
+	this.display.material.opacity = .25;
+	this.display.material.transparent = true;
+	this.display.material.map = _SceneManager.getTexture('./vwfDataManager.svc/texture?UID=checker.jpg');
 	$('#PainterToolGUIChooseBlock').click(function()
 	{
 		_MapBrowser.setTexturePickedCallback(function(e)
 		{
 			this.nodeProto.properties.materialDef.layers[0].src = e;
 			$('#PainterToolGUITexture').attr('src',e);
-			
+			this.display.material.map = _SceneManager.getTexture(e);
 			_MapBrowser.hide();
 		}.bind(this));
 		_MapBrowser.show();
@@ -45,11 +52,13 @@ function PainterTool()
 		{
 			_Editor.addTool('Painter',_PainterTool);
 			_Editor.setActiveTool('Painter');
+			_dScene.add(_PainterTool.display);
 		}
 		else
 		{
 			
 			_Editor.setActiveTool('Gizmo');
+			_dScene.remove(_PainterTool.display);
 		}
 	})
 	
@@ -216,67 +225,22 @@ function PainterTool()
 		
 		if(e.button != 0) return;
 		
-		var c = _Editor.findcamera();
-		var campos = [c.position.x,c.position.y,c.position.z];
-		var pick = _Editor.ThreeJSPick(campos,_Editor.GetWorldPickRay(e),{filter:function(o){ return o.isAvatar != true;}});
 		
-		if(pick && pick.object)
-		{
-			if(pick.object.name == 'GroundPlane')
-				return;
-				
 			var t = _DataManager.getCleanNodePrototype(this.nodeProto);
 			if(!t.properties)
 				t.properties = {};
 			t.properties.owner = _UserManager.GetCurrentUserName();
-			var pos = new THREE.Vector3();
-			pos.getPositionFromMatrix(pick.object.matrixWorld);
-			var bounds = pick.object.getBoundingBox();
-			var norm = pick.norm;
+		
 			
-			
-			if(norm[0] == -1)
-			{
-				pos.x += bounds.min.x;
-				pos.x += (this.protoBounds.min.x);
-			}
-			if(norm[0] == 1)
-			{
-				pos.x += bounds.max.x;
-				pos.x += (this.protoBounds.max.x);
-			}
-			
-			if(norm[1] == -1)
-			{
-				pos.y += bounds.min.y;
-				pos.y += (this.protoBounds.min.y);
-			}
-			if(norm[1] == 1)
-			{
-				pos.y += bounds.max.y;
-				pos.y += (this.protoBounds.max.y);
-			}
-			
-			if(norm[2] == -1)
-			{
-				pos.z += bounds.min.z;
-				pos.z += (this.protoBounds.min.z);
-			}
-			if(norm[2] == 1)
-			{
-				pos.z += bounds.max.z;
-				pos.z += (this.protoBounds.max.z);
-			}
-			
-			t.properties.transform[12] = pos.x;
-			t.properties.transform[13] = pos.y;
-			t.properties.transform[14] = pos.z;
+			t.properties.transform[12] = this.display.position.x;
+			t.properties.transform[13] = this.display.position.y;
+			t.properties.transform[14] = this.display.position.z;
 		
 			t.properties.DisplayName = _Editor.GetUniqueName(t.properties.DisplayName);
 			
 			_Editor.createChild('index-vwf',GUID(),t,null,null); 
 			
-		}
+		this.mousemove(e);
 	}
 	this.mousedown = function(e)
 	{
@@ -293,6 +257,67 @@ function PainterTool()
 	}
 	this.mousemove = function(e)
 	{
+		
+		var c = _Editor.findcamera();
+		var campos = [c.position.x,c.position.y,c.position.z];
+		var pick = _Editor.ThreeJSPick(campos,_Editor.GetWorldPickRay(e),{filter:function(o){ return o.isAvatar != true;}});
+		
+		
+		if(pick && pick.object)
+		{
+			if(pick.object.name == 'GroundPlane')
+				return;
+
+			var pos = new THREE.Vector3();
+			pos.getPositionFromMatrix(pick.object.matrixWorld);
+			var bounds = pick.object.getBoundingBox();
+			var norm = pick.norm;
+			
+			if(_PainterTool.currentClickCallback != _PainterTool.deleteObject)
+			{
+				if(norm[0] == -1)
+				{
+					pos.x += bounds.min.x;
+					pos.x += (this.protoBounds.min.x);
+				}
+				if(norm[0] == 1)
+				{
+					pos.x += bounds.max.x;
+					pos.x += (this.protoBounds.max.x);
+				}
+				
+				if(norm[1] == -1)
+				{
+					pos.y += bounds.min.y;
+					pos.y += (this.protoBounds.min.y);
+				}
+				if(norm[1] == 1)
+				{
+					pos.y += bounds.max.y;
+					pos.y += (this.protoBounds.max.y);
+				}
+				
+				if(norm[2] == -1)
+				{
+					pos.z += bounds.min.z;
+					pos.z += (this.protoBounds.min.z);
+				}
+				if(norm[2] == 1)
+				{
+					pos.z += bounds.max.z;
+					pos.z += (this.protoBounds.max.z);
+				}
+			}else
+			{
+			
+			}
+			
+			this.display.position = pos.clone();
+			this.display.updateMatrixWorld();
+		}
+		
+		
+		
 		
 	}
 	this.mousewheel = function(e)
