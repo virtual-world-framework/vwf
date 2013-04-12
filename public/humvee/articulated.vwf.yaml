@@ -371,7 +371,7 @@ children:
       intensity: 1
       color: [ 255, 255, 255 ]
       castShadows: false
-      #specular: false # the highlights are way too hot (materials or light?)
+      specular: false # the highlights are way too hot (materials or light?)
       rotation: [ 1, 0, 0, -10 ]
   dir2:
     extends: http://vwf.example.com/light.vwf
@@ -383,7 +383,7 @@ children:
       intensity: 1
       color: [ 255, 255, 255 ]
       castShadows: false
-      #specular: false # the highlights are way too hot (materials or light?)
+      specular: false # the highlights are way too hot (materials or light?)
       rotation: [ -1, 0, 0, 200 ]
 scripts:
 - |
