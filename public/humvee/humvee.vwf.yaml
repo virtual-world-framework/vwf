@@ -1691,7 +1691,3 @@ children:
     children: 
       material: 
         extends: http://vwf.example.com/material.vwf 
-  Omni001: 
-    extends: http://vwf.example.com/node3.vwf 
-  EnvironmentAmbientLight: 
-    extends: http://vwf.example.com/node3.vwf 

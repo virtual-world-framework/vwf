@@ -47,14 +47,7 @@ children:
 scripts:
 - |
   this.initialize = function() {
-    this.camera.translation = this.lesson.cameraPose1.translation;
-    this.camera.rotation = this.lesson.cameraPose1.rotation;
+    this.camera.translation = this.lesson.cameraPoseEnteringVehicle.translation;
+    this.camera.rotation = this.lesson.cameraPoseEnteringVehicle.rotation;
     this.camera.far = 3000;
-  }
-  this.keyDown = function( params ) {
-    console.info( "onKeyDown" );
-    this.humvee.onKeyDown( params );
-  }
-  this.keyUp = function( params ) {
-    this.humvee.onKeyUp( params );
-  }  //@ sourceURL=index.vwf
+  } //@ sourceURL=index.vwf

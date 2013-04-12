@@ -20,7 +20,7 @@ children:
     extends: http://vwf.example.com/lesson/task.vwf
     properties:
       text: "1.0 Enter the Vehicle"
-      cameraPoseRef: /lesson/cameraPose1
+      cameraPoseRef: /lesson/cameraPoseEnteringVehicle
     children:
       walkToVehicle:
         extends: http://vwf.example.com/lesson/task.vwf
@@ -93,7 +93,7 @@ children:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
           text: "1.4 Close vehicle door"
-          cameraPoseRef: /lesson/cameraPose14
+          cameraPoseRef: /lesson/cameraPoseDriversSeat
         children:
           closeDoorInstructions:
             extends: http://vwf.example.com/lesson/task.vwf
@@ -122,7 +122,7 @@ children:
     extends: http://vwf.example.com/lesson/task.vwf
     properties:
       text: "2.0 Start the Engine"
-      cameraPoseRef: /lesson/cameraPose2
+      cameraPoseRef: /lesson/cameraPoseStartingEngine
     children:
       moveIgnitionToRun:
         extends: http://vwf.example.com/lesson/task.vwf
@@ -198,13 +198,12 @@ children:
     extends: http://vwf.example.com/lesson/task.vwf
     properties:
       text: "3.0 Drive Vehicle"
-      cameraPoseRef: /lesson/cameraPose3
+      cameraPoseRef: /lesson/cameraPoseTranmission
     children:
       moveToDrive:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
           text: "3.1 Move transmission to drive"
-          cameraPoseRef: /lesson/cameraPose31
         children:
           moveToDriveInstructions:
             extends: http://vwf.example.com/lesson/task.vwf
@@ -251,72 +250,71 @@ children:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
           text: "3.3 Drive vehicle forward"
-          cameraPoseRef: /lesson/driveLocalPosition
+          cameraPoseRef: /lesson/cameraPoseDriving
         children:
           moveVehicleInstructions:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
-              text: "" 
+              text: "Press the 'G' key to simulate gas pedal interaction to drive the vehicle forward." 
             scripts:
             - |
               this.entering = function() {
-                // UPDATE
+                this.logger.info( "Step: Drive Vehicle" );
+                var complete = false;
+                var app = this.parent.parent.parent.parent;
+                app.keyDown = this.events.add( function(e) {
+                  var kd = $.extend(true, {}, e.keysDown, e.keysUp);
+                  for ( var keyPress in kd ) {
+                    if (Number( kd[ keyPress ].code == 71)) // G
+                    {
+                      app.camera.translation = [ app.camera.translation[0] - 10, app.camera.translation[1], app.camera.translation[2] ];
+                      app.humvee.translation = [ app.humvee.translation[0] - 10, app.humvee.translation[1], app.humvee.translation[2] ];
+                      if(!complete)
+                      {
+                        this.logger.info( "Step: Drive Vehicle - Completed" );
+                        this.completed();
+                        complete = true;
+                      }
+                    }
+                  }
+                }, this );
               } //@ sourceURL=moveVehicleTask.vwf
-        scripts:
-        - |
-          this.cameraTransformComplete = function() {
-            // Switch cameras here
-            var hv = this.find( "/humvee" )[ 0 ];
-            hv.mode = "drive";
-          } //@ sourceURL=moveVehicleTask.vwf
-  cameraPose1:
+  cameraPoseEnteringVehicle:
     extends: http://vwf.example.com/node3.vwf
     properties:
       translation: [ 150, -360, 74 ]
       rotation: [ 0, 0, 1, 30 ]
-  cameraPose14:
+  cameraPoseDriversSeat:
     extends: http://vwf.example.com/node3.vwf
-  cameraPose2:
+  cameraPoseStartingEngine:
     extends: http://vwf.example.com/node3.vwf
-  cameraPose3:
+  cameraPoseTranmission:
     extends: http://vwf.example.com/node3.vwf
-  cameraPose31:
-    extends: http://vwf.example.com/node3.vwf
-  driveLocalPosition:
+  cameraPoseDriving:
     extends: http://vwf.example.com/node3.vwf
 scripts:
 - |
   this.initialize = function() {
-    this.cameraPose14.transform = [-0.8957634568214417,0.44452738761901855,0,0,
+    this.cameraPoseDriversSeat.transform = [-0.8957634568214417,0.44452738761901855,0,0,
       -0.44452738761901855,-0.8957634568214417,0,0,
       0,0,1,0,
       -14.165600776672363,-7.067508220672607,75,1];
 
-    this.cameraPose2.transform = [ 
+    this.cameraPoseStartingEngine.transform = [ 
       -0.4162047505378723,0.9092690348625183,0,0,
       -0.9092690348625183,-0.4162047505378723,0,0,
       0,0,1,0,
       -6.781380653381348,-22.743375778198242,76.43529510498047,1 ];
 
-    this.cameraPose3.transform = [0.9015761017799377,0.43261784315109253,0,0,
-      -0.43261784315109253,0.9015761017799377,0,0,
-      0,0,1,0,
-      -21.921772003173828,-45.81437301635742,63.3342170715332,1];
-
     // changing transmission and brake
-    this.cameraPose31.transform = [ 0.8790436387062073,0.4767311215400696,-0.000013773170394415502,0,
+    this.cameraPoseTranmission.transform = [ 0.8790436387062073,0.4767311215400696,-0.000013773170394415502,0,
     -0.43207061290740967,0.7966820001602173,-0.42261648178100586,0,
     -0.20146524906158447, 0.37150758504867554,0.9063078165054321,0,
     -13.254499435424805,-45.380226135253906,86.13629150390625,1 ];
 
     // driving position
-    this.driveLocalPosition.transform = [ 0.045417796820402145,0.9989691972732544,0,0,
+    this.cameraPoseDriving.transform = [ 0.045417796820402145,0.9989691972732544,0,0,
       -0.9989691972732544,0.045417796820402145,0,0,
       0,0,1,0,
       -14.136186599731445,-42.1671028137207,88.4365005493164,1 ];
-
-  } 
-  this.entering = function() {
-    var hv = this.find( "/humvee" )[ 0 ];
-    hv.mode = "normal";    
   } //@ sourceURL=humvee-lesson.vwf

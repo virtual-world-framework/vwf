@@ -15,19 +15,12 @@
 extends: http://vwf.example.com/node3.vwf
 source: humvee.dae
 type: model/vnd.collada+xml
-methods:
-  userControlled: false
 implements: 
 - drive.vwf
 properties:
   started: false
   enableDrive: false
-  mode: 
-    set: |
-      // I'm not sure that getProperty works from a setter
-      this.userControlled( value == "drive" );
-      this.mode = value; //@ sourceURL=humvee.mode.setter.vwf
-    value: "normal"
+  mode: "normal"
 children:
   interiorCamera:
     extends: http://vwf.example.com/camera.vwf
@@ -1700,30 +1693,3 @@ children:
     children: 
       material: 
         extends: http://vwf.example.com/material.vwf 
-scripts:
-- |
-  this.userControlled= function( value ) {
-    var app = this.find( "/" )[ 0 ];
-    var camTrans, activeCam  = app.getActiveCameraComp();
-    if ( activeCam && app ) {
-      if ( value ) {
-        camTrans = activeCam.worldTransform; 
-        if ( camTrans ) {
-          this.interiorCamera.worldTransform = camTrans;
-        }
-        app.navmode = "none";
-        app.activeCamera = this.interiorCamera.id;
-        this.driving = true;
-      } else {
-        this.driving = false;
-        if ( this.interiorCamera !== undefined ) {
-          camTrans = this.interiorCamera.worldTransform; 
-          app.activeCamera = app.lastActiveCameraID();
-          if ( camTrans && app.getActiveCameraComp() ) {
-            app.getActiveCameraComp().worldTransform = camTrans;
-          }
-          app.navmode = "walk";
-        }
-      }
-    }
-  } //@ sourceURL=humvee.vwf
