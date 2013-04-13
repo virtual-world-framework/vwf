@@ -1574,7 +1574,7 @@ define({
 		}
 		this.CreateModifier = function(type,owner)
 		{       
-			if(GetSelectedVWFNode() == null)
+			if(this.GetSelectedVWFNode() == null)
 			{
 				_Notifier.notify('no object selected');
 				return;
@@ -1597,7 +1597,7 @@ define({
 				proto.properties.type = 'modifier';
 				proto.properties.DisplayName = _Editor.GetUniqueName(type);
 				
-				var id = GetFirstChildLeaf(GetSelectedVWFNode()).id;
+				var id = this.GetFirstChildLeaf(this.GetSelectedVWFNode()).id;
 				
 				var owner = vwf.getProperty(id,'owner');
 				if(!_Editor.isOwner(id,document.PlayerNumber))
@@ -1608,7 +1608,7 @@ define({
 			
 				this.createChild(id,GUID(),proto,null,null); 
 			
-				window.setTimeout(function(){$(document).trigger('modifierCreated',GetSelectedVWFNode());},500);
+				window.setTimeout(function(){$(document).trigger('modifierCreated',this.GetSelectedVWFNode());},500);
 				
 		}.bind(this);
 		this.GetFirstChildLeaf = function(object)
@@ -1620,7 +1620,7 @@ define({
 					for(var i in object.children)
 					{
 						if(vwf.getProperty(object.children[i].id,'isModifier') == true)
-							return GetFirstChildLeaf(object.children[i]);
+							return this.GetFirstChildLeaf(object.children[i]);
 					}
 				}
 				return object;

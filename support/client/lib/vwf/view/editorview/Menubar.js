@@ -433,6 +433,11 @@ define({
 			_Editor.CreatePrim('sphere',_Editor.GetInsertPoint(),[.5,1,1],'checker.jpg',document.PlayerNumber,'');
 			
 		});
+		$('#MenuCreateText').click(function(e){
+			
+			_Editor.CreatePrim('text',_Editor.GetInsertPoint(),[.5,1,1],'checker.jpg',document.PlayerNumber,'');
+			
+		});
 		$('#MenuCreatePlane').click(function(e){
 			
 			_Editor.CreatePrim('plane',_Editor.GetInsertPoint(),[1,1,5],'checker.jpg',document.PlayerNumber,'');

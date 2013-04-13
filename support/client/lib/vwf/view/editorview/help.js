@@ -254,4 +254,5 @@ function StartTutorial()
 	//PointAtAndClick('MenuScriptEditoricon',tutStep2)
 	_Notifier.alert('Welcome to the VWF Sandbox tutorial. This presentation will show you some of the system features. You`ll see text appear in boxes like this one, and arrows will show you where the demo clicks. Please don`t interact with the system except when prompted to do so.',tutStep2);	
 }
+window.startHelp = startHelp 
 }});

@@ -33,7 +33,7 @@ define( [ "module", "version",
 			$(document.head).append('<link rel="stylesheet" type="text/css" href="vwf/view/editorview/ddsmoothmenu-v.css" />')
 			$(document.head).append('<link rel="stylesheet" type="text/css" href="vwf/view/editorview/editorview.css" />')
 			$(document.body).append($.get('vwf/view/editorview/menus.html',{async:false,datatype:'text'}).responseText);
-          
+            $(document.head).append('<script src="vwf/model/threejs/helvetiker_regular.typeface.js"></script>');
 		  
 		  if(!window._EditorInitialized)
 	      {
@@ -108,7 +108,7 @@ define( [ "module", "version",
 						
 						
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.qtip-1.0.0-rc3.min.js"></script>');
-						$(document.head).append('<script type="text/javascript" src="http://crypto-js.googlecode.com/svn/tags/3.0.2/build/rollups/sha256.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/sha256.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.ui.touch-punch.min.js"></script>');
 						
 						
