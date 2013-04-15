@@ -138,6 +138,10 @@
 				geometry.normalsNeedUpdate = true;
 				geometry.facesNeedUpdate = true;
 				geometry.uvsNeedUpdate = true;
+				this.GetMesh().position.x = 0;
+				this.GetMesh().position.y = 0;
+				this.GetMesh().position.z = 0;
+				this.GetMesh().updateMatrixWorld(true);
 			}
 			this.Build = function()
 			{
