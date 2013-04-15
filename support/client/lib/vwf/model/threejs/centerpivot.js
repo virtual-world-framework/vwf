@@ -3,8 +3,6 @@
 		{
 			this.updateSelf = function()
 			{
-				
-				
 				var mesh = this.GetMesh();
 				mesh.geometry.dirtyMesh = true;
 				var bounds = mesh.geometry.GetBoundingBox(true);
@@ -13,8 +11,6 @@
 				mesh.position.y = 0-(bounds.min[2] + (bounds.max[2]-bounds.min[2])/2);
 				mesh.rotation.x = 0;
 				mesh.updateMatrixWorld(true);
-				
-				
 			}
 			this.settingProperty = function(prop,val)
 			{
