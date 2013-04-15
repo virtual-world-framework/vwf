@@ -2,6 +2,237 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.6.7
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+- CHG: Fix typos in lesson for GameTech Demonstration of Virtual World Framework.
+- CHG: Remove old work-around for orientation problems. Not needed after the orientation fixes, plus it was making a direct kernel reference and using an invalid static ID. References #1680.
+- CHG: Revert terrain z position and camera far changes from commit:6576d61. Raising the terrain would allow the camera to rotate to see underneath it. The distance to the far end of the terrain with the default orbit radius is approximatly 40000. The previous far value of 500000 should still be OK. References #1680.
+- CHG: changed implements: //vwf.example.com/control.vwf to 'control-old.vwf' to account for threejs merge
+- CHG: Explicity disable specular highlights in the humvee applications.
+- CHG: Humvee lesson updates: Rename cameraPoses to more meaningful names.
+- CHG: Humvee lesson updates: Added simple drive capability attached to 'G' key.
+- CHG: Humvee lesson updates: Pass the key events down to the humvee
+- CHG: Humvee lesson updates: Added the ability for the user to take control of the humvee
+- CHG: Humvee lesson updates: Made some functions local due to issues calling those functions within the behavior
+- CHG: Humvee lesson updates: Added resetting the humvee mode when entering the lesson
+- CHG: Humvee lesson updates: Added support to remember the last active camera
+- CHG: Humvee lesson updates: Merge branch 'branch/threejs' of http://github.com/virtual-world-framework/vwf into branch/threejs
+- CHG: Humvee lesson updates: Remove empty `value:` fields from components.
+- CHG: Humvee lesson updates: Rather than not setting a value, these were actually setting a value of `null`.
+- CHG: Humvee lesson updates: Don't presume the application ID in the driver `initialize`.
+- CHG: Apply the `this.scene.sceneRootID` => `this.kernel.application()` changes from model/glge to model/threejs too.
+- CHG: Make `this.scene.sceneRootID` => `this.kernel.application()` changes to the new functions `isPrototype` in model/glge and `ifPrototypeGetId` in model/threejs.
+- CHG: Merge branch 'development' into branch/threejs for rebasing current source code branch with main development branch.
+- NEW*: Update driver configuration to look for a config file of the same name as the application, rather than a hard-coded index
+- CHG: Remove unneeded property setters on terrain. Fixes #1720.
+- CHG: Remove obsolete, unused `useLegacyID` conditions.
+- NEW*: Add `kernel.application` to identify the application node. Removes `index-vwf` references from the kernel and drivers and should allow any remaining assumptions about the `index.vwf` application name to be removed. Closes #1748.
+- NEW: Accept `undefined` for `rootID`.
+- NEW: Hide references to ancestors from uninitialized nodes in applications.
+- NEW*: Register nodes with the kernel before `creatingNode` rather than during. The kernel delegates node metadata, such as the name, source/type fields, and the prototype and behaviors lists, to vwf/model/object. But since vwf/model/object is the last driver, relying on the normal order for `creatingNode` prevented other drivers from asking about prototypes and other node information in their `creatingNode` handlers.
+- CHG: Kernel documentation updates.
+- CHG: Finish `kernel.prototypes( ..., includeBehaviors )`.
+- CHG: Pass the read-only kernel functions generically. They all pass straight through so there is no need to handle each one separately to be able to reinterpret the arguments.
+- NEW: Add drive behavior to humvee app.
+- CHG: Update humvee lesson to use controlValueUpdated event to trigger task completions.
+- CHG: Update checks to not set properties if the value is null
+- CHG: Remove the axis marker for GLGE. It was causing an ugly box to appear in the middle of the scene until the assets loaded, and it isn't visible in most scenes anyway. Fixes #1782.
+- CHG: Fix bug with laser collision detection
+- CHG: Removing physics.xml from xmas-tree application, and updating appscene to match physics app. Fixes #1781.
+- CHG*: Revert the fixed-with tick and convert tests counting on it to `future`. Ticks for models are deprecated, so we don't want to add new functionality. The reflector would like to have flexibility to alter the tick interval on slow networks, so the interval can't be known to models. Views primarily need to know when the simulation time has changed since the simulation state won't change otherwise. `setTimeout` and `setInterval` are available for views to use for other timing needs.
+- NEW: Add cameraTransformComplete event to task component.
+- NEW: Humvee: Update gear shift, high-low selector and turn signal to use detent control positions
+- NEW: Humvee: Changing pointerClick listeners to pointerUp listeners to account for draggable controls.
+- CHG: Humvee: Updated the camera positions
+- NEW: Humvee: Added the worldTransform property for the internal view of the camera used for driving
+- CHG: Humvee: Added worldTransform to the 'z' camera position info
+- NEW: Humvee: Add ignition sound on humvee start.
+- CHG: Humvee: Update animationTime to check for null to handle values of 0 correctly
+- CHG: Humvee: Update gauge positions on engine start to be normal values, not the maximum.
+- CHG: Humvee: Fix animateControlToPosition function so that it still works with momentary controls
+- CHG: Humvee: Update hierarchy for the lights
+- NEW: Humvee: Updated lesson with the correct hierarchy and inserted the drive behavior
+- CHG: Humvee: Add new animateControlToPosition to control behavior. Update humvee gauges to use this method to animate.
+- CHG: Humvee: Adjust volt, temp, oil, and fuel gauges based on engine ignition. Refs #1772
+- NEW: Humvee: Add lesson instructions for vehicle ignition and drive capabilities. Fixes #1688. Updated lesson UI driver to add a space between instructions for level 3 and below.
+- CHG: Fix proxy issue with Windows build.
+- CHG: Update threejs view driver to take new experimental option to control the pick interval. Refs #1735
+- CHG: Fixed the prototype property setting
+- CHG: Update Redhat script install to fix #1616
+- CHG: Fix URL issue for Debian install.
+- NEW: Build update to Ruby 1.9.3
+- CHG: Humvee: Pull humvee definition into component file for reuse in multiple applications.
+- CHG: Update of installation instructions for VWF Framework.
+- CHG: Humvee: Update the brake and engine wait lights so that they can turn on or off based on related controls.
+- NEW: Humvee: Added started property to the humvee.
+- NEW: Humvee: Added controlDisabled property to the control behavior. Fixes #1771
+- CHG: Humvee: Move full humvee component and horn honk to lesson application. Refs #1585, #1770.
+- CHG: Humvee: Add horn honk to humvee application. Fixes #1770.
+- CHG: Humvee:  Move cameraPoses to lesson component, and reset initial camera position. Fixes #1585.
+- CHG: Humvee:  Move lesson and humvee components into their own file, utilizing the includes directive. Refs #1585.
+- NEW: Rudimentary support for `{ includes: prototype }`. The `includes` directive may used as an alternative to `extends` to work around certain cases where nodes don't inherit correctly from a prototype. Closes #1753.
+- CHG: Remove debugging log message.
+- CHG: Update glge view driver to take new experimental option to control the pick interval
+- CHG: Update driver configuration to support JSON objects as parameters. Refs #1735
+- CHG: Humvee: Change collada extension of humvee file to lowercase to match model file.
+- CHG: Humvee: Update humvee-lesson door to use new control behavior.
+- CHG: Revert "Rough animation test case."
+- CHG: Revert duck to its original behavior
+- NEW: Add an initialTransform property to the control behavior to fix issue with syncing animations with multiple clients. Refs #739
+- NEW: Add the old control behavior as "control-old.vwf.yaml" and update the radio to use it, until it can be moved over to the new control behavior. Refs #739
+- NEW: Update control types to allow text values. Refs #739
+- CHG: Clean up logger statements
+- CHG: Remove unnecessary check that would sometimes prevent the animationTime from being updated when the control value changed. Refs #1760
+- CHG: Change the control positions so they don't extend node3. Refs: #739
+- CHG: Humvee: Add control behavior to ignition switch. Fix bugs with spring control types. Refs #1685
+- CHG: Humvee: Remove unneeded intermediateValue property. Refs #739
+- NEW: Add new property to control behavior to simplify linking multiple controls together. Refs #739
+- CHG: Humvee: Update humvee to use new control and animation behaviors. Refs #1584
+- CHG: Humvee: Update control behavior to animate between positions. Fixes #1698
+- CHG: Fix logic for snapping to control key values
+- CHG: Add sequence property to animation and control key value nodes as a workaround for Ruby 1.8.7, which does not preserve child order in component objects
+- CHG: Add basic mouse support to new control behavior
+- CHG: First draft of updated control behavior that integrates with the new animation behavior
+- CHG: Experimental patch to initialize using all prototypes' functions.
+- NEW: Test the node3 animation behavior. An animation behavior for node3 nodes. Get behaviors from kernel.prototypes() Inherit initialize() from behaviors.
+- CHG: Update for animation.vwf changes.
+- NEW*: General animation behavior to add standard animation functions. Provides: animationTime, animationDuration, animationRate, animationLoop, animationPlaying, animationPlay(), animationPause(), animationResume(), animationStop() Sends: animationStarted(), animationStopped(), animationLooped(), animationTimeChanged() Nodes react to time changes by implementing: animationUpdate()
+- NEW: Rough animation test case. Click the duck to play/pause. Control the time position using a hard-coded second slider under the editor's "Time" tab. The editor
+patches cause several scripts errors on start.
+- NEW: animation.vwf with working time, timeChange, events, and node update.
+- CHG: Add terrain and background color to humvee-lesson. Fixes #1586. Add check to see if door is in proper position before moving to next lesson step.
+- NEW: Added initial radio-lesson app
+- NEW: Don't set properties from the prototypes if there's no value
+- CHG: Remove ambient light from glge view driver (it is now in scene.vwf) refs #1737
+- CHG: In glge.creatingNode, notify drivers of node's prototype properties. fixes #1762
+- CHG: Remove glgeLight from test/Zup/index.vwf.yaml to avoid washout. refs #1762
+- CHG: Remove glgeLight from radio app so it works more consistently
+- NEW: Add sourceUrl to hmvee.vwf.yaml to aid in debugging
+- NEW: Add default background color to scene.vwf.yaml
+- NEW: Add guards in node3.vwf.yaml for null transform and boundingBox It had defaulted to undefined which wreaked havoc on the worldTransform getter.  This commit also places a check in that getter to guard against null/undefined values that get set later. refs #1762
+- CHG: Add a check in bzflag/index.vwf.yaml for players being null. refs #1762
+- CHG: Move bzflag scoreboard from appscene.vwf.yaml to index.vwf.yaml. scoreboard references players which is defined one level higher in index.vwf.yaml refs #1762
+- CHG: Clean up loadCollada in GLGE model driver refs #1762
+- CHG: In threejs.creatingNode, notify drivers of node's prototype properties. This fixes the problem that prototype properties were not being set int the renderer, so defaults were getting lost.  This commit fixes threejs.js, but the problem persists in glge.js. Also removed default ambient light in threejs.js because it is no longer necessary (taken care of by default value in scene.vwf) refs #1762
+- NEW: ThreeJS: Spruce up lights in duck application a bit. refs #1680, #1682
+- NEW: ThreeJS: Put a default ambient light in drivers as a stop-gap for proper fix refs #1680, #1682
+- NEW: ThreeJS: Removed old legacy code
+- NEW: ThreeJS: Brought over the prototype detection code from GLGE
+- NEW: ThreeJS: Cleaned up the prototype code in preparation to copy over to threejs
+- NEW: ThreeJS: Create another example of a component with children
+- NEW: Added the prototype node3 skipping and implemented a new recursive search for GLGE.Collada children
+- NEW: Removed the console output
+- NEW: ThreeJS: Created a humvee component and converted the humvee app to use the component
+- NEW: ThreeJS: Add config to hwmvee so it uses glge (glge-specific stuff inside)
+- NEW: ThreeJS: Change "pointerEnter/pointerLeave" to "pointerOver/pointerOut"
+- NEW: ThreeJS: Brings us into line w/ html spec and allowed us to remove code that was causing pointerOver/pointerOut errors.  refs #1680, #1682
+- NEW: ThreeJS:  Fix bug in threejs view driver that caused a pick every frame
+- NEW: ThreeJS: Fix ColladaLoader to identify transparent textures as such. Remove unneeded backup. References #1680.
+- NEW: ThreeJS: Restore `up_axis` to the original `Z_UP`. These were changed from `Z_UP` to `Y_UP` to `Z` during the axis excursions. three.js' Collada parser only looks at the first character, so the behavior should be the same. But we shouldn't keep a change for no reason. References #1680.
+- NEW: ThreeJS: Undo unintentional comment-out and tweak formatting.
+- NEW: ThreeJS: Fixed the spin axis for the propeller
+- NEW: ThreeJS: Added JSON output for alt-click
+- NEW: ThreeJS: Support nodes with mirrored transforms (negative scales).
+- NEW: ThreeJS: Matrix4#decompose will generate a negative scale and a correct rotation when the determinant < 0.
+- NEW: ThreeJS: Object3D maintains a `matrixWorldIsMirrored` property.
+- NEW: ThreeJS: WebGLRenderer.setMaterialFaces considers the node's mirror state when setting the face orientation.
+- NEW: ThreeJS: `flipSided` moved from a shader parameter to a uniform. Fixes #1717.
+- NEW: ThreeJS: GLGE Mouse pick fix when the editor is open or possibly when the view was scrolled
+- NEW: ThreeJS: Don't rotate Collada objects after import. ColladaLoader's axis conversion will take care of this, and the correction would also incorrectly appear in the node3 transform. References #1680, #1556.
+- NEW: ThreeJS: Set ColladaLoader options from the caller instead of modifying the source. This restores ColladaLoader.js to the upstream state, except for the
+patch to honor Collada document names: 
+- NEW: ThreeJS: Don't ignore the entire support/build directory. support/build/.gitignore has more precise patterns.
+- NEW: ThreeJS: Add logic to allow overriding the renderer specified in a config file with URL parameters. Refs #1702.
+- NEW: ThreeJS: Change default renderer to threejs. Add config files to bzflag and humvee so they still use glge. Fixes #1704
+- NEW: ThreeJS: Corrected the default alpha value if parseFloat fails
+- NEW: ThreeJS: Deleted commented out 3D lib references
+- NEW: ThreeJS: Fixed the prop spin axis in GLGE
+- NEW: ThreeJS: Add collada loader to driver configuration options
+- NEW: ThreeJS: Fix dependency problems between three.js and ColladaLoader.js.
+- NEW: ThreeJS: Upgrade to require.js 2.1.5 and domReady 2.0.1.
+- NEW: ThreeJS: Implemented gettingProperty for several of the properties supported by the settingProperty/ Also updated all of the color properties to use the color utility. Particle systems are still allowing the properties to be passed through to the object model
+- NEW: ThreeJS: Removed the satProperty function, everything is in the model now
+- NEW: ThreeJS: Fixed the array parsing of colors
+- NEW: ThreeJS: Corrected the color handling, and set up getting property for many properties
+- NEW: ThreeJS: Cleaned up some commented out code
+- NEW: ThreeJS: Added array handling to the color parser
+- NEW: ThreeJS: Fixed the spin-axis for the prop. Something is still wrong here, the prop should be rotating around X, but the correct visual axis is Y
+- NEW: ThreeJS: Convert the up axis to Z up during the import
+- NEW: ThreeJS: Use the xml collada element name before using the id if defined
+- NEW: ThreeJS: Initial commit from threejs of branch r51. Updated README and removed unneeded includes in example.
+- NEW: ThreeJS: Updated the spin-axis for the prop
+- NEW: ThreeJS: Skip extra nodes created by GLGE import to better match threejs
+- NEW: ThreeJS: Some clean up and use the color converter utility
+- NEW: ThreeJS: Added sourceurl references for easier debugging
+- NEW: ThreeJS: moved interpolation of positions in Euler solver to shader
+- NEW: ThreeJS: moved more computation into shader for Euler solver. some inline documentation
+- NEW: ThreeJS: adding gravity and gravityCenter to particlesystem API
+- NEW: ThreeJS: adding particle system propertes to API
+- NEW: ThreeJS: Updated with new art, and set the color property of the material
+- NEW: ThreeJS: New art files that contain materials instead of textures
+- NEW: ThreeJS: Fixed logic to set color properties
+- NEW: ThreeJS: particle gravity, colorRange, sizeRange, orientation
+- NEW: ThreeJS: slight particle fix
+- NEW: ThreeJS: minor tweak to orbit example, fix for lookat and axes test
+- NEW: ThreeJS: Delayed the setting of the texture property and added callback for image loading
+- NEW: ThreeJS: texure tiling
+- NEW: ThreeJS: removing ECS demo
+- NEW: ThreeJS: Added check for perfomance.now before calling the function
+- NEW: ThreeJS: fix for older browsers that dont support performance.now()
+- NEW: ThreeJS: Fixed the tile-puzzle by replacing the art
+- NEW: ThreeJS: White space cleanup and converted to spaces instead of tabs
+- NEW: ThreeJS: Fixed formatting issues with arrays in yaml
+- NEW: ThreeJS: Corrected the pick vector calculations
+- NEW: ThreeJS: support max and min spin in analyticShader
+- NEW: ThreeJS: Three types of particle solver available. Euler can take into account drag, or in the future more complex sims, Analytic will do the analytic solution to the phyics sim cpu side. This works nicely, but takes some bandwidth on the GPU bus to upload each position at each frame. Analytic can take into account emitter movement properly. 'AnalyticShader' runs the analytic solution on the GPU. Much faster to compute and next to no data on the bus, but cannot take into account emitter movement.
+- NEW: ThreeJS: added custom shader. now supporting start and end particle size. Can choose solver, either analytic or euler. Must use euler for damping. fixed timeing issue in frame counter. updated examples. Start and end color now take alphas
+- NEW: ThreeJS: interpolate color for display as well
+- NEW: ThreeJS: ticking integrator 10 times per second, interpolating for display values.
+- NEW: ThreeJS: update aspect on window.resize
+- NEW: ThreeJS: take cube root of random when picking radius for even random distribution in sphere. Some graphics update in samples
+- NEW: ThreeJS: proper distribution of random sphere coords
+- NEW: ThreeJS: Fixed the vector calculation for the mouse pick
+- NEW: ThreeJS: particles now update on render, not tick. Timing aligned with old speeds.
+- NEW: ThreeJS: particle position now calculated in world space, velocity in local
+- NEW: ThreeJS: particle startcolor and endcolor, support for map, opacity and blendmode
+- NEW: ThreeJS: Modified the collada import to remove extra node, and several other changes
+- NEW: ThreeJS: Find the existing material, instead of creating a new material Set the name of the Object3D when the driver creates a Object3D Ambient Light created when the scene's ambient color is set
+- NEW: ThreeJS: Modified to grab the name from the name attribute in the collada file
+- NEW: ThreeJS: Implemented the mouse position calculations, and yaml hierarchy output
+- NEW: ThreeJS: Remove unnecessary .bak files and stackdump
+- NEW: ThreeJS: Added hierarchy output for the renderer
+- NEW: ThreeJS: Added alpha to a previous color bug fix
+- NEW: ThreeJS: Remove bin directory since the stubs are different on different platforms
+- NEW: ThreeJS: YES! finally found that transform problem. it was in the lookat. Sandtable now works properly!
+- NEW: ThreeJS: updated app to store local vars for access node3
+- NEW: ThreeJS: had to modify the mesh creation code to store the normals in the correct object. Added utility.color support for material.color, needs to be added to other setRGB calls
+- NEW: ThreeJS: removed the duplicated lightType definition, updated lights, major light work, added a directional light sample and pointlight demo.
+- NEW: ThreeJS: Replace ‘tick’ with a call to this.future. Insert threejs light property values. Insert the glgeLight behavior. Modify any glge light properties to the new name. Remove any calls to vwf.setProperty with calls to directly access the objects/properties
+- NEW: ThreeJS: renderer selection in the url, light setup for the new API, the duck is the best test app so far
+- NEW: ThreeJS: Implemented createMesh for the threejs model. added camera types, fov, near and far. initial work on supporting shadows
+- NEW: ThreeJS: deleteNode implemented
+- NEW: ThreeJS: ambient changes, updates to collada axis flip
+- NEW: ThreeJS: added UTF-8 compressed model format parsing and associated test.
+- NEW: ThreeJS: added test for physics. Identified bug in physics driver. there is a switch on array.length with the test values '2' and '5'. This compare fails, should be 2 and 5. Probably this worked at some point in some browsers. Failed on Chrome 23.0.1271.52 beta-m. Fixed in driver. Cannot set initial rotation of physics mesh, even when setting entire transform matrix
+- NEW: ThreeJS: fixed physics example to use collada meshes. Added get MeshData. Physics example working. added set material. added key input.
+- NEW: ThreeJS: initial work on materials, texture and color. changes to examples to reflect different scene graph from collada parse
+- NEW: ThreeJS: adding test case for YAML parse error for initial properties
+- NEW: ThreeJS: adding test for scene initialization
+- NEW: ThreeJS: fixed some problems with the pointerClick - several new examples working. Plane, duck, and radio much closer along
+- NEW: ThreeJS: get transform in threejs driver now working, slight updates to radio example
+- NEW: ThreeJS: Now properly pausing the queue when loading meshes. TODO: deal with delayed properties. Handling scene ambient throught THREE AmbientLight, handling child transforms properly. NOTE: axis flip only necessary on top of heirarchy. LightColor working. Visible working. NOTE: threejs only hides specific node, not entire subgraph. handling manually. mouse picking working nicely. Should mouse over events bubble up? maybe leave it to the objects to inform parent. ActiveCamera implemented. Mouse movement and click hooked up.
+- NEW: ThreeJS: added pointerOver and pointerOut events to glge view, fixed slight offset in mousepick coordinates
+- NEW: ThreeJS: Added cross-origin texture support, fixed bugs related to drawing and picking transparent objects
+- NEW: ThreeJS: More work on getting the coord systems straitened out. Looks like it's correct now. Checking in tests for coord transforms. Should look the same under GLGE and THREE.js
+- NEW: ThreeJS: Beginning support for collada files. basic Lights and lightType working
+- NEW: ThreeJS: initial commit for three.js driver. basics working - cameras, nodes and transforms. renderer. No input currently, all models rendered as cubes
+- NEW: ThreeJS: 
+- NEW: ThreeJS: 
+
+
+----------------------------------
 0.6.6
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change.
