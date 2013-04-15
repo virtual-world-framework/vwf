@@ -129,7 +129,7 @@ This configuration sets the renderer to use the glge model and view driver in ad
 
 By activating the lesson driver, the application's user interface will automatically be updated to autogenerate an instruction panel upon lesson start. This instruction panel will pull in the *text* properties defined in the task components in the model. Additionally, the instruction panel will update based on *entering* and *completed* events fired in order to show the current step and progress of the overall lesson. 
 
-Visit the [lesson application](../../../lesson) to view the final result.
+Visit the [humvee lesson](../../../humvee-lesson) or the [duck lesson](../../../lesson) to view the final result.
 
 --------------
 
