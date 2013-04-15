@@ -189,9 +189,14 @@ define(
 		{
 			_Editor.CreateModifier('twist', document.PlayerNumber);
 		});
+		
 		$('#MenuCreateUVMap').click(function (e)
 		{
 			_Editor.CreateModifier('uvmap', document.PlayerNumber,true);
+		});
+		$('#MenuCreateCenterPivot').click(function (e)
+		{
+			_Editor.CreateModifier('centerpivot', document.PlayerNumber,true);
 		});
 		$('#MenuCreatePerlinNoise').click(function (e)
 		{

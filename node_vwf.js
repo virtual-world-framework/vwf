@@ -629,6 +629,8 @@ function startVWF(){
 				  {	
 						//We need to keep track internally of the properties
 						//mostly just to check that the user has not messed with the ownership manually
+						if(!node.properties)
+							node.properties = {};
 						node.properties[message.member] = message.parameters[0];
 						global.instances[namespace].Log("Set " +message.member +" of " +node.id+" to " + message.parameters[0],1);
 				  }

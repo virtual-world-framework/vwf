@@ -1020,7 +1020,7 @@ scripts:
         //set the skybox position
       
         this.skycube.position = findcamera().position;
-   
+        this.skycube.updateMatrixWorld();
       var div = this.nametag;
       var pos = [0,0,0];
       pos = [pos[0],pos[1],pos[2],1];
