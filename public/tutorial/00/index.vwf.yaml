@@ -13,6 +13,8 @@
 
 ---
 extends: http://vwf.example.com/navscene.vwf
+properties:
+  ambientColor: [ 183, 183, 183 ]
 children:
   blueCube:
     extends: http://vwf.example.com/node3.vwf
