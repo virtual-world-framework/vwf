@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 // Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
 // Secretary of Defense (Personnel & Readiness).
@@ -35,9 +35,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
  
             this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
+            this.state.prototypes = {}; 
             this.state.kernel = this.kernel;
-
-            this.state.sceneRootID = this.kernel.find("", "/")[0];
 
         },
 
@@ -49,11 +48,32 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childURI, childName, callback ) {
 
-            var node, parentNode, glgeChild, prototypes;
-            var kernel = this.kernel;
+            var self = this;
 
-            if ( childExtendsID === undefined /* || childName === undefined */ )
+            //console.log(["creatingNode:",nodeID,childID,childName,childExtendsID,childType]);
+            var prototypeID = isPrototype.call( this, nodeID, childID );
+            if ( prototypeID !== undefined ) {
+                //console.info( "FOUND prototype: " + prototypeID );
+                this.state.prototypes[ prototypeID ] = {
+                    parentID: nodeID,
+                    ID: childID,
+                    extendsID: childExtendsID,
+                    implementsID: childImplementsIDs,
+                    source: childSource, 
+                    type: childType,
+                    uri: childURI,
+                    name: childName
+                };
+                return;                
+            }
+            if ( childExtendsID === undefined )
                 return;
+
+            //console.log("Create " + childID);
+
+            var node, parentNode, glgeChild, glgeParent;
+            var kernel = this.kernel;
+            var prototypes = getPrototypes.call( this, kernel, childExtendsID );
 
 //            this.logger.enabled = true;
 //            this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
@@ -68,15 +88,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     parentNode = this.state.scenes[ nodeID ];
 
                 if ( parentNode ) {
-                    var glgeParent = parentNode.glgeObject ? parentNode.glgeObject : parentNode.glgeScene;
+                    glgeParent = parentNode.glgeObject ? parentNode.glgeObject : parentNode.glgeScene;
+                    var recursive = false;
                     if ( glgeParent && childName ) {
-                        glgeChild = glgeObjectChild.call( this, glgeParent, childName, childExtendsID );
+                        recursive = ( glgeParent.constructor == GLGE.Collada );
+                        glgeChild = glgeObjectChild.call( this, glgeParent, childName, childExtendsID, prototypes, recursive );
                     }
                 }
             }
 
-            prototypes = getPrototypes.call( this, kernel, childExtendsID );
-            if ( prototypes && isGlgeSceneDefinition.call( this, prototypes ) && childID == this.state.sceneRootID ) {
+            if ( prototypes && isGlgeSceneDefinition.call( this, prototypes ) && childID == this.kernel.application() ) {
+
+                this.state.sceneRootID = childID;
 
                 var sceneNode = this.state.scenes[childID] = {
                     glgeDocument: new GLGE.Document(),
@@ -97,7 +120,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     modelInited: false,
                     pendingLoads: 0,
                 };
-
+				
                 if ( sceneNode.glgeScene.camera ) {
                         sceneNode.camera.glgeCameras[ sceneNode.camera.defaultCamID ] = sceneNode.glgeScene.camera;
                 } else {
@@ -130,176 +153,185 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 }
            
             } else if ( prototypes && isGlgeCameraDefinition.call( this, prototypes ) ) {
-                var camName = childID.substring( childID.lastIndexOf( '-' ) + 1 );
-                var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-                node = this.state.nodes[childID] = {
-                    name: childName,
-                    glgeObject: glgeChild,
-                    ID: childID,
-                    parentID: nodeID,
-                    sceneID: this.state.sceneRootID,
-                    glgeScene: sceneNode ? sceneNode.glgeScene : undefined,
-                    type: childExtendsID,
-                    sourceType: childType,
-                };
+                if ( childName !== undefined ) {
+                    var camName = childID.substring( childID.lastIndexOf( '-' ) + 1 );
+                    var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+                    node = this.state.nodes[childID] = {
+                        name: childName,
+                        glgeObject: glgeChild,
+                        ID: childID,
+                        parentID: nodeID,
+                        sceneID: this.state.sceneRootID,
+                        glgeScene: sceneNode ? sceneNode.glgeScene : undefined,
+                        type: childExtendsID,
+                        sourceType: childType,
+                    };
 
-                if ( nodeID != 0 && !node.glgeObject ) {
-                    createCamera.call( this, nodeID, childID, childName );
-                }
-
-                if ( sceneNode && sceneNode.camera ) {
-                    if ( childID == sceneNode.camera.defaultCamID ) {
-                        if ( !sceneNode.camera.glgeCameras[ childID ] ) {
-                            var cam = new GLGE.Camera();
-                            sceneNode.camera.glgeCameras[ childID ] = cam;
-                            initCamera.call( this, cam );
-                        }
-                        node.name = camName;
-                        node.glgeObject = sceneNode.camera.glgeCameras[ childID ];
-                  
-                    } else if ( node.glgeObject ) {
-                        sceneNode.camera.glgeCameras[ childID ] = node.glgeObject;
+                    if ( nodeID != 0 && !node.glgeObject ) {
+                        createCamera.call( this, nodeID, childID, childName );
                     }
-                }               
+
+                    if ( sceneNode && sceneNode.camera ) {
+                        if ( childID == sceneNode.camera.defaultCamID ) {
+                            if ( !sceneNode.camera.glgeCameras[ childID ] ) {
+                                var cam = new GLGE.Camera();
+                                sceneNode.camera.glgeCameras[ childID ] = cam;
+                                initCamera.call( this, cam );
+                            }
+                            node.name = camName;
+                            node.glgeObject = sceneNode.camera.glgeCameras[ childID ];
+                      
+                        } else if ( node.glgeObject ) {
+                            sceneNode.camera.glgeCameras[ childID ] = node.glgeObject;
+                        }
+                    } 
+                }              
             } else if ( prototypes && isGlgeLightDefinition.call( this, prototypes ) ) {
-                node = this.state.nodes[childID] = {
-                    name: childName,
-                    glgeObject: glgeChild,
-                    ID: childID,
-                    parentID: nodeID,
-                    type: childExtendsID,
-                    sourceType: childType,
-                };
-                if ( nodeID != 0 && !node.glgeObject ) {
-                    createLight.call( this, nodeID, childID, childName );
+                if ( childName !== undefined ) {
+                    node = this.state.nodes[childID] = {
+                        name: childName,
+                        glgeObject: glgeChild,
+                        ID: childID,
+                        parentID: nodeID,
+                        type: childExtendsID,
+                        sourceType: childType,
+                    };
+                    if ( nodeID != 0 && !node.glgeObject ) {
+                        createLight.call( this, nodeID, childID, childName );
+                    }
                 }
             } else if ( prototypes && isGlgeParticleSystemDefinition.call( this, prototypes ) ) {
-                node = this.state.nodes[childID] = {
-                    name: childName,
-                    glgeObject: glgeChild,
-                    ID: childID,
-                    parentID: nodeID,
-                    type: childExtendsID
-                };
-                if ( nodeID != 0 && !node.glgeObject ) {
-                    createParticleSystem.call( this, nodeID, childID, childName );
+                if ( childName !== undefined ) {
+                    node = this.state.nodes[childID] = {
+                        name: childName,
+                        glgeObject: glgeChild,
+                        ID: childID,
+                        parentID: nodeID,
+                        type: childExtendsID
+                    };
+                    if ( nodeID != 0 && !node.glgeObject ) {
+                        createParticleSystem.call( this, nodeID, childID, childName );
+                    }
                 }
             } else if ( prototypes && isGlgeNodeDefinition.call( this, prototypes ) ) {
 
-                var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-                switch ( childType ) {
-                    case "model/vnd.collada+xml":
-                        callback( false );
-                        node = this.state.nodes[childID] = {
-                            name: childName,  
-                            glgeObject: undefined,
-                            source: utility.resolveURI( childSource, childURI ),
-                            ID: childID,
-                            parentID: nodeID,
-                            sourceType: childType,
-                            type: childExtendsID,
-                            loadingCollada: callback,
-                            glgeScene: sceneNode
-                        };
-                        loadCollada.call( this, parentNode, node ); 
-                        break;
-
-                    case "text/xml":
-                        node = this.state.nodes[childID] = {
-                            name: childName,  
-                            glgeObject: undefined,
-                            source: childSource,
-                            ID: childID,                                
-                            parentID: nodeID,
-                            type: childExtendsID,
-                            sourceType: childType,
-                            glgeScene: sceneNode 
-                        };
-                            
-                        if ( sceneNode && sceneNode.glgeDocument ){
-                            var meshDef = sceneNode.glgeDocument.getElement( node.source );
-                            if ( meshDef ) {
-                                node.glgeObject = new GLGE.Object();
-                                node.glgeObject.setMesh( meshDef );
-                                if ( glgeParent ) {
-                                    glgeParent.addObject( node.glgeObject );
-                                } else {
-                                    if ( sceneNode.glgeScene ) {
-                                        sceneNode.glgeScene.addObject( node.glgeObject );
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                        
-                    case "definition/mesh": {
+                if ( childName !== undefined ) {
+                    var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+                    switch ( childType ) {
+                        case "model/vnd.collada+xml":
+                            callback( false );
                             node = this.state.nodes[childID] = {
                                 name: childName,  
                                 glgeObject: undefined,
-                                glgeParent: glgeParent,
+                                source: utility.resolveURI( childSource, childURI ),
+                                ID: childID,
+                                parentID: nodeID,
+                                sourceType: childType,
+                                type: childExtendsID,
+                                loadedCallback: callback,
+                                glgeScene: sceneNode
+                            };
+                            loadCollada.call( this, parentNode, node, notifyDriverOfPrototypeAndBehaviorProps ); 
+                            break;
+
+                        case "text/xml":
+                            node = this.state.nodes[childID] = {
+                                name: childName,  
+                                glgeObject: undefined,
                                 source: childSource,
                                 ID: childID,                                
                                 parentID: nodeID,
                                 type: childExtendsID,
                                 sourceType: childType,
-                                glgeScene: sceneNode  
+                                glgeScene: sceneNode 
                             };
-                            createMesh.call( this, node );
-                        }
-                        break;
-
-                    default:
-                        node = this.state.nodes[childID] = {
-                            name: childName,  
-                            glgeObject: glgeChild,
-                            ID: childID,
-                            parentID: nodeID,
-                            type: childExtendsID,
-                            sourceType: childType,
-                            glgeScene: sceneNode  
-                        };
-                        if ( node.glgeObject ) {
-                            if ( ( node.glgeObject.constructor == GLGE.Collada ) ) {
-                                callback( false );
-                                node.glgeObject.vwfID = childID;
-                                sceneNode.xmlColladaObjects.push( node.glgeObject );
-                                setupColladaCallback.call( this, node.glgeObject, sceneNode );
-                                node.loadingCollada = callback;                                    
-                            }
-                        } else {
-                            if ( nodeID != 0 ) {
-                                node.glgeObject = new GLGE.Group();
-                                if ( parentNode ) {
-                                    if ( parentNode.glgeObject ) {
-                                        parentNode.glgeObject.addObject( node.glgeObject );
-                                    } else if ( parentNode.glgeScene ) {
-                                        parentNode.glgeScene.addObject( node.glgeObject );
+                                
+                            if ( sceneNode && sceneNode.glgeDocument ){
+                                var meshDef = sceneNode.glgeDocument.getElement( node.source );
+                                if ( meshDef ) {
+                                    node.glgeObject = new GLGE.Object();
+                                    node.glgeObject.setMesh( meshDef );
+                                    if ( glgeParent ) {
+                                        glgeParent.addObject( node.glgeObject );
+                                    } else {
+                                        if ( sceneNode.glgeScene ) {
+                                            sceneNode.glgeScene.addObject( node.glgeObject );
+                                        }
                                     }
                                 }
-                        
-                                node.gui = node.glgeObject.uid;
-                                node.glgeObject.name = childName;  
                             }
-                        }
-                        break;
-                }  
+                            break;
+                            
+                        case "definition/mesh": {
+                                node = this.state.nodes[childID] = {
+                                    name: childName,  
+                                    glgeObject: undefined,
+                                    glgeParent: glgeParent,
+                                    source: childSource,
+                                    ID: childID,                                
+                                    parentID: nodeID,
+                                    type: childExtendsID,
+                                    sourceType: childType,
+                                    glgeScene: sceneNode  
+                                };
+                                createMesh.call( this, node );
+                            }
+                            break;
 
-                this.settingProperty( childID, "playing", false );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
-                this.settingProperty( childID, "looping", false );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
-                this.settingProperty( childID, "speed", 1 );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
+                        default:
+                            node = this.state.nodes[childID] = {
+                                name: childName,  
+                                glgeObject: glgeChild,
+                                ID: childID,
+                                parentID: nodeID,
+                                type: childExtendsID,
+                                sourceType: childType,
+                                glgeScene: sceneNode  
+                            };
+                            if ( node.glgeObject ) {
+                                if ( ( node.glgeObject.constructor == GLGE.Collada ) ) {
+                                    callback( false );
+                                    node.glgeObject.vwfID = childID;
+                                    sceneNode.xmlColladaObjects.push( node.glgeObject );
+                                    setColladaCallback.call( this, node.glgeObject, sceneNode );
+                                    node.loadedCallback = callback;                                    
+                                }
+                            } else {
+                                if ( nodeID != 0 ) {
+                                    node.glgeObject = new GLGE.Group();
+                                    if ( parentNode ) {
+                                        if ( parentNode.glgeObject ) {
+                                            parentNode.glgeObject.addObject( node.glgeObject );
+                                        } else if ( parentNode.glgeScene ) {
+                                            parentNode.glgeScene.addObject( node.glgeObject );
+                                        }
+                                    }
+                            
+                                    node.gui = node.glgeObject.uid;
+                                    node.glgeObject.name = childName;  
+                                }
+                            }
+                            break;
+                    }  
 
+                    this.settingProperty( childID, "playing", false );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
+                    this.settingProperty( childID, "looping", false );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
+                    this.settingProperty( childID, "speed", 1 );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
 
+                }
             } else if ( prototypes && isGlgeMaterialDefinition.call( this, prototypes ) ) {
-                node = this.state.nodes[childID] = {
-                    name: childName,
-                    glgeObject: undefined,
-                    glgeMaterial: true,
-                    ID: childID,
-                    parentID: nodeID,
-                    type: childExtendsID,
-                    sourceType: childType,
-                };
-                findMaterial.call( this, nodeID, childName, node );
+                if ( childName !== undefined ) {
+                    node = this.state.nodes[childID] = {
+                        name: childName,
+                        glgeObject: undefined,
+                        glgeMaterial: true,
+                        ID: childID,
+                        parentID: nodeID,
+                        type: childExtendsID,
+                        sourceType: childType,
+                    };
+                    findMaterial.call( this, nodeID, childName, node );
+                }
             } else {
 
                 switch ( childExtendsID ) {
@@ -325,8 +357,43 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                  }  // end of switch
             } // end of else
 
-//            this.logger.enabled = false;
-               
+            // If we do not have a load a model for this node, then we are almost done, so we can update all
+            // the driver properties w/ the stop-gap function below.
+            // Else, it will be called at the end of the assetLoaded callback
+            if ( ! ( childType == "model/vnd.collada+xml" || 
+                     childType == "model/vnd.osgjs+json+compressed" ) )
+                notifyDriverOfPrototypeAndBehaviorProps();
+
+            // Since prototypes are created before the object, it does not get "setProperty" updates for
+            // its prototype (and behavior) properties.  Therefore, we cycle through those properties to
+            // notify the drivers of the property values so they can react accordingly
+            // TODO: Have the kernel send the "setProperty" updates itself so the driver need not
+            // NOTE: Identical code exists in three.js driver, so if an change is necessary, it should be made
+            //       there, too
+            function notifyDriverOfPrototypeAndBehaviorProps() {
+                var ptPropValue;
+                var protos = getPrototypes.call( this, kernel, childExtendsID );
+                protos.forEach( function( prototypeID ) {
+                    for ( var propertyName in kernel.getProperties( prototypeID ) ) {
+                        //console.info( " 1    getting "+propertyName+" of: " + childExtendsID  );
+                        ptPropValue = kernel.getProperty( childExtendsID, propertyName );
+                        if ( ptPropValue !== undefined && ptPropValue !== null && childID !== undefined && childID !== null) {
+                            //console.info( " 1    setting "+propertyName+" of: " + nodeID + " to " + ptPropValue );
+                            self.settingProperty( childID, propertyName, ptPropValue );
+                        }
+                    }
+                } );
+                childImplementsIDs.forEach( function( behaviorID ) {
+                    for ( var propertyName in kernel.getProperties( behaviorID ) ) {
+                        //console.info( "     2    getting "+propertyName+" of: " + behaviorID  );
+                        ptPropValue = kernel.getProperty( behaviorID, propertyName );
+                        if ( ptPropValue !== undefined && ptPropValue !== null && childID !== undefined && childID !== null) {
+                            //console.info( "     2    setting "+propertyName+" of: " + nodeID + " to " + ptPropValue );
+                            self.settingProperty( childID, propertyName, ptPropValue );
+                        }
+                    }
+                } );
+            }; 
         },
          
         // -- deletingNode -------------------------------------------------------------------------
@@ -656,8 +723,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         break;
                 
                     case "boundingbox":
-                        var bbox = getLocalBoundingBox.call( this, glgeObject );
-                        value = { min: [ bbox.xMin, bbox.yMin, bbox.zMin ], max: [ bbox.xMax, bbox.yMax, bbox.zMax ] };
+                        var bbox;
+                        if ( glgeObject.getBoundingVolume ) {
+                            bbox = glgeObject.getBoundingVolume( true );
+                            value = { min: [ bbox.limits[0], bbox.limits[2], bbox.limits[4] ], max: [ bbox.limits[1], bbox.limits[3], bbox.limits[5] ] };
+                        } else {
+                            bbox = getLocalBoundingBox.call( this, glgeObject );
+                            value = { min: [ bbox.xMin, bbox.yMin, bbox.zMin], max: [ bbox.xMax, bbox.yMax, bbox.zMax] };
+                        }
                         break;
 
                     case "centerOffset":
@@ -781,67 +854,27 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     // -- loadCollada ------------------------------------------------------------------------  
     
-    function loadCollada( parentNode, node ) {
+    function loadCollada( parentNode, node, propertyNotifyCallback ) {
 
-        var nodeCopy = node; 
-        var nodeID = node.ID;
-        var childName = node.name;
-        var glgeModel = this;
-        var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-
-        function colladaLoaded( collada ) { 
-            sceneNode.pendingLoads--;
-            collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
-            var removed = false;
-            if ( nodeCopy && nodeCopy.colladaLoaded ) {
-                nodeCopy.colladaLoaded( true );
-            }
-            for ( var j = 0; j < sceneNode.srcColladaObjects.length; j++ ) {
-                if ( sceneNode.srcColladaObjects[j] == collada ){
-                    sceneNode.srcColladaObjects.splice( j, 1 );
-                    removed = true;
-                }
-            } 
-            if ( removed ) {
-                if ( sceneNode.srcColladaObjects.length == 0 ) {
-                    //vwf.setProperty( glgeModel.state.sceneRootID, "loadDone", true );
-                    loadComplete.call( glgeModel );
-                }
-
-                var id = collada.vwfID;
-                if ( !id ) id = getObjectID.call( glgeModel, collada, true, false );
-                if ( id && id != "" ){
-                    //glgeModel.kernel.callMethod( id, "loadComplete" );
-                    if ( glgeModel.state.nodes[id] ) {
-                        var colladaNode = glgeModel.state.nodes[id];
-                        if ( colladaNode.loadingCollada ) {
-                            colladaNode.loadingCollada( true );                    
-                        }
-                    }
-                }
-            }
-        }
-
-        node.name = childName;
+        // Create new GLGE collada object
         node.glgeObject = new GLGE.Collada;
-        sceneNode.srcColladaObjects.push( node.glgeObject );
-        node.glgeObject.vwfID = nodeID;
 
-        node.glgeObject.setDocument( node.source, window.location.href, colladaLoaded );
-        node.glgeObject.loadedCallback = colladaLoaded;
-        sceneNode.pendingLoads++;
+        // Set properties on new GLGE collada object
+        var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+        var colladaLoadedCallback = setColladaCallback.call( this, node.glgeObject, sceneNode, 
+                                                             propertyNotifyCallback );
+        node.glgeObject.vwfID = node.ID;
+        node.glgeObject.setDocument( node.source, window.location.href, colladaLoadedCallback );
+
+        // Add the new GLGE collada object to the list of those that need to be loaded
+        sceneNode.srcColladaObjects.push( node.glgeObject );
         
-        if ( parentNode && parentNode.glgeObject ) {
+        // If the new node has a parent, attach its GLGE object to that of the parent
+        // Else, attach it to the scene directly as a top-level object
+        if ( parentNode && parentNode.glgeObject )
             parentNode.glgeObject.addCollada( node.glgeObject );
-         } else if ( sceneNode ) {
-//          if ( !sceneNode.glgeScene ) {
-//              this.initScene.call( this, sceneNode );
-//          }
-            if ( sceneNode.glgeScene ) {
-                sceneNode.glgeScene.addCollada( node.glgeObject );
-            }
-             
-        }
+        else if ( sceneNode && sceneNode.glgeScene )
+            sceneNode.glgeScene.addCollada( node.glgeObject );
     }
 
 
@@ -859,7 +892,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     var glgeModel = this;
 
                     sceneNode.xmlColladaObjects.push( children[i] );
-                    setupColladaCallback.call( this, children[i], sceneNode );
+                    setColladaCallback.call( this, children[i], sceneNode );
 
                     children[i].loadedCallback = colladaLoaded;
                     sceneNode.pendingLoads++;
@@ -870,43 +903,64 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }
 
 
-    // -- setupColladaCallback ------------------------------------------------------------------------
+    // -- setColladaCallback ------------------------------------------------------------------------
 
-    function setupColladaCallback( glgeCollada, scene ) {
+    function setColladaCallback( glgeColladaObject, sceneNode, propertyNotifyCallback ) {
 
-        var glgeModel = this;
-        var sceneNode = scene;
-        function colladaLoaded( collada ) { 
+        var self = this;
+
+        // Update the number of pending loads on the scene node
+        // This information is just for our own knowledge; it is not used anywhere
+        // (But double-check to make sure no one has added a reference before you do anything drastic)
+        sceneNode.pendingLoads++;
+
+        // Set the callback as defined below
+        glgeColladaObject.loadedCallback = colladaLoaded;
+
+        function colladaLoaded( colladaObject ) {
+
+            // Undo default GLGE rotation applied in GLGE.Collada.initVisualScene that adjusts for +Y up
+            colladaObject.setRot( 0, 0, 0 );
+
+            // Update the number of pending loads on the scene node
+            // This information is just for our own knowledge; it is not used anywhere
+            // (But double-check to make sure no one has added a reference before you do anything drastic)
             sceneNode.pendingLoads--;
-            collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
-            var bRemoved = false;
-            for ( var j = 0; j < sceneNode.xmlColladaObjects.length; j++ ) {
-                if ( sceneNode.xmlColladaObjects[j] == collada ){
-                    sceneNode.xmlColladaObjects.splice( j, 1 );
-                    bRemoved = true;
-                }
-            } 
-            if ( bRemoved ){
-                if ( sceneNode.xmlColladaObjects.length == 0 ) {
-                    //this.kernel.setProperty( modelID, "loadDone", true );
-                    loadComplete.call( glgeModel );
+
+            // Now that this object has loaded, remove it from the list of objects to be loaded            
+            var removedFromLoadList = false;
+            for ( var i = 0; !removedFromLoadList && i < sceneNode.srcColladaObjects.length; i++ ) {
+                if ( sceneNode.srcColladaObjects[ i ] == colladaObject ){
+                    sceneNode.srcColladaObjects.splice( i, 1 );
+                    removedFromLoadList = true;
                 }
             }
-            var id = collada.vwfID;
-            if ( !id ) id = getObjectID.call( glgeModel, collada, true, false );
-            if ( id && id != "" ){
-                //glgeModel.kernel.callMethod( id, "loadComplete" );
-                if ( glgeModel.state.nodes[id] ) {
-                    var colladaNode = glgeModel.state.nodes[id];
-                    if ( colladaNode.loadingCollada ) {
-                        colladaNode.loadingCollada( true );                    
-                    }
+            for ( var i = 0; !removedFromLoadList && i < sceneNode.xmlColladaObjects.length; i++ ) {
+                if ( sceneNode.xmlColladaObjects[ i ] == colladaObject ){
+                    sceneNode.xmlColladaObjects.splice( i, 1 );
+                    removedFromLoadList = true;
+                }
+            }
+
+            // Since prototypes are created before the object, it does not get "setProperty" updates for
+            // its prototype (and behavior) properties.  Therefore, we cycle through those properties to
+            // notify the drivers of the property values so they can react accordingly
+            // TODO: Have the kernel send the "setProperty" updates itself so the driver need not
+            if ( propertyNotifyCallback )
+                propertyNotifyCallback();
+
+            // If the VWF node for the newly loaded collada has a callback function, call it
+            // TODO: Since the callback resumes the queue, maybe we should not call it if there are still
+            //       objects to be loaded
+            var id = colladaObject.vwfID || getObjectID.call( self, colladaObject, true, false );
+            if ( id && ( id != "" ) ) {
+                var colladaNode = self.state.nodes[ id ];
+                if ( colladaNode && colladaNode.loadedCallback ) {
+                    colladaNode.loadedCallback( true );                    
                 }
             }
         }
-        glgeCollada.loadedCallback = colladaLoaded;
-        sceneNode.pendingLoads++;
-
+        return colladaLoaded;
     }
 
     // -- findColladaParent ------------------------------------------------------------------------
@@ -945,7 +999,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         if ( sceneNode && sceneNode.glgeScene ) {
             switch ( propertyName ) {
                 case "ambientColor":
-                    sceneNode.glgeScene.setAmbientColor( propertyValue );
+                    if ( propertyValue )
+                        sceneNode.glgeScene.setAmbientColor( propertyValue );
+                    else
+                        this.logger.warn( "Invalid ambient color");
                     break;
                 case "activeCamera":
                         if ( this.state.nodes[ propertyValue ] ) {
@@ -953,7 +1010,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         }
                     break;
                 case "backgroundColor":
-                    sceneNode.glgeScene.setBackgroundColor( propertyValue );
+                    if ( propertyValue )
+                        sceneNode.glgeScene.setBackgroundColor( propertyValue );
+                    else
+                        this.logger.warn( "Invalid background color");
                     break;
 
                 default:
@@ -994,37 +1054,53 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 node.glgeObject.setLoop( propertyValue );
                 break;
             case "velocity":
-                node.glgeObject.setVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
                 break;
             case "maxVelocity":
-                node.glgeObject.setMaxVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setMaxVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
                 break;            
             case "minVelocity":
-                node.glgeObject.setMinVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setMinVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
                 break;    
             case "startAcceleration":
-                node.glgeObject.setStartAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setStartAccelertaion( propertyValue[0], propertyValue[1], 
+                                                          propertyValue[2] );
                 break;
             case "endAcceleration":
-                node.glgeObject.setEndAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setEndAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
                 break;
             case "maxStartAcceleration":
-                node.glgeObject.setMaxStartAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setMaxStartAccelertaion( propertyValue[0], propertyValue[1], 
+                                                             propertyValue[2] );
                 break;
             case "maxEndAcceleration":
-                node.glgeObject.setMaxEndAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setMaxEndAccelertaion( propertyValue[0], propertyValue[1], 
+                                                           propertyValue[2] );
                 break;
             case "minStartAcceleration":
-                node.glgeObject.setMinStartAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setMinStartAccelertaion( propertyValue[0], propertyValue[1], 
+                                                             propertyValue[2] );
                 break;
             case "minEndAcceleration":
-                node.glgeObject.setMinEndAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setMinEndAccelertaion( propertyValue[0], propertyValue[1], 
+                                                           propertyValue[2] );
                 break;
             case "startColor":
-                node.glgeObject.setStartColor( propertyValue );
+                if ( propertyValue )
+                    node.glgeObject.setStartColor( propertyValue );
                 break;
             case "endColor":
-                node.glgeObject.setEndColor( propertyValue );
+                if ( propertyValue )
+                    node.glgeObject.setEndColor( propertyValue );
                 break;
             case "image":
                 node.glgeObject.setImage( propertyValue );
@@ -1067,7 +1143,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 node.glgeObject.setFovY( Number( propertyValue ) );
                 break;            
             case "aspect":
-                node.glgeObject.setAspect( Number( propertyValue ) );
+                
+                // If the propertyValue is real, set it
+                // Else, it will be set to be the aspect ratio of the GLGE canvas
+                if ( propertyValue )
+                    node.glgeObject.setAspect( Number( propertyValue ) );
                 break;            
 //            case "orthoscale":
 //                if ( propertyValue ) { 
@@ -1264,27 +1344,27 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 }
                 break;
 
-            case "constantAttenuation":
+            case "glge-constantAttenuation":
                 node.glgeObject.setAttenuationConstant( propertyValue );
                 break;
 
-            case "linearAttenuation":
+            case "glge-linearAttenuation":
                 node.glgeObject.setAttenuationLinear( propertyValue );
                 break;
 
-            case "quadraticAttenuation":
+            case "glge-quadraticAttenuation":
                 node.glgeObject.setAttenuationQuadratic( propertyValue );
                 break;
 
-            case "spotCosCutOff":
+            case "glge-spotCosCutOff":
                 node.glgeObject.setSpotCosCutOff( propertyValue );
                 break;
 
-            case "spotCutOff":
+            case "glge-spotCutOff":
                 node.glgeObject.setSpotCutOff( propertyValue );
                 break;
 
-            case "spotExponent":
+            case "glge-spotExponent":
                 node.glgeObject.setSpotExponent( propertyValue );
                 break;
 
@@ -1293,30 +1373,31 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 break;
 
             case "diffuse":
-                node.glgeObject.diffuse = propertyValue; // no setDiffuse() in GLGE 0.7
+                node.glgeObject.setColor(propertyValue); // no setDiffuse() in GLGE 0.7
                 break;
 
             case "specular":
+            case "glge-specular":
                 node.glgeObject.specular = propertyValue; // no setSpecular() in GLGE 0.7
                 break;
 
-            case "samples":
+            case "glge-samples":
                 node.glgeObject.setShadowSamples( propertyValue );
                 break;
 
-            case "softness":
+            case "glge-softness":
                 node.glgeObject.setShadowSoftness( propertyValue );
                 break;
 
-            case "bufferHeight":
+            case "glge-bufferHeight":
                 node.glgeObject.setBufferHeight( propertyValue );
                 break;
 
-            case "bufferWidth":
+            case "glge-bufferWidth":
                 node.glgeObject.setBufferWidth( propertyValue );
                 break;
 
-            case "shadowBias":
+            case "glge-shadowBias":
                 node.glgeObject.setShadowBias( propertyValue );
                 break;
 
@@ -1328,15 +1409,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 node.glgeObject.setCastShadows( propertyValue );
                 break;
 
-            case "spotSoftness":
+            case "glge-spotSoftness":
                 node.glgeObject.setSpotSoftness( propertyValue );
                 break;
 
-            case "spotSoftnessDistance":
+            case "glge-spotSoftnessDistance":
                 node.glgeObject.setSpotSoftDistance( propertyValue );
                 break;
 
-            case "cascadeLevels":
+            case "glge-cascadeLevels":
                 node.glgeObject.setCascadeLevels( propertyValue );
                 break;
 
@@ -1597,26 +1678,26 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 }
                 break;
 
-            case "constantAttenuation":
+            case "glge-constantAttenuation":
                 temp = node.glgeObject.getAttenuation();
                 value = temp.constant;
                 break;
 
-            case "linearAttenuation":
+            case "glge-linearAttenuation":
                 temp = node.glgeObject.getAttenuation();
                 value = temp.linear;
                 break;
 
-            case "quadraticAttenuation":
+            case "glge-quadraticAttenuation":
                 temp = node.glgeObject.getAttenuation();
                 value = temp.quadratic;
                 break;
 
-            case "spotCosCutOff":
+            case "glge-spotCosCutOff":
                 value = node.glgeObject.getSpotCosCutOff();
                 break;
 
-            case "spotCutOff":
+            case "glge-spotCutOff":
                 node.glgeObject.getSpotCutOff( propertyValue );
                 break;
 
@@ -1633,27 +1714,27 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 value = node.glgeObject.diffuse; // no getDiffuse() in GLGE 0.7
                 break;
 
-            case "specular":
+            case "glge-specular":
                 value = node.glgeObject.specular; // no getSpecular() in GLGE 0.7
                 break;
 
-            case "samples":
+            case "glge-samples":
                 value = node.glgeObject.getShadowSamples();
                 break;
 
-            case "softness":
+            case "glge-softness":
                 value = node.glgeObject.getShadowSoftness();
                 break;
 
-            case "bufferHeight":
+            case "glge-bufferHeight":
                 value = node.glgeObject.getBufferHeight();
                 break;
 
-            case "bufferWidth":
+            case "glge-bufferWidth":
                 value = node.glgeObject.getBufferWidth();
                 break;
 
-            case "shadowBias":
+            case "glge-shadowBias":
                 value = node.glgeObject.getShadowBias();
                 break;
 
@@ -1665,15 +1746,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 value = node.glgeObject.getCastShadows();
                 break;
 
-            case "spotSoftness":
+            case "glge-spotSoftness":
                 value = node.glgeObject.getSpotSoftness();
                 break;
                 
-            case "spotSoftnessDistance":
+            case "glge-spotSoftnessDistance":
                 value = node.glgeObject.getSpotSoftDistance();
                 break;                
 
-            case "cascadeLevels":
+            case "glge-cascadeLevels":
                 value = node.glgeObject.getCascadeLevels();
                 break;
 
@@ -1727,7 +1808,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     // -- findGlgeObject ------------------------------------------------------------------------------
 
-    function findGlgeObject( objName, type ) {
+    function findGlgeObject( objName, type, prototypes ) {
 
         var obj = undefined;
         var assetObj = undefined;
@@ -2087,6 +2168,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         vwfColor['g'] = color['g']*255;
         vwfColor['b'] = color['b']*255;                                
         if ( color['a'] !== undefined && color['a'] != 1 ) {
+            vwfColor['a'] = color['a'];
             vwfColor = new utility.color( "rgba("+vwfColor['r']+","+vwfColor['g']+","+vwfColor['b']+","+vwfColor['a']+")" );
         } else {
             vwfColor = new utility.color( "rgb("+vwfColor['r']+","+vwfColor['g']+","+vwfColor['b']+")" );
@@ -2127,9 +2209,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         return vertexIndices;
     }
 
-    function loadComplete() {
-    }
-
     // get the list of types this ID extends
 
     function getPrototypes( kernel, extendsID ) {
@@ -2143,6 +2222,21 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 
         return prototypes;
     }
+
+    function isPrototype( nodeID, childID ) {
+        var ptID;
+        if ( ( nodeID == 0 && childID != this.kernel.application() ) || this.state.prototypes[ nodeID ] !== undefined ) {
+            if ( nodeID != 0 || childID != this.kernel.application() ) {
+                ptID = nodeID ? nodeID : childID;
+                if ( this.state.prototypes[ ptID ] !== undefined ) {
+                    ptID = childID;
+                }
+                return ptID;
+            } 
+        }
+        return undefined;
+    }
+
 
     function isGlgeSceneDefinition( prototypes ) {
         var foundGlge = false;
@@ -2224,17 +2318,19 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     // Search a GLGE.Object, GLGE.Collada, GLGE.Light for a child with the given name.  TODO: really, it's anything with children[]; could be the same as glgeSceneChild().
 
-    function glgeObjectChild( glgeObject, childName, childType ) {
+    function glgeObjectChild( glgeObject, childName, childType, prototypes, recursive ) {
         
         var childToReturn = jQuery.grep( glgeObject.children || [], function ( glgeChild ) {
             return (glgeChild.colladaName || glgeChild.colladaId || glgeChild.name || glgeChild.id || "") == childName;
         }).shift();
 
         // to slow, and may bind to the incorrect object
-        //if ( !childToReturn ) {
-        //    childToReturn = findGlgeObject.call( this, childName, childType );
-        //}
-        //this.logger.info("      glgeObjectChild( " + childName + " ) returns " + childToReturn);
+        if ( recursive && childToReturn === undefined ) {
+            if ( glgeObject.children ) {
+            for ( var i = 0; i < glgeObject.children.length && childToReturn === undefined; i++ )
+                childToReturn = glgeObjectChild.call( this, glgeObject.children[i], childName, childType, prototypes, recursive );
+            }
+        }
         return childToReturn;
 
     }
@@ -2318,7 +2414,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }
 
     function createMesh( node ) {
-        //console.info( "createMesh( "+node.name+" )" );
         if ( !node.glgeParent ) {
             node.glgeParent = this.state.nodes[ node.parentID ];    
         }
@@ -2357,7 +2452,70 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             node.glgeObject.addObject( obj );
         }        
     }
-
+			
+	function BuildBox(size,offset,color)
+	{
+		
+		var hx = size[0]/2;
+		var hy = size[1]/2;
+		var hz = size[2]/2;
+		
+		var ox = offset[0];
+		var oy = offset[1];
+		var oz = offset[2];
+		
+		var planemesh = new GLGE.Mesh();
+		var planeobj = new GLGE.Object();
+		planeobj.setMesh(planemesh);
+		
+		var positions = [
+		hx + ox,hy + oy,hz + oz, 
+		hx + ox,hy + oy,-hz + oz, 
+		hx + ox,-hy + oy,hz + oz, 
+		hx + ox,-hy + oy,-hz + oz,
+		-hx + ox,hy + oy,hz + oz,
+		-hx + ox,hy + oy,-hz + oz, 
+		-hx + ox,-hy + oy,hz + oz, 
+		-hx + ox,-hy + oy,-hz + oz
+		];
+		
+		var colors = [];
+		for(var i = 0; i < (positions.length/3); i++)
+		{	colors.push(color[0]);
+			colors.push(color[1]);
+			colors.push(color[2]);
+			colors.push(color[3]);
+		}
+		
+		var indexes = [0,2,6,6,4,0,1,3,7,7,5,1,0,1,3,3,2,0,4,5,7,7,6,4,0,1,5,5,4,0,2,3,7,7,6,2];
+		
+		planemesh.setPositions(positions);
+		planemesh.setVertexColors(colors);
+		planemesh.setFaces(indexes);
+		
+		var mat = new GLGE.Material();
+		
+		planeobj.setPickable(true);
+		planeobj.setMaterial(mat);
+		mat.setVertexColorMode(GLGE.VC_MUL);
+		//mat.setColor(color);
+		//mat.setEmit(color);
+		//mat.setShadeless(true);
+		//mat.setAmbient([.5,.5,.5,1]);
+		return planeobj;
+	}
+	function BuildAxis()
+	{	
+		var red = [1,.55,.55,1];
+		var green = [.55,1,.55,1];
+		var blue = [.55,.55,1,1];
+		
+		var MoveGizmo = new GLGE.Group();
+		MoveGizmo.addChild(BuildBox([1,.030,.030],[.5,0,0],red));               //move x
+		MoveGizmo.addChild(BuildBox([.030,1,.030],[0,.5,0],green));//move y
+		MoveGizmo.addChild(BuildBox([.030,.030,1],[0,0,.5],blue));//move z
+		return MoveGizmo;
+	}
     function addGlgeChild( parentID, childID ) {
         
         var glgeParent;

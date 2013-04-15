@@ -63,17 +63,29 @@ children:
             extends: http://vwf.example.com/node3.vwf
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
-      quadraticAttenuation: 10
-      specular: false # the highlights are way too hot (materials or light?)
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
+      castShadows: false
+      glge-quadraticAttenuation: 10
+      glge-specular: false # the highlights are way too hot (materials or light?)
       rotation: [ 1, 0, 0, -10 ]
   dir2:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
-      quadraticAttenuation: 10
-      specular: false # the highlights are way too hot (materials or light?)
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
+      castShadows: false
+      glge-quadraticAttenuation: 10
+      glge-specular: false # the highlights are way too hot (materials or light?)
       rotation: [ -1, 0, 0, 200 ]
 methods:
   drive:

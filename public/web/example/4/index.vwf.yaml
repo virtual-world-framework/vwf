@@ -10,20 +10,20 @@ children:
       rotation: [ 0, 0, 1, 180 ]
       scale: 1
     children:
-      HelloTextMaterial1:
+      material:
         extends: http://vwf.example.com/material.vwf
         properties: 
           texture: “images/red.png”
     scripts:
     - |
         this.pointerClick = function() {
-          if( this.HelloTextMaterial1.texture == "images/red.png" )
+          if( this.material.texture == "images/red.png" )
           {
-            this.HelloTextMaterial1.texture = "images/blue.png";
+            this.material.texture = "images/blue.png";
           }
           else
           {
-            this.HelloTextMaterial1.texture = "images/red.png";
+            this.material.texture = "images/red.png";
           }
         }
   world: 
@@ -35,26 +35,26 @@ children:
       rotation: [ 0, 0, 1, 180 ]
       scale: 1
     children:
-      WorldTextMaterial1:
+      material:
         extends: http://vwf.example.com/material.vwf
         properties: 
           texture: “images/blue.png”
     scripts:
     - |
         this.pointerClick = function() {
-          if( this.WorldTextMaterial1.texture == "images/red.png" )
+          if( this.material.texture == "images/red.png" )
           {
-            this.WorldTextMaterial1.texture = "images/blue.png";
+            this.material.texture = "images/blue.png";
           }
           else
           {
-            this.WorldTextMaterial1.texture = "images/red.png";
+            this.material.texture = "images/red.png";
           }
         }
 scripts:
 - |
     this.initialize = function() {
       this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,0,5,0,1 ];
-      this.hello.HelloTextMaterial1.texture = "images/red.png";
-      this.world.WorldTextMaterial1.texture = "images/blue.png";
+      this.hello.material.texture = "images/red.png";
+      this.world.material.texture = "images/blue.png";
     }

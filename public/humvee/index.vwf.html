@@ -34,10 +34,18 @@
       }
 
       vwf_view.calledMethod = function (nodeId, methodName, methodParameters, methodValue) {
-        if(methodName == "switchCameraView") {
-          $("#" + methodParameters[0]).attr("checked", true);
-          $("#exterior").button("refresh");
-          $("#interior").button("refresh");
+        switch(methodName) {
+          case "switchCameraView":
+            $("#" + methodParameters[0]).attr("checked", true);
+            $("#exterior").button("refresh");
+            $("#interior").button("refresh");
+            break;
+          case "honkHorn":
+            $('#honk')[0].play();
+            break;
+          case "startEngine":
+            $('#ignition')[0].play();
+            break;
         }
       }
 
@@ -50,6 +58,12 @@
         <input type="radio" id="interior" name="cameraSetting" onclick="changeCameraLocation('interior')"/><label for="interior">Interior</label>
       </div>
     </div>
+    <audio id='honk'>
+      <source src="honk.wav"></source>
+    </audio>
+    <audio id='ignition'>
+      <source src="ignition.wav"></source>
+    </audio>
     <script type="text/javascript">
       $('#wrapper').appendTo('#vwf-root');
     </script>

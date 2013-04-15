@@ -212,8 +212,8 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- prototypes ---------------------------------------------------------------------------
 
-        prototypes: function( node ) {
-            return this.kernel.prototypes( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        prototypes: function( node, includeBehaviors ) {
+            return this.kernel.prototypes( this.model_to_kernel[this.object_id(node)] || node, includeBehaviors ); // TODO remap return value
         },
 
         // -- behaviors ----------------------------------------------------------------------------
@@ -224,14 +224,14 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- ancestors ----------------------------------------------------------------------------
 
-        ancestors: function( node ) {
-            return this.kernel.ancestors( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        ancestors: function( node, initializedOnly ) {
+            return this.kernel.ancestors( this.model_to_kernel[this.object_id(node)] || node, initializedOnly ); // TODO remap return value
         },
 
         // -- parent -------------------------------------------------------------------------------
 
-        parent: function( node ) {
-            return this.kernel.parent( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        parent: function( node, initializedOnly ) {
+            return this.kernel.parent( this.model_to_kernel[this.object_id(node)] || node, initializedOnly ); // TODO remap return value
         },
 
         // -- children -----------------------------------------------------------------------------
@@ -248,16 +248,16 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- find ---------------------------------------------------------------------------------
 
-        find: function( node, matchPattern, callback /* ( matchID ) */ ) { // TODO remap return value and callback parameter
+        find: function( node, matchPattern, initializedOnly, callback /* ( matchID ) */ ) { // TODO remap return value and callback parameter (initializedOnly is optional and callback may be third argument)
             return this.kernel.find( this.model_to_kernel[this.object_id(node)] || node,
-                matchPattern, callback );
+                matchPattern, initializedOnly, callback );
         },
 
         // -- test ---------------------------------------------------------------------------------
 
-        test: function( node, matchPattern, test ) {
+        test: function( node, matchPattern, test, initializedOnly ) {
             return this.kernel.test( this.model_to_kernel[this.object_id(node)] || node,
-                matchPattern, this.model_to_kernel[this.object_id(test)] || test );
+                matchPattern, this.model_to_kernel[this.object_id(test)] || test, initializedOnly );
         },
 
         // == Model API ============================================================================

@@ -10,7 +10,7 @@ children:
       rotation: [ 0, 0, 1, 180 ]
       scale: 1
     children:
-      HelloTextMaterial1:
+      material:
         extends: http://vwf.example.com/material.vwf
         properties: 
           texture: “images/red.png”
@@ -23,7 +23,7 @@ children:
       rotation: [ 0, 0, 1, 180 ]
       scale: 1
     children:
-      WorldTextMaterial1:
+      material:
         extends: http://vwf.example.com/material.vwf
         properties: 
           texture: “images/blue.png”

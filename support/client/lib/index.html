@@ -86,6 +86,11 @@
                 application = parameters;
             }
             else {
+                try {
+                    parameters = JSON.parse(parameters);
+                }
+                catch(e) {
+                }
                 userLibraries["model"]["vwf/model/" + key] = (parameters && parameters != "") ? parameters : undefined;
             }
         }
@@ -93,6 +98,11 @@
         while(match = regex.exec(hashString)) {
             var key = $.encoder.canonicalize(match[1]);
             var parameters = $.encoder.canonicalize(match[2]);
+            try {
+                parameters = JSON.parse(parameters);
+            }
+            catch(e) {
+            }
             userLibraries["view"]["vwf/view/" + key] = (parameters && parameters != "") ? parameters : undefined;
             if(key == "google-earth") {
                 googleEarth = true;
@@ -105,12 +115,12 @@
     
     <script type="text/javascript">
         vwf.loadConfiguration(application, userLibraries);
+
     </script>
 
     <!-- This is the common view implementation and an example view that summarizes the          -->
     <!-- simulation state in HTML on the main page.                                              -->
-    <!--<script type="text/javascript" src="vwf/model/glge/glge-compiled.js"></script>
-    <script type="text/javascript" src="vwf/model/jiglib/jiglib.js"></script>-->
+
  	<link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
     <link rel="stylesheet" type="text/css" href="index.css" />
     <link rel="stylesheet" type="text/css" href="vwf/view/editor/editor.css" />

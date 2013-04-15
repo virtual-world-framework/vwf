@@ -148,9 +148,9 @@ VWF also defines several dispatched events. These are triggered when outside act
 * keyUp
 * pointerClick
 * pointerDown
-* pointerEnter
+* pointerOver
 * pointerHover
-* pointerLeave
+* pointerOut
 * pointerMove
 * pointerUp
 * pointerWheel

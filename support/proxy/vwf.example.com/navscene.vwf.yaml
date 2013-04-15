@@ -87,7 +87,7 @@ events:
   pointerDown:
   pointerUp:
   pointerMove:
-  pointerLeave:
+  pointerOut:
   pointerWheel:
 
 methods:
@@ -253,7 +253,7 @@ scripts:
       } 
       this.input.lastInputTime = this.time;   
     }
-    this.pointerLeave = function( parms ){
+    this.pointerOut = function( parms ){
       this.input.lastPointerInfo = this.input.pointerInfo;
       this.input.pointerInfo = undefined;
       this.input.lastPickInfo = this.input.pickInfo;
@@ -365,6 +365,7 @@ scripts:
               this.logger.info( " quaternion: [ " + Array.prototype.slice.call( this.activeCameraComp.quaternion ) + " ]" );              
               this.logger.info( "   rotation: [ " + Array.prototype.slice.call( this.activeCameraComp.rotation ) + " ]" );
               this.logger.info( "  transform: [ " + Array.prototype.slice.call( this.activeCameraComp.transform )  + " ]" );
+              this.logger.info( "  worldTransform: [ " + Array.prototype.slice.call( this.activeCameraComp.worldTransform )  + " ]" );
               this.logger.enabled = temp;
               break;
             case 88: // x

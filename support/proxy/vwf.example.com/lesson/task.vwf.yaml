@@ -97,6 +97,13 @@ events:
 
   exiting:
 
+  ## Event fired on the task to let it and others know that the camera transform is complete
+  ## 
+  ## @name task.vwf#cameraTransformComplete
+  ## @event
+
+  cameraTransformComplete:
+
 scripts:
 - |
   this.scene;
@@ -134,6 +141,7 @@ scripts:
             if ( camera ) {
               var duration = 2;
               camera.worldTransformTo( newCameraPose.worldTransform, duration);
+              this.in(duration).cameraTransformComplete();
             }
             else
               console.error( "Could not find camera - to move the 3D camera using cameraPose, make sure the " +

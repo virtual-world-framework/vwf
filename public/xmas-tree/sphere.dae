@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>chadwickr</author>
+      <authoring_tool>COLLADAMax NextGen;  Version: 0.9.5;  Revision: 447;  Platform: Win32;  Configuration: Release Max2010</authoring_tool>
+    </contributor>
+    <created>2012-10-31T16:32:45</created>
+    <modified>2012-10-31T16:32:45</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_effects>
+    <effect id="ColorEffectR0G0B0">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0 0 0 1</color>
+            </diffuse>
+            <specular>
+              <color>1 1 1 1</color>
+            </specular>
+            <shininess>
+              <float>10</float>
+            </shininess>
+            <reflective>
+              <color>0 0 0 1</color>
+            </reflective>
+            <transparent>
+              <color>1 1 1 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="ColorEffectR6G134B58">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <ambient>
+              <color>0.0235294 0.52549 0.227451 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.0235294 0.52549 0.227451 1</color>
+            </diffuse>
+            <specular>
+              <color>1 1 1 1</color>
+            </specular>
+            <shininess>
+              <float>10</float>
+            </shininess>
+            <reflective>
+              <color>0 0 0 1</color>
+            </reflective>
+            <transparent>
+              <color>1 1 1 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_materials>
+    <material id="ColorEffectR0G0B0-material" name="ColorEffectR0G0B0-material">
+      <instance_effect url="#ColorEffectR0G0B0"/>
+    </material>
+    <material id="ColorEffectR6G134B58-material" name="ColorEffectR6G134B58-material">
+      <instance_effect url="#ColorEffectR6G134B58"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="geom-Sphere01" name="Sphere01">
+      <mesh>
+        <source id="geom-Sphere01-positions">
+          <float_array id="geom-Sphere01-positions-array" count="87">0 0 2 -5.61943e-008 1.28558 1.53209 -0.826352 0.984808 1.53209 -1.26604 0.223238 1.53209 -1.11334 -0.642788 1.53209 -0.439693 -1.20805 1.53209 0.439693 -1.20805 1.53209 1.11334 -0.642788 1.53209 1.26604 0.223237 1.53209 0.826352 0.984807 1.53209 -8.60946e-008 1.96962 0.347296 -1.26604 1.50881 0.347296 -1.93969 0.34202 0.347296 -1.70574 -0.984808 0.347296 -0.673648 -1.85083 0.347296 0.673648 -1.85083 0.347296 1.70574 -0.984808 0.347296 1.93969 0.342019 0.347296 1.26605 1.50881 0.347296 -7.57103e-008 1.73205 -1 -1.11334 1.32683 -1 -1.70574 0.300767 -1 -1.5 -0.866026 -1 -0.592396 -1.6276 -1 0.592396 -1.6276 -1 1.5 -0.866026 -1 1.70574 0.300767 -1 1.11334 1.32683 -1 0 0 -2</float_array>
+          <technique_common>
+            <accessor source="#geom-Sphere01-positions-array" count="29" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom-Sphere01-normals">
+          <float_array id="geom-Sphere01-normals-array" count="87">-2.30624e-008 0 1 5.46754e-008 0.683002 0.730416 -0.439025 0.52321 0.730416 -0.672626 0.118602 0.730416 -0.591497 -0.341501 0.730416 -0.2336 -0.641812 0.730416 0.2336 -0.641812 0.730416 0.591497 -0.341501 0.730416 0.672626 0.118602 0.730416 0.439026 0.52321 0.730416 5.7514e-008 0.986769 0.16213 -0.634283 0.755909 0.16213 -0.971778 0.171351 0.16213 -0.854567 -0.493385 0.16213 -0.337495 -0.92726 0.16213 0.337495 -0.92726 0.16213 0.854567 -0.493385 0.16213 0.971778 0.17135 0.16213 0.634283 0.755909 0.16213 9.14291e-008 0.845573 -0.53386 -0.543524 0.647746 -0.53386 -0.832727 0.146832 -0.53386 -0.732287 -0.422786 -0.53386 -0.289203 -0.794578 -0.53386 0.289203 -0.794578 -0.53386 0.732287 -0.422787 -0.53386 0.832727 0.146832 -0.53386 0.543524 0.647746 -0.53386 -2.42329e-008 2.58485e-008 -1</float_array>
+          <technique_common>
+            <accessor source="#geom-Sphere01-normals-array" count="29" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom-Sphere01-map-channel1">
+          <float_array id="geom-Sphere01-map-channel1-array" count="150">0 1 0 0.111111 1 0 0.222222 1 0 0.333333 1 0 0.444444 1 0 0.555556 1 0 0.666667 1 0 0.777778 1 0 0.888889 1 0 1 1 0 0 0.777778 0 0.111111 0.777778 0 0.222222 0.777778 0 0.333333 0.777778 0 0.444444 0.777778 0 0.555556 0.777778 0 0.666667 0.777778 0 0.777778 0.777778 0 0.888889 0.777778 0 1 0.777778 0 0 0.555556 0 0.111111 0.555556 0 0.222222 0.555556 0 0.333333 0.555556 0 0.444444 0.555556 0 0.555556 0.555556 0 0.666667 0.555556 0 0.777778 0.555556 0 0.888889 0.555556 0 1 0.555556 0 0 0.333333 0 0.111111 0.333333 0 0.222222 0.333333 0 0.333333 0.333333 0 0.444444 0.333333 0 0.555556 0.333333 0 0.666667 0.333333 0 0.777778 0.333333 0 0.888889 0.333333 0 1 0.333333 0 0 0.111111 0 0.111111 0.111111 0 0.222222 0.111111 0 0.333333 0.111111 0 0.444444 0.111111 0 0.555556 0.111111 0 0.666667 0.111111 0 0.777778 0.111111 0 0.888889 0.111111 0 1 0.111111 0</float_array>
+          <technique_common>
+            <accessor source="#geom-Sphere01-map-channel1-array" count="50" stride="3">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+              <param name="P" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="geom-Sphere01-vertices">
+          <input semantic="POSITION" source="#geom-Sphere01-positions"/>
+        </vertices>
+        <triangles material="ColorMaterial" count="54">
+          <input semantic="VERTEX" source="#geom-Sphere01-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-Sphere01-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-Sphere01-map-channel1" offset="2" set="1"/>
+          <p>0 0 0 1 1 10 2 2 11 0 0 1 2 2 11 3 3 12 0 0 2 3 3 12 4 4 13 0 0 3 4 4 13 5 5 14 0 0 4 5 5 14 6 6 15 0 0 5 6 6 15 7 7 16 0 0 6 7 7 16 8 8 17 0 0 7 8 8 17 9 9 18 0 0 8 9 9 18 1 1 19 1 1 10 10 10 20 11 11 21 1 1 10 11 11 21 2 2 11 2 2 11 11 11 21 12 12 22 2 2 11 12 12 22 3 3 12 3 3 12 12 12 22 13 13 23 3 3 12 13 13 23 4 4 13 4 4 13 13 13 23 14 14 24 4 4 13 14 14 24 5 5 14 5 5 14 14 14 24 15 15 25 5 5 14 15 15 25 6 6 15 6 6 15 15 15 25 16 16 26 6 6 15 16 16 26 7 7 16 7 7 16 16 16 26 17 17 27 7 7 16 17 17 27 8 8 17 8 8 17 17 17 27 18 18 28 8 8 17 18 18 28 9 9 18 9 9 18 18 18 28 10 10 29 9 9 18 10 10 29 1 1 19 10 10 20 19 19 30 20 20 31 10 10 20 20 20 31 11 11 21 11 11 21 20 20 31 21 21 32 11 11 21 21 21 32 12 12 22 12 12 22 21 21 32 22 22 33 12 12 22 22 22 33 13 13 23 13 13 23 22 22 33 23 23 34 13 13 23 23 23 34 14 14 24 14 14 24 23 23 34 24 24 35 14 14 24 24 24 35 15 15 25 15 15 25 24 24 35 25 25 36 15 15 25 25 25 36 16 16 26 16 16 26 25 25 36 26 26 37 16 16 26 26 26 37 17 17 27 17 17 27 26 26 37 27 27 38 17 17 27 27 27 38 18 18 28 18 18 28 27 27 38 19 19 39 18 18 28 19 19 39 10 10 29 28 28 40 20 20 31 19 19 30 28 28 41 21 21 32 20 20 31 28 28 42 22 22 33 21 21 32 28 28 43 23 23 34 22 22 33 28 28 44 24 24 35 23 23 34 28 28 45 25 25 36 24 24 35 28 28 46 26 26 37 25 25 36 28 28 47 27 27 38 26 26 37 28 28 48 19 19 39 27 27 38</p>
+        </triangles>
+      </mesh>
+      <extra>
+        <technique profile="3dsMAX">
+          <max_sphere>
+            <generateuvs>1</generateuvs>
+            <hemisphere>0</hemisphere>
+            <radius>2</radius>
+            <recenter>0</recenter>
+            <segments>9</segments>
+            <slicefrom>0</slicefrom>
+            <sliceon>0</sliceon>
+            <sliceto>0</sliceto>
+            <smooth>1</smooth>
+            <squash>0</squash>
+          </max_sphere>
+        </technique>
+      </extra>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="MaxScene">
+      <node id="node-Scene_Root" name="Scene_Root">
+        <node id="node-Sphere01" name="Sphere01">
+          <translate>-0.118059 -0.0763594 0</translate>
+          <instance_geometry url="#geom-Sphere01">
+            <bind_material>
+              <technique_common>
+                <instance_material symbol="ColorMaterial" target="#ColorEffectR6G134B58-material"/>
+              </technique_common>
+            </bind_material>
+          </instance_geometry>
+        </node>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#MaxScene"/>
+  </scene>
+</COLLADA>

@@ -104,7 +104,23 @@ define(function(){
 			default : 
 				switch(typeof value) {
 					case 'object' :
-						this.set(value);
+						if ( value instanceof Array ) {
+							if ( value.length == 3 ) {
+								this.red( p2v( value[0] ) );
+								this.green( p2v( value[1] ) );
+								this.blue( p2v( value[2] ) );
+								this.alpha( 1 );
+								this.output = Color.RGB;
+							} else if ( value.length == 4 ) {
+								this.red( p2v( value[0] ) );
+								this.green( p2v( value[1] ) );
+								this.blue( p2v( value[2] ) );
+								this.alpha( parseFloat( value[3] ) || 1 );
+								this.output = Color.RGBA;								
+							}
+						} else {
+							this.set( value );
+						}
 						return this;
 					case 'string' :
 						switch(true){
@@ -136,6 +152,9 @@ define(function(){
 								this.alpha(parseFloat(parts[5]) || 1);
 								this.output = parts[5] ? 6: 5; 
 								return this;
+							default:
+								console.info( "WARNING: color not parsed" );
+								break;
 						};
 				};		
 			

@@ -55,7 +55,7 @@
 
           asyncTest( "Event firing kernel", function() {
 
-            createFixture( function( nodeID ) {
+            createFixture( function( nodeID, cleanup ) {
 
               vwf.fireEvent( nodeID, "empty" );
               deepEqual( vwf.execute( nodeID, "this.result" ), { event: "empty", result: [] }, "no parameters declared, no parameters passed" );
@@ -69,7 +69,9 @@
               vwf.fireEvent( nodeID, "parameters", [ 'abc', false, 2 ] );
               deepEqual( vwf.execute( nodeID, "this.result" ), { event: "parameters", result: [ 'abc', false, 2 ] }, "parameters declared, parameters passed" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -78,7 +80,7 @@
 
           asyncTest( "Event firing JavaScript", function() {
 
-            createFixture( function( nodeID ) {
+            createFixture( function( nodeID, cleanup ) {
 
               vwf.execute( nodeID, "this.empty()" );
               deepEqual( vwf.execute( nodeID, "this.result" ), { event: "empty", result: [] }, "no parameters declared, no parameters passed" );
@@ -92,7 +94,9 @@
               vwf.execute( nodeID, "this.parameters( 'abc', false, 2 )" );
               deepEqual( vwf.execute( nodeID, "this.result" ), { event: "parameters", result: [ 'abc', false, 2 ] }, "parameters declared, parameters passed" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -101,13 +105,15 @@
 
           asyncTest( "JavaScript handler explicit context", function() {
 
-            createFixtureParentChild( function( parentID, childID, baseID ) {
+            createFixtureParentChild( function( parentID, childID, baseID, cleanup ) {
 
               vwf.execute( childID, "this.parent.base = this.events.add( function( result ) { this.result = result }, this )" );
               vwf.fireEvent( parentID, "base", [ "explicit context" ] );
               equal( vwf.execute( childID, "this.result" ), "explicit context", "invoked on child" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -116,13 +122,15 @@
 
           asyncTest( "JavaScript handler no context", function() {
 
-            createFixtureParentChild( function( parentID, childID, baseID ) {
+            createFixtureParentChild( function( parentID, childID, baseID, cleanup ) {
 
               vwf.execute( childID, "this.parent.base = this.events.add( function( result ) { this.result = result } )" );
               vwf.fireEvent( parentID, "base", [ "no context" ] );
               equal( vwf.execute( 0, "this.result" ), "no context", "invoked on global root" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -131,13 +139,15 @@
 
           asyncTest( "JavaScript handler implicit context", function() {
 
-            createFixtureParentChild( function( parentID, childID, baseID ) {
+            createFixtureParentChild( function( parentID, childID, baseID, cleanup ) {
 
               vwf.execute( childID, "this.parent.base = function( result ) { this.result = result }" );
               vwf.fireEvent( parentID, "base", [ "implicit context" ] );
               equal( vwf.execute( parentID, "this.result" ), "implicit context", "invoked on parent" ); // invoked on target
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -146,7 +156,7 @@
 
           asyncTest( "Event inheritance kernel", function() {
 
-            createFixtureDerivedBase( function( derivedID, baseID ) {
+            createFixtureDerivedBase( function( derivedID, baseID, cleanup ) {
 
               vwf.execute( derivedID, "this.derived = this.events.add( function( result ) { this.result = result }, this )" );
               vwf.execute( derivedID, "this.base = this.events.add( function( result ) { this.result = result }, this )" );
@@ -166,7 +176,9 @@
               vwf.fireEvent( baseID, "base", [ 'base-' + baseID ] );
               equal( vwf.execute( baseID, "this.result" ), "base-" + baseID, "base event from base" );
               
+              cleanup();
               start();
+
             } );
 
           } );
@@ -175,7 +187,7 @@
 
           asyncTest( "Event inheritance JavaScript direct", function() {
 
-            createFixtureDerivedBase( function( derivedID, baseID ) {
+            createFixtureDerivedBase( function( derivedID, baseID, cleanup ) {
 
               vwf.execute( derivedID, "this.derived = this.events.add( function( result ) { this.result = result }, this )" );
               vwf.execute( derivedID, "this.base = this.events.add( function( result ) { this.result = result }, this )" );
@@ -195,7 +207,9 @@
               vwf.execute( baseID, "this.base( 'base-' + this.id )" );
               equal( vwf.execute( baseID, "this.result" ), "base-" + baseID, "base event from base" );
               
+              cleanup();
               start();
+
             } );
 
           } );
@@ -204,7 +218,7 @@
 
           asyncTest( "Event inheritance JavaScript collection", function() {
 
-            createFixtureDerivedBase( function( derivedID, baseID ) {
+            createFixtureDerivedBase( function( derivedID, baseID, cleanup ) {
 
               vwf.execute( derivedID, "this.events.derived = this.events.add( function( result ) { this.result = result }, this )" );
               vwf.execute( derivedID, "this.events.base = this.events.add( function( result ) { this.result = result }, this )" );
@@ -224,7 +238,9 @@
               vwf.execute( baseID, "this.events.base( 'base-' + this.id )" );
               equal( vwf.execute( baseID, "this.result" ), "base-" + baseID, "base event from base" );
               
+              cleanup();
               start();
+
             } );
 
           } );
@@ -233,7 +249,7 @@
 
           asyncTest( "Event inheritance self-targeted handlers", function() {
 
-            createFixtureDerivedBase( function( derivedID, baseID ) {
+            createFixtureDerivedBase( function( derivedID, baseID, cleanup ) {
 
               vwf.execute( derivedID, "this.derived = function( result ) { this.result = ( this.result || [] ).concat( result + '-derived' ) }" );
               vwf.execute( derivedID, "this.base = function( result ) { this.result = ( this.result || [] ).concat( result + '-derived' ) }" );
@@ -254,7 +270,9 @@
               vwf.fireEvent( baseID, "base", [ 'base-' + baseID ] );
               deepEqual( vwf.execute( baseID, "this.result" ), [ "base-" + baseID + "-base" ], "base event from base receives handlers from base" );
               
+              cleanup();
               start();
+
             } );
 
           } );
@@ -263,7 +281,7 @@
 
           asyncTest( "Event listeners JavaScript", function() {
 
-            createFixture( function( nodeID ) {
+            createFixture( function( nodeID, cleanup ) {
 
               vwf.execute( nodeID, "this.empty = this.events.add( this.result.listener1 = function() { this.result.count1 = ( this.result.count1 || 0 ) + 5 }, this )" );
               vwf.execute( nodeID, "this.empty = this.events.add( this.result.listener2 = function() { this.result.count2 = ( this.result.count2 || 0 ) + 7 }, this )" );
@@ -305,7 +323,9 @@
               vwf.execute( nodeID, "this.empty = function() {}" );  // TODO: should invoke with this as the global object, but how to test?
               vwf.execute( nodeID, "this.empty()" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -336,7 +356,9 @@
 
             }, undefined, function( nodeID ) {
 
-                callback( nodeID );
+                callback( nodeID, function() {
+                  vwf.deleteNode( nodeID );
+                } );
 
             } );
 
@@ -371,7 +393,13 @@
 
                 }, undefined, function( childID ) {
 
-                  callback( parentID, childID, baseID );
+                  var nodes = [ parentID, childID, baseID ];
+
+                  callback( parentID, childID, baseID, function() {
+                    vwf.deleteNode( parentID );
+                    vwf.deleteNode( childID );
+                    vwf.deleteNode( baseID );
+                  } );
 
                 } );
 
@@ -401,7 +429,10 @@
 
               }, function( derivedID ) {
 
-                callback( derivedID, baseID );
+                callback( derivedID, baseID, function() {
+                  vwf.deleteNode( derivedID );
+                  vwf.deleteNode( baseID );
+                } );
 
               } );
 

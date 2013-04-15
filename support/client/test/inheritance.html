@@ -86,7 +86,7 @@
 
           asyncTest( "Property Inheritance fixture VWF", function() {
 
-            createFixtureVWF( "empty", "value", "accessor", function( fixture ) {
+            createFixtureVWF( "empty", "value", "accessor", function( fixture, cleanup ) {
 
               equal( vwf.execute( fixture.top, "this.tag" ), "top", "top tag" );
               ok( ! vwf.execute( fixture.top, "this.hasOwnProperty( 'property' )" ) ); // "empty" type
@@ -100,7 +100,9 @@
               ok( vwf.execute( fixture.bottom, "this.hasOwnProperty( 'property' )" ) ); // "accessor" type
               // ok( fixture.bottom.hasOwnProperty( "property_" ) ); // "accessor" type  // TODO: vwf/model/javascript internals
   
+              cleanup();
               start();
+
             } );
 
           } );
@@ -127,7 +129,7 @@
 
           asyncTest( "Property Inheritance VWF: empty, empty, empty", function() {
 
-            createFixtureVWF( "empty", "empty", "empty", function( fixture ) {
+            createFixtureVWF( "empty", "empty", "empty", function( fixture, cleanup ) {
 
               equal( vwf.getProperty( fixture.top, "property" ), undefined, "top before" );
               equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle before" );
@@ -139,7 +141,9 @@
               equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle after" );
               equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom after" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -162,7 +166,7 @@
 
           asyncTest( "Property Inheritance VWF: empty, empty, value", function() {
 
-            createFixtureVWF( "empty", "empty", "value", function( fixture ) {
+            createFixtureVWF( "empty", "empty", "value", function( fixture, cleanup ) {
 
               equal( vwf.getProperty( fixture.top, "property" ), "bottom", "top before" );
               equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle before" );
@@ -174,7 +178,9 @@
               equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle after" );
               equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom after" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -202,7 +208,7 @@
 
           asyncTest( "Property Inheritance VWF: empty, empty, accessor", function() {
 
-            createFixtureVWF( "empty", "empty", "accessor", function( fixture ) {
+            createFixtureVWF( "empty", "empty", "accessor", function( fixture, cleanup ) {
 
               equal( vwf.getProperty( fixture.top, "property" ), "BOTTOM", "top before" ); // via accessor on bottom
               // ok( ! fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
@@ -219,7 +225,9 @@
               equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
               equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -242,7 +250,7 @@
 
           asyncTest( "Property Inheritance VWF: value, empty, empty", function() {
 
-            createFixtureVWF( "value", "empty", "empty", function( fixture ) {
+            createFixtureVWF( "value", "empty", "empty", function( fixture, cleanup ) {
 
               equal( vwf.getProperty( fixture.top, "property" ), "top", "top before" );
               equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle before" );
@@ -254,7 +262,9 @@
               equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle after" );
               equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom after" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -277,7 +287,7 @@
 
           asyncTest( "Property Inheritance VWF: value, empty, value", function() {
 
-            createFixtureVWF( "value", "empty", "value", function( fixture ) {
+            createFixtureVWF( "value", "empty", "value", function( fixture, cleanup ) {
 
               equal( vwf.getProperty( fixture.top, "property" ), "top", "top before" );
               equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle before" );
@@ -289,7 +299,9 @@
               equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle after" );
               equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom after" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -316,7 +328,7 @@
 
           asyncTest( "Property Inheritance VWF: value, empty, accessor", function() {
 
-            createFixtureVWF( "value", "empty", "accessor", function( fixture ) {
+            createFixtureVWF( "value", "empty", "accessor", function( fixture, cleanup ) {
 
               equal( vwf.getProperty( fixture.top, "property" ), "top", "top before" );
               // ok( ! fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
@@ -332,7 +344,9 @@
               equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
               equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -361,7 +375,7 @@
 
           asyncTest( "Property Inheritance VWF: accessor, empty, empty", function() {
 
-            createFixtureVWF( "accessor", "empty", "empty", function( fixture ) {
+            createFixtureVWF( "accessor", "empty", "empty", function( fixture, cleanup ) {
 
               equal( vwf.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
               // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
@@ -379,7 +393,9 @@
               equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle after" );
               equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom after" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -408,7 +424,7 @@
 
           asyncTest( "Property Inheritance VWF: accessor, empty, value", function() {
 
-            createFixtureVWF( "accessor", "empty", "value", function( fixture ) {
+            createFixtureVWF( "accessor", "empty", "value", function( fixture, cleanup ) {
 
               equal( vwf.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
               // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
@@ -426,7 +442,9 @@
               equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle after" );
               equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom after" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -455,7 +473,7 @@
 
           asyncTest( "Property Inheritance VWF: accessor, empty, accessor", function() {
 
-            createFixtureVWF( "accessor", "empty", "accessor", function( fixture ) {
+            createFixtureVWF( "accessor", "empty", "accessor", function( fixture, cleanup ) {
 
               equal( vwf.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
               // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
@@ -473,7 +491,9 @@
               equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
               equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -588,7 +608,11 @@
                 vwf.execute( middleID, "this.tag = 'middle'" );
                 vwf.createNode( { extends: middleID, properties: topProperties }, function( topID ) {
                   vwf.execute( topID, "this.tag = 'top'" );
-                  callback( { top: topID, middle: middleID, bottom: bottomID } );
+                  callback( { top: topID, middle: middleID, bottom: bottomID }, function() {
+                    vwf.deleteNode( topID );
+                    vwf.deleteNode( middleID );
+                    vwf.deleteNode( bottomID );
+                  } );
                 } );
               } );
             } );
