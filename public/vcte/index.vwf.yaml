@@ -233,10 +233,6 @@ children:
     extends: http://vwf.example.com/node3.vwf
     source: joc/televisions.DAE
     type: model/vnd.collada+xml
-  tv_screens:
-    extends: http://vwf.example.com/node3.vwf
-    source: joc/tv_screens.DAE
-    type: model/vnd.collada+xml
 scripts:
 - |
   this.initialize = function() {
