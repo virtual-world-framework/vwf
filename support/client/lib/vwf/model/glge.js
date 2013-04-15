@@ -1257,7 +1257,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                     }                                     
                                     break;
                                 case "video":
-                                    txt = new GLGE.TextureVideo( undefined, "512", "512" );
+                                    txt = new GLGE.TextureVideo( undefined, "1024", "512" );
                                     txt.setSrc( propertyValue );
                                     ml.setScaleX( -1 );
                                     ml.setScaleY( -1 );                                    
