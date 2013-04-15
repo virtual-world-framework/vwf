@@ -179,6 +179,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     $('#message').css('display', 'none');
                     $('#startButton').css('display', 'none');
                     $('#nextButton').css('display', 'inline-block');
+                    $('a').css('color', 'white');
                     if($('#accordion').html() == '') updateLessonInstructions.call(self, this.lessonSteps);
                     $( $( $("#accordion").children('div')[0] ).children('h2')[0] ).trigger('click');
                     break;
@@ -203,6 +204,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     if($(stepDivName).length) $(stepDivName).trigger('click');
                     break;
                   case "completed":
+                    var htmlDiv = nodeId.replace(/\:/g, "_");
+                    if( $('#div--' + htmlDiv) ) $('#' + htmlDiv).css('color', 'green');
                     var numTasks = 0;
                     for (var step in this.lessonSteps) { numTasks++; }
                     var widthDelta = Math.ceil(100 / numTasks);
@@ -267,7 +270,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     function startLesson()
     {
-        if($('#accordion').html() == '') updateLessonInstructions.call(self, this.lessonSteps);
         vwf_view.kernel.callMethod(vwf.find('','/lesson')[0], 'enter', []);
     }
 
