@@ -442,6 +442,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //console.log(["       settingProperty: ",nodeID,propertyName,propertyValue]);
             if ( propertyValue !== undefined ) 
             {
+                var self = this;
                 if(threeObject instanceof THREE.Object3D)
                 {
                     if(propertyName == 'transform' || propertyName == 'localMatrix')
@@ -897,10 +898,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if(propertyValue !== "")
                         {
                             THREE.ImageUtils.loadTexture( propertyValue, undefined, function( texture ) { 
-                                threeObject.map = texture;
-                                threeObject.needsUpdate = true;                                 
-                            }, function( event ) { 
-                                this.logger.warnx( "settingProperty", nodeID, propertyName, propertyValue );
+                                    threeObject.map = texture;
+                                    threeObject.needsUpdate = true;                                 
+                                }, function( event ) { 
+                                    self.logger.warnx( "settingProperty", nodeID, propertyName, propertyValue );
                             } );
                         } else {
                             threeObject.map = null;
