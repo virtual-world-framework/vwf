@@ -207,7 +207,7 @@ children:
     type: model/vnd.collada+xml
   screen2:
     extends: http://vwf.example.com/node3.vwf
-    source: joc/screenTest.DAE
+    source: joc/screenTest.dae
     type: model/vnd.collada+xml
     properties:
       translation: [-695, 543, 33]
