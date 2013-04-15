@@ -1,2 +1,2 @@
 description:
-  The radio application allows a user to click its buttons and knobs and the radio will update its screen accordingly.  For example, clicking the top right most knob will cause the screen to turn on. Additionally, clicking the middle knob will cause the channels to change or clicking the red button will scroll through the backlight, beep function, sql, and channel functions.  The side bottom buttons can update the backlight, beep, and sql functions.  NOTE This application works best in Firefox.
+  The radio lesson application walks a user through turning the radio on and its basic operations using the VWF lesson interface.
