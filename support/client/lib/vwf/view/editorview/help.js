@@ -1,5 +1,19 @@
-define({
-	initialize:function()
+define(function(){
+
+	var HelpManager = {};
+	var isInitialized = false;
+	return {
+		getSingleton : function(){
+			if(!isInitialized)
+			{
+				initialize.call(HelpManager);
+				isInitialized = true;
+				
+			}
+			return HelpManager;
+		}
+	}
+	function initialize()
 	{
 $(document.body).append('<div id="welcomescreen" />');
 
