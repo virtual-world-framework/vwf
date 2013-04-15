@@ -1572,7 +1572,7 @@ define({
 				this.createChild(id,GUID(),proto,null,null); 
 		
 		}
-		this.CreateModifier = function(type,owner)
+		this.CreateModifier = function(type,owner,subDriver)
 		{       
 			if(this.GetSelectedVWFNode() == null)
 			{
@@ -1588,6 +1588,53 @@ define({
 					}
 				};
 				var proto = ModProto;
+				if(subDriver)
+				{
+					ModProto.type = 'subDriver/threejs';
+					ModProto.source = 'vwf/model/threejs/' + type + '.js';
+				}
+				proto.NotProto = "NOT!";
+				proto.properties.NotProto = "NOT!";
+				proto.properties.translation = [0,0,0];
+				proto.properties.scale = [1,1,1];
+				proto.properties.rotation = [0,0,1,0];
+				proto.properties.owner = owner;
+				proto.properties.type = 'modifier';
+				proto.properties.DisplayName = _Editor.GetUniqueName(type);
+				
+				var id = this.GetFirstChildLeaf(this.GetSelectedVWFNode()).id;
+				
+				var owner = vwf.getProperty(id,'owner');
+				if(!_Editor.isOwner(id,document.PlayerNumber))
+				{
+					_Notifier.notify('You do not have permission to edit this object');
+					return;
+				}
+			
+				this.createChild(id,GUID(),proto,null,null); 
+			
+				window.setTimeout(function(){$(document).trigger('modifierCreated',_Editor.GetSelectedVWFNode());},500);
+				
+		}.bind(this);
+		
+		this.CreateModifierSubDriver = function(type,owner)
+		{       
+			if(this.GetSelectedVWFNode() == null)
+			{
+				_Notifier.notify('no object selected');
+				return;
+			}
+			
+				var ModProto = { 
+					
+				extends: type+'.vwf',
+				properties: {
+				NotProto: ""
+					}
+				};
+				var proto = ModProto;
+				BoxProto.type = 'subDriver/threejs';
+				BoxProto.source = 'vwf/model/threejs/' + type + '.js';
 				proto.NotProto = "NOT!";
 				proto.properties.NotProto = "NOT!";
 				proto.properties.translation = [0,0,0];
@@ -1611,6 +1658,7 @@ define({
 				window.setTimeout(function(){$(document).trigger('modifierCreated',this.GetSelectedVWFNode());},500);
 				
 		}.bind(this);
+		
 		this.GetFirstChildLeaf = function(object)
 		{
 			if(object)

@@ -1,5 +1,5 @@
 (function(){
-		function cone(childID, childSource, childName)
+		function text(childID, childSource, childName)
 		{
 			
 			this.textsize = 1;
@@ -39,7 +39,7 @@
 			this.BuildMesh = function(mat)
 			{
 				
-				var mesh=  new THREE.Mesh(new THREE.TextGeometry(this.text,{size:this.textsize,height:this.height,curveSegments:2}), mat);
+				var mesh=  new THREE.Mesh(new THREE.TextGeometry(this.text || "text",{size:this.textsize,height:this.height,curveSegments:2}), mat);
 				
 				return mesh;
 			}
@@ -55,6 +55,6 @@
 		//default factory code
         return function(childID, childSource, childName) {
 			//name of the node constructor
-            return new cone(childID, childSource, childName);
+            return new text(childID, childSource, childName);
         }
 })();

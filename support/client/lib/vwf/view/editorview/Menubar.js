@@ -433,11 +433,22 @@ define({
 			_Editor.CreatePrim('sphere',_Editor.GetInsertPoint(),[.5,1,1],'checker.jpg',document.PlayerNumber,'');
 			
 		});
+		$('#MenuCreatePush').click(function(e){
+			
+			_Editor.CreateModifier('push',document.PlayerNumber,true);
+			
+		});
 		$('#MenuCreateText').click(function(e){
 			
 			_Editor.CreatePrim('text',_Editor.GetInsertPoint(),[.5,1,1],'checker.jpg',document.PlayerNumber,'');
 			
 		});
+		$('#MenuCreateTorus').click(function(e){
+			
+			_Editor.CreatePrim('torus',_Editor.GetInsertPoint(),[.5,1,1],'checker.jpg',document.PlayerNumber,'');
+			
+		});
+		
 		$('#MenuCreatePlane').click(function(e){
 			
 			_Editor.CreatePrim('plane',_Editor.GetInsertPoint(),[1,1,5],'checker.jpg',document.PlayerNumber,'');
