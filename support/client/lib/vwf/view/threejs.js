@@ -722,6 +722,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     //    }
                     //}
                 }
+				if(pointerDownID)
                 sceneView.kernel.dispatchEvent( pointerDownID, "pointerUp", eData.eventData, eData.eventNodeData );
             }
             pointerDownID = undefined;

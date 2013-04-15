@@ -48,6 +48,7 @@
 				if(prop == 'EditorData')
 				{
 					return {
+						_active:{displayname : 'Active',property:'active',type:'check',min:-10,max:10,step:.01},
 						amount:{
 								displayname : 'Amount',
 								property:'amount',

@@ -70,7 +70,7 @@
 				
 				for(var i in children)
 				{
-					return vwf.callMethod(children[i],'updateStack');
+					vwf.callMethod(children[i],'updateStack');
 				}
 			}
 			this.backupMesh = function()
@@ -85,6 +85,18 @@
 					geometry.originalFaces = this.copyArray([],geometry.faces);
 				if(geometry.normals)
 					geometry.originalNormals = this.copyArray([],geometry.normals);
+				if(geometry.faceVertexUvs[0])
+				{
+					
+					geometry.originalfaceVertexUvs = [];
+					for(var i =0; i < geometry.faceVertexUvs[0].length; i++)
+					{
+						var arr  = [];
+						for(var j =0; j < geometry.faceVertexUvs[0][i].length; j++)
+							arr.push(geometry.faceVertexUvs[0][i][j].clone());
+						geometry.originalfaceVertexUvs.push(arr);	
+					}
+				}
 			   
 			}
 			this.copyArray = function(arrNew, arrOld)
@@ -109,10 +121,23 @@
 					 this.copyArray(geometry.normals,geometry.originalNormals);
 				if(geometry.originalFaces)
 					 this.copyArray(geometry.faces,geometry.originalFaces);
+				if(geometry.originalfaceVertexUvs)
+				{
+					
+					geometry.faceVertexUvs[0] = [];
+					for(var i =0; i < geometry.originalfaceVertexUvs.length; i++)
+					{
+						var arr  = [];
+						for(var j =0; j < geometry.originalfaceVertexUvs[i].length; j++)
+							arr.push(geometry.originalfaceVertexUvs[i][j].clone());
+						geometry.faceVertexUvs[0].push(arr);	
+					}
+				}	 
 				
 				geometry.verticesNeedUpdate = true;
 				geometry.normalsNeedUpdate = true;
 				geometry.facesNeedUpdate = true;
+				geometry.uvsNeedUpdate = true;
 			}
 			this.Build = function()
 			{

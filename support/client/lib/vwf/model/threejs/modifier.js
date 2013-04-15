@@ -1,6 +1,7 @@
 (function(){
 		function modifier(childID, childSource, childName)
 		{
+			this.active = true;
 			this.callingMethod = function(methodName,args)
 			{
 				if(methodName == 'GetMesh')
@@ -23,6 +24,16 @@
 			this.gettingProperty = function(prop)
 			{
 				if(prop == 'isModifier') return true;
+				if(prop == 'active') return this.active;
+			}
+			this.settingProperty = function(prop,val)
+			{
+				if(prop == 'isModifier') return true;
+				if(prop == 'active')
+				{	
+					this.active = val;
+					this.dirtyStack();
+				}
 			}
 			this.initializingNode = function()
 			{
@@ -31,8 +42,8 @@
 			}
 			this.updateStack = function()
 			{
-				
-				this.updateSelf();
+				if(this.active)
+					this.updateSelf();
 				var children = vwf.children(this.ID);
 				for(var i in children)
 				{

@@ -1,202 +1,24 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+---
+
 extends: http://vwf.example.com/node3.vwf
 properties:
-  offsetx:
-    value: 0
-    set: |
-            this.offsetx = value;
-            this.dirtyStack();
-  offsety:
-    value: 0
-    set: |
-            this.offsety = value;
-            this.dirtyStack();
-  scaley:
-    value: 1
-    set: |
-            this.scaley = value;
-            this.dirtyStack();
-  scalex:
-    value: 1
-    set: |
-            this.scalex = value;
-            this.dirtyStack(); 
-  rotateuv:
-    value: 0
-    set: |
-            this.rotateuv = value;
-            this.dirtyStack();             
-  translation:
-    set:|
-            this.translation = value;
-            this.dirtyStack();
-  rotation:
-    set:|
-            this.translation = value;
-            this.dirtyStack();
-  scale:
-    set:|
-            this.translation = value;
-            this.dirtyStack();            
-  minAmount:
-  maxAmount:
-  isModifier: true
-  type:
-  EditorData:
-    offsetx:
-      displayname: offset x
-      property: offsetx
-      type: slider
-      min: -1
-      max: 1
-      step: .01
-    offsety:
-      displayname: offset y
-      property: offsety
-      type: slider
-      min: -1
-      max: 1
-      step: .01
-    scalex:
-      displayname: tile x
-      property: scalex
-      type: slider
-      min: -10
-      max: 10
-      step: .05
-    scaley:
-      displayname: tile y
-      property: scaley
-      type: slider
-      min: -10
-      max: 10
-      step: .05
-    rotateuv:
-      displayname: rotate
-      property: rotateuv
-      type: slider
-      min: -2
-      max: 2
-      step: .05        
-methods:
-  GetBounds:
-  updateStack:
-  updateSelf:
-  dirtyStack:
-  GetMesh:
-  taper:
-  uv:
-  bend:
-  twist:
-events:
-  childAdded:
-scripts:
-- |
-    this.updateSelf = function()
-    {   
-       
-        var scalex = vwf.getProperty(this.id,'scalex');
-        var scaley = vwf.getProperty(this.id,'scaley');
-        var offsetx = vwf.getProperty(this.id,'offsetx');
-        var offsety = vwf.getProperty(this.id,'offsety');
-        var rotateuv = vwf.getProperty(this.id,'rotateuv');
-        
-        this.uv(scalex,scaley,offsetx,offsety,rotateuv);
-    }
-    this.uv = function(scalex,scaley,offsetx,offsety,rotateuv)
-    {   
-        
-         
-         var mesh = this.GetMesh();
-         var m = mesh.getMesh();
-         var uvs = [];
-         for(var i=0;i<m.uv1set.length-1; i+=2)
-         {
-            uvs.push([m.uv1set[i],m.uv1set[i+1]]);
-         }
-         
-         
-         for(var i=0;i<uvs.length; i+=1)
-         {
-         
-           var r = RotateVecAroundAxis([uvs[i][0]-.5,uvs[i][1]-.5,0],[0,0,1],rotateuv);
-           uvs[i][0] = r[0]+.5;
-           uvs[i][1] = r[1]+.5;
-           uvs[i][0] = (uvs[i][0] * scalex) + offsetx;
-           uvs[i][1] = (uvs[i][1] * scaley) + offsety;
-
-         }
-         
-         var newuvs = []
-         for(var i=0;i<uvs.length; i+=1)
-         {
-            newuvs.push(uvs[i][0]);
-            newuvs.push(uvs[i][1]);
-         }
-         
-         m.setUV(newuvs);
-    }
-    this.updateStack = function()
-    {
-        
-        this.updateSelf();
-        for(var i in this.children)
-        {
-            return vwf.callMethod(this.children[i].id,'updateStack');
-        }
-    }
-    this.initialize = function()
-    {
-         
-    }
-    this.GetMesh = function()
-    {
-        
-        return vwf.callMethod(vwf.parent(this.id),'GetMesh');
-    }
-    this.GetBounds = function()
-    {
-        
-        return vwf.callMethod(vwf.parent(this.id),'GetBounds');
-    }
-    this.dirtyStack = function()
-    {
-        
-        
-        return vwf.callMethod(vwf.parent(this.id),'dirtyStack');
-    }
-    var Matrix = function()
-    {
-        var mat = [];
-        for(var i=0; i < 16; i++)
-        {
-            mat.push(0);
-        }
-        return mat;
-    }
-    //quick function to initialize a blank vector array
-    var Vec3 = function()
-    {
-        var vec = [];
-        for(var i=0; i < 3; i++)
-        {
-            vec.push(0);
-        }
-        return vec;
-    }
-    var Quat = function()
-    {
-        var quat = [];
-        for(var i=0; i < 4; i++)
-        {
-            quat.push(0);
-        }
-        return quat;
-    };
-    var RotateVecAroundAxis = function(Vector, Axis, Radians)
-    {
-        //Get a quaternion for the input matrix
-        var RotationQuat = goog.vec.Quaternion.fromAngleAxis(Radians, Axis, Quat());
-        var NewMatrix = goog.vec.Quaternion.toRotationMatrix4(RotationQuat, Matrix());
-        return GLGE.mulMat4Vec3(NewMatrix,Vector);
-    }
-    
+  _length: 1
+  width: 1
+  height: 1
+  mode: plane
+  plane: z
+  tilex: 1
+  tiley: 1
+  rotate: 0

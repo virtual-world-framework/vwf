@@ -173,6 +173,10 @@ define(
 		{
 			_Editor.Duplicate();
 		});
+		$('#MenuCreatePush').click(function (e)
+		{
+			_Editor.CreateModifier('push', document.PlayerNumber, true);
+		});
 		$('#MenuCreateTaper').click(function (e)
 		{
 			_Editor.CreateModifier('taper', document.PlayerNumber);
@@ -187,7 +191,7 @@ define(
 		});
 		$('#MenuCreateUVMap').click(function (e)
 		{
-			_Editor.CreateModifier('uvmap', document.PlayerNumber);
+			_Editor.CreateModifier('uvmap', document.PlayerNumber,true);
 		});
 		$('#MenuCreatePerlinNoise').click(function (e)
 		{
@@ -204,10 +208,6 @@ define(
 		$('#MenuCreateStretch').click(function (e)
 		{
 			_Editor.CreateModifier('stretch', document.PlayerNumber);
-		});
-		$('#MenuCreateTangents').click(function (e)
-		{
-			_Editor.CreateModifier('tangents', document.PlayerNumber);
 		});
 		$('#MenuHelpBrowse').click(function (e)
 		{
@@ -456,10 +456,7 @@ define(
 		{
 			_Editor.CreatePrim('sphere', _Editor.GetInsertPoint(), [.5, 1, 1], 'checker.jpg', document.PlayerNumber, '');
 		});
-		$('#MenuCreatePush').click(function (e)
-		{
-			_Editor.CreateModifier('push', document.PlayerNumber, true);
-		});
+		
 		$('#MenuCreateText').click(function (e)
 		{
 			_Editor.CreatePrim('text', _Editor.GetInsertPoint(), [.5, 1, 1], 'checker.jpg', document.PlayerNumber, '');
