@@ -192,8 +192,8 @@ children:
                 this.in(5).completed();
               }
   driveVehicle:
-    # With parking break applied, move the transmission range selector from the N to the D position.
-    # Release the parking break and ensure brake warning light goes out
+    # With parking brake applied, move the transmission range selector from the N to the D position.
+    # Release the parking brake and ensure brake warning light goes out
     # Move vehicle forward
     extends: http://vwf.example.com/lesson/task.vwf
     properties:
@@ -208,7 +208,7 @@ children:
           moveToDriveInstructions:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
-              text: "With parking break applied, click and drag the transmission range selector from the N to the D position." 
+              text: "With parking brake applied, click and drag the transmission range selector from the N to the D position." 
             scripts:
             - |
               this.entering = function() {
@@ -226,7 +226,7 @@ children:
       releaseBrake:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
-          text: "3.2 Release parking break"
+          text: "3.2 Release parking brake"
         children:
           releaseBrakeInstructions:
             extends: http://vwf.example.com/lesson/task.vwf
