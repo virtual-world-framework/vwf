@@ -171,13 +171,10 @@ function AlignTool()
 		var tbounds = target.GetBoundingBox(true);
 		
 		tbounds=tbounds.clone();
-		tbounds.min[0] = tbounds.min[0] * target.matrixWorld.elements[0];
-		tbounds.min[1] = tbounds.min[1] * target.matrixWorld.elements[5];
-		tbounds.min[2] = tbounds.min[2] * target.matrixWorld.elements[10];
-		tbounds.max[0] = tbounds.max[0] * target.matrixWorld.elements[0];
-		tbounds.max[1] = tbounds.max[1] * target.matrixWorld.elements[5];
-		tbounds.max[2] = tbounds.max[2] * target.matrixWorld.elements[10];
-		var tcenter = this.tcenter.clone();
+	
+		var tcenter = new THREE.Vector3();
+		var mat = target.matrixWorld.clone();
+		tbounds = tbounds.transformBy(mat.clone().transpose().elements);
 		this.xDisplay.position = tcenter.clone();
 		this.yDisplay.position = tcenter.clone();
 		this.zDisplay.position = tcenter.clone();
@@ -199,13 +196,10 @@ function AlignTool()
 			var source = _Editor.findviewnode(this.sourceNodeIDs[i])
 			var sbounds = source.GetBoundingBox(true);
 			sbounds=sbounds.clone();
+			var smat = source.matrixWorld.clone();
+			smat = smat.setPosition(new THREE.Vector3());
+			sbounds = sbounds.transformBy(smat.clone().transpose().elements);
 			
-			sbounds.min[0] = sbounds.min[0] * source.matrixWorld.elements[0];
-			sbounds.min[1] = sbounds.min[1] * source.matrixWorld.elements[5];
-			sbounds.min[2] = sbounds.min[2] * source.matrixWorld.elements[10];
-			sbounds.max[0] = sbounds.max[0] * source.matrixWorld.elements[0];
-			sbounds.max[1] = sbounds.max[1] * source.matrixWorld.elements[5];
-			sbounds.max[2] = sbounds.max[2] * source.matrixWorld.elements[10];
 			var scenter = this.scenter[i].clone();
 			var spos = scenter.clone();
 			
@@ -216,20 +210,24 @@ function AlignTool()
 				spos.x = tcenter.x
 				if(xFrom == 'Center' && xTo == 'Max')
 				{
-					spos.x -= tbounds.min[0];
+					spos.x += tbounds.max[0];
 				}
 				if(xFrom == 'Max' && xTo == 'Center')
 				{
-					spos.x += sbounds.min[0];
+					spos.x += sbounds.min[0] + ((tbounds.min[0] + tbounds.max[0])/2);
 				}
 				
 				if(xFrom == 'Center' && xTo == 'Min')
 				{
-					spos.x -= tbounds.max[0];
+					spos.x += tbounds.min[0];
 				}
 				if(xFrom == 'Min' && xTo == 'Center')
 				{
-					spos.x += sbounds.max[0];
+					spos.x += sbounds.max[0] + ((tbounds.min[0] + tbounds.max[0])/2);
+				}
+				if(xFrom == 'Center' && xTo == 'Center')
+				{
+					spos.x += ((sbounds.max[0]+sbounds.min[0])/2) + ((tbounds.min[0] + tbounds.max[0])/2);
 				}
 				
 				if(xFrom == 'Min' && xTo == 'Max')
@@ -265,20 +263,24 @@ function AlignTool()
 				this.yDisplay.visible = true;
 				if(yFrom == 'Center' && yTo == 'Max')
 				{
-					spos.y -= tbounds.min[1];
+					spos.y += tbounds.max[1];
 				}
 				if(yFrom == 'Max' && yTo == 'Center')
 				{
-					spos.y += sbounds.min[1];
+					spos.y += sbounds.min[1] + ((tbounds.min[1] + tbounds.max[1])/2);
 				}
 				
 				if(yFrom == 'Center' && yTo == 'Min')
 				{
-					spos.y -= tbounds.max[1];
+					spos.y += tbounds.min[1];
 				}
 				if(yFrom == 'Min' && yTo == 'Center')
 				{
-					spos.y += sbounds.max[1];
+					spos.y += sbounds.max[1] + ((tbounds.min[1] + tbounds.max[1])/2);
+				}
+				if(yFrom == 'Center' && yTo == 'Center')
+				{
+					spos.y += ((sbounds.max[1]+sbounds.min[1])/2) + ((tbounds.min[1] + tbounds.max[1])/2);
 				}
 				
 				if(yFrom == 'Min' && yTo == 'Max')
@@ -315,20 +317,24 @@ function AlignTool()
 				this.zDisplay.visible = true;
 				if(zFrom == 'Center' && zTo == 'Max')
 				{
-					spos.z -= tbounds.min[2];
+					spos.z += tbounds.max[2];
 				}
 				if(zFrom == 'Max' && zTo == 'Center')
 				{
-					spos.z += sbounds.min[2];
+					spos.z += sbounds.min[2] + ((tbounds.min[2] + tbounds.max[2])/2);
 				}
 				
 				if(zFrom == 'Center' && zTo == 'Min')
 				{
-					spos.z -= tbounds.max[2];
+					spos.z += tbounds.min[2];
 				}
 				if(zFrom == 'Min' && zTo == 'Center')
 				{
-					spos.z += sbounds.max[2];
+					spos.z += sbounds.max[2] + ((tbounds.min[2] + tbounds.max[2])/2);
+				}
+				if(zFrom == 'Center' && zTo == 'Center')
+				{
+					spos.z += ((sbounds.max[2]+sbounds.min[2])/2) + ((tbounds.min[2] + tbounds.max[2])/2);
 				}
 				
 				if(zFrom == 'Min' && zTo == 'Max')
@@ -364,7 +370,7 @@ function AlignTool()
 			vwf_view.kernel.setProperty(this.sourceNodeIDs[i],'translation',[spos.x,spos.y,spos.z]);
 		}
 		
-		if(zTo == 'Max')
+			if(zTo == 'Max')
 					this.zDisplay.position.z += tbounds.max[2];
 			if(zTo == 'Min')
 					this.zDisplay.position.z += tbounds.min[2];	
@@ -375,7 +381,13 @@ function AlignTool()
 			if(xTo == 'Max')
 					this.xDisplay.position.x += tbounds.max[0];
 			if(xTo == 'Min')
-					this.xDisplay.position.x += tbounds.min[0];	
+					this.xDisplay.position.x += tbounds.min[0];
+			if(xTo == 'Center')
+					this.xDisplay.position.x += (tbounds.min[0] + tbounds.max[0])/2;
+			if(yTo == 'Center')
+					this.yDisplay.position.y += (tbounds.min[1] + tbounds.max[1])/2;	
+			if(zTo == 'Center')
+					this.zDisplay.position.z += (tbounds.min[2] + tbounds.max[2])/2;						
 					
 					this.xDisplay.updateMatrixWorld(true);
 			this.yDisplay.updateMatrixWorld(true);
