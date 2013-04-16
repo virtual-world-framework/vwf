@@ -542,17 +542,17 @@ define(function ()
 		{
 			for (var s = 0; s < SelectedVWFNodes.length; s++)
 			{
-				// if(document.PlayerNumber == null)
-				// {
-				// _Notifier.notify('You must log in to participate');
-				// return;
-				// }
-				// var owner = vwf.getProperty(SelectedVWFNodes[s].id,'owner');
-				// if(!_Editor.isOwner(SelectedVWFNodes[s].id,document.PlayerNumber))
-				// {
-				// _Notifier.notify('You do not have permission to delete this object');
-				// return;
-				// }
+				if(document.PlayerNumber == null)
+				{
+				_Notifier.notify('You must log in to participate');
+				return;
+				}
+				var owner = vwf.getProperty(SelectedVWFNodes[s].id,'owner');
+				if(!_Editor.isOwner(SelectedVWFNodes[s].id,document.PlayerNumber))
+				{
+				_Notifier.notify('You do not have permission to delete this object');
+				return;
+				}
 				if (SelectedVWFNodes[s])
 				{
 					vwf_view.kernel.deleteNode(SelectedVWFNodes[s].id);
@@ -1243,16 +1243,16 @@ define(function ()
 		}
 		this.setProperty = function (id, prop, val)
 		{
-			// if(document.PlayerNumber == null)
-			// {
-			// _Notifier.notify('You must log in to participate');
-			// return false;
-			// }
-			// if(!_Editor.isOwner(id,document.PlayerNumber))
-			// {
-			// _Notifier.notify('You do not permission to edit this object.');
-			// return false;
-			// }
+			if(document.PlayerNumber == null)
+			{
+			_Notifier.notify('You must log in to participate');
+			return false;
+			}
+			if(!_Editor.isOwner(id,document.PlayerNumber))
+			{
+			_Notifier.notify('You do not permission to edit this object.');
+			return false;
+			}
 			vwf_view.kernel.setProperty(id, prop, val)
 			return true;
 		}
@@ -1271,11 +1271,11 @@ define(function ()
 		}
 		this.createChild = function (parent, name, proto, uri, callback)
 		{
-			//if(document.PlayerNumber == null)
-			//{
-			//	_Notifier.notify('You must log in to participate');
-			//	return;
-			//}
+			if(document.PlayerNumber == null)
+			{
+				_Notifier.notify('You must log in to participate');
+				return;
+			}
 			vwf_view.kernel.createChild(parent, name, proto, uri, callback);
 		}
 		this.createLight = function (type, pos, owner)

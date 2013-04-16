@@ -135,18 +135,18 @@ define(function ()
 		}
 		this.setProperty = function (id, prop, val)
 		{
-			// if(document.PlayerNumber == null)
-			// {
-			// _Notifier.notify('You must log in to participate');
-			// return;
-			// }
+			if(document.PlayerNumber == null)
+			{
+			_Notifier.notify('You must log in to participate');
+			return;
+			}
 			if (id != 'selection')
 			{
-				// if(!_Editor.isOwner(id,_UserManager.GetCurrentUserName()))
-				// {
-				// _Notifier.notify('You do not have permission to edit this object');
-				// return;
-				// }
+				if(!_Editor.isOwner(id,_UserManager.GetCurrentUserName()))
+				{
+				_Notifier.notify('You do not have permission to edit this object');
+				return;
+				}
 				vwf_view.kernel.setProperty(id, prop, val)
 			}
 			if (id == 'selection')
@@ -154,11 +154,11 @@ define(function ()
 				console.log(_Editor.getSelectionCount());
 				for (var k = 0; k < _Editor.getSelectionCount(); k++)
 				{
-					// if(!_Editor.isOwner(_Editor.GetSelectedVWFNode(k).id,_UserManager.GetCurrentUserName()))
-					// {
-					// _Notifier.notify('You do not have permission to edit this object');
-					// continue;
-					// }
+					if(!_Editor.isOwner(_Editor.GetSelectedVWFNode(k).id,_UserManager.GetCurrentUserName()))
+					{
+					_Notifier.notify('You do not have permission to edit this object');
+					continue;
+					}
 					vwf_view.kernel.setProperty(_Editor.GetSelectedVWFNode(k).id, prop, val)
 				}
 			}

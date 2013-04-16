@@ -21,6 +21,7 @@ define(function ()
 		$(document.body).append("<div id='WaitingWindow'><div style='text-align: center;margin-top: 50px;'><img src='images/loading.gif'><div style='font-size: 1.5em;' id='waittitle'/></div></div>");
 		$(document.body).append("<div id='NotifierAlertMessage'></div>");
 		$('#NotifierWindow').hide();
+		this.state = 'hidden';
 		$('#WaitingWindow').dialog(
 		{
 			modal: true,
@@ -32,14 +33,24 @@ define(function ()
 			clearTimeout($('#element').stop().data('timer'));
 			$('#NotifierWindow').css('font-size', $(window).height() / 25 + 'px');
 			$('#NotifierWindow').text(text);
-			$('#NotifierWindow').fadeIn(function ()
+			if(_Notifier.state == 'hidden')
 			{
-				var elem = $(this);
-				$.data(this, 'timer', setTimeout(function ()
+				$('#NotifierWindow').stop().fadeIn(function ()
 				{
-					elem.fadeOut();
-				}, 2000));
-			});
+					var elem = $(this);
+					_Notifier.state = 'fadeout';
+					$.data(this, 'timer', setTimeout(function ()
+					{
+						_Notifier.state = 'fadeout';
+						elem.fadeOut(function(){
+						_Notifier.state = 'hidden';
+						
+						});
+						
+					}, 2000));
+				});
+				_Notifier.state = 'fadein';
+			}
 		}
 		this.alert = function (text, callback)
 		{

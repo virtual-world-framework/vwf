@@ -276,11 +276,11 @@ define(["vwf/view/editorview/Editor"], function (Editor)
 		this.insertObject = function (pid)
 		{
 			var pos = [0, 0, 0];
-			// if(!_UserManager.GetCurrentUserName())
-			// {
-			// _Notifier.notify('You must log in to create objects');
-			// return;
-			// }
+			if(!_UserManager.GetCurrentUserName())
+			{
+			_Notifier.notify('You must log in to create objects');
+			return;
+			}
 			if (Editor)
 			{
 				pos = Editor.GetInsertPoint();

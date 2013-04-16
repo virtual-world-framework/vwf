@@ -90,18 +90,18 @@ define(["vwf/view/editorview/mapbrowser"], function ()
 		}
 		this.updateObject = function ()
 		{
-			// if(document.PlayerNumber == null)
-			// {
-			// _Notifier.notify('You must log in to participate');
-			// return;
-			// }
+			if(document.PlayerNumber == null)
+			{
+			_Notifier.notify('You must log in to participate');
+			return;
+			}
 			for (var i = 0; i < _Editor.getSelectionCount(); i++)
 			{
-				// if(!_Editor.isOwner(_Editor.GetSelectedVWFNode(i).id,document.PlayerNumber))
-				// {
-				// _Notifier.notify('You do not have permission to edit this material');
-				// continue;
-				// }
+				if(!_Editor.isOwner(_Editor.GetSelectedVWFNode(i).id,document.PlayerNumber))
+				{
+				_Notifier.notify('You do not have permission to edit this material');
+				continue;
+				}
 				var id = _Editor.GetSelectedVWFNode(i).id;
 				vwf_view.kernel.setProperty(id, 'materialDef', _MaterialEditor.currentMaterial);
 			}
