@@ -17,6 +17,28 @@ properties:
   backgroundColor: [ 83, 157, 194 ]
   ambientColor: [ 250, 250, 250 ]
   colorIndex: 0
+  ## The sorted list of scores for all players
+  ##
+  ## @name appscene.vwf#scoreBoard
+  ## @property
+  scoreBoard: 
+    get: |
+      var scoreBoard = [];
+      if ( this.players ) {
+        for ( var i = 0; i < this.players.children.length; i++) {
+          scoreBoard.push( {
+            id: this.players.children[ i ].id, 
+            name: this.players.children[ i ].name, 
+            score: this.players.children[ i ].score,
+            playerKills: this.players.children[ i ].playerKills,
+            playerDeaths: this.players.children[ i ].playerDeaths
+          } );
+        }
+      }
+      scoreBoard.sort(function(a,b) {
+        return b.score - a.score;
+      } );
+      return scoreBoard;
 methods:
   createPlayer:
   fireLaser:
@@ -52,29 +74,6 @@ children:
     extends: http://vwf.example.com/node3.vwf
   lasers:
     extends: http://vwf.example.com/node3.vwf
-
-  ## The sorted list of scores for all players
-  ##
-  ## @name appscene.vwf#scoreBoard
-  ## @property
-  scoreBoard: 
-    get: |
-      var scoreBoard = [];
-      if ( this.players ) {
-        for ( var i = 0; i < this.players.children.length; i++) {
-          scoreBoard.push( {
-            id: this.players.children[ i ].id, 
-            name: this.players.children[ i ].name, 
-            score: this.players.children[ i ].score,
-            playerKills: this.players.children[ i ].playerKills,
-            playerDeaths: this.players.children[ i ].playerDeaths
-          } );
-        }
-      }
-      scoreBoard.sort(function(a,b) {
-        return b.score - a.score;
-      } );
-      return scoreBoard;
 scripts:
 - |
   var tankMaterials = [ "models/images/blue_tank.png", "models/images/green_tank.png", "models/images/hunter_tank.png", 
