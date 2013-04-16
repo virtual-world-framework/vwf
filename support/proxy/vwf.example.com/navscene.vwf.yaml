@@ -303,7 +303,7 @@ scripts:
       var active = this.input.futureActive();
 
       // capture the event input locally
-      this.input.keyInfo = parms;
+      this.input.keyInfo = $.extend(true, {}, parms);;
 
       // store the current Time
       this.input.lastInputTime = this.time;
@@ -315,7 +315,7 @@ scripts:
       
     }
     this.keyUp = function( parms ) {
-      this.input.keyInfo = parms;
+      this.input.keyInfo = $.extend(true, {}, parms);
       if ( Object.keys( parms.keysDown ).length == 0 ){
         this.handleKeyDown();
       } 
