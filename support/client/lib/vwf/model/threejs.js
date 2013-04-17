@@ -1154,8 +1154,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         
                 }
                 if(propertyName == "color") {
-                    
-                        
+                    var vwfColor = new utility.color( [ threeObject.color.r*255, threeObject.color.g*255, threeObject.color.b*255 ] );
+                    value = colorToString.call( this, vwfColor );
+                    return value;    
                 }
                 if(propertyName == "diffuse") {
                     
@@ -2720,7 +2721,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         {
             if(start && start.material)
             {
-                
                 //this will override any ambient colors set in materials.
                 if(start.material.ambient)
                     start.material.ambient.setRGB(1,1,1);
