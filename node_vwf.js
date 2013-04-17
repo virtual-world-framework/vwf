@@ -366,7 +366,9 @@ function startVWF(){
 					//no instance id is given, new instance
 					if(appname && instance == null)
 					{			
-						GenerateNewInstance(request,response,appname);
+						//GenerateNewInstance(request,response,appname);
+						console.log(appname);
+						ServeFile(appname+"/index.html",response);
 						return;
 					}
 					//instance needs to end in a slash, so redirect but keep instance id
