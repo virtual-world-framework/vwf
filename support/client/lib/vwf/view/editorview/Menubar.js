@@ -1,5 +1,14 @@
+function clearCameraModeIcons()
+		{
+			$('#MenuCameraOrbiticon').css('background', '');
+			$('#MenuCamera3RDPersonicon').css('background', '');
+			$('#MenuCameraNavigateicon').css('background', '');
+			$('#MenuCameraFreeicon').css('background', '');
+		}
+		
 define(
 {
+	
 	initialize: function ()
 	{
 		//$(document.body).append('');
@@ -367,6 +376,7 @@ define(
 		{
 			$(this).mouseenter();
 		});
+		
 		$('#MenuCameraNavigate').click(function (e)
 		{
 			clearCameraModeIcons();

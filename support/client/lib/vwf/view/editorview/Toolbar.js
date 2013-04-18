@@ -24,13 +24,7 @@ define(
 			});
 		}
 
-		function clearCameraModeIcons()
-		{
-			$('#MenuCameraOrbiticon').css('background', '');
-			$('#MenuCamera3RDPersonicon').css('background', '');
-			$('#MenuCameraNavigateicon').css('background', '');
-			$('#MenuCameraFreeicon').css('background', '');
-		}
+	
 
 		function createSeperator()
 		{
