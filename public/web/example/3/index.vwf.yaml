@@ -13,7 +13,7 @@ children:
       material:
         extends: http://vwf.example.com/material.vwf
         properties: 
-          texture: “images/red.png”
+          texture: images/red.png
   world: 
     extends: http://vwf.example.com/node3.vwf
     source: world.dae
@@ -26,11 +26,20 @@ children:
       material:
         extends: http://vwf.example.com/material.vwf
         properties: 
-          texture: “images/blue.png”
+          texture: images/blue.png
+  light:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: point
+      enable: true
+      distance: 2000
+      intensity: 0.3
+      color: [ 255, 255, 255 ]
+      translation: [ 0, -30, 8 ]
 scripts:
 - |
-    this.initialize = function() {
-      this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,0,5,0,1 ];
-      this.hello.HelloTextMaterial1.texture = "images/red.png";
-      this.world.WorldTextMaterial1.texture = "images/blue.png";
-    }
+  this.initialize = function() {
+    this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,0,5,0,1 ];
+    this.hello.material.texture = "images/red.png";
+    this.world.material.texture = "images/blue.png";
+  }
