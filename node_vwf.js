@@ -6,7 +6,8 @@ var libpath = require('path'),
 	sio = require('socket.io'),
 	YAML = require('js-yaml'),
 	SandboxAPI = require('./sandboxAPI'),
-	Shell = require('./ShellInterface.js');
+	Shell = require('./ShellInterface'),
+	DAL = require('./dal');
 	
 // pick the application name out of the URL by finding the index.vwf.yaml
 function findAppName(uri)
@@ -93,13 +94,20 @@ function GenerateNewInstance(request,response,appname,newid)
 	newid = newid.replace(/\/\/\//g,'/');
 	
 	
+	redirect(newid,response);			
+}
+
+function redirect(url,response)
+{
+				url = url.replace(/\/\//g,'/');
+				url = url.replace(/\/\/\//g,'/');
 				response.writeHead(200, {
 					"Content-Type": "text/html" 
 				});
 				response.write( "<html>" +
 								"<head>" +
 								"	<title>Virtual World Framework</title>" +
-								"	<meta http-equiv=\"REFRESH\" content=\"0;url="+newid+"\">" +
+								"	<meta http-equiv=\"REFRESH\" content=\"0;url="+url+"\">" +
 								"</head>" +
 								"<body>" +
 								"</body>" +
@@ -107,7 +115,6 @@ function GenerateNewInstance(request,response,appname,newid)
 				response.end();
 				return;
 }
-
 //Find the instance(instance) ID in a URL
 function Findinstance(uri)
 {
@@ -301,13 +308,18 @@ function startVWF(){
 			
 			var URL = url.parse(request.url,true);
 			var uri = URL.pathname;
-			//global.log(uri);
+			//global.log( URL.pathname);
 			uri = uri.replace(/\//g,'\\');
 			
 			if(URL.pathname.toLowerCase().indexOf('/vwfdatamanager.svc/') != -1)
 			{
 				//Route to DataServer
 				SandboxAPI.serve(request,response);
+				return;
+			}
+			if(URL.pathname == '/' || URL.pathname == '')
+			{
+				redirect('/adl/sandbox/',response);
 				return;
 			}
 			
@@ -366,9 +378,11 @@ function startVWF(){
 					//no instance id is given, new instance
 					if(appname && instance == null)
 					{			
-						GenerateNewInstance(request,response,appname);
+						//GenerateNewInstance(request,response,appname);
 						//console.log(appname);
 						//ServeFile(appname+"/index.html",response);
+						redirect(URL.pathname+"/index.html",response);
+						console.log('redirect ' + appname+"./index.html");
 						return;
 					}
 					//instance needs to end in a slash, so redirect but keep instance id
@@ -436,29 +450,7 @@ function startVWF(){
 		}
 	} // close onRequest
 	
-	//create the server
-	
-	
-
-	var p = process.argv.indexOf('-p');
-	var port = p >= 0 ? parseInt(process.argv[p+1]) : 3000;
-	
-	p = process.argv.indexOf('-d');
-	var datapath = p >= 0 ? process.argv[p+1] : "C:\\VWFData";
-	SandboxAPI.setDataPath(datapath);
-	
-	p = process.argv.indexOf('-l');
-	global.logLevel = p >= 0 ? process.argv[p+1] : 2;
-	
-	global.log('LogLevel = ' +  global.logLevel,0);
-	var srv = http.createServer(OnRequest).listen(port);
-	global.log('Serving on port ' + port,0);
-	
-	Shell.StartShellInterface();  
-	//create socket server
-	sio = sio.listen(srv,{log:false});
-	sio.set('transports', ['websocket']);
-	sio.sockets.on('connection', function (socket) {
+	function WebSocketConnection(socket) {
 	  
 	
 	  //get instance for new connection
@@ -780,6 +772,35 @@ function startVWF(){
 
 		});
 		  
+	}
+	//create the server
+	
+	
+	//start the DAL
+	var p = process.argv.indexOf('-p');
+	var port = p >= 0 ? parseInt(process.argv[p+1]) : 3000;
+		
+	p = process.argv.indexOf('-d');
+	var datapath = p >= 0 ? process.argv[p+1] : "C:\\VWFData";
+		
+	p = process.argv.indexOf('-l');
+	global.logLevel = p >= 0 ? process.argv[p+1] : 2;
+	global.log('LogLevel = ' +  global.logLevel,0);	
+	
+	SandboxAPI.setDAL(DAL);
+	SandboxAPI.setDataPath(datapath);
+	
+	DAL.startup(function(){
+		
+		
+		var srv = http.createServer(OnRequest).listen(port);
+		global.log('Serving on port ' + port,0);
+		
+		Shell.StartShellInterface();  
+		//create socket server
+		sio = sio.listen(srv,{log:false});
+		sio.set('transports', ['websocket']);
+		sio.sockets.on('connection', WebSocketConnection);
 	});
 
 }

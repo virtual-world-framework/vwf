@@ -11,27 +11,53 @@
 	{
 	
 		cursor: pointer;
-		background: lightblue;
+		background: #f6f8f9; /* Old browsers */
+		background: -moz-linear-gradient(top,  #f6f8f9 0%, #e5ebee 50%, #d7dee3 56%, #f5f7f9 100%); /* FF3.6+ */
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f6f8f9), color-stop(50%,#e5ebee), color-stop(56%,#d7dee3), color-stop(100%,#f5f7f9)); /* Chrome,Safari4+ */
+		background: -webkit-linear-gradient(top,  #f6f8f9 0%,#e5ebee 50%,#d7dee3 56%,#f5f7f9 100%); /* Chrome10+,Safari5.1+ */
+		background: -o-linear-gradient(top,  #f6f8f9 0%,#e5ebee 50%,#d7dee3 56%,#f5f7f9 100%); /* Opera 11.10+ */
+		background: -ms-linear-gradient(top,  #f6f8f9 0%,#e5ebee 50%,#d7dee3 56%,#f5f7f9 100%); /* IE10+ */
+		background: linear-gradient(to bottom,  #f6f8f9 0%,#e5ebee 50%,#d7dee3 56%,#f5f7f9 100%); /* W3C */
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f6f8f9', endColorstr='#f5f7f9',GradientType=0 ); /* IE6-9 */
+
 		border-radius: 10px;
 		margin: 10px;
 		padding: 10px;
 		text-align: center;
 		font-size: 1.8em;
-		box-shadow: 5px 5px 5px;
-	
+		box-shadow: 5px 5px 10px;
+		width: 200px;
+		height: 200px;
+		display: inline-block;
+		vertical-align: middle;
+		line-height: 200px;
+		overflow: hidden;
 	}
 	.hotstate
 	{
 
 		cursor: pointer;
-		background: lightgreen;
+		background: rgb(184,225,252); /* Old browsers */
+		background: -moz-linear-gradient(top,  rgba(184,225,252,1) 0%, rgba(144,191,240,1) 47%, rgba(107,168,229,1) 53%, rgba(191,215,255,1) 100%); /* FF3.6+ */
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(184,225,252,1)), color-stop(47%,rgba(144,191,240,1)), color-stop(53%,rgba(107,168,229,1)), color-stop(100%,rgba(191,215,255,1))); /* Chrome,Safari4+ */
+		background: -webkit-linear-gradient(top,  rgba(184,225,252,1) 0%,rgba(144,191,240,1) 47%,rgba(107,168,229,1) 53%,rgba(191,215,255,1) 100%); /* Chrome10+,Safari5.1+ */
+		background: -o-linear-gradient(top,  rgba(184,225,252,1) 0%,rgba(144,191,240,1) 47%,rgba(107,168,229,1) 53%,rgba(191,215,255,1) 100%); /* Opera 11.10+ */
+		background: -ms-linear-gradient(top,  rgba(184,225,252,1) 0%,rgba(144,191,240,1) 47%,rgba(107,168,229,1) 53%,rgba(191,215,255,1) 100%); /* IE10+ */
+		background: linear-gradient(to bottom,  rgba(184,225,252,1) 0%,rgba(144,191,240,1) 47%,rgba(107,168,229,1) 53%,rgba(191,215,255,1) 100%); /* W3C */
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b8e1fc', endColorstr='#bfd7ff',GradientType=0 ); /* IE6-9 */
+
 		border-radius: 10px;
 		margin: 10px;
 		padding: 10px;
 		text-align: center;
 		font-size: 1.8em;
-		box-shadow: 5px 5px 5px;
-	
+		box-shadow: 5px 5px 10px;
+		width: 200px;
+		height: 200px;
+		display: inline-block;
+		vertical-align: middle;
+		line-height: 200px;
+		overflow: hidden;
 	}
 	.button
 	{
@@ -49,12 +75,16 @@
 	}
 	.hotstate:hover
 	{
-		border: 2px solid blue;
+		border: 1px solid lightblue;
+		width: 198px;
+		height: 198px;
 	}
 	
 	.coldstate:hover
 	{
-		border: 2px solid blue;
+		border: 1px solid lightblue;
+		width: 198px;
+		height: 198px;
 	}
 	.input
 	{
@@ -79,7 +109,9 @@
 					var id = keys[i].substr(13,16);
 					$('#activeInstances').append('<div class="hotstate" id="'+id+'" >' + id + '</div>');
 					$('#'+id).click(function(){
-						window.location.pathname += $(this).attr('id') + '/';
+						var str = window.location.pathname;
+							str = str.substr(0,str.lastIndexOf('/')+1)
+							window.location.pathname = str + $(this).attr('id') + '/';
 					});
 				}
 				
@@ -98,7 +130,9 @@
 					{
 						$('#coldInstances').append('<div class="coldstate" id="'+id+'" >' + id + '</div>');
 						$('#'+id).click(function(){
-							window.location.pathname += $(this).attr('id') + '/';
+							var str = window.location.pathname;
+							str = str.substr(0,str.lastIndexOf('/')+1)
+							window.location.pathname = str + $(this).attr('id') + '/';
 						});
 					}
 				}
@@ -118,10 +152,10 @@
 		 <input type='text' id='newstate' class='input' placeholder='World Name'/>
 		 <div id = 'newstatebtn' class='button'> Create World </div>
 		</div>
-		<div id="activeInstances">
+		<div id="activeInstances" style='width:800px'>
 		
 		</div>
-		<div id="coldInstances">
+		<div id="coldInstances" style='width:800px'>
 		
 		</div>
     </div>

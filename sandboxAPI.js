@@ -7,6 +7,8 @@ var libpath = require('path'),
 	YAML = require('js-yaml');
 	
 	
+var datapath = 'C:\\VWFData';
+var DAL = null;	
 // default path to data. over written by setup flags
 
 //generate a random id.
@@ -28,7 +30,7 @@ function GUID()
             );
     }
 	
-var datapath = 'C:\\VWFData';
+
 
 //simple functio to write a response
 function respond(response,status,message)
@@ -885,6 +887,15 @@ function serve (request, response)
 			case "state":{
 				ServeFile(basedir+"states\\" + SID+'\\state',response,URL,'GetStateResult');		
 			} break;
+			case "statedata":{
+				DAL.getInstance(SID,function(state)
+				{
+					if(state)
+						ServeJSON(state,response,URL);
+					else
+						respond(response,500,'state not found' );
+				});
+			} break;
 			case "clonestate":{
 				CopyState(URL,SID,URL.query.SID2,response,'GetStateResult');		
 			} break;
@@ -899,20 +910,33 @@ function serve (request, response)
 			} break;
 			case "profiles":{
 
-				var files = fs.readdir(basedir+"profiles\\",function(err,files){
-					var o = {};
-					o.GetProfilesResult = JSON.stringify(files);
-					ServeJSON(o,response,URL);
+				//var files = fs.readdir(basedir+"profiles\\",function(err,files){
+				//	var o = {};
+				//	o.GetProfilesResult = JSON.stringify(files);
+				//	ServeJSON(o,response,URL);
+				//});
+				DAL.getUsers(function(users)
+				{
+					if(users)
+						ServeJSON(users,response,URL);
+					else
+						respond(response,500,'users not found' );
 				});
 			} break;
 			case "states":{
 
-				fs.readdir(basedir+"states\\",function(err,files){
-					var o = {};
-					o.GetStatesResult = JSON.stringify(files);
-					ServeJSON(o,response,URL);
+				//fs.readdir(basedir+"states\\",function(err,files){
+				//	var o = {};
+				//	o.GetStatesResult = JSON.stringify(files);
+				//	ServeJSON(o,response,URL);
+				//});
+				DAL.getInstances(function(state)
+				{
+					if(state)
+						ServeJSON(state,response,URL);
+					else
+						respond(response,500,'state not found' );
 				});
-
 			} break;
 			case "textures":{
 				if(global.textures)
@@ -1043,6 +1067,12 @@ exports.setDataPath = function(p)
 {
 	global.log("datapath is " + p,0);
 	datapath = p;
+	if(DAL)
+		DAL.setDataPath(p);
+}
+exports.setDAL = function(p)
+{
+	DAL = p;
 }
 exports.getDataPath = function()
 {
