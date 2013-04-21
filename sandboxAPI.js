@@ -910,33 +910,33 @@ function serve (request, response)
 			} break;
 			case "profiles":{
 
-				//var files = fs.readdir(basedir+"profiles\\",function(err,files){
-				//	var o = {};
-				//	o.GetProfilesResult = JSON.stringify(files);
-				//	ServeJSON(o,response,URL);
-				//});
-				DAL.getUsers(function(users)
-				{
-					if(users)
-						ServeJSON(users,response,URL);
-					else
-						respond(response,500,'users not found' );
+				var files = fs.readdir(basedir+"profiles\\",function(err,files){
+					var o = {};
+					o.GetProfilesResult = JSON.stringify(files);
+					ServeJSON(o,response,URL);
 				});
+				//DAL.getUsers(function(users)
+				//{
+				//	if(users)
+				//		ServeJSON(users,response,URL);
+				//	else
+				//		respond(response,500,'users not found' );
+				//});
 			} break;
 			case "states":{
 
-				//fs.readdir(basedir+"states\\",function(err,files){
-				//	var o = {};
-				//	o.GetStatesResult = JSON.stringify(files);
-				//	ServeJSON(o,response,URL);
-				//});
-				DAL.getInstances(function(state)
-				{
-					if(state)
-						ServeJSON(state,response,URL);
-					else
-						respond(response,500,'state not found' );
+				fs.readdir(basedir+"states\\",function(err,files){
+					var o = {};
+					o.GetStatesResult = JSON.stringify(files);
+					ServeJSON(o,response,URL);
 				});
+				//DAL.getInstances(function(state)
+				//{
+				//	if(state)
+				//		ServeJSON(state,response,URL);
+				//	else
+				//		respond(response,500,'state not found' );
+				//});
 			} break;
 			case "textures":{
 				if(global.textures)
