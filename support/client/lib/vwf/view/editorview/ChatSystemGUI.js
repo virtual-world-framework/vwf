@@ -169,5 +169,6 @@ define(
 		window.PMReceived = PMReceived;
 		window.SendPM = SendPM;
 		window.ToSafeID = ToSafeID;
+		window.setupPmWindow = setupPmWindow;
 	}
 });
