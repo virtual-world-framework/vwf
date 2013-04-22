@@ -378,11 +378,11 @@ function startVWF(){
 					//no instance id is given, new instance
 					if(appname && instance == null)
 					{			
-						//GenerateNewInstance(request,response,appname);
-						//console.log(appname);
-						//ServeFile(appname+"/index.html",response);
-						redirect(URL.pathname+"/index.html",response);
-						console.log('redirect ' + appname+"./index.html");
+						GenerateNewInstance(request,response,appname);
+						
+						
+						//redirect(URL.pathname+"/index.html",response);
+						//console.log('redirect ' + appname+"./index.html");
 						return;
 					}
 					//instance needs to end in a slash, so redirect but keep instance id
@@ -789,7 +789,7 @@ function startVWF(){
 	
 	SandboxAPI.setDAL(DAL);
 	SandboxAPI.setDataPath(datapath);
-	
+	Shell.setDAL(DAL);
 	DAL.startup(function(){
 		
 		

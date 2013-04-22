@@ -1,7 +1,7 @@
 var nStore = require('nstore');
 nStore = nStore.extend(require('nstore/query')());
-
 var async = require('async');
+var fs = require('fs-extra');
 
 var datapath = '';
 
@@ -9,6 +9,26 @@ var DBTablePath = '\\users.db';
 
 var DB = '';
 
+
+//generate a random id.
+function GUID()
+    {
+        var S4 = function ()
+        {
+            return Math.floor(
+                    Math.random() * 0x10000 /* 65536 */
+                ).toString(16);
+        };
+
+        return (
+                S4() + S4() + "-" +
+                S4() + "-" +
+                S4() + "-" +
+                S4() + "-" +
+                S4() + S4() + S4()
+            );
+    }
+	
 function getUser (id,cb)
 {
 	DB.get(id,function(err,doc,key){
@@ -157,6 +177,161 @@ function updateInstance (id,data,cb)
 		}
 	);	
 };
+
+//make a directory if the directory does not exist
+function MakeDirIfNotExist(dirname,callback)
+{
+	fs.exists(dirname, function(e)
+	{
+		if(e)
+			callback();
+		else
+		{
+			fs.mkdir(dirname,function(){
+			callback();
+			});
+		}
+	
+	});
+}
+var deleteFolderRecursive = function(path) {
+  if( fs.existsSync(path) ) {
+    fs.readdirSync(path).forEach(function(file,index){
+      var curPath = path + "/" + file;
+      if(fs.statSync(curPath).isDirectory()) { // recurse
+        deleteFolderRecursive(curPath);
+      } else { // delete file
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(path);
+  }
+};
+
+function SaveFile(filename,data,cb)
+{
+	fs.writeFile(filename,data,'binary',function()
+	{
+		cb();
+	});
+}
+function RenameFile(filename,newname,callback,sync)
+{
+	if(!sync)
+		fs.rename(filename,newname,callback);
+	else
+	{
+		fs.renameSync(filename,newname);
+		callback();
+	}
+}
+//hash a string
+function hash(str)
+{
+	return require('crypto').createHash('md5').update(str).digest("hex");
+}
+//no point clogging up the disk with backups if the state does not change.
+function CheckHash(filename,data,callback)
+{
+	fs.readFile(filename, "utf8", function (err, file) {
+			
+			//global.log("hash is:"+hash(data) +" "+ hash(file));
+			if(err || !file)
+			{
+				callback(false);
+				return;
+			}
+			
+			
+			if(typeof data == "string")
+			{
+				
+				callback(hash(data) == hash(file));
+			}
+			else
+			{
+				var str = JSON.stringify(data)
+				var h1 = hash(str);
+				var h2 = hash(file)
+				callback(h1 == h2);
+			}
+		});
+		return;
+
+}
+function saveInstanceState(id,data,cb)
+{
+	console.log('saveinstancestate');
+	getInstance(id,function(instance){
+	
+		console.log('get instance callback inside saveinstancestate');
+		if(instance)
+		{
+			global.log('instance '+ id + ' exists');
+			async.waterfall([
+				function(cb2)
+				{
+				
+					MakeDirIfNotExist(datapath + '\\States\\' + id,function() 
+						{
+							cb2();
+						});
+				
+				},
+				function(cb2)
+				{
+					CheckHash(datapath + '\\States\\' + id+'\\state',data,function(issame)
+					{
+						cb2(undefined,issame);
+					});
+				},
+				function(issame,cb2)
+				{
+					if(!issame)
+					{
+						RenameFile(datapath + '\\States\\' + id+'\\state',datapath + '\\States\\' + id+'\\statebackup'+GUID(),function()
+						{
+							cb2(undefined,issame);
+						});
+					}else
+					{
+						cb2(undefined);
+					}
+				},
+				function(issame,cb2)
+				{
+					if(!issame)
+					{
+						SaveFile(datapath + '\\States\\' + id+'\\state',data,function()
+						{
+							cb2(undefined);
+						});
+					}else
+					{
+						cb2(undefined);
+					}
+				},
+				function(cb2)
+				{
+					getInstance(id,function(state)
+					{
+						updateInstance(id,{lastUpdate:(new Date()),updates:1 + state.updates},function()
+						{
+							cb2(undefined);
+						});
+					});
+				}
+				],function(err,results)
+				{
+					cb();
+				});
+		
+		}else
+		{
+			cb(false);
+		}
+	});
+}
 function createInstance (id,data,cb)
 {
 	getInstance(id,function(instance){
@@ -177,7 +352,10 @@ function createInstance (id,data,cb)
 					stateIndex.push(id);
 					DB.save('StateIndex',stateIndex,function()
 					{
-						cb(true);
+						MakeDirIfNotExist(datapath + '\\States\\' + id,function() 
+						{
+							cb(true);
+						});
 					});
 				});
 			});
@@ -186,10 +364,31 @@ function createInstance (id,data,cb)
 };
 function deleteInstance (id,cb)
 {
-	DB.remove(id,function(err,doc,key)
+	async.series([
+	function(cb)
 	{
-		cb();
-	});
+		DB.remove(id,function(err,doc,key)
+		{
+			deleteFolderRecursive(datapath + '\\States\\' + id);
+			cb();
+		});
+	},
+	function(cb)
+	{
+		DB.get('StateIndex',function(err,stateIndex,key)
+		{
+			if(!stateIndex)
+			{
+				cb();
+				return;
+			}
+			stateIndex.splice(stateIndex.indexOf(id),1);
+			DB.save('StateIndex',stateIndex,function()
+			{
+				cb(true);
+			});
+		});
+	}]);
 };
 			
 function getUsers (cb)
@@ -290,7 +489,7 @@ function startup(callback)
 			global.log('Get Demo');
 			getInstance('Demo',function(state)
 			{
-				global.log('Demo is:');
+				global.log('234234 callback Demo is:');
 				console.log(state);
 				if(!state)
 				{
@@ -303,6 +502,14 @@ function startup(callback)
 				{
 					cb();
 				}
+			});
+		},
+		function(cb)
+		{
+			console.log('saving demo state');
+			saveInstanceState('Demo',{test:GUID()},function()
+			{
+				cb();
 			});
 		},
 		function(cb)
@@ -323,7 +530,7 @@ function startup(callback)
 			
 			exports.searchUsers = searchUsers;
 			exports.searchInstances = searchInstances;
-			
+			exports.saveInstanceState = saveInstanceState;
 			callback();
 		}
 	

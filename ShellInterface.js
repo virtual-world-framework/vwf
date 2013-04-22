@@ -7,6 +7,7 @@ var libpath = require('path'),
 	YAML = require('js-yaml');
 	SandboxAPI = require('./sandboxAPI');
 
+	var DAL;
 	function GUID()
     {
         var S4 = function ()
@@ -34,20 +35,27 @@ function StartShellInterface()
 		if(!chunk) return;
 		
 		if(!global.instances)
-					return;
+			global.instances = {};
 					
 		chunk = chunk + '  ';
 		chunk = chunk.replace(/\r\n/g,'');
 		var commands = chunk.split( ' ');
-		
+		console.log('here');
 		if(commands[0] && commands[0] == 'show' && commands[1])
 		{
 			if(commands[1] == 'instances')
 			{
+				
 				var keys = Object.keys(global.instances);
 				for(var i in keys)
-					global.log(keys[i],0);
-				
+					global.log(keys[i],0);	
+			}
+			if(commands[1] == 'states')
+			{
+					DAL.getInstances(function(data)
+					{
+						global.log(data,0);
+					});	
 			}
 			if(commands[1] == 'clients')
 			{
@@ -72,6 +80,17 @@ function StartShellInterface()
 					   }
 					}
 				}
+			}
+		}
+		if(commands[0] && commands[0] == 'import' && commands[1])
+		{
+			if(commands[1] == 'users')
+			{
+				DAL.importUsers();
+			}
+			if(commands[1] == 'states')
+			{
+				DAL.importStates();
 			}
 		}
 		if(commands[0] && commands[0] == 'boot' && commands[1])
@@ -157,5 +176,8 @@ function StartShellInterface()
 	});
 	
 }
-	
+exports.setDAL = function(p)
+{
+	DAL = p;
+}	
 exports.StartShellInterface = StartShellInterface;
