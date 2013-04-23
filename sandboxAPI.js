@@ -113,141 +113,182 @@ function ServeProfile(filename,response,URL, JSONHeader)
 		});
 }
 
+function GetLoginData(response,URL)
+{
+	if(URL.loginData)
+		respond(response,200,JSON.stringify({username:URL.loginData.UID}));
+	else
+		respond(response,200,JSON.stringify({username:null}));
+	return;
+}
+function SessionData()
+{
+	this.sessionId = GUID();
+	this.UID = '';
+	this.Password = '';
+	this.loginTime = new Date();
+	this.clients = {};
+	this.setTimeout = function(sec)
+	{
+		if(this.timeout) clearTimeout(this.timeout);
+		this.timeout = setTimeout(function()
+		{
+			//if I have no active clients, log me out
+			if(Object.keys(this.clients).length == 0)
+				global.sessions.splice(global.sessions.indexOf(this),1);
+			//wait another three minutes and try again
+			else
+				this.resetTimeout();
+		
+		}.bind(this),sec*1000);
+	}
+	this.resetTimeout = function()
+	{
+		this.setTimeout(180);
+	}	
+}
+
+//login to the site
+function SiteLogin(response,URL)
+{
+			var UID = URL.query.UID;
+			var password = URL.query.P;
+			
+			console.log(UID);
+			console.log(password);
+			if(!UID || !password)
+			{
+				respond(response,401,'Login Format incorrect');
+				return;
+			}
+			if(URL.loginData)
+			{
+				respond(response,401,'Already Logged in');
+				return;
+			}
+			
+			CheckPassword(UID,password,function(ok)
+			{
+				console.log("Login "+ ok);
+				if(ok)
+				{
+					var session = new SessionData();
+					session.UID = UID;
+					session.Password = password;
+					session.resetTimeout();
+					global.sessions.push(session);
+					console.log('set cookie');
+					response.writeHead(200, {
+							"Content-Type":  "text/plain",
+							"Set-Cookie": "session="+session.sessionId+"; Path=/; HttpOnly;"
+					});
+					response.write("Login Successful", "utf8");
+					global.log('Client Logged in');
+					response.end();
+				}else
+				{
+					respond(response,401,'Password incorrect');
+					return;
+				}
+			});		
+}
+
+//login to the site
+function SiteLogout(response,URL)
+{
+			
+			if(!URL.loginData)
+			{
+				respond(response,401,"Client Not Logged In");
+				return;
+			}
+			global.sessions.splice(global.sessions.indexOf(URL.loginData),1);
+			response.writeHead(200, {
+							"Content-Type":  "text/plain",
+							"Set-Cookie": "session=; HttpOnly;"
+					});
+			return;
+			
+}
 
 //Take ownership if a client websocket connection
 //must provide a password and name for the user, and the instance and client ids.
 //This will associate a user with a reflector connection
 //The reflector will not accept incomming messages from an anonymous connection
-function Login(filename,response,URL, JSONHeader)
+function InstanceLogin(response,URL)
 {
-			var UID = URL.query.UID;
-			var password = URL.query.P;
+			
+			console.log('instance login');
+			if(!URL.loginData)
+			{
+				console.log("Client Not Logged In");
+				respond(response,401,"Client Not Logged In");
+				return;
+			}			
 			var instance = URL.query.S;
-			global.log(instance);
-			global.log(global.instances);
 			var cid = URL.query.CID;
 			
-			if(!UID || !password || !instance || !cid)
+			console.log(URL.loginData.clients);
+			if(URL.loginData.clients[cid])
 			{
-				respond(response,401,'Login Format incorrect');
+				console.log("Client already logged into session");
+				respond(response,401,"Client already logged into session");
 				return;
-			}
-			if(!global.instances || !global.instances[instance])
-			{
-				respond(response,401,'instance does not exist');
-				return;
-			}
-			if(!global.instances[instance].clients[cid])
-			{
-				
-				respond(response,401,'Client is not connected to instance');
-				return;
-			}
-			if(global.instances[instance].clients[cid].loginData)
-			{
-
-				respond(response,401,'Client is already logged in');
-				return;
-			}
-			for (var i in global.instances[instance].clients)
-			{
-				if(global.instances[instance].clients[i].loginData && global.instances[instance].clients[i].loginData.UID == UID)
-				{
-				
-					respond(response,401,'User is already logged in');
-					return;
-				}
-			}
-			fs.readFile(filename, "utf8", function (err, file) {
+			}	
 			
-				//the file could not be read
-				if (err) {
-
-					respond(response,401,'Profile not found');
-					return;
-				}
-	 
-				//check that the user can get the data
-				var profile = JSON.parse(file);
-				
-				var storedPassword = profile.Password;
-				
-				if(storedPassword == password)
-				{
-					global.instances[instance].clients[cid].loginData = {};
-					global.instances[instance].clients[cid].loginData.UID = UID;
-					global.instances[instance].clients[cid].loginData.Password = password;
-					global.instances[instance].clients[cid].loginData.SocketClient = cid;
-					global.instances[instance].clients[cid].loginData.InstanceID = instance;
-					var SessionID = GUID();
-					global.instances[instance].clients[cid].loginData.SessionID = SessionID;
-					response.writeHead(200, {
-						"Content-Type":  "text/plain",
-						"Set-Cookie": "session="+SessionID+"; HttpOnly; Path="+instance 
-					});
-					response.write("Login Successful", "utf8");
-					global.log('Client Logged in');
-					response.end();
-				}
-				else
-				{
-					
-					respond(response,401,'Incorrect password when getting Profile ' + filename);
-					
-				}
-				return;
-			});
-}
-
-function Logout(filename,response,URL, JSONHeader)
-{
-			var UID = URL.query.UID || URL.loginData.UID;
-			var password = URL.query.P || URL.loginData.Password;
-			var instance = URL.query.S || URL.loginData.InstanceID;
-			var cid = URL.query.CID || URL.loginData.SocketClient;
-			
-			if(!UID || !password || !instance || !cid)
+			if(global.instances[instance] && global.instances[instance].clients[cid])
 			{
-			
-				respond(response,401,"Logout Format incorrect");
-				return;
-			}
-			if(!global.instances || !global.instances[instance])
-			{
-				
-				respond(response,401,"instance does not exist");
-				return;
-			}
-			if(!global.instances[instance].clients[cid])
-			{
-			
-				respond(response,401,"Client is not connected to instance");
-				return;
-			}
-			if(!global.instances[instance].clients[cid].loginData)
-			{
-				
-				respond(response,401,"Client is not logged in");
-				return;
-			}
-			if(global.instances[instance].clients[cid].loginData.UID == UID && global.instances[instance].clients[cid].loginData.Password == password)
-			{
-				response.writeHead(200, {
-					"Content-Type":  "text/plain",
-					"Set-Cookie": "session=; HttpOnly"
-				});
-				response.write("Client logged out", "utf8");
-				response.end();
-				delete global.instances[instance].clients[cid].loginData;
+				URL.loginData.clients[cid] = instance;
+				global.instances[instance].clients[cid].loginData = URL.loginData;
+				console.log("Client Logged Into " + instance);
+				respond(response,200,"Client Logged Into " + instance);
 				return;
 			}else
 			{
-			
-				respond(response,401,"Name or password incorrect");
+				respond(response,200,"Client Or Instance does not exist " + instance);
 				return;
-			
 			}
 			
+}
+
+function InstanceLogout(response,URL)
+{
+			if(!URL.loginData)
+			{
+				respond("Client Not Logged In",401,response);
+				return;
+			}	
+			console.log(URL.loginData);
+			var instance = URL.query.S;
+			var cid = URL.query.CID;
+			
+			console.log(cid);
+			console.log(URL.loginData.clients[cid]);
+			if(URL.loginData.clients[cid])
+			{
+			
+				if(global.instances[URL.loginData.clients[cid]])
+				{
+					console.log('got here1');
+					if(global.instances[URL.loginData.clients[cid]].clients[cid])
+					{
+						console.log('got here2');
+						delete global.instances[URL.loginData.clients[cid]].clients[cid].loginData;
+							console.log('got here3');
+					}
+				}
+				
+				delete URL.loginData.clients[cid];
+				respond(response,200,"Client Logged out " + instance);
+			}else
+			{				
+			console.log('got here4');
+				respond(response,200,"Client was not Logged into " + instance);
+				console.log("Client was not Logged into " + instance);
+				return;
+			}
+			
+			return;
 }
 
 function ServeJSON(jsonobject,response,URL)
@@ -648,69 +689,26 @@ function CheckHash(filename,data,callback)
 }
 
 //Save an instance. the POST URL must contain valid name/password and that UID must match the Asset Author
-function SaveState(URL,dirname,data,response)
+function SaveState(URL,id,data,response)
 {
 	var UID = URL.query.UID || URL.loginData.UID;
 	var P = URL.query.P || URL.loginData.Password;
 	CheckPassword(UID,P,function(e){
 	
-		//Did no supply a good name password pair
+		//Did not supply a good name password pair
 		if(!e)
 		{
 				
-				respond(response,401,'Incorrect password when saving state ' + dirname);
+				respond(response,401,'Incorrect password when saving state ' + id);
 				return;
 		}
 		else
 		{
-				//the state is new
-				if(!fs.existsSync(dirname+'/state'))
+				DAL.saveInstanceState(id,data,function()
 				{
-					
-					respond(response,200,'saving new state' + dirname);
-					MakeDirIfNotExist(dirname,function(){SaveFile(dirname+'/state',data,response);});
+					respond(response,200,'saved ' + id);
 					return;
-				}
-				else
-				{
-					//overwriting the state;
-					//check that the owner property of hte state did not change
-					var asset = JSON.parse(data);
-					//global.log(asset);
-					var storedOwner = asset[asset.length-1].owner;
-			
-					CheckOwner(storedOwner,dirname+'/state',function(e){
-						
-						//trying to delete existing file that user is not author of
-						if(!e)
-						{
-							
-							respond(response,401,'Cannot change owner of existing state' + dirname);
-							return;
-						}else
-						{
-							
-							respond(response,200,'saving over state' + dirname);
-							MakeDirIfNotExist(dirname,function(){     //pretty sure the dir must exist at this point
-								//dont write the same file over and over
-								CheckHash(dirname+'/state',data,function(same){
-									if(!same)
-									{
-										//rename must be sync
-										RenameFile(dirname+'/state',dirname+'/state_backup' + GUID(),function(){
-										//writeing over a file must by sync
-										SaveFile(dirname+'/state',data,response,true);
-										},true);
-									}else
-									{
-										respond(response,200,'The state has not changed' + dirname);
-									}
-								});
-							});
-							return;
-						}
-					});
-				}
+				});
 		}
 	});
 }
@@ -832,7 +830,7 @@ function getState(SID)
 function GetSessionData(request)
 {
   if(!request.headers['cookie'])
-	return {};
+	return null;
 	
   cookies = {};
   var cookielist = request.headers.cookie.split(';');
@@ -845,17 +843,18 @@ function GetSessionData(request)
 
   var SessionID = cookies.session;
   
-  if(!SessionID) return {};
+  if(!SessionID) return null;
   global.log(SessionID);
-  for(var i in global.instances)
-  {
-	for(var j in global.instances[i].clients)
+  for(var i in global.sessions)
+  {	
+	console.log("checking "+global.sessions[i].sessionId+" == " + SessionID);
+	if(global.sessions[i].sessionId == SessionID)
 	{
-		if(global.instances[i].clients[j].loginData && global.instances[i].clients[j].loginData.SessionID == SessionID)
-		   return global.instances[i].clients[j].loginData;
+		global.sessions[i].resetTimeout();
+		return global.sessions[i];
 	}
   }
-  return {};
+  return null;
 }
 
 //router
@@ -867,8 +866,10 @@ function serve (request, response)
 	
 	URL.loginData = GetSessionData(request);
 	
-	var UID = URL.query.UID || URL.loginData.UID;
-	var SID = URL.query.SID || URL.loginData.InstanceID;
+	var UID = URL.query.UID;
+	if(URL.loginData)
+		UID = URL.loginData.UID;
+	var SID = URL.query.SID;
 	if(SID)
 	 SID = SID.replace(/[\\,\/]/g,'_');
 	 
@@ -903,10 +904,19 @@ function serve (request, response)
 				ServeProfile(basedir+"profiles\\" + UID,response,URL,'GetProfileResult');		
 			} break;
 			case "login":{
-				Login(basedir+"profiles\\" + UID,response,URL);		
+				InstanceLogin(response,URL);		
+			} break;
+			case "sitelogin":{
+				SiteLogin(response,URL);		
+			} break;
+			case "sitelogout":{
+				SiteLogout(response,URL);		
+			} break;
+			case "logindata":{
+				GetLoginData(response,URL);		
 			} break;
 			case "logout":{
-				Logout(basedir+"profiles\\" + UID,response,URL,'GetProfileResult');		
+				InstanceLogout(response,URL);		
 			} break;
 			case "profiles":{
 
@@ -925,18 +935,18 @@ function serve (request, response)
 			} break;
 			case "states":{
 
-				fs.readdir(basedir+"states\\",function(err,files){
-					var o = {};
-					o.GetStatesResult = JSON.stringify(files);
-					ServeJSON(o,response,URL);
+			//	fs.readdir(basedir+"states\\",function(err,files){
+			//		var o = {};
+			//		o.GetStatesResult = JSON.stringify(files);
+			//		ServeJSON(o,response,URL);
+			//	});
+				DAL.getInstances(function(state)
+				{
+					if(state)
+						ServeJSON(state,response,URL);
+					else
+						respond(response,500,'state not found' );
 				});
-				//DAL.getInstances(function(state)
-				//{
-				//	if(state)
-				//		ServeJSON(state,response,URL);
-				//	else
-				//		respond(response,500,'state not found' );
-				//});
 			} break;
 			case "textures":{
 				if(global.textures)
@@ -1011,7 +1021,7 @@ function serve (request, response)
             switch(command)
 			{	
 				case "state":{
-					SaveState(URL,basedir+"states\\"+SID,body,response);
+					SaveState(URL,SID,body,response);
 				}break;
 				case "globalasset":{
 					SaveAsset(URL, basedir+"GlobalAssets\\"+URL.query.AID,body,response);

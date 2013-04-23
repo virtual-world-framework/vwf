@@ -149,6 +149,20 @@ define(function ()
 			data = JSON.parse(JSON.parse(data.responseText).GetProfilesResult);
 			return data;
 		}
+		this.getCurrentUserName = function()
+		{
+				var data = jQuery.ajax(
+				{
+					type: 'GET',
+					url: PersistanceServer + '/vwfDataManager.svc/logindata',
+					//url: PersistanceServer + '/vwfDataManager.svc/Profile?UID=' + username + "&P=" + password,
+					data: null,
+					success: null,
+					async: false,
+					dataType: "json"
+				});
+				return JSON.parse(data.responseText).username;
+		}
 		this.GetProfileForUser = function (username, password, reload)
 		{
 			var profile = null;

@@ -204,7 +204,7 @@ define(function ()
 			var data = jQuery.ajax(
 			{
 				type: 'GET',
-				url: PersistanceServer + "/vwfDataManager.svc/login?S=" + S + "&UID=" + username + "&P=" + password + "&CID=" + vwf.moniker(),
+				url: PersistanceServer + "/vwfDataManager.svc/login?S=" + S + "&CID=" + vwf.moniker(),
 				data: null,
 				success: null,
 				async: false,
@@ -321,7 +321,7 @@ define(function ()
 			var data = jQuery.ajax(
 			{
 				type: 'GET',
-				url: PersistanceServer + "/vwfDataManager.svc/logout?S=" + S + "&UID=" + profile.Username + "&P=" + profile.Password + "&CID=" + vwf.moniker(),
+				url: PersistanceServer + "/vwfDataManager.svc/logout?S=" + S + "&CID=" + vwf.moniker(),
 				data: null,
 				success: null,
 				async: false,
@@ -370,7 +370,16 @@ define(function ()
 				},
 				"Log In": function ()
 				{
-					_UserManager.Login($('#profilenames').val(), $('#password').val());
+					
+					var username = _DataManager.getCurrentUserName();
+					if(!username)
+					{
+						_Notifier.alert('You must log into the system before you can enter this world');
+					}
+					else
+					{
+					_UserManager.Login(username, '');
+					}
 				},
 				"Cancel": function ()
 				{

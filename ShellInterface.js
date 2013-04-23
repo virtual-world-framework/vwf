@@ -50,6 +50,11 @@ function StartShellInterface()
 				for(var i in keys)
 					global.log(keys[i],0);	
 			}
+			if(commands[1] == 'sessions')
+			{
+				for(var i =0; i < global.sessions.length; i++)
+					global.log(global.sessions[i],0);	
+			}
 			if(commands[1] == 'states')
 			{
 					DAL.getInstances(function(data)
@@ -91,6 +96,26 @@ function StartShellInterface()
 			if(commands[1] == 'states')
 			{
 				DAL.importStates();
+			}
+		}
+		if(commands[0] && commands[0] == 'purge' && commands[1])
+		{
+			if(commands[1] == 'states')
+			{
+				DAL.purgeInstances();
+			}
+		}
+		if(commands[0] && commands[0] == 'find' && commands[1])
+		{
+			if(commands[1] == 'states')
+			{
+				if(commands[2] == 'owner')
+				{
+					DAL.findState({owner:commands[3]},function(results)
+					{
+						console.log(results);
+					});
+				}
 			}
 		}
 		if(commands[0] && commands[0] == 'boot' && commands[1])

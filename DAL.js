@@ -262,6 +262,7 @@ function CheckHash(filename,data,callback)
 function saveInstanceState(id,data,cb)
 {
 	console.log('saveinstancestate');
+	var parsedData = typeof data == 'string' ? JSON.parse(data) : data;
 	getInstance(id,function(instance){
 	
 		console.log('get instance callback inside saveinstancestate');
@@ -315,7 +316,7 @@ function saveInstanceState(id,data,cb)
 				{
 					getInstance(id,function(state)
 					{
-						updateInstance(id,{lastUpdate:(new Date()),updates:1 + state.updates},function()
+						updateInstance(id,{lastUpdate:(new Date()),updates:1 + state.updates,objects:parsedData.length},function()
 						{
 							cb2(undefined);
 						});
@@ -328,6 +329,7 @@ function saveInstanceState(id,data,cb)
 		
 		}else
 		{
+			console.log("instance not found");
 			cb(false);
 		}
 	});
@@ -365,32 +367,83 @@ function createInstance (id,data,cb)
 function deleteInstance (id,cb)
 {
 	async.series([
-	function(cb)
+	function(cb2)
 	{
 		DB.remove(id,function(err,doc,key)
 		{
+			console.log('delete demo folder');
 			deleteFolderRecursive(datapath + '\\States\\' + id);
-			cb();
+			cb2();
 		});
 	},
-	function(cb)
+	function(cb2)
 	{
+		console.log('update state index');
 		DB.get('StateIndex',function(err,stateIndex,key)
 		{
+			
 			if(!stateIndex)
 			{
 				cb();
 				return;
 			}
+			console.log('Got state index');
 			stateIndex.splice(stateIndex.indexOf(id),1);
 			DB.save('StateIndex',stateIndex,function()
 			{
-				cb(true);
+				console.log('Saved StateIndex');
+				cb();
 			});
 		});
 	}]);
 };
-			
+function findState(query,cb)
+{
+	
+	DB.find(query,function(err,res)
+	{
+		cb(res);
+	});
+
+}
+function importStates()
+{
+	fs.readdir(datapath+"\\states\\",function(err,files){
+		async.each(files,
+			function(i,cb)
+			{
+				console.log(i);
+				getInstance(i,function(inst)
+				{
+					if(inst)
+					{
+						console.log(i + " already in database");
+						cb();
+					}
+					else
+					{
+						var instdata = fs.readFileSync(datapath+"\\states\\"+i+"\\state",'utf8');
+						instdata = JSON.parse(instdata);
+						var statedata = {};
+						statedata.objects = instdata.length;
+						statedata.owner = instdata[instdata.length -1].owner;
+						statedata.title = "Imported State";
+						statedata.description = "Imported automatically from database update";
+						createInstance(i,statedata,function()
+						{
+							console.log('imported' + i);
+							cb();
+						});
+					}
+				});
+				
+			},
+			function(err)
+			{
+				console.log('done');
+			});
+	});
+}			
 function getUsers (cb)
 {
 	DB.get('UserIndex',function(err,UserIndex,key)
@@ -399,11 +452,55 @@ function getUsers (cb)
 	});
 	
 };
-function getInstances (cb)
+function purgeInstances()
+{
+	DB.get('StateIndex',function(err,stateIndex,key)
+	{
+		var data = {}
+		async.each(stateIndex,function(i,cb)
+		{
+			if(!fs.existsSync(datapath +"\\States\\" + i))
+			{
+				console.log('delete instance ' + i);
+				deleteInstance(i,function()
+				{
+					cb();
+				})
+			}else
+			{
+				cb();
+			}
+		},function(err)
+		{
+			
+		});
+		
+	});
+}
+function getInstanceNamess (cb)
 {
 	DB.get('StateIndex',function(err,stateIndex,key)
 	{
 		cb(stateIndex);
+	});
+};
+function getInstances (cb)
+{
+	DB.get('StateIndex',function(err,stateIndex,key)
+	{
+		var data = {}
+		async.each(stateIndex,function(i,cb)
+		{
+			getInstance(i,function(inst)
+			{
+				data[i] = inst;
+				cb();
+			});
+		},function(err)
+		{
+			cb(data);
+		});
+		
 	});
 };
 			
@@ -514,6 +611,14 @@ function startup(callback)
 		},
 		function(cb)
 		{
+			console.log('delete demo');
+			deleteInstance('Demo',function()
+			{
+				cb();
+			});
+		},
+		function(cb)
+		{
 			global.log('DAL startup complete',0);
 			exports.getUser = getUser;
 			exports.updateUser = updateUser;
@@ -531,6 +636,10 @@ function startup(callback)
 			exports.searchUsers = searchUsers;
 			exports.searchInstances = searchInstances;
 			exports.saveInstanceState = saveInstanceState;
+			
+			exports.importStates = importStates;
+			exports.purgeInstances = purgeInstances;
+			exports.findState = findState;
 			callback();
 		}
 	

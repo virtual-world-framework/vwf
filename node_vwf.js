@@ -74,7 +74,7 @@ function instance(inid)
 }
 
 //Redirect the user to a new instance
-function GenerateNewInstance(request,response,appname,newid)
+function RedirectToInstance(request,response,appname,newid)
 {
 	if(newid === undefined)
 		newid = makeid() + "/";
@@ -99,8 +99,15 @@ function GenerateNewInstance(request,response,appname,newid)
 
 function redirect(url,response)
 {
+				url = url.replace(/\\\\/g,'/');
+				url = url.replace(/\\/g,'/');
 				url = url.replace(/\/\//g,'/');
+				
 				url = url.replace(/\/\/\//g,'/');
+				//url = url.replace('http://','');
+				url = url.replace(/\/\/\//g,"/");
+				url = url.replace(/\/\/\/\//g,"/");
+				//url = 'http://' + url;
 				response.writeHead(200, {
 					"Content-Type": "text/html" 
 				});
@@ -354,11 +361,13 @@ function startVWF(){
 				 }
 				 else
 				 {
+						
 					 filename = filename.substr(appname.length-2);
 					 if(appname == "")
 						filename = './support/client/lib/index.html'
 					 else	
 						filename = './support/client/lib/' + filename;
+					
 				 }
 
 			}
@@ -378,17 +387,17 @@ function startVWF(){
 					//no instance id is given, new instance
 					if(appname && instance == null)
 					{			
-						GenerateNewInstance(request,response,appname);
+						//GenerateNewInstance(request,response,appname);
 						
 						
-						//redirect(URL.pathname+"/index.html",response);
+						redirect(URL.pathname+"/index.html",response);
 						//console.log('redirect ' + appname+"./index.html");
 						return;
 					}
 					//instance needs to end in a slash, so redirect but keep instance id
 					if(appname && strEndsWith(URL.pathname,instance))
 					{
-						GenerateNewInstance(request,response,appname,"");
+						RedirectToInstance(request,response,appname,"");
 						return;
 					}
 					//no app name but is directory. Not listing directories, so 404
@@ -399,8 +408,20 @@ function startVWF(){
 						
 						return;
 					}
-					//should never reach here.
+					
+					//this is the bootstrap html. Must have instnace and appname
 					filename = './support/client/lib/index.html';
+					
+					//when loading the bootstrap, you must have an instance that exists in the database
+					console.log(appname);
+					DAL.getInstance(appname.substr(8).replace(/\\/g,'_') + instance + "_",function(data)
+					{
+						if(data)
+							ServeFile(filename,response,URL);
+						else
+							redirect(filterinstance(URL.pathname,instance)+"/index.html",response);
+					});
+					return;
 				}
 				//just serve the file
 				ServeFile(filename,response,URL);
@@ -752,6 +773,7 @@ function startVWF(){
 		  
 		  if(loginData)
 		  {
+			  delete loginData.clients[socket.id];
 			  for(var i in global.instances[namespace].clients)
 			  {
 					var avatarID = 'character-vwf-'+loginData.UID;
@@ -792,7 +814,7 @@ function startVWF(){
 	Shell.setDAL(DAL);
 	DAL.startup(function(){
 		
-		
+		global.sessions = [];
 		var srv = http.createServer(OnRequest).listen(port);
 		global.log('Serving on port ' + port,0);
 		
