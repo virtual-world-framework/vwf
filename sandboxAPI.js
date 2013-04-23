@@ -431,7 +431,7 @@ function CheckOwner(UID,stateFilename, callback)
 function SaveAsset(URL,filename,data,response)
 {
 	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
-	var P = URL.query.P || URL.loginData.Password;
+	var P = URL.query.P || (URL.loginData && URL.loginData.Password);
 	CheckPassword(UID,P,function(e){
 	
 		//Did no supply a good name password pair
@@ -484,7 +484,7 @@ function SaveAsset(URL,filename,data,response)
 function DeleteProfile(URL,filename,response)
 {
 	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
-	var P = URL.query.P || URL.loginData.Password;
+	var P = URL.query.P || (URL.loginData && URL.loginData.Password);
 	CheckPassword(UID,P,function(e){
 	
 		//Did no supply a good name password pair
@@ -541,7 +541,7 @@ function CopyState(URL,filename,newname,response)
 {
 	
 	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
-	var P = URL.query.P || URL.loginData.Password;
+	var P = URL.query.P || (URL.loginData && URL.loginData.Password);
 	
 	if(!UID || !P)
 	{
@@ -604,50 +604,26 @@ function CopyState(URL,filename,newname,response)
 }
 
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
-function DeleteState(URL,filename,response)
+function DeleteState(URL,SID,response)
 {
-	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
-	var P = URL.query.P || URL.loginData.Password;
-	CheckPassword(UID,P,function(e){
-	
-		//Did no supply a good name password pair
-		if(!e)
+	if(!URL.loginData)
+	{
+		respond(response,401,'Anonymous users cannot delete instances');
+		return;
+	}
+	DAL.getInstance(SID,function(state)
+	{
+		if(state.owner != URL.loginData.UID)
 		{
-				
-				respond(response,401,'Incorrect password when deleting state ' + filename);
+			respond(response,401,'User does not have permission to delete instance');
+			return;
+		}else
+		{
+			DAL.deleteInstance(SID,function()
+			{
+				respond(response,200,'deleted instance');
 				return;
-		}
-		else
-		{
-				//the asset is new
-				if(!fs.existsSync(filename))
-				{
-					
-					respond(response,500,'cant delete state that does not exist' + filename);
-					return;
-				}
-				else
-				{
-					//overwriting the asset;
-					CheckOwner(UID,filename + '/state',function(e){
-						
-						//trying to delete existing file that user is not author of
-						if(!e)
-						{
-							
-							respond(response,500,'Permission denied to delete state ' + filename);
-							return;
-						}else
-						{
-							
-							deleteFolderRecursive(filename);
-							respond(response,200,'Deleted state ' + filename);
-							return;
-							
-							
-						}
-					});
-				}
+			});
 		}
 	});
 }
@@ -700,7 +676,7 @@ function CheckHash(filename,data,callback)
 function SaveState(URL,id,data,response)
 {
 	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
-	var P = URL.query.P || URL.loginData.Password;
+	var P = URL.query.P || (URL.loginData && URL.loginData.Password);
 	CheckPassword(UID,P,function(e){
 	
 		//Did not supply a good name password pair
@@ -727,7 +703,7 @@ function SaveState(URL,id,data,response)
 function DeleteAsset(URL,filename,response)
 {
 	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
-	var P = URL.query.P || URL.loginData.Password;
+	var P = URL.query.P || (URL.loginData && URL.loginData.Password);
 	CheckPassword(UID,P,function(e){
 	
 		//Did no supply a good name password pair
@@ -831,6 +807,44 @@ function makeid()
 
     return text;
 }
+
+function setStateData(URL,data,response)
+{
+	if(!URL.loginData)
+	{
+		respond(response,401,'Anonymous users cannot edit instances');
+		return;
+	}
+	data = JSON.parse(data);
+	var sid = URL.query.SID;
+	var statedata = {};
+	sid = sid.replace(/\//g,'_');
+	statedata.title = data.title;
+	statedata.description = data.description;
+	statedata.lastUpdate = (new Date());
+	
+	DAL.getInstance(sid,function(state)
+	{
+		if(!state)
+		{
+			respond(response,401,'State not found. State ' + sid);
+			return;
+		}
+		if(state.owner == URL.loginData.UID)
+		{
+			DAL.updateInstance(sid,statedata,function()
+			{
+				respond(response,200,'Created state ' + sid);
+			});
+		}else
+		{
+			respond(response,401,'Not authorized to edit state ' + sid);
+		}
+
+	});	
+
+}
+
 function createState(URL,data,response)
 {
 	if(!URL.loginData)
@@ -1066,6 +1080,9 @@ function serve (request, response)
 				case "createstate":{
 					createState(URL,body,response);
 				}break;
+				case "statedata":{
+					setStateData(URL,body,response);
+				}break;
 				case "globalasset":{
 					SaveAsset(URL, basedir+"GlobalAssets\\"+URL.query.AID,body,response);
 				}break;
@@ -1093,7 +1110,7 @@ function serve (request, response)
             switch(command)
 			{	
 				case "state":{
-					DeleteState(URL,basedir+"states\\"+SID,response);
+					DeleteState(URL,SID,response);
 				}break;
 				case "globalasset":{
 					DeleteAsset(URL, basedir+"GlobalAssets\\"+URL.query.AID,response);

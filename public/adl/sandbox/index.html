@@ -10,7 +10,7 @@
 	.coldstate
 	{
 	
-		cursor: pointer;
+		
 		background: #f6f8f9; /* Old browsers */
 		background: -moz-linear-gradient(top,  #f6f8f9 0%, #e5ebee 50%, #d7dee3 56%, #f5f7f9 100%); /* FF3.6+ */
 		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f6f8f9), color-stop(50%,#e5ebee), color-stop(56%,#d7dee3), color-stop(100%,#f5f7f9)); /* Chrome,Safari4+ */
@@ -57,8 +57,9 @@
 		height: 200px;
 		display: inline-block;
 		vertical-align: middle;
-		text-decoration: none;
+		color: #52697E;
 		overflow: hidden;
+		text-decoration: none;
 	}
 	.title
 	{
@@ -122,7 +123,20 @@
 		height: 198px;
 		color: #52697E;
 	}
-	
+	.coldstate a
+	{
+		color: #52697E;
+		
+		text-decoration: none;
+		cursor: pointer;
+	}
+	.hotstate a
+	{
+		color: #52697E;
+		
+		text-decoration: none;
+		cursor: pointer;
+	}
 	.coldstate:hover
 	{
 		border: 1px solid lightblue;
@@ -138,10 +152,54 @@
 		width: 65%;
 	
 	}
+	.editstate
+	{
+		text-align: right;
+		background: lightgray;
+		border-radius: 5px;
+		position: absolute;
+		display: block;
+		margin-top: -9px;
+		margin-left: 165px;
+		height: 1em;
+		line-height: 1em;
+	}
+	.editstatedata
+	{
+		display: inline-block;
+		width: 25px;
+		height: 15px;
+		position: absolute;
+		cursor: pointer;
+		border-radius: 7px;
+	}
+	.editstatedelete
+	{
+		display: inline-block;
+		
+		height: 15px;
+		position: absolute;
+		cursor: pointer;
+		border-radius: 7px;
+		left: 25px;
+	}
+	.editstatedata img
+	{
+		height: 100%;
+	}
+	.editstatedata img:hover
+	{
+		background:red
+		height: 200%;
+	}
+	.editstatedelete img
+	{
+		height: 100%;
+	}
 	</style>
 
     <script type="text/javascript">
-	
+		var g_Username;
 		function showStates()
 		{
 			
@@ -149,6 +207,12 @@
 			{
 				
 				$('#activeInstances').empty();
+				if(g_Username)
+				{
+					
+					$('#activeInstances').append('<a href="createInstance.html" class="coldstate" id="newinstancebutton" ><img style="height: 204px;" src="icons/add.png"></a>');
+				}
+				
 				var keys = Object.keys(e);
 				for(var i = 0; i < keys.length; i++)
 				{
@@ -156,19 +220,36 @@
 					if($('#'+id).length == 0)
 					{
 						
-						$('#activeInstances').append('<a class="coldstate" id="'+id+'" ></a>');
+						$('#activeInstances').append('<div class="coldstate" id="'+id+'" ></div>');
 						//$('#'+id).click(function(){
 						//	var str = window.location.pathname;
 						//	str = str.substr(0,str.lastIndexOf('/')+1)
 						//	window.location.pathname = str + $(this).attr('id') + '/';
 						//});
-						$('#'+id).attr('href',id);
-						$('#'+id).append('<div class="title">'+e[keys[i]].title+'</div>');
-						$('#'+id).append('<div class="description">'+e[keys[i]].description+'</div>');
-						$('#'+id).append('<div class="owner">Owner: '+e[keys[i]].owner+'</div>');
-						$('#'+id).append('<div class="objects">Objects: '+e[keys[i]].objects+'</div>');
-						$('#'+id).append('<div class="lastModified">Last Modified: '+e[keys[i]].lastUpdate+'</div>');
-						$('#'+id).append('<div class="stateid">'+keys[i]+'</div>');
+						
+						$('#'+id).append('<div id="'+id+"edit"+'"class="editstate"></div>');
+						
+						$('#'+id+"edit").append('<a id="'+id+"editData"+'"class="editstatedata"><img src="icons/edit.jpg"></a>');
+						$('#'+id+"edit").append('<a id="'+id+"editDelete"+'"class="editstatedelete"><img src="icons/delete.png"></a>');
+						
+						
+						
+						$('#'+id).append('<a  id="'+id+'data" ></a>');
+						$('#'+id+'data').attr('href',id);
+						$('#'+id+'editDelete').attr('href','deleteInstance.html?id='+id);
+						$('#'+id+'editData').attr('href','editInstance.html?id='+id);
+						
+						$('#'+id+'data').append('<div class="title">'+e[keys[i]].title+'</div>');
+						$('#'+id+'data').append('<div class="description">'+e[keys[i]].description+'</div>');
+						$('#'+id+'data').append('<div class="owner">Owner: '+e[keys[i]].owner+'</div>');
+						$('#'+id+'data').append('<div class="objects">Objects: '+e[keys[i]].objects+'</div>');
+						$('#'+id+'data').append('<div class="lastModified">Last Modified: '+e[keys[i]].lastUpdate+'</div>');
+						$('#'+id+'data').append('<div class="stateid">'+keys[i]+'</div>');
+						
+						if(g_Username != e[keys[i]].owner)
+						{
+							$('#'+id+"edit").hide();
+						}
 					}
 				}
 				
@@ -194,46 +275,27 @@
 					{
 						data = JSON.parse(xhr.responseText);
 						$('#username').text("Logged in as: " + data.username);
+						g_Username = data.username;
 						$('#login').hide();
+						showStates();
+						window.setInterval(function(){
+							showStates();
+						},5000);
 					},
 					error:function(xhr,status,err)
 					{
 						$('#username').hide();
 						$('#logout').hide();
 						$('#newstatearea').hide();
-					}
-			});
-			
-			showStates();
-			
-			$('#newstatebtn').click(function(){
-				
-				var statedata = {};
-				statedata.title = $('#newstate').val();
-				statedata.description = $('#newstatedes').val();
-				
-				jQuery.ajax(
-				{
-					type: 'POST',
-					url: '/vwfDataManager.svc/createstate',
-					data: JSON.stringify(statedata),
-					success:function(data,status,xhr)
-					{
+						
 						showStates();
-					},
-					error:function(xhr,status,err)
-					{
-						alert(xhr.responseText);
-					},
-					dataType: "text"
-				});
+						window.setInterval(function(){
+							showStates();
+						},5000);
+					}
+					
 			});
 			
-			window.setInterval(function(){
-				showStates();
-			},5000);
-			//$('#newstatebtn').button({label:'Create World'});
-		
 		});
 	
 	</script>
@@ -251,11 +313,7 @@
 		<h1> Virtual World Framework Sandbox </h1>
 		<div>Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in "cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a new world" </div>
 		
-		<div id='newstatearea' style="margin: 10px;">
-		 <input type='text' id='newstate' class='input' placeholder='World Name'/>
-		 <input type='textarea' id='newstatedes' class='input' placeholder='Description'/>
-		 <div id = 'newstatebtn' class='button'> Create World </div>
-		</div>
+		
 		<div id="activeInstances" style='width:800px'>
 		
 		</div>

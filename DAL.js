@@ -296,7 +296,7 @@ function saveInstanceState(id,data,cb)
 						});
 					}else
 					{
-						cb2(undefined);
+						cb2(undefined,issame);
 					}
 				},
 				function(issame,cb2)
