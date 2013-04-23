@@ -8053,6 +8053,10 @@ GLGE.Texture.prototype.setSrc=function(url){
 	this.url=url;
 	this.state=0;
 	this.image=new Image();
+	if(url.indexOf('@')!=-1)
+		this.image.crossOrigin = "use-credentials";
+	else
+		this.image.crossOrigin = 'anonymous';
 	var texture=this;
 	this.image.onload = function(){
 		texture.state=1;
@@ -8467,13 +8471,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * @augments GLGE.QuickNotation
 * @augments GLGE.JSONLoader
 */
-GLGE.TextureCanvas=function(uid){
+GLGE.TextureCanvas=function( uid, width, height, ID, canvas ){
+	if ( canvas === undefined ) {
 	this.canvas=document.createElement("canvas");
+  } else {
+    this.canvas = canvas;
+  }
 	//temp canvas to force chrome to update FIX ME when bug sorted!
 	this.t=document.createElement("canvas");
 	this.t.width=1;
 	this.t.height=1;
 	GLGE.Assets.registerAsset(this,uid);
+  this.canvas.style.display="none";
+  if ( ID !== undefined ) {
+    this.canvas.setAttribute("id",ID);
+  }
+  this.canvas.setAttribute("width", width ? width : "256" );
+  this.canvas.setAttribute("height", height ? height : "256" ); 
+
+  document.getElementsByTagName("body")[0].appendChild(this.canvas);  
 }
 GLGE.augment(GLGE.QuickNotation,GLGE.TextureCanvas);
 GLGE.augment(GLGE.JSONLoader,GLGE.TextureCanvas);
@@ -8802,10 +8818,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * @augments GLGE.QuickNotation
 * @augments GLGE.JSONLoader
 */
-GLGE.TextureVideo=function(uid){
+GLGE.TextureVideo=function( uid, width, height, ID, video ){
+  if ( video === undefined ) {
 	this.video=document.createElement("video");
+  } else {
+    this.video = video;
+  }
+
 	this.video.style.display="none";
 	this.video.setAttribute("loop","loop");
+  if ( ID !== undefined ) {
+    this.video.setAttribute("id",ID);
+  }
+  this.video.setAttribute("width", width ? width : "256" );
+  this.video.setAttribute("height", height ? height : "256" );  
+
 	this.video.autoplay=true;
 	//looping isn't working in firefox so quick fix!
 	this.video.addEventListener("ended", function() { this.play(); }, true); 
@@ -8814,8 +8841,8 @@ GLGE.TextureVideo=function(uid){
 	//used to get webkit working
 	this.canvas=document.createElement("canvas");
 	this.ctx=this.canvas.getContext("2d");
-	GLGE.Assets.registerAsset(this,uid);
 	
+	GLGE.Assets.registerAsset(this,uid);
 }
 GLGE.augment(GLGE.QuickNotation,GLGE.TextureVideo);
 GLGE.augment(GLGE.JSONLoader,GLGE.TextureVideo);
@@ -10409,6 +10436,22 @@ GLGE.Text.prototype.setPickType=function(value){
 	return this;
 };
 /**
+* Gets the aspect of the text
+* @returns {Number} the aspect of the text
+*/
+GLGE.Text.prototype.getAspect=function(){
+  return this.aspect;
+};
+/**
+* Sets the aspect of the text
+* @param {Number} value the aspect of the text
+*/
+GLGE.Text.prototype.setAspect=function(value){
+  this.aspect=value;
+  this.dirty=true;
+  return this;
+};
+/**
 * Gets the font of the text
 * @returns {string} the font of the text
 */
@@ -10417,7 +10460,7 @@ GLGE.Text.prototype.getFont=function(){
 };
 /**
 * Sets the font of the text
-* @param {Number} value the font of the text
+* @param {string} value the font of the text
 */
 GLGE.Text.prototype.setFont=function(value){
 	this.font=value;
@@ -10623,7 +10666,7 @@ GLGE.Text.prototype.updateCanvas=function(gl){
 	canvas.height=this.size*1.2;
 	var ctx = canvas.getContext("2d");
 	ctx.font = this.size+"px "+this.font;
-	canvas.width=ctx.measureText(this.text).width;
+	canvas.width= ctx.measureText(this.text).width || 80;
 	canvas.height=this.size*1.2;
 	 ctx = canvas.getContext("2d");
 	ctx.textBaseline="top";
@@ -12822,7 +12865,7 @@ GLGE.Scene.prototype.renderPass=function(gl,renderObjects,offsetx,offsety,width,
 	gl.clearDepth(1.0);
 	gl.depthFunc(gl.LEQUAL);
 	gl.viewport(offsetx,offsety,width,height);
-	
+	gl.enable(this.gl.DEPTH_TEST);
 	gl.clearColor(this.backgroundColor.r, this.backgroundColor.g, this.backgroundColor.b, this.backgroundColor.a);
 	if(!type) {
 		gl.scissor(offsetx,offsety,width,height);
@@ -12971,9 +13014,25 @@ GLGE.Scene.prototype.ray=function(origin,direction){
 			var cvp=this.camera.getViewProjection();
 			objects=this.objectsInViewFrustum(objects,cvp);
 		}*/
+		var pickableDepthTestObjects = [];
+		var pickableNoDepthObjects = [];
+		var ordermap = {}
 		for(var i=0; i<objects.length;i++){
-			if(objects[i].pickable) objects[i].GLRender(gl,GLGE.RENDER_PICK,i+1);
+			if(objects[i].pickable && objects[i].depthTest) pickableDepthTestObjects.push(objects[i]);//objects[i].GLRender(gl,GLGE.RENDER_PICK,i+1);
+			if(objects[i].pickable && !objects[i].depthTest) pickableNoDepthObjects.push(objects[i]);
+			ordermap[objects[i].uid] = i+1;
 		}
+		gl.enable(this.gl.DEPTH_TEST);
+		gl.depthFunc(gl.LEQUAL);
+		for(var i=0; i<pickableDepthTestObjects.length;i++){
+			pickableDepthTestObjects[i].GLRender(gl,GLGE.RENDER_PICK,ordermap[pickableDepthTestObjects[i].uid]);
+		}
+		
+		gl.disable(this.gl.DEPTH_TEST);
+		for(var i=0; i<pickableNoDepthObjects.length;i++){
+			pickableNoDepthObjects[i].GLRender(gl,GLGE.RENDER_PICK,ordermap[pickableNoDepthObjects[i].uid]);
+		}
+		gl.enable(this.gl.DEPTH_TEST);
 		//gl.flush();
 
 		var data = new Uint8Array(8 * 1 * 4);

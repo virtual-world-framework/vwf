@@ -58,7 +58,7 @@
 
           asyncTest( "Time passage", function() {
 
-            createFixture( function( fixtureID ) {
+            createFixture( function( fixtureID, cleanup ) {
 
               // Calculate times. We need to find two system tick times and additional times between
               // the system ticks. This calculation will need to be adjusted if the single-user tick
@@ -123,7 +123,7 @@
                 { absolute: timeStop, assertion: function() {
                     deepEqual( vwf.execute( fixtureID, "this.property" )[ timeStop ], [ "tick" ], "one tick with the future action at the periodic interval time" ) } },
 
-              ] );
+              ], cleanup );
 
             } );
 
@@ -133,7 +133,7 @@
 
           asyncTest( "Future JavaScript", function() {
 
-            createFixture( function( fixtureID ) {
+            createFixture( function( fixtureID, cleanup ) {
 
               vwf.setProperty( fixtureID, "property", undefined );
 
@@ -157,7 +157,7 @@
                 { absolute: time3, assertion: function() {
                     equal( vwf.getProperty( fixtureID, "property" ), "future", "relative alias" ) } },
 
-              ] );
+              ], cleanup );
 
             } );
 
@@ -167,7 +167,7 @@
 
           asyncTest( "Immediate kernel", function() {
 
-            createFixture( function( fixtureID ) {
+            createFixture( function( fixtureID, cleanup ) {
 
               kernel.setProperty( fixtureID, "property", "property", undefined );
               equal( vwf.getProperty( fixtureID, "property" ), "property", "immediate property" );
@@ -178,7 +178,9 @@
               kernel.fireEvent( fixtureID, "event", [ "event" ], undefined );
               equal( vwf.getProperty( fixtureID, "property" ), "event", "immediate event" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -187,7 +189,7 @@
 
           asyncTest( "Immediate JavaScript", function() {
 
-            createFixture( function( fixtureID ) {
+            createFixture( function( fixtureID, cleanup ) {
 
               vwf.execute( fixtureID, "this.property = 'property'" );
               equal( vwf.getProperty( fixtureID, "property" ), "property", "immediate property" );
@@ -198,7 +200,9 @@
               vwf.execute( fixtureID, "this.event( 'event' )" );
               equal( vwf.getProperty( fixtureID, "property" ), "event", "immediate event" );
 
+              cleanup();
               start();
+
             } );
 
           } );
@@ -207,7 +211,7 @@
 
           asyncTest( "Future kernel", function() {
 
-            createFixture( function( fixtureID ) {
+            createFixture( function( fixtureID, cleanup ) {
 
               vwf.setProperty( fixtureID, "property", undefined );
               equal( vwf.getProperty( fixtureID, "property" ), undefined, "future initialized" );
@@ -229,7 +233,7 @@
                 { relative: 0.003, assertion: function() {
                     equal( vwf.getProperty( fixtureID, "property" ), "event", "future event" ) } },
 
-              ] );
+              ], cleanup );
 
             } );
 
@@ -239,7 +243,7 @@
 
           asyncTest( "Future JavaScript", function() {
 
-            createFixture( function( fixtureID ) {
+            createFixture( function( fixtureID, cleanup ) {
 
               vwf.setProperty( fixtureID, "property", undefined );
               equal( vwf.getProperty( fixtureID, "property" ), undefined, "future initialized" );
@@ -261,7 +265,7 @@
                 { relative: 0.003, assertion: function() {
                     equal( vwf.getProperty( fixtureID, "property" ), "event", "future event" ) } },
 
-              ] );
+              ], cleanup );
 
             } );
 
@@ -271,7 +275,7 @@
 
           asyncTest( "Future JavaScript inherited direct", function() {
 
-            createFixtureDerivedBase( function( derivedID, baseID ) {
+            createFixtureDerivedBase( function( derivedID, baseID, cleanup ) {
 
               equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived in derived initialized" );
               equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived initialized" ); // inherited
@@ -293,7 +297,7 @@
                     equal( vwf.getProperty( derivedID, "base" ), "base updated", "base in derived executed" ) // no longer inherited
                     equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" ) } },
 
-              ] );
+              ], cleanup );
 
             } );
 
@@ -303,7 +307,7 @@
 
           asyncTest( "Future JavaScript inherited collection", function() {
 
-            createFixtureDerivedBase( function( derivedID, baseID ) {
+            createFixtureDerivedBase( function( derivedID, baseID, cleanup ) {
 
               equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived in derived initialized" );
               equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived initialized" ); // inherited
@@ -325,7 +329,7 @@
                     equal( vwf.getProperty( derivedID, "base" ), "base updated", "base in derived executed" ) // no longer inherited
                     equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" ) } },
 
-              ] );
+              ], cleanup );
 
             } );
 
@@ -360,7 +364,9 @@
 
             }, undefined, function( fixtureID ) {
 
-              callback( fixtureID );
+              callback( fixtureID, function() {
+                vwf.deleteNode( fixtureID );
+              } );
 
             } );
 
@@ -392,7 +398,10 @@
 
               }, function( derivedID ) {
 
-                callback( derivedID, baseID );
+                callback( derivedID, baseID, function() {
+                  vwf.deleteNode( derivedID );
+                  vwf.deleteNode( baseID );
+                } );
 
               } );
 
@@ -410,12 +419,13 @@
 
           // Run assertions against actions on the future queue.
 
-          function runFutureAssertions( ticked, assertions ) {
+          function runFutureAssertions( ticked, assertions, cleanup ) {
 
-            // Interpret runFutureAssertions( assertions ) as
-            // runFutureAssertions( undefined, assertions )
+            // Interpret runFutureAssertions( assertions, cleanup ) as
+            // runFutureAssertions( undefined, assertions, cleanup )
 
             if ( typeof ticked != "function" && ! ( ticked instanceof Function ) ) {
+              cleanup = assertions;
               assertions = ticked;
               ticked = undefined;
             }
@@ -438,6 +448,7 @@
 
               if ( next == assertions.length ) {
                 window.vwf_view.ticked = undefined;
+                cleanup();
                 start();
               }
 

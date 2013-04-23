@@ -332,6 +332,22 @@ define( function() {
 
         moniker: [],
 
+        /// Return the application root node.
+        /// 
+        /// @function
+        /// 
+        /// @param {Boolean} [initializedOnly]
+        ///   If set, only return the application node if the application has completed
+        ///   initialization. Drivers that manage application code should set `initializedOnly`
+        ///   since applications should never have access to uninitialized parts of the application
+        ///   graph.
+        /// 
+        /// @returns {ID}
+        ///   The ID of the application root. `application` may return `undefined` if the entire
+        ///   application has been deleted.
+
+        application: [ /* initializedOnly */ ],
+
         /// Return the node's intrinsic state. This consists of:
         /// 
         ///   source -- the URI of the node's data blob
@@ -374,64 +390,85 @@ define( function() {
 
         name: [ /* nodeID */ ],
 
-        /// Prototype calls prototyping() on each model. The first model to return a non-undefined value
-        /// dictates the return value.
+        /// Return a node's prototype.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
         /// 
         /// @returns {ID}
+        ///   The ID of the node's prototype, or `undefined` if called on the proto-prototype,
+        ///   `node.vwf`.
 
         prototype: [ /* nodeID */ ],
 
-        /// Prototypes returns a list of all the prototype ids for a given node id.
+        /// Return a node's prototype, its prototype, etc. up to and including `node.vwf`.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {Boolean} [includeBehaviors]
+        ///   If set, also include the node's and prototypes' behaviors.
+        /// 
+        /// @returns {ID[]}
+        ///   An array of IDs of the node's prototypes.
+
+        prototypes: [ /* nodeID, includeBehaviors */ ],
+
+        /// Return a node's behaviors.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
         /// 
         /// @returns {ID[]}
-
-        prototypes: [ /* nodeID */ ],
-
-        /// Behaviors returns a list of all the behavior ids for a given node id.
-        /// 
-        /// @function
-        /// 
-        /// @param {ID} nodeID
-        /// 
-        /// @returns {ID[]}
+        ///   An array of IDs of the node's behaviors. An empty array is returned if the node
+        ///   doesn't have any behaviors.
 
         behaviors: [ /* nodeID */ ],
 
-        /// Returns an array of node ids for all of the parents for the given child node id.
+        /// Return a node's parent, grandparent, its parent, etc.
         /// 
         /// @param {ID} nodeID
+        /// @param {Boolean} [initializedOnly]
+        ///   If set, only include parents of nodes that have completed initialization. If a portion
+        ///   of the tree containing the node is still initializing, the node's parent, grandparent,
+        ///   etc. will be included if the preceding node is initialized, but the remaining
+        ///   ancestors will be omitted. Drivers that manage application code should set
+        ///   `initializedOnly` since applications should never have access to uninitialized parts
+        ///   of the application graph.
         /// 
         /// @returns {ID[]}
+        ///   An array of IDs of the node's ancestors. An empty array is returned for global,
+        ///   top-level nodes that don't have a parent.
 
-        ancestors: [ /* nodeID */ ],
+        ancestors: [ /* nodeID, initializedOnly */ ],
 
-        /// Parent calls parenting() on each model. The first model to return a non-undefined value
-        /// dictates the return value.
+        /// Return a node's parent.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
+        /// @param {Boolean} [initializedOnly]
+        ///   If set, only return the parent if the node has completed initialization. Drivers that
+        ///   manage application code should set `initializedOnly` since applications should never
+        ///   have access to uninitialized parts of the application graph.
         /// 
         /// @returns {ID}
+        ///   The ID of the node's parent, or `undefined` for the application root node or other
+        ///   global, top-level nodes.
 
-        parent: [ /* nodeID */ ],
+        parent: [ /* nodeID, initializedOnly */ ],
 
-        /// Children calls childrening() on each model. The return value is the union of the non-undefined
-        /// results.
+        /// Return a node's children.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
         /// 
         /// @returns {ID[]}
+        ///   An array of IDs of the node's children. An empty array is returned if the node
+        ///   doesn't have any children.
 
         children: [ /* nodeID */ ],
 
@@ -442,6 +479,8 @@ define( function() {
         /// @param {ID} nodeID
         /// 
         /// @returns {ID[]}
+        ///   An array of IDs of the node's descendants. An empty array is returned if the node
+        ///   doesn't have any children.
 
         descendants: [ /* nodeID */ ],
 
@@ -505,9 +544,14 @@ define( function() {
         /// @function
         /// 
         /// @param {ID} nodeID
-        ///   The reference node. Relative patterns are resolved with respect to this node.
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
         /// @param {String} matchPattern
         ///   The search pattern.
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
         /// @param {Function} [callback]
         ///   A callback to receive the search results. If callback is provided, find invokes
         ///   callback( matchID ) for each match. Otherwise the result is returned as an array.
@@ -515,7 +559,7 @@ define( function() {
         /// @returns {ID[]|undefined}
         ///   If callback is provided, undefined; otherwise an array of the node ids of the result.
 
-        find: [ /* nodeID, matchPattern, callback( matchID ) */ ],
+        find: [ /* nodeID, matchPattern, initializedOnly, callback( matchID ) */ ],
 
         /// Test a node against a search pattern. See vwf.api.kernel#find for details of the query
         /// syntax.
@@ -523,16 +567,21 @@ define( function() {
         /// @function
         /// 
         /// @param {ID} nodeID
-        ///   The reference node. Relative patterns are resolved with respect to this node.
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
         /// @param {String} matchPattern
         ///   The search pattern.
         /// @param {ID} testID
         ///   A node to test against the pattern.
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
         /// 
         /// @returns {Boolean}
         ///   true when testID matches the pattern.
 
-        test: [ /* nodeID, matchPattern, testID */ ],
+        test: [ /* nodeID, matchPattern, testID, initializedOnly */ ],
 
     };
 

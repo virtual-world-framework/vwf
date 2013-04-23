@@ -58,12 +58,14 @@
 
           asyncTest( "node and prototype initializers", function() {
   
-            create_node_prototype_with_initializers( true, true, function( nodeID, prototypeID ) {
+            create_node_prototype_with_initializers( true, true, function( nodeID, prototypeID, cleanup ) {
 
                 equal( vwf.getProperty( nodeID, "property" ), "node", "node's initialization" );
                 equal( vwf.getProperty( prototypeID, "property" ), "prototype", "prototype's initialization" );
 
+                cleanup();
                 start();
+
             } );
 
           } );
@@ -72,12 +74,14 @@
 
           asyncTest( "node initializer", function() {
   
-            create_node_prototype_with_initializers( true, false, function( nodeID, prototypeID ) {
+            create_node_prototype_with_initializers( true, false, function( nodeID, prototypeID, cleanup ) {
 
                 equal( vwf.getProperty( nodeID, "property" ), "node", "node's initialization" );
                 equal( vwf.getProperty( prototypeID, "property" ), null, "prototype's initialization" );
 
+                cleanup();
                 start();
+
             } );
 
           } );
@@ -86,12 +90,14 @@
 
           asyncTest( "prototype initializer", function() {
   
-            create_node_prototype_with_initializers( false, true, function( nodeID, prototypeID ) {
+            create_node_prototype_with_initializers( false, true, function( nodeID, prototypeID, cleanup ) {
 
                 equal( vwf.getProperty( nodeID, "property" ), "prototype", "node's initialization" );
                 equal( vwf.getProperty( prototypeID, "property" ), "prototype", "prototype's initialization" );
 
+                cleanup();
                 start();
+
             } );
 
           } );
@@ -100,12 +106,14 @@
 
           asyncTest( "no initializers", function() {
   
-            create_node_prototype_with_initializers( false, false, function( nodeID, prototypeID ) {
+            create_node_prototype_with_initializers( false, false, function( nodeID, prototypeID, cleanup ) {
 
                 equal( vwf.getProperty( nodeID, "property" ), null, "node's initialization" );
                 equal( vwf.getProperty( prototypeID, "property" ), null, "prototype's initialization" );
 
+                cleanup();
                 start();
+
             } );
 
           } );
@@ -128,7 +136,10 @@
                 node.properties.property = node.properties.property || null;
 
                 vwf.createChild( 0, unique_name( "node" ), node, undefined, function( nodeID ) {
-                    callback( nodeID, prototypeID );
+                    callback( nodeID, prototypeID, function() {
+                      vwf.deleteNode( nodeID );
+                      vwf.deleteNode( prototypeID );
+                    } );
                 } );
 
             } );

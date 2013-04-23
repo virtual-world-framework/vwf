@@ -14,6 +14,7 @@
 --- 
 extends: http://vwf.example.com/physics2.vwf
 properties:
+  nodesCreated: 
   createCube: true
   cubesCreated: 0
   spheresCreated: 0
@@ -37,7 +38,6 @@ properties:
         this.tossSphereStrength = value;
       }   
     value: 250
-  nodesCreated: 
 methods:
   clear:
 scripts:
@@ -48,37 +48,53 @@ scripts:
     var idsToAddVelocity;
     var materials = [ "red", "blue", "yellow", "green", "orange", "purple", "silver" ];
     var cube = { 
-      "source": "Cube", 
+      "source": "cube.dae", 
       "extends": "http://vwf.example.com/physics3.vwf",
-      "type": "text/xml",
+      "type": "model/vnd.collada+xml",
       "properties": { 
-        "material": "",
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
         "physics": [ "box", 3.0, 3.0, 3.0 ], 
         "friction": 0.5, 
         "mass": 400, 
         "linVelocityDamping": [ 1, 1, 1, 0 ], 
         "restitution": 0.10, 
-        } 
+        "private": null,
+        },
+        "children": {
+          "material": {
+            "extends": "http://vwf.example.com/material.vwf",
+            "properties": {
+              "color": ""
+            }
+          }
+        }
       };
     var sphere = { 
-      "source": "Sphere", 
+      "source": "sphere.dae", 
       "extends": "http://vwf.example.com/physics3.vwf",
-      "type": "text/xml",
+      "type": "model/vnd.collada+xml",
       "properties": { 
-        "material": "", 
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
         "physics": [ "sphere", 2.0 ], 
         "friction": 0.5, 
         "mass": 100, 
         "linVelocityDamping": [ 0.99, 0.99, 0.99, 0 ], 
         "restitution": 0.10, 
-        } 
+        "private": null,
+        },
+        "children": {
+          "material": {
+            "extends": "http://vwf.example.com/material.vwf",
+            "properties": {
+              "color": ""
+            }
+          }
+        }
       };
     this.initialize = function() {
       this.nodesCreated = [];
-    }
-    this.keyDown = this.events.add( function( keyInfo ) {
+    }  
+    this.keyDown = function( keyInfo ) {
       var key = undefined;
       for ( var kd in keyInfo.keysDown ) {
         key = keyInfo.keysDown[kd];
@@ -86,27 +102,7 @@ scripts:
           this.createObject();
         }
       }
-    }, this );   
-    this.pointerDown = function( pointerInfo, pickInfo ) {
-      mouseIsDown = true;
-      mouseDownTime = this.time;
     }
-    this.pointerUp = function( pointerInfo, pickInfo ) {
-      mouseIsDown = false;
-      var now =  this.time;
-      //if ( now - mouseDownTime < 700 ) {
-      //  this.createObject();
-      //}
-      mouseDownTime = -1;
-    }
-    this.getCameraLook = function() {
-        var trans = goog.vec.Mat4.multVec4(
-          this.activeCameraComp.rotationMatrix,
-          goog.vec.Vec4.createFromValues( 1, 1, 1, 1 ),
-          goog.vec.Vec3.create()
-        );
-        return trans;      
-    } 
     this.clear = function(){
       if ( this.nodesCreated ) {
         var node;
@@ -136,7 +132,7 @@ scripts:
             this.cubesCreated += 1;
             newObjName = "cube" + this.cubesCreated;
             
-            cube.properties.material = materials[ this.colorIndex ];
+            cube.children.material.properties.color = materials[ this.colorIndex ];
             cube.properties.transform = [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, trans[12], trans[13], trans[14] - 10, 1 ];
             var vel = [ at[0] * this.tossCubeStrength, at[1] * this.tossCubeStrength, at[2] * this.tossCubeStrength];
             this.colorIndex += 1;
@@ -154,7 +150,7 @@ scripts:
             this.spheresCreated += 1;
             newObjName = "sphere" + this.spheresCreated;
             
-            sphere.properties.material = materials[ this.colorIndex ];
+            sphere.children.material.properties.color = materials[ this.colorIndex ];
             sphere.properties.transform = [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, trans[12], trans[13], trans[14] - 10, 1 ];
             var vel = [ at[0] * this.tossSphereStrength, at[1] * this.tossSphereStrength, at[2] * this.tossSphereStrength ];
             this.colorIndex += 1;
@@ -171,4 +167,4 @@ scripts:
           }
         }
       }
-    }  //@ sourceURL=appScene.vwf
+    } //@ sourceURL=appscene.vwf

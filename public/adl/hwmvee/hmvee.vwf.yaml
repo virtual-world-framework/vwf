@@ -132,7 +132,7 @@ scripts:
                 this.tireLF = findChildColladaNode(root,'driver_side_front_wheel');
                 this.tireLB = findChildColladaNode(root,'driver_side_back_wheel');
                 this.turret = findChildColladaNode(root,'turret');
-                debugger;
+                //debugger;
                 this.numfired = 0;
                 this.steerAmt = 1.0;
                 this.wheelRotate = 0.0;
@@ -585,6 +585,6 @@ scripts:
          
          }
      
-         var that = this;
+         var that = this; //@ sourceURL=hmvee.vwf
        
         

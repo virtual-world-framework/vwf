@@ -1,0 +1,94 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: http://vwf.example.com/scene.vwf
+properties:
+  navmode: none
+children:
+  surface:
+    extends: plane.vwf
+    properties:
+      height: 600
+      width: 800
+      normal: [ 0, -1, 0 ]
+      counter: 0
+      translation: [ 0, 0, 0 ]
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+      properties:
+        texture:
+        diffuse:
+    methods:
+      update:    
+    scripts:
+    - |
+         this.initialize = function()
+         {
+            this.counter = 0;
+            if ( this.material ) { 
+              this.material.texture = "";
+            }  
+            this.future(0.1).update();
+         }
+         this.update = function()   
+         {
+            this.counter++;
+            if(this.counter == 100)
+                this.material = 'green';
+            if(this.counter == 200)   
+                this.material = 'red';
+            if(this.counter == 300)  
+                this.material = 'blue';
+            if(this.counter == 400)  
+                this.material = 'purple';
+            if(this.counter == 500)  
+                this.material = 'orange';
+            if(this.counter == 600)  
+                this.material = 'gray';                
+            if(this.counter == 700)  
+                this.material = 'yellow';
+            if(this.counter == 800)  
+                this.material = 'white';
+            if(this.counter == 900) 
+            {            
+                this.counter = 0;
+                this.material = 'black';        
+            }
+            this.future(0.1).update();    
+         }
+  camera:
+    extends: http://vwf.example.com/camera.vwf
+  dir1:
+    extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
+    properties:
+      lightType: "point"
+      enable: true
+      distance: 2000
+      intensity: 1.4
+      color: [ 255, 255, 255 ]
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
+      rotation: [ 1, 0, 0, -45 ]
+      translation: [0,-100,0]
+scripts:
+- | 
+    this.initialize = function()
+    {
+        this.camera.rotation = [0,1,0,0];
+        this.camera.translation = [0,-600,50];
+    }

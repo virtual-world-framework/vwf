@@ -48,11 +48,10 @@ scripts:
     var idsToAddVelocity;
     var materials = [ "red", "blue", "yellow", "green", "orange", "purple", "silver" ];
     var cube = { 
-      "source": "Cube", 
+      "source": "cube.dae", 
       "extends": "http://vwf.example.com/physics3.vwf",
-      "type": "text/xml",
+      "type": "model/vnd.collada+xml",
       "properties": { 
-        "material": "",
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
         "physics": [ "box", 3.0, 3.0, 3.0 ], 
         "friction": 0.5, 
@@ -60,14 +59,21 @@ scripts:
         "linVelocityDamping": [ 1, 1, 1, 0 ], 
         "restitution": 0.10, 
         "private": null,
-        } 
+        },
+        "children": {
+          "material": {
+            "extends": "http://vwf.example.com/material.vwf",
+            "properties": {
+              "color": ""
+            }
+          }
+        }
       };
     var sphere = { 
-      "source": "Sphere", 
+      "source": "sphere.dae", 
       "extends": "http://vwf.example.com/physics3.vwf",
-      "type": "text/xml",
+      "type": "model/vnd.collada+xml",
       "properties": { 
-        "material": "", 
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
         "physics": [ "sphere", 2.0 ], 
         "friction": 0.5, 
@@ -75,7 +81,15 @@ scripts:
         "linVelocityDamping": [ 0.99, 0.99, 0.99, 0 ], 
         "restitution": 0.10, 
         "private": null,
-        } 
+        },
+        "children": {
+          "material": {
+            "extends": "http://vwf.example.com/material.vwf",
+            "properties": {
+              "color": ""
+            }
+          }
+        }
       };
     this.initialize = function() {
       this.nodesCreated = [];
@@ -118,7 +132,7 @@ scripts:
             this.cubesCreated += 1;
             newObjName = "cube" + this.cubesCreated;
             
-            cube.properties.material = materials[ this.colorIndex ];
+            cube.children.material.properties.color = materials[ this.colorIndex ];
             cube.properties.transform = [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, trans[12], trans[13], trans[14] - 10, 1 ];
             var vel = [ at[0] * this.tossCubeStrength, at[1] * this.tossCubeStrength, at[2] * this.tossCubeStrength];
             this.colorIndex += 1;
@@ -136,7 +150,7 @@ scripts:
             this.spheresCreated += 1;
             newObjName = "sphere" + this.spheresCreated;
             
-            sphere.properties.material = materials[ this.colorIndex ];
+            sphere.children.material.properties.color = materials[ this.colorIndex ];
             sphere.properties.transform = [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, trans[12], trans[13], trans[14] - 10, 1 ];
             var vel = [ at[0] * this.tossSphereStrength, at[1] * this.tossSphereStrength, at[2] * this.tossSphereStrength ];
             this.colorIndex += 1;

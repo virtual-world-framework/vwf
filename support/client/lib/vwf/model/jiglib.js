@@ -69,7 +69,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                  case "http://vwf.example.com/node3.vwf":
                  case "http://vwf.example.com/mesh.vwf":
                     this.nodes[ childID ] = {};
-                    this.nodes[ childID ].sceneID = this.kernel.find("", "/")[0];
+                    this.nodes[ childID ].sceneID = this.kernel.application();
                     this.nodes[ childID ].name = childName;
                     this.nodes[ childID ].ID = childID;
                     this.nodes[ childID ].parentID = nodeID;
@@ -493,7 +493,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 if ( elaspedTime > 0 ) {
                     if (elaspedTime > 0.05) elaspedTime = 0.05;
                     var activeObj, posRotProp, pos, rot, posRot;
-                    var sceneNode = this.scenes[this.kernel.find("", "/")[0]];               
+                    var sceneNode = this.scenes[this.kernel.application()];
 
                     if ( sceneNode && sceneNode.system ) {
                         sceneNode.system.integrate( elaspedTime );
@@ -683,17 +683,18 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var scene = this.scenes[ node.sceneID ];
             if ( scene ) {
                 var normal = [0, 0, 1, 0];
+				
 				var pos = this.kernel.getProperty( nodeID, "translation" )|| [ 0, 0, 0 ];
                 if ( physicsDef.constructor == Array ) {
                     switch ( physicsDef.length ) {
-                        case "2":
+                        case 2:
                             if ( physicsDef[1].constructor == Array ) {
                                 if ( physicsDef[1].length == 4 ) {
                                     normal = physicsDef[1];
                                 }
                             }
                             break;
-                        case "5":
+                        case 5:
                             for ( var i = 0; i < 4; i++ ) {
                                 normal[i] = physicsDef[i+1];
                             }

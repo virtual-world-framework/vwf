@@ -53,19 +53,19 @@ Light Attenuation
 
 Light attenuation is the decrease in intensity of the light with respect to distance, and applies to both point and spot lights. There are three types of light attenuation: constant, linear, and quadratic. Values for each attenuation type fall between 0 and 1. Attenuation types may be blended to sum of 1. The default values for these are:
 
-* constantAttenuation  = 1
-* linearAttenuation    = 0
-* quadraticAttenuation = 0
+* glge-constantAttenuation  = 1
+* glge-linearAttenuation    = 0
+* glge-quadraticAttenuation = 0
    
-**constantAttenuation**
+**glge-constantAttenuation**
  
 Constant attenuation of 1 will result in a light where the intensity is unaffected by distance, and will remain constant until it hits a surface.
   
-**linearAttenuation**
+**glge-linearAttenuation**
   
 Linear attenutation will result in a light thats intensity is inversely proportial to the distance from the light source. In other words, the light intensity will diminish at a fixed rate as it travels from the source. 
   
-**quadraticAttenuation**
+**glge-quadraticAttenuation**
 
 Quadratic attenuation is the most dramatic, where the drop off is exponential to the distance an object is from the light source.
 

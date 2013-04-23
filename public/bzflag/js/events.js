@@ -314,12 +314,14 @@ function mouseYPos(e) {
 }
 
 function updateScoreboard(scores) {
-    var scoreHtml = '';
-    for(var i=0; i<scores.length; i++) {
-        scoreHtml += "<tr><td>" + scores[i].score + "</td><td>" + scores[i].playerKills + "-" + 
-            scores[i].playerDeaths + "</td><td>" + scores[i].name + "</td></tr>";
+    if(scores) {
+        var scoreHtml = '';
+        for(var i=0; i<scores.length; i++) {
+            scoreHtml += "<tr><td>" + scores[i].score + "</td><td>" + scores[i].playerKills + "-" + 
+                scores[i].playerDeaths + "</td><td>" + scores[i].name + "</td></tr>";
+        }
+        $('#scoreBoard tbody').html(scoreHtml);
     }
-    $('#scoreBoard tbody').html(scoreHtml);
 }
 
 function preloadImages() {

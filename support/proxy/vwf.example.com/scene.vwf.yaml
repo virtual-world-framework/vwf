@@ -20,6 +20,12 @@
 extends: http://vwf.example.com/node2.vwf
 properties:
 
+  ## Cast Shadows
+  ## 
+  ## @name scene.vwf#enableShadows
+  ## @property
+
+  enableShadows: 
   ## Active camera
   ## 
   ## @name scene.vwf#activeCamera
@@ -32,11 +38,13 @@ properties:
           var cam = this.getChild( value );
           if ( cam ) {
              this.activeCameraComp = cam;
+             this.lastActiveCamera = this.activeCamera;
              this.activeCamera = value;
           }
         }        
       } else {
         if ( this.activeCamera != value ) {
+          this.lastActiveCamera = this.activeCamera;
           this.activeCamera = value;
           if ( this.getChild ) {
             var temp = this.getChild( value );
@@ -51,14 +59,20 @@ properties:
   ## @name scene.vwf#ambientColor
   ## @property
 
-  ambientColor: 
+  ambientColor: [ 50, 50, 50 ]
 
   ## Back ground color
   ## 
   ## @name scene.vwf#backgroundColor
   ## @property
 
-  backgroundColor:   
+  backgroundColor: [ 0, 0, 0 ]
+
+methods:
+  getActiveCameraComp:
+  getChild:
+  getActiveCamera:
+  lastActiveCameraID:
 
 scripts:
 - |
@@ -66,6 +80,7 @@ scripts:
     var scene = this;
     this.initialize = function() {
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
+      this.lastActiveCamera = this.activeCamera;
     }
     this.getChild = function( childName, startingNode ) {
       if(!startingNode) {
@@ -85,6 +100,12 @@ scripts:
       }
       //console.info( "WARNING: SCENE.getChild   CHILD NOT FOUND: " + childName );
       return undefined;
+    }
+    this.getActiveCameraComp = function() {
+      return this.activeCameraComp;
+    }
+    this.lastActiveCameraID = function() {
+      return this.lastActiveCamera;
     }
     this.getActiveCamera = function() {
       if ( !this.activeCameraComp ) {

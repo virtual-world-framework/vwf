@@ -48,7 +48,7 @@ properties:
   ## @name spin-on-click.vwf#spin-axis
   ## @property
 
-  spin-axis: [ 0, 0, 1 ]
+  spin-axis: [ 0, 1, 0 ]
 
 methods:
   

@@ -242,11 +242,11 @@ node.uri = childURI; // TODO: move to vwf/model/object
             Object.defineProperty( node, "find", {
                 value: function( matchPattern, callback /* ( match ) */ ) { // "this" is node
                     if ( callback ) {
-                        self.kernel.find( this.id, matchPattern, function( matchID ) {
+                        self.kernel.find( this.id, matchPattern, true, function( matchID ) {
                             callback.call( node, self.nodes[matchID] );
                         } );
                     } else {  // TODO: future iterator proxy
-                        var findResults = self.kernel.find( this.id, matchPattern );
+                        var findResults = self.kernel.find( this.id, matchPattern, true );
                         if ( findResults )
                             return findResults.map( function( matchID ) {
                                 return self.nodes[matchID];
@@ -257,7 +257,7 @@ node.uri = childURI; // TODO: move to vwf/model/object
 
             Object.defineProperty( node, "test", {
                 value: function( matchPattern, testNode ) { // "this" is node
-                    return self.kernel.test( this.id, matchPattern, testNode.id );
+                    return self.kernel.test( this.id, matchPattern, testNode.id, true );
                 }
             } );
 
@@ -310,6 +310,24 @@ node.uri = childURI; // TODO: move to vwf/model/object
 
             var child = this.nodes[childID];
             var scriptText = "this.initialize && this.initialize()";
+
+var scriptText = " \
+    \
+    var initializers = [], node = this;\n\
+    \n\
+    while ( node ) {\n\
+        if ( node.hasOwnProperty( 'initialize' ) && node.initialize ) {\n\
+            initializers.unshift( { func: node.initialize, id: node.id } );\n\
+        }\n\
+        node = Object.getPrototypeOf( node );\n\
+    }\n\
+    \n\
+    initializers.forEach( function( initialize ) {\n\
+        // this.logger.warn( 'initializing', this.id, 'from', initialize.id );\n\
+        initialize.func.call( this );\n\
+    }, this );\n\
+    \
+";
 
             try {
                 return ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
@@ -697,6 +715,8 @@ proxy.id = behavior.id; // TODO: move to vwf/model/object
 
         proxy.source = behavior.source;
         proxy.type = behavior.type;
+
+        proxy.initialize = behavior.initialize;
 
         proxy.properties = Object.create( prototype.properties || Object.prototype, {
             node: { value: proxy } // for proxy.properties accessors (non-enumerable)  // TODO: hide this better

@@ -1,0 +1,147 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+## The component representation of a light in 3D space
+## 
+## @name light.vwf
+## @namespace
+
+--- 
+extends: http://vwf.example.com/node3.vwf
+properties: 
+
+  ## Constant attenuation
+  ## 
+  ## @name light.vwf#constantAttenuation
+  ## @property
+
+  glge-constantAttenuation:
+
+  ## Linear attenuation
+  ## 
+  ## @name light.vwf#linearAttenuation
+  ## @property
+
+  glge-linearAttenuation:
+
+  ## Quadratic attenuation
+  ## 
+  ## @name light.vwf#quadraticAttenuation
+  ## @property
+
+  glge-quadraticAttenuation:
+
+  ## Enables the spotCosCutOff calculations
+  ## 
+  ## @name light.vwf#spotCutOff
+  ## @property
+
+  glge-spotCutOff:
+
+  ## Represents the cosine ofthe angle beyond which the light is cut off
+  ## 
+  ## @name light.vwf#spotCosCutOff
+  ## @property
+
+  glge-spotCosCutOff:
+
+  ## Amount of "spottiness" of the spotlight
+  ## 
+  ## @name light.vwf#spotExponent
+  ## @property
+
+  glge-spotExponent:
+
+  ## Diffuse value
+  ## 
+  ## @name light.vwf#diffuse
+  ## @property
+
+  glge-diffuse:
+
+  ## Specular value
+  ## 
+  ## @name light.vwf#specular
+  ## @property
+
+  glge-specular:
+
+  ## The number of samples for shadow
+  ## 
+  ## @name light.vwf#samples
+  ## @property
+
+  glge-samples:
+
+  ## The softness value of shadow
+  ## 
+  ## @name light.vwf#softness
+  ## @property
+
+  glge-softness:
+
+  ## The Shadow Buffer Memory size for the resolution height of the shadow
+  ## 
+  ## @name light.vwf#bufferHeight
+  ## @property
+
+  glge-bufferHeight:
+
+  ## The Shadow Buffer Memory size for the resolution width of the shadow
+  ## 
+  ## @name light.vwf#bufferWidth
+  ## @property
+
+  glge-bufferWidth:
+
+  ## The shadow buffer bias. Map bias moves the shadow toward or away from the shadow-casting object(s)
+  ## 
+  ## @name light.vwf#shadowBias
+  ## @property
+
+  glge-shadowBias:
+
+  ## The shadow casting distance
+  ## 
+  ## @name light.vwf#distance
+  ## @property
+
+  glge-distance:
+
+  ## The shadow casting flag. True if casting shadows is enabled.
+  ## 
+  ## @name light.vwf#castShadows
+  ## @property
+
+  glge-castShadows:
+
+  ## Sets the cascade levels
+  ## 
+  ## @name light.vwf#cascadeLevels
+  ## @property
+
+  glge-cascadeLevels:
+
+  ## Sets the softness if this is a spot light
+  ## 
+  ## @name light.vwf#spotSoftness
+  ## @property
+
+  glge-spotSoftness:
+
+  ## Sets the distance of the softness if this is a spot light
+  ## 
+  ## @name light.vwf#spotSoftness
+  ## @property
+
+  glge-spotSoftnessDistance:

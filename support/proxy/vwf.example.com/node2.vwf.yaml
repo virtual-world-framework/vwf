@@ -58,6 +58,5 @@ events:
   pointerDown:
   pointerMove:
   pointerUp:
-  pointerEnter:
   pointerOver:
-  pointerLeave:
+  pointerOut:

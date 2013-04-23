@@ -1,0 +1,332 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+---
+extends: http://vwf.example.com/node3.vwf
+methods:
+  init:
+  initGeometry:
+  createGeometry:
+  createPlane:
+  createBorder:
+  deleteGeometry:
+  setTexture:
+  showName:
+  getPlane:
+  getBorder:
+  created:
+properties:
+  height:
+    set: |
+      if ( value > 0 && value != this.height ) {
+        this.height = value;
+        this.createGeometry();
+      }
+    value: 300
+  width:
+    set: |
+      if ( value > 0 && value != this.width ) {
+        this.width = value;
+        this.createGeometry();
+      }
+    value: 400
+  normal:
+    set: |
+      if ( value > 0 && value != this.normal ) {
+        this.normal = value;
+        this.createGeometry();
+      }
+    value: [ 0, -1, 0 ]
+  border:
+    set: |
+      if ( value != this.border ) {
+        this.border = value;
+        this.createGeometry();
+      }
+    value: 0 
+  borderColor:
+    set: |
+      if ( value != this.borderColor ) {
+        this.borderColor = value;
+        this.createGeometry();
+      } 
+    value: [ 0, 0, 0, 255 ]
+  flip:
+    set: |
+      if ( value != this.flip ) {
+        this.flip = value;
+        this.createGeometry();
+      }
+    value: false
+  nameIndex: 1
+scripts:
+- |
+    this.createGeometry = function(){
+      //console.info( "P plane P  plane.createGeometry " + this.id );
+      if ( this.okToCreate ) {
+        //console.info( "P plane P  plane.createGeometry " + this.id );
+        //this.planeName = "plane" + this.nameIndex;
+        if ( !this.planeName ) { 
+          this.planeName = "plane"; 
+        }
+        this.borderName = "border";
+        //this.borderName = "border" + this.nameIndex;
+        this.nameIndex = this.nameIndex + 1;
+        this.deleteGeometry();
+        this.createBorder();
+        this.createPlane();
+      }
+    }
+    this.initialize = function() {
+      console.info( "P plane P  plane.initialize " + this.id );
+      if ( this.id != "http-vwf-example-com-plane-vwf" ) {
+        this.init();
+      }
+    }
+    this.init = function( name ) {
+      console.info( "P plane P  plane.init "  + this.id );
+      this.okToCreate = false;
+      this.planeName = undefined;
+      if ( name ) { this.planeName = name; }
+      if ( this.id != "http-vwf-example-com-plane-vwf" ) {
+        //this.future(0.8).initGeometry();
+        this.initGeometry();
+      }      
+    }
+    this.initGeometry = function(){
+      this.planeObj = undefined;
+      this.borderObj = undefined;
+      //console.info( "P plane P  plane.initGeometry " + this.id );
+      this.okToCreate = true;
+      this.createGeometry();
+    }
+    this.createPlane = function() {
+      // hack since the prototype is creating a plane
+      // which we do not want.  Only the first instance of plane.vwf
+      // was ending up with 2 planes, so the prototype creating a plane
+      if ( this.id == "http-vwf-example-com-plane-vwf" ) {
+        return;        
+      }
+
+      if ( this.height && this.width && this.normal ) {
+        console.info( "==================================================================" );
+        console.info( "==== plane is being created ====" );
+        console.info( "==================================================================" );
+        this.planeObj = {
+          "extends": "http://vwf.example.com/node3.vwf",
+          "type": "definition/mesh",
+          "children": {
+            "material": {
+              "extends": "http://vwf.example.com/material.vwf",
+              "properties": {
+                "texture": "",
+                "color": "#444",
+                "shininess": "2",
+                "specular": "1.0",
+              },
+            },
+          },
+          "properties": { 
+            "meshDefinition": { positions: [], faces: [], normals: [], uv1: [] }
+          },
+        };
+        var dx, dy, dz, normals, uvs, faces, pos;
+        var neg = true;
+
+        if ( this.normal[0] == 0 && this.normal[1] == 0 ) {
+          dx = this.width * 0.5;
+          dy = this.height * 0.5;
+          neg = ( this.normal[2] < 0 );
+          pos = [ -dx, dy, 0, dx, dy, 0, dx, -dy, 0, -dx, -dy, 0 ];
+        } else if ( this.normal[1] == 0 && this.normal[2] == 0 ) {
+          dy = this.width * 0.5;
+          dz = this.height * 0.5;
+          neg = ( this.normal[0] < 0 );
+          pos = [ 0, -dy, dz, 0, dy, dz, 0, dy, -dz, 0, -dy, -dz ];  
+        } else { // y ( this.normal[0] == 0 && this.normal[2] == 0 )
+          dx = this.width * 0.5;
+          dz = this.height * 0.5;
+          neg = ( this.normal[1] < 0 );
+          pos = [ -dx, 0, dz, dx, 0, dz, dx, 0, -dz, -dx, 0, -dz ];         
+        }
+
+        normals = [ this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2] ];  
+        if ( this.flip ) {
+          uvs = [ 0, 0, 1.0, 0, 1.0, 1.0, 0, 1.0 ]; 
+        } else {
+          //uvs = [ 1.0, 0, 0, 0, 0, 1.0, 1.0, 1.0 ];          
+          //uvs = [ 0, 0, 1.0, 0, 1.0, 1.0, 0, 1.0  ];
+          uvs = [ 1.0, 1.0, 0, 1.0, 0, 0, 1.0, 0  ];
+        }
+        faces = [ 0, 1, 3, 3, 1, 2  ];
+
+        this.planeObj.properties.meshDefinition.positions = pos;
+        this.planeObj.properties.meshDefinition.faces = faces;
+        this.planeObj.properties.meshDefinition.normals = normals;
+        this.planeObj.properties.meshDefinition.uv1 = uvs;
+        this.children.create( this.planeName, this.planeObj, function( child ) {
+          console.info( "P plane P  created" );
+          this.created();
+        } );
+      }
+    }
+    this.created = function() {
+      //console.info( "P plane P  created" );
+    }
+    this.setTexture = function( url ){
+      console.info( "P plane P  plane.setTexture( "+url+" )" );
+      if ( this.planeName ) {
+        var plane = undefined;
+        for ( var i = 0; i < this.children.length && !plane; i++ ) {
+          if ( this.children[i].name == this.planeName ) {
+            plane = this.children[i];
+          }
+        }
+        if ( plane && plane.material ){
+          //console.info( "     P plane P  plane and material are valid" );
+          plane.material.texture = url;
+        }
+      }
+    } 
+    this.getPlane = function( name ){
+      var plane = undefined;
+      if ( name ) {
+        for ( var i = 0; i < this.children.length && !plane; i++ ) {
+          if ( this.children[i].name == name ) {
+            plane = this.children[i];
+          }
+        }
+      } else if ( this.planeName ) {
+        for ( var i = 0; i < this.children.length && !plane; i++ ) {
+          if ( this.children[i].name == this.planeName ) {
+            plane = this.children[i];
+          }
+        }
+      }
+      return plane;
+    }
+    this.getBorder = function(){
+      var border = undefined;
+      if ( this.borderName ) {
+        for ( var i = 0; i < this.children.length && !border; i++ ) {
+          if ( this.children[i].name == this.borderName ) {
+            border = this.children[i];
+          }
+        }
+      }
+      return border;
+    }
+    this.deleteGeometry = function(){
+      if ( this.material ) {
+        this.oldTexture = this.material.texture;
+      }
+      if ( this.children && this.children.length > 1 ){
+        for ( var i = this.children.length-1; i >= 0; i-- ) {
+          this.children.delete( this.children[i] );
+        }
+      }
+    }
+    this.createBorder = function(){
+      // hack since the prototype is creating a plane
+      // which we do not want.  Only the first instance of plane.vwf
+      // was ending up with 2 planes, so the prototype creating a plane
+      if ( this.id == "http-vwf-example-com-plane-vwf" ) {
+        return;        
+      }
+
+      if ( this.height && this.width && this.normal && this.border && this.borderColor ) {
+        this.borderObj = {
+          "extends": "http://vwf.example.com/node3.vwf",
+          "type": "definition/mesh",
+          "children": {
+            "material": {
+              "extends": "http://vwf.example.com/material.vwf",
+              "properties": {
+                "texture": "",
+                "color": "#444",
+                "shininess": "2",
+                "specular": "1.0",
+              },
+            },
+          },
+          "properties": { 
+            "meshDefinition": { positions: [], faces: [], normals: [], color: [], }
+          },
+        };
+        var dx, dy, dz, normals, faces, pos;
+        var neg = true;
+
+        if ( this.normal[0] == 0 && this.normal[1] == 0 ) {
+          dx = this.width * 0.5;
+          dy = this.height * 0.5;
+          neg = ( this.normal[2] < 0 );
+          pos = [ -dx, dy, 0,
+                  dx, dy, 0,
+                  dx, -dy, 0,
+                  -dx, -dy, 0,
+                  -dx - this.border, dy, 0,
+                  -dx - this.border, dy + this.border, 0,
+                  dx + this.border, dy + this.border, 0,
+                  dx + this.border, dy, 0,
+                  dx + this.border, -dy, 0,
+                  dx + this.border, -dy - this.border, 0,
+                  -dx - this.border, -dy  - this.border, 0,
+                  -dx - this.border, -dy, 0,
+                ];
+        } else if ( this.normal[1] == 0 && this.normal[2] == 0 ) {
+          dy = this.width * 0.5;
+          dz = this.height * 0.5;
+          neg = ( this.normal[0] < 0 );
+          pos = [ 0, -dy, dz,
+                  0, dy, dz, 
+                  0, dy, -dz, 
+                  0, -dy, -dz,
+                  0, -dy - this.border, dz,
+                  0, -dy - this.border, dz + this.border,
+                  0, dy + this.border, dz + this.border,
+                  0, dy + this.border, dz,
+                  0, dy + this.border, -dz,
+                  0, dy + this.border, -dz - this.border,
+                  0, -dy - this.border, -dz - this.border,
+                  0, -dy - this.border, -dz,
+                ];  
+        } else { // y ( this.normal[0] == 0 && this.normal[2] == 0 )
+          dx = this.width * 0.5;
+          dz = this.height * 0.5;
+          neg = ( this.normal[1] < 0 );
+          pos = [ -dx, 0, dz,
+                  dx, 0, dz,
+                  dx, 0, -dz, 
+                  -dx, 0, -dz,
+                  -dx - this.border, 0, dz,
+                  -dx - this.border, 0, dz + this.border,
+                  dx + this.border, 0, dz + this.border,
+                  dx + this.border, 0, dz,
+                  dx + this.border, 0, -dz,
+                  dx + this.border, 0, -dz - this.border,
+                  -dx - this.border, 0, -dz - this.border,
+                  -dx - this.border, 0, -dz,
+                ];         
+        }
+
+        normals = [ this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2], this.normal[0], this.normal[1], this.normal[2] ];  
+        faces = [ 5,6,4, 4,6,7, 2,1,7, 2,7,8, 10,11,8, 10,8,9, 11,4,0, 11,0,3  ];
+
+        this.borderObj.properties.meshDefinition.positions = pos;
+        this.borderObj.properties.meshDefinition.faces = faces;
+        this.borderObj.properties.meshDefinition.normals = normals;
+        this.borderObj.properties.meshDefinition.color = this.borderColor;
+        //console.info( "creating border for plane: " + this.planeName );
+        this.children.create( this.borderName, this.borderObj );
+      }
+    } //@ sourceURL=plane.vwf

@@ -21,6 +21,20 @@ extends: http://vwf.example.com/node.vwf
 
 properties:
 
+  ## Node casts shadows
+  ## 
+  ## @name node3.vwf#castShadows
+  ## @property
+
+  castShadows:
+  
+  ## Node receives shadows
+  ## 
+  ## @name node3.vwf#receiveShadows
+  ## @property
+
+  receiveShadows:
+  
   ## World transform of 3D node
   ## 
   ## @name node3.vwf#worldTransform
@@ -34,7 +48,7 @@ properties:
         this.transform = transform;
       }
     get: |
-      if( this.parent && this.parent.worldTransform )
+      if( this.parent && this.parent.worldTransform && this.transform )
       {
         return goog.vec.Mat4.multMat( this.parent.worldTransform, this.transform, goog.vec.Mat4.create() );
       }
@@ -196,7 +210,7 @@ properties:
       this.logger.info("WARNING: node3 worldBoundingBox cannot be set" )
     get: |
       var worldTransform = this.worldTransform;
-      if(worldTransform) {
+      if ( worldTransform ) {
         var worldBoundingBox;
         for(var i=0;i<this.children.length;i++) {
           var childBoundingBox = this.children[i].worldBoundingBox;
@@ -214,22 +228,24 @@ properties:
             }
           }
         }
-        if(!worldBoundingBox) {
+        if( !worldBoundingBox ) {
           worldBoundingBox = this.boundingbox;
-          var coord0=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.min[0],worldBoundingBox.min[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
-          var coord1=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.max[0],worldBoundingBox.min[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
-          var coord2=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.min[0],worldBoundingBox.max[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
-          var coord3=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.max[0],worldBoundingBox.max[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
-          var coord4=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.min[0],worldBoundingBox.min[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
-          var coord5=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.max[0],worldBoundingBox.min[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
-          var coord6=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.min[0],worldBoundingBox.max[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
-          var coord7=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.max[0],worldBoundingBox.max[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
-          worldBoundingBox.min[0]=Math.min(coord0[0],coord1[0],coord2[0],coord3[0],coord4[0],coord5[0],coord6[0],coord7[0]);
-          worldBoundingBox.max[0]=Math.max(coord0[0],coord1[0],coord2[0],coord3[0],coord4[0],coord5[0],coord6[0],coord7[0]);
-          worldBoundingBox.min[1]=Math.min(coord0[1],coord1[1],coord2[1],coord3[1],coord4[1],coord5[1],coord6[1],coord7[1]);
-          worldBoundingBox.max[1]=Math.max(coord0[1],coord1[1],coord2[1],coord3[1],coord4[1],coord5[1],coord6[1],coord7[1]);
-          worldBoundingBox.min[2]=Math.min(coord0[2],coord1[2],coord2[2],coord3[2],coord4[2],coord5[2],coord6[2],coord7[2]);
-          worldBoundingBox.max[2]=Math.max(coord0[2],coord1[2],coord2[2],coord3[2],coord4[2],coord5[2],coord6[2],coord7[2]);
+          if ( worldBoundingBox ) {
+            var coord0=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.min[0],worldBoundingBox.min[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
+            var coord1=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.max[0],worldBoundingBox.min[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
+            var coord2=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.min[0],worldBoundingBox.max[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
+            var coord3=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.max[0],worldBoundingBox.max[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
+            var coord4=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.min[0],worldBoundingBox.min[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
+            var coord5=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.max[0],worldBoundingBox.min[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
+            var coord6=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.min[0],worldBoundingBox.max[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
+            var coord7=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.max[0],worldBoundingBox.max[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
+            worldBoundingBox.min[0]=Math.min(coord0[0],coord1[0],coord2[0],coord3[0],coord4[0],coord5[0],coord6[0],coord7[0]);
+            worldBoundingBox.max[0]=Math.max(coord0[0],coord1[0],coord2[0],coord3[0],coord4[0],coord5[0],coord6[0],coord7[0]);
+            worldBoundingBox.min[1]=Math.min(coord0[1],coord1[1],coord2[1],coord3[1],coord4[1],coord5[1],coord6[1],coord7[1]);
+            worldBoundingBox.max[1]=Math.max(coord0[1],coord1[1],coord2[1],coord3[1],coord4[1],coord5[1],coord6[1],coord7[1]);
+            worldBoundingBox.min[2]=Math.min(coord0[2],coord1[2],coord2[2],coord3[2],coord4[2],coord5[2],coord6[2],coord7[2]);
+            worldBoundingBox.max[2]=Math.max(coord0[2],coord1[2],coord2[2],coord3[2],coord4[2],coord5[2],coord6[2],coord7[2]);
+          }
         }
         return worldBoundingBox;
       }
@@ -254,7 +270,6 @@ properties:
   vertices: 
     set: |
       this.logger.info( "WARNING: node3 vertices cannot be set" )
-    value: 
 
   ## Vertex indices of 3D node
   ## 
@@ -264,7 +279,6 @@ properties:
   vertexIndices: 
     set: |
       this.logger.info( "WARNING: node3 vertexIndices cannot be set" )
-    value: 
 
   ## Speed value
   ## 
@@ -765,9 +779,8 @@ events:
   pointerDown:
   pointerMove:
   pointerUp:
-  pointerEnter:
   pointerOver:
-  pointerLeave:
+  pointerOut:
   pointerWheel:
   transformChanged:
 
