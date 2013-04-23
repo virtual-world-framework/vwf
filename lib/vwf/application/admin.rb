@@ -104,10 +104,10 @@ class VWF::Application::Admin < Sinatra::Base
   get "/models" do
     directory = Rack::Directory.new('public')
     directory._call({'SCRIPT_NAME'=>request.scheme+'://'+request.host_with_port, 'PATH_INFO'=>'models'})
-    dirContents = directory.list_directory[2].files 
+    dirContents = directory.list_directory[2].files
     dirContents.map do |dirContent|
       if dirContent[3] != "" && dirContent[3] != "directory"
-        Hash[ "url"=>dirContent[0], "basename"=>dirContent[1], "size"=>dirContent[2], "type"=>dirContent[3], "mtime"=>dirContent[4] ]
+        Hash[ "url"=>dirContent[0].gsub(/http%3A\//, 'http%3A//'), "basename"=>dirContent[1], "size"=>dirContent[2], "type"=>dirContent[3], "mtime"=>dirContent[4] ]
       end
     end .compact .to_json
   end
@@ -118,7 +118,7 @@ class VWF::Application::Admin < Sinatra::Base
     dirContents = directory.list_directory[2].files 
     dirContents.map do |dirContent|
       if dirContent[3] == "application/json"
-        Hash[ "url"=>dirContent[0], "basename"=>dirContent[1], "size"=>dirContent[2], "type"=>dirContent[3], "mtime"=>dirContent[4] ]
+        Hash[ "url"=>dirContent[0].gsub(/http%3A\//, 'http%3A//'), "basename"=>dirContent[1], "size"=>dirContent[2], "type"=>dirContent[3], "mtime"=>dirContent[4] ]
       end
     end .compact .to_json
   end

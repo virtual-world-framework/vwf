@@ -1257,7 +1257,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                     }                                     
                                     break;
                                 case "video":
-                                    txt = new GLGE.TextureVideo( undefined, "512", "512" );
+                                    txt = new GLGE.TextureVideo( undefined, "1024", "512" );
                                     txt.setSrc( propertyValue );
                                     ml.setScaleX( -1 );
                                     ml.setScaleY( -1 );                                    
@@ -1578,35 +1578,37 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     // -- getMaterialProperty ------------------------------------------------------------------------------
 
     function getMaterialProperty( nodeID, propertyName, propertyValue ) {
-
         var node = this.state.nodes[ nodeID ]; 
         var value = undefined;
         var txtr, mat, obj, color;
 
-        switch ( propertyName ) {
-            case "texture": {
-                    if ( node.glgeMaterial && node.glgeMaterial.textures ) {
-                        txtr = node.glgeMaterial.textures[0];
-                    }
+        if ( node.glgeMaterial && node.glgeMaterial.textures ) {
+            mat = node.glgeMaterial;
+            txtr = node.glgeMaterial.textures[0];
+        } else if ( node.glgeObject && node.glgeObject.material ) {
+            mat = node.glgeObject.material; 
+            txtr = node.glgeObject.material.textures[0];
+        }   
 
-                    if ( txtr ) {
-                        if ( txtr instanceof GLGE.TextureCanvas ) {
-                            var cv = txtr.getCanvas();
-                            value = "canvas";
-                            if ( cv ) {
-                                value = cv.getAttribute( 'id' );
-                            }  
-                        } else if ( txtr instanceof GLGE.TextureCamera ) {
-                            var cam = txtr.getCamera();
-                            if ( cam === this.state.cameraInUse ) {
-                                value = "activeCamera"; 
-                            } else {
-                                value = getObjectID.call( this, cam, false, false );
-                            }
+        switch ( propertyName ) {
+            case "texture": 
+                if ( txtr ) {
+                    if ( txtr instanceof GLGE.TextureCanvas ) {
+                        var cv = txtr.getCanvas();
+                        value = "canvas";
+                        if ( cv ) {
+                            value = cv.getAttribute( 'id' );
+                        }  
+                    } else if ( txtr instanceof GLGE.TextureCamera ) {
+                        var cam = txtr.getCamera();
+                        if ( cam === this.state.cameraInUse ) {
+                            value = "activeCamera"; 
                         } else {
-                            if ( txtr.getSrc ) {
-                                value = txtr.getSrc();
-                            }
+                            value = getObjectID.call( this, cam, false, false );
+                        }
+                    } else {
+                        if ( txtr.getSrc ) {
+                            value = txtr.getSrc();
                         }
                     }
                 }

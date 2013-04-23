@@ -19,7 +19,7 @@ Let's load it in our index.vwf.yaml file:
 
 ## Add a behavior to an object that reacts to user interaction
 
-A *behavior* is a component that can be added to another to give it added functionality.  Once created, these behaviors can be reused like building blocks, making it faster to create your applications.  Luckily, someone has already written a *control* behavior that we can reuse.  Let's put it on the volume knob, deep inside the radio 3D model:
+A *behavior* is a component that can be added to another to give it added functionality.  Once created, these behaviors can be reused like building blocks, making it faster to create your applications.  Luckily, someone has already written a *control* behavior that we can reuse.  Let's put it on the volume knob, inside the radio 3D model:
 
 	---
 	extends: http://vwf.example.com/navscene.vwf
@@ -27,26 +27,20 @@ A *behavior* is a component that can be added to another to give it added functi
 	  radio:
 	    extends: http://vwf.example.com/node3.vwf
 	    source: radio.DAE
-	    children:
-	      bone1:
-	        extends: http://vwf.example.com/node3.vwf
-	        children:
-	          MaxScene:
-	            extends: http://vwf.example.com/node3.vwf
-	            children:
-	              Radio:
-	                extends: http://vwf.example.com/node3.vwf
-	                children:
-	                  ic40Volume:
-	                    extends: http://vwf.example.com/node3.vwf
-	                    implements:
-	                    - http://vwf.example.com/control.vwf
-	                    properties:
-	                      rotation: [0, 0, 1, 0]
-	                      controlType: rotate
-	                      controlMode: positions
-	                      transformIncrement: 12
-	                      transformAxis: [0, 0, 1]
+        children:
+          Radio:
+            extends: http://vwf.example.com/node3.vwf
+            children:
+              ic40Volume:
+                extends: http://vwf.example.com/node3.vwf
+                implements:
+                - http://vwf.example.com/control-old.vwf
+                properties:
+                  rotation: [0, 0, 1, 0]
+                  controlType: rotate
+                  controlMode: positions
+                  transformIncrement: 12
+                  transformAxis: [ 0, 1, 0 ]
 
 ## Add a behavior to another object that reacts to the first
 

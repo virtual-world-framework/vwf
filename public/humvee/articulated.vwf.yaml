@@ -19,7 +19,7 @@ properties:
 children:
   humvee:
     extends: http://vwf.example.com/node3.vwf
-    source: humvee.DAE
+    source: humvee.dae
     type: model/vnd.collada+xml
     children:
       MaxScene:

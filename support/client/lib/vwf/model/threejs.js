@@ -442,6 +442,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //console.log(["       settingProperty: ",nodeID,propertyName,propertyValue]);
             if ( propertyValue !== undefined ) 
             {
+                var self = this;
                 if(threeObject instanceof THREE.Object3D)
                 {
                     if(propertyName == 'transform' || propertyName == 'localMatrix')
@@ -897,10 +898,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if(propertyValue !== "")
                         {
                             THREE.ImageUtils.loadTexture( propertyValue, undefined, function( texture ) { 
-                                threeObject.map = texture;
-                                threeObject.needsUpdate = true;                                 
-                            }, function( event ) { 
-                                this.logger.warnx( "settingProperty", nodeID, propertyName, propertyValue );
+                                    threeObject.map = texture;
+                                    threeObject.needsUpdate = true;                                 
+                                }, function( event ) { 
+                                    self.logger.warnx( "settingProperty", nodeID, propertyName, propertyValue );
                             } );
                         } else {
                             threeObject.map = null;
@@ -1105,6 +1106,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     return value;
                 }
+                if(propertyName =='lookAt')
+                {
+                    value = threeObject.lookatval;
+                    return value;
+                }
                 if(propertyName =='localMatrix')
                 {
                     value = matCpy(threeObject.matrix.elements); 
@@ -1153,8 +1159,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         
                 }
                 if(propertyName == "color") {
-                    
-                        
+                    var vwfColor = new utility.color( [ threeObject.color.r*255, threeObject.color.g*255, threeObject.color.b*255 ] );
+                    value = colorToString.call( this, vwfColor );
+                    return value;    
                 }
                 if(propertyName == "diffuse") {
                     
@@ -2719,7 +2726,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         {
             if(start && start.material)
             {
-                
                 //this will override any ambient colors set in materials.
                 if(start.material.ambient)
                     start.material.ambient.setRGB(1,1,1);

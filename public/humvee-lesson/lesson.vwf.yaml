@@ -317,4 +317,7 @@ scripts:
       -0.9989691972732544,0.045417796820402145,0,0,
       0,0,1,0,
       -14.136186599731445,-42.1671028137207,88.4365005493164,1 ];
+  }
+  this.entering = function() {
+    this.parent.humvee.translation = [ 0, 0, 0 ];
   } //@ sourceURL=humvee-lesson.vwf

@@ -17,6 +17,15 @@ children:
       translation: [ 1.3, 0, -1 ]
       rotation: [ 0, 0, 1, 180 ]
       scale: 1
+  light:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "point"
+      enable: true
+      distance: 2000
+      intensity: 0.3
+      color: [ 255, 255, 255 ]
+      translation: [ 0, -30, 8 ]
 scripts:
 - |
     this.initialize = function() {
