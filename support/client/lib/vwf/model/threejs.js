@@ -1106,6 +1106,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     return value;
                 }
+                if(propertyName =='lookAt')
+                {
+                    value = threeObject.lookatval;
+                    return value;
+                }
                 if(propertyName =='localMatrix')
                 {
                     value = matCpy(threeObject.matrix.elements); 
