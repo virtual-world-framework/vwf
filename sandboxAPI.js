@@ -118,7 +118,7 @@ function GetLoginData(response,URL)
 	if(URL.loginData)
 		respond(response,200,JSON.stringify({username:URL.loginData.UID}));
 	else
-		respond(response,200,JSON.stringify({username:null}));
+		respond(response,401,JSON.stringify({username:null}));
 	return;
 }
 function SessionData()
@@ -202,11 +202,19 @@ function SiteLogout(response,URL)
 				respond(response,401,"Client Not Logged In");
 				return;
 			}
-			global.sessions.splice(global.sessions.indexOf(URL.loginData),1);
-			response.writeHead(200, {
+			if(global.sessions.indexOf(URL.loginData) != -1)
+			{
+				global.sessions.splice(global.sessions.indexOf(URL.loginData),1);
+				response.writeHead(200, {
 							"Content-Type":  "text/plain",
 							"Set-Cookie": "session=; HttpOnly;"
 					});
+				response.end();	
+			}else
+			{
+				respond(response,401,"Client Not Logged In");
+				return;
+			}
 			return;
 			
 }
@@ -422,7 +430,7 @@ function CheckOwner(UID,stateFilename, callback)
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function SaveAsset(URL,filename,data,response)
 {
-	var UID = URL.query.UID || URL.loginData.UID;
+	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
 	var P = URL.query.P || URL.loginData.Password;
 	CheckPassword(UID,P,function(e){
 	
@@ -475,7 +483,7 @@ function SaveAsset(URL,filename,data,response)
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function DeleteProfile(URL,filename,response)
 {
-	var UID = URL.query.UID || URL.loginData.UID;
+	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
 	var P = URL.query.P || URL.loginData.Password;
 	CheckPassword(UID,P,function(e){
 	
@@ -532,7 +540,7 @@ function strEndsWith(str, suffix) {
 function CopyState(URL,filename,newname,response)
 {
 	
-	var UID = URL.query.UID || URL.loginData.UID;
+	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
 	var P = URL.query.P || URL.loginData.Password;
 	
 	if(!UID || !P)
@@ -598,7 +606,7 @@ function CopyState(URL,filename,newname,response)
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function DeleteState(URL,filename,response)
 {
-	var UID = URL.query.UID || URL.loginData.UID;
+	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
 	var P = URL.query.P || URL.loginData.Password;
 	CheckPassword(UID,P,function(e){
 	
@@ -691,7 +699,7 @@ function CheckHash(filename,data,callback)
 //Save an instance. the POST URL must contain valid name/password and that UID must match the Asset Author
 function SaveState(URL,id,data,response)
 {
-	var UID = URL.query.UID || URL.loginData.UID;
+	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
 	var P = URL.query.P || URL.loginData.Password;
 	CheckPassword(UID,P,function(e){
 	
@@ -718,7 +726,7 @@ function SaveState(URL,id,data,response)
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function DeleteAsset(URL,filename,response)
 {
-	var UID = URL.query.UID || URL.loginData.UID;
+	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
 	var P = URL.query.P || URL.loginData.Password;
 	CheckPassword(UID,P,function(e){
 	
@@ -811,7 +819,39 @@ function RecurseDirs(startdir, currentdir, files)
 		}
 	}
 }
+//Generate a random ID for a instance
+var ValidIDChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+function makeid()
+{
+    var text = "";
+    
 
+    for( var i=0; i < 16; i++ )
+        text += ValidIDChars.charAt(Math.floor(Math.random() * ValidIDChars.length));
+
+    return text;
+}
+function createState(URL,data,response)
+{
+	if(!URL.loginData)
+	{
+		respond(response,401,'Anonymous users cannot create instances');
+		return;
+	}
+	data = JSON.parse(data);
+	
+	var statedata = {};
+	statedata.objects = 0;
+	statedata.owner = URL.loginData.UID;
+	statedata.title = data.title;
+	statedata.description = data.description;
+	statedata.lastUpdate = (new Date());
+	var id = '_adl_sandbox_' + makeid() +'_';	
+	DAL.createInstance(id,statedata,function()
+	{
+		respond(response,200,'Created state ' + id);
+	});
+}
 //Just return the state data, dont serve a response
 function getState(SID)
 {
@@ -1022,6 +1062,9 @@ function serve (request, response)
 			{	
 				case "state":{
 					SaveState(URL,SID,body,response);
+				}break;
+				case "createstate":{
+					createState(URL,body,response);
 				}break;
 				case "globalasset":{
 					SaveAsset(URL, basedir+"GlobalAssets\\"+URL.query.AID,body,response);

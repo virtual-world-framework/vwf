@@ -99,15 +99,16 @@
 
 		cursor: pointer;
 		background: rgb(226,226,226); /* Old browsers */
-		background: -moz-linear-gradient(top,  rgba(226,226,226,1) 0%, rgba(219,219,219,1) 50%, rgba(209,209,209,1) 51%, rgba(254,254,254,1) 100%); /* FF3.6+ */
-		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(226,226,226,1)), color-stop(50%,rgba(219,219,219,1)), color-stop(51%,rgba(209,209,209,1)), color-stop(100%,rgba(254,254,254,1))); /* Chrome,Safari4+ */
-		background: -webkit-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* Chrome10+,Safari5.1+ */
-		background: -o-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* Opera 11.10+ */
-		background: -ms-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* IE10+ */
-		background: linear-gradient(to bottom,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* W3C */
-		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', endColorstr='#fefefe',GradientType=0 ); /* IE6-9 */
+background: -moz-linear-gradient(top,  rgba(226,226,226,1) 0%, rgba(219,219,219,1) 50%, rgba(209,209,209,1) 51%, rgba(254,254,254,1) 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(226,226,226,1)), color-stop(50%,rgba(219,219,219,1)), color-stop(51%,rgba(209,209,209,1)), color-stop(100%,rgba(254,254,254,1))); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* IE10+ */
+background: linear-gradient(to bottom,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', endColorstr='#fefefe',GradientType=0 ); /* IE6-9 */
+
 		border-radius: 10px;
-		
+		margin-top: 10px;
 		padding: 10px;
 		text-align: center;
 		font-size: 1.8em;
@@ -136,132 +137,93 @@
 		padding: 5px;
 		border-radius: 10px;
 		width: 65%;
-	
+		margin-top: 10px;
 	}
 	</style>
 
+	<script type="text/javascript" src="vwf/view/editorview/sha256.js"></script>
     <script type="text/javascript">
 	
-		function showStates()
+	
+		var salt = 'OBS#$%SGSDF##$%#DA';
+		var EncryptPassword = function (password, username)
 		{
-			
-			$.getJSON("./vwfDataManager.svc/states",function(e)
+			var unencrpytedpassword = password + username + salt;
+			for (var i = 0; i < 1000; i++)
 			{
-				
-				$('#activeInstances').empty();
-				var keys = Object.keys(e);
-				for(var i = 0; i < keys.length; i++)
-				{
-					var id = keys[i].substr(13,16);
-					if($('#'+id).length == 0)
-					{
-						
-						$('#activeInstances').append('<a class="coldstate" id="'+id+'" ></a>');
-						//$('#'+id).click(function(){
-						//	var str = window.location.pathname;
-						//	str = str.substr(0,str.lastIndexOf('/')+1)
-						//	window.location.pathname = str + $(this).attr('id') + '/';
-						//});
-						$('#'+id).attr('href',id);
-						$('#'+id).append('<div class="title">'+e[keys[i]].title+'</div>');
-						$('#'+id).append('<div class="description">'+e[keys[i]].description+'</div>');
-						$('#'+id).append('<div class="owner">Owner: '+e[keys[i]].owner+'</div>');
-						$('#'+id).append('<div class="objects">Objects: '+e[keys[i]].objects+'</div>');
-						$('#'+id).append('<div class="lastModified">Last Modified: '+e[keys[i]].lastUpdate+'</div>');
-						$('#'+id).append('<div class="stateid">'+keys[i]+'</div>');
-					}
-				}
-				
-				$.getJSON("./admin/instances",function(e)
-				{
-					var keys = Object.keys(e);
-					for(var i = 0; i < keys.length; i++)
-					{
-						var id = keys[i].substr(13,16);
-						$('#'+id).attr("class", "hotstate");
-					}
-				});
-			
-			});
+				unencrpytedpassword = CryptoJS.SHA256(unencrpytedpassword) + '';
+			}
+			return unencrpytedpassword;
 		}
 		$(document).ready(function()
 		{
-			
 			$.ajax('/vwfDataManager.svc/logindata',
 				{
 					cache:false,
 					success:function(data,status,xhr)
 					{
-						data = JSON.parse(xhr.responseText);
-						$('#username').text("Logged in as: " + data.username);
-						$('#login').hide();
+						//already logged in, need to redirect back to target!
+						redirect();
 					},
 					error:function(xhr,status,err)
 					{
-						$('#username').hide();
-						$('#logout').hide();
-						$('#newstatearea').hide();
+						setup();
 					}
-			});
+				});
+		});	
+		function redirect()
+		{
+			var ret = window.location.search.substr(window.location.search.indexOf('=')+1);
+			var path = window.location.pathname.substr(0,window.location.pathname.lastIndexOf('/')+1);
 			
-			showStates();
+			var url = window.location.protocol + "//" + window.location.host + path + ret;
+			window.location = url;
+		}
+		function setup()
+		{
+		
+			$('#btnlogin').click(
+			function(){
 			
-			$('#newstatebtn').click(function(){
+				var username = $('#txtusername').val();
+				var password = $('#txtpassword').val();
+				password = EncryptPassword(password,username);
 				
-				var statedata = {};
-				statedata.title = $('#newstate').val();
-				statedata.description = $('#newstatedes').val();
-				
-				jQuery.ajax(
+				$.ajax('/vwfDataManager.svc/sitelogin?UID=' + username +"&P=" + password,
 				{
-					type: 'POST',
-					url: '/vwfDataManager.svc/createstate',
-					data: JSON.stringify(statedata),
+					cache:false,
 					success:function(data,status,xhr)
 					{
-						showStates();
+						$('#txtusername').val('');
+						$('#txtpassword').val('');
+						redirect();
 					},
 					error:function(xhr,status,err)
 					{
-						alert(xhr.responseText);
-					},
-					dataType: "text"
+						$('#txtusername').val('');
+						$('#txtpassword').val('');
+						$('#error').text("Error: " + xhr.responseText);
+					}
 				});
 			});
-			
-			window.setInterval(function(){
-				showStates();
-			},5000);
-			//$('#newstatebtn').button({label:'Create World'});
 		
-		});
+		};
 	
 	</script>
 </head>
 <body>
-<div style="text-align: center">
-	<div style="text-align: right; width:700px;display: inline-block;">
-		<span href="" id="username">Name</span>
-		<a href="login.html?return=index.html" id="login">Login</a>
-		<a href="logout.html?return=index.html" id="logout">Logout</a>
-		
-	</div>
-</div>	
+
     <div class="wrapper">
-		<h1> Virtual World Framework Sandbox </h1>
-		<div>Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in "cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a new world" </div>
+		<h1> Virtual World Framework Sandbox Login </h1>
+		<div>Enter your name and password below. </div>
 		
-		<div id='newstatearea' style="margin: 10px;">
-		 <input type='text' id='newstate' class='input' placeholder='World Name'/>
-		 <input type='textarea' id='newstatedes' class='input' placeholder='Description'/>
-		 <div id = 'newstatebtn' class='button'> Create World </div>
+		<div>
+		 <input type='text' id='txtusername' class='input' placeholder='Username'/>
+		 <input type='password' id='txtpassword' class='input' placeholder='Password'/>
+		 <div id = 'btnlogin' class='button'> Login </div>
 		</div>
-		<div id="activeInstances" style='width:800px'>
+		<div id='error' style="margin-top: 20PX;font-size: 3EM;color: red;"/>
 		
-		</div>
-		<div id="coldInstances" style='width:800px'>
-		
-		</div>
     </div>
 </body>
 </html>

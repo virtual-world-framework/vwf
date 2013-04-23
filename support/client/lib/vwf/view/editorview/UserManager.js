@@ -342,8 +342,32 @@ define(function ()
 		}
 		this.showLogin = function ()
 		{
-			$('#Logon').dialog('open');
-			$('#profilenames').empty();
+			//new system does not do logins!
+			
+			
+			$.ajax('/vwfDataManager.svc/logindata',
+				{
+					cache:false,
+					success:function(data,status,xhr)
+					{
+						var username = _DataManager.getCurrentUserName();
+						this.Login(username,'');
+						
+					}.bind(this),
+					error:function(xhr,status,err)
+					{
+						
+						window.onbeforeunload = '';
+						$(window).unbind();
+						window.location = _DataManager.getCurrentApplication() + "/login.html?return=" + _DataManager.getCurrentSession().substr(13);
+					}.bind(this)
+				});
+			
+			
+			
+			
+			//$('#Logon').dialog('open');
+			//$('#profilenames').empty();
 			//var users = _DataManager.GetUsers();
 			//users = ['New Profile...'].concat(users);
 			//$('#profilenames').combobox(users);

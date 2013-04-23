@@ -389,7 +389,7 @@ define(function ()
 			if (nodes.length > 0) var ret = jQuery.ajax(
 				{
 					type: 'POST',
-					url: PersistanceServer + '/vwfDataManager.svc/state',
+					url: PersistanceServer + '/vwfDataManager.svc/state?SID=' + _DataManager.getCurrentSession(),
 					data: JSON.stringify(nodes),
 					success: null,
 					async: false,
