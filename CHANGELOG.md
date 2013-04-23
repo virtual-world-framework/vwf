@@ -1,6 +1,42 @@
 VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
+
+----------------------------------
+0.6.8
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+- CHG: Make `lookAt` readable.
+- NEW: Add config file to hmmwv-touch to default to glge.
+- NEW: Add lights to example apps and fix yaml parsing errors
+- NEW: Add config file to agi/cesium app so it uses cesium view driver
+- CHG: Update simulation recipe
+- CHG: Remove GLGE phantom nodes and update screenshot to current rendering fixes #1803
+- CHG: VCTE Demo: Reduced video size
+- CHG: Created radio component and fixed the replication bug
+- CHG: Fix drag and drop model URLs Fixes #1761
+- CHG: Fix drivers so they properly return assigned color values
+- CHG: Reset humvee translation in humvee-lesson on lesson start.
+- CHG: Fix physics and xmas-tree materials. Fixes #1796
+- CHG: Default minesweeper, sandtable and tile-puzzle to glge until we figure out ambient light issue
+- CHG: Move scoreBoard up to the properties block where its supposed to be. Fixes #1807
+- CHG: Add catalog files for VCTE app.
+- CHG: Fix issue with the navscene key handler removing keyUp information from the object passed into the event
+- CHG: Fix case problems with .DAE extensions. Of the ones with problems, normalize to lower case since the errors tend to be in that direction.
+- CHG: Increase the near clip. Prevents sizzling on the information boards in the back of the room.
+- CHG: Fixed a 'this' reference in the textureLoading error callback
+- CHG: VCTE: Removed tv_screens reference.  Throwing error once pushed to the development branch.
+- CHG: VCTE: resolved a case sensitive issue with screenTest.dae
+- CHG: VCTE: Changed default video size from 512x512 to 1024x512 (WxH)
+- NEW: VCTE: Initial vcte app submission
+- New: Editor: Add Rob's sandbox application to the catalog page.
+- CHG: Merged over some of the texture changes from the threejs branch
+- CHG: Add link to humvee-lesson to the lesson recipe.
+- CHG: Add catalog files for the humvee lesson application, and update catalog files for the radio lesson.
+- CHG: Add ambient color to tutorial applications. Fixes #1787.
+- CHG: Change task text to green as a visible representation of task completion. Fixes #1785.
+
 ----------------------------------
 0.6.7
 ----------------------------------------------------------------------------------------------------
