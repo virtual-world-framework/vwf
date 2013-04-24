@@ -1,0 +1,70 @@
+# Copyright 2013 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+---
+extends: http://vwf.example.com/navscene.vwf
+properties:
+  count: 0
+methods:
+  createUser:
+events:
+  userCreated:
+children:
+  terrain:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/bzworld.dae
+    type: model/vnd.collada+xml
+    rotation: [ 1, 0, 0, -90 ]
+    scale: 4
+  light:
+    extends: http://vwf.example.com/light.vwf
+    lightType: point
+    enable: true
+    distance: 2000
+    intensity: 0.3
+    color: [ 255, 255, 255 ]
+scripts:
+- |
+  this.initialize = function() {
+    this.camera.translation = [ 0, 0, 800 ];
+    this.camera.far = 1000000;
+    this.camera.near = 1;
+  }
+
+  this.createUser = function( userName ) {
+
+    // Ready the parameters to the call to create the child (2 steps)
+    // Step 1: Make the user name unique
+    userName += count++;
+
+    // Step 2: Create the definition of an object that will group a camera w/ an avatar 3D model
+    var userDef = { 
+      "extends": "http://vwf.example.com/node3.vwf",
+      "children": {}     
+    };
+    var cameraDef = {
+      "extends": "http://vwf.example.com/camera.vwf" 
+    };
+    var avatarDef = {
+      "extends": "http://vwf.example.com/node3.vwf",
+      "source": "models/BlueCube.dae",
+      "type": "model/vnd.collada+xml"
+    };
+    userDef.children[ "camera" ] = cameraDef;
+    userDef.children[ "avatar" ] = avatarDef;
+
+    // Create the user object, passing a callback that fires an event upon completion
+    this.children.create( userName, userDef, function( node ) {
+      this.userCreated( node.id );
+    } );
+  } //@ sourceURL=index.vwf
