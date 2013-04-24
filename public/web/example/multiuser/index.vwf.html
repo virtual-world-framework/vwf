@@ -65,6 +65,12 @@ the License.
 					break;
 				case 68: // 'D' key
 					vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ 100, 0, 0 ] ] );
+					break;
+				case 81: // 'Q' key
+					vwf_view.kernel.callMethod( view.myUserObjectId, "rotateBy", [ [ 0, 0, 1, 1 ] ] );
+					break;
+				case 69: // 'E' key
+					vwf_view.kernel.callMethod( view.myUserObjectId, "rotateBy", [ [ 0, 0, 1, -1 ] ] );
 					break;	
 			}
 	} //@ sourceURL=index.vwf.html
