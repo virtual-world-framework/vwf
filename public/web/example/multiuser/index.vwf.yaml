@@ -30,25 +30,21 @@ children:
   light:
     extends: http://vwf.example.com/light.vwf
     properties:
-      lightType: point
-      enable: true
       translation: [ -30000, -30000, 10000 ]
       distance: 200000
-      intensity: 1
-      color: [ 255, 255, 255 ]
   light2:
     extends: http://vwf.example.com/light.vwf
     properties:
-      lightType: point
-      enable: true
       translation: [ 30000, 30000, 0 ]
       distance: 200000
-      intensity: 1
-      color: [ 255, 255, 255 ]
 scripts:
 - |
   this.initialize = function() {
     this.camera.translation = [ 0, 0, 800 ];
+
+    // This is a large scene, so let's increase the distance to the far clipping plane quite a bit
+    // We'll also increase the distance to the near clipping plane so as not to have a crazy range for the 
+    // rendering frustum (this will reduce z-fighting)
     this.camera.far = 1000000;
     this.camera.near = 1;
   }
