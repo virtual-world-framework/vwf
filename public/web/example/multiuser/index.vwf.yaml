@@ -14,6 +14,7 @@
 ---
 extends: http://vwf.example.com/navscene.vwf
 properties:
+  ambientColor: [ 180, 180, 180 ]
   count: 0
 methods:
   createUser:
@@ -24,8 +25,9 @@ children:
     extends: http://vwf.example.com/node3.vwf
     source: models/bzworld.dae
     type: model/vnd.collada+xml
-    rotation: [ 1, 0, 0, -90 ]
-    scale: 4
+    properties:
+      rotation: [ 1, 0, 0, -90 ]
+      scale: 4
   light:
     extends: http://vwf.example.com/light.vwf
     lightType: point
@@ -45,7 +47,7 @@ scripts:
 
     // Ready the parameters to the call to create the child (2 steps)
     // Step 1: Make the user name unique
-    userName += count++;
+    userName += this.count++;
 
     // Step 2: Create the definition of an object that will group a camera w/ an avatar 3D model
     var userDef = { 
@@ -53,12 +55,21 @@ scripts:
       "children": {}     
     };
     var cameraDef = {
-      "extends": "http://vwf.example.com/camera.vwf" 
+      "extends": "http://vwf.example.com/camera.vwf",
+      "properties": {
+        "translation": [ 0, 0, 800 ],
+        "far": 1000000,
+        "near": 1
+      }
     };
     var avatarDef = {
       "extends": "http://vwf.example.com/node3.vwf",
-      "source": "models/BlueCube.dae",
-      "type": "model/vnd.collada+xml"
+      "source": "models/duck.dae",
+      "type": "model/vnd.collada+xml",
+      "properties": {
+        "rotation": [ 0, 0, 1, 90 ],
+        "scale": 4.5
+      }
     };
     userDef.children[ "camera" ] = cameraDef;
     userDef.children[ "avatar" ] = avatarDef;

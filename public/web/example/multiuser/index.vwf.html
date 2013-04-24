@@ -1,0 +1,76 @@
+<!--
+Copyright 2013 United States Government, as represented by the Secretary of Defense, Under
+Secretary of Defense (Personnel & Readiness).
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+in compliance with the License. You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License
+is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+or implied. See the License for the specific language governing permissions and limitations under
+the License.
+-->
+
+<script type="text/javascript">
+	var view = this;
+	
+	$('#login').dialog( {
+		title: 'Login',
+		height: 'auto',
+		modal: true,
+		resizable: false,
+		draggable: false,
+		buttons: {
+			"Login": function() {
+				var userName = $( "#userName" ).val();
+				if ( !( ( userName == "Your Name" ) || ( userName == "" ) ) ) {
+					userName = userName.replace(/ /g,"_");
+					userName = userName.replace(/([^0-9A-Za-z])/g,"");
+					$( "#main" ).show();
+					$( this ).dialog("close");
+					var kernel = vwf_view.kernel;
+					kernel.callMethod( kernel.application(), "createUser", [ userName ] );
+				}
+			}
+		}
+	});
+
+	vwf_view.firedEvent = function( nodeId, eventName, eventParameters ) {
+		if ( ( eventName == "userCreated" ) && ( this.kernel.client() == this.kernel.moniker() ) ) {
+			view.myUserObjectId = eventParameters[ 0 ];
+			var cameraId = vwf_view.kernel.find( view.myUserObjectId, "camera" );
+			var applicationId = vwf_view.kernel.application();
+			var canvas = $( "#" + applicationId );
+			vwf_view.kernel.setProperty( cameraId, "aspect", canvas.width() / canvas.height() );
+			var rendererState = vwf_view.kernel.kernel.views[ "vwf/view/threejs" ].state;
+			rendererState.cameraInUse = rendererState.nodes[ cameraId ].threeObject;
+			var sceneNode = rendererState.scenes[ applicationId ];
+			sceneNode.camera.ID = cameraId;
+		}
+	}
+
+	window.onkeydown = function( eventArg ) {
+	 	if ( view.myUserObjectId )
+			switch ( eventArg.keyCode ) {
+				case 87: // 'W' key
+					vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ 0, 100, 0 ] ] );
+					break;
+				case 65: // 'A' key
+					vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ -100, 0, 0 ] ] );
+					break;
+				case 83: // 'S' key
+					vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ 0, -100, 0 ] ] );
+					break;
+				case 68: // 'D' key
+					vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ 100, 0, 0 ] ] );
+					break;	
+			}
+	} //@ sourceURL=index.vwf.html
+</script>
+
+<link rel="stylesheet" type="text/css" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css" />
+<div id="login">
+	<input id="userName" type="text" placeholder="Your Name">
+</div>
