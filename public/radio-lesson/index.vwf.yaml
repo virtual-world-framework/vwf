@@ -358,8 +358,8 @@ children:
                 radio.backLightMode = "on";
               break;
             case "squelch":
-              if ( radio.squelch <= 100 )
-                radio.squelch = radio.squelch + 10;
+              if ( radio.squelch <= 100 ) 
+                  radio.squelch = radio.squelch + 10;
               break;
             case "beep":
               radio.beepOn = !radio.beepOn;
@@ -376,7 +376,7 @@ children:
               break;
             case "squelch":
               if ( radio.squelch >= 30 )
-                radio.squelch = radio.squelch - 10;
+                  radio.squelch = radio.squelch - 10;
               break;
             case "beep":
               radio.beepOn = !radio.beepOn;
@@ -596,13 +596,18 @@ children:
               controlMode: positions
               transformIncrement: 12
               transformAxis: [ 0, 1, 0 ]
+            methods:
+              playStatic:
+              stopStatic:
             scripts:  
             - | 
                 this.pointerUp = function()  {
                   if ( this.parent.parent.volume == 0 ) {
                     this.parent.parent.volume = 1;
+                    this.playStatic();
                   } else {
                     this.parent.parent.volume = 0;
+                    this.stopStatic();
                   }                            
                 } //@ sourceURL=ic40Volume.vwf
             children: 
@@ -782,6 +787,8 @@ children:
               properties:
                 text: "1.5 Continue to click Up Key until static background noise is silenced"
                 cameraPoseRef: /cameraPose3
+              methods:
+                stopStatic:
               scripts:
               - |
                 this.entering = function() {
@@ -792,6 +799,7 @@ children:
                     if (radio.squelch >= 70) 
                     {
                       radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
+                      this.stopStatic();
                       this.completed();
                       this.logger.info( "Step 5 after completed");
                     }
