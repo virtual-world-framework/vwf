@@ -14,7 +14,6 @@
 ---
 extends: http://vwf.example.com/navscene.vwf
 properties:
-  ambientColor: [ 180, 180, 180 ]
   count: 0
 methods:
   createUser:
@@ -30,11 +29,22 @@ children:
       scale: 4
   light:
     extends: http://vwf.example.com/light.vwf
-    lightType: point
-    enable: true
-    distance: 2000
-    intensity: 0.3
-    color: [ 255, 255, 255 ]
+    properties:
+      lightType: point
+      enable: true
+      translation: [ -30000, -30000, 10000 ]
+      distance: 200000
+      intensity: 1
+      color: [ 255, 255, 255 ]
+  light2:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: point
+      enable: true
+      translation: [ 30000, 30000, 0 ]
+      distance: 200000
+      intensity: 1
+      color: [ 255, 255, 255 ]
 scripts:
 - |
   this.initialize = function() {
