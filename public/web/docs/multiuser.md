@@ -68,30 +68,39 @@ In your index.vwf.html file you could create an input field like so:
 
 	<link rel="stylesheet" type="text/css" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css" />
 	<div id="login">
-		<input id="userName" type="text" placeholder="Your Name">
+	  <input id="userName" type="text" placeholder="Your Name">
 	</div>
 
 And then connect a script to the login that will call your createUser function when a button is clicked (also in index.vwf.html):
 
+	// The user login dialog
 	$('#login').dialog( {
-		title: 'Login',
-		height: 'auto',
-		modal: true,
-		resizable: false,
-		draggable: false,
-		buttons: {
-			"Login": function() {
-				var userName = $( "#userName" ).val();
-				if ( !( ( userName == "Your Name" ) || ( userName == "" ) ) ) {
-					userName = userName.replace(/ /g,"_");
-					userName = userName.replace(/([^0-9A-Za-z])/g,"");
-					$( "#main" ).show();
-					$( this ).dialog("close");
-					var kernel = vwf_view.kernel;
-					kernel.callMethod( kernel.application(), "createUser", [ userName ] );
-				}
-			}
-		}
+	  title: 'Login',
+	  height: 'auto',
+	  modal: true,
+	  resizable: false,
+	  draggable: false,
+	  buttons: {
+	    "Login": function() {
+	        
+	      var userName = $( "#userName" ).val();
+	      
+	      // If the user entered something valid, proceed
+	      if ( !( ( userName == "Your Name" ) || ( userName == "" ) ) ) {
+
+	        // Remove ugly characters from the username
+	        userName = userName.replace(/ /g,"_");
+	        userName = userName.replace(/([^0-9A-Za-z])/g,"");
+
+	        // Close the dialog box
+	        $( this ).dialog("close");
+
+	        // Call the function in the model to create the new user object
+	        var kernel = vwf_view.kernel;
+	        kernel.callMethod( kernel.application(), "createUser", [ userName ] );
+	      }
+	    }
+	  }
 	});
 
 Note: The jquery API is loaded by default by all VWF applications.
@@ -100,40 +109,65 @@ Note: The jquery API is loaded by default by all VWF applications.
 
 When the *userCreated* event fires, we will save the reference to the user object so the user can control it.  We will also tell the renderer to render from the point of view of this user's camera.  These two steps are done from the view (.html), since this behavior is specific to this user.  Below is an event handler for *userCreated* that should get the job done:
 
+	// The event handler that is called whenever an event is fired from the model
 	vwf_view.firedEvent = function( nodeId, eventName, eventParameters ) {
-		if ( ( eventName == "userCreated" ) && ( this.kernel.client() == this.kernel.moniker() ) ) {
-			view.myUserObjectId = eventParameters[ 0 ];
-			var cameraId = vwf_view.kernel.find( view.myUserObjectId, "camera" );
-			var applicationId = vwf_view.kernel.application();
-			var canvas = $( "#" + applicationId );
-			vwf_view.kernel.setProperty( cameraId, "aspect", canvas.width() / canvas.height() );
-			var rendererState = vwf_view.kernel.kernel.views[ "vwf/view/threejs" ].state;
-			rendererState.cameraInUse = rendererState.nodes[ cameraId ].threeObject;
-			var sceneNode = rendererState.scenes[ applicationId ];
-			sceneNode.camera.ID = cameraId;
-		}
+
+	  // If the event that triggered this event handler was the creation of a new user,
+	  // And the event issued from this client, grab the camera from the new object to use for this user
+	  if ( ( eventName == "userCreated" ) && ( this.kernel.client() == this.kernel.moniker() ) ) {
+
+	    // Save the reference to the user object - this belongs to this user
+	    view.myUserObjectId = eventParameters[ 0 ];
+
+	    // Set the aspect ration on the camera to match that of the html canvas
+	    var cameraId = vwf_view.kernel.find( view.myUserObjectId, "camera" );
+	    var applicationId = vwf_view.kernel.application();
+	    var canvas = $( "#" + applicationId );
+	    vwf_view.kernel.setProperty( cameraId, "aspect", canvas.width() / canvas.height() );
+
+	    // Tell the renderer to render from this camera for this user
+	    var rendererState = vwf_view.kernel.kernel.views[ "vwf/view/threejs" ].state;
+	    rendererState.cameraInUse = rendererState.nodes[ cameraId ].threeObject;
+
+	    // Save the camera id for future use
+	    var sceneNode = rendererState.scenes[ applicationId ];
+	    sceneNode.camera.ID = cameraId;
+	  }
 	}
 
 Note: This code makes reference to renderer-specific objects ("vwf/view/threejs" and threeObject are specific to the three.js renderer).  Soon, such renderer references will be able to be made through view-side components so that the programmer need not worry him or herself with renderer details unless there is a desire to do so for advanced functionality.
 
 We can now make the user's interactions affect his specific character by updating the properties of myUserObject:
 
+	// The event handler that is called whenever the user presses a key
 	window.onkeydown = function( eventArg ) {
-	 	if ( view.myUserObjectId )
-			switch ( eventArg.keyCode ) {
-				case 87: // 'W' key
-					vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ 0, 100, 0 ] ] );
-					break;
-				case 65: // 'A' key
-					vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ -100, 0, 0 ] ] );
-					break;
-				case 83: // 'S' key
-					vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ 0, -100, 0 ] ] );
-					break;
-				case 68: // 'D' key
-					vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ 100, 0, 0 ] ] );
-					break;	
-			}
+
+	  // If this user has a user object, react accordingly to the key press as follows:
+	  // W,A,S,D - move forward, left, back, right
+	  // Q,E - rotate left, right
+	  // Note: In this example, translations are in world coordinates, so W,A,S,D always move the user in the
+	  //       same direction, regardless of which way they are facing
+	  if ( view.myUserObjectId )
+	    switch ( eventArg.keyCode ) {
+	      case 87: // 'W' key
+	        vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ 0, 100, 0 ] ] );
+	        break;
+	      case 65: // 'A' key
+	        vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ -100, 0, 0 ] ] );
+	        break;
+	      case 83: // 'S' key
+	        vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ 0, -100, 0 ] ] );
+	        break;
+	      case 68: // 'D' key
+	        vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ 100, 0, 0 ] ] );
+	        break;
+	      case 81: // 'Q' key
+	        vwf_view.kernel.callMethod( view.myUserObjectId, "rotateBy", [ [ 0, 0, 1, 1 ] ] );
+	        break;
+	      case 69: // 'E' key
+	        vwf_view.kernel.callMethod( view.myUserObjectId, "rotateBy", [ [ 0, 0, 1, -1 ] ] );
+	        break;  
+	    }
 	}
 
 ## Pitfalls
