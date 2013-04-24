@@ -17,9 +17,9 @@ The task component contains the following properties that can be set in the less
 * **text**: Text to display to the user to explain the task
 * **cameraPoseRef**: Search string used to find a node3 that represents the transform to which the camera will move at the beginning of this task
 * **scenePath**: xpath reference to the top node of the scene to which the lesson listens for task completion events
-* **taskIndex**: Index of the currently active subtask
+* **taskIndex**: Index of the currently active subtask; used internally and does not need to be explicitly set in the application
 
-In the following example, we'll focus on the *text* and *cameraPoseRef* properties. The remaining properties can be used for more complex lessons that are more than one level deep. 
+In the following example, we'll focus on the *text* and *cameraPoseRef* properties. 
 
 The task component also consists of the following methods and events:
 
@@ -105,6 +105,54 @@ Additionally, the cameraPoses referenced in the task properties each need to be 
           rotation: [ 1, 0, 0, 0 ]
 
 Thus the complete lesson hierarchy is defined in the VWF model, including all lesson tasks, their cameraPoses, and their entering and exit methods. 
+
+**Multiple Levels**
+
+For more complex lessons, define tasks with a structure that is more than one level deep. These levels of tasking can be used for tasks that consist of multiple actions, or for those requiring additional instructions in order to complete. 
+
+	lesson:
+	  extends: http://vwf.example.com/lesson/task.vwf
+	  properties:
+	  scenePath: /
+	  children:
+	    step_1:
+	      extends: http://vwf.example.com/lesson/task.vwf
+	      properties:
+	        text: "1.0"
+	        cameraPoseRef: /lesson/cameraPose1
+	      children:
+	        step_1_1:
+	          extends: http://vwf.example.com/lesson/task.vwf
+	          properties:
+	            text: "1.1"
+	          children:
+	            step_1_1_1:
+	              extends: http://vwf.example.com/lesson/task.vwf
+	              properties:
+	                text: "1.1.1"
+	              scripts:
+	              - |
+	                this.entering = function() {
+	                  this.logger.info( "Step: 1.1.1" );
+	                }
+	        step_1_2:
+	          extends: http://vwf.example.com/lesson/task.vwf
+	          properties:
+	            text: "1.2"
+	          children:
+	            step_1_2_1:
+	              extends: http://vwf.example.com/lesson/task.vwf
+	              properties:
+	                text: "1.2.1"
+	              scripts:
+	              - |
+	                this.entering = function() {
+	                  this.logger.info( "Step: 1.2.1" );
+	                }
+
+The standard lesson interface view driver, described below, supports multiple levels automatically. The figure below shows an example lesson with three levels of tasks in the hierarchy below the overall lesson task. Any additional levels will be appended to the innermost content section. 
+
+<div style='width:100%;text-align:center'><img src='images/lesson.png' alt='hierarchy' /></div>
 
 --------------
 
