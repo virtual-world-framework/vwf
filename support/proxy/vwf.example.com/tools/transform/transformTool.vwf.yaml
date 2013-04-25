@@ -1,0 +1,874 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+## The component representation of an editable node3 behavior
+## 
+## @name node3edit.vwf
+## @namespace
+
+--- 
+extends: http://vwf.example.com/node3.vwf
+implements:
+- http://vwf.example.com/tools/transform/node3edit.vwf
+properties:
+  selectedID: 
+    set: |
+      console.info( "transform Tool selectedID set to: " + value );
+      this.objectSelected && this.objectSelected( value );
+  ttPositions:
+  ttPoints:
+  boxCenter:
+  pivotPoint:
+methods:
+  testTool:
+  objectSelected:
+  calcBoxCenter:
+  calcPivotPoint:
+events:
+  transformUpdated:
+scripts:
+- |
+    this.initialize = function() {
+      console.info( "== initialize == transformTool == initialize ==" );
+      //this.ttPositions = undefined;
+      //this.ttPoints = undefined;
+      //this.boxCenter = undefined;
+      //this.pivotPoint = undefined;
+      this.objBoundingBox = undefined;
+    }
+    this.transformUpdated = this.events.add( function( ID ) {
+      
+    } );
+    this.objectSelected = function( ID ) {
+      console.info( "SELECTING: " + ID );
+      if ( this.selectedID !== undefined && this.selectedID != "" ) {
+        this.removeChildren( this );        
+      }
+      this.selectedID = ID;
+      console.info( "SELECTED: " + this.selectedID );
+      if ( ID != "" && ID !== undefined ) {
+        this.createTool();
+      }
+      var tf = vwf.getProperty( ID, "transform", [] );
+      this.transform = tf;
+      var newTrans = goog.vec.Mat4.createFromArray( tf );
+      this.transform = goog.vec.Mat4.translate( tf, this.boxCenter[0], this.boxCenter[1], this.boxCenter[2] );
+      if ( this.rotationPoint )
+        this.rotationPoint = [ this.boxCenter[0], this.boxCenter[1], this.boxCenter[2] ]; 
+    };
+    this.testTool = function() {
+      this.createToolGeometry( 100, 100, 100 );
+      this.position = [ 0, 0, 0 ];
+    }
+    this.createTool = function() {
+      this.objBoundingBox = vwf.getProperty( this.selectedID, "boundingbox", [] );
+   
+      if ( this.objBoundingBox ) {
+        this.calcBoxCenter();
+        var dim = this.getToolDimensions();
+        if ( dim ) {
+          this.createToolGeometry( dim[0], dim[1], dim[2] );
+        }
+      }
+    }
+    this.calcBoxCenter = function() {
+      if ( this.objBoundingBox ) { 
+        var min = this.objBoundingBox.min;
+        var max = this.objBoundingBox.max;
+        var dX = max[0]-min[0];
+        var dY = max[1]-min[1];
+        var dZ = max[2]-min[2];
+
+        this.boxCenter = goog.vec.Vec3.add(
+          goog.vec.Vec3.createFromArray( [ min[0], min[1], min[2] ] ),
+          goog.vec.Vec3.scale(
+            goog.vec.Vec3.createFromArray( [ dX, dY, dZ ] ),
+            0.5,
+            goog.vec.Vec3.create()
+            ),
+          goog.vec.Vec3.create()
+        );
+        console.info( " this.boxCenter = " +  Array.prototype.slice.call( this.boxCenter ) );
+      }       
+    }
+    this.removeChildren = function( node ) {
+      console.info( "DESELECTING: " + this.selectedID );
+      if ( node.children ) {
+        for ( var i = node.children.length-1; i >= 0; i-- ) {
+          //this.removeChild( node.children[i] );
+          this.children.delete( node.children[i] );
+        }
+      }
+    }
+    this.getToolDimensions = function() {
+      if ( this.objBoundingBox ) {
+        var dX = this.objBoundingBox.max[0]-this.objBoundingBox.min[0];
+        var dY = this.objBoundingBox.max[1]-this.objBoundingBox.min[1];
+        var dZ = this.objBoundingBox.max[2]-this.objBoundingBox.min[2];
+        return [ dX, dY, dZ ];
+      }
+      return undefined;
+    }
+    this.createToolGeometry = function( dx, dy, dz ) {
+      this.createPointList( dx, dy, dz );
+      var path = "http://vwf.example.com/tools/transform/";
+      if ( this.ttPoints ){
+        // translate xPos 9,18,15,12
+        this.children.create( "transXPos", { "includes": path + "translateXPos.vwf" }, function( child) {
+          child.createGeometry();
+        } );
+
+        // translate xNeg 21,24,27,30
+        this.children.create( "transXNeg", { "includes": path + "translateXNeg.vwf" }, function( child) {
+          child.createGeometry();
+        } );
+
+        // translate yPos 48,49,50,51
+        this.children.create( "transYPos", { "includes": path + "translateYPos.vwf" }, function( child) {
+          child.createGeometry();
+        } );
+
+        // translate yNeg 52,53,54,55
+        this.children.create( "transYNeg", { "includes": path + "translateYNeg.vwf" }, function( child) {
+          child.createGeometry();
+        } );
+
+        // translate zPos 32,34,36,38
+        this.children.create( "transZPos", { "includes": path + "translateZPos.vwf" }, function( child) {
+          child.createGeometry();
+        } );
+
+        // translate zNeg 40,46,44,42
+        this.children.create( "transZNeg", { "includes": path + "translateZNeg.vwf" }, function( child) {
+          child.createGeometry();
+        } );
+        
+        // rotate X yPos 34,35,37,36
+        // rotate X yNeg 33,32,38,39    
+        // rotate X yPos 44,45,43,42
+        // rotate X yNeg 47,46,40,41
+        // rotate X zPos 39,54,53,33
+        // rotate X zNeg 55,47,41,52
+        // rotate X zPos 50,49,35,37
+        // rotate X zNeg 43,48,51,45 
+        // this.createXRotate(); 
+
+        // rotate Z yPos 12,13,16,15
+        // rotate Z yNeg 10,9,18,19
+        // rotate Z yPos 24,25,28,27
+        // rotate Z yNeg 22,21,30,31
+        // rotate Z xPos 16,48,49,13
+        // rotate Z xNeg 28,51,50,25     
+        // rotate Z xPos 52,19,10,53
+        // rotate Z xNeg 22,54,55,31           
+        // this.createYRotate();
+
+        // rotate Z yPos 12,13,16,15
+        // rotate Z yNeg 10,9,18,19
+        // rotate Z yPos 24,25,28,27
+        // rotate Z yNeg 22,21,30,31
+        // rotate Z xPos 16,48,49,13
+        // rotate Z xNeg 28,51,50,25     
+        // rotate Z xPos 52,19,10,53
+        // rotate Z xNeg 22,54,55,31 
+        // this.createZRotate();
+      }
+    }
+    this.createPointList = function( dX, dY, dZ ) {
+      var points = [];
+
+      console.info( "createPointList( " +dX+ ", "+dY+ ", "+ +dZ+ " )" );
+      
+      var fHalfX = dX * 0.6;
+      var fHalfY = dY * 0.6;
+      var fHalfZ = dZ * 0.6;
+      var fXThick = dX * 0.08;
+      var fYThick = dY * 0.08;
+      var fZThick = dZ * 0.08;
+      var rp;
+      
+      points.push( [ fHalfX, -fHalfY, fHalfZ ] );		//0
+      points.push( [ fHalfX, fHalfY, fHalfZ ] );		//1
+      points.push( [ -fHalfX, fHalfY, fHalfZ ] );		//2
+      points.push( [ -fHalfX, -fHalfY, fHalfZ ] );  //3
+      points.push( [ fHalfX, -fHalfY, -fHalfZ ] );	//4
+      points.push( [ fHalfX, fHalfY, -fHalfZ ] );		//5
+      points.push( [ -fHalfX, fHalfY, -fHalfZ ] );	//6
+      points.push( [ -fHalfX, -fHalfY, -fHalfZ ] );	//7   
+
+      // x pos 
+      // y-neg z-pos 
+      rp = points[ 0 ];
+      points.push( [ rp[0], fYThick + rp[1], rp[2] ] );			//8
+      points.push( [ rp[0], fYThick + rp[1], -fZThick + rp[2] ] );	//9
+      points.push( [ rp[0], rp[1], -fZThick + rp[2] ] );			//10
+      // y-pos z-pos 
+      rp = points[ 1 ];
+      points.push( [ rp[0], -fYThick + rp[1], rp[2] ] );			//11
+      points.push( [ rp[0], -fYThick + rp[1], -fZThick + rp[2] ] );	//12
+      points.push( [ rp[0], rp[1], -fZThick + rp[2] ] );			//13
+      // y-pos z-neg
+      rp = points[ 5 ];      
+      points.push( [ rp[0], -fYThick + rp[1], rp[2] ] );			//14
+      points.push( [ rp[0], -fYThick + rp[1], fZThick + rp[2] ] );	//15
+      points.push( [ rp[0], rp[1], fZThick + rp[2] ] );			//16
+      // y-neg z-neg 
+      rp = points[ 4 ];
+      points.push( [ rp[0], fYThick + rp[1], rp[2] ] );			//17
+      points.push( [ rp[0], fYThick + rp[1], fZThick + rp[2] ] );	//18
+      points.push( [ rp[0], rp[1], fZThick + rp[2] ] );			//19      
+
+      // x neg 
+      // y-neg z-pos
+      rp = points[ 3 ];      
+      points.push( [ rp[0], fYThick + rp[1], rp[2] ] );			//20
+      points.push( [ rp[0], fYThick + rp[1], -fZThick + rp[2] ] );	//21
+      points.push( [ rp[0], rp[1], -fZThick + rp[2] ] );			//22
+      // y-pos z-pos
+      rp = points[ 2 ];      
+      points.push( [ rp[0], -fYThick + rp[1], rp[2] ] );			//23
+      points.push( [ rp[0], -fYThick + rp[1], -fZThick + rp[2] ] );	//24
+      points.push( [ rp[0], rp[1], -fZThick + rp[2] ] );			//25
+      // y-pos z-neg
+      rp = points[ 6 ];      
+      points.push( [ rp[0], -fYThick + rp[1], rp[2] ] );			//26
+      points.push( [ rp[0], -fYThick + rp[1], fZThick + rp[2] ] );	//27
+      points.push( [ rp[0], rp[1], fZThick + rp[2] ] );			//28
+      // y-neg z-neg
+      rp = points[ 7 ];      
+      points.push( [ rp[0], fYThick + rp[1], rp[2] ] );			//29
+      points.push( [ rp[0], fYThick + rp[1], fZThick + rp[2] ] );	//30
+      points.push( [ rp[0], rp[1], fZThick + rp[2] ] );			//31
+
+      // z pos 
+      //  x-pos y-neg 
+      //8
+      rp = points[ 0 ];
+      points.push( [ -fXThick + rp[0], fYThick + rp[1], rp[2] ] );	//32
+      points.push( [ -fXThick + rp[0], rp[1], rp[2] ] );			//33
+      // x-pos y-pos 
+      //11
+      rp = points[ 1 ];
+      points.push( [ -fXThick + rp[0], -fYThick + rp[1], rp[2] ] );	//34
+      points.push( [ -fXThick + rp[0], rp[1], rp[2] ] );			//35
+      // x-neg y-pos 
+      //23
+      rp = points[ 2 ];      
+      points.push( [ fXThick + rp[0], -fYThick + rp[1], rp[2] ] );	//36
+      points.push( [ fXThick + rp[0], rp[1], rp[2] ] );			//37
+      // x-neg  y-neg
+      //20
+      rp = points[ 3 ]; 
+      points.push( [ fXThick + rp[0], fYThick + rp[1], rp[2] ] );	//38
+      points.push( [ fXThick + rp[0], rp[1], rp[2] ] );			//39
+
+      // z neg 
+      //  x-pos y-neg 
+      //17
+      rp = points[ 4 ];
+      points.push( [ -fXThick + rp[0], fYThick + rp[1], rp[2] ] );	//40
+      points.push( [ -fXThick + rp[0], rp[1], rp[2] ] );			//41
+      // x-pos y-pos 
+      //14
+      rp = points[ 5 ];
+      points.push( [ -fXThick + rp[0], -fYThick + rp[1], rp[2] ] );	//42
+      points.push( [ -fXThick + rp[0], rp[1], rp[2] ] );			//43
+      // x-neg y-pos 
+      //26
+      rp = points[ 6 ];
+      points.push( [ fXThick + rp[0], -fYThick + rp[1], rp[2] ] );	//44
+      points.push( [ fXThick + rp[0], rp[1], rp[2] ] );			//45
+      // x-neg  y-neg
+      //29
+      rp = points[ 7 ];
+      points.push( [ fXThick + rp[0], fYThick + rp[1], rp[2] ] );	//46
+      points.push( [ fXThick + rp[0], rp[1], rp[2] ] );			//47
+
+
+      // y pos 
+      //  x-pos z-neg 
+      //16
+      rp = points[ 5 ];
+      points.push( [ -fXThick + rp[0], rp[1], fZThick + rp[2] ] );	//48
+      //43
+      // x-pos z-pos 
+      //13
+      rp = points[ 1 ];
+      points.push( [ -fXThick + rp[0], rp[1], -fZThick + rp[2] ] );	//49
+      //35
+      // x-neg z-pos 
+      //25
+      rp = points[ 2 ];
+      points.push( [ fXThick + rp[0], rp[1], -fZThick + rp[2] ] );	//50
+      //37
+      // x-neg  z-neg
+      //28
+      rp = points[ 6 ];
+      points.push( [ fXThick + rp[0], rp[1], fZThick + rp[2] ] );	//51
+      //45
+
+      // y neg 
+      //  x-pos z-neg 
+      //19
+      rp = points[ 4 ];
+      points.push( [ -fXThick + rp[0], rp[1], fZThick + rp[2] ] );	//52
+      //41
+      // x-pos z-pos 
+      //10
+      rp = points[ 0 ];
+      points.push( [ -fXThick + rp[0], rp[1], -fZThick + rp[2] ] );	//53
+      //33
+      // x-neg z-pos 
+      //22
+      rp = points[ 3 ];
+      points.push( [ fXThick + rp[0], rp[1], -fZThick + rp[2] ] );	//54
+      //39
+      // x-neg  z-neg
+      //31
+      rp = points[ 7 ];
+      points.push( [ fXThick + rp[0], rp[1], fZThick + rp[2] ] );	//55
+      //47
+
+      this.ttPositions = points;
+      var pts = [];
+      for ( var i = 0; i < points.length; i++ ) {
+        //console.info( "  points["+i+"] = " +points[i] );
+        pts.push( points[i][0] );
+        pts.push( points[i][1] );
+        pts.push( points[i][2] );
+      }
+      this.ttPoints = pts;
+    }
+    
+  
+    // rotate X yPos 34,35,37,36
+    // rotate X yNeg 33,32,38,39    
+    // rotate X yPos 44,45,43,42
+    // rotate X yNeg 47,46,40,41
+    // rotate X zPos 39,54,53,33
+    // rotate X zNeg 55,47,41,52
+    // rotate X zPos 50,49,35,37
+    // rotate X zNeg 43,48,51,45      
+    this.createXRotate = function() {
+      if ( this.ttPoints ) {
+        var pos = [];
+        var faces;
+        pos.push( this.ttPositions[34][0] );
+        pos.push( this.ttPositions[34][1] ); // 0       
+        pos.push( this.ttPositions[34][2] );
+
+        pos.push( this.ttPositions[35][0] );
+        pos.push( this.ttPositions[35][1] ); // 1       
+        pos.push( this.ttPositions[35][2] );
+        
+        pos.push( this.ttPositions[37][0] );
+        pos.push( this.ttPositions[37][1] ); // 2       
+        pos.push( this.ttPositions[37][2] );
+        
+        pos.push( this.ttPositions[36][0] );
+        pos.push( this.ttPositions[36][1] ); // 3   
+        pos.push( this.ttPositions[36][2] ); 
+        
+        faces = [ 0, 3, 1, 1, 3, 2 ];
+        
+        pos.push( this.ttPositions[33][0] );
+        pos.push( this.ttPositions[33][1] ); // 4       
+        pos.push( this.ttPositions[33][2] );
+
+        pos.push( this.ttPositions[32][0] );
+        pos.push( this.ttPositions[32][1] ); // 5       
+        pos.push( this.ttPositions[32][2] );
+        
+        pos.push( this.ttPositions[38][0] );
+        pos.push( this.ttPositions[38][1] ); // 6       
+        pos.push( this.ttPositions[38][2] );
+        
+        pos.push( this.ttPositions[39][0] );
+        pos.push( this.ttPositions[39][1] ); // 7   
+        pos.push( this.ttPositions[39][2] );   
+ 
+        faces.push( 4, 7, 5, 5, 7, 6 );
+        
+        pos.push( this.ttPositions[44][0] );
+        pos.push( this.ttPositions[44][1] ); // 8       
+        pos.push( this.ttPositions[44][2] );
+
+        pos.push( this.ttPositions[45][0] );
+        pos.push( this.ttPositions[45][1] ); // 9       
+        pos.push( this.ttPositions[45][2] );
+        
+        pos.push( this.ttPositions[43][0] );
+        pos.push( this.ttPositions[43][1] ); // 10       
+        pos.push( this.ttPositions[43][2] );
+        
+        pos.push( this.ttPositions[42][0] );
+        pos.push( this.ttPositions[42][1] ); // 11   
+        pos.push( this.ttPositions[42][2] );   
+ 
+        faces.push( 8, 11, 9, 9, 11, 10 );        
+
+        pos.push( this.ttPositions[47][0] );
+        pos.push( this.ttPositions[47][1] ); // 12       
+        pos.push( this.ttPositions[47][2] );
+
+        pos.push( this.ttPositions[46][0] );
+        pos.push( this.ttPositions[46][1] ); // 13       
+        pos.push( this.ttPositions[46][2] );
+        
+        pos.push( this.ttPositions[40][0] );
+        pos.push( this.ttPositions[40][1] ); // 14       
+        pos.push( this.ttPositions[40][2] );
+        
+        pos.push( this.ttPositions[41][0] );
+        pos.push( this.ttPositions[41][1] ); // 15   
+        pos.push( this.ttPositions[41][2] );   
+ 
+        faces.push( 12, 15, 13, 13, 15, 14 );
+ 
+        pos.push( this.ttPositions[39][0] );
+        pos.push( this.ttPositions[39][1] ); // 16       
+        pos.push( this.ttPositions[39][2] );
+
+        pos.push( this.ttPositions[54][0] );
+        pos.push( this.ttPositions[54][1] ); // 17       
+        pos.push( this.ttPositions[54][2] );
+        
+        pos.push( this.ttPositions[53][0] );
+        pos.push( this.ttPositions[53][1] ); // 18       
+        pos.push( this.ttPositions[53][2] );
+        
+        pos.push( this.ttPositions[33][0] );
+        pos.push( this.ttPositions[33][1] ); // 19   
+        pos.push( this.ttPositions[33][2] );   
+ 
+        faces.push( 16, 19, 17, 17, 19, 18 ); 
+
+        pos.push( this.ttPositions[55][0] );
+        pos.push( this.ttPositions[55][1] ); // 20       
+        pos.push( this.ttPositions[55][2] );
+
+        pos.push( this.ttPositions[47][0] );
+        pos.push( this.ttPositions[47][1] ); // 21       
+        pos.push( this.ttPositions[47][2] );
+        
+        pos.push( this.ttPositions[41][0] );
+        pos.push( this.ttPositions[41][1] ); // 22       
+        pos.push( this.ttPositions[41][2] );
+        
+        pos.push( this.ttPositions[52][0] );
+        pos.push( this.ttPositions[52][1] ); // 23   
+        pos.push( this.ttPositions[52][2] );   
+ 
+        faces.push( 20, 23, 21, 21, 23, 22 ); 
+
+        pos.push( this.ttPositions[50][0] );
+        pos.push( this.ttPositions[50][1] ); // 24       
+        pos.push( this.ttPositions[50][2] );
+
+        pos.push( this.ttPositions[49][0] );
+        pos.push( this.ttPositions[49][1] ); // 25       
+        pos.push( this.ttPositions[49][2] );
+        
+        pos.push( this.ttPositions[35][0] );
+        pos.push( this.ttPositions[35][1] ); // 26       
+        pos.push( this.ttPositions[35][2] );
+        
+        pos.push( this.ttPositions[37][0] );
+        pos.push( this.ttPositions[37][1] ); // 27   
+        pos.push( this.ttPositions[37][2] );   
+ 
+        faces.push( 24, 27, 25, 25, 27, 26 );
+
+        pos.push( this.ttPositions[43][0] );
+        pos.push( this.ttPositions[43][1] ); // 28       
+        pos.push( this.ttPositions[43][2] );
+
+        pos.push( this.ttPositions[48][0] );
+        pos.push( this.ttPositions[48][1] ); // 29       
+        pos.push( this.ttPositions[48][2] );
+        
+        pos.push( this.ttPositions[51][0] );
+        pos.push( this.ttPositions[51][1] ); // 30       
+        pos.push( this.ttPositions[51][2] );
+        
+        pos.push( this.ttPositions[45][0] );
+        pos.push( this.ttPositions[45][1] ); // 31   
+        pos.push( this.ttPositions[45][2] );   
+ 
+        faces.push( 28, 31, 29, 29, 31, 30 );
+        
+        var surface = {
+          "extends": "http://vwf.example.com/node3.vwf",
+          "type": "definition/mesh",
+          "properties": { 
+            "meshDefinition": { positions: pos, faces: faces, color: [ 255, 255, 255 ], },
+          },
+          "scripts": [ "this.pointerDown=this.events.add(function(pointerInfo,pickInfo){ "+
+                         "this.parent.editMode='rotate'; "+
+                         "this.parent.axis=[1,0,0]; "+
+                         "return false; "+
+                       "}, this ); //@ sourceURL=xRotate" ],
+        };
+        
+        vwf.createNode( this.id, surface, "xRotate", undefined );
+      }
+    }
+
+      // rotate Y zPos 9,8,11,12
+      // rotate Y zNeg 17,18,15,14
+      // rotate Y zPos 20,21,24,23
+      // rotate Y zNeg 30,27,26,29
+      // rotate Y xPos 8,32,34,11
+      // rotate Y xNeg 36,23,20,38        
+      // rotate Y xPos 40,17,14,42
+      // rotate Y xNeg 29,46,44,26 
+      
+    this.createYRotate = function() {
+      if ( this.ttPoints ) {
+        var pos = [];
+        var faces;
+        pos.push( this.ttPositions[9][0] );
+        pos.push( this.ttPositions[9][1] ); // 0       
+        pos.push( this.ttPositions[9][2] );
+
+        pos.push( this.ttPositions[8][0] );
+        pos.push( this.ttPositions[8][1] ); // 1       
+        pos.push( this.ttPositions[8][2] );
+        
+        pos.push( this.ttPositions[11][0] );
+        pos.push( this.ttPositions[11][1] ); // 2       
+        pos.push( this.ttPositions[11][2] );
+        
+        pos.push( this.ttPositions[12][0] );
+        pos.push( this.ttPositions[12][1] ); // 3   
+        pos.push( this.ttPositions[12][2] ); 
+        
+        faces = [ 0, 3, 1, 1, 3, 2 ];
+        
+        pos.push( this.ttPositions[17][0] );
+        pos.push( this.ttPositions[17][1] ); // 4       
+        pos.push( this.ttPositions[17][2] );
+
+        pos.push( this.ttPositions[18][0] );
+        pos.push( this.ttPositions[18][1] ); // 5       
+        pos.push( this.ttPositions[18][2] );
+        
+        pos.push( this.ttPositions[15][0] );
+        pos.push( this.ttPositions[15][1] ); // 6       
+        pos.push( this.ttPositions[15][2] );
+        
+        pos.push( this.ttPositions[14][0] );
+        pos.push( this.ttPositions[14][1] ); // 7   
+        pos.push( this.ttPositions[14][2] );   
+ 
+        faces.push( 4, 7, 5, 5, 7, 6 );
+        
+        pos.push( this.ttPositions[20][0] );
+        pos.push( this.ttPositions[20][1] ); // 8       
+        pos.push( this.ttPositions[20][2] );
+
+        pos.push( this.ttPositions[21][0] );
+        pos.push( this.ttPositions[21][1] ); // 9       
+        pos.push( this.ttPositions[21][2] );
+        
+        pos.push( this.ttPositions[24][0] );
+        pos.push( this.ttPositions[24][1] ); // 10       
+        pos.push( this.ttPositions[24][2] );
+        
+        pos.push( this.ttPositions[23][0] );
+        pos.push( this.ttPositions[23][1] ); // 11   
+        pos.push( this.ttPositions[23][2] );   
+ 
+        faces.push( 8, 11, 9, 9, 11, 10 );        
+
+        pos.push( this.ttPositions[30][0] );
+        pos.push( this.ttPositions[30][1] ); // 12       
+        pos.push( this.ttPositions[30][2] );
+
+        pos.push( this.ttPositions[27][0] );
+        pos.push( this.ttPositions[27][1] ); // 13       
+        pos.push( this.ttPositions[27][2] );
+        
+        pos.push( this.ttPositions[26][0] );
+        pos.push( this.ttPositions[26][1] ); // 14       
+        pos.push( this.ttPositions[26][2] );
+        
+        pos.push( this.ttPositions[29][0] );
+        pos.push( this.ttPositions[29][1] ); // 15   
+        pos.push( this.ttPositions[29][2] );   
+ 
+        faces.push( 12, 15, 13, 13, 15, 14 );
+ 
+        pos.push( this.ttPositions[8][0] );
+        pos.push( this.ttPositions[8][1] ); // 16       
+        pos.push( this.ttPositions[8][2] );
+
+        pos.push( this.ttPositions[32][0] );
+        pos.push( this.ttPositions[32][1] ); // 17       
+        pos.push( this.ttPositions[32][2] );
+        
+        pos.push( this.ttPositions[34][0] );
+        pos.push( this.ttPositions[34][1] ); // 18       
+        pos.push( this.ttPositions[34][2] );
+        
+        pos.push( this.ttPositions[11][0] );
+        pos.push( this.ttPositions[11][1] ); // 19   
+        pos.push( this.ttPositions[11][2] );   
+ 
+        faces.push( 16, 19, 17, 17, 19, 18 ); 
+
+        pos.push( this.ttPositions[36][0] );
+        pos.push( this.ttPositions[36][1] ); // 20       
+        pos.push( this.ttPositions[36][2] );
+
+        pos.push( this.ttPositions[23][0] );
+        pos.push( this.ttPositions[23][1] ); // 21       
+        pos.push( this.ttPositions[23][2] );
+        
+        pos.push( this.ttPositions[20][0] );
+        pos.push( this.ttPositions[20][1] ); // 22       
+        pos.push( this.ttPositions[20][2] );
+        
+        pos.push( this.ttPositions[38][0] );
+        pos.push( this.ttPositions[38][1] ); // 23   
+        pos.push( this.ttPositions[38][2] );   
+ 
+        faces.push( 20, 23, 21, 21, 23, 22 ); 
+
+        pos.push( this.ttPositions[40][0] );
+        pos.push( this.ttPositions[40][1] ); // 24       
+        pos.push( this.ttPositions[40][2] );
+
+        pos.push( this.ttPositions[17][0] );
+        pos.push( this.ttPositions[17][1] ); // 25       
+        pos.push( this.ttPositions[17][2] );
+        
+        pos.push( this.ttPositions[14][0] );
+        pos.push( this.ttPositions[14][1] ); // 26       
+        pos.push( this.ttPositions[14][2] );
+        
+        pos.push( this.ttPositions[42][0] );
+        pos.push( this.ttPositions[42][1] ); // 27   
+        pos.push( this.ttPositions[42][2] );   
+ 
+        faces.push( 24, 27, 25, 25, 27, 26 );
+
+        pos.push( this.ttPositions[29][0] );
+        pos.push( this.ttPositions[29][1] ); // 28       
+        pos.push( this.ttPositions[29][2] );
+
+        pos.push( this.ttPositions[46][0] );
+        pos.push( this.ttPositions[46][1] ); // 29       
+        pos.push( this.ttPositions[46][2] );
+        
+        pos.push( this.ttPositions[44][0] );
+        pos.push( this.ttPositions[44][1] ); // 30       
+        pos.push( this.ttPositions[44][2] );
+        
+        pos.push( this.ttPositions[26][0] );
+        pos.push( this.ttPositions[26][1] ); // 31   
+        pos.push( this.ttPositions[26][2] );   
+ 
+        faces.push( 28, 31, 29, 29, 31, 30 );
+        
+        var surface = {
+          "extends": "http://vwf.example.com/node3.vwf",
+          "type": "definition/mesh",
+          "properties": { 
+            "meshDefinition": { positions: pos, faces: faces, color: [ 255, 255, 255 ], },
+          },
+          "scripts": [ "this.pointerDown=this.events.add(function(pointerInfo,pickInfo){ "+
+                         "this.parent.editMode='rotate'; "+
+                         "this.parent.axis=[0,1,0]; "+
+                         "return false; "+
+                       "}, this ); //@ sourceURL=yRotate" ],
+        };        
+        
+        vwf.createNode( this.id, surface, "yRotate", undefined );
+      }    
+    }
+
+      // rotate Z yPos 12,13,16,15
+      // rotate Z yNeg 10,9,18,19
+      // rotate Z yPos 24,25,28,27
+      // rotate Z yNeg 22,21,30,31
+      // rotate Z xPos 16,48,49,13
+      // rotate Z xNeg 28,51,50,25     
+      // rotate Z xPos 52,19,10,53
+      // rotate Z xNeg 22,54,55,31    
+    
+    this.createZRotate = function() {
+      if ( this.ttPoints ) {
+        var pos = [];
+        var faces;
+        pos.push( this.ttPositions[12][0] );
+        pos.push( this.ttPositions[12][1] ); // 0       
+        pos.push( this.ttPositions[12][2] );
+
+        pos.push( this.ttPositions[13][0] );
+        pos.push( this.ttPositions[13][1] ); // 1       
+        pos.push( this.ttPositions[13][2] );
+        
+        pos.push( this.ttPositions[16][0] );
+        pos.push( this.ttPositions[16][1] ); // 2       
+        pos.push( this.ttPositions[16][2] );
+        
+        pos.push( this.ttPositions[15][0] );
+        pos.push( this.ttPositions[15][1] ); // 3   
+        pos.push( this.ttPositions[15][2] ); 
+        
+        faces = [ 0, 3, 1, 1, 3, 2 ];
+        
+        pos.push( this.ttPositions[10][0] );
+        pos.push( this.ttPositions[10][1] ); // 4       
+        pos.push( this.ttPositions[10][2] );
+
+        pos.push( this.ttPositions[9][0] );
+        pos.push( this.ttPositions[9][1] ); // 5       
+        pos.push( this.ttPositions[9][2] );
+        
+        pos.push( this.ttPositions[18][0] );
+        pos.push( this.ttPositions[18][1] ); // 6       
+        pos.push( this.ttPositions[18][2] );
+        
+        pos.push( this.ttPositions[19][0] );
+        pos.push( this.ttPositions[19][1] ); // 7   
+        pos.push( this.ttPositions[19][2] );   
+ 
+        faces.push( 4, 7, 5, 5, 7, 6 );
+        
+        pos.push( this.ttPositions[24][0] );
+        pos.push( this.ttPositions[24][1] ); // 8       
+        pos.push( this.ttPositions[24][2] );
+
+        pos.push( this.ttPositions[25][0] );
+        pos.push( this.ttPositions[25][1] ); // 9       
+        pos.push( this.ttPositions[25][2] );
+        
+        pos.push( this.ttPositions[28][0] );
+        pos.push( this.ttPositions[28][1] ); // 10       
+        pos.push( this.ttPositions[28][2] );
+        
+        pos.push( this.ttPositions[27][0] );
+        pos.push( this.ttPositions[27][1] ); // 11   
+        pos.push( this.ttPositions[27][2] );   
+ 
+        faces.push( 8, 11, 9, 9, 11, 10 );        
+
+        pos.push( this.ttPositions[22][0] );
+        pos.push( this.ttPositions[22][1] ); // 12       
+        pos.push( this.ttPositions[22][2] );
+
+        pos.push( this.ttPositions[21][0] );
+        pos.push( this.ttPositions[21][1] ); // 13       
+        pos.push( this.ttPositions[21][2] );
+        
+        pos.push( this.ttPositions[30][0] );
+        pos.push( this.ttPositions[30][1] ); // 14       
+        pos.push( this.ttPositions[30][2] );
+        
+        pos.push( this.ttPositions[31][0] );
+        pos.push( this.ttPositions[31][1] ); // 15   
+        pos.push( this.ttPositions[31][2] );   
+ 
+        faces.push( 12, 15, 13, 13, 15, 14 );
+ 
+        pos.push( this.ttPositions[16][0] );
+        pos.push( this.ttPositions[16][1] ); // 16       
+        pos.push( this.ttPositions[16][2] );
+
+        pos.push( this.ttPositions[48][0] );
+        pos.push( this.ttPositions[48][1] ); // 17       
+        pos.push( this.ttPositions[48][2] );
+        
+        pos.push( this.ttPositions[49][0] );
+        pos.push( this.ttPositions[49][1] ); // 18       
+        pos.push( this.ttPositions[49][2] );
+        
+        pos.push( this.ttPositions[13][0] );
+        pos.push( this.ttPositions[13][1] ); // 19   
+        pos.push( this.ttPositions[13][2] );   
+ 
+        faces.push( 16, 19, 17, 17, 19, 18 ); 
+
+        pos.push( this.ttPositions[28][0] );
+        pos.push( this.ttPositions[28][1] ); // 20       
+        pos.push( this.ttPositions[28][2] );
+
+        pos.push( this.ttPositions[51][0] );
+        pos.push( this.ttPositions[51][1] ); // 21       
+        pos.push( this.ttPositions[51][2] );
+        
+        pos.push( this.ttPositions[50][0] );
+        pos.push( this.ttPositions[50][1] ); // 22       
+        pos.push( this.ttPositions[50][2] );
+        
+        pos.push( this.ttPositions[25][0] );
+        pos.push( this.ttPositions[25][1] ); // 23   
+        pos.push( this.ttPositions[25][2] );   
+ 
+        faces.push( 20, 23, 21, 21, 23, 22 ); 
+
+        pos.push( this.ttPositions[52][0] );
+        pos.push( this.ttPositions[52][1] ); // 24       
+        pos.push( this.ttPositions[52][2] );
+
+        pos.push( this.ttPositions[19][0] );
+        pos.push( this.ttPositions[19][1] ); // 25       
+        pos.push( this.ttPositions[19][2] );
+        
+        pos.push( this.ttPositions[10][0] );
+        pos.push( this.ttPositions[10][1] ); // 26       
+        pos.push( this.ttPositions[10][2] );
+        
+        pos.push( this.ttPositions[53][0] );
+        pos.push( this.ttPositions[53][1] ); // 27   
+        pos.push( this.ttPositions[53][2] );   
+ 
+        faces.push( 24, 27, 25, 25, 27, 26 );
+
+        pos.push( this.ttPositions[22][0] );
+        pos.push( this.ttPositions[22][1] ); // 28       
+        pos.push( this.ttPositions[22][2] );
+
+        pos.push( this.ttPositions[54][0] );
+        pos.push( this.ttPositions[54][1] ); // 29       
+        pos.push( this.ttPositions[54][2] );
+        
+        pos.push( this.ttPositions[55][0] );
+        pos.push( this.ttPositions[55][1] ); // 30       
+        pos.push( this.ttPositions[55][2] );
+        
+        pos.push( this.ttPositions[31][0] );
+        pos.push( this.ttPositions[31][1] ); // 31   
+        pos.push( this.ttPositions[31][2] );   
+ 
+        faces.push( 28, 31, 29, 29, 31, 30 );
+        
+        var surface = {
+          "extends": "http://vwf.example.com/node3.vwf",
+          "type": "definition/mesh",
+          "properties": { 
+            "meshDefinition": { positions: pos, faces: faces, color: [ 255, 255, 255 ], },
+          },
+          "scripts": [ "this.pointerDown=this.events.add(function(pointerInfo,pickInfo){ "+
+                         "this.parent.editMode='rotate'; "+
+                         "this.parent.axis=[0,0,1]; "+
+                         "return false; "+
+                       "}, this ); //@ sourceURL=zRotate" ],
+        };          
+        vwf.createNode( this.id, surface, "zRotate", undefined );
+      }     
+    } //@ sourceURL=transformTool.vwf  
+
+ 
