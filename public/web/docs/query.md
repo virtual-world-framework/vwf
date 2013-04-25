@@ -67,7 +67,7 @@ The driver-level syntax is very similar, with three exceptions:
 
 For example:
 
-	var matchedIds = vwf_view.find( parentNodeId, "/radio/bone1/MaxScene/Radio" );
-	var nodeExists = vwf_view.test( nodeId, "/*" );
+	var matchedIds = vwf_view.kernel.find( parentNodeId, "/radio/bone1/MaxScene/Radio" );
+	var nodeExists = vwf_view.kernel.test( nodeId, "/*" );
 
 -------------------
