@@ -29,6 +29,7 @@ end
 group :test do
   gem "minitest"
   gem "rack-test", :require => "rack/test"
+  gem "phantomjs"
 end
 
 group :build do
