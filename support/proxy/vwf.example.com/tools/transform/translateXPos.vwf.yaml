@@ -29,7 +29,7 @@ scripts:
   this.pointerDown = function( pointerInfo, pickInfo ){
     console.info( 'pointerDown translateXPos' );
     this.parent.editMode='translate';
-    this.parent.the=[1,0,0];
+    this.parent.axis=[1,0,0];
     return false;
   }
   // } )

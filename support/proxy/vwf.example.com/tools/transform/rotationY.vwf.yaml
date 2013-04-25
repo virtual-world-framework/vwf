@@ -24,7 +24,7 @@ scripts:
   this.pointerDown = function( pointerInfo, pickInfo ){
     console.info( 'pointerDown rotationY' );
     this.parent.editMode='rotate';
-    this.parent.the=[0,1,0];
+    this.parent.axis=[0,1,0];
     return false;
   }
   // } )

@@ -28,7 +28,7 @@ scripts:
   this.pointerDown = this.events.add( function( pointerInfo, pickInfo ){
     console.info( 'pointerDown translateZNeg' );
     this.parent.editMode='translate';
-    this.parent.the=[0,0,1];
+    this.parent.axis=[0,0,1];
     return false;
   } )
   this.createGeometry = function() {
