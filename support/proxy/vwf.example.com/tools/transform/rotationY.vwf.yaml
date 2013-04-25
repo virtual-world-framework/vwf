@@ -1,0 +1,190 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: http://vwf.example.com/node3.vwf
+methods:
+  createGeometry:
+scripts:
+- |
+  this.initialize = function() {
+    console.info( "initialize rotationY.vwf" );
+  }
+  //this.pointerDown = this.events.add( function( pointerInfo, pickInfo ){
+  this.pointerDown = function( pointerInfo, pickInfo ){
+    console.info( 'pointerDown rotationY' );
+    this.parent.editMode='rotate';
+    this.parent.the=[0,1,0];
+    return false;
+  }
+  // } )
+  this.createGeometry = function() {
+    if ( this.parent.ttPoints ) {
+      var pos = [];
+      var faces;
+      pos.push( this.parent.ttPositions[9][0] );
+      pos.push( this.parent.ttPositions[9][1] ); // 0       
+      pos.push( this.parent.ttPositions[9][2] );
+
+      pos.push( this.parent.ttPositions[8][0] );
+      pos.push( this.parent.ttPositions[8][1] ); // 1       
+      pos.push( this.parent.ttPositions[8][2] );
+      
+      pos.push( this.parent.ttPositions[11][0] );
+      pos.push( this.parent.ttPositions[11][1] ); // 2       
+      pos.push( this.parent.ttPositions[11][2] );
+      
+      pos.push( this.parent.ttPositions[12][0] );
+      pos.push( this.parent.ttPositions[12][1] ); // 3   
+      pos.push( this.parent.ttPositions[12][2] ); 
+      
+      faces = [ 0, 3, 1, 1, 3, 2 ];
+      
+      pos.push( this.parent.ttPositions[17][0] );
+      pos.push( this.parent.ttPositions[17][1] ); // 4       
+      pos.push( this.parent.ttPositions[17][2] );
+
+      pos.push( this.parent.ttPositions[18][0] );
+      pos.push( this.parent.ttPositions[18][1] ); // 5       
+      pos.push( this.parent.ttPositions[18][2] );
+      
+      pos.push( this.parent.ttPositions[15][0] );
+      pos.push( this.parent.ttPositions[15][1] ); // 6       
+      pos.push( this.parent.ttPositions[15][2] );
+      
+      pos.push( this.parent.ttPositions[14][0] );
+      pos.push( this.parent.ttPositions[14][1] ); // 7   
+      pos.push( this.parent.ttPositions[14][2] );   
+
+      faces.push( 4, 7, 5, 5, 7, 6 );
+      
+      pos.push( this.parent.ttPositions[20][0] );
+      pos.push( this.parent.ttPositions[20][1] ); // 8       
+      pos.push( this.parent.ttPositions[20][2] );
+
+      pos.push( this.parent.ttPositions[21][0] );
+      pos.push( this.parent.ttPositions[21][1] ); // 9       
+      pos.push( this.parent.ttPositions[21][2] );
+      
+      pos.push( this.parent.ttPositions[24][0] );
+      pos.push( this.parent.ttPositions[24][1] ); // 10       
+      pos.push( this.parent.ttPositions[24][2] );
+      
+      pos.push( this.parent.ttPositions[23][0] );
+      pos.push( this.parent.ttPositions[23][1] ); // 11   
+      pos.push( this.parent.ttPositions[23][2] );   
+
+      faces.push( 8, 11, 9, 9, 11, 10 );        
+
+      pos.push( this.parent.ttPositions[30][0] );
+      pos.push( this.parent.ttPositions[30][1] ); // 12       
+      pos.push( this.parent.ttPositions[30][2] );
+
+      pos.push( this.parent.ttPositions[27][0] );
+      pos.push( this.parent.ttPositions[27][1] ); // 13       
+      pos.push( this.parent.ttPositions[27][2] );
+      
+      pos.push( this.parent.ttPositions[26][0] );
+      pos.push( this.parent.ttPositions[26][1] ); // 14       
+      pos.push( this.parent.ttPositions[26][2] );
+      
+      pos.push( this.parent.ttPositions[29][0] );
+      pos.push( this.parent.ttPositions[29][1] ); // 15   
+      pos.push( this.parent.ttPositions[29][2] );   
+
+      faces.push( 12, 15, 13, 13, 15, 14 );
+
+      pos.push( this.parent.ttPositions[8][0] );
+      pos.push( this.parent.ttPositions[8][1] ); // 16       
+      pos.push( this.parent.ttPositions[8][2] );
+
+      pos.push( this.parent.ttPositions[32][0] );
+      pos.push( this.parent.ttPositions[32][1] ); // 17       
+      pos.push( this.parent.ttPositions[32][2] );
+      
+      pos.push( this.parent.ttPositions[34][0] );
+      pos.push( this.parent.ttPositions[34][1] ); // 18       
+      pos.push( this.parent.ttPositions[34][2] );
+      
+      pos.push( this.parent.ttPositions[11][0] );
+      pos.push( this.parent.ttPositions[11][1] ); // 19   
+      pos.push( this.parent.ttPositions[11][2] );   
+
+      faces.push( 16, 19, 17, 17, 19, 18 ); 
+
+      pos.push( this.parent.ttPositions[36][0] );
+      pos.push( this.parent.ttPositions[36][1] ); // 20       
+      pos.push( this.parent.ttPositions[36][2] );
+
+      pos.push( this.parent.ttPositions[23][0] );
+      pos.push( this.parent.ttPositions[23][1] ); // 21       
+      pos.push( this.parent.ttPositions[23][2] );
+      
+      pos.push( this.parent.ttPositions[20][0] );
+      pos.push( this.parent.ttPositions[20][1] ); // 22       
+      pos.push( this.parent.ttPositions[20][2] );
+      
+      pos.push( this.parent.ttPositions[38][0] );
+      pos.push( this.parent.ttPositions[38][1] ); // 23   
+      pos.push( this.parent.ttPositions[38][2] );   
+
+      faces.push( 20, 23, 21, 21, 23, 22 ); 
+
+      pos.push( this.parent.ttPositions[40][0] );
+      pos.push( this.parent.ttPositions[40][1] ); // 24       
+      pos.push( this.parent.ttPositions[40][2] );
+
+      pos.push( this.parent.ttPositions[17][0] );
+      pos.push( this.parent.ttPositions[17][1] ); // 25       
+      pos.push( this.parent.ttPositions[17][2] );
+      
+      pos.push( this.parent.ttPositions[14][0] );
+      pos.push( this.parent.ttPositions[14][1] ); // 26       
+      pos.push( this.parent.ttPositions[14][2] );
+      
+      pos.push( this.parent.ttPositions[42][0] );
+      pos.push( this.parent.ttPositions[42][1] ); // 27   
+      pos.push( this.parent.ttPositions[42][2] );   
+
+      faces.push( 24, 27, 25, 25, 27, 26 );
+
+      pos.push( this.parent.ttPositions[29][0] );
+      pos.push( this.parent.ttPositions[29][1] ); // 28       
+      pos.push( this.parent.ttPositions[29][2] );
+
+      pos.push( this.parent.ttPositions[46][0] );
+      pos.push( this.parent.ttPositions[46][1] ); // 29       
+      pos.push( this.parent.ttPositions[46][2] );
+      
+      pos.push( this.parent.ttPositions[44][0] );
+      pos.push( this.parent.ttPositions[44][1] ); // 30       
+      pos.push( this.parent.ttPositions[44][2] );
+      
+      pos.push( this.parent.ttPositions[26][0] );
+      pos.push( this.parent.ttPositions[26][1] ); // 31   
+      pos.push( this.parent.ttPositions[26][2] );   
+
+      faces.push( 28, 31, 29, 29, 31, 30 );
+    
+      
+      var surface = {
+        "extends": "http://vwf.example.com/node3.vwf",
+        "type": "definition/mesh",
+        "properties": { 
+          "meshDefinition": { "positions": pos, "faces": faces, "color": [ 0, 255, 0 ], },
+        },
+      };
+      
+      this.children.create( "rotateY", surface );
+    }    
+  } //@ sourceURL=rotationY.vwf
