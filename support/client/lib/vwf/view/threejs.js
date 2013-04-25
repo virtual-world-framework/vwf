@@ -19,6 +19,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     return view.load( module, {
 
         initialize: function( options ) {
+            
+            checkCompatibility.call(this);
 
             this.pickInterval = 10;
 
@@ -93,6 +95,24 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     
     } );
     // private ===============================================================================
+        function checkCompatibility() {
+            this.compatibilityStatus = { compatible:true, errors:{} }
+            var contextNames = ["webgl","experimental-webgl","moz-webgl","webkit-3d"];
+            for(var i = 0; i < contextNames.length; i++){
+                try{
+                    var canvas = document.createElement('canvas');
+                    var gl = canvas.getContext(contextNames[i]);
+                    if(gl){
+                        return true;
+                    }
+                }
+                catch(e){}
+            }
+            this.compatibilityStatus.compatible = false;
+            this.compatibilityStatus.errors["WGL"] = "This browser is not compatible. The vwf/view/threejs driver requires WebGL.";
+            return false;
+        }
+
         function initScene( sceneNode ) {
     
         var self = this;

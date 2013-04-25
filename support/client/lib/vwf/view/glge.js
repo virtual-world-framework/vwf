@@ -24,6 +24,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         initialize: function( options ) {
             if (!vwf) return;
             
+            checkCompatibility.call(this);
+
             this.pickInterval = 10;
             
             if(typeof options == "object") {
@@ -204,6 +206,25 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     } );
 
     // GLGE private functions
+    // -- checkCompatibility -------------------------------------------------------------
+    function checkCompatibility() {
+        this.compatibilityStatus = { compatible:true, errors:{} }
+        var contextNames = ["webgl","experimental-webgl","moz-webgl","webkit-3d"];
+        for(var i = 0; i < contextNames.length; i++){
+            try{
+                var canvas = document.createElement('canvas');
+                var gl = canvas.getContext(contextNames[i]);
+                if(gl){
+                    return true;
+                }
+            }
+            catch(e){}
+        }
+        this.compatibilityStatus.compatible = false;
+        this.compatibilityStatus.errors["WGL"] = "This browser is not compatible. The vwf/view/threejs driver requires WebGL.";
+        return false;
+    }
+
     // -- initScene ------------------------------------------------------------------------
     function initScene( sceneNode ) {
     

@@ -55,6 +55,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         initialize: function() {
             
+            checkCompatibility.call(this);
+
             this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
             this.state.prototypes = {}; 
@@ -1282,6 +1284,25 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
     } );
     // == PRIVATE  ========================================================================================
+    
+    function checkCompatibility() {
+        this.compatibilityStatus = { compatible:true, errors:{} }
+        var contextNames = ["webgl","experimental-webgl","moz-webgl","webkit-3d"];
+        for(var i = 0; i < contextNames.length; i++){
+            try{
+                var canvas = document.createElement('canvas');
+                var gl = canvas.getContext(contextNames[i]);
+                if(gl){
+                    return true;
+                }
+            }
+            catch(e){}
+        }
+        this.compatibilityStatus.compatible = false;
+        this.compatibilityStatus.errors["WGL"] = "This browser is not compatible. The vwf/view/threejs driver requires WebGL.";
+        return false;
+    }
+
     function getPrototypes( kernel, extendsID ) {
         var prototypes = [];
         var id = extendsID;

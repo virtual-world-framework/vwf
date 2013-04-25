@@ -237,6 +237,8 @@
 
             var userLibraries = args.shift() || {};
 
+            var callback = args.shift();
+
             var requireConfig = {
                 shim: {
                     "vwf/model/threejs/three": {
@@ -357,20 +359,22 @@
                 Object.keys(userLibraries).forEach(function(libraryType) {
                     if(initializers[libraryType]) {
                         Object.keys(userLibraries[libraryType]).forEach(function(libraryName) {
-                            requireArray[libraryName].active = true;
-                            initializers[libraryType][libraryName].active = true;
-                            if(userLibraries[libraryType][libraryName] && userLibraries[libraryType][libraryName] != "") {
-                                if(typeof initializers[libraryType][libraryName].parameters == "object") {
-                                    initializers[libraryType][libraryName].parameters = $.extend({}, initializers[libraryType][libraryName].parameters,
-                                        userLibraries[libraryType][libraryName]);
+                            if(requireArray[libraryName]) {
+                                requireArray[libraryName].active = true;
+                                initializers[libraryType][libraryName].active = true;
+                                if(userLibraries[libraryType][libraryName] && userLibraries[libraryType][libraryName] != "") {
+                                    if(typeof initializers[libraryType][libraryName].parameters == "object") {
+                                        initializers[libraryType][libraryName].parameters = $.extend({}, initializers[libraryType][libraryName].parameters,
+                                            userLibraries[libraryType][libraryName]);
+                                    }
+                                    else {
+                                        initializers[libraryType][libraryName].parameters = userLibraries[libraryType][libraryName];
+                                    }
                                 }
-                                else {
-                                    initializers[libraryType][libraryName].parameters = userLibraries[libraryType][libraryName];
-                                }
-                            }
-                            if(requireArray[libraryName].linkedLibraries) {
-                                for(var i=0; i<requireArray[libraryName].linkedLibraries.length; i++) {
-                                    requireArray[requireArray[libraryName].linkedLibraries[i]].active = true;
+                                if(requireArray[libraryName].linkedLibraries) {
+                                    for(var i=0; i<requireArray[libraryName].linkedLibraries.length; i++) {
+                                        requireArray[requireArray[libraryName].linkedLibraries[i]].active = true;
+                                    }
                                 }
                             }
                         });
@@ -395,7 +399,7 @@
                         // accepts three parameters: a world specification, model configuration parameters,
                         // and view configuration parameters.
 
-                        vwf.initialize(application, getActiveLibraries(initializers["model"], true), getActiveLibraries(initializers["view"], true));
+                        vwf.initialize(application, getActiveLibraries(initializers["model"], true), getActiveLibraries(initializers["view"], true), callback);
 
                     } );
 
@@ -466,6 +470,9 @@
 
             var viewInitializers = args.shift() || [];
 
+            var callback = args.shift();
+            var compatibilityStatus = { compatible: true, errors: {} };
+
             // Create the model interface to the kernel. Models can make direct calls that execute
             // immediately or future calls that are placed on the queue and executed when removed.
 
@@ -501,15 +508,22 @@
                         this.models.push( model );
                         this.models[modelName] = model; // also index by id  // TODO: this won't work if multiple model instances are allowed
 
-if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
-    this.models.javascript = model;
-    while ( this.models.javascript.model ) this.models.javascript = this.models.javascript.model;
-}
+                        if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
+                            this.models.javascript = model;
+                            while ( this.models.javascript.model ) this.models.javascript = this.models.javascript.model;
+                        }
 
-if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf-model-object
-    this.models.object = model;
-    while ( this.models.object.model ) this.models.object = this.models.object.model;
-}
+                        if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf-model-object
+                            this.models.object = model;
+                            while ( this.models.object.model ) this.models.object = this.models.object.model;
+                        }
+                        
+                        if(model.model.compatibilityStatus) {
+                            if(!model.model.compatibilityStatus.compatible) {
+                                compatibilityStatus.compatible = false;
+                                $.extend(compatibilityStatus.errors, model.model.compatibilityStatus.errors);
+                            }
+                        }
                     }
 
                 }
@@ -551,6 +565,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                             view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
                             this.views.push( instance );
                             this.views[viewName] = instance; // also index by id  // TODO: this won't work if multiple view instances are allowed
+
+                            if(view.compatibilityStatus) {
+                                if(!view.compatibilityStatus.compatible) {
+                                    compatibilityStatus.compatible = false;
+                                    $.extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
+                                }
+                            }
                         }
 
                     } else { // new way
@@ -567,6 +588,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         if ( view ) {
                             this.views.push( view );
                             this.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
+
+                            if(view.compatibilityStatus) {
+                                if(!view.compatibilityStatus.compatible) {
+                                    compatibilityStatus.compatible = false;
+                                    $.extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
+                                }
+                            }
                         }
 
                     }
@@ -574,6 +602,23 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 }
 
             }, this );
+
+            // Test for ECMAScript 5
+            if(!(function() { return !this })()) {
+                compatibilityStatus.compatible = false;
+                $.extend(compatibilityStatus.errors, {"ES5": "This browser is not compatible. VWF requires ECMAScript 5."});
+            }
+
+            // Test for WebSockets
+            if( !io.Transport.websocket.check() )
+            {
+                compatibilityStatus.compatible = false;
+                $.extend(compatibilityStatus.errors, {"WS": "This browser is not compatible. VWF requires WebSockets."});
+            }
+
+            if(callback) {
+                callback(compatibilityStatus);
+            }
 
             // Load the application.
 
