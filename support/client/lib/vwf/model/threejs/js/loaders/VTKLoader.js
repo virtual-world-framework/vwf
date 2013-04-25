@@ -4,7 +4,7 @@
 
 THREE.VTKLoader = function () {
 
-	THREE.EventTarget.call( this );
+	THREE.EventDispatcher.call( this );
 
 };
 
@@ -12,14 +12,18 @@ THREE.VTKLoader.prototype = {
 
 	constructor: THREE.VTKLoader,
 
-	load: function ( url ) {
+	load: function ( url, callback ) {
 
 		var scope = this;
 		var request = new XMLHttpRequest();
 
 		request.addEventListener( 'load', function ( event ) {
 
-			scope.dispatchEvent( { type: 'load', content: scope.parse( event.target.responseText ) } );
+			var geometry = scope.parse( event.target.responseText );
+
+			scope.dispatchEvent( { type: 'load', content: geometry } );
+
+			if ( callback ) callback( geometry );
 
 		}, false );
 
