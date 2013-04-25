@@ -332,7 +332,7 @@
                         }
                         Object.keys(configLibraries[libraryType]).forEach(function(libraryName) {
                             var disabled = false;
-                            if(requireArray[libraryName].disabledBy) {
+                            if(requireArray[libraryName] && requireArray[libraryName].disabledBy) {
                                 for(var i=0; i<requireArray[libraryName].disabledBy.length; i++) {
                                     Object.keys(userLibraries).forEach(function(userLibraryType) {
                                         Object.keys(userLibraries[userLibraryType]).forEach(function(userLibraryName) {
