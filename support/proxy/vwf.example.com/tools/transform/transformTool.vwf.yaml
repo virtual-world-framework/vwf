@@ -124,34 +124,34 @@ scripts:
       var path = "http://vwf.example.com/tools/transform/";
       if ( this.ttPoints ){
         // translate xPos 9,18,15,12
-        this.children.create( "transXPos", { "includes": path + "translateXPos.vwf" }, function( child) {
-          child.createGeometry();
-        } );
+        //this.children.create( "transXPos", { "includes": path + "translateXPos.vwf" }, function( child) {
+        //  child.createGeometry();
+        //} );
 
         // translate xNeg 21,24,27,30
-        this.children.create( "transXNeg", { "includes": path + "translateXNeg.vwf" }, function( child) {
-          child.createGeometry();
-        } );
+        //this.children.create( "transXNeg", { "includes": path + "translateXNeg.vwf" }, function( child) {
+        //  child.createGeometry();
+        //} );
 
         // translate yPos 48,49,50,51
-        this.children.create( "transYPos", { "includes": path + "translateYPos.vwf" }, function( child) {
-          child.createGeometry();
-        } );
+        //this.children.create( "transYPos", { "includes": path + "translateYPos.vwf" }, function( child) {
+        //  child.createGeometry();
+        //} );
 
         // translate yNeg 52,53,54,55
-        this.children.create( "transYNeg", { "includes": path + "translateYNeg.vwf" }, function( child) {
-          child.createGeometry();
-        } );
+        //this.children.create( "transYNeg", { "includes": path + "translateYNeg.vwf" }, function( child) {
+        //  child.createGeometry();
+        //} );
 
         // translate zPos 32,34,36,38
-        this.children.create( "transZPos", { "includes": path + "translateZPos.vwf" }, function( child) {
-          child.createGeometry();
-        } );
+        //this.children.create( "transZPos", { "includes": path + "translateZPos.vwf" }, function( child) {
+        //  child.createGeometry();
+        //} );
 
         // translate zNeg 40,46,44,42
-        this.children.create( "transZNeg", { "includes": path + "translateZNeg.vwf" }, function( child) {
-          child.createGeometry();
-        } );
+        //this.children.create( "transZNeg", { "includes": path + "translateZNeg.vwf" }, function( child) {
+        //  child.createGeometry();
+        //} );
         
         // rotate X yPos 34,35,37,36
         // rotate X yNeg 33,32,38,39    
@@ -189,7 +189,12 @@ scripts:
         // this.createZRotate();
         this.children.create( "rotZ", { "includes": path + "rotationZ.vwf" }, function( child) {
           child.createGeometry();
-        } ); 
+        } );
+
+        this.children.create( "scaler", { "includes": path + "scaleXYZ.vwf" }, function( child) {
+          child.createGeometry();
+        } );
+
       }
     }
     this.createPointList = function( dX, dY, dZ ) {
