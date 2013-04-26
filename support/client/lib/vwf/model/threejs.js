@@ -440,11 +440,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
-
             if ( this.debug.properties ) {
                 this.logger.infox( "C === creatingProperty ", nodeID, propertyName, propertyValue );
             }
-
             return this.initializingProperty( nodeID, propertyName, propertyValue );
         },
 
@@ -453,7 +451,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var value = undefined;
-            //console.info( "initializingProperty( " + nodeID+", "+propertyName+", "+propertyValue + " )" );
 
             if ( this.debug.properties ) {
                 this.logger.infox( "  I === initializingProperty ", nodeID, propertyName, propertyValue );
@@ -467,6 +464,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         case "meshDefinition":
                             createMesh.call( this, node, propertyValue, true );
                             value = propertyValue; 
+                            break;
+                        case "texture":
+                            // delay the setting of the texture until the actual
+                            // settingProperty call
                             break;
                         default:
                             value = this.settingProperty( nodeID, propertyName, propertyValue );                  

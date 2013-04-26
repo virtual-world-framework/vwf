@@ -434,6 +434,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Note: this is a costly operation and should be optimized if possible
             if ( ( now - lastPickTime ) > self.pickInterval && !self.disableInputs )
             {
+                sceneNode.frameCount = 0;
+            
                 var newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
                 
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
@@ -2082,7 +2084,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         this.raycaster.set(pos, pickDirectionVector);
         var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
-        
+        var target = undefined;
+
         // intersections are, by default, ordered by distance,
         // so we only care for the first (visible) one. The intersection
         // object holds the intersection point, the face that's
@@ -2090,12 +2093,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // face belongs. We only care for the object itself.
 
         // Cycle through the list of intersected objects and return the first visible one
-        for ( var i = 0; i < intersects.length; i++ ) {
+        for ( var i = 0; i < intersects.length && target === undefined; i++ ) {
+            if ( debug ) {
+                for ( var i = 0; i < intersects.length; i++ ) { 
+                    console.info( i + ". " + intersects[i].object.name ) 
+                }
+            }   
+
             if ( intersects[ i ].object.visible ) {
-                return intersects[ i ];
+                target = intersects[ i ];
             }
         }
-        return null;
+        return target;
     }
     function getPickObjectID(threeObject)
     {   
