@@ -369,6 +369,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
+            return this.initializingProperty( nodeID, propertyName, propertyValue );
         },
 
         // -- initializingProperty -----------------------------------------------------------------
@@ -376,7 +377,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var value = undefined;
-            //console.log(["initializingProperty: ",nodeID,propertyName,propertyValue]);
+            //console.info( "initializingProperty( " + nodeID+", "+propertyName+", "+propertyValue + " )" );
 
             if ( propertyValue !== undefined ) {
                 var node = this.state.nodes[ nodeID ];
@@ -384,7 +385,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 if ( node !== undefined ) {
                     switch ( propertyName ) {
                         case "meshDefinition":
-                            createMesh.call( this, node, propertyValue );
+                            createMesh.call( this, node, propertyValue, true );
+                            value = propertyValue; 
                             break;
                         case "texture":
                             // delay the setting of the texture until the actual
@@ -405,7 +407,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
-            //console.log(["settingProperty: ",nodeID,propertyName,propertyValue]);
+            //console.info( "settingProperty( " + nodeID+", "+propertyName+", "+propertyValue + " )" );
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             if( node === undefined ) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
@@ -1641,21 +1643,38 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
         }
     }
-    function createMesh( node, meshDef ) {
+    function createMesh( node, meshDef, doubleSided ) {
         if ( node.threeObject && node.threeObject instanceof THREE.Object3D ) {
             var i, face;
+            var pts = meshDef.positions.length / 3;
             var geo = new THREE.Geometry();
-            var mat = new THREE.MeshBasicMaterial( { color: meshDef.color ? meshDef.color : 0xffffff } )
+            var vwfColor, colorHex = 0xFFFFFF;    
+            if ( meshDef.color !== undefined ) {
+                vwfColor = new utility.color( meshDef.color );
+                if ( vwfColor ) {
+                    colorHex = vwfColor._decimal;
+                }
+            }
+            var mat = new THREE.MeshLambertMaterial( { "color": colorHex, "emissive": colorHex } )
 
-            for ( i = 0; geo.vertices && meshDef.positions && i < meshDef.positions.length; i++ ) {
+            for ( i = 0; geo.vertices && meshDef.positions && ((i*3) < meshDef.positions.length); i++ ) {
+                //console.info( "     adding vertices: [" + (meshDef.positions[i*3]) + ", " + (meshDef.positions[i*3+1]) + ", "+ (meshDef.positions[i*3+2]) + " ]" )
                 geo.vertices.push( new THREE.Vector3( meshDef.positions[i*3], meshDef.positions[i*3+1],meshDef.positions[i*3+2] ) );   
             }
             for ( i = 0; geo.faces && meshDef.faces && ( (i*3) < meshDef.faces.length ); i++ ) {
+                //console.info( "     adding face: [" + (meshDef.faces[i*3]) + ", " + (meshDef.faces[i*3+1]) + ", "+ (meshDef.faces[i*3+2]) + " ]" );
                 face = new THREE.Face3( meshDef.faces[i*3], meshDef.faces[i*3+1],meshDef.faces[i*3+2] );
-                geo.faces.push( face );   
+                geo.faces.push( face );
+                if ( doubleSided ) {
+                    //console.info( "     adding face: [" + (meshDef.faces[i*3+2]) + ", " + (meshDef.faces[i*3+1]) + ", "+ (meshDef.faces[i*3]) + " ]" );
+                    face = new THREE.Face3( meshDef.faces[i*3+2], meshDef.faces[i*3+1],meshDef.faces[i*3] );
+                    geo.faces.push( face );
+                }
             } 
+            // TODO: needed doubleSided support for normals
             for ( i = 0 ; geo.faces && meshDef.normals && i < geo.faces.length; i++ ) {
                 face = geo.faces[ i ];
+                //console.info( "     adding face normal: [" + (meshDef.normals[i*3]) + ", " + (meshDef.normals[i*3+1]) + ", "+ (meshDef.normals[i*3+2]) + " ]" );
                 face.vertexNormals.push( new THREE.Vector3( meshDef.normals[i*3], meshDef.normals[i*3+1],meshDef.normals[i*3+2] ) );   
             }
             for ( i = 0; geo.faceVertexUvs && meshDef.uv1 && i < meshDef.uv1.length; i++ ) {
