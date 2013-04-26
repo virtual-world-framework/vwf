@@ -610,7 +610,7 @@
             }
 
             // Test for WebSockets
-            if( !io.Transport.websocket.check() )
+            if( window.io && !io.Transport.websocket.check() )
             {
                 compatibilityStatus.compatible = false;
                 $.extend(compatibilityStatus.errors, {"WS": "This browser is not compatible. VWF requires WebSockets."});
