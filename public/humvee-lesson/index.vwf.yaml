@@ -27,7 +27,7 @@ children:
       translation: [ -500, 1000, 0 ]
       scale: [ 0.001, 0.001, 0.000001 ]
   humvee:
-    includes: humvee.vwf
+    includes: /humvee/humvee.vwf
   lesson:
     includes: lesson.vwf
   dir1:
