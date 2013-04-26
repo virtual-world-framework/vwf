@@ -513,8 +513,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                
                                 var up = new THREE.Vector3();
                                 up.set(0,0,1);
-                                lookatPosition.copy(lookatObject.matrix.getPosition());
-                                thisPosition.copy(thisMatrix.getPosition());
+                                lookatPosition.getPositionFromMatrix( lookatObject.matrix );
+                                thisPosition.getPositionFromMatrix( thisMatrix );
                                 
                                 if(thisPosition.distanceTo(lookatPosition) > 0)
 								{
@@ -530,7 +530,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             var up = new THREE.Vector();
                             up.set(0,0,1);
                             lookatPosition.set(propertyValue[0],propertyValue[1],propertyValue[2]);
-                            thisPosition.copy(threeObject.matrix.getPosition());
+                            thisPosition.getPositionFromMatrix( threeObject.matrix );
                             threeObject.matrix.lookAt(thisPosition,lookatPosition,up);
                             var flipmat = new THREE.Matrix4(-1, 0,0,0,
                                                         0, 1,0,0,

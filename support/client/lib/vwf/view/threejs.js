@@ -456,7 +456,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var camera = sceneView.state.cameraInUse;
             var worldCamPos, worldCamTrans, camInverse;
             if ( camera ) { 
-                worldCamTrans = camera.matrix.getPosition();
+                var worldCamTrans = new THREE.Vector3();
+                worldCamTrans.getPositionFromMatrix( camera.matrix );
+
+                // QUESTION: Is the double use of y a bug?  I would assume so, but then why not
+                //           just use worldCamTrans as-is?
                 worldCamPos = [ worldCamTrans.x, worldCamTrans.y, worldCamTrans.y];
             }
 
@@ -876,7 +880,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         
         var threeCam = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
-        if(!this.ray) this.ray = new THREE.Ray();
+        if(!this.raycaster) this.raycaster = new THREE.Raycaster();
         if(!this.projector) this.projector = new THREE.Projector();
         
         var SCREEN_HEIGHT = window.innerHeight;
@@ -895,13 +899,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         this.projector.unprojectVector(directionVector, threeCam);
         var pos = new THREE.Vector3();
-        pos.copy(threeCam.matrix.getPosition());
-        directionVector.subSelf(pos);
+        pos.getPositionFromMatrix( threeCam.matrix );
+        directionVector.sub(pos);
         directionVector.normalize();
         
         
-        this.ray.set(pos, directionVector);
-        var intersects = this.ray.intersectObjects(sceneNode.threeScene.children, true);
+        this.raycaster.set(pos, directionVector);
+        var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
         if (intersects.length) {
             // intersections are, by default, ordered by distance,
             // so we only care for the first one. The intersection
