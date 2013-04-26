@@ -13,7 +13,7 @@
 
 --- 
 extends: http://vwf.example.com/node3.vwf
-source: /radio/radio.dae
+source: /radio/radio.DAE
 type: model/vnd.collada+xml
 properties:
   translation: [ 0, 0, 0 ]
