@@ -13,7 +13,7 @@
 
 --- 
 extends: http://vwf.example.com/node3.vwf
-source: Radio.DAE
+source: /radio/radio.DAE
 type: model/vnd.collada+xml
 properties:
   translation: [ 0, 0, 0 ]
@@ -33,7 +33,7 @@ properties:
           this.menuMode = "channel";
         } else {
           this.volume = 0;
-          this.Radio.LCD.material.texture = "images/lcd.png";
+          this.Radio.LCD.material.texture = "/radio/images/lcd.png";
         } 
       } //@ sourceURL=radio.vwf.property.powerOn
     value: false
@@ -541,20 +541,20 @@ scripts:
 - |
     var radio = this;
     this.initialize = function() {
-      this.channelImages = ["images/LCD12_Chan1_Gon_Von.png", "images/LCD12_Chan2_Gon_Von.png", "images/LCD12_Chan3_Gon_Von.png",
-        "images/LCD12_Chan4_Gon_Von.png", "images/LCD12_Chan5_Gon_Von.png", "images/LCD12_Chan6_Gon_Von.png",
-        "images/LCD12_Chan7_Gon_Von.png", "images/LCD12_Chan8_Gon_Von.png", "images/LCD12_Chan9_Gon_Von.png",
-        "images/LCD12_Chan10_Gon_Von.png", "images/LCD12_Chan11_Gon_Von.png", "images/LCD12_Chan12_Gon_Von.png",
-        "images/LCD12_Chan13_Gon_Von.png", "images/LCD12_Chan14_Gon_Von.png", "images/LCD12_Chan15_Gon_Von.png",
-        "images/LCD12_Chan16_Gon_Von.png"];
-      this.backlightImages = ["images/LCD12_LIGT_AUTO_Gon_Von.png", "images/LCD12_LIGT_OFF_Gon_Von.png", "images/LCD12_LIGT_ON_Gon_Von.png"];
-      this.beepImages = ["images/LCD12_BEEP_ON_Gon_Von.png", "images/LCD12_BEEP_OFF_Gon_Von.png"];
-      this.squelchImages = ["images/LCD12_SQL20_Gon_Von.png", "images/LCD12_SQL30_Gon_Von.png", "images/LCD12_SQL40_Gon_Von.png",
-        "images/LCD12_SQL50_Gon_Von.png", "images/LCD12_SQL60_Gon_Von.png", "images/LCD12_SQL70_Gon_Von.png", 
-        "images/LCD12_SQL80_Gon_Von.png", "images/LCD12_SQL90_Gon_Von.png", "images/LCD12_SQL100_Gon_Von.png", 
-        "images/LCD12_SQL110_Gon_Von.png"];
-      this.encryptImages = ["images/LCD7_Scrambler_Gon_Von.png", "images/LCD7_Scrambler_Gon_Voff.png"];
-      this.powerImages = ["images/LCD12_Blank_Gon_Voff.png", "images/LCD12_Low2_Gon_Von.png", "images/LCD12_Low1_Gon_Von.png"];
+      this.channelImages = ["/radio/images/LCD12_Chan1_Gon_Von.png", "/radio/images/LCD12_Chan2_Gon_Von.png", "/radio/images/LCD12_Chan3_Gon_Von.png",
+        "/radio/images/LCD12_Chan4_Gon_Von.png", "/radio/images/LCD12_Chan5_Gon_Von.png", "/radio/images/LCD12_Chan6_Gon_Von.png",
+        "/radio/images/LCD12_Chan7_Gon_Von.png", "/radio/images/LCD12_Chan8_Gon_Von.png", "/radio/images/LCD12_Chan9_Gon_Von.png",
+        "/radio/images/LCD12_Chan10_Gon_Von.png", "/radio/images/LCD12_Chan11_Gon_Von.png", "/radio/images/LCD12_Chan12_Gon_Von.png",
+        "/radio/images/LCD12_Chan13_Gon_Von.png", "/radio/images/LCD12_Chan14_Gon_Von.png", "/radio/images/LCD12_Chan15_Gon_Von.png",
+        "/radio/images/LCD12_Chan16_Gon_Von.png"];
+      this.backlightImages = ["/radio/images/LCD12_LIGT_AUTO_Gon_Von.png", "/radio/images/LCD12_LIGT_OFF_Gon_Von.png", "/radio/images/LCD12_LIGT_ON_Gon_Von.png"];
+      this.beepImages = ["/radio/images/LCD12_BEEP_ON_Gon_Von.png", "/radio/images/LCD12_BEEP_OFF_Gon_Von.png"];
+      this.squelchImages = ["/radio/images/LCD12_SQL20_Gon_Von.png", "/radio/images/LCD12_SQL30_Gon_Von.png", "/radio/images/LCD12_SQL40_Gon_Von.png",
+        "/radio/images/LCD12_SQL50_Gon_Von.png", "/radio/images/LCD12_SQL60_Gon_Von.png", "/radio/images/LCD12_SQL70_Gon_Von.png", 
+        "/radio/images/LCD12_SQL80_Gon_Von.png", "/radio/images/LCD12_SQL90_Gon_Von.png", "/radio/images/LCD12_SQL100_Gon_Von.png", 
+        "/radio/images/LCD12_SQL110_Gon_Von.png"];
+      this.encryptImages = ["/radio/images/LCD7_Scrambler_Gon_Von.png", "/radio/images/LCD7_Scrambler_Gon_Voff.png"];
+      this.powerImages = ["/radio/images/LCD12_Blank_Gon_Voff.png", "/radio/images/LCD12_Low2_Gon_Von.png", "/radio/images/LCD12_Low1_Gon_Von.png"];
       this.preloadImages();
     }
     this.preloadImages = function() {
