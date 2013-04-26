@@ -18,6 +18,12 @@ type: model/vnd.collada+xml
 properties:
   translation: [ 0, 0, 0 ]
   rotation: [ 1, 0, 0, -90 ]
+  channelImages:
+  backlightImages: 
+  beepImages: 
+  squelchImages: 
+  encryptImages: 
+  powerImages: 
   powerOn:
     set: |
       if ( this.powerOn != Boolean( value ) ){
@@ -29,7 +35,7 @@ properties:
           this.volume = 0;
           this.Radio.LCD.material.texture = "images/lcd.png";
         } 
-      } //@ sourceURL=radio.property.powerOn.index.vwf
+      } //@ sourceURL=radio.vwf.property.powerOn
     value: false
   volume:
     set: |
@@ -40,7 +46,7 @@ properties:
           this.powerOn = false;
         }
         this.volume = value;
-      } //@ sourceURL=radio.property.volume.index.vwf
+      } //@ sourceURL=radio.vwf.property.volume
     value: 0
   speak: "up"
   channel:
@@ -111,7 +117,7 @@ properties:
           this.Radio.LCD.material.texture = this.channelImages[15];
           this.channel = value;
           break;
-      } //@ sourceURL=radio.property.channel.index.vwf
+      } //@ sourceURL=radio.vwf.property.channel
     value: 0
   headphones: false
   antenna:
@@ -146,7 +152,7 @@ properties:
           this.beepOn = this.beepOn;
           this.menuMode = value;
           break;
-      } //@ sourceURL=radio.property.menuMode.index.vwf
+      } //@ sourceURL=radio.vwf.property.menuMode
     value: "none"
   backLightMode:
     set: |
@@ -164,7 +170,7 @@ properties:
           this.Radio.LCD.material.texture = this.backlightImages[2];
           this.backLightMode = value;
           break;
-      } //@ sourceURL=radio.property.backLightMode.index.vwf
+      } //@ sourceURL=radio.vwf.property.backLightMode
     value: "auto"
   beepOn:
     set: |
@@ -175,7 +181,7 @@ properties:
       } else {
           this.Radio.LCD.material.texture = this.beepImages[1];
           this.beepOn = value;
-      } //@ sourceURL=radio.property.beepOn.index.vwf
+      } //@ sourceURL=radio.vwf.property.beepOn
     value: true
   squelch:
     set: |
@@ -221,7 +227,7 @@ properties:
           this.Radio.LCD.material.texture = this.squelchImages[9];
           this.squelch = value;
           break;
-      } //@ sourceURL=radio.property.beepOn.index.vwf
+      } //@ sourceURL=radio.vwf.property.squelch
     value: 20
   encryptionOn:
     set: |
@@ -233,8 +239,8 @@ properties:
         this.Radio.LCD.material.texture = this.encryptImages[1];
           this.encryptionOn = value;
       } 
-      this.encryptionOn = value; 
-      //@ sourceURL=radio.property.encryptionOn.index.vwf
+      this.encryptionOn = value;
+      //@ sourceURL=radio.vwf.property.encryptionOn
     value: false
   transmitPower:
     set: |
@@ -252,7 +258,7 @@ properties:
           this.Radio.LCD.material.texture = this.powerImages[2];
           this.transmitPower = value;
           break;
-      } //@ sourceURL=radio.property.transmitPower.index.vwf
+      } //@ sourceURL=radio.vwf.property.transmitPower
     value: 4
   keysLocked: false
 children: 
@@ -429,13 +435,18 @@ children:
           controlMode: positions
           transformIncrement: 12
           transformAxis: [ 0, 1, 0 ]
+        methods:
+          playStatic:
+          stopStatic:
         scripts:  
         - | 
             this.pointerUp = function()  {
               if ( this.parent.parent.volume == 0 ) {
                 this.parent.parent.volume = 1;
+                this.playStatic();
               } else {
                 this.parent.parent.volume = 0;
+                this.stopStatic();
               }                            
             } //@ sourceURL=ic40Volume.vwf
         children: 
@@ -446,6 +457,8 @@ children:
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
+            properties:
+              texture: 
       LCD_Back: 
         extends: http://vwf.example.com/node3.vwf 
         children: 
@@ -473,6 +486,14 @@ children:
               playing: false
               looping: false
               speed: 1
+            scripts:
+            - |
+                this.pointerUp = function() {
+                  this.playing = !this.playing 
+                }   
+            children: 
+              BeltClipTab: 
+                extends: http://vwf.example.com/node3.vwf 
       Battery: 
         extends: http://vwf.example.com/node3.vwf 
         properties: 
@@ -520,23 +541,24 @@ scripts:
 - |
     var radio = this;
     this.initialize = function() {
-      console.info( "*** === radio.initialize() id = " + this.id );
-      var i;  
       this.channelImages = ["images/LCD12_Chan1_Gon_Von.png", "images/LCD12_Chan2_Gon_Von.png", "images/LCD12_Chan3_Gon_Von.png",
-          "images/LCD12_Chan4_Gon_Von.png", "images/LCD12_Chan5_Gon_Von.png", "images/LCD12_Chan6_Gon_Von.png",
-          "images/LCD12_Chan7_Gon_Von.png", "images/LCD12_Chan8_Gon_Von.png", "images/LCD12_Chan9_Gon_Von.png",
-          "images/LCD12_Chan10_Gon_Von.png", "images/LCD12_Chan11_Gon_Von.png", "images/LCD12_Chan12_Gon_Von.png",
-          "images/LCD12_Chan13_Gon_Von.png", "images/LCD12_Chan14_Gon_Von.png", "images/LCD12_Chan15_Gon_Von.png",
-          "images/LCD12_Chan16_Gon_Von.png"];
+        "images/LCD12_Chan4_Gon_Von.png", "images/LCD12_Chan5_Gon_Von.png", "images/LCD12_Chan6_Gon_Von.png",
+        "images/LCD12_Chan7_Gon_Von.png", "images/LCD12_Chan8_Gon_Von.png", "images/LCD12_Chan9_Gon_Von.png",
+        "images/LCD12_Chan10_Gon_Von.png", "images/LCD12_Chan11_Gon_Von.png", "images/LCD12_Chan12_Gon_Von.png",
+        "images/LCD12_Chan13_Gon_Von.png", "images/LCD12_Chan14_Gon_Von.png", "images/LCD12_Chan15_Gon_Von.png",
+        "images/LCD12_Chan16_Gon_Von.png"];
       this.backlightImages = ["images/LCD12_LIGT_AUTO_Gon_Von.png", "images/LCD12_LIGT_OFF_Gon_Von.png", "images/LCD12_LIGT_ON_Gon_Von.png"];
       this.beepImages = ["images/LCD12_BEEP_ON_Gon_Von.png", "images/LCD12_BEEP_OFF_Gon_Von.png"];
       this.squelchImages = ["images/LCD12_SQL20_Gon_Von.png", "images/LCD12_SQL30_Gon_Von.png", "images/LCD12_SQL40_Gon_Von.png",
-          "images/LCD12_SQL50_Gon_Von.png", "images/LCD12_SQL60_Gon_Von.png", "images/LCD12_SQL70_Gon_Von.png", 
-          "images/LCD12_SQL80_Gon_Von.png", "images/LCD12_SQL90_Gon_Von.png", "images/LCD12_SQL100_Gon_Von.png", 
-          "images/LCD12_SQL110_Gon_Von.png"];
+        "images/LCD12_SQL50_Gon_Von.png", "images/LCD12_SQL60_Gon_Von.png", "images/LCD12_SQL70_Gon_Von.png", 
+        "images/LCD12_SQL80_Gon_Von.png", "images/LCD12_SQL90_Gon_Von.png", "images/LCD12_SQL100_Gon_Von.png", 
+        "images/LCD12_SQL110_Gon_Von.png"];
       this.encryptImages = ["images/LCD7_Scrambler_Gon_Von.png", "images/LCD7_Scrambler_Gon_Voff.png"];
       this.powerImages = ["images/LCD12_Blank_Gon_Voff.png", "images/LCD12_Low2_Gon_Von.png", "images/LCD12_Low1_Gon_Von.png"];
-
+      this.preloadImages();
+    }
+    this.preloadImages = function() {
+      var i;
       for(i = 0; i < this.channelImages.length; i++) {
         new Image().src = this.channelImages[i];
       }
@@ -552,7 +574,7 @@ scripts:
       for(i = 0; i < this.powerImages.length; i++) {
         new Image().src = this.powerImages[i];
       }
-    } 
+    }
     this.red = function() {
       if ( radio.keysLocked ) return;
       switch( radio.menuMode ) {
@@ -642,4 +664,4 @@ scripts:
     }
     this.ptt = function() {
       if ( radio.keysLocked ) return;
-    } //@ sourceURL=radio.index.vwf
+    } //@ sourceURL=radio.vwf

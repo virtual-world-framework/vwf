@@ -13,55 +13,15 @@
 
 --- 
 extends: http://vwf.example.com/navscene.vwf
-type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
   navmode: none
-  channelImages:
-  backlightImages: 
-  beepImages: 
-  squelchImages: 
-  encryptImages: 
-  powerImages:  
 scripts:
 - text: |
     this.initialize = function() {
       this.camera.transform = [ 0.8791424632072449,-0.4765590727329254,0,0,0.44338271021842957,0.8179396390914917,-0.36658763885498047,0,0.17470066249370575,0.3222827613353729,0.9303835034370422,0,-3.814249038696289,-7.036417007446289,3.153610944747925,1 ];
       this.camera.lookAt = this.children.sceneCenter.id;
-      this.channelImages = ["images/LCD12_Chan1_Gon_Von.png", "images/LCD12_Chan2_Gon_Von.png", "images/LCD12_Chan3_Gon_Von.png",
-          "images/LCD12_Chan4_Gon_Von.png", "images/LCD12_Chan5_Gon_Von.png", "images/LCD12_Chan6_Gon_Von.png",
-          "images/LCD12_Chan7_Gon_Von.png", "images/LCD12_Chan8_Gon_Von.png", "images/LCD12_Chan9_Gon_Von.png",
-          "images/LCD12_Chan10_Gon_Von.png", "images/LCD12_Chan11_Gon_Von.png", "images/LCD12_Chan12_Gon_Von.png",
-          "images/LCD12_Chan13_Gon_Von.png", "images/LCD12_Chan14_Gon_Von.png", "images/LCD12_Chan15_Gon_Von.png",
-          "images/LCD12_Chan16_Gon_Von.png"];
-      this.backlightImages = ["images/LCD12_LIGT_AUTO_Gon_Von.png", "images/LCD12_LIGT_OFF_Gon_Von.png", "images/LCD12_LIGT_ON_Gon_Von.png"];
-      this.beepImages = ["images/LCD12_BEEP_ON_Gon_Von.png", "images/LCD12_BEEP_OFF_Gon_Von.png"];
-      this.squelchImages = ["images/LCD12_SQL20_Gon_Von.png", "images/LCD12_SQL30_Gon_Von.png", "images/LCD12_SQL40_Gon_Von.png",
-          "images/LCD12_SQL50_Gon_Von.png", "images/LCD12_SQL60_Gon_Von.png", "images/LCD12_SQL70_Gon_Von.png", 
-          "images/LCD12_SQL80_Gon_Von.png", "images/LCD12_SQL90_Gon_Von.png", "images/LCD12_SQL100_Gon_Von.png", 
-          "images/LCD12_SQL110_Gon_Von.png"];
-      this.encryptImages = ["images/LCD7_Scrambler_Gon_Von.png", "images/LCD7_Scrambler_Gon_Voff.png"];
-      this.powerImages = ["images/LCD12_Blank_Gon_Voff.png", "images/LCD12_Low2_Gon_Von.png", "images/LCD12_Low1_Gon_Von.png"];
-      this.preloadImages();
-    }
-    this.preloadImages = function() {
-      var i;
-      for(i = 0; i < this.channelImages.length; i++) {
-        new Image().src = this.channelImages[i];
-      }
-      for(i = 0; i < this.beepImages.length; i++) {
-        new Image().src = this.beepImages[i];
-      }
-      for(i = 0; i < this.squelchImages.length; i++) {
-        new Image().src = this.squelchImages[i];
-      }
-      for(i = 0; i < this.encryptImages.length; i++) {
-        new Image().src = this.encryptImages[i];
-      }
-      for(i = 0; i < this.powerImages.length; i++) {
-        new Image().src = this.powerImages[i];
-      }
-    } //@ sourceURL=radio.index.vwf
+    } //@ sourceURL=index.vwf
 children:
   Omni01:
     extends: http://vwf.example.com/light.vwf

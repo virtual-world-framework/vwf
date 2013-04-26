@@ -200,11 +200,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             {
                 switch (eventName) {
                   case "entering":
-                    var stepDivName = '#' + nodeId.replace(/\:/g, "_");
+                    var stepDivName = '#' + nodeId.replace(/\:/g, "_").replace(/\./g, "-");
                     if($(stepDivName).length) $(stepDivName).trigger('click');
                     break;
                   case "completed":
-                    var htmlDiv = nodeId.replace(/\:/g, "_");
+                    var htmlDiv = nodeId.replace(/\:/g, "_").replace(/\./g, "-");
                     if( $('#div--' + htmlDiv) ) $('#' + htmlDiv).css('color', 'green');
                     var numTasks = 0;
                     for (var step in this.lessonSteps) { numTasks++; }
@@ -215,7 +215,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     $('#lessonProgressBar').css('width', this.progressWidth+'px');
                     break;
                   case "exiting":
-                    var accordionName = '#accordion--' + nodeId.replace(/\:/g, "_");
+                    var accordionName = '#accordion--' + nodeId.replace(/\:/g, "_").replace(/\./g, "-");
                     if($(accordionName).length) $(accordionName).accordion("activate", false);
                     break;
                 }
@@ -238,7 +238,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if(parentID == lessonID)
             {
                 var subAccordionDiv = document.createElement('div');
-                subAccordionDiv.id = 'accordion--' + step.replace(/\:/g, "_");
+                subAccordionDiv.id = 'accordion--' + step.replace(/\:/g, "_").replace(/\./g, "-");
 
                 $('#accordion').append("<p class='taskTitle'>" + lessonSteps[step] + "</p>");
                 $('#accordion').append(subAccordionDiv);
@@ -248,16 +248,17 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }
             else if(parentID == currentTaskID)
             {
-                $('#accordion--'+parentID.replace(/\:/g, "_")).append("<h2><a id='" + step.replace(/\:/g, "_") + "' href='#'>" + lessonSteps[step] + "</a></h2>");
-                $('#accordion--'+parentID.replace(/\:/g, "_")).append("<div id='div--" + step.replace(/\:/g, "_") + "'></div>");  
+                $('#accordion--'+parentID.replace(/\:/g, "_").replace(/\./g, "-")).append("<h2><a id='" + step.replace(/\:/g, "_").replace(/\./g, "-") + "' href='#'>" + lessonSteps[step] + "</a></h2>");
+                $('#accordion--'+parentID.replace(/\:/g, "_").replace(/\./g, "-")).append("<div id='div--" + step.replace(/\:/g, "_").replace(/\./g, "-") + "'></div>");  
             }
             else
             {
-                var htmlParent = parentID.replace(/\:/g, "_");
-                while(! $('#div--' + htmlParent).length) 
-                {
-                    htmlParent = htmlParent.substring(0, htmlParent.lastIndexOf('_'));
-                }
+                var htmlParent = parentID.replace(/\:/g, "_").replace(/\./g, "-");
+                console.info(htmlParent);
+                // while(! $('#div--' + htmlParent).length) 
+                // {
+                //     htmlParent = htmlParent.substring(0, htmlParent.lastIndexOf('_'));
+                // }
                 if( $('#div--' + htmlParent).html() != "" ) $('#div--' + htmlParent).append("<br />");
                 $('#div--' + htmlParent).append(lessonSteps[step] + "<br />");
             }

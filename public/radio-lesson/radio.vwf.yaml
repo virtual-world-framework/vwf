@@ -18,6 +18,12 @@ type: model/vnd.collada+xml
 properties:
   translation: [ 0, 0, 0 ]
   rotation: [ 1, 0, 0, -90 ]
+  channelImages:
+  backlightImages: 
+  beepImages: 
+  squelchImages: 
+  encryptImages: 
+  powerImages: 
   powerOn:
     set: |
       if ( this.powerOn != Boolean( value ) ){
@@ -29,7 +35,7 @@ properties:
           this.volume = 0;
           this.Radio.LCD.material.texture = "images/lcd.png";
         } 
-      } //@ sourceURL=radio.property.powerOn.index.vwf
+      } //@ sourceURL=radio.vwf.property.powerOn
     value: false
   volume:
     set: |
@@ -40,7 +46,7 @@ properties:
           this.powerOn = false;
         }
         this.volume = value;
-      } //@ sourceURL=radio.property.volume.index.vwf
+      } //@ sourceURL=radio.vwf.property.volume
     value: 0
   speak: "up"
   channel:
@@ -48,70 +54,70 @@ properties:
       if ( !this.powerOn ) return;
       switch( value ) {
         case 0:
-          this.Radio.LCD.material.texture = this.parent.channelImages[0];
+          this.Radio.LCD.material.texture = this.channelImages[0];
           this.channel = value;
           break;
         case 1:
-          this.Radio.LCD.material.texture = this.parent.channelImages[1];
+          this.Radio.LCD.material.texture = this.channelImages[1];
           this.channel = value;
           break;
         case 2:
-          this.Radio.LCD.material.texture = this.parent.channelImages[2];
+          this.Radio.LCD.material.texture = this.channelImages[2];
           this.channel = value;
           break;
         case 3:
-          this.Radio.LCD.material.texture = this.parent.channelImages[3];
+          this.Radio.LCD.material.texture = this.channelImages[3];
           this.channel = value;
           break;
         case 4:
-          this.Radio.LCD.material.texture = this.parent.channelImages[4];
+          this.Radio.LCD.material.texture = this.channelImages[4];
           this.channel = value;
           break;
         case 5:
-          this.Radio.LCD.material.texture = this.parent.channelImages[5];
+          this.Radio.LCD.material.texture = this.channelImages[5];
           this.channel = value;
           break;
         case 6:
-          this.Radio.LCD.material.texture = this.parent.channelImages[6];
+          this.Radio.LCD.material.texture = this.channelImages[6];
           this.channel = value;
           break;
         case 7:
-          this.Radio.LCD.material.texture = this.parent.channelImages[7];
+          this.Radio.LCD.material.texture = this.channelImages[7];
           this.channel = value;
           break;
         case 8:
-          this.Radio.LCD.material.texture = this.parent.channelImages[8];
+          this.Radio.LCD.material.texture = this.channelImages[8];
           this.channel = value;
           break;
         case 9:
-          this.Radio.LCD.material.texture = this.parent.channelImages[9];
+          this.Radio.LCD.material.texture = this.channelImages[9];
           this.channel = value;
           break;
         case 10:
-          this.Radio.LCD.material.texture = this.parent.channelImages[10];
+          this.Radio.LCD.material.texture = this.channelImages[10];
           this.channel = value;
           break;
         case 11:
-          this.Radio.LCD.material.texture = this.parent.channelImages[11];
+          this.Radio.LCD.material.texture = this.channelImages[11];
           this.channel = value;
           break;
         case 12:
-          this.Radio.LCD.material.texture = this.parent.channelImages[12];
+          this.Radio.LCD.material.texture = this.channelImages[12];
           this.channel = value;
           break;
         case 13:
-          this.Radio.LCD.material.texture = this.parent.channelImages[13];
+          this.Radio.LCD.material.texture = this.channelImages[13];
           this.channel = value;
           break;
         case 14:
-          this.Radio.LCD.material.texture = this.parent.channelImages[14];
+          this.Radio.LCD.material.texture = this.channelImages[14];
           this.channel = value;
           break;
         case 15:
-          this.Radio.LCD.material.texture = this.parent.channelImages[15];
+          this.Radio.LCD.material.texture = this.channelImages[15];
           this.channel = value;
           break;
-      }
+      } //@ sourceURL=radio.vwf.property.channel
     value: 0
   headphones: false
   antenna:
@@ -146,213 +152,116 @@ properties:
           this.beepOn = this.beepOn;
           this.menuMode = value;
           break;
-      }
+      } //@ sourceURL=radio.vwf.property.menuMode
     value: "none"
   backLightMode:
     set: |
       if ( !this.powerOn ) return;
       switch(value) {
         case "auto":
-          this.Radio.LCD.material.texture = this.parent.backlightImages[0];
+          this.Radio.LCD.material.texture = this.backlightImages[0];
           this.backLightMode = value;
           break;
         case "off":
-          this.Radio.LCD.material.texture = this.parent.backlightImages[1];
+          this.Radio.LCD.material.texture = this.backlightImages[1];
           this.backLightMode = value;
           break;
         case "on":
-          this.Radio.LCD.material.texture = this.parent.backlightImages[2];
+          this.Radio.LCD.material.texture = this.backlightImages[2];
           this.backLightMode = value;
           break;
-      }
+      } //@ sourceURL=radio.vwf.property.backLightMode
     value: "auto"
   beepOn:
     set: |
       if ( !this.powerOn ) return;
       if ( value ) {
-          this.Radio.LCD.material.texture = this.parent.beepImages[0];
+          this.Radio.LCD.material.texture = this.beepImages[0];
           this.beepOn = value;
       } else {
-          this.Radio.LCD.material.texture = this.parent.beepImages[1];
+          this.Radio.LCD.material.texture = this.beepImages[1];
           this.beepOn = value;
-      }
+      } //@ sourceURL=radio.vwf.property.beepOn
     value: true
   squelch:
     set: |
       if ( !this.powerOn ) return;
       switch(value) {
         case 20:
-          this.Radio.LCD.material.texture = this.parent.squelchImages[0];
+          this.Radio.LCD.material.texture = this.squelchImages[0];
           this.squelch = value;
           break;
         case 30:
-          this.Radio.LCD.material.texture = this.parent.squelchImages[1];
+          this.Radio.LCD.material.texture = this.squelchImages[1];
           this.squelch = value;
           break;
         case 40:
-          this.Radio.LCD.material.texture = this.parent.squelchImages[2];
+          this.Radio.LCD.material.texture = this.squelchImages[2];
           this.squelch = value;
           break;
         case 50:
-          this.Radio.LCD.material.texture = this.parent.squelchImages[3];
+          this.Radio.LCD.material.texture = this.squelchImages[3];
           this.squelch = value;
           break;
         case 60:
-          this.Radio.LCD.material.texture = this.parent.squelchImages[4];
+          this.Radio.LCD.material.texture = this.squelchImages[4];
           this.squelch = value;
           break;
         case 70:
-          this.Radio.LCD.material.texture = this.parent.squelchImages[5];
+          this.Radio.LCD.material.texture = this.squelchImages[5];
           this.squelch = value;
           break;
         case 80:
-          this.Radio.LCD.material.texture = this.parent.squelchImages[6];
+          this.Radio.LCD.material.texture = this.squelchImages[6];
           this.squelch = value;
           break;
         case 90:
-          this.Radio.LCD.material.texture = this.parent.squelchImages[7];
+          this.Radio.LCD.material.texture = this.squelchImages[7];
           this.squelch = value;
           break;
         case 100:
-          this.Radio.LCD.material.texture = this.parent.squelchImages[8];
+          this.Radio.LCD.material.texture = this.squelchImages[8];
           this.squelch = value;
           break;
         case 110:
-          this.Radio.LCD.material.texture = this.parent.squelchImages[9];
+          this.Radio.LCD.material.texture = this.squelchImages[9];
           this.squelch = value;
           break;
-      }
+      } //@ sourceURL=radio.vwf.property.squelch
     value: 20
   encryptionOn:
     set: |
       if ( !this.powerOn ) return;
       if ( value ) {
-        this.Radio.LCD.material.texture = this.parent.encryptImages[0];
+        this.Radio.LCD.material.texture = this.encryptImages[0];
           this.encryptionOn = value;
       } else { 
-        this.Radio.LCD.material.texture = this.parent.encryptImages[1];
+        this.Radio.LCD.material.texture = this.encryptImages[1];
           this.encryptionOn = value;
       } 
       this.encryptionOn = value;
+      //@ sourceURL=radio.vwf.property.encryptionOn
     value: false
   transmitPower:
     set: |
       if ( !this.powerOn ) return;
       switch ( value ){
         case 4:
-          this.Radio.LCD.material.texture = this.parent.powerImages[0];
+          this.Radio.LCD.material.texture = this.powerImages[0];
           this.transmitPower = value;
           break;
         case 2:
-          this.Radio.LCD.material.texture = this.parent.powerImages[1];
+          this.Radio.LCD.material.texture = this.powerImages[1];
           this.transmitPower = value;
           break;
         case 1:
-          this.Radio.LCD.material.texture = this.parent.powerImages[2];
+          this.Radio.LCD.material.texture = this.powerImages[2];
           this.transmitPower = value;
           break;
-      }
+      } //@ sourceURL=radio.vwf.property.transmitPower
     value: 4
   keysLocked: false
-scripts: 
-- |
-    var radio = this;
-    this.configSave = function(){
-    }
-    this.red = function() {
-      if ( radio.keysLocked ) return;
-      switch( radio.menuMode ) {
-        case 'channel':
-          radio.menuMode = 'backLight';
-          break;
-        case 'backLight':
-          radio.menuMode = 'squelch';
-          break;
-        case 'squelch':
-          radio.menuMode = "beep";
-          break;
-        case 'beep':
-          radio.configSave();
-          radio.menuMode = 'channel';
-          break;
-      }
-    }
-    this.up = function() {
-      switch( radio.menuMode ) {
-        case "backLight":
-          if ( radio.backLightMode == "on" )
-            radio.backLightMode = "auto";
-          else if ( radio.backLightMode == "auto")
-            radio.backLightMode = "off";
-          else
-            radio.backLightMode = "on";
-          break;
-        case "squelch":
-          if ( radio.squelch <= 100 ) 
-              radio.squelch = radio.squelch + 10;
-          break;
-        case "beep":
-          radio.beepOn = !radio.beepOn;
-          break;
-      }
-    }
-    this.down = function() {
-      switch( radio.menuMode ) {
-        case "backLight":
-          if ( radio.backLightMode == "on" )
-            radio.backLightMode = "auto";
-          else 
-            radio.backLightMode = "on";
-          break;
-        case "squelch":
-          if ( radio.squelch >= 30 )
-              radio.squelch = radio.squelch - 10;
-          break;
-        case "beep":
-          radio.beepOn = !radio.beepOn;
-          break;
-      }
-    }
-    this.p0 = function() {
-      if ( radio.keysLocked ) return;
-      switch( radio.menuMode ){
-        case "channel":
-          radio.encryptionOn = !radio.encryptionOn;
-          break;
-      }
-    }
-    this.p1 = function() {
-      if ( radio.keysLocked ) return;
-    }
-    this.p2 = function() {
-      if ( radio.keysLocked ) return;
-      if ( radio.menuMode == "channel" ){
-        if ( !radio.settingTransmitPower ){
-          radio.settingTransmitPower = true;
-        } else {
-          switch ( radio.transmitPower ){
-            case 4:
-              radio.transmitPower = 2;
-              break;
-            case 2:
-              radio.transmitPower = 1;
-              break;
-            case 1:
-              radio.transmitPower = 4;
-              break;
-          }
-        }
-      }
-    }
-    this.p3 = function() {
-      radio.keysLocked = !radio.keysLocked;
-    }
-    this.ptt = function() {
-      if ( radio.keysLocked ) return;
-    } //@ sourceURL=radio.base.index.vwf
 children: 
-  EnvironmentAmbientLight: 
-    extends: http://vwf.example.com/node3.vwf 
   Radio: 
     extends: http://vwf.example.com/node3.vwf 
     properties: 
@@ -628,3 +537,131 @@ children:
     children: 
       material: 
         extends: http://vwf.example.com/material.vwf 
+scripts: 
+- |
+    var radio = this;
+    this.initialize = function() {
+      this.channelImages = ["images/LCD12_Chan1_Gon_Von.png", "images/LCD12_Chan2_Gon_Von.png", "images/LCD12_Chan3_Gon_Von.png",
+        "images/LCD12_Chan4_Gon_Von.png", "images/LCD12_Chan5_Gon_Von.png", "images/LCD12_Chan6_Gon_Von.png",
+        "images/LCD12_Chan7_Gon_Von.png", "images/LCD12_Chan8_Gon_Von.png", "images/LCD12_Chan9_Gon_Von.png",
+        "images/LCD12_Chan10_Gon_Von.png", "images/LCD12_Chan11_Gon_Von.png", "images/LCD12_Chan12_Gon_Von.png",
+        "images/LCD12_Chan13_Gon_Von.png", "images/LCD12_Chan14_Gon_Von.png", "images/LCD12_Chan15_Gon_Von.png",
+        "images/LCD12_Chan16_Gon_Von.png"];
+      this.backlightImages = ["images/LCD12_LIGT_AUTO_Gon_Von.png", "images/LCD12_LIGT_OFF_Gon_Von.png", "images/LCD12_LIGT_ON_Gon_Von.png"];
+      this.beepImages = ["images/LCD12_BEEP_ON_Gon_Von.png", "images/LCD12_BEEP_OFF_Gon_Von.png"];
+      this.squelchImages = ["images/LCD12_SQL20_Gon_Von.png", "images/LCD12_SQL30_Gon_Von.png", "images/LCD12_SQL40_Gon_Von.png",
+        "images/LCD12_SQL50_Gon_Von.png", "images/LCD12_SQL60_Gon_Von.png", "images/LCD12_SQL70_Gon_Von.png", 
+        "images/LCD12_SQL80_Gon_Von.png", "images/LCD12_SQL90_Gon_Von.png", "images/LCD12_SQL100_Gon_Von.png", 
+        "images/LCD12_SQL110_Gon_Von.png"];
+      this.encryptImages = ["images/LCD7_Scrambler_Gon_Von.png", "images/LCD7_Scrambler_Gon_Voff.png"];
+      this.powerImages = ["images/LCD12_Blank_Gon_Voff.png", "images/LCD12_Low2_Gon_Von.png", "images/LCD12_Low1_Gon_Von.png"];
+      this.preloadImages();
+    }
+    this.preloadImages = function() {
+      var i;
+      for(i = 0; i < this.channelImages.length; i++) {
+        new Image().src = this.channelImages[i];
+      }
+      for(i = 0; i < this.beepImages.length; i++) {
+        new Image().src = this.beepImages[i];
+      }
+      for(i = 0; i < this.squelchImages.length; i++) {
+        new Image().src = this.squelchImages[i];
+      }
+      for(i = 0; i < this.encryptImages.length; i++) {
+        new Image().src = this.encryptImages[i];
+      }
+      for(i = 0; i < this.powerImages.length; i++) {
+        new Image().src = this.powerImages[i];
+      }
+    }
+    this.red = function() {
+      if ( radio.keysLocked ) return;
+      switch( radio.menuMode ) {
+        case 'channel':
+          radio.menuMode = 'backLight';
+          break;
+        case 'backLight':
+          radio.menuMode = 'squelch';
+          break;
+        case 'squelch':
+          radio.menuMode = "beep";
+          break;
+        case 'beep':
+          radio.menuMode = 'channel';
+          break;
+      }
+    }
+    this.up = function() {
+      switch( radio.menuMode ) {
+        case "backLight":
+          if ( radio.backLightMode == "on" )
+            radio.backLightMode = "auto";
+          else if ( radio.backLightMode == "auto")
+            radio.backLightMode = "off";
+          else
+            radio.backLightMode = "on";
+          break;
+        case "squelch":
+          if ( radio.squelch <= 100 )
+            radio.squelch = radio.squelch + 10;
+          break;
+        case "beep":
+          radio.beepOn = !radio.beepOn;
+          break;
+      }
+    }
+    this.down = function() {
+      switch( radio.menuMode ) {
+        case "backLight":
+          if ( radio.backLightMode == "on" )
+            radio.backLightMode = "auto";
+          else 
+            radio.backLightMode = "on";
+          break;
+        case "squelch":
+          if ( radio.squelch >= 30 )
+            radio.squelch = radio.squelch - 10;
+          break;
+        case "beep":
+          radio.beepOn = !radio.beepOn;
+          break;
+      }
+    }
+    this.p0 = function() {
+      if ( radio.keysLocked ) return;
+      switch( radio.menuMode ){
+        case "channel":
+          radio.encryptionOn = !radio.encryptionOn;
+          break;
+      }
+    }
+    this.p1 = function() {
+      if ( radio.keysLocked ) return;
+    }
+    this.p2 = function() {
+      if ( radio.keysLocked ) return;
+      if ( radio.menuMode == "channel" ){
+        if ( !radio.settingTransmitPower ){
+          radio.settingTransmitPower = true;
+        } else {
+          switch ( radio.transmitPower ){
+            case 4:
+              radio.transmitPower = 2;
+              break;
+            case 2:
+              radio.transmitPower = 1;
+              break;
+            case 1:
+              radio.transmitPower = 4;
+              break;
+          }
+        }
+      }
+    }
+    this.p3 = function() {
+      radio.keysLocked = !radio.keysLocked;
+    }
+    this.ptt = function() {
+      if ( radio.keysLocked ) return;
+    } //@ sourceURL=radio.vwf
