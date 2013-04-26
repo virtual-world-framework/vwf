@@ -16,7 +16,7 @@ extends: http://vwf.example.com/navtouch.vwf
 properties:
   navmode: walk
   rotationSpeed: 2
-  ambientColor: [ 255, 255, 255 ]
+  #ambientColor: [ 255, 255, 255 ]
 children:
   transformTool:
     includes: http://vwf.example.com/tools/transform/transformTool.vwf
