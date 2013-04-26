@@ -250,17 +250,17 @@ scripts:
       pos.push( this.parent.ttPositions[28][1] ); // 44       
       pos.push( this.parent.ttPositions[28][2] );
 
-      pos.push( this.parent.ttPositions[18][0] );
-      pos.push( this.parent.ttPositions[18][1] ); // 45       
-      pos.push( this.parent.ttPositions[18][2] );
+      pos.push( this.parent.ttPositions[51][0] );
+      pos.push( this.parent.ttPositions[51][1] ); // 45       
+      pos.push( this.parent.ttPositions[51][2] );
       
-      pos.push( this.parent.ttPositions[19][0] );
-      pos.push( this.parent.ttPositions[19][1] ); // 46       
-      pos.push( this.parent.ttPositions[19][2] );
+      pos.push( this.parent.ttPositions[45][0] );
+      pos.push( this.parent.ttPositions[45][1] ); // 46       
+      pos.push( this.parent.ttPositions[45][2] );
       
-      pos.push( this.parent.ttPositions[4][0] );
-      pos.push( this.parent.ttPositions[4][1] ); // 47   
-      pos.push( this.parent.ttPositions[4][2] );   
+      pos.push( this.parent.ttPositions[6][0] );
+      pos.push( this.parent.ttPositions[6][1] ); // 47   
+      pos.push( this.parent.ttPositions[6][2] );   
 
       faces.push( count, count+3, count+1, count+1, count+3, count+2 );
       count += 4; 
@@ -351,13 +351,13 @@ scripts:
       pos.push( this.parent.ttPositions[37][1] ); // 65       
       pos.push( this.parent.ttPositions[37][2] );
       
-      pos.push( this.parent.ttPositions[50][0] );
-      pos.push( this.parent.ttPositions[50][1] ); // 66       
-      pos.push( this.parent.ttPositions[50][2] );
+      pos.push( this.parent.ttPositions[36][0] );
+      pos.push( this.parent.ttPositions[36][1] ); // 66       
+      pos.push( this.parent.ttPositions[36][2] );
       
-      pos.push( this.parent.ttPositions[25][0] );
-      pos.push( this.parent.ttPositions[25][1] ); // 67   
-      pos.push( this.parent.ttPositions[25][2] ); 
+      pos.push( this.parent.ttPositions[23][0] );
+      pos.push( this.parent.ttPositions[23][1] ); // 67   
+      pos.push( this.parent.ttPositions[23][2] ); 
       
       faces.push( count, count+3, count+1, count+1, count+3, count+2 );
       count += 4; 
@@ -370,102 +370,102 @@ scripts:
       pos.push( this.parent.ttPositions[1][1] ); // 69       
       pos.push( this.parent.ttPositions[1][2] );
       
-      pos.push( this.parent.ttPositions[13][0] );
-      pos.push( this.parent.ttPositions[13][1] ); // 70       
-      pos.push( this.parent.ttPositions[13][2] );
+      pos.push( this.parent.ttPositions[11][0] );
+      pos.push( this.parent.ttPositions[11][1] ); // 70       
+      pos.push( this.parent.ttPositions[11][2] );
       
-      pos.push( this.parent.ttPositions[49][0] );
-      pos.push( this.parent.ttPositions[49][1] ); // 71   
-      pos.push( this.parent.ttPositions[49][2] );   
+      pos.push( this.parent.ttPositions[34][0] );
+      pos.push( this.parent.ttPositions[34][1] ); // 71   
+      pos.push( this.parent.ttPositions[34][2] );   
 
       faces.push( count, count+3, count+1, count+1, count+3, count+2 );
       count += 4; 
       
-      pos.push( this.parent.ttPositions[48][0] );
-      pos.push( this.parent.ttPositions[48][1] ); // 72       
-      pos.push( this.parent.ttPositions[48][2] );
+      pos.push( this.parent.ttPositions[32][0] );
+      pos.push( this.parent.ttPositions[32][1] ); // 72       
+      pos.push( this.parent.ttPositions[32][2] );
 
-      pos.push( this.parent.ttPositions[16][0] );
-      pos.push( this.parent.ttPositions[16][1] ); // 73       
-      pos.push( this.parent.ttPositions[16][2] );
+      pos.push( this.parent.ttPositions[8][0] );
+      pos.push( this.parent.ttPositions[8][1] ); // 73       
+      pos.push( this.parent.ttPositions[8][2] );
       
-      pos.push( this.parent.ttPositions[5][0] );
-      pos.push( this.parent.ttPositions[5][1] ); // 74       
-      pos.push( this.parent.ttPositions[5][2] );
+      pos.push( this.parent.ttPositions[0][0] );
+      pos.push( this.parent.ttPositions[0][1] ); // 74       
+      pos.push( this.parent.ttPositions[0][2] );
       
-      pos.push( this.parent.ttPositions[43][0] );
-      pos.push( this.parent.ttPositions[43][1] ); // 75   
-      pos.push( this.parent.ttPositions[43][2] );   
+      pos.push( this.parent.ttPositions[33][0] );
+      pos.push( this.parent.ttPositions[33][1] ); // 75   
+      pos.push( this.parent.ttPositions[33][2] );   
 
       faces.push( count, count+3, count+1, count+1, count+3, count+2 );
       count += 4;         
 
-      pos.push( this.parent.ttPositions[28][0] );
-      pos.push( this.parent.ttPositions[28][1] ); // 76       
-      pos.push( this.parent.ttPositions[28][2] );
+      pos.push( this.parent.ttPositions[20][0] );
+      pos.push( this.parent.ttPositions[20][1] ); // 76       
+      pos.push( this.parent.ttPositions[20][2] );
 
-      pos.push( this.parent.ttPositions[18][0] );
-      pos.push( this.parent.ttPositions[18][1] ); // 77       
-      pos.push( this.parent.ttPositions[18][2] );
+      pos.push( this.parent.ttPositions[38][0] );
+      pos.push( this.parent.ttPositions[38][1] ); // 77       
+      pos.push( this.parent.ttPositions[38][2] );
       
-      pos.push( this.parent.ttPositions[19][0] );
-      pos.push( this.parent.ttPositions[19][1] ); // 78       
-      pos.push( this.parent.ttPositions[19][2] );
+      pos.push( this.parent.ttPositions[39][0] );
+      pos.push( this.parent.ttPositions[39][1] ); // 78       
+      pos.push( this.parent.ttPositions[39][2] );
       
-      pos.push( this.parent.ttPositions[4][0] );
-      pos.push( this.parent.ttPositions[4][1] ); // 79   
-      pos.push( this.parent.ttPositions[4][2] );   
+      pos.push( this.parent.ttPositions[3][0] );
+      pos.push( this.parent.ttPositions[3][1] ); // 79   
+      pos.push( this.parent.ttPositions[3][2] );   
 
       faces.push( count, count+3, count+1, count+1, count+3, count+2 );
       count += 4; 
 
 
       // z negative
-      pos.push( this.parent.ttPositions[3][0] );
-      pos.push( this.parent.ttPositions[3][1] ); // 80       
-      pos.push( this.parent.ttPositions[3][2] );
+      pos.push( this.parent.ttPositions[6][0] );
+      pos.push( this.parent.ttPositions[6][1] ); // 80       
+      pos.push( this.parent.ttPositions[6][2] );
 
-      pos.push( this.parent.ttPositions[22][0] );
-      pos.push( this.parent.ttPositions[22][1] ); // 81       
-      pos.push( this.parent.ttPositions[22][2] );
+      pos.push( this.parent.ttPositions[45][0] );
+      pos.push( this.parent.ttPositions[45][1] ); // 81       
+      pos.push( this.parent.ttPositions[45][2] );
       
-      pos.push( this.parent.ttPositions[54][0] );
-      pos.push( this.parent.ttPositions[54][1] ); // 82       
-      pos.push( this.parent.ttPositions[54][2] );
+      pos.push( this.parent.ttPositions[44][0] );
+      pos.push( this.parent.ttPositions[44][1] ); // 82       
+      pos.push( this.parent.ttPositions[44][2] );
       
-      pos.push( this.parent.ttPositions[39][0] );
-      pos.push( this.parent.ttPositions[39][1] ); // 83   
-      pos.push( this.parent.ttPositions[39][2] );   
+      pos.push( this.parent.ttPositions[26][0] );
+      pos.push( this.parent.ttPositions[26][1] ); // 83   
+      pos.push( this.parent.ttPositions[26][2] );   
 
       faces.push( count, count+3, count+1, count+1, count+3, count+2 );
       count += 4;  
 
-      pos.push( this.parent.ttPositions[33][0] );
-      pos.push( this.parent.ttPositions[33][1] ); // 84       
-      pos.push( this.parent.ttPositions[33][2] );
+      pos.push( this.parent.ttPositions[43][0] );
+      pos.push( this.parent.ttPositions[43][1] ); // 84       
+      pos.push( this.parent.ttPositions[43][2] );
 
-      pos.push( this.parent.ttPositions[0][0] );
-      pos.push( this.parent.ttPositions[0][1] ); // 85       
-      pos.push( this.parent.ttPositions[0][2] );
+      pos.push( this.parent.ttPositions[5][0] );
+      pos.push( this.parent.ttPositions[5][1] ); // 85       
+      pos.push( this.parent.ttPositions[5][2] );
       
-      pos.push( this.parent.ttPositions[10][0] );
-      pos.push( this.parent.ttPositions[10][1] ); // 86       
-      pos.push( this.parent.ttPositions[10][2] );
+      pos.push( this.parent.ttPositions[14][0] );
+      pos.push( this.parent.ttPositions[14][1] ); // 86       
+      pos.push( this.parent.ttPositions[14][2] );
       
-      pos.push( this.parent.ttPositions[53][0] );
-      pos.push( this.parent.ttPositions[53][1] ); // 87   
-      pos.push( this.parent.ttPositions[53][2] );   
+      pos.push( this.parent.ttPositions[42][0] );
+      pos.push( this.parent.ttPositions[42][1] ); // 87   
+      pos.push( this.parent.ttPositions[42][2] );   
 
       faces.push( count, count+3, count+1, count+1, count+3, count+2 );
       count += 4;  
 
-      pos.push( this.parent.ttPositions[52][0] );
-      pos.push( this.parent.ttPositions[52][1] ); // 88       
-      pos.push( this.parent.ttPositions[52][2] );
+      pos.push( this.parent.ttPositions[40][0] );
+      pos.push( this.parent.ttPositions[40][1] ); // 88       
+      pos.push( this.parent.ttPositions[40][2] );
 
-      pos.push( this.parent.ttPositions[19][0] );
-      pos.push( this.parent.ttPositions[19][1] ); // 89       
-      pos.push( this.parent.ttPositions[19][2] );
+      pos.push( this.parent.ttPositions[17][0] );
+      pos.push( this.parent.ttPositions[17][1] ); // 89       
+      pos.push( this.parent.ttPositions[17][2] );
       
       pos.push( this.parent.ttPositions[4][0] );
       pos.push( this.parent.ttPositions[4][1] ); // 90       
@@ -478,13 +478,13 @@ scripts:
       faces.push( count, count+3, count+1, count+1, count+3, count+2 );
       count += 4; 
 
-      pos.push( this.parent.ttPositions[31][0] );
-      pos.push( this.parent.ttPositions[31][1] ); // 92       
-      pos.push( this.parent.ttPositions[31][2] );
+      pos.push( this.parent.ttPositions[29][0] );
+      pos.push( this.parent.ttPositions[29][1] ); // 92       
+      pos.push( this.parent.ttPositions[29][2] );
 
-      pos.push( this.parent.ttPositions[55][0] );
-      pos.push( this.parent.ttPositions[55][1] ); // 93       
-      pos.push( this.parent.ttPositions[55][2] );
+      pos.push( this.parent.ttPositions[46][0] );
+      pos.push( this.parent.ttPositions[46][1] ); // 93       
+      pos.push( this.parent.ttPositions[46][2] );
       
       pos.push( this.parent.ttPositions[47][0] );
       pos.push( this.parent.ttPositions[47][1] ); // 94       
