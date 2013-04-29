@@ -279,7 +279,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         threeParent.add( node.threeObject ); 
                     } 
                 } else {     
-                        
+
                     node = this.state.nodes[childID] = {
                         name: childName,  
                         threeObject: threeChild,
