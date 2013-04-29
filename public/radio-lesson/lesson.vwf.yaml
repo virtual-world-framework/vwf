@@ -36,8 +36,8 @@ children:
           this.entering = function() {
             this.logger.info( "Step 1 entering", this );
             var radio = this.find( "/radio" )[ 0 ];
-            radio.Radio.ic40Volume.pointerClick = radio.events.add( function() {
-              radio.Radio.ic40Volume.pointerClick = radio.events.flush( this );
+            radio.Radio.ic40Volume.pointerUp = radio.events.add( function() {
+              radio.Radio.ic40Volume.pointerUp = radio.events.flush( this );
               this.logger.info("BCBB: ", radio.Radio);
               this.logger.info( "Step 1 completed" );
               this.completed();
@@ -64,7 +64,7 @@ children:
       selectUpButton:
           extends: http://vwf.example.com/lesson/task.vwf
           properties:
-            text: "1.3 Click on the Up Key to select LIGT OFF"
+            text: "1.3 Click on the Up Key to select LIGT ON"
             cameraPoseRef: /lesson/cameraPose3
           scripts:
           - |

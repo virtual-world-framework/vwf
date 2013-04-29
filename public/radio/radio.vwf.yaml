@@ -274,43 +274,177 @@ children:
       ic40_SpeakerPort: 
         extends: http://vwf.example.com/node3.vwf 
       ic40Channel: 
-        extends: http://vwf.example.com/node3.vwf
-        implements:
-        - http://vwf.example.com/control-old.vwf
-        properties: 
-          controlType: rotate
-          controlMode: continuous
-          transformIncrement: -18
-          transformAxis: [ 0, 1, 0 ]
-          maxValue: 15
-          dragSpeed: 20
-        scripts:
-        - |
-            this.pointerUp = function( pointerInfo, pickInfo ) {
-              this.parent.parent.channel = this.controlValue;
-            }
-            this.pointerMove = function( pointerInfo, pickInfo ) {
-              this.parent.parent.channel = this.controlValue;
-            }             
+        extends: http://vwf.example.com/node3.vwf 
+        implements:  
+        - http://vwf.example.com/animation.vwf
+        - http://vwf.example.com/node3/animation.vwf
+        - http://vwf.example.com/control.vwf
+        properties:
+          controlValue: 0
+          controlDirection: -1
+          animationTime: 0
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
+          channel0:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 0
+              controlType: detent
+          channel1:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 1
+              controlType: detent
+          channel2:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 2
+              controlType: detent
+          channel3:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 3
+              controlType: detent
+          channel4:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 4
+              controlType: detent
+          channel5:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 5
+              controlType: detent
+          channel6:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 6
+              controlType: detent
+          channel7:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 7
+              controlType: detent
+          channel8:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 8
+              controlType: detent
+          channel9:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 9
+              controlType: detent
+          channel10:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 10
+              controlType: detent
+          channel11:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 11
+              controlType: detent
+          channel12:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 12
+              controlType: detent
+          channel13:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 13
+              controlType: detent
+          channel14:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 14
+              controlType: detent
+          channel15:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 15
+              controlType: detent
+        scripts:
+        - |
+          this.animationUpdate = function(time, duration) {
+            if(!this.initialTransform) {
+              this.initialTransform = this.transform;
+            }
+            this.transform = this.initialTransform;
+            this.rotateBy([0, 1, 0, (time * 300)], 0, "rotated");
+            // Update channel
+            this.parent.parent.channel = time * 15;
+          }
       ic40Down: 
         extends: http://vwf.example.com/node3.vwf 
-        implements:
-        - http://vwf.example.com/control-old.vwf
+        implements: 
+        - http://vwf.example.com/animation.vwf
+        - http://vwf.example.com/node3/animation.vwf
+        - http://vwf.example.com/control.vwf
         properties:
-          controlType: translate
-          controlMode: momentary
-          transformAxis: [ 0.03, 0, 0 ]
-        scripts:
-        - |
-            this.pointerUp = function() {
-              this.parent.parent.down();
-            }            
+          animationRate: 10
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
+          unpressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 0
+          pressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 1
+              controlType: "spring"
+        scripts:
+        - |
+          this.animationUpdate = function(time, duration) {
+            if(!this.initialTransform) {
+              this.initialTransform = this.transform;
+            }
+            this.transform = this.initialTransform;
+            this.translateBy([0.04 * time, 0, 0], 0);
+          }
+          this.pointerUp = function() {
+            this.parent.parent.down();
+          }
       ic40Monitor: 
         extends: http://vwf.example.com/node3.vwf 
         children: 
@@ -318,140 +452,303 @@ children:
             extends: http://vwf.example.com/material.vwf 
       ic40P0: 
         extends: http://vwf.example.com/node3.vwf 
-        implements:
-        - http://vwf.example.com/control-old.vwf
+        implements: 
+        - http://vwf.example.com/animation.vwf
+        - http://vwf.example.com/node3/animation.vwf
+        - http://vwf.example.com/control.vwf
         properties:
-          controlType: translate
-          controlMode: momentary
-          transformAxis: [ 0, 0, 0.03 ]
-        scripts:
-        - |
-            this.pointerUp = function() {
-              this.parent.parent.p0();
-            }   
+          animationRate: 10
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
+          unpressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 0
+          pressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 1
+              controlType: "spring"
+        scripts:
+        - |
+          this.animationUpdate = function(time, duration) {
+            if(!this.initialTransform) {
+              this.initialTransform = this.transform;
+            }
+            this.transform = this.initialTransform;
+            this.translateBy([0, 0, 0.03 * time], 0);
+          } 
+          this.pointerUp = function() {
+            this.parent.parent.p0();
+          }
       ic40P1: 
         extends: http://vwf.example.com/node3.vwf 
-        implements:
-        - http://vwf.example.com/control-old.vwf
+        implements: 
+        - http://vwf.example.com/animation.vwf
+        - http://vwf.example.com/node3/animation.vwf
+        - http://vwf.example.com/control.vwf
         properties:
-          controlType: translate
-          controlMode: momentary
-          transformAxis: [ 0, 0, 0.03 ]
-        scripts:
-        - |
-            this.pointerUp = function() {
-              this.parent.parent.p1();
-            }  
+          animationRate: 10
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
+          unpressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 0
+          pressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 1
+              controlType: "spring"
+        scripts:
+        - |
+          this.animationUpdate = function(time, duration) {
+            if(!this.initialTransform) {
+              this.initialTransform = this.transform;
+            }
+            this.transform = this.initialTransform;
+            this.translateBy([0, 0, 0.03 * time], 0);
+          }
+          this.pointerUp = function() {
+            this.parent.parent.p1();
+          }
       ic40P2: 
         extends: http://vwf.example.com/node3.vwf 
-        implements:
-        - http://vwf.example.com/control-old.vwf
+        implements: 
+        - http://vwf.example.com/animation.vwf
+        - http://vwf.example.com/node3/animation.vwf
+        - http://vwf.example.com/control.vwf
         properties:
-          controlType: translate
-          controlMode: momentary
-          transformAxis: [ 0, 0, 0.03 ]
-        scripts:
-        - |
-            this.pointerUp = function() {
-              this.parent.parent.p2();
-            }   
+          animationRate: 10
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
+          unpressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 0
+          pressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 1
+              controlType: "spring"
+        scripts:
+        - |
+          this.animationUpdate = function(time, duration) {
+            if(!this.initialTransform) {
+              this.initialTransform = this.transform;
+            }
+            this.transform = this.initialTransform;
+            this.translateBy([0, 0, 0.03 * time], 0);
+          } 
+          this.pointerUp = function() {
+            this.parent.parent.p2();
+          }
       ic40P3: 
         extends: http://vwf.example.com/node3.vwf 
-        implements:
-        - http://vwf.example.com/control-old.vwf
+        implements: 
+        - http://vwf.example.com/animation.vwf
+        - http://vwf.example.com/node3/animation.vwf
+        - http://vwf.example.com/control.vwf
         properties:
-          controlType: translate
-          controlMode: momentary
-          transformAxis: [ 0, 0, 0.03 ]
-        scripts:
-        - |
-            this.pointerUp = function() {
-              this.parent.parent.p3();
-            }  
+          animationRate: 10
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
+          unpressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 0
+          pressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 1
+              controlType: "spring"
+        scripts:
+        - |
+          this.animationUpdate = function(time, duration) {
+            if(!this.initialTransform) {
+              this.initialTransform = this.transform;
+            }
+            this.transform = this.initialTransform;
+            this.translateBy([0, 0, 0.03 * time], 0);
+          } 
+          this.pointerUp = function() {
+            this.parent.parent.p3();
+          }
       ic40PTT: 
         extends: http://vwf.example.com/node3.vwf 
-        implements:
-        - http://vwf.example.com/control-old.vwf
+        implements: 
+        - http://vwf.example.com/animation.vwf
+        - http://vwf.example.com/node3/animation.vwf
+        - http://vwf.example.com/control.vwf
         properties:
-          controlType: translate
-          controlMode: momentary
-          transformAxis: [ 0.04, 0, 0 ]
+          animationRate: 10
+        children: 
+          material: 
+            extends: http://vwf.example.com/material.vwf 
+          unpressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 0
+          pressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 1
+              controlType: "spring"
         scripts:
         - |
-            this.pointerUp = function() {
-              this.parent.parent.ptt();
-            }    
+          this.animationUpdate = function(time, duration) {
+            if(!this.initialTransform) {
+              this.initialTransform = this.transform;
+            }
+            this.transform = this.initialTransform;
+            this.translateBy([0.04 * time, 0, 0], 0);
+          } 
+          this.pointerUp = function() {
+            this.parent.parent.ptt();
+          }
       ic40Red: 
         extends: http://vwf.example.com/node3.vwf 
-        implements:
-        - http://vwf.example.com/control-old.vwf
+        implements: 
+        - http://vwf.example.com/animation.vwf
+        - http://vwf.example.com/node3/animation.vwf
+        - http://vwf.example.com/control.vwf
         properties:
-          controlType: translate
-          controlMode: momentary
-          transformAxis: [ 0, 0.02, 0 ]
-        scripts:
-        - |
-            this.pointerUp = function() {
-              this.parent.parent.red();
-            } //@ sourceURL=ic40Red.vwf  
+          animationRate: 10
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
+          unpressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 0
+          pressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 1
+              controlType: "spring"
+        scripts:
+        - |
+          this.animationUpdate = function(time, duration) {
+            if(!this.initialTransform) {
+              this.initialTransform = this.transform;
+            }
+            this.transform = this.initialTransform;
+            this.translateBy([0, 0.02 * time, 0], 0);
+          } 
+          this.pointerUp = function() {
+            this.parent.parent.red();
+          }
       ic40Up: 
         extends: http://vwf.example.com/node3.vwf 
-        implements:
-        - http://vwf.example.com/control-old.vwf
+        implements: 
+        - http://vwf.example.com/animation.vwf
+        - http://vwf.example.com/node3/animation.vwf
+        - http://vwf.example.com/control.vwf
         properties:
-          controlType: translate
-          controlMode: momentary
-          transformAxis: [ 0.04, 0, 0 ]
-        scripts:
-        - |
-            this.pointerUp = function() {
-              this.parent.parent.up();
-            } //@ sourceURL=ic40Up.vwf 
+          animationRate: 10
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
+          unpressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 0
+          pressed:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 1
+              controlType: "spring"
+        scripts:
+        - |
+          this.animationUpdate = function(time, duration) {
+            if(!this.initialTransform) {
+              this.initialTransform = this.transform;
+            }
+            this.transform = this.initialTransform;
+            this.translateBy([0.04 * time, 0, 0], 0);
+          }
+          this.pointerUp = function() {
+            this.parent.parent.up();
+          }
       ic40Volume: 
         extends: http://vwf.example.com/node3.vwf 
-        implements:
-        - http://vwf.example.com/control-old.vwf
+        implements: 
+        - http://vwf.example.com/animation.vwf
+        - http://vwf.example.com/node3/animation.vwf
+        - http://vwf.example.com/control.vwf
         properties:
-          rotation: [ 0, 0, 1, 0 ]
-          controlType: rotate
-          controlMode: positions
-          transformIncrement: 12
-          transformAxis: [ 0, 1, 0 ]
+          controlValue: 0
+          controlDirection: -1
+          animationTime: 0
+        children: 
+          material: 
+            extends: http://vwf.example.com/material.vwf 
+          volume0:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 0
+          volume1:
+            implements:
+            - http://vwf.example.com/animation/position.vwf
+            - http://vwf.example.com/control/position.vwf
+            properties:
+              sequence: 1
         methods:
           playStatic:
           stopStatic:
         scripts:  
         - | 
-            this.pointerUp = function()  {
-              if ( this.parent.parent.volume == 0 ) {
-                this.parent.parent.volume = 1;
-                this.playStatic();
-              } else {
-                this.parent.parent.volume = 0;
-                this.stopStatic();
-              }                            
-            } //@ sourceURL=ic40Volume.vwf
-        children: 
-          material: 
-            extends: http://vwf.example.com/material.vwf 
+          this.animationUpdate = function(time, duration) {
+            if(!this.initialTransform) {
+              this.initialTransform = this.transform;
+            }
+            this.transform = this.initialTransform;
+            this.rotateBy([0, 1, 0, (time * 300)], 0, "rotated");
+            if(time > 0.001)
+            {
+              this.parent.parent.volume = 1;
+              this.playStatic(time);
+            }
+            else
+            {
+              this.parent.parent.volume = 0;
+              this.stopStatic();
+            }
+          }
       LCD: 
         extends: http://vwf.example.com/node3.vwf 
         children: 
@@ -547,7 +844,7 @@ scripts:
         "/radio/images/LCD12_Chan10_Gon_Von.png", "/radio/images/LCD12_Chan11_Gon_Von.png", "/radio/images/LCD12_Chan12_Gon_Von.png",
         "/radio/images/LCD12_Chan13_Gon_Von.png", "/radio/images/LCD12_Chan14_Gon_Von.png", "/radio/images/LCD12_Chan15_Gon_Von.png",
         "/radio/images/LCD12_Chan16_Gon_Von.png"];
-      this.backlightImages = ["/radio/images/LCD12_LIGT_AUTO_Gon_Von.png", "/radio/images/LCD12_LIGT_OFF_Gon_Von.png", "/radio/images/LCD12_LIGT_ON_Gon_Von.png"];
+      this.backlightImages = ["/radio/images/LCD12_LIGT_AUTO_Gon_Von.png", "/radio/images/LCD12_LIGT_ON_Gon_Von.png", "/radio/images/LCD12_LIGT_OFF_Gon_Von.png"];
       this.beepImages = ["/radio/images/LCD12_BEEP_ON_Gon_Von.png", "/radio/images/LCD12_BEEP_OFF_Gon_Von.png"];
       this.squelchImages = ["/radio/images/LCD12_SQL20_Gon_Von.png", "/radio/images/LCD12_SQL30_Gon_Von.png", "/radio/images/LCD12_SQL40_Gon_Von.png",
         "/radio/images/LCD12_SQL50_Gon_Von.png", "/radio/images/LCD12_SQL60_Gon_Von.png", "/radio/images/LCD12_SQL70_Gon_Von.png", 
