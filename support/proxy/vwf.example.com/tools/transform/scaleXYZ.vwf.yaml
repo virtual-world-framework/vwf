@@ -496,11 +496,9 @@ scripts:
 
       faces.push( count, count+3, count+1, count+1, count+3, count+2 );
 
-      console.info( "faces: " + faces );
-
       var surface = {
         "extends": "http://vwf.example.com/node3.vwf",
-        "type": "definition/mesh",
+        "type": "mesh/definition",
         "properties": { 
           "meshDefinition": { "positions": pos, "faces": faces, "color": [ 255, 255, 255 ], },
         },
