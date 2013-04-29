@@ -178,7 +178,7 @@ scripts:
        
       var surface = {
         "extends": "http://vwf.example.com/node3.vwf",
-        "type": "definition/mesh",
+        "type": "mesh/definition",
         "properties": { 
           "meshDefinition": { "positions": pos, "faces": faces, "color": [ 0, 0, 255 ], },
         },
