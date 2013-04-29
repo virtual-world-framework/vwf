@@ -20,6 +20,16 @@ properties:
 children:
   transformTool:
     includes: http://vwf.example.com/tools/transform/transformTool.vwf
+  cubeTest:
+    extends: http://vwf.example.com/threejs/cube.vwf
+    properties:
+      meshDefinition: { "width": 100, "height": 100, "depth": 100, "color": "red" }
+      translation: [ -200, 0, 0 ]
+  sphereTest:
+    extends: http://vwf.example.com/threejs/sphere.vwf
+    properties:
+      meshDefinition: { "radius": 50, "color": "green" }
+      translation: [ 200, 0, 0 ]
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -57,5 +67,7 @@ scripts:
     this.initialize = function(){
       this.camera.transform = [ -1,0,0,0, 0,-1,0,0, 0,0,1,0, 0,600,0,1 ];
       this.camera.far = this.camera.far * 4;
-      this.transformTool.testTool();
+      if ( this.transformTool !== undefined ) {
+        this.transformTool.testTool();
+      }
     }
