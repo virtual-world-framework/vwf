@@ -1714,7 +1714,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     colorValue = vwfColor._decimal;
                 }
             }
-            var mat = new THREE.MeshLambertMaterial( { "color": colorValue, "emissive": colorValue } );
+            var mat = new THREE.MeshLambertMaterial( { "color": colorValue, "ambient": colorValue } );
            
             if ( isCubeDefinition.call( this, node.prototypes ) ) {
                 height = meshDef.height || 1;
