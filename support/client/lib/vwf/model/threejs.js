@@ -1571,6 +1571,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     
                         
                 }
+                // these properties should possibly be three js specific
+                if( propertyName == "transparent" ) {
+                    value = threeObject.transparent;
+                    return value;
+                }
+                if( propertyName == "opacity" ) {
+                    value = threeObject.opacity;
+                    return value;
+                }                
             }
             if( threeObject instanceof THREE.Camera ) {
                 switch ( propertyName ) {
