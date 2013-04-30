@@ -364,7 +364,7 @@ var scriptText = " \
 
             if ( node ) {
 
-                node.children.push( child );
+                node.children[childIndex] = child;
                 node.children[childName] = child;  // TODO: conflict if childName is parseable as a number
 
 node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example

@@ -39,68 +39,87 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                 childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
 
-            // The kernel calls vwf/model/object's `creatingNode` twice: once as a special case
-            // before the other drivers, and once in the normal order as the last driver. Ignore the
-            // second call.
-
-            if ( this.objects[childID] ) {  // TODO: return node metadata to the kernel and use vwf/model/object just as a property store?
-                return;
-            }
+            // The kernel calls vwf/model/object's `creatingNode` multiple times: once at the start
+            // of `createChild` so that we can claim our spot in the parent's children array before
+            // doing any async operations, a second time after loading the prototype and behaviors,
+            // then a third time in the normal order as the last driver.
 
             var parent = nodeID != 0 && this.objects[nodeID];
 
-            var child = this.objects[childID] = {
+            var child = this.objects[childID];
 
-                id: childID,
+            if ( ! child ) {
 
-                prototype: childExtendsID &&
-                    this.objects[childExtendsID],
+                // First time: initialize the node.
 
-                behaviors: ( childImplementsIDs || [] ).map( function( childImplementsID ) {
+                child = this.objects[childID] = {
+
+                    id: childID,
+
+                    prototype: undefined,
+                    behaviors: undefined,
+
+                    source: childSource,
+                    type: childType,
+
+                    uri: parent ? undefined : childIndex,
+
+                    name: childName,
+
+                    properties: {},
+
+                    parent: undefined,
+                    children: [],
+
+                    sequence: 0,                      // counter for child ID assignments
+
+                    prng: parent ?                    // pseudorandom number generator, seeded by ...
+                        new Alea( JSON.stringify( parent.prng.state ), childID ) :  // ... the parent's prng and the child ID, or
+                        new Alea( configuration.active["random-seed"], childID ),   // ... the global seed and the child ID
+
+                    // Change list for patchable objects. This field is omitted until needed.
+
+                    // patches: {
+                    //     root: true,                // node is the root of the component
+                    //     descendant: true,          // node is a descendant still within the component
+                    //     internals: true,           // random, seed, or sequence has changed
+                    //     properties: true,          // placeholder for a property change list
+                    //     methods: [],               // array of method names for methods that changed
+                    // },
+
+                    initialized: false,
+
+                };
+
+                // Connect to the parent.
+
+                if ( parent ) {
+                    child.parent = parent;
+                    parent.children[childIndex] = child;
+                }
+
+                // Create the `patches` field for tracking changes if the node is patchable (if it's
+                // the root or a descendant in a component).
+
+                if ( child.uri ) {
+                    child.patches = { root: true };
+                } else  if ( parent && ! parent.initialized && parent.patches ) {
+                    child.patches = { descendant: true };
+                }
+
+            } else if ( ! child.prototype ) {
+
+                // Second time: fill in the prototype and behaviors.
+
+                child.prototype = childExtendsID && this.objects[childExtendsID];
+
+                child.behaviors = ( childImplementsIDs || [] ).map( function( childImplementsID ) {
                     return this.objects[childImplementsID];
-                }, this ),
+                }, this );
 
-                source: childSource,
-                type: childType,
+            } else {
 
-                uri: parent ? undefined : childIndex,
-
-                name: childName,
-
-                properties: {},
-
-                parent: undefined,
-                children: [],
-
-                sequence: 0,                      // counter for child ID assignments
-
-                prng: parent ?                    // pseudorandom number generator, seeded by ...
-                    new Alea( JSON.stringify( parent.prng.state ), childID ) :  // ... the parent's prng and the child ID, or
-                    new Alea( configuration.active["random-seed"], childID ),   // ... the global seed and the child ID
-
-                // Change list for patchable objects. This field is omitted until needed.
-
-                // patches: {
-                //     root: true,                // node is the root of the component
-                //     descendant: true,          // node is a descendant still within the component
-                //     internals: true,           // random, seed, or sequence has changed
-                //     properties: true,          // placeholder for a property change list
-                //     methods: [],               // array of method names for methods that changed
-                // },
-
-                initialized: false,
-
-            };
-
-            if ( parent ) {
-                child.parent = parent;
-                parent.children.push( child );
-            }
-
-            if ( child.uri ) {
-                child.patches = { root: true };
-            } else  if ( parent && ! parent.initialized && parent.patches ) {
-                child.patches = { descendant: true };
+                // Third time: ignore since nothing is new.
             }
 
         },

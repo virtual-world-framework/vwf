@@ -162,7 +162,6 @@
         /// @name module:vwf~applicationID
 
         var applicationID = undefined;
-        var pendingApplicationID = undefined;
 
         /// Components describe the objects that make up the simulation. They may also serve as
         /// prototype objects for further derived components. External components are identified by
@@ -1852,7 +1851,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             childComponent = normalizedComponent( childComponent );
 
-            var childID, childIndex;
+            var childID, childIndex, childPrototypeID, childBehaviorIDs = [], deferredInitializations = {};
 
             // Determine if we're replicating previously-saved state, or creating a fresh object.
 
@@ -1895,24 +1894,31 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
 }
             }
 
-            // Record the application root ID. The application is the first (global) node created.
-            // The application node is recognized here but recorded as pending. Then, after its
-            // dependencies are loaded, it is registered just as its `creatingNode` calls are sent.
+            // Record the application root ID. The application is the first (global) node created.  // TODO: this would be better if made more explicit from the caller (possibly using a special `childName` marker, but that would require the "this is the application" annotation to pass through `createNode`; since `createNode` and `createChild` should probably merge to simplify the patches: and includes: support, this can wait)
 
-            if ( ! applicationID && ! pendingApplicationID ) {
-                pendingApplicationID = childID;
+            if ( ! applicationID ) {
+                applicationID = childID;
             }
 
-            var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
+            // Register the node in vwf/model/object. Since the kernel delegates many node
+            // information functions to vwf/model/object, this serves to register it with the
+            // kernel. The node must be registered before any async operations occur to ensure that
+            // the parent's child list is correct when following siblings calculate their index
+            // numbers.
+
+            vwf.models.object.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                childComponent.source, childComponent.type, childIndex, childName );  // TODO: move node metadata back to the kernel and only use vwf/model/object just as a property store?
+
+            // Construct the node.
 
             async.series( [
 
-                // Rudimentary support for `{ includes: prototype }`, which absorbs a prototype
-                // descriptor into the child descriptor before creating the child.
-
-                // See the notes in `createNode` and the `mergeDescriptors` limitations.
-
                 function( series_callback_async /* ( err, results ) */ ) {
+
+                    // Rudimentary support for `{ includes: prototype }`, which absorbs a prototype
+                    // descriptor into the child descriptor before creating the child.
+
+                    // See the notes in `createNode` and the `mergeDescriptors` limitations.
 
                     if ( componentIsDescriptor( childComponent ) && childComponent.includes && componentIsURI( childComponent.includes ) ) {
 
@@ -1992,22 +1998,12 @@ if ( ! childComponent.source ) {
 
                 function( series_callback_async /* ( err, results ) */ ) {
 
-                    // Register the node as the application root if it was recognized as such
-                    // earlier.  // TODO: this would be better if made more explicit from the caller (possibly using a special `childName` marker, but that would require the "this is the application" annotation to pass through `createNode`; since `createNode` and `createChild` should probably merge to simplify the patches: and includes: support, this can wait)
-
-                    if ( childID === pendingApplicationID ) {
-                        applicationID = childID;
-                        pendingApplicationID = undefined;
-                    }
-
-                    // As a special case, since many kernel functions delegate to vwf/model/object,
-                    // call it first so that those functions will be available to the other drivers.
-                    // vwf/model/object is the last model driver, so relying on the normal order for
-                    // `creatingNode` would prevent other drivers from asking about prototypes and
-                    // other node information in their `creatingNode` handlers.
+                    // Re-register the node in vwf/model/object now that we have the prototypes and
+                    // behaviors. vwf/model/object knows that we call it more than once and only
+                    // updates the new information.
 
                     vwf.models.object.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                        childComponent.source, childComponent.type, childIndex, childName );  // TODO: return node metadata to the kernel and use vwf/model/object just as a property store?
+                        childComponent.source, childComponent.type, childIndex, childName );  // TODO: move node metadata back to the kernel and only use vwf/model/object just as a property store?
 
                     // Call creatingNode() on each model. The node is considered to be constructed
                     // after all models have run.
