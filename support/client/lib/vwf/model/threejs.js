@@ -958,6 +958,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             value = colorToString.call( this, vwfColor );
                         }
                     }
+
+                    // backgroundColor and enableShadows are dependent on the renderer object, but if they are set in a prototype,
+                    // the renderer is not available yet, so store them until it is ready.
                     if ( propertyName == 'backgroundColor' )
                     {
                         if ( node && node.renderer ) {
@@ -967,12 +970,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 value = colorToString.call( this, vwfColor );
                             }
                         }
+                        else if(node) {
+                            node.rendererProperties["backgroundColor"] = propertyValue;
+                        }
                     }
                     if(propertyName == 'enableShadows')
                     {
                         if ( node && node.renderer ) {
                             value = Boolean( propertyValue );
                             node.renderer.shadowMapEnabled = value;
+                        }
+                        else if(node) {
+                            node.rendererProperties["enableShadows"] = propertyValue;
                         }
                     }
                 }   
@@ -1396,6 +1405,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         node.threeScene.name = "scene";
         node.pendingLoads = 0;
         node.srcAssetObjects = [];
+        node.rendererProperties = {};
         
         return node;
     }

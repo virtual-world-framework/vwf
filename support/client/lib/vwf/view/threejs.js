@@ -302,6 +302,21 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 sceneNode.renderer = new THREE.CanvasRenderer({canvas:mycanvas,antialias:true});
                 sceneNode.renderer.setSize(window.innerWidth,window.innerHeight);
             }
+
+            // backgroundColor and enableShadows are dependent on the renderer object, but if they are set in a prototype,
+            // the renderer is not available yet, so set them now.
+            for(var key in sceneNode.rendererProperties) {
+                if(key == "backgroundColor") {
+                    var vwfColor = new utility.color( sceneNode.rendererProperties["backgroundColor"] );
+                    if ( vwfColor ) {
+                        sceneNode.renderer.setClearColor( { r:vwfColor.red()/255, g:vwfColor.green()/255, b:vwfColor.blue()/255 }, vwfColor.alpha() );
+                    }
+                }
+                else if(key == "enableShadows") {
+                    value = Boolean( sceneNode.rendererProperties["enableShadows"] );
+                    sceneNode.renderer.shadowMapEnabled = value;
+                }
+            }
             
             rebuildAllMaterials.call(this);
             if(sceneNode.renderer.setFaceCulling)
