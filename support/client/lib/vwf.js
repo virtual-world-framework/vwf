@@ -1460,8 +1460,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                 }
             } );
 
-            // Call deletingNode() on each model. The node is considered deleted after each model
-            // has run.
+            // Call deletingNode() on each model. The node is considered deleted after all models
+            // have run.
 
             this.models.forEach( function( model ) {
                 model.deletingNode && model.deletingNode( nodeID );
@@ -2004,7 +2004,7 @@ if ( ! childComponent.source ) {
                         childComponent.source, childComponent.type, childURI, childName );  // TODO: return node metadata to the kernel and use vwf/model/object just as a property store?
 
                     // Call creatingNode() on each model. The node is considered to be constructed
-                    // after each model has run.
+                    // after all models have run.
 
                     async.forEachSeries( vwf.models, function( model, each_callback_async /* ( err ) */ ) {
 
@@ -2269,7 +2269,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             this.logger.debuggx( "addChild", nodeID, childID, childName );
 
-            // Call addingChild() on each model. The child is considered added after each model has
+            // Call addingChild() on each model. The child is considered added after all models have
             // run.
 
             this.models.forEach( function( model ) {
@@ -2296,8 +2296,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             this.logger.debuggx( "removeChild", nodeID, childID );
 
-            // Call removingChild() on each model. The child is considered removed after each model
-            // has run.
+            // Call removingChild() on each model. The child is considered removed after all models
+            // have run.
 
             this.models.forEach( function( model ) {
                 model.removingChild && model.removingChild( nodeID, childID );
@@ -2449,8 +2449,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];  // TODO: add truncated propertyGet, propertySet to log
             } );
 
-            // Call creatingProperty() on each model. The property is considered created after each
-            // model has run.
+            // Call creatingProperty() on each model. The property is considered created after all
+            // models have run.
 
             this.models.forEach( function( model ) {
                 model.creatingProperty && model.creatingProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
@@ -2508,7 +2508,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             // Call settingProperty() on each model. The first model to return a non-undefined value
             // has performed the set and dictates the return value. The property is considered set
-            // after each model has run.
+            // after all models have run.
 
             this.models.some( function( model, index ) {
 
@@ -2725,8 +2725,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             this.logger.debuggx( "createMethod", nodeID, methodName, methodParameters );
 
-            // Call creatingMethod() on each model. The method is considered created after each
-            // model has run.
+            // Call creatingMethod() on each model. The method is considered created after all
+            // models have run.
 
             this.models.forEach( function( model ) {
                 model.creatingMethod && model.creatingMethod( nodeID, methodName, methodParameters, methodBody );
@@ -2785,8 +2785,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             this.logger.debuggx( "createEvent", nodeID, eventName, eventParameters );
 
-            // Call creatingEvent() on each model. The event is considered created after each model
-            // has run.
+            // Call creatingEvent() on each model. The event is considered created after all models
+            // have run.
 
             this.models.forEach( function( model ) {
                 model.creatingEvent && model.creatingEvent( nodeID, eventName, eventParameters );
@@ -2940,8 +2940,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 scriptType = "application/javascript";
             }
 
-            // Call executing() on each model. The script is considered executed after each model
-            // has run.
+            // Call executing() on each model. The script is considered executed after all models
+            // have run.
 
             var scriptValue = undefined;
 
