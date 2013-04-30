@@ -24,7 +24,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <color sid="diffuse">0.4704 0.4704 0.4704 1</color>
@@ -66,7 +66,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="_096_M996_AMB_bmp-sampler" texcoord="_1096_M996_AMB-lib-UV0"/>
