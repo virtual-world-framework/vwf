@@ -30,6 +30,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             this.lessonSteps = new Array();
             this.progressWidth = 10;
 
+            this.currentTaskName = undefined;
+
             // Add CSS files
             var lessonCss = document.createElement('link');
             lessonCss.rel = 'stylesheet';
@@ -173,6 +175,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             {
                 switch (eventName) {
                   case "entering":
+                    this.currentTaskName = vwf.name(nodeId);
                     this.progressWidth = 10;
                     $('#lessonProgressBar').css('display', 'block');
                     $('#lessonProgressBar').css('width', '10px');
@@ -200,6 +203,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             {
                 switch (eventName) {
                   case "entering":
+                    this.currentTaskName = vwf.name(nodeId);
                     var stepDivName = '#' + nodeId.replace(/\:/g, "_").replace(/\./g, "-");
                     if($(stepDivName).length) $(stepDivName).trigger('click');
                     break;
@@ -254,11 +258,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             else
             {
                 var htmlParent = parentID.replace(/\:/g, "_").replace(/\./g, "-");
-                console.info(htmlParent);
-                // while(! $('#div--' + htmlParent).length) 
-                // {
-                //     htmlParent = htmlParent.substring(0, htmlParent.lastIndexOf('_'));
-                // }
+                while(! $('#div--' + htmlParent).length) 
+                {
+                    htmlParent = htmlParent.substring(0, htmlParent.lastIndexOf('_'));
+                }
                 if( $('#div--' + htmlParent).html() != "" ) $('#div--' + htmlParent).append("<br />");
                 $('#div--' + htmlParent).append(lessonSteps[step] + "<br />");
             }
@@ -278,7 +281,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     function nextTask()
     {
-        vwf_view.kernel.callMethod(vwf.find('','/lesson')[0], 'next', []);
+        vwf_view.kernel.callMethod(vwf.find('','//'+this.currentTaskName)[0], 'next', []);
     }
 
     // -- completeLesson --------------------------------------------------------------------

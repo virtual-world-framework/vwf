@@ -138,3 +138,12 @@ children:
     properties:
       translation: [ 0, -6, 5 ]
      # rotation: [ 1, 0, 0, 0 ]
+scripts:
+- |
+  this.entering = function() {
+    // Reset control value positions
+    this.parent.radio.Radio.ic40Volume.controlValue = this.parent.radio.Radio.ic40Volume.volume0.controlValue;
+    this.parent.radio.Radio.ic40Channel.controlValue = this.parent.radio.Radio.ic40Channel.channel0.controlValue;
+    this.parent.radio.backLightMode = "auto";
+    this.parent.radio.squelch = 20;
+  } //@ sourceURL=radio-lesson.vwf
