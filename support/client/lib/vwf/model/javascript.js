@@ -365,10 +365,12 @@ var scriptText = " \
             if ( node ) {
 
                 node.children[childIndex] = child;
-                node.children[childName] = child;  // TODO: conflict if childName is parseable as a number
 
+                if ( parseInt( childName ).toString() !== childName ) {
+                    node.children[childName] = child;
 node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                ( node[childName] = child );
+                    ( node[childName] = child );
+                }
 
             }
 
