@@ -86,8 +86,17 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 value: {} // for bookkeeping, not visible to scripts on the node  // TODO: well, ideally not visible; hide this better ("_private", "vwf_private", ?)
             } );
 
-node.id = childID; // TODO: move to vwf/model/object
-node.uri = childURI; // TODO: move to vwf/model/object
+            Object.defineProperty( node, "id", {
+                value: childID,
+                enumerable: true,
+            } );
+
+            Object.defineProperty( node, "uri", { // "this" is node
+                get: function() {
+                    return self.kernel.uri( this.id );
+                },
+                enumerable: true,
+            } );
 
             node.name = childName;
 
@@ -707,7 +716,10 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
         proxy.private.origin = behavior; // the node we're the proxy for
 
-proxy.id = behavior.id; // TODO: move to vwf/model/object
+        Object.defineProperty( proxy, "id", {
+            value: behavior.id,
+            enumerable: true,
+        } );
 
         proxy.name = behavior.name;
 
@@ -935,7 +947,10 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
 
         if ( future.private.change < node.private.change ) { // only if out of date
 
-            future.id = node.id;
+            Object.defineProperty( future, "id", {
+                value: node.id,
+                enumerable: true,
+            } );
 
             future.properties = Object.create( Object.getPrototypeOf( future ).properties || Object.prototype, {
                 future: { value: future } // for future.properties accessors (non-enumerable)  // TODO: hide this better
