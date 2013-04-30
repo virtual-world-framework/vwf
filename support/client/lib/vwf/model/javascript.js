@@ -318,7 +318,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName ) {
 
+            var node = this.nodes[nodeID];
             var child = this.nodes[childID];
+
             var scriptText = "this.initialize && this.initialize()";
 
 var scriptText = " \
@@ -339,11 +341,35 @@ var scriptText = " \
     \
 ";
 
+            // Call the initializer.
+
             try {
-                return ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
+                ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
             } catch ( e ) {
                 this.logger.warnx( "initializingNode", childID,
                     "exception in initialize:", utility.exceptionMessage( e ) );
+            }
+
+            // Link to the parent.
+            // 
+            // The parent reference is only defined once the node is fully initialized. It is not
+            // defined earlier since components should be able to stand alone without depending on
+            // external nodes.
+            // 
+            // Additionally, since parts of the application may become ready in a different order on
+            // other clients, referring to properties in other parts of the application may lead to
+            // consistency errors.
+
+            child.parent = node;
+
+            if ( node ) {
+
+                node.children.push( child );
+                node.children[childName] = child;  // TODO: conflict if childName is parseable as a number
+
+node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+                ( node[childName] = child );
+
             }
 
             return undefined;
@@ -381,22 +407,6 @@ var scriptText = " \
         // -- addingChild --------------------------------------------------------------------------
 
         addingChild: function( nodeID, childID, childName ) {
-
-            var node = this.nodes[nodeID];
-            var child = this.nodes[childID];
-
-            child.parent = node;
-
-            if ( node ) {
-
-                node.children.push( child );
-                node.children[childName] = child;  // TODO: conflict if childName is parseable as a number
-
-node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                ( node[childName] = child );
-
-            }
-
         },
 
         // TODO: removingChild

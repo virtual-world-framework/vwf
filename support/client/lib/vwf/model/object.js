@@ -92,6 +92,11 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
 
             };
 
+            if ( parent ) {
+                child.parent = parent;
+                parent.children.push( child );
+            }
+
             if ( child.uri ) {
                 child.patches = { root: true };
             } else  if ( parent && ! parent.initialized && parent.patches ) {
@@ -132,15 +137,8 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
 
         // -- addingChild --------------------------------------------------------------------------
 
-        addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
-
-            var object = this.objects[nodeID];
-            var child = this.objects[childID];
-
-            child.parent = object;
-            object.children.push( child );
-
-        },
+        // addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
+        // },
 
         // -- removingChild ------------------------------------------------------------------------
 

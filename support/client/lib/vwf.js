@@ -2254,9 +2254,6 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
             ], function( err, results ) /* async */ {
 
-if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
-vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) implicit in createChild( parent-id, child-name, child-component ); remove this
-
                 // The node is complete. Invoke the callback method and pass the new node ID and the
                 // ID of its prototype. If this was the root node for the application, the
                 // application is now fully initialized.
