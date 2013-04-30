@@ -864,7 +864,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 isolateProperties--;
 
                 set_callback && set_callback();
-
+				$(document).trigger('setstatecomplete');
             } );
 
             this.logger.groupEnd();

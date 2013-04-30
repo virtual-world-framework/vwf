@@ -139,50 +139,142 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 		width: 65%;
 		margin-top: 10px;
 	}
+	.required
+	{
+		padding: 17px;
+		border-radius: 10px;
+		margin-top: 10px;
+		border: 1px solid lightblue;
+	}
+	.optional
+	{
+		padding: 17px;
+		border-radius: 10px;
+		margin-top: 10px;
+		border: 1px solid lightblue;
+	}
 	</style>
 
 	<script type="text/javascript" src="vwf/view/editorview/sha256.js"></script>
     <script type="text/javascript">
 	
 	
-	
+		var salt = 'OBS#$%SGSDF##$%#DA';
+		var EncryptPassword = function (password, username)
+		{
+			var unencrpytedpassword = password + username + salt;
+			for (var i = 0; i < 1000; i++)
+			{
+				unencrpytedpassword = CryptoJS.SHA256(unencrpytedpassword) + '';
+			}
+			return unencrpytedpassword;
+		}
 		$(document).ready(function()
 		{
-			function redirect()
-			{
-				var ret = window.location.search.substr(window.location.search.indexOf('=')+1);
-				var path = window.location.pathname.substr(0,window.location.pathname.lastIndexOf('/')+1);
-				
-				var url = window.location.protocol + "//"+ window.location.host + path + ret;
-				window.location = url;
-			}
-			window.setTimeout(function(){
-			$.ajax('/vwfDataManager.svc/sitelogout',
+			$.ajax('/vwfDataManager.svc/logindata',
 				{
-					
-					async:false,
+					cache:false,
 					success:function(data,status,xhr)
 					{
-						
 						//already logged in, need to redirect back to target!
 						redirect();
 					},
 					error:function(xhr,status,err)
 					{
-						
-						redirect();
+						setup();
 					}
 				});
-			},1000);
 		});	
+		function redirect()
+		{
+			var ret = window.location.search.substr(window.location.search.indexOf('=')+1);
+			var path = window.location.pathname.substr(0,window.location.pathname.lastIndexOf('/')+1);
+			
+			var url = window.location.protocol + "//" + window.location.host + path + ret;
+			window.location = url;
+		}
+		function setup()
+		{
 		
+			$('#btncreate').click(
+			function(){
+			
+				var username = $('#txtusername').val();
+				var password = $('#txtpassword').val();
+				password = EncryptPassword(password,username);
+				
+				var profile = {};
+				
+				profile.inventory = {objects:[],scripts:[]};
+				profile.Username = username;
+				profile.Password = password;
+				profile.Avatar = 'usmale.dae';
+				
+				$.ajax("/VWFDataManager.svc/Profile?UID=" + profile.Username + "&P=" + profile.Password,
+				{
+					cache:false,
+					data:JSON.stringify(profile),
+					type:'POST',
+					success:function(data,status,xhr)
+					{
+						$('#txtusername').val('');
+						$('#txtpassword').val('');
+						
+						$.ajax('/vwfDataManager.svc/sitelogin?UID=' + username +"&P=" + password,
+						{
+							cache:false,
+							success:function(data,status,xhr)
+							{
+								
+								redirect();
+							},
+							error:function(xhr,status,err)
+							{
+								
+								$('#error').text("Error: " + xhr.responseText);
+							}
+						});
+				
+					},
+					error:function(xhr,status,err)
+					{
+						
+						$('#error').text("Error: " + xhr.responseText);
+					},
+					dataType:'text'
+				});
+			});
+		
+		};
+	
 	</script>
 </head>
 <body>
 
     <div class="wrapper">
-		<h1> Virtual World Framework Sandbox Logout </h1>
-		<div>Logging out... </div>
+		<h1> Virtual World Framework Sandbox Account Creation </h1>
+		<div>Enter your name and password below. </div>
+		
+		<div class='required'>
+		 <div class='label'>Required Information</div>
+		 <input type='text' id='txtusername' class='input' placeholder='Username'/>
+		 <input type='password' id='txtpassword' class='input' placeholder='Password'/>
+		 <input type='password' id='txtpasswordconfirm' class='input' placeholder='Confirm Password'/>
+		 <div id = 'btncreate' class='button'> Create Account </div>
+		</div>
+		<div class='optional'>
+		 <div class='label'>Optional Information</div>
+		 <input type='text' id='dob' class='input' placeholder='Date Of Birth'/>
+		 <input type='text' id='location' class='input' placeholder='Sex'/>
+		 <input type='text' id='relationship' class='input' placeholder='Relationship Status'/>
+		 <input type='text' id='name' class='input' placeholder='Full Name'/>
+		 <input type='text' id='location' class='input' placeholder='Location'/>
+		 <input type='text' id='homepage' class='input' placeholder='Homepage'/>
+		 <input type='text' id='employer' class='input' placeholder='Employer'/>
+		</div>
+		<div id='error' style="margin-top: 20PX;font-size: 3EM;color: red;"/>
+		
     </div>
 </body>
 </html>
+

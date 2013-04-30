@@ -200,6 +200,15 @@
 
     <script type="text/javascript">
 		var g_Username;
+		var g_Admin = false;
+		function checkFilter(text)
+		{
+			var filter = $('#filter').val();
+			if(text.toLowerCase().indexOf(filter.toLowerCase()) != -1)
+				return true;
+			return false;	
+		
+		}
 		function showStates()
 		{
 			
@@ -217,7 +226,11 @@
 				for(var i = 0; i < keys.length; i++)
 				{
 					var id = keys[i].substr(13,16);
-					if($('#'+id).length == 0)
+					var show = checkFilter(e[keys[i]].title) ||
+							   checkFilter(e[keys[i]].description) ||
+							   checkFilter(e[keys[i]].owner);
+					
+					if($('#'+id).length == 0 && show)
 					{
 						
 						$('#activeInstances').append('<div class="coldstate" id="'+id+'" ></div>');
@@ -246,7 +259,7 @@
 						$('#'+id+'data').append('<div class="lastModified">Last Modified: '+e[keys[i]].lastUpdate+'</div>');
 						$('#'+id+'data').append('<div class="stateid">'+keys[i]+'</div>');
 						
-						if(g_Username != e[keys[i]].owner)
+						if(g_Username != e[keys[i]].owner && !g_Admin)
 						{
 							$('#'+id+"edit").hide();
 						}
@@ -276,8 +289,14 @@
 						data = JSON.parse(xhr.responseText);
 						$('#username').text("Logged in as: " + data.username);
 						g_Username = data.username;
+						g_Admin = data.admin;
 						$('#login').hide();
+						$('#signup').hide();
 						showStates();
+						$('#filter').keyup(function()
+						{
+							showStates();
+						});
 						window.setInterval(function(){
 							showStates();
 						},5000);
@@ -289,6 +308,10 @@
 						$('#newstatearea').hide();
 						
 						showStates();
+						$('#filter').keyup(function()
+						{
+							showStates();
+						});
 						window.setInterval(function(){
 							showStates();
 						},5000);
@@ -306,7 +329,7 @@
 		<span href="" id="username">Name</span>
 		<a href="login.html?return=index.html" id="login">Login</a>
 		<a href="logout.html?return=index.html" id="logout">Logout</a>
-		
+		<a href="signup.html?return=index.html" id="signup">Create Account</a>
 	</div>
 </div>	
     <div class="wrapper">
@@ -314,6 +337,9 @@
 		<div>Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in "cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a new world" </div>
 		
 		
+		<div>
+			<input id="filter" type="text" placeholder="Filter Results" style="margin: 10px;"/>
+		</div>
 		<div id="activeInstances" style='width:800px'>
 		
 		</div>

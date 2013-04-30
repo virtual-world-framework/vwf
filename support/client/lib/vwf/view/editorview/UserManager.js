@@ -144,6 +144,30 @@ define(function ()
 		{
 			setupPmWindow(_UserManager.SelectedProfile.Username);
 		});
+		$(document).on('setstatecomplete',function()
+		{
+			
+			
+				$.ajax('/vwfDataManager.svc/logindata',
+				{
+					cache:false,
+					success:function(data,status,xhr)
+					{
+						var username = _DataManager.getCurrentUserName();
+						this.Login(username,'');
+						
+					}.bind(this),
+					error:function(xhr,status,err)
+					{
+						_Notifier.alert('You are viewing this world as a guest. Please sign in to participate');
+						
+					}.bind(this)
+				});
+			
+			
+			
+		}.bind(this)
+		);
 		this.SelectedProfile = null;
 		this.showProfile = function (profile)
 		{
@@ -192,6 +216,8 @@ define(function ()
 		};
 		this.Login = function (username, password)
 		{
+		
+			if(this.GetCurrentUserName()) return;
 			//clear this. No reason to have it saved in the dom
 			$('#profilenames').val('');
 			$('#password').val('');
@@ -210,6 +236,7 @@ define(function ()
 				async: false,
 				dataType: "json"
 			});
+			
 			var profile = _DataManager.GetProfileForUser(username, password, true);
 			if (!profile)
 			{
@@ -297,7 +324,11 @@ define(function ()
 		}
 		this.Logout = function ()
 		{
-			if (!_UserManager.GetCurrentUserName()) return;
+			//if (!_UserManager.GetCurrentUserName()) return;
+			
+			window.location = _DataManager.getCurrentApplication();
+			return;
+			
 			$('#MenuLogOuticon').css('background', "#555555");
 			$('#MenuLogInicon').css('background', "");
 			$('#MenuLogIn').removeAttr('disabled');

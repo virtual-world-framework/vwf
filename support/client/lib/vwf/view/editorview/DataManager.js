@@ -653,7 +653,11 @@ define(function ()
 			{
 				var node = this.rawdata.scenes[num][i];
 				var name = node.properties.DisplayName + i;
-				vwf_view.kernel.kernel.createChild('index-vwf', name, node, null, null);
+				var callback = null;
+				if(i == this.rawdata.scenes[num].length - 2)
+					callback = $(document).trigger('setstatecomplete');
+				vwf_view.kernel.kernel.createChild('index-vwf', name, node, callback, null);
+				
 			}
 			var props = this.rawdata.scenes[num][this.rawdata.scenes[num].length - 1]
 			for (var i in props)

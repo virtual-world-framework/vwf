@@ -116,7 +116,7 @@ function ServeProfile(filename,response,URL, JSONHeader)
 function GetLoginData(response,URL)
 {
 	if(URL.loginData)
-		respond(response,200,JSON.stringify({username:URL.loginData.UID}));
+		respond(response,200,JSON.stringify({username:URL.loginData.UID,admin:URL.loginData.UID==global.adminUID}));
 	else
 		respond(response,401,JSON.stringify({username:null}));
 	return;
@@ -488,7 +488,7 @@ function DeleteProfile(URL,filename,response)
 	CheckPassword(UID,P,function(e){
 	
 		//Did no supply a good name password pair
-		if(!e)
+		if(!e && state.owner != global.adminUID)
 		{
 				
 				respond(response,401,'Incorrect password when deleting state ' + filename);
@@ -613,7 +613,7 @@ function DeleteState(URL,SID,response)
 	}
 	DAL.getInstance(SID,function(state)
 	{
-		if(state.owner != URL.loginData.UID)
+		if(state.owner != URL.loginData.UID && URL.loginData.UID != global.adminUID)
 		{
 			respond(response,401,'User does not have permission to delete instance');
 			return;
@@ -830,7 +830,7 @@ function setStateData(URL,data,response)
 			respond(response,401,'State not found. State ' + sid);
 			return;
 		}
-		if(state.owner == URL.loginData.UID)
+		if(state.owner == URL.loginData.UID || URL.loginData.UID == global.adminUID)
 		{
 			DAL.updateInstance(sid,statedata,function()
 			{

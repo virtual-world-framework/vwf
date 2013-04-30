@@ -809,13 +809,21 @@ function startVWF(){
 	global.logLevel = p >= 0 ? process.argv[p+1] : 2;
 	global.log('LogLevel = ' +  global.logLevel,0);	
 	
+	var adminUID = 'admin';
+	
+	p = process.argv.indexOf('-a');
+	adminUID = p >= 0 ? process.argv[p+1] : adminUID;	
+	
 	SandboxAPI.setDAL(DAL);
 	SandboxAPI.setDataPath(datapath);
 	Shell.setDAL(DAL);
 	DAL.startup(function(){
 		
 		global.sessions = [];
+		global.adminUID = adminUID;
+		
 		var srv = http.createServer(OnRequest).listen(port);
+		global.log('Admin is "' + global.adminUID+"\"",0);
 		global.log('Serving on port ' + port,0);
 		
 		Shell.StartShellInterface();  
