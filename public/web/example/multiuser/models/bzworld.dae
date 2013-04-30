@@ -63,7 +63,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <color sid="diffuse">0.8 0.8 0.8 1</color>
@@ -105,7 +105,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="wall_png-sampler" texcoord="UVSET0"/>
@@ -147,7 +147,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="std_ground_png-sampler" texcoord="UVSET0"/>
@@ -189,7 +189,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="pyrwall_png-sampler" texcoord="UVSET0"/>
@@ -231,7 +231,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="boxwall_png-sampler" texcoord="UVSET0"/>
@@ -273,7 +273,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="purple_basetop_png-sampler" texcoord="UVSET0"/>
@@ -315,7 +315,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="purple_basewall_png-sampler" texcoord="UVSET0"/>
@@ -357,7 +357,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="green_basetop_png-sampler" texcoord="UVSET0"/>
@@ -399,7 +399,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="green_basewall_png-sampler" texcoord="UVSET0"/>
@@ -441,7 +441,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="blue_basetop_png-sampler" texcoord="UVSET0"/>
@@ -483,7 +483,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="blue_basewall_png-sampler" texcoord="UVSET0"/>
@@ -525,7 +525,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="caution_png-sampler" texcoord="UVSET0"/>
@@ -567,7 +567,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="telelink_png-sampler" texcoord="UVSET0"/>
@@ -609,7 +609,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="red_basetop_png-sampler" texcoord="UVSET0"/>
@@ -651,7 +651,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="red_basewall_png-sampler" texcoord="UVSET0"/>
