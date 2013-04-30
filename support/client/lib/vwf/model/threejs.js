@@ -946,7 +946,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 if(threeObject.__lights[i] instanceof THREE.AmbientLight)
                                 {
                                     threeObject.__lights[i].color.setRGB(vwfColor.red()/255,vwfColor.green()/255,vwfColor.blue()/255);
-                                    SetMaterialAmbients.call(this);
                                     lightsFound++;
                                 }
                             
@@ -955,7 +954,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 var ambientlight = new THREE.AmbientLight( '#000000' );
                                 ambientlight.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                                 node.threeScene.add( ambientlight );
-                                SetMaterialAmbients.call(this);                            
                             }
                             value = colorToString.call( this, vwfColor );
                         }
@@ -1731,8 +1729,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             asset.name = childName;
             asset.vwfID = nodeID;
             asset.matrixAutoUpdate = false;
-           
-            SetMaterialAmbients.call(threeModel,asset);
             
             // remember that this was a loaded collada file
             asset.loadedColladaNode = true;
@@ -2731,34 +2727,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 ret = child;
         }       
         return ret;
-    }
-    //necessary when settign the amibent color to match GLGE behavior
-    //Three js mults scene ambient by material ambient
-    function SetMaterialAmbients(start)
-    {
-        
-        if(!start)
-        {
-            for(var i in this.state.scenes)
-            {
-                SetMaterialAmbients(this.state.scenes[i].threeScene);
-            }
-        }else
-        {
-            if(start && start.material)
-            {
-                //this will override any ambient colors set in materials.
-                if(start.material.ambient)
-                    start.material.ambient.setRGB(1,1,1);
-                if(!start.material.ambient) 
-                    start.material.ambient = new THREE.Color('#FFFFFF');
-            }
-            if(start && start.children)
-            {
-               for(var i in start.children)
-                SetMaterialAmbients(start.children[i]);
-            }
-        }
     }
     function SetVisible(node,state) 
     {
