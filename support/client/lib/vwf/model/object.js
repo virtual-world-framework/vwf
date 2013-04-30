@@ -37,7 +37,7 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
         // -- creatingNode -------------------------------------------------------------------------
 
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-                childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+                childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
 
             // The kernel calls vwf/model/object's `creatingNode` twice: once as a special case
             // before the other drivers, and once in the normal order as the last driver. Ignore the
@@ -63,7 +63,7 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
                 source: childSource,
                 type: childType,
 
-                uri: childURI,
+                uri: parent ? undefined : childIndex,
 
                 name: childName,
 
@@ -102,7 +102,8 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
 
         // -- initializingNode ---------------------------------------------------------------------
 
-        initializingNode: function( nodeID, childID ) {
+        initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+                childSource, childType, childIndex, childName ) {
             this.objects[childID].initialized = true;
         },
 

@@ -83,7 +83,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- creatingNode ------------------------------------------------------------------------
         
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-                                childSource, childType, childURI, childName, callback ) {
+                                childSource, childType, childIndex, childName, callback ) {
+
+            var childURI = nodeID === 0 ? childIndex : undefined;
 
             var self = this;
 

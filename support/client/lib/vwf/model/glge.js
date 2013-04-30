@@ -46,7 +46,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // -- creatingNode ------------------------------------------------------------------------
         
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-                                childSource, childType, childURI, childName, callback ) {
+                                childSource, childType, childIndex, childName, callback ) {
+
+            var childURI = nodeID === 0 ? childIndex : undefined;
 
             var self = this;
 
@@ -77,7 +79,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
 //            this.logger.enabled = true;
 //            this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
-//                                childSource, childType, childURI, childName );
+//                                childSource, childType, childIndex, childName );
 //            this.logger.enabled = false;
 
             // find the parent node

@@ -1852,6 +1852,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             childComponent = normalizedComponent( childComponent );
 
+            var childID, childIndex;
+
             // Determine if we're replicating previously-saved state, or creating a fresh object.
 
             var replicating = !! childComponent.id;
@@ -1863,7 +1865,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // of the descriptor. An existing ID is used when synchronizing to state drawn from
             // another client or to a previously-saved state.
 
-var useLegacyID = childURI &&
+var useLegacyID = nodeID === 0 && childURI &&
     ( childURI == "index.vwf" || childURI == "appscene.vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
     childURI != "http://vwf.example.com/node.vwf";
     
@@ -1871,21 +1873,25 @@ useLegacyID = useLegacyID ||
     nodeID == applicationID && childName == "camera"; // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
-                var childID = childComponent.id;
+                childID = childComponent.id;
+                childIndex = this.children( nodeID ).length;
             } else if ( nodeID === 0 ) {  // global: component's URI or hash of its descriptor
-                var childID = childURI ||  // TODO: hash uri => id to shorten for faster lookups?
+                childID = childURI ||  // TODO: hash uri => id to shorten for faster lookups?
                     Crypto.MD5( JSON.stringify( childComponent ) ).toString();  // TODO: MD5 may be too slow here
 if ( useLegacyID ) {  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
 }
+                childIndex = childURI;
             } else {  // descendant: parent id + next from parent's sequence
 if ( useLegacyID ) {  // TODO: fix static ID references and remove
-    var childID = ( childComponent["extends"] || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
+    childID = ( childComponent["extends"] || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
+    childIndex = this.children( nodeID ).length;
 } else {    
-                var childID = nodeID + ":" + this.sequence( nodeID ) +
+                childID = nodeID + ":" + this.sequence( nodeID ) +
                     ( this.configuration["randomize-ids"] ? "-" + ( "0" + Math.floor( this.random( nodeID ) * 100 ) ).slice( -2 ) : "" ) +
                     ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
+                childIndex = this.children( nodeID ).length;
 }
             }
 
@@ -2001,7 +2007,7 @@ if ( ! childComponent.source ) {
                     // other node information in their `creatingNode` handlers.
 
                     vwf.models.object.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                        childComponent.source, childComponent.type, childURI, childName );  // TODO: return node metadata to the kernel and use vwf/model/object just as a property store?
+                        childComponent.source, childComponent.type, childIndex, childName );  // TODO: return node metadata to the kernel and use vwf/model/object just as a property store?
 
                     // Call creatingNode() on each model. The node is considered to be constructed
                     // after all models have run.
@@ -2013,7 +2019,7 @@ if ( ! childComponent.source ) {
                         // TODO: suppress kernel reentry here (just for childID?) with kernel/model showing a warning when breached; no actions are allowed until all drivers have seen creatingNode()
 
                         model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childURI, childName, function( ready ) /* async */ {
+                                childComponent.source, childComponent.type, childIndex, childName, function( ready ) /* async */ {
 
                             if ( driver_ready && ! ready ) {
                                 queue.suspend( "while loading " + childComponent.source + " for " + childID + " in creatingNode" ); // suspend the queue
@@ -2046,7 +2052,7 @@ if ( ! childComponent.source ) {
                         var driver_ready = true;
 
                         view.createdNode && view.createdNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childURI, childName, function( ready ) /* async */ {
+                                childComponent.source, childComponent.type, childIndex, childName, function( ready ) /* async */ {
 
                             if ( driver_ready && ! ready ) {
                                 queue.suspend( "while loading " + childComponent.source + " for " + childID + " in createdNode" ); // suspend the queue
@@ -2230,11 +2236,13 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                     // indicate that the node is fully constructed.
 
                     vwf.models.forEach( function( model ) {
-                        model.initializingNode && model.initializingNode( nodeID, childID );
+                        model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                            childComponent.source, childComponent.type, childIndex, childName );
                     } );
 
                     vwf.views.forEach( function( view ) {
-                        view.initializedNode && view.initializedNode( nodeID, childID );
+                        view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                            childComponent.source, childComponent.type, childIndex, childName );
                     } );
 
                     // Restore kernel reentry.

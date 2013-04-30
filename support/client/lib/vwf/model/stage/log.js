@@ -38,7 +38,7 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
                 switch ( modelFunctionName ) {
 
-                    case "creatingNode": // nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback /* ( ready ) */
+                    case "creatingNode": // nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName, callback /* ( ready ) */
                         logees[8] = undefined; // callback /* ( ready ) */
                         break;
 

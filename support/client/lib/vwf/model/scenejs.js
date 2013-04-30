@@ -36,7 +36,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- creatingNode -------------------------------------------------------------------------
 
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+            childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
         },
 
         // -- deletingNode -------------------------------------------------------------------------

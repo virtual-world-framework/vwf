@@ -137,7 +137,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         },
         
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+            childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
 
             var nodeIDAttribute = $.encoder.encodeForHTMLAttribute("id", nodeID, true);
             var childIDAttribute = $.encoder.encodeForHTMLAttribute("id", childID, true);

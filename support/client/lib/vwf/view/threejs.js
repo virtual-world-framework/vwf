@@ -43,7 +43,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childURI, childName, callback /* ( ready ) */) {
+            childSource, childType, childIndex, childName, callback /* ( ready ) */) {
             
             
             //the created node is a scene, and has already been added to the state by the model.

@@ -56,7 +56,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // -- creatingNode -------------------------------------------------------------------------
 
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+            childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
 
             var self = this;
 
@@ -106,7 +106,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             node.type = childType;
 
             Object.defineProperty( node, "logger", {
-                value: this.logger.for( "#" + ( childName || childURI || childID ), node ),
+                value: this.logger.for( "#" + ( childName || childIndex || childID ), node ),
                 enumerable: true,
             } );
 
@@ -315,7 +315,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         // Invoke an initialize() function if one exists.
 
-        initializingNode: function( nodeID, childID ) {
+        initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childIndex, childName ) {
 
             var child = this.nodes[childID];
             var scriptText = "this.initialize && this.initialize()";
