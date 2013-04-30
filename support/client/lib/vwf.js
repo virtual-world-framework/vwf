@@ -1875,7 +1875,7 @@ useLegacyID = useLegacyID ||
                 childID = childComponent.id;
                 childIndex = this.children( nodeID ).length;
             } else if ( nodeID === 0 ) {  // global: component's URI or hash of its descriptor
-                childID = childURI ||  // TODO: hash uri => id to shorten for faster lookups?
+                childID = childURI ||
                     Crypto.MD5( JSON.stringify( childComponent ) ).toString();  // TODO: MD5 may be too slow here
 if ( useLegacyID ) {  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
