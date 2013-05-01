@@ -424,17 +424,53 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- addingChild ------------------------------------------------------------------------
         
         addingChild: function( nodeID, childID, childName ) {
-            
+
+            var threeObjParent = getThreeObject.call( this, nodeID );
+            var threeObjChild = getThreeObject.call( this, childID ); 
+            if ( threeObjParent && threeObjChild && ( threeObjParent instanceof THREE.Object3D ) ){
+
+                var childParent = threeObjChild.parent;
+                // what does vwf do here?  add only if parent is currently undefined
+                if ( childParent ) {
+                    childParent.remove( threeObjChild )   
+                } 
+                threeObjParent.add( threeObjChild );
+            } 
+
         },
 
         // -- movingChild ------------------------------------------------------------------------
         
         movingChild: function( nodeID, childID, childName ) {
+
+            var threeObjParent = getThreeObject.call( this, nodeID );
+            var threeObjChild = getThreeObject.call( this, childID ); 
+            if ( threeObjParent && threeObjChild && ( threeObjParent instanceof THREE.Object3D ) ){
+
+                var childParent = threeObjChild.parent;
+                // do we only move if there is currently a parent
+                if ( childParent ) {
+                    childParent.remove( threeObjChild );
+                    threeObjParent.add( threeObjChild );   
+                } 
+            } 
+
         },
 
         // -- removingChild ------------------------------------------------------------------------
         
         removingChild: function( nodeID, childID, childName ) {
+            
+            var threeObjParent = getThreeObject.call( this, nodeID );
+            var threeObjChild = getThreeObject.call( this, childID );
+            if ( threeObjParent && threeObjChild && ( threeObjParent instanceof THREE.Object3D ) ){    
+
+                var childParent = threeObjChild.parent;
+                if ( childParent === threeObjParent ) {
+                    childParent.remove( threeObjChild )   
+                } 
+            } 
+            
         },
 
         // -- creatingProperty ---------------------------------------------------------------------
@@ -1997,6 +2033,21 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
     }
 
+    function getThreeObject( ID ) {
+        var threeObject = undefined;
+        var node = this.state.nodes[ ID ]; // { name: childName, glgeObject: undefined }
+        if( node === undefined ) node = this.state.scenes[ ID ]; // { name: childName, glgeObject: undefined }
+
+        if( node ) {
+            threeObject = node.threeObject;
+            if( !threeObject )
+                threeObject = node.threeScene;
+            if ( node.threeMaterial )
+                threeObject = node.threeMaterial;
+        }
+
+        return threeObject;
+    }
     
     function findAllMeshes(threeObject,list)
     {
@@ -2213,8 +2264,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     }
     function createMesh( node, meshDef, doubleSided ) {
         if ( node.threeObject && node.threeObject instanceof THREE.Object3D ) {
-            var i, face, geo;
-            var height, width, depth, radius;
+            var i, face, geo, sides;
+            var materials = undefined;
             var vwfColor, colorValue = 0xFFFFFF;    
             if ( meshDef.color !== undefined ) {
                 vwfColor = new utility.color( meshDef.color );
@@ -2225,28 +2276,27 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var mat = new THREE.MeshLambertMaterial( { "color": colorValue, "ambient": colorValue } );
            
             if ( isCubeDefinition.call( this, node.prototypes ) ) {
-                height = meshDef.height || 1;
-                width = meshDef.width || 1;
-                depth = meshDef.depth || 1;
-                geo = new THREE.CubeGeometry( width, height, depth );
+                // materials = ??
+                sides = meshDef.sides || { px: true, nx: true, py: true, ny: true, pz: true, nz: true };
+                geo = new THREE.CubeGeometry( meshDef.width || 10, meshDef.height || 10, meshDef.depth || 10, 
+                    meshDef.segmentsWidth || 1, meshDef.segmentsHeight || 1, meshDef.segmentsDepth || 1,
+                    materials, sides );
             } else if ( isPlaneDefinition.call( this, node.prototypes ) ) {
-                height = meshDef.height || 1;
-                width = meshDef.width || 1;
-                geo = new THREE.PlaneGeometry( width, height );
+                geo = new THREE.PlaneGeometry( meshDef.width || 1, meshDef.height || 1,
+                    meshDef.segmentsWidth || 1, meshDef.segmentsHeight || 1 );
             } else if ( isCircleDefinition.call( this, node.prototypes ) ) {
-                radius = meshDef.radius || 10;
-                geo = new THREE.CircleGeometry( radius );
+                geo = new THREE.CircleGeometry( meshDef.radius || 10, 
+                    meshDef.segments || 8, meshDef.thetaStart || 0, 
+                    meshDef.thetaLength || Math.PI * 2 );
             } else if ( isSphereDefinition.call( this, node.prototypes ) ) {
-                radius = meshDef.radius || 10;
-                geo = new THREE.SphereGeometry( radius );
+                geo = new THREE.SphereGeometry( meshDef.radius || 10, meshDef.segmentsWidth || 4,
+                    meshDef.segmentsHeight || 4, meshDef.phiStart || 0,
+                    meshDef.phiLength || Math.PI * 2, meshDef.thetaStart || 0, 
+                    meshDef.thetaLength || Math.PI );
             } else if ( isCylinderDefinition.call( this, node.prototypes ) ) {
-                height = meshDef.height || 1;
-                if ( meshDef.radius !== undefined ){ 
-                    radius = meshDef.radius || 10;
-                    geo = new THREE.CylinderGeometry( radius, radius, height );
-                } else {
-                    geo = new THREE.CylinderGeometry( meshDef.radiusTop || 10, meshDef.radiusBottom || 10, height );
-                }
+                geo = new THREE.CylinderGeometry( meshDef.radiusTop || 10, meshDef.radiusBottom || 10,
+                     meshDef.height || 10, meshDef.segmentsRadius || 8, 
+                     meshDef.segmentsHeight || 1, meshDef.openEnded );
             } else {
                 geo = new THREE.Geometry();
 
