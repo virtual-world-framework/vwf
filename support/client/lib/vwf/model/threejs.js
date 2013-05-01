@@ -538,7 +538,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                                         0, 0,0,1);
                             var matrix = new THREE.Matrix4();
                             matrix.copy(threeObject.matrix);                        
-                            matrix = matrix.multiply(flipmat,matrix);
+                            matrix = matrix.multiplyMatrices(flipmat,matrix);
                             threeObject.matrix.copy(matrix);
                             threeObject.updateMatrixWorld(true);
                             value = propertyValue;   
@@ -1583,18 +1583,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         {
             var mat = new THREE.Matrix4();
             mat.copy(parent.matrix);
-            matrix = matrix.multiply(mat,matrix);
+            matrix = matrix.multiplyMatrices(mat,matrix);
             parent = parent.parent;
         }
         var mat = new THREE.Matrix4();
             mat.copy(threeObject.matrix);
-        matrix = matrix.multiply(mat,matrix);
+        matrix = matrix.multiplyMatrices(mat,matrix);
         var ret = [];
         for(var i = 0; i < mesh.geometry.vertices.length; i++)
         {
             var vert = new THREE.Vector3();
             vert.copy(mesh.geometry.vertices[i]);
-            vert = matrix.multiplyVector3(vert);
+            vert.applyMatrix4( matrix );
             ret.push([vert.x,-vert.y,vert.z]);
 
         }
@@ -2260,7 +2260,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 particle.z = 0;
                 
 				//generate a point in objects space, the move to world space
-                particle.world = mat.multiplyVector3(this.generatePoint());
+                particle.world = this.generatePoint().applyMatrix4( mat );
                 
 				//back up initial (needed by the analyticShader)
                 particle.initialx = particle.world.x;
@@ -2318,7 +2318,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 mat.elements[12] = 0;
                 mat.elements[13] = 0;
                 mat.elements[14] = 0;
-                particle.velocity = mat.multiplyVector3(particle.velocity.clone());
+                particle.velocity.applyMatrix4( mat );
                 
                 //accelerations are always world space, just min and max on each axis
                 particle.acceleration.x = this.minAcceleration[0] + (this.maxAcceleration[0] - this.minAcceleration[0]) * Math.random();
@@ -2496,7 +2496,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					this.temp.z = particle.world.z;
 					
 					//need to specify in object space, event though comptued in local
-					inv.multiplyVector3(this.temp);
+					this.temp.applyMatrix4( inv );
 					particle.x = this.temp.x;
 					particle.y = this.temp.y;
 					particle.z = this.temp.z;
@@ -2576,12 +2576,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					this.temp.x = particle.world.x ;
 					this.temp.y = particle.world.y ;
 					this.temp.z = particle.world.z;
-					inv.multiplyVector3(this.temp);
+					this.temp.applyMatrix4( inv );
 					particle.x = this.temp.x;
 					particle.y = this.temp.y;
 					particle.z = this.temp.z;
 					//careful to have prev and current pos in same space!!!!
-					inv.multiplyVector3(particle.prevworld);
+					particle.prevworld.applyMatrix4( inv );
                 }
             }
            
@@ -2637,10 +2637,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				//a system to a moving object would break.
 				for(var i =0; i < this.geometry.vertices.length; i++)
 				{
-						inv.multiplyVector3(this.geometry.vertices[i]);
-						inv.multiplyVector3(this.shaderMaterial_interpolate.attributes.previousPosition.value[i]);
-						newt.multiplyVector3(this.geometry.vertices[i]);
-						newt.multiplyVector3(this.shaderMaterial_interpolate.attributes.previousPosition.value[i]);
+						this.geometry.vertices[ i ].applyMatrix4( inv );
+						this.shaderMaterial_interpolate.attributes.previousPosition.value[ i ].applyMatrix4( inv );
+						this.geometry.vertices[ i ].applyMatrix4( newt );
+						this.shaderMaterial_interpolate.attributes.previousPosition.value[ i ].applyMatrix4( newt );
 				}
 				this.geometry.verticesNeedUpdate  = true;	
 				this.shaderMaterial_interpolate.attributes.previousPosition.needsUpdate = true;
@@ -3110,7 +3110,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                             0, 0,0,1);
                             
                                             
-            glmat = glmat.multiply(flipmat,glmat);
+            glmat = glmat.multiplyMatrices(flipmat,glmat);
             
             //glmat = glmat.transpose();
             newnode.matrix.copy(glmat)  
