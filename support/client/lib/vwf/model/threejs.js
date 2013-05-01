@@ -1645,9 +1645,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             {
                 var face = mesh.geometry.faces[i];
                 if(face instanceof THREE.Face4)
-                    mesh.geometry.faceVertexUvs[0].push([new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1)]);
+                    mesh.geometry.faceVertexUvs[0].push( [ new THREE.Vector2( 0, 1 ),
+                                                           new THREE.Vector2( 0, 1 ),
+                                                           new THREE.Vector2( 0, 1 ), 
+                                                           new THREE.Vector2( 0, 1 ) ] );
                 if(face instanceof THREE.Face3)
-                    mesh.geometry.faceVertexUvs[0].push([new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1)]);
+                    mesh.geometry.faceVertexUvs[0].push( [ new THREE.Vector2( 0, 1 ), 
+                                                           new THREE.Vector2( 0, 1 ),
+                                                           new THREE.Vector2( 0, 1 ) ] );
             }
         }
          
@@ -1709,7 +1714,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 face.vertexNormals.push( new THREE.Vector3( meshDef.normals[i*3], meshDef.normals[i*3+1],meshDef.normals[i*3+2] ) );   
             }
             for ( i = 0; geo.faceVertexUvs && meshDef.uv1 && i < meshDef.uv1.length; i++ ) {
-                geo.faceVertexUvs.push( new THREE.UV( meshDef.uv1[i*2], meshDef.uv1[i*2+1] ) );   
+                geo.faceVertexUvs.push( new THREE.Vector2( meshDef.uv1[i*2], meshDef.uv1[i*2+1] ) );   
             }             
             node.threeObject.add( new THREE.Mesh( geo, mat ) ); 
             
@@ -2974,7 +2979,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         for(var i = 0; i < node.attributes[key].length-2; i+= 3)
                         {
-                            var vert = new THREE.Vector3(node.attributes[key][i],node.attributes[key][i+1],node.attributes[key][i+2]);
+                            var vert = new THREE.Vector3( node.attributes[ key ][ i ],
+                                                          node.attributes[ key ][ i + 1 ],
+                                                          node.attributes[ key ][ i + 2 ] );
                             mesh.geometry.vertices.push(vert);
                         }
                     }
@@ -2982,7 +2989,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         for(var i = 0; i < node.attributes[key].length-2; i+= 3)
                         {
-                            var norm = new THREE.Vector3(node.attributes[key][i],node.attributes[key][i+1],node.attributes[key][i+2]);
+                            var norm = new THREE.Vector3( node.attributes[ key ][ i ],
+                                                          node.attributes[ key ][ i + 1 ],
+                                                          node.attributes[ key ][ i + 2 ] );
                             mesh.geometry.normals.push(norm);
                         }
                     }
@@ -2990,7 +2999,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         for(var i = 0; i < node.attributes[key].length-1; i+= 2)
                         {
-                            var uv = new THREE.UV(node.attributes[key][i],node.attributes[key][i+1]);
+                            var uv = new THREE.Vector2( node.attributes[ key ][ i ], 
+                                                        node.attributes[ key ][ i + 1 ] );
                             mesh.geometry.UVS.push(uv);
                         }
                     }
@@ -2999,7 +3009,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         for(var i = 0; i < node.attributes[key].length-3; i+= 4)
                         {
-                            var vert = new THREE.Vector3(node.attributes[key][i],node.attributes[key][i+1],node.attributes[key][i+2]);
+                            var vert = new THREE.Vector3( node.attributes[ key ][ i ],
+                                                          node.attributes[ key ][ i + 1 ],
+                                                          node.attributes[ key ][ i + 2 ] );
                             mesh.geometry.colors.push(vert);
                             
                         }
