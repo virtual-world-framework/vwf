@@ -412,18 +412,55 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         // -- addingChild ------------------------------------------------------------------------
         
-//        addingChild: function( nodeID, childID, childName ) {
-//        },
+        addingChild: function( nodeID, childID, childName ) {
+            
+            var parentGlgeObj = getGlgeObject.call( this, nodeID );
+            var childGlgeObj = getGlgeObject.call( this, childID );
+
+            if ( parentGlgeObj && childGlgeObj && parentGlgeObj instanceof GLGE.Group ) {
+
+                var childParent = childGlgeObj.parent;
+                // what does vwf do here?  add only if parent is currently undefined
+                if ( childParent ) {
+                    childParent.remove( childGlgeObj )   
+                } 
+                parentGlgeObj.add( childGlgeObj );   
+            }
+        },
 
         // -- movingChild ------------------------------------------------------------------------
         
-//        movingChild: function( nodeID, childID, childName ) {
-//        },
+        movingChild: function( nodeID, childID, childName ) {
+            var parentGlgeObj = getGlgeObject.call( this, nodeID );
+            var childGlgeObj = getGlgeObject.call( this, childID );
+
+            if ( parentGlgeObj && childGlgeObj && parentGlgeObj instanceof GLGE.Group ) {
+
+                var childParent = childGlgeObj.parent;
+                
+                if ( childParent ) {
+                    childParent.remove( childGlgeObj ); 
+                    parentGlgeObj.add( childGlgeObj );   
+                } 
+                  
+            }
+        },
 
         // -- removingChild ------------------------------------------------------------------------
         
-//        removingChild: function( nodeID, childID, childName ) {
-//        },
+        removingChild: function( nodeID, childID, childName ) {
+            var parentGlgeObj = getGlgeObject.call( this, nodeID );
+            var childGlgeObj = getGlgeObject.call( this, childID );
+
+            if ( parentGlgeObj && childGlgeObj && parentGlgeObj instanceof GLGE.Group ) {
+
+                var childParent = childGlgeObj.parent;
+                if ( childParent === parentGlgeObj ) {
+                    parentGlgeObj.remove( childGlgeObj )   
+                } 
+                  
+            }
+        },
 
         // -- creatingProperty ---------------------------------------------------------------------
 
@@ -2124,6 +2161,23 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
         return meshes;
 
+    }
+
+   // -- getGlgeObject ------------------------------------------------------------------------------
+
+    function getGlgeObject( id ) {
+        var glgeObj = undefined;
+        var node = this.state.nodes[ id ];
+        if ( !node && this.state.scenes[ id ] ) {
+            node = this.state.scenes[ id ];
+        }
+        if ( node ) {
+            glgeObj = node.glgeObject;
+            if ( !glgeObj && node.glgeScene ) {
+                glgeObj = node.glgeScene;
+            }
+        }
+        return glgeObj;
     }
 
    // -- getObjectID ------------------------------------------------------------------------------
