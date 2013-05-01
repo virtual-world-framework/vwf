@@ -320,7 +320,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             
             rebuildAllMaterials.call(this);
             if(sceneNode.renderer.setFaceCulling)
-                sceneNode.renderer.setFaceCulling(false);
+                sceneNode.renderer.setFaceCulling( THREE.CullFaceBack );
             this.state.cameraInUse = sceneNode.threeScene.children[1];
 
             // Schedule the renderer.
