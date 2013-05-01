@@ -1,0 +1,128 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: http://vwf.example.com/navtouch.vwf
+properties:
+  navmode: walk
+  rotationSpeed: 2
+  translationSpeed: 10
+methods:
+  update1:
+  update2:
+  update3:
+children:
+  cubeTop:
+    includes: spinningCube.vwf
+    properties:
+      translation: [ 0, 0, 100 ]
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+  cubeMiddle1:
+    includes: spinningCube.vwf
+    properties:
+      translation: [ 100, 0, 0 ]
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          color: "red"
+  cubeMiddle2:
+    includes: spinningCube.vwf
+    properties:
+      translation: [ 0, 0, 0 ]
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          color: "green"
+  cubeMiddle3:
+    includes: spinningCube.vwf
+    properties:
+      translation: [ -100, 0, 0 ]
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          color: "blue"
+  sceneCenter:
+    extends: http://vwf.example.com/node3.vwf
+    properties:
+      translation: [ 0, 0, 0 ]
+  dir1:
+    extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
+    properties:
+      lightType: "point"
+      enable: true
+      distance: 2000
+      intensity: 2
+      color: [ 128, 128, 128 ]
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
+      translation: [ -400, 400, -900 ]
+  dir2:
+    extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
+    properties:
+      lightType: "point"
+      enable: true
+      distance: 2000
+      intensity: 2
+      color: [ 128, 128, 128 ]
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
+      translation: [ 400, 400, 900 ]
+scripts:
+- |
+    this.initialize = function(){
+      console.info( "========== xParent application ==========" );
+      this.camera.transform = [ -1,0,0,0, 0,-1,0,0, 0,0,1,0, 0,600,0,1 ];
+      this.camera.far = this.camera.far * 4;
+      this.future(10).update1( true );
+      this.future(15).update2( true );
+      this.future(20).update3( true );
+    }
+    this.update1 = function( add ){
+      if ( add ) {
+        var wt = this.cubeMiddle1.worldTransform;
+        vwf_view.kernel.addChild( this.cubeTop.id, this.cubeMiddle1.id, this.cubeMiddle1.name ); 
+        this.cubeMiddle1.worldTransform = wt;
+      } else {
+        var wt = this.cubeMiddle1.worldTransform;
+        vwf_view.kernel.addChild( this.id, this.cubeMiddle1.id, this.cubeMiddle1.name );
+        this.cubeMiddle1.worldTransform = wt;
+      }
+      this.future(10).update1( !add );
+    }
+    this.update2 = function( remove ){
+      if ( remove ) {
+        vwf_view.kernel.removeChild( this.id, this.cubeMiddle2.id, this.cubeMiddle2.name );
+      } else {
+        vwf_view.kernel.addChild( this.id, this.cubeMiddle2.id, this.cubeMiddle2.name );
+      }
+      this.future(15).update2( !remove );
+    }
+    this.update3 = function( move ){
+      if ( move ) {
+        vwf_view.kernel.moveChild( this.cubeTop.id, this.cubeMiddle3.id, this.cubeMiddle3.name ); 
+      } else {
+        vwf_view.kernel.moveChild( this.id, this.cubeMiddle3.id, this.cubeMiddle3.name );
+      }
+      this.future(20).update3( !move );
+    } //@ sourceURL=index.vwf
