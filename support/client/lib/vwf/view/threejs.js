@@ -780,6 +780,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     }
                                         
                     returnData.eventNodeData[ childID ] = [ {
+                        pickID: pointerPickID,
                         position: localTrans,
                         normal: localNormal,
                         source: relativeCamPos,
