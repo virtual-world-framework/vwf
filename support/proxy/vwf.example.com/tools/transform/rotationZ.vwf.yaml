@@ -18,7 +18,7 @@ methods:
 scripts:
 - |
   this.initialize = function() {
-    console.info( "initialize rotationZ.vwf" );
+    //console.info( "initialize rotationZ.vwf" );
   }
   //this.pointerDown = this.events.add( function( pointerInfo, pickInfo ){
   this.pointerDown = function( pointerInfo, pickInfo ){
