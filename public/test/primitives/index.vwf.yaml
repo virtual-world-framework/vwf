@@ -16,51 +16,98 @@ extends: http://vwf.example.com/navtouch.vwf
 properties:
   navmode: walk
   rotationSpeed: 2
-  #ambientColor: [ 255, 255, 255 ]
+  translationSpeed: 10
 children:
   cubeTest:
     extends: http://vwf.example.com/threejs/cube.vwf
+    implements:
+    - http://vwf.example.com/spin-on-click.vwf 
+    - http://vwf.example.com/sway-on-click.vwf 
     properties:
       meshDefinition: { "width": 100, "height": 100, "depth": 100, "color": "red" }
       translation: [ -200, 0, 0 ]
+      sway-swaying: true
+      spin-spinning: true
+      spin-axis: [ 0, 0, 1 ]
     children:
       material:
         extends: http://vwf.example.com/material.vwf
   sphereTest:
     extends: http://vwf.example.com/threejs/sphere.vwf
+    implements:
+    - http://vwf.example.com/spin-on-click.vwf 
+    - http://vwf.example.com/sway-on-click.vwf 
     properties:
-      meshDefinition: { "radius": 50, "color": "green" }
+      meshDefinition: { "radius": 50, "color": "green", "segmentsWidth": 16, "segmentsHeight": 16 }
       translation: [ -100, 0, 0 ]
+      sway-swaying: true
+      spin-spinning: true
+      spin-axis: [ 0, 0, 1 ]
     children:
       material:
         extends: http://vwf.example.com/material.vwf
   circleTest:
     extends: http://vwf.example.com/threejs/circle.vwf
+    implements:
+    - http://vwf.example.com/spin-on-click.vwf 
+    - http://vwf.example.com/sway-on-click.vwf 
     properties:
-      meshDefinition: { "radius": 50, "color": "blue" }
+      meshDefinition: { "radius": 50, "color": "blue", "segments": 32 }
       translation: [ 0, 0, 0 ]
-      rotation: [ 1, 0, 0, 45 ]
+      rotation: [ 1, 0, 0, -90 ]
+      sway-swaying: false
+      spin-spinning: false
+      spin-axis: [ 0, 0, 1 ]
     children:
       material:
         extends: http://vwf.example.com/material.vwf
+    scripts:
+    - |
+      this.initialize = function() {
+        this['sway-swaying'] = true;
+        this['spin-spinning'] = true;
+      }  
   cylinderTest:
     extends: http://vwf.example.com/threejs/cylinder.vwf
+    implements:
+    - http://vwf.example.com/spin-on-click.vwf 
+    - http://vwf.example.com/sway-on-click.vwf 
     properties:
-      meshDefinition: { "radius": 50, "height": 100, "color": [ 183, 183, 183 ] }
+      meshDefinition: { "radiusTop": 50, "radiusBottom": 50, "height": 100, "color": "purple" }
       translation: [ 100, 0, 0 ]
       rotation: [ 1, 0, 0, 90 ]
+      sway-swaying: true
+      spin-spinning: true
+      spin-axis: [ 0, 0, 1 ]
     children:
       material:
         extends: http://vwf.example.com/material.vwf
+    scripts:
+    - |
+      this.initialize = function() {
+        console.info( "cylinderTest id: " + this.id );
+      }
   planeTest:
     extends: http://vwf.example.com/threejs/plane.vwf
+    implements:
+    - http://vwf.example.com/spin-on-click.vwf 
+    - http://vwf.example.com/sway-on-click.vwf 
     properties:
-      meshDefinition: { "width": 100, "height": 100, "color": "red" }
+      meshDefinition: { "width": 100, "height": 100, "color": "lightgoldenrodyellow" }
       translation: [ 200, 0, 0 ]
-      rotation: [ 1, 0, 0, 45 ]
+      rotation: [ 1, 0, 0, -90 ]
+      sway-swaying: false
+      spin-spinning: false
+      spin-axis: [ 0, 0, 1 ]
     children:
       material:
         extends: http://vwf.example.com/material.vwf
+    scripts:
+    - |
+      this.initialize = function() {
+        this['sway-swaying'] = true;
+        this['spin-spinning'] = true;
+      }
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
     properties:
