@@ -23,7 +23,7 @@ methods:
 scripts:
 - |
   this.initialize = function() {
-    console.info( "initialize translateZNeg.vwf" );
+    //console.info( "initialize translateZNeg.vwf id = " + this.id );
   }
   this.pointerDown = this.events.add( function( pointerInfo, pickInfo ){
     console.info( 'pointerDown translateZNeg' );

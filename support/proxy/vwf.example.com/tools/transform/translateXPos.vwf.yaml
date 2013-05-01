@@ -23,7 +23,7 @@ methods:
 scripts:
 - |
   this.initialize = function() {
-    console.info( "initialize translateXPos.vwf" );
+    //console.info( "initialize translateXPos.vwf id = " + this.id );
   }
   //this.pointerDown = this.events.add( function( pointerInfo, pickInfo ){
   this.pointerDown = function( pointerInfo, pickInfo ){
