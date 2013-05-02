@@ -2325,19 +2325,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             } else if ( isTextDefinition.call( this, node.prototypes ) ) {
                 if ( meshDef.text != "" ) {
                     var parms = meshDef.parameters || {};
-                    // geo = new THREE.TextGeometry( meshDef.text, { "size": parms.size || 100,
-                    //     "curveSegments": parms.curveSegments || 4, "font": parms.font || "helvetiker",
-                    //     "weight": parms.weight || "normal", "style": parms.style || "normal",
-                    //     "amount": parms.amount || 50, "height": parms.height || 50, 
-                    //     "bevelThickness": parms.bevelThickness || 10, "bevelSize": parms.bevelSize || 8,
-                    //     "bevelEnabled": Boolean( parms.bevelEnabled ),
-                    // } );
-                    geo = new THREE.TextGeometry( meshDef.text, {
-                        size: 80,
-                        height: 20,
-                        curveSegments: 2,
-                        font: "helvetiker"
+                    geo = new THREE.TextGeometry( meshDef.text, { "size": parms.size || 100,
+                        "curveSegments": parms.curveSegments || 4, "font": parms.font || "helvetiker",
+                        "weight": parms.weight || "normal", "style": parms.style || "normal",
+                        "amount": parms.amount || 50, "height": parms.height || 50, 
+                        "bevelThickness": parms.bevelThickness || 10, "bevelSize": parms.bevelSize || 8,
+                        "bevelEnabled": Boolean( parms.bevelEnabled ),
                     } );
+                    // geo = new THREE.TextGeometry( meshDef.text, {
+                    //     size: 80,
+                    //     height: 20,
+                    //     curveSegments: 2,
+                    //     font: "helvetiker"
+                    // } );
                 }
             } else {
                 geo = new THREE.Geometry();
