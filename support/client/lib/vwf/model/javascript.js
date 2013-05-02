@@ -102,6 +102,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             node.parent = undefined;
 
+            Object.defineProperty( node, "parent_", { // "this" is node in get/set
+                get: function() {
+                    return this.parent;
+                },
+                set: function( value ) {
+                    self.kernel.removeChild( this.parent.id, this.id );
+                    self.kernel.addChild( value.id, this.id, this.name );
+                },
+            } );
+
             node.source = childSource;
             node.type = childType;
 
@@ -411,7 +421,22 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
         addingChild: function( nodeID, childID, childName ) {
         },
 
-        // TODO: removingChild
+        // -- removingChild ------------------------------------------------------------------------
+
+        removingChild: function( nodeID, childID ) {
+
+            var node = this.nodes[nodeID];
+            var child = this.nodes[childID];
+
+            child.parent = undefined;
+
+            if ( node ) {
+                node.children.splice( node.children.indexOf( child ), 1 );
+                delete node.children[child.name];  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+                delete node[child.name];  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+            }
+
+        },
 
         // -- creatingProperty ---------------------------------------------------------------------
 
