@@ -1,0 +1,233 @@
+html, body{
+
+	background-color:#f4f4f4;
+
+}
+
+a{
+	text-decoration: none;
+}
+
+#wrapper{
+	width: 100%;
+	margin: 0;
+	display: block;
+}
+
+#header{
+	width: 100%;
+	background-color: #C4DCEC;
+	border-bottom: 1px solid #A2C8E2;
+	height: 25px;
+	overflow: hidden;
+}
+
+#header div{
+	width: 70%;
+	margin: 0 auto;
+}
+#header a, #header span{
+	font-size: 14px;
+	display: block;
+	margin: 3px 10px;
+	float: right;
+}
+
+#content{
+	background-color: #fff;
+	width: 70%;
+	margin: 0 auto;
+	border-left: 1px solid #e4e4e4;
+	border-right: 1px solid #e4e4e4;
+	padding: 0 15px;
+}
+
+.coldstate
+{
+
+	
+	background: #f6f8f9; /* Old browsers */
+	background: -moz-linear-gradient(top,  #f6f8f9 0%, #e5ebee 50%, #d7dee3 56%, #f5f7f9 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f6f8f9), color-stop(50%,#e5ebee), color-stop(56%,#d7dee3), color-stop(100%,#f5f7f9)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #f6f8f9 0%,#e5ebee 50%,#d7dee3 56%,#f5f7f9 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #f6f8f9 0%,#e5ebee 50%,#d7dee3 56%,#f5f7f9 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #f6f8f9 0%,#e5ebee 50%,#d7dee3 56%,#f5f7f9 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  #f6f8f9 0%,#e5ebee 50%,#d7dee3 56%,#f5f7f9 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f6f8f9', endColorstr='#f5f7f9',GradientType=0 ); /* IE6-9 */
+
+	border-radius: 10px;
+	margin: 10px;
+	padding: 10px;
+	text-align: center;
+	font-size: 1.8em;
+	box-shadow: 5px 5px 10px;
+	width: 200px;
+	height: 200px;
+	display: inline-block;
+	vertical-align: middle;
+	color: #52697E;
+	overflow: hidden;
+	text-decoration: none;
+}
+.hotstate
+{
+
+	cursor: pointer;
+	background: rgb(184,225,252); /* Old browsers */
+	background: -moz-linear-gradient(top,  rgba(184,225,252,1) 0%, rgba(144,191,240,1) 47%, rgba(107,168,229,1) 53%, rgba(191,215,255,1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(184,225,252,1)), color-stop(47%,rgba(144,191,240,1)), color-stop(53%,rgba(107,168,229,1)), color-stop(100%,rgba(191,215,255,1))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  rgba(184,225,252,1) 0%,rgba(144,191,240,1) 47%,rgba(107,168,229,1) 53%,rgba(191,215,255,1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  rgba(184,225,252,1) 0%,rgba(144,191,240,1) 47%,rgba(107,168,229,1) 53%,rgba(191,215,255,1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  rgba(184,225,252,1) 0%,rgba(144,191,240,1) 47%,rgba(107,168,229,1) 53%,rgba(191,215,255,1) 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  rgba(184,225,252,1) 0%,rgba(144,191,240,1) 47%,rgba(107,168,229,1) 53%,rgba(191,215,255,1) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b8e1fc', endColorstr='#bfd7ff',GradientType=0 ); /* IE6-9 */
+	color: #52697E;
+	border-radius: 10px;
+	margin: 10px;
+	padding: 10px;
+	text-align: center;
+	font-size: 1.8em;
+	box-shadow: 5px 5px 10px;
+	width: 200px;
+	height: 200px;
+	display: inline-block;
+	vertical-align: middle;
+	color: #52697E;
+	overflow: hidden;
+	text-decoration: none;
+}
+.title
+{
+	margin-top: 1em;
+	text-decoration: underline;
+}
+.description
+{
+	font-size: .7em;
+	margin-top: 1em;
+}
+.owner
+{
+	font-size: .5em;
+	color: gray;
+	margin-top: 1em;
+}
+.objects
+{
+	font-size: .5em;
+	color: gray;
+	margin-top: .2em;
+}
+.lastModified
+{
+	font-size: .5em;
+	color: gray;
+	margin-top: .2em;
+}
+.stateid
+{
+	font-size: .5em;
+	color: lightgray;
+	margin-top: .2em;
+}
+.button
+{
+
+	cursor: pointer;
+	background: rgb(226,226,226); /* Old browsers */
+	background: -moz-linear-gradient(top,  rgba(226,226,226,1) 0%, rgba(219,219,219,1) 50%, rgba(209,209,209,1) 51%, rgba(254,254,254,1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(226,226,226,1)), color-stop(50%,rgba(219,219,219,1)), color-stop(51%,rgba(209,209,209,1)), color-stop(100%,rgba(254,254,254,1))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', endColorstr='#fefefe',GradientType=0 ); /* IE6-9 */
+	border-radius: 10px;
+	
+	padding: 10px;
+	text-align: center;
+	font-size: 1.8em;
+	box-shadow: 5px 5px 5px;
+	
+	width: 25%;
+}
+.hotstate:hover
+{
+	border: 1px solid lightblue;
+	width: 198px;
+	height: 198px;
+	color: #52697E;
+}
+.coldstate a
+{
+	color: #52697E;
+	
+	text-decoration: none;
+	cursor: pointer;
+}
+.hotstate a
+{
+	color: #52697E;
+	
+	text-decoration: none;
+	cursor: pointer;
+}
+.coldstate:hover
+{
+	border: 1px solid lightblue;
+	width: 198px;
+	height: 198px;
+	color: #52697E;
+}
+.input
+{
+	font-size: 1.6em;
+	padding: 5px;
+	border-radius: 10px;
+	width: 65%;
+
+}
+.editstate
+{
+	text-align: right;
+	background: lightgray;
+	border-radius: 5px;
+	position: absolute;
+	display: block;
+	margin-top: -9px;
+	margin-left: 165px;
+	height: 1em;
+	line-height: 1em;
+}
+.editstatedata
+{
+	display: inline-block;
+	width: 25px;
+	height: 15px;
+	position: absolute;
+	cursor: pointer;
+	border-radius: 7px;
+}
+.editstatedelete
+{
+	display: inline-block;
+	
+	height: 15px;
+	position: absolute;
+	cursor: pointer;
+	border-radius: 7px;
+	left: 25px;
+}
+.editstatedata img
+{
+	height: 100%;
+}
+.editstatedata img:hover
+{
+	background:red
+	height: 200%;
+}
+.editstatedelete img
+{
+	height: 100%;
+}

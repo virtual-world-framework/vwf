@@ -3,204 +3,12 @@
 <head>
 	<link rel="stylesheet" href="css/colorpicker.css" type="text/css" />
     <link rel="stylesheet" media="screen" type="text/css" href="css/layout.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="style.css" />
     <title>Virtual World Framework</title>
 	<script type="text/javascript" src="jquery-1.7.1.js"></script>
     <script type="text/javascript" src="jquery-ui-1.8.16.custom.js"></script>
-	<style>
-	.coldstate
-	{
-	
-		
-		background: #f6f8f9; /* Old browsers */
-		background: -moz-linear-gradient(top,  #f6f8f9 0%, #e5ebee 50%, #d7dee3 56%, #f5f7f9 100%); /* FF3.6+ */
-		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f6f8f9), color-stop(50%,#e5ebee), color-stop(56%,#d7dee3), color-stop(100%,#f5f7f9)); /* Chrome,Safari4+ */
-		background: -webkit-linear-gradient(top,  #f6f8f9 0%,#e5ebee 50%,#d7dee3 56%,#f5f7f9 100%); /* Chrome10+,Safari5.1+ */
-		background: -o-linear-gradient(top,  #f6f8f9 0%,#e5ebee 50%,#d7dee3 56%,#f5f7f9 100%); /* Opera 11.10+ */
-		background: -ms-linear-gradient(top,  #f6f8f9 0%,#e5ebee 50%,#d7dee3 56%,#f5f7f9 100%); /* IE10+ */
-		background: linear-gradient(to bottom,  #f6f8f9 0%,#e5ebee 50%,#d7dee3 56%,#f5f7f9 100%); /* W3C */
-		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f6f8f9', endColorstr='#f5f7f9',GradientType=0 ); /* IE6-9 */
+    <script type="text/javascript" src="knockout-2.2.1.js"></script>
 
-		border-radius: 10px;
-		margin: 10px;
-		padding: 10px;
-		text-align: center;
-		font-size: 1.8em;
-		box-shadow: 5px 5px 10px;
-		width: 200px;
-		height: 200px;
-		display: inline-block;
-		vertical-align: middle;
-		color: #52697E;
-		overflow: hidden;
-		text-decoration: none;
-	}
-	.hotstate
-	{
-
-		cursor: pointer;
-		background: rgb(184,225,252); /* Old browsers */
-		background: -moz-linear-gradient(top,  rgba(184,225,252,1) 0%, rgba(144,191,240,1) 47%, rgba(107,168,229,1) 53%, rgba(191,215,255,1) 100%); /* FF3.6+ */
-		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(184,225,252,1)), color-stop(47%,rgba(144,191,240,1)), color-stop(53%,rgba(107,168,229,1)), color-stop(100%,rgba(191,215,255,1))); /* Chrome,Safari4+ */
-		background: -webkit-linear-gradient(top,  rgba(184,225,252,1) 0%,rgba(144,191,240,1) 47%,rgba(107,168,229,1) 53%,rgba(191,215,255,1) 100%); /* Chrome10+,Safari5.1+ */
-		background: -o-linear-gradient(top,  rgba(184,225,252,1) 0%,rgba(144,191,240,1) 47%,rgba(107,168,229,1) 53%,rgba(191,215,255,1) 100%); /* Opera 11.10+ */
-		background: -ms-linear-gradient(top,  rgba(184,225,252,1) 0%,rgba(144,191,240,1) 47%,rgba(107,168,229,1) 53%,rgba(191,215,255,1) 100%); /* IE10+ */
-		background: linear-gradient(to bottom,  rgba(184,225,252,1) 0%,rgba(144,191,240,1) 47%,rgba(107,168,229,1) 53%,rgba(191,215,255,1) 100%); /* W3C */
-		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b8e1fc', endColorstr='#bfd7ff',GradientType=0 ); /* IE6-9 */
-		color: #52697E;
-		border-radius: 10px;
-		margin: 10px;
-		padding: 10px;
-		text-align: center;
-		font-size: 1.8em;
-		box-shadow: 5px 5px 10px;
-		width: 200px;
-		height: 200px;
-		display: inline-block;
-		vertical-align: middle;
-		color: #52697E;
-		overflow: hidden;
-		text-decoration: none;
-	}
-	.title
-	{
-		margin-top: 1em;
-		text-decoration: underline;
-	}
-	.description
-	{
-		font-size: .7em;
-		margin-top: 1em;
-	}
-	.owner
-	{
-		font-size: .5em;
-		color: gray;
-		margin-top: 1em;
-	}
-	.objects
-	{
-		font-size: .5em;
-		color: gray;
-		margin-top: .2em;
-	}
-	.lastModified
-	{
-		font-size: .5em;
-		color: gray;
-		margin-top: .2em;
-	}
-	.stateid
-	{
-		font-size: .5em;
-		color: lightgray;
-		margin-top: .2em;
-	}
-	.button
-	{
-
-		cursor: pointer;
-		background: rgb(226,226,226); /* Old browsers */
-		background: -moz-linear-gradient(top,  rgba(226,226,226,1) 0%, rgba(219,219,219,1) 50%, rgba(209,209,209,1) 51%, rgba(254,254,254,1) 100%); /* FF3.6+ */
-		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(226,226,226,1)), color-stop(50%,rgba(219,219,219,1)), color-stop(51%,rgba(209,209,209,1)), color-stop(100%,rgba(254,254,254,1))); /* Chrome,Safari4+ */
-		background: -webkit-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* Chrome10+,Safari5.1+ */
-		background: -o-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* Opera 11.10+ */
-		background: -ms-linear-gradient(top,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* IE10+ */
-		background: linear-gradient(to bottom,  rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* W3C */
-		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', endColorstr='#fefefe',GradientType=0 ); /* IE6-9 */
-		border-radius: 10px;
-		
-		padding: 10px;
-		text-align: center;
-		font-size: 1.8em;
-		box-shadow: 5px 5px 5px;
-		
-		width: 25%;
-	}
-	.hotstate:hover
-	{
-		border: 1px solid lightblue;
-		width: 198px;
-		height: 198px;
-		color: #52697E;
-	}
-	.coldstate a
-	{
-		color: #52697E;
-		
-		text-decoration: none;
-		cursor: pointer;
-	}
-	.hotstate a
-	{
-		color: #52697E;
-		
-		text-decoration: none;
-		cursor: pointer;
-	}
-	.coldstate:hover
-	{
-		border: 1px solid lightblue;
-		width: 198px;
-		height: 198px;
-		color: #52697E;
-	}
-	.input
-	{
-		font-size: 1.6em;
-		padding: 5px;
-		border-radius: 10px;
-		width: 65%;
-	
-	}
-	.editstate
-	{
-		text-align: right;
-		background: lightgray;
-		border-radius: 5px;
-		position: absolute;
-		display: block;
-		margin-top: -9px;
-		margin-left: 165px;
-		height: 1em;
-		line-height: 1em;
-	}
-	.editstatedata
-	{
-		display: inline-block;
-		width: 25px;
-		height: 15px;
-		position: absolute;
-		cursor: pointer;
-		border-radius: 7px;
-	}
-	.editstatedelete
-	{
-		display: inline-block;
-		
-		height: 15px;
-		position: absolute;
-		cursor: pointer;
-		border-radius: 7px;
-		left: 25px;
-	}
-	.editstatedata img
-	{
-		height: 100%;
-	}
-	.editstatedata img:hover
-	{
-		background:red
-		height: 200%;
-	}
-	.editstatedelete img
-	{
-		height: 100%;
-	}
-	.loginheader
-	{
-		margin-left: 5px;
-	}
-	</style>
 
     <script type="text/javascript">
 		var g_Username;
@@ -218,7 +26,7 @@
 			
 			$.getJSON("./vwfDataManager.svc/states",function(e)
 			{
-				
+
 				$('#activeInstances').empty();
 				if(g_Username)
 				{
@@ -298,7 +106,7 @@
 						$('#signup').hide();
 						
 						if(!g_Admin)
-							$('#admin').hide();
+             				$('#admin').hide();
 						showStates();
 						$('#filter').keyup(function()
 						{
@@ -332,30 +140,30 @@
 	</script>
 </head>
 <body>
-<div style="text-align: center">
-	<div style="text-align: right; width:700px;display: inline-block;">
-		<span href="" id="username">Name</span>
-		<a href="login.html?return=index.html" id="login" class='loginheader'>Login</a>
-		<a href="logout.html?return=index.html" id="logout" class='loginheader'>Logout</a>
-		<a href="signup.html?return=index.html" id="signup" class='loginheader'>Create Account</a>
-		<a href="account.html" id="account" class='loginheader'>My Account</a>
-		<a href="admin.html" id="admin" class='loginheader'>Admin</a>
+	<div id="wrapper">
+		<div id="header" style="text-align: center">
+			<div>
+				<span href="" id="username">Name</span>
+				<a href="login.html?return=index.html" id="login">Login</a>
+				<a href="logout.html?return=index.html" id="logout">Logout</a>
+				<a href="signup.html?return=index.html" id="signup">Create Account</a>
+			</div>
+		</div>	
+		<div id="content">
+			<h1> Virtual World Framework Sandbox </h1>
+			<div>Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in "cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a new world" </div>
+			
+			
+			<div>
+				<input id="filter" type="text" placeholder="Filter Results" style="margin: 10px;"/>
+			</div>
+			<div id="activeInstances" style='width:800px'>
+			
+			</div>
+			<div id="coldInstances" style='width:800px'>
+			
+			</div>
+		</div>
 	</div>
-</div>	
-    <div class="wrapper">
-		<h1> Virtual World Framework Sandbox </h1>
-		<div>Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in "cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a new world" </div>
-		
-		
-		<div>
-			<input id="filter" type="text" placeholder="Filter Results" style="margin: 10px;"/>
-		</div>
-		<div id="activeInstances" style='width:800px'>
-		
-		</div>
-		<div id="coldInstances" style='width:800px'>
-		
-		</div>
-    </div>
 </body>
 </html>
