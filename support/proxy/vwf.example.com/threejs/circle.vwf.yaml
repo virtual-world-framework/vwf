@@ -21,6 +21,3 @@ extends: http://vwf.example.com/node3.vwf
 type: "mesh/definition"
 properties:
   meshDefinition:
-children:
-  material:
-    extends: http://vwf.example.com/material.vwf
