@@ -163,13 +163,27 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
 
         // -- addingChild --------------------------------------------------------------------------
 
-        // addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
-        // },
+        addingChild: function( nodeID, childID, childName ) {  // ... doesn't validate arguments or check for moving to/from 0  // TODO: not for global anchor node 0
+
+            var object = this.objects[nodeID];
+            var child = this.objects[childID];
+
+            child.parent = object;
+            object.children.push( child );
+
+        },
 
         // -- removingChild ------------------------------------------------------------------------
 
-        // removingChild: function( nodeID, childID ) {
-        // },
+        removingChild: function( nodeID, childID ) {  // ... doesn't validate arguments or check for moving to/from 0
+
+            var object = this.objects[nodeID];
+            var child = this.objects[childID];
+
+            child.parent = undefined;
+            object.children.splice( object.children.indexOf( child ), 1 );
+
+        },
 
         // TODO: creatingProperties, initializingProperties
 
