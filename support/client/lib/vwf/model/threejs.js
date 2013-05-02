@@ -1699,7 +1699,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 asset = asset.scene;
             var removed = false;
            
-            SetMaterialAmbients.call(threeModel,asset);
+            //SetMaterialAmbients.call(threeModel,asset);
 			//asset.rotation.z = Math.PI;
 			
             
@@ -3245,9 +3245,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
                 if (node.stateset.material) {
-                    newmaterial.ambient = (toColor(node.stateset.material.ambient));
+                    newmaterial.ambient = (toColor(node.stateset.material.diffuse));
                     newmaterial.color = (toColor(node.stateset.material.diffuse));
-                    
+                    newmaterial.alpha = 1.0;
                     newmaterial.shininess = (node.stateset.material.shininess);
                     newmaterial.specular = (toColor(node.stateset.material.specular));
                     newmaterial.needsUpdate = true;
