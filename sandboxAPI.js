@@ -934,10 +934,10 @@ function serve (request, response)
 		switch(command)
 		{	
 			case "texture":{
-				ServeFile(basedir+"textures\\" + UID,response,URL);		
+				ServeFile(basedir+"textures\\" + URL.query.UID,response,URL);		
 			} break;
 			case "thumbnail":{
-				ServeFile(basedir+"thumbnails\\" + UID,response,URL);		
+				ServeFile(basedir+"thumbnails\\" + URL.query.UID,response,URL);		
 			} break;
 			case "state":{
 				ServeFile(basedir+"states\\" + SID+'\\state',response,URL,'GetStateResult');		

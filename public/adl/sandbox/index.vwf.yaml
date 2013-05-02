@@ -768,7 +768,7 @@ scripts:
         }else  if(this.cameramode == '3RDPerson')
         {
             
-            var xmatrix = MATH.angleAxis(this.oldRotZ,[0,0,1]);
+            var xmatrix = MATH.angleAxis(this.objectFollowed.rotZ,[0,0,1]);
             var offset = MATH.mulMat4Vec3(xmatrix,[0,1.5,.5]);
             
             var finaldist = MATH.lengthVec3(offset);  

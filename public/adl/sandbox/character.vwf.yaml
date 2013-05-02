@@ -79,7 +79,7 @@ scripts:
                 runningjump:{start:109,length:48,speed:1.25,current:0,loop:false}
             };
           this.prerendercallback = this.placeNameTag.bind(this);
-          $(document).bind('prerender',this.prerendercallback);
+          $(document).bind('postpostprerender',this.prerendercallback);
           //this.callbacknum = findVWFscene().addUpdateCallback(this.placeNameTag.bind(this));
           this.updatecounter = 0;
           this.mesh = findChildViewNode(findscene(),this.id);
@@ -342,12 +342,12 @@ scripts:
         
             //if the character is not completely still, and they're not jumpping, then check their motion vector 
             //for intersetions, and prevent penetration through objects
-            if((MATH.lengthVec3(this.originalvelocity) > .001 || motionvec) && !this.inMotion('jump') && this.activeCycle != 'stand')
+            if((MATH.lengthVec3(this.originalvelocity) > .001 || motionvec) && !this.inMotion('jump'))
             {
                 this.skin.PickPriority = -1;
                 
                 
-                motionvec = MATH.toUnitVec3(motionvec);
+                motionvec = motionvec ? MATH.toUnitVec3(motionvec) : [0,0,0];
                 var testpos = MATH.subVec3(finalt,MATH.scaleVec3(motionvec,-.15));
                 
                 var intersectfront = _SceneManager.CPUPick(MATH.addVec3(testpos,[0,0,1]),motionvec,{filter:function(o){return o.isAvatar != true;},maxDist: 100,ignore:[this.skin,_Editor.GetMoveGizmo()]});
@@ -360,7 +360,7 @@ scripts:
                         var len = MATH.lengthVec3(offset);
                         offset = MATH.scaleVec3(offset,1/MATH.lengthVec3(offset));
                         var norm = [intersectfront.norm[0],intersectfront.norm[1],intersectfront.norm[2]];
-                        console.log(norm);
+                        
                         if(Math.abs(norm[0]) < .05) norm[0] = 0;
                         if(Math.abs(norm[1]) < .05) norm[1] = 0;
                         if(Math.abs(norm[2]) < .05) norm[2] = 0;
@@ -398,7 +398,8 @@ scripts:
                     }
                     else
                     {
-                        finalt = MATH.addVec3(finalt, [0,0,zmove/3]);
+                        //the 1.0 here is a fudge factor that allows for animated transitions between clamped heights.
+                        finalt = MATH.addVec3(finalt, [0,0,zmove/1.0]);
                         
                     }
                     
@@ -448,17 +449,19 @@ scripts:
              this.updatecounter = 0;
           }
           
-        for(var i = 0; i < this.updateCallbacks.length; i++)
-        {
-        
-            this.updateCallbacks[i](this);
-        }
+       
       
         this.skin.PickPriority = 1;
         this.tbak = finalt;
         this.translation = finalt;
       
         this.rotation = backupr;
+        
+         for(var i = 0; i < this.updateCallbacks.length; i++)
+        {
+        
+            this.updateCallbacks[i](this);
+        }
     }
     this.tick = function()
     {
@@ -593,19 +596,19 @@ scripts:
          {          
              if(this.id == 'character-vwf') return;
             if(vwf.client() != this.ownerClientID) return;
-            if(!e.keysDown.W)
+            if(!e.keysDown.W && !e.keysDown.uparrow)
                 this.removeMotion('walk');
-            if(!e.keysDown.S)
+            if(!e.keysDown.S && !e.keysDown.downarrow)
                 this.removeMotion('walkback');    
             if(!e.keysDown.D)
                 {this.removeMotion('straferight'); this.removeMotion('strafeleft');}
-            if(!e.keysDown.C)
+            if(!e.keysDown.C && !e.keysDown.rightarrow)
                 {this.removeMotion('turnright'); this.removeMotion('turnleft');}    
-            if(!e.keysDown.A)
+            if(!e.keysDown.A  )
                 {this.removeMotion('strafeleft');this.removeMotion('straferight');}
-            if(!e.keysDown.Z)
+            if(!e.keysDown.Z && !e.keysDown.leftarrow)
                 {this.removeMotion('turnleft'); this.removeMotion('turnright');}        
-            if(!e.keysDown.W && this.inMotion('run'))
+            if(!e.keysDown.W  && !e.keysDown.uparrow && this.inMotion('run'))
                 this.cancelRun();       
             
          }
@@ -613,9 +616,10 @@ scripts:
          {
             if(this.id == 'character-vwf') return;
            if(vwf.client() != this.ownerClientID) return;
-            if(e.keysDown.W)
+            
+            if(e.keysDown.W || e.keysDown.uparrow)
                 this.walk();
-            if(e.keysDown.S)
+            if(e.keysDown.S || e.keysDown.downarrow)
                 this.walkback();
             if(e.keysDown.space && !e.mods.shift)
             {
@@ -624,7 +628,7 @@ scripts:
                 else
                     this.runningjump();
             }
-            if(e.keysDown.D && !this.inMotion('walkback'))
+            if(e.keysDown.D  && !this.inMotion('walkback'))
                { this.addMotion('straferight');  this.activeCycle = 'straferight';  }
             if(e.keysDown.D && this.inMotion('walkback'))
                { this.addMotion('strafeleft');  this.activeCycle = 'strafeleft';  }
@@ -633,13 +637,13 @@ scripts:
             if(e.keysDown.A && this.inMotion('walkback'))
                { this.addMotion('straferight');   this.activeCycle = 'straferight';   }
                
-             if(e.keysDown.C && !this.inMotion('walkback'))
+             if((e.keysDown.C || e.keysDown.rightarrow) && !this.inMotion('walkback'))
                { this.addMotion('turnright');   }
-            if(e.keysDown.C && this.inMotion('walkback'))
+            if((e.keysDown.C || e.keysDown.rightarrow) && this.inMotion('walkback'))
                { this.addMotion('turnleft');    }
-            if(e.keysDown.Z && !this.inMotion('walkback'))
+            if((e.keysDown.Z || e.keysDown.leftarrow) && !this.inMotion('walkback'))
                { this.addMotion('turnleft');      }
-            if(e.keysDown.Z && this.inMotion('walkback'))
+            if((e.keysDown.Z || e.keysDown.leftarrow )&& this.inMotion('walkback'))
                { this.addMotion('turnright');    }
             if(e.mods.shift && e.keysDown.W)
                 this.run();    

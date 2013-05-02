@@ -300,7 +300,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			}
 			
 			$(document).trigger('postprerender',[vp,wh,ww]);
-			
+			$(document).trigger('postpostprerender',[vp,wh,ww]);
 			var camera = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
 			var pos = camera.localToWorld(new THREE.Vector3(-.4,.275,-1.0))
 			sceneNode.axes.position = pos;

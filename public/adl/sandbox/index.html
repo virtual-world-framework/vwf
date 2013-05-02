@@ -196,6 +196,10 @@
 	{
 		height: 100%;
 	}
+	.loginheader
+	{
+		margin-left: 5px;
+	}
 	</style>
 
     <script type="text/javascript">
@@ -292,6 +296,9 @@
 						g_Admin = data.admin;
 						$('#login').hide();
 						$('#signup').hide();
+						
+						if(!g_Admin)
+							$('#admin').hide();
 						showStates();
 						$('#filter').keyup(function()
 						{
@@ -306,7 +313,8 @@
 						$('#username').hide();
 						$('#logout').hide();
 						$('#newstatearea').hide();
-						
+						$('#admin').hide();
+						$('#account').hide();
 						showStates();
 						$('#filter').keyup(function()
 						{
@@ -327,9 +335,11 @@
 <div style="text-align: center">
 	<div style="text-align: right; width:700px;display: inline-block;">
 		<span href="" id="username">Name</span>
-		<a href="login.html?return=index.html" id="login">Login</a>
-		<a href="logout.html?return=index.html" id="logout">Logout</a>
-		<a href="signup.html?return=index.html" id="signup">Create Account</a>
+		<a href="login.html?return=index.html" id="login" class='loginheader'>Login</a>
+		<a href="logout.html?return=index.html" id="logout" class='loginheader'>Logout</a>
+		<a href="signup.html?return=index.html" id="signup" class='loginheader'>Create Account</a>
+		<a href="account.html" id="account" class='loginheader'>My Account</a>
+		<a href="admin.html" id="admin" class='loginheader'>Admin</a>
 	</div>
 </div>	
     <div class="wrapper">

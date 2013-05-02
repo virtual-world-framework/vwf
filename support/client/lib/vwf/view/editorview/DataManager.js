@@ -655,10 +655,14 @@ define(function ()
 				var name = node.properties.DisplayName + i;
 				var callback = null;
 				if(i == this.rawdata.scenes[num].length - 2)
-					callback = $(document).trigger('setstatecomplete');
+					callback = function(){$(document).trigger('setstatecomplete')};
 				vwf_view.kernel.kernel.createChild('index-vwf', name, node, callback, null);
 				
 			}
+			// if there is no data to load
+			if(this.rawdata.scenes[num].length - 1 == 0)
+				$(document).trigger('setstatecomplete');
+			
 			var props = this.rawdata.scenes[num][this.rawdata.scenes[num].length - 1]
 			for (var i in props)
 			{
@@ -696,7 +700,8 @@ define(function ()
 			catch (e)
 			{
 				data = [];
-				startHelp();
+				//startHelp();
+				$(document).trigger('setstatecomplete');
 			}
 			this.loadedScene = data;
 			this.rawdata.scenes[SID] = data;

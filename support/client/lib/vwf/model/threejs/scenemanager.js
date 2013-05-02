@@ -830,7 +830,7 @@ THREE.RenderBatch.prototype.build = function()
 
 				for ( var j = 0, jl = uv.length; j < jl; j ++ ) {
 
-					uvCopy.push( new THREE.Vector2( uv[ j ].x, uv[ j ].y ) );
+					uvCopy.push( new THREE.Vector2( uv[ j ] ? uv[ j ].x : 0, uv[ j ] ? uv[ j ].y : 0 ) );
 
 				}
 
