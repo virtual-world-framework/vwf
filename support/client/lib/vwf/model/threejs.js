@@ -425,17 +425,31 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         
         addingChild: function( nodeID, childID, childName ) {
 
+            //console.info( "addingChild( " + nodeID+", "+childID+", "+childName + " )" );
+            //debugger;
             var threeObjParent = getThreeObject.call( this, nodeID );
             var threeObjChild = getThreeObject.call( this, childID ); 
-            if ( threeObjParent && threeObjChild && ( threeObjParent instanceof THREE.Object3D ) ){
+            
+            if ( threeObjParent && threeObjChild ) { 
+                if ( threeObjParent instanceof THREE.Object3D ) {
 
-                var childParent = threeObjChild.parent;
-                // what does vwf do here?  add only if parent is currently undefined
-                if ( childParent ) {
-                    childParent.remove( threeObjChild )   
-                } 
-                threeObjParent.add( threeObjChild );
-            } 
+                    if ( !( threeObjChild instanceof THREE.Material ) ) {
+                        var childParent = threeObjChild.parent;
+                        if ( childParent !== threeObjParent ) {
+                            // what does vwf do here?  add only if parent is currently undefined
+                            if ( childParent ) {
+                                //console.info( "A     *R* removing: " + childID + " from " + childParent.name );
+                                childParent.remove( threeObjChild )   
+                            } 
+                            //console.info( "A     *R* adding: " + childID + " from " + nodeID );
+                            threeObjParent.add( threeObjChild );
+                        }
+                    } else {
+                        // TODO
+                        // this is adding of a material
+                    }
+                }
+            }
 
         },
 
@@ -443,13 +457,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         
         movingChild: function( nodeID, childID, childName ) {
 
+            //console.info( "movingChild( " + nodeID+", "+childID+", "+childName + " )" );
             var threeObjParent = getThreeObject.call( this, nodeID );
             var threeObjChild = getThreeObject.call( this, childID ); 
+            
             if ( threeObjParent && threeObjChild && ( threeObjParent instanceof THREE.Object3D ) ){
-
                 var childParent = threeObjChild.parent;
                 // do we only move if there is currently a parent
-                if ( childParent ) {
+                if ( childParent && ( childParent !== threeObjParent ) ) {
                     childParent.remove( threeObjChild );
                     threeObjParent.add( threeObjChild );   
                 } 
@@ -461,12 +476,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         
         removingChild: function( nodeID, childID, childName ) {
             
+            //console.info( "removingChild( " + nodeID+", "+childID+", "+childName + " )" );
             var threeObjParent = getThreeObject.call( this, nodeID );
             var threeObjChild = getThreeObject.call( this, childID );
             if ( threeObjParent && threeObjChild && ( threeObjParent instanceof THREE.Object3D ) ){    
 
                 var childParent = threeObjChild.parent;
                 if ( childParent === threeObjParent ) {
+                    //console.info( "A     *R* removing: " + childID + " from " + nodeID );
                     childParent.remove( threeObjChild )   
                 } 
             } 
@@ -1911,7 +1928,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
         return foundNode;
     }
-
+    function isTextDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-text-vwf" );    
+            }
+        }
+        return foundNode;
+    }
     function CreateThreeJSSceneNode(parentID,thisID,extendsID)
     {
         var node = {};
@@ -2289,14 +2314,31 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     meshDef.segments || 8, meshDef.thetaStart || 0, 
                     meshDef.thetaLength || Math.PI * 2 );
             } else if ( isSphereDefinition.call( this, node.prototypes ) ) {
-                geo = new THREE.SphereGeometry( meshDef.radius || 10, meshDef.segmentsWidth || 4,
-                    meshDef.segmentsHeight || 4, meshDef.phiStart || 0,
+                geo = new THREE.SphereGeometry( meshDef.radius || 10, meshDef.segmentsWidth || 8,
+                    meshDef.segmentsHeight || 6, meshDef.phiStart || 0,
                     meshDef.phiLength || Math.PI * 2, meshDef.thetaStart || 0, 
                     meshDef.thetaLength || Math.PI );
             } else if ( isCylinderDefinition.call( this, node.prototypes ) ) {
                 geo = new THREE.CylinderGeometry( meshDef.radiusTop || 10, meshDef.radiusBottom || 10,
                      meshDef.height || 10, meshDef.segmentsRadius || 8, 
                      meshDef.segmentsHeight || 1, meshDef.openEnded );
+            } else if ( isTextDefinition.call( this, node.prototypes ) ) {
+                if ( meshDef.text != "" ) {
+                    var parms = meshDef.parameters || {};
+                    // geo = new THREE.TextGeometry( meshDef.text, { "size": parms.size || 100,
+                    //     "curveSegments": parms.curveSegments || 4, "font": parms.font || "helvetiker",
+                    //     "weight": parms.weight || "normal", "style": parms.style || "normal",
+                    //     "amount": parms.amount || 50, "height": parms.height || 50, 
+                    //     "bevelThickness": parms.bevelThickness || 10, "bevelSize": parms.bevelSize || 8,
+                    //     "bevelEnabled": Boolean( parms.bevelEnabled ),
+                    // } );
+                    geo = new THREE.TextGeometry( meshDef.text, {
+                        size: 80,
+                        height: 20,
+                        curveSegments: 2,
+                        font: "helvetiker"
+                    } );
+                }
             } else {
                 geo = new THREE.Geometry();
 

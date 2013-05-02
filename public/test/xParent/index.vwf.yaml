@@ -21,15 +21,25 @@ methods:
   update1:
   update2:
   update3:
+  update4:
 children:
-  cubeTop:
+  topCube:
     includes: spinningCube.vwf
     properties:
       translation: [ 0, 0, 100 ]
     children:
       material:
         extends: http://vwf.example.com/material.vwf
-  cubeMiddle1:
+      purpleCube:
+        includes: spinningCube.vwf
+        properties:
+          translation: [ 50, 0, -100 ]
+        children:
+          material:
+            extends: http://vwf.example.com/material.vwf  
+            properties:
+              color: "purple"
+  redCube:
     includes: spinningCube.vwf
     properties:
       translation: [ 100, 0, 0 ]
@@ -38,7 +48,12 @@ children:
         extends: http://vwf.example.com/material.vwf
         properties:
           color: "red"
-  cubeMiddle2:
+  yellowCube:
+    extends: http://vwf.example.com/threejs/cube.vwf
+    properties:
+      meshDefinition: { "height": 25, "width": 25, "depth": 25, color: "greenyellow" }
+      translation: [ 150, 0, 0 ]
+  greenCube:
     includes: spinningCube.vwf
     properties:
       translation: [ 0, 0, 0 ]
@@ -47,7 +62,7 @@ children:
         extends: http://vwf.example.com/material.vwf
         properties:
           color: "green"
-  cubeMiddle3:
+  blueCube:
     includes: spinningCube.vwf
     properties:
       translation: [ -100, 0, 0 ]
@@ -91,38 +106,91 @@ children:
 scripts:
 - |
     this.initialize = function(){
-      console.info( "========== xParent application ==========" );
+      //console.info( "========== xParent application ==========" );
       this.camera.transform = [ -1,0,0,0, 0,-1,0,0, 0,0,1,0, 0,600,0,1 ];
       this.camera.far = this.camera.far * 4;
-      this.future(10).update1( true );
-      this.future(15).update2( true );
-      this.future(20).update3( true );
+      this.future(7).update1( true );
+      this.future(13).update2( true );
+      this.future(19).update3( true );
+      this.future(23).update4( true );
+
+      this.cubes = { 
+        "top": this.topCube, 
+        "red": this.redCube, 
+        "yellow": this.yellowCube,
+        "green": this.greenCube, 
+        "blue": this.blueCube,
+        "purple": this.topCube.purpleCube,
+      };
     }
     this.update1 = function( add ){
+     
+      var wt;
       if ( add ) {
-        var wt = this.cubeMiddle1.worldTransform;
-        vwf_view.kernel.addChild( this.cubeTop.id, this.cubeMiddle1.id, this.cubeMiddle1.name ); 
-        this.cubeMiddle1.worldTransform = wt;
+        
+        if ( this.cubes.red.parent_ ) {
+          wt = this.cubes.red.worldTransform;
+          this.cubes.red.parent_ = this.cubes.top; 
+          this.cubes.red.worldTransform = wt;
+
+          wt = this.cubes.yellow.worldTransform;
+          this.cubes.yellow.parent_ = this.cubes.top; 
+          this.cubes.yellow.worldTransform = wt;
+        } else {
+          wt = this.cubes.red.worldTransform;
+          vwf_view.kernel.addChild( this.cubes.top.id, this.cubes.red.id, this.cubes.red.name );
+          vwf_view.kernel.setProperty( this.cubes.red.id, "worldTransform", wt ); 
+
+          wt = this.cubes.yellow.worldTransform;
+          vwf_view.kernel.addChild( this.cubes.top.id, this.cubes.yellow.id, this.cubes.yellow.name );
+          vwf_view.kernel.setProperty( this.cubes.yellow.id, "worldTransform", wt ); 
+        }
       } else {
-        var wt = this.cubeMiddle1.worldTransform;
-        vwf_view.kernel.addChild( this.id, this.cubeMiddle1.id, this.cubeMiddle1.name );
-        this.cubeMiddle1.worldTransform = wt;
+        
+        if ( this.cubes.red.parent_ ) {
+          wt = this.cubes.red.worldTransform;
+          this.cubes.red.parent_ = this;
+          this.cubes.red.worldTransform = wt;
+
+          wt = this.cubes.yellow.worldTransform;
+          this.cubes.yellow.parent_ = this;
+          this.cubes.yellow.worldTransform = wt;
+        } else {
+          wt = this.cubes.red.worldTransform;
+          vwf_view.kernel.addChild( this.id, this.cubes.red.id, this.cubes.red.name );
+          vwf_view.kernel.setProperty( this.cubes.red.id, "worldTransform", wt );
+
+          wt = this.cubes.yellow.worldTransform;
+          vwf_view.kernel.addChild( this.id, this.cubes.yellow.id, this.cubes.yellow.name );
+          vwf_view.kernel.setProperty( this.cubes.yellow.id, "worldTransform", wt );         
+        }
+
       }
-      this.future(10).update1( !add );
+      this.future(7).update1( !add );
     }
     this.update2 = function( remove ){
       if ( remove ) {
-        vwf_view.kernel.removeChild( this.id, this.cubeMiddle2.id, this.cubeMiddle2.name );
+        vwf_view.kernel.removeChild( this.id, this.cubes.green.id, this.cubes.green.name );
+        //this.cubes.green.parent = undefined;
       } else {
-        vwf_view.kernel.addChild( this.id, this.cubeMiddle2.id, this.cubeMiddle2.name );
+        vwf_view.kernel.addChild( this.id, this.cubes.green.id, this.cubes.green.name );
+        //this.cubes.green.parent = this;
       }
-      this.future(15).update2( !remove );
+      this.future(13).update2( !remove );
     }
-    this.update3 = function( move ){
-      if ( move ) {
-        vwf_view.kernel.moveChild( this.cubeTop.id, this.cubeMiddle3.id, this.cubeMiddle3.name ); 
+    this.update3 = function( remove ){
+      if ( remove ) {
+        vwf_view.kernel.removeChild( this.cubes.top.id, this.cubes.purple.id, this.cubes.purple.name ); 
       } else {
-        vwf_view.kernel.moveChild( this.id, this.cubeMiddle3.id, this.cubeMiddle3.name );
+        vwf_view.kernel.addChild( this.cubes.top.id, this.cubes.purple.id, this.cubes.purple.name );
       }
-      this.future(20).update3( !move );
+      this.future(23).update3( !remove );
+    }     
+    this.update4 = function( move ){
+      if ( move ) {
+        //vwf_view.kernel.moveChild( this.cubes.top.id, this.cubes.blue.id, this.cubes.blue.name ); 
+      } else {
+        //vwf_view.kernel.moveChild( this.id, this.cubes.blue.id, this.cubes.blue.name );
+      }
+      this.future(23).update4( !move );
     } //@ sourceURL=index.vwf

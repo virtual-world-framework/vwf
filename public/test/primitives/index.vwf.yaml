@@ -108,6 +108,15 @@ children:
         this['sway-swaying'] = true;
         this['spin-spinning'] = true;
       }
+  #textTest:
+  #  extends: http://vwf.example.com/threejs/text.vwf
+  #  properties:
+  #    meshDefinition: { "text": "http://vwf.example.com/threejs/text.vwf", "color": "green" }
+  #  children:
+  #    material:
+  #      extends: http://vwf.example.com/material.vwf 
+  #      properties:
+  #        color: [ 255, 255, 255 ]
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
     properties:
