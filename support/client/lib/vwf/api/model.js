@@ -23,6 +23,8 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {ID} nodeID
         /// @param {ID} childID
         /// @param {String} childExtendsID
@@ -37,7 +39,7 @@ define( function() {
         ///   Nodes won't necessarily arrive in numerical order since varying dependencies cause
         ///   nodes to become ready at indeterminate times.
         /// @param {String} childName
-        /// @param {Function} [callback]
+        /// @param {module:vwf/api/model~readyCallback} callback
         /// 
         /// @returns {}
 
@@ -45,6 +47,8 @@ define( function() {
             childIndex, childName, callback( ready ) */ ],
 
         /// Description.
+        /// 
+        /// @function
         /// 
         /// @param {ID} nodeID
         /// @param {ID} childID
@@ -68,6 +72,8 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {ID} nodeID
         /// 
         /// @returns {}
@@ -75,6 +81,8 @@ define( function() {
         deletingNode: [ /* nodeID */ ],
 
         /// Description.
+        /// 
+        /// @function
         /// 
         /// @param {}
         /// 
@@ -84,6 +92,8 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {}
         /// 
         /// @returns {}
@@ -91,6 +101,8 @@ define( function() {
         removingChild: [],
 
         /// Description.
+        /// 
+        /// @function
         /// 
         /// @param {}
         /// 
@@ -100,6 +112,8 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {}
         /// 
         /// @returns {}
@@ -108,6 +122,8 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {}
         /// 
         /// @returns {}
@@ -115,6 +131,8 @@ define( function() {
         creatingProperty: [],
 
         /// Description.
+        /// 
+        /// @function
         /// 
         /// @param {}
         /// 
@@ -126,6 +144,8 @@ define( function() {
       
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {}
         /// 
         /// @returns {}
@@ -134,6 +154,8 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {}
         /// 
         /// @returns {}
@@ -141,6 +163,8 @@ define( function() {
         gettingProperty: [],
 
         /// Description.
+        /// 
+        /// @function
         /// 
         /// @param {ID} nodeID
         /// @param {String} methodName
@@ -155,6 +179,8 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {ID} nodeID
         /// @param {String} methodName
         /// @param {String[]} methodParameters
@@ -165,6 +191,8 @@ define( function() {
         callingMethod: [ /* nodeID, methodName, methodParameters, methodValue */ ],
 
         /// Description.
+        /// 
+        /// @function
         /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
@@ -178,6 +206,8 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
         /// @param {String[]} eventParameters
@@ -188,6 +218,8 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {}
         /// @returns {}
 
@@ -195,10 +227,18 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {}
         /// @returns {}
 
         ticking: [],
+
+        /// Description.
+        /// 
+        /// @callback module:vwf/api/model~readyCallback
+        /// 
+        /// @param {Boolean} ready
 
     };
 
