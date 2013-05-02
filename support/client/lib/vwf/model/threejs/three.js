@@ -3784,6 +3784,12 @@ THREE.Matrix4.prototype = {
 			var scaleY = 1 / v1.set( me[4], me[5], me[6] ).length();
 			var scaleZ = 1 / v1.set( me[8], me[9], me[10] ).length();
 
+			if ( this.determinant() < 0 ) {
+
+				scaleX = -scaleX;
+				
+			}
+
 			te[0] = me[0] * scaleX;
 			te[1] = me[1] * scaleX;
 			te[2] = me[2] * scaleX;
@@ -4622,6 +4628,12 @@ THREE.extend( THREE.Matrix4.prototype, {
 			scale.x = x.length();
 			scale.y = y.length();
 			scale.z = z.length();
+
+			if ( this.determinant() < 0 ) {
+
+				scale.x = -scale.x;
+
+			}
 
 			position.x = te[12];
 			position.y = te[13];
@@ -6260,6 +6272,7 @@ THREE.Object3D = function () {
 
 	this.matrixAutoUpdate = true;
 	this.matrixWorldNeedsUpdate = true;
+	this.matrixWorldIsMirrored = false;
 
 	this.quaternion = new THREE.Quaternion();
 	this.useQuaternion = false;
@@ -6651,6 +6664,8 @@ THREE.Object3D.prototype = {
 
 			}
 
+			this.matrixWorldIsMirrored = this.matrixWorld.determinant() < 0;
+
 			this.matrixWorldNeedsUpdate = false;
 
 			force = true;
@@ -6941,6 +6956,9 @@ THREE.Projector = function () {
 				isFaceMaterial = object.material instanceof THREE.MeshFaceMaterial;
 				objectMaterials = isFaceMaterial === true ? object.material : null;
 
+				var frontSide = object.matrixWorldIsMirrored ? THREE.BackSide : THREE.FrontSide;
+				var backSide = object.matrixWorldIsMirrored ? THREE.FrontSide : THREE.BackSide;
+
 				for ( v = 0, vl = vertices.length; v < vl; v ++ ) {
 
 					_vertex = getNextVertexInPool();
@@ -6986,7 +7004,7 @@ THREE.Projector = function () {
 							visible = ( ( v3.positionScreen.x - v1.positionScreen.x ) * ( v2.positionScreen.y - v1.positionScreen.y ) -
 								( v3.positionScreen.y - v1.positionScreen.y ) * ( v2.positionScreen.x - v1.positionScreen.x ) ) < 0;
 
-							if ( side === THREE.DoubleSide || visible === ( side === THREE.FrontSide ) ) {
+							if ( side === THREE.DoubleSide || visible === ( side === frontSide ) ) {
 
 								_face = getNextFace3InPool();
 
@@ -7027,7 +7045,7 @@ THREE.Projector = function () {
 								( v2.positionScreen.y - v3.positionScreen.y ) * ( v4.positionScreen.x - v3.positionScreen.x ) < 0;
 
 
-							if ( side === THREE.DoubleSide || visible === ( side === THREE.FrontSide ) ) {
+							if ( side === THREE.DoubleSide || visible === ( side === frontSide ) ) {
 
 								_face = getNextFace4InPool();
 
@@ -7052,7 +7070,7 @@ THREE.Projector = function () {
 
 					_face.normalModel.copy( face.normal );
 
-					if ( visible === false && ( side === THREE.BackSide || side === THREE.DoubleSide ) ) {
+					if ( visible === false && ( side === backSide || side === THREE.DoubleSide ) ) {
 
 						_face.normalModel.negate();
 
@@ -7071,7 +7089,7 @@ THREE.Projector = function () {
 						var normalModel = _face.vertexNormalsModel[ n ];
 						normalModel.copy( faceVertexNormals[ n ] );
 
-						if ( visible === false && ( side === THREE.BackSide || side === THREE.DoubleSide ) ) {
+						if ( visible === false && ( side === backSide || side === THREE.DoubleSide ) ) {
 
 							normalModel.negate();
 
@@ -16658,6 +16676,12 @@ THREE.ShaderChunk = {
 
 	].join("\n"),
 
+	defaultnormal_pars_vertex: [
+
+		"uniform bool flipSided;"
+
+	].join("\n"),
+
 	defaultnormal_vertex: [
 
 		"vec3 objectNormal;",
@@ -16680,11 +16704,7 @@ THREE.ShaderChunk = {
 
 		"#endif",
 
-		"#ifdef FLIP_SIDED",
-
-			"objectNormal = -objectNormal;",
-
-		"#endif",
+		"if ( flipSided ) objectNormal = -objectNormal;",
 
 		"vec3 transformedNormal = normalMatrix * objectNormal;"
 
@@ -17080,7 +17100,9 @@ THREE.UniformsLib = {
 		"refractionRatio" : { type: "f", value: 0.98 },
 		"combine" : { type: "i", value: 0 },
 
-		"morphTargetInfluences" : { type: "f", value: 0 }
+		"morphTargetInfluences" : { type: "f", value: 0 },
+
+		"flipSided": { type: "i", value: 0 }
 
 	},
 
@@ -17177,6 +17199,13 @@ THREE.ShaderLib = {
 			THREE.ShaderChunk[ "lightmap_pars_vertex" ],
 			THREE.ShaderChunk[ "envmap_pars_vertex" ],
 			THREE.ShaderChunk[ "color_pars_vertex" ],
+
+			"#ifdef USE_ENVMAP",
+
+			THREE.ShaderChunk[ "defaultnormal_pars_vertex" ],
+
+			"#endif",
+
 			THREE.ShaderChunk[ "morphtarget_pars_vertex" ],
 			THREE.ShaderChunk[ "skinning_pars_vertex" ],
 			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
@@ -17277,6 +17306,7 @@ THREE.ShaderLib = {
 			THREE.ShaderChunk[ "envmap_pars_vertex" ],
 			THREE.ShaderChunk[ "lights_lambert_pars_vertex" ],
 			THREE.ShaderChunk[ "color_pars_vertex" ],
+			THREE.ShaderChunk[ "defaultnormal_pars_vertex" ],
 			THREE.ShaderChunk[ "morphtarget_pars_vertex" ],
 			THREE.ShaderChunk[ "skinning_pars_vertex" ],
 			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
@@ -17397,6 +17427,7 @@ THREE.ShaderLib = {
 			THREE.ShaderChunk[ "envmap_pars_vertex" ],
 			THREE.ShaderChunk[ "lights_phong_pars_vertex" ],
 			THREE.ShaderChunk[ "color_pars_vertex" ],
+			THREE.ShaderChunk[ "defaultnormal_pars_vertex" ],
 			THREE.ShaderChunk[ "morphtarget_pars_vertex" ],
 			THREE.ShaderChunk[ "skinning_pars_vertex" ],
 			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
@@ -17734,7 +17765,9 @@ THREE.ShaderLib = {
 			"uOffset" : { type: "v2", value: new THREE.Vector2( 0, 0 ) },
 			"uRepeat" : { type: "v2", value: new THREE.Vector2( 1, 1 ) },
 
-			"wrapRGB"  : { type: "v3", value: new THREE.Vector3( 1, 1, 1 ) }
+			"wrapRGB"  : { type: "v3", value: new THREE.Vector3( 1, 1, 1 ) },
+
+			"flipSided": { type: "i", value: 0 }
 
 			}
 
@@ -17813,6 +17846,8 @@ THREE.ShaderLib = {
 
 			"#endif",
 
+			"uniform bool flipSided;",
+
 			"varying vec3 vWorldPosition;",
 			"varying vec3 vViewPosition;",
 
@@ -17869,11 +17904,8 @@ THREE.ShaderLib = {
 				"mat3 tsb = mat3( normalize( vTangent ), normalize( vBinormal ), normalize( vNormal ) );",
 				"vec3 finalNormal = tsb * normalTex;",
 
-				"#ifdef FLIP_SIDED",
-
+				"if( flipSided )",
 					"finalNormal = -finalNormal;",
-
-				"#endif",
 
 				"vec3 normal = normalize( finalNormal );",
 				"vec3 viewPosition = normalize( vViewPosition );",
@@ -22678,7 +22710,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 				}
 
-				_this.setMaterialFaces( material );
+				_this.setMaterialFaces( material, object.matrixWorldIsMirrored );
 
 				if ( buffer instanceof THREE.BufferGeometry ) {
 
@@ -22739,7 +22771,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		_currentGeometryGroupHash = -1;
 
-		_this.setMaterialFaces( material );
+		_this.setMaterialFaces( material, object.matrixWorldIsMirrored );
 
 		if ( object.immediateRenderCallback ) {
 
@@ -23420,8 +23452,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 			metal: material.metal,
 			perPixel: material.perPixel,
 			wrapAround: material.wrapAround,
-			doubleSided: material.side === THREE.DoubleSide,
-			flipSided: material.side === THREE.BackSide
+			doubleSided: material.side === THREE.DoubleSide
 
 		};
 
@@ -23566,6 +23597,13 @@ THREE.WebGLRenderer = function ( parameters ) {
 				}
 
 			}
+
+		}
+
+		if ( m_uniforms.flipSided.value !== object.matrixWorldIsMirrored ) {
+
+			_gl.uniform1i( p_uniforms.flipSided, object.matrixWorldIsMirrored );
+			m_uniforms.flipSided.value = object.matrixWorldIsMirrored;
 
 		}
 
@@ -24455,10 +24493,10 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	};
 
-	this.setMaterialFaces = function ( material ) {
+	this.setMaterialFaces = function ( material, mirrored ) {
 
 		var doubleSided = material.side === THREE.DoubleSide;
-		var flipSided = material.side === THREE.BackSide;
+		var flipSided = material.side === ( mirrored ? THREE.FrontSide : THREE.BackSide );
 
 		if ( _oldDoubleSided !== doubleSided ) {
 
@@ -24774,7 +24812,6 @@ THREE.WebGLRenderer = function ( parameters ) {
 			parameters.perPixel ? "#define PHONG_PER_PIXEL" : "",
 			parameters.wrapAround ? "#define WRAP_AROUND" : "",
 			parameters.doubleSided ? "#define DOUBLE_SIDED" : "",
-			parameters.flipSided ? "#define FLIP_SIDED" : "",
 
 			parameters.shadowMapEnabled ? "#define USE_SHADOWMAP" : "",
 			parameters.shadowMapEnabled ? "#define " + shadowMapTypeDefine : "",
@@ -24873,7 +24910,6 @@ THREE.WebGLRenderer = function ( parameters ) {
 			parameters.perPixel ? "#define PHONG_PER_PIXEL" : "",
 			parameters.wrapAround ? "#define WRAP_AROUND" : "",
 			parameters.doubleSided ? "#define DOUBLE_SIDED" : "",
-			parameters.flipSided ? "#define FLIP_SIDED" : "",
 
 			parameters.shadowMapEnabled ? "#define USE_SHADOWMAP" : "",
 			parameters.shadowMapEnabled ? "#define " + shadowMapTypeDefine : "",
@@ -36138,7 +36174,7 @@ THREE.DepthPassPlugin = function () {
 
 				objectMaterial = getObjectMaterial( object );
 
-				if ( objectMaterial ) _renderer.setMaterialFaces( object.material );
+				if ( object.material ) _renderer.setMaterialFaces( object.material, object.matrixWorldIsMirrored );
 
 				useMorphing = object.geometry.morphTargets.length > 0 && objectMaterial.morphTargets;
 				useSkinning = object instanceof THREE.SkinnedMesh && objectMaterial.skinning;
