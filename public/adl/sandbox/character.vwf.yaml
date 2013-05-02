@@ -79,7 +79,7 @@ scripts:
                 runningjump:{start:109,length:48,speed:1.25,current:0,loop:false}
             };
           this.prerendercallback = this.placeNameTag.bind(this);
-          $(document).bind('postpostprerender',this.prerendercallback);
+          $(document).bind('postprerender',this.prerendercallback);
           //this.callbacknum = findVWFscene().addUpdateCallback(this.placeNameTag.bind(this));
           this.updatecounter = 0;
           this.mesh = findChildViewNode(findscene(),this.id);
@@ -152,7 +152,7 @@ scripts:
     this.deinitialize = function()
     {
        //findVWFscene().removeUpdateCallback(this.callbacknum);
-       $(document).unbind('prerender',this.prerendercallback);
+       $(document).unbind('postprerender',this.prerendercallback);
         _UserManager.PlayerDeleted(this.PlayerNumber);
        //this.deleteMe = true;            
        $(this.nametag).remove()

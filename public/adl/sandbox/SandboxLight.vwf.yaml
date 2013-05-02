@@ -52,7 +52,7 @@ scripts:
           
           if(this.id == 'SandboxLight-vwf') return;
           this.prerendercallback = this.placeNameTag.bind(this);
-          $(document).bind('prerender',this.prerendercallback);
+          $(document).bind('postprerender',this.prerendercallback);
           this.createNameTag();
           
         
@@ -81,7 +81,7 @@ scripts:
     }
     this.deinitialize = function()
     {
-       $(document).unbind('prerender',this.prerendercallback);
+       $(document).unbind('postprerender',this.prerendercallback);
        $(this.nametag).remove();
     }
     this.placeNameTag = function(e,viewprojection, wh, ww)

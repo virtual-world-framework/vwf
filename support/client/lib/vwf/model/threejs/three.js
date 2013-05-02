@@ -16284,10 +16284,11 @@ THREE.ShaderChunk = {
 						
 						"vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ i ], 0.0 );",
 						"vec3 dirVector = normalize( lDirection.xyz );",
-						"float dotProduct = 1.0-clamp(dot( normal, -dirVector ),0.0,1.0);",
-						"dotProduct = pow(dotProduct,4.0);",
-						"shadowColor = shadowColor * vec3( ( 1.0 - shadowDarkness[ i ] * shadow * dotProduct ) );",
+						"float dotProduct = clamp(dot( normal, dirVector ),0.0,1.0);",
+						//"dotProduct = pow(dotProduct,4.0);",
+						"shadowColor = shadowColor * vec3( ( 1.0 - shadowDarkness[ i ] * max(shadow , 1.0-dotProduct) ) );",
 						"shadowColor = mix(shadowColor,vec3(1.0,1.0,1.0),clamp(0.0,1.0,pow(length(shadowCoord.xy - .5)*2.0,4.0)));",
+						//"gl_FragColor = vec4(shadowColor.rgb,1.0);return;",
 					"#elif defined( SHADOWMAP_TYPE_PCF_SOFT )",
 
 						// Percentage-close filtering

@@ -186,9 +186,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                             if(threeObject.__lights[i] instanceof THREE.AmbientLight)
                             {
                                 threeObject.__lights[i].color.setRGB(propertyValue[0],propertyValue[1],propertyValue[2]);
-                                SetMaterialAmbients.call(this);
+                                //SetMaterialAmbients.call(this);
                                 lightsFound++;
-                            }
+                            }else
+							{
+								threeObject.__lights[i].shadowDarkness = MATH.lengthVec3(propertyValue)/2.7320508075688772;
+							}
                             
                         }
                         if ( lightsFound == 0 ) {
@@ -197,7 +200,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                             var ambientlight = new THREE.AmbientLight( '#000000' );
                             ambientlight.color.setRGB( propertyValue[0], propertyValue[1], propertyValue[2] );
                             node.threeScene.add( ambientlight );
-                            SetMaterialAmbients.call(this);                            
+                            //SetMaterialAmbients.call(this);                            
                         }
                         
                     }
@@ -299,8 +302,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 					node.private.bodies.prerender.call(node,[timepassed]);
 			}
 			
+			//the camera changes the view projection in the prerender call
+			_viewProjectionMatrix = new THREE.Matrix4();
+			_viewProjectionMatrix.multiplyMatrices( cam.projectionMatrix, cam.matrixWorldInverse );
+			var vp =  MATH.transposeMat4(_viewProjectionMatrix.flattenToArray([]));
+			
 			$(document).trigger('postprerender',[vp,wh,ww]);
-			$(document).trigger('postpostprerender',[vp,wh,ww]);
 			var camera = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
 			var pos = camera.localToWorld(new THREE.Vector3(-.4,.275,-1.0))
 			sceneNode.axes.position = pos;

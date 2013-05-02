@@ -1010,12 +1010,12 @@ scripts:
        $(document).unbind('postprerender',this.postrendercallback);
        $(this.nametag).remove();
     }
-    this.postrender = function()
+    this.prerender = function()
     {
         
         this.updateCamera();
     }
-    this.prerender = function(e,viewprojection, wh, ww)
+    this.postrender = function(e,viewprojection, wh, ww)
     {
         //set the skybox position
       

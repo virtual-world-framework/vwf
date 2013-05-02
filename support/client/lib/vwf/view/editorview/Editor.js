@@ -592,21 +592,21 @@ define(function ()
 				this.PickMod = Subtract;
 				$('#index-vwf').css('cursor', 'not-allowed');
 			}
-			if (e.keyCode == 87)
+			if (e.keyCode == 87 && this.SelectMode == 'Pick')
 			{
 				this.SetGizmoMode(Move);
 			}
 			if (e.keyCode == 69)
 			{
-				this.SetGizmoMode(Rotate);
+				this.SetGizmoMode(Rotate && this.SelectMode == 'Pick');
 			}
 			if (e.keyCode == 82)
 			{
-				this.SetGizmoMode(Scale);
+				this.SetGizmoMode(Scale && this.SelectMode == 'Pick');
 			}
 			if (e.keyCode == 84)
 			{
-				this.SetGizmoMode(Multi);
+				this.SetGizmoMode(Multi && this.SelectMode == 'Pick');
 			}
 			if (e.keyCode == 81)
 			{
