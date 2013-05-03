@@ -309,7 +309,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if(key == "backgroundColor") {
                     var vwfColor = new utility.color( sceneNode.rendererProperties["backgroundColor"] );
                     if ( vwfColor ) {
-                        sceneNode.renderer.setClearColor( { r:vwfColor.red()/255, g:vwfColor.green()/255, b:vwfColor.blue()/255 }, vwfColor.alpha() );
+                        sceneNode.renderer.setClearColor( vwfColor.getHex(), vwfColor.alpha() );
                     }
                 }
                 else if(key == "enableShadows") {
