@@ -114,7 +114,9 @@ When the *userCreated* event fires, we will save the reference to the user objec
 
 	  // If the event that triggered this event handler was the creation of a new user,
 	  // And the event issued from this client, grab the camera from the new object to use for this user
-	  if ( ( eventName == "userCreated" ) && ( this.kernel.client() == this.kernel.moniker() ) ) {
+	  var clientThatIssuedEvent = this.kernel.client();
+	  var me = this.kernel.moniker();
+	  if ( ( eventName == "userCreated" ) && ( clientThatIssuedEvent == me ) ) {
 
 	    // Save the reference to the user object - this belongs to this user
 	    view.myUserObjectId = eventParameters[ 0 ];
