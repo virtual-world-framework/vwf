@@ -14750,7 +14750,7 @@ THREE.ShaderChunk = {
 			"#if defined( USE_BUMPMAP ) || defined( USE_NORMALMAP )",
 
 				"vec3 cameraToVertex = normalize( vWorldPosition - cameraPosition );",
-
+				
 				"if ( useRefract ) {",
 
 					"reflectVec = refract( cameraToVertex, normal, refractionRatio );",
@@ -15382,7 +15382,7 @@ THREE.ShaderChunk = {
 
 		"#endif",
 
-		"#if MAX_SPOT_LIGHTS > 0 || defined( USE_BUMPMAP )",
+		"#if MAX_SPOT_LIGHTS > 0 || defined( USE_BUMPMAP ) || defined( USE_NORMALMAP )",
 
 			"varying vec3 vWorldPosition;",
 
@@ -15431,7 +15431,7 @@ THREE.ShaderChunk = {
 
 		"#endif",
 
-		"#if MAX_SPOT_LIGHTS > 0 || defined( USE_BUMPMAP )",
+		"#if MAX_SPOT_LIGHTS > 0 || defined( USE_BUMPMAP ) || defined( USE_NORMALMAP )",
 
 			"vWorldPosition = worldPosition.xyz;",
 
@@ -15495,7 +15495,7 @@ THREE.ShaderChunk = {
 
 		"#endif",
 
-		"#if MAX_SPOT_LIGHTS > 0 || defined( USE_BUMPMAP )",
+		"#if MAX_SPOT_LIGHTS > 0 || defined( USE_BUMPMAP ) || defined( USE_NORMALMAP )",
 
 			"varying vec3 vWorldPosition;",
 
@@ -16205,7 +16205,7 @@ THREE.ShaderChunk = {
 
 				"bool frustumTest = all( frustumTestVec );",
 
-				"if ( frustumTest ) {",
+				"if ( true ) {",
 
 					"shadowCoord.z += shadowBias[ i ];",
 
@@ -16250,6 +16250,9 @@ THREE.ShaderChunk = {
 						"float dx1 = 1.25 * xPixelOffset;",
 						"float dy1 = 1.25 * yPixelOffset;",
 						
+						"vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ i ], 0.0 );",
+						"vec3 dirVector = normalize( lDirection.xyz );",
+						"float dotProduct = clamp(dot( normal, dirVector ),0.0,1.0);",
 						"if(shadowCoord.x + dx1 > 1.0 || shadowCoord.x - dx1 < 0.0 || shadowCoord.y + dy1 > 1.0 || shadowCoord.y - dy1 < 0.0)",
 						"shadow = 0.0;",
 						"else {",
@@ -16282,12 +16285,13 @@ THREE.ShaderChunk = {
 
 						"}",
 						
-						"vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ i ], 0.0 );",
-						"vec3 dirVector = normalize( lDirection.xyz );",
-						"float dotProduct = clamp(dot( normal, dirVector ),0.0,1.0);",
+						
 						//"dotProduct = pow(dotProduct,4.0);",
-						"shadowColor = shadowColor * vec3( ( 1.0 - shadowDarkness[ i ] * max(shadow , 1.0-dotProduct) ) );",
-						"shadowColor = mix(shadowColor,vec3(1.0,1.0,1.0),clamp(0.0,1.0,pow(length(shadowCoord.xy - .5)*2.0,4.0)));",
+						"vec3 shadowColor1 = shadowColor * vec3( ( 1.0 - shadowDarkness[ i ] * max(shadow , 1.0-dotProduct) ) );",
+						"shadowColor1 = mix(shadowColor1,vec3(1.0,1.0,1.0),clamp(0.0,1.0,pow(length(shadowCoord.xy - .5)*2.0,4.0)));",
+						"vec3 shadowColor2 = shadowColor * vec3( ( 1.0 - shadowDarkness[ i ] * max(0.0 , 1.0-dotProduct) ) );",
+						//"shadowColor2 = mix(shadowColor2,vec3(1.0,1.0,1.0),clamp(0.0,1.0,pow(length(shadowCoord.xy - .5)*2.0,4.0)));",
+						"shadowColor = min(shadowColor1,shadowColor2);",
 						//"gl_FragColor = vec4(shadowColor.rgb,1.0);return;",
 					"#elif defined( SHADOWMAP_TYPE_PCF_SOFT )",
 

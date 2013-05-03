@@ -59,7 +59,7 @@
 				currentmat.shininess = value.shininess * 5 ;
 				
 				var mapnames = ['map','bumpMap','lightMap','normalMap','specularMap','envMap'];
-				currentmat.reflectivity = value.reflect;
+				currentmat.reflectivity = value.reflect/10;
 				
 				
 				for(var i =0; i < value.layers.length; i++)
@@ -141,9 +141,12 @@
 				{
 					currentmat[mapnames[i]] = null;
 				}
-				var sky = vwf_view.kernel.kernel.callMethod('index-vwf','getSkyMat')
-				currentmat.envMap = sky.uniforms.texture.value;
-				currentmat.envMap.mapping = new THREE.CubeReflectionMapping();
+				if(currentmat.reflectivity)
+				{
+					var sky = vwf_view.kernel.kernel.callMethod('index-vwf','getSkyMat')
+					currentmat.envMap = sky.uniforms.texture.value;
+					currentmat.envMap.mapping = new THREE.CubeReflectionMapping();
+				}
 				currentmat.needsUpdate = true;
 			}
 			this.GetAllLeafMeshes = function(threeObject,list)

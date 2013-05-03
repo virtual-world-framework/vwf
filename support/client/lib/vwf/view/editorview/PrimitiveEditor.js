@@ -53,7 +53,43 @@ define(function ()
 				}
 			}
 		});
-		$('#sidepanel').append("<div id='PrimitiveEditor'>" + "<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Object Properties</span></div>" + '<div id="accordion" style="height:100%;overflow:hidden">' + '<h3><a href="#">Flags</a></h3>' + '<div>' + "<div id='otherprops'>" + "<input class='TransformEditorInput' style='width:50%;margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='text' id='dispName'>Name</input><br/>" + "<input disabled='disabled' class='TransformEditorInput' style='width:50%;margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='text' id='dispOwner'>Owners</input><br/>" + "<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='isTransparent'>Transparent</input><br/>" + "<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='isStatic'>Static</input><br/>" + "</div>" + '</div>' + '<h3><a href="#">Transforms</a></h3>' + '<div>' + "<div class='EditorLabel'>Translation</div>" + "<div id='Translation'>" + "<input type='number' class='TransformEditorInput' id='PositionX'/>" + "<input type='number' class='TransformEditorInput' id='PositionY'/>" + "<input type='number' class='TransformEditorInput' id='PositionZ'/>" + "</div>" + "<div class='EditorLabel'>Rotation</div>" + "<div id='Rotation'>" + "<input type='number' class='TransformEditorInput' id='RotationX'/>" + "<input type='number' class='TransformEditorInput' id='RotationY'/>" + "<input type='number' class='TransformEditorInput' id='RotationZ'/>" + "<input type='number' class='TransformEditorInput' id='RotationW'/>" + "</div>" + "<div class='EditorLabel'>Scale</div>" + "<div id='Scale'>" + "<input type='number' class='TransformEditorInput' id='ScaleX'/>" + "<input type='number' class='TransformEditorInput' id='ScaleY'/>" + "<input type='number' class='TransformEditorInput' id='ScaleZ'/>" + "</div>" + '</div>' + '</div>');
+		$('#sidepanel').append("<div id='PrimitiveEditor'>" 
+		+ "<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Object Properties</span></div>" +
+		'<div id="accordion" style="height:100%;overflow:hidden">' +
+		'<h3><a href="#">Flags</a></h3>' +
+		'<div>' +
+		"<div id='otherprops'>" +
+		"<input class='TransformEditorInput' style='width:50%;margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='text' id='dispName'>Name</input><br/>" +
+		"<input disabled='disabled' class='TransformEditorInput' style='width:50%;margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='text' id='dispOwner'>Owners</input><br/>" +
+		"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='isTransparent'>Transparent</input><br/>" +
+		"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='isStatic'>Static</input><br/>" +
+		"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='castShadows'>Cast Shadows</input><br/>" +
+		"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='receiveShadows'>Receive Shadows</input><br/>" +
+		"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='passable'>Passable</input><br/>" +
+		"</div>" +
+		'</div>' +
+		'<h3><a href="#">Transforms</a></h3>' +
+		'<div>' +
+		"<div class='EditorLabel'>Translation</div>" +
+		"<div id='Translation'>" +
+		"<input type='number' class='TransformEditorInput' id='PositionX'/>" +
+		"<input type='number' class='TransformEditorInput' id='PositionY'/>" +
+		"<input type='number' class='TransformEditorInput' id='PositionZ'/>" +
+		"</div>" + "<div class='EditorLabel'>Rotation</div>" +
+		"<div id='Rotation'>" +
+		"<input type='number' class='TransformEditorInput' id='RotationX'/>" +
+		"<input type='number' class='TransformEditorInput' id='RotationY'/>" +
+		"<input type='number' class='TransformEditorInput' id='RotationZ'/>" +
+		"<input type='number' class='TransformEditorInput' id='RotationW'/>" +
+		"</div>" +
+		"<div class='EditorLabel'>Scale</div>" +
+		"<div id='Scale'>" +
+		"<input type='number' class='TransformEditorInput' id='ScaleX'/>" +
+		"<input type='number' class='TransformEditorInput' id='ScaleY'/>" +
+		"<input type='number' class='TransformEditorInput' id='ScaleZ'/>" +
+		"</div>" +
+		'</div>' +
+		'</div>');
 		$('#primeditortitle').append('<a id="primitiveeditorclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
 		$('#primeditortitle').prepend('<img class="headericon" src="../vwf/view/editorview/images/icons/properties.png" />');
 		$('#primitiveeditorclose').click(function ()
@@ -67,6 +103,18 @@ define(function ()
 		$('#isStatic').change(function (e)
 		{
 			_PrimitiveEditor.setProperty('selection', 'isStatic', this.checked)
+		});
+		$('#castShadows').change(function (e)
+		{
+			_PrimitiveEditor.setProperty('selection', 'castShadows', this.checked)
+		});
+		$('#receiveShadows').change(function (e)
+		{
+			_PrimitiveEditor.setProperty('selection', 'receiveShadows', this.checked)
+		});
+		$('#passable').change(function (e)
+		{
+			_PrimitiveEditor.setProperty('selection', 'passable', this.checked)
 		});
 		$('#dispName').blur(function (e)
 		{
@@ -197,6 +245,30 @@ define(function ()
 					else
 					{
 						$('#isStatic').removeAttr('checked');
+					}
+					if (vwf.getProperty(node.id, 'castShadows'))
+					{
+						$('#castShadows').attr('checked', 'checked');
+					}
+					else
+					{
+						$('#castShadows').removeAttr('checked');
+					}
+					if (vwf.getProperty(node.id, 'passable'))
+					{
+						$('#passable').attr('checked', 'checked');
+					}
+					else
+					{
+						$('#passable').removeAttr('checked');
+					}
+					if (vwf.getProperty(node.id, 'receiveShadows'))
+					{
+						$('#receiveShadows').attr('checked', 'checked');
+					}
+					else
+					{
+						$('#receiveShadows').removeAttr('checked');
 					}
 					$('#BaseSectionTitle').text(node.properties.type + ": " + node.id);
 					this.SelectionTransformed(null, node);

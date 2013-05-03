@@ -370,8 +370,11 @@ scripts:
        
        
         
-
-            var skyCubeTexture = THREE.ImageUtils.loadTextureCube(urls);
+       var loaded = function(){
+            this.skymaterial.uniforms.texture.value.image = skyCubeTexture.image;
+            this.skymaterial.uniforms.texture.value.needsUpdate = true;
+       }.bind(this);
+            var skyCubeTexture = THREE.ImageUtils.loadTextureCube(urls,undefined,loaded);
             skyCubeTexture.format = THREE.RGBFormat;
             skyCubeTexture.generateMipmaps = true;
             skyCubeTexture.minFilter = THREE.LinearFilter;
@@ -421,10 +424,12 @@ scripts:
                     fragmentShader: fragShader_default
 
                 });
-                
+            this.skymaterial.uniforms.texture.value = skyCubeTexture;    
        }
+       
+       
        this.skymaterial.side = 1;
-       this.skymaterial.uniforms.texture.value = skyCubeTexture;
+       
        this.skymaterial.fog = false;
        if(!this.skycube)
        {

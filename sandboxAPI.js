@@ -39,13 +39,13 @@ function respond(response,status,message)
 					"Content-Type": "text/plain"
 				});
 	response.write(message + "\n");
-	global.log(message);
+	global.log(message,2);
 	response.end();
 }
 //Just serve a simple file
 function ServeFile(filename,response,URL, JSONHeader)
 {
-		global.log(filename);
+		global.log(filename,2);
 		
 		var datatype = 	"binary";
 		if(JSONHeader)
@@ -103,7 +103,7 @@ function ServeProfile(filename,response,URL, JSONHeader)
 				
 				response.write(JSON.stringify(o), "utf8");			
 				response.end();
-				global.log('Served Profile ' + filename);
+				global.log('Served Profile ' + filename,2);
 			}
 			else
 			{
@@ -154,8 +154,7 @@ function SiteLogin(response,URL)
 			var UID = URL.query.UID;
 			var password = URL.query.P;
 			
-			console.log(UID);
-			console.log(password);
+			
 			if(!UID || !password)
 			{
 				respond(response,401,'Login Format incorrect');
@@ -169,7 +168,7 @@ function SiteLogin(response,URL)
 			
 			CheckPassword(UID,password,function(ok)
 			{
-				console.log("Login "+ ok);
+				global.log("Login "+ ok,2);
 				if(ok)
 				{
 					var session = new SessionData();
@@ -177,13 +176,13 @@ function SiteLogin(response,URL)
 					session.Password = password;
 					session.resetTimeout();
 					global.sessions.push(session);
-					console.log('set cookie');
+					
 					response.writeHead(200, {
 							"Content-Type":  "text/plain",
 							"Set-Cookie": "session="+session.sessionId+"; Path=/; HttpOnly;"
 					});
 					response.write("Login Successful", "utf8");
-					global.log('Client Logged in');
+					global.log('Client Logged in',0);
 					response.end();
 				}else
 				{
@@ -226,7 +225,7 @@ function SiteLogout(response,URL)
 function InstanceLogin(response,URL)
 {
 			
-			console.log('instance login');
+			global.log('instance login',2);
 			if(!URL.loginData)
 			{
 				console.log("Client Not Logged In");
@@ -236,10 +235,10 @@ function InstanceLogin(response,URL)
 			var instance = URL.query.S;
 			var cid = URL.query.CID;
 			
-			console.log(URL.loginData.clients);
+			
 			if(URL.loginData.clients[cid])
 			{
-				console.log("Client already logged into session");
+				
 				respond(response,401,"Client already logged into session");
 				return;
 			}	
@@ -248,7 +247,7 @@ function InstanceLogin(response,URL)
 			{
 				URL.loginData.clients[cid] = instance;
 				global.instances[instance].clients[cid].loginData = URL.loginData;
-				console.log("Client Logged Into " + instance);
+				
 				respond(response,200,"Client Logged Into " + instance);
 				return;
 			}else
@@ -266,23 +265,22 @@ function InstanceLogout(response,URL)
 				respond("Client Not Logged In",401,response);
 				return;
 			}	
-			console.log(URL.loginData);
+			
 			var instance = URL.query.S;
 			var cid = URL.query.CID;
 			
-			console.log(cid);
-			console.log(URL.loginData.clients[cid]);
+			
 			if(URL.loginData.clients[cid])
 			{
 			
 				if(global.instances[URL.loginData.clients[cid]])
 				{
-					console.log('got here1');
+					
 					if(global.instances[URL.loginData.clients[cid]].clients[cid])
 					{
-						console.log('got here2');
+						
 						delete global.instances[URL.loginData.clients[cid]].clients[cid].loginData;
-							console.log('got here3');
+							
 					}
 				}
 				
@@ -290,9 +288,9 @@ function InstanceLogout(response,URL)
 				respond(response,200,"Client Logged out " + instance);
 			}else
 			{				
-			console.log('got here4');
+			
 				respond(response,200,"Client was not Logged into " + instance);
-				console.log("Client was not Logged into " + instance);
+				
 				return;
 			}
 			
@@ -445,12 +443,12 @@ function SaveAsset(URL,filename,data,response)
 				if(!fs.existsSync(filename))
 				{
 					//Save the asset Author info
-					global.log('parse asset');
+					global.log('parse asset',2);
 					var asset = JSON.parse(data);
 					asset.Author = URL.query.UID;
 					data = JSON.stringify(asset);
 					SaveFile(filename,data,response);
-					global.log('Saved Asset ' + filename);
+					global.log('Saved Asset ' + filename,2);
 					return;
 				}else
 				{
@@ -469,7 +467,7 @@ function SaveAsset(URL,filename,data,response)
 							asset.Author = URL.query.UID;
 							data = JSON.stringify(asset);
 							SaveFile(filename,data,response);
-							global.log('Saved Asset ' + filename);
+							global.log('Saved Asset ' + filename,2);
 							return;
 						}
 					});
@@ -928,7 +926,7 @@ function serve (request, response)
 	 SID = SID.replace(/[\\,\/]/g,'_');
 	 
 	var basedir = datapath + "\\";
-	global.log(command,UID);
+	global.log(command,UID,3);
 	if(request.method == "GET")
 	{
 		switch(command)
@@ -1091,7 +1089,7 @@ function serve (request, response)
 				}break;
 				default:
 				{
-					global.log("POST");
+					global.log("POST",2);
 					_404(response);
 					return;
 				}
@@ -1120,7 +1118,7 @@ function serve (request, response)
 				}break;
 				default:
 				{
-					global.log("DELETE");
+					global.log("DELETE",2);
 					_404(response);
 					return;
 				}

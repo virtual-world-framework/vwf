@@ -500,7 +500,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
           
 		  if(node.settingProperty)
 				value = node.settingProperty(propertyName,propertyValue);
-		  
+		  if(value !== undefined)
+			    return value;
+				
           var threeObject = node.threeObject;
           if(!threeObject)
             threeObject = node.threeScene;
@@ -1131,7 +1133,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
           
 		  if(node.gettingProperty)
 				value = node.gettingProperty(propertyName);
-		  if(value) return value;		
+		  		
+		  if(value !== undefined) return value;		
           var threeObject = node.threeObject;
           if( !threeObject )
             threeObject = node.threeScene;
@@ -3425,7 +3428,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 								"{\n"+
 									"var ret = undefined;\n"+
 									"for(var i =0; i < this['"+capi+'Internal'+"'].length; i++)\n"+
-									"	ret = ret || this['"+capi+'Internal'+"'][i].call(this,arg0,arg1,arg2,arg3,arg4,arg5);\n"+
+									"	ret = ret !== undefined ? ret : (this['"+capi+'Internal'+"'][i] && this['"+capi+'Internal'+"'][i].call(this,arg0,arg1,arg2,arg3,arg4,arg5));\n"+
 									"return ret;\n"+
 								"}; f;"
 								);	

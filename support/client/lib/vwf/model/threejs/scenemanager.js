@@ -875,7 +875,7 @@ function compareMaterials(m1,m2)
 	delta += Math.abs(m1.normalScale.x - m2.normalScale.x);
 	delta += Math.abs(m1.normalScale.y - m2.normalScale.y);
 	
-		var mapnames = ['map','bumpMap','lightMap','normalMap','specularMap','envMap'];
+		var mapnames = ['map','bumpMap','lightMap','normalMap','specularMap'];
         for(var i =0; i < mapnames.length; i++)
         {
 				var mapname = mapnames[i];

@@ -44,8 +44,7 @@
 					this.restoreMesh();   
 				}
 				this.GetMesh().geometry.dirtyMesh = true;
-				this.GetMesh().castShadow = true;
-				this.GetMesh().receiveShadow = true;
+				
 			}
 			
 			this.dirtyStack = function(rebuild)
@@ -156,12 +155,22 @@
 				
 				var mesh = this.BuildMesh(mat);
 				this.mesh = mesh;
-				mesh.castShadows = true;
-				mesh.receiveShadows = true;
+				
+				
+				
 				this.rootnode.add(mesh);
 				
+				var cast = this.gettingProperty('castShadows');
+				var rec = this.gettingProperty('receiveShadows');
+				
+				var pass = this.gettingProperty('passable');
+				// reset the shadows flags for the new mesh
+				this.settingProperty('castShadows',cast);
+				this.settingProperty('receiveShadows',rec);
+				this.settingProperty('passable',pass);
+				
 			}
-			this.inherits = ['vwf/model/threejs/materialDef.js'];
+			this.inherits = ['vwf/model/threejs/materialDef.js','vwf/model/threejs/shadowcaster.js','vwf/model/threejs/transformable.js','vwf/model/threejs/passable.js'];
 		}
 		//default factory code
         return function(childID, childSource, childName) {

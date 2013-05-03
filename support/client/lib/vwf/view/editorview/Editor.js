@@ -2477,6 +2477,9 @@ define(function ()
 			value.specularColor.g = currentmat.specular.g;
 			value.specularColor.b = currentmat.specular.b;
 			value.specularLevel = 1;
+			value.alpha = currentmat.alpha;
+			
+			 value.reflect = currentmat.reflectivity * 10;
 			var mapnames = ['map', 'bumpMap', 'lightMap', 'normalMap', 'specularMap', 'envMap'];
 			value.layers = [];
 			for (var i = 0; i < mapnames.length; i++)
@@ -2523,7 +2526,7 @@ define(function ()
 			else currentmat.transparent = false;
 			currentmat.shininess = value.shininess * 5;
 			var mapnames = ['map', 'bumpMap', 'lightMap', 'normalMap', 'specularMap', 'envMap'];
-			currentmat.reflectivity = value.reflect;
+			currentmat.reflectivity = value.reflect/10;
 			for (var i = 0; i < value.layers.length; i++)
 			{
 				var mapname;
@@ -2595,9 +2598,12 @@ define(function ()
 			{
 				currentmat[mapnames[i]] = null;
 			}
+			if(currentmat.reflectivity)
+			{
 			var sky = vwf_view.kernel.kernel.callMethod('index-vwf','getSkyMat')
 				currentmat.envMap = sky.uniforms.texture.value;
 				currentmat.envMap.mapping = new THREE.CubeReflectionMapping();
+			}
 			currentmat.needsUpdate = true;
 		}
 		this.initialize = function ()
