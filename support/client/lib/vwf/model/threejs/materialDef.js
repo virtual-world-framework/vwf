@@ -60,6 +60,8 @@
 				
 				var mapnames = ['map','bumpMap','lightMap','normalMap','specularMap','envMap'];
 				currentmat.reflectivity = value.reflect;
+				
+				
 				for(var i =0; i < value.layers.length; i++)
 				{
 						var mapname;
@@ -139,6 +141,9 @@
 				{
 					currentmat[mapnames[i]] = null;
 				}
+				var sky = vwf_view.kernel.kernel.callMethod('index-vwf','getSkyMat')
+				currentmat.envMap = sky.uniforms.texture.value;
+				currentmat.envMap.mapping = new THREE.CubeReflectionMapping();
 				currentmat.needsUpdate = true;
 			}
 			this.GetAllLeafMeshes = function(threeObject,list)

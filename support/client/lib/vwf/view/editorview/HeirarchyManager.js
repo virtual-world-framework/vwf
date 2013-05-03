@@ -194,6 +194,8 @@ define(function ()
 			{
 				node = this.selectedID;
 				list = [];
+				if(!node)
+					return list;
 				depth = 0;
 				var children = vwf.children(node);
 				for (var i = 0; i < children.length; i++)
@@ -243,6 +245,8 @@ define(function ()
 			{
 				node = _Editor.findviewnode(this.selectedID);
 				list = [];
+				if(!node)
+					return list;
 				depth = 1;
 				var children = node.children;
 				if (children) for (var i = 0; i < children.length; i++)
@@ -334,10 +338,11 @@ define(function ()
 					this.SelectionBounds.parent.remove(this.SelectionBounds);
 					this.SelectionBounds = null;
 				}
-				if (node && this.isOpen())
+				if (node )
 				{
 					this.selectedID = node.id
-					this.BuildGUI();
+					if(this.isOpen())
+						this.BuildGUI();
 				}
 				else
 				{

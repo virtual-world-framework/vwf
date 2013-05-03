@@ -2208,8 +2208,16 @@ define(function ()
 		{
 			SelectMode = e;
 			$('#StatusPickMode').text('Pick: ' + e);
-			if (e == 'Pick') $('#MenuSelectPickicon').css('background', "#9999FF");
-			else $('#MenuSelectPickicon').css('background', "");
+			if (e == 'Pick') 
+			{	
+				$('#MenuSelectPickicon').css('background', "#9999FF");
+				$('#glyphOverlay').show();
+			}
+			else {
+			
+				$('#MenuSelectPickicon').css('background', "")
+				$('#glyphOverlay').hide();
+			}
 			if (SelectMode == 'TempPick')
 			{
 				$('#index-vwf').css('cursor', 'crosshair');
@@ -2587,6 +2595,9 @@ define(function ()
 			{
 				currentmat[mapnames[i]] = null;
 			}
+			var sky = vwf_view.kernel.kernel.callMethod('index-vwf','getSkyMat')
+				currentmat.envMap = sky.uniforms.texture.value;
+				currentmat.envMap.mapping = new THREE.CubeReflectionMapping();
 			currentmat.needsUpdate = true;
 		}
 		this.initialize = function ()

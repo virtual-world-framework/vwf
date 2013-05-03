@@ -160,6 +160,7 @@ methods:
   CreatePlane:
   PM:
   latencyTest:
+  getSkyMat:
 scripts:
 - |
     this.initialize = function(){
@@ -281,6 +282,12 @@ scripts:
           this.createNameTag();
           this.updateCamera();
     }
+    this.getSkyMat = function()
+    {
+    
+        return this.skycube.material;
+    
+    }
     this.latencyTest = function(e)
     {
         if(this.moniker == this.client)
@@ -349,23 +356,22 @@ scripts:
     {
      
         ////console.log('set sky ' + sky_name);
-        if(this.skycube)
-            this.skycube.parent.remove(this.skycube);
+       
        //var sky_name = 'cloudy_noon';
        var urls = [];
 
         
         urls.push('skys/'+sky_name+'_FR.jpg');
         urls.push('skys/'+sky_name+'_BK.jpg');
-        urls.push('skys/'+sky_name+'_LF.jpg');
         urls.push('skys/'+sky_name+'_RT.jpg');
-        urls.push('skys/'+sky_name+'_DN.jpg');
+        urls.push('skys/'+sky_name+'_LF.jpg');
         urls.push('skys/'+sky_name+'_UP.jpg');
+        urls.push('skys/'+sky_name+'_DN.jpg');
        
        
         
 
-       var skyCubeTexture = THREE.ImageUtils.loadTextureCube(urls);
+            var skyCubeTexture = THREE.ImageUtils.loadTextureCube(urls);
             skyCubeTexture.format = THREE.RGBFormat;
             skyCubeTexture.generateMipmaps = true;
             skyCubeTexture.minFilter = THREE.LinearFilter;
@@ -374,19 +380,63 @@ scripts:
             skyCubeTexture.wrapT = THREE.ClampToEdgeWrapping;
 
             
+       if(!this.skymaterial)
+       {
        
-       this.skymaterial = new THREE.MeshBasicMaterial();
+                //default material expects all computation done cpu side, just renders
+                // note that since the color, size, spin and orientation are just linear
+                // interpolations, they can be done in the shader
+                var vertShader_default = 
+                "varying vec3 pos;"+
+                "void main() {\n"+
+                "   vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n"+
+                " pos = position;"+
+                "   gl_Position = projectionMatrix * mvPosition;\n"+
+                "}    \n";
+                var fragShader_default = 
+               
+                "uniform samplerCube texture;\n"+
+                "varying vec3 pos;"+
+                "void main() {\n"+
+                "   gl_FragColor = textureCube(texture,pos);\n"+
+                "}\n";
+                
+                //the default shader - the one used by the analytic solver, just has some simple stuff
+                //note that this could be changed to do just life and lifespan, and calculate the 
+                //size and color from to uniforms. Im not going to bother
+                var attributes_default = {
+                   
+                    
+                };
+                var uniforms_default = {
+                   
+                    texture:   { type: "t", value: skyCubeTexture },
+                  
+                };
+                uniforms_default.texture.value.wrapS = uniforms_default.texture.value.wrapT = THREE.RepeatWrapping;
+                this.skymaterial = new THREE.ShaderMaterial( {
+                    uniforms:       uniforms_default,
+                    attributes:     attributes_default,
+                    vertexShader:   vertShader_default,
+                    fragmentShader: fragShader_default
+
+                });
+                
+       }
        this.skymaterial.side = 1;
-       this.skymaterial.envMap = skyCubeTexture;
+       this.skymaterial.uniforms.texture.value = skyCubeTexture;
        this.skymaterial.fog = false;
-       this.skycube = new THREE.Mesh(new THREE.CubeGeometry(1000,1000,1000), this.skymaterial);
-       this.skycube.name = "SkyCube";
-       this.skycube.renderDepth = -1;
-       this.skycube.InvisibleToCPUPick = true;
-       this.skycube.depthWrite = false;
-       this.skycube.depthCheck = false;
-       findscene().add(this.skycube);
-       window._dSky = this.skycube;
+       if(!this.skycube)
+       {
+           this.skycube = new THREE.Mesh(new THREE.CubeGeometry(1000,1000,1000), this.skymaterial);
+           this.skycube.name = "SkyCube";
+           this.skycube.renderDepth = -1;
+           this.skycube.InvisibleToCPUPick = true;
+           this.skycube.depthWrite = false;
+           this.skycube.depthCheck = false;
+           findscene().add(this.skycube);
+           window._dSky = this.skycube;
+       }
         
     }
     this.removeUpdateCallback = function(m)
@@ -1068,7 +1118,7 @@ scripts:
       {
        
       
-       var campos = findcamera().localToWorld(new THREE.Vector3(0,0,-10));
+       var campos = findcamera().localToWorld(new THREE.Vector3(0,0,-3));
        
        this.sun.shadowCamera.updateMatrixWorld(true)
         var lm = this.sun.shadowCamera.matrixWorld.clone();
@@ -1077,7 +1127,7 @@ scripts:
         
        
         
-        this.sun.shadowCamera.projectionMatrix.makeOrthographic(camposLS.x - 10,camposLS.x + 10,camposLS.y - 10,camposLS.y+10,-camposLS.z - 10 ,-camposLS.z + 10 );
+        this.sun.shadowCamera.projectionMatrix.makeOrthographic(camposLS.x - 5,camposLS.x + 5,camposLS.y - 5,camposLS.y+5,-camposLS.z - 5 ,-camposLS.z + 5 );
         }
     }    
     this.setMaterialByDef = function(currentmat,value)

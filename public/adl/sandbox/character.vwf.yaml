@@ -90,6 +90,9 @@ scripts:
           this.mesh.children[0].children[0].position.z = -.85
           this.mesh.children[0].children[0].updateMatrixWorld(true);
           this.skin = this.mesh.children[0].children[0].children[1];
+          this.skin.material.ambient.r = 1;
+          this.skin.material.ambient.g = 1;
+          this.skin.material.ambient.b = 1;
           this.skin.isAvatar = true;
           this.jumpcounter = 0.0;
           //this.stand();
