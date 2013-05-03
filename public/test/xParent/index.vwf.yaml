@@ -126,9 +126,10 @@ scripts:
     this.update1 = function( add ){
      
       var wt;
+      var useParent = true;
       if ( add ) {
         
-        if ( this.cubes.red.parent_ ) {
+        if ( useParent ) {
           wt = this.cubes.red.worldTransform;
           this.cubes.red.parent_ = this.cubes.top; 
           this.cubes.red.worldTransform = wt;
@@ -147,7 +148,7 @@ scripts:
         }
       } else {
         
-        if ( this.cubes.red.parent_ ) {
+        if ( useParent ) {
           wt = this.cubes.red.worldTransform;
           this.cubes.red.parent_ = this;
           this.cubes.red.worldTransform = wt;

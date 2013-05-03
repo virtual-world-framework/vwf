@@ -18,8 +18,11 @@ implements:
 properties:
   navmode: walk
   rotationSpeed: 2
+  translationSpeed: 10
   #ambientColor: [ 255, 255, 255 ]
 children:
+  transformTool:
+    includes: http://vwf.example.com/tools/transform/transformTool.vwf
   cubeTest:
     extends: http://vwf.example.com/threejs/cube.vwf
     properties:
@@ -28,7 +31,7 @@ children:
   sphereTest:
     extends: http://vwf.example.com/threejs/sphere.vwf
     properties:
-      meshDefinition: { "radius": 50, "color": "green" }
+      meshDefinition: { "radius": 50, "color": "green", "segmentsWidth": 16, "segmentsHeight": 16 }
       translation: [ 200, 0, 0 ]
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf

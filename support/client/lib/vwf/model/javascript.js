@@ -107,7 +107,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     return this.parent;
                 },
                 set: function( value ) {
-                    self.kernel.removeChild( this.parent.id, this.id );
+                    if ( this.parent ) 
+                        self.kernel.removeChild( this.parent.id, this.id );
                     self.kernel.addChild( value.id, this.id, this.name );
                 },
             } );
