@@ -77,39 +77,19 @@ function ServeFile(filename,response,URL, JSONHeader)
 }
 //get a profile for a user
 //url must contain UID for user and password hash
-function ServeProfile(filename,response,URL, JSONHeader)
+function ServeProfile(UID,response,URL)
 {
-		fs.readFile(filename, "utf8", function (err, file) {
-			
-			//the file could not be read
-			if (err) {
-				respond(response,400,'Profile Not Found');
-				return;
-			}
- 
-			//check that the user can get the data
-			var profile = JSON.parse(file);
-			//def3735d7a0d2696775d6d72f379e4536c4d9e3cd6367f27a0bcb7f40d4558fb
-			var storedPassword = profile.Password;
-			var suppliedPassword = URL.query.P || URL.loginData.Password;
-			if(storedPassword == suppliedPassword)
+		DAL.getUser(UID,function(user)
+		{
+			if(!user)
 			{
-				
-				
-				var o = {};
-				profile.Password = '';
-				o[JSONHeader] = JSON.stringify(profile);
-				
-				
-				response.write(JSON.stringify(o), "utf8");			
-				response.end();
-				global.log('Served Profile ' + filename,2);
-			}
-			else
+				respond(response,401,"user not logged in, or profile not found");
+			}else
 			{
-				respond(response,401,'Incorrect password when getting Profile ' + filename);
-				response.end();
+				user.password = '';
+				respond(response,200,JSON.stringify(user));
 			}
+		
 		});
 }
 
@@ -307,67 +287,44 @@ function ServeJSON(jsonobject,response,URL)
 			response.end();
 			
 }
-function SaveProfile(URL,filename,data,response)
+function SaveProfile(URL,data,response)
 {
-	//the profile is new
-	if(!fs.existsSync(filename))
+	if(!URL.loginData)
 	{
-		SaveFile(filename,data,response);
-		global.log('Saved Profile ' + filename);
+		respond(response,401,'no login data saving profile ' + filename);
+		return;
 	}
-	//the profile exists
-	else
+	
+	DAL.updateUser(URL.loginData.UID,data,function()
 	{
-		fs.readFile(filename, "utf8", function (err, file) {
-			
-			//the file could not be read
-			if (err) {
-				
-				respond(response,500,err);
-				return;
-			}
- 
-			//check that the user can get the data
-			var profile = JSON.parse(file);
-			
-			var storedPassword = profile.Password;
-			var suppliedPassword = URL.query.P;
-			if(storedPassword == suppliedPassword)
-			{
-				SaveFile(filename,data,response);
-				global.log('Saved Profile ' + filename);
-			}else
-			{
-				
-				respond(response,401,'Incorrect password when saving Profile ' + filename);
-				
-			}
-		});
-	}
+		respond(response,200,'');
+		return;
+	});
 }
-
+function CreateProfile(URL,data,response)
+{
+	data = JSON.parse(data);
+	data.Password = URL.query.P
+	DAL.createUser(URL.query.UID,data,function()
+	{
+		respond(response,200,'');
+		return;
+	});
+}
 //Read the password from the profile for the UID user, and callback with the match
 function CheckPassword(UID,Password, callback)
 {
-	var basedir = datapath + "\\profiles\\";
-	var filename = basedir+UID;
-	if(!fs.existsSync(filename))
+	DAL.getUser(UID,function(user)
 	{
-		callback(false);
-		return;
-	}
-	else
-	{
-		fs.readFile(filename, "utf8", function (err, file) {
-			var profile = JSON.parse(file);
-			var storedPassword = profile.Password;
-			var suppliedPassword = Password;
-			callback(storedPassword == suppliedPassword);
+		if(!user)
+		{
+			callback(false);
 			return;
-		});
+		}	
+		callback(user.Password == Password);
 		return;
-	}
-	callback(false);
+	
+	});
 }
 
 //Check that the UID is the author of the asset
@@ -481,34 +438,9 @@ function SaveAsset(URL,filename,data,response)
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function DeleteProfile(URL,filename,response)
 {
-	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
-	var P = URL.query.P || (URL.loginData && URL.loginData.Password);
-	CheckPassword(UID,P,function(e){
-	
-		//Did no supply a good name password pair
-		if(!e && state.owner != global.adminUID)
-		{
-				
-				respond(response,401,'Incorrect password when deleting state ' + filename);
-				return;
-		}
-		else
-		{
-				//the asset is new
-				if(!fs.existsSync(filename))
-				{
-					
-					respond(response,401,'cant delete profile that does not exist' + filename);
-					return;
-				}
-				else
-				{
-					fs.unlink(filename);
-					respond(response,200,'Deleted profile '  + filename);
-					
-					return;			
-				}
-		}
+	DAL.deleteUser(URL.loginData,function()
+	{
+		respond(response,200,'');
 	});
 }
 
@@ -673,26 +605,18 @@ function CheckHash(filename,data,callback)
 //Save an instance. the POST URL must contain valid name/password and that UID must match the Asset Author
 function SaveState(URL,id,data,response)
 {
-	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
-	var P = URL.query.P || (URL.loginData && URL.loginData.Password);
-	CheckPassword(UID,P,function(e){
-	
-		//Did not supply a good name password pair
-		if(!e)
-		{
-				
-				respond(response,401,'Incorrect password when saving state ' + id);
-				return;
-		}
-		else
-		{
-				DAL.saveInstanceState(id,data,function()
-				{
-					respond(response,200,'saved ' + id);
-					return;
-				});
-		}
+	if(!URL.loginData)
+	{
+		respond(response,401,'No login data when saving state');
+		return;
+	}
+	//not currently checking who saves the state, so long as they are logged in
+	DAL.saveInstanceState(id,data,function()
+	{
+		respond(response,200,'saved ' + id);
+		return;
 	});
+		
 }
 
 
@@ -899,7 +823,7 @@ function GetSessionData(request)
   global.log(SessionID);
   for(var i in global.sessions)
   {	
-	console.log("checking "+global.sessions[i].sessionId+" == " + SessionID);
+	//console.log("checking "+global.sessions[i].sessionId+" == " + SessionID);
 	if(global.sessions[i].sessionId == SessionID)
 	{
 		global.sessions[i].resetTimeout();
@@ -907,6 +831,27 @@ function GetSessionData(request)
 	}
   }
   return null;
+}
+
+function Salt(URL,response)
+{	
+	DAL.getUser(URL.query.UID,function(user){
+		
+		if(user && user.Salt)
+		{
+			respond(response,200,user.Salt);
+			
+		}else if (user)
+		{
+			respond(response,200,'OBS#$%SGSDF##$%#DA');
+		}else
+		{
+			respond(response,401,'');
+		}
+	
+		
+	});
+
 }
 
 //router
@@ -952,8 +897,11 @@ function serve (request, response)
 			case "clonestate":{
 				CopyState(URL,SID,URL.query.SID2,response,'GetStateResult');		
 			} break;
+			case "salt":{
+				Salt(URL,response);		
+			} break;
 			case "profile":{
-				ServeProfile(basedir+"profiles\\" + UID,response,URL,'GetProfileResult');		
+				ServeProfile(UID,response,URL);		
 			} break;
 			case "login":{
 				InstanceLogin(response,URL);		
@@ -1085,7 +1033,10 @@ function serve (request, response)
 					SaveAsset(URL, basedir+"GlobalAssets\\"+URL.query.AID,body,response);
 				}break;
 				case "profile":{
-					SaveProfile(URL, basedir+"profiles\\"+UID,body,response);
+					SaveProfile(URL,body,response);
+				}break;
+				case "createprofile":{
+					CreateProfile(URL,body,response);
 				}break;
 				default:
 				{

@@ -145,8 +145,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
     <script type="text/javascript">
 	
 	
-		var salt = 'OBS#$%SGSDF##$%#DA';
-		var EncryptPassword = function (password, username)
+		
+		var EncryptPassword = function (password, username,salt)
 		{
 			var unencrpytedpassword = password + username + salt;
 			for (var i = 0; i < 1000; i++)
@@ -187,7 +187,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 			
 				var username = $('#txtusername').val();
 				var password = $('#txtpassword').val();
-				password = EncryptPassword(password,username);
+				
+				var salt = $.ajax('vwfDataManager.svc/salt?UID='+ username,{async:false}).responseText;
+				
+				password = EncryptPassword(password,username,$.trim(salt));
 				
 				$.ajax('/vwfDataManager.svc/sitelogin?UID=' + username +"&P=" + password,
 				{

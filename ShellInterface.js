@@ -40,7 +40,7 @@ function StartShellInterface()
 		chunk = chunk + '  ';
 		chunk = chunk.replace(/\r\n/g,'');
 		var commands = chunk.split( ' ');
-		console.log('here');
+		
 		if(commands[0] && commands[0] == 'show' && commands[1])
 		{
 			if(commands[1] == 'instances')
@@ -49,6 +49,55 @@ function StartShellInterface()
 				var keys = Object.keys(global.instances);
 				for(var i in keys)
 					global.log(keys[i],0);	
+			}
+			if(commands[1] == 'users')
+			{
+				DAL.getUsers(function(users)
+				{
+					global.log(users);
+				});
+			}
+			if(commands[1] == 'user')
+			{
+				DAL.getUser( commands[2], function(users)
+				{
+					global.log(users);
+				});
+			}
+			if(commands[1] == 'inventory')
+			{
+				DAL.getInventoryForUser(commands[2],function(inventory,key)
+				{
+					global.log('Inventory Database key is ' + key);
+					global.log(JSON.stringify(inventory));
+				});
+			
+			}
+			if(commands[1] == 'inventorydisplay')
+			{
+				DAL.getInventoryDisplayData(commands[2],function(data)
+				{
+					global.log(data,0);
+				});
+			}
+			
+			if(commands[1] == 'inventoryitem')
+			{
+				if(commands[2] == 'metadata')
+				{
+					DAL.getInventoryItemMetadata(commands[3],commands[4],function(data)
+					{
+						console.log(data);
+					});
+				}
+				if(commands[2] == 'assetdata')
+				{
+					DAL.getInventoryItemAssetData(commands[3],commands[4],function(data)
+					{
+						console.log(data);
+					});
+				}					
+				
 			}
 			if(commands[1] == 'sessions')
 			{
@@ -118,6 +167,24 @@ function StartShellInterface()
 				}
 			}
 		}
+		if(commands[0] == 'update')
+		{
+			if(commands[1] == 'inventoryitem')
+				if(commands[2] == 'metadata')
+				{
+					DAL.updateInventoryItemMetadata(commands[3],commands[4],JSON.parse(commands[5].replace(/'/g,'"')),function()
+					{
+					
+					});
+				}
+			if(commands[1] == 'user')
+			{
+				DAL.updateUser(commands[2],JSON.parse(commands[3].replace(/'/g,'"')),function()
+				{
+				
+				});
+			}	
+		}
 		if(commands[0] && commands[0] == 'boot' && commands[1])
 		{
 			var name = commands[1];
@@ -154,6 +221,53 @@ function StartShellInterface()
 					}
 				}
 			
+		}
+		if(commands[0] == 'delete')
+		{
+			if(commands[1] == 'user')
+			{
+				DAL.deleteUser(commands[2],function(res){
+					
+					global.log(res,0);
+				
+				});
+			}
+			if(commands[1] == 'inventoryitem')
+			{
+				DAL.deleteInventoryItem(commands[2],commands[3],function()
+				{
+				
+				});
+			}
+		}
+		if(commands[0] == 'clear')
+		{
+			if(commands[1] == 'users')
+			{
+				DAL.clearUsers();
+			}
+			if(commands[1] == 'inventoryitem')
+			{
+				DAL.clearStates();
+			}
+		}
+		if(commands[0] == 'create')
+		{
+			if(commands[1] == 'user')
+			{
+				DAL.createUser(commands[2],{username:commands[2],loginCount:0},function(res){
+					
+					global.log(res,0);
+				
+				});
+			}
+			if(commands[1] == 'inventoryitem')
+			{
+				DAL.addToInventory(commands[2],{title:commands[3],created:new Date()},{data:'test asset binary data'},function()
+				{
+				
+				});
+			}
 		}
 		if(commands[0] && commands[0] == 'loglevel' && commands[1])
 		{

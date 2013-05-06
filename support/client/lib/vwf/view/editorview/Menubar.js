@@ -243,10 +243,6 @@ define(
 		{
 			_DataManager.load();
 		});
-		$('#MenuChangeInstance').click(function (e)
-		{
-			_DataManager.chooseInstance();
-		});
 		$('#ChatInput').keypress(function (e)
 		{
 			e.stopPropagation();
@@ -442,14 +438,6 @@ define(
 		$('#MenuCreateParticlesBasic').click(function (e)
 		{
 			_Editor.createParticleSystem('basic', _Editor.GetInsertPoint(), document.PlayerNumber);
-		});
-		$('#MenuDeleteInstance').click(function (e)
-		{
-			_DataManager.DeleteInstance();
-		});
-		$('#MenuCloneInstance').click(function (e)
-		{
-			_DataManager.CloneInstance();
 		});
 		$('#MenuCreateLightPoint').click(function (e)
 		{

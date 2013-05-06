@@ -31,10 +31,22 @@ function GUID()
 	
 function getUser (id,cb)
 {
-	DB.get(id,function(err,doc,key){
+	getUsers(function(UserIndex){
 	
-		cb(doc);
+		if(UserIndex.indexOf(id) != -1)
+		{
+			DB.get(id,function(err,doc,key){
+			
+				cb(doc);
+			});
+		}
+		else
+		{
+			cb(null);
+		}
+	
 	});
+	
 }
 function updateUser (id,data,cb)
 {
@@ -88,6 +100,188 @@ function updateUser (id,data,cb)
 		}
 	);	
 };
+function deleteInventoryItem(userID,inventoryID,cb)
+{
+	getInventoryForUser(userID,function(inventory,Ikey)
+	{	
+		if(!inventory)
+		{
+			global.log('inventory not found');
+			cb();
+			return;
+		}
+		//item must be in list of user
+		if(inventory.indexOf(inventoryID) != -1)
+		{
+			//remove from user inventory list
+			while(inventory.indexOf(inventoryID) != -1)
+				inventory.splice(inventory.indexOf(inventoryID),1);
+			//save user inventory list	
+			DB.save(Ikey,inventory,function()
+			{
+				//remove database entry
+				DB.remove(inventoryID,function(){
+				
+					//delete file
+					fs.unlink(datapath+'\\Profiles\\'+userID+'_Data\\' + inventoryID,function()
+					{
+						cb();
+					});
+				});
+			});
+		}
+		else
+		{
+			cb();
+		}	
+	});
+
+}
+function getInventoryItemAssetData(userID,inventoryID,cb)
+{
+	getInventoryForUser(userID,function(inventory,Ikey)
+	{
+	
+		if(!inventory)
+		{	
+			global.log('inventory not found',0);
+			cb(null);
+			return;
+		}
+		if(inventory.indexOf(inventoryID) != -1)
+		{
+			fs.readFile(datapath + '\\Profiles\\' + userID + '_Data' + '\\' + inventoryID,"utf8",function(err,data)
+			{
+				cb(data);
+			});			
+		}
+		else
+		{
+			global.log('User does not contain inventory item');
+			cb(null);
+		}
+	});
+}
+function getInventoryItemMetadata(userID,inventoryID, cb)
+{
+	getInventoryForUser(userID,function(inventory,Ikey)
+	{
+		if(!inventory)
+		{
+			cb(null);
+			return;
+		}
+		if(inventory.indexOf(inventoryID) != -1)
+		{
+			DB.get(inventoryID,function(err,doc,key)
+			{
+				cb(doc,key);
+			});
+		}
+		else
+		{
+			global.log('User does not contain inventory item');
+			cb(null);
+		}
+	});
+}
+
+function updateInventoryItemMetadata(userID,inventoryID,data, cb)
+{
+	getInventoryForUser(userID,function(inventory,Ikey)
+	{
+		if(!inventory)
+		{	
+			global.log('inventory not found',0);
+			cb(null);
+			return;
+		}
+		if(inventory.indexOf(inventoryID) != -1)
+		{
+			DB.get(inventoryID,function(err,item)
+			{
+				if(!item)
+				{	
+					global.log('item not found',0);
+					cb(null);
+					return;
+				}
+				for(var key in data)
+				{
+					item[key] = data[key];
+				}
+				DB.save(inventoryID,item,function()
+				{
+				    global.log('saved' + item,0);
+					cb();
+				});
+			});
+		}
+		else
+		{
+			global.log('User does not contain inventory item');
+			cb(null);
+		}
+	});
+}
+
+function addToInventory(userID,data,assetdata,cb)
+{
+	//get the inventor list for the user
+	getInventoryForUser(userID,function(inventory,Ikey)
+	{
+		//save the data
+		DB.save(null,data,function(err,key)
+		{	
+			//put the key for the data in the inventory
+			inventory.push(key);
+			
+			//save the inventory
+			DB.save(Ikey,inventory,function(err)
+			{
+				fs.writeFile(datapath+'\\Profiles\\' + userID + '_Data\\' + key,JSON.stringify(assetdata),function(err)
+				{
+					cb();
+				});	
+			});
+			
+		});
+	});
+}
+function getInventoryForUser(userID,cb)
+{
+	getUser(userID,function(user)
+	{
+		var ik = user && user.inventoryKey;
+		DB.get(ik,function(err,doc,key)
+		{
+			cb(doc,ik);
+		});
+		
+	});
+}
+function getInventoryDisplayData(userID,cb)
+{
+	getInventoryForUser(userID,function(inventory)
+	{
+		var list = [];
+		async.each(inventory,
+		function(item,cb2){
+		
+			getInventoryItemMetadata(userID, item,function(data)
+			{
+				list.push({title:data.title,description:data.description,type:data.type,key:item});
+				cb2();
+			});
+		
+		},
+		function(){
+			cb(list);
+		});
+	
+	
+	})
+}
 function createUser (id,data,cb)
 {
 	getUser(id,function(user){
@@ -99,27 +293,103 @@ function createUser (id,data,cb)
 		}
 		else
 		{
-			DB.save(id,data,function(err,doc,key)
-			{
+			console.log('got here');
+			async.waterfall([
+			function(cb2){
+				
+				var inventory = [];
+				DB.save(null,inventory,function(err,key)
+				{
+					cb2(null,key);
+				});
+			
+			},
+			function(inventoryKey,cb2){
+				
+				console.log('got here2');
+				data.inventoryKey = inventoryKey;
+				DB.save(id,data,function(err,doc,key)
+				{
+					cb2();
+				});
+			
+			},
+			function(cb2){
+				
+				console.log('got here3');
 				DB.get('UserIndex',function(err,UserIndex,key)
 				{
+					cb2(null,UserIndex);
+				});
+			
+			},
+			function(UserIndex, cb2)
+			{
+				console.log('got here4');
 					if(!UserIndex)
 						UserIndex = [];
 					UserIndex.push(id);
 					DB.save('UserIndex',UserIndex,function()
 					{
-						cb(true);
+						cb2();
+					});
+			},
+			function(cb2)
+			{
+			
+				console.log('got here5');
+				global.log(datapath + '\\Profiles\\' + id,0);
+				MakeDirIfNotExist(datapath + '\\Profiles\\' + id+'_Data',function(){
+						
+					cb2();
+				});
+			}],
+			function(err,results)
+			{
+				console.log('got here6');
+				console.log(err,0);
+				cb(true);
+			}
+			);
+		}
+	});
+}
+function deleteUser (id,cb)
+{
+	//get all inventory
+	getInventoryForUser(id,function(inventory,idk)
+	{
+		//remove each inveentory item metadata entry
+		if(!inventory) inventory = [];
+		async.each(inventory,function(item,cb2)
+		{
+			DB.remove(item,cb2);
+		},
+		function(){
+			//remove the inventory index
+			DB.remove(idk,function(err,doc,key)
+			{
+				//remove user from user index
+				DB.get('UserIndex',function(err,UserIndex,key)
+				{
+					
+					while(UserIndex.indexOf(id) != -1)
+						UserIndex.splice(UserIndex.indexOf(id),1);
+					
+					//save user index
+					DB.save('UserIndex',UserIndex,function(err,doc,key)
+					{
+						//remove user from database
+						DB.remove(id,function(err,doc,key)
+						{
+							//delete user folder
+							deleteFolderRecursive(datapath + '\\Profiles\\' + id + '_Data');
+							cb();
+						});
 					});
 				});
 			});
-		}
-	});
-};
-function deleteUser (id,cb)
-{
-	DB.remove(id,function(err,doc,key)
-	{
-		cb();
+		});
 	});
 };
 			
@@ -184,11 +454,23 @@ function MakeDirIfNotExist(dirname,callback)
 	fs.exists(dirname, function(e)
 	{
 		if(e)
-			callback();
-		else
+		{
+			fs.stat(dirname,function(err,stats)
+			{
+				
+				if(stats.isDirectory())
+					callback();
+				else
+				{
+					fs.mkdir(dirname,function(){
+						callback();
+					});
+				}
+			});
+		}else
 		{
 			fs.mkdir(dirname,function(){
-			callback();
+				callback();
 			});
 		}
 	
@@ -406,6 +688,130 @@ function findState(query,cb)
 	});
 
 }
+function clearUsers()
+{
+	getUsers(function(UserIndex)
+	{
+		async.eachSeries(UserIndex,function(item,cb2)
+		{
+			console.log('delete ' + item);
+			deleteUser(item,function()
+			{
+				cb2();
+			});
+		},function()
+		{
+			
+		});
+	});
+}
+function importUsers()
+{
+	fs.readdir(datapath+"\\Profiles\\",function(err,files){
+		async.eachSeries(files,
+			function(i,cb)
+			{
+				
+				if(!fs.statSync(datapath+"\\Profiles\\"+i).isDirectory())
+				{
+					getUser(i,function(user)
+					{
+						if(user)
+						{
+							console.log("user "+ i + " already in database");
+							cb();	
+						}else
+						{
+							var profile = fs.readFileSync(datapath+"\\Profiles\\"+i,"utf8");
+							profile = JSON.parse(profile);
+							var inventory = profile.inventory;
+							delete profile.inventory;
+							createUser(i,profile,function()
+							{
+								async.series([
+									function(cb3)
+									{
+										if(inventory && inventory.objects)
+										{
+											async.eachSeries(Object.keys(inventory.objects),function(item,cb2)
+											{
+												console.log("create inventoryitem " + item);
+												var itemdata = inventory.objects[item];
+												if(itemdata)
+												{
+													addToInventory(i,{title:item,type:itemdata.type || 'object'},itemdata,function()
+													{
+														cb2();
+													});
+												}else
+												{
+													cb2();
+												}
+												
+												
+											},function(res)
+											{
+												cb3();
+											});
+										}
+										else{
+										  cb3();
+										}
+									},
+									function(cb3)
+									{
+									
+										if(inventory && inventory.scripts)
+										{
+											async.eachSeries(Object.keys(inventory.scripts),function(item,cb2)
+											{
+												console.log("create inventoryitem " + item);
+												var itemdata = inventory.scripts[item];
+												if(itemdata)
+												{
+													addToInventory(i,{title:item,type:itemdata.type},itemdata,cb2);
+												}else
+												{
+													cb2();
+												}
+												
+												
+											},function(res)
+											{
+												cb3();
+											});
+										}
+										else{
+										  cb3();
+										}
+									
+									}],function(err,res)
+									{
+										cb();
+									}
+								);	
+							});
+						};
+							
+					});
+						
+				}
+				else
+				{
+					cb();
+				}
+			
+				
+				
+			},
+			function(err)
+			{
+				console.log('done');
+			});
+	});
+
+
+}
 function importStates()
 {
 	fs.readdir(datapath+"\\states\\",function(err,files){
@@ -526,96 +932,31 @@ function startup(callback)
 				cb();		
 			});
 		},
-	
 		function(cb)
 		{
-			// do a bootstrap test
-			global.log('startup test');
-			getUser('Rob',function(user)
-			{
-				global.log('Rob is:');
-				console.log(user);
-				if(!user)
-				{	
-					createUser('Rob',{username:'Rob',id:'123',logincount:0},function(err)
-					{
-						global.log('Rob created');
-						cb();
-					});
-				}
-				else
-					cb();
-			});
-		},
-		function(cb)
-		{
-			global.log('GEt Rob');
-			getUser('Rob',function(user)
-			{
-				global.log('Got Rob');
-				updateUser('Rob',{logincount:user.logincount + 1},function(err)
+				DB.get('UserIndex',function(err,UserIndex)
 				{
-					global.log('Rob Update');
-					cb();
+					if(!UserIndex)
+						DB.save('UserIndex',[],function(err,data,key)
+						{
+							cb();
+						});
+					else
+						cb();
 				});
-			});
-			
 		},
 		function(cb)
 		{
-			global.log('Get Rob');
-			getUser('Rob',function(user)
-			{
-				global.log('Rob is:');
-				console.log(user);
-				if(user.logincount >= 5)
+				DB.get('StateIndex',function(err,StateIndex)
 				{
-					deleteUser('Rob',function()
-					{
-						global.log('Delete Rob');
+					if(!StateIndex)
+						DB.save('StateIndex',[],function(err,data,key)
+						{
+							cb();
+						});
+					else
 						cb();
-					});
-				}else
-				{
-					cb();
-				}
-			});
-		},
-		function(cb)
-		{
-			global.log('Get Demo');
-			getInstance('Demo',function(state)
-			{
-				global.log('234234 callback Demo is:');
-				console.log(state);
-				if(!state)
-				{
-					createInstance('Demo',{title:'Demo World',description:'this is the demo world'},function()
-					{
-						global.log('Created Demo');
-						cb();
-					});
-				}else
-				{
-					cb();
-				}
-			});
-		},
-		function(cb)
-		{
-			console.log('saving demo state');
-			saveInstanceState('Demo',{test:GUID()},function()
-			{
-				cb();
-			});
-		},
-		function(cb)
-		{
-			console.log('delete demo');
-			deleteInstance('Demo',function()
-			{
-				cb();
-			});
+				});
 		},
 		function(cb)
 		{
@@ -640,6 +981,15 @@ function startup(callback)
 			exports.importStates = importStates;
 			exports.purgeInstances = purgeInstances;
 			exports.findState = findState;
+			exports.deleteInventoryItem=deleteInventoryItem
+			exports.getInventoryForUser = getInventoryForUser;
+			exports.addToInventory = addToInventory;
+			exports.getInventoryItemMetadata = getInventoryItemMetadata;
+			exports.getInventoryItemAssetData = getInventoryItemAssetData;
+			exports.getInventoryDisplayData = getInventoryDisplayData;
+			exports.updateInventoryItemMetadata = updateInventoryItemMetadata;
+			exports.importUsers = importUsers;
+			exports.clearUsers = clearUsers;
 			callback();
 		}
 	
