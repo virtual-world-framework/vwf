@@ -40,6 +40,10 @@ Select the following packages for installation. Use the search box or scroll dow
 
 Click through to *Finish* to close Cygwin setup. Save setup.exe for later since you may need it to add or update packages.
 
+**Install Java**
+
+Please make sure your computer has the latest version of Java installed.  You may install java from http://www.java.com
+
 --------------------------
 
 **Option 1: Automatic Windows Installation**
