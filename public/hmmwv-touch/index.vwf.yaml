@@ -51,7 +51,7 @@ children:
               AirFan: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: translate
                   controlMode: continuous
@@ -69,7 +69,7 @@ children:
               GearShift: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: translate
                   controlMode: continuous
@@ -88,7 +88,7 @@ children:
               HighLowSelector: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: translate
                   controlMode: continuous
@@ -107,7 +107,7 @@ children:
               EmergencyBrake: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -125,7 +125,7 @@ children:
               Accelerator: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: momentary
@@ -142,7 +142,7 @@ children:
               Brake: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: momentary
@@ -159,7 +159,7 @@ children:
               SteeringWheel: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -204,7 +204,7 @@ children:
               TurnSignal: 
                 extends: http://vwf.example.com/node3.vwf
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -223,7 +223,7 @@ children:
               Ignition: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -265,7 +265,7 @@ children:
               AirTemp: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: translate
                   controlMode: continuous
@@ -284,7 +284,7 @@ children:
               SpeedNeedle: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -302,7 +302,7 @@ children:
               VoltMeter: 
                 extends: http://vwf.example.com/node3.vwf
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -321,7 +321,7 @@ children:
               TempNeedle: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -340,7 +340,7 @@ children:
               OilNeedle: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -359,7 +359,7 @@ children:
               FuelNeedle: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -378,7 +378,7 @@ children:
               DoorPassFront: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -396,7 +396,7 @@ children:
               DoorPassRear: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -416,7 +416,7 @@ children:
               WiperPass: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -447,7 +447,7 @@ children:
               WiperDriver: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -478,7 +478,7 @@ children:
               GunMount: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -491,7 +491,7 @@ children:
                   GunMountHatch01: 
                     extends: http://vwf.example.com/node3.vwf 
                     implements: 
-                    - http://vwf.example.com/control.vwf
+                    - http://vwf.example.com/control-old.vwf
                     properties:
                       controlType: rotate
                       controlMode: continuous
@@ -504,7 +504,7 @@ children:
                       GunMountHatch02: 
                         extends: http://vwf.example.com/node3.vwf 
                         implements: 
-                        - http://vwf.example.com/control.vwf
+                        - http://vwf.example.com/control-old.vwf
                         properties:
                           controlType: rotate
                           controlMode: continuous
@@ -532,7 +532,7 @@ children:
               DoorDriverFront: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -550,7 +550,7 @@ children:
               RearHatch: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -568,7 +568,7 @@ children:
               SpareMount: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -591,7 +591,7 @@ children:
               DoorDriverRear: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -619,7 +619,7 @@ children:
               TirePassFront: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -653,7 +653,7 @@ children:
               TireDriverFront: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -692,7 +692,7 @@ children:
               HoodLatchPass: 
                 extends: http://vwf.example.com/node3.vwf
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -710,7 +710,7 @@ children:
               HoodLatchDriver: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous
@@ -728,7 +728,7 @@ children:
               Hood: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
-                - http://vwf.example.com/control.vwf
+                - http://vwf.example.com/control-old.vwf
                 properties:
                   controlType: rotate
                   controlMode: continuous

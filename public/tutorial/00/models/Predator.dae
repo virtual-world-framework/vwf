@@ -29,17 +29,11 @@
                      <color>0.000000 0.000000 0.000000 1</color>
                   </emission>
                   <ambient>
-                     <color>0.000000 0.000000 0.000000 1</color>
+                     <color>1 1 0 1</color>
                   </ambient>
                   <diffuse>
                      <color>1 1 0 1</color>
                   </diffuse>
-                  <transparent>
-                     <color>1 1 1 1</color>
-                  </transparent>
-                  <transparency>
-                     <float>0.000000</float>
-                  </transparency>
                </lambert>
             </technique>
             <extra>
@@ -57,17 +51,11 @@
                      <color>0.000000 0.000000 0.000000 1</color>
                   </emission>
                   <ambient>
-                     <color>0.000000 0.000000 0.000000 1</color>
+                     <color>1 1 0 1</color>
                   </ambient>
                   <diffuse>
                      <color>1 1 0 1</color>
                   </diffuse>
-                  <transparent>
-                     <color>1 1 1 1</color>
-                  </transparent>
-                  <transparency>
-                     <float>0.000000</float>
-                  </transparency>
                </lambert>
             </technique>
          </profile_COMMON>
@@ -80,17 +68,11 @@
                      <color>0.000000 0.000000 0.000000 1</color>
                   </emission>
                   <ambient>
-                     <color>0.000000 0.000000 0.000000 1</color>
+                     <color>0.200000 0.200000 0.200000 1</color>
                   </ambient>
                   <diffuse>
                      <color>0.200000 0.200000 0.200000 1</color>
                   </diffuse>
-                  <transparent>
-                     <color>1 1 1 1</color>
-                  </transparent>
-                  <transparency>
-                     <float>0.000000</float>
-                  </transparency>
                </lambert>
             </technique>
          </profile_COMMON>

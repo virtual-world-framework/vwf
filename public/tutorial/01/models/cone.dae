@@ -68,6 +68,9 @@
             <profile_COMMON>
                 <technique sid="COMMON">
                     <lambert>
+                        <ambient>
+                            <color>0.7450980392156863 1 0.7411764705882353 1</color>
+                        </ambient>
                         <diffuse>
                             <color>0.7450980392156863 1 0.7411764705882353 1</color>
                         </diffuse>

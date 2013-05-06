@@ -319,5 +319,10 @@ scripts:
       -14.136186599731445,-42.1671028137207,88.4365005493164,1 ];
   }
   this.entering = function() {
+    // Reset control value positions and humvee translation
+    this.parent.humvee.DoorDriverFront.controlValue = this.parent.humvee.DoorDriverFront.close.controlValue;
+    this.parent.humvee.Ignition.controlValue = this.parent.humvee.Ignition.stop.controlValue;
+    this.parent.humvee.GearShift.controlValue = this.parent.humvee.GearShift.neutral.controlValue;
+    this.parent.humvee.EmergencyBrake.controlValue = this.parent.humvee.EmergencyBrake.engage.controlValue;
     this.parent.humvee.translation = [ 0, 0, 0 ];
   } //@ sourceURL=humvee-lesson.vwf

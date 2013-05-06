@@ -178,7 +178,7 @@ define( function() {
         /// Changes for testing environments.
 
         testing: {
-            "random-seed": window.location, // make the random sequence repeatable
+            "random-seed": window.location.href, // make the random sequence repeatable
         },
 
     };

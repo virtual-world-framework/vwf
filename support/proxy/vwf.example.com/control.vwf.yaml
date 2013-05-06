@@ -229,44 +229,46 @@ scripts:
   }
 
   this.pointerMove = function( pointerInfo, pickInfo ) {
-    if(!this.controlDisabled && !this.controlMomentary) {
-      var minValue = this.positions[0].controlValue;
-      var maxValue = this.positions[this.positions.length-1].controlValue;
-      this.input.update( pointerInfo, pickInfo );
-      var diff = this.input.change();
-      if(Math.abs(diff[0]) >= Math.abs(diff[1])) {
-        var changeBy = diff[0] * this.controlScale;
-        if(diff[0] > 0 && this.controlValue < maxValue) {
-          this.controlDirection = 1;
-          if((this.controlValue + changeBy) < maxValue) {
-            this.controlValue = this.controlValue + changeBy;
+    if( !this.controlDisabled && !this.controlMomentary ) {
+      if ( this.positions.length ) {
+        var minValue = this.positions[ 0 ].controlValue;
+        var maxValue = this.positions[ this.positions.length - 1 ].controlValue;
+        this.input.update( pointerInfo, pickInfo );
+        var diff = this.input.change();
+        if(Math.abs(diff[0]) >= Math.abs(diff[1])) {
+          var changeBy = diff[0] * this.controlScale;
+          if(diff[0] > 0 && this.controlValue < maxValue) {
+            this.controlDirection = 1;
+            if((this.controlValue + changeBy) < maxValue) {
+              this.controlValue = this.controlValue + changeBy;
+            }
+          }
+          else if(diff[0] < 0 && this.controlValue > minValue) {
+            this.controlDirection = -1;
+            if((this.controlValue + changeBy) > minValue) {
+              this.controlValue = this.controlValue + changeBy;
+            }
           }
         }
-        else if(diff[0] < 0 && this.controlValue > minValue) {
-          this.controlDirection = -1;
-          if((this.controlValue + changeBy) > minValue) {
-            this.controlValue = this.controlValue + changeBy;
+        else {
+          var changeBy = diff[1] * this.controlScale;
+          if(diff[1] > 0 && this.controlValue < maxValue) {
+            this.controlDirection = 1;
+            if((this.controlValue + changeBy) < maxValue) {
+              this.controlValue = this.controlValue + changeBy;
+            }
+          }
+          else if(diff[1] < 0 && this.controlValue > minValue) {
+            this.controlDirection = -1;
+            if((this.controlValue + changeBy) > minValue) {
+              this.controlValue = this.controlValue + changeBy;
+            }
           }
         }
+        this.processLinkedControls();
+        this.input.previous.pointerInfo = pointerInfo;
+        this.input.previous.pickInfo = pickInfo;
       }
-      else {
-        var changeBy = diff[1] * this.controlScale;
-        if(diff[1] > 0 && this.controlValue < maxValue) {
-          this.controlDirection = 1;
-          if((this.controlValue + changeBy) < maxValue) {
-            this.controlValue = this.controlValue + changeBy;
-          }
-        }
-        else if(diff[1] < 0 && this.controlValue > minValue) {
-          this.controlDirection = -1;
-          if((this.controlValue + changeBy) > minValue) {
-            this.controlValue = this.controlValue + changeBy;
-          }
-        }
-      }
-      this.processLinkedControls();
-      this.input.previous.pointerInfo = pointerInfo;
-      this.input.previous.pickInfo = pickInfo;
     }
   }
 

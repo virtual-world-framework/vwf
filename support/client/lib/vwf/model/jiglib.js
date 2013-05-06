@@ -41,12 +41,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
        // -- creatingNode -------------------------------------------------------------------------
 
        creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-          childSource, childType, childURI, childName, callback /* ( ready ) */) {
+          childSource, childType, childIndex, childName, callback /* ( ready ) */) {
 
           var kernel = this.kernel;
           //this.logger.enable = true;
           //this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
-          //                  childSource, childType, childURI, childName );
+          //                  childSource, childType, childIndex, childName );
           //this.logger.enabled = false;
 
           if ( childExtendsID && this.kernel.test( childExtendsID,

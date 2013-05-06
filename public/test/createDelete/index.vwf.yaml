@@ -54,24 +54,22 @@ scripts:
     }
     this.update = function()
     {
-        this.counter++;
-        if(this.counter == 100)
-        {   
-            this.children.delete(this.children[this.children.length-1]);
+      this.counter++;
+      if(this.counter == 100)
+        this.children.delete( this.duck );
+      if(this.counter == 200)
+      {
+        var p = {
+          extends: "http://vwf.example.com/node3.vwf",
+          source: "duck.dae",
+          type: "model/vnd.collada+xml"
         }
-        if(this.counter == 200)
-        {
-            var p = {
-                extends: "http://vwf.example.com/node3.vwf",
-                source: "duck.dae",
-                type: "model/vnd.collada+xml"
-            }
-            this.children.create("duck",p, function( child ) {
-              // child is the new duck object
-            });
-            this.duck.translation = [0,0,0];
-            this.duck.rotation = [0,0,1,0];
-            this.counter = 0;
-        }
-        this.future(0.02).update();
-    }
+        this.children.create( "duck", p, function( child ) {
+          child.translation = [ 0, 0, 0 ];
+          child.rotation = [ 0, 0, 1, 0 ];
+        });
+
+        this.counter = 0;
+      }
+      this.future( 0.02 ).update();
+    } //@ sourceURL=index.vwf

@@ -163,7 +163,7 @@ Code View: *index.vwf.yaml*
 		  material:
 			extends: http://vwf.example.com/material.vwf
 			properties: 
-			  texture: "images/red.png"
+			  color: red
 	  world:
 		extends: http://vwf.example.com/node3.vwf
 		source: world.dae
@@ -174,7 +174,7 @@ Code View: *index.vwf.yaml*
 		  material:
 			extends: http://vwf.example.com/material.vwf
 			properties: 
-			  texture: "images/blue.png"
+			  color: blue
 		  
 URL: *http://vwf.example.com/web/example/3/*
 
@@ -267,19 +267,19 @@ Code View: *index.vwf.yaml*
 		  material:
             extends: http://vwf.example.com/material.vwf
             properties: 
-              texture: ""
+              color: red
         scripts:
         - |
             this.pointerClick = function() {
-              if( this.HelloTextMaterial1.texture == "images/red.png" )
-              {
-                this.HelloTextMaterial1.texture = "images/blue.png";
-              }
-              else
-              {
-                this.HelloTextMaterial1.texture = "images/red.png";
-              }
-            }
+	          if( this.material.color == "rgb(255,0,0)" )
+	          {
+	            this.material.color = "blue";
+	          }
+	          else
+	          {
+	            this.material.color = "red";
+	          }
+	        }
 	  world: 
 		extends: http://vwf.example.com/node3.vwf
 		source: world.dae
@@ -290,19 +290,19 @@ Code View: *index.vwf.yaml*
 		  material:
 			extends: http://vwf.example.com/material.vwf
 			properties: 
-			  texture: ""
+			  color: blue
 	    scripts:
 	    - |
 		    this.pointerClick = function() {
-              if( this.WorldTextMaterial1.texture == "images/red.png" )
-              {
-                this.WorldTextMaterial1.texture = "images/blue.png";
-              }
-              else
-              {
-                this.WorldTextMaterial1.texture = "images/red.png";
-              }
-            }
+	          if( this.material.color == "rgb(255,0,0)" )
+	          {
+	            this.material.color = "blue";
+	          }
+	          else
+	          {
+	            this.material.color = "red";
+	          }
+	        }
 
 URL: *http://vwf.example.com/web/example/4/*
 

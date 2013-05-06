@@ -19,7 +19,9 @@ Let's load it in our index.vwf.yaml file:
 
 ## Add a behavior to an object that reacts to user interaction
 
-A *behavior* is a component that can be added to another to give it added functionality.  Once created, these behaviors can be reused like building blocks, making it faster to create your applications.  Luckily, someone has already written a *control* behavior that we can reuse.  Let's put it on the volume knob, inside the radio 3D model:
+A *behavior* is a component that can be added to another to give it added functionality.  Once created, these behaviors can be reused like building blocks, making it faster to create your applications.  Luckily, someone has already written a *control* behavior that we can reuse.  Let's put it on the volume knob, inside the radio 3D model.
+
+Hold down the Alt key and click anywhere in the scene; the console will print the hierarchy of the scene in both yaml and json format.  Copy and paste the yaml into your application document (unfortunately, it will bring the console line numbers with it, but they are all identical, so a string replace can rid you of them easily).  Here is a subset of it below with the behavior added to the *ic40Volume* node:
 
 	---
 	extends: http://vwf.example.com/navscene.vwf
