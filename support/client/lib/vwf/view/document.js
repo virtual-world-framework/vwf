@@ -23,7 +23,7 @@
 /// And receive view calls:
 /// 
 ///     window.vwf_view.createdNode = function( nodeID, childID, childExtendsID, childImplementsIDs,
-///         childSource, childType, childURI, childName, callback /- ( ready ) -/ ) {
+///         childSource, childType, childIndex, childName, callback /- ( ready ) -/ ) {
 ///         ...
 ///     }
 /// 

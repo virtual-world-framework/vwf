@@ -13,12 +13,14 @@
 
 ---
 extends: http://vwf.example.com/node3.vwf
-source: humvee.dae
+source: /humvee/humvee.DAE
 type: model/vnd.collada+xml
 implements: 
-- drive.vwf
+- /humvee/drive.vwf
 properties:
   started: false
+  enableDrive: false
+  mode: "normal"
 children:
   interiorCamera:
     extends: http://vwf.example.com/camera.vwf
@@ -29,7 +31,7 @@ children:
     children: 
       brake:
         extends: http://vwf.example.com/node3.vwf
-        source: brake.dae
+        source: /humvee/brake.DAE
         type: model/vnd.collada+xml
         properties:
           transform: [-0.34999996423721313, -0.00008858287037583068, 0.00008858287037583068, 0, 0.00008858287037583068, 1.1979989444910188e-8, 0.34999996423721313, 0, -0.00008858287037583068, 0.34999996423721313, 1.1979989444910188e-8, 0, 0.05000000074505806, 0.3400000035762787, 0, 1]
@@ -73,7 +75,7 @@ children:
     children:               
       wait:
         extends: http://vwf.example.com/node3.vwf
-        source: wait.dae
+        source: /humvee/wait.DAE
         type: model/vnd.collada+xml
         properties:
           transform: [-0.34999996423721313, -0.00006472349923569709, 0.00006472349923569709, 0, 0.00006472349195973948, 1.1979989444910188e-8, 0.3499999940395355, 0, -0.00006472349195973948, 0.3499999940395355, 1.1979989444910188e-8, 0, 0.05000000074505806, 0.33000001311302185, 0, 1]

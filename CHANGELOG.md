@@ -1,6 +1,77 @@
 VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
+----------------------------------
+0.6.9
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+- CHG: Moved stopped static on squelch to radio component. Fixes #1933.
+
+- CHG: Update multiuser.md to reflect clarifying change to example app refs #1711
+- CHG: Add variables to multiuser example app to make code clearer refs #1711
+- CHG: Remove url switches from catalog for physics and xmas-tree refs #1724
+- CHG: Fix setClearColor call to pass in the hex representation of the colors Refs #1928
+- CHG: Fix bugs in test/createDelete/index.vwf.yaml refs #1928
+- CHG: Add negative scale fixes to three.js r58 fixes #1928
+- CHG: Initial commit of three.js r58 refs #1928
+- CHG: Switch xmas-tree to use three.js by default fixes #1872
+- CHG: Default tile-puzzle to use three.js refs #1872
+- CHG: Switch physics to use three.js by default refs #1724
+- CHG: Remove deprecated matrix function calls fixes #1871
+- CHG: Put a check in control for undefined positions
+- CHG: Also switched hmmwv-touch/index.vwf.yaml to use control-old since it hadn't been updated, yet. refs #1872
+- CHG: Replace deprecated THREE.UV with THREE.Vector2 refs #1871
+- CHG: Fix parameter to renderer.setFaceCulling We had been passing "false" when it expected an enumerated value that specified the culling mode - the result was that it was culling both front and back faces ... which for obvious reasons was undesirable fixes #1870
+- CHG: Add negative scale fixes to new three.js and remove deprecated calls refs #1683, 1870, 1871
+- CHG: Initial commit of three.js r57 refs #1683
+- CHG: Remove the `hash uri => id...?` comment since there is no performance issue.
+- CHG: Give the child index priority when the name looks like a number.
+- CHG: Keep child array order consistent with the child list in the component. Closes #1918.
+- CHG: Establish the parent/child relationship before calling `creatingNode`. Fixes #1894.
+- CHG: Add @function tags and callback types. Parameters weren't being rendered since JSDoc didn't know they were functions.
+- CHG: Replace `childURI` with `childIndex` and expand initializingNode. References #1918.
+- CHG: Delegate `node.uri` to the kernel. Make `node.id` read-only. References #1918.
+- CHG: Add the `childURI` parameter.
+- CHG: Clarify the action-considered-performed comments.
+- CHG: Fix an "index-vwf" reference. This is a follow-on change from commit:184f459 now needed after the branch/threejs merge to development. Also see commit:ef1bbcf.
+- CHG: Fix error in query.md refs #1711
+- CHG: Fix ambient colors in collada models Refs #1873
+- CHG: Update threejs drivers to store backgroundProperty and enableShadows until the renderer is ready. Change default backgroundColor. Refs #1873
+- CHG: Fix ambient colors in collada models Refs #1873
+- CHG: Remove setMaterialAmbients function Refs #1873
+- CHG: Correct lesson UI driver to call next on the current task instead of the top level task. Update humvee and radio lessons to reset control behavior and node positions on start. Fixes #1799.
+- CHG: Update radio.vwf to use new control behaviors. Updated html static sound to account for volume parameter. Fixed lesson bug on volume. Fixes #1817.
+- CHG: Declare the Ruby 1.9 requirement. References #1742, #1878.
+- CHG: Added a check for undefined before inserting the 'scripts'
+- CHG: Use a simple translation instead of a rotated and translated transform.
+- CHG: Use .DAE extensions until lower case extension issue can be resolved.
+- CHG: Update radio.dae reference to lower case.
+- CHG: Update humvee-lesson to reuse humvee component in public/humvee. Fixes #1886.
+- CHG: Update radio lesson to reference radio component in public/radio and remove extraneous files. Refs #1886.
+- CHG: Only check for socket.io WebSockets when socket.io is available. Tests don't load socket.io, for example.
+- CHG: Use the `Location` `href` instead of the object as the random seed. It should have been that way from the start, but specifically, in IE the `Location` object doesn't survive `jQuery.extend` in a form that can have `toString` called on it.
+- CHG: Update radio components from radio and radio-lesson application to match. Fix bug in lesson view driver for allowing applications not named index. Refs #1886.
+- CHG: Prevent the jsdoc filter from generating a comment closing its own block. `/////...` was being converted to '/**//...' and causing a syntax error. Now, any `*/` sequence in the resulting comment is converted to `* /`. Also, only comment lines starting with exactly three slashes are considered to be jsdoc comments. For ruby-style comments in YAML files, jsdoc blocks must start with exactly two hash characters. Closes #1874, #1884.
+PhantomJS integration of gem into baseline refs #1595
+- NEW: Add 2D tile puzzle app. Fixes #207
+- CHG: Fix config files to handle drivers it doesn't know about without failing. Refs #1850
+- CHG: Update driver config to handle drivers it doesn't know about without failing. Move browser compatibility checks into the kernel and drivers, so that they are only performed if they are needed for the application. Fixes #1850, #1853
+- CHG: Break radio lesson application into lesson and radio components. Refs #1817, #1842.
+- CHG: pdate multiuser.md to reflect comments in code refs #1711
+- CHG: Simplify multiuser example app code and add explanatory comments
+- CHG: Fix lighting in multiuser/index.vwf.yaml refs #1711
+- CHG: Add new radio lesson sound to alleviate issues with the HTML5 audio tag. Fixes #1783.
+- CHG: Allow user to rotate in multiuser app
+- CHG: Add info about Alt+click to simulation.md and resize image fixes #1818
+- CHG: Update multiuser.md to match multiuser example app fixes #1711
+- CHG: Update lesson recipe with information about multiple levels of tasks. Fixes #1828.
+- NEW: Add beginning of multiuser example app
+- NEW: Added radio static audio loop to radio-lesson app
+
+
+
+
+
 
 ----------------------------------
 0.6.8

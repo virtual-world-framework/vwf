@@ -34,7 +34,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="_160_Soldier_bmp-sampler" texcoord="_1160_Soldier-lib-UV0"/>

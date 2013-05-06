@@ -50,7 +50,7 @@ var laserImages = ["images/blue_bolt.png", "images/green_bolt.png", "images/hunt
     "images/rabbit_bolt.png", "images/red_bolt.png", "images/rogue_bolt.png"];
 
 vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplementsIDs,
-    childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+    childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
     if(childName == playerName) {
         playerNode = childID;
     }

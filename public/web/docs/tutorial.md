@@ -29,7 +29,7 @@ The following code creates a child node of the application named blueCube, of ty
 	scripts:
 	- |
 	  this.initialize = function() {
-	    this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,0,100,0,1 ];
+	    this.camera.translation = [ 0,-100,0 ];
 	  }
 
 The above is all that is needed to create an application. The default walk mode allows the user to navigate with the standard WASD keys, as well as Q and E to rotate and R and C to move up and down. 

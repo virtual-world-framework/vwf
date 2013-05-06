@@ -34,7 +34,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="_097_LMTV_M1079A1_bmp-sampler" texcoord="_1097_LMTV_M1079A1-lib-UV0"/>

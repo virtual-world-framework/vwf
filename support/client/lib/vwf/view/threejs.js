@@ -19,6 +19,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     return view.load( module, {
 
         initialize: function( options ) {
+            
+            checkCompatibility.call(this);
 
             this.pickInterval = 10;
 
@@ -41,7 +43,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childURI, childName, callback /* ( ready ) */) {
+            childSource, childType, childIndex, childName, callback /* ( ready ) */) {
             
             
             //the created node is a scene, and has already been added to the state by the model.
@@ -93,6 +95,24 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     
     } );
     // private ===============================================================================
+        function checkCompatibility() {
+            this.compatibilityStatus = { compatible:true, errors:{} }
+            var contextNames = ["webgl","experimental-webgl","moz-webgl","webkit-3d"];
+            for(var i = 0; i < contextNames.length; i++){
+                try{
+                    var canvas = document.createElement('canvas');
+                    var gl = canvas.getContext(contextNames[i]);
+                    if(gl){
+                        return true;
+                    }
+                }
+                catch(e){}
+            }
+            this.compatibilityStatus.compatible = false;
+            this.compatibilityStatus.errors["WGL"] = "This browser is not compatible. The vwf/view/threejs driver requires WebGL.";
+            return false;
+        }
+
         function initScene( sceneNode ) {
     
         var self = this;
@@ -282,10 +302,25 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 sceneNode.renderer = new THREE.CanvasRenderer({canvas:mycanvas,antialias:true});
                 sceneNode.renderer.setSize(window.innerWidth,window.innerHeight);
             }
+
+            // backgroundColor and enableShadows are dependent on the renderer object, but if they are set in a prototype,
+            // the renderer is not available yet, so set them now.
+            for(var key in sceneNode.rendererProperties) {
+                if(key == "backgroundColor") {
+                    var vwfColor = new utility.color( sceneNode.rendererProperties["backgroundColor"] );
+                    if ( vwfColor ) {
+                        sceneNode.renderer.setClearColor( vwfColor.getHex(), vwfColor.alpha() );
+                    }
+                }
+                else if(key == "enableShadows") {
+                    value = Boolean( sceneNode.rendererProperties["enableShadows"] );
+                    sceneNode.renderer.shadowMapEnabled = value;
+                }
+            }
             
             rebuildAllMaterials.call(this);
             if(sceneNode.renderer.setFaceCulling)
-                sceneNode.renderer.setFaceCulling(false);
+                sceneNode.renderer.setFaceCulling( THREE.CullFaceBack );
             this.state.cameraInUse = sceneNode.threeScene.children[1];
 
             // Schedule the renderer.
@@ -421,7 +456,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var camera = sceneView.state.cameraInUse;
             var worldCamPos, worldCamTrans, camInverse;
             if ( camera ) { 
-                worldCamTrans = camera.matrix.getPosition();
+                var worldCamTrans = new THREE.Vector3();
+                worldCamTrans.getPositionFromMatrix( camera.matrix );
+
+                // QUESTION: Is the double use of y a bug?  I would assume so, but then why not
+                //           just use worldCamTrans as-is?
                 worldCamPos = [ worldCamTrans.x, worldCamTrans.y, worldCamTrans.y];
             }
 
@@ -823,7 +862,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     }
 
                     if ( object ) {
-                        sceneView.kernel.createChild( "index-vwf", fileName, object );                
+                        sceneView.kernel.createChild( sceneView.kernel.application(), fileName, object );
                     }
 
                 } catch ( e ) {
@@ -841,7 +880,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         
         var threeCam = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
-        if(!this.ray) this.ray = new THREE.Ray();
+        if(!this.raycaster) this.raycaster = new THREE.Raycaster();
         if(!this.projector) this.projector = new THREE.Projector();
         
         var SCREEN_HEIGHT = window.innerHeight;
@@ -860,13 +899,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         this.projector.unprojectVector(directionVector, threeCam);
         var pos = new THREE.Vector3();
-        pos.copy(threeCam.matrix.getPosition());
-        directionVector.subSelf(pos);
+        pos.getPositionFromMatrix( threeCam.matrix );
+        directionVector.sub(pos);
         directionVector.normalize();
         
         
-        this.ray.set(pos, directionVector);
-        var intersects = this.ray.intersectObjects(sceneNode.threeScene.children, true);
+        this.raycaster.set(pos, directionVector);
+        var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
         if (intersects.length) {
             // intersections are, by default, ordered by distance,
             // so we only care for the first one. The intersection

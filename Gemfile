@@ -15,6 +15,8 @@
 
 source "http://rubygems.org"
 
+ruby "1.9.3"
+
 gem "sinatra", ">= 1.3", :require => "sinatra/base"
 gem "json"
 gem "websocket-rack", :require => "rack/websocket"
@@ -29,6 +31,7 @@ end
 group :test do
   gem "minitest"
   gem "rack-test", :require => "rack/test"
+  gem "phantomjs"
 end
 
 group :build do

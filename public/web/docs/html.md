@@ -67,7 +67,7 @@ The first argument is the name of the node where the method resides. The second 
 
 New components can also be created from the HTML. In order to create a node, the following syntax should be used.
 
-	vwf_view.kernel.createChild("application-vwf", "componentName", component, callback);
+	vwf_view.kernel.createChild("application-vwf", "componentName", component, undefined, callback);
 
 The first argument is the name of the node that will be the parent of the new component. The second argument is the name of the new component, and the third is the JavaScript object defining the new component. The final argument is optional, and is a function that will be called after the new component has been created.
 

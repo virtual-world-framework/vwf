@@ -265,14 +265,14 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
         // -- creatingNode -------------------------------------------------------------------------
 
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+                childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
 
             var child = this.model.creatingNode && this.model.creatingNode(
                 this.kernel_to_model[nodeID] || nodeID,
                 childID,
                 this.kernel_to_model[childExtendsID] || childExtendsID,
                 childImplementsIDs,  // TODO: remap childImplementsIDs array values
-                childSource, childType, childURI, childName, callback );
+                childSource, childType, childIndex, childName, callback );
 
             if ( child !== undefined ) {
                 this.kernel_to_model[childID] = child;
@@ -284,9 +284,15 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- initializingNode ---------------------------------------------------------------------
 
-        initializingNode: function( nodeID, childID ) {
+        initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+                childSource, childType, childIndex, childName ) {
+
             return this.model.initializingNode && this.model.initializingNode(
-                this.kernel_to_model[nodeID] || nodeID, this.kernel_to_model[childID] || childID );
+                this.kernel_to_model[nodeID] || nodeID,
+                this.kernel_to_model[childID] || childID,
+                this.kernel_to_model[childExtendsID] || childExtendsID,
+                childImplementsIDs,  // TODO: remap childImplementsIDs array values
+                childSource, childType, childIndex, childName );
         },
 
         // -- deletingNode -------------------------------------------------------------------------

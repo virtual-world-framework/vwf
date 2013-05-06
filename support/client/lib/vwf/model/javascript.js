@@ -56,7 +56,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // -- creatingNode -------------------------------------------------------------------------
 
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+            childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
 
             var self = this;
 
@@ -86,8 +86,17 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 value: {} // for bookkeeping, not visible to scripts on the node  // TODO: well, ideally not visible; hide this better ("_private", "vwf_private", ?)
             } );
 
-node.id = childID; // TODO: move to vwf/model/object
-node.uri = childURI; // TODO: move to vwf/model/object
+            Object.defineProperty( node, "id", {
+                value: childID,
+                enumerable: true,
+            } );
+
+            Object.defineProperty( node, "uri", { // "this" is node
+                get: function() {
+                    return self.kernel.uri( this.id );
+                },
+                enumerable: true,
+            } );
 
             node.name = childName;
 
@@ -97,7 +106,7 @@ node.uri = childURI; // TODO: move to vwf/model/object
             node.type = childType;
 
             Object.defineProperty( node, "logger", {
-                value: this.logger.for( "#" + ( childName || childURI || childID ), node ),
+                value: this.logger.for( "#" + ( childName || childIndex || childID ), node ),
                 enumerable: true,
             } );
 
@@ -306,9 +315,12 @@ node.uri = childURI; // TODO: move to vwf/model/object
 
         // Invoke an initialize() function if one exists.
 
-        initializingNode: function( nodeID, childID ) {
+        initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childIndex, childName ) {
 
+            var node = this.nodes[nodeID];
             var child = this.nodes[childID];
+
             var scriptText = "this.initialize && this.initialize()";
 
 var scriptText = " \
@@ -329,11 +341,37 @@ var scriptText = " \
     \
 ";
 
+            // Call the initializer.
+
             try {
-                return ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
+                ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
             } catch ( e ) {
                 this.logger.warnx( "initializingNode", childID,
                     "exception in initialize:", utility.exceptionMessage( e ) );
+            }
+
+            // Link to the parent.
+            // 
+            // The parent reference is only defined once the node is fully initialized. It is not
+            // defined earlier since components should be able to stand alone without depending on
+            // external nodes.
+            // 
+            // Additionally, since parts of the application may become ready in a different order on
+            // other clients, referring to properties in other parts of the application may lead to
+            // consistency errors.
+
+            child.parent = node;
+
+            if ( node ) {
+
+                node.children[childIndex] = child;
+
+                if ( parseInt( childName ).toString() !== childName ) {
+                    node.children[childName] = child;
+node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+                    ( node[childName] = child );
+                }
+
             }
 
             return undefined;
@@ -371,22 +409,6 @@ var scriptText = " \
         // -- addingChild --------------------------------------------------------------------------
 
         addingChild: function( nodeID, childID, childName ) {
-
-            var node = this.nodes[nodeID];
-            var child = this.nodes[childID];
-
-            child.parent = node;
-
-            if ( node ) {
-
-                node.children.push( child );
-                node.children[childName] = child;  // TODO: conflict if childName is parseable as a number
-
-node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                ( node[childName] = child );
-
-            }
-
         },
 
         // TODO: removingChild
@@ -707,7 +729,10 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
         proxy.private.origin = behavior; // the node we're the proxy for
 
-proxy.id = behavior.id; // TODO: move to vwf/model/object
+        Object.defineProperty( proxy, "id", {
+            value: behavior.id,
+            enumerable: true,
+        } );
 
         proxy.name = behavior.name;
 
@@ -935,7 +960,10 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
 
         if ( future.private.change < node.private.change ) { // only if out of date
 
-            future.id = node.id;
+            Object.defineProperty( future, "id", {
+                value: node.id,
+                enumerable: true,
+            } );
 
             future.properties = Object.create( Object.getPrototypeOf( future ).properties || Object.prototype, {
                 future: { value: future } // for future.properties accessors (non-enumerable)  // TODO: hide this better

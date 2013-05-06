@@ -23,5 +23,5 @@ children:
 scripts:
 - |
   this.initialize = function() {
-    this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,0,100,0,1 ];
+    this.camera.translation = [ 0,-100,0 ];
   }

@@ -53,7 +53,7 @@ Explanations of the parameters can be found in the [callMethod](jsdoc/symbols/vw
 
 Create a model component from the view like so:
 
-	vwf_view.kernel.createChild( nodeId, "componentName", component, callback );
+	vwf_view.kernel.createChild( nodeId, "componentName", component, undefined, callback );
 
 Explanations of the parameters can be found in the [createChild](jsdoc/symbols/vwf.api.kernel.html#createChild) API description.
 
