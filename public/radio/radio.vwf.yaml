@@ -902,6 +902,8 @@ scripts:
         case "squelch":
           if ( radio.squelch <= 100 )
             radio.squelch = radio.squelch + 10;
+          if (radio.squelch >= 70) 
+            radio.Radio.ic40Volume.stopStatic();
           break;
         case "beep":
           radio.beepOn = !radio.beepOn;

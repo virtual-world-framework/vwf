@@ -112,7 +112,6 @@ children:
                 if (radio.squelch >= 70) 
                 {
                   radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
-                  this.stopStatic();
                   this.completed();
                   this.logger.info( "Step 5 after completed");
                 }
