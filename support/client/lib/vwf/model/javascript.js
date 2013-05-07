@@ -262,6 +262,7 @@ node.id = childID; // TODO: move to vwf/model/object
         initializingNode: function( nodeID, childID ) {
 
             var child = this.nodes[childID];
+			
             var scriptText = "this.initialize && this.initialize()";
 
             try {
@@ -327,7 +328,7 @@ node.id = childID; // TODO: move to vwf/model/object
 
             var node = this.nodes[nodeID];
             var child = this.nodes[childID];
-
+			
             child.parent = node;
 
             if ( node ) {
@@ -335,9 +336,27 @@ node.id = childID; // TODO: move to vwf/model/object
                 node.children.push( child );
                 node.children[childName] = child;  // TODO: conflict if childName is parseable as a number
 
-node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+				node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
                 ( node[childName] = child );
 
+            }
+			
+			var scriptText = "this.attached && this.attached()";
+
+            try {
+                ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
+            } catch ( e ) {
+                this.logger.warnc( "addingChild", childID,
+                    "exception in addingChild:", utility.exceptionMessage( e ) );
+            }
+			
+			scriptText = "this.childAdded && this.childAdded('"+child+"')";
+
+            try {
+                ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
+            } catch ( e ) {
+                this.logger.warnc( "addingChild", childID,
+                    "exception in addingChild:", utility.exceptionMessage( e ) );
             }
 
         },
