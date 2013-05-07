@@ -4826,13 +4826,13 @@
   </library_lights>
   <library_images>
     <image id="earpiece_psd">
-      <init_from>./images/earpiece.psd</init_from>
+      <init_from>./images/earpiece.png</init_from>
     </image>
     <image id="ic40channelambient_occlusion__mr__tga">
       <init_from>./images/ic40channelambient%20occlusion%20_mr_.tga</init_from>
     </image>
     <image id="ic40channeldiffusemap_tga">
-      <init_from>./images/ic40channeldiffusemap.tga</init_from>
+      <init_from>./images/ic40channeldiffusemap.png</init_from>
     </image>
     <image id="BeltClipFront_png">
       <init_from>./images/BeltClipFront.png</init_from>
