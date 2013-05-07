@@ -59,7 +59,7 @@
 					saveIndex = saveIndex > -1 ? saveIndex : i;
 
 					e[keys[i]].hotState = ko.observable();
-					
+					e[keys[i]].lastUpdate = e[keys[i]].lastUpdate?e[keys[i]].lastUpdate:new Date();
 					//If the incoming and currently displayed objects are not the same, update
 					if(JSON.stringify(vwfPortalModel.worldObjects()[saveIndex]) != JSON.stringify(e[keys[i]]))
 						vwfPortalModel.worldObjects()[saveIndex] = e[keys[i]];

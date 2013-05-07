@@ -57,49 +57,52 @@ define(function ()
 		$('#InventoryManagerRename').click(this.renameSelectedItem);
 		this.createInventoryItem = function ()
 		{
-			if (!_Editor.GetSelectedVWFNode() && _InventoryManager.selectedType == 'script')
+			this.getInventoryItemAssetData(this.inventory[this.selectedName].key,function(item)
 			{
-				_Notifier.alert('You must select an object before createing a script from inventory');
-				//$('#InventoryManagerMessage').dialog('open');
-			}
-			if (_Editor.GetSelectedVWFNode() && _InventoryManager.selectedType == 'script')
-			{
-				_ScriptEditor.show();
-				var t = _InventoryManager.selectedItem;
-				if (t.type == 'method') _ScriptEditor.setSelectedMethod(t.name, t.body);
-				if (t.type == 'event') _ScriptEditor.setSelectedEvent(t.name, t.body);
-			}
-			if (_InventoryManager.selectedType == 'object')
-			{
-				var t = _InventoryManager.selectedItem;
-				var newintersectxy = _Editor.GetInsertPoint()
-				if (t.properties.type != 'modifier' && t.properties.type != 'behavior')
+				if (!_Editor.GetSelectedVWFNode() && (_InventoryManager.selectedType == 'event' || _InventoryManager.selectedType == 'method'))
 				{
-					t.properties.transform[12] = newintersectxy[0];
-					t.properties.transform[13] = newintersectxy[1];
-					t.properties.transform[14] = newintersectxy[2];
-					//t.properties.translation[0] = newintersectxy[0];
-					//t.properties.translation[1] = newintersectxy[1];
-					//t.properties.translation[2] = newintersectxy[2];
-					t.properties.DisplayName = _Editor.GetUniqueName(t.properties.DisplayName);
-					t = _DataManager.getCleanNodePrototype(t);
-					_InventoryManager.setOwner(t, _UserManager.GetCurrentUserName());
-					_Editor.SelectOnNextCreate();
-					_InventoryManager.createChild('index-vwf', GUID(), t, null, null);
+					_Notifier.alert('You must select an object before createing a script from inventory');
+					//$('#InventoryManagerMessage').dialog('open');
 				}
-				else
+				if (_Editor.GetSelectedVWFNode() && (_InventoryManager.selectedType == 'event' || _InventoryManager.selectedType == 'method'))
 				{
-					if (!_Editor.GetSelectedVWFNode())
+					_ScriptEditor.show();
+					var t = item;
+					if (t.type == 'method') _ScriptEditor.setSelectedMethod(t.name, t.body);
+					if (t.type == 'event') _ScriptEditor.setSelectedEvent(t.name, t.body);
+				}
+				if (_InventoryManager.selectedType != 'event' && _InventoryManager.selectedType != 'method')
+				{
+					var t = item;
+					var newintersectxy = _Editor.GetInsertPoint()
+					if (t.properties.type != 'modifier' && t.properties.type != 'behavior')
 					{
-						_Notifier.alert('You must select an object before createing a script from inventory');
-						return;
+						t.properties.transform[12] = newintersectxy[0];
+						t.properties.transform[13] = newintersectxy[1];
+						t.properties.transform[14] = newintersectxy[2];
+						//t.properties.translation[0] = newintersectxy[0];
+						//t.properties.translation[1] = newintersectxy[1];
+						//t.properties.translation[2] = newintersectxy[2];
+						t.properties.DisplayName = _Editor.GetUniqueName(t.properties.DisplayName);
+						t = _DataManager.getCleanNodePrototype(t);
+						_InventoryManager.setOwner(t, _UserManager.GetCurrentUserName());
+						_Editor.SelectOnNextCreate();
+						_InventoryManager.createChild('index-vwf', GUID(), t, null, null);
 					}
-					t = _DataManager.getCleanNodePrototype(t);
-					_InventoryManager.setOwner(t, _UserManager.GetCurrentUserName());
-					_InventoryManager.createChild(_Editor.GetSelectedVWFID(), GUID(), t, null, null);
+					else
+					{
+						if (!_Editor.GetSelectedVWFNode())
+						{
+							_Notifier.alert('You must select an object before createing a script from inventory');
+							return;
+						}
+						t = _DataManager.getCleanNodePrototype(t);
+						_InventoryManager.setOwner(t, _UserManager.GetCurrentUserName());
+						_InventoryManager.createChild(_Editor.GetSelectedVWFID(), GUID(), t, null, null);
+					}
 				}
-			}
-		}
+			});
+		}.bind(this)
 		this.setOwner = function (t, owner)
 		{
 			t.properties.owner = owner;
@@ -112,67 +115,119 @@ define(function ()
 			}
 		}
 		$('#InventoryManagerCreate').click(this.createInventoryItem);
+		this.deleteInventoryItem = function(id,cb)
+		{
+			$.ajax('/vwfDataManager.svc/inventoryitem?AID=' + id,{
+				
+				type:'DELETE',
+				success:function(err,d,xhr)
+				{
+					cb();
+				},
+			});
+		}
 		this.deleteSelectedItem = function ()
 		{
-			_DataManager.deleteInventoryItem(_UserManager.GetCurrentUserName(), _InventoryManager.selectedItem);
-			_InventoryManager.BuildGUI();
-		}
+			this.deleteInventoryItem(this.inventory[_InventoryManager.selectedName].key,function(){
+				_InventoryManager.NoAnimateRedraw();
+			});
+			
+		}.bind(this)
 		$('#InventoryManagerDelete').click(this.deleteSelectedItem);
+		this.getInventoryItemAssetData = function(id,cb)
+		{
+			$.ajax('/vwfDataManager.svc/inventoryitemassetdata?AID=' + id,{
+				type:'GET',
+				success:function(err,d,xhr)
+				{
+					var item = JSON.parse(xhr.responseText);
+					cb(item);
+				}
+			});
+		
+		}
+		this.NoAnimateRedraw = function(cb)
+		{
+		
+			_InventoryManager.getInventory(function(inventory)
+				{
+					
+					if(!_InventoryManager.isOpen())
+					{
+						$('#InventoryManager').prependTo($('#InventoryManager').parent());
+						$('#InventoryManager').show('blind', function ()
+						{
+							if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
+						});
+						showSidePanel();
+					}
+					_InventoryManager.BuildGUI(inventory);
+					_InventoryManager.open = true;
+					if(cb) cb();
+				});
+		
+		}
 		this.viewInventoryItem = function ()
 		{
-			$('#InventoryViewer').dialog('open');
-			if (_InventoryManager.selectedType == 'object')
+			
+			this.getInventoryItemAssetData(this.inventory[this.selectedName].key,
+			function(item)
 			{
-				var text = JSON.stringify(_InventoryManager.selectedItem);
-				text = text.replace(/([^\n])\{/gm, '$1\n\{');
-				text = text.replace(/([^\n])\}/gm, '$1\n\}');
-				var opening = 0;
-				var inbracket = 0;
-				var indentedtext = "";
-				for (var i = 0; i < text.length - 1; i++)
+				
+				$('#InventoryViewer').dialog('open');
+				if (_InventoryManager.selectedType != 'event' &&  _InventoryManager.selectedType != 'method')
 				{
-					if (text[i] == '{') opening++;
-					if (text[i] == ']') inbracket--;
-					if (text[i] == '[') inbracket++;
-					if (text[i] == '\n')
-					{}
-					else if (text[i] == ',' && !inbracket)
+					var text = JSON.stringify(item);
+					text = text.replace(/([^\n])\{/gm, '$1\n\{');
+					text = text.replace(/([^\n])\}/gm, '$1\n\}');
+					var opening = 0;
+					var inbracket = 0;
+					var indentedtext = "";
+					for (var i = 0; i < text.length - 1; i++)
 					{
-						indentedtext += ',\n';
-						for (var j = 0; j < opening; j++) indentedtext += '   ';
+						if (text[i] == '{') opening++;
+						if (text[i] == ']') inbracket--;
+						if (text[i] == '[') inbracket++;
+						if (text[i] == '\n')
+						{}
+						else if (text[i] == ',' && !inbracket)
+						{
+							indentedtext += ',\n';
+							for (var j = 0; j < opening; j++) indentedtext += '   ';
+						}
+						else if (text[i] == '{')
+						{
+							indentedtext += '\n'
+							for (var j = 0; j < opening; j++) indentedtext += '   ';
+							indentedtext += '{\n'
+							for (var j = 0; j < opening; j++) indentedtext += '   ';
+						}
+						else if (text[i] == '}')
+						{
+							indentedtext += '\n';
+							for (var j = 0; j < opening; j++) indentedtext += '   ';
+							indentedtext += '}\n'
+							for (var j = 0; j < opening; j++) indentedtext += '   ';
+						}
+						else
+						{
+							indentedtext += text[i];
+						}
+						if (text[i] == '}') opening--;
 					}
-					else if (text[i] == '{')
-					{
-						indentedtext += '\n'
-						for (var j = 0; j < opening; j++) indentedtext += '   ';
-						indentedtext += '{\n'
-						for (var j = 0; j < opening; j++) indentedtext += '   ';
-					}
-					else if (text[i] == '}')
-					{
-						indentedtext += '\n';
-						for (var j = 0; j < opening; j++) indentedtext += '   ';
-						indentedtext += '}\n'
-						for (var j = 0; j < opening; j++) indentedtext += '   ';
-					}
-					else
-					{
-						indentedtext += text[i];
-					}
-					if (text[i] == '}') opening--;
+					indentedtext += text[text.length - 1];
+					_InventoryManager.itemViewer.setValue(indentedtext);
+					_InventoryManager.itemViewer.selection.clearSelection();
+					_InventoryManager.itemViewer.getSession().setMode("ace/mode/json");
 				}
-				indentedtext += text[text.length - 1];
-				_InventoryManager.itemViewer.setValue(indentedtext);
-				_InventoryManager.itemViewer.selection.clearSelection();
-				_InventoryManager.itemViewer.getSession().setMode("ace/mode/json");
-			}
-			if (_InventoryManager.selectedType == 'script')
-			{
-				_InventoryManager.itemViewer.setValue(_InventoryManager.selectedItem.body);
-				_InventoryManager.itemViewer.selection.clearSelection();
-				_InventoryManager.itemViewer.getSession().setMode("ace/mode/javascript");
-			}
-		}
+				if (_InventoryManager.selectedType == 'script')
+				{
+					_InventoryManager.itemViewer.setValue(_InventoryManager.selectedItem.body);
+					_InventoryManager.itemViewer.selection.clearSelection();
+					_InventoryManager.itemViewer.getSession().setMode("ace/mode/javascript");
+				}
+			});
+		}.bind(this);
 		$('#InventoryManagerView').click(this.viewInventoryItem);
 		this.DeleteIDsAndOwner = function (t)
 		{
@@ -194,19 +249,33 @@ define(function ()
 				}
 			}
 		}
+		this.addInventoryItem = function(data,title,type,cb)
+		{
+			$.ajax('/vwfDataManager.svc/inventoryitem?title=' + title +'&type=' + type,{
+				
+				type:'POST',
+				success:function(err,d,xhr)
+				{
+					cb($.trim(xhr.responseText));
+				},
+				data:JSON.stringify(data),
+				dateType:'text'
+			});
+		
+		}
 		this.Take = function (id)
 		{
 			if (!id) id = _Editor.GetSelectedVWFNode().id
 			var t = _DataManager.getCleanNodePrototype(id);
-			var name = t.properties.DisplayName || GUID();
-			_DataManager.addInventoryItem(_UserManager.GetCurrentUserName(), t, name, 'object');
-			_InventoryManager.BuildGUI();
-			showSidePanel();
-			window.setTimeout(function ()
+			var title = t.properties.DisplayName || GUID();
+			
+			this.addInventoryItem(t, title, 'object',function(key)
 			{
-				_InventoryManager.selectItem(name, 'object');
-			}, 450);
-			if (!_InventoryManager.isOpen()) _InventoryManager.show();
+				_InventoryManager.NoAnimateRedraw(function()
+				{
+					_InventoryManager.selectKey(key);
+				});
+			});
 		}
 		this.createChild = function (parent, name, proto, uri, callback)
 		{
@@ -217,19 +286,36 @@ define(function ()
 			}
 			vwf_view.kernel.createChild(parent, name, proto, uri, callback);
 		}
+		this.getInventory = function(cb)
+		{
+			
+			var inventory = null;
+			$.ajax('/vwfDataManager.svc/inventory',{
+				
+				type:'GET',
+				success:function(err,d,xhr)
+				{
+					inventory = JSON.parse(xhr.responseText);
+					cb(inventory);
+				}
+			});
+		}
 		this.show = function ()
 		{
-			//$('#InventoryManager').dialog('open');
-			$('#InventoryManager').prependTo($('#InventoryManager').parent());
-			$('#InventoryManager').show('blind', function ()
+			this.getInventory(function(inventory)
 			{
-				if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
+				//$('#InventoryManager').dialog('open');
+				$('#InventoryManager').prependTo($('#InventoryManager').parent());
+				$('#InventoryManager').show('blind', function ()
+				{
+					if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
+				});
+				//$('#InventoryManager').dialog('option','position',[1282,40]);
+				_InventoryManager.BuildGUI(inventory);
+				showSidePanel();
+				_InventoryManager.open = true;
+				
 			});
-			//$('#InventoryManager').dialog('option','position',[1282,40]);
-			_InventoryManager.BuildGUI();
-			showSidePanel();
-			_InventoryManager.open = true;
-			this.resize();
 		}
 		this.addScript = function (body, name, type)
 		{
@@ -237,7 +323,7 @@ define(function ()
 			t.name = name;
 			t.body = body;
 			t.type = type;
-			_DataManager.addInventoryItem(_UserManager.GetCurrentUserName(), t, GUID(), 'script');
+			this.addInventoryItem(t, GUID(), 'script');
 			this.BuildGUI();
 		}
 		this.resize = function ()
@@ -282,14 +368,31 @@ define(function ()
 			//return $("#InventoryManager").dialog( "isOpen" );
 			return $('#InventoryManager').is(':visible');
 		}
+		this.renameInventoryItem = function(id,val,cb)
+		{
+			
+			$.ajax('/vwfDataManager.svc/inventoryitemmetadata?AID=' + id,{
+				
+				type:'POST',
+				success:function(err,d,xhr)
+				{
+					cb();
+				},
+				data:JSON.stringify({title:val}),
+				dateType:'text'
+			});
+		
+		}
 		this.offClicked = function ()
 		{
 			$('#InventoryRename').hide();
 			if (_InventoryManager.inRename)
 			{
-				_DataManager.renameInventoryItem(_UserManager.GetCurrentUserName(), _InventoryManager.selectedName, $('#InventoryRename').val(), _InventoryManager.selectedType);
-				_InventoryManager.BuildGUI();
+				_InventoryManager.renameInventoryItem(this.inventory[_InventoryManager.selectedName].id, $('#InventoryRename').val(),function(){
+				
 				_InventoryManager.inRename = false;
+				_InventoryManager.NoAnimateRedraw();
+				});
 			}
 		}
 		$('#InventoryDisplay').click(this.offClicked);
@@ -297,26 +400,34 @@ define(function ()
 		{
 			if (_InventoryManager.inRename)
 			{
-				_DataManager.renameInventoryItem(_UserManager.GetCurrentUserName(), _InventoryManager.selectedName, $('#InventoryRename').val(), _InventoryManager.selectedType);
-				_InventoryManager.BuildGUI();
+				_InventoryManager.renameInventoryItem(this.inventory[_InventoryManager.selectedName].id, $('#InventoryRename').val(),function(){
 				_InventoryManager.inRename = false;
+				_InventoryManager.NoAnimateRedraw();
+				});
 			}
 			$('#InventoryRename').hide();
 			var name = $(this).attr('name');
 			var type = $(this).attr('type');
 			_InventoryManager.selectItem(name, type);
-			$('#InventoryRename').val(name);
+			$('#InventoryRename').val(_InventoryManager.inventory[name].title);
 			$('#InventoryRename').css('top', ($(this).position().top - .5) + 'px');
 		}
 		this.selectItem = function (name, type)
 		{
-			var inventory = _DataManager.getInventory(_UserManager.GetCurrentUserName());
-			if (type == 'script') _InventoryManager.selectedItem = inventory.scripts[name];
-			if (type == 'object') _InventoryManager.selectedItem = inventory.objects[name];
+			var inventory = this.inventory;
 			_InventoryManager.selectedType = type;
 			_InventoryManager.selectedName = name;
 			$(".inventoryItem").css('background', '#FFFFF8');
 			$('#InventoryDisplay').find('[name="' + name + '"]').css('background', 'lightblue');
+		}
+		this.selectKey = function (key)
+		{
+			var inventory = this.inventory;
+			for(var i = 0; i < inventory.length; i++)
+			{
+				if(inventory[i].key == key)
+					this.selectItem(i,inventory[i].type);
+			}
 		}
 		this.rename = function (e)
 		{
@@ -324,14 +435,19 @@ define(function ()
 			_InventoryManager.inRename = true;
 			if (e.keyCode == 13)
 			{
-				_DataManager.renameInventoryItem(_UserManager.GetCurrentUserName(), _InventoryManager.selectedName, $(this).val(), _InventoryManager.selectedType);
-				$('#InventoryRename').hide();
-				_InventoryManager.BuildGUI();
+				_InventoryManager.renameInventoryItem(this.inventory[_InventoryManager.selectedName].key, $('#InventoryRename').val(),function(){
 				_InventoryManager.inRename = false;
+				_InventoryManager.NoAnimateRedraw();
+				});
 			}
-		}
-		this.BuildGUI = function ()
+		}.bind(this)
+		this.BuildGUI = function (newInventory)
 		{
+			
+			if(newInventory)
+				this.inventory = newInventory
+			var inventory = this.inventory;
+			
 			$('#InventoryDisplay').empty();
 			$('#InventoryDisplay').append("<input type='text' id='InventoryRename' style='display: inline-block;top: 22.0px;position: absolute;padding: 0px;font: 1.0em sans-serif;border: 1px solid black;margin: 0px;width: 80%;'/>");
 			$('#InventoryRename').hide();
@@ -344,26 +460,17 @@ define(function ()
 			{
 				$(this).select();
 			});
-			$('#InventoryDisplay').append("<div id='InventoryObjects'><div style='font-weight:bold;border-bottom: 1px solid black;'>Objects</div></div>");
-			$('#InventoryDisplay').append("<div id='InventoryScripts'><div style='font-weight:bold;border-bottom: 1px solid black;'>Scripts</div></div>");
-			var inventory = _DataManager.getInventory(_UserManager.GetCurrentUserName());
+			
 			if (!inventory) return;
-			for (var i in inventory.objects)
+			for (var i=0;i < inventory.length; i++)
 			{
-				$('#InventoryObjects').append('<div class="inventoryItem" style="background:#FFFFF8;padding-left: 10px;" id="inventoryObject' + ToSafeID(i) + '" />');
-				$('#inventoryObject' + ToSafeID(i)).html("<div style='font-weight:bold;display:inline'>" + i + "</div>" + " : " + (inventory.objects[i].properties.type || ""));
-				$('#inventoryObject' + ToSafeID(i)).attr('name', i);
-				$('#inventoryObject' + ToSafeID(i)).attr('type', 'object');
-				$('#inventoryObject' + ToSafeID(i)).click(_InventoryManager.itemClicked);
+				$('#InventoryDisplay').append('<div class="inventoryItem" style="white-space: nowrap;text-overflow: ellipsis;background:#FFFFF8;padding-left: 10px;" id="InventoryDisplay' + i + '" />');
+				$('#InventoryDisplay' + (i)).html("<div style='font-weight:bold;display:inline'>" + inventory[i].title + "</div>" + " : " + (inventory[i].type || ""));
+				$('#InventoryDisplay' + (i)).attr('name', i);
+				$('#InventoryDisplay' + (i)).attr('type', inventory[i].type);
+				$('#InventoryDisplay' + (i)).click(_InventoryManager.itemClicked);
 			}
-			for (var i in inventory.scripts)
-			{
-				$('#InventoryScripts').append('<div class="inventoryItem" id="inventoryScript' + ToSafeID(i) + '" style="background:#FFFFF8;padding-left: 10px;"/>');
-				$('#inventoryScript' + ToSafeID(i)).html(i);
-				$('#inventoryScript' + ToSafeID(i)).attr('name', i);
-				$('#inventoryScript' + ToSafeID(i)).attr('type', 'script');
-				$('#inventoryScript' + ToSafeID(i)).click(_InventoryManager.itemClicked);
-			}
+			
 			if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
 		}
 		this.itemViewer = ace.edit("InventoryView");

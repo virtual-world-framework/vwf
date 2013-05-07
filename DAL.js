@@ -10,6 +10,18 @@ var DBTablePath = '\\users.db';
 var DB = '';
 
 
+Array.prototype.getUnique = function(){
+   var u = {}, a = [];
+   for(var i = 0, l = this.length; i < l; ++i){
+      if(u.hasOwnProperty(this[i])) {
+         continue;
+      }
+      a.push(this[i]);
+      u[this[i]] = 1;
+   }
+   return a;
+}
+
 //generate a random id.
 function GUID()
     {
@@ -152,7 +164,7 @@ function getInventoryItemAssetData(userID,inventoryID,cb)
 		{
 			fs.readFile(datapath + '\\Profiles\\' + userID + '_Data' + '\\' + inventoryID,"utf8",function(err,data)
 			{
-				cb(data);
+				cb(JSON.parse(data));
 			});			
 		}
 		else
@@ -162,7 +174,7 @@ function getInventoryItemAssetData(userID,inventoryID,cb)
 		}
 	});
 }
-function getInventoryItemMetadata(userID,inventoryID, cb)
+function getInventoryItemMetaData(userID,inventoryID, cb)
 {
 	getInventoryForUser(userID,function(inventory,Ikey)
 	{
@@ -225,6 +237,7 @@ function updateInventoryItemMetadata(userID,inventoryID,data, cb)
 	});
 }
 
+//cb(key);
 function addToInventory(userID,data,assetdata,cb)
 {
 	//get the inventor list for the user
@@ -241,7 +254,7 @@ function addToInventory(userID,data,assetdata,cb)
 			{
 				fs.writeFile(datapath+'\\Profiles\\' + userID + '_Data\\' + key,JSON.stringify(assetdata),function(err)
 				{
-					cb();
+					cb(key);
 				});	
 			});
 			
@@ -260,17 +273,66 @@ function getInventoryForUser(userID,cb)
 		
 	});
 }
+//cb(results)
+function searchInventory(userID,searchTerms,cb)
+{
+	
+	if(searchTerms.constructor != Array)
+		searchTerms = [searchTerms];
+	else
+		searchTerms = searchTerms.getUnique();
+		
+		
+	getInventoryDisplayData(userID,function(inventory){
+	
+		if(!inventory || ! searchTerms)
+		{
+			cb([]);
+			return;
+		}
+		
+		var results = [];
+		for(var i =0; i < inventory.length; i ++)
+		{
+			var match = false;
+			for(var j =0; j < searchTerms.length; j++)
+			{
+				if(searchTerms[j])
+				{
+					if(inventory[i].title && inventory[i].title.indexOf(searchTerms[j]) != -1)
+						match = true;
+					if(inventory[i].description && inventory[i].description.indexOf(searchTerms[j]) != -1)
+						match = true;
+					if(inventory[i].keywords && inventory[i].keywords.indexOf(searchTerms[j]) != -1)
+						match = true;
+				}					
+			}
+			if(match)
+				results.push(inventory[i]);
+	
+		}
+		cb(results.getUnique());
+	});
+}
+
+//cb(list)
 function getInventoryDisplayData(userID,cb)
 {
 	getInventoryForUser(userID,function(inventory)
 	{
 		var list = [];
-		async.each(inventory,
+		if(!inventory)
+		{
+			cb(list);
+			return;
+		}
+		async.eachSeries(inventory,
 		function(item,cb2){
 		
-			getInventoryItemMetadata(userID, item,function(data)
+			getInventoryItemMetaData(userID, item,function(data)
 			{
-				list.push({title:data.title,description:data.description,type:data.type,key:item});
+				if(data)
+					list.push({title:data.title,description:data.description,type:data.type,key:item});
 				cb2();
 			});
 		
@@ -616,6 +678,7 @@ function saveInstanceState(id,data,cb)
 		}
 	});
 }
+
 function createInstance (id,data,cb)
 {
 	getInstance(id,function(instance){
@@ -646,6 +709,7 @@ function createInstance (id,data,cb)
 		}
 	});
 };
+
 function deleteInstance (id,cb)
 {
 	async.series([
@@ -663,7 +727,6 @@ function deleteInstance (id,cb)
 		console.log('update state index');
 		DB.get('StateIndex',function(err,stateIndex,key)
 		{
-			
 			if(!stateIndex)
 			{
 				cb();
@@ -679,6 +742,7 @@ function deleteInstance (id,cb)
 		});
 	}]);
 };
+
 function findState(query,cb)
 {
 	
@@ -705,6 +769,7 @@ function clearUsers()
 		});
 	});
 }
+
 function importUsers()
 {
 	fs.readdir(datapath+"\\Profiles\\",function(err,files){
@@ -739,7 +804,10 @@ function importUsers()
 												var itemdata = inventory.objects[item];
 												if(itemdata)
 												{
-													addToInventory(i,{title:item,type:itemdata.type || 'object'},itemdata,function()
+													var type ="object";
+													if( itemdata.type) type = itemdata.type;
+													if(itemdata.properties && itemdata.properties.type) type = itemdata.properties.type;
+													addToInventory(i,{title:item,type:type},itemdata,function()
 													{
 														cb2();
 													});
@@ -774,8 +842,6 @@ function importUsers()
 												{
 													cb2();
 												}
-												
-												
 											},function(res)
 											{
 												cb3();
@@ -809,8 +875,6 @@ function importUsers()
 				console.log('done');
 			});
 	});
-
-
 }
 function importStates()
 {
@@ -984,12 +1048,13 @@ function startup(callback)
 			exports.deleteInventoryItem=deleteInventoryItem
 			exports.getInventoryForUser = getInventoryForUser;
 			exports.addToInventory = addToInventory;
-			exports.getInventoryItemMetadata = getInventoryItemMetadata;
+			exports.getInventoryItemMetaData = getInventoryItemMetaData;
 			exports.getInventoryItemAssetData = getInventoryItemAssetData;
 			exports.getInventoryDisplayData = getInventoryDisplayData;
 			exports.updateInventoryItemMetadata = updateInventoryItemMetadata;
 			exports.importUsers = importUsers;
 			exports.clearUsers = clearUsers;
+			exports.searchInventory = searchInventory;
 			callback();
 		}
 	

@@ -277,13 +277,111 @@ function InstanceLogout(response,URL)
 			return;
 }
 
+
+function getInventory(URL,response)
+{	
+	if(!URL.loginData)
+	{
+		respond(response,401,'no login data');
+		return;
+	}
+	DAL.getInventoryDisplayData(URL.loginData.UID,function(inventory)
+	{
+		ServeJSON(inventory,response,URL);
+	});
+}
+
+function getInventoryItemAssetData(URL,response)
+{	
+	if(!URL.loginData)
+	{
+		respond(response,401,'no login data');
+		return;
+	}
+	if(!URL.query.AID)
+	{
+		respond(response,500,'no AID in query string');
+		return;
+	}
+	DAL.getInventoryItemAssetData(URL.loginData.UID,URL.query.AID,function(item)
+	{
+		ServeJSON(item,response,URL);
+	});
+}
+
+function getInventoryItemMetaData(URL,response)
+{	
+	if(!URL.loginData)
+	{
+		respond(response,401,'no login data');
+		return;
+	}
+	if(!URL.query.AID)
+	{
+		respond(response,500,'no AID in query string');
+		return;
+	}
+	DAL.getInventoryItemMetaData(URL.loginData.UID,URL.query.AID,function(item)
+	{
+		ServeJSON(item,response,URL);
+	});
+}
+function addInventoryItem(URL,data,response)
+{
+	if(!URL.loginData)
+	{
+		respond(response,401,'no login data');
+		return;
+	}
+	DAL.addToInventory(URL.loginData.UID,{title:URL.query.title,uploaded:new Date(),description:'',type:URL.query.type},data,function(id)
+	{
+		respond(response,200,id);
+	});
+}
+function updateInventoryItemMetadata(URL,data,response)
+{
+	if(!URL.loginData)
+	{
+		respond(response,401,'no login data');
+		return;
+	}
+	if(!URL.query.AID)
+	{
+		respond(response,500,'no AID in query string');
+		return;
+	}
+	DAL.updateInventoryItemMetadata(URL.loginData.UID,URL.query.AID,JSON.parse(data),function()
+	{
+		respond(response,200,'ok');
+	});
+}
+function deleteInventoryItem(URL,response)
+{
+	if(!URL.loginData)
+	{
+		respond(response,401,'no login data');
+		return;
+	}
+	if(!URL.query.AID)
+	{
+		respond(response,500,'no AID in query string');
+		return;
+	}
+	DAL.deleteInventoryItem(URL.loginData.UID,URL.query.AID,function()
+	{
+		respond(response,200,'ok');
+	});
+}
 function ServeJSON(jsonobject,response,URL)
 {
 		    
 			response.writeHead(200, {
 				"Content-Type": "text/json"
 			});
-			response.write(JSON.stringify(jsonobject), "utf8");
+			if (jsonobject.constructor != String)
+				response.write(JSON.stringify(jsonobject), "utf8");
+			else
+				response.write(jsonobject, "utf8");
 			response.end();
 			
 }
@@ -800,7 +898,7 @@ function getState(SID)
 		return JSON.parse(file);
 	}
 	return null;
-}
+}  
 
 //find the session data for a request
 function GetSessionData(request)
@@ -820,7 +918,7 @@ function GetSessionData(request)
   var SessionID = cookies.session;
   
   if(!SessionID) return null;
-  global.log(SessionID);
+  global.log(SessionID,3);
   for(var i in global.sessions)
   {	
 	//console.log("checking "+global.sessions[i].sessionId+" == " + SessionID);
@@ -846,7 +944,9 @@ function Salt(URL,response)
 			respond(response,200,'OBS#$%SGSDF##$%#DA');
 		}else
 		{
-			respond(response,401,'');
+			//respond with a fake salt so attackers can't identify which is a valid account using this endpoint
+			//note: probably a timing attack here
+			respond(response,401,GUID());
 		}
 	
 		
@@ -918,13 +1018,7 @@ function serve (request, response)
 			case "logout":{
 				InstanceLogout(response,URL);		
 			} break;
-			case "profiles":{
-
-				var files = fs.readdir(basedir+"profiles\\",function(err,files){
-					var o = {};
-					o.GetProfilesResult = JSON.stringify(files);
-					ServeJSON(o,response,URL);
-				});
+		//	case "profiles":{
 				//DAL.getUsers(function(users)
 				//{
 				//	if(users)
@@ -932,7 +1026,16 @@ function serve (request, response)
 				//	else
 				//		respond(response,500,'users not found' );
 				//});
-			} break;
+		//	} break;
+		    case "inventory":{
+				getInventory(URL,response);
+			}break;
+			case "inventoryitemassetdata":{
+				getInventoryItemAssetData(URL,response);
+			}break;
+			case "inventoryitemmetadata":{
+				getInventoryItemMetaData(URL,response);
+			}break;
 			case "states":{
 
 			//	fs.readdir(basedir+"states\\",function(err,files){
@@ -1038,6 +1141,12 @@ function serve (request, response)
 				case "createprofile":{
 					CreateProfile(URL,body,response);
 				}break;
+				case "inventoryitem":{
+					addInventoryItem(URL,body,response);
+				}break;
+				case "inventoryitemmetadata":{
+					updateInventoryItemMetadata(URL,body,response);
+				} break;
 				default:
 				{
 					global.log("POST",2);
@@ -1045,7 +1154,6 @@ function serve (request, response)
 					return;
 				}
 			}
-
         });
 	}	
 	if(request.method == "DELETE")
@@ -1061,6 +1169,9 @@ function serve (request, response)
 				case "state":{
 					DeleteState(URL,SID,response);
 				}break;
+				case "inventoryitem":{
+					deleteInventoryItem(URL,response);
+				} break;
 				case "globalasset":{
 					DeleteAsset(URL, basedir+"GlobalAssets\\"+URL.query.AID,response);
 				}break;
