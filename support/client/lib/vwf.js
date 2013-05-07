@@ -326,6 +326,10 @@
             $.getJSON("admin/config", function(configLibraries) {
                 if(configLibraries && typeof configLibraries == "object") {
                     Object.keys(configLibraries).forEach(function(libraryType) {
+                        if(libraryType == 'info' && configLibraries[libraryType]["title"])
+                        {
+                            $('title').html(configLibraries[libraryType]["title"]);
+                        }
                         if(!userLibraries[libraryType]) {
                             userLibraries[libraryType] = {};
                         }
