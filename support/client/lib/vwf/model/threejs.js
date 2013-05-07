@@ -968,7 +968,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if ( node && node.renderer ) {
                             var vwfColor = new utility.color( propertyValue );
                             if ( vwfColor ) {
-                                node.renderer.setClearColor( { r:vwfColor.red()/255, g:vwfColor.green()/255, b:vwfColor.blue()/255 }, vwfColor.alpha() );
+                                node.renderer.setClearColor( vwfColor.getHex(), vwfColor.alpha() );
                                 value = colorToString.call( this, vwfColor );
                             }
                         }
