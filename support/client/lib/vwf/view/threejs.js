@@ -117,39 +117,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     
         var self = this;
         var lastPickTime = 0;
-        var requestAnimFrame, cancelAnimFrame;
-        (function() {
-            var lastTime = 0;
-            var vendors = ['ms', 'moz', 'webkit', 'o'];
-            for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-                window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-                window.cancelRequestAnimationFrame = window[vendors[x]+
-                  'CancelRequestAnimationFrame'];
-            }
-
-            if (!window.requestAnimationFrame) {
-                requestAnimFrame = window.requestAnimationFrame = function(callback, element) {
-                    var currTime = +new Date;
-                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                    var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
-                      timeToCall);
-                    lastTime = currTime + timeToCall;
-                    return id;
-                };
-            }
-            else {
-                requestAnimFrame = window.requestAnimationFrame;
-            }
-
-            if (!window.cancelAnimationFrame) {
-                cancelAnimFrame = window.cancelAnimationFrame = function(id) {
-                    clearTimeout(id);
-                };
-            }
-            else {
-                cancelAnimFrame = window.cancelAnimationFrame;
-            }
-        }());
         
         function GetParticleSystems(node,list)
 		{
@@ -165,7 +132,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 		}
         function renderScene(time) {
 
-            requestAnimFrame( renderScene );
+            window.requestAnimationFrame( renderScene );
             sceneNode.frameCount++;
 			var now = ( performance !== undefined && performance.now !== undefined ) ? performance.now() : time;
 			var timepassed = now - sceneNode.lastTime;
