@@ -325,34 +325,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
         }
     }   
-    //necessary when settign the amibent color to match GLGE behavior
-    //Three js mults scene ambient by material ambient
-    function SetMaterialAmbients(start)
-    {
-        
-        if(!start)
-        {
-            for(var i in this.state.scenes)
-            {
-                SetMaterialAmbients(this.state.scenes[i].threeScene);
-            }
-        }else
-        {
-            if(start && start.material)
-            {
-                //.005 chosen to make the 255 range for the ambient light mult to values that look like GLGE values.
-                //this will override any ambient colors set in materials.
-                if(start.material.ambient)
-                    start.material.ambient.setRGB(1,1,1);
-            }
-            if(start && start.children)
-            {
-               for(var i in start.children)
-                SetMaterialAmbients(start.children[i]);
-            }
-        }
-    }
-        // -- initInputEvents ------------------------------------------------------------------------
+    
+    // -- initInputEvents ------------------------------------------------------------------------
 
     function initInputEvents( canvas ) {
         var sceneNode = this.state.scenes[this.state.sceneRootID], child;
