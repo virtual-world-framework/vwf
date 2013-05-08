@@ -818,8 +818,21 @@ define(function ()
 			var propertyname = _ScriptEditor.selectedProperty;
 			propertyname = $.trim(propertyname);
 			var rawtext = _ScriptEditor.propertyEditor.getValue();
+			var val = rawtext;
+			try{val = JSON.parse(rawtext)}catch(e){
 			
-			vwf_view.kernel.setProperty(_ScriptEditor.currentNode.id, propertyname, rawtext);
+				if(!isNaN(parseFloat(rawtext)))
+					val = parseFloat(rawtext)
+				else
+				{
+					if(rawtext == 'true')
+						val = true;
+					if(rawtext == 'false')
+						val = false;
+				}
+			
+			}
+			vwf_view.kernel.setProperty(_ScriptEditor.currentNode.id, propertyname, val);
 			window.setTimeout(_ScriptEditor.PostSaveProperty, 500);
 			return true;
 		}
