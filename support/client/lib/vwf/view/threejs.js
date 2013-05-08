@@ -23,11 +23,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             checkCompatibility.call(this);
 
             this.pickInterval = 10;
+            this.disableInputs = false;
 
             if(typeof options == "object") {
                 this.rootSelector = options["application-root"];
-                if(options["experimental-pick-interval"]) {
+                if("experimental-pick-interval" in options) {
                     this.pickInterval = options["experimental-pick-interval"];
+                }
+                if("experimental-disable-inputs" in options) {
+                    this.disableInputs = options["experimental-disable-inputs"];
                 }
             }
             else {
@@ -154,34 +158,31 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
             // Note: this is a costly operation and should be optimized if possible
-            if((now - lastPickTime) > self.pickInterval)
+            if((now - lastPickTime) > self.pickInterval && !self.disableInputs)
             {
                 sceneNode.frameCount = 0;
             
                 var newPick = ThreeJSPick.call( self, mycanvas, sceneNode );
                 
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
+
                 if(self.lastPickId != newPickId && self.lastEventData)
                 {
                     view.kernel.dispatchEvent( self.lastPickId, "pointerOut", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                     view.kernel.dispatchEvent( newPickId, "pointerOver", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                 }
-                
-                self.lastPickId = newPickId
-                self.lastPick = newPick;
                 if(view.lastEventData && (view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || view.lastEventData.eventData[0].screenPosition[1] != oldMouseY)) {
                     oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
                     oldMouseY = view.lastEventData.eventData[0].screenPosition[1];
                     hovering = false;
                 }
-                else if(self.lastEventData && self.mouseOverCanvas && !hovering && self.lastPick) {
-                    var pickId = getPickObjectID.call( view, self.lastPick.object, false );
-                    if(!pickId) {
-                        pickId = view.state.sceneRootID;
-                    }
-                    view.kernel.dispatchEvent( pickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
+                else if(self.lastEventData && self.mouseOverCanvas && !hovering && newPick) {
+                    view.kernel.dispatchEvent( newPickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                     hovering = true;
                 }
+                
+                self.lastPickId = newPickId
+                self.lastPick = newPick;
                 lastPickTime = now;
             }
 
@@ -299,7 +300,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 			window._dSceneNode = sceneNode;
             sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
             
-            initInputEvents.call(this,mycanvas);
+            if(!this.disableInputs) {
+                initInputEvents.call(this,mycanvas);
+            }
             renderScene((+new Date));
         }
     }
