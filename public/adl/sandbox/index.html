@@ -11,8 +11,17 @@
 
 
     <script type="text/javascript">
-		var g_Username;
-		var g_Admin = false;
+		var vwfPortalModel = {
+		
+			user: ko.observable({
+				isLoggedIn: false,
+				isAdmin: false,
+				username: 'Guest'
+			}),
+			
+			worldObjects: ko.observableArray()	
+		};
+		
 		function checkFilter(text)
 		{
 			var filter = $('#filter').val();
@@ -21,117 +30,105 @@
 			return false;	
 		
 		}
+		
+		function getFlatIdArr(resetHotstate){
+			var tempArr = [];
+			
+			//Get all world IDs in flat array form
+			for(var i = 0; i < vwfPortalModel.worldObjects().length; i++){
+				if(resetHotstate){vwfPortalModel.worldObjects()[i].hotState(false);}
+				tempArr.push(vwfPortalModel.worldObjects()[i].id);
+			}
+			
+			return tempArr;
+		}
 		function showStates()
 		{
-			
+
 			$.getJSON("./vwfDataManager.svc/states",function(e)
 			{
-
-				$('#activeInstances').empty();
-				if(g_Username)
-				{
-					
-					$('#activeInstances').append('<a href="createInstance.html" class="coldstate" id="newinstancebutton" ><img style="height: 204px;" src="icons/add.png"></a>');
-				}
-				
 				var keys = Object.keys(e);
+				var tempArr = getFlatIdArr();
+				var saveIndex = 0;
+
 				for(var i = 0; i < keys.length; i++)
 				{
 					var id = keys[i].substr(13,16);
-					var show = checkFilter(e[keys[i]].title) ||
-							   checkFilter(e[keys[i]].description) ||
-							   checkFilter(e[keys[i]].owner);
+					e[keys[i]].id = id;
 					
-					if($('#'+id).length == 0 && show)
-					{
+					saveIndex = tempArr.indexOf(id);
+					saveIndex = saveIndex > -1 ? saveIndex : i;
+					
+					//If the incoming and currently displayed objects are not the same, update
+					if(JSON.stringify(vwfPortalModel.worldObjects()[saveIndex]) != JSON.stringify(e[keys[i]])){
 						
-						$('#activeInstances').append('<div class="coldstate" id="'+id+'" ></div>');
-						//$('#'+id).click(function(){
-						//	var str = window.location.pathname;
-						//	str = str.substr(0,str.lastIndexOf('/')+1)
-						//	window.location.pathname = str + $(this).attr('id') + '/';
-						//});
-						
-						$('#'+id).append('<div id="'+id+"edit"+'"class="editstate"></div>');
-						
-						$('#'+id+"edit").append('<a id="'+id+"editData"+'"class="editstatedata"><img src="icons/edit.jpg"></a>');
-						$('#'+id+"edit").append('<a id="'+id+"editDelete"+'"class="editstatedelete"><img src="icons/delete.png"></a>');
-						
-						
-						
-						$('#'+id).append('<a  id="'+id+'data" ></a>');
-						$('#'+id+'data').attr('href',id);
-						$('#'+id+'editDelete').attr('href','deleteInstance.html?id='+id);
-						$('#'+id+'editData').attr('href','editInstance.html?id='+id);
-						
-						$('#'+id+'data').append('<div class="title">'+e[keys[i]].title+'</div>');
-						$('#'+id+'data').append('<div class="description">'+e[keys[i]].description+'</div>');
-						$('#'+id+'data').append('<div class="owner">Owner: '+e[keys[i]].owner+'</div>');
-						$('#'+id+'data').append('<div class="objects">Objects: '+e[keys[i]].objects+'</div>');
-						$('#'+id+'data').append('<div class="lastModified">Last Modified: '+e[keys[i]].lastUpdate+'</div>');
-						$('#'+id+'data').append('<div class="stateid">'+keys[i]+'</div>');
-						
-						if(g_Username != e[keys[i]].owner && !g_Admin)
-						{
-							$('#'+id+"edit").hide();
-						}
+						e[keys[i]].hotState = ko.observable(false);
+						e[keys[i]].lastUpdate = e[keys[i]].lastUpdate?e[keys[i]].lastUpdate:(new Date()).toString();
+						vwfPortalModel.worldObjects()[saveIndex] = e[keys[i]];	
 					}
 				}
 				
+				vwfPortalModel.worldObjects.valueHasMutated();
+				
 				$.getJSON("./admin/instances",function(e)
 				{
+					//Get all world IDs in flat array form
+					var tempArr = getFlatIdArr(true);
 					var keys = Object.keys(e);
+					var saveIndex = 0;
+					
+					//Iterate through keys, get index of world id which matches key, set its hotState to true
 					for(var i = 0; i < keys.length; i++)
 					{
 						var id = keys[i].substr(13,16);
-						$('#'+id).attr("class", "hotstate");
+						saveIndex = tempArr.indexOf(id);
+						
+						if(saveIndex > -1){
+							vwfPortalModel.worldObjects()[saveIndex].hotState(true);
+						}	
 					}
 				});
 			
 			});
 		}
+		
+
 		$(document).ready(function()
-		{
-			
+		{	
+			ko.applyBindings(vwfPortalModel);
 			$.ajax('/vwfDataManager.svc/logindata',
+			{
+				cache:false,
+				success:function(data,status,xhr)
 				{
-					cache:false,
-					success:function(data,status,xhr)
-					{
-						data = JSON.parse(xhr.responseText);
-						$('#username').text("Logged in as: " + data.username);
-						g_Username = data.username;
-						g_Admin = data.admin;
-						$('#login').hide();
-						$('#signup').hide();
+					data = JSON.parse(xhr.responseText);
+					vwfPortalModel.user().username = data.username;
+					vwfPortalModel.user().isAdmin = data.admin;
+					vwfPortalModel.user().isLoggedIn = true;
 						
-						if(!g_Admin)
-             				$('#admin').hide();
-						showStates();
-						$('#filter').keyup(function()
-						{
-							showStates();
-						});
-						window.setInterval(function(){
-							showStates();
-						},5000);
-					},
-					error:function(xhr,status,err)
+					showStates();
+					$('#filter').keyup(function()
 					{
-						$('#username').hide();
-						$('#logout').hide();
-						$('#newstatearea').hide();
-						$('#admin').hide();
-						$('#account').hide();
 						showStates();
-						$('#filter').keyup(function()
-						{
-							showStates();
-						});
-						window.setInterval(function(){
-							showStates();
-						},5000);
-					}
+					});
+					window.setInterval(function(){
+						showStates();
+					},5000);
+					
+					vwfPortalModel.user.valueHasMutated();
+				},
+				error:function(xhr,status,err)
+				{
+
+					showStates();
+					$('#filter').keyup(function()
+					{
+						showStates();
+					});
+					window.setInterval(function(){
+						showStates();
+					},5000);
+				}
 					
 			});
 			
@@ -143,26 +140,47 @@
 	<div id="wrapper">
 		<div id="header" style="text-align: center">
 			<div>
-				<span href="" id="username">Name</span>
-				<a href="login.html?return=index.html" id="login">Login</a>
-				<a href="logout.html?return=index.html" id="logout">Logout</a>
-				<a href="signup.html?return=index.html" id="signup">Create Account</a>
+				<span id="username" data-bind="text:'Logged in as: ' + user().username, visible:user().isLoggedIn"></span>
+				<a href="login.html?return=index.html"  id="login"  data-bind="visible:!user().isLoggedIn">Login</a>
+				<a href="logout.html?return=index.html" id="logout" data-bind="visible:user().isLoggedIn">Logout</a>
+				<a href="signup.html?return=index.html" id="signup" data-bind="visible:!user().isLoggedIn">Create Account</a>
 			</div>
 		</div>	
 		<div id="content">
-			<h1> Virtual World Framework Sandbox </h1>
-			<div>Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in "cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a new world" </div>
-			
+			<h1> Virtual World Framework Sandbox</h1>
+			<div>
+				Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in
+				"cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a
+				new world" 
+			</div>
 			
 			<div>
 				<input id="filter" type="text" placeholder="Filter Results" style="margin: 10px;"/>
 			</div>
-			<div id="activeInstances" style='width:800px'>
 			
+			<div style="float:left;" data-bind="visible:user().isLoggedIn">
+				<a href="createInstance.html" class="coldstate" id="newinstancebutton"><img style="height: 204px;" src="icons/add.png"></a>
 			</div>
-			<div id="coldInstances" style='width:800px'>
+			<div id="activeInstances" style='width:800px' data-bind="foreach:worldObjects">
 			
+				<div data-bind="css:hotState()?'hotstate':'coldstate'">
+					<div class="editstate">
+						<a class="editstatedata" data-bind="attr:{href:'editInstance.html?id='+id}"><img src="icons/edit.jpg"></a>
+						<a class="editstatedelete" data-bind="attr:{href:'deleteInstance.html?id='+id}"><img src="icons/delete.png"></a>
+					</div>
+					
+					<a data-bind="attr:{href:id}">
+						<div class="title" data-bind="text:title"></div>
+						<div class="description" data-bind="text:description"></div>
+						<div class="owner" data-bind="text:owner"></div>
+						<div class="objects" data-bind="text:objects"></div>
+						<div class="lastModified" data-bind="text:lastUpdate"></div>
+						<div class="stateid" data-bind="text:id"></div>
+					</a>
+				</div>
+
 			</div>
+			<div id="coldInstances" style='width:800px'></div>
 		</div>
 	</div>
 </body>

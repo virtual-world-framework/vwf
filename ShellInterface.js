@@ -85,7 +85,7 @@ function StartShellInterface()
 			{
 				if(commands[2] == 'metadata')
 				{
-					DAL.getInventoryItemMetadata(commands[3],commands[4],function(data)
+					DAL.getInventoryItemMetaData(commands[3],commands[4],function(data)
 					{
 						console.log(data);
 					});
@@ -186,6 +186,16 @@ function StartShellInterface()
 				DAL.updateUser(commands[2],JSON.parse(commands[3].replace(/'/g,'"')),function()
 				{
 				
+				});
+			}	
+		}
+		if(commands[0] == 'search')
+		{
+			if(commands[1] == 'inventory')
+			{
+				DAL.searchInventory(commands[2],commands[3].split(','),function(results)
+				{
+					console.log(results);
 				});
 			}	
 		}

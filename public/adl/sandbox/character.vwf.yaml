@@ -22,6 +22,7 @@ properties:
 methods:
   update:
   tick:
+  attached:
 events:
   pointerOver:
   pointerOut:
@@ -29,7 +30,11 @@ events:
   keyDown:
 scripts:
 - |
-
+    this.attached = function()
+    {
+        //called when added to the scene, after initialize is called and parent is set.
+        this.parent.newClient(this.PlayerNumber);
+    }
     this.initialize = function(){
         
         if(this.id == 'character.vwf') return;
