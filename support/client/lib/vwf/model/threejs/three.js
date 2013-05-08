@@ -39248,13 +39248,23 @@ THREE.ColladaLoader = function () {
 						if ( cot.isTexture() ) {
 
 							var samplerId = cot.texture;
-							var surfaceId = this.effect.sampler[samplerId].source;
-              
-
-							if (surfaceId) {
+							
+							var init_from;
+							if(this.effect.sampler[samplerId])
+							{
+								var surfaceId = this.effect.sampler[samplerId].source;
+								if (surfaceId) {
 
 								var surface = this.effect.surface[surfaceId];
-								var image = images[surface.init_from];
+								init_from = surface.init_from
+							}else
+							{
+								init_from = images[cot.texture].init_from
+							}
+							
+							
+							var image = images[init_from];
+							
 
 								if (image) {
 

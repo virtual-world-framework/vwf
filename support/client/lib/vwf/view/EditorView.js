@@ -65,6 +65,9 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/Menubar", "vwf/vie
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.qtip-1.0.0-rc3.min.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/sha256.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.ui.touch-punch.min.js"></script>');
+					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/beautify.module.js"></script>');
+					
+					
 					//  $(document).ready(function(){
 					//	});
 				}

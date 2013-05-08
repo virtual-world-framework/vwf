@@ -25,7 +25,36 @@ var libpath = require('path'),
                 S4() + S4() + S4()
             );
     }
+function IsSpace(c)
+{
+	return c == " " || c == "\t";
+}	
+function ParseLine(str)
+{
+	var ret = [""];
+	var inquote = false;
+	for(var i = 0; i < str.length; i++)
+	{
+		var c = str[i];
+		if(IsSpace(c) && !inquote)
+		{
+			ret.push("");
+		}else
+		{
+			if(c == "\"")
+				inquote = !inquote;
+			else
+			{
+				ret[ret.length -1] += (c);
+			}			
+		}
+	}
+	while(ret.indexOf("")!= -1)
+		ret.splice(ret.indexOf(""),1);
+		
 	
+	return ret;
+}
 function StartShellInterface()
 {
 //shell interface defaults
@@ -39,7 +68,8 @@ function StartShellInterface()
 					
 		chunk = chunk + '  ';
 		chunk = chunk.replace(/\r\n/g,'');
-		var commands = chunk.split( ' ');
+		
+		var commands = ParseLine(chunk);
 		
 		if(commands[0] && commands[0] == 'show' && commands[1])
 		{

@@ -53,40 +53,87 @@ define(function ()
 			$('#ScriptEditorTabs').css('height', $('#ScriptEditor').height() + 'px');
 			var w = ($('#textinnere').parent().width() - 190);
 			if (w <= 0) w = ($('#textinnerm').parent().width() - 190);
+			if (w <= 0) w = ($('#textinnerp').parent().width() - 190);
 			var h = ($('#textinnere').parent().height() - 125);
 			if (h <= 50) h = ($('#textinnerm').parent().height() - 125);
+			if (h <= 50) h = ($('#textinnerp').parent().height() - 125);
 			$('#textinnerm').css('width', w + 'px')
 			$('#textinnere').css('width', w + 'px')
+			$('#textinnerp').css('width', w + 'px')
 			$('#textinnerm').css('height', h + 'px')
 			$('#textinnere').css('height', h + 'px')
+			$('#textinnerp').css('height', h + 'px')
+			
+			
+			$('#methodlist').css('height', h + 'px');
+			$('#eventlist').css('height', h + 'px');
+			$('#propertylist').css('height', h + 'px');
+			
+			
 			h += 15;
 			$('#checkSyntaxMethod').css('top', h + 'px');
 			$('#checkSyntaxEvent').css('top', h + 'px');
 			$('#callMethod').css('top', h + 'px');
 			$('#deleteMethod').css('top', h + 'px');
 			$('#newMethod').css('top', h + 'px');
+			$('#newProperty').css('top', h + 'px');
 			$('#saveMethodCopy').css('top', h + 'px');
 			$('#callEvent').css('top', h + 'px');
 			$('#deleteEvent').css('top', h + 'px');
+			$('#deleteProperty').css('top', h + 'px');
 			$('#newEvent').css('top', h + 'px');
 			$('#saveEventCopy').css('top', h + 'px');
 			_ScriptEditor.methodEditor.resize();
 			_ScriptEditor.eventEditor.resize();
+			_ScriptEditor.propertyEditor.resize();
 			$('#saveMethod').css('top', $('#ScriptEditor').height() - 75);
 			$('#saveEvent').css('top', $('#ScriptEditor').height() - 75);
+			$('#saveProperty').css('top', $('#ScriptEditor').height() - 75);
 		}
 		$(document.body).append('<script src="../vwf/view/editorview/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>');
 		$(document.body).append("<div id='ScriptEditorAbandonChanges'>You have are about to load a different script,but you have unsaved changes to this script. Do you want to continue and abandon the changes? This action cannot be undone.</div>");
 		$(document.body).append("<div id='ScriptEditorCreateMethod'><input id='newMethodName' type='text' /></div>");
 		$(document.body).append("<div id='ScriptEditorCreateEvent'><input id='newEventName' type='text' /></div>");
+		$(document.body).append("<div id='ScriptEditorCreateProperty'><input id='newPropertyName' type='text' /></div>");
 		$(document.body).append("<div id='ScriptEditorDeleteMethod'>Are you sure you want to delete this script? This cannot be undone.</div>");
+		$(document.body).append("<div id='ScriptEditorDeleteProperty'>Are you sure you want to delete this property? This cannot be undone.</div>");
 		$(document.body).append("<div id='ScriptEditorDeleteEvent'>Are you sure you want to delete this script? This cannot be undone.</div>");
 		$(document.body).append("<div id='ScriptEditorMessage'>This script contains syntax errors, and cannot be saved;</div>");
-		$(document.body).append("<div id='ScriptEditor'  style=''>" + "<div id='scripteditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>ScriptEditor</span></div>" + '<div id="ScriptEditorTabs" style="width:100%;height:100%;overflow:hidden;padding: 0px 10px 0px 0px;">' + '	<ul>' + '		<li><a href="#methods">Methods</a></li>' + '		<li><a href="#events">Events</a></li>' + '	</ul>' + '	<div id="methods" style="height: 100%;padding:4px">' + '		<div style="width: 180px;display: inline-block;vertical-align: top;"><div id="methodlist"/><div id="saveMethod"/></div>' + '<div id="textinnerm" style="display: inline-block;position:absolute">' +
-		//'<div style="white-space: pre;overflow: hidden;border: 1px transparent solid;width:100%;height:100%;tab-size: 3;border-radius: 10px;box-shadow: 5px 5px 20px lightgray inset;padding:10px 0px 0px 10px;font-family: monospace;font-size: 1.5em;" type="text" id="methodtextback" />'+
-		'<div style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;"  id="methodtext" />' + '<div id="callMethod"/><div id="deleteMethod"/><div id="newMethod"/><div id="checkSyntaxMethod"/><div id="saveMethodCopy"/>' + '</div>' + '	</div>' + '	<div id="events" style="height: 100%;padding:4px">' + '		<div style="width: 180px;display: inline-block;vertical-align: top;"><div id="eventlist"/><div id="saveEvent"/></div>' + '		<div id="textinnere" style="display: inline-block;position:absolute">' +
-		//'       <div style="white-space: pre;overflow: hidden;border: 1px transparent solid;width:100%;height:100%;tab-size: 3;border-radius: 10px;box-shadow: 5px 5px 20px lightgray inset;padding:10px 0px 0px 10px;font-family: monospace;font-size: 1.5em;" type="text" id="eventtextback" />'+
-		'       <div style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;"  id="eventtext" />' + '		<div id="callEvent"/><div id="deleteEvent"/><div id="newEvent"/><div id="checkSyntaxEvent"/><div id="saveEventCopy"/>' + '		</div>' + '	</div>' + '</div>' + "</div>");
+		$(document.body).append("<div id='ScriptEditor'  style=''>" +
+		"<div id='scripteditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' >"+
+		"<span class='ui-dialog-title' id='ui-dialog-title-Players'>ScriptEditor</span></div>" +
+		 '<div id="ScriptEditorTabs" style="width:100%;height:100%;overflow:hidden;padding: 0px 10px 0px 0px;">' +
+		 '	<ul>' +
+		 '		<li><a href="#methods">Methods</a></li>'+ 
+		 '		<li><a href="#events">Events</a></li>' +
+		 '		<li><a href="#properties">Properties</a></li>' +
+		 '	</ul>'+
+		 '	<div id="methods" style="height: 100%;padding:4px">' +
+		 '		<div style="width: 180px;display: inline-block;vertical-align: top;">'+
+		 '      <div id="methodlist"/><div id="saveMethod"/></div>' +
+		 '      <div id="textinnerm" style="display: inline-block;position:absolute">' +
+		'          <div style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;"  id="methodtext" />' +
+		 '         <div id="callMethod"/><div id="deleteMethod"/><div id="newMethod"/><div id="checkSyntaxMethod"/><div id="saveMethodCopy"/>'+
+		 '      </div>' + 
+		 '	</div>' + 
+		 '	<div id="events" style="height: 100%;padding:4px">'+
+		 '		<div style="width: 180px;display: inline-block;vertical-align: top;">'+
+		'       <div id="eventlist"/><div id="saveEvent"/></div>' + 
+		'		<div id="textinnere" style="display: inline-block;position:absolute">' +
+		'          <div style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;"  id="eventtext" />'		+
+		'		   <div id="callEvent"/><div id="deleteEvent"/><div id="newEvent"/><div id="checkSyntaxEvent"/><div id="saveEventCopy"/>' +
+		'		</div>' +
+		'	</div>' +
+		 '	<div id="properties" style="height: 100%;padding:4px">'+
+		 '		<div style="width: 180px;display: inline-block;vertical-align: top;">'+
+		'       <div id="propertylist"/><div id="saveProperty"/></div>' + 
+		'		<div id="textinnerp" style="display: inline-block;position:absolute">' +
+		'          <div style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;"  id="propertytext" />'		+
+		'		   <div id="deleteProperty"/><div id="newProperty"/>' +
+		'		</div>' +
+		'	</div>' +
+		'</div>' +
+		"</div>");
 		this.MethodChanged = false;
 		this.EventChanged = false;
 		//$('#ScriptEditor').resize(function(){_ScriptEditor.resize()});
@@ -140,6 +187,26 @@ define(function ()
 				'No': function ()
 				{
 					$('#ScriptEditorDeleteMethod').dialog('close');
+				},
+			}
+		});
+		$('#ScriptEditorDeleteProperty').dialog(
+		{
+			title: 'Delete Property?',
+			autoOpen: false,
+			height: 'auto',
+			width: '200px',
+			position: 'center',
+			modal: true,
+			buttons: {
+				'Yes': function ()
+				{
+					_ScriptEditor.DeleteActiveProperty_imp();
+					$('#ScriptEditorDeleteProperty').dialog('close');
+				},
+				'No': function ()
+				{
+					$('#ScriptEditorDeleteProperty').dialog('close');
 				},
 			}
 		});
@@ -219,6 +286,28 @@ define(function ()
 				}
 			}
 		});
+		$('#ScriptEditorCreateProperty').dialog(
+		{
+			title: 'Enter Method Name',
+			autoOpen: false,
+			height: 'auto',
+			width: '300px',
+			position: 'center',
+			modal: true,
+			buttons: {
+				'Ok': function ()
+				{
+					var name = $('#newPropertyName').val();
+					_ScriptEditor.setSelectedProperty(name, '"null"');
+					_ScriptEditor.SavePropertyClicked();
+					$('#ScriptEditorCreateProperty').dialog('close');
+				},
+				'Cancel': function ()
+				{
+					$('#ScriptEditorCreateProperty').dialog('close');
+				}
+			}
+		});
 		$('#ScriptEditorCreateEvent').dialog(
 		{
 			title: 'Enter Event Signiture',
@@ -246,9 +335,19 @@ define(function ()
 		$('#ScriptEditorTabs ul').css('background', 'lightgray');
 		$('#methodlist').css('width', '180px');
 		$('#eventlist').css('width', '180px');
+		$('#propertylist').css('width', '180px');
+		
+		
+		$('#methodlist').css('overflow-y', 'scroll');
+		$('#eventlist').css('overflow-y', 'scroll');
+		$('#propertylist').css('overflow-y', 'scroll');
+		
+		
 		$('#saveEvent').css('position', 'absolute');
+		$('#saveProperty').css('position', 'absolute');
 		//$('#saveEvent').css('bottom','6px');
 		$('#saveEvent').css('width', '175px');
+		$('#saveProperty').css('width', '175px');
 		//$('#saveEventCopy').css('position','absolute');
 		$('#saveEventCopy').css('bottom', '10px');
 		$('#saveEventCopy').css('width', '145px');
@@ -270,6 +369,10 @@ define(function ()
 		{
 			label: 'Save Event'
 		});
+		$('#saveProperty').button(
+		{
+			label: 'Save Property'
+		});
 		$('#saveMethod').button(
 		{
 			label: 'Save Method'
@@ -282,9 +385,17 @@ define(function ()
 		{
 			label: 'Delete Method'
 		});
+		$('#deleteProperty').button(
+		{
+			label: 'Delete Property'
+		});
 		$('#newMethod').button(
 		{
 			label: 'New Method'
+		});
+		$('#newProperty').button(
+		{
+			label: 'New Property'
 		});
 		$('#checkSyntaxEvent').button(
 		{
@@ -305,8 +416,10 @@ define(function ()
 		$('#callMethod').css('float', 'right');
 		$('#deleteMethod').css('float', 'right');
 		$('#newMethod').css('float', 'right');
+		$('#newProperty').css('float', 'right');
 		$('#callMethod').css('margin-top', '3px');
 		$('#deleteMethod').css('margin-top', '3px');
+		$('#deleteProperty').css('margin-top', '3px');
 		$('#newMethod').css('margin-top', '3px');
 		$('#callEvent').button(
 		{
@@ -325,8 +438,9 @@ define(function ()
 		$('#newEvent').css('float', 'right');
 		$('#callEvent').css('margin-top', '3px');
 		$('#deleteEvent').css('margin-top', '3px');
+		$('#deleteProperty').css('margin-top', '3px');
 		$('#newEvent').css('margin-top', '3px');
-		$('#methodtext,#eventtext').keydown(function (e)
+		$('#methodtext,#eventtext,#propertytext').keydown(function (e)
 		{
 			var code = (e.keyCode ? e.keyCode : e.which);
 			e.stopPropagation();
@@ -360,9 +474,26 @@ define(function ()
 				}, 500);
 			}
 		}
+		this.DeleteActiveProperty_imp = function ()
+		{
+			if (!_ScriptEditor.checkPermission()) return;
+			if (this.currentNode.properties && this.currentNode.properties[this.selectedProperty])
+			{
+				vwf_view.kernel.deleteProperty(_ScriptEditor.currentNode.id, this.selectedProperty);
+				window.setTimeout(function ()
+				{
+					_ScriptEditor.currentNode = vwf.getNode(_ScriptEditor.currentNode.id);
+					_ScriptEditor.BuildGUI();
+				}, 500);
+			}
+		}
 		this.DeleteActiveMethod = function ()
 		{
 			$('#ScriptEditorDeleteMethod').dialog('open');
+		}
+		this.DeleteActiveProperty = function ()
+		{
+			$('#ScriptEditorDeleteProperty').dialog('open');
 		}
 		this.CallActiveMethod = function ()
 		{
@@ -474,6 +605,16 @@ define(function ()
 				});
 			else $('#ScriptEditorCreateEvent').dialog('open');
 		}
+		this.NewProperty = function ()
+		{
+			if (!_ScriptEditor.checkPermission()) return;
+			if (_ScriptEditor.PropertyChanged) _ScriptEditor.PromptAbandon(function ()
+				{
+					_ScriptEditor.PropertyChanged = false;
+					$('#ScriptEditorCreateProperty').dialog('open');
+				});
+			else $('#ScriptEditorCreateProperty').dialog('open');
+		}
 		this.MethodChange = function ()
 		{
 			if (!_ScriptEditor.selectedMethod) return false;
@@ -488,7 +629,15 @@ define(function ()
 			$('#eventtext').css('border-color', 'red');
 			return true;
 		}
+		this.PropertyChange = function ()
+		{
+			if (!_ScriptEditor.selectedProperty) return false;
+			_ScriptEditor.PropertyChanged = true;
+			$('#propertytext').css('border-color', 'red');
+			return true;
+		}
 		$('#deleteMethod').click(this.DeleteActiveMethod);
+		$('#deleteProperty').click(this.DeleteActiveProperty);
 		$('#callMethod').click(this.CallActiveMethod);
 		$('#checkSyntaxMethod').click(this.checkMethodSyntaxClick);
 		$('#deleteEvent').click(this.DeleteActiveEvent);
@@ -496,8 +645,10 @@ define(function ()
 		$('#checkSyntaxEvent').click(this.checkEventSyntaxClick);
 		$('#newMethod').click(this.NewMethod);
 		$('#newEvent').click(this.NewEvent);
+		$('#newProperty').click(this.NewProperty);
 		$('#methodtext').keyup(this.MethodChange);
 		$('#eventtext').keyup(this.EventChange);
+		$('#propertytext').keyup(this.PropertyChange);
 		this.show = function ()
 		{
 			//window.clearInterval(window.scripthideinterval);
@@ -649,6 +800,35 @@ define(function ()
 			return true;
 		}
 		$('#saveEvent').click(this.SaveEventClicked);
+		
+		
+		this.PostSaveProperty = function ()
+		{
+			_ScriptEditor.currentNode = vwf.getNode(_ScriptEditor.currentNode.id);
+			_ScriptEditor.PropertyChanged = false;
+			$('#propertytext').css('border-color', 'black');
+			_ScriptEditor.BuildGUI(true);
+		}
+		this.SavePropertyClicked = function ()
+		{
+			
+			if (!_ScriptEditor.checkPermission()) return;
+			if (!_ScriptEditor.PropertyChanged) return;
+			
+			var propertyname = _ScriptEditor.selectedProperty;
+			propertyname = $.trim(propertyname);
+			var rawtext = _ScriptEditor.propertyEditor.getValue();
+			
+			vwf_view.kernel.setProperty(_ScriptEditor.currentNode.id, propertyname, rawtext);
+			window.setTimeout(_ScriptEditor.PostSaveProperty, 500);
+			return true;
+		}
+		$('#saveProperty').click(this.SavePropertyClicked);
+		
+		
+		
+		
+		
 		this.PromptAbandon = function (callback)
 		{
 			$('#ScriptEditorAbandonChanges').dialog('open');
@@ -656,40 +836,7 @@ define(function ()
 		}
 		this.setSelectedMethod_internal = function (name, text)
 		{
-			/*	text = text.replace(/([^\n])\{/gm,'$1\n\{');
-		text = text.replace(/([^\n])\}/gm,'$1\n\}');
-		var opening = 0;
-		var indentedtext = "";
-		debugger;
-		for(var i = 0; i < text.length-1; i++)
-		{
-			
-			
-			if(text[i+1] == '}')
-				opening--;
-			
-			//if(text[i] != '{' && text[i] != '}' && text[i] != '\n')
-			if(text[i] != '\n')			
-				indentedtext += text[i];	
-			//if(text[i] == '{' || text[i] == '}')
-			//{
-			//	for(var j = 0; j<opening;j++)
-			//		indentedtext+='   ';
-			//	indentedtext += text[i];	
-			//}
-			if(text[i] == '\n')
-			{
-				indentedtext += text[i];
-				for(var j = 0; j<opening;j++)
-					indentedtext+='   ';
-				
-			}
-				if(text[i] == '{')
-				opening++;
-			
-		}
-		indentedtext += text[text.length-1];	
-		*/
+		
 			if (this.currentNode.methods && this.currentNode.methods[name])
 			{
 				_ScriptEditor.MethodChanged = false;
@@ -701,7 +848,7 @@ define(function ()
 				$('#methodtext').css('border-color', 'red');
 			}
 			_ScriptEditor.selectedMethod = name;
-			_ScriptEditor.methodEditor.setValue(text);
+			_ScriptEditor.methodEditor.setValue(js_beautify(text,{braces_on_own_line:true,opt_keep_array_indentation:true}));
 			_ScriptEditor.methodEditor.selection.clearSelection();
 			//$('#methodtextback').text(_ScriptEditor.formatScript(indentedtext));
 			$('#methodtext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/stripe.png) 100% 100% repeat');
@@ -714,6 +861,35 @@ define(function ()
 					_ScriptEditor.setSelectedMethod_internal(name, text);
 				})
 			else _ScriptEditor.setSelectedMethod_internal(name, text);
+		}
+		
+		this.setSelectedProperty_internal = function (name, text)
+		{
+		
+			if (this.currentNode.properties && this.currentNode.properties[name])
+			{
+				_ScriptEditor.PropertyChanged = false;
+				$('#propertytext').css('border-color', 'black');
+			}
+			else
+			{
+				_ScriptEditor.PropertyChanged = true;
+				$('#propertytext').css('border-color', 'red');
+			}
+			_ScriptEditor.selectedProperty = name;
+			_ScriptEditor.propertyEditor.setValue(js_beautify(text,{braces_on_own_line:true,opt_keep_array_indentation:true}));
+			_ScriptEditor.propertyEditor.selection.clearSelection();
+			//$('#methodtextback').text(_ScriptEditor.formatScript(indentedtext));
+			$('#propertytext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/stripe.png) 100% 100% repeat');
+			$('#propertytext').removeAttr('disabled');
+		}
+		this.setSelectedProperty = function (name, text)
+		{
+			if (_ScriptEditor.PropertyChanged) _ScriptEditor.PromptAbandon(function ()
+				{
+					_ScriptEditor.setSelectedProperty_internal(name, text);
+				})
+			else _ScriptEditor.setSelectedProperty_internal(name, text);
 		}
 		this.setSelectedEvent_internal = function (name, text)
 		{
@@ -728,7 +904,7 @@ define(function ()
 				$('#eventtext').css('border-color', 'red');
 			}
 			_ScriptEditor.selectedEvent = name;
-			_ScriptEditor.eventEditor.setValue(text);
+			_ScriptEditor.eventEditor.setValue(js_beautify(text,{braces_on_own_line:true,opt_keep_array_indentation:true}));
 			_ScriptEditor.eventEditor.selection.clearSelection();
 			//$('#eventtextback').text(_ScriptEditor.formatScript(text));
 			$('#eventtext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/stripe.png) 100% 100% repeat');
@@ -769,15 +945,18 @@ define(function ()
 				$('#eventtext').css('border-color', 'black');
 				$('#methodtext').css('border-color', 'black');
 				$('#methodtext').attr('disabled', 'disabled');
+				$('#propertytext').attr('disabled', 'disabled');
 				$('#eventtext').attr('disabled', 'disabled');
 				$('#eventtext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
 				$('#methodtext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
+				$('#propertytext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
 				_ScriptEditor.eventEditor.setValue('');
 				_ScriptEditor.methodEditor.setValue('');
 			}
 			if (!this.currentNode) return;
 			$('#methodlist').empty();
 			$('#eventlist').empty();
+			$('#propertylist').empty();
 			var style = "cursor:pointer;font-size: 1.5em;border: 1px solid gray;border-radius: 5px;box-shadow: 0px 0px 20px lightgray inset;margin: 2px;padding: 3px;"
 			var newstyle = "cursor:pointer;font-size: 1.5em;border: 2px solid gray;border-radius: 5px;box-shadow: 0px 0px 20px gray inset;margin: 2px;padding: 3px;"
 			var lightstyle = "color:lightgray;cursor:pointer;font-size: 1.5em;border: 0px solid lightgray;border-radius: 5px;box-shadow: 0px 0px 20px #EEEEEE inset;margin: 2px;padding: 3px;"
@@ -805,6 +984,36 @@ define(function ()
 					if (this.selectedMethod == i)
 					{
 						$('#method' + i).click();
+					}
+				}
+			}
+			for (var i in this.currentNode.properties)
+			{
+				$('#propertylist').append('<div class="scriptchoice" style="' + style + '" id="property' + i + '"></div>');
+				$('#property' + i).text(i);
+				$('#property' + i).qtip(
+				{
+					content: "Edit the " + i + " property",
+					show: {
+						delay: 1000
+					}
+				});
+				$('#property' + i).attr('property', i);
+				$('#property' + i).click(function ()
+				{
+					$("#propertylist").children().css('border-color', 'gray');
+					$(this).css('border-color', 'blue');
+					var property = $(this).attr('property');
+					var val = _ScriptEditor.currentNode.properties[property];
+					if(typeof(val) == 'object')
+						val = JSON.stringify(val);
+					_ScriptEditor.setSelectedProperty(property, val );
+				});
+				if (refresh)
+				{
+					if (this.selectedMethod == i)
+					{
+						$('#property' + i).click();
 					}
 				}
 			}
@@ -1010,6 +1219,12 @@ define(function ()
 		this.methodEditor.setFontSize('15px');
 		this.eventEditor.setPrintMarginColumn(false);
 		this.eventEditor.setFontSize('15px');
+		
+		this.propertyEditor = ace.edit("propertytext");
+		this.propertyEditor.setTheme("ace/theme/chrome");
+		this.propertyEditor.getSession().setMode("ace/mode/javascript");
+		this.propertyEditor.setPrintMarginColumn(false);
+		this.propertyEditor.setFontSize('15px');
 		$('#ScriptEditor').hide();
 		$('#ScriptEditor').css('height', '405px');
 	}

@@ -478,6 +478,33 @@ define(function ()
 			}
 			return unencrpytedpassword;
 		}
+		this.GetPlayernameForClientID = function(id)
+		{
+			for(var i in vwf.models[0].model.nodes)
+			{
+				var node = vwf.models[0].model.nodes[i];
+				if(node.ownerClientID == id)
+					return node.name;
+			}
+		}
+		this.GetAvatarForClientID = function(id)
+		{
+			for(var i in vwf.models[0].model.nodes)
+			{
+				var node = vwf.models[0].model.nodes[i];
+				if(node.ownerClientID == id)
+					return node;
+			}
+		}
+		this.GetClientIDForPlayername = function(id)
+		{
+			for(var i in vwf.models[0].model.nodes)
+			{
+				var node = vwf.models[0].model.nodes[i];
+				if(node.PlayerNumber == id)
+					return node.ownerClientID;
+			}
+		}
 		$('#CreateProfileDialog').dialog(
 		{
 			autoOpen: false,
