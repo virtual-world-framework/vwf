@@ -11,6 +11,7 @@
 
 
     <script type="text/javascript">
+		var filter = '';
 		var vwfPortalModel = {
 		
 			user: ko.observable({
@@ -19,16 +20,24 @@
 				username: 'Guest'
 			}),
 			
+			filterVal: ko.computed({
+				read:  function(){ return ''; }, 
+				write: function(str){ 
+					filter = str;
+					showStates(); 
+				}	
+			}).extend({throttle:750}),
+			
 			worldObjects: ko.observableArray()	
 		};
 		
-		function checkFilter(text)
+		function checkFilter(textArr)
 		{
-			var filter = $('#filter').val();
-			if(text.toLowerCase().indexOf(filter.toLowerCase()) != -1)
-				return true;
+			for(var i = 0; i < textArr.length; i++){
+				if(textArr[i] && textArr[i].toLowerCase().indexOf(filter.toLowerCase()) != -1)
+					return true;
+			}
 			return false;	
-		
 		}
 		
 		function getFlatIdArr(resetHotstate){
@@ -42,9 +51,9 @@
 			
 			return tempArr;
 		}
+		
 		function showStates()
 		{
-
 			$.getJSON("./vwfDataManager.svc/states",function(e)
 			{
 				var keys = Object.keys(e);
@@ -55,11 +64,13 @@
 				{
 					var id = keys[i].substr(13,16);
 					e[keys[i]].id = id;
+					e[keys[i]].isHidden = checkFilter([e[keys[i]].title, e[keys[i]].description, e[keys[i]].owner]);
 					
+					//The incoming data elements may not be in the same order as existing elements, get proper index
 					saveIndex = tempArr.indexOf(id);
 					saveIndex = saveIndex > -1 ? saveIndex : i;
 					
-					//If the incoming and currently displayed objects are not the same, update
+					//If the incoming and currently displayed objects are not the same, then something must have chaged. Update
 					if(JSON.stringify(vwfPortalModel.worldObjects()[saveIndex]) != JSON.stringify(e[keys[i]])){
 						
 						e[keys[i]].hotState = ko.observable(false);
@@ -88,11 +99,9 @@
 						}	
 					}
 				});
-			
 			});
 		}
 		
-
 		$(document).ready(function()
 		{	
 			ko.applyBindings(vwfPortalModel);
@@ -107,10 +116,7 @@
 					vwfPortalModel.user().isLoggedIn = true;
 						
 					showStates();
-					$('#filter').keyup(function()
-					{
-						showStates();
-					});
+
 					window.setInterval(function(){
 						showStates();
 					},5000);
@@ -119,21 +125,14 @@
 				},
 				error:function(xhr,status,err)
 				{
-
 					showStates();
-					$('#filter').keyup(function()
-					{
-						showStates();
-					});
+
 					window.setInterval(function(){
 						showStates();
 					},5000);
-				}
-					
+				}	
 			});
-			
 		});
-	
 	</script>
 </head>
 <body>
@@ -155,7 +154,7 @@
 			</div>
 			
 			<div>
-				<input id="filter" type="text" placeholder="Filter Results" style="margin: 10px;"/>
+				<input id="filter" type="text" placeholder="Filter Results" style="margin: 10px;" data-bind="value:filterVal, valueUpdate:'afterkeydown'"/>
 			</div>
 			
 			<div style="float:left;" data-bind="visible:user().isLoggedIn">
@@ -163,7 +162,7 @@
 			</div>
 			<div id="activeInstances" style='width:800px' data-bind="foreach:worldObjects">
 			
-				<div data-bind="css:hotState()?'hotstate':'coldstate'">
+				<div data-bind="css:hotState()?'hotstate':'coldstate', visible:isHidden">
 					<div class="editstate">
 						<a class="editstatedata" data-bind="attr:{href:'editInstance.html?id='+id}"><img src="icons/edit.jpg"></a>
 						<a class="editstatedelete" data-bind="attr:{href:'deleteInstance.html?id='+id}"><img src="icons/delete.png"></a>
