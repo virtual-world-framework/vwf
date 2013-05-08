@@ -990,6 +990,10 @@ function startup(callback)
 			exports.updateInventoryItemMetadata = updateInventoryItemMetadata;
 			exports.importUsers = importUsers;
 			exports.clearUsers = clearUsers;
+			exports.compactDatabase = function()
+			{
+				DB.compactDatabase();
+			}
 			callback();
 		}
 	

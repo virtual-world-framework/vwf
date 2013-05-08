@@ -136,6 +136,10 @@ function StartShellInterface()
 				}
 			}
 		}
+		if(commands[0] == 'compact')
+		{
+			DAL.compactDatabase();
+		}
 		if(commands[0] && commands[0] == 'import' && commands[1])
 		{
 			if(commands[1] == 'users')
