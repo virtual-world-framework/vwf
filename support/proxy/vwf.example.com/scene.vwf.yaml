@@ -161,6 +161,7 @@ methods:
   getActiveCamera:
   lastActiveCameraID:
   findByID:
+  isChildOf:
 scripts:
 - |
     var scene = this;
@@ -211,7 +212,16 @@ scripts:
         idNode = this.findByID( node.children[i], id );
       }
       return idNode;
-    }     
+    }  
+    this.isChildOf = function( node, parent ) {
+      var nodeToCheck = node.parent;
+      var isParent = false;
+      while ( !isParent && nodeToCheck !== undefined ) {
+        isParent = ( nodeToCheck === parent );
+        nodeToCheck = nodeToCheck.parent;
+      }
+      return isParent;
+    }   
     this.getActiveCameraComp = function() {
       return this.activeCameraComp;
     }
