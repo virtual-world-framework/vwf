@@ -93,7 +93,7 @@ define(function ()
 					{
 						var logindata = JSON.parse(xhr.responseText);
 						var username = logindata.username;
-						debugger;
+						
 						if(logindata.instances.indexOf(window.location.pathname) != -1)
 						{
 							_Notifier.alert('You are already logged into this space from another tab, browser or computer. This session will be a guest.');

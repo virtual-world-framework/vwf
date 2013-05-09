@@ -134,7 +134,10 @@ function SessionData()
 		{
 			//if I have no active clients, log me out
 			if(Object.keys(this.clients).length == 0)
+			{
 				global.sessions.splice(global.sessions.indexOf(this),1);
+				global.log('Removing Session data for ' + this.UID);
+			}
 			//wait another three minutes and try again
 			else
 				this.resetTimeout();

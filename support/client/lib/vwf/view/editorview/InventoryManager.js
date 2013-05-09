@@ -268,8 +268,10 @@ define(function ()
 			if (!id) id = _Editor.GetSelectedVWFNode().id
 			var t = _DataManager.getCleanNodePrototype(id);
 			var title = t.properties.DisplayName || GUID();
-			
-			this.addInventoryItem(t, title, 'object',function(key)
+			var type = 'object';
+			if(t.properties && t.properties.type)
+			type = t.properties.type
+			this.addInventoryItem(t, title, type,function(key)
 			{
 				_InventoryManager.NoAnimateRedraw(function()
 				{

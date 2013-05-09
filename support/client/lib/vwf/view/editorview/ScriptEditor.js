@@ -890,7 +890,7 @@ define(function ()
 				$('#propertytext').css('border-color', 'red');
 			}
 			_ScriptEditor.selectedProperty = name;
-			_ScriptEditor.propertyEditor.setValue(js_beautify(text,{braces_on_own_line:true,opt_keep_array_indentation:true}));
+			_ScriptEditor.propertyEditor.setValue(js_beautify(text.toString(),{braces_on_own_line:true,opt_keep_array_indentation:true}));
 			_ScriptEditor.propertyEditor.selection.clearSelection();
 			//$('#methodtextback').text(_ScriptEditor.formatScript(indentedtext));
 			$('#propertytext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/stripe.png) 100% 100% repeat');
