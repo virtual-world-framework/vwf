@@ -924,7 +924,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if ( threeObject.ambient !== undefined ) {
                             threeObject.ambient.setRGB( threeObject.color.r, threeObject.color.g, threeObject.color.b ); 
                         }
-                        value = colorToString.call( this, vwfColor );
+                        value = vwfColor.toString();
                     }
                 }
                 if( threeObject instanceof THREE.Scene )
@@ -957,7 +957,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 ambientlight.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                                 node.threeScene.add( ambientlight );
                             }
-                            value = colorToString.call( this, vwfColor );
+                            value = vwfColor.toString();
                         }
                     }
 
@@ -969,7 +969,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             var vwfColor = new utility.color( propertyValue );
                             if ( vwfColor ) {
                                 node.renderer.setClearColor( vwfColor.getHex(), vwfColor.alpha() );
-                                value = colorToString.call( this, vwfColor );
+                                value = vwfColor.toString();
                             }
                         }
                         else if(node) {
@@ -1057,7 +1057,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if ( vwfColor ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                         }
-                        value = colorToString.call( this, vwfColor );
+                        value = vwfColor.toString();
                     }
                     else if ( propertyName == 'intensity' ) {
                         value = parseFloat( propertyValue );
@@ -1171,7 +1171,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
                 if(propertyName == "color") {
                     var vwfColor = new utility.color( [ threeObject.color.r*255, threeObject.color.g*255, threeObject.color.b*255 ] );
-                    value = colorToString.call( this, vwfColor );
+                    value = vwfColor.toString();
                     return value;    
                 }
                 if(propertyName == "diffuse") {
@@ -1211,7 +1211,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             if( threeObject.__lights[i] instanceof THREE.AmbientLight ) {
                                 color = threeObject.__lights[i].color;
                                 vwfColor = new utility.color( [ color.r*255, color.g*255, color.b*255 ] );
-                                value = colorToString.call( this, vwfColor );
+                                value = vwfColor.toString();
                                 found = true;
                             }
                         }
@@ -1220,19 +1220,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if ( node.renderer ) {
                             var color = node.renderer.getClearColor();
                             var alpha = node.renderer.getClearAlpha();
-                            if ( alpha != 1 ){
+                            if ( alpha !== undefined && alpha != 1 ){
                                 vwfColor = new utility.color( [ color.r*255, color.g*255, color.b*255, alpha ] );
                             } else {
                                 vwfColor = new utility.color( [ color.r*255, color.g*255, color.b*255 ] );
                             }
-                            value = colorToString.call( this, vwfColor );
+                            value = vwfColor.toString();
                         }
                         break;
                     case 'enableShadows':
-                        {
-                            if ( node.renderer ) {
-                                value = node.renderer.shadowMapEnabled = value;
-                            }
+                        if ( node.renderer ) {
+                            value = node.renderer.shadowMapEnabled = value;
                         }
                         break;
                     case "activeCamera":
@@ -1255,7 +1253,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         value = threeObject.distance;
                         break;
                     case "color":
-                        value = colorToString.call( this, new utility.color( [ threeObject.color.r, threeObject.color.g, threeObject.color.b ] ) );
+                        var clr = new utility.color( [ threeObject.color.r, threeObject.color.g, threeObject.color.b ] ) 
+                        value = clr.toString();
                         break;
                     case "intensity":
                         value = threeObject.intensity;
@@ -1883,17 +1882,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             vwfColor = new utility.color( "rgb("+vwfColor['r']+","+vwfColor['g']+","+vwfColor['b']+")" );
         }
         return vwfColor;        
-    }
-
-    function colorToString( color ) {
-        var retColor = "";
-        if ( color.alpha() != 1 ) {
-            retColor = "rgba("+color.red()+","+color.green()+","+color.blue()+","+color.alpha()+")";
-        } else {
-            retColor = "rgb("+color.red()+","+color.green()+","+color.blue()+")";
-        }
-        //console.info( "retColor returns: " + retColor );
-        return retColor;
     }
 
     function CreateParticleSystem(nodeID, childID, childName )
