@@ -5,7 +5,7 @@ var libpath = require('path'),
     mime = require('mime'),
 	sio = require('socket.io'),
 	YAML = require('js-yaml');
-	
+	require('./hash.js');
 	
 var datapath = 'C:\\VWFData';
 var DAL = null;	
@@ -96,7 +96,26 @@ function ServeProfile(UID,response,URL)
 function GetLoginData(response,URL)
 {
 	if(URL.loginData)
-		respond(response,200,JSON.stringify({username:URL.loginData.UID,admin:URL.loginData.UID==global.adminUID}));
+	{
+		var logindata = {username:URL.loginData.UID,admin:URL.loginData.UID==global.adminUID};
+		logindata.instances = [];
+		logindata.clients = [];
+		
+		for(var i in global.instances)
+		{
+			for(var j in global.instances[i].clients)
+			{
+				if(global.instances[i].clients[j].loginData && global.instances[i].clients[j].loginData.UID == URL.loginData.UID)
+				{
+					logindata.instances.push(i);
+					logindata.clients.push(j);
+				}
+			}
+		}
+		
+		
+		respond(response,200,JSON.stringify(logindata));
+	}
 	else
 		respond(response,401,JSON.stringify({username:null}));
 	return;
@@ -402,7 +421,7 @@ function SaveProfile(URL,data,response)
 function CreateProfile(URL,data,response)
 {
 	data = JSON.parse(data);
-	data.Password = URL.query.P
+	data.Password = Hash(URL.query.P);
 	DAL.createUser(URL.query.UID,data,function()
 	{
 		respond(response,200,'');
@@ -419,7 +438,7 @@ function CheckPassword(UID,Password, callback)
 			callback(false);
 			return;
 		}	
-		callback(user.Password == Password);
+		callback(user.Password == Hash(Password));
 		return;
 	
 	});

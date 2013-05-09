@@ -2,7 +2,7 @@ var nStore = require('nstore');
 nStore = nStore.extend(require('nstore/query')());
 var async = require('async');
 var fs = require('fs-extra');
-
+require('./hash.js');
 var datapath = '';
 
 var DBTablePath = '\\users.db';
@@ -789,6 +789,7 @@ function importUsers()
 						{
 							var profile = fs.readFileSync(datapath+"\\Profiles\\"+i,"utf8");
 							profile = JSON.parse(profile);
+							profile.Password = Hash(profile.Password);
 							var inventory = profile.inventory;
 							delete profile.inventory;
 							createUser(i,profile,function()
@@ -1055,10 +1056,6 @@ function startup(callback)
 			exports.importUsers = importUsers;
 			exports.clearUsers = clearUsers;
 			exports.searchInventory = searchInventory;
-			exports.compactDatabase = function()
-			{
-				DB.compactDatabase();
-			}
 			callback();
 		}
 	

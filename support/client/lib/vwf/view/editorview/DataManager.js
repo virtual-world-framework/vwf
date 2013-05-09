@@ -82,7 +82,7 @@ define(function ()
 				});
 				return JSON.parse(data.responseText).username;
 		}
-		this.GetProfileForUser = function (username, password, reload)
+		this.GetProfileForUser = function (username, reload)
 		{
 			var profile = null;
 			for (var i in this.rawdata.profiles)
