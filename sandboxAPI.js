@@ -35,9 +35,9 @@ function GUID()
 //simple functio to write a response
 function respond(response,status,message)
 {
-	response.writeHead(status, {
-					"Content-Type": "text/plain"
-				});
+	//response.writeHead(status, {
+	//				"Content-Type": "text/plain"
+	//			});
 	response.write(message + "\n");
 	global.log(message,2);
 	response.end();
@@ -1122,11 +1122,14 @@ function serve (request, response)
 	if(request.method == "POST")
 	{
 		var body = '';
+		console.log("Made it to post");
         request.on('data', function (data) {
+			console.log("Reading data.");
             body += data;
         });
         request.on('end', function () {
-
+			
+			console.log("End callback");
 			if(body == '')
 			{
 				

@@ -7,7 +7,11 @@ var libpath = require('path'),
 	YAML = require('js-yaml'),
 	SandboxAPI = require('./sandboxAPI'),
 	Shell = require('./ShellInterface'),
-	DAL = require('./dal');
+	DAL = require('./dal'),
+	express = require('express'),
+	app = express();
+
+
 	
 // pick the application name out of the URL by finding the index.vwf.yaml
 function findAppName(uri)
@@ -168,9 +172,9 @@ function ServeFile(filename,response,URL)
 			}
  
 			var type = mime.lookup(filename);
-			response.writeHead(200, {
-				"Content-Type": type
-			});
+			//response.writeHead(200, {
+			//	"Content-Type": type
+			//});
 			response.write(file, "binary");
 			response.end();
 			
@@ -305,7 +309,7 @@ function isPointerEvent(message)
 		
 //Start the VWF server
 function startVWF(){
-
+	
 	global.activeinstances = [];
 	function OnRequest(request, response) 
 	{
@@ -317,7 +321,7 @@ function startVWF(){
 			var uri = URL.pathname;
 			//global.log( URL.pathname);
 			uri = uri.replace(/\//g,'\\');
-			
+		
 			if(URL.pathname.toLowerCase().indexOf('/vwfdatamanager.svc/') != -1)
 			{
 				//Route to DataServer
@@ -464,7 +468,7 @@ function startVWF(){
 				response.writeHead(500, {
 					"Content-Type": "text/plain"
 				});
-				response.write(e, "utf8");
+				response.write(e.toString(), "utf8");
 				response.end();
 		
 		
@@ -822,7 +826,29 @@ function startVWF(){
 		global.sessions = [];
 		global.adminUID = adminUID;
 		
-		var srv = http.createServer(OnRequest).listen(port);
+		//var srv = http.createServer(OnRequest).listen(port);
+		
+		app.use(express.bodyParser());
+		app.use(express.methodOverride());
+		app.use(app.router);
+
+		app.get('/adl/sandbox', function(req, res){
+			console.log("Routing use");
+		  var body = 'Hello World';
+		  res.end(body);
+		});
+		
+		app.use(function(req, res, next){
+			
+			console.log("App Use");
+			OnRequest(req, res);
+			
+			//My attempt at fixing the sandboxAPI problem
+			//if(req.method != "GET")
+			//	res.end();
+		});
+		
+		var srv = app.listen(port);
 		global.log('Admin is "' + global.adminUID+"\"",0);
 		global.log('Serving on port ' + port,0);
 		
