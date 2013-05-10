@@ -16,6 +16,35 @@
 		box-shadow: 3px 3px 7px grey;
 		margin-bottom: 5px;
 	}
+	.SidePanelWindowTitle
+	{
+		padding:3px 4px 3px 4px;
+		font:1.5em sans-serif;
+		font-weight: bold;
+	}
+	.SidePanelWindowBottomBorder
+	{
+		border-bottom:5px solid #444444;
+		border-left:2px solid #444444;
+	}
+	.InventoryRename
+	{
+		display: inline-block;top: 22.0px;position: absolute;padding: 0px;font: 1.0em sans-serif;border: 1px solid black;margin: 0px;width: 80%;
+	}
+	.InventoryPanel
+	{
+		font:1.5em sans-serif;
+		padding-bottom:5px;
+		background:#FFFFF8;
+		border: 1px black solid;
+		margin: 3px 3px 3px 3px;
+		height:auto
+	
+	}
+	.inventoryItem
+	{
+		white-space: nowrap;text-overflow: ellipsis;background:#FFFFF8;padding-left: 10px;
+	}
 	.loadchoice:hover
 	{
 		background-color: #DDF;

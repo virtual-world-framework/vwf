@@ -16,10 +16,10 @@ define(function ()
 
 	function initialize()
 	{
-		$('#sidepanel').append("<div id='InventoryManager' class='ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
+		$('#sidepanel').append("<div id='InventoryManager' class='SidePanelWindowBottomBorder ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
 		$(document.body).append("<div id='InventoryViewer' style='overflow:hidden'><div id='InventoryView' style='width: 100%;height: 100%;margin: -5px -5px 5px -10px;'/></div>");
-		$('#InventoryManager').append("<div id='inventorymanagertitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Inventory</span></div>");
-		$('#InventoryManager').append("<div id='InventoryDisplay' style='font:1.5em sans-serif;padding-bottom:5px;background:#FFFFF8;border: 1px black solid;margin: 3px 3px 3px 3px;height:auto'></div>");
+		$('#InventoryManager').append("<div id='inventorymanagertitle' style = '' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix SidePanelWindowTitle' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Inventory</span></div>");
+		$('#InventoryManager').append("<div id='InventoryDisplay' class='InventoryPanel'></div>");
 		$('#InventoryManager').append("<div id='InventoryManagerCreate'></div>");
 		$('#InventoryManager').append("<div id='InventoryManagerDelete'></div>");
 		$('#InventoryManager').append("<div id='InventoryManagerView'></div>");
@@ -43,8 +43,6 @@ define(function ()
 		});
 		$('#inventorymanagertitle').append('<a id="inventoryclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
 		$('#inventorymanagertitle').prepend('<img class="headericon" src="../vwf/view/editorview/images/icons/inventory.png" />');
-		$('#InventoryManager').css('border-bottom', '5px solid #444444')
-		$('#InventoryManager').css('border-left', '2px solid #444444')
 		$('#inventoryclose').click(function ()
 		{
 			_InventoryManager.hide()
@@ -451,7 +449,7 @@ define(function ()
 			var inventory = this.inventory;
 			
 			$('#InventoryDisplay').empty();
-			$('#InventoryDisplay').append("<input type='text' id='InventoryRename' style='display: inline-block;top: 22.0px;position: absolute;padding: 0px;font: 1.0em sans-serif;border: 1px solid black;margin: 0px;width: 80%;'/>");
+			$('#InventoryDisplay').append("<input type='text' id='InventoryRename' class='InventoryRename'/>");
 			$('#InventoryRename').hide();
 			$('#InventoryRename').keypress(_InventoryManager.rename)
 			$('#InventoryRename').keydown(function (e)
@@ -466,7 +464,7 @@ define(function ()
 			if (!inventory) return;
 			for (var i=0;i < inventory.length; i++)
 			{
-				$('#InventoryDisplay').append('<div class="inventoryItem" style="white-space: nowrap;text-overflow: ellipsis;background:#FFFFF8;padding-left: 10px;" id="InventoryDisplay' + i + '" />');
+				$('#InventoryDisplay').append('<div class="inventoryItem" id="InventoryDisplay' + i + '" />');
 				$('#InventoryDisplay' + (i)).html("<div style='font-weight:bold;display:inline'>" + inventory[i].title + "</div>" + " : " + (inventory[i].type || ""));
 				$('#InventoryDisplay' + (i)).attr('name', i);
 				$('#InventoryDisplay' + (i)).attr('type', inventory[i].type);
