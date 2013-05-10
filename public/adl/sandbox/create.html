@@ -1,0 +1,77 @@
+    <script type="text/javascript">
+	
+		$(document).ready(function()
+		{
+			$.ajax('/vwfDataManager.svc/logindata',
+				{
+					cache:false,
+					success:function(data,status,xhr)
+					{				
+						setup();
+					},
+					error:function(xhr,status,err)
+					{
+						redirect();
+					}
+				});
+				
+		});	
+		function redirect()
+		{
+			window.location.pathname = '';
+		}
+		function setup()
+		{
+		
+			$('#btnSave').click(
+			function(){
+			
+				
+				var name = $('#txtInstanceName').val();
+				var des = $('#txtInstanceDescription').val();
+				
+				var state = window.location.search.substr(window.location.search.indexOf('=')+1);
+				var path = window.location.pathname.substr(0,window.location.pathname.lastIndexOf('/')+1);
+				
+				var sid = path+state+'/';
+				
+			
+				var statedata = {};
+				statedata.title = name;
+				statedata.description = des;
+				
+				jQuery.ajax(
+				{
+					type: 'POST',
+					url: '/vwfDataManager.svc/createstate',
+					data: JSON.stringify(statedata),
+					success:function(data,status,xhr)
+					{
+						redirect();
+					},
+					error:function(xhr,status,err)
+					{
+						$('#error').text("Error: " + xhr.responseText);
+					},
+					dataType: "text"
+				});
+				
+				
+				
+			});
+		
+		};
+		
+	</script>
+    <div class="wrapper">
+		<h1> Virtual World Framework Create World </h1>
+		<div>Enter a world name and description below. </div>
+		
+		<div>
+		 <input type='text' id='txtInstanceName' class='input' placeholder='World Name'/>
+		 <input type='textarea' id='txtInstanceDescription' class='input' placeholder='Description'/>
+		 <div id = 'btnSave' class='button'> Create </div>
+		</div>
+		<div id='error' style="margin-top: 20PX;font-size: 3EM;color: red;"/>
+		
+    </div>

@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<link rel="stylesheet" href="css/colorpicker.css" type="text/css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="css/layout.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="style.css" />
+	<!--[if !IE 7]>
+	<style type="text/css">
+		#wrapper {display:table;height:100%}
+	</style>
+	<![endif]-->
+    <title>Virtual World Framework</title>
+	<script type="text/javascript" src="jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="jquery-ui-1.8.16.custom.js"></script>
+    <script type="text/javascript" src="knockout-2.2.1.js"></script>
+	<script type="text/javascript" src="vwf/view/editorview/sha256.js"></script>
+
+
+    <script type="text/javascript">
+		var filter = '';
+		var vwfPortalModel = {
+		
+			user: ko.observable({
+				isLoggedIn: false,
+				isAdmin: false,
+				username: 'Guest'
+			}),
+			
+			filterVal: ko.computed({
+				read:  function(){ return ''; }, 
+				write: function(str){ 
+					filter = str;
+					showStates(); 
+				}	
+			}).extend({throttle:750}),
+			
+			worldObjects: ko.observableArray()	
+		};
+		
+		function checkFilter(textArr)
+		{
+			for(var i = 0; i < textArr.length; i++){
+				if(textArr[i] && textArr[i].toLowerCase().indexOf(filter.toLowerCase()) != -1)
+					return true;
+			}
+			return false;	
+		}
+		
+		function getFlatIdArr(resetHotstate){
+			var tempArr = [];
+			
+			//Get all world IDs in flat array form
+			for(var i = 0; i < vwfPortalModel.worldObjects().length; i++){
+				if(resetHotstate){vwfPortalModel.worldObjects()[i].hotState(false);}
+				tempArr.push(vwfPortalModel.worldObjects()[i].id);
+			}
+			
+			return tempArr;
+		}
+		
+		function showStates()
+		{
+			$.getJSON("./vwfDataManager.svc/states",function(e)
+			{
+				var keys = Object.keys(e);
+				var tempArr = getFlatIdArr();
+				var saveIndex = 0;
+
+				for(var i = 0; i < keys.length; i++)
+				{
+					var id = keys[i].substr(13,16);
+					e[keys[i]].id = id;
+					e[keys[i]].isHidden = checkFilter([e[keys[i]].title, e[keys[i]].description, e[keys[i]].owner]);
+					
+					//The incoming data elements may not be in the same order as existing elements, get proper index
+					saveIndex = tempArr.indexOf(id);
+					saveIndex = saveIndex > -1 ? saveIndex : i;
+					
+					//If the incoming and currently displayed objects are not the same, then something must have chaged. Update
+					if(JSON.stringify(vwfPortalModel.worldObjects()[saveIndex]) != JSON.stringify(e[keys[i]])){
+						
+						e[keys[i]].hotState = ko.observable(false);
+						e[keys[i]].lastUpdate = e[keys[i]].lastUpdate?e[keys[i]].lastUpdate:(new Date()).toString();
+						vwfPortalModel.worldObjects()[saveIndex] = e[keys[i]];	
+					}
+				}
+				
+				vwfPortalModel.worldObjects.valueHasMutated();
+				
+				$.getJSON("./admin/instances",function(e)
+				{
+					//Get all world IDs in flat array form
+					var tempArr = getFlatIdArr(true);
+					var keys = Object.keys(e);
+					var saveIndex = 0;
+					
+					//Iterate through keys, get index of world id which matches key, set its hotState to true
+					for(var i = 0; i < keys.length; i++)
+					{
+						var id = keys[i].substr(13,16);
+						saveIndex = tempArr.indexOf(id);
+						
+						if(saveIndex > -1){
+							vwfPortalModel.worldObjects()[saveIndex].hotState(true);
+						}	
+					}
+				});
+			});
+		}
+		
+		$(document).ready(function()
+		{	
+			ko.applyBindings(vwfPortalModel);
+			$.ajax('/vwfDataManager.svc/logindata',
+			{
+				cache:false,
+				success:function(data,status,xhr)
+				{
+					data = JSON.parse(xhr.responseText);
+					vwfPortalModel.user().username = data.username;
+					vwfPortalModel.user().isAdmin = data.admin;
+					vwfPortalModel.user().isLoggedIn = (data.username)?true:false;
+						
+					showStates();
+
+					window.setInterval(function(){
+						showStates();
+					},5000);
+					
+					vwfPortalModel.user.valueHasMutated();
+				},
+				error:function(xhr,status,err)
+				{
+					showStates();
+
+					window.setInterval(function(){
+						showStates();
+					},5000);
+				}	
+			});
+		});
+	</script>
+</head>
+<body>
+	<div id="wrapper">
+		<div id="header" style="text-align: center">
+			<div>
+				<span id="username" data-bind="text:'Logged in as: ' + user().username, visible:user().isLoggedIn"></span>
+				<a href="login?return=index"  id="login"  data-bind="visible:!user().isLoggedIn">Login</a>
+				<a href="logout?return=index" id="logout" data-bind="visible:user().isLoggedIn">Logout</a>
+				<a href="signup?return=index" id="signup" data-bind="visible:!user().isLoggedIn">Create Account</a>
+			</div>
+		</div>	
+		<div id="content">
+			{{{yield}}}
+		</div>
+	</div>
+	<div style="clear:both;"></div>
+	<div id="footer">
+		<br/><p style="color:#eee">This is the footer.</p>
+	</div>
+</body>
+</html>

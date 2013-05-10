@@ -9,9 +9,8 @@ var libpath = require('path'),
 	Shell = require('./ShellInterface'),
 	DAL = require('./dal'),
 	express = require('express'),
-	app = express();
-
-
+	app = express(),
+	landing = require('./landingRoutes');
 	
 // pick the application name out of the URL by finding the index.vwf.yaml
 function findAppName(uri)
@@ -827,7 +826,12 @@ function startVWF(){
 		global.adminUID = adminUID;
 		
 		//var srv = http.createServer(OnRequest).listen(port);
-
+		
+		app.set('layout', 'layout');
+		app.set('views', __dirname + '/public/adl/sandbox');
+		app.set('view engine', 'html');
+		app.engine('.html', require('hogan-express'));
+		
 		app.use(express.methodOverride());
 		app.use (function(req, res, next) {
 			
@@ -844,26 +848,22 @@ function startVWF(){
 		});
 		
 		app.use(app.router);
+		app.get('/adl/sandbox', landing.index);
+		app.get('/adl/sandbox/index', landing.index);
+		app.get('/adl/sandbox/create', landing.create);
+		app.get('/adl/sandbox/signup', landing.signup);
+		app.get('/adl/sandbox/login', landing.login);
+		app.get('/adl/sandbox/logout', landing.logout);
 		
-		app.get('/adl/sandbox', function(req, res){
-			console.log("Routing use");
-		  var body = 'Hello World';
-		  res.end(body);
-		});
+		app.use(OnRequest);
+		app.listen(port);
 		
-		app.use(function(req, res, next){
-			
-			console.log("App Use");
-			OnRequest(req, res);
-		});
-		
-		var srv = app.listen(port);
 		global.log('Admin is "' + global.adminUID+"\"",0);
 		global.log('Serving on port ' + port,0);
 		
 		Shell.StartShellInterface();  
 		//create socket server
-		sio = sio.listen(srv,{log:false});
+		sio = sio.listen(http.createServer(app),{log:false});
 		sio.set('transports', ['websocket']);
 		sio.sockets.on('connection', WebSocketConnection);
 	});
