@@ -9,9 +9,8 @@ var libpath = require('path'),
 	Shell = require('./ShellInterface'),
 	DAL = require('./dal'),
 	express = require('express'),
-	app = express();
-
-
+	app = express(),
+	landing = require('./landingRoutes');
 	
 // pick the application name out of the URL by finding the index.vwf.yaml
 function findAppName(uri)
@@ -172,9 +171,9 @@ function ServeFile(filename,response,URL)
 			}
  
 			var type = mime.lookup(filename);
-			//response.writeHead(200, {
-			//	"Content-Type": type
-			//});
+			response.writeHead(200, {
+				"Content-Type": type
+			});
 			response.write(file, "binary");
 			response.end();
 			
@@ -828,33 +827,43 @@ function startVWF(){
 		
 		//var srv = http.createServer(OnRequest).listen(port);
 		
-		app.use(express.bodyParser());
+		app.set('layout', 'layout');
+		app.set('views', __dirname + '/public/adl/sandbox');
+		app.set('view engine', 'html');
+		app.engine('.html', require('hogan-express'));
+		
 		app.use(express.methodOverride());
-		app.use(app.router);
+		app.use (function(req, res, next) {
+			
+		   var data='';
+		   req.setEncoding('utf8');
+		   req.on('data', function(chunk) { 
+			  data += chunk;
+		   });
 
-		app.get('/adl/sandbox', function(req, res){
-			console.log("Routing use");
-		  var body = 'Hello World';
-		  res.end(body);
+		   req.on('end', function() {
+			req.body = data;
+			next();
+		   });
 		});
 		
-		app.use(function(req, res, next){
-			
-			console.log("App Use");
-			OnRequest(req, res);
-			
-			//My attempt at fixing the sandboxAPI problem
-			//if(req.method != "GET")
-			//	res.end();
-		});
+		app.use(app.router);
+		app.get('/adl/sandbox', landing.index);
+		app.get('/adl/sandbox/index', landing.index);
+		app.get('/adl/sandbox/create', landing.create);
+		app.get('/adl/sandbox/signup', landing.signup);
+		app.get('/adl/sandbox/login', landing.login);
+		app.get('/adl/sandbox/logout', landing.logout);
 		
-		var srv = app.listen(port);
+		app.use(OnRequest);
+		app.listen(port);
+		
 		global.log('Admin is "' + global.adminUID+"\"",0);
 		global.log('Serving on port ' + port,0);
 		
 		Shell.StartShellInterface();  
 		//create socket server
-		sio = sio.listen(srv,{log:false});
+		sio = sio.listen(http.createServer(app),{log:false});
 		sio.set('transports', ['websocket']);
 		sio.sockets.on('connection', WebSocketConnection);
 	});
