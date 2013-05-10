@@ -1600,10 +1600,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 	}
 	function fixMissingUVs(mesh)
 	{
+		
 		if(!mesh.geometry.faceVertexUvs[0] )
 			mesh.geometry.faceVertexUvs[0] = [];
 		if(mesh.geometry.faceVertexUvs[0].length == 0)
 		{
+			
 			for(var i =0; i < mesh.geometry.faces.length; i++)
 			{
 				var face = mesh.geometry.faces[i];
@@ -1616,8 +1618,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 		
 		 
 		mesh.geometry.computeCentroids();
-		mesh.geometry.computeFaceNormals();
-		mesh.geometry.computeVertexNormals();
+		
 		
 		
 		
@@ -1663,7 +1664,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         if ( node.threeObject && node.threeObject instanceof THREE.Object3D ) {
             var i, face;
             var geo = new THREE.Geometry();
-            var mat = new THREE.MeshBasicMaterial( { color: meshDef.color ? meshDef.color : 0xffffff } )
+            var mat = new THREE.MeshPhongMaterial( { color: meshDef.color ? meshDef.color : 0xffffff } )
 
             for ( i = 0; geo.vertices && meshDef.positions && i < meshDef.positions.length; i++ ) {
                 geo.vertices.push( new THREE.Vector3( meshDef.positions[i*3], meshDef.positions[i*3+1],meshDef.positions[i*3+2] ) );   
@@ -1692,6 +1693,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var threeModel = this;
         var sceneNode = this.state.scenes[ this.state.sceneRootID ];
 		$(document).trigger('BeginParse');
+		
+		function assetFailed(err)
+		{
+			$(document).trigger('EndParse');
+			if(window._Notifier)
+				_Notifier.alert('error loading asset');
+		}
+		
         function assetLoaded( asset ) { 
 			$(document).trigger('EndParse');
             sceneNode.pendingLoads--;
@@ -1710,11 +1719,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			var meshes =[];
 			GetAllLeafMeshes(asset,meshes);
 		
+			
 			for(var i =0; i < meshes.length; i++)
 			{
 				//fixMissingUVs(meshes[i]);	
-				meshes[i].castShadow = true;
-				meshes[i].receiveShadow = true;
+				
 			}
 			
 		//	window.setTimeout(function(){
@@ -1820,7 +1829,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			}
 			if(childType == "model/vnd.osgjs+json+compressed")
 			{
-				node.loader = new UTF8JsonLoader(node,assetLoaded.bind(this));
+				node.loader = new UTF8JsonLoader(node,assetLoaded.bind(this),assetFailed.bind(this));
 			}
 			
 			
@@ -3030,7 +3039,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         return array2;
     }
 
-    function UTF8JsonLoader(node,callback)
+    function UTF8JsonLoader(node,callback,errorCallback)
     {
         
         var self = this;
@@ -3064,7 +3073,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         
         this.error = function(e)
         {
-            alert(e.responseText);
+           if(errorCallback)
+				errorCallback(e);
         }.bind(this);
         
         $.ajax({
@@ -3079,9 +3089,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
     
 
-    function BuildUTF8JsonNode(node,callback)
+    function BuildUTF8JsonNode(node,callback,err)
     {
-        return new UTF8JsonLoader(node,callback);
+        return new UTF8JsonLoader(node,callback,err);
     }
     function toColor(arr)
         {
@@ -3132,7 +3142,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             //newnode = new THREE.Object3D();
             var geo = new THREE.Geometry();
-            var mesh = newnode = new THREE.Mesh(geo);
+            var mesh = newnode = new THREE.Mesh(geo,new THREE.MeshPhongMaterial());
 			mesh.castShadow = true;
 			mesh.receiveShadow = true;
             mesh.geometry.normals = [];
@@ -3193,11 +3203,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     for(var j = 0; j < array.length-2; j+= 3)
                     {
                         var face = new THREE.Face3(array[j],array[j+1],array[j+2],new THREE.Vector3(0,1,0),new THREE.Color('#000000'),0);
-                        face.vertexNormals.push(mesh.geometry.normals[face.a]);
+                        //in this case, the compression of the mesh index array to 16 bits has wrapped some indexes around the maximum
+						if(face.a < 0 || face.b < 0 || face.c < 0)
+							continue;
+						if(face.a > 32767 || face.b > 32767 || face.c > 32767)
+							continue;	
+						face.vertexNormals.push(mesh.geometry.normals[face.a]);
                         face.vertexNormals.push(mesh.geometry.normals[face.b]);
                         face.vertexNormals.push(mesh.geometry.normals[face.c]);
                         mesh.geometry.faces.push(face);
-                        mesh.geometry.faceVertexUvs[0].push([mesh.geometry.UVS[face.a],mesh.geometry.UVS[face.b],mesh.geometry.UVS[face.c]]);
+						if(mesh.geometry.UVS && mesh.geometry.UVS.length > 0)
+							mesh.geometry.faceVertexUvs[0].push([mesh.geometry.UVS[face.a],mesh.geometry.UVS[face.b],mesh.geometry.UVS[face.c]]);
+						else
+							mesh.geometry.faceVertexUvs[0].push([new THREE.Vector2(0,0),new THREE.Vector2(0,1),new THREE.Vector2(1,1)]);	
 
                     }
                 } else {
