@@ -827,12 +827,9 @@ function startVWF(){
 		global.adminUID = adminUID;
 		
 		//var srv = http.createServer(OnRequest).listen(port);
-		
+
 		app.use(express.methodOverride());
 		app.use (function(req, res, next) {
-		  
-		  // if(req.method == "GET") 
-		//	next();
 			
 		   var data='';
 		   req.setEncoding('utf8');
@@ -858,10 +855,6 @@ function startVWF(){
 			
 			console.log("App Use");
 			OnRequest(req, res);
-			
-			//My attempt at fixing the sandboxAPI problem
-			//if(req.method != "GET")
-			//	res.end();
 		});
 		
 		var srv = app.listen(port);

@@ -1122,10 +1122,7 @@ function serve (request, response)
 	if(request.method == "POST")
 	{
 		var body = request.body;
-		console.log(request, "Post body: ", body);
-		console.log("Made it to post");
-		 
-		console.log("End callback");
+
 		if(body == '')
 		{
 			
@@ -1178,37 +1175,30 @@ function serve (request, response)
 	}	
 	if(request.method == "DELETE")
 	{
-		var body = '';
-        request.on('data', function (data) {
-            body += data;
-        });
-        request.on('end', function () {
+		var body = request.body;
 
-            switch(command)
-			{	
-				case "state":{
-					DeleteState(URL,SID,response);
-				}break;
-				case "inventoryitem":{
-					deleteInventoryItem(URL,response);
-				} break;
-				case "globalasset":{
-					DeleteAsset(URL, basedir+"GlobalAssets\\"+URL.query.AID,response);
-				}break;
-				case "profile":{
-					DeleteProfile(URL, basedir+"profiles\\"+UID,response);
-				}break;
-				default:
-				{
-					global.log("DELETE",2);
-					_404(response);
-					return;
-				}
+		switch(command)
+		{	
+			case "state":{
+				DeleteState(URL,SID,response);
+			}break;
+			case "inventoryitem":{
+				deleteInventoryItem(URL,response);
+			} break;
+			case "globalasset":{
+				DeleteAsset(URL, basedir+"GlobalAssets\\"+URL.query.AID,response);
+			}break;
+			case "profile":{
+				DeleteProfile(URL, basedir+"profiles\\"+UID,response);
+			}break;
+			default:
+			{
+				global.log("DELETE",2);
+				_404(response);
+				return;
 			}
-
-        });
+		}
 	}	
-
 }
 
 exports.serve = serve;
