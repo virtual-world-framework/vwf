@@ -172,9 +172,9 @@ function ServeFile(filename,response,URL)
 			}
  
 			var type = mime.lookup(filename);
-			//response.writeHead(200, {
-			//	"Content-Type": type
-			//});
+			response.writeHead(200, {
+				"Content-Type": type
+			});
 			response.write(file, "binary");
 			response.end();
 			
@@ -828,10 +828,26 @@ function startVWF(){
 		
 		//var srv = http.createServer(OnRequest).listen(port);
 		
-		app.use(express.bodyParser());
 		app.use(express.methodOverride());
-		app.use(app.router);
+		app.use (function(req, res, next) {
+		  
+		  // if(req.method == "GET") 
+		//	next();
+			
+		   var data='';
+		   req.setEncoding('utf8');
+		   req.on('data', function(chunk) { 
+			  data += chunk;
+		   });
 
+		   req.on('end', function() {
+			req.body = data;
+			next();
+		   });
+		});
+		
+		app.use(app.router);
+		
 		app.get('/adl/sandbox', function(req, res){
 			console.log("Routing use");
 		  var body = 'Hello World';

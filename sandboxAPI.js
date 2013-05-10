@@ -35,9 +35,9 @@ function GUID()
 //simple functio to write a response
 function respond(response,status,message)
 {
-	//response.writeHead(status, {
-	//				"Content-Type": "text/plain"
-	//			});
+	response.writeHead(status, {
+					"Content-Type": "text/plain"
+				});
 	response.write(message + "\n");
 	global.log(message,2);
 	response.end();
@@ -1121,65 +1121,60 @@ function serve (request, response)
 	}
 	if(request.method == "POST")
 	{
-		var body = '';
+		var body = request.body;
+		console.log(request, "Post body: ", body);
 		console.log("Made it to post");
-        request.on('data', function (data) {
-			console.log("Reading data.");
-            body += data;
-        });
-        request.on('end', function () {
+		 
+		console.log("End callback");
+		if(body == '')
+		{
 			
-			console.log("End callback");
-			if(body == '')
+			respond(response,500,"Error in post: data is null");
+			return;
+		}
+		
+		//Have to do this here! throw does not work quite as you would think 
+		//with all the async stuff. Do error checking first.
+		try{
+			JSON.parse(body);
+		}catch(e)
+		{
+			respond(response,500,"Error in post: data is not json");
+			return;
+		}
+		switch(command)
+		{	
+			case "state":{
+				SaveState(URL,SID,body,response);
+			}break;
+			case "createstate":{
+				createState(URL,body,response);
+			}break;
+			case "statedata":{
+				setStateData(URL,body,response);
+			}break;
+			case "globalasset":{
+				SaveAsset(URL, basedir+"GlobalAssets\\"+URL.query.AID,body,response);
+			}break;
+			case "profile":{
+				SaveProfile(URL,body,response);
+			}break;
+			case "createprofile":{
+				CreateProfile(URL,body,response);
+			}break;
+			case "inventoryitem":{
+				addInventoryItem(URL,body,response);
+			}break;
+			case "inventoryitemmetadata":{
+				updateInventoryItemMetadata(URL,body,response);
+			} break;
+			default:
 			{
-				
-				respond(response,500,"Error in post: data is null");
+				global.log("POST",2);
+				_404(response);
 				return;
 			}
-			
-			//Have to do this here! throw does not work quite as you would think 
-			//with all the async stuff. Do error checking first.
-			try{
-				JSON.parse(body);
-			}catch(e)
-			{
-				respond(response,500,"Error in post: data is not json");
-				return;
-			}
-            switch(command)
-			{	
-				case "state":{
-					SaveState(URL,SID,body,response);
-				}break;
-				case "createstate":{
-					createState(URL,body,response);
-				}break;
-				case "statedata":{
-					setStateData(URL,body,response);
-				}break;
-				case "globalasset":{
-					SaveAsset(URL, basedir+"GlobalAssets\\"+URL.query.AID,body,response);
-				}break;
-				case "profile":{
-					SaveProfile(URL,body,response);
-				}break;
-				case "createprofile":{
-					CreateProfile(URL,body,response);
-				}break;
-				case "inventoryitem":{
-					addInventoryItem(URL,body,response);
-				}break;
-				case "inventoryitemmetadata":{
-					updateInventoryItemMetadata(URL,body,response);
-				} break;
-				default:
-				{
-					global.log("POST",2);
-					_404(response);
-					return;
-				}
-			}
-        });
+		}
 	}	
 	if(request.method == "DELETE")
 	{

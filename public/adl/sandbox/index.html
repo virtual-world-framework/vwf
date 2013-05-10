@@ -113,7 +113,7 @@
 					data = JSON.parse(xhr.responseText);
 					vwfPortalModel.user().username = data.username;
 					vwfPortalModel.user().isAdmin = data.admin;
-					vwfPortalModel.user().isLoggedIn = true;
+					vwfPortalModel.user().isLoggedIn = (data.username)?true:false;
 						
 					showStates();
 
