@@ -828,7 +828,7 @@ function startVWF(){
 		//var srv = http.createServer(OnRequest).listen(port);
 		
 		app.set('layout', 'layout');
-		app.set('views', __dirname + '/public/adl/sandbox');
+		app.set('views', __dirname + '/public/adl/sandbox/views');
 		app.set('view engine', 'html');
 		app.engine('.html', require('hogan-express'));
 		
