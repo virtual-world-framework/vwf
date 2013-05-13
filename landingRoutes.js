@@ -29,3 +29,15 @@ exports.logout = function(req, res){
 	res.locals = { 'test' : 'Hey now.', root: root};
 	res.render('logout');
 }
+exports.edit = function(req, res){
+
+
+	res.locals = { 'test' : 'Hey now.', root: root};
+	res.render('editInstance');
+}
+exports.remove = function(req, res){
+
+
+	res.locals = { 'test' : 'Hey now.', root: root};
+	res.render('deleteInstance');
+}

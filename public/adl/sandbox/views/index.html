@@ -6,29 +6,46 @@
 	</div>
 	
 	<div>
-		<input id="filter" type="text" placeholder="Filter Results" style="margin: 10px;" data-bind="value:filterVal, valueUpdate:'afterkeydown'"/>
-	</div>
-	
-	<div style="float:left;" data-bind="visible:user().isLoggedIn">
-		<a href="create" class="coldstate" id="newinstancebutton"><img style="height: 204px;" src="{{root}}/icons/add.png"></a>
-	</div>
-	<div id="activeInstances" style='width:800px' data-bind="foreach:worldObjects">
-	
-		<div data-bind="css:hotState()?'hotstate':'coldstate', visible:isHidden">
-			<div class="editstate">
-				<a class="editstatedata" data-bind="attr:{href:'{{root}}/'+'editInstance.html?id='+id}"><img src="{{root}}/icons/edit.jpg"></a>
-				<a class="editstatedelete" data-bind="attr:{href:'{{root}}/'+'deleteInstance.html?id='+id}"><img src="{{root}}/icons/delete.png"></a>
-			</div>
-			
-			<a data-bind="attr:{href:'{{root}}/'+id}">
-				<div class="title" data-bind="text:title"></div>
-				<div class="description" data-bind="text:description"></div>
-				<div class="owner" data-bind="text:owner"></div>
-				<div class="objects" data-bind="text:objects"></div>
-				<div class="lastModified" data-bind="text:lastUpdate"></div>
-				<div class="stateid" data-bind="text:id"></div>
-			</a>
+		<div style="float:left;" data-bind="visible:user().isLoggedIn">
+			<a href="{{root}}/create" class="coldstate" id="newinstancebutton"><img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"></a>
 		</div>
+		<input class="span5" id="filter" type="text" placeholder="Filter Results" data-bind="value:filterVal, valueUpdate:'afterkeydown'">
+	</div>
+	
 
+	<div id="activeInstances" style='width:800px' class="accordion" data-bind="foreach:worldObjects">
+	
+		<div class="accordion-group" data-bind="visible:isHidden">
+		
+			<div class="accordion-heading">
+				<a class="accordion-toggle" data-toggle="collapse" data-parent="#activeInstances" data-bind="text:title,attr:{href:'#collapse'+$index()}">Title</a>
+			</div>
+			<div data-bind="attr:{id:'collapse'+$index()}" class="accordion-body collapse in">
+			
+				<div class="accordion-inner">
+				
+					<div data-bind="css:hotState()?'hotstate':'coldstate'">
+						<div class="editstate">
+							<a class="editstatedata" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"><img src="{{root}}/icons/edit.jpg"></a>
+							<a class="editstatedelete" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"><img src="{{root}}/icons/delete.png"></a>
+						</div>
+						
+						<a data-bind="attr:{href:'{{root}}/'+id}">
+							<div class="title" data-bind="text:title"></div>
+							<div class="description" data-bind="text:description"></div>
+							<div class="owner" data-bind="text:owner"></div>
+							<div class="objects" data-bind="text:objects"></div>
+							<div class="lastModified" data-bind="text:lastUpdate"></div>
+							<div class="stateid" data-bind="text:id"></div>
+						</a>
+					</div>
+				
+				</div>
+			</div>
+		</div>
+		
+		
+		
+		
 	</div>
 	<div id="coldInstances" style='width:800px'></div>

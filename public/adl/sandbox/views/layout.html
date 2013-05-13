@@ -89,6 +89,10 @@
 				}
 				
 				vwfPortalModel.worldObjects.valueHasMutated();
+				console.log("New collapse");
+				$(".collapse").collapse();
+				setTimeout(function(){$(".accordion").css("visibility","visible")}, 200);
+				
 				
 				$.getJSON("/admin/instances",function(e)
 				{

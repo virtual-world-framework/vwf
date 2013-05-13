@@ -854,6 +854,8 @@ function startVWF(){
 		app.get('/adl/sandbox/signup', landing.signup);
 		app.get('/adl/sandbox/login', landing.login);
 		app.get('/adl/sandbox/logout', landing.logout);
+		app.get('/adl/sandbox/edit', landing.edit);
+		app.get('/adl/sandbox/remove', landing.remove);
 		
 		app.use(OnRequest);
 		var listen = app.listen(port);
