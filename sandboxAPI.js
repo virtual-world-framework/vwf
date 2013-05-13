@@ -147,7 +147,8 @@ function SessionData()
 	}
 	this.resetTimeout = function()
 	{
-		this.setTimeout(15);
+		//15 mins
+		this.setTimeout(900);
 	}	
 }
 
