@@ -3128,6 +3128,10 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
         /// @see {@link module:vwf/api/kernel.children}
 
         this.children = function( nodeID ) {
+            if ( !nodeID ) {
+                this.logger.error( "Cannot retrieve children of nonexistent node" );
+                return;
+            }
             return this.models.object.children( nodeID );
         };
 
@@ -3138,6 +3142,11 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
         /// @see {@link module:vwf/api/kernel.descendants}
 
         this.descendants = function( nodeID ) {
+
+            if ( !nodeID ) {
+                this.logger.error( "Cannot retrieve children of nonexistent node" );
+                return;
+            }
 
             var descendants = [];
 

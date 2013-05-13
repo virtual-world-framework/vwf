@@ -302,9 +302,17 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
         // -- children -----------------------------------------------------------------------------
 
         children: function( nodeID ) {
-            return this.objects[nodeID].children.map( function( child ) {
-                return child.id;
-            } );
+            if ( !nodeID ) {
+                this.logger.error( "Cannot retrieve children of nonexistent node");
+                return;
+            }
+            var node = this.objects[ nodeID ];
+            if ( node )
+                return node.children.map( function( child ) {
+                    return child.id;
+                } );
+            else
+                this.logger.error( "Cannot find node: " + nodeID );
         },
 
         // == Special utilities ====================================================================
