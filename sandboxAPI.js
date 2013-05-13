@@ -133,6 +133,7 @@ function SessionData()
 		this.timeout = setTimeout(function()
 		{
 			//if I have no active clients, log me out
+			console.log(Object.keys(this.clients));
 			if(Object.keys(this.clients).length == 0)
 			{
 				global.sessions.splice(global.sessions.indexOf(this),1);
@@ -146,7 +147,7 @@ function SessionData()
 	}
 	this.resetTimeout = function()
 	{
-		this.setTimeout(180);
+		this.setTimeout(15);
 	}	
 }
 

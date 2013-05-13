@@ -338,7 +338,7 @@ define(function ()
 						
 						window.onbeforeunload = '';
 						$(window).unbind();
-						window.location = _DataManager.getCurrentApplication() + "/login.html?return=" + _DataManager.getCurrentSession().substr(13);
+						window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13);
 					}.bind(this)
 				});
 			
