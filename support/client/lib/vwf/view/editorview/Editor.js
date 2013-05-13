@@ -2606,6 +2606,27 @@ define(function ()
 			}
 			currentmat.needsUpdate = true;
 		}
+		this.loadMesh = function(url,type)
+		{
+			
+			if( !type)
+				type = 'model/vnd.collada+xml';
+			var Proto = 
+			{
+				extends: 'http://vwf.example.com/node3.vwf',
+				source: url,
+				type: type,
+				properties: {
+					PlayerNumber: 1,
+				}
+			};
+			
+			var newintersectxy = _Editor.GetInsertPoint();
+			Proto.properties.owner = _UserManager.GetCurrentUserName();
+			Proto.properties.translation = newintersectxy;
+			vwf_view.kernel.createChild('index-vwf', url, Proto);
+			
+		}
 		this.initialize = function ()
 		{
 			this.BuildMoveGizmo();

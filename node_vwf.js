@@ -856,14 +856,14 @@ function startVWF(){
 		app.get('/adl/sandbox/logout', landing.logout);
 		
 		app.use(OnRequest);
-		app.listen(port);
+		var listen = app.listen(port);
 		
 		global.log('Admin is "' + global.adminUID+"\"",0);
 		global.log('Serving on port ' + port,0);
 		
 		Shell.StartShellInterface();  
 		//create socket server
-		sio = sio.listen(http.createServer(app),{log:false});
+		sio = sio.listen(listen,{log:false});
 		sio.set('transports', ['websocket']);
 		sio.sockets.on('connection', WebSocketConnection);
 	});
