@@ -10,17 +10,17 @@
 	</div>
 	
 	<div style="float:left;" data-bind="visible:user().isLoggedIn">
-		<a href="create" class="coldstate" id="newinstancebutton"><img style="height: 204px;" src="icons/add.png"></a>
+		<a href="create" class="coldstate" id="newinstancebutton"><img style="height: 204px;" src="{{root}}/icons/add.png"></a>
 	</div>
 	<div id="activeInstances" style='width:800px' data-bind="foreach:worldObjects">
 	
 		<div data-bind="css:hotState()?'hotstate':'coldstate', visible:isHidden">
 			<div class="editstate">
-				<a class="editstatedata" data-bind="attr:{href:'editInstance.html?id='+id}"><img src="icons/edit.jpg"></a>
-				<a class="editstatedelete" data-bind="attr:{href:'deleteInstance.html?id='+id}"><img src="icons/delete.png"></a>
+				<a class="editstatedata" data-bind="attr:{href:'{{root}}/'+'editInstance.html?id='+id}"><img src="{{root}}/icons/edit.jpg"></a>
+				<a class="editstatedelete" data-bind="attr:{href:'{{root}}/'+'deleteInstance.html?id='+id}"><img src="{{root}}/icons/delete.png"></a>
 			</div>
 			
-			<a data-bind="attr:{href:id}">
+			<a data-bind="attr:{href:'{{root}}/'+id}">
 				<div class="title" data-bind="text:title"></div>
 				<div class="description" data-bind="text:description"></div>
 				<div class="owner" data-bind="text:owner"></div>
