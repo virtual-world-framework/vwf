@@ -49,6 +49,11 @@ file "build.js" => "build.js.erb" do |task|
 
 end
 
+
+desc "Null Tasks"
+task :full
+task :web
+
 desc "Compile."
 
 task :compile => "build.js" do |task|

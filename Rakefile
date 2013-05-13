@@ -19,7 +19,7 @@ import "support/build/utility.rake"
 
 # Delegate the standard tasks to any child projects.
 
-DELEGATED_TASKS = [ :build, :test, :clean, :clobber ]
+DELEGATED_TASKS = [ :build, :test, :clean, :clobber, :full, :web ]
 
 # Path to the standalone ruby built by support/build/Rakefile.
 
@@ -30,9 +30,16 @@ RUBY_GEM_HOME = "#{RUBY}/lib/ruby/gems/1.9.1"
 
 CLOBBER.include "bin/*", "run.bat"
 
+# Task Build That Includes Web Buildout
+task :full => [:web, :build]
+task :web
+
+# Default Task
+task :default => :full
+
 # Build by default.
 
-task :default => :build
+task :build
 
 # Delegate standard tasks to descendant Rakefiles.
     

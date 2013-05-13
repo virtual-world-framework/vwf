@@ -46,7 +46,7 @@ chmod 744 -R *
 
 # Execute Build Process
 cd ../../
-bundle exec rake build
+bundle exec rake 
 
 # Download, and Setup Ruby Thin Server Service
 bundle exec thin start

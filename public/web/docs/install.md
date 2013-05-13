@@ -85,7 +85,7 @@ Then enter these commands:
 
 	bundle install
 	
-	bundle exec rake build
+	bundle exec rake 
 	
 Ignore the warning about sudo not found for bundle install. If you get linker relocation errors, you probably need to tell Cygwin to rebaseall. See [Cygwin rebaseall](http://www.heikkitoivonen.net/blog/2008/11/26/cygwin-upgrades-and-rebaseall) for details. The required rebase and dash packages should already be installed.
 
@@ -209,7 +209,7 @@ Now you can install the RubyGems to the system (as root):
 
 *3.4 Build the Server*
 
-    # sudo bundle exec rake build
+    # sudo bundle exec rake 
 
 *3.5 Launch the Server*
 
