@@ -212,19 +212,19 @@ scripts:
       
        findcamera().fov = 70;
        findcamera().updateProjectionMatrix();
-       var ground = new THREE.Mesh(new THREE.PlaneGeometry(250,250,1,1), new THREE.MeshPhongMaterial());
+       var ground = new THREE.Mesh(new THREE.PlaneGeometry(256,256,10,10), new THREE.MeshPhongMaterial());
        ground.receiveShadow = true;
        ground.PickPriority = -1;
        
        
-       var grassTex = THREE.ImageUtils.loadTexture('textures/grid2.gif');
+       var grassTex = THREE.ImageUtils.loadTexture('textures/gridnew.png');
        
       
        ground.material.map = grassTex;
         grassTex.wrapS = THREE.RepeatWrapping;
         grassTex.wrapT = THREE.RepeatWrapping;
-        grassTex.repeat.x = 250/9;
-        grassTex.repeat.y = 250/9;
+        grassTex.repeat.x = 64;
+        grassTex.repeat.y = 64;
        grassTex.anisotropy  = _dRenderer.getMaxAnisotropy();
        this.groundplane = ground;
        

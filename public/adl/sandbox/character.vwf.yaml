@@ -98,6 +98,7 @@ scripts:
           this.skin.material.ambient.r = 1;
           this.skin.material.ambient.g = 1;
           this.skin.material.ambient.b = 1;
+          this.skin.castShadow = true;
           this.skin.isAvatar = true;
           this.jumpcounter = 0.0;
           //this.stand();

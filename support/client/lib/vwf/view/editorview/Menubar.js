@@ -130,19 +130,19 @@ define(
 		});
 		$('#MenuSnapLarge').click(function (e)
 		{
-			_Editor.SetSnaps(.60, 15 * 0.0174532925, 5);
+			_Editor.SetSnaps(1, 15 * 0.0174532925, 5);
 		});
 		$('#MenuSnapMedium').click(function (e)
 		{
-			_Editor.SetSnaps(.20, 5 * 0.0174532925, 2);
+			_Editor.SetSnaps(.5, 5 * 0.0174532925, 2);
 		});
 		$('#MenuSnapSmall').click(function (e)
 		{
-			_Editor.SetSnaps(.1, 1 * 0.0174532925, .5);
+			_Editor.SetSnaps(.25, 1 * 0.0174532925, .5);
 		});
 		$('#MenuSnapOff').click(function (e)
 		{
-			_Editor.SetSnaps(.005, .01 * 0.0174532925, .001);
+			_Editor.SetSnaps(.025, .01 * 0.0174532925, .001);
 		});
 		$('#MenuMaterialEditor').click(function (e)
 		{

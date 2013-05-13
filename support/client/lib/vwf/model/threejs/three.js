@@ -16253,7 +16253,7 @@ THREE.ShaderChunk = {
 						"vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ i ], 0.0 );",
 						"vec3 dirVector = normalize( lDirection.xyz );",
 						"float dotProduct = clamp(dot( normal, dirVector ),0.0,1.0);",
-						"if(shadowCoord.x + dx1 > 1.0 || shadowCoord.x - dx1 < 0.0 || shadowCoord.y + dy1 > 1.0 || shadowCoord.y - dy1 < 0.0)",
+						"if(shadowCoord.x + dx1 > 1.0 || shadowCoord.x - dx1 < 0.0 || shadowCoord.y + dy1 > 1.0 || shadowCoord.y - dy1 < 0.0 || shadowCoord.z > 1.0)",
 						"shadow = 0.0;",
 						"else {",
 							"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( dx0, dy0 ) ) );",
