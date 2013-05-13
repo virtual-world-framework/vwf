@@ -1,19 +1,19 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-	<link rel="stylesheet" href="css/colorpicker.css" type="text/css" />
-    <link rel="stylesheet" media="screen" type="text/css" href="css/layout.css" />
-    <link rel="stylesheet" media="screen" type="text/css" href="style.css" />
+	<link rel="stylesheet" href="{{root}}/css/colorpicker.css" type="text/css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="{{root}}/css/layout.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="{{root}}/style.css" />
 	<!--[if !IE 7]>
 	<style type="text/css">
 		#wrapper {display:table;height:100%}
 	</style>
 	<![endif]-->
     <title>Virtual World Framework</title>
-	<script type="text/javascript" src="jquery-1.7.1.js"></script>
-    <script type="text/javascript" src="jquery-ui-1.8.16.custom.js"></script>
-    <script type="text/javascript" src="knockout-2.2.1.js"></script>
-	<script type="text/javascript" src="vwf/view/editorview/sha256.js"></script>
+	<script type="text/javascript" src="{{root}}/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="{{root}}/jquery-ui-1.8.16.custom.js"></script>
+    <script type="text/javascript" src="{{root}}/knockout-2.2.1.js"></script>
+	<script type="text/javascript" src="{{root}}/vwf/view/editorview/sha256.js"></script>
 
 
     <script type="text/javascript">
@@ -146,9 +146,9 @@
 		<div id="header" style="text-align: center">
 			<div>
 				<span id="username" data-bind="text:'Logged in as: ' + user().username, visible:user().isLoggedIn"></span>
-				<a href="login?return=index"  id="login"  data-bind="visible:!user().isLoggedIn">Login</a>
-				<a href="logout?return=index" id="logout" data-bind="visible:user().isLoggedIn">Logout</a>
-				<a href="signup?return=index" id="signup" data-bind="visible:!user().isLoggedIn">Create Account</a>
+				<a href="{{root}}/login?return=index"  id="login"  data-bind="visible:!user().isLoggedIn">Login</a>
+				<a href="{{root}}/logout?return=index" id="logout" data-bind="visible:user().isLoggedIn">Logout</a>
+				<a href="{{root}}/signup?return=index" id="signup" data-bind="visible:!user().isLoggedIn">Create Account</a>
 			</div>
 		</div>	
 		<div id="content">

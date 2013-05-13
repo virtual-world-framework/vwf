@@ -1,42 +1,31 @@
-
+var root = '/adl/sandbox';
 
 exports.index = function(req, res){
 
-
-	res.locals = { 'test' : 'Hey now.'};
+	res.locals = { 'test' : 'Hey now.', root: root};
 	res.render('index');
-
-	console.log("Test!!");
 }
 exports.create = function(req, res){
 
 
-	res.locals = { 'test' : 'Hey now.'};
+	res.locals = { 'test' : 'Hey now.', root: root};
 	res.render('create');
-
-	console.log("Test!!");
 }
 exports.signup = function(req, res){
 
 
-	res.locals = { 'test' : 'Hey now.'};
+	res.locals = { 'test' : 'Hey now.', root: root};
 	res.render('signup');
-
-	console.log("Test!!");
 }
 exports.login = function(req, res){
 
 
-	res.locals = { 'test' : 'Hey now.'};
+	res.locals = { 'test' : 'Hey now.', root: root};
 	res.render('login');
-
-	console.log("Test!!");
 }
 exports.logout = function(req, res){
 
 
-	res.locals = { 'test' : 'Hey now.'};
+	res.locals = { 'test' : 'Hey now.', root: root};
 	res.render('logout');
-
-	console.log("Test!!");
 }

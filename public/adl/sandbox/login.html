@@ -41,7 +41,7 @@
 			var username = $('#txtusername').val();
 			var password = $('#txtpassword').val();
 			
-			var salt = $.ajax('vwfDataManager.svc/salt?UID='+ username,{async:false}).responseText;
+			var salt = $.ajax('/vwfDataManager.svc/salt?UID='+ username,{async:false}).responseText;
 			
 			password = EncryptPassword(password,username,$.trim(salt));
 			
