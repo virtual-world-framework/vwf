@@ -1440,7 +1440,7 @@
 
                 // Load the UI chrome if available.
 
-                if ( nodeURI && ! nodeURI.match( /^data:/ ) ) {  // TODO: normalizedComponent() on component["extends"] and use component.extends || component.source?
+                if ( nodeURI && ! nodeURI.match( /^data:/ ) ) {  // TODO: normalizedComponent() on component.extends and use component.extends || component.source?
 if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  // TODO: any better way to only attempt to load chrome for the main application and not the prototypes?
                     jQuery("body").append( "<div />" ).children( ":last" ).load( remappedURI( nodeURI ) + ".html", function() {  // TODO: move to vwf/view/document#initializedNode; don't reach out to the window from the kernel; connect through a future vwf.initialize callback.
                         $('#loadstatus').remove(); // remove 'loading' overlay
@@ -1580,7 +1580,10 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                 // perform any immediate actions and retain any callbacks as appropriate for the
                 // script type.
 
-                nodeComponent.scripts && nodeComponent.scripts.forEach( function( script ) {
+                var scripts = nodeComponent.scripts ?
+                    [].concat( nodeComponent.scripts ) : []; // accept either an array or a single item
+
+                scripts.forEach( function( script ) {
                     if ( valueHasType( script ) ) {
                         script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
                     } else {
@@ -1872,7 +1875,7 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                 childIndex = childURI;
             } else {  // descendant: parent id + next from parent's sequence
 if ( useLegacyID ) {  // TODO: fix static ID references and remove
-    childID = ( childComponent["extends"] || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
+    childID = ( childComponent.extends || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
     childIndex = this.children( nodeID ).length;
 } else {    
@@ -1965,8 +1968,8 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
 
                             // Create or find the prototype and save the ID in childPrototypeID.
 
-                            if ( childComponent["extends"] !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
-                                vwf.createNode( childComponent["extends"] || nodeTypeURI, function( prototypeID ) /* async */ {
+                            if ( childComponent.extends !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
+                                vwf.createNode( childComponent.extends || nodeTypeURI, function( prototypeID ) /* async */ {
                                     childPrototypeID = prototypeID;
 
 // TODO: the GLGE driver doesn't handle source/type or properties in prototypes properly; as a work-around pull those up into the component when not already defined
@@ -1998,7 +2001,10 @@ if ( ! childComponent.source ) {
 
                             // Create or find the behaviors and save the IDs in childBehaviorIDs.
 
-                            async.map( childComponent["implements"] || [], function( behaviorComponent, map_callback_async /* ( err, result ) */ ) {
+                            var behaviorComponents = childComponent.implements ?
+                                [].concat( childComponent.implements ) : []; // accept either an array or a single item
+
+                            async.map( behaviorComponents, function( behaviorComponent, map_callback_async /* ( err, result ) */ ) {
                                 vwf.createNode( behaviorComponent, function( behaviorID ) /* async */ {
                                     map_callback_async( undefined, behaviorID );
                                 } );
@@ -2207,7 +2213,10 @@ if ( ! childComponent.source ) {
                         // perform any immediate actions and retain any callbacks as appropriate for the
                         // script type.
 
-                        childComponent.scripts && childComponent.scripts.forEach( function( script ) {
+                        var scripts = childComponent.scripts ?
+                            [].concat( childComponent.scripts ) : []; // accept either an array or a single item
+
+                        scripts.forEach( function( script ) {
                             if ( valueHasType( script ) ) {
                                 script.text && vwf.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
                             } else {
@@ -4007,8 +4016,16 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                 } else if ( containerName == "implements" ) {
 
                     if ( containerIndex > 0 ) {
-                        var memberIndex = containerIndex - 1;
-                        var memberName = names[memberIndex];
+                        if ( typeof names[containerIndex-1] == "number" ) {
+                            var memberIndex = containerIndex - 1;
+                            var memberName = names[memberIndex];
+                        } else {
+                            var memberIndex = containerIndex;
+                            var memberName = undefined;
+                        }
+                    } else if ( typeof object != "object" || ! ( object instanceof Array ) ) {
+                        var memberIndex = containerIndex;
+                        var memberName = undefined;
                     }
 
                 } else if ( containerName == "properties" || containerName == "methods" || containerName == "events" ||
@@ -4022,8 +4039,16 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                 } else if ( containerName == "scripts" ) {
 
                     if ( containerIndex > 0 ) {
-                        var memberIndex = containerIndex - 1;
-                        var memberName = names[memberIndex];
+                        if ( typeof names[containerIndex-1] == "number" ) {
+                            var memberIndex = containerIndex - 1;
+                            var memberName = names[memberIndex];
+                        } else {
+                            var memberIndex = containerIndex;
+                            var memberName = undefined;
+                        }
+                    } else if ( typeof object != "object" || ! ( object instanceof Array ) ) {
+                        var memberIndex = containerIndex;
+                        var memberName = undefined;
                     }
 
                 } else {
@@ -4053,7 +4078,7 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                     // Omit component descriptors for the behaviors.
 
-                    if ( memberIndex == 1 && componentIsDescriptor( object ) ) {
+                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
                         return {};
                     }
 

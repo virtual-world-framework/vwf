@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="../lib/async.js"></script>
+
+    <script type="text/javascript" src="../lib/crypto.js"></script>
+    <script type="text/javascript" src="../lib/md5.js"></script>
+
+    <script type="text/javascript" src="../lib/alea.js"></script>
+    <script type="text/javascript" src="../lib/mash.js"></script>
+
+    <script type="text/javascript" src="../lib/vwf.js"></script>
+
+    <script type="text/javascript" src="../lib/require.js"></script>
+
+    <script type="text/javascript">
+
+      require( {
+
+        baseUrl: "../lib"
+
+      }, [
+
+        "domReady",
+        "utility.js",
+
+        // This is the common model implementation and an example model that connects the
+        // simulation to a WebGL scene manager.
+
+        "vwf/configuration",
+        "vwf/kernel/model",
+        "vwf/model/javascript",
+        "vwf/model/object",
+        "vwf/model/stage/log",
+        "vwf/kernel/view",
+        "vwf/utility",
+        "logger",
+
+      ], function( ready, testUtility ) {
+
+        ready( function() {
+
+          vwf.initialize(
+            /* models */ [ "vwf/model/javascript", "vwf/model/object" ],
+            /*  views */ [ ]
+          );
+
+          asyncTest( "Single script as string", function() {
+
+              vwf.createChild( 0, testUtility.uniqueName( "node" ), {
+                  scripts: "this.tag = this.id"
+              }, undefined, function( nodeID ) {
+                  equal( vwf.execute( nodeID, "this.tag" ), nodeID, "script as string created" );
+                  vwf.deleteNode( nodeID );
+                  start();
+              } );
+
+          } );
+
+          asyncTest( "Single script with explicit text property", function() {
+
+              vwf.createChild( 0, testUtility.uniqueName( "node" ), {
+                  scripts: { text: "this.tag = this.id" }
+              }, undefined, function( nodeID ) {
+                  equal( vwf.execute( nodeID, "this.tag" ), nodeID, "script with explicit text property created" );
+                  vwf.deleteNode( nodeID );
+                  start();
+              } );
+
+          } );
+
+          asyncTest( "Array with script as string", function() {
+
+              vwf.createChild( 0, testUtility.uniqueName( "node" ), {
+                  scripts: [ "this.tag = this.id" ]
+              }, undefined, function( nodeID ) {
+                  equal( vwf.execute( nodeID, "this.tag" ), nodeID, "script as string created" );
+                  vwf.deleteNode( nodeID );
+                  start();
+              } );
+
+          } );
+
+          asyncTest( "Array with script with explicit text property", function() {
+
+              vwf.createChild( 0, testUtility.uniqueName( "node" ), {
+                  scripts: [ { text: "this.tag = this.id" } ]
+              }, undefined, function( nodeID ) {
+                  equal( vwf.execute( nodeID, "this.tag" ), nodeID, "script with explicit text property created" );
+                  vwf.deleteNode( nodeID );
+                  start();
+              } );
+
+          } );
+
+        } );
+
+      } );
+
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="qunit.css" />
+
+  </head>
+
+  <body>
+
+    <h1 id="qunit-header">Virtual World Framework</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture">test markup, will be hidden</div>
+
+  </body>
+
+</html>

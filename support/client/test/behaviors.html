@@ -226,6 +226,75 @@
 
           } );
 
+          asyncTest( "Behavior as single URI", function() {
+
+            var uri = testUtility.dataURIFromDescriptor( { properties: { property: "uri" } } );
+
+            vwf.createChild( 0, testUtility.uniqueName( "node" ), {
+
+              implements: uri
+
+            }, undefined, function( nodeID ) {
+
+              var behaviorIDs = vwf.behaviors( nodeID );
+              equal( behaviorIDs.length, 1, "one behavior created from lone specifier" );
+              equal( vwf.getProperty( behaviorIDs[0], "property" ), "uri", "specifier recognized as URI behavior" );
+
+              vwf.deleteNode( nodeID );
+              vwf.deleteNode( behaviorIDs[0] );
+
+              start();
+            } );
+
+          } );
+
+          asyncTest( "Behavior as single descriptor", function() {
+
+            var descriptor = { properties: { property: "descriptor" } };
+
+            vwf.createChild( 0, testUtility.uniqueName( "node" ), {
+
+              implements: descriptor
+
+            }, undefined, function( nodeID ) {
+
+              var behaviorIDs = vwf.behaviors( nodeID );
+              equal( behaviorIDs.length, 1, "one behavior created from lone specifier" );
+              equal( vwf.getProperty( behaviorIDs[0], "property" ), "descriptor", "specifier recognized as descriptor behavior" );
+
+              vwf.deleteNode( nodeID );
+              vwf.deleteNode( behaviorIDs[0] );
+
+              start();
+            } );
+
+          } );
+
+          asyncTest( "Multiple behaviors as array of URI and descriptor", function() {
+
+            var uri = testUtility.dataURIFromDescriptor( { properties: { property: "uri" } } );
+            var descriptor = { properties: { property: "descriptor" } };
+
+            vwf.createChild( 0, testUtility.uniqueName( "node" ), {
+
+              implements: [ uri, descriptor ]
+
+            }, undefined, function( nodeID ) {
+
+              var behaviorIDs = vwf.behaviors( nodeID );
+              equal( behaviorIDs.length, 2, "multiple behaviors created from array of specifiers" );
+              equal( vwf.getProperty( behaviorIDs[0], "property" ), "uri", "first specifier recognized as URI behavior" );
+              equal( vwf.getProperty( behaviorIDs[1], "property" ), "descriptor", "second specifier recognized as descriptor behavior" );
+
+              vwf.deleteNode( nodeID );
+              vwf.deleteNode( behaviorIDs[0] );
+              vwf.deleteNode( behaviorIDs[1] );
+
+              start();
+            } );
+
+          } );
+
           // == Helper functions =====================================================================
 
           // Create nodes in this arrangement:
