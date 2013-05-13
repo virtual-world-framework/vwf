@@ -396,6 +396,79 @@ function deleteInventoryItem(URL,response)
 		respond(response,200,'ok');
 	});
 }
+
+function getGlobalInventory(URL,response)
+{
+	DAL.getInventoryDisplayData('___Global___',function(inventory)
+	{
+		ServeJSON(inventory,response,URL);
+	});
+}
+
+function getGlobalInventoryItemAssetData(URL,response)
+{	
+	if(!URL.query.AID)
+	{
+		respond(response,500,'no AID in query string');
+		return;
+	}
+	DAL.getInventoryItemAssetData('___Global___',URL.query.AID,function(item)
+	{
+		ServeJSON(item,response,URL);
+	});
+}
+
+function getGlobalInventoryItemMetaData(URL,response)
+{	
+	if(!URL.query.AID)
+	{
+		respond(response,500,'no AID in query string');
+		return;
+	}
+	DAL.getInventoryItemMetaData('___Global___',URL.query.AID,function(item)
+	{
+		ServeJSON(item,response,URL);
+	});
+}
+function addGlobalInventoryItem(URL,data,response)
+{
+	if(!URL.loginData)
+	{
+		respond(response,401,'no login data');
+		return;
+	}
+	DAL.addToInventory('___Global___',{uploader:URL.loginData.UID,title:URL.query.title,uploaded:new Date(),description:'',type:URL.query.type},data,function(id)
+	{
+		respond(response,200,id);
+	});
+}
+function deleteGlobalInventoryItem(URL,response)
+{
+	if(!URL.loginData)
+	{
+		respond(response,401,'no login data');
+		return;
+	}
+	if(!URL.query.AID)
+	{
+		respond(response,500,'no AID in query string');
+		return;
+	}
+	DAL.getInventoryItemMetaData('___Global___',URL.query.AID,function(item)
+	{
+		if(item.uploader == URL.loginData.UID)
+		{
+			DAL.deleteInventoryItem('___Global___',URL.query.AID,function()
+			{
+				respond(response,200,'ok');
+			});
+		}else
+		{
+			respond(response,401,'you are not the asset owner');
+		}
+	});
+}
+
 function ServeJSON(jsonobject,response,URL)
 {
 		    
@@ -1097,21 +1170,13 @@ function serve (request, response)
 					
 			} break;
 			case "globalassets":{
-				fs.readdir(basedir+"GlobalAssets\\",function(err,files){
-					RecurseDirs(basedir+"GlobalAssets\\", "",files);
-					files.sort(function(a,b){
-					   if(typeof a == "string" && typeof b == "string") return (a<b ? -1 : 1);
-					   if(typeof a == "object" && typeof b == "string") return  1;
-					   if(typeof a == "string" && typeof b == "object") return  -1;
-					   return -1;
-					});
-					var o = JSON.stringify({root:files}).replace(/\\\\/g,"\\");
-					ServeJSON(o,response,URL);
-				});
-					
+				getGlobalInventory(URL,response);
 			} break;
-			case "globalasset":{
-				ServeFile(basedir+"GlobalAssets\\" + URL.query.AID,response,URL);		
+			case "globalassetassetdata":{
+				getGlobalInventoryItemAssetData(URL,response);
+			} break;
+			case "globalassetmetadata":{
+				getGlobalInventoryItemMetaData(URL,response);
 			} break;
 			default:
 			{
@@ -1153,7 +1218,7 @@ function serve (request, response)
 				setStateData(URL,body,response);
 			}break;
 			case "globalasset":{
-				SaveAsset(URL, basedir+"GlobalAssets\\"+URL.query.AID,body,response);
+				addGlobalInventoryItem(URL,body,response);
 			}break;
 			case "profile":{
 				SaveProfile(URL,body,response);
@@ -1188,7 +1253,7 @@ function serve (request, response)
 				deleteInventoryItem(URL,response);
 			} break;
 			case "globalasset":{
-				DeleteAsset(URL, basedir+"GlobalAssets\\"+URL.query.AID,response);
+				 deleteGlobalInventoryItem(URL,response);
 			}break;
 			case "profile":{
 				DeleteProfile(URL, basedir+"profiles\\"+UID,response);

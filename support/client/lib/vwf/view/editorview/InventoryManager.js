@@ -115,7 +115,10 @@ define(function ()
 		$('#InventoryManagerCreate').click(this.createInventoryItem);
 		this.deleteInventoryItem = function(id,cb)
 		{
-			$.ajax('/vwfDataManager.svc/inventoryitem?AID=' + id,{
+			var URL = '/vwfDataManager.svc/inventoryitem?AID=';
+			if(this.global)
+				URL = '/vwfDataManager.svc/globalasset?AID='
+			$.ajax(URL + id,{
 				
 				type:'DELETE',
 				success:function(err,d,xhr)
@@ -134,7 +137,12 @@ define(function ()
 		$('#InventoryManagerDelete').click(this.deleteSelectedItem);
 		this.getInventoryItemAssetData = function(id,cb)
 		{
-			$.ajax('/vwfDataManager.svc/inventoryitemassetdata?AID=' + id,{
+		
+			var URL = '/vwfDataManager.svc/inventoryitemassetdata?AID=';
+			if(this.global)
+				URL = '/vwfDataManager.svc/globalassetassetdata?AID='
+		
+			$.ajax(URL + id,{
 				type:'GET',
 				success:function(err,d,xhr)
 				{
@@ -261,6 +269,20 @@ define(function ()
 			});
 		
 		}
+		this.addGlobalInventoryItem = function(data,title,type,cb)
+		{
+			$.ajax('/vwfDataManager.svc/globalasset?title=' + title +'&type=' + type,{
+				
+				type:'POST',
+				success:function(err,d,xhr)
+				{
+					cb($.trim(xhr.responseText));
+				},
+				data:JSON.stringify(data),
+				dateType:'text'
+			});
+		
+		}
 		this.Take = function (id)
 		{
 			if (!id) id = _Editor.GetSelectedVWFNode().id
@@ -270,6 +292,22 @@ define(function ()
 			if(t.properties && t.properties.type)
 			type = t.properties.type
 			this.addInventoryItem(t, title, type,function(key)
+			{
+				_InventoryManager.NoAnimateRedraw(function()
+				{
+					_InventoryManager.selectKey(key);
+				});
+			});
+		}
+		this.Publish = function (id)
+		{
+			if (!id) id = _Editor.GetSelectedVWFNode().id
+			var t = _DataManager.getCleanNodePrototype(id);
+			var title = t.properties.DisplayName || GUID();
+			var type = 'object';
+			if(t.properties && t.properties.type)
+			type = t.properties.type
+			this.addGlobalInventoryItem(t, title, type,function(key)
 			{
 				_InventoryManager.NoAnimateRedraw(function()
 				{
@@ -288,9 +326,11 @@ define(function ()
 		}
 		this.getInventory = function(cb)
 		{
-			
+			var URL = '/vwfDataManager.svc/inventory';
+			if(this.global)
+				URL = '/vwfDataManager.svc/globalassets'
 			var inventory = null;
-			$.ajax('/vwfDataManager.svc/inventory',{
+			$.ajax(URL,{
 				
 				type:'GET',
 				success:function(err,d,xhr)

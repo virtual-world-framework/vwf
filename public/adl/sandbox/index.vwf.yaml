@@ -763,6 +763,11 @@ scripts:
         if(this.objectFollowed != null)    
             this.targetUpdated(this.objectFollowed);
         
+        if(this.cameramode == 'None')
+        {
+            return;
+        }
+        
         if(this.cameramode != '3RDPerson' && this.cameramode != 'FirstPerson')
         {
             if(this.x_rot == undefined) return;
