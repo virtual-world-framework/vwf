@@ -77,6 +77,18 @@
 
           } );
 
+          asyncTest( "Single script from URI", function() {
+
+              vwf.createChild( 0, testUtility.uniqueName( "node" ), {
+                  scripts: { source: testUtility.dataURIFromScriptText( "this.tag = this.id" ) }
+              }, undefined, function( nodeID ) {
+                  equal( vwf.execute( nodeID, "this.tag" ), nodeID, "script from URI created" );
+                  vwf.deleteNode( nodeID );
+                  start();
+              } );
+
+          } );
+
           asyncTest( "Array with script as string", function() {
 
               vwf.createChild( 0, testUtility.uniqueName( "node" ), {
@@ -95,6 +107,18 @@
                   scripts: [ { text: "this.tag = this.id" } ]
               }, undefined, function( nodeID ) {
                   equal( vwf.execute( nodeID, "this.tag" ), nodeID, "script with explicit text property created" );
+                  vwf.deleteNode( nodeID );
+                  start();
+              } );
+
+          } );
+
+          asyncTest( "Array with script from URI", function() {
+
+              vwf.createChild( 0, testUtility.uniqueName( "node" ), {
+                  scripts: [ { source: testUtility.dataURIFromScriptText( "this.tag = this.id" ) } ]
+              }, undefined, function( nodeID ) {
+                  equal( vwf.execute( nodeID, "this.tag" ), nodeID, "script from URI created" );
                   vwf.deleteNode( nodeID );
                   start();
               } );

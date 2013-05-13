@@ -1597,16 +1597,33 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                     async.map( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
 
                         if ( valueHasType( script ) ) {
-                            map_callback_async( undefined, { text: script.text, type: script.type } );
+                            if ( script.source ) {
+                                loadScript( script.source, function( scriptText ) /* async */ {  // TODO: this load would be better left to the driver, which may want to ignore it in certain cases, but that would require a completion callback from kernel.execute()
+                                    map_callback_async( undefined, { text: scriptText, type: script.type } );
+                                } );
+                            } else {
+                                map_callback_async( undefined, { text: script.text, type: script.type } );
+                            }
                         } else {
                             map_callback_async( undefined, { text: script, type: undefined } );
                         }
 
                     }, function( err, scripts ) /* async */ {
 
+                        // Suppress kernel reentry so that initialization functions don't make any
+                        // changes during replication.
+
+                        vwf.models.kernel.disable();
+
+                        // Create each script.
+
                         scripts.forEach( function( script ) {
-                            script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                            vwf.execute( nodeID, script.text, script.type ); // TODO: callback
                         } );
+
+                        // Restore kernel reentry.
+
+                        vwf.models.kernel.enable();
 
                         series_callback_async( err, undefined );
                     } );
@@ -2233,7 +2250,13 @@ if ( ! childComponent.source ) {
                     async.map( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
 
                         if ( valueHasType( script ) ) {
-                            map_callback_async( undefined, { text: script.text, type: script.type } );
+                            if ( script.source ) {
+                                loadScript( script.source, function( scriptText ) /* async */ {  // TODO: this load would be better left to the driver, which may want to ignore it in certain cases, but that would require a completion callback from kernel.execute()
+                                    map_callback_async( undefined, { text: scriptText, type: script.type } );
+                                } );
+                            } else {
+                                map_callback_async( undefined, { text: script.text, type: script.type } );
+                            }
                         } else {
                             map_callback_async( undefined, { text: script, type: undefined } );
                         }
@@ -2253,7 +2276,7 @@ if ( ! childComponent.source ) {
                             // Create each script.
 
                             scripts.forEach( function( script ) {
-                                script.text && vwf.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                                vwf.execute( childID, script.text, script.type ); // TODO: callback
                             } );
 
                             // Restore kernel reentry.
@@ -3435,7 +3458,8 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
             } else if ( nodeURI.match( RegExp( "^data:application/json;base64," ) ) ) {
 
                 // Primarly for testing, parse one specific form of data URIs. We need to parse
-                // these ourselves since Chrome can't load data URIs (with a cross origin error).
+                // these ourselves since Chrome can't load data URIs due to cross origin
+                // restrictions.
 
                 callback_async( JSON.parse( atob( nodeURI.substring( 29 ) ) ) );  // TODO: support all data URIs
 
@@ -3457,6 +3481,33 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                     // },
 
                 } );
+
+            }
+
+        };
+
+        // -- loadScript ---------------------------------------------------------------------------
+
+        /// @name module:vwf~loadScript
+
+        var loadScript = function( scriptURI, callback_async /* ( scriptText ) */ ) {
+
+            if ( scriptURI.match( RegExp( "^data:application/javascript;base64," ) ) ) {
+
+                // Primarly for testing, parse one specific form of data URIs. We need to parse
+                // these ourselves since Chrome can't load data URIs due to cross origin
+                // restrictions.
+
+                callback_async( atob( scriptURI.substring( 35 ) ) );  // TODO: support all data URIs
+
+            } else {
+
+                queue.suspend( "while loading " + scriptURI ); // suspend the queue
+
+                jQuery.get( remappedURI( scriptURI ), function( scriptText ) /* async */ {
+                    callback_async( scriptText );
+                    queue.resume( "after loading " + scriptURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                }, "text" );
 
             }
 
@@ -3776,6 +3827,7 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
         var valueHasType = function( candidate ) {  // TODO: refactor and share with valueHasBody, valueHasAccessors and possibly objectIsComponent
 
             var typeAttributes = [
+                "source",
                 "text",
                 "type",
             ];
