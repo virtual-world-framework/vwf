@@ -602,6 +602,26 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         value = propertyValue;
                     }
+
+                    if(propertyName == "animationTimeUpdated") {
+                        if(node.threeObject.animatedMesh && propertyValue !== undefined) {
+                            for(var i = 0; i < node.threeObject.animatedMesh.length; i++) {
+                                for(var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++) {
+                                    node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
+                                }
+                                node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * 30) ] = 1;
+                            }
+                        }
+                        else if(node.threeObject.kfAnimations && propertyValue !== undefined) {
+                            // The update in THREE.KeyFrameAnimation takes a delta time, so reset the animation to the beginning, 
+                            // and pass the current VWF animation time
+                           for(var i = 0; i < node.threeObject.kfAnimations.length; i++) {
+                                node.threeObject.kfAnimations[i].stop()
+                                node.threeObject.kfAnimations[i].play(false, 0);
+                                node.threeObject.kfAnimations[i].update(propertyValue);
+                            } 
+                        }
+                    }
                 }
                 if(threeObject instanceof THREE.ParticleSystem)
                 {
@@ -1735,6 +1755,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             sceneNode.pendingLoads--;
             var removed = false;
             
+            var animations, animatedMesh;
+            if(asset.animations && asset.animations.length > 0) {
+                animations = asset.animations;
+            }
+            if(asset.skins && asset.skins.length > 0) {
+                animatedMesh = asset.skins;
+            }
+
             //possibly deal with setting intial scale and rotation here, if threejs does something strange by default
             //collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
             if(asset.scene)
@@ -1745,6 +1773,39 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             asset.name = childName;
             asset.vwfID = nodeID;
             asset.matrixAutoUpdate = false;
+            if(animations) {
+                var animHandler = THREE.AnimationHandler;
+                asset.kfAnimations = [];
+                asset.animations = animations;
+                // Initialize the key frame animations
+                for(var i = 0; i < animations.length; i++) {
+                    var animation = animations[i];
+                    animHandler.add(animation);
+                    var kfAnimation = new THREE.KeyFrameAnimation(animation.node, animation.name);
+                    kfAnimation.timeScale = 1;
+                    asset.kfAnimations.push(kfAnimation);
+                    for(var h = 0; h < kfAnimation.hierarchy.length; h++) {
+                        var keys = kfAnimation.data.hierarchy[h].keys;
+                        var sids = kfAnimation.data.hierarchy[h].sids;
+                        var obj = kfAnimation.hierarchy[h];
+
+                        if(keys.length && sids) {
+                            for(var s = 0; s < sids.length; s++) {
+                                var sid = sids[s];
+                                var next = kfAnimation.getNextKeyWith(sid, h, 0);
+                                if(next) next.apply(sid);
+                            }
+                            obj.matrixAutoUpdate = false;
+                            kfAnimation.data.hierarchy[h].node.updateMatrix();
+                            obj.matrixWorldNeedsUpdate = true;
+                        }
+                    }
+                    kfAnimation.play(false, 0);
+                }
+            }
+            if(animatedMesh) {
+                asset.animatedMesh = animatedMesh;
+            }
             
             // remember that this was a loaded collada file
             asset.loadedColladaNode = true;
