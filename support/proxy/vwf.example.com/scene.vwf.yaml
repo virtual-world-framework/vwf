@@ -207,9 +207,11 @@ scripts:
     this.findByID = function( node, id ) {
       var idNode = undefined;
       //console.info( "findByID( "+node.id+", "+id+" )" );
-      if ( node.id == id ) return node;
-      for ( var i = 0; i < node.children.length && idNode === undefined; i++ ) {
-        idNode = this.findByID( node.children[i], id );
+      if ( node ) {
+        if ( node.id == id ) return node;
+        for ( var i = 0; i < node.children.length && idNode === undefined; i++ ) {
+          idNode = this.findByID( node.children[i], id );
+        }
       }
       return idNode;
     }  
