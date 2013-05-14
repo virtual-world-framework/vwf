@@ -1482,7 +1482,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     function getSceneProperty( nodeID, propertyName, propertyValue ) {
 
-        var color = undefined;
+        var color = undefined, tempClr;
         var sceneNode = this.state.scenes[nodeID] // { name: childName, glgeObject: undefined }
         var value = undefined;
         switch ( propertyName ) {
@@ -1497,8 +1497,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 break;
 
             case "backgroundColor":
-                color = vwfColor.call( this, sceneNode.glgeScene.getBackgroundColor() );
-                value = color.toString();
+                tempClr = sceneNode.glgeScene.getBackgroundColor();
+                if ( tempClr ) {
+                    if ( tempClr.r && isNaN( tempClr.r ) ) tempClr.r = 0;
+                    if ( tempClr.g && isNaN( tempClr.g ) ) tempClr.g = 0;
+                    if ( tempClr.b && isNaN( tempClr.b ) ) tempClr.b = 0;
+                    if ( tempClr.a && isNaN( tempClr.a ) ) tempClr.a = 0;
+                    color = vwfColor.call( this, tempClr );
+                    value = color.toString();
+                }
                 break;
             
             default:
