@@ -2,6 +2,7 @@
 extends: http://vwf.example.com/navtouch.vwf
 properties: 
   navmode: orbit
+  ambientColor: [200, 200, 200]
 children:
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
