@@ -24,6 +24,7 @@ properties:
       }
     value: "walk"
   orbitPoint: [ 0, 0, 0 ]
+  lookAt:
   far:
     set: |
       if ( value > 0 && value > this.near ) {

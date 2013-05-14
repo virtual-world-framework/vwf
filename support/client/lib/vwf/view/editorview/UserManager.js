@@ -106,8 +106,10 @@ define(function ()
 					}.bind(this),
 					error:function(xhr,status,err)
 					{
-						_Notifier.alert('You are viewing this world as a guest. Please sign in to participate');
 						
+						hideTools();
+						$('#NotifierAlertMessage').dialog('open');
+						$('#NotifierAlertMessage').html('You are viewing this world as a guest. Please <a style="color:blue" href="'+_DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13)+'">sign in</a> to participate');
 					}.bind(this)
 				});
 			
@@ -322,7 +324,7 @@ define(function ()
 					{
 						var logindata = JSON.parse(xhr.responseText);
 						var username = logindata.username;
-						debugger;
+						
 						if(logindata.instances.indexOf(window.location.pathname) != -1)
 						{
 							_Notifier.alert('You are already logged into this space from another tab, browser or computer. This session will be a guest.');

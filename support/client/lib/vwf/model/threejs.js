@@ -578,7 +578,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 									thisPosition.getPositionFromMatrix(thisMatrix);
 									
 									
-									threeObject.matrix.lookAt(thisPosition,lookatPosition,up);
+									threeObject.matrix.lookAt(thisPosition,lookatPosition,new THREE.Vector3(0,0,1));
 									
 									threeObject.updateMatrixWorld(true); 
 															
@@ -586,22 +586,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         
                         }else if (propertyValue instanceof Array)
                         {
+								
                                 var lookatPosition = new THREE.Vector3();
-                                var thisPosition = new THREE.Vector3();
-                                var up = new THREE.Vector();
-                                up.set(0,0,1);
-                                lookatPosition.set(propertyValue[0],propertyValue[1],propertyValue[2]);
-                                thisPosition.getPositionFromMatrix(threeObject.matrix);
-                                threeObject.matrix.lookAt(thisPosition,lookatPosition,up);
-                                var flipmat = new THREE.Matrix4(-1, 0,0,0,
-                                                            0, 1,0,0,
-                                                            0,0,1,0,
-                                                            0, 0,0,1);
-                                var matrix = new THREE.Matrix4();
-                                matrix.copy(threeObject.matrix);                        
-                                matrix = matrix.multiply(flipmat,matrix);
-                                threeObject.matrix.copy(matrix);
-                                threeObject.updateMatrixWorld(true);    
+									var thisPosition = new THREE.Vector3();
+									var thisMatrix = new THREE.Matrix4();
+									thisMatrix.elements = matCpy(threeObject.matrix.elements);
+									
+									
+									lookatPosition.set(propertyValue[0],propertyValue[1],propertyValue[2]);
+									thisPosition.getPositionFromMatrix(thisMatrix);
+									
+									
+									threeObject.matrix.lookAt(thisPosition,lookatPosition,new THREE.Vector3(0,0,1));
+									
+									threeObject.updateMatrixWorld(true); 
                         }
                     
                     }
