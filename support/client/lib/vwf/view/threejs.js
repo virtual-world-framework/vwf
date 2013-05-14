@@ -56,17 +56,23 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             //the created node is a scene, and has already been added to the state by the model.
             //how/when does the model set the state object? 
             if(this.state.scenes[childID])
-            {
-                var threeview = this;
-                var domWin = window;
-                
-                
+            {                
                 this.canvasQuery = jQuery(this.rootSelector).append("<canvas id='" + this.state.sceneRootID + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
                 ).children(":last");
                 
                 initScene.call(this,this.state.scenes[childID]);
             }
         },
+
+        initializedNode: function( nodeID, childID ) {
+
+            // If the node that was initialized is the application node, find the user's navigation object
+            var sceneView = this;
+            var appID = sceneView.kernel.application();
+            this.logger.warn( "Initialized node: " + childID );
+            if ( childID == appID )
+                findNavObject.call( sceneView );
+        }
  
  
         // -- deletedNode ------------------------------------------------------------------------------
@@ -102,25 +108,25 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     
     } );
     // private ===============================================================================
-        function checkCompatibility() {
-            this.compatibilityStatus = { compatible:true, errors:{} }
-            var contextNames = ["webgl","experimental-webgl","moz-webgl","webkit-3d"];
-            for(var i = 0; i < contextNames.length; i++){
-                try{
-                    var canvas = document.createElement('canvas');
-                    var gl = canvas.getContext(contextNames[i]);
-                    if(gl){
-                        return true;
-                    }
+    function checkCompatibility() {
+        this.compatibilityStatus = { compatible:true, errors:{} }
+        var contextNames = ["webgl","experimental-webgl","moz-webgl","webkit-3d"];
+        for(var i = 0; i < contextNames.length; i++){
+            try{
+                var canvas = document.createElement('canvas');
+                var gl = canvas.getContext(contextNames[i]);
+                if(gl){
+                    return true;
                 }
-                catch(e){}
             }
-            this.compatibilityStatus.compatible = false;
-            this.compatibilityStatus.errors["WGL"] = "This browser is not compatible. The vwf/view/threejs driver requires WebGL.";
-            return false;
+            catch(e){}
         }
+        this.compatibilityStatus.compatible = false;
+        this.compatibilityStatus.errors["WGL"] = "This browser is not compatible. The vwf/view/threejs driver requires WebGL.";
+        return false;
+    }
 
-        function initScene( sceneNode ) {
+    function initScene( sceneNode ) {
     
         var self = this;
         var lastPickTime = 0;
@@ -287,7 +293,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             rebuildAllMaterials.call(this);
             if(sceneNode.renderer.setFaceCulling)
                 sceneNode.renderer.setFaceCulling( THREE.CullFaceBack );
-            this.state.cameraInUse = sceneNode.threeScene.children[1];
+
+            // I'm commenting this out so that we can let the view choose which camera to use, rather than
+            // forcing it to use the model-specified one - Eric (5/8/13)
+            // this.state.cameraInUse = sceneNode.threeScene.children[1];
 
             // Schedule the renderer.
             var scene = sceneNode.threeScene;
@@ -303,6 +312,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
             renderScene((+new Date));
         }
+
+        // If scene is already loaded, find the user's navigation object
+        var sceneView = this;
+        var appID = sceneView.kernel.kernel.application( true );
+        if ( appID )
+            findNavObject.call( sceneView );
     }
     function rebuildAllMaterials(start)
     {
@@ -1403,6 +1418,89 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 break;
         }
         return key;
+    }
+
+    var navObject = undefined;
+
+    function controlNavObject( node ) {
+        
+        var sceneView = this;
+
+        // Delete the viewTransform from the old navigation object that doesn't need it anymore
+        if ( navObject )
+            delete navObject.viewTransform;
+
+        // Set the new navigation object and create a viewTransform property on it that is a copy of its
+        // transform property (in its model)
+        navObject = node;
+        navObject.viewTransform = matCpy( navObject.threeObject.matrix.elements );
+        
+        // Search for a camera in the navigation object and if it exists, make it active
+        var cameraIds = sceneView.kernel.find( navObject.ID, 
+                                               "descendant-or-self::element(*,'http://vwf.example.com/camera.vwf')" );
+        if ( cameraIds.length ) {
+
+            // TODO: Make this work - it isn't now.
+
+            // Save a reference to the active camera
+            var rendererState = sceneView.state;
+            var cameraId = cameraIds[ 0 ];
+            rendererState.cameraInUse = rendererState.nodes[ cameraId ].threeObject;
+
+            // Set the active camera
+            var applicationId = vwf_view.kernel.application();
+            var sceneNode = rendererState.scenes[ applicationId ];
+            sceneNode.camera.ID = cameraId;
+        }
+    }
+
+    function findNavObject() {
+
+        // Find the navigable objects in the scene
+        var sceneView = this;
+        var sceneRootID = sceneView.state.sceneRootID;
+        var navObjectIds = sceneView.kernel.find( sceneRootID,
+                                                  ".//element(*,'http://vwf.example.com/navigable.vwf')" );
+        var navObjects = [];
+        for ( var i = 0; i < navObjectIds.length; i++ )
+            navObjects.push( sceneView.state.nodes[ navObjectIds[ i ] ] );
+
+        // Search the navigable objects for one whose owner is this user
+        // If found, take control of it 
+        var found = false;
+        var thisUserId = sceneView.kernel.moniker();
+        for ( var i = 0; i < navObjects.length; i++ )
+            if ( navObjects[ i ].owner == thisUserId ) {
+                controlNavObject.call( sceneView, navObjects[ i ] );
+                found = true;
+                break;
+            }
+
+        // If no navigable object was found whose owner is this user, search for one that has no owner
+        // If found, take control of it
+        if ( !found )
+            for ( var i = 0; i < navObjects.length; i++ )
+                if ( !navObjects[ i ].owner ) {
+                    controlNavObject.call( sceneView, navObjects[ i ] );
+                    found = true;
+                    break;
+                }
+
+        // If no ownerless navigable objects were found, create one, set its owner to be this user,
+        // and take control of it
+        if ( !found ) {
+            var navObjectSpec = {
+                "extends": "http://vwf.example.com/camera.vwf",
+                "implements": [ "http://vwf.example.com/navigable.vwf" ],
+                "properties": {
+                    "owner": thisUserId
+                }
+            };
+            sceneView.kernel.createChild( sceneRootID, "navobj_" + thisUserId, navObjectSpec, undefined, 
+                                          function( nodeID ) {
+                controlNavObject.call( sceneView, sceneView.state.nodes[ nodeID ] );
+            } );
+        }
     }
 
 });
