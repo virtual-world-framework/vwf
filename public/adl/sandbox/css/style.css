@@ -11,6 +11,13 @@ a{
 	text-decoration: none;
 }
 
+#activeInstances{
+
+	max-height: 500px;
+	overflow-y: scroll;
+	width:90%;
+}
+
 #wrapper{
 	width: 100%;
 	overflow: hidden;

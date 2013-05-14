@@ -6,13 +6,13 @@
 					<a href="{{root}}/create" class="coldstate" id="newinstancebutton"><img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"></a>
 				</div>
 				<div class="span3">
-					<input id="filter" class="span3" type="text" placeholder="Filter Results" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
+					<input id="filter" class="span3" style="width:89%; float:left;" type="text" placeholder="Filter Results" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
 				</div>
 			</div>
-			<div class="row">
+			<div class="row" id="activeRow">
 				<div id="activeInstances" class="accordion span4" data-bind="foreach:worldObjects">
 				
-					<div class="accordion-group" data-bind="visible:isHidden">
+					<div class="accordion-group" data-bind="visible:isHidden" style="width:97.5%;">
 					
 						<div class="accordion-heading">
 							<a class="accordion-toggle" data-toggle="collapse" data-parent="#activeInstances" data-bind="text:title,attr:{href:'#collapse'+$index()}, css:hotState()?'alert-success':'coldstate'">Title</a>
@@ -49,8 +49,9 @@
 	</div>
 	<script>
 		$(document).ready(function(){	
-		
+			
 			ko.applyBindings(vwfPortalModel);
+			$("#activeInstances").niceScroll({"cursoropacitymax": 0.4, "cursorborderradius": 0} );
 			getLoginInfo(function(){
 					
 				showStates();
