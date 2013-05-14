@@ -18,6 +18,8 @@
 
 --- 
 extends: http://vwf.example.com/node3.vwf
+implements:
+- http://vwf.example.com/planarDrag.vwf
 methods:
   createGeometry:
 scripts:
@@ -25,14 +27,6 @@ scripts:
   this.initialize = function() {
     //console.info( "initialize translateXPos.vwf id = " + this.id );
   }
-  //this.pointerDown = this.events.add( function( pointerInfo, pickInfo ){
-  this.pointerDown = function( pointerInfo, pickInfo ){
-    console.info( 'pointerDown translateXPos' );
-    this.parent.editMode='translate';
-    this.parent.axis=[1,0,0];
-    return false;
-  }
-  // } )
   this.createGeometry = function() {
     if ( this.parent.ttPoints ) {
       var pos = [];

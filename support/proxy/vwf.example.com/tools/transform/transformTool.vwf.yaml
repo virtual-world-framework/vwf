@@ -18,60 +18,60 @@
 
 --- 
 extends: http://vwf.example.com/node3.vwf
-implements:
-- http://vwf.example.com/tools/transform/node3edit.vwf
 properties:
-  selectedID: 
-    set: |
-      console.info( "transform Tool selectedID set to: " + value );
-      this.objectSelected && this.objectSelected( value );
   ttPositions:
   ttPoints:
   boxCenter:
   pivotPoint:
 methods:
+  createTool:
+  getToolDimensions:
+  createToolGeometry:
+  createPointList:
   testTool:
   objectSelected:
   calcBoxCenter:
-  calcPivotPoint:
+  removeChildren:
 events:
   transformUpdated:
 scripts:
 - |
     this.initialize = function() {
       console.info( "== initialize == transformTool == initialize ==" );
-      //this.ttPositions = undefined;
-      //this.ttPoints = undefined;
-      //this.boxCenter = undefined;
-      //this.pivotPoint = undefined;
       this.objBoundingBox = undefined;
+
+      this.selectedID = undefined;
+      this.selectedNode = undefined;      
     }
     this.transformUpdated = this.events.add( function( ID ) {
       
     } );
-    this.objectSelected = function( ID ) {
-      console.info( "SELECTING: " + ID );
-      if ( this.selectedID !== undefined && this.selectedID != "" ) {
-        this.removeChildren( this );        
+    this.objectSelected = function( node ) {
+
+      if ( node ) {
+        this.selectedNode = node;
+        this.selectedID = this.selectedNode.id;
+      } else {
+        if ( this.children.length > 0 ) {
+            this.selectedNode = this.children[0];
+            this.selectedID = this.selectedNode.id;
+          } else {
+            this.selectedID = undefined;
+            this.selectedNode = undefined; 
+          }
       }
-      this.selectedID = ID;
-      console.info( "SELECTED: " + this.selectedID );
-      if ( ID != "" && ID !== undefined ) {
+      
+      if ( this.selectedNode ) {
         this.createTool();
       }
-      var tf = vwf.getProperty( ID, "transform", [] );
-      this.transform = tf;
-      var newTrans = goog.vec.Mat4.createFromArray( tf );
-      this.transform = goog.vec.Mat4.translate( tf, this.boxCenter[0], this.boxCenter[1], this.boxCenter[2] );
-      if ( this.rotationPoint )
-        this.rotationPoint = [ this.boxCenter[0], this.boxCenter[1], this.boxCenter[2] ]; 
+
     };
     this.testTool = function() {
       this.createToolGeometry( 100, 100, 100 );
       this.position = [ 0, 0, 0 ];
     }
     this.createTool = function() {
-      this.objBoundingBox = vwf.getProperty( this.selectedID, "boundingbox", [] );
+      this.objBoundingBox = this.selectedNode.boundingbox;
    
       if ( this.objBoundingBox ) {
         this.calcBoxCenter();
@@ -85,12 +85,12 @@ scripts:
       if ( this.objBoundingBox ) { 
         var min = this.objBoundingBox.min;
         var max = this.objBoundingBox.max;
-        var dX = max[0]-min[0];
-        var dY = max[1]-min[1];
-        var dZ = max[2]-min[2];
+        var dX = max.x-min.x;
+        var dY = max.y-min.y;
+        var dZ = max.z-min.z;
 
         this.boxCenter = goog.vec.Vec3.add(
-          goog.vec.Vec3.createFromArray( [ min[0], min[1], min[2] ] ),
+          goog.vec.Vec3.createFromArray( [ min.x, min.y, min.z ] ),
           goog.vec.Vec3.scale(
             goog.vec.Vec3.createFromArray( [ dX, dY, dZ ] ),
             0.5,
@@ -101,20 +101,19 @@ scripts:
         console.info( " this.boxCenter = " +  Array.prototype.slice.call( this.boxCenter ) );
       }       
     }
-    this.removeChildren = function( node ) {
+    this.removeChildren = function() {
       console.info( "DESELECTING: " + this.selectedID );
-      if ( node.children ) {
-        for ( var i = node.children.length-1; i >= 0; i-- ) {
-          //this.removeChild( node.children[i] );
+      if ( this.children ) {
+        for ( var i = this.children.length-1; i >= 0; i-- ) {
           this.children.delete( node.children[i] );
         }
       }
     }
     this.getToolDimensions = function() {
       if ( this.objBoundingBox ) {
-        var dX = this.objBoundingBox.max[0]-this.objBoundingBox.min[0];
-        var dY = this.objBoundingBox.max[1]-this.objBoundingBox.min[1];
-        var dZ = this.objBoundingBox.max[2]-this.objBoundingBox.min[2];
+        var dX = this.objBoundingBox.max.x-this.objBoundingBox.min.x;
+        var dY = this.objBoundingBox.max.y-this.objBoundingBox.min.y;
+        var dZ = this.objBoundingBox.max.z-this.objBoundingBox.min.z;
         return [ dX, dY, dZ ];
       }
       return undefined;
@@ -124,32 +123,32 @@ scripts:
       var path = "http://vwf.example.com/tools/transform/";
       if ( this.ttPoints ){
         // translate xPos 9,18,15,12
-        this.children.create( "transXPos", { "extends": path + "translateXPos.vwf" }, function( child) {
+        this.children.create( "transXPos", { "includes": path + "translateXPos.vwf" }, function( child) {
           child.createGeometry();
         } );
 
         // translate xNeg 21,24,27,30
-        this.children.create( "transXNeg", { "extends": path + "translateXNeg.vwf" }, function( child) {
+        this.children.create( "transXNeg", { "includes": path + "translateXNeg.vwf" }, function( child) {
           child.createGeometry();
         } );
 
         // translate yPos 48,49,50,51
-        this.children.create( "transYPos", { "extends": path + "translateYPos.vwf" }, function( child) {
+        this.children.create( "transYPos", { "includes": path + "translateYPos.vwf" }, function( child) {
           child.createGeometry();
         } );
 
         // translate yNeg 52,53,54,55
-        this.children.create( "transYNeg", { "extends": path + "translateYNeg.vwf" }, function( child) {
+        this.children.create( "transYNeg", { "includes": path + "translateYNeg.vwf" }, function( child) {
           child.createGeometry();
         } );
 
         // translate zPos 32,34,36,38
-        this.children.create( "transZPos", { "extends": path + "translateZPos.vwf" }, function( child) {
+        this.children.create( "transZPos", { "includes": path + "translateZPos.vwf" }, function( child) {
           child.createGeometry();
         } );
 
         // translate zNeg 40,46,44,42
-        this.children.create( "transZNeg", { "extends": path + "translateZNeg.vwf" }, function( child) {
+        this.children.create( "transZNeg", { "includes": path + "translateZNeg.vwf" }, function( child) {
           child.createGeometry();
         } );
         

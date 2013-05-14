@@ -13,8 +13,12 @@
 
 --- 
 extends: http://vwf.example.com/node3.vwf
+implements:
+- http://vwf.example.com/spin-on-move.vwf
 methods:
   createGeometry:
+properties:
+  spin-axis: [ 0, 0, 1 ]
 scripts:
 - |
   this.initialize = function() {
