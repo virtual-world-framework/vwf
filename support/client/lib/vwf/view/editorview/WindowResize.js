@@ -90,7 +90,7 @@ define({
 			$('#toolbar').show();
 			$('#sidepanel').show();
 			$('#statusbar').show();
-			$('#ScriptEditor').show();
+			
 			$('#index-vwf').css('height',$(window).height() + 'px');
 			$('#index-vwf').css('width',$(window).width() + 'px');
 			$('#index-vwf').css('top', $('#smoothmenu1').height() + $('#toolbar').height() + 'px');
@@ -100,5 +100,15 @@ define({
 			$(window).resize();
 			
 		}
+		$(window).keypress(function(e)
+		{
+			if(e.charCode == 92)
+			{
+				if(!toolsHidden)
+					hideTools();
+				else
+					showTools();
+			}
+		});
 	}
 });

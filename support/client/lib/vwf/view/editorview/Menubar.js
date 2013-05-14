@@ -111,7 +111,7 @@ define(
 		});
 		$('#MenuPublish').click(function (e)
 		{
-			_GlobalInventoryManager.Take();
+			_InventoryManager.Publish();
 		});
 		$('#MenuChat').click(function (e)
 		{

@@ -29,7 +29,23 @@ define(function ()
 		$('#InventoryTypeChoice').append("<input type='radio' id='InventoryTypeChoiceGlobal' name='InventoryTypeChoice' class=''></input><label for='InventoryTypeChoiceGlobal'>Global</label>");
 		$('#InventoryControls').append("<input type='text' id='InventoryFilter' class=''></input>");
 		$( "#InventoryTypeChoice" ).buttonset();
+		$( "#InventoryTypeChoiceGlobal" ).click(function(e){
+			
+			_InventoryManager.global = true;
+			_InventoryManager.NoAnimateRedraw();
 		
+		});
+		
+		$( "#InventoryFilter" ).keyup(function(e){
+			_InventoryManager.BuildGUI();
+		});
+		
+		$( "#InventoryTypeChoicePersonal" ).click(function(e){
+			
+			_InventoryManager.global = false;
+			_InventoryManager.NoAnimateRedraw();
+		
+		});
 		
 		$('#InventoryManager').append("<div id='InventoryDisplay' class='InventoryPanel'></div>");
 		$('#InventoryManager').append("<div id='InventoryManagerCreate'></div>");
@@ -305,6 +321,7 @@ define(function ()
 			type = t.properties.type
 			this.addInventoryItem(t, title, type,function(key)
 			{
+				_InventoryManager.global = false;
 				_InventoryManager.NoAnimateRedraw(function()
 				{
 					_InventoryManager.selectKey(key);
@@ -321,6 +338,7 @@ define(function ()
 			type = t.properties.type
 			this.addGlobalInventoryItem(t, title, type,function(key)
 			{
+				_InventoryManager.global = true;
 				_InventoryManager.NoAnimateRedraw(function()
 				{
 					_InventoryManager.selectKey(key);
@@ -496,6 +514,7 @@ define(function ()
 		this.BuildGUI = function (newInventory)
 		{
 			
+			var filter = $('#InventoryFilter').val();
 			if(newInventory)
 				this.inventory = newInventory
 			var inventory = this.inventory;
@@ -516,11 +535,14 @@ define(function ()
 			if (!inventory) return;
 			for (var i=0;i < inventory.length; i++)
 			{
-				$('#InventoryDisplay').append('<div class="inventoryItem" id="InventoryDisplay' + i + '" />');
-				$('#InventoryDisplay' + (i)).html("<div style='font-weight:bold;display:inline'>" + inventory[i].title + "</div>" + " : " + (inventory[i].type || ""));
-				$('#InventoryDisplay' + (i)).attr('name', i);
-				$('#InventoryDisplay' + (i)).attr('type', inventory[i].type);
-				$('#InventoryDisplay' + (i)).click(_InventoryManager.itemClicked);
+				if(!filter || inventory[i].title.indexOf(filter) != -1 || inventory[i].type.indexOf(filter) != -1 )
+				{
+					$('#InventoryDisplay').append('<div class="inventoryItem" id="InventoryDisplay' + i + '" />');
+					$('#InventoryDisplay' + (i)).html("<div style='font-weight:bold;display:inline'>" + inventory[i].title + "</div>" + " : " + (inventory[i].type || ""));
+					$('#InventoryDisplay' + (i)).attr('name', i);
+					$('#InventoryDisplay' + (i)).attr('type', inventory[i].type);
+					$('#InventoryDisplay' + (i)).click(_InventoryManager.itemClicked);
+				}
 			}
 			
 			if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();

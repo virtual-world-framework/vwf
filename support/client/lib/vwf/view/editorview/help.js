@@ -251,7 +251,7 @@ PointAtAndClick('MenuCreateSphereicon',tutStep3)
 }
 function tutStep2()
 {
-	debugger;
+	
 	_Notifier.alert('First, lets create a simple object. I`ll click the "Sphere" button to create a sphere at the center of our view.',tutStep2a);	
 }
 function StartTutorial()
