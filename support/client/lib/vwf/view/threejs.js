@@ -25,6 +25,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             this.pickInterval = 10;
             this.disableInputs = false;
 
+            // Store parameter options for persistence functionality
+            this.parameters = options;
+
             if(typeof options == "object") {
                 this.rootSelector = options["application-root"];
                 if("experimental-pick-interval" in options) {

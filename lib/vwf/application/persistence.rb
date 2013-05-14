@@ -22,6 +22,20 @@ class VWF::Application::Persistence < Sinatra::Base
     @root = root
   end
 
+  post "/config" do
+
+    pass unless settings.development? # only in development mode
+
+    f = File.open('public/'+params["root"]+'/'+params["filename"]+'.vwf.config.json', 'w')
+    f.puts params["jsonState"]
+    f.close
+
+    f = File.open('public/'+params["root"]+'/'+params["filename"]+'_'+params["inst"]+'_'+params["timestamp"]+'.vwf.config.json', 'w')
+    f.puts params["jsonState"]
+    f.close
+
+  end
+
   post "/*" do
 
     pass unless settings.development? # only in development mode

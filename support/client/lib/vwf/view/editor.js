@@ -1554,6 +1554,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         {
             var xhr = new XMLHttpRequest();
 
+            // Save State Information
             var state = vwf.getState();
 
             var timestamp = state["queue"].time;
@@ -1610,6 +1611,40 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             xhr.open("POST", "/"+root, true);
             xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             xhr.send("root="+root+"&filename="+filename+"&inst="+inst+"&timestamp="+timestamp+"&jsonState="+json);
+
+            // Save Config Information
+            var config = {"info":{}, "model":{}, "view":{} };
+
+            // Save browser title
+            config["info"]["title"] = $('title').html();
+
+            // Save model drivers
+            Object.keys(vwf_view.kernel.kernel.models).forEach(function(modelDriver) {
+                if(modelDriver.indexOf('vwf/model/') != -1) config["model"][modelDriver] = "";
+            });
+
+            // If neither glge or threejs model drivers are defined, specify nodriver
+            if(config["model"]["vwf/model/glge"] === undefined && config["model"]["vwf/model/threejs"] === undefined) config["model"]["nodriver"] = "";
+
+            // Save view drivers and associated parameters, if any
+            Object.keys(vwf_view.kernel.kernel.views).forEach(function(viewDriver) {
+                if(viewDriver.indexOf('vwf/view/') != -1)
+                {
+                    if( vwf_view.kernel.kernel.views[viewDriver].parameters )
+                    {
+                        config["view"][viewDriver] = vwf_view.kernel.kernel.views[viewDriver].parameters;
+                    }
+                    else config["view"][viewDriver] = "";
+                }
+            });
+
+            var jsonConfig = $.encoder.encodeForURL( JSON.stringify( config ) );
+
+            // Save config file to server
+            var xhrConfig = new XMLHttpRequest();
+            xhrConfig.open("POST", "/"+root+"/config", true);
+            xhrConfig.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhrConfig.send("root="+root+"&filename="+filename+"&inst="+inst+"&timestamp="+timestamp+"&jsonState="+jsonConfig);
         }
 
         else
