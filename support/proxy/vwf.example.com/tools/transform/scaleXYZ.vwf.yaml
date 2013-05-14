@@ -20,14 +20,6 @@ scripts:
   this.initialize = function() {
     //console.info( "initialize scaleXYZ.vwf" );
   }
-  //this.pointerDown = this.events.add( function( pointerInfo, pickInfo ){
-  this.pointerDown = function( pointerInfo, pickInfo ){
-    console.info( 'pointerDown scale' );
-    this.parent.editMode='scale';
-    //this.parent.axis=[1,1,1];
-    return false;
-  }
-  // } )
   this.createGeometry = function() {
     if ( this.parent.ttPoints ) {
       var pos = [];

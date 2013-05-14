@@ -13,21 +13,17 @@
 
 --- 
 extends: http://vwf.example.com/node3.vwf
+implements:
+- http://vwf.example.com/spin-on-move.vwf
 methods:
   createGeometry:
+properties:
+  spin-axis: [ 1, 0, 0 ]
 scripts:
 - |
   this.initialize = function() {
     //console.info( "initialize rotationX.vwf" );
   }
-  //this.pointerDown = this.events.add( function( pointerInfo, pickInfo ){
-  this.pointerDown = function( pointerInfo, pickInfo ){
-    console.info( 'pointerDown rotationX' );
-    this.parent.editMode='rotate';
-    this.parent.axis=[1,0,0];
-    return false;
-  }
-  // } )
   this.createGeometry = function() {
     if ( this.parent.ttPoints ) {
       var pos = [];

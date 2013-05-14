@@ -18,40 +18,73 @@
 
 ---
 properties:
-  enabled:
+  transformTool-enabled:
     set: |
-      this.enabled = Boolean( value );
+      this["transformTool-enabled"] = Boolean( value );
     value: true
-methods:
-  mouseInit: 
-  getNumber:
-  findNodeByID:
 events:
   pointerClick:
+methods:
+  select:
+  createTool:
 scripts:
 - |
   this.initialize = function() {
     this.tt = undefined;
+    this.clickedID = undefined;
     this.selectedObject = undefined;
+    this.previousParent = undefined;
   }
   this.pointerClick = function( pointerInfo, pickInfo ) {
-    if ( this.enabled && pickInfo.pickID ) {
-      var clickedNode = this.findNodeByID( this, pickInfo.pickID );
-      if ( clickedNode ) {
+    this.clickedID = pickInfo.pickID;
+    if ( this["transformTool-enabled"] ) {
+      this.select( pickInfo.pickID );
+    }
+  } 
+  this.select = function( id ) {
 
-        if ( this.transformTool === undefined ) {
-          // transformTool does not exist
-          // create tool and select the node
-          var wt = clickedNode.worldTransform;
-          var clickedParent = clickedNode.parent;
-          var tt = { "includes": "http://vwf.example.com/tools/transform/transformTool.vwf" }
-          this.children.create( "transformTool", tt, function( child ) {
+    console.info( "this.select( "+id+" )" );
+    if ( this["transformTool-enabled"] && id ) {
+
+      if ( this.transformTool === undefined ) {
+        this.createTool();
+      } else {
+        var clickedNode = this.findByID( this, id );
+        if ( clickedNode ) {
+          console.info( "      valid clickedNode: " + clickedNode.id );
+          var self = this;
+          var selectNode = function() {
+            console.info( "       selectNode: " + clickedNode.id );
+            var wt;
+            if ( self.selectedObject !== undefined ) {
+              wt = self.transformTool.worldTransform; 
+              self.selectedObject.parent_ = self.previousParent;
+              self.selectedObject.worldTransform = wt;
+              self.transformTool.removeChildren();
+            }
+            self.selectedObject = clickedNode;
+            self.previousParent = clickedNode.parent;
+            wt = self.selectedObject.worldTransform;
+            clickedNode.parent_ = self.transformTool;
+            self.transformTool.worldTransform = wt;
+            self.selectedObject.transform = [ 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 ];
             
-          } )
-        } else if ( !this.isChildOf( clickedNode, this.transformTool ) ) {
-          // swap nodes 
+            console.info( "       tt calling to select to generate tool: " );
+            self.transformTool.objectSelected( self.selectedObject );          
+          };        
+
+          if ( !this.isChildOf( clickedNode, this.transformTool ) ) {
+            selectNode();
+          }
         }
       }
     }
-  } 
-  //@ sourceURL=transformToolManager.vwf
+
+  }
+  this.createTool = function() {
+    var self = this;
+    var tt = { "includes": "http://vwf.example.com/tools/transform/transformTool.vwf" }
+    this.children.create( "transformTool", tt, function( child ) {
+      self.select( self.clickedID );
+    } );
+  } //@ sourceURL=transformToolManager.vwf

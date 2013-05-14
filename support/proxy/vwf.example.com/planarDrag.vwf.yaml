@@ -17,17 +17,9 @@
 ## @namespace
 
 ---
-properties:
-  normal:
-  constant:
-  mode: 
-    set: |
-      if ( value == "local" || value == "world" ) {
-        this.mode = value;
-      }
-    value: "local"
 methods:
-  mouseInit: 
+  mouseInit:
+  linePlaneIntersection: 
 events:
   pointerDown:
   pointerMove:
@@ -35,8 +27,10 @@ events:
 scripts:
 - |
   this.initialize = function() {
-    this.pointerDownNormal = undefined;
-    this.pointerDownConstant = undefined;
+    this.planeNormal = undefined;
+    this.planePoint = undefined;
+    this.cameraTranslation = undefined;
+    this.pointerVector = goog.vec.Vec3.create();
   }
   // Sets up the mouse pointer information used for dragging.
   this.mouseInit = function() {
@@ -72,11 +66,43 @@ scripts:
     };
   }
   
+
+  this.linePlaneIntersection = function( planePoint, planeNormal, linePoint, lineVec ){
+ 
+    var intersection, dotNumerator, dotDenominator;
+    var vector = goog.vec.Vec3.create();
+ 
+    //calculate the distance between the linePoint and the line-plane intersection point
+    var temp = goog.vec.Vec3.create();
+    
+    goog.vec.Vec3.subtract( planePoint, linePoint, temp );
+    dotNumerator = goog.vec.Vec3.dot( temp, planeNormal );
+    dotDenominator = goog.vec.Vec3.dot( lineVec, planeNormal );
+ 
+    //line and plane are not parallel
+    if( dotDenominator != 0.0 ){
+      intersection = goog.vec.Vec3.create();
+
+      //create a vector from the linePoint to the intersection point
+      goog.vec.Vec3.scale( lineVec, dotNumerator / dotDenominator, vector );
+ 
+      //get the coordinates of the line-plane intersection point
+      goog.vec.Vec3.add( linePoint, vector, intersection );  
+    }
+    return intersection;
+  }
+
+
   this.pointerDown = function( pointerInfo, pickInfo ) {
     if ( this.input === undefined ) this.mouseInit();
     this.input.clear();
     this.input.pointerInfo = pointerInfo;
     this.input.pickInfo = pickInfo;
+
+    this.planeNormal = goog.vec.Vec3.createFloat32FromArray( pickInfo.globalNormal );
+    this.planePoint = goog.vec.Vec3.createFloat32FromArray( pickInfo.globalPosition ); 
+    this.cameraTranslation = goog.vec.Vec3.createFloat32FromArray( pickInfo.globalSource );
+    goog.vec.Vec3.subtract( this.planePoint, this.cameraTranslation, this.pointerVector );
   }
 
   this.pointerUp = function( pointerInfo, pickInfo ) {
@@ -84,10 +110,20 @@ scripts:
   }
 
   this.pointerMove = function( pointerInfo, pickInfo ) {
-    if ( this.mode == "world" ) {
+    
+    // update the camera location and the view vector
+    this.cameraTranslation = goog.vec.Vec3.createFloat32FromArray( pickInfo.globalSource );
+    var hitPoint = goog.vec.Vec3.createFloat32FromArray( pickInfo.globalPosition );
+    goog.vec.Vec3.subtract( hitPoint, this.cameraTranslation, this.pointerVector );
 
-    } else if ( this.mode == "local" ) {
-
+    var newPlaneIntersection = this.linePlaneIntersection( this.planePoint, 
+              this.planeNormal, this.cameraTranslation, this.pointerVector );
+    if ( newPlaneIntersection !== undefined ) {
+      var translation = goog.vec.Vec3.createFloat32FromArray( this.parent.translation );
+      var diff = goog.vec.Vec3.create();
+      goog.vec.Vec3.subtract( newPlaneIntersection, this.planePoint, diff );
+      this.parent.translation = goog.vec.Vec3.add( translation, diff, goog.vec.Vec3.create() );
+      this.planePoint = goog.vec.Vec3.clone( newPlaneIntersection );
     }
 
     this.input.previous.pointerInfo = pointerInfo;
