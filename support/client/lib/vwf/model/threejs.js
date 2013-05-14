@@ -136,10 +136,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 sceneNode.threeScene.add(cam);
                 
                 cam.name = 'camera';
-
-                // I'm commenting this out so that we can let the view choose which camera to use, rather than
-                // forcing it to use the model-specified one - Eric (5/8/13)
-                // this.state.cameraInUse = cam;
                 
                 var camType = "http://vwf.example.com/camera.vwf";
                 
@@ -989,11 +985,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         if( this.state.scenes[this.state.sceneRootID].camera.threeJScameras[propertyValue] )
                         {
-                            // I'm commenting this out so that we can let the view choose which camera to use,
-                            // rather than forcing it to use the model-specified one - Eric (5/8/13)
-                            // this.state.cameraInUse = this.state.scenes[this.state.sceneRootID].camera.threeJScameras[propertyValue];
+                            // If the view is currently using the model's activeCamera, update it to the new activeCamera
+                            var sceneRootID = this.state.sceneRootID;
+                            var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
+                            if ( this.state.cameraInUse == modelCameraInfo.threeJScameras[ modelCameraInfo.ID ] )
+                                this.state.cameraInUse = modelCameraInfo.threeJScameras[ propertyValue ];
                             
-                            this.state.scenes[this.state.sceneRootID].camera.ID = propertyValue;
+                            // Update the model's activeCamera
+                            this.state.scenes[ sceneRootID ].camera.ID = propertyValue;
+
+                            // Prepare the return value
                             value = propertyValue;
                         }
                     }

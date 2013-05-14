@@ -1,4 +1,4 @@
-﻿
+
 "use strict";
 
 // Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
@@ -167,12 +167,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
 
-                if(self.lastPickId != newPickId && self.lastEventData)
+                if ( self.lastPickId != newPickId && self.lastEventData )
                 {
                     view.kernel.dispatchEvent( self.lastPickId, "pointerOut", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                     view.kernel.dispatchEvent( newPickId, "pointerOver", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                 }
-                if(view.lastEventData && (view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || view.lastEventData.eventData[0].screenPosition[1] != oldMouseY)) {
+
+                if ( view.lastEventData && 
+                     ( view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || 
+                       view.lastEventData.eventData[0].screenPosition[1] != oldMouseY ) ) {
                     oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
                     oldMouseY = view.lastEventData.eventData[0].screenPosition[1];
                     hovering = false;
@@ -187,8 +190,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 lastPickTime = now;
             }
 
-            renderer.render(scene,sceneNode.camera.threeJScameras[sceneNode.camera.ID]);
-            sceneNode.lastTime = now;
+            renderer.render( scene, camera );
+			sceneNode.lastTime = now;
         };
 
         var mycanvas = this.canvasQuery.get( 0 );
@@ -291,9 +294,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if(sceneNode.renderer.setFaceCulling)
                 sceneNode.renderer.setFaceCulling( THREE.CullFaceBack );
 
-            // I'm commenting this out so that we can let the view choose which camera to use, rather than
-            // forcing it to use the model-specified one - Eric (5/8/13)
-            // this.state.cameraInUse = sceneNode.threeScene.children[1];
+            // Set the camera that the view will render from
+            // It starts here as that dictated by the model until the view tells it otherwise
+            this.state.cameraInUse = sceneNode.camera.threeJScameras[ sceneNode.camera.ID ];
 
             // Schedule the renderer.
             var scene = sceneNode.threeScene;
@@ -403,8 +406,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 position: [ mousePos.x / sceneView.width, mousePos.y / sceneView.height ],
                 screenPosition: [ mousePos.x, mousePos.y ]
             } ];
-
-
 
             var camera = sceneView.state.cameraInUse;
             var worldCamPos, worldCamTrans, camInverse;
@@ -836,9 +837,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     function ThreeJSPick( canvas, sceneNode, debug )
     {
         if(!this.lastEventData) return;
-        
-        
-        var threeCam = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
+
+        var threeCam = this.state.cameraInUse;
         if(!this.raycaster) this.raycaster = new THREE.Raycaster();
         if(!this.projector) this.projector = new THREE.Projector();
         
@@ -1436,14 +1436,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                                "descendant-or-self::element(*,'http://vwf.example.com/camera.vwf')" );
         if ( cameraIds.length ) {
 
-            // Set the active camera
+            // Set the view's active camera
             var rendererState = sceneView.state;
-            var applicationId = vwf_view.kernel.application();
-            var sceneNode = rendererState.scenes[ applicationId ];
             var cameraId = cameraIds[ 0 ];
-            sceneNode.camera.ID = cameraId;
-
-            // Save a reference to the active camera
             rendererState.cameraInUse = rendererState.nodes[ cameraId ].threeObject;
         }
     }
