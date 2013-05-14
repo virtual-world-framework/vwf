@@ -11,7 +11,11 @@
 	</style>
 	<![endif]-->
     <title>Virtual World Framework</title>
-
+	
+	<script type="text/javascript">
+		//IE undefined console fix
+		if (!window.console) console = {log: function() {}};
+	</script>
 	<script type="text/javascript" src="{{root}}/jquery-1.7.1.js"></script>
     <script type="text/javascript" src="{{root}}/jquery-ui-1.8.16.custom.js"></script>
     <script type="text/javascript" src="{{root}}/js/knockout-2.2.1.js"></script>
