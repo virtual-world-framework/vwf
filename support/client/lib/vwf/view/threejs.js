@@ -132,40 +132,37 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var lastPickTime = 0;
         
         function GetParticleSystems(node,list)
-		{
-			if(!list)
-				list = [];
-			for(var i =0; i<node.children.length; i++)
-			{
-				if(node.children[i] instanceof THREE.ParticleSystem)
-					list.push(node.children[i]);
-				list = 	GetParticleSystems(node.children[i],list);
-			}			
-				return list;
-		}
+        {
+            if(!list)
+                list = [];
+            for(var i =0; i<node.children.length; i++)
+            {
+                if(node.children[i] instanceof THREE.ParticleSystem)
+                    list.push(node.children[i]);
+                list =  GetParticleSystems(node.children[i],list);
+            }           
+                return list;
+        }
         function renderScene(time) {
 
             window.requestAnimationFrame( renderScene );
-            sceneNode.frameCount++;
-			var now = ( performance !== undefined && performance.now !== undefined ) ? performance.now() : time;
-			var timepassed = now - sceneNode.lastTime;
+            var now = ( performance !== undefined && performance.now !== undefined ) ? performance.now() : time;
+            var timepassed = now - sceneNode.lastTime;
 
-			var pss = GetParticleSystems(sceneNode.threeScene);
-			for(var i in pss)
-			{
-				if(pss[i].update)
-					pss[i].update(timepassed);
-			}
+            var pss = GetParticleSystems(sceneNode.threeScene);
+            for(var i in pss)
+            {
+                if(pss[i].update)
+                    pss[i].update(timepassed);
+            }
 
-			var camera = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
-			var pos = camera.localToWorld(new THREE.Vector3(-.4,.275,-1.0))
-			
+            var camera = sceneNode.camera.threeJScameras[ sceneNode.camera.ID ];
+            var pos = camera.localToWorld(new THREE.Vector3(-.4,.275,-1.0))
+            
             // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
             // Note: this is a costly operation and should be optimized if possible
-            if((now - lastPickTime) > self.pickInterval && !self.disableInputs)
+            if ( ( now - lastPickTime ) > self.pickInterval && !self.disableInputs )
             {
-                sceneNode.frameCount = 0;
-            
                 var newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
                 
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
@@ -191,7 +188,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
 
             renderer.render(scene,sceneNode.camera.threeJScameras[sceneNode.camera.ID]);
-			sceneNode.lastTime = now;
+            sceneNode.lastTime = now;
         };
 
         var mycanvas = this.canvasQuery.get( 0 );
@@ -256,9 +253,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     mycanvas.height = self.height;
                     mycanvas.width = self.width;
                     sceneNode.renderer.setViewport(0,0,window.innerWidth,window.innerHeight)
-					
-					view.state.cameraInUse.aspect =  mycanvas.width / mycanvas.height;
-					view.state.cameraInUse.updateProjectionMatrix();
+                    
+                    view.state.cameraInUse.aspect =  mycanvas.width / mycanvas.height;
+                    view.state.cameraInUse.updateProjectionMatrix();
                     //var cam = self.state.cameraInUse;
                     //if ( cam ) {
                     //    cam.aspect = mycanvas.width / mycanvas.height;
@@ -304,8 +301,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var scenenode = sceneNode;
             window._dScene = scene;
             window._dRenderer = renderer;
-			window._dSceneNode = sceneNode;
-            sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
+            window._dSceneNode = sceneNode;
             
             if(!this.disableInputs) {
                 initInputEvents.call(this,mycanvas);
@@ -1440,17 +1436,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                                "descendant-or-self::element(*,'http://vwf.example.com/camera.vwf')" );
         if ( cameraIds.length ) {
 
-            // TODO: Make this work - it isn't now.
-
-            // Save a reference to the active camera
-            var rendererState = sceneView.state;
-            var cameraId = cameraIds[ 0 ];
-            rendererState.cameraInUse = rendererState.nodes[ cameraId ].threeObject;
-
             // Set the active camera
+            var rendererState = sceneView.state;
             var applicationId = vwf_view.kernel.application();
             var sceneNode = rendererState.scenes[ applicationId ];
+            var cameraId = cameraIds[ 0 ];
             sceneNode.camera.ID = cameraId;
+
+            // Save a reference to the active camera
+            rendererState.cameraInUse = rendererState.nodes[ cameraId ].threeObject;
         }
     }
 
