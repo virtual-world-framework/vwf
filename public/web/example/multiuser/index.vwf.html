@@ -59,7 +59,7 @@ the License.
 			// Save the reference to the user object - this belongs to this user
 			view.myUserObjectId = eventParameters[ 0 ];
 
-			// Set the aspect ration on the camera to match that of the html canvas
+			// Set the aspect ratio on the camera to match that of the html canvas
 			var cameraId = vwf_view.kernel.find( view.myUserObjectId, "camera" );
 			var applicationId = vwf_view.kernel.application();
 			var canvas = $( "#" + applicationId );
