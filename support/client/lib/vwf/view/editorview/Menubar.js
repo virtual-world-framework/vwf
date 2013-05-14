@@ -383,6 +383,13 @@ define(
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Orbit');
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Navigate');
 		});
+		
+		
+		$('#MenuCameraNone').click(function (e)
+		{
+			clearCameraModeIcons();
+			vwf.models[0].model.nodes['index-vwf'].setCameraMode('None');
+		});
 		$('#MenuCameraFree').click(function (e)
 		{
 			clearCameraModeIcons();
