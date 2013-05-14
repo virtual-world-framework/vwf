@@ -56,7 +56,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/Menubar", "vwf/vie
 					window._ModelLibrary = require("vwf/view/editorview/_3DRIntegration").getSingleton();
 					window._InventoryManager = require("vwf/view/editorview/InventoryManager").getSingleton();;
 					window.HierarchyManager = require("vwf/view/editorview/HeirarchyManager").getSingleton();;
-					window._GlobalInventoryManager = require("vwf/view/editorview/GlobalInventoryManager").getSingleton();;
+					
 					window._DataManager = require("vwf/view/editorview/DataManager").getSingleton();;
 					window._UserManager = require("vwf/view/editorview/UserManager").getSingleton();;
 					require("vwf/view/editorview/Help").getSingleton();
@@ -67,6 +67,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/Menubar", "vwf/vie
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.ui.touch-punch.min.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/beautify.module.js"></script>');
 					
+					$('input[type="text"]').keypress(function(e){e.stopImmediatePropagation();});
 					
 					//  $(document).ready(function(){
 					//	});
@@ -161,6 +162,8 @@ function InitializeEditor()
 	//	$('#vwf-root').parent().parent().enableSelection();
 	//	$('#index-vwf').enableSelection();
 	//	$('* :not(input)').disableSelection();
+	
+	
 }
 
 function PlayerDeleted(e)

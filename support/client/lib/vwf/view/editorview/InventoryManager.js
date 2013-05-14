@@ -17,8 +17,20 @@ define(function ()
 	function initialize()
 	{
 		$('#sidepanel').append("<div id='InventoryManager' class='SidePanelWindowBottomBorder ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
+		
+		
+		
 		$(document.body).append("<div id='InventoryViewer' style='overflow:hidden'><div id='InventoryView' style='width: 100%;height: 100%;margin: -5px -5px 5px -10px;'/></div>");
 		$('#InventoryManager').append("<div id='inventorymanagertitle' style = '' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix SidePanelWindowTitle' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Inventory</span></div>");
+		
+		$('#InventoryManager').append("<div id='InventoryControls' class=''></div>");
+		$('#InventoryControls').append("<div id='InventoryTypeChoice' class=''></div>");
+		$('#InventoryTypeChoice').append("<input type='radio' id='InventoryTypeChoicePersonal' name='InventoryTypeChoice' class='' checked='checked'></input><label for='InventoryTypeChoicePersonal'>Personal</label>");
+		$('#InventoryTypeChoice').append("<input type='radio' id='InventoryTypeChoiceGlobal' name='InventoryTypeChoice' class=''></input><label for='InventoryTypeChoiceGlobal'>Global</label>");
+		$('#InventoryControls').append("<input type='text' id='InventoryFilter' class=''></input>");
+		$( "#InventoryTypeChoice" ).buttonset();
+		
+		
 		$('#InventoryManager').append("<div id='InventoryDisplay' class='InventoryPanel'></div>");
 		$('#InventoryManager').append("<div id='InventoryManagerCreate'></div>");
 		$('#InventoryManager').append("<div id='InventoryManagerDelete'></div>");

@@ -793,7 +793,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
         canvas.setAttribute("onmousewheel", '');
         
-        window.onkeydown = function (event) {
+        window.document.getElementById('index-vwf').onkeydown = function (event) {
                     
                     var key = undefined;
                     var validKey = false;
@@ -826,7 +826,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     }
                 };
 
-         window.onkeyup = function (event) {
+         window.document.getElementById('index-vwf').onkeyup = function (event) {
                     var key = undefined;
                     var validKey = false;
                     switch (event.keyCode) {

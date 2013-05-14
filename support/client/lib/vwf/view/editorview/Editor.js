@@ -148,7 +148,7 @@ define(function ()
 		var Rotate = 1;
 		var Scale = 2;
 		var Multi = 3;
-		var GizmoMode = Move;
+		this.GizmoMode = Move;
 		var oldintersectxy = [];
 		var oldintersectxz = [];
 		var oldintersectyz = [];
@@ -592,21 +592,23 @@ define(function ()
 				this.PickMod = Subtract;
 				$('#index-vwf').css('cursor', 'not-allowed');
 			}
-			if (e.keyCode == 87 && this.SelectMode == 'Pick')
+			if (e.keyCode == 87 && SelectMode == 'Pick')
 			{
 				this.SetGizmoMode(Move);
 			}
-			if (e.keyCode == 69)
+			if (e.keyCode == 69&& SelectMode == 'Pick')
 			{
-				this.SetGizmoMode(Rotate && this.SelectMode == 'Pick');
+				
+				this.SetGizmoMode(Rotate );
 			}
-			if (e.keyCode == 82)
+			if (e.keyCode == 82&& SelectMode == 'Pick')
 			{
-				this.SetGizmoMode(Scale && this.SelectMode == 'Pick');
+				
+				this.SetGizmoMode(Scale );
 			}
-			if (e.keyCode == 84)
+			if (e.keyCode == 84&& SelectMode == 'Pick')
 			{
-				this.SetGizmoMode(Multi && this.SelectMode == 'Pick');
+				this.SetGizmoMode(Multi );
 			}
 			if (e.keyCode == 81)
 			{
@@ -1250,7 +1252,7 @@ define(function ()
 			}
 			if(!_Editor.isOwner(id,document.PlayerNumber))
 			{
-			_Notifier.notify('You do not permission to edit this object.');
+			_Notifier.notify('You do not have permission to edit this object.');
 			return false;
 			}
 			vwf_view.kernel.setProperty(id, prop, val)
@@ -1803,7 +1805,7 @@ define(function ()
 		}
 		this.showMoveGizmo = function ()
 		{
-			this.SetGizmoMode(GizmoMode);
+			this.SetGizmoMode(this.GizmoMode);
 		}
 		this.updateBoundsAndGizmoLoc = function ()
 		{
@@ -1894,11 +1896,11 @@ define(function ()
 			MoveGizmo.allChildren.push(this.BuildBox([.85, .85, .85], [0, 9.25, 0], green)); //scale xyz
 			MoveGizmo.allChildren.push(this.BuildBox([.85, .85, .85], [0, 0, 9.25], blue)); //scale xyz
 			MoveGizmo.allChildren.push(this.BuildBox([1.50, 1.50, .30], [.75, .75, .15], [75, 75, 0, 1])); //movexy
-			//	MoveGizmo.children[MoveGizmo.children.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( 8, 8, .30 ));
+			MoveGizmo.allChildren[MoveGizmo.allChildren.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( 8, 8, .30 ));
 			MoveGizmo.allChildren.push(this.BuildBox([1.50, .30, 1.50], [.75, .15, .75], [75, 0, 75, 1])); //movexz
-			//	MoveGizmo.children[MoveGizmo.children.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( 8, .30, 8 ));
+			MoveGizmo.allChildren[MoveGizmo.allChildren.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( 8, .30, 8 ));
 			MoveGizmo.allChildren.push(this.BuildBox([.30, 1.50, 1.50], [.15, .75, .75], [0, 75, 75, 1])); //moveyz
-			//	MoveGizmo.children[MoveGizmo.children.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( .30, 8, 8 ));
+			MoveGizmo.allChildren[MoveGizmo.allChildren.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( .30, 8, 8 ));
 			MoveGizmo.allChildren.push(this.BuildRing(12, .7, [0, 0, 1], 30, [1, 1, 1, 1], 90, 450)); //rotate z
 			MoveGizmo.allChildren.push(this.BuildRing(7, 0.5, [1, 0, 0], 37, red, 0, 370)); //rotate x
 			MoveGizmo.allChildren.push(this.BuildRing(7, 0.5, [0, 1, 0], 37, green, 0, 370)); //rotate y
@@ -1963,7 +1965,7 @@ define(function ()
 		}.bind(this);
 		this.SetGizmoMode = function (type)
 		{
-			GizmoMode = type;
+			this.GizmoMode = type;
 			if (MoveGizmo.visible == false) return;
 			if (type == Move)
 			{
@@ -1978,7 +1980,7 @@ define(function ()
 					{
 						MoveGizmo.remove(MoveGizmo.allChildren[i], true);
 					}
-					GizmoMode = Move;
+					this.GizmoMode = Move;
 				}
 			}
 			if (type == Rotate)
@@ -1994,7 +1996,7 @@ define(function ()
 					{
 						MoveGizmo.remove(MoveGizmo.allChildren[i], true);
 					}
-					GizmoMode = Rotate;
+					this.GizmoMode = Rotate;
 				}
 			}
 			if (type == Scale)
@@ -2011,7 +2013,7 @@ define(function ()
 					{
 						MoveGizmo.remove(MoveGizmo.allChildren[i], true);
 					}
-					GizmoMode = Scale;
+					this.GizmoMode = Scale;
 				}
 			}
 			if (type == Multi)
@@ -2027,7 +2029,7 @@ define(function ()
 					{
 						MoveGizmo.remove(MoveGizmo.allChildren[i], true);
 					}
-					GizmoMode = Multi;
+					this.GizmoMode = Multi;
 				}
 			}
 		}.bind(this);
