@@ -720,10 +720,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
 
             returnData.eventNodeData = { "": [ {
+                pickID: pointerPickID,
                 distance: pickInfo ? pickInfo.distance : undefined,
                 origin: pickInfo ? pickInfo.worldCamPos : undefined,
                 globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined,
-                globalNormal: pickInfo ? [0,0,1] : undefined,    //** not implemented by threejs
+                globalNormal: pickInfo && pickInfo.face ? [pickInfo.face.normal.x,pickInfo.face.normal.y,pickInfo.face.normal.z] : undefined,    //** not implemented by threejs
                 globalSource: worldCamPos
             } ] };
 
@@ -765,8 +766,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     }
 
                     // transform the global normal into local
-                    if ( pickInfo && pickInfo.normal ) {
-                        localNormal = goog.vec.Mat4.multVec3Projective( transform, pickInfo.normal, 
+                    if ( pickInfo && pickInfo.face ) {
+                        localNormal = goog.vec.Mat4.multVec3Projective( trans, pickInfo.face.normal, 
                             goog.vec.Vec3.create() );
                     } else {
                         localNormal = undefined;  
@@ -785,8 +786,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         normal: localNormal,
                         source: relativeCamPos,
                         distance: pickInfo ? pickInfo.distance : undefined,
-                        globalPosition: pickInfo ? pickInfo.coord : undefined,
-                        globalNormal: pickInfo ? pickInfo.normal : undefined,
+                        globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined,
+                        globalNormal: pickInfo && pickInfo.face ? [pickInfo.face.normal.x,pickInfo.face.normal.y,pickInfo.face.normal.z] : undefined,
                         globalSource: worldCamPos,            
                     } ];
 
