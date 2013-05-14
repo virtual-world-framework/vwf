@@ -69,7 +69,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // If the node that was initialized is the application node, find the user's navigation object
             var sceneView = this;
             var appID = sceneView.kernel.application();
-            this.logger.warn( "Initialized node: " + childID );
             if ( childID == appID )
                 findNavObject.call( sceneView );
         }
