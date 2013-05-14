@@ -68,6 +68,10 @@ properties:
 
   backgroundColor: [ 200, 200, 200 ]
 
+children:
+  camera:
+    extends: http://vwf.example.com/camera.vwf
+    
 methods:
   getActiveCameraComp:
   getChild:
