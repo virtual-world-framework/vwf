@@ -1,77 +1,59 @@
     <script type="text/javascript">
-	
-		$(document).ready(function()
-		{
-			$.ajax('/vwfDataManager.svc/logindata',
+		vwfPortalModel.handleCreateButton = function(o, e){
+
+			var name = $('#txtInstanceName').val();
+			var des = $('#txtInstanceDescription').val();
+			
+			var state = window.location.search.substr(window.location.search.indexOf('=')+1);
+			var path = window.location.pathname.substr(0,window.location.pathname.lastIndexOf('/')+1);
+			
+			var sid = path+state+'/';
+			
+			var statedata = {};
+			statedata.title = name;
+			statedata.description = des;
+			
+			jQuery.ajax(
+			{
+				type: 'POST',
+				url: '/vwfDataManager.svc/createstate',
+				data: JSON.stringify(statedata),
+				success:function(data,status,xhr)
 				{
-					cache:false,
-					success:function(data,status,xhr)
-					{				
-						setup();
-					},
-					error:function(xhr,status,err)
-					{
-						redirect();
-					}
-				});
-				
-		});	
+					redirect();
+				},
+				error:function(xhr,status,err)
+				{
+					$('#error').text("Error: " + xhr.responseText);
+				},
+				dataType: "text"
+			});
+		};
+		
 		function redirect()
 		{
 			window.location.pathname = '';
 		}
-		function setup()
+		
+		$(document).ready(function()
 		{
-		
-			$('#btnSave').click(
-			function(){
-			
-				
-				var name = $('#txtInstanceName').val();
-				var des = $('#txtInstanceDescription').val();
-				
-				var state = window.location.search.substr(window.location.search.indexOf('=')+1);
-				var path = window.location.pathname.substr(0,window.location.pathname.lastIndexOf('/')+1);
-				
-				var sid = path+state+'/';
-				
-			
-				var statedata = {};
-				statedata.title = name;
-				statedata.description = des;
-				
-				jQuery.ajax(
-				{
-					type: 'POST',
-					url: '/vwfDataManager.svc/createstate',
-					data: JSON.stringify(statedata),
-					success:function(data,status,xhr)
-					{
-						redirect();
-					},
-					error:function(xhr,status,err)
-					{
-						$('#error').text("Error: " + xhr.responseText);
-					},
-					dataType: "text"
-				});
-				
-				
-				
-			});
-		
-		};
-		
+			getLoginInfo();
+			ko.applyBindings(vwfPortalModel);
+		});	
 	</script>
-    <div class="wrapper">
-		<h1> Virtual World Framework Create World </h1>
-		<div>Enter a world name and description below. </div>
-		
-		<div>
-		 <input type='text' id='txtInstanceName' class='input' placeholder='World Name'/>
-		 <textarea id='txtInstanceDescription' class='input' placeholder='Description'></textarea>
-		 <div id = 'btnSave' class='button'> Create </div>
+	<h1> Virtual World Framework Create World </h1>
+    <div class="row">
+		<div class="span5 offset3">
+			<form data-bind="submit:handleCreateButton">
+				<fieldset>
+					<legend>Create a world</legend>
+					<input type='text' id='txtInstanceName' placeholder='World Name' class="span5" />
+					<textarea id='txtInstanceDescription' placeholder='Description' class="span5"></textarea><br/>
+					<input type="submit" class='btn' style="float:right;" value="Create"/>
+				</fieldset>
+			</form>
 		</div>
-		<div id='error' style="margin-top: 20PX;font-size: 3EM;color: red;"/>
-		
-    </div>
+	</div>
+	<div class="row">	
+		<div id='error' style="margin-top: 20px;margin-bottom:20px;font-size: 3EM;color: red;" class="span12"></div>
+	</div>

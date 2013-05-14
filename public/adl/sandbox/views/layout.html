@@ -3,7 +3,7 @@
 <head>
 	<link rel="stylesheet" type="text/css" href="{{root}}/css/colorpicker.css" />
     <link rel="stylesheet" media="screen" type="text/css" href="{{root}}/css/bootstrap.min.css" />
-	<link rel="stylesheet" media="screen" type="text/css" href="{{root}}/css/layout.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="{{root}}/css/bootstrap-responsive.css" />
 	<link rel="stylesheet" media="screen" type="text/css" href="{{root}}/css/style.css" />
 	<!--[if !IE 7]>
 	<style type="text/css">
@@ -63,7 +63,7 @@
 		
 		function showStates()
 		{
-			$.getJSON("/vwfDataManager.svc/states",function(e)
+			$.getJSON("./vwfDataManager.svc/states",function(e)
 			{
 				var keys = Object.keys(e);
 				var tempArr = getFlatIdArr();
@@ -94,7 +94,7 @@
 				setTimeout(function(){$(".accordion").css("visibility","visible")}, 200);
 				
 				
-				$.getJSON("/admin/instances",function(e)
+				$.getJSON("./admin/instances",function(e)
 				{
 					//Get all world IDs in flat array form
 					var tempArr = getFlatIdArr(true);
@@ -115,9 +115,7 @@
 			});
 		}
 		
-		$(document).ready(function()
-		{	
-			ko.applyBindings(vwfPortalModel);
+		function getLoginInfo(defaultCb, failCb){			
 			$.ajax('/vwfDataManager.svc/logindata',
 			{
 				cache:false,
@@ -127,25 +125,16 @@
 					vwfPortalModel.user().username = data.username;
 					vwfPortalModel.user().isAdmin = data.admin;
 					vwfPortalModel.user().isLoggedIn = (data.username)?true:false;
-						
-					showStates();
-
-					window.setInterval(function(){
-						showStates();
-					},5000);
-					
 					vwfPortalModel.user.valueHasMutated();
+					
+					if(defaultCb) defaultCb();
 				},
-				error:function(xhr,status,err)
-				{
-					showStates();
-
-					window.setInterval(function(){
-						showStates();
-					},5000);
-				}	
+				error:function(){
+					if(failCb) failCb();
+					else if(defaultCb) defaultCb();
+				}
 			});
-		});
+		}
 	</script>
 </head>
 <body>
@@ -158,13 +147,14 @@
 				<a href="{{root}}/signup?return=index" id="signup" data-bind="visible:!user().isLoggedIn">Create Account</a>
 			</div>
 		</div>	
-		<div id="content">
+		<div id="content" class="container">
 			{{{yield}}}
+			
+
 		</div>
-	</div>
-	<div style="clear:both;"></div>
-	<div id="footer">
-		<br/><p style="color:#eee">This is the footer.</p>
+		<div id="footer" class="container">
+			<br/><p style="color:#eee">This is the footer.</p>
+		</div>
 	</div>
 </body>
 </html>

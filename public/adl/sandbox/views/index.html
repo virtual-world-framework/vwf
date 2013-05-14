@@ -1,51 +1,68 @@
-	<h1> Virtual World Framework Sandbox</h1>
-	<div>
-		Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in
-		"cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a
-		new world" 
-	</div>
-	
-	<div>
-		<div style="float:left;" data-bind="visible:user().isLoggedIn">
-			<a href="{{root}}/create" class="coldstate" id="newinstancebutton"><img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"></a>
-		</div>
-		<input class="span5" id="filter" type="text" placeholder="Filter Results" data-bind="value:filterVal, valueUpdate:'afterkeydown'">
-	</div>
-	
-
-	<div id="activeInstances" style='width:800px' class="accordion" data-bind="foreach:worldObjects">
-	
-		<div class="accordion-group" data-bind="visible:isHidden">
-		
-			<div class="accordion-heading">
-				<a class="accordion-toggle" data-toggle="collapse" data-parent="#activeInstances" data-bind="text:title,attr:{href:'#collapse'+$index()}">Title</a>
+	<h1>Virtual World Framework Sandbox</h1>	
+	<div class="row" style="margin-top:30px;">
+		<div class="span4">
+			<div class="row">
+				<div class="span1" data-bind="visible:user().isLoggedIn">
+					<a href="{{root}}/create" class="coldstate" id="newinstancebutton"><img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"></a>
+				</div>
+				<div class="span3">
+					<input id="filter" class="span3" type="text" placeholder="Filter Results" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
+				</div>
 			</div>
-			<div data-bind="attr:{id:'collapse'+$index()}" class="accordion-body collapse in">
-			
-				<div class="accordion-inner">
+			<div class="row">
+				<div id="activeInstances" class="accordion span4" data-bind="foreach:worldObjects">
 				
-					<div data-bind="css:hotState()?'hotstate':'coldstate'">
-						<div class="editstate">
-							<a class="editstatedata" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"><img src="{{root}}/icons/edit.jpg"></a>
-							<a class="editstatedelete" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"><img src="{{root}}/icons/delete.png"></a>
+					<div class="accordion-group" data-bind="visible:isHidden">
+					
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#activeInstances" data-bind="text:title,attr:{href:'#collapse'+$index()}, css:hotState()?'alert-success':'coldstate'">Title</a>
 						</div>
+						<div data-bind="attr:{id:'collapse'+$index()}" class="accordion-body collapse in">
 						
-						<a data-bind="attr:{href:'{{root}}/'+id}">
-							<div class="title" data-bind="text:title"></div>
-							<div class="description" data-bind="text:description"></div>
-							<div class="owner" data-bind="text:owner"></div>
-							<div class="objects" data-bind="text:objects"></div>
-							<div class="lastModified" data-bind="text:lastUpdate"></div>
-							<div class="stateid" data-bind="text:id"></div>
-						</a>
+							<div class="accordion-inner">
+								<div class="editstate">
+									<a class="editstatedata" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"><img src="{{root}}/icons/edit.jpg"></a>
+									<a class="editstatedelete" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"><img src="{{root}}/icons/delete.png"></a>
+								</div>
+								
+								<a data-bind="attr:{href:'{{root}}/'+id}">
+									<div class="description" data-bind="text:description"></div>
+									<div class="owner" data-bind="text:'Created by: ' + owner"></div>
+									<div class="objects" data-bind="text:objects +' objects currently in world'"></div>
+									<div class="lastModified" data-bind="text:lastUpdate"></div>
+									<div class="stateid" data-bind="text:id"></div>
+								</a>
+							</div>
+						</div>
 					</div>
-				
 				</div>
 			</div>
 		</div>
-		
-		
-		
-		
+		<div class="span8">
+			<p>
+				Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in
+				"cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a
+				new world" 
+			</p>
+			<iframe style="margin:15px auto;display:block;" width="480" height="360" src="http://www.youtube-nocookie.com/embed/utEVly2KCnE?rel=0" frameborder="0" allowfullscreen></iframe>
+		</div>
 	</div>
-	<div id="coldInstances" style='width:800px'></div>
+	<script>
+		$(document).ready(function(){	
+		
+			ko.applyBindings(vwfPortalModel);
+			getLoginInfo(function(){
+					
+				showStates();
+
+				window.setInterval(function(){
+					showStates();
+				},5000);
+
+			});
+		});
+	</script>
+	
+	
+	
+	
