@@ -107,9 +107,19 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     return this.parent;
                 },
                 set: function( value ) {
-                    if ( this.parent ) 
+                    var childIndex;
+                    if ( this.parent ) { 
+                        var oldParent = this.parent;
                         self.kernel.removeChild( this.parent.id, this.id );
+                        childIndex = oldParent.children.indexOf( this );
+                        if ( childIndex != -1 )
+                            oldParent.children.splice( childIndex, 1 );
+                    }
                     self.kernel.addChild( value.id, this.id, this.name );
+                    this.parent = value;
+                    childIndex = this.parent.children.indexOf( this );
+                    if ( childIndex == -1 )
+                        this.parent.children.push( this ); 
                 },
             } );
 
