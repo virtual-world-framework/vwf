@@ -580,6 +580,9 @@ scripts:
         trans[2] = 0;
 
         if ( goog.vec.Vec3.magnitudeSquared( trans ) > goog.vec.EPSILON ) {
+
+          // TODO: Clean this up - right now the two vectors are added together and both vectors are replaced 
+          //       w/ the result.  That's probably not the desired behavior.
           this.activeCameraComp.translation = goog.vec.Vec3.add(
             this.activeCameraComp.translation,
             goog.vec.Vec3.scale(
