@@ -65,7 +65,7 @@ children:
               this.material.color = [ 0, 0, 0 ];        
           }
           this.future(0.1).update();    
-       } //@ sourceURL=index.vwf
+       } //@ sourceURL=index.duck.vwf
   camera:
     extends: http://vwf.example.com/camera.vwf
   dir1:
