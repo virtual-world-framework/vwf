@@ -408,7 +408,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                 // QUESTION: Is the double use of y a bug?  I would assume so, but then why not
                 //           just use worldCamTrans as-is?
-                worldCamPos = [ worldCamTrans.x, worldCamTrans.y, worldCamTrans.y];
+                worldCamPos = [ worldCamTrans.x, worldCamTrans.y, worldCamTrans.z];
             }
 
             returnData.eventNodeData = { "": [ {
