@@ -460,17 +460,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
                         var transformMatrix = goog.vec.Mat4.createFromArray( propertyValue || [] );
-
-                        // Rotate 90 degress around X to convert from VWF Z-up to GLGE Y-up.
-                        if ( threeObject instanceof THREE.Camera ) {
-                            
-							var columny = goog.vec.Vec4.create();
-                            goog.vec.Mat4.getColumn( transformMatrix, 1, columny );
-                            var columnz = goog.vec.Vec4.create();
-                            goog.vec.Mat4.getColumn( transformMatrix, 2, columnz );
-                            goog.vec.Mat4.setColumn( transformMatrix, 1, columnz );
-                            goog.vec.Mat4.setColumn( transformMatrix, 2, goog.vec.Vec4.negate( columny, columny ) );
-                        }
 						
                         // Store the value locally
                         // It must be stored separately from the threeObject so the view can change the
@@ -479,9 +468,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         // If this node has a view-specific transform, that will dictate the transform of
                         // the local user's  rendered object.
-                        // But if not, the model transform will dictate the transform - done here
+                        // But if not, the model transform dictates the transform (in the following code)
                         if ( !node.viewTransform )
                         {
+                            // Rotate 90 degress around X to convert from VWF Z-up to three.js Y-up.
+                            if ( threeObject instanceof THREE.Camera ) {
+                                
+                                // Get column y and z out of the matrix
+                                var columny = goog.vec.Vec4.create();
+                                goog.vec.Mat4.getColumn( transformMatrix, 1, columny );
+                                var columnz = goog.vec.Vec4.create();
+                                goog.vec.Mat4.getColumn( transformMatrix, 2, columnz );
+
+                                // Swap the two columns, negating columny
+                                goog.vec.Mat4.setColumn( transformMatrix, 1, columnz );
+                                goog.vec.Mat4.setColumn( transformMatrix, 2, goog.vec.Vec4.negate( columny, 
+                                                                                                   columny ) );
+                            }
+
     						if( threeObject instanceof THREE.ParticleSystem )
     						{	
                                 // I don't see where this function is defined. Maybe a copy-paste bug from
@@ -490,8 +494,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     						}
     						
                             threeObject.matrixAutoUpdate = false;
-                            threeObject.matrix.elements = matCpy(transformMatrix);
-                            threeObject.updateMatrixWorld(true);      
+                            threeObject.matrix.elements = matCpy( transformMatrix );
+                            threeObject.updateMatrixWorld( true );      
                         }
 
                         value = propertyValue;
