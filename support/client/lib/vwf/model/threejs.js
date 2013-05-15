@@ -570,38 +570,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         value = Boolean( propertyValue );
                         threeObject.receiveShadow = value;
                     }
-                    //This can be a bit confusing, as the node has a material property, and a material child node. 
-                    //setting the property does this, but the code in the component is ambigious
-                    if(propertyName == 'material')
-                    {
-                        var material = GetMaterial(node.threeObject);
-                        if(!material)
-                        {   
-                            material = new THREE.MeshPhongMaterial();
-                            SetMaterial(node.threeObject,material);
-                        }
-                        if(propertyValue == 'red')
-                            material.color.setRGB(1,0,0);
-                        if(propertyValue == 'green')
-                            material.color.setRGB(0,1,0);
-                        if(propertyValue == 'blue')
-                            material.color.setRGB(0,0,1);
-                        if(propertyValue == 'purple')
-                            material.color.setRGB(1,0,1);
-                        if(propertyValue == 'orange')
-                            material.color.setRGB(1,.5,0);
-                        if(propertyValue == 'yellow')
-                            material.color.setRGB(1,1,0);   
-                        if(propertyValue == 'gray')
-                            material.color.setRGB(.5,.5,.5);
-                        if(propertyValue == 'white')
-                            material.color.setRGB(1,1,1);
-                        if(propertyValue == 'black')
-                            material.color.setRGB(0,0,0);                           
-                        material.ambient.setRGB( material.color.r,material.color.g,material.color.b);
-
-                        value = propertyValue;
-                    }
 
                     if(propertyName == "animationTimeUpdated") {
                         if(node.threeObject.animatedMesh && propertyValue !== undefined) {
