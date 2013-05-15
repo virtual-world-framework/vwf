@@ -22,6 +22,7 @@ implements:
 - http://vwf.example.com/planarDrag.vwf
 methods:
   createGeometry:
+  deleteGeometry:
 scripts:
 - |
   this.initialize = function() {
@@ -65,4 +66,9 @@ scripts:
       
       this.children.create( "translateYPositive", surface );
     }    
-  } //@ sourceURL=translateYPos.vwf
+  } 
+  this.deleteGeometry = function() {
+    if ( this.translateYPositive ) {
+      this.children.delete( this.translateYPositive );
+    }
+  }  //@ sourceURL=translateYPos.vwf
