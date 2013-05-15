@@ -20,6 +20,7 @@ methods:
   deleteGeometry:
 properties:
   spin-axis: [ 0, 0, 1 ]
+  spin-rate: 100
 scripts:
 - |
   this.initialize = function() {
@@ -185,7 +186,7 @@ scripts:
         "extends": "http://vwf.example.com/node3.vwf",
         "type": "mesh/definition",
         "properties": { 
-          "meshDefinition": { "positions": pos, "faces": faces, "color": [ 0, 0, 255 ], },
+          "meshDefinition": { "positions": pos, "faces": faces, "color": [ 255, 0, 0 ], },
         },
       };
       

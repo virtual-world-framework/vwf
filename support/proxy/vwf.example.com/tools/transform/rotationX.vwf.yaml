@@ -20,6 +20,7 @@ methods:
   deleteGeometry:
 properties:
   spin-axis: [ 1, 0, 0 ]
+  spin-rate: 100
 scripts:
 - |
   this.initialize = function() {
