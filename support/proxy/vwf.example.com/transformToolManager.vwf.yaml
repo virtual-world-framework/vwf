@@ -43,7 +43,7 @@ scripts:
   } 
   this.select = function( id ) {
 
-    console.info( "this.select( "+id+" )" );
+    //console.info( "this.select( "+id+" )" );
     if ( this["transformTool-enabled"] && id ) {
 
       if ( this.transformTool === undefined ) {
@@ -51,10 +51,10 @@ scripts:
       } else {
         var clickedNode = this.findByID( this, id );
         if ( clickedNode ) {
-          console.info( "      valid clickedNode: " + clickedNode.id );
+          //console.info( "      valid clickedNode: " + clickedNode.id );
           var self = this;
           var selectNode = function() {
-            console.info( "       selectNode: " + clickedNode.id );
+            //console.info( "       selectNode: " + clickedNode.id );
             var wt;
             if ( self.selectedObject !== undefined ) {
               wt = self.transformTool.worldTransform; 
@@ -70,7 +70,7 @@ scripts:
             self.transformTool.worldTransform = wt;
             self.selectedObject.transform = [ 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 ];
             
-            console.info( "       tt calling to select to generate tool: " );
+            //console.info( "       tt calling to select to generate tool: " );
             self.transformTool.objectSelected( self.selectedObject );          
           };        
 

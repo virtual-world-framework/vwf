@@ -99,7 +99,6 @@ scripts:
     this.input.pointerInfo = pointerInfo;
     this.input.pickInfo = pickInfo;
 
-    console.info( "pickInfo.globalNormal = " + pickInfo.globalNormal );
     this.planeNormal = goog.vec.Vec3.createFloat32FromArray( pickInfo.globalNormal );
     this.planePoint = goog.vec.Vec3.createFloat32FromArray( pickInfo.globalPosition ); 
     this.cameraTranslation = goog.vec.Vec3.createFloat32FromArray( pickInfo.globalSource );
@@ -122,9 +121,6 @@ scripts:
     //var hitPoint = goog.vec.Vec3.createFloat32FromArray( pickInfo.globalPosition );
     //goog.vec.Vec3.subtract( hitPoint, this.cameraTranslation, this.pointerVector );
     //goog.vec.Vec3.normalize( this.pointerVector, this.pointerVector );
-
-    //console.info( "     this.pointerVector     = " + Array.prototype.slice.call( this.pointerVector ) );
-    //console.info( "     pickInfo.pointerVector = " + pickInfo.pointerVector );
 
     var newPlaneIntersection = this.linePlaneIntersection( this.planePoint, 
               this.planeNormal, this.cameraTranslation, this.pointerVector );

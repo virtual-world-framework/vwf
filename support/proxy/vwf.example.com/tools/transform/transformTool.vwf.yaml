@@ -38,7 +38,7 @@ events:
 scripts:
 - |
     this.initialize = function() {
-      console.info( "== initialize == transformTool == initialize ==" );
+      //console.info( "== initialize == transformTool == initialize ==" );
       this.objBoundingBox = undefined;
 
       this.selectedID = undefined;
@@ -99,7 +99,7 @@ scripts:
             ),
           goog.vec.Vec3.create()
         );
-        console.info( " this.boxCenter = " +  Array.prototype.slice.call( this.boxCenter ) );
+        //console.info( " this.boxCenter = " +  Array.prototype.slice.call( this.boxCenter ) );
       }       
     }
     this.deleteGeometry = function() {
@@ -135,7 +135,7 @@ scripts:
       }      
     }
     this.removeChildren = function() {
-      console.info( "DESELECTING: " + this.selectedID );
+      //console.info( "DESELECTING: " + this.selectedID );
       if ( this.children ) {
         for ( var i = this.children.length-1; i >= 0; i-- ) {
           this.children.delete( node.children[i] );
@@ -275,7 +275,7 @@ scripts:
     this.createPointList = function( dX, dY, dZ ) {
       var points = [];
 
-      console.info( "createPointList( " +dX+ ", "+dY+ ", "+ +dZ+ " )" );
+      //console.info( "createPointList( " +dX+ ", "+dY+ ", "+ +dZ+ " )" );
       
       var fHalfX = dX * 0.6;
       var fHalfY = dY * 0.6;
