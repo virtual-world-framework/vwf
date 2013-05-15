@@ -1610,7 +1610,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
             xhr.open("POST", "/"+root, true);
             xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            xhr.send("root="+root+"&filename="+filename+"&inst="+inst+"&timestamp="+timestamp+"&jsonState="+json);
+            xhr.send("root="+root+"&filename="+filename+"&inst="+inst+"&timestamp="+timestamp+"&extension=.vwf.json"+"&jsonState="+json);
 
             // Save Config Information
             var config = {"info":{}, "model":{}, "view":{} };
@@ -1642,9 +1642,9 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
             // Save config file to server
             var xhrConfig = new XMLHttpRequest();
-            xhrConfig.open("POST", "/"+root+"/config", true);
+            xhrConfig.open("POST", "/"+root, true);
             xhrConfig.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            xhrConfig.send("root="+root+"&filename="+filename+"&inst="+inst+"&timestamp="+timestamp+"&jsonState="+jsonConfig);
+            xhrConfig.send("root="+root+"&filename="+filename+"&inst="+inst+"&timestamp="+timestamp+"&extension=.vwf.config.json"+"&jsonState="+jsonConfig);
         }
 
         else
