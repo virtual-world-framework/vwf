@@ -120,6 +120,7 @@ scripts:
     //this.pointerVector = goog.vec.Vec3.createFloat32FromArray( pickInfo.pointerVector );
     var hitPoint = goog.vec.Vec3.createFloat32FromArray( pickInfo.globalPosition );
     goog.vec.Vec3.subtract( hitPoint, this.cameraTranslation, this.pointerVector );
+    goog.vec.Vec3.normalize( this.pointerVector, this.pointerVector );
 
     var newPlaneIntersection = this.linePlaneIntersection( this.planePoint, 
               this.planeNormal, this.cameraTranslation, this.pointerVector );
