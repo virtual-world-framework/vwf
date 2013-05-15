@@ -116,7 +116,6 @@ a{
 }
 .button
 {
-
 	cursor: pointer;
 	background: rgb(226,226,226); /* Old browsers */
 	border-radius: 10px;
@@ -129,35 +128,41 @@ a{
 
 .editstate
 {
-	text-align: right;
-	background: lightgray;
-	border-radius: 5px;
-	position: absolute;
 	display: block;
-	margin-top: -9px;
-	margin-left: 165px;
-	height: 1em;
-	line-height: 1em;
-}
-.editstatedata
-{
-	display: inline-block;
-	width: 25px;
-	height: 15px;
-	position: absolute;
-	cursor: pointer;
-	border-radius: 7px;
-}
-.editstatedelete
-{
-	display: inline-block;
+	border-top: 1px solid #eee;
+	margin-top: 10px;
 	
-	height: 15px;
-	position: absolute;
+	width:100%;
+	color: gray;
+	padding-top: 7px;
+	padding-bottom: 20px;
+}
+
+.editstate a
+{
+	text-align:right;
+	float:right;
+}
+.loadWorld{
+
+	text-align:left !important;
+	float:left !important;
+	color:gray;
+	text-decoration: none !important;
+	cursor: pointer;
+	margin-top:-3px;
+}
+.accordion-inner{
+
+	padding-bottom: 3px;
+}
+.editstatedata, .editstatedelete
+{
 	cursor: pointer;
 	border-radius: 7px;
-	left: 25px;
+	margin: 0 10px;
 }
+
 .editstatedata img
 {
 	height: 100%;

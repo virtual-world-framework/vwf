@@ -19,19 +19,20 @@
 						</div>
 						<div data-bind="attr:{id:'collapse'+$index()}" class="accordion-body collapse in">
 						
-							<div class="accordion-inner">
-								<div class="editstate">
-									<a class="editstatedata" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"><img src="{{root}}/icons/edit.jpg"></a>
-									<a class="editstatedelete" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"><img src="{{root}}/icons/delete.png"></a>
-								</div>
-								
-								<a data-bind="attr:{href:'{{root}}/'+id}">
+							<div class="accordion-inner">								
+								<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
 									<div class="description" data-bind="text:description"></div>
 									<div class="owner" data-bind="text:'Created by: ' + owner"></div>
 									<div class="objects" data-bind="text:objects +' objects currently in world'"></div>
 									<div class="lastModified" data-bind="text:lastUpdate"></div>
 									<div class="stateid" data-bind="text:id"></div>
 								</a>
+								
+								<div class="editstate">
+									<a class="loadWorld" data-bind="attr:{href:'{{root}}/'+id}">Load World</a>
+									<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
+									<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
+								</div>
 							</div>
 						</div>
 					</div>
