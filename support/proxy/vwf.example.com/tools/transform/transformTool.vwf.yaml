@@ -27,6 +27,7 @@ methods:
   createTool:
   getToolDimensions:
   createToolGeometry:
+  deleteGeometry:
   createPointList:
   testTool:
   objectSelected:
@@ -101,6 +102,38 @@ scripts:
         console.info( " this.boxCenter = " +  Array.prototype.slice.call( this.boxCenter ) );
       }       
     }
+    this.deleteGeometry = function() {
+      if ( this.children["transXPos"] !== undefined ) {
+        this.children["transXPos"].deleteGeometry();
+      }
+      if ( this.children["transXNeg"] !== undefined ) {
+        this.children["transXNeg"].deleteGeometry();
+      }
+      if ( this.children["transYPos"] !== undefined ) {
+        this.children["transYPos"].deleteGeometry();
+      }
+      if ( this.children["transYNeg"] !== undefined ) {
+        this.children["transYNeg"].deleteGeometry();
+      }
+      if ( this.children["transZPos"] !== undefined ) {
+        this.children["transZPos"].deleteGeometry();
+      }
+      if ( this.children["transZNeg"] !== undefined ) {
+        this.children["transZNeg"].deleteGeometry();
+      }
+      if ( this.children["rotX"] !== undefined ) {
+        this.children["rotX"].deleteGeometry();
+      }
+      if ( this.children["rotY"] !== undefined ) {
+        this.children["rotY"].deleteGeometry();
+      }
+      if ( this.children["rotZ"] !== undefined ) {
+        this.children["rotY"].deleteGeometry();
+      }
+      if ( this.children["scaler"] !== undefined ) {
+        this.children["scaler"].deleteGeometry();
+      }      
+    }
     this.removeChildren = function() {
       console.info( "DESELECTING: " + this.selectedID );
       if ( this.children ) {
@@ -122,35 +155,60 @@ scripts:
       this.createPointList( dx, dy, dz );
       var path = "http://vwf.example.com/tools/transform/";
       if ( this.ttPoints ){
+        
         // translate xPos 9,18,15,12
-        this.children.create( "transXPos", { "includes": path + "translateXPos.vwf" }, function( child) {
-          child.createGeometry();
-        } );
+        if ( this.children["transXPos"] === undefined ) {
+          this.children.create( "transXPos", { "includes": path + "translateXPos.vwf" }, function( child ) {
+            child.createGeometry();
+          } );
+        } else {
+          this.children["transXPos"].createGeometry();
+        }
 
         // translate xNeg 21,24,27,30
-        this.children.create( "transXNeg", { "includes": path + "translateXNeg.vwf" }, function( child) {
-          child.createGeometry();
-        } );
+        if ( this.children["transXNeg"] === undefined ) {
+          this.children.create( "transXNeg", { "includes": path + "translateXNeg.vwf" }, function( child ) {
+            child.createGeometry();
+          } );
+        } else {
+          this.children["transXNeg"].createGeometry();
+        } 
 
         // translate yPos 48,49,50,51
-        this.children.create( "transYPos", { "includes": path + "translateYPos.vwf" }, function( child) {
-          child.createGeometry();
-        } );
+        if ( this.children["transYPos"] === undefined ) {
+          this.children.create( "transYPos", { "includes": path + "translateYPos.vwf" }, function( child ) {
+            child.createGeometry();
+          } );
+        } else {
+          this.children["transYPos"].createGeometry();
+        }
 
         // translate yNeg 52,53,54,55
-        this.children.create( "transYNeg", { "includes": path + "translateYNeg.vwf" }, function( child) {
-          child.createGeometry();
-        } );
+        if ( this.children["transYNeg"] === undefined ) {
+          this.children.create( "transYNeg", { "includes": path + "translateYNeg.vwf" }, function( child ) {
+            child.createGeometry();
+          } );
+        } else {
+          this.children["transYNeg"].createGeometry();
+        }
 
         // translate zPos 32,34,36,38
-        this.children.create( "transZPos", { "includes": path + "translateZPos.vwf" }, function( child) {
-          child.createGeometry();
-        } );
+        if ( this.children["transZPos"] === undefined ) {
+          this.children.create( "transZPos", { "includes": path + "translateZPos.vwf" }, function( child ) {
+            child.createGeometry();
+          } );
+        } else {
+          this.children["transZPos"].createGeometry();
+        }
 
         // translate zNeg 40,46,44,42
-        this.children.create( "transZNeg", { "includes": path + "translateZNeg.vwf" }, function( child) {
-          child.createGeometry();
-        } );
+        if ( this.children["transZNeg"] === undefined ) {
+          this.children.create( "transZNeg", { "includes": path + "translateZNeg.vwf" }, function( child ) {
+            child.createGeometry();
+          } );
+        } else {
+          this.children["transZNeg"].createGeometry();
+        }
         
         // rotate X yPos 34,35,37,36
         // rotate X yNeg 33,32,38,39    
@@ -160,10 +218,14 @@ scripts:
         // rotate X zNeg 55,47,41,52
         // rotate X zPos 50,49,35,37
         // rotate X zNeg 43,48,51,45 
-        // this.createXRotate(); 
-        this.children.create( "rotX", { "includes": path + "rotationX.vwf" }, function( child) {
-          child.createGeometry();
-        } );        
+
+        if ( this.children["rotX"] === undefined ) {
+          this.children.create( "rotX", { "includes": path + "rotationX.vwf" }, function( child) {
+            child.createGeometry();
+          } );        
+        } else {
+          this.children["rotX"].createGeometry();
+        }
 
         // rotate Z yPos 12,13,16,15
         // rotate Z yNeg 10,9,18,19
@@ -173,10 +235,15 @@ scripts:
         // rotate Z xNeg 28,51,50,25     
         // rotate Z xPos 52,19,10,53
         // rotate Z xNeg 22,54,55,31           
-        // this.createYRotate();
-        this.children.create( "rotY", { "includes": path + "rotationY.vwf" }, function( child) {
-          child.createGeometry();
-        } ); 
+        
+        if ( this.children["rotY"] === undefined ) {
+          this.children.create( "rotY", { "includes": path + "rotationY.vwf" }, function( child) {
+            child.createGeometry();
+          } ); 
+        } else {
+          this.children["rotY"].createGeometry();
+        }
+
         // rotate Z yPos 12,13,16,15
         // rotate Z yNeg 10,9,18,19
         // rotate Z yPos 24,25,28,27
@@ -185,14 +252,23 @@ scripts:
         // rotate Z xNeg 28,51,50,25     
         // rotate Z xPos 52,19,10,53
         // rotate Z xNeg 22,54,55,31 
-        // this.createZRotate();
-        this.children.create( "rotZ", { "includes": path + "rotationZ.vwf" }, function( child) {
-          child.createGeometry();
-        } );
 
-        this.children.create( "scaler", { "includes": path + "scaleXYZ.vwf" }, function( child) {
-          child.createGeometry();
-        } );
+        if ( this.children["rotZ"] === undefined ) {
+          this.children.create( "rotZ", { "includes": path + "rotationZ.vwf" }, function( child) {
+            child.createGeometry();
+          } );
+        } else {
+          this.children["rotZ"].createGeometry();
+        }
+
+
+        if ( this.children["scaler"] === undefined ) {
+          this.children.create( "scaler", { "includes": path + "scaleXYZ.vwf" }, function( child) {
+            child.createGeometry();
+          } );
+        } else {
+          this.children["scaler"].createGeometry();
+        }        
 
       }
     }

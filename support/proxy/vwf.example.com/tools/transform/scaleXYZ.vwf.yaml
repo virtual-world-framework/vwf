@@ -15,6 +15,7 @@
 extends: http://vwf.example.com/node3.vwf
 methods:
   createGeometry:
+  deleteGeometry:
 scripts:
 - |
   this.initialize = function() {
@@ -498,4 +499,9 @@ scripts:
       
       this.children.create( "scaleSurfaces", surface );
     }    
+  } 
+  this.deleteGeometry = function() {
+    if ( this.scaleSurfaces ) {
+      this.children.delete( this.scaleSurfaces );
+    }
   } //@ sourceURL=scaleXYZ.vwf

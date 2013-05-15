@@ -17,6 +17,7 @@ implements:
 - http://vwf.example.com/spin-on-move.vwf
 methods:
   createGeometry:
+  deleteGeometry:
 properties:
   spin-axis: [ 1, 0, 0 ]
 scripts:
@@ -182,4 +183,9 @@ scripts:
       
       this.children.create( "rotateX", surface );
     }    
-  } //@ sourceURL=rotationX.vwf
+  } 
+  this.deleteGeometry = function() {
+    if ( this.rotateX ) {
+      this.children.delete( this.rotateX );
+    }
+  }  //@ sourceURL=rotationX.vwf

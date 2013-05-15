@@ -60,7 +60,8 @@ scripts:
               wt = self.transformTool.worldTransform; 
               self.selectedObject.parent_ = self.previousParent;
               self.selectedObject.worldTransform = wt;
-              self.transformTool.removeChildren();
+              //self.transformTool.removeChildren();
+              self.transformTool.deleteGeometry();
             }
             self.selectedObject = clickedNode;
             self.previousParent = clickedNode.parent;
