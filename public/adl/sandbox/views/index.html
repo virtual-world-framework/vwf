@@ -13,9 +13,9 @@
 				<div id="activeInstances" class="accordion span4" data-bind="foreach:worldObjects">
 				
 					<div class="accordion-group" data-bind="visible:isHidden" style="width:97.5%;">
-					
+						
 						<div class="accordion-heading">
-							<a class="accordion-toggle" data-toggle="collapse" data-parent="#activeInstances" data-bind="text:title,attr:{href:'#collapse'+$index()}, css:hotState()?'alert-success':'coldstate'">Title</a>
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#activeInstances" data-bind="text:title,attr:{href:'#collapse'+$index()}, css:hotState()?'alert-success':'coldstate'" onclick='scrollbarFix()'>Title</a>
 						</div>
 						<div data-bind="attr:{id:'collapse'+$index()}" class="accordion-body collapse in">
 						
@@ -48,6 +48,13 @@
 		</div>
 	</div>
 	<script>
+		function scrollbarFix(){
+
+			obj = $("#activeInstances");
+
+			obj.getNiceScroll().remove();
+			obj.niceScroll({"cursoropacitymax": 0.4, "cursorborderradius": 0} );
+		};
 		$(document).ready(function(){	
 			
 			ko.applyBindings(vwfPortalModel);

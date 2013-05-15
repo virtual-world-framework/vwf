@@ -40,3 +40,9 @@ exports.remove = function(req, res){
 	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root};
 	res.render('deleteInstance');
 }
+exports.user = function(req, res){
+
+
+	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root};
+	res.render('userManagement');
+}
