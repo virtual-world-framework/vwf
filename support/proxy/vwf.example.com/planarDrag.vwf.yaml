@@ -113,6 +113,11 @@ scripts:
     
     // update the camera location and the view vector
     this.cameraTranslation = goog.vec.Vec3.createFloat32FromArray( pickInfo.globalSource );
+    
+    // we need a way of getting the pointerVector here without the using the 
+    // globalPosition, because that might not have a value
+    
+    //this.pointerVector = goog.vec.Vec3.createFloat32FromArray( pickInfo.pointerVector );
     var hitPoint = goog.vec.Vec3.createFloat32FromArray( pickInfo.globalPosition );
     goog.vec.Vec3.subtract( hitPoint, this.cameraTranslation, this.pointerVector );
 

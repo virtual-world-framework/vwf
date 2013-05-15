@@ -53,6 +53,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             this.pickInterval = 10;
             this.disableInputs = false;
+            this.pointerVector = undefined;
 
             // Store parameter options for persistence functionality
             this.parameters = options;
@@ -716,11 +717,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 worldCamTrans.getPositionFromMatrix( camera.matrixWorld );
 
                 // Convert THREE.Vector3 to array
+                // QUESTION: Is the double use of y a bug?  I would assume so, but then why not
+                //           just use worldCamTrans as-is?
                 worldCamPos = [ worldCamTrans.x, worldCamTrans.y, worldCamTrans.z];
             }
 
             returnData.eventNodeData = { "": [ {
                 pickID: pointerPickID,
+                pointerVector: self.pointerVector ? vec3ToArray( self.pointerVector ) : undefined,
                 distance: pickInfo ? pickInfo.distance : undefined,
                 origin: pickInfo ? pickInfo.worldCamPos : undefined,
                 globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined,
@@ -782,6 +786,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                         
                     returnData.eventNodeData[ childID ] = [ {
                         pickID: pointerPickID,
+                        pointerVector: self.pointerVector ? vec3ToArray( self.pointerVector ) : undefined,
                         position: localTrans,
                         normal: localNormal,
                         source: relativeCamPos,
@@ -2116,6 +2121,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         else if(threeObject.parent)
          return getPickObjectID(threeObject.parent);
         return null;    
+    }
+
+    function vec3ToArray( vec ) {
+        return [ vec.x, vec.y, vec.z ];
     }
 
     function indentStr() {
