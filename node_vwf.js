@@ -175,7 +175,7 @@ function _FileCache()
 	this.getDataType = function(file)
 	{
 		var type = file.substr(file.lastIndexOf('.')+1).toLowerCase();
-		if(type === 'js' || type === 'html' || type === 'xml' || type === 'txt' || type === 'xhtml')
+		if(type === 'js' || type === 'html' || type === 'xml' || type === 'txt' || type === 'xhtml' || type === 'css')
 		{
 			return "utf8";
 		}
