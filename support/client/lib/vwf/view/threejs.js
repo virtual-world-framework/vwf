@@ -627,13 +627,109 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         // TEMPNAV: This is part of a temporary example of navigation - 
         //          to be replaced by better navigation soon
-        this.input = {
-            "move": [ 0, 0 ],
-            "look": [ 0, 0 ],
-            "lastInputTime": undefined
+
+        this.translationSpeed = 100; // Units per second
+        this.rotationSpeed = 90; // Degrees per second
+        var moveStartTime;
+        var rotateStartTime;
+        var movingForward = false;
+        var movingBack = false;
+        var movingLeft = false;
+        var movingRight = false;
+        var rotatingLeft = false;
+        var rotatingRight = false;
+
+        this.startForward = function() {
+            if ( !movingForward ) {
+                movingForward = true;
+                // If we're not already moving, start the move
+                if ( !( movingBack || movingLeft || movingRight ) ) {
+                    moveStartTime = +new Date;
+                    this.move();
+                }
+            }
         };
 
-        this.move = function( x, y ) {
+        this.startBack = function() {
+            if ( !movingBack ) {
+                movingBack = true;
+                // If we're not already moving, start the move
+                if ( !( movingForward || movingLeft || movingRight ) ) {
+                    moveStartTime = +new Date;
+                    this.move();
+                }
+            }
+        };
+
+        this.startLeft = function() {
+            if ( !movingLeft ) {
+                movingLeft = true;
+                // If we're not already moving, start the move
+                if ( !( movingForward || movingBack || movingRight ) ) {
+                    moveStartTime = +new Date;
+                    this.move();
+                }
+            }
+        };
+
+        this.startRight = function() {
+            if ( !movingRight ) {
+                movingRight = true;
+                // If we're not already moving, start the move
+                if ( !( movingForward || movingBack || movingLeft ) ) {
+                    moveStartTime = +new Date;
+                    this.move();
+                }
+            }
+        };
+
+        this.startRotatingLeft = function() {
+            if ( !rotatingLeft ) {
+                rotatingLeft = true;
+                // If we're not already moving, start the move
+                if ( !rotatingRight ) {
+                    rotateStartTime = +new Date;
+                    this.rotate();
+                }
+            }
+        };
+
+        this.startRotatingRight = function() {
+            if ( !rotatingRight ) {
+                rotatingRight = true;
+                // If we're not already moving, start the move
+                if ( !rotatingLeft ) {
+                    rotateStartTime = +new Date;
+                    this.rotate();
+                }
+            }
+        };
+
+        this.move = function() {
+
+            // If all movement has ceased, return
+            if ( !( movingForward || movingBack || movingLeft || movingRight ) )
+                return;
+
+            var self = this;
+            var seconds = this.secondsElapsed( moveStartTime );
+
+            // Compute the distance traveled in the elapsed time
+            // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
+            // one key press doesn't send them off in space
+            var dist = this.translationSpeed * Math.min( seconds, 0.5 );
+
+            var x = 0;
+            var y = 0;
+
+            if ( movingForward )
+                y += 1;
+            if ( movingBack )
+                y -= 1;
+            if ( movingLeft )
+                x -= 1;
+            if ( movingRight )
+                x += 1;
 
             // Transform the displacement vector from camera coordinates
             // to the coordinates of the camera's parent
@@ -652,8 +748,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 
                 // Take the direction specified by the translation direction and apply a calculated magnitude 
                 // to that direction to compute the displacement vector
-                goog.vec.Vec3.scale( goog.vec.Vec3.normalize( translation, translation ), this.distance(), 
-                                     translation );
+                goog.vec.Vec3.scale( goog.vec.Vec3.normalize( translation, translation ), dist, translation );
 
                 // Add the displacement to the current camera position
                 cameraPos = goog.vec.Vec3.add( cameraPos, translation, cameraPos );
@@ -666,14 +761,73 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 // Force the camera's world transform to update from its local transform
                 camera.updateMatrixWorld( true );
             }
+
+            moveStartTime = +new Date;
+            window.setTimeout( function() {
+                self.move.call( self );
+            }, 0.01 );
         }
 
-        this.look = function() {
+        this.rotate = function() {
 
+            // If all movement has ceased, return
+            if ( !( rotatingLeft || rotatingRight ) )
+                return;
+
+            var self = this;
+            var seconds = this.secondsElapsed( rotateStartTime );
+
+            var direction = 0;
+
+            if ( rotatingLeft )
+                direction += 1;
+            if ( rotatingRight )
+                direction -= 1;
+
+            // Compute the distance rotated in the elapsed time
+            // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
+            // one key press doesn't send them off in space
+            var theta = direction * ( this.rotationSpeed * Math.PI / 180 ) * Math.min( seconds, 0.5 );
+
+            var cos = Math.cos( theta );
+            var sin = Math.sin( theta );
+            var rotation = [  cos, sin, 0, 0,
+                             -sin, cos, 0, 0,
+                                0,   0, 1, 0,
+                                0,   0, 0, 1 ];
+            
+            // Left multiply the current transform matrix by the rotation transform
+            // and assign the result back to the camera's transform
+            var camera = this.state.cameraInUse;
+            var cameraTransform = camera.matrix.elements;
+
+            // Save the camera position so we can reinstitute it after the rotation
+            // (effectively rotating the camera in place rather than around its origin)
+            var cameraPos = [ cameraTransform[ 12 ], cameraTransform[ 13 ], cameraTransform[ 14 ] ];
+
+            // Perform the rotation
+            goog.vec.Mat4.multMat( rotation, cameraTransform, cameraTransform );
+
+            // Put the original camera position back
+            cameraTransform[ 12 ] = cameraPos[ 0 ];
+            cameraTransform[ 13 ] = cameraPos[ 1 ];
+            cameraTransform[ 14 ] = cameraPos[ 2 ];
+
+            // Force the camera's world transform to update from its local transform
+            camera.updateMatrixWorld( true );
+
+            rotateStartTime = +new Date;
+            window.setTimeout( function() {
+                self.rotate.call( self );
+            }, 0.01 );
         }
 
-        this.cameraZ = function() {
-
+        this.secondsElapsed = function( startTime ) {
+            var currTime = +new Date;
+            if ( startTime )
+                return ( currTime - startTime ) * 0.001;
+            else
+                return 0;
         }
 
         this.getCameraVec = function( x, y, z ) {
@@ -692,22 +846,30 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             return camAt;      
         }
 
-        this.translationSpeed = 1;
+        this.stopForward = function() {
+            movingForward = false;
+        };
 
-        this.distance = function(){
-            var dist = this.translationSpeed;
-            if(this.timeElapsed() > 0)
-                dist = dist * this.timeElapsed();
-            return dist;
-        }
+        this.stopBack = function() {
+            movingBack = false;
+        };
 
-        this.timeElapsed = function() {
-            var currTime = +new Date;
-            var timeElapsed = currTime - this.input.lastInputTime;
-            if ( !this.input.lastInputTime || timeElapsed > 1 )
-                timeElapsed = 1;  
-            return timeElapsed;
-        }
+        this.stopLeft = function() {
+            movingLeft = false;
+        };
+
+        this.stopRight = function() {
+            movingRight = false;
+        };
+
+        this.stopRotatingLeft = function() {
+            rotatingLeft = false;
+        };
+
+        this.stopRotatingRight = function() {
+            rotatingRight = false;
+        };
+
         // END TEMPNAV
 
         window.onkeydown = function (event) {
@@ -730,46 +892,34 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                             // TEMPNAV: This is part of a temporary example of navigation - 
                             //          to be replaced by better navigation soon
-                            self.input.look = [ 0, 0 ];
-                            self.input.move = [ 0, 0 ];
-                            var deltaZ = 0;
                             switch ( event.keyCode ) {
                                 case 87:  //w
                                 case 38:  //up
-                                    self.input.move[1] += 1;
+                                    self.startForward();
                                     break;
                                 case 83:  //s
                                 case 40:  //down
-                                    self.input.move[1] += -1;
+                                    self.startBack();
                                     break;
                                 case 37: // left              
                                 case 65:  //a
-                                    self.input.move[0] += -1;
+                                    self.startLeft();
                                     break;
                                 case 39: // right              
                                 case 68:  //d
-                                    self.input.move[0] += 1;
+                                    self.startRight();
                                     break;
                                 case 81: // q
-                                    self.input.look[0] += -1;
+                                    self.startRotatingLeft();
                                     break;
                                 case 69: // e
-                                    self.input.look[0] += 1;
+                                    self.startRotatingRight();
                                     break;
                                 case 82: // r
-                                    deltaZ += 1.0;
                                     break;
                                 case 67: // c
-                                    deltaZ += - 1.0;
                                     break;
                             }
-                            if ( self.input.look[0] != 0 || self.input.look[1] != 0 )
-                                self.look( self.input.look[0], self.input.look[1] );
-                            if ( self.input.move[0] != 0 || self.input.move[1] != 0 )
-                                self.move( self.input.move[0], self.input.move[1] );
-                            if ( deltaZ != 0 )
-                                self.cameraZ( deltaZ );
-                            self.input.lastInputTime = +new Date;
                             // END TEMPNAV
 
                             break;
@@ -805,6 +955,35 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                             delete sceneView.keyStates.keysDown[key.key];
                             sceneView.keyStates.keysUp[key.key] = key;
                             validKey = true;
+
+                            // TEMPNAV: This is part of a temporary example of navigation - 
+                            //          to be replaced by better navigation soon
+                            switch ( event.keyCode ) {
+                                case 87:  //w
+                                case 38:  //up
+                                    self.stopForward();
+                                    break;
+                                case 83:  //s
+                                case 40:  //down
+                                    self.stopBack();
+                                    break;
+                                case 37: // left              
+                                case 65:  //a
+                                    self.stopLeft();
+                                    break;
+                                case 39: // right              
+                                case 68:  //d
+                                    self.stopRight();
+                                    break;
+                                case 81: // q
+                                    self.stopRotatingLeft();
+                                    break;
+                                case 69: // e
+                                    self.stopRotatingRight();
+                                    break;
+                            }
+                            //END TEMPNAV
+
                             break;
                     }
 
@@ -819,7 +998,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         sceneView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [sceneView.keyStates]);
                         delete sceneView.keyStates.keysUp[key.key];
                     }
-
                 };
         
         if(typeof canvas.onmousewheel == "function") {
