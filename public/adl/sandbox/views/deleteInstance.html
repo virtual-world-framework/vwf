@@ -2,7 +2,7 @@
 	var sid = '{{sid}}';
 	$(document).ready(function()
 	{
-		getLoginInfo(function(){}, redirect);
+		getLoginInfo(false, redirect);
 		ko.applyBindings(vwfPortalModel);
 			
 		$.ajax('/vwfDataManager.svc/statedata?SID=' + sid,
