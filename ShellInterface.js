@@ -294,6 +294,10 @@ function StartShellInterface()
 			{
 				DAL.clearStates();
 			}
+			if(commands[1] == 'cache')
+			{
+				global.FileCache.clear();
+			}
 		}
 		if(commands[0] == 'create')
 		{

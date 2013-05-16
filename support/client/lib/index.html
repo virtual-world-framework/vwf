@@ -67,6 +67,21 @@
     <script type="text/javascript" src="vwf/model/jiglib/jiglib.js"></script>
     <script type="text/javascript">
 
+	//remove the instnace name from requests to make things cache
+	$.ajaxSetup({ cache: true });
+			
+			$.ajaxPrefilter( function(options, originalOptions, jqXHR) 
+			{
+				var p = window.location.pathname;
+				if(p[p.length-1] == '/') {p = p.substring(0,p.length -1)};
+				p = p.substring(p.lastIndexOf('/')+1);
+				options.url = options.url.replace(p,'');
+				console.log(options.url);
+			
+			
+			}
+			);
+			
         require( [
 
             "domReady",

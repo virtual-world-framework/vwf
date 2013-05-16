@@ -11,6 +11,7 @@ var libpath = require('path'),
 	express = require('express'),
 	app = express(),
 	landing = require('./landingRoutes');
+var zlib = require('zlib');
 	
 // pick the application name out of the URL by finding the index.vwf.yaml
 function findAppName(uri)
@@ -157,27 +158,133 @@ function filterinstance(uri,instance)
 {
 	return uri.replace(instance +'\\','').replace(instance,'\\');
 }
-//Just serve a simple file
-function ServeFile(filename,response,URL)
+
+function hash(str)
 {
-			fs.readFile(filename, "binary", function (err, file) {
-			if (err) {
+	return require('crypto').createHash('md5').update(str).digest("hex");
+}
+
+function _FileCache() 
+{
+	this.files = [];
+	this.enabled = true;
+	this.clear = function()
+	{
+		this.files.length = 0;
+	}
+	this.getDataType = function(file)
+	{
+		var type = file.substr(file.lastIndexOf('.')+1).toLowerCase();
+		if(type === 'js' || type === 'html' || type === 'xml' || type === 'txt' || type === 'xhtml')
+		{
+			return "utf8";
+		}
+		else return "binary";
+	}
+	this.getFile = function(path,callback)
+	{
+		for(var i =0; i < this.files.length; i++)
+		{
+			if(this.files[i].path == path)
+			{	
+				console.log('serving from cache: ' + path);
+				callback(this.files[i]);
+				return;
+			}
+		}
+		// if got here, have no record;
+		var datatype = this.getDataType(path);
+		var file = fs.readFileSync(path);
+		var stats = fs.statSync(path);
+		
+		if(file)
+		{
+			var self = this;
+			zlib.gzip(file,function(_,zippeddata)
+			{
+				
+				var newentry = {};
+				newentry.path = path;
+				newentry.data = file;
+				newentry.stats = stats;
+				newentry.zippeddata = zippeddata;
+				newentry.datatype = datatype;
+				newentry.hash = hash(file);
+				console.log(newentry.hash);
+				console.log('loading into cache: ' + path);
+				if(self.enabled == true)
+					self.files.push(newentry);
+				callback(newentry);
+				return;
+			});
+			return;
+		}
+		callback(null);
+	}
+	this.ServeFile = function(request,filename,response,URL)
+	{
+		FileCache.getFile(filename,function(file)
+		{
+			if (!file) {
 				response.writeHead(500, {
 					"Content-Type": "text/plain"
 				});
-				response.write(err + "\n");
+				response.write('file load error' + "\n");
 				response.end();
 				return;
 			}
- 
 			var type = mime.lookup(filename);
-			response.writeHead(200, {
-				"Content-Type": type
-			});
-			response.write(file, "binary");
+			
+			if(request.headers['if-none-match'] === file.hash)
+			{
+				response.writeHead(304, {
+				"Content-Type": type,
+				"Last-Modified": file.stats.mtime,
+				"ETag": file.hash,
+				"Cache-Control":"public; max-age=31536000" ,
+				
+				});
+				response.end();
+				return;
+			}
+			
+			if(request.headers['accept-encoding'] && request.headers['accept-encoding'].indexOf('gzip') >= 0)
+			{
+				response.writeHead(200, {
+					"Content-Type": type,
+					"Last-Modified": file.stats.mtime,
+					"ETag": file.hash,
+					"Cache-Control":"public; max-age=31536000" ,
+					'Content-Encoding': 'gzip'
+				});
+				response.write(file.zippeddata, file.datatype);
+			
+			
+			}else
+			{
+				response.writeHead(200, {
+					"Content-Type": type,
+					"Last-Modified": file.stats.mtime,
+					"ETag": file.hash,
+					"Cache-Control":"public; max-age=31536000"
+					
+				});
+				response.write(file.data, file.datatype);
+			}
 			response.end();
 			
-		});
+		
+		});	
+	}
+}
+
+var FileCache = new _FileCache();
+global.FileCache = FileCache;
+//Just serve a simple file
+function ServeFile(request,filename,response,URL)
+{
+	FileCache.ServeFile(request,filename,response,URL)
+		
 }
 //Return a 404 not found coude
 function _404(response)
@@ -420,14 +527,14 @@ function startVWF(){
 					DAL.getInstance(appname.substr(8).replace(/\\/g,'_') + instance + "_",function(data)
 					{
 						if(data)
-							ServeFile(filename,response,URL);
+							ServeFile(request,filename,response,URL);
 						else
 							redirect(filterinstance(URL.pathname,instance)+"/index.html",response);
 					});
 					return;
 				}
 				//just serve the file
-				ServeFile(filename,response,URL);
+				ServeFile(request,filename,response,URL);
 				
 			}
 			else if(c4)
@@ -817,6 +924,12 @@ function startVWF(){
 	p = process.argv.indexOf('-a');
 	adminUID = p >= 0 ? process.argv[p+1] : adminUID;	
 	
+	p = process.argv.indexOf('-nocache');
+	if(p >= 0)
+	{
+	   FileCache.enabled = false;
+	   console.log('server cache disabled');
+	}
 	SandboxAPI.setDAL(DAL);
 	SandboxAPI.setDataPath(datapath);
 	Shell.setDAL(DAL);

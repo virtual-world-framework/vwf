@@ -162,7 +162,7 @@ define(
 		});
 		$('#MenuGlobalInventory').click(function (e)
 		{
-			_GlobalInventoryManager.show();
+			
 		});
 		$('#MenuLatencyTest').click(function (e)
 		{

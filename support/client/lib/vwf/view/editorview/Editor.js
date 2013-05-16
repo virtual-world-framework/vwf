@@ -403,13 +403,14 @@ define(function ()
 			this.selectionMarquee.hide();
 			this.selectionMarquee.css('z-index', '-1');
 			this.mouseUpScreenPoint = [e.clientX, e.clientY];
-			var w = this.mouseUpScreenPoint[0] - this.mouseDownScreenPoint[0];
-			var h = this.mouseUpScreenPoint[1] - this.mouseDownScreenPoint[1];
-			var picksize = Math.sqrt(w * w + h * h);
+			
 			if (document.AxisSelected == -1 && e.button == 0)
 			{
-				if (SelectMode == 'Pick')
+				if (SelectMode == 'Pick' && this.mouseDownScreenPoint)
 				{
+					var w = this.mouseUpScreenPoint[0] - this.mouseDownScreenPoint[0];
+					var h = this.mouseUpScreenPoint[1] - this.mouseDownScreenPoint[1];
+					var picksize = Math.sqrt(w * w + h * h);
 					if (picksize < 10)
 					{
 						if (vwf.views[0].lastPickId)
@@ -507,6 +508,7 @@ define(function ()
 				$('#StatusAxis').text('Axis: -1');
 				this.updateGizmoOrientation(true);
 			}
+			this.mouseDownScreenPoint = null;
 		}.bind(this);
 		this.GetAllLeafMeshes = function (threeObject, list)
 		{

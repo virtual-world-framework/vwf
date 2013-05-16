@@ -1074,10 +1074,10 @@ function serve (request, response)
 		switch(command)
 		{	
 			case "texture":{
-				ServeFile(basedir+"textures\\" + URL.query.UID,response,URL);		
+				global.FileCache.ServeFile(request,basedir+"textures\\" + URL.query.UID,response,URL);		
 			} break;
 			case "thumbnail":{
-				ServeFile(basedir+"thumbnails\\" + URL.query.UID,response,URL);		
+				global.FileCache.ServeFile(request,basedir+"thumbnails\\" + URL.query.UID,response,URL);		
 			} break;
 			case "state":{
 				ServeFile(basedir+"states\\" + SID+'\\state',response,URL,'GetStateResult');		

@@ -121,6 +121,11 @@ SceneManager.prototype.update = function(dt)
 SceneManager.prototype.getTexture = function(src)
 {
 	
+	var p = window.location.pathname;
+	if(p[p.length-1] == '/') {p = p.substring(0,p.length -1)};
+	p = p.substring(p.lastIndexOf('/')+1);
+	src = src.replace(p,'');
+	
 	if(!this.textureList)
 		this.textureList = {};
 	if(!this.textureList[src])
