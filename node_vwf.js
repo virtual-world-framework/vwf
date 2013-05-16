@@ -361,14 +361,25 @@ function getNamespace(socket)
 }
 function checkOwner(node,name)
 {
+	var level = 0;
+	if(!node.properties) node.properties = {};
+	if(!node.properties.permission) node.properties.permission = {}
+	var permission = node.properties['permission'];
+	var owner = node.properties['owner'];
+	if(owner == name)
+	{
+		level = Infinity;
+		return level;
+	}
+	if(permission)
+	{
+		level = Math.max(level?level:0,permission[name]?permission[name]:0,permission['Everyone']?permission['Everyone']:0);
+	}
+	var parent = node.parent;
+	if(parent)
+		level = Math.max(level?level:0,checkOwner(parent,name));
+	return level?level:0;	
 	
-	if(!node) return false;
-	if(!node.properties || !node.properties.owner)
-		return true;
-	var names = node.properties.owner.split(',');
-	if(names.indexOf(name) != -1)
-		return true;
-	return false;
 }
 function strEndsWith(str, suffix) {
     return str.match(suffix+"$")==suffix;
@@ -408,6 +419,7 @@ function isPointerEvent(message)
 				childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
 				childComponent.id = childID;
 				node.children[childID] = childComponent;
+				node.children[childID].parent = node;
 				delete node.children[i];
 				fixIDs(childComponent);
 			}
@@ -686,6 +698,7 @@ function startVWF(){
 			childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
 			state[i].id = childID;
 			global.instances[namespace].state.nodes['index-vwf'].children[childID] = state[i];
+			global.instances[namespace].state.nodes['index-vwf'].children[childID].parent = global.instances[namespace].state.nodes['index-vwf'];
 			fixIDs(state[i]);
 		}
 		//global.log(Object.keys(global.instances[namespace].state.nodes['index-vwf'].children));
@@ -820,7 +833,7 @@ function startVWF(){
 				  //Keep a record of the new node
 				  if(checkOwner(node,sendingclient.loginData.UID) || message.node == 'index-vwf')
 				  {	
-						var childComponent = message.parameters[0];
+						var childComponent = JSON.parse(JSON.stringify(message.parameters[0]));
 						if(!childComponent) return;
 						var childName = message.member;
 						if(!childName) return;
@@ -829,6 +842,7 @@ function startVWF(){
 						childComponent.id = childID;
 						if(!node.children) node.children = {};
 						node.children[childID] = childComponent;
+						node.children[childID].parent = node;
 						if(!childComponent.properties)
 							childComponent.properties = {};
 						fixIDs(node.children[childID]);
@@ -865,6 +879,7 @@ function startVWF(){
 						client.pendingList.push(message);
 					}else
 					{
+						
 						client.emit('message',message);
 					}
 				}

@@ -550,7 +550,7 @@ define(function ()
 				return;
 				}
 				var owner = vwf.getProperty(SelectedVWFNodes[s].id,'owner');
-				if(!_Editor.isOwner(SelectedVWFNodes[s].id,document.PlayerNumber))
+				if(_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),SelectedVWFNodes[s].id) == 0)
 				{
 				_Notifier.notify('You do not have permission to delete this object');
 				return;
@@ -1247,18 +1247,9 @@ define(function ()
 		}
 		this.setProperty = function (id, prop, val)
 		{
-			if(document.PlayerNumber == null)
-			{
-			_Notifier.notify('You must log in to participate');
-			return false;
-			}
-			if(!_Editor.isOwner(id,document.PlayerNumber))
-			{
-			_Notifier.notify('You do not have permission to edit this object.');
-			return false;
-			}
-			vwf_view.kernel.setProperty(id, prop, val)
-			return true;
+			var ret = _PermissionsManager.setProperty(id, prop, val);
+			if(!ret)
+			  _Notifier.notify('You do not have permission to modify this object');	
 		}
 		this.GetInsertPoint = function ()
 		{
@@ -1354,7 +1345,7 @@ define(function ()
 			proto.properties.owner = document.PlayerNumber;
 			var id = GetSelectedVWFNode().id;
 			var owner = vwf.getProperty(id, 'owner');
-			if (!_Editor.isOwner(id, document.PlayerNumber))
+			if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
 			{
 				_Notifier.notify('You do not have permission to edit this object');
 				return;
@@ -1390,7 +1381,7 @@ define(function ()
 			proto.properties.DisplayName = _Editor.GetUniqueName(type);
 			var id = this.GetFirstChildLeaf(this.GetSelectedVWFNode()).id;
 			var owner = vwf.getProperty(id, 'owner');
-			if (!_Editor.isOwner(id, document.PlayerNumber))
+			if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
 			{
 				_Notifier.notify('You do not have permission to edit this object');
 				return;
@@ -1427,7 +1418,7 @@ define(function ()
 			proto.properties.DisplayName = _Editor.GetUniqueName(type);
 			var id = this.GetFirstChildLeaf(this.GetSelectedVWFNode()).id;
 			var owner = vwf.getProperty(id, 'owner');
-			if (!_Editor.isOwner(id, document.PlayerNumber))
+			if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
 			{
 				_Notifier.notify('You do not have permission to edit this object');
 				return;

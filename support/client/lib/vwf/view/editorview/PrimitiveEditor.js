@@ -190,7 +190,7 @@ define(function ()
 			}
 			if (id != 'selection')
 			{
-				if(!_Editor.isOwner(id,_UserManager.GetCurrentUserName()))
+				if(_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
 				{
 				_Notifier.notify('You do not have permission to edit this object');
 				return;
@@ -202,7 +202,7 @@ define(function ()
 				console.log(_Editor.getSelectionCount());
 				for (var k = 0; k < _Editor.getSelectionCount(); k++)
 				{
-					if(!_Editor.isOwner(_Editor.GetSelectedVWFNode(k).id,_UserManager.GetCurrentUserName()))
+					if(_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
 					{
 					_Notifier.notify('You do not have permission to edit this object');
 					continue;
@@ -649,7 +649,7 @@ define(function ()
 				return;
 			}
 			var id = $(this).attr('nodename');
-			if (!_Editor.isOwner(id, _UserManager.GetCurrentUserName()))
+			if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
 			{
 				_Notifier.notify('You do not have permission to delete this object');
 				return;

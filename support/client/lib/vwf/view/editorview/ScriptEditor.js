@@ -544,7 +544,8 @@ define(function ()
 				_Notifier.notify('You must log in to edit scripts');
 				return false;
 			}
-			if (!_Editor.isOwner(_ScriptEditor.currentNode.id, _UserManager.GetCurrentUserName()))
+			
+			if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),_ScriptEditor.currentNode.id) == 0)
 			{
 				_Notifier.notify('You do not have permission to script this object');
 				return false;
