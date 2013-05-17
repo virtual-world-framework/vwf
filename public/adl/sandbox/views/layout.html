@@ -41,8 +41,7 @@
 				}	
 			}).extend({throttle:750}),
 			
-			worldObjects: ko.observableArray(),
-			showUserMenu: function(){$('#userOptions').tooltip('toggle')}
+			worldObjects: ko.observableArray()
 		};
 		
 		function checkFilter(textArr)
@@ -120,17 +119,7 @@
 			});
 		}
 		
-		function getTooltipHTML(){
-			
-			
-			return '<a href="{{root}}/user" >Manage</a><br/>' +
-				   '<a href="{{root}}/logout?return=index" id="logout">Logout</a>';
-		}
-		
 		function getLoginInfo(defaultCb, failCb){
-			
-			$('#userOptions').tooltip({placement:'bottom', title:getTooltipHTML, trigger:'manual', html:true});
-			$('#userOptions').tooltip('hide');
 			
 			$.ajax('/vwfDataManager.svc/logindata',
 			{
@@ -151,10 +140,6 @@
 				}
 			});
 		}
-		
-		$(document).on("mouseleave", ".tooltip",function(){
-			$('#userOptions').tooltip('hide');
-		});
 	</script>
 </head>
 <body>
@@ -165,10 +150,11 @@
 				
 				<div id="username" data-bind="visible:user().isLoggedIn">
 					<span class="headerSpan" data-bind="text:'Logged in as: '"></span>
-					<a class="headerA" href="" id="userOptions" data-bind="text: user().username, event:{mouseover:showUserMenu}, click:showUserMenu"></a>
+					<a class="headerA" href="{{root}}/user" id="userOptions" data-bind="text: user().username"></a>
 				</div>
 				<div id="login">
 					<a class="headerA" href="{{root}}/login?return=index"  id="login"  data-bind="visible:!user().isLoggedIn">Login</a>
+					<a class="headerA" href="{{root}}/logout?return=index"  id="logout"  data-bind="visible:user().isLoggedIn">Logout</a>
 					<a class="headerA" href="{{root}}/signup?return=index" id="signup" data-bind="visible:!user().isLoggedIn">Create Account</a>
 				</div>
 			</div>
