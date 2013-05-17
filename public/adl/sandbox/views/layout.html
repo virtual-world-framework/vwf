@@ -154,12 +154,23 @@
 				</div>
 				<div id="login">
 					<a class="headerA" href="{{root}}/login?return=index"  id="login"  data-bind="visible:!user().isLoggedIn">Login</a>
-					<a class="headerA" href="{{root}}/logout?return=index"  id="logout"  data-bind="visible:user().isLoggedIn">Logout</a>
+					<a class="headerA" href="{{root}}/logout?return=index" id="logout" data-bind="visible:user().isLoggedIn">Logout</a>
 					<a class="headerA" href="{{root}}/signup?return=index" id="signup" data-bind="visible:!user().isLoggedIn">Create Account</a>
 				</div>
 			</div>
-		</div>	
+		</div>		
 		<div id="content" class="container">
+			<div id="pageLogo">
+				<h1 style="text-align:center;">Virtual World Framework</h1>
+				<h2 style="text-align:center;">Sandbox</h2>
+			</div>
+			<div class="linkMenu">
+				<a href="/">Home</a>
+				<a href="">About</a> 
+				<a href="">Videos</a> 
+				<a href="">Documentation</a> 
+			</div>
+			<h3>{{title}}</h3>
 			{{{yield}}}
 			
 

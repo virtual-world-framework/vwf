@@ -5,6 +5,7 @@ html, body{
 	background-color:#f4f4f4;
 	height: 100%;
 	color: #555;
+	font-family: ‘Lucida Sans Unicode’, ‘Lucida Grande’, sans-serif;
 }
 
 a{
@@ -40,6 +41,7 @@ a{
 	background-color: #C4DCEC;
 	border-bottom: 1px solid #A2C8E2;
 	height: 25px;
+	clear:both;
 }
 
 #header .headerMenu{
@@ -59,6 +61,29 @@ a{
 }
 #header .headerA{
 	float: right;
+}
+
+.linkMenu{
+	width: 100%;
+	clear:both;
+	padding: 10px 0;
+	border-bottom: 1px solid #ebebeb;
+	border-top: 1px solid #ebebeb;
+	margin-bottom: 30px;
+}
+
+.linkMenu a{
+
+	font-size: 18px;
+	font-weight: bold;
+	margin: 0 20px;
+}
+#pageLogo {
+	padding: 10px 0;
+}
+#pageLogo h1, #pageLogo h2{
+
+	line-height: 33px;
 }
 
 #content{
