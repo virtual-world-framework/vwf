@@ -25,6 +25,9 @@ properties:
       if ( ! goog.vec.Mat4.equals( this.transform || goog.vec.Mat4.createIdentity(), transform ) ) {
         this.transform = transform;
         this.transformChanged( transform );
+        this.translation = this.translation;
+        this.quaternion = this.quaternion;
+        this.rotation = this.rotation;
       }
   translation:
     # node.translation <= [ x, y, z ]

@@ -16,11 +16,19 @@ define(function ()
 
 	function initialize()
 	{
+		var self = this;
 		$('#sidepanel').append("<div id='hierarchyManager' class='ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
 		$('#hierarchyManager').append("<div id='hierarchyManagertitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Hierarchy</span></div>");
+		$('#hierarchyManager').append("<span>Filter: </span><input type='text' id='HeirarchyFilter' class=''></input>");
 		$('#hierarchyManager').append("<div id='hierarchyDisplay' style='font:1.5em sans-serif;padding-bottom:5px;background:#FFFFF8;border: 1px black solid;margin: 3px 3px 3px 3px;height:auto'></div>");
 		$('#hierarchyManager').append("<div id='hierarchyManagerMakeNode'></div>");
 		$('#hierarchyManager').append("<div id='hierarchyManagerSelect'></div>");
+		
+		$('#HeirarchyFilter').keyup(function()
+		{
+			self.BuildGUI();
+		});
+		
 		$('#hierarchyManagerMakeNode').button(
 		{
 			label: 'Make VWF Node'
@@ -63,6 +71,8 @@ define(function ()
 				if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
 			});
 			//$('#hierarchyManager').dialog('option','position',[1282,40]);
+			if(!this.selectedID)
+				this.selectedID = 'index-vwf';
 			HierarchyManager.BuildGUI();
 			showSidePanel();
 			HierarchyManager.open = true;
@@ -296,19 +306,24 @@ define(function ()
 			$('#heirarchyParent').attr('name', vwf.parent(this.selectedID));
 			$('#heirarchyParent').attr('type', 'vwf');
 			var VWFChildren = HierarchyManager.getVWFChildren();
+			var filter = $('#HeirarchyFilter').val();
 			for (var j in VWFChildren)
 			{
 				var i = VWFChildren[j];
 				var thisid = 'VWFChild' + ToSafeID(i.name) + i.depth;
-				$('#VWFChildren').append('<div class="hierarchyItem" style="font-weight:normal;white-space: nowrap;text-overflow: ellipsis;height:1.3em;overflow:hidden;background:#FFFFF8;padding-left:0px;" id="' + thisid + '" />');
 				var dispName = vwf.getProperty(i.name, 'DisplayName');
-				if (dispName) $('#' + thisid).text(dispName);
-				else $('#' + thisid).text(i.name);
-				for (var t = 0; t < i.depth; t++) $('#' + thisid).prepend('<div style="padding-bottom: 5px;border-left: 1px solid lightgray;margin-right: 10px;margin-left: 0px;display: inline;height: 1.3em;white-space: nowrap;" />');
-				$('#' + thisid).attr('name', i.name);
-				$('#' + thisid).attr('type', 'vwf');
-				$('#' + thisid).click(HierarchyManager.itemClicked);
-				$('#' + thisid).dblclick(HierarchyManager.itemDblClicked);
+				if((i.name.indexOf(filter) != -1 ||(dispName && dispName.indexOf(filter) != -1)))
+				{
+					$('#VWFChildren').append('<div class="hierarchyItem" style="font-weight:normal;white-space: nowrap;text-overflow: ellipsis;height:1.3em;overflow:hidden;background:#FFFFF8;padding-left:0px;" id="' + thisid + '" />');
+					
+					if (dispName) $('#' + thisid).text(dispName);
+					else $('#' + thisid).text(i.name);
+					for (var t = 0; t < i.depth; t++) $('#' + thisid).prepend('<div style="padding-bottom: 5px;border-left: 1px solid lightgray;margin-right: 10px;margin-left: 0px;display: inline;height: 1.3em;white-space: nowrap;" />');
+					$('#' + thisid).attr('name', i.name);
+					$('#' + thisid).attr('type', 'vwf');
+					$('#' + thisid).click(HierarchyManager.itemClicked);
+					$('#' + thisid).dblclick(HierarchyManager.itemDblClicked);
+				}
 			}
 			var THREEChildren = HierarchyManager.getTHREEChildren();
 			var count = 0;
@@ -318,13 +333,16 @@ define(function ()
 				var i = THREEChildren[j];
 				if (i.name != "")
 				{
-					var thisid = 'THREEChild' + ToSafeID(i.name) + i.depth + count;
-					$('#THREEChildren').append('<div class="hierarchyItem" style="font-weight:normal;white-space: nowrap;text-overflow: ellipsis;height:1.3em;overflow:hidden;background:#FFFFF8;padding-left:0px;" id="' + thisid + '" />');
-					$('#' + thisid).text(i.name);
-					for (var t = 0; t < i.depth; t++) $('#' + thisid).prepend('<div style="padding-bottom: 5px;border-left: 1px solid lightgray;margin-right: 10px;margin-left: 0px;display: inline;height: 1.3em;white-space: nowrap;" />');
-					$('#' + thisid).attr('name', i.name);
-					$('#' + thisid).attr('type', 'glge');
-					$('#' + thisid).click(HierarchyManager.itemClicked);
+					if((i.name.indexOf(filter) != -1 ))
+					{
+						var thisid = 'THREEChild' + ToSafeID(i.name) + i.depth + count;
+						$('#THREEChildren').append('<div class="hierarchyItem" style="font-weight:normal;white-space: nowrap;text-overflow: ellipsis;height:1.3em;overflow:hidden;background:#FFFFF8;padding-left:0px;" id="' + thisid + '" />');
+						$('#' + thisid).text(i.name);
+						for (var t = 0; t < i.depth; t++) $('#' + thisid).prepend('<div style="padding-bottom: 5px;border-left: 1px solid lightgray;margin-right: 10px;margin-left: 0px;display: inline;height: 1.3em;white-space: nowrap;" />');
+						$('#' + thisid).attr('name', i.name);
+						$('#' + thisid).attr('type', 'glge');
+						$('#' + thisid).click(HierarchyManager.itemClicked);
+					}
 				}
 			}
 			if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
@@ -347,6 +365,7 @@ define(function ()
 				else
 				{
 					this.hide();
+					this.selectedID = null;
 				}
 			}
 			catch (e)

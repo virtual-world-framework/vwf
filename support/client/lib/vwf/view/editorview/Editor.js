@@ -1824,14 +1824,20 @@ define(function ()
 			var cam = this.findcamera();
 			cam.updateMatrixWorld(true);
 			cam.matrixWorldInverse.getInverse(cam.matrixWorld);
-			gizpos = MATH.mulMat4Vec3(MATH.transposeMat4(cam.matrixWorldInverse.elements), gizpos);
-			dist = -gizpos[2] / 65;
-			var oldscale = MoveGizmo.matrix.elements[0];
-			MoveGizmo.matrix.scale(new THREE.Vector3(1 / oldscale, 1 / oldscale, 1 / oldscale));
+			var gizpos2 = MATH.mulMat4Vec3(MATH.transposeMat4(cam.matrixWorldInverse.elements), gizpos);
+			dist = -gizpos2[2] / 65;
+			var oldscale = [MoveGizmo.matrix.elements[0],MoveGizmo.matrix.elements[5],MoveGizmo.matrix.elements[10]];
+			MoveGizmo.matrix.scale(new THREE.Vector3(1 / oldscale[0], 1 / oldscale[1], 1 / oldscale[2]));
 			var windowXadj = 1600.0 / $('#index-vwf').width();
 			var windowYadj = 1200.0 / $('#index-vwf').height();
 			var winadj = Math.max(windowXadj, windowYadj);
 			MoveGizmo.matrix.scale(new THREE.Vector3(dist * winadj, dist * winadj, dist * winadj));
+			var cammatinverse = new THREE.Matrix4();
+			cammatinverse.getInverse(MoveGizmo.parent.matrixWorld);
+			var camposGizSpace = MATH.mulMat4Vec3(MATH.transposeMat4(cammatinverse.elements), campos);
+			//document.title = camposGizSpace[0];
+			MoveGizmo.matrix.scale(new THREE.Vector3(camposGizSpace[0]>0?1:-1,camposGizSpace[1]>0?1:-1,camposGizSpace[2]>0?1:-1));
+			
 			MoveGizmo.updateMatrixWorld(true);
 		}.bind(this);
 		this.BuildMoveGizmo = function ()

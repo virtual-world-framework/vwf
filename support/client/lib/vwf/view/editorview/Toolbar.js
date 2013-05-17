@@ -72,6 +72,7 @@ define(
 		createIcon('../vwf/view/editorview/images/icons/properties.png', 'MenuObjectProperties', 'Show Object Properties Window');
 		createIcon('../vwf/view/editorview/images/icons/models.png', 'MenuModels', 'Show Model Library Window');
 		createIcon('../vwf/view/editorview/images/icons/inventory.png', 'MenuInventory', 'Show Inventory Window');
+		createIcon('../vwf/view/editorview/images/icons/hierarchy.gif', 'MenuHierarchyManager', 'Show Heirarchy Window');
 		$('#MenuCameraOrbiticon').css('background', '#9999FF');
 		$('#MenuMoveicon').css('background', "#9999FF");
 		$('#MenuWorldicon').css('background', "#9999FF");
