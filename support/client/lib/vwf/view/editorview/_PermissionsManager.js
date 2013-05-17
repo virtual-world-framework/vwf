@@ -17,7 +17,7 @@ define(["vwf/view/editorview/Editor"], function (Editor)
 	function initialize()
 	{
 		var self = this;
-	
+		var UserList = [];
 		$(document.body).append('<div id="PermissionsManager"><div id="PermissionsOwner" style="font-size: 1.5em;width: 100%;border-bottom: 1px solid gray;margin-bottom: 14px;color: gray;"/><div id="PermissionsDisplay" style="border-bottom: 1px solid gray;padding-bottom: 16px;"></div></div>');
 		
 		$('#PermissionsManager').append('<div id="AddPermission" />');
@@ -28,13 +28,44 @@ define(["vwf/view/editorview/Editor"], function (Editor)
 		
 			
 			var i = $('#AddPermissionName').val();
-			if($('#permisisonFor'+i).length == 0)
+			if(self.UserList.indexOf(i) == -1)
 			{
-				$('#PermissionsDisplay').append('<div><input type="checkbox" id="permisisonFor'+i+'" name="permisisonFor'+i+'" /><label for="permisisonFor'+i+'">'+i+'</label></div>');
-				$('#permisisonFor'+i).attr('user',i);
-				
+				$('#AddPermissionName').css('background','rgb(255, 10, 10)');
+				$('#AddPermissionName').animate({backgroundColor:'rgb(209, 140, 140)'});
+			}
+			else
+			{
+				$('#AddPermissionName').val('');
+				$('#AddPermissionName').css('background','white');
+				if($('#permisisonFor'+i).length == 0)
+				{
+					$('#PermissionsDisplay').append('<div><span id="permisisonCloseFor'+i+'" class="ui-icon ui-icon-closethick" style="float:right;cursor:pointer">Close</span><input type="checkbox" id="permisisonFor'+i+'" name="permisisonFor'+i+'" /><label for="permisisonFor'+i+'">'+i+'</label></div>');
+					$('#permisisonCloseFor'+i).attr('user',i);
+					 $('#permisisonCloseFor'+i).click(function()
+					 {
+						   $(this).parent().remove();
+					 });
+					$('#permisisonFor'+i).attr('user',i);
+					
+				}
 			}
 			
+		
+		});
+		
+		$('#AddPermissionName').keyup(function()
+		{
+			
+			var i = $('#AddPermissionName').val();
+			if(self.UserList.indexOf(i) == -1)
+			{
+				$(this).css('background','rgb(209, 140, 140)');
+			
+			}else
+			{
+				
+				$(this).css('background','rgb(156, 187, 156)');
+			}
 		
 		});
 		$('#PermissionsManager').dialog({title:'Edit Permissions',
@@ -104,7 +135,22 @@ define(["vwf/view/editorview/Editor"], function (Editor)
 		}
 		this.show = function()
 		{
-			$('#PermissionsManager').dialog('open');
+			var self = this;
+			$('#AddPermissionName').css('background','white');
+			if(UserList.length > 0)
+			{
+				$('#PermissionsManager').dialog('open');
+			}
+			else
+			{
+				$.get('vwfDataManager.svc/profiles',function(data,status,xhr)
+				{
+					
+					self.UserList = JSON.parse(xhr.responseText);
+					$('#PermissionsManager').dialog('open');
+				
+				});
+			}
 		}
 		this.hide = function()
 		{
@@ -114,7 +160,7 @@ define(["vwf/view/editorview/Editor"], function (Editor)
 		{
 			$('#PermissionsManager').is(':visible');
 		}
-		this.BuildGUI = function()
+		this.BuildGUI = function()   
 		{
 			$('#PermissionsDisplay').empty();
 			
@@ -124,8 +170,13 @@ define(["vwf/view/editorview/Editor"], function (Editor)
 			{
 				for(var i in permission)
 				{
-				     $('#PermissionsDisplay').append('<div><input type="checkbox" id="permisisonFor'+i+'" name="permisisonFor'+i+'" /><label for="permisisonFor'+i+'">'+i+'</label></div>');
+				     $('#PermissionsDisplay').append('<div><span id="permisisonCloseFor'+i+'" class="ui-icon ui-icon-closethick" style="float:right;cursor:pointer">Close</span><input type="checkbox" id="permisisonFor'+i+'" name="permisisonFor'+i+'" /><label for="permisisonFor'+i+'">'+i+'</label></div>');
 				     $('#permisisonFor'+i).attr('user',i);
+					 $('#permisisonCloseFor'+i).attr('user',i);
+					 $('#permisisonCloseFor'+i).click(function()
+					 {
+						   $(this).parent().remove();
+					 });
 				     if(permission[i] !== 0)
 				     {
 					$('#permisisonFor'+i).attr('checked','checked');
