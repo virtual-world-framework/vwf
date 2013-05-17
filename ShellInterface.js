@@ -141,6 +141,13 @@ function StartShellInterface()
 						global.log(data,0);
 					});	
 			}
+			if(commands[1] == 'state')
+			{
+					DAL.getInstance(commands[2],function(data)
+					{
+						global.log(data,0);
+					});	
+			}
 			if(commands[1] == 'clients')
 			{
 				for(var i in global.instances)
@@ -190,15 +197,15 @@ function StartShellInterface()
 		}
 		if(commands[0] && commands[0] == 'find' && commands[1])
 		{
-			if(commands[1] == 'states')
+			if(commands[1] == 'state')
 			{
-				if(commands[2] == 'owner')
-				{
-					DAL.findState({owner:commands[3]},function(results)
+				    var search = {}
+					search[commands[2]] = commands[3];
+					DAL.findState(search,function(results)
 					{
 						console.log(results);
 					});
-				}
+				
 			}
 		}
 		if(commands[0] == 'update')
@@ -217,7 +224,14 @@ function StartShellInterface()
 				{
 				
 				});
-			}	
+			}
+			if(commands[1] == 'state')
+			{
+				DAL.updateInstance(commands[2],JSON.parse(commands[3].replace(/'/g,'"')),function()
+				{
+				
+				});
+			}
 		}
 		if(commands[0] == 'search')
 		{
@@ -227,7 +241,14 @@ function StartShellInterface()
 				{
 					console.log(results);
 				});
-			}	
+			}
+			if(commands[1] == 'states')
+			{
+				DAL.findState(JSON.parse(commands[2].replace(/'/g,'"')),function(results)
+				{
+					console.log(results);
+				});
+			}			
 		}
 		if(commands[0] && commands[0] == 'boot' && commands[1])
 		{

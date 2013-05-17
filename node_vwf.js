@@ -210,10 +210,18 @@ function _FileCache()
 				newentry.zippeddata = zippeddata;
 				newentry.datatype = datatype;
 				newentry.hash = hash(file);
+				
 				console.log(newentry.hash);
 				console.log('loading into cache: ' + path);
 				if(self.enabled == true)
+				{
 					self.files.push(newentry);
+					fs.watch(path,{},function(event,filename){
+				
+					console.log(newentry.path + ' has changed on disk');
+				      self.files.splice(self.files.indexOf(newentry),1);
+					});
+				}
 				callback(newentry);
 				return;
 			});

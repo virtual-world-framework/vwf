@@ -1115,15 +1115,15 @@ function serve (request, response)
 			case "logout":{
 				InstanceLogout(response,URL);		
 			} break;
-		//	case "profiles":{
-				//DAL.getUsers(function(users)
-				//{
-				//	if(users)
-				//		ServeJSON(users,response,URL);
-				//	else
-				//		respond(response,500,'users not found' );
-				//});
-		//	} break;
+			case "profiles":{
+				DAL.getUsers(function(users)
+				{
+					if(users)
+						ServeJSON(users,response,URL);
+					else
+						respond(response,500,'users not found' );
+				});
+			} break;
 		    case "inventory":{
 				getInventory(URL,response);
 			}break;
@@ -1134,12 +1134,6 @@ function serve (request, response)
 				getInventoryItemMetaData(URL,response);
 			}break;
 			case "states":{
-
-			//	fs.readdir(basedir+"states\\",function(err,files){
-			//		var o = {};
-			//		o.GetStatesResult = JSON.stringify(files);
-			//		ServeJSON(o,response,URL);
-			//	});
 				DAL.getInstances(function(state)
 				{
 					if(state)
