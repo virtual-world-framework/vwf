@@ -2,7 +2,7 @@
 	var sid = '{{sid}}';
 	$(document).ready(function()
 	{
-		getLoginInfo();
+		getLoginInfo(function(){}, redirect);
 			
 		$.ajax('/vwfDataManager.svc/statedata?SID=' + sid,
 		{

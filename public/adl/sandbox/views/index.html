@@ -13,25 +13,26 @@
 				<div id="activeInstances" class="accordion span4" data-bind="foreach:worldObjects">
 				
 					<div class="accordion-group" data-bind="visible:isHidden" style="width:97.5%;">
-					
+						
 						<div class="accordion-heading">
-							<a class="accordion-toggle" data-toggle="collapse" data-parent="#activeInstances" data-bind="text:title,attr:{href:'#collapse'+$index()}, css:hotState()?'alert-success':'coldstate'">Title</a>
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#activeInstances" data-bind="text:title,attr:{href:'#collapse'+$index()}, css:hotState()?'alert-success':'coldstate'" onclick='scrollbarFix()'>Title</a>
 						</div>
 						<div data-bind="attr:{id:'collapse'+$index()}" class="accordion-body collapse in">
 						
-							<div class="accordion-inner">
-								<div class="editstate">
-									<a class="editstatedata" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"><img src="{{root}}/icons/edit.jpg"></a>
-									<a class="editstatedelete" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"><img src="{{root}}/icons/delete.png"></a>
-								</div>
-								
-								<a data-bind="attr:{href:'{{root}}/'+id}">
+							<div class="accordion-inner">								
+								<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
 									<div class="description" data-bind="text:description"></div>
 									<div class="owner" data-bind="text:'Created by: ' + owner"></div>
 									<div class="objects" data-bind="text:objects +' objects currently in world'"></div>
 									<div class="lastModified" data-bind="text:lastUpdate"></div>
 									<div class="stateid" data-bind="text:id"></div>
 								</a>
+								
+								<div class="editstate">
+									<a class="loadWorld" data-bind="attr:{href:'{{root}}/'+id}">Load World</a>
+									<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
+									<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
+								</div>
 							</div>
 						</div>
 					</div>
@@ -44,10 +45,17 @@
 				"cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a
 				new world" 
 			</p>
-			<iframe style="margin:15px auto;display:block;" width="480" height="360" src="http://www.youtube-nocookie.com/embed/utEVly2KCnE?rel=0" frameborder="0" allowfullscreen></iframe>
+			<iframe width="560" height="315" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
 		</div>
 	</div>
 	<script>
+		function scrollbarFix(){
+
+			obj = $("#activeInstances");
+
+			obj.getNiceScroll().remove();
+			obj.niceScroll({"cursoropacitymax": 0.4, "cursorborderradius": 0} );
+		};
 		$(document).ready(function(){	
 			
 			ko.applyBindings(vwfPortalModel);
@@ -63,7 +71,22 @@
 			});
 		});
 	</script>
-	
+	    <div id="disqus_thread"></div>
+	    <script type="text/javascript">
+		/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+		var disqus_shortname = 'vwfsandbox'; // required: replace example with your forum shortname
+
+		/* * * DON'T EDIT BELOW THIS LINE * * */
+		(function() {
+		    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+		})();
+	    </script>
+	    <a href="https://github.com/adlnet/vwf/tree/node_threejs"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    
 	
 	
 	

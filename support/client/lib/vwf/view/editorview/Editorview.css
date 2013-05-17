@@ -9,7 +9,7 @@
 		display: inline;
 		width: 50%;
 	}
-	#InventoryFilter
+	#InventoryFilter, #AddPermissionName
 	{
 		display: inline;
 		width: 50%;

@@ -1,0 +1,98 @@
+    <script type="text/javascript">
+	
+		var EncryptPassword = function (password, username,salt)
+		{
+			var unencrpytedpassword = password + username + salt;
+			for (var i = 0; i < 1000; i++)
+			{
+				unencrpytedpassword = CryptoJS.SHA256(unencrpytedpassword) + '';
+			}
+			return unencrpytedpassword;
+		}
+		
+		$(document).ready(function()
+		{
+			getLoginInfo(false, redirect);
+			ko.applyBindings(vwfPortalModel);
+		});	
+		
+		function redirect()
+		{
+			var ret = window.location.search.substr(window.location.search.indexOf('=')+1);
+			var path = window.location.pathname.substr(0,window.location.pathname.lastIndexOf('/')+1);
+			
+			var url = window.location.protocol + "//" + window.location.host + path + ret;
+			window.location = url;
+		}
+		function GUID()
+		{
+			var S4 = function ()
+			{
+				return Math.floor(
+						Math.random() * 0x10000 /* 65536 */
+					).toString(16);
+			};
+
+			return (
+					S4() + S4() + "-" +
+					S4() + "-" +
+					S4() + "-" +
+					S4() + "-" +
+					S4() + S4() + S4()
+				);
+		}
+		vwfPortalModel.handleAccountButton = function(o, e){
+		
+			var username = $('#txtusername').val();
+			var password = $('#txtpassword').val();
+			
+			var salt = GUID();
+			password = EncryptPassword(password,username,salt);
+			
+			var profile = {};
+			
+			
+			profile.Username = username;
+			profile.Password = password;
+			profile.Avatar = 'usmale.dae';
+			profile.Salt = salt;
+			
+		}
+	</script>
+
+		<h1> Virtual World Framework Sandbox Account Management </h1>
+
+<div class="row">
+	<div class="span5 offset3">
+		<form data-bind="submit:handleAccountButton" >
+			<fieldset>
+				<legend>In progress!</legend>
+				<div class='required'>
+					<div class='label'>Required Information</div><br/><br/>
+					<input type='text' id='txtusername' class="span5" placeholder='Username'/>
+					<input type='password' id='txtpassword' class="span5" placeholder='Password'/>
+					<input type='password' id='txtpasswordconfirm' class="span5" placeholder='Confirm Password'/>
+					<input type="submit" class='btn' style="float:right;"  value="Edit Account"/>
+				</div><br/><br/><br/>
+				<legend></legend>
+				<div class='optional'>
+					<div class='label'>Optional Information</div><br/><br/>
+					<input type='text' id='dob' class='input' placeholder='Date Of Birth'/>
+					<input type='text' id='location' class='input' placeholder='Sex'/>
+					<input type='text' id='relationship' class='input' placeholder='Relationship Status'/>
+					<input type='text' id='name' class='input' placeholder='Full Name'/>
+					<input type='text' id='location' class='input' placeholder='Location'/>
+					<input type='text' id='homepage' class='input' placeholder='Homepage'/>
+					<input type='text' id='employer' class='input' placeholder='Employer'/>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+</div>
+<div class="row">	
+	<div id='error' style="margin-top: 20px;margin-bottom:20px;font-size: 3EM;color: red;" class="span12"></div>
+</div>
+
+
+
+		

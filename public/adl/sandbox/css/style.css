@@ -40,17 +40,29 @@ a{
 	background-color: #C4DCEC;
 	border-bottom: 1px solid #A2C8E2;
 	height: 25px;
-	overflow: hidden;
 }
 
-#header div{
-	width: 70%;
-	margin: 0 auto;
+.tooltip a{
+
+	color: #fff;
 }
-#header a, #header span{
+
+#header .headerMenu{
+	margin: 0 19% 0 0;
+	float:right;
+	
+}
+#header .headerA, #header .headerSpan{
 	font-size: 14px;
-	display: block;
 	margin: 3px 10px;
+	text-align: right;
+	display:block;
+}
+
+#header .headerSpan{
+	float: left;
+}
+#header .headerA{
 	float: right;
 }
 
@@ -60,6 +72,12 @@ a{
 	border-left: 1px solid #e4e4e4;
 	border-right: 1px solid #e4e4e4;
 	padding: 0 15px;
+}
+#login{
+	float:right;
+}
+#username{
+	float:left;
 }
 
 .accordion{
@@ -116,7 +134,6 @@ a{
 }
 .button
 {
-
 	cursor: pointer;
 	background: rgb(226,226,226); /* Old browsers */
 	border-radius: 10px;
@@ -129,35 +146,41 @@ a{
 
 .editstate
 {
-	text-align: right;
-	background: lightgray;
-	border-radius: 5px;
-	position: absolute;
 	display: block;
-	margin-top: -9px;
-	margin-left: 165px;
-	height: 1em;
-	line-height: 1em;
-}
-.editstatedata
-{
-	display: inline-block;
-	width: 25px;
-	height: 15px;
-	position: absolute;
-	cursor: pointer;
-	border-radius: 7px;
-}
-.editstatedelete
-{
-	display: inline-block;
+	border-top: 1px solid #eee;
+	margin-top: 10px;
 	
-	height: 15px;
-	position: absolute;
+	width:100%;
+	color: gray;
+	padding-top: 15px;
+	padding-bottom: 24px;
+}
+
+.editstate a
+{
+	text-align:right;
+	float:right;
+}
+.loadWorld{
+
+	text-align:left !important;
+	float:left !important;
+	color:gray;
+	text-decoration: none !important;
+	cursor: pointer;
+	margin-top:-3px;
+}
+.accordion-inner{
+
+	padding-bottom: 3px;
+}
+.editstatedata, .editstatedelete
+{
 	cursor: pointer;
 	border-radius: 7px;
-	left: 25px;
+	margin: 0 10px;
 }
+
 .editstatedata img
 {
 	height: 100%;

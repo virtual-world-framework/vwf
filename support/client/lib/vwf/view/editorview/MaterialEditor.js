@@ -97,12 +97,13 @@ define(["vwf/view/editorview/mapbrowser"], function ()
 			}
 			for (var i = 0; i < _Editor.getSelectionCount(); i++)
 			{
-				if(!_Editor.isOwner(_Editor.GetSelectedVWFNode(i).id,document.PlayerNumber))
+				var id = _Editor.GetSelectedVWFNode(i).id;
+				if(_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
 				{
 				_Notifier.notify('You do not have permission to edit this material');
 				continue;
 				}
-				var id = _Editor.GetSelectedVWFNode(i).id;
+				
 				vwf_view.kernel.setProperty(id, 'materialDef', _MaterialEditor.currentMaterial);
 			}
 		}

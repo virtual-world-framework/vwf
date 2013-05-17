@@ -73,7 +73,7 @@ define(
 		});
 		$('#MenuShare').click(function (e)
 		{
-			$('#ShareWithDialog').dialog('open');
+			_PermissionsManager.show();
 		});
 		$('#MenuSetParent').click(function (e)
 		{
@@ -162,7 +162,7 @@ define(
 		});
 		$('#MenuGlobalInventory').click(function (e)
 		{
-			_GlobalInventoryManager.show();
+			
 		});
 		$('#MenuLatencyTest').click(function (e)
 		{

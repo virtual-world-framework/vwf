@@ -403,16 +403,14 @@ define(function ()
 			this.selectionMarquee.hide();
 			this.selectionMarquee.css('z-index', '-1');
 			this.mouseUpScreenPoint = [e.clientX, e.clientY];
-		
+			
 			if (document.AxisSelected == -1 && e.button == 0)
 			{
-				if (SelectMode == 'Pick')
+				if (SelectMode == 'Pick' && this.mouseDownScreenPoint)
 				{
-					if(this.mouseDownScreenPoint)
-					{
-						var w = this.mouseUpScreenPoint[0] - this.mouseDownScreenPoint[0];
-						var h = this.mouseUpScreenPoint[1] - this.mouseDownScreenPoint[1];
-						var picksize = Math.sqrt(w * w + h * h);
+					var w = this.mouseUpScreenPoint[0] - this.mouseDownScreenPoint[0];
+					var h = this.mouseUpScreenPoint[1] - this.mouseDownScreenPoint[1];
+					var picksize = Math.sqrt(w * w + h * h);
 						if (picksize < 10)
 						{
 							if (vwf.views[0].lastPickId)
@@ -484,7 +482,7 @@ define(function ()
 							}
 							this.SelectObject(vwfhits, this.PickMod);
 						}
-					}
+					
 					e.stopPropagation();
 				}
 				if (SelectMode == 'TempPick')
@@ -558,7 +556,7 @@ define(function ()
 				return;
 				}
 				var owner = vwf.getProperty(SelectedVWFNodes[s].id,'owner');
-				if(!_Editor.isOwner(SelectedVWFNodes[s].id,document.PlayerNumber))
+				if(_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),SelectedVWFNodes[s].id) == 0)
 				{
 				_Notifier.notify('You do not have permission to delete this object');
 				return;
@@ -1255,18 +1253,9 @@ define(function ()
 		}
 		this.setProperty = function (id, prop, val)
 		{
-			if(document.PlayerNumber == null)
-			{
-			_Notifier.notify('You must log in to participate');
-			return false;
-			}
-			if(!_Editor.isOwner(id,document.PlayerNumber))
-			{
-			_Notifier.notify('You do not have permission to edit this object.');
-			return false;
-			}
-			vwf_view.kernel.setProperty(id, prop, val)
-			return true;
+			var ret = _PermissionsManager.setProperty(id, prop, val);
+			if(!ret)
+			  _Notifier.notify('You do not have permission to modify this object');	
 		}
 		this.GetInsertPoint = function ()
 		{
@@ -1362,7 +1351,7 @@ define(function ()
 			proto.properties.owner = document.PlayerNumber;
 			var id = GetSelectedVWFNode().id;
 			var owner = vwf.getProperty(id, 'owner');
-			if (!_Editor.isOwner(id, document.PlayerNumber))
+			if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
 			{
 				_Notifier.notify('You do not have permission to edit this object');
 				return;
@@ -1398,7 +1387,7 @@ define(function ()
 			proto.properties.DisplayName = _Editor.GetUniqueName(type);
 			var id = this.GetFirstChildLeaf(this.GetSelectedVWFNode()).id;
 			var owner = vwf.getProperty(id, 'owner');
-			if (!_Editor.isOwner(id, document.PlayerNumber))
+			if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
 			{
 				_Notifier.notify('You do not have permission to edit this object');
 				return;
@@ -1435,7 +1424,7 @@ define(function ()
 			proto.properties.DisplayName = _Editor.GetUniqueName(type);
 			var id = this.GetFirstChildLeaf(this.GetSelectedVWFNode()).id;
 			var owner = vwf.getProperty(id, 'owner');
-			if (!_Editor.isOwner(id, document.PlayerNumber))
+			if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
 			{
 				_Notifier.notify('You do not have permission to edit this object');
 				return;

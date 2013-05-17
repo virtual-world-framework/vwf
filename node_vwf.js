@@ -11,6 +11,7 @@ var libpath = require('path'),
 	express = require('express'),
 	app = express(),
 	landing = require('./landingRoutes');
+var zlib = require('zlib');
 	
 // pick the application name out of the URL by finding the index.vwf.yaml
 function findAppName(uri)
@@ -157,27 +158,133 @@ function filterinstance(uri,instance)
 {
 	return uri.replace(instance +'\\','').replace(instance,'\\');
 }
-//Just serve a simple file
-function ServeFile(filename,response,URL)
+
+function hash(str)
 {
-			fs.readFile(filename, "binary", function (err, file) {
-			if (err) {
+	return require('crypto').createHash('md5').update(str).digest("hex");
+}
+
+function _FileCache() 
+{
+	this.files = [];
+	this.enabled = true;
+	this.clear = function()
+	{
+		this.files.length = 0;
+	}
+	this.getDataType = function(file)
+	{
+		var type = file.substr(file.lastIndexOf('.')+1).toLowerCase();
+		if(type === 'js' || type === 'html' || type === 'xml' || type === 'txt' || type === 'xhtml' || type === 'css')
+		{
+			return "utf8";
+		}
+		else return "binary";
+	}
+	this.getFile = function(path,callback)
+	{
+		for(var i =0; i < this.files.length; i++)
+		{
+			if(this.files[i].path == path)
+			{	
+				console.log('serving from cache: ' + path);
+				callback(this.files[i]);
+				return;
+			}
+		}
+		// if got here, have no record;
+		var datatype = this.getDataType(path);
+		var file = fs.readFileSync(path);
+		var stats = fs.statSync(path);
+		
+		if(file)
+		{
+			var self = this;
+			zlib.gzip(file,function(_,zippeddata)
+			{
+				
+				var newentry = {};
+				newentry.path = path;
+				newentry.data = file;
+				newentry.stats = stats;
+				newentry.zippeddata = zippeddata;
+				newentry.datatype = datatype;
+				newentry.hash = hash(file);
+				console.log(newentry.hash);
+				console.log('loading into cache: ' + path);
+				if(self.enabled == true)
+					self.files.push(newentry);
+				callback(newentry);
+				return;
+			});
+			return;
+		}
+		callback(null);
+	}
+	this.ServeFile = function(request,filename,response,URL)
+	{
+		FileCache.getFile(filename,function(file)
+		{
+			if (!file) {
 				response.writeHead(500, {
 					"Content-Type": "text/plain"
 				});
-				response.write(err + "\n");
+				response.write('file load error' + "\n");
 				response.end();
 				return;
 			}
- 
 			var type = mime.lookup(filename);
-			response.writeHead(200, {
-				"Content-Type": type
-			});
-			response.write(file, "binary");
+			
+			if(request.headers['if-none-match'] === file.hash)
+			{
+				response.writeHead(304, {
+				"Content-Type": type,
+				"Last-Modified": file.stats.mtime,
+				"ETag": file.hash,
+				"Cache-Control":"public; max-age=31536000" ,
+				
+				});
+				response.end();
+				return;
+			}
+			
+			if(request.headers['accept-encoding'] && request.headers['accept-encoding'].indexOf('gzip') >= 0)
+			{
+				response.writeHead(200, {
+					"Content-Type": type,
+					"Last-Modified": file.stats.mtime,
+					"ETag": file.hash,
+					"Cache-Control":"public; max-age=31536000" ,
+					'Content-Encoding': 'gzip'
+				});
+				response.write(file.zippeddata, file.datatype);
+			
+			
+			}else
+			{
+				response.writeHead(200, {
+					"Content-Type": type,
+					"Last-Modified": file.stats.mtime,
+					"ETag": file.hash,
+					"Cache-Control":"public; max-age=31536000"
+					
+				});
+				response.write(file.data, file.datatype);
+			}
 			response.end();
 			
-		});
+		
+		});	
+	}
+}
+
+var FileCache = new _FileCache();
+global.FileCache = FileCache;
+//Just serve a simple file
+function ServeFile(request,filename,response,URL)
+{
+	FileCache.ServeFile(request,filename,response,URL)
+		
 }
 //Return a 404 not found coude
 function _404(response)
@@ -254,14 +361,25 @@ function getNamespace(socket)
 }
 function checkOwner(node,name)
 {
+	var level = 0;
+	if(!node.properties) node.properties = {};
+	if(!node.properties.permission) node.properties.permission = {}
+	var permission = node.properties['permission'];
+	var owner = node.properties['owner'];
+	if(owner == name)
+	{
+		level = Infinity;
+		return level;
+	}
+	if(permission)
+	{
+		level = Math.max(level?level:0,permission[name]?permission[name]:0,permission['Everyone']?permission['Everyone']:0);
+	}
+	var parent = node.parent;
+	if(parent)
+		level = Math.max(level?level:0,checkOwner(parent,name));
+	return level?level:0;	
 	
-	if(!node) return false;
-	if(!node.properties || !node.properties.owner)
-		return true;
-	var names = node.properties.owner.split(',');
-	if(names.indexOf(name) != -1)
-		return true;
-	return false;
 }
 function strEndsWith(str, suffix) {
     return str.match(suffix+"$")==suffix;
@@ -301,6 +419,7 @@ function isPointerEvent(message)
 				childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
 				childComponent.id = childID;
 				node.children[childID] = childComponent;
+				node.children[childID].parent = node;
 				delete node.children[i];
 				fixIDs(childComponent);
 			}
@@ -420,14 +539,14 @@ function startVWF(){
 					DAL.getInstance(appname.substr(8).replace(/\\/g,'_') + instance + "_",function(data)
 					{
 						if(data)
-							ServeFile(filename,response,URL);
+							ServeFile(request,filename,response,URL);
 						else
 							redirect(filterinstance(URL.pathname,instance)+"/index.html",response);
 					});
 					return;
 				}
 				//just serve the file
-				ServeFile(filename,response,URL);
+				ServeFile(request,filename,response,URL);
 				
 			}
 			else if(c4)
@@ -579,6 +698,7 @@ function startVWF(){
 			childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
 			state[i].id = childID;
 			global.instances[namespace].state.nodes['index-vwf'].children[childID] = state[i];
+			global.instances[namespace].state.nodes['index-vwf'].children[childID].parent = global.instances[namespace].state.nodes['index-vwf'];
 			fixIDs(state[i]);
 		}
 		//global.log(Object.keys(global.instances[namespace].state.nodes['index-vwf'].children));
@@ -713,7 +833,7 @@ function startVWF(){
 				  //Keep a record of the new node
 				  if(checkOwner(node,sendingclient.loginData.UID) || message.node == 'index-vwf')
 				  {	
-						var childComponent = message.parameters[0];
+						var childComponent = JSON.parse(JSON.stringify(message.parameters[0]));
 						if(!childComponent) return;
 						var childName = message.member;
 						if(!childName) return;
@@ -722,6 +842,7 @@ function startVWF(){
 						childComponent.id = childID;
 						if(!node.children) node.children = {};
 						node.children[childID] = childComponent;
+						node.children[childID].parent = node;
 						if(!childComponent.properties)
 							childComponent.properties = {};
 						fixIDs(node.children[childID]);
@@ -758,6 +879,7 @@ function startVWF(){
 						client.pendingList.push(message);
 					}else
 					{
+						
 						client.emit('message',message);
 					}
 				}
@@ -817,6 +939,12 @@ function startVWF(){
 	p = process.argv.indexOf('-a');
 	adminUID = p >= 0 ? process.argv[p+1] : adminUID;	
 	
+	p = process.argv.indexOf('-nocache');
+	if(p >= 0)
+	{
+	   FileCache.enabled = false;
+	   console.log('server cache disabled');
+	}
 	SandboxAPI.setDAL(DAL);
 	SandboxAPI.setDataPath(datapath);
 	Shell.setDAL(DAL);
@@ -856,6 +984,7 @@ function startVWF(){
 		app.get('/adl/sandbox/logout', landing.logout);
 		app.get('/adl/sandbox/edit', landing.edit);
 		app.get('/adl/sandbox/remove', landing.remove);
+		app.get('/adl/sandbox/user', landing.user);
 		
 		app.use(OnRequest);
 		var listen = app.listen(port);

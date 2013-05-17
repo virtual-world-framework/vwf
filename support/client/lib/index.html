@@ -46,7 +46,7 @@
     <!-- the global window object as window.vwf. All access to the framework is through that     -->
     <!-- reference, and no other objects are globally visible.                                   -->
 
-    <script type="text/javascript" src="vwf.js"></script>
+    <script type="text/javascript" src="../vwf.js"></script>
 
     <!-- The core framework manages the simulation and synchronizes it across worlds shared by   -->
     <!-- multiple users. But, the manner in which the simulation is expressed is controlled by   -->
@@ -61,12 +61,33 @@
     <script type="text/javascript">connected && google.load( "earth", "1" )</script>
   <!-- This is the common view implementation and an example view that summarizes the          -->
     <!-- simulation state in HTML on the main page.                                              -->
-    <script type="text/javascript" src="vwf/view/EditorView/MATH.js"></script>
-	<script type="text/javascript" src="vwf/model/threejs/THREE.js"></script>
-	<script type="text/javascript" src="vwf/model/threejs/ColladaLoader.js"></script>
-    <script type="text/javascript" src="vwf/model/jiglib/jiglib.js"></script>
+    <script type="text/javascript" src="../vwf/view/EditorView/MATH.js"></script>
+	<script type="text/javascript" src="../vwf/model/threejs/THREE.js"></script>
+	<script type="text/javascript" src="../vwf/model/threejs/ColladaLoader.js"></script>
+    <script type="text/javascript" src="../vwf/model/jiglib/jiglib.js"></script>
     <script type="text/javascript">
 
+	//remove the instnace name from requests to make things cache
+	$.ajaxSetup({ cache: true });
+			
+			$.ajaxPrefilter( function(options, originalOptions, jqXHR) 
+			{
+				var p = window.location.pathname;
+				if(p[p.length-1] == '/') {p = p.substring(0,p.length -1)};
+				p = p.substring(p.lastIndexOf('/')+1);
+				options.url = options.url.replace(p,'');
+				console.log(options.url);
+			
+			
+			}
+			);
+	require.config({
+	   
+	    paths: {
+		"vwf": "../vwf"
+	    },
+	    waitSeconds: 15
+	  });		
         require( [
 
             "domReady",
@@ -82,7 +103,7 @@
             "vwf/model/stage/log",
             "vwf/kernel/view",
             "vwf/view/document",
-			"vwf/view/EditorView",
+	    "vwf/view/EditorView",
             "vwf/view/threejs",
             "vwf/view/googleEarth",
             "vwf/utility",

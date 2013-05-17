@@ -1,11 +1,13 @@
 "use strict";
-define(["module", "version", "vwf/view", "vwf/view/editorview/Menubar", "vwf/view/editorview/WindowResize", "vwf/view/editorview/InputSetup", "vwf/view/editorview/SaveLoadTimer", "vwf/view/editorview/TouchHandler", "vwf/view/editorview/SidePanel", "vwf/view/editorview/Toolbar", "vwf/view/editorview/ChatSystemGUI", "vwf/view/editorview/PrimitiveEditor", "vwf/view/editorview/MaterialEditor", "vwf/view/editorview/Notifier", "vwf/view/editorview/ScriptEditor", "vwf/view/editorview/Editor", "vwf/view/editorview/_3DRIntegration", "vwf/view/editorview/InventoryManager", "vwf/view/editorview/HeirarchyManager", "vwf/view/editorview/GlobalInventoryManager", "vwf/view/editorview/DataManager", "vwf/view/editorview/UserManager", "vwf/view/editorview/Help"], function (module, version, view)
+define(["module", "version", "vwf/view", "vwf/view/editorview/Menubar", "vwf/view/editorview/WindowResize","vwf/view/editorview/_PermissionsManager", "vwf/view/editorview/InputSetup", "vwf/view/editorview/SaveLoadTimer", "vwf/view/editorview/TouchHandler", "vwf/view/editorview/SidePanel", "vwf/view/editorview/Toolbar", "vwf/view/editorview/ChatSystemGUI", "vwf/view/editorview/PrimitiveEditor", "vwf/view/editorview/MaterialEditor", "vwf/view/editorview/Notifier", "vwf/view/editorview/ScriptEditor", "vwf/view/editorview/Editor", "vwf/view/editorview/_3DRIntegration", "vwf/view/editorview/InventoryManager", "vwf/view/editorview/HeirarchyManager",  "vwf/view/editorview/DataManager", "vwf/view/editorview/UserManager", "vwf/view/editorview/Help"], function (module, version, view)
 {
 	return view.load(module,
 	{
 		// == Module Definition ====================================================================
 		initialize: function ()
 		{
+			
+			
 			$(document.head).append('<link rel="stylesheet" type="text/css" href="vwf/view/editorview/ddsmoothmenu.css" />');
 			$(document.head).append('<link rel="stylesheet" type="text/css" href="vwf/view/editorview/ddsmoothmenu-v.css" />')
 			$(document.head).append('<link rel="stylesheet" type="text/css" href="vwf/view/editorview/editorview.css" />')
@@ -56,7 +58,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/Menubar", "vwf/vie
 					window._ModelLibrary = require("vwf/view/editorview/_3DRIntegration").getSingleton();
 					window._InventoryManager = require("vwf/view/editorview/InventoryManager").getSingleton();;
 					window.HierarchyManager = require("vwf/view/editorview/HeirarchyManager").getSingleton();;
-					
+					window._PermissionsManager = require("vwf/view/editorview/_PermissionsManager").getSingleton();
 					window._DataManager = require("vwf/view/editorview/DataManager").getSingleton();;
 					window._UserManager = require("vwf/view/editorview/UserManager").getSingleton();;
 					require("vwf/view/editorview/Help").getSingleton();
