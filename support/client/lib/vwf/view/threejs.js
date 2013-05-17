@@ -330,6 +330,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 
 				if(self.lastPickId != newPickId && self.lastEventData)
                 {
+					//console.log(self.lastPickId);
+					console.log(newPickId);
                     if(self.lastPickId)
                     view.kernel.dispatchEvent( self.lastPickId, "pointerOut", self.lastEventData.eventData, self.lastEventData.eventNodeData );
 					if(newPickId)

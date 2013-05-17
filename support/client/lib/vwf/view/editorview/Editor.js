@@ -403,79 +403,87 @@ define(function ()
 			this.selectionMarquee.hide();
 			this.selectionMarquee.css('z-index', '-1');
 			this.mouseUpScreenPoint = [e.clientX, e.clientY];
-			var w = this.mouseUpScreenPoint[0] - this.mouseDownScreenPoint[0];
-			var h = this.mouseUpScreenPoint[1] - this.mouseDownScreenPoint[1];
-			var picksize = Math.sqrt(w * w + h * h);
+		
 			if (document.AxisSelected == -1 && e.button == 0)
 			{
 				if (SelectMode == 'Pick')
 				{
-					if (picksize < 10)
+					if(this.mouseDownScreenPoint)
 					{
-						if (vwf.views[0].lastPickId)
+						var w = this.mouseUpScreenPoint[0] - this.mouseDownScreenPoint[0];
+						var h = this.mouseUpScreenPoint[1] - this.mouseDownScreenPoint[1];
+						var picksize = Math.sqrt(w * w + h * h);
+						if (picksize < 10)
 						{
-							this.SelectObject(vwf.getNode(vwf.views[0].lastPickId), this.PickMod);
+							if (vwf.views[0].lastPickId)
+							{
+								this.SelectObject(vwf.getNode(vwf.views[0].lastPickId), this.PickMod);
+							}
 						}
-					}
-					else
-					{
-						var top = this.mouseDownScreenPoint[1];
-						var left = this.mouseDownScreenPoint[0]
-						var bottom = this.mouseUpScreenPoint[1];
-						var right = this.mouseUpScreenPoint[0];
-						if (h < 0)
+						else
 						{
-							top = top + h;
-							bottom = top + -h;
+						//use this to filter out mouse ups that happen when dragging a slider over into the scene
+						
+							
+							
+							var top = this.mouseDownScreenPoint[1];
+							var left = this.mouseDownScreenPoint[0]
+							var bottom = this.mouseUpScreenPoint[1];
+							var right = this.mouseUpScreenPoint[0];
+							if (h < 0)
+							{
+								top = top + h;
+								bottom = top + -h;
+							}
+							if (w < 0)
+							{
+								left = left + w;
+								right = left + -w;
+							}
+							var TopLeftRay = this.GetWorldPickRay(
+							{
+								clientX: left,
+								clientY: top
+							});
+							var TopRightRay = this.GetWorldPickRay(
+							{
+								clientX: right,
+								clientY: top
+							});
+							var BottomLeftRay = this.GetWorldPickRay(
+							{
+								clientX: left,
+								clientY: bottom
+							});
+							var BottomRighttRay = this.GetWorldPickRay(
+							{
+								clientX: right,
+								clientY: bottom
+							});
+							var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
+							var ntl = MATH.addVec3(campos, TopLeftRay);
+							var ntr = MATH.addVec3(campos, TopRightRay);
+							var nbl = MATH.addVec3(campos, BottomLeftRay);
+							var nbr = MATH.addVec3(campos, BottomRighttRay);
+							var ftl = MATH.addVec3(campos, MATH.scaleVec3(TopLeftRay, 10000));
+							var ftr = MATH.addVec3(campos, MATH.scaleVec3(TopRightRay, 10000));
+							var fbl = MATH.addVec3(campos, MATH.scaleVec3(BottomLeftRay, 10000));
+							var fbr = MATH.addVec3(campos, MATH.scaleVec3(BottomRighttRay, 10000));
+							var frustrum = new Frustrum(ntl, ntr, nbl, nbr, ftl, ftr, fbl, fbr);
+							var hits = _SceneManager.FrustrumCast(frustrum,
+							{
+								OneHitPerMesh: true
+							});
+							var vwfhits = [];
+							for (var i = 0; i < hits.length; i++)
+							{
+								var vwfnode;
+								while (hits[i] && hits[i].object && !hits[i].object.vwfID) hits[i].object = hits[i].object.parent;
+								if (hits[i] && hits[i].object) vwfnode = hits[i].object.vwfID;
+								if (vwfhits.indexOf(vwfnode) == -1 && vwfnode) vwfhits.push(vwfnode);
+							}
+							this.SelectObject(vwfhits, this.PickMod);
 						}
-						if (w < 0)
-						{
-							left = left + w;
-							right = left + -w;
-						}
-						var TopLeftRay = this.GetWorldPickRay(
-						{
-							clientX: left,
-							clientY: top
-						});
-						var TopRightRay = this.GetWorldPickRay(
-						{
-							clientX: right,
-							clientY: top
-						});
-						var BottomLeftRay = this.GetWorldPickRay(
-						{
-							clientX: left,
-							clientY: bottom
-						});
-						var BottomRighttRay = this.GetWorldPickRay(
-						{
-							clientX: right,
-							clientY: bottom
-						});
-						var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
-						var ntl = MATH.addVec3(campos, TopLeftRay);
-						var ntr = MATH.addVec3(campos, TopRightRay);
-						var nbl = MATH.addVec3(campos, BottomLeftRay);
-						var nbr = MATH.addVec3(campos, BottomRighttRay);
-						var ftl = MATH.addVec3(campos, MATH.scaleVec3(TopLeftRay, 10000));
-						var ftr = MATH.addVec3(campos, MATH.scaleVec3(TopRightRay, 10000));
-						var fbl = MATH.addVec3(campos, MATH.scaleVec3(BottomLeftRay, 10000));
-						var fbr = MATH.addVec3(campos, MATH.scaleVec3(BottomRighttRay, 10000));
-						var frustrum = new Frustrum(ntl, ntr, nbl, nbr, ftl, ftr, fbl, fbr);
-						var hits = _SceneManager.FrustrumCast(frustrum,
-						{
-							OneHitPerMesh: true
-						});
-						var vwfhits = [];
-						for (var i = 0; i < hits.length; i++)
-						{
-							var vwfnode;
-							while (hits[i] && hits[i].object && !hits[i].object.vwfID) hits[i].object = hits[i].object.parent;
-							if (hits[i] && hits[i].object) vwfnode = hits[i].object.vwfID;
-							if (vwfhits.indexOf(vwfnode) == -1 && vwfnode) vwfhits.push(vwfnode);
-						}
-						this.SelectObject(vwfhits, this.PickMod);
 					}
 					e.stopPropagation();
 				}
@@ -484,6 +492,7 @@ define(function ()
 					if (this.TempPickCallback) this.TempPickCallback(vwf.getNode(vwf.views[0].lastPickId));
 					e.stopPropagation();
 				}
+				
 			}
 			//else if(document.AxisSelected == -1)
 			//	this.SelectObject(null);
@@ -507,6 +516,7 @@ define(function ()
 				$('#StatusAxis').text('Axis: -1');
 				this.updateGizmoOrientation(true);
 			}
+			this.mouseDownScreenPoint = null;
 		}.bind(this);
 		this.GetAllLeafMeshes = function (threeObject, list)
 		{
