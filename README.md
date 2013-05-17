@@ -29,6 +29,15 @@ Development Environment Setup and Manual Installation
 -
 For additional information please visit: http://www.virtual.wf/web/docs/install.html
 
+Macintosh OS X
+-
+NOTE: For OSX, please make sure you have XCode, and XCode Command Line Tools installed prior to executing the script below (https://developer.apple.com/xcode/).
+
+Perform the following shell command at a user shell prompt:
+<pre><code>sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_osx.sh  | bash
+</code></pre>
+
+This command may be re-executed to upgrade the installation to the latest version of VWF at any time.
 
 Ubuntu/Debian
 -
