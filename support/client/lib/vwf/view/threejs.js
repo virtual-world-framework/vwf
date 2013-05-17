@@ -148,11 +148,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var now = ( performance !== undefined && performance.now !== undefined ) ? performance.now() : time;
             var timepassed = now - sceneNode.lastTime;
 
-            var pss = GetParticleSystems(sceneNode.threeScene);
-            for(var i in pss)
-            {
-                if(pss[i].update)
-                    pss[i].update(timepassed);
+            if ( timepassed ) {
+
+                var pss = GetParticleSystems(sceneNode.threeScene);
+                for ( var i in pss )
+                {
+                    if(pss[i].update)
+                        pss[i].update(timepassed);
+                }
+
+                // Move the user's camera according to their input
+                self.moveCamera( timepassed );
+                self.rotateCamera( timepassed );
             }
             
             // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
@@ -252,10 +259,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     mycanvas.height = self.height;
                     mycanvas.width = self.width;
                     sceneNode.renderer.setViewport(0,0,window.innerWidth,window.innerHeight)
-					
-					var viewCam = view.state.cameraInUse;
+                    
+                    var viewCam = view.state.cameraInUse;
                     viewCam.aspect =  mycanvas.width / mycanvas.height;
-					viewCam.updateProjectionMatrix();
+                    viewCam.updateProjectionMatrix();
                 }
             }
 
@@ -630,8 +637,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         this.translationSpeed = 100; // Units per second
         this.rotationSpeed = 90; // Degrees per second
-        var moveStartTime;
-        var rotateStartTime;
         var movingForward = false;
         var movingBack = false;
         var movingLeft = false;
@@ -639,89 +644,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var rotatingLeft = false;
         var rotatingRight = false;
 
-        this.startForward = function() {
-            if ( !movingForward ) {
-                movingForward = true;
-                // If we're not already moving, start the move
-                if ( !( movingBack || movingLeft || movingRight ) ) {
-                    moveStartTime = +new Date;
-                    this.move();
-                }
-            }
-        };
-
-        this.startBack = function() {
-            if ( !movingBack ) {
-                movingBack = true;
-                // If we're not already moving, start the move
-                if ( !( movingForward || movingLeft || movingRight ) ) {
-                    moveStartTime = +new Date;
-                    this.move();
-                }
-            }
-        };
-
-        this.startLeft = function() {
-            if ( !movingLeft ) {
-                movingLeft = true;
-                // If we're not already moving, start the move
-                if ( !( movingForward || movingBack || movingRight ) ) {
-                    moveStartTime = +new Date;
-                    this.move();
-                }
-            }
-        };
-
-        this.startRight = function() {
-            if ( !movingRight ) {
-                movingRight = true;
-                // If we're not already moving, start the move
-                if ( !( movingForward || movingBack || movingLeft ) ) {
-                    moveStartTime = +new Date;
-                    this.move();
-                }
-            }
-        };
-
-        this.startRotatingLeft = function() {
-            if ( !rotatingLeft ) {
-                rotatingLeft = true;
-                // If we're not already moving, start the move
-                if ( !rotatingRight ) {
-                    rotateStartTime = +new Date;
-                    this.rotate();
-                }
-            }
-        };
-
-        this.startRotatingRight = function() {
-            if ( !rotatingRight ) {
-                rotatingRight = true;
-                // If we're not already moving, start the move
-                if ( !rotatingLeft ) {
-                    rotateStartTime = +new Date;
-                    this.rotate();
-                }
-            }
-        };
-
-        this.move = function() {
-
-            // If all movement has ceased, return
-            if ( !( movingForward || movingBack || movingLeft || movingRight ) )
-                return;
-
-            var self = this;
-            var seconds = this.secondsElapsed( moveStartTime );
-
-            // Compute the distance traveled in the elapsed time
-            // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
-            // one key press doesn't send them off in space
-            var dist = this.translationSpeed * Math.min( seconds, 0.5 );
+        this.moveCamera = function( msSinceLastFrame ) {
 
             var x = 0;
             var y = 0;
 
+            // Calculate the movement increments
             if ( movingForward )
                 y += 1;
             if ( movingBack )
@@ -731,63 +659,75 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( movingRight )
                 x += 1;
 
-            // Transform the displacement vector from camera coordinates
-            // to the coordinates of the camera's parent
-            var translation = this.getCameraVec( x, y, 0 );
-
-            // Eliminate any z component that might have crept in
-            translation[ 2 ] = 0;
-
-            if ( goog.vec.Vec3.magnitudeSquared( translation ) > goog.vec.EPSILON ) {
-
-                var camera = this.state.cameraInUse;
-                var cameraTransformArray = camera.matrix.elements;
-                var cameraPos = [ cameraTransformArray[ 12 ], 
-                                  cameraTransformArray[ 13 ], 
-                                  cameraTransformArray[ 14 ] ];
-                
-                // Take the direction specified by the translation direction and apply a calculated magnitude 
-                // to that direction to compute the displacement vector
-                goog.vec.Vec3.scale( goog.vec.Vec3.normalize( translation, translation ), dist, translation );
-
-                // Add the displacement to the current camera position
-                cameraPos = goog.vec.Vec3.add( cameraPos, translation, cameraPos );
-
-                // Insert the new camera position in the camera transform
-                cameraTransformArray[ 12 ] = cameraPos [ 0 ];
-                cameraTransformArray[ 13 ] = cameraPos [ 1 ];
-                cameraTransformArray[ 14 ] = cameraPos [ 2 ];
-
-                // Force the camera's world transform to update from its local transform
-                camera.updateMatrixWorld( true );
-            }
-
-            moveStartTime = +new Date;
-            window.setTimeout( function() {
-                self.move.call( self );
-            }, 16 );
-        }
-
-        this.rotate = function() {
-
-            // If all movement has ceased, return
-            if ( !( rotatingLeft || rotatingRight ) )
+            // If there is no movement since last frame, return
+            if ( ! ( x || y ) )
                 return;
 
-            var self = this;
-            var seconds = this.secondsElapsed( rotateStartTime );
+            // Compute the distance traveled in the elapsed time
+            // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
+            // one key press doesn't send them off in space
+            var dist = this.translationSpeed * Math.min( msSinceLastFrame * 0.001, 0.5 );
+
+            consoleOut( "move: timepassed = " + msSinceLastFrame * 0.001 + "; dist = " + dist);
+
+            // Get the camera's rotation matrix
+            // (remove its translation component so it is just a rotation matrix)
+            var camera = this.state.cameraInUse;
+            var cameraTransformArray = camera.matrix.elements;
+            var camRotMat = goog.vec.Mat4.createFromArray( cameraTransformArray );
+            camRotMat[ 12 ] = 0;
+            camRotMat[ 13 ] = 0;
+            camRotMat[ 14 ] = 0;
+
+            // Calculate a unit direction vector in the camera's parent's frame of reference
+            var dir = goog.vec.Mat4.multVec4(
+              camRotMat,
+              goog.vec.Vec4.createFromValues( x, 0, -y, 1 ), // Accounts for z-up (VWF) to y-up (three.js) change
+              goog.vec.Vec3.create()
+            );
+            dir[ 2 ] = 0;
+            goog.vec.Vec3.normalize( dir, dir );
+            
+            // Extract the camera position so we can add to it
+            var cameraPos = [ cameraTransformArray[ 12 ], 
+                              cameraTransformArray[ 13 ], 
+                              cameraTransformArray[ 14 ] ];
+            
+            // Take the direction and apply a calculated magnitude 
+            // to that direction to compute the displacement vector
+            var translation = goog.vec.Vec3.scale( dir, dist, goog.vec.Vec3.create() );
+
+            // Add the displacement to the current camera position
+            goog.vec.Vec3.add( cameraPos, translation, cameraPos );
+
+            // Insert the new camera position in the camera transform
+            cameraTransformArray[ 12 ] = cameraPos [ 0 ];
+            cameraTransformArray[ 13 ] = cameraPos [ 1 ];
+            cameraTransformArray[ 14 ] = cameraPos [ 2 ];
+
+            // Force the camera's world transform to update from its local transform
+            camera.updateMatrixWorld( true );
+        }
+
+        this.rotateCamera = function( msSinceLastFrame ) {
 
             var direction = 0;
 
+            // Calculate movement increment
             if ( rotatingLeft )
                 direction += 1;
             if ( rotatingRight )
                 direction -= 1;
 
+            // If there is no rotation this frame, return
+            if ( !direction )
+                return;
+
             // Compute the distance rotated in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
             // one key press doesn't send them off in space
-            var theta = direction * ( this.rotationSpeed * Math.PI / 180 ) * Math.min( seconds, 0.5 );
+            var theta = direction * ( this.rotationSpeed * Math.PI / 180 ) * 
+                        Math.min( msSinceLastFrame * 0.001, 0.5 );
 
             var cos = Math.cos( theta );
             var sin = Math.sin( theta );
@@ -815,60 +755,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             // Force the camera's world transform to update from its local transform
             camera.updateMatrixWorld( true );
-
-            rotateStartTime = +new Date;
-            window.setTimeout( function() {
-                self.rotate.call( self );
-            }, 16 );
         }
-
-        this.secondsElapsed = function( startTime ) {
-            var currTime = +new Date;
-            if ( startTime )
-                return ( currTime - startTime ) * 0.001;
-            else
-                return 0;
-        }
-
-        this.getCameraVec = function( x, y, z ) {
-            var camRotMat = goog.vec.Mat4.createFromArray( this.state.cameraInUse.matrix.elements );
-            
-            // Remove translation component, so it is only a rotation matrix
-            camRotMat[ 12 ] = 0;
-            camRotMat[ 13 ] = 0;
-            camRotMat[ 14 ] = 0;
-
-            var camAt = goog.vec.Mat4.multVec4(
-              camRotMat,
-              goog.vec.Vec4.createFromValues( x, z, -y, 1 ), // Accounts for z-up (VWF) to y-up (three.js) change
-              goog.vec.Vec3.create()
-            );
-            return camAt;      
-        }
-
-        this.stopForward = function() {
-            movingForward = false;
-        };
-
-        this.stopBack = function() {
-            movingBack = false;
-        };
-
-        this.stopLeft = function() {
-            movingLeft = false;
-        };
-
-        this.stopRight = function() {
-            movingRight = false;
-        };
-
-        this.stopRotatingLeft = function() {
-            rotatingLeft = false;
-        };
-
-        this.stopRotatingRight = function() {
-            rotatingRight = false;
-        };
 
         // END TEMPNAV
 
@@ -895,25 +782,25 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                             switch ( event.keyCode ) {
                                 case 87:  //w
                                 case 38:  //up
-                                    self.startForward();
+                                    movingForward = true;
                                     break;
                                 case 83:  //s
                                 case 40:  //down
-                                    self.startBack();
+                                    movingBack = true;
                                     break;
                                 case 37: // left              
                                 case 65:  //a
-                                    self.startLeft();
+                                    movingLeft = true;
                                     break;
                                 case 39: // right              
                                 case 68:  //d
-                                    self.startRight();
+                                    movingRight = true;
                                     break;
                                 case 81: // q
-                                    self.startRotatingLeft();
+                                    rotatingLeft = true;
                                     break;
                                 case 69: // e
-                                    self.startRotatingRight();
+                                    rotatingRight = true;
                                     break;
                                 case 82: // r
                                     break;
@@ -961,25 +848,25 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                             switch ( event.keyCode ) {
                                 case 87:  //w
                                 case 38:  //up
-                                    self.stopForward();
+                                    movingForward = false;
                                     break;
                                 case 83:  //s
                                 case 40:  //down
-                                    self.stopBack();
+                                    movingBack = false;
                                     break;
                                 case 37: // left              
                                 case 65:  //a
-                                    self.stopLeft();
+                                    movingLeft = false;
                                     break;
                                 case 39: // right              
                                 case 68:  //d
-                                    self.stopRight();
+                                    movingRight = false;
                                     break;
                                 case 81: // q
-                                    self.stopRotatingLeft();
+                                    rotatingLeft = false;
                                     break;
                                 case 69: // e
-                                    self.stopRotatingRight();
+                                    rotatingRight = false;
                                     break;
                             }
                             //END TEMPNAV
@@ -1787,8 +1674,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     "owner": thisUserId
                 }
             };
-            sceneView.kernel.createChild( sceneRootID, "navobj_" + thisUserId, navObjectSpec, undefined, 
-                                          function( nodeID ) {
+            sceneView.kernel.createChild( sceneRootID, "navobj_" + thisUserId, navObjectSpec, 
+                                          undefined, undefined, function( nodeID ) {
                 controlNavObject.call( sceneView, sceneView.state.nodes[ nodeID ] );
             } );
         }
