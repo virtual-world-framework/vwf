@@ -765,7 +765,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             moveStartTime = +new Date;
             window.setTimeout( function() {
                 self.move.call( self );
-            }, 0.01 );
+            }, 16 );
         }
 
         this.rotate = function() {
@@ -819,7 +819,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             rotateStartTime = +new Date;
             window.setTimeout( function() {
                 self.rotate.call( self );
-            }, 0.01 );
+            }, 16 );
         }
 
         this.secondsElapsed = function( startTime ) {
