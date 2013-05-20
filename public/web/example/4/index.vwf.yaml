@@ -1,5 +1,7 @@
 --- 
 extends: http://vwf.example.com/navscene.vwf
+properties:
+  ambientColor: [183, 183, 183]
 children: 
   hello: 
     extends: http://vwf.example.com/node3.vwf
@@ -13,17 +15,17 @@ children:
       material:
         extends: http://vwf.example.com/material.vwf
         properties: 
-          texture: “images/red.png”
+          color: red
     scripts:
     - |
         this.pointerClick = function() {
-          if( this.material.texture == "images/red.png" )
+          if( this.material.color == "rgb(255,0,0)" )
           {
-            this.material.texture = "images/blue.png";
+            this.material.color = "blue";
           }
           else
           {
-            this.material.texture = "images/red.png";
+            this.material.color = "red";
           }
         }
   world: 
@@ -38,17 +40,17 @@ children:
       material:
         extends: http://vwf.example.com/material.vwf
         properties: 
-          texture: “images/blue.png”
+          color: blue
     scripts:
     - |
         this.pointerClick = function() {
-          if( this.material.texture == "images/red.png" )
+          if( this.material.color == "rgb(255,0,0)" )
           {
-            this.material.texture = "images/blue.png";
+            this.material.color = "blue";
           }
           else
           {
-            this.material.texture = "images/red.png";
+            this.material.color = "red";
           }
         }
   light:
@@ -64,6 +66,4 @@ scripts:
 - |
     this.initialize = function() {
       this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,0,5,0,1 ];
-      this.hello.material.texture = "images/red.png";
-      this.world.material.texture = "images/blue.png";
     }

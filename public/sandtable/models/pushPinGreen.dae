@@ -243,6 +243,9 @@
             <profile_COMMON>
                 <technique sid="COMMON">
                     <lambert>
+                        <ambient>
+                            <color>1 1 0 1</color>
+                        </ambient>
                         <diffuse>
                             <color>1 1 0 1</color>
                         </diffuse>
@@ -254,6 +257,9 @@
             <profile_COMMON>
                 <technique sid="COMMON">
                     <lambert>
+                        <ambient>
+                            <color>0.196078431372549 0.803921568627451 0.196078431372549 1</color>
+                        </ambient>
                         <diffuse>
                             <color>0.196078431372549 0.803921568627451 0.196078431372549 1</color>
                         </diffuse>
@@ -265,6 +271,9 @@
             <profile_COMMON>
                 <technique sid="COMMON">
                     <lambert>
+                        <ambient>
+                            <color>0 0 1 1</color>
+                        </ambient>
                         <diffuse>
                             <color>0 0 1 1</color>
                         </diffuse>
@@ -276,6 +285,9 @@
             <profile_COMMON>
                 <technique sid="COMMON">
                     <lambert>
+                        <ambient>
+                            <color>0.8941176470588236 0.8941176470588236 0.8941176470588236 1</color>
+                        </ambient>
                         <diffuse>
                             <color>0.8941176470588236 0.8941176470588236 0.8941176470588236 1</color>
                         </diffuse>

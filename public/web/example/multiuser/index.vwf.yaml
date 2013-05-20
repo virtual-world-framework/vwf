@@ -1,0 +1,87 @@
+# Copyright 2013 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+---
+extends: http://vwf.example.com/navscene.vwf
+properties:
+  count: 0
+methods:
+  createUser:
+events:
+  userCreated:
+children:
+  terrain:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/bzworld.dae
+    type: model/vnd.collada+xml
+    properties:
+      rotation: [ 1, 0, 0, -90 ]
+      scale: 4
+  light:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ -30000, -30000, 10000 ]
+      distance: 200000
+  light2:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 30000, 30000, 0 ]
+      distance: 200000
+scripts:
+- |
+  this.initialize = function() {
+    this.camera.translation = [ 0, 0, 800 ];
+
+    // This is a large scene, so let's increase the distance to the far clipping plane quite a bit
+    // We'll also increase the distance to the near clipping plane so as not to have a crazy range for the 
+    // rendering frustum (this will reduce z-fighting)
+    this.camera.far = 1000000;
+    this.camera.near = 1;
+  }
+
+  this.createUser = function( userName ) {
+
+    // Ready the parameters to the call to create the child (2 steps)
+    // Step 1: Make the user name unique
+    userName += this.count++;
+
+    // Step 2: Create the definition of an object that will group a camera w/ an avatar 3D model
+    var userDef = { 
+      "extends": "http://vwf.example.com/node3.vwf",
+      "children": {}     
+    };
+    var cameraDef = {
+      "extends": "http://vwf.example.com/camera.vwf",
+      "properties": {
+        "translation": [ 0, 0, 800 ],
+        "far": 1000000,
+        "near": 1
+      }
+    };
+    var avatarDef = {
+      "extends": "http://vwf.example.com/node3.vwf",
+      "source": "models/duck.dae",
+      "type": "model/vnd.collada+xml",
+      "properties": {
+        "rotation": [ 0, 0, 1, 90 ],
+        "scale": 4.5
+      }
+    };
+    userDef.children[ "camera" ] = cameraDef;
+    userDef.children[ "avatar" ] = avatarDef;
+
+    // Create the user object, passing a callback that fires an event upon completion
+    this.children.create( userName, userDef, function( node ) {
+      this.userCreated( node.id );
+    } );
+  } //@ sourceURL=index.vwf

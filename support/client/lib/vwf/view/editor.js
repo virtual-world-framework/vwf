@@ -137,7 +137,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         },
         
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+            childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
 
             var nodeIDAttribute = $.encoder.encodeForHTMLAttribute("id", nodeID, true);
             var childIDAttribute = $.encoder.encodeForHTMLAttribute("id", childID, true);
@@ -904,44 +904,48 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         });
         $('#createScript > div:last').css('border-bottom-width', '3px');
 
-        // Add node scripts
-        $(topdownTemp).append("<div id='scripts'></div>");
-        for( var i=0; i < this.allScripts[ nodeID ].length; i++ )
-        {
-            var scriptFull = this.allScripts[nodeID][i].text;
-            if(scriptFull != undefined)
+        if ( this.allScripts[ nodeID ] !== undefined ) {
+            // Add node scripts
+            $(topdownTemp).append("<div id='scripts'></div>");
+            for( var i=0; i < this.allScripts[ nodeID ].length; i++ )
             {
-                var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
-                $('#scripts').append("<div id='script-" + nodeIDAlpha + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div></div>");
-                $('#script-' + nodeIDAlpha + "-" + i).click( function(evt) {
-                    var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
-                    viewScript.call(self, nodeID, scriptID, undefined);
-                });
+                var scriptFull = this.allScripts[nodeID][i].text;
+                if(scriptFull != undefined)
+                {
+                    var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
+                    $('#scripts').append("<div id='script-" + nodeIDAlpha + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div></div>");
+                    $('#script-' + nodeIDAlpha + "-" + i).click( function(evt) {
+                        var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
+                        viewScript.call(self, nodeID, scriptID, undefined);
+                    });
+                }
             }
+
+            $('#scripts > div:last').css('border-bottom-width', '3px');
         }
 
-        $('#scripts > div:last').css('border-bottom-width', '3px');
-
-        // Add prototype scripts
-        $(topdownTemp).append("<div id='prototypeScripts'></div>");
-        for( var i=0; i < this.allScripts[ node.extendsID ].length; i++ )
-        {
-            var scriptFull = this.allScripts[node.extendsID][i].text;
-            if(scriptFull != undefined)
+        if ( this.allScripts[ node.extendsID ] !== undefined ) {
+            // Add prototype scripts
+            $(topdownTemp).append("<div id='prototypeScripts'></div>");
+            for( var i=0; i < this.allScripts[ node.extendsID ].length; i++ )
             {
-                var nodeExtendsIDAlpha = $.encoder.encodeForAlphaNumeric(node.extendsID);
-                var nodeExtendsIDAttribute = $.encoder.encodeForHTMLAttribute("id", node.extendsID, true);
-                var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
-                $('#prototypeScripts').append("<div id='script-" + nodeExtendsIDAlpha + "-" + i + "' class='childContainer' data-nodeExtendsID='" + nodeExtendsIDAttribute + "'><div class='childEntry'><b>script </b>" + scriptName + "</div></div>");
-                $('#script-' + nodeExtendsIDAlpha + "-" + i).click( function(evt) {
-                    var extendsId = $.encoder.canonicalize($(this).attr("data-nodeExtendsID"));
-                    var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
-                    viewScript.call(self, nodeID, scriptID, extendsId);
-                });
+                var scriptFull = this.allScripts[node.extendsID][i].text;
+                if(scriptFull != undefined)
+                {
+                    var nodeExtendsIDAlpha = $.encoder.encodeForAlphaNumeric(node.extendsID);
+                    var nodeExtendsIDAttribute = $.encoder.encodeForHTMLAttribute("id", node.extendsID, true);
+                    var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
+                    $('#prototypeScripts').append("<div id='script-" + nodeExtendsIDAlpha + "-" + i + "' class='childContainer' data-nodeExtendsID='" + nodeExtendsIDAttribute + "'><div class='childEntry'><b>script </b>" + scriptName + "</div></div>");
+                    $('#script-' + nodeExtendsIDAlpha + "-" + i).click( function(evt) {
+                        var extendsId = $.encoder.canonicalize($(this).attr("data-nodeExtendsID"));
+                        var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
+                        viewScript.call(self, nodeID, scriptID, extendsId);
+                    });
+                }
             }
-        }
 
-        $('#prototypeScripts > div:last').css('border-bottom-width', '3px');
+            $('#prototypeScripts > div:last').css('border-bottom-width', '3px');
+        }
     }
 
     // -- createScript ----------------------------------------------------------------------

@@ -18,6 +18,7 @@ THREE.ColladaLoader = function () {
 	var materials = {};
 	var effects = {};
 	var cameras = {};
+	var lights = {};
 
 	var animData;
 	var visualScenes;
@@ -47,12 +48,9 @@ THREE.ColladaLoader = function () {
 
 	};
 
-	// TODO: support unit conversion as well
 	var colladaUnit = 1.0;
 	var colladaUp = 'Y';
 	var upConversion = null;
-
-	var TO_RADIANS = Math.PI / 180;
 
 	function load ( url, readyCallback, progressCallback ) {
 
@@ -138,6 +136,7 @@ THREE.ColladaLoader = function () {
 		effects = parseLib( "//dae:library_effects/dae:effect", Effect, "effect" );
 		geometries = parseLib( "//dae:library_geometries/dae:geometry", Geometry, "geometry" );
 		cameras = parseLib( ".//dae:library_cameras/dae:camera", Camera, "camera" );
+		lights = parseLib( ".//dae:library_lights/dae:light", Light, "light" );
 		controllers = parseLib( "//dae:library_controllers/dae:controller", Controller, "controller" );
 		animations = parseLib( "//dae:library_animations/dae:animation", Animation, "animation" );
 		visualScenes = parseLib( ".//dae:library_visual_scenes/dae:visual_scene", VisualScene, "visual_scene" );
@@ -154,6 +153,9 @@ THREE.ColladaLoader = function () {
 
 		}
 
+		// unit conversion
+		scene.scale.multiplyScalar( colladaUnit );
+
 		createAnimations();
 
 		var result = {
@@ -166,6 +168,7 @@ THREE.ColladaLoader = function () {
 				images: images,
 				materials: materials,
 				cameras: cameras,
+				lights: lights,
 				effects: effects,
 				geometries: geometries,
 				controllers: controllers,
@@ -446,7 +449,7 @@ THREE.ColladaLoader = function () {
 
 			for ( var i = 0; i < geometry.vertices.length; i ++ ) {
 
-				skin.bindShapeMatrix.multiplyVector3( geometry.vertices[ i ] );
+				geometry.vertices[ i ].applyMatrix4( skin.bindShapeMatrix );
 
 			}
 
@@ -474,7 +477,7 @@ THREE.ColladaLoader = function () {
 
 		if ( parent ) {
 
-			node.world.multiply( parent, node.world );
+			node.world.multiplyMatrices( parent, node.world );
 
 		}
 
@@ -516,7 +519,7 @@ THREE.ColladaLoader = function () {
 
 				bone.invBindMatrix = inv;
 				bone.skinningMatrix = new THREE.Matrix4();
-				bone.skinningMatrix.multiply(bone.world, inv); // (IBMi * JMi)
+				bone.skinningMatrix.multiplyMatrices(bone.world, inv); // (IBMi * JMi)
 
 				bone.weights = [];
 
@@ -577,7 +580,7 @@ THREE.ColladaLoader = function () {
 
 		for ( i = 0; i < geometry.vertices.length; i ++ ) {
 
-			skinController.skin.bindShapeMatrix.multiplyVector3( geometry.vertices[i] );
+			geometry.vertices[i].applyMatrix4( skinController.skin.bindShapeMatrix );
 
 		}
 
@@ -621,7 +624,7 @@ THREE.ColladaLoader = function () {
 					v.y = o.y;
 					v.z = o.z;
 
-					bones[i].skinningMatrix.multiplyVector3(v);
+					v.applyMatrix4( bones[i].skinningMatrix );
 
 					s.x += (v.x * weight);
 					s.y += (v.y * weight);
@@ -782,8 +785,7 @@ THREE.ColladaLoader = function () {
 
 				if ( num_materials > 1 ) {
 
-					material = new THREE.MeshFaceMaterial();
-					geom.materials = used_materials_array;
+					material = new THREE.MeshFaceMaterial( used_materials_array );
 
 					for ( j = 0; j < geom.faces.length; j ++ ) {
 
@@ -834,15 +836,36 @@ THREE.ColladaLoader = function () {
 
 		for ( i = 0; i < node.cameras.length; i ++ ) {
 
-			var instance_camera = node.cameras[i];
-			var cparams = cameras[instance_camera.url];
+			var params = cameras[node.cameras[i].url];
+			obj = new THREE.PerspectiveCamera(params.fov, params.aspect_ratio, params.znear, params.zfar);
 
-			obj = new THREE.PerspectiveCamera(cparams.fov, cparams.aspect_ratio, cparams.znear, cparams.zfar);
+		}
+
+		for ( i = 0; i < node.lights.length; i ++ ) {
+
+			var params = lights[node.lights[i].url];
+
+			switch ( params.technique ) {
+
+				case 'ambient':
+					obj = new THREE.AmbientLight(params.color);
+					break;
+
+				case 'point':
+					obj = new THREE.PointLight(params.color);
+					break;
+
+				case 'directional':
+					obj = new THREE.DirectionalLight(params.color);
+					break;
+
+			}
 
 		}
 
 		obj.name = node.name || node.id || "";
 		obj.matrix = node.matrix;
+
 		var props = node.matrix.decompose();
 		obj.position = props[ 0 ];
 		obj.quaternion = props[ 1 ];
@@ -852,8 +875,10 @@ THREE.ColladaLoader = function () {
 		if ( options.centerGeometry && obj.geometry ) {
 
 			var delta = THREE.GeometryUtils.center( obj.geometry );
-			obj.quaternion.multiplyVector3( delta.multiplySelf( obj.scale ) );
-			obj.position.subSelf( delta );
+			delta.multiply( obj.scale );
+			delta.applyQuaternion( obj.quaternion );
+
+			obj.position.sub( delta );
 
 		}
 
@@ -990,25 +1015,25 @@ THREE.ColladaLoader = function () {
 
 					if ( value instanceof THREE.Matrix4 ) {
 
-						matrix = matrix.multiply( matrix, value );
+						matrix.multiplyMatrices( matrix, value );
 
 					} else {
 
 						// FIXME: handle other types
 
-						matrix = matrix.multiply( matrix, transform.matrix );
+						matrix.multiplyMatrices( matrix, transform.matrix );
 
 					}
 
 				} else {
 
-					matrix = matrix.multiply( matrix, transform.matrix );
+					matrix.multiplyMatrices( matrix, transform.matrix );
 
 				}
 
 			} else {
 
-				matrix = matrix.multiply( matrix, transform.matrix );
+				matrix.multiplyMatrices( matrix, transform.matrix );
 
 			}
 
@@ -1800,6 +1825,7 @@ THREE.ColladaLoader = function () {
 		this.transforms = [];
 		this.geometries = [];
 		this.cameras = [];
+		this.lights = [];
 		this.controllers = [];
 		this.matrix = new THREE.Matrix4();
 
@@ -1820,6 +1846,11 @@ THREE.ColladaLoader = function () {
 					this.cameras.push( ( new InstanceCamera() ).parse( child ) );
 					break;
 
+				case 'instance_light':
+
+					this.lights.push( ( new InstanceLight() ).parse( child ) );
+					break;
+
 				case 'instance_controller':
 
 					this.controllers.push( ( new InstanceController() ).parse( child ) );
@@ -1828,10 +1859,6 @@ THREE.ColladaLoader = function () {
 				case 'instance_geometry':
 
 					this.geometries.push( ( new InstanceGeometry() ).parse( child ) );
-					break;
-
-				case 'instance_light':
-
 					break;
 
 				case 'instance_node':
@@ -1921,7 +1948,7 @@ THREE.ColladaLoader = function () {
 
 			case 'rotate':
 
-				this.angle = this.data[3] * TO_RADIANS;
+				this.angle = THREE.Math.degToRad( this.data[3] );
 
 			case 'translate':
 
@@ -1943,33 +1970,43 @@ THREE.ColladaLoader = function () {
 
 	};
 
-	Transform.prototype.apply = function ( matrix ) {
+	Transform.prototype.apply = function () {
 
-		switch ( this.type ) {
+		var m1 = new THREE.Matrix4();
 
-			case 'matrix':
+		return function ( matrix ) {
 
-				matrix.multiplySelf( this.obj );
-				break;
+			switch ( this.type ) {
 
-			case 'translate':
+				case 'matrix':
 
-				matrix.translate( this.obj );
-				break;
+					matrix.multiply( this.obj );
 
-			case 'rotate':
+					break;
 
-				matrix.rotateByAxis( this.obj, this.angle );
-				break;
+				case 'translate':
 
-			case 'scale':
+					matrix.multiply( m1.makeTranslation( this.obj.x, this.obj.y, this.obj.z ) );
 
-				matrix.scale( this.obj );
-				break;
+					break;
 
-		}
+				case 'rotate':
 
-	};
+					matrix.multiply( m1.makeRotationAxis( this.obj, this.angle ) );
+
+					break;
+
+				case 'scale':
+
+					matrix.scale( this.obj );
+
+					break;
+
+			}
+
+		};
+
+	}();
 
 	Transform.prototype.update = function ( data, member ) {
 
@@ -2102,7 +2139,7 @@ THREE.ColladaLoader = function () {
 
 					case 'ANGLE':
 
-						this.angle = data * TO_RADIANS;
+						this.angle = THREE.Math.degToRad( data );
 						break;
 
 					default:
@@ -2110,7 +2147,7 @@ THREE.ColladaLoader = function () {
 						this.obj.x = data[ 0 ];
 						this.obj.y = data[ 1 ];
 						this.obj.z = data[ 2 ];
-						this.angle = data[ 3 ] * TO_RADIANS;
+						this.angle = THREE.Math.degToRad( data[ 3 ] );
 						break;
 
 				}
@@ -2438,7 +2475,7 @@ THREE.ColladaLoader = function () {
 								ts = ts || { };
 								if ( ts[ input.set ] === undefined ) ts[ input.set ] = [];
 								// invert the V
-								ts[ input.set ].push( new THREE.UV( source.data[ idx32 ], source.data[ idx32 + 1 ] ) );
+								ts[ input.set ].push( new THREE.Vector2( source.data[ idx32 ], source.data[ idx32 + 1 ] ) );
 
 								break;
 
@@ -2499,7 +2536,7 @@ THREE.ColladaLoader = function () {
 							idx32 = vs[ ndx ] * numParams;
 							if ( ts[ input.set ] === undefined ) ts[ input.set ] = [ ];
 							// invert the V
-							ts[ input.set ].push( new THREE.UV( source.data[ idx32 ], 1.0 - source.data[ idx32 + 1 ] ) );
+							ts[ input.set ].push( new THREE.Vector2( source.data[ idx32 ], 1.0 - source.data[ idx32 + 1 ] ) );
 
 						}
 
@@ -2918,7 +2955,7 @@ THREE.ColladaLoader = function () {
 
 	function ColorOrTexture () {
 
-		this.color = new THREE.Color( 0 );
+		this.color = new THREE.Color();
 		this.color.setRGB( Math.random(), Math.random(), Math.random() );
 		this.color.a = 1.0;
 
@@ -2952,7 +2989,7 @@ THREE.ColladaLoader = function () {
 				case 'color':
 
 					var rgba = _floats( child.textContent );
-					this.color = new THREE.Color(0);
+					this.color = new THREE.Color();
 					this.color.setRGB( rgba[0], rgba[1], rgba[2] );
 					this.color.a = rgba[3];
 					break;
@@ -3105,27 +3142,27 @@ THREE.ColladaLoader = function () {
 
 						if ( cot.isTexture() ) {
 
-							if ( this.effect.sampler && this.effect.surface ) {
+							var samplerId = cot.texture;
+							var surfaceId = this.effect.sampler[samplerId].source;
 
-								if ( this.effect.sampler.source == this.effect.surface.sid ) {
+							if ( surfaceId ) {
 
-									var image = images[this.effect.surface.init_from];
+								var surface = this.effect.surface[surfaceId];
+								var image = images[surface.init_from];
 
-									if ( image ) {
+								if (image) {
 
-										var texture = THREE.ImageUtils.loadTexture(baseUrl + image.init_from);
-										texture.wrapS = cot.texOpts.wrapU ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
-										texture.wrapT = cot.texOpts.wrapV ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
-										texture.offset.x = cot.texOpts.offsetU;
-										texture.offset.y = cot.texOpts.offsetV;
-										texture.repeat.x = cot.texOpts.repeatU;
-										texture.repeat.y = cot.texOpts.repeatV;
-										props['map'] = texture;
+									var texture = THREE.ImageUtils.loadTexture(baseUrl + image.init_from);
+									texture.wrapS = cot.texOpts.wrapU ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
+									texture.wrapT = cot.texOpts.wrapV ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
+									texture.offset.x = cot.texOpts.offsetU;
+									texture.offset.y = cot.texOpts.offsetV;
+									texture.repeat.x = cot.texOpts.repeatU;
+									texture.repeat.y = cot.texOpts.repeatV;
+									props['map'] = texture;
 
-										// Texture with baked lighting?
-										if ( prop === 'emission' ) props[ 'emissive' ] = 0xffffff;
-
-									}
+									// Texture with baked lighting?
+									if (prop === 'emission') props['emissive'] = 0xffffff;
 
 								}
 
@@ -3179,10 +3216,6 @@ THREE.ColladaLoader = function () {
 
 					break;
 
-				case 'transparent':
-					props[ 'transparent' ] = true;
-					break;
-
 				default:
 					break;
 
@@ -3197,21 +3230,21 @@ THREE.ColladaLoader = function () {
 
 			case 'constant':
 
-				props.color = props.emission;
+				if (props.emissive != undefined) props.color = props.emissive;
 				this.material = new THREE.MeshBasicMaterial( props );
 				break;
 
 			case 'phong':
 			case 'blinn':
 
-				props.color = props.diffuse;
+				if (props.diffuse != undefined) props.color = props.diffuse;
 				this.material = new THREE.MeshPhongMaterial( props );
 				break;
 
 			case 'lambert':
 			default:
 
-				props.color = props.diffuse;
+				if (props.diffuse != undefined) props.color = props.diffuse;
 				this.material = new THREE.MeshLambertMaterial( props );
 				break;
 
@@ -3330,8 +3363,8 @@ THREE.ColladaLoader = function () {
 		this.id = "";
 		this.name = "";
 		this.shader = null;
-		this.surface = null;
-		this.sampler = null;
+		this.surface = {};
+		this.sampler = {};
 
 	};
 
@@ -3390,14 +3423,12 @@ THREE.ColladaLoader = function () {
 
 				case 'surface':
 
-					this.surface = ( new Surface( this ) ).parse( child );
-					this.surface.sid = sid;
+					this.surface[sid] = ( new Surface( this ) ).parse( child );
 					break;
 
 				case 'sampler2D':
 
-					this.sampler = ( new Sampler2D( this ) ).parse( child );
-					this.sampler.sid = sid;
+					this.sampler[sid] = ( new Sampler2D( this ) ).parse( child );
 					break;
 
 				case 'extra':
@@ -3910,6 +3941,8 @@ THREE.ColladaLoader = function () {
 
 	};
 
+	// Camera
+
 	function Camera() {
 
 		this.id = "";
@@ -3931,11 +3964,7 @@ THREE.ColladaLoader = function () {
 			switch ( child.nodeName ) {
 
 				case 'optics':
-
 					this.parseOptics( child );
-					break;
-
-				default:
 					break;
 
 			}
@@ -4037,6 +4066,91 @@ THREE.ColladaLoader = function () {
 	};
 
 	InstanceCamera.prototype.parse = function ( element ) {
+
+		this.url = element.getAttribute('url').replace(/^#/, '');
+
+		return this;
+
+	};
+
+	// Light
+
+	function Light() {
+
+		this.id = "";
+		this.name = "";
+		this.technique = "";
+
+	};
+
+	Light.prototype.parse = function ( element ) {
+
+		this.id = element.getAttribute( 'id' );
+		this.name = element.getAttribute( 'name' );
+
+		for ( var i = 0; i < element.childNodes.length; i ++ ) {
+
+			var child = element.childNodes[ i ];
+			if ( child.nodeType != 1 ) continue;
+
+			switch ( child.nodeName ) {
+
+				case 'technique_common':
+					this.parseTechnique( child );
+					break;
+
+			}
+
+		}
+
+		return this;
+
+	};
+
+	Light.prototype.parseTechnique = function ( element ) {
+
+		for ( var i = 0; i < element.childNodes.length; i ++ ) {
+
+			var child = element.childNodes[ i ];
+
+			switch ( child.nodeName ) {
+
+				case 'ambient':
+				case 'point':
+				case 'directional':
+
+					this.technique = child.nodeName;
+
+					for ( var k = 0; k < child.childNodes.length; k ++ ) {
+
+						var param = child.childNodes[ k ];
+
+						switch ( param.nodeName ) {
+
+							case 'color':
+								var vector = new THREE.Vector3().fromArray( _floats( param.textContent ) );
+								this.color = new THREE.Color().setRGB( vector.x, vector.y, vector.z );
+								break;
+
+						}
+
+					}
+
+				break;
+
+			}
+
+		}
+
+	};
+
+	function InstanceLight() {
+
+		this.url = "";
+
+	};
+
+	InstanceLight.prototype.parse = function ( element ) {
 
 		this.url = element.getAttribute('url').replace(/^#/, '');
 

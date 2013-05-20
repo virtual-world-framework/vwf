@@ -1,0 +1,148 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: http://vwf.example.com/lesson/task.vwf
+properties:
+  scenePath: /
+children:
+  radioOperation:
+    extends: http://vwf.example.com/lesson/task.vwf
+    properties:
+      text: "1.0 Radio Operation"
+      cameraPoseRef: /lesson/cameraPose1
+    children:
+      turnOnRadio:
+        extends: http://vwf.example.com/lesson/task.vwf
+        properties:
+          text: "1.1 Turn on the IC-40 radio"
+        children:
+          turnOnRadioInstructions:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "Select the On/Off Vol switch"
+        scripts:
+        - |
+          this.entering = function() {
+            this.logger.info( "Step 1 entering", this );
+            var radio = this.find( "/radio" )[ 0 ];
+            radio.Radio.ic40Volume.pointerUp = radio.events.add( function() {
+              radio.Radio.ic40Volume.pointerUp = radio.events.flush( this );
+              this.logger.info("BCBB: ", radio.Radio);
+              this.logger.info( "Step 1 completed" );
+              this.completed();
+              this.logger.info( "Step 1 after completed");
+            }, this );
+          } //@ sourceURL=step1.entering
+      selectRedButton:
+          extends: http://vwf.example.com/lesson/task.vwf
+          properties:
+            text: "1.2 Click red key button"
+            cameraPoseRef: /lesson/cameraPose2
+          scripts:
+          - |
+            this.entering = function() {
+              this.logger.info( "Step 2 entering" );
+              var radio = this.find( "/radio" )[ 0 ];
+              radio.Radio.ic40Red.pointerClick = radio.events.add( function() {
+                radio.Radio.ic40Red.pointerClick = radio.events.flush( this );
+                this.logger.info( "Step 2 completed" );
+                this.completed();
+                this.logger.info( "Step 2 after completed");
+              }, this );
+            } //@ sourceURL=step2.entering
+      selectUpButton:
+          extends: http://vwf.example.com/lesson/task.vwf
+          properties:
+            text: "1.3 Click on the Up Key to select LIGT ON"
+            cameraPoseRef: /lesson/cameraPose3
+          scripts:
+          - |
+            this.entering = function() {
+              this.logger.info( "Step 2 entering" );
+              var radio = this.find( "/radio" )[ 0 ];
+              radio.Radio.ic40Up.pointerClick = radio.events.add( function() {
+                radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
+                this.logger.info( "Step 3 completed" );
+                this.completed();
+                this.logger.info( "Step 3 after completed");
+              }, this );
+            } //@ sourceURL=step3.entering
+      selectRedButton2:
+          extends: http://vwf.example.com/lesson/task.vwf
+          properties:
+            text: "1.4 Click on the Red Key button to display SQL 20"
+            cameraPoseRef: /lesson/cameraPose4
+          scripts:
+          - |
+            this.entering = function() {
+              this.logger.info( "Step 2 entering" );
+              var radio = this.find( "/radio" )[ 0 ];
+              radio.Radio.ic40Red.pointerClick = radio.events.add( function() {
+                radio.Radio.ic40Red.pointerClick = radio.events.flush( this );
+                this.logger.info( "Step 3 completed" );
+                this.completed();
+                this.logger.info( "Step 3 after completed");
+              }, this );
+            } //@ sourceURL=step3.entering#          
+      selectUpButton2:
+          extends: http://vwf.example.com/lesson/task.vwf
+          properties:
+            text: "1.5 Continue to click Up Key until static background noise is silenced"
+            cameraPoseRef: /lesson/cameraPose3
+          methods:
+            stopStatic:
+          scripts:
+          - |
+            this.entering = function() {
+              this.logger.info( "Step 5 entering" );
+              var radio = this.find( "/radio" )[ 0 ];
+              radio.Radio.ic40Up.pointerClick = radio.events.add( function() {
+                this.logger.info("BCB3: ", radio.squelch );
+                if (radio.squelch >= 70) 
+                {
+                  radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
+                  this.completed();
+                  this.logger.info( "Step 5 after completed");
+                }
+              } , this );
+            } //@ sourceURL=step3.entering#   
+  cameraPose1:
+    extends: http://vwf.example.com/node3.vwf
+    properties:
+      translation: [ 1, -1, 6 ]
+      #rotation: [ 1, 0, 0, 0 ]
+  cameraPose2:
+    extends: http://vwf.example.com/node3.vwf
+    properties:
+      translation: [ 0, -6, 6 ]
+      #rotation: [ 1, 0, 0, 0 ]
+  cameraPose3:
+    extends: http://vwf.example.com/node3.vwf
+    properties:
+      translation: [ -4, -6, 0 ]
+     # rotation: [ 1, 0, 0, 0 ]
+  cameraPose4:
+    extends: http://vwf.example.com/node3.vwf
+    properties:
+      translation: [ 0, -6, 5 ]
+     # rotation: [ 1, 0, 0, 0 ]
+scripts:
+- |
+  this.entering = function() {
+    // Reset control value positions
+    this.parent.radio.Radio.ic40Volume.controlValue = this.parent.radio.Radio.ic40Volume.volume0.controlValue;
+    this.parent.radio.Radio.ic40Channel.controlValue = this.parent.radio.Radio.ic40Channel.channel0.controlValue;
+    this.parent.radio.backLightMode = "auto";
+    this.parent.radio.squelch = 20;
+  } //@ sourceURL=radio-lesson.vwf

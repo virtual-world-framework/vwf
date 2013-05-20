@@ -162,7 +162,6 @@
         /// @name module:vwf~applicationID
 
         var applicationID = undefined;
-        var pendingApplicationID = undefined;
 
         /// Components describe the objects that make up the simulation. They may also serve as
         /// prototype objects for further derived components. External components are identified by
@@ -236,6 +235,8 @@
             }
 
             var userLibraries = args.shift() || {};
+
+            var callback = args.shift();
 
             var requireConfig = {
                 shim: {
@@ -330,7 +331,7 @@
                         }
                         Object.keys(configLibraries[libraryType]).forEach(function(libraryName) {
                             var disabled = false;
-                            if(requireArray[libraryName].disabledBy) {
+                            if(requireArray[libraryName] && requireArray[libraryName].disabledBy) {
                                 for(var i=0; i<requireArray[libraryName].disabledBy.length; i++) {
                                     Object.keys(userLibraries).forEach(function(userLibraryType) {
                                         Object.keys(userLibraries[userLibraryType]).forEach(function(userLibraryName) {
@@ -357,20 +358,22 @@
                 Object.keys(userLibraries).forEach(function(libraryType) {
                     if(initializers[libraryType]) {
                         Object.keys(userLibraries[libraryType]).forEach(function(libraryName) {
-                            requireArray[libraryName].active = true;
-                            initializers[libraryType][libraryName].active = true;
-                            if(userLibraries[libraryType][libraryName] && userLibraries[libraryType][libraryName] != "") {
-                                if(typeof initializers[libraryType][libraryName].parameters == "object") {
-                                    initializers[libraryType][libraryName].parameters = $.extend({}, initializers[libraryType][libraryName].parameters,
-                                        userLibraries[libraryType][libraryName]);
+                            if(requireArray[libraryName]) {
+                                requireArray[libraryName].active = true;
+                                initializers[libraryType][libraryName].active = true;
+                                if(userLibraries[libraryType][libraryName] && userLibraries[libraryType][libraryName] != "") {
+                                    if(typeof initializers[libraryType][libraryName].parameters == "object") {
+                                        initializers[libraryType][libraryName].parameters = $.extend({}, initializers[libraryType][libraryName].parameters,
+                                            userLibraries[libraryType][libraryName]);
+                                    }
+                                    else {
+                                        initializers[libraryType][libraryName].parameters = userLibraries[libraryType][libraryName];
+                                    }
                                 }
-                                else {
-                                    initializers[libraryType][libraryName].parameters = userLibraries[libraryType][libraryName];
-                                }
-                            }
-                            if(requireArray[libraryName].linkedLibraries) {
-                                for(var i=0; i<requireArray[libraryName].linkedLibraries.length; i++) {
-                                    requireArray[requireArray[libraryName].linkedLibraries[i]].active = true;
+                                if(requireArray[libraryName].linkedLibraries) {
+                                    for(var i=0; i<requireArray[libraryName].linkedLibraries.length; i++) {
+                                        requireArray[requireArray[libraryName].linkedLibraries[i]].active = true;
+                                    }
                                 }
                             }
                         });
@@ -395,7 +398,7 @@
                         // accepts three parameters: a world specification, model configuration parameters,
                         // and view configuration parameters.
 
-                        vwf.initialize(application, getActiveLibraries(initializers["model"], true), getActiveLibraries(initializers["view"], true));
+                        vwf.initialize(application, getActiveLibraries(initializers["model"], true), getActiveLibraries(initializers["view"], true), callback);
 
                     } );
 
@@ -466,6 +469,9 @@
 
             var viewInitializers = args.shift() || [];
 
+            var callback = args.shift();
+            var compatibilityStatus = { compatible: true, errors: {} };
+
             // Create the model interface to the kernel. Models can make direct calls that execute
             // immediately or future calls that are placed on the queue and executed when removed.
 
@@ -501,15 +507,22 @@
                         this.models.push( model );
                         this.models[modelName] = model; // also index by id  // TODO: this won't work if multiple model instances are allowed
 
-if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
-    this.models.javascript = model;
-    while ( this.models.javascript.model ) this.models.javascript = this.models.javascript.model;
-}
+                        if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
+                            this.models.javascript = model;
+                            while ( this.models.javascript.model ) this.models.javascript = this.models.javascript.model;
+                        }
 
-if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf-model-object
-    this.models.object = model;
-    while ( this.models.object.model ) this.models.object = this.models.object.model;
-}
+                        if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf-model-object
+                            this.models.object = model;
+                            while ( this.models.object.model ) this.models.object = this.models.object.model;
+                        }
+                        
+                        if(model.model.compatibilityStatus) {
+                            if(!model.model.compatibilityStatus.compatible) {
+                                compatibilityStatus.compatible = false;
+                                $.extend(compatibilityStatus.errors, model.model.compatibilityStatus.errors);
+                            }
+                        }
                     }
 
                 }
@@ -551,6 +564,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                             view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
                             this.views.push( instance );
                             this.views[viewName] = instance; // also index by id  // TODO: this won't work if multiple view instances are allowed
+
+                            if(view.compatibilityStatus) {
+                                if(!view.compatibilityStatus.compatible) {
+                                    compatibilityStatus.compatible = false;
+                                    $.extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
+                                }
+                            }
                         }
 
                     } else { // new way
@@ -567,6 +587,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         if ( view ) {
                             this.views.push( view );
                             this.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
+
+                            if(view.compatibilityStatus) {
+                                if(!view.compatibilityStatus.compatible) {
+                                    compatibilityStatus.compatible = false;
+                                    $.extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
+                                }
+                            }
                         }
 
                     }
@@ -574,6 +601,23 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 }
 
             }, this );
+
+            // Test for ECMAScript 5
+            if(!(function() { return !this })()) {
+                compatibilityStatus.compatible = false;
+                $.extend(compatibilityStatus.errors, {"ES5": "This browser is not compatible. VWF requires ECMAScript 5."});
+            }
+
+            // Test for WebSockets
+            if( window.io && !io.Transport.websocket.check() )
+            {
+                compatibilityStatus.compatible = false;
+                $.extend(compatibilityStatus.errors, {"WS": "This browser is not compatible. VWF requires WebSockets."});
+            }
+
+            if(callback) {
+                callback(compatibilityStatus);
+            }
 
             // Load the application.
 
@@ -1415,8 +1459,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                 }
             } );
 
-            // Call deletingNode() on each model. The node is considered deleted after each model
-            // has run.
+            // Call deletingNode() on each model. The node is considered deleted after all models
+            // have run.
 
             this.models.forEach( function( model ) {
                 model.deletingNode && model.deletingNode( nodeID );
@@ -1807,6 +1851,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             childComponent = normalizedComponent( childComponent );
 
+            var childID, childIndex, childPrototypeID, childBehaviorIDs = [], deferredInitializations = {};
+
             // Determine if we're replicating previously-saved state, or creating a fresh object.
 
             var replicating = !! childComponent.id;
@@ -1818,7 +1864,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // of the descriptor. An existing ID is used when synchronizing to state drawn from
             // another client or to a previously-saved state.
 
-var useLegacyID = childURI &&
+var useLegacyID = nodeID === 0 && childURI &&
     ( childURI == "index.vwf" || childURI == "appscene.vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
     childURI != "http://vwf.example.com/node.vwf";
     
@@ -1826,42 +1872,53 @@ useLegacyID = useLegacyID ||
     nodeID == applicationID && childName == "camera"; // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
-                var childID = childComponent.id;
+                childID = childComponent.id;
+                childIndex = this.children( nodeID ).length;
             } else if ( nodeID === 0 ) {  // global: component's URI or hash of its descriptor
-                var childID = childURI ||  // TODO: hash uri => id to shorten for faster lookups?
+                childID = childURI ||
                     Crypto.MD5( JSON.stringify( childComponent ) ).toString();  // TODO: MD5 may be too slow here
 if ( useLegacyID ) {  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
 }
+                childIndex = childURI;
             } else {  // descendant: parent id + next from parent's sequence
 if ( useLegacyID ) {  // TODO: fix static ID references and remove
-    var childID = ( childComponent["extends"] || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
+    childID = ( childComponent["extends"] || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
+    childIndex = this.children( nodeID ).length;
 } else {    
-                var childID = nodeID + ":" + this.sequence( nodeID ) +
+                childID = nodeID + ":" + this.sequence( nodeID ) +
                     ( this.configuration["randomize-ids"] ? "-" + ( "0" + Math.floor( this.random( nodeID ) * 100 ) ).slice( -2 ) : "" ) +
                     ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
+                childIndex = this.children( nodeID ).length;
 }
             }
 
-            // Record the application root ID. The application is the first (global) node created.
-            // The application node is recognized here but recorded as pending. Then, after its
-            // dependencies are loaded, it is registered just as its `creatingNode` calls are sent.
+            // Record the application root ID. The application is the first (global) node created.  // TODO: this would be better if made more explicit from the caller (possibly using a special `childName` marker, but that would require the "this is the application" annotation to pass through `createNode`; since `createNode` and `createChild` should probably merge to simplify the patches: and includes: support, this can wait)
 
-            if ( ! applicationID && ! pendingApplicationID ) {
-                pendingApplicationID = childID;
+            if ( ! applicationID ) {
+                applicationID = childID;
             }
 
-            var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
+            // Register the node in vwf/model/object. Since the kernel delegates many node
+            // information functions to vwf/model/object, this serves to register it with the
+            // kernel. The node must be registered before any async operations occur to ensure that
+            // the parent's child list is correct when following siblings calculate their index
+            // numbers.
+
+            vwf.models.object.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                childComponent.source, childComponent.type, childIndex, childName );  // TODO: move node metadata back to the kernel and only use vwf/model/object just as a property store?
+
+            // Construct the node.
 
             async.series( [
 
-                // Rudimentary support for `{ includes: prototype }`, which absorbs a prototype
-                // descriptor into the child descriptor before creating the child.
-
-                // See the notes in `createNode` and the `mergeDescriptors` limitations.
-
                 function( series_callback_async /* ( err, results ) */ ) {
+
+                    // Rudimentary support for `{ includes: prototype }`, which absorbs a prototype
+                    // descriptor into the child descriptor before creating the child.
+
+                    // See the notes in `createNode` and the `mergeDescriptors` limitations.
 
                     if ( componentIsDescriptor( childComponent ) && childComponent.includes && componentIsURI( childComponent.includes ) ) {
 
@@ -1941,25 +1998,15 @@ if ( ! childComponent.source ) {
 
                 function( series_callback_async /* ( err, results ) */ ) {
 
-                    // Register the node as the application root if it was recognized as such
-                    // earlier.  // TODO: this would be better if made more explicit from the caller (possibly using a special `childName` marker, but that would require the "this is the application" annotation to pass through `createNode`; since `createNode` and `createChild` should probably merge to simplify the patches: and includes: support, this can wait)
-
-                    if ( childID === pendingApplicationID ) {
-                        applicationID = childID;
-                        pendingApplicationID = undefined;
-                    }
-
-                    // As a special case, since many kernel functions delegate to vwf/model/object,
-                    // call it first so that those functions will be available to the other drivers.
-                    // vwf/model/object is the last model driver, so relying on the normal order for
-                    // `creatingNode` would prevent other drivers from asking about prototypes and
-                    // other node information in their `creatingNode` handlers.
+                    // Re-register the node in vwf/model/object now that we have the prototypes and
+                    // behaviors. vwf/model/object knows that we call it more than once and only
+                    // updates the new information.
 
                     vwf.models.object.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                        childComponent.source, childComponent.type, childURI, childName );  // TODO: return node metadata to the kernel and use vwf/model/object just as a property store?
+                        childComponent.source, childComponent.type, childIndex, childName );  // TODO: move node metadata back to the kernel and only use vwf/model/object just as a property store?
 
                     // Call creatingNode() on each model. The node is considered to be constructed
-                    // after each model has run.
+                    // after all models have run.
 
                     async.forEachSeries( vwf.models, function( model, each_callback_async /* ( err ) */ ) {
 
@@ -1968,7 +2015,7 @@ if ( ! childComponent.source ) {
                         // TODO: suppress kernel reentry here (just for childID?) with kernel/model showing a warning when breached; no actions are allowed until all drivers have seen creatingNode()
 
                         model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childURI, childName, function( ready ) /* async */ {
+                                childComponent.source, childComponent.type, childIndex, childName, function( ready ) /* async */ {
 
                             if ( driver_ready && ! ready ) {
                                 queue.suspend( "while loading " + childComponent.source + " for " + childID + " in creatingNode" ); // suspend the queue
@@ -2001,7 +2048,7 @@ if ( ! childComponent.source ) {
                         var driver_ready = true;
 
                         view.createdNode && view.createdNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childURI, childName, function( ready ) /* async */ {
+                                childComponent.source, childComponent.type, childIndex, childName, function( ready ) /* async */ {
 
                             if ( driver_ready && ! ready ) {
                                 queue.suspend( "while loading " + childComponent.source + " for " + childID + " in createdNode" ); // suspend the queue
@@ -2185,11 +2232,13 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                     // indicate that the node is fully constructed.
 
                     vwf.models.forEach( function( model ) {
-                        model.initializingNode && model.initializingNode( nodeID, childID );
+                        model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                            childComponent.source, childComponent.type, childIndex, childName );
                     } );
 
                     vwf.views.forEach( function( view ) {
-                        view.initializedNode && view.initializedNode( nodeID, childID );
+                        view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                            childComponent.source, childComponent.type, childIndex, childName );
                     } );
 
                     // Restore kernel reentry.
@@ -2200,9 +2249,6 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                 },
 
             ], function( err, results ) /* async */ {
-
-if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
-vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) implicit in createChild( parent-id, child-name, child-component ); remove this
 
                 // The node is complete. Invoke the callback method and pass the new node ID and the
                 // ID of its prototype. If this was the root node for the application, the
@@ -2224,7 +2270,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             this.logger.debuggx( "addChild", nodeID, childID, childName );
 
-            // Call addingChild() on each model. The child is considered added after each model has
+            // Call addingChild() on each model. The child is considered added after all models have
             // run.
 
             this.models.forEach( function( model ) {
@@ -2251,8 +2297,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             this.logger.debuggx( "removeChild", nodeID, childID );
 
-            // Call removingChild() on each model. The child is considered removed after each model
-            // has run.
+            // Call removingChild() on each model. The child is considered removed after all models
+            // have run.
 
             this.models.forEach( function( model ) {
                 model.removingChild && model.removingChild( nodeID, childID );
@@ -2404,8 +2450,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];  // TODO: add truncated propertyGet, propertySet to log
             } );
 
-            // Call creatingProperty() on each model. The property is considered created after each
-            // model has run.
+            // Call creatingProperty() on each model. The property is considered created after all
+            // models have run.
 
             this.models.forEach( function( model ) {
                 model.creatingProperty && model.creatingProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
@@ -2463,7 +2509,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             // Call settingProperty() on each model. The first model to return a non-undefined value
             // has performed the set and dictates the return value. The property is considered set
-            // after each model has run.
+            // after all models have run.
 
             this.models.some( function( model, index ) {
 
@@ -2680,8 +2726,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             this.logger.debuggx( "createMethod", nodeID, methodName, methodParameters );
 
-            // Call creatingMethod() on each model. The method is considered created after each
-            // model has run.
+            // Call creatingMethod() on each model. The method is considered created after all
+            // models have run.
 
             this.models.forEach( function( model ) {
                 model.creatingMethod && model.creatingMethod( nodeID, methodName, methodParameters, methodBody );
@@ -2740,8 +2786,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             this.logger.debuggx( "createEvent", nodeID, eventName, eventParameters );
 
-            // Call creatingEvent() on each model. The event is considered created after each model
-            // has run.
+            // Call creatingEvent() on each model. The event is considered created after all models
+            // have run.
 
             this.models.forEach( function( model ) {
                 model.creatingEvent && model.creatingEvent( nodeID, eventName, eventParameters );
@@ -2895,8 +2941,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 scriptType = "application/javascript";
             }
 
-            // Call executing() on each model. The script is considered executed after each model
-            // has run.
+            // Call executing() on each model. The script is considered executed after all models
+            // have run.
 
             var scriptValue = undefined;
 

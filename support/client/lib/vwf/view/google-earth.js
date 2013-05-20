@@ -47,12 +47,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         },
   
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+            childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
 
             if ( childExtendsID === undefined )
                 return;
 
-            this.logger.infox( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName );
+            this.logger.infox( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName );
             var node = {
                 parentID: nodeID,
                 ID: childID,

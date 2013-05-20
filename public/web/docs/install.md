@@ -33,6 +33,10 @@ Select the following packages for installation. Use the search box or scroll dow
 *   perl
 *   python
 *   p7zip
+*   libxml2
+*   libxml2-devel
+*   libxslt
+*   libxslt-devel
 
 Click through to *Finish* to close Cygwin setup. Save setup.exe for later since you may need it to add or update packages.
 

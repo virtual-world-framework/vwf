@@ -30,6 +30,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             this.lessonSteps = new Array();
             this.progressWidth = 10;
 
+            this.currentTaskName = undefined;
+
             // Add CSS files
             var lessonCss = document.createElement('link');
             lessonCss.rel = 'stylesheet';
@@ -173,6 +175,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             {
                 switch (eventName) {
                   case "entering":
+                    this.currentTaskName = vwf.name(nodeId);
                     this.progressWidth = 10;
                     $('#lessonProgressBar').css('display', 'block');
                     $('#lessonProgressBar').css('width', '10px');
@@ -200,11 +203,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             {
                 switch (eventName) {
                   case "entering":
-                    var stepDivName = '#' + nodeId.replace(/\:/g, "_");
+                    this.currentTaskName = vwf.name(nodeId);
+                    var stepDivName = '#' + nodeId.replace(/\:/g, "_").replace(/\./g, "-");
                     if($(stepDivName).length) $(stepDivName).trigger('click');
                     break;
                   case "completed":
-                    var htmlDiv = nodeId.replace(/\:/g, "_");
+                    var htmlDiv = nodeId.replace(/\:/g, "_").replace(/\./g, "-");
                     if( $('#div--' + htmlDiv) ) $('#' + htmlDiv).css('color', 'green');
                     var numTasks = 0;
                     for (var step in this.lessonSteps) { numTasks++; }
@@ -215,7 +219,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     $('#lessonProgressBar').css('width', this.progressWidth+'px');
                     break;
                   case "exiting":
-                    var accordionName = '#accordion--' + nodeId.replace(/\:/g, "_");
+                    var accordionName = '#accordion--' + nodeId.replace(/\:/g, "_").replace(/\./g, "-");
                     if($(accordionName).length) $(accordionName).accordion("activate", false);
                     break;
                 }
@@ -238,7 +242,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if(parentID == lessonID)
             {
                 var subAccordionDiv = document.createElement('div');
-                subAccordionDiv.id = 'accordion--' + step.replace(/\:/g, "_");
+                subAccordionDiv.id = 'accordion--' + step.replace(/\:/g, "_").replace(/\./g, "-");
 
                 $('#accordion').append("<p class='taskTitle'>" + lessonSteps[step] + "</p>");
                 $('#accordion').append(subAccordionDiv);
@@ -248,12 +252,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }
             else if(parentID == currentTaskID)
             {
-                $('#accordion--'+parentID.replace(/\:/g, "_")).append("<h2><a id='" + step.replace(/\:/g, "_") + "' href='#'>" + lessonSteps[step] + "</a></h2>");
-                $('#accordion--'+parentID.replace(/\:/g, "_")).append("<div id='div--" + step.replace(/\:/g, "_") + "'></div>");  
+                $('#accordion--'+parentID.replace(/\:/g, "_").replace(/\./g, "-")).append("<h2><a id='" + step.replace(/\:/g, "_").replace(/\./g, "-") + "' href='#'>" + lessonSteps[step] + "</a></h2>");
+                $('#accordion--'+parentID.replace(/\:/g, "_").replace(/\./g, "-")).append("<div id='div--" + step.replace(/\:/g, "_").replace(/\./g, "-") + "'></div>");  
             }
             else
             {
-                var htmlParent = parentID.replace(/\:/g, "_");
+                var htmlParent = parentID.replace(/\:/g, "_").replace(/\./g, "-");
                 while(! $('#div--' + htmlParent).length) 
                 {
                     htmlParent = htmlParent.substring(0, htmlParent.lastIndexOf('_'));
@@ -277,7 +281,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     function nextTask()
     {
-        vwf_view.kernel.callMethod(vwf.find('','/lesson')[0], 'next', []);
+        vwf_view.kernel.callMethod(vwf.find('','//'+this.currentTaskName)[0], 'next', []);
     }
 
     // -- completeLesson --------------------------------------------------------------------

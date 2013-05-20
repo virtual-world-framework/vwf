@@ -51,7 +51,7 @@ define( function() {
         /// @function
         /// 
         /// @param {String|Object} nodeComponent
-        /// @param {Function} [callback]
+        /// @param {module:vwf/api/kernel~nodeCallback} [callback]
         /// 
         /// @returns {}
 
@@ -75,7 +75,7 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String|Object} nodeComponent
-        /// @param {Function} [callback]
+        /// @param {module:vwf/api/kernel~nodeCallback} [callback]
         /// 
         /// @returns {}
 
@@ -101,7 +101,7 @@ define( function() {
         /// @param {String} childName
         /// @param {String|Object} childComponent
         /// @param {String} [childURI]
-        /// @param {Function} [callback]
+        /// @param {module:vwf/api/kernel~nodeCallback} [callback]
         /// 
         /// @returns {}
 
@@ -429,6 +429,8 @@ define( function() {
 
         /// Return a node's parent, grandparent, its parent, etc.
         /// 
+        /// @function
+        /// 
         /// @param {ID} nodeID
         /// @param {Boolean} [initializedOnly]
         ///   If set, only include parents of nodes that have completed initialization. If a portion
@@ -552,7 +554,7 @@ define( function() {
         ///   Interpret nodes that haven't completed initialization as though they don't have
         ///   ancestors. Drivers that manage application code should set `initializedOnly` since
         ///   applications should never have access to uninitialized parts of the application graph.
-        /// @param {Function} [callback]
+        /// @param {module:vwf/api/kernel~nodeCallback} [callback]
         ///   A callback to receive the search results. If callback is provided, find invokes
         ///   callback( matchID ) for each match. Otherwise the result is returned as an array.
         /// 
@@ -582,6 +584,12 @@ define( function() {
         ///   true when testID matches the pattern.
 
         test: [ /* nodeID, matchPattern, testID, initializedOnly */ ],
+
+        /// Description.
+        /// 
+        /// @callback module:vwf/api/kernel~nodeCallback
+        /// 
+        /// @param {ID} nodeID
 
     };
 

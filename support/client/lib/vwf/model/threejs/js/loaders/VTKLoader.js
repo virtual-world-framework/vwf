@@ -2,24 +2,29 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
-THREE.VTKLoader = function () {
-
-	THREE.EventTarget.call( this );
-
-};
+THREE.VTKLoader = function () {};
 
 THREE.VTKLoader.prototype = {
 
 	constructor: THREE.VTKLoader,
 
-	load: function ( url ) {
+	addEventListener: THREE.EventDispatcher.prototype.addEventListener,
+	hasEventListener: THREE.EventDispatcher.prototype.hasEventListener,
+	removeEventListener: THREE.EventDispatcher.prototype.removeEventListener,
+	dispatchEvent: THREE.EventDispatcher.prototype.dispatchEvent,
+
+	load: function ( url, callback ) {
 
 		var scope = this;
 		var request = new XMLHttpRequest();
 
 		request.addEventListener( 'load', function ( event ) {
 
-			scope.dispatchEvent( { type: 'load', content: scope.parse( event.target.responseText ) } );
+			var geometry = scope.parse( event.target.responseText );
+
+			scope.dispatchEvent( { type: 'load', content: geometry } );
+
+			if ( callback ) callback( geometry );
 
 		}, false );
 
@@ -109,4 +114,4 @@ THREE.VTKLoader.prototype = {
 
 	}
 
-}
+};

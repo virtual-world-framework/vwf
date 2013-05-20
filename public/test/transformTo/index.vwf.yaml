@@ -13,6 +13,8 @@
 
 --- 
 extends: http://vwf.example.com/navscene.vwf
+properties:
+  backgroundColor: [200, 200, 200]
 methods:
   log:
 children:

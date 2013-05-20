@@ -55,6 +55,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         initialize: function() {
             
+            checkCompatibility.call(this);
+
             this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
             this.state.prototypes = {}; 
@@ -81,7 +83,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- creatingNode ------------------------------------------------------------------------
         
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-                                childSource, childType, childURI, childName, callback ) {
+                                childSource, childType, childIndex, childName, callback ) {
+
+            var childURI = nodeID === 0 ? childIndex : undefined;
 
             var self = this;
 
@@ -509,8 +513,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                
                                 var up = new THREE.Vector3();
                                 up.set(0,0,1);
-                                lookatPosition.copy(lookatObject.matrix.getPosition());
-                                thisPosition.copy(thisMatrix.getPosition());
+                                lookatPosition.getPositionFromMatrix( lookatObject.matrix );
+                                thisPosition.getPositionFromMatrix( thisMatrix );
                                 
                                 if(thisPosition.distanceTo(lookatPosition) > 0)
 								{
@@ -526,7 +530,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             var up = new THREE.Vector();
                             up.set(0,0,1);
                             lookatPosition.set(propertyValue[0],propertyValue[1],propertyValue[2]);
-                            thisPosition.copy(threeObject.matrix.getPosition());
+                            thisPosition.getPositionFromMatrix( threeObject.matrix );
                             threeObject.matrix.lookAt(thisPosition,lookatPosition,up);
                             var flipmat = new THREE.Matrix4(-1, 0,0,0,
                                                         0, 1,0,0,
@@ -534,7 +538,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                                         0, 0,0,1);
                             var matrix = new THREE.Matrix4();
                             matrix.copy(threeObject.matrix);                        
-                            matrix = matrix.multiply(flipmat,matrix);
+                            matrix = matrix.multiplyMatrices(flipmat,matrix);
                             threeObject.matrix.copy(matrix);
                             threeObject.updateMatrixWorld(true);
                             value = propertyValue;   
@@ -944,7 +948,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 if(threeObject.__lights[i] instanceof THREE.AmbientLight)
                                 {
                                     threeObject.__lights[i].color.setRGB(vwfColor.red()/255,vwfColor.green()/255,vwfColor.blue()/255);
-                                    SetMaterialAmbients.call(this);
                                     lightsFound++;
                                 }
                             
@@ -953,11 +956,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 var ambientlight = new THREE.AmbientLight( '#000000' );
                                 ambientlight.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                                 node.threeScene.add( ambientlight );
-                                SetMaterialAmbients.call(this);                            
                             }
                             value = colorToString.call( this, vwfColor );
                         }
                     }
+
+                    // backgroundColor and enableShadows are dependent on the renderer object, but if they are set in a prototype,
+                    // the renderer is not available yet, so store them until it is ready.
                     if ( propertyName == 'backgroundColor' )
                     {
                         if ( node && node.renderer ) {
@@ -967,12 +972,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 value = colorToString.call( this, vwfColor );
                             }
                         }
+                        else if(node) {
+                            node.rendererProperties["backgroundColor"] = propertyValue;
+                        }
                     }
                     if(propertyName == 'enableShadows')
                     {
                         if ( node && node.renderer ) {
                             value = Boolean( propertyValue );
                             node.renderer.shadowMapEnabled = value;
+                        }
+                        else if(node) {
+                            node.rendererProperties["enableShadows"] = propertyValue;
                         }
                     }
                 }   
@@ -1282,6 +1293,25 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
     } );
     // == PRIVATE  ========================================================================================
+    
+    function checkCompatibility() {
+        this.compatibilityStatus = { compatible:true, errors:{} }
+        var contextNames = ["webgl","experimental-webgl","moz-webgl","webkit-3d"];
+        for(var i = 0; i < contextNames.length; i++){
+            try{
+                var canvas = document.createElement('canvas');
+                var gl = canvas.getContext(contextNames[i]);
+                if(gl){
+                    return true;
+                }
+            }
+            catch(e){}
+        }
+        this.compatibilityStatus.compatible = false;
+        this.compatibilityStatus.errors["WGL"] = "This browser is not compatible. The vwf/view/threejs driver requires WebGL.";
+        return false;
+    }
+
     function getPrototypes( kernel, extendsID ) {
         var prototypes = [];
         var id = extendsID;
@@ -1377,6 +1407,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         node.threeScene.name = "scene";
         node.pendingLoads = 0;
         node.srcAssetObjects = [];
+        node.rendererProperties = {};
         
         return node;
     }
@@ -1552,18 +1583,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         {
             var mat = new THREE.Matrix4();
             mat.copy(parent.matrix);
-            matrix = matrix.multiply(mat,matrix);
+            matrix = matrix.multiplyMatrices(mat,matrix);
             parent = parent.parent;
         }
         var mat = new THREE.Matrix4();
             mat.copy(threeObject.matrix);
-        matrix = matrix.multiply(mat,matrix);
+        matrix = matrix.multiplyMatrices(mat,matrix);
         var ret = [];
         for(var i = 0; i < mesh.geometry.vertices.length; i++)
         {
             var vert = new THREE.Vector3();
             vert.copy(mesh.geometry.vertices[i]);
-            vert = matrix.multiplyVector3(vert);
+            vert.applyMatrix4( matrix );
             ret.push([vert.x,-vert.y,vert.z]);
 
         }
@@ -1614,9 +1645,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             {
                 var face = mesh.geometry.faces[i];
                 if(face instanceof THREE.Face4)
-                    mesh.geometry.faceVertexUvs[0].push([new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1)]);
+                    mesh.geometry.faceVertexUvs[0].push( [ new THREE.Vector2( 0, 1 ),
+                                                           new THREE.Vector2( 0, 1 ),
+                                                           new THREE.Vector2( 0, 1 ), 
+                                                           new THREE.Vector2( 0, 1 ) ] );
                 if(face instanceof THREE.Face3)
-                    mesh.geometry.faceVertexUvs[0].push([new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1)]);
+                    mesh.geometry.faceVertexUvs[0].push( [ new THREE.Vector2( 0, 1 ), 
+                                                           new THREE.Vector2( 0, 1 ),
+                                                           new THREE.Vector2( 0, 1 ) ] );
             }
         }
          
@@ -1678,7 +1714,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 face.vertexNormals.push( new THREE.Vector3( meshDef.normals[i*3], meshDef.normals[i*3+1],meshDef.normals[i*3+2] ) );   
             }
             for ( i = 0; geo.faceVertexUvs && meshDef.uv1 && i < meshDef.uv1.length; i++ ) {
-                geo.faceVertexUvs.push( new THREE.UV( meshDef.uv1[i*2], meshDef.uv1[i*2+1] ) );   
+                geo.faceVertexUvs.push( new THREE.Vector2( meshDef.uv1[i*2], meshDef.uv1[i*2+1] ) );   
             }             
             node.threeObject.add( new THREE.Mesh( geo, mat ) ); 
             
@@ -1710,8 +1746,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             asset.name = childName;
             asset.vwfID = nodeID;
             asset.matrixAutoUpdate = false;
-           
-            SetMaterialAmbients.call(threeModel,asset);
             
             // remember that this was a loaded collada file
             asset.loadedColladaNode = true;
@@ -2226,7 +2260,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 particle.z = 0;
                 
 				//generate a point in objects space, the move to world space
-                particle.world = mat.multiplyVector3(this.generatePoint());
+                particle.world = this.generatePoint().applyMatrix4( mat );
                 
 				//back up initial (needed by the analyticShader)
                 particle.initialx = particle.world.x;
@@ -2284,7 +2318,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 mat.elements[12] = 0;
                 mat.elements[13] = 0;
                 mat.elements[14] = 0;
-                particle.velocity = mat.multiplyVector3(particle.velocity.clone());
+                particle.velocity.applyMatrix4( mat );
                 
                 //accelerations are always world space, just min and max on each axis
                 particle.acceleration.x = this.minAcceleration[0] + (this.maxAcceleration[0] - this.minAcceleration[0]) * Math.random();
@@ -2462,7 +2496,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					this.temp.z = particle.world.z;
 					
 					//need to specify in object space, event though comptued in local
-					inv.multiplyVector3(this.temp);
+					this.temp.applyMatrix4( inv );
 					particle.x = this.temp.x;
 					particle.y = this.temp.y;
 					particle.z = this.temp.z;
@@ -2542,12 +2576,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					this.temp.x = particle.world.x ;
 					this.temp.y = particle.world.y ;
 					this.temp.z = particle.world.z;
-					inv.multiplyVector3(this.temp);
+					this.temp.applyMatrix4( inv );
 					particle.x = this.temp.x;
 					particle.y = this.temp.y;
 					particle.z = this.temp.z;
 					//careful to have prev and current pos in same space!!!!
-					inv.multiplyVector3(particle.prevworld);
+					particle.prevworld.applyMatrix4( inv );
                 }
             }
            
@@ -2603,10 +2637,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				//a system to a moving object would break.
 				for(var i =0; i < this.geometry.vertices.length; i++)
 				{
-						inv.multiplyVector3(this.geometry.vertices[i]);
-						inv.multiplyVector3(this.shaderMaterial_interpolate.attributes.previousPosition.value[i]);
-						newt.multiplyVector3(this.geometry.vertices[i]);
-						newt.multiplyVector3(this.shaderMaterial_interpolate.attributes.previousPosition.value[i]);
+						this.geometry.vertices[ i ].applyMatrix4( inv );
+						this.shaderMaterial_interpolate.attributes.previousPosition.value[ i ].applyMatrix4( inv );
+						this.geometry.vertices[ i ].applyMatrix4( newt );
+						this.shaderMaterial_interpolate.attributes.previousPosition.value[ i ].applyMatrix4( newt );
 				}
 				this.geometry.verticesNeedUpdate  = true;	
 				this.shaderMaterial_interpolate.attributes.previousPosition.needsUpdate = true;
@@ -2710,34 +2744,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 ret = child;
         }       
         return ret;
-    }
-    //necessary when settign the amibent color to match GLGE behavior
-    //Three js mults scene ambient by material ambient
-    function SetMaterialAmbients(start)
-    {
-        
-        if(!start)
-        {
-            for(var i in this.state.scenes)
-            {
-                SetMaterialAmbients(this.state.scenes[i].threeScene);
-            }
-        }else
-        {
-            if(start && start.material)
-            {
-                //this will override any ambient colors set in materials.
-                if(start.material.ambient)
-                    start.material.ambient.setRGB(1,1,1);
-                if(!start.material.ambient) 
-                    start.material.ambient = new THREE.Color('#FFFFFF');
-            }
-            if(start && start.children)
-            {
-               for(var i in start.children)
-                SetMaterialAmbients(start.children[i]);
-            }
-        }
     }
     function SetVisible(node,state) 
     {
@@ -2973,7 +2979,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         for(var i = 0; i < node.attributes[key].length-2; i+= 3)
                         {
-                            var vert = new THREE.Vector3(node.attributes[key][i],node.attributes[key][i+1],node.attributes[key][i+2]);
+                            var vert = new THREE.Vector3( node.attributes[ key ][ i ],
+                                                          node.attributes[ key ][ i + 1 ],
+                                                          node.attributes[ key ][ i + 2 ] );
                             mesh.geometry.vertices.push(vert);
                         }
                     }
@@ -2981,7 +2989,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         for(var i = 0; i < node.attributes[key].length-2; i+= 3)
                         {
-                            var norm = new THREE.Vector3(node.attributes[key][i],node.attributes[key][i+1],node.attributes[key][i+2]);
+                            var norm = new THREE.Vector3( node.attributes[ key ][ i ],
+                                                          node.attributes[ key ][ i + 1 ],
+                                                          node.attributes[ key ][ i + 2 ] );
                             mesh.geometry.normals.push(norm);
                         }
                     }
@@ -2989,7 +2999,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         for(var i = 0; i < node.attributes[key].length-1; i+= 2)
                         {
-                            var uv = new THREE.UV(node.attributes[key][i],node.attributes[key][i+1]);
+                            var uv = new THREE.Vector2( node.attributes[ key ][ i ], 
+                                                        node.attributes[ key ][ i + 1 ] );
                             mesh.geometry.UVS.push(uv);
                         }
                     }
@@ -2998,7 +3009,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         for(var i = 0; i < node.attributes[key].length-3; i+= 4)
                         {
-                            var vert = new THREE.Vector3(node.attributes[key][i],node.attributes[key][i+1],node.attributes[key][i+2]);
+                            var vert = new THREE.Vector3( node.attributes[ key ][ i ],
+                                                          node.attributes[ key ][ i + 1 ],
+                                                          node.attributes[ key ][ i + 2 ] );
                             mesh.geometry.colors.push(vert);
                             
                         }
@@ -3097,7 +3110,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                             0, 0,0,1);
                             
                                             
-            glmat = glmat.multiply(flipmat,glmat);
+            glmat = glmat.multiplyMatrices(flipmat,glmat);
             
             //glmat = glmat.transpose();
             newnode.matrix.copy(glmat)  

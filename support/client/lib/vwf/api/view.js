@@ -23,30 +23,56 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {ID} nodeID
         /// @param {ID} childID
         /// @param {String} childExtendsID
         /// @param {String[]} childImplementsIDs
         /// @param {String} childSource
         /// @param {String} childType
-        /// @param {String} childURI
+        /// @param {String} childIndex
+        ///   When `nodeID` is falsy, the URI of the component, or `undefined` if the component
+        ///   wasn't loaded from a URI. When `nodeID` is truthy, the numerical index of the child's
+        ///   position in the parent's array, starting at `0`. When child order is significant to
+        ///   the driver, the child should be placed at the given position in the parent's array.
+        ///   Nodes won't necessarily arrive in numerical order since varying dependencies cause
+        ///   nodes to become ready at indeterminate times.
         /// @param {String} childName
-        /// @param {Function} [callback]
+        /// @param {module:vwf/api/view~readyCallback} callback
         /// 
         /// @returns {}
 
-        createdNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback( ready ) */ ],
+        createdNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType,
+            childIndex, childName, callback( ready ) */ ],
 
         /// Description.
+        /// 
+        /// @function
         /// 
         /// @param {ID} nodeID
         /// @param {ID} childID
+        /// @param {String} childExtendsID
+        /// @param {String[]} childImplementsIDs
+        /// @param {String} childSource
+        /// @param {String} childType
+        /// @param {String} childIndex
+        ///   When `nodeID` is falsy, the URI of the component, or `undefined` if the component
+        ///   wasn't loaded from a URI. When `nodeID` is truthy, the numerical index of the child's
+        ///   position in the parent's array, starting at `0`. When child order is significant to
+        ///   the driver, the child should be placed at the given position in the parent's array.
+        ///   Nodes won't necessarily arrive in numerical order since varying dependencies cause
+        ///   nodes to become ready at indeterminate times.
+        /// @param {String} childName
         /// 
         /// @returns {}
 
-        initializedNode: [ /* nodeID, childID */ ],
+        initializedNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType,
+            childIndex, childName */ ],
 
         /// Description.
+        /// 
+        /// @function
         /// 
         /// @param {ID} nodeID
         /// 
@@ -55,6 +81,8 @@ define( function() {
         deletedNode: [ /* nodeID */ ],
 
         /// Description.
+        /// 
+        /// @function
         /// 
         /// @param {ID} nodeID
         /// @param {ID} childID
@@ -66,6 +94,8 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {ID} nodeID
         /// @param {ID} childID
         /// 
@@ -74,6 +104,8 @@ define( function() {
         removedChild: [ /* nodeID, childID */ ],
 
         /// Description.
+        /// 
+        /// @function
         /// 
         /// @param {ID} nodeID
         /// @param {String} propertyName
@@ -84,6 +116,8 @@ define( function() {
         createdProperty: [ /* nodeID, propertyName, propertyValue */ ],
 
         /// Description.
+        /// 
+        /// @function
         /// 
         /// @param {ID} nodeID
         /// @param {String} propertyName
@@ -97,6 +131,8 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {ID} nodeID
         /// @param {String} propertyName
         /// @param {Value} propertyValue
@@ -107,6 +143,8 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {ID} nodeID
         /// @param {String} propertyName
         /// @param {Value} propertyValue
@@ -116,6 +154,8 @@ define( function() {
         gotProperty: [ /* nodeID, propertyName, propertyValue */ ],
 
         /// Description.
+        /// 
+        /// @function
         /// 
         /// @param {ID} nodeID
         /// @param {String} methodName
@@ -130,6 +170,8 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {ID} nodeID
         /// @param {String} methodName
         /// @param {String[]} methodParameters
@@ -140,6 +182,8 @@ define( function() {
         calledMethod: [ /* nodeID, methodName, methodParameters, methodValue */ ],
 
         /// Description.
+        /// 
+        /// @function
         /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
@@ -153,6 +197,8 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
         /// @param {String[]} eventParameters
@@ -162,6 +208,8 @@ define( function() {
         firedEvent: [ /* nodeID, eventName, eventParameters */ ],
 
         /// Description.
+        /// 
+        /// @function
         /// 
         /// @param {ID} nodeID
         /// @param {String} scriptText
@@ -173,11 +221,19 @@ define( function() {
 
         /// Description.
         /// 
+        /// @function
+        /// 
         /// @param {Number} time
         /// 
         /// @returns {}
 
         ticked: [ /* time */ ],
+
+        /// Description.
+        /// 
+        /// @callback module:vwf/api/view~readyCallback
+        /// 
+        /// @param {Boolean} ready
 
     };
 
