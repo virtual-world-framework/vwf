@@ -26,6 +26,16 @@
 		box-shadow: 0px 0px 5px blue;
 	}
 	
+	#alertify
+	{
+		font-size: 1.7em;
+		top: 38%;
+	}
+	#alertify-logs
+	{
+		font-size: 2em;
+		
+	}
 	canvas:focus
 	{
 		border: 2px solid blue;

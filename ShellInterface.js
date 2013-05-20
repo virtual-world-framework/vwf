@@ -287,6 +287,50 @@ function StartShellInterface()
 				}
 			
 		}
+		if(commands[0] && commands[0] == 'message' && commands[1])
+		{
+			var name = commands[1];
+			
+				for(var i in global.instances)
+				{
+					
+					{
+						//find either the client or the user and boot them from all instances
+						
+						for(var j in global.instances[i].clients)
+						{
+						   var client = global.instances[i].clients[j];
+						  
+						   if(client && client.loginData)
+						   {
+							  if(client.loginData.UID == name)
+								client.emit('message',{"time":global.instances[i].time,"node":"index-vwf","action":"callMethod","member":'PM',"parameters":[[JSON.stringify({receiver:name,sender:"*System*",text:commands[2]})]]});
+						   }
+						}
+					}
+				}
+			
+		}
+		if(commands[0] && commands[0] == 'broadcast' && commands[1])
+		{
+			var name = commands[1];
+			
+				for(var i in global.instances)
+				{
+					
+					//find either the client or the user and boot them from all instances
+					
+					for(var j in global.instances[i].clients)
+					{
+					   var client = global.instances[i].clients[j];   
+					   if(client && client.emit)
+						client.emit('message',{"time":global.instances[i].time,"node":"index-vwf","action":"callMethod","member":'receiveChat',"parameters":[[JSON.stringify({sender:"*System*",text:commands[1]})]]});
+					   
+					}
+					
+				}
+			
+		}
 		if(commands[0] == 'delete')
 		{
 			if(commands[1] == 'user')

@@ -20,8 +20,10 @@ define(function ()
 		$(document.body).append("<div style='" + style + "' id='NotifierWindow'>This is a test of the multi </div>");
 		$(document.body).append("<div id='WaitingWindow'><div style='text-align: center;margin-top: 50px;'><img src='images/loading.gif'><div style='font-size: 1.5em;' id='waittitle'/></div></div>");
 		$(document.body).append("<div id='NotifierAlertMessage'></div>");
+		
 		$('#NotifierWindow').hide();
 		this.state = 'hidden';
+		this.alerts = [];
 		$('#WaitingWindow').dialog(
 		{
 			modal: true,
@@ -30,33 +32,34 @@ define(function ()
 		});
 		this.notify = function (text)
 		{
-			clearTimeout($('#element').stop().data('timer'));
-			$('#NotifierWindow').css('font-size', $(window).height() / 25 + 'px');
-			$('#NotifierWindow').text(text);
-			if(_Notifier.state == 'hidden')
+			
+			if(this.alerts.indexOf(text) == -1)
 			{
-				$('#NotifierWindow').stop().fadeIn(function ()
+				var i = this.alerts.length-1;
+				var self = this;
+				this.alerts.push(text);
+				alertify.log(text);
+				window.setTimeout(function()
 				{
-					var elem = $(this);
-					_Notifier.state = 'fadeout';
-					$.data(this, 'timer', setTimeout(function ()
-					{
-						_Notifier.state = 'fadeout';
-						elem.fadeOut(function(){
-						_Notifier.state = 'hidden';
-						
-						});
-						
-					}, 2000));
-				});
-				_Notifier.state = 'fadein';
+					self.alerts.splice(i,1);
+				},3000);
 			}
 		}
 		this.alert = function (text, callback)
 		{
-			$('#NotifierAlertMessage').text(text);
-			$('#NotifierAlertMessage').dialog('open');
-			this.alertcallback = callback;
+			
+			if(this.alerts.indexOf(text) == -1)
+			{
+				var i = this.alerts.length-1;
+				var self = this;
+				this.alerts.push(text);
+				alertify.alert(text,function()
+				{
+					self.alerts.splice(i,1);
+					if(callback)
+						callback();
+				});
+			}
 		}
 		$('#NotifierAlertMessage').dialog(
 		{

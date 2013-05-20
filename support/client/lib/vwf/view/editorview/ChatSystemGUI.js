@@ -4,6 +4,7 @@ define(
 	{
 		$(document.body).append('<div id="ChatWindow" style="width: 100%;margin:0px;padding:0px">' + '<div class="text ui-widget-content ui-corner-all" style="background-image: -webkit-linear-gradient(top, white 0%, #D9EEEF 100%);width: 99%;top: 0%; height:90%;padding:0px;margin:0px;position: absolute;overflow-y:auto">' + '	<table id="ChatLog" style="width:100%;background-color: transparent;">' + '	</table>' + '</div>' + '<input type="text" name="ChatInput" id="ChatInput" class="text ui-widget-content ui-corner-all" style="width: 99%;top: 92%;position: absolute;padding: 0px;font-size: 1.2em;"/>		' + '</div>');
 
+		
 		function SendChatMessage()
 		{
 			if (document.PlayerNumber == null)
@@ -102,6 +103,9 @@ define(
 			if (e.sender == document.PlayerNumber) color = 'darkblue';
 			if (e.sender != document.PlayerNumber) $('#ChatLog' + ToSafeID(e.sender)).append('<tr><td style="vertical-align: top;width: 25%;min-width: 25%;margin-right: 1em;color:' + color + ';display: table-cell;">' + e.sender + '</td><td style="color:' + color + ';width: 75%;max-width: 75%;">' + e.text + '</td></tr>');
 			else $('#ChatLog' + ToSafeID(e.receiver)).append('<tr><td style="vertical-align: top;width: 25%;min-width: 25%;margin-right: 1em;color:' + color + ';display: table-cell;">' + e.sender + '</td><td style="color:' + color + ';width: 75%;max-width: 75%;">' + e.text + '</td></tr>');
+			
+			$('#ChatLog' + ToSafeID(e.receiver)).parent().animate({ scrollTop: $('#ChatLog' + ToSafeID(e.receiver)).height() }, "slow");
+			$('#ChatLog' + ToSafeID(e.sender)).parent().animate({ scrollTop: $('#ChatLog' + ToSafeID(e.sender)).height() }, "slow");
 		}
 
 		function ChatMessageReceived(e)
@@ -110,6 +114,8 @@ define(
 			var color = 'darkred';
 			if (message.sender == document.PlayerNumber) color = 'darkblue';
 			$('#ChatLog').append('<tr><td style="vertical-align: top;width: 25%;min-width: 25%;margin-right: 1em;color:' + color + ';display: table-cell;">' + message.sender + '</td><td style="color:' + color + ';width: 75%;max-width: 75%;">' + message.text + '</td></tr>');
+			_Notifier.notify(message.sender + ": " + message.text);
+			$('#ChatLog').parent().animate({ scrollTop: $('#ChatLog').height() }, "slow");
 		}
 
 		function disableEnterKey(e)
@@ -120,7 +126,7 @@ define(
 			if (key == 13) return false;
 			else return true;
 		}
-
+		$('#ChatInput').keyup(ChatKeypress);
 		function ChatKeypress(e)
 		{
 			var key;

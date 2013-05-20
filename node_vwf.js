@@ -762,6 +762,28 @@ function startVWF(){
 					global.instances[namespace].Log('DENIED ' + JSON.stringify(message), 2);				
 				return;
 			}
+			if(message.action == 'callMethod' && message.node =='index-vwf' && message.member=='PM')
+			{
+				var textmessage = JSON.parse(message.parameters[0]);
+				if(textmessage.receiver == '*System*')
+				{
+					console.log(textmessage.sender + ": " + textmessage.text);
+					
+				}
+				for(var i in global.instances[namespace].clients)
+				{
+					var client = global.instances[namespace].clients[i];
+					if(client && client.loginData && (client.loginData.UID == textmessage.receiver || client.loginData.UID == textmessage.sender))
+					{	
+						client.emit('message',message);
+						
+					}
+						
+				}
+				
+				
+				return;
+			}
 			//We'll only accept a setProperty if the user has ownership of the object
 			if(message.action == "setProperty")
 			{
