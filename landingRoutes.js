@@ -46,3 +46,20 @@ exports.user = function(req, res){
 	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: 'Account'};
 	res.render('userManagement');
 }
+exports.help = function(req, res){
+	
+	var acceptedPages = ['index', 'modifiers', 'feedback', 'toolwindows', 'primitiveobjects', 'cameramodes', 'maintoolbarbuttons'];
+	
+	var currentIndex = acceptedPages.indexOf(req.params.page);
+	var displayPage = currentIndex >= 0 ? acceptedPages[currentIndex] : acceptedPages[0];
+	
+	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: ''};
+	res.render('help/'+displayPage+'.html');
+}
+
+
+
+
+
+
+
