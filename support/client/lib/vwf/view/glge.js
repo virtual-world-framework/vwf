@@ -27,11 +27,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             checkCompatibility.call(this);
 
             this.pickInterval = 10;
-            
+            this.disableInputs = false;
+
+            // Store parameter options for persistence functionality
+            this.parameters = options;
+
             if(typeof options == "object") {
                 this.rootSelector = options["application-root"];
-                if(options["experimental-pick-interval"]) {
+                if("experimental-pick-interval" in options) {
                     this.pickInterval = options["experimental-pick-interval"];
+                }
+                if("experimental-disable-inputs" in options) {
+                    this.disableInputs = options["experimental-disable-inputs"];
                 }
             }
             else {
@@ -75,69 +82,71 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 ).children(":last");
 
                 var canvas = this.canvasQuery.get(0);
-                window.onkeydown = function (event) {
-                    var key = undefined;
-                    var validKey = false;
-                    var keyAlreadyDown = false;
-                    switch (event.keyCode) {
-                        case 17:
-                        case 16:
-                        case 18:
-                        case 19:
-                        case 20:
-                            break;
-                        default:
-                            key = getKeyValue.call( glgeView, event.keyCode);
-                            keyAlreadyDown = !!glgeView.keyStates.keysDown[key.key];
-                            glgeView.keyStates.keysDown[key.key] = key;
-                            validKey = true;
-                            break;
-                    }
+                if(!this.disableInputs) {
+                    window.onkeydown = function (event) {
+                        var key = undefined;
+                        var validKey = false;
+                        var keyAlreadyDown = false;
+                        switch (event.keyCode) {
+                            case 17:
+                            case 16:
+                            case 18:
+                            case 19:
+                            case 20:
+                                break;
+                            default:
+                                key = getKeyValue.call( glgeView, event.keyCode);
+                                keyAlreadyDown = !!glgeView.keyStates.keysDown[key.key];
+                                glgeView.keyStates.keysDown[key.key] = key;
+                                validKey = true;
+                                break;
+                        }
 
-                    if (!glgeView.keyStates.mods) glgeView.keyStates.mods = {};
-                    glgeView.keyStates.mods.alt = event.altKey;
-                    glgeView.keyStates.mods.shift = event.shiftKey;
-                    glgeView.keyStates.mods.ctrl = event.ctrlKey;
-                    glgeView.keyStates.mods.meta = event.metaKey;
+                        if (!glgeView.keyStates.mods) glgeView.keyStates.mods = {};
+                        glgeView.keyStates.mods.alt = event.altKey;
+                        glgeView.keyStates.mods.shift = event.shiftKey;
+                        glgeView.keyStates.mods.ctrl = event.ctrlKey;
+                        glgeView.keyStates.mods.meta = event.metaKey;
 
-                    var sceneNode = glgeView.state.scenes[glgeView.state.sceneRootID];
-                    if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( glgeView.keyStates.keysDown ).length > 0*/) {
-                        //var params = JSON.stringify( glgeView.keyStates );
-                        glgeView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [glgeView.keyStates]);
-                    }
-                };
+                        var sceneNode = glgeView.state.scenes[glgeView.state.sceneRootID];
+                        if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( glgeView.keyStates.keysDown ).length > 0*/) {
+                            //var params = JSON.stringify( glgeView.keyStates );
+                            glgeView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [glgeView.keyStates]);
+                        }
+                    };
 
-                window.onkeyup = function (event) {
-                    var key = undefined;
-                    var validKey = false;
-                    switch (event.keyCode) {
-                        case 16:
-                        case 17:
-                        case 18:
-                        case 19:
-                        case 20:
-                            break;
-                        default:
-                            key = getKeyValue.call( glgeView, event.keyCode);
-                            delete glgeView.keyStates.keysDown[key.key];
-                            glgeView.keyStates.keysUp[key.key] = key;
-                            validKey = true;
-                            break;
-                    }
+                    window.onkeyup = function (event) {
+                        var key = undefined;
+                        var validKey = false;
+                        switch (event.keyCode) {
+                            case 16:
+                            case 17:
+                            case 18:
+                            case 19:
+                            case 20:
+                                break;
+                            default:
+                                key = getKeyValue.call( glgeView, event.keyCode);
+                                delete glgeView.keyStates.keysDown[key.key];
+                                glgeView.keyStates.keysUp[key.key] = key;
+                                validKey = true;
+                                break;
+                        }
 
-                    glgeView.keyStates.mods.alt = event.altKey;
-                    glgeView.keyStates.mods.shift = event.shiftKey;
-                    glgeView.keyStates.mods.ctrl = event.ctrlKey;
-                    glgeView.keyStates.mods.meta = event.metaKey;
+                        glgeView.keyStates.mods.alt = event.altKey;
+                        glgeView.keyStates.mods.shift = event.shiftKey;
+                        glgeView.keyStates.mods.ctrl = event.ctrlKey;
+                        glgeView.keyStates.mods.meta = event.metaKey;
 
-                    var sceneNode = glgeView.state.scenes[glgeView.state.sceneRootID];
-                    if (validKey && sceneNode) {
-                        //var params = JSON.stringify( glgeView.keyStates );
-                        glgeView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [glgeView.keyStates]);
-                        delete glgeView.keyStates.keysUp[key.key];
-                    }
+                        var sceneNode = glgeView.state.scenes[glgeView.state.sceneRootID];
+                        if (validKey && sceneNode) {
+                            //var params = JSON.stringify( glgeView.keyStates );
+                            glgeView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [glgeView.keyStates]);
+                            delete glgeView.keyStates.keysUp[key.key];
+                        }
 
-                };
+                    };
+                }
 
                 window.onresize = function () {
                     var origWidth = glgeView.width;
@@ -234,7 +243,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             time = time || 0;
             window.requestAnimationFrame( renderScene );
             sceneNode.frameCount++;
-            if((time - lastPickTime) > self.pickInterval) {
+            if((time - lastPickTime) > self.pickInterval && !self.disableInputs) {
                 var newPick = mousePick.call( this, mouse, sceneNode );
                 self.lastPick = newPick;
                 if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY)) {
@@ -269,7 +278,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             this.state.cameraInUse.setAspect( ( canvas.width / canvas.height)  );
 
             // set up all of the mouse event handlers
-            initMouseEvents.call( this, canvas );
+            if(!self.disableInputs) {
+                initMouseEvents.call( this, canvas );
+            }
 
             // Schedule the renderer.
 

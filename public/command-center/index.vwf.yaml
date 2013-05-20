@@ -240,4 +240,5 @@ scripts:
     this.camera.translation = [ -296.55, -118.78, 70.80 ]; 
     this.camera.rotation = [0,0,-1,19.261152267456055];
     this.translationSpeed = 5;
+    this.rotationSpeed = 0.333;
   } //@ sourceURL=index.vwf

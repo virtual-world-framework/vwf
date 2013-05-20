@@ -23,11 +23,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             checkCompatibility.call(this);
 
             this.pickInterval = 10;
+            this.disableInputs = false;
+
+            // Store parameter options for persistence functionality
+            this.parameters = options;
 
             if(typeof options == "object") {
                 this.rootSelector = options["application-root"];
-                if(options["experimental-pick-interval"]) {
+                if("experimental-pick-interval" in options) {
                     this.pickInterval = options["experimental-pick-interval"];
+                }
+                if("experimental-disable-inputs" in options) {
+                    this.disableInputs = options["experimental-disable-inputs"];
                 }
             }
             else {
@@ -117,39 +124,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     
         var self = this;
         var lastPickTime = 0;
-        var requestAnimFrame, cancelAnimFrame;
-        (function() {
-            var lastTime = 0;
-            var vendors = ['ms', 'moz', 'webkit', 'o'];
-            for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-                window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-                window.cancelRequestAnimationFrame = window[vendors[x]+
-                  'CancelRequestAnimationFrame'];
-            }
-
-            if (!window.requestAnimationFrame) {
-                requestAnimFrame = window.requestAnimationFrame = function(callback, element) {
-                    var currTime = +new Date;
-                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                    var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
-                      timeToCall);
-                    lastTime = currTime + timeToCall;
-                    return id;
-                };
-            }
-            else {
-                requestAnimFrame = window.requestAnimationFrame;
-            }
-
-            if (!window.cancelAnimationFrame) {
-                cancelAnimFrame = window.cancelAnimationFrame = function(id) {
-                    clearTimeout(id);
-                };
-            }
-            else {
-                cancelAnimFrame = window.cancelAnimationFrame;
-            }
-        }());
         
         function GetParticleSystems(node,list)
 		{
@@ -165,7 +139,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 		}
         function renderScene(time) {
 
-            requestAnimFrame( renderScene );
+            window.requestAnimationFrame( renderScene );
             sceneNode.frameCount++;
 			var now = ( performance !== undefined && performance.now !== undefined ) ? performance.now() : time;
 			var timepassed = now - sceneNode.lastTime;
@@ -187,34 +161,31 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
             // Note: this is a costly operation and should be optimized if possible
-            if((now - lastPickTime) > self.pickInterval)
+            if((now - lastPickTime) > self.pickInterval && !self.disableInputs)
             {
                 sceneNode.frameCount = 0;
             
                 var newPick = ThreeJSPick.call( self, mycanvas, sceneNode );
                 
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
+
                 if(self.lastPickId != newPickId && self.lastEventData)
                 {
                     view.kernel.dispatchEvent( self.lastPickId, "pointerOut", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                     view.kernel.dispatchEvent( newPickId, "pointerOver", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                 }
-                
-                self.lastPickId = newPickId
-                self.lastPick = newPick;
                 if(view.lastEventData && (view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || view.lastEventData.eventData[0].screenPosition[1] != oldMouseY)) {
                     oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
                     oldMouseY = view.lastEventData.eventData[0].screenPosition[1];
                     hovering = false;
                 }
-                else if(self.lastEventData && self.mouseOverCanvas && !hovering && self.lastPick) {
-                    var pickId = getPickObjectID.call( view, self.lastPick.object, false );
-                    if(!pickId) {
-                        pickId = view.state.sceneRootID;
-                    }
-                    view.kernel.dispatchEvent( pickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
+                else if(self.lastEventData && self.mouseOverCanvas && !hovering && newPick) {
+                    view.kernel.dispatchEvent( newPickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                     hovering = true;
                 }
+                
+                self.lastPickId = newPickId
+                self.lastPick = newPick;
                 lastPickTime = now;
             }
 
@@ -332,7 +303,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 			window._dSceneNode = sceneNode;
             sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
             
-            initInputEvents.call(this,mycanvas);
+            if(!this.disableInputs) {
+                initInputEvents.call(this,mycanvas);
+            }
             renderScene((+new Date));
         }
     }
@@ -358,34 +331,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
         }
     }   
-    //necessary when settign the amibent color to match GLGE behavior
-    //Three js mults scene ambient by material ambient
-    function SetMaterialAmbients(start)
-    {
-        
-        if(!start)
-        {
-            for(var i in this.state.scenes)
-            {
-                SetMaterialAmbients(this.state.scenes[i].threeScene);
-            }
-        }else
-        {
-            if(start && start.material)
-            {
-                //.005 chosen to make the 255 range for the ambient light mult to values that look like GLGE values.
-                //this will override any ambient colors set in materials.
-                if(start.material.ambient)
-                    start.material.ambient.setRGB(1,1,1);
-            }
-            if(start && start.children)
-            {
-               for(var i in start.children)
-                SetMaterialAmbients(start.children[i]);
-            }
-        }
-    }
-        // -- initInputEvents ------------------------------------------------------------------------
+    
+    // -- initInputEvents ------------------------------------------------------------------------
 
     function initInputEvents( canvas ) {
         var sceneNode = this.state.scenes[this.state.sceneRootID], child;
@@ -461,7 +408,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                 // QUESTION: Is the double use of y a bug?  I would assume so, but then why not
                 //           just use worldCamTrans as-is?
-                worldCamPos = [ worldCamTrans.x, worldCamTrans.y, worldCamTrans.y];
+                // THREE.Vector3 is an object { x:, y:, z: }
+                worldCamPos = [ worldCamTrans.x, worldCamTrans.y, worldCamTrans.z];
             }
 
             returnData.eventNodeData = { "": [ {

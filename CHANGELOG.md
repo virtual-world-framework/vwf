@@ -2,11 +2,47 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.6.10
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+- NEW: Apple Macintosh OSX installation script and README.md updated. Fixes #1903
+- CHG: Added source url name to help someone understand where the script is attached to
+- CHG: Removed the test/planeMaterial application, test/nodeMaterial is working and does the same thing
+- CHG: Removed material being used as a property( it's a child/component), and fixed test/nodeMaterial
+- CHG: Fixed copy paste error dealing with getting the camera's world position
+- CHG: Remove duplicate code from persistence by passing in an extension parameter. Refs #1810.
+- CHG: Update persistence functionality to save current running state into a configuration file, including browser title, model and view drivers and as well as associated parameters. Fixes #1810.
+- CHG: Fix bug in threejs ColladaLoader to allow multi materials to load correctly. Fix ambient color issues in minesweeper, test/axes and test/transformTo Fixes #1902, #1923
+- CHG: Reduce the camera rotation rate to make the scene easier to navigate.
+- CHG: Increase navigation updates from 10 to 30 fps. This is the maximum update rate. Time increments are still controlled by the server which currently defaults to 20 fps. Change the value in `schedule_tick` in `vwf/application/reflector.rb` to adjust.
+- CHG: Add support for using animations from the collada model in threejs.js Refs #1867, #1953
+- CHG: Split out Rakefile task for a new web task, updates the default to build a full build, and removes the web from the rake build command. Going forward: bundle exec rake - main default build that compiles everything and needs to be executed at least once to serve the website. bundle exec rake build - can be used to compile only the server components. fixes #1966
+- CHG: Load index.vwf.config.yaml if a config file matching the name of the application is not present. Fixes #1810.
+- CHG: Rewrote JQuery accordion to allow multiple hide/shows at once.  Added Expand All/Collapse All feature to top right.  Fixes #1543
+- CHG: Fixed the handling of getting color properties when the alpha = 0
+- CHG: Add new driver config option "experimental-disable-inputs", that keeps mouse and keyboard events from being mapped in the GLGE and threejs view drivers Fixes #1948
+- CHG: Remove unnecessary setMaterialAmbients function. Refs #1873
+- CHG: Remove requestAnimationFrame, since it is now in a separate javascript file. Refs #1322
+- CHG: Updated hmmwv-touch to use the humvee component, and updated it's lighting to match that application. Fixes #1925.
+- CHG: Converted .psd and .tga files to .png. Fixes #1909.
+- CHG: Fix setClearColor call to pass in the hex representation of the colors. Refs #1928
+- CHG: Installation documentation has been modified such that issues are now resolved, or OBE from earlier iterations. Fixes #100
+- CHG: Renamed vcte to command-center. Fixes #1949.
+- CHG: Updating 2D interface cookbook recipe to include information on setting the title and favicon of an application. Refs #1360.
+- CHG: Add info/title config option. Updated duck application to use favicon and title option. Fixes #1360.
+- CHG: Remove catalog files for simple and similar applications. Renamed catalog files for adl humvee until the application is working. Fixes #1950.
+- CHG: Set humvee ground texture (LM logo) visible property to false for lesson.
+- CHG: Update Installation Instructions to contain Java install.
+
+
+
+
+----------------------------------
 0.6.9
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change.
 - CHG: Moved stopped static on squelch to radio component. Fixes #1933.
-
 - CHG: Update multiuser.md to reflect clarifying change to example app refs #1711
 - CHG: Add variables to multiuser example app to make code clearer refs #1711
 - CHG: Remove url switches from catalog for physics and xmas-tree refs #1724

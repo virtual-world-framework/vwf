@@ -42,6 +42,8 @@ task :default => :build
 # Null build and test tasks.
 
 task :build
+task :full 
+task :web
 task :test
 
 desc "Install a standalone ruby for Windows and configure DevKit."

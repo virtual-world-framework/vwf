@@ -47,6 +47,7 @@ children:
 scripts:
 - |
   this.initialize = function() {
+    this.humvee.Ground.visible = false;
     this.camera.translation = this.lesson.cameraPoseEnteringVehicle.translation;
     this.camera.rotation = this.lesson.cameraPoseEnteringVehicle.rotation;
     this.camera.far = 3000;

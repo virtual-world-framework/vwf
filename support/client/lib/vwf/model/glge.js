@@ -1461,7 +1461,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         switch ( propertyName ) {
               case "ambientColor":
                 color = vwfColor.call( this, sceneNode.glgeScene.getAmbientColor() );
-                value = colorToString.call( this, color );
+                value = color.toString();
                 break;
             case "activeCamera":
                 if ( sceneNode.glgeScene.camera ) {
@@ -1471,7 +1471,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             case "backgroundColor":
                 color = vwfColor.call( this, sceneNode.glgeScene.getBackgroundColor() );
-                value = colorToString.call( this, color );
+                value = color.toString();
                 break;
             
             default:
@@ -1555,13 +1555,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 case "startColor":
                     if ( ps.getStartColor ) {
                         color = vwfColor.call( this, ps.getStartColor() );
-                        value = colorToString.call( this, color );
+                        value = color.toString();
                     } else { value = undefined; }
                     break;
                 case "endColor":
                     if ( ps.getEndColor ){
                         color = vwfColor.call( this, ps.getEndColor() );
-                        value = colorToString.call( this, color );
+                        value = color.toString();
                     } else { value = undefined; }
                     break;
                 case "image":
@@ -1639,20 +1639,20 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             case "color":
                 if ( mat ) { 
                     color = vwfColor.call( this, mat.getColor() );
-                    value = colorToString.call( this, color );
+                    value = color.toString();
                 } else { value = undefined; }
                 break;
                 
             case "ambient":
                 if ( mat ) { 
                     color = vwfColor.call( this, mat.getAmbient() );
-                    value = colorToString.call( this, color );               
+                    value = color.toString();               
                 } else { value = undefined; }
                 break;
             case "specColor":
                 if ( mat ) { 
                     color = vwfColor.call( this, mat.getSpecularColor() );
-                    value = colorToString.call( this, color );  
+                    value = color.toString();  
                 } else { value = undefined; }
                 break;
             case "shininess":
@@ -1731,7 +1731,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             case "color":
                 color = vwfColor.call( this, node.glgeObject.getColor() );
-                value = colorToString.call( this, color );  
+                value = color.toString();  
                 break;
 
             case "diffuse":
@@ -2198,16 +2198,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             vwfColor = new utility.color( "rgb("+vwfColor['r']+","+vwfColor['g']+","+vwfColor['b']+")" );
         }
         return vwfColor;        
-    }
-
-    function colorToString( color ) {
-        var retColor = "";
-        if ( color.alpha() != 1 ) {
-            retColor = "rgba("+color.red()+","+color.green()+","+color.blue()+","+color.alpha()+")";
-        } else {
-            retColor = "rgb("+color.red()+","+color.green()+","+color.blue()+")";
-        }
-        return retColor;
     }
 
     function getMeshVertexIndices( glgeObject ) {

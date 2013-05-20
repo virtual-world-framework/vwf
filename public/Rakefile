@@ -20,11 +20,14 @@ require "yaml"
 CLOBBER.include "web/**/*.html"
 CLOBBER.include "web/*.html"
 
-task :default => [ :clean, :clobber, :build ]
+task :default => [ :clean, :clobber, :web ]
 
 desc "Generate the catalog and documentation."
 
-task :build => "web/catalog.html" do
+task :build 
+task :full
+
+task :web => "web/catalog.html" do
 
     # Add the build tools to the path.
 

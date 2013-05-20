@@ -570,37 +570,25 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         value = Boolean( propertyValue );
                         threeObject.receiveShadow = value;
                     }
-                    //This can be a bit confusing, as the node has a material property, and a material child node. 
-                    //setting the property does this, but the code in the component is ambigious
-                    if(propertyName == 'material')
-                    {
-                        var material = GetMaterial(node.threeObject);
-                        if(!material)
-                        {   
-                            material = new THREE.MeshPhongMaterial();
-                            SetMaterial(node.threeObject,material);
-                        }
-                        if(propertyValue == 'red')
-                            material.color.setRGB(1,0,0);
-                        if(propertyValue == 'green')
-                            material.color.setRGB(0,1,0);
-                        if(propertyValue == 'blue')
-                            material.color.setRGB(0,0,1);
-                        if(propertyValue == 'purple')
-                            material.color.setRGB(1,0,1);
-                        if(propertyValue == 'orange')
-                            material.color.setRGB(1,.5,0);
-                        if(propertyValue == 'yellow')
-                            material.color.setRGB(1,1,0);   
-                        if(propertyValue == 'gray')
-                            material.color.setRGB(.5,.5,.5);
-                        if(propertyValue == 'white')
-                            material.color.setRGB(1,1,1);
-                        if(propertyValue == 'black')
-                            material.color.setRGB(0,0,0);                           
-                        material.ambient.setRGB( material.color.r,material.color.g,material.color.b);
 
-                        value = propertyValue;
+                    if(propertyName == "animationTimeUpdated") {
+                        if(node.threeObject.animatedMesh && propertyValue !== undefined) {
+                            for(var i = 0; i < node.threeObject.animatedMesh.length; i++) {
+                                for(var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++) {
+                                    node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
+                                }
+                                node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * 30) ] = 1;
+                            }
+                        }
+                        else if(node.threeObject.kfAnimations && propertyValue !== undefined) {
+                            // The update in THREE.KeyFrameAnimation takes a delta time, so reset the animation to the beginning, 
+                            // and pass the current VWF animation time
+                           for(var i = 0; i < node.threeObject.kfAnimations.length; i++) {
+                                node.threeObject.kfAnimations[i].stop()
+                                node.threeObject.kfAnimations[i].play(false, 0);
+                                node.threeObject.kfAnimations[i].update(propertyValue);
+                            } 
+                        }
                     }
                 }
                 if(threeObject instanceof THREE.ParticleSystem)
@@ -924,7 +912,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if ( threeObject.ambient !== undefined ) {
                             threeObject.ambient.setRGB( threeObject.color.r, threeObject.color.g, threeObject.color.b ); 
                         }
-                        value = colorToString.call( this, vwfColor );
+                        value = vwfColor.toString();
                     }
                 }
                 if( threeObject instanceof THREE.Scene )
@@ -957,7 +945,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 ambientlight.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                                 node.threeScene.add( ambientlight );
                             }
-                            value = colorToString.call( this, vwfColor );
+                            value = vwfColor.toString();
                         }
                     }
 
@@ -968,8 +956,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if ( node && node.renderer ) {
                             var vwfColor = new utility.color( propertyValue );
                             if ( vwfColor ) {
-                                node.renderer.setClearColor( { r:vwfColor.red()/255, g:vwfColor.green()/255, b:vwfColor.blue()/255 }, vwfColor.alpha() );
-                                value = colorToString.call( this, vwfColor );
+                                node.renderer.setClearColor( vwfColor.getHex(), vwfColor.alpha() );
+                                value = vwfColor.toString();
                             }
                         }
                         else if(node) {
@@ -1057,7 +1045,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if ( vwfColor ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                         }
-                        value = colorToString.call( this, vwfColor );
+                        value = vwfColor.toString();
                     }
                     else if ( propertyName == 'intensity' ) {
                         value = parseFloat( propertyValue );
@@ -1171,7 +1159,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
                 if(propertyName == "color") {
                     var vwfColor = new utility.color( [ threeObject.color.r*255, threeObject.color.g*255, threeObject.color.b*255 ] );
-                    value = colorToString.call( this, vwfColor );
+                    value = vwfColor.toString();
                     return value;    
                 }
                 if(propertyName == "diffuse") {
@@ -1211,7 +1199,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             if( threeObject.__lights[i] instanceof THREE.AmbientLight ) {
                                 color = threeObject.__lights[i].color;
                                 vwfColor = new utility.color( [ color.r*255, color.g*255, color.b*255 ] );
-                                value = colorToString.call( this, vwfColor );
+                                value = vwfColor.toString();
                                 found = true;
                             }
                         }
@@ -1220,19 +1208,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if ( node.renderer ) {
                             var color = node.renderer.getClearColor();
                             var alpha = node.renderer.getClearAlpha();
-                            if ( alpha != 1 ){
+                            if ( alpha !== undefined && alpha != 1 ){
                                 vwfColor = new utility.color( [ color.r*255, color.g*255, color.b*255, alpha ] );
                             } else {
                                 vwfColor = new utility.color( [ color.r*255, color.g*255, color.b*255 ] );
                             }
-                            value = colorToString.call( this, vwfColor );
+                            value = vwfColor.toString();
                         }
                         break;
                     case 'enableShadows':
-                        {
-                            if ( node.renderer ) {
-                                value = node.renderer.shadowMapEnabled = value;
-                            }
+                        if ( node.renderer ) {
+                            value = node.renderer.shadowMapEnabled = value;
                         }
                         break;
                     case "activeCamera":
@@ -1255,7 +1241,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         value = threeObject.distance;
                         break;
                     case "color":
-                        value = colorToString.call( this, new utility.color( [ threeObject.color.r, threeObject.color.g, threeObject.color.b ] ) );
+                        var clr = new utility.color( [ threeObject.color.r, threeObject.color.g, threeObject.color.b ] ) 
+                        value = clr.toString();
                         break;
                     case "intensity":
                         value = threeObject.intensity;
@@ -1736,6 +1723,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             sceneNode.pendingLoads--;
             var removed = false;
             
+            var animations, animatedMesh;
+            if(asset.animations && asset.animations.length > 0) {
+                animations = asset.animations;
+            }
+            if(asset.skins && asset.skins.length > 0) {
+                animatedMesh = asset.skins;
+            }
+
             //possibly deal with setting intial scale and rotation here, if threejs does something strange by default
             //collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
             if(asset.scene)
@@ -1746,6 +1741,39 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             asset.name = childName;
             asset.vwfID = nodeID;
             asset.matrixAutoUpdate = false;
+            if(animations) {
+                var animHandler = THREE.AnimationHandler;
+                asset.kfAnimations = [];
+                asset.animations = animations;
+                // Initialize the key frame animations
+                for(var i = 0; i < animations.length; i++) {
+                    var animation = animations[i];
+                    animHandler.add(animation);
+                    var kfAnimation = new THREE.KeyFrameAnimation(animation.node, animation.name);
+                    kfAnimation.timeScale = 1;
+                    asset.kfAnimations.push(kfAnimation);
+                    for(var h = 0; h < kfAnimation.hierarchy.length; h++) {
+                        var keys = kfAnimation.data.hierarchy[h].keys;
+                        var sids = kfAnimation.data.hierarchy[h].sids;
+                        var obj = kfAnimation.hierarchy[h];
+
+                        if(keys.length && sids) {
+                            for(var s = 0; s < sids.length; s++) {
+                                var sid = sids[s];
+                                var next = kfAnimation.getNextKeyWith(sid, h, 0);
+                                if(next) next.apply(sid);
+                            }
+                            obj.matrixAutoUpdate = false;
+                            kfAnimation.data.hierarchy[h].node.updateMatrix();
+                            obj.matrixWorldNeedsUpdate = true;
+                        }
+                    }
+                    kfAnimation.play(false, 0);
+                }
+            }
+            if(animatedMesh) {
+                asset.animatedMesh = animatedMesh;
+            }
             
             // remember that this was a loaded collada file
             asset.loadedColladaNode = true;
@@ -1883,17 +1911,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             vwfColor = new utility.color( "rgb("+vwfColor['r']+","+vwfColor['g']+","+vwfColor['b']+")" );
         }
         return vwfColor;        
-    }
-
-    function colorToString( color ) {
-        var retColor = "";
-        if ( color.alpha() != 1 ) {
-            retColor = "rgba("+color.red()+","+color.green()+","+color.blue()+","+color.alpha()+")";
-        } else {
-            retColor = "rgb("+color.red()+","+color.green()+","+color.blue()+")";
-        }
-        //console.info( "retColor returns: " + retColor );
-        return retColor;
     }
 
     function CreateParticleSystem(nodeID, childID, childName )

@@ -128,6 +128,10 @@ class VWF::Application::Admin < Sinatra::Base
       config = File.read("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.config.yaml")
       config = YAML.load(config)
       config.to_json
+    elsif(File.exists?("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.config.json"))
+      config = File.read("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.config.json")
+      config = JSON.load(config)
+      config.to_json
     end
   end
 
