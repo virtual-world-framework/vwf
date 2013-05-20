@@ -39,13 +39,14 @@ define(["vwf/view/editorview/Editor"], function (Editor)
 				$('#AddPermissionName').css('background','white');
 				if($('#permisisonFor'+i).length == 0)
 				{
-					$('#PermissionsDisplay').append('<div><span id="permisisonCloseFor'+i+'" class="ui-icon ui-icon-closethick" style="float:right;cursor:pointer">Close</span><input type="checkbox" id="permisisonFor'+i+'" name="permisisonFor'+i+'" /><label for="permisisonFor'+i+'">'+i+'</label></div>');
-					$('#permisisonCloseFor'+i).attr('user',i);
-					 $('#permisisonCloseFor'+i).click(function()
+					var id = ToSafeID(i);
+					$('#PermissionsDisplay').append('<div><span id="permisisonCloseFor'+id+'" class="ui-icon ui-icon-closethick" style="float:right;cursor:pointer">Close</span><input type="checkbox" id="permisisonFor'+id+'" name="permisisonFor'+id+'" /><label for="permisisonFor'+id+'">'+i+'</label></div>');
+					$('#permisisonCloseFor'+id).attr('user',i);
+					 $('#permisisonCloseFor'+id).click(function()
 					 {
 						   $(this).parent().remove();
 					 });
-					$('#permisisonFor'+i).attr('user',i);
+					$('#permisisonFor'+id).attr('user',i);
 					
 				}
 			}
@@ -170,16 +171,17 @@ define(["vwf/view/editorview/Editor"], function (Editor)
 			{
 				for(var i in permission)
 				{
-				     $('#PermissionsDisplay').append('<div><span id="permisisonCloseFor'+i+'" class="ui-icon ui-icon-closethick" style="float:right;cursor:pointer">Close</span><input type="checkbox" id="permisisonFor'+i+'" name="permisisonFor'+i+'" /><label for="permisisonFor'+i+'">'+i+'</label></div>');
-				     $('#permisisonFor'+i).attr('user',i);
-					 $('#permisisonCloseFor'+i).attr('user',i);
-					 $('#permisisonCloseFor'+i).click(function()
+					var id = ToSafeID(i);
+				     $('#PermissionsDisplay').append('<div><span id="permisisonCloseFor'+id+'" class="ui-icon ui-icon-closethick" style="float:right;cursor:pointer">Close</span><input type="checkbox" id="permisisonFor'+id+'" name="permisisonFor'+id+'" /><label for="permisisonFor'+id+'">'+i+'</label></div>');
+				     $('#permisisonFor'+id).attr('user',i);
+					 $('#permisisonCloseFor'+id).attr('user',i);
+					 $('#permisisonCloseFor'+id).click(function()
 					 {
 						   $(this).parent().remove();
 					 });
 				     if(permission[i] !== 0)
 				     {
-					$('#permisisonFor'+i).attr('checked','checked');
+					$('#permisisonFor'+id).attr('checked','checked');
 				     }
 				}
 				
