@@ -284,7 +284,7 @@ define(function ()
 			for (var i = 0; i < scene.length - 1; i++)
 			{
 				var node = scene[i];
-				var name = node.properties.DisplayName + i;
+				var name = node.properties.DisplayName?node.properties.DisplayName + i:GUID();
 				var callback = null;
 				if(i == scene.length - 2)
 					callback = function(){$(document).trigger('setstatecomplete')};

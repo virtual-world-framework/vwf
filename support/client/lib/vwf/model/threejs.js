@@ -3204,7 +3204,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         //in this case, the compression of the mesh index array to 16 bits has wrapped some indexes around the maximum
 						if(face.a < 0 || face.b < 0 || face.c < 0)
 							continue;
-						if(face.a > 32767 || face.b > 32767 || face.c > 32767)
+						if(face.a > mesh.geometry.vertices.length || face.b > mesh.geometry.vertices.length || face.c > mesh.geometry.vertices.length)
 							continue;	
 						face.vertexNormals.push(mesh.geometry.normals[face.a]);
                         face.vertexNormals.push(mesh.geometry.normals[face.b]);
