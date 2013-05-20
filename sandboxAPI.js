@@ -133,7 +133,7 @@ function SessionData()
 		this.timeout = setTimeout(function()
 		{
 			//if I have no active clients, log me out
-			console.log(Object.keys(this.clients));
+			
 			if(Object.keys(this.clients).length == 0)
 			{
 				global.sessions.splice(global.sessions.indexOf(this),1);
@@ -232,7 +232,7 @@ function InstanceLogin(response,URL)
 			global.log('instance login',2);
 			if(!URL.loginData)
 			{
-				console.log("Client Not Logged In");
+				global.log("Client Not Logged In");
 				respond(response,401,"Client Not Logged In");
 				return;
 			}			

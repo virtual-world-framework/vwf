@@ -187,7 +187,7 @@ function _FileCache()
 		{
 			if(this.files[i].path == path)
 			{	
-				console.log('serving from cache: ' + path);
+				global.log('serving from cache: ' + path);
 				callback(this.files[i]);
 				return;
 			}
@@ -211,14 +211,14 @@ function _FileCache()
 				newentry.datatype = datatype;
 				newentry.hash = hash(file);
 				
-				console.log(newentry.hash);
-				console.log('loading into cache: ' + path);
+				global.log(newentry.hash);
+				global.log('loading into cache: ' + path);
 				if(self.enabled == true)
 				{
 					self.files.push(newentry);
 					fs.watch(path,{},function(event,filename){
 				
-					console.log(newentry.path + ' has changed on disk');
+					global.log(newentry.path + ' has changed on disk');
 				      self.files.splice(self.files.indexOf(newentry),1);
 					});
 				}
@@ -543,7 +543,7 @@ function startVWF(){
 					filename = './support/client/lib/index.html';
 					
 					//when loading the bootstrap, you must have an instance that exists in the database
-					console.log(appname);
+					global.log(appname);
 					DAL.getInstance(appname.substr(8).replace(/\\/g,'_') + instance + "_",function(data)
 					{
 						if(data)
@@ -767,7 +767,11 @@ function startVWF(){
 				var textmessage = JSON.parse(message.parameters[0]);
 				if(textmessage.receiver == '*System*')
 				{
-					console.log(textmessage.sender + ": " + textmessage.text);
+					var red, blue, reset;
+					red   = '\u001b[31m';
+					blue  = '\u001b[33m';
+					reset = '\u001b[0m';
+					global.log(blue + textmessage.sender + ": " + textmessage.text + reset,0);
 					
 				}
 				for(var i in global.instances[namespace].clients)
@@ -953,6 +957,11 @@ function startVWF(){
 	//create the server
 	
 	
+	
+	var red, brown, reset;
+					red   = '\u001b[31m';
+					brown  = '\u001b[33m';
+					reset = '\u001b[0m';
 	//start the DAL
 	var p = process.argv.indexOf('-p');
 	var port = p >= 0 ? parseInt(process.argv[p+1]) : 3000;
@@ -962,7 +971,7 @@ function startVWF(){
 		
 	p = process.argv.indexOf('-l');
 	global.logLevel = p >= 0 ? process.argv[p+1] : 2;
-	global.log('LogLevel = ' +  global.logLevel,0);	
+	global.log(brown+'LogLevel = ' +  global.logLevel+reset,0);	
 	
 	var adminUID = 'admin';
 	
@@ -1019,8 +1028,8 @@ function startVWF(){
 		app.use(OnRequest);
 		var listen = app.listen(port);
 		
-		global.log('Admin is "' + global.adminUID+"\"",0);
-		global.log('Serving on port ' + port,0);
+		global.log(brown+'Admin is "' + global.adminUID+"\""+reset,0);
+		global.log(brown+'Serving on port ' + port+reset,0);
 		
 		Shell.StartShellInterface();  
 		//create socket server
