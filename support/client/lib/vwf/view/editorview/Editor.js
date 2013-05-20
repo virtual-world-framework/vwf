@@ -1256,6 +1256,7 @@ define(function ()
 			var ret = _PermissionsManager.setProperty(id, prop, val);
 			if(!ret)
 			  _Notifier.notify('You do not have permission to modify this object');	
+			return ret; 
 		}
 		this.GetInsertPoint = function ()
 		{
