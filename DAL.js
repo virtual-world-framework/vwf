@@ -898,7 +898,7 @@ function importStates()
 						var statedata = {};
 						statedata.objects = instdata.length;
 						statedata.owner = instdata[instdata.length -1].owner;
-						statedata.title = "Imported State";
+						statedata.title = "Imported State " + i;
 						statedata.description = "Imported automatically from database update";
 						createInstance(i,statedata,function()
 						{
