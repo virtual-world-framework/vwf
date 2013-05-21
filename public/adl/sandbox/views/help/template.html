@@ -1,0 +1,18 @@
+<div data-bind="with:help">
+	<h3 data-bind="text:title"></h3>
+	<div data-bind="foreach:entries">
+		<p>
+			<!-- ko if:icon --><img data-bind="attr:{src:'{{root}}/images/icons/' + icon}" /><!-- /ko -->
+			<span class="h4" data-bind="html:title"></span><br/>
+			<span data-bind="html:body"></span>
+		</p>
+	</div>
+</div>
+
+<script src="{{root}}/views/help/{{script}}" type="text/javascript"></script>
+<script>
+	$(document).ready(function(){
+		getLoginInfo();
+		ko.applyBindings(vwfPortalModel);
+	});
+</script>

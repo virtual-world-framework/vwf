@@ -53,8 +53,8 @@ exports.help = function(req, res){
 	var currentIndex = acceptedPages.indexOf(req.params.page);
 	var displayPage = currentIndex >= 0 ? acceptedPages[currentIndex] : acceptedPages[0];
 	
-	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: ''};
-	res.render('help/'+displayPage+'.html');
+	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: '', script: displayPage + ".js"};
+	res.render('help/template.html');
 }
 
 
