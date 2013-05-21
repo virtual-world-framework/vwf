@@ -668,8 +668,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // one key press doesn't send them off in space
             var dist = this.translationSpeed * Math.min( msSinceLastFrame * 0.001, 0.5 );
 
-            consoleOut( "move: timepassed = " + msSinceLastFrame * 0.001 + "; dist = " + dist);
-
             // Get the camera's rotation matrix
             // (remove its translation component so it is just a rotation matrix)
             var camera = this.state.cameraInUse;
