@@ -139,6 +139,8 @@ define(function ()
 
 	function initialize()
 	{
+		var self = this;
+		
 		var SelectedVWFNodes = [];
 		var MoveGizmo = null;
 		var WorldMouseDownPoint = null;
@@ -326,7 +328,7 @@ define(function ()
 			var vwfnode;
 			while (pick && pick.object && !pick.object.vwfID) pick.object = pick.object.parent;
 			if (pick && pick.object) vwfnode = pick.object.vwfID;
-			if (_Editor.isSelected(vwfnode))
+			if (self.isSelected(vwfnode))
 			{
 				$('#ContextMenuCopy').show();
 				$('#ContextMenuDelete').show();
@@ -392,7 +394,7 @@ define(function ()
 		{
 			if (e.button == 2 && !MouseMoved)
 			{
-				_Editor.ShowContextMenu(e);
+				self.ShowContextMenu(e);
 				return false;
 			}
 			if (e.mouseleave)
@@ -641,7 +643,7 @@ define(function ()
 		}.bind(this);
 		this.SelectParent = function ()
 		{
-			if (_Editor.GetSelectedVWFNode()) _Editor.SelectObject(vwf.parent(_Editor.GetSelectedVWFNode().id));
+			if (self.GetSelectedVWFNode()) self.SelectObject(vwf.parent(self.GetSelectedVWFNode().id));
 		}
 		this.intersectLinePlane = function (ray, raypoint, planepoint, planenormal)
 		{
@@ -678,7 +680,7 @@ define(function ()
 		this.GetCameraCenterRay = function (e)
 		{
 			screenmousepos = [0, 0, 0, 1];
-			var worldmousepos = MATH.mulMat4Vec4(MATH.inverseMat4(_Editor.getViewProjection()), screenmousepos);
+			var worldmousepos = MATH.mulMat4Vec4(MATH.inverseMat4(self.getViewProjection()), screenmousepos);
 			worldmousepos[0] /= worldmousepos[3];
 			worldmousepos[1] /= worldmousepos[3];
 			worldmousepos[2] /= worldmousepos[3];
@@ -698,7 +700,7 @@ define(function ()
 			screenmousepos[0] -= 1;
 			screenmousepos[1] -= 1;
 			screenmousepos[1] *= -1;
-			var worldmousepos = MATH.mulMat4Vec4(MATH.inverseMat4(_Editor.getViewProjection()), screenmousepos);
+			var worldmousepos = MATH.mulMat4Vec4(MATH.inverseMat4(self.getViewProjection()), screenmousepos);
 			worldmousepos[0] /= worldmousepos[3];
 			worldmousepos[1] /= worldmousepos[3];
 			worldmousepos[2] /= worldmousepos[3];
@@ -750,13 +752,13 @@ define(function ()
 		{
 			if (CoordSystem == WorldCoords)
 			{
-				var childmat = this.GetRotationMatrix(toGMat(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).matrixWorld));
-				var parentmat = this.GetRotationMatrix(toGMat(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).parent.matrixWorld));
+				var childmat = this.GetRotationMatrix(toGMat(self.findviewnode(self.GetSelectedVWFNode().id).matrixWorld));
+				var parentmat = this.GetRotationMatrix(toGMat(self.findviewnode(self.GetSelectedVWFNode().id).parent.matrixWorld));
 				Axis = MATH.mulMat4Vec3(MATH.inverseMat4(parentmat), Axis);
 			}
 			if (CoordSystem == LocalCoords)
 			{
-				var childmat = this.GetRotationMatrix(toGMat(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).matrixWorld));
+				var childmat = this.GetRotationMatrix(toGMat(self.findviewnode(self.GetSelectedVWFNode().id).matrixWorld));
 				Axis = MATH.mulMat4Vec3(MATH.inverseMat4(childmat), Axis);
 			}
 			//Get a quaternion for the input matrix
@@ -768,8 +770,8 @@ define(function ()
 		}.bind(this);
 		this.TransformOffset = function (gizoffset, id)
 		{
-			//_Editor.findviewnode(id).parent.updatethis.Matrix();
-			var parentmat = toGMat(_Editor.findviewnode(id).parent.matrixWorld);
+			//self.findviewnode(id).parent.updatethis.Matrix();
+			var parentmat = toGMat(self.findviewnode(id).parent.matrixWorld);
 			parentmat = MATH.inverseMat4(parentmat);
 			parentmat[3] = 0;
 			parentmat[7] = 0;
@@ -781,14 +783,14 @@ define(function ()
 		{
 			if (CoordSystem == WorldCoords)
 			{
-				//_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).parent.updatethis.Matrix();
-				var parentmat = this.GetRotationMatrix(toGMat(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).parent.matrixWorld));
+				//self.findviewnode(self.GetSelectedVWFNode().id).parent.updatethis.Matrix();
+				var parentmat = this.GetRotationMatrix(toGMat(self.findviewnode(self.GetSelectedVWFNode().id).parent.matrixWorld));
 				Axis = MATH.mulMat4Vec3(parentmat, Axis);
 			}
 			if (CoordSystem == LocalCoords)
 			{
-				//_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).updatethis.Matrix();
-				var childmat = this.GetRotationMatrix(toGMat(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).matrix));
+				//self.findviewnode(self.GetSelectedVWFNode().id).updatethis.Matrix();
+				var childmat = this.GetRotationMatrix(toGMat(self.findviewnode(self.GetSelectedVWFNode().id).matrix));
 				Axis = MATH.mulMat4Vec3(MATH.inverseMat4(childmat), Axis);
 			}
 			//Get a quaternion for the input matrix
@@ -1195,7 +1197,7 @@ define(function ()
 							if (success) this.waitingForSet.push(SelectedVWFNodes[s].id);
 							if (SelectedVWFNodes.length > 1)
 							{
-								var parentmat = toGMat(_Editor.findviewnode(SelectedVWFNodes[s].id).parent.matrixWorld);
+								var parentmat = toGMat(self.findviewnode(SelectedVWFNodes[s].id).parent.matrixWorld);
 								var parentmatinv = MATH.inverseMat4(parentmat);
 								var parentgizloc = MATH.mulMat4Vec3(parentmatinv, originalGizmoPos);
 								var gizoffset = MATH.subVec3(lastpos[s], parentgizloc);
@@ -1209,10 +1211,10 @@ define(function ()
 							}
 						}
 						//triggerSelectionTransformed(SelectedVWFNode);
-						_Editor.updateGizmoOrientation(false);
+						self.updateGizmoOrientation(false);
 					}
 				}
-				//if(wasScaled || wasRotated|| wasMoved && _Editor.getSelectionCount() > 1) _Editor.updateBounds();
+				//if(wasScaled || wasRotated|| wasMoved && self.getSelectionCount() > 1) self.updateBounds();
 			}
 			else
 			{
@@ -1261,7 +1263,7 @@ define(function ()
 		this.GetInsertPoint = function ()
 		{
 			var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
-			var ray = _Editor.GetCameraCenterRay();
+			var ray = self.GetCameraCenterRay();
 			var pick = this.ThreeJSPick(campos, ray);
 			var dxy = pick.distance;
 			var newintersectxy = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy));
@@ -1278,6 +1280,11 @@ define(function ()
 				_Notifier.notify('You must log in to participate');
 				return;
 			}
+			if(_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),parent) == 0)
+			{
+				_Notifier.alert('You must have permissions on the parent object to create a child');
+				return;
+			}
 			vwf_view.kernel.createChild(parent, name, proto, uri, callback);
 		}
 		this.createLight = function (type, pos, owner)
@@ -1290,7 +1297,7 @@ define(function ()
 					owner: owner,
 					type: 'Light',
 					lightType: type,
-					DisplayName: _Editor.GetUniqueName('Light')
+					DisplayName: self.GetUniqueName('Light')
 				}
 			};
 			this.createChild('index-vwf', GUID(), proto, null, null);
@@ -1304,7 +1311,7 @@ define(function ()
 					translation: pos,
 					owner: owner,
 					type: 'ParticleSystem',
-					DisplayName: _Editor.GetUniqueName('ParticleSystem')
+					DisplayName: self.GetUniqueName('ParticleSystem')
 				}
 			};
 			this.createChild('index-vwf', GUID(), proto, null, null);
@@ -1330,7 +1337,7 @@ define(function ()
 			proto.properties.texture = texture;
 			proto.properties.type = 'primitive';
 			proto.properties.tempid = id;
-			proto.properties.DisplayName = _Editor.GetUniqueName(type);
+			proto.properties.DisplayName = self.GetUniqueName(type);
 			this.createChild('index-vwf', GUID(), proto, null, null);
 		}.bind(this);
 		this.AddBlankBehavior = function ()
@@ -1348,7 +1355,7 @@ define(function ()
 			};
 			var proto = ModProto;
 			proto.properties.type = 'behavior';
-			proto.properties.DisplayName = _Editor.GetUniqueName('behavior');
+			proto.properties.DisplayName = self.GetUniqueName('behavior');
 			proto.properties.owner = document.PlayerNumber;
 			var id = GetSelectedVWFNode().id;
 			var owner = vwf.getProperty(id, 'owner');
@@ -1385,7 +1392,7 @@ define(function ()
 			proto.properties.rotation = [0, 0, 1, 0];
 			proto.properties.owner = owner;
 			proto.properties.type = 'modifier';
-			proto.properties.DisplayName = _Editor.GetUniqueName(type);
+			proto.properties.DisplayName = self.GetUniqueName(type);
 			var id = this.GetFirstChildLeaf(this.GetSelectedVWFNode()).id;
 			var owner = vwf.getProperty(id, 'owner');
 			if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
@@ -1396,7 +1403,7 @@ define(function ()
 			this.createChild(id, GUID(), proto, null, null);
 			window.setTimeout(function ()
 			{
-				$(document).trigger('modifierCreated', _Editor.GetSelectedVWFNode());
+				$(document).trigger('modifierCreated', self.GetSelectedVWFNode());
 			}, 500);
 		}.bind(this);
 		this.CreateModifierSubDriver = function (type, owner)
@@ -1422,7 +1429,7 @@ define(function ()
 			proto.properties.rotation = [0, 0, 1, 0];
 			proto.properties.owner = owner;
 			proto.properties.type = 'modifier';
-			proto.properties.DisplayName = _Editor.GetUniqueName(type);
+			proto.properties.DisplayName = self.GetUniqueName(type);
 			var id = this.GetFirstChildLeaf(this.GetSelectedVWFNode()).id;
 			var owner = vwf.getProperty(id, 'owner');
 			if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
@@ -1456,15 +1463,15 @@ define(function ()
 			for (var i = 0; i < SelectedVWFNodes.length; i++)
 			{
 				var proto = _DataManager.getCleanNodePrototype(SelectedVWFNodes[i].id);
-				proto.properties.DisplayName = _Editor.GetUniqueName(proto.properties.DisplayName);
-				var parent = vwf.parent(_Editor.GetSelectedVWFNode().id);
-				_Editor.createChild(parent, GUID(), proto, null, null, function ()
+				proto.properties.DisplayName = self.GetUniqueName(proto.properties.DisplayName);
+				var parent = vwf.parent(self.GetSelectedVWFNode().id);
+				self.createChild(parent, GUID(), proto, null, null, function ()
 				{
 					alert();
 				});
 			}
-			_Editor.SelectOnNextCreate(SelectedVWFNodes.length);
-			_Editor.SelectObject(null);
+			self.SelectOnNextCreate(SelectedVWFNodes.length);
+			self.SelectObject(null);
 		}.bind(this);
 		this.DeleteIDs = function (t)
 		{
@@ -1511,21 +1518,21 @@ define(function ()
 		}.bind(this);
 		this.Paste = function (useMousePoint)
 		{
-			_Editor.SelectObject(null);
+			self.SelectObject(null);
 			for (var i = 0; i < _CopiedNodes.length; i++)
 			{
 				var t = _CopiedNodes[i];
 				t = _DataManager.getCleanNodePrototype(t);
 				var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
 				var newintersectxy;
-				if (!useMousePoint) newintersectxy = _Editor.GetInsertPoint();
+				if (!useMousePoint) newintersectxy = self.GetInsertPoint();
 				else
 				{
 					var ray;
 					ray = this.GetWorldPickRay(this.ContextShowEvent);
-					_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
+					self.GetMoveGizmo().InvisibleToCPUPick = true;
 					var pick = this.ThreeJSPick(campos, ray);
-					_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
+					self.GetMoveGizmo().InvisibleToCPUPick = false;
 					var dxy = pick.distance;
 					newintersectxy = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy * .99));
 					var dxy2 = this.intersectLinePlane(ray, campos, [0, 0, 0], [0, 0, 1]);
@@ -1536,8 +1543,8 @@ define(function ()
 				t.properties.transform[12] += newintersectxy[0];
 				t.properties.transform[13] += newintersectxy[1];
 				t.properties.transform[14] += newintersectxy[2];
-				t.properties.DisplayName = _Editor.GetUniqueName(t.properties.DisplayName);
-				_Editor.SelectOnNextCreate();
+				t.properties.DisplayName = self.GetUniqueName(t.properties.DisplayName);
+				self.SelectOnNextCreate();
 				this.createChild('index-vwf', GUID(), t, null, null);
 				t.properties.transform[12] -= newintersectxy[0];
 				t.properties.transform[13] -= newintersectxy[1];
@@ -1620,8 +1627,8 @@ define(function ()
 			{
 				var box;
 				var mat;
-				box = _Editor.findviewnode(SelectedVWFNodes[i].id).getBoundingBox(true);
-				mat = toGMat(_Editor.findviewnode(SelectedVWFNodes[i].id).matrixWorld).slice(0);
+				box = self.findviewnode(SelectedVWFNodes[i].id).getBoundingBox(true);
+				mat = toGMat(self.findviewnode(SelectedVWFNodes[i].id).matrixWorld).slice(0);
 				var color = [1, 1, 1, 1];
 				if (this.findviewnode(SelectedVWFNodes[i].id).initializedFromAsset) color = [1, 0, 0, 1];
 				if (vwf.getProperty(SelectedVWFNodes[i].id, 'type') == 'Group' && vwf.getProperty(SelectedVWFNodes[i].id, 'open') == false) color = [0, 1, 0, 1];
@@ -1662,7 +1669,7 @@ define(function ()
 			{
 				if (SelectionBounds[i].vwfid == id)
 				{
-					var mat = toGMat(_Editor.findviewnode(id).matrixWorld).slice(0);
+					var mat = toGMat(self.findviewnode(id).matrixWorld).slice(0);
 					SelectionBounds[i].matrix.elements = MATH.transposeMat4(mat);
 					SelectionBounds[i].updateMatrixWorld(true);
 				}
@@ -1809,10 +1816,10 @@ define(function ()
 		}
 		this.updateBoundsAndGizmoLoc = function ()
 		{
-			_Editor.updateGizmoLocation();
-			_Editor.updateGizmoSize();
-			_Editor.updateGizmoOrientation(false);
-			_Editor.updateBounds();
+			self.updateGizmoLocation();
+			self.updateGizmoSize();
+			self.updateGizmoOrientation(false);
+			self.updateBounds();
 			$('#StatusSelectedID').text(SelectedVWFNodes[0].id);
 		}.bind(this);
 		this.updateGizmoSize = function ()
@@ -2090,7 +2097,7 @@ define(function ()
 			node.properties.transform = MATH.transposeMat4(childmat);
 			this.DeleteSelection();
 			this.createChild(parentnode.id, GUID(), node);
-			_Editor.SelectOnNextCreate();
+			self.SelectOnNextCreate();
 			this.SetSelectMode('Pick');
 		}
 		this.RemoveParent = function ()
@@ -2103,7 +2110,7 @@ define(function ()
 			delete node.properties.scale;
 			node.properties.transform = MATH.transposeMat4(childmat);
 			this.DeleteSelection();
-			_Editor.SelectOnNextCreate();
+			self.SelectOnNextCreate();
 			this.createChild('index-vwf', GUID(), node);
 			this.SetSelectMode('Pick');
 		}
@@ -2121,7 +2128,7 @@ define(function ()
 		{
 			for (var i = 0; i < this.getSelectionCount(); i++)
 			{
-				// if(!_Editor.isOwner(SelectedVWFNodes[i].id,document.PlayerNumber))
+				// if(!self.isOwner(SelectedVWFNodes[i].id,document.PlayerNumber))
 				// {
 				// _Notifier.alert('You must be the group owner to ungroup objects.');
 				// continue;
@@ -2159,7 +2166,7 @@ define(function ()
 					_Notifier.alert('All objects must have the same parent to be grouped');
 					return;
 				}
-				// if(!_Editor.isOwner(SelectedVWFNodes[i].id,document.PlayerNumber))
+				// if(!self.isOwner(SelectedVWFNodes[i].id,document.PlayerNumber))
 				// {
 				// _Notifier.alert('You must be the owner of all objects to group them.');
 				// return;
@@ -2196,7 +2203,7 @@ define(function ()
 			}
 			this.DeleteSelection();
 			vwf_view.kernel.createChild('index-vwf', GUID(), proto);
-			_Editor.SelectOnNextCreate();
+			self.SelectOnNextCreate();
 			this.SetSelectMode('Pick');
 		}
 		this.findviewnode = function (id)
@@ -2286,17 +2293,17 @@ define(function ()
 			if (!count) count = 1;
 			this.toSelect = count;
 			this.tempSelect = [];
-			this.expectedParent = vwf.parent(_Editor.GetSelectedVWFID());
+			this.expectedParent = vwf.parent(self.GetSelectedVWFID());
 			this.SetCreateNodeCallback(function (e, p)
 			{
 				if (p == this.expectedParent)
 				{
-					_Editor.tempSelect.push(e);
-					_Editor.toSelect--;
-					if (_Editor.toSelect == 0)
+					self.tempSelect.push(e);
+					self.toSelect--;
+					if (self.toSelect == 0)
 					{
-						_Editor.createNodeCallback = null;
-						_Editor.SelectObject(_Editor.tempSelect, Add);
+						self.createNodeCallback = null;
+						self.SelectObject(self.tempSelect, Add);
 					}
 				}
 			});
@@ -2369,7 +2376,7 @@ define(function ()
 			$('#ContextMenu').disableSelection();
 			$('#ContextMenuSelect').click(function ()
 			{
-				_Editor.SelectObject($('#ContextMenuName').attr('VWFID'));
+				self.SelectObject($('#ContextMenuName').attr('VWFID'));
 				$('#ContextMenu').hide();
 				$('#ContextMenu').css('z-index', '-1');
 				$(".ddsmoothmenu").find('li').trigger('mouseleave');
@@ -2377,7 +2384,7 @@ define(function ()
 			});
 			$('#ContextMenuSelectNone').click(function ()
 			{
-				_Editor.SelectObject(null);
+				self.SelectObject(null);
 				this.SetSelectMode('None');
 				$('#ContextMenu').hide();
 				$('#ContextMenu').css('z-index', '-1');
@@ -2426,7 +2433,7 @@ define(function ()
 			});
 			$('#ContextMenuPaste').click(function (e)
 			{
-				_Editor.Paste(true);
+				self.Paste(true);
 				$('#ContextMenu').hide();
 				$('#ContextMenu').css('z-index', '-1');
 			});
@@ -2629,7 +2636,7 @@ define(function ()
 				}
 			};
 			
-			var newintersectxy = _Editor.GetInsertPoint();
+			var newintersectxy = self.GetInsertPoint();
 			Proto.properties.owner = _UserManager.GetCurrentUserName();
 			Proto.properties.translation = newintersectxy;
 			vwf_view.kernel.createChild('index-vwf', url, Proto);
@@ -2664,21 +2671,21 @@ define(function ()
 			//this.selectionMarquee.css('box-shadow','0px 0px 10px lightgray, 0px 0px 10px lightgray inset');
 			this.selectionMarquee.mousedown(function (e)
 			{
-				_Editor.mousedown(e);
+				self.mousedown(e);
 				e.preventDefault();
 				e.stopPropagation();
 				return false;
 			});
 			this.selectionMarquee.mouseup(function (e)
 			{
-				_Editor.mouseup(e);
+				self.mouseup(e);
 				e.preventDefault();
 				e.stopPropagation();
 				return false;
 			});
 			this.selectionMarquee.mousemove(function (e)
 			{
-				_Editor.mousemove(e);
+				self.mousemove(e);
 				e.preventDefault();
 				e.stopPropagation();
 				return false;
@@ -2738,7 +2745,7 @@ define(function ()
 		this.GetSelectionBounds = function ()
 		{
 			return SelectionBounds;
-		};
+		}; 
 		this.Move = Move;
 		this.Rotate = Rotate;
 		this.Scale = Scale;

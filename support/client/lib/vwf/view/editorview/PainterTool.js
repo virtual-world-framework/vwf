@@ -181,7 +181,7 @@ function PainterTool()
 						"rot": 0,
 						"scalex": 1,
 						"scaley": 1,
-						"src": "/adl/sandbox/zqDBa4NK7n8pfREs//vwfDataManager.svc/texture?UID=grass.jpg"
+						"src": "./vwfDataManager.svc/texture?UID=checker.jpg"
 					}
 				]
 			}
@@ -238,17 +238,21 @@ function PainterTool()
 		
 			t.properties.DisplayName = _Editor.GetUniqueName(t.properties.DisplayName);
 			
-			_Editor.createChild('index-vwf',GUID(),t,null,null); 
+			this.lastName = GUID();
+			_Editor.createChild('index-vwf',this.lastName,t,null,null); 
 			
-		this.mousemove(e);
+		//this.mousemove(e);
 	}
 	this.mousedown = function(e)
 	{
+		if(e.button != 0) return;
 		
+		this.mouseisdown = true;
 	}
 	this.mouseup = function(e)
 	{
-		
+		if(e.button != 0) return;
+		this.mouseisdown = false;
 	}
 	this.click = function(e)
 	{
@@ -265,11 +269,13 @@ function PainterTool()
 		
 		if(pick && pick.object)
 		{
-			if(pick.object.name == 'GroundPlane')
-				return;
+			
 
 			var pos = new THREE.Vector3();
+			console.log(pick.object.name);
+			
 			pos.getPositionFromMatrix(pick.object.matrixWorld);
+			
 			var bounds = pick.object.getBoundingBox();
 			var norm = pick.norm;
 			
@@ -312,8 +318,37 @@ function PainterTool()
 			
 			}
 			
+			if(pick.object.name == 'GroundPlane' || pick.object.name == 'SkyCube')
+			{
+				
+				var campos = [_Editor.findcamera().position.x, _Editor.findcamera().position.y, _Editor.findcamera().position.z];
+				var ray;
+				ray = _Editor.GetWorldPickRay(e);
+				var dxy2 = _Editor.intersectLinePlane(ray, campos, [0, 0, 0], [0, 0, 1]);
+				var npos = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy2));
+				pos.x = Math.round(npos[0]);
+				pos.y = Math.round(npos[1]);
+				pos.z = Math.round(npos[2])+.5;
+				
+			}
+			
 			this.display.position = pos.clone();
 			this.display.updateMatrixWorld();
+			
+			if(this.mouseisdown == true)
+			{
+				if(pick.object && pick.object.parent && pick.object.parent.parent)
+				{
+					if(pick.object.parent.parent.name != this.lastName)
+						this.currentClickCallback(e);
+				}else
+				{
+					this.currentClickCallback(e);
+				}
+			}
+		}else
+		{
+			
 		}
 		
 		

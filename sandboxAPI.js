@@ -137,7 +137,7 @@ function SessionData()
 			if(Object.keys(this.clients).length == 0)
 			{
 				global.sessions.splice(global.sessions.indexOf(this),1);
-				global.log('Removing Session data for ' + this.UID);
+				global.log('Removing Session data for ' + this.UID,1);
 			}
 			//wait another three minutes and try again
 			else
@@ -186,7 +186,7 @@ function SiteLogin(response,URL)
 							"Set-Cookie": "session="+session.sessionId+"; Path=/; HttpOnly;"
 					});
 					response.write("Login Successful", "utf8");
-					global.log('Client Logged in',0);
+					global.log('Client Logged in',1);
 					response.end();
 				}else
 				{
@@ -232,7 +232,7 @@ function InstanceLogin(response,URL)
 			global.log('instance login',2);
 			if(!URL.loginData)
 			{
-				global.log("Client Not Logged In");
+				global.log("Client Not Logged In",1);
 				respond(response,401,"Client Not Logged In");
 				return;
 			}			
@@ -536,11 +536,11 @@ function CheckAuthor(UID,assetFilename, callback)
 	{
 		fs.readFile(assetFilename, "utf8", function (err, file) {
 			var asset = JSON.parse(file);
-			global.log(asset);
+			
 			var storedAuthor = asset.Author;
 			
 			var suppliedAuthor = UID;
-			global.log(storedAuthor,suppliedAuthor);
+			global.log(storedAuthor,suppliedAuthor,2);
 			callback(storedAuthor == suppliedAuthor);
 		});
 		return;
@@ -563,12 +563,12 @@ function CheckOwner(UID,stateFilename, callback)
 	{
 		fs.readFile(stateFilename, "utf8", function (err, file) {
 			var asset = JSON.parse(file);
-			global.log(asset);
+			
 			
 			var storedOwner = asset[asset.length-1].owner;
 			
 			var suppliedOwner = UID;
-			global.log(storedOwner,suppliedOwner);
+			global.log(storedOwner,suppliedOwner,2);
 			callback(storedOwner == suppliedOwner);
 		});
 		return;
@@ -677,7 +677,7 @@ function CopyState(URL,filename,newname,response)
 	
 	newname = newname.replace(/[\\\/]/g,'_');
 	var appname = filename.replace(/_[a-zA-Z0-9]*?_$/,'');
-	global.log(appname);
+	
 	var stateID = newname.match(/_([a-zA-Z0-9]*?)_$/)[1];
 	if(!strBeginsWith(newname,appname) || !strEndsWith(newname,'_') || !stateID || stateID.length != 16)
 	{
@@ -790,7 +790,7 @@ function CheckHash(filename,data,callback)
 {
 	fs.readFile(filename, "utf8", function (err, file) {
 			
-			global.log("hash is:"+hash(data) +" "+ hash(file));
+			global.log("hash is:"+hash(data) +" "+ hash(file),2);
 			callback(hash(data) == hash(file));
 		});
 		return;
@@ -988,7 +988,7 @@ function getState(SID)
 {
 	SID = SID.replace(/[\\,\/]/g,'_');
 	var basedir = datapath + "\\";
-	global.log('servestate ' + basedir+"states\\" + SID);
+	global.log('serve state ' + basedir+"states\\" + SID,2);
 	if(fs.existsSync(basedir+"states\\" + SID+'\\state'))
 	{
 		file = fs.readFileSync(basedir+"states\\" + SID+'\\state','utf8');

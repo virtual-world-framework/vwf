@@ -37,6 +37,31 @@ function findAppName(uri)
 //Generate a random ID for a instance
 var ValidIDChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
+global.error = function()
+{
+	var red, brown, reset;
+					red   = '\u001b[31m';
+					brown  = '\u001b[33m';
+					reset = '\u001b[0m';
+					
+	var args = Array.prototype.slice.call(arguments);
+	args[0] = red + args[0] + reset;
+	var level = args.splice(args.length-1)[0];
+	
+	if(!isNaN(parseInt(level)))
+	{
+		level = parseInt(level);
+	}
+	else
+	{
+		args.push(level)
+		level = 1;
+	};
+	
+	if(level <= global.logLevel)
+		console.log.apply(this,args);
+}
+
 global.log = function()
 {
 	var args = Array.prototype.slice.call(arguments);
@@ -187,7 +212,7 @@ function _FileCache()
 		{
 			if(this.files[i].path == path)
 			{	
-				global.log('serving from cache: ' + path);
+				global.log('serving from cache: ' + path,2);
 				callback(this.files[i]);
 				return;
 			}
@@ -211,14 +236,14 @@ function _FileCache()
 				newentry.datatype = datatype;
 				newentry.hash = hash(file);
 				
-				global.log(newentry.hash);
-				global.log('loading into cache: ' + path);
+				global.log(newentry.hash,2);
+				global.log('loading into cache: ' + path,2);
 				if(self.enabled == true)
 				{
 					self.files.push(newentry);
 					fs.watch(path,{},function(event,filename){
 				
-					global.log(newentry.path + ' has changed on disk');
+					global.log(newentry.path + ' has changed on disk',2);
 				      self.files.splice(self.files.indexOf(newentry),1);
 					});
 				}
@@ -629,6 +654,23 @@ function startVWF(){
 				global.log(message +'\n');
 			}
 		}
+		global.instances[namespace].Error = function(message,level)
+		{
+			var red, brown, reset;
+			red   = '\u001b[31m';
+			brown  = '\u001b[33m';
+			reset = '\u001b[0m';
+			if(global.logLevel >= level)
+			{
+				log.write(message +'\n');
+				global.log(red + message + reset + '\n');
+			}
+		}
+		
+		
+		
+		
+		
 		//keep track of the timer for this instance
 		global.instances[namespace].timerID = setInterval(function(){
 		
@@ -757,9 +799,9 @@ function startVWF(){
 			if(!sendingclient.loginData && message.action != "getState" && message.member != "latencyTest")
 			{
 				if(isPointerEvent(message))
-					global.instances[namespace].Log('DENIED ' + JSON.stringify(message), 4);
+					global.instances[namespace].Error('DENIED ' + JSON.stringify(message), 4);
 				else
-					global.instances[namespace].Log('DENIED ' + JSON.stringify(message), 2);				
+					global.instances[namespace].Error('DENIED ' + JSON.stringify(message), 2);				
 				return;
 			}
 			if(message.action == 'callMethod' && message.node =='index-vwf' && message.member=='PM')
@@ -804,11 +846,11 @@ function startVWF(){
 						if(!node.properties)
 							node.properties = {};
 						node.properties[message.member] = message.parameters[0];
-						global.instances[namespace].Log("Set " +message.member +" of " +node.id+" to " + message.parameters[0],1);
+						global.instances[namespace].Log("Set " +message.member +" of " +node.id+" to " + message.parameters[0],2);
 				  }
 				  else
 				  {
-					global.instances[namespace].Log('permission denied for modifying ' + node.id,1);
+					global.instances[namespace].Error('permission denied for modifying ' + node.id,1);
 					return;
 				  }
 			}
@@ -819,16 +861,16 @@ function startVWF(){
 			      var node = global.instances[namespace].state.findNode(message.node);
 				  if(!node)
 				  {
-					global.instances[namespace].Log('server has no record of ' + message.node,1);
+					global.instances[namespace].Error('server has no record of ' + message.node,1);
 					return;
 				  }
 				  if(checkOwner(node,sendingclient.loginData.UID))
 				  {	
-						global.instances[namespace].Log("Do " +message.action +" of " +node.id,1);
+						global.instances[namespace].Log("Do " +message.action +" of " +node.id,2);
 				  }
 				  else
 				  {
-					global.instances[namespace].Log('permission denied for '+message.action+' on ' + node.id,1);
+					global.instances[namespace].Error('permission denied for '+message.action+' on ' + node.id,1);
 					return;
 				  }
 			}
@@ -838,7 +880,7 @@ function startVWF(){
 				  var node = global.instances[namespace].state.findNode(message.node);
 				  if(!node)
 				  {
-					global.instances[namespace].Log('server has no record of ' + message.node,1);
+					global.instances[namespace].Error('server has no record of ' + message.node,1);
 					return;
 				  }
 				  if(checkOwner(node,sendingclient.loginData.UID))
@@ -849,7 +891,7 @@ function startVWF(){
 				  }
 				  else
 				  {
-					global.instances[namespace].Log('permission denied for deleting ' + node.id,1);
+					global.instances[namespace].Error('permission denied for deleting ' + node.id,1);
 					return;
 				  }
 			}
@@ -861,7 +903,7 @@ function startVWF(){
 				  var node = global.instances[namespace].state.findNode(message.node);
 				  if(!node)
 				  {
-					global.instances[namespace].Log('server has no record of ' + message.node,1);
+					global.instances[namespace].Error('server has no record of ' + message.node,1);
 					return;
 				  }
 				  //Keep a record of the new node
@@ -884,7 +926,7 @@ function startVWF(){
 				  }
 				  else
 				  {
-					global.instances[namespace].Log('permission denied for creating child ' + node.id,1);
+					global.instances[namespace].Error('permission denied for creating child ' + node.id,1);
 					return;
 				  }
 			}
@@ -937,7 +979,7 @@ function startVWF(){
 			  {
 					var avatarID = 'character-vwf-'+loginData.UID;
 					//deleting node for avatar
-					global.log("Unexpected disconnect. Deleting node for user avatar " + loginData.UID);
+					global.error("Unexpected disconnect. Deleting node for user avatar " + loginData.UID);
 					var cl = global.instances[namespace].clients[i];
 					cl.emit('message',{"action":"deleteNode","node":avatarID,"time":global.instances[namespace].time});
 					global.instances[namespace].state.deleteNode(avatarID);					
@@ -970,7 +1012,7 @@ function startVWF(){
 	var datapath = p >= 0 ? process.argv[p+1] : "C:\\VWFData";
 		
 	p = process.argv.indexOf('-l');
-	global.logLevel = p >= 0 ? process.argv[p+1] : 2;
+	global.logLevel = p >= 0 ? process.argv[p+1] : 1;
 	global.log(brown+'LogLevel = ' +  global.logLevel+reset,0);	
 	
 	var adminUID = 'admin';
