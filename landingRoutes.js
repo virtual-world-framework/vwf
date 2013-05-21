@@ -32,19 +32,19 @@ exports.logout = function(req, res){
 exports.edit = function(req, res){
 
 	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title:''};
-	res.render('editInstance');
+	res.render('edit');
 }
 exports.remove = function(req, res){
 
 
 	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: 'Warning!'};
-	res.render('deleteInstance');
+	res.render('delete');
 }
 exports.user = function(req, res){
 
 
 	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: 'Account'};
-	res.render('userManagement');
+	res.render('user');
 }
 exports.help = function(req, res){
 	
@@ -54,7 +54,7 @@ exports.help = function(req, res){
 	var displayPage = currentIndex >= 0 ? acceptedPages[currentIndex] : acceptedPages[0];
 	
 	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: '', script: displayPage + ".js"};
-	res.render('help/template.html');
+	res.render('help/template');
 }
 
 
