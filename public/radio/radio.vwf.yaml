@@ -276,8 +276,6 @@ children:
       ic40Channel: 
         extends: http://vwf.example.com/node3.vwf 
         implements:  
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           controlValue: 0
@@ -412,8 +410,6 @@ children:
       ic40Down: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
@@ -453,8 +449,6 @@ children:
       ic40P0: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
@@ -489,8 +483,6 @@ children:
       ic40P1: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
@@ -525,8 +517,6 @@ children:
       ic40P2: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
@@ -561,8 +551,6 @@ children:
       ic40P3: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
@@ -597,8 +585,6 @@ children:
       ic40PTT: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
@@ -633,8 +619,6 @@ children:
       ic40Red: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
@@ -669,8 +653,6 @@ children:
       ic40Up: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
@@ -705,8 +687,6 @@ children:
       ic40Volume: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           controlValue: 0
