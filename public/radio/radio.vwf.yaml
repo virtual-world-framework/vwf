@@ -413,6 +413,7 @@ children:
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -428,7 +429,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -452,6 +452,7 @@ children:
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -467,7 +468,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -486,6 +486,7 @@ children:
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -501,7 +502,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -520,6 +520,7 @@ children:
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -535,7 +536,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -554,6 +554,7 @@ children:
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -569,7 +570,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -588,6 +588,7 @@ children:
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -603,7 +604,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -622,6 +622,7 @@ children:
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -637,7 +638,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -656,6 +656,7 @@ children:
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -671,7 +672,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
