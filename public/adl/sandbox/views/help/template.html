@@ -1,11 +1,11 @@
-<div data-bind="with:help">
-	<h3 data-bind="text:title"></h3>
-	<div data-bind="foreach:entries">
-		<p>
-			<!-- ko if:icon --><img data-bind="attr:{src:'{{root}}/images/icons/' + icon}" /><!-- /ko -->
-			<span class="h4" data-bind="html:title"></span><br/>
-			<span data-bind="html:body"></span>
-		</p>
+<h3 data-bind="text:help.title"></h3>
+<div data-bind="foreach:help.entries" style="width: 85%; margin: 20px auto;">
+	<div style="margin-top:20px;">
+		<!-- ko if:icon --><div style="float:left;"><img data-bind="attr:{src:'{{root}}/images/icons/' + icon}" /></div><!-- /ko -->
+		<div data-bind="style:{margin:icon?'0 0 0 60px':0}">
+			<span class="h4" data-bind="html:title"></span>
+			<p data-bind="html:body"></p>
+		</div>
 	</div>
 </div>
 
