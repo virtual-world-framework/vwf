@@ -55,7 +55,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             
             //the created node is a scene, and has already been added to the state by the model.
             //how/when does the model set the state object? 
-            if(this.state.scenes[childID])
+            if ( this.state.scenes[ childID ] )
             {                
                 this.canvasQuery = jQuery(this.rootSelector).append("<canvas id='" + this.state.sceneRootID + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
                 ).children(":last");
@@ -315,7 +315,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         // If scene is already loaded, find the user's navigation object
         var sceneView = this;
-        var appID = sceneView.kernel.kernel.application( true );
+        var appID = sceneView.kernel.application( true );
         if ( appID )
             findNavObject.call( sceneView );
     }
