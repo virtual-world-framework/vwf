@@ -31,6 +31,7 @@ function PainterTool()
 	this.display.material.wireframe = false;
 	this.display.material.opacity = .25;
 	this.display.material.transparent = true;
+	this.lastNames = [];
 	this.display.material.map = _SceneManager.getTexture('./vwfDataManager.svc/texture?UID=checker.jpg');
 	$('#PainterToolGUIChooseBlock').click(function()
 	{
@@ -238,8 +239,9 @@ function PainterTool()
 		
 			t.properties.DisplayName = _Editor.GetUniqueName(t.properties.DisplayName);
 			
-			this.lastName = GUID();
-			_Editor.createChild('index-vwf',this.lastName,t,null,null); 
+			var lastName = GUID();
+			this.lastNames.push(lastName);
+			_Editor.createChild('index-vwf',lastName,t,null,null); 
 			
 		//this.mousemove(e);
 	}
@@ -253,11 +255,13 @@ function PainterTool()
 	{
 		if(e.button != 0) return;
 		this.mouseisdown = false;
+		
 	}
 	this.click = function(e)
 	{
-		if(this.currentClickCallback)
+		if(this.currentClickCallback && this.lastNames.length == 0)
 			this.currentClickCallback(e)
+		this.lastNames = [];	
 	}
 	this.mousemove = function(e)
 	{
@@ -339,7 +343,7 @@ function PainterTool()
 			{
 				if(pick.object && pick.object.parent && pick.object.parent.parent)
 				{
-					if(pick.object.parent.parent.name != this.lastName)
+					if(this.lastNames.indexOf(pick.object.parent.parent.name) == -1)
 						this.currentClickCallback(e);
 				}else
 				{

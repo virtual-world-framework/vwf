@@ -57,7 +57,30 @@
         
         return array2;
     }
-
+	function decompressArrays(node)
+	{
+		 if (node.attributes) {
+					for(var i in node.attributes)
+					{
+						
+					   var attributeArray = node.attributes[i];
+					   
+					   node.attributes[i] = DecodeArray(attributeArray,i);
+					}
+		 }
+		  for (i in node.primitives) {
+					if (node.primitives[i].indices) {
+						var array = node.primitives[i].indices;
+						array = DecodeArray(array);
+						node.primitives[i].indices = array;
+					}
+			}
+		 if(node.children)
+		 {
+			for( var i =0; i < node.children.length; i++)
+				decompressArrays(node.children[i]);
+		 }
+	}
     function UTF8JsonLoader(node,callback,errorCallback)
     {
         
@@ -71,7 +94,17 @@
             var test = 1+1;
             //async decompress UTF8 data in webworker
 			alertify.log('Decompressing ' + this.url);
-			backgroundLoader.decompress(e,function(jsonData){
+			
+			
+			
+			
+			
+			backgroundLoader.decompress(e,function(jsonData)
+			
+			{
+				
+//				var jsonData = JSON.parse(decompress(e));
+//				decompressArrays(jsonData)
 				
 				var texture_load_callback = function(texturename)
 				{
@@ -91,8 +124,9 @@
 				this.scene = ParseSceneGraph(jsonData,texture_load_callback.bind(this));
 				if(this.callback)
 					this.callback(this);
-				}.bind(this)
-			);
+				
+				
+			}.bind(this));
 				
         }.bind(this);
         
