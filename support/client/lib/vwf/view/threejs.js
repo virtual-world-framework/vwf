@@ -16,7 +16,7 @@
 
 define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
 
-    var navMode;
+    var navmode;
 
     return view.load( module, {
 
@@ -101,8 +101,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // -- satProperty ------------------------------------------------------------------------------
 
         satProperty: function ( nodeID, propertyName, propertyValue ) { 
-            if ( navObject && ( nodeID == navObject.ID ) && ( propertyName == "navMode" ) ) { 
-                navMode = propertyValue;
+            if ( navObject && ( nodeID == navObject.ID ) && ( propertyName == "navmode" ) ) { 
+                navmode = propertyValue;
             }
         },
 
@@ -111,8 +111,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         gotProperty: function ( nodeID, propertyName, propertyValue ) { 
             var clientThatGotProperty = this.kernel.client();
             var me = this.kernel.moniker();
-            if ( ( propertyName == "navMode" ) && ( clientThatGotProperty == me ) ) { 
-                navMode = propertyValue;
+            if ( navObject && ( nodeID == navObject.ID ) &&
+                 ( propertyName == "navmode" ) && ( clientThatGotProperty == me ) ) { 
+                navmode = propertyValue;
             }
         }
     
@@ -527,6 +528,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( event ) {
                 pointerDownID = pointerPickID ? pointerPickID : sceneID;
                 sceneView.kernel.dispatchEvent( pointerDownID, "pointerDown", event.eventData, event.eventNodeData );
+                
+                // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                startMousePosition = event.eventData[ 0 ].position;
+                // END TODO
             }
             e.preventDefault();
         }
@@ -593,6 +598,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             if ( !( mouseLeftDown || mouseRightDown || mouseMiddleDown ) ) {
                 pointerDownID = undefined;
+
+                // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                startMousePosition = undefined;
+                // END TODO
             }
 
             e.preventDefault();
@@ -727,6 +736,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         delete sceneView.keyStates.keysUp[key.key];
                     }
                 };
+
+        window.oncontextmenu = function() {
+            if ( navmode == "none" )
+                return true;
+            else
+                return false;
+        }
         
         if(typeof canvas.onmousewheel == "function") {
             canvas.removeAttribute("onmousewheel");
@@ -780,6 +796,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var movingRight = false;
         var rotatingLeft = false;
         var rotatingRight = false;
+        var startMousePosition;
 
         this.moveCamera = function( msSinceLastFrame ) {
 
@@ -820,7 +837,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var dir = goog.vec.Mat4.multVec4( camRotMat, moveVectorInCameraFrame,  goog.vec.Vec3.create() );
             
             // If user is walking, constrain movement to the horizontal plane
-            if ( navMode == "walk") {
+            if ( navmode == "walk") {
                 dir[ 2 ] = 0;
             }
 
@@ -928,10 +945,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         var handleMouseNavigation = function( mouseEventData ) {
 
-            for ( var i = 0; i < mouseEventData.length; i++ ) {
-
+            if ( mouseEventData[ 0 ].buttons.right ) {
+                var currentMousePosition = mouseEventData[ 0 ].position;
+                var deltaX = currentMousePosition[ 0 ] = startMousePosition [ 0 ];
+                var deltaY = currentMousePosition[ 1 ] = startMousePosition [ 1 ];
             }
-
         }
 
         // END TODO
@@ -1640,7 +1658,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         }
 
         // Request the navigation mode from the navigation object
-        vwf_view.kernel.getProperty( navObject.ID, "navMode" );
+        vwf_view.kernel.getProperty( navObject.ID, "navmode" );
     }
 
     function findNavObject() {
