@@ -1,0 +1,28 @@
+Hi there!
+
+<div data-bind="foreach:fileList">
+	<a href="" data-bind="text:$data, click:$root.loadScript"></a><br/>
+</div>
+<div data-bind="text:entries">
+	
+	
+
+</div>
+
+<script>
+	var fileList =  "{{fileList}}".split(',');
+	vwfPortalModel.entries = ko.observable("HI");
+	vwfPortalModel.loadScript = function(e){
+		
+		$.get("{{root}}/views/help/" + e + ".js", function(data){
+			
+			vwfPortalModel.entries(data.help);
+			console.log(data);
+		});
+		console.log(e);
+	};
+	$(document).ready(function(){
+		getLoginInfo();
+		ko.applyBindings(vwfPortalModel);
+	});
+</script>

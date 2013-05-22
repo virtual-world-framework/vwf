@@ -1055,7 +1055,7 @@ function startVWF(){
 			next();
 		   });
 		});
-		
+
 		app.use(app.router);
 		app.get('/adl/sandbox', landing.index);
 		app.get('/adl/sandbox/index', landing.index);
@@ -1067,7 +1067,9 @@ function startVWF(){
 		app.get('/adl/sandbox/remove', landing.remove);
 		app.get('/adl/sandbox/user', landing.user);
 		app.get('/adl/sandbox/help', landing.help);
+		
 		app.get('/adl/sandbox/help/:page([a-zA-Z]+)', landing.help);
+		app.get('/adl/sandbox/admin', landing.admin);
 		
 		app.use(OnRequest);
 		var listen = app.listen(port);

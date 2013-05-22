@@ -1073,6 +1073,8 @@ function serve (request, response)
 	if(SID)
 	 SID = SID.replace(/[\\,\/]/g,'_');
 	 
+	console.log(UID);
+	 
 	var basedir = datapath + "\\";
 	global.log(command,UID,3);
 	if(request.method == "GET")
