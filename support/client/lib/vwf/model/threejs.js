@@ -1690,7 +1690,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var childName = node.name;
         var threeModel = this;
         var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-		$(document).trigger('BeginParse');
+		$(document).trigger('BeginParse',['Loading...',node.source]);
 		
 		function assetFailed(err)
 		{

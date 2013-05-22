@@ -70,19 +70,19 @@ THREE.extend = function ( obj, source ) {
 	var lastTime = 0;
 	var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
 
-	for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++ x ) {
+	for ( var x = 0; x < vendors.length && !self.requestAnimationFrame; ++ x ) {
 
-		window.requestAnimationFrame = window[ vendors[ x ] + 'RequestAnimationFrame' ];
-		window.cancelAnimationFrame = window[ vendors[ x ] + 'CancelAnimationFrame' ] || window[ vendors[ x ] + 'CancelRequestAnimationFrame' ];
+		self.requestAnimationFrame = self[ vendors[ x ] + 'RequestAnimationFrame' ];
+		self.cancelAnimationFrame = self[ vendors[ x ] + 'CancelAnimationFrame' ] || self[ vendors[ x ] + 'CancelRequestAnimationFrame' ];
 
 	}
 
-	if ( window.requestAnimationFrame === undefined ) {
+	if ( self.requestAnimationFrame === undefined ) {
 
-		window.requestAnimationFrame = function ( callback ) {
+		self.requestAnimationFrame = function ( callback ) {
 
 			var currTime = Date.now(), timeToCall = Math.max( 0, 16 - ( currTime - lastTime ) );
-			var id = window.setTimeout( function() { callback( currTime + timeToCall ); }, timeToCall );
+			var id = self.setTimeout( function() { callback( currTime + timeToCall ); }, timeToCall );
 			lastTime = currTime + timeToCall;
 			return id;
 
@@ -90,7 +90,7 @@ THREE.extend = function ( obj, source ) {
 
 	}
 
-	window.cancelAnimationFrame = window.cancelAnimationFrame || function ( id ) { window.clearTimeout( id ) };
+	self.cancelAnimationFrame = self.cancelAnimationFrame || function ( id ) { self.clearTimeout( id ) };
 
 }() );
 
@@ -5859,8 +5859,8 @@ THREE.extend( THREE.Clock.prototype, {
 
 	start: function () {
 
-		this.startTime = window.performance !== undefined && window.performance.now !== undefined
-					? window.performance.now()
+		this.startTime = self.performance !== undefined && self.performance.now !== undefined
+					? self.performance.now()
 					: Date.now();
 
 		this.oldTime = this.startTime;
@@ -5893,8 +5893,8 @@ THREE.extend( THREE.Clock.prototype, {
 
 		if ( this.running ) {
 
-			var newTime = window.performance !== undefined && window.performance.now !== undefined
-					? window.performance.now()
+			var newTime = self.performance !== undefined && self.performance.now !== undefined
+					? self.performance.now()
 					: Date.now();
 
 			diff = 0.001 * ( newTime - this.oldTime );
@@ -8782,7 +8782,7 @@ THREE.PerspectiveCamera.prototype.setLens = function ( focalLength, frameHeight 
 
 
 /**
- * Sets an offset in a larger frustum. This is useful for multi-window or
+ * Sets an offset in a larger frustum. This is useful for multi-self or
  * multi-monitor/multi-machine setups.
  *
  * For example, if you have 3x2 monitors and each monitor is 1920x1080 and
@@ -13483,8 +13483,8 @@ THREE.CanvasRenderer = function ( parameters ) {
 
 	this.devicePixelRatio = parameters.devicePixelRatio !== undefined
 				? parameters.devicePixelRatio
-				: window.devicePixelRatio !== undefined
-					? window.devicePixelRatio
+				: self.devicePixelRatio !== undefined
+					? self.devicePixelRatio
 					: 1;
 
 	this.autoClear = true;
@@ -17922,8 +17922,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 	this.context = null;
 	this.devicePixelRatio = parameters.devicePixelRatio !== undefined
 				? parameters.devicePixelRatio
-				: window.devicePixelRatio !== undefined
-					? window.devicePixelRatio
+				: self.devicePixelRatio !== undefined
+					? self.devicePixelRatio
 					: 1;
 
 	// clearing

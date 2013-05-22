@@ -82,12 +82,14 @@ define(function ()
 				},
 			}
 		});
-		this.startLoad = function ()
+		this.startLoad = function (event,title,data)
 		{
-			this.startWait('Loading...');
+			
+			this.startWait(title,data);
 		}
-		this.startWait = function (title)
+		this.startWait = function (title,data)
 		{
+			
 			$('#WaitingWindow').dialog('open');
 			$('#WaitingWindow').parent().find(".ui-dialog-titlebar").hide();
 			$('#WaitingWindow').parent().css('border-radius', '20px');
@@ -95,6 +97,7 @@ define(function ()
 			$('#WaitingWindow').parent().css('height', '200px');
 			$('#WaitingWindow').dialog('option', 'position', 'center');
 			$('#waittitle').text(title);
+			//alertify.log(data);
 		}
 		this.stopWait = function ()
 		{

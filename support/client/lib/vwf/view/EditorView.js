@@ -20,6 +20,9 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/alertify.js-0.3.9/
 				datatype: 'text'
 			}).responseText);
 			$(document.head).append('<script src="vwf/model/threejs/helvetiker_regular.typeface.js"></script>');
+			$(document.head).append('<script src="vwf/model/threejs/tinyxmlw3cdom.js"></script>');
+			$(document.head).append('<script src="vwf/model/threejs/tinyxmlsax.js"></script>');
+			$(document.head).append('<script src="vwf/model/threejs/tinyxmlxpath.js"></script>');
 			
 			if (!window._EditorInitialized)
 			{

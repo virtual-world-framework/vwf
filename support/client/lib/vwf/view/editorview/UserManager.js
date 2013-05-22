@@ -108,8 +108,28 @@ define(function ()
 					{
 						
 						hideTools();
-						$('#NotifierAlertMessage').dialog('open');
-						$('#NotifierAlertMessage').html('You are viewing this world as a guest. Please <a style="color:blue" href="'+_DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13)+'">sign in</a> to participate');
+						//$('#NotifierAlertMessage').dialog('open');
+						//$('#NotifierAlertMessage').html('You are viewing this world as a guest. Please <a style="color:blue" href="'+_DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13)+'">sign in</a> to participate');
+						alertify.set({ labels: {
+						    ok     : "Login",
+						    cancel : "Continue As Guest"
+						} });
+						alertify.confirm("You are viewing this world as a guest. You will be able to view the world, but not interact with it. Would you like to go back and log in?",
+						function(e)
+						{
+							if(e)
+								window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13);
+							else
+							{
+								
+								$(document.body).append('<a href="#" id="GuestLogin" style="z-index:100;position:fixed;font-size: 2em;" class="alertify-button alertify-button-ok" id="alertify-ok">Login</a>');
+								$('#GuestLogin').click(function()
+								{
+									window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13);
+								});
+							}
+						}
+						);
 					}.bind(this)
 				});
 			
