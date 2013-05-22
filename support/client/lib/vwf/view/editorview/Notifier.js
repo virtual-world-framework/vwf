@@ -90,6 +90,8 @@ define(function ()
 		this.startWait = function (title,data)
 		{
 			
+			
+			
 			$('#WaitingWindow').dialog('open');
 			$('#WaitingWindow').parent().find(".ui-dialog-titlebar").hide();
 			$('#WaitingWindow').parent().css('border-radius', '20px');

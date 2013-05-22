@@ -122,7 +122,7 @@ define(function ()
 							else
 							{
 								
-								$(document.body).append('<a href="#" id="GuestLogin" style="z-index:100;position:fixed;font-size: 2em;" class="alertify-button alertify-button-ok" id="alertify-ok">Login</a>');
+								$(document.body).append('<a href="#" id="GuestLogin" style="font-family: sans-serif;z-index:100;position:fixed;font-size: 2em;" class="alertify-button alertify-button-ok" id="alertify-ok">Login</a>');
 								$('#GuestLogin').click(function()
 								{
 									window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13);
