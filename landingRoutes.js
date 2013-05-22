@@ -38,7 +38,7 @@ exports.remove = function(req, res){
 
 
 	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: 'Warning!'};
-	res.render('delete');
+	res.render('remove');
 }
 exports.user = function(req, res){
 
