@@ -100,25 +100,25 @@ vwfPortalModel.help = {
 		{
 			icon: "camera.png",
 			title: "Orbit Camera (Camera->Orbit)",
-			body: "Activate 'Camera Orbit' mode. See the <a href=\"cameramodes\">'Camera Modes'</a> section for details on how the camera controls work."	
+			body: "Activate 'Camera Orbit' mode. See the <a href=\"cameramodes\">Camera Modes</a> section for details on how the camera controls work."	
 		},
 		
 		{
 			icon: "firstperson.png",
 			title: "First Person Camera (Camera->First Person)",
-			body: "Activate 'First Person' mode. See the <a href=\"cameramodes\">'Camera Modes'</a> section for details on how the camera controls work."	
+			body: "Activate 'First Person' mode. See the <a href=\"cameramodes\">Camera Modes</a> section for details on how the camera controls work."	
 		},
 		
 		{
 			icon: "navigate.png",
 			title: "Navigate Camera (Camera-> Navigate)",
-			body: "Activate 'Navigate' mode. See the <a href=\"cameramodes\">'Camera Modes'</a> section for details on how the camera controls work."	
+			body: "Activate 'Navigate' mode. See the <a href=\"cameramodes\">Camera Modes</a> section for details on how the camera controls work."	
 		},
 		
 		{
 			icon: "free.png",
 			title: "Free Camera (Camera-> Free)",
-			body: "Activate 'Free Camera' mode. See the <a href=\"cameramodes\">'Camera Modes'</a> section for details on how the camera controls work."	
+			body: "Activate 'Free Camera' mode. See the <a href=\"cameramodes\">Camera Modes</a> section for details on how the camera controls work."	
 		},
 		
 		{
@@ -130,79 +130,79 @@ vwfPortalModel.help = {
 		{
 			icon: "sphere.png",
 			title: "Create Sphere (Create-Primitives->Sphere)",
-			body: "Create a new sphere object at the center of the view. See the <a href=\"primitiveobjects\">'Primitive Objects'</a> sections for information on the object settings."	
+			body: "Create a new sphere object at the center of the view. See the <a href=\"primitiveobjects\">Primitive Objects</a> sections for information on the object settings."	
 		},
 		
 		{
 			icon: "cube.png",
 			title: "Create Box (Create-Primitives->Box)",
-			body: "Create a new box object at the center of the view. See the <a href=\"primitiveobjects\">'Primitive Objects'</a> sections for information on the object settings."	
+			body: "Create a new box object at the center of the view. See the <a href=\"primitiveobjects\">Primitive Objects</a> sections for information on the object settings."	
 		},
 		
 		{
 			icon: "cylinder.png",
 			title: "Create Cylinder (Create-Primitives->Cylinder)",
-			body: "Create a new Cylinder object at the center of the view. See the <a href=\"primitiveobjects\">'Primitive Objects'</a> sections for information on the object settings."	
+			body: "Create a new Cylinder object at the center of the view. See the <a href=\"primitiveobjects\">Primitive Objects</a> sections for information on the object settings."	
 		},
 		
 		{
 			icon: "cone.png",
 			title: "Create Cone (Create-Primitives->Cone)",
-			body: "Create a new cone object at the center of the view. See the <a href=\"primitiveobjects\">'Primitive Objects'</a> sections for information on the object settings."	
+			body: "Create a new cone object at the center of the view. See the <a href=\"primitiveobjects\">Primitive Objects</a> sections for information on the object settings."	
 		},
 		
 		{
 			icon: "pyramid.png",
 			title: "Create Pyramid (Create-Primitives-> Pyramid)",
-			body: "Create a new pyramid object at the center of the view. See the <a href=\"primitiveobjects\">'Primitive Objects'</a> sections for information on the object settings."	
+			body: "Create a new pyramid object at the center of the view. See the <a href=\"primitiveobjects\">Primitive Objects</a> sections for information on the object settings."	
 		},
 		
 		{
 			icon: "plane.png",
 			title: "Create Plane (Create-Primitives-> Plane)",
-			body: "Create a new plane object at the center of the view. See the <a href=\"primitiveobjects\">'Primitive Objects'</a> sections for information on the object settings."	
+			body: "Create a new plane object at the center of the view. See the <a href=\"primitiveobjects\">Primitive Objects</a> sections for information on the object settings."	
 		},
 		
 		{
 			icon: "users.png",
 			title: "Users Window (Windows->Users)",
-			body: "Show the Users window. See <a href=\"toolwindows\">'Tool Windows'</a> for more information."	
+			body: "Show the Users window. See <a href=\"toolwindows\">Tool Windows</a> for more information."	
 		},
 		
 		{
 			icon: "chat.png",
 			title: "Chat Window (Windows->Chat)",
-			body: "Show the Chat window. See <a href=\"toolwindows\">'Tool Windows'</a> for more information."	
+			body: "Show the Chat window. See <a href=\"toolwindows\">Tool Windows</a> for more information."	
 		},
 		
 		{
 			icon: "material.png",
 			title: "Material Editor Window (Windows->Material Editor)",
-			body: "Show the Material Editor window. You should have an object selected when opening this window. See <a href=\"toolwindows\">'Tool Windows'</a> for more information."	
+			body: "Show the Material Editor window. You should have an object selected when opening this window. See <a href=\"toolwindows\">Tool Windows</a> for more information."	
 		},
 		
 		{
 			icon: "script.png",
 			title: "Script Editor Window (Windows->Script Editor)",
-			body: "Show the Script Editor window. You should have an object selected when opening this window. See <a href=\"toolwindows\">'Tool Windows'</a> for more information."
+			body: "Show the Script Editor window. You should have an object selected when opening this window. See <a href=\"toolwindows\">Tool Windows</a> for more information."
 		},
 		
 		{
 			icon: "properties.png",
 			title: "Object Properties Window (Windows-> Object Properties)",
-			body: "Show the Object Properties window. You should have an object selected when opening this window. See <a href=\"toolwindows\">'Tool Windows'</a> for more information."
+			body: "Show the Object Properties window. You should have an object selected when opening this window. See <a href=\"toolwindows\">Tool Windows</a> for more information."
 		},
 		
 		{
 			icon: "models.png",
 			title: "Asset Library Window (Windows-> Models)",
-			body: "Show the Asset Library window. See <a href=\"toolwindows\">'Tool Windows'</a> for more information."
+			body: "Show the Asset Library window. See <a href=\"toolwindows\">Tool Windows</a> for more information."
 		},
 		
 		{
 			icon: "inventory.png",
 			title: "Inventory Window (Windows-> Inventory)",
-			body: "Show the Inventory window. See <a href=\"toolwindows\">'Tool Windows'</a> for more information."
+			body: "Show the Inventory window. See <a href=\"toolwindows\">Tool Windows</a> for more information."
 		}
 	]
 };

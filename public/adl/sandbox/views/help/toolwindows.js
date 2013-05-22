@@ -20,17 +20,17 @@ vwfPortalModel.help = {
 		{
 			icon: "material.png",
 			title: "Material Editor Window (Windows->Material Editor)",
-			body: "This window lets you change the physical surface of the object. You can load textures, set colors, change shininess and specuarlity. It's even possible to build some complex effects, like normal mapping or reflections. A material is made of the base properties, and zero or more texture layers. Each layer will appear as a bar in the editor window. Click that bar to edit the settings for that layer. You can add a layer on the 'Basic Settings' tab. See more information in the <a href=\"materialeditor\">'Material Editor'</a> document."	
+			body: "This window lets you change the physical surface of the object. You can load textures, set colors, change shininess and specuarlity. It's even possible to build some complex effects, like normal mapping or reflections. A material is made of the base properties, and zero or more texture layers. Each layer will appear as a bar in the editor window. Click that bar to edit the settings for that layer. You can add a layer on the 'Basic Settings' tab. See more information in the <a href=\"materialeditor\">Material Editor</a> document."	
 		},
 		{
 			icon: "script.png",
 			title: "Script Editor Window (Windows->Script Editor)",
-			body: "The Script Editor allows you to program behaviors on objects. It will roll up from the bottom of the screen, and may be maximized with the up arrow button ( <img class=\"inlineicon\" src=\"../images/icons/up2.png\", ) on the right. You can restore it with the restore icon ( <img class=\"inlineicon\" src=\"../images/icons/window.png\", ), or minimize it with the down icon ( <img class=\"inlineicon\" src=\"../images/icons/down.png\", ). It has two tabs along the top - Events and Methods. Each tab contains the code for a given event or method. Events and methods for the selected object will be listed along the left side, with suggestions for new events and methods grayed out. Click the name of the event or method to see and edit the code for that script. More information is available in the <a href=\"scripteditor\">'Script Editor'</a> document."
+			body: "The Script Editor allows you to program behaviors on objects. It will roll up from the bottom of the screen, and may be maximized with the up arrow button ( <img class=\"inlineicon\" src=\"../images/icons/up2.png\", ) on the right. You can restore it with the restore icon ( <img class=\"inlineicon\" src=\"../images/icons/window.png\", ), or minimize it with the down icon ( <img class=\"inlineicon\" src=\"../images/icons/down.png\", ). It has two tabs along the top - Events and Methods. Each tab contains the code for a given event or method. Events and methods for the selected object will be listed along the left side, with suggestions for new events and methods grayed out. Click the name of the event or method to see and edit the code for that script. More information is available in the <a href=\"scripteditor\">Script Editor</a> document."
 		},
 		{
 			icon: "properties.png",
 			title: "Object Properties Window (Windows-> Object Properties)",
-			body: "The Object Properties window will show you the editable properties of the selected object (with the exception of the scripts and materials). It will list the position, rotation, and scale of the object in the 'Transforms' tab, and show bars below for basic properties of the primitive object or the 3D model. It will also list all the modifiers applied to the object, and the settings for each of these. The available setting will differ based on what type of object is selected, and what modifiers are applied. Reference on these properties is available in the 'Primitive Objects' document, and the <a href=\"modifiers\">'Modifiers'</a> document."
+			body: "The Object Properties window will show you the editable properties of the selected object (with the exception of the scripts and materials). It will list the position, rotation, and scale of the object in the 'Transforms' tab, and show bars below for basic properties of the primitive object or the 3D model. It will also list all the modifiers applied to the object, and the settings for each of these. The available setting will differ based on what type of object is selected, and what modifiers are applied. Reference on these properties is available in the 'Primitive Objects' document, and the <a href=\"modifiers\">Modifiers</a> document."
 		},
 		{
 			icon: "models.png",
@@ -45,7 +45,7 @@ vwfPortalModel.help = {
 		{
 			icon: "Hierarchy.gif",
 			title: "Hierarchy  Window (Hierarchy ->Show Hierarchy )",
-			body: "This window is complex, but powerful. It will show you the VWF nodes that are children of the currently selected object, and also the scene graph nodes that are part of the 3D model, but not replicated by the VWF. You can select the VWF children, and you can convert the scene graph nodes into VWF nodes - allowing you to edit and synchronize their properties. See the <a href=\"hierarchywindow\">'Hierarchy  Window'</a> article for more information."
+			body: "This window is complex, but powerful. It will show you the VWF nodes that are children of the currently selected object, and also the scene graph nodes that are part of the 3D model, but not replicated by the VWF. You can select the VWF children, and you can convert the scene graph nodes into VWF nodes - allowing you to edit and synchronize their properties. See the <a href=\"hierarchywindow\">Hierarchy  Window</a> article for more information."
 		}
 	]
 };
