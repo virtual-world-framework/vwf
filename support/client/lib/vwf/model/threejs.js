@@ -168,12 +168,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if ( childID == sceneNode.camera.defaultCamID ) {
                         if ( !sceneNode.camera.threeJScameras[ childID ] ) {
                             var cam = CreateThreeCamera();
-                            sceneNode.camera.threeJScameras[ childID ] = cam;
-                            
-                            // Why is this commented out?  Can it go away? - Eric (5/13/13)
-                            //cam.position.set(0, 0, 0);
-                            //cam.lookAt( sceneNode.threeScene.position );
-                            
+                            sceneNode.camera.threeJScameras[ childID ] = cam;                            
                         }
                         node.name = camName;
                         node.threeObject = sceneNode.camera.threeJScameras[ childID ];

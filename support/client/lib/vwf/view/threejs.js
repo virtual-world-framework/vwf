@@ -16,6 +16,8 @@
 
 define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
 
+    var navMode;
+
     return view.load( module, {
 
         initialize: function( options ) {
@@ -71,7 +73,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var appID = sceneView.kernel.application();
             if ( childID == appID )
                 findNavObject.call( sceneView );
-        }
+        },
  
  
         // -- deletedNode ------------------------------------------------------------------------------
@@ -98,11 +100,21 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         // -- satProperty ------------------------------------------------------------------------------
 
-        //satProperty: function (nodeID, propertyName, propertyValue) { },
+        satProperty: function ( nodeID, propertyName, propertyValue ) { 
+            if ( navObject && ( nodeID == navObject.ID ) && ( propertyName == "navMode" ) ) { 
+                navMode = propertyValue;
+            }
+        },
 
         // -- gotProperty ------------------------------------------------------------------------------
 
-        //gotProperty: function ( nodeID, propertyName, propertyValue ) { },
+        gotProperty: function ( nodeID, propertyName, propertyValue ) { 
+            var clientThatGotProperty = this.kernel.client();
+            var me = this.kernel.moniker();
+            if ( ( propertyName == "navMode" ) && ( clientThatGotProperty == me ) ) { 
+                navMode = propertyValue;
+            }
+        }
     
     
     } );
@@ -578,7 +590,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
                 sceneView.kernel.dispatchEvent( pointerDownID, "pointerUp", eData.eventData, eData.eventNodeData );
             }
-            pointerDownID = undefined;
+
+            if ( !( mouseLeftDown || mouseRightDown || mouseMiddleDown ) ) {
+                pointerDownID = undefined;
+            }
+
             e.preventDefault();
         }
 
@@ -597,6 +613,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             
             if ( eData ) {
                 if ( mouseLeftDown || mouseRightDown || mouseMiddleDown ) {
+                
+                    // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                    handleMouseNavigation( eData.eventData );
+                    // END TODO
+
                     sceneView.kernel.dispatchEvent( pointerDownID, "pointerMove", eData.eventData, eData.eventNodeData );
                 } else {
                     if ( pointerPickID ) {
@@ -630,10 +651,126 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             e.preventDefault();
         }
 
-        canvas.setAttribute("onmousewheel", '');
+        canvas.setAttribute( "onmousewheel", '' );
         
-        // TEMPNAV: This is part of a temporary example of navigation - 
-        //          to be replaced by better navigation soon
+        
+        window.onkeydown = function (event) {
+                    
+                    var key = undefined;
+                    var validKey = false;
+                    var keyAlreadyDown = false;
+                    switch ( event.keyCode ) {
+                        case 17:
+                        case 16:
+                        case 18:
+                        case 19:
+                        case 20:
+                            break;
+                        default:
+                            key = getKeyValue.call( sceneView, event.keyCode);
+                            keyAlreadyDown = !!sceneView.keyStates.keysDown[key.key];
+                            sceneView.keyStates.keysDown[key.key] = key;
+                            validKey = true;
+
+                            // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                            handleKeyNavigation( event.keyCode, true );
+                            // END TODO
+
+                            break;
+                    }
+
+                    if (!sceneView.keyStates.mods) sceneView.keyStates.mods = {};
+                    sceneView.keyStates.mods.alt = event.altKey;
+                    sceneView.keyStates.mods.shift = event.shiftKey;
+                    sceneView.keyStates.mods.ctrl = event.ctrlKey;
+                    sceneView.keyStates.mods.meta = event.metaKey;
+
+                    var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
+                    if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( sceneView.keyStates.keysDown ).length > 0*/) {
+                        //var params = JSON.stringify( sceneView.keyStates );
+                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [sceneView.keyStates]);
+                    }
+                };
+
+         window.onkeyup = function (event) {
+                    var key = undefined;
+                    var validKey = false;
+                    switch (event.keyCode) {
+                        case 16:
+                        case 17:
+                        case 18:
+                        case 19:
+                        case 20:
+                            break;
+                        default:
+                            key = getKeyValue.call( sceneView, event.keyCode);
+                            delete sceneView.keyStates.keysDown[key.key];
+                            sceneView.keyStates.keysUp[key.key] = key;
+                            validKey = true;
+
+                            // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                            handleKeyNavigation( event.keyCode, false );
+                            // END TODO
+
+                            break;
+                    }
+
+                    sceneView.keyStates.mods.alt = event.altKey;
+                    sceneView.keyStates.mods.shift = event.shiftKey;
+                    sceneView.keyStates.mods.ctrl = event.ctrlKey;
+                    sceneView.keyStates.mods.meta = event.metaKey;
+
+                    var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
+                    if (validKey && sceneNode) {
+                        //var params = JSON.stringify( sceneView.keyStates );
+                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [sceneView.keyStates]);
+                        delete sceneView.keyStates.keysUp[key.key];
+                    }
+                };
+        
+        if(typeof canvas.onmousewheel == "function") {
+            canvas.removeAttribute("onmousewheel");
+            canvas.onmousewheel = function( e ) {
+                var eData = getEventData( e, false );
+                if ( eData ) {
+                    eData.eventNodeData[""][0].wheel = {
+                        delta: e.wheelDelta / -40,
+                        deltaX: e.wheelDeltaX / -40,
+                        deltaY: e.wheelDeltaY / -40,
+                    };
+                    var id = sceneID;
+                    if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
+                        id = pointerDownID;
+                    else if ( pointerOverID )
+                        id = pointerOverID; 
+                        
+                    sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
+                }
+            };
+        }
+        else {
+            canvas.removeAttribute("onmousewheel");
+            canvas.addEventListener('DOMMouseScroll', function( e ) {
+                var eData = getEventData( e, false );
+                if ( eData ) {
+                    eData.eventNodeData[""][0].wheel = {
+                        delta: e.detail,
+                        deltaX: e.detail,
+                        deltaY: e.detail,
+                    };
+                    var id = sceneID;
+                    if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
+                        id = pointerDownID;
+                    else if ( pointerOverID )
+                        id = pointerOverID; 
+                        
+                    sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
+                }
+            });
+        }
+
+        // TODO: Navigation - This section should become a view component as soon as that system is available
+        //       When altering this, search for other sections that say "TODO: Navigation"
 
         this.translationSpeed = 100; // Units per second
         this.rotationSpeed = 90; // Degrees per second
@@ -678,12 +815,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             camRotMat[ 14 ] = 0;
 
             // Calculate a unit direction vector in the camera's parent's frame of reference
-            var dir = goog.vec.Mat4.multVec4(
-              camRotMat,
-              goog.vec.Vec4.createFromValues( x, 0, -y, 1 ), // Accounts for z-up (VWF) to y-up (three.js) change
-              goog.vec.Vec3.create()
-            );
-            dir[ 2 ] = 0;
+            var moveVectorInCameraFrame = goog.vec.Vec4.createFromValues( x, 0, -y, 1 ); // Accounts for z-up (VWF) to y-up (three.js) change
+            moveVectorInCameraFrame = goog.vec.Vec4.createFromValues( x, 0, -y, 1 ); // Accounts for z-up (VWF) to y-up (three.js) change
+            var dir = goog.vec.Mat4.multVec4( camRotMat, moveVectorInCameraFrame,  goog.vec.Vec3.create() );
+            
+            // If user is walking, constrain movement to the horizontal plane
+            if ( navMode == "walk") {
+                dir[ 2 ] = 0;
+            }
+
             goog.vec.Vec3.normalize( dir, dir );
             
             // Extract the camera position so we can add to it
@@ -755,176 +895,46 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             camera.updateMatrixWorld( true );
         }
 
-        // END TEMPNAV
-
-        window.onkeydown = function (event) {
-                    
-                    var key = undefined;
-                    var validKey = false;
-                    var keyAlreadyDown = false;
-                    switch ( event.keyCode ) {
-                        case 17:
-                        case 16:
-                        case 18:
-                        case 19:
-                        case 20:
-                            break;
-                        default:
-                            key = getKeyValue.call( sceneView, event.keyCode);
-                            keyAlreadyDown = !!sceneView.keyStates.keysDown[key.key];
-                            sceneView.keyStates.keysDown[key.key] = key;
-                            validKey = true;
-
-                            // TEMPNAV: This is part of a temporary example of navigation - 
-                            //          to be replaced by better navigation soon
-                            switch ( event.keyCode ) {
-                                case 87:  //w
-                                case 38:  //up
-                                    movingForward = true;
-                                    break;
-                                case 83:  //s
-                                case 40:  //down
-                                    movingBack = true;
-                                    break;
-                                case 37: // left              
-                                case 65:  //a
-                                    movingLeft = true;
-                                    break;
-                                case 39: // right              
-                                case 68:  //d
-                                    movingRight = true;
-                                    break;
-                                case 81: // q
-                                    rotatingLeft = true;
-                                    break;
-                                case 69: // e
-                                    rotatingRight = true;
-                                    break;
-                                case 82: // r
-                                    break;
-                                case 67: // c
-                                    break;
-                            }
-                            // END TEMPNAV
-
-                            break;
-                    }
-
-                    if (!sceneView.keyStates.mods) sceneView.keyStates.mods = {};
-                    sceneView.keyStates.mods.alt = event.altKey;
-                    sceneView.keyStates.mods.shift = event.shiftKey;
-                    sceneView.keyStates.mods.ctrl = event.ctrlKey;
-                    sceneView.keyStates.mods.meta = event.metaKey;
-
-                    var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
-                    if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( sceneView.keyStates.keysDown ).length > 0*/) {
-                        //var params = JSON.stringify( sceneView.keyStates );
-                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [sceneView.keyStates]);
-                    }
-                };
-
-
-
-         window.onkeyup = function (event) {
-                    var key = undefined;
-                    var validKey = false;
-                    switch (event.keyCode) {
-                        case 16:
-                        case 17:
-                        case 18:
-                        case 19:
-                        case 20:
-                            break;
-                        default:
-                            key = getKeyValue.call( sceneView, event.keyCode);
-                            delete sceneView.keyStates.keysDown[key.key];
-                            sceneView.keyStates.keysUp[key.key] = key;
-                            validKey = true;
-
-                            // TEMPNAV: This is part of a temporary example of navigation - 
-                            //          to be replaced by better navigation soon
-                            switch ( event.keyCode ) {
-                                case 87:  //w
-                                case 38:  //up
-                                    movingForward = false;
-                                    break;
-                                case 83:  //s
-                                case 40:  //down
-                                    movingBack = false;
-                                    break;
-                                case 37: // left              
-                                case 65:  //a
-                                    movingLeft = false;
-                                    break;
-                                case 39: // right              
-                                case 68:  //d
-                                    movingRight = false;
-                                    break;
-                                case 81: // q
-                                    rotatingLeft = false;
-                                    break;
-                                case 69: // e
-                                    rotatingRight = false;
-                                    break;
-                            }
-                            //END TEMPNAV
-
-                            break;
-                    }
-
-                    sceneView.keyStates.mods.alt = event.altKey;
-                    sceneView.keyStates.mods.shift = event.shiftKey;
-                    sceneView.keyStates.mods.ctrl = event.ctrlKey;
-                    sceneView.keyStates.mods.meta = event.metaKey;
-
-                    var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
-                    if (validKey && sceneNode) {
-                        //var params = JSON.stringify( sceneView.keyStates );
-                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [sceneView.keyStates]);
-                        delete sceneView.keyStates.keysUp[key.key];
-                    }
-                };
-        
-        if(typeof canvas.onmousewheel == "function") {
-            canvas.removeAttribute("onmousewheel");
-            canvas.onmousewheel = function( e ) {
-                var eData = getEventData( e, false );
-                if ( eData ) {
-                    eData.eventNodeData[""][0].wheel = {
-                        delta: e.wheelDelta / -40,
-                        deltaX: e.wheelDeltaX / -40,
-                        deltaY: e.wheelDeltaY / -40,
-                    };
-                    var id = sceneID;
-                    if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
-                        id = pointerDownID;
-                    else if ( pointerOverID )
-                        id = pointerOverID; 
-                        
-                    sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
-                }
-            };
+        var handleKeyNavigation = function( keyCode, keyIsDown ) {
+            switch ( keyCode ) {
+                case 87:  //w
+                case 38:  //up
+                    movingForward = keyIsDown;
+                    break;
+                case 83:  //s
+                case 40:  //down
+                    movingBack = keyIsDown;
+                    break;
+                case 37: // left              
+                case 65:  //a
+                    movingLeft = keyIsDown;
+                    break;
+                case 39: // right              
+                case 68:  //d
+                    movingRight = keyIsDown;
+                    break;
+                case 81: // q
+                    rotatingLeft = keyIsDown;
+                    break;
+                case 69: // e
+                    rotatingRight = keyIsDown;
+                    break;
+                case 82: // r
+                    break;
+                case 67: // c
+                    break;
+            }
         }
-        else {
-            canvas.removeAttribute("onmousewheel");
-            canvas.addEventListener('DOMMouseScroll', function( e ) {
-                var eData = getEventData( e, false );
-                if ( eData ) {
-                    eData.eventNodeData[""][0].wheel = {
-                        delta: e.detail,
-                        deltaX: e.detail,
-                        deltaY: e.detail,
-                    };
-                    var id = sceneID;
-                    if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
-                        id = pointerDownID;
-                    else if ( pointerOverID )
-                        id = pointerOverID; 
-                        
-                    sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
-                }
-            });
+
+        var handleMouseNavigation = function( mouseEventData ) {
+
+            for ( var i = 0; i < mouseEventData.length; i++ ) {
+
+            }
+
         }
+
+        // END TODO
 
         // == Draggable Content ========================================================================
 
@@ -1628,6 +1638,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var cameraId = cameraIds[ 0 ];
             rendererState.cameraInUse = rendererState.nodes[ cameraId ].threeObject;
         }
+
+        // Request the navigation mode from the navigation object
+        vwf_view.kernel.getProperty( navObject.ID, "navMode" );
     }
 
     function findNavObject() {

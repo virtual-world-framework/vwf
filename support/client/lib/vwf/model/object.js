@@ -293,10 +293,14 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
         parent: function( nodeID, initializedOnly ) {
 
-            var object = this.objects[nodeID];
+            var object = this.objects[ nodeID ];
 
-            return ! initializedOnly || object.initialized ?
-                object.parent && object.parent.id || 0 : undefined;
+            if ( object ) {
+                return ( !initializedOnly || object.initialized ) ?
+                    ( object.parent && object.parent.id || 0 ) : undefined;
+            } else {
+                this.logger.error( "Cannot find node: '" + nodeID + "'" );
+            }
         },
 
         // -- children -----------------------------------------------------------------------------
