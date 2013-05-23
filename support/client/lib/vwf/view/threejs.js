@@ -172,7 +172,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                 // Move the user's camera according to their input
                 self.moveCamera( timepassed );
-                self.rotateCamera( timepassed );
+                self.rotateCameraByKey( timepassed );
             }
             
             // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
@@ -790,6 +790,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         this.translationSpeed = 100; // Units per second
         this.rotationSpeed = 90; // Degrees per second
+        var degreesToRadians = Math.PI / 180;
         var movingForward = false;
         var movingBack = false;
         var movingLeft = false;
@@ -864,7 +865,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             camera.updateMatrixWorld( true );
         }
 
-        this.rotateCamera = function( msSinceLastFrame ) {
+        this.rotateCameraByKey = function( msSinceLastFrame ) {
 
             var direction = 0;
 
@@ -881,7 +882,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Compute the distance rotated in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
             // one key press doesn't send them off in space
-            var theta = direction * ( this.rotationSpeed * Math.PI / 180 ) * 
+            var theta = direction * ( this.rotationSpeed * degreesToRadians ) * 
                         Math.min( msSinceLastFrame * 0.001, 0.5 );
 
             var cos = Math.cos( theta );
@@ -947,8 +948,40 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             if ( mouseEventData[ 0 ].buttons.right ) {
                 var currentMousePosition = mouseEventData[ 0 ].position;
-                var deltaX = currentMousePosition[ 0 ] = startMousePosition [ 0 ];
-                var deltaY = currentMousePosition[ 1 ] = startMousePosition [ 1 ];
+                var deltaX = currentMousePosition[ 0 ] - startMousePosition [ 0 ];
+                var deltaY = currentMousePosition[ 1 ] - startMousePosition [ 1 ];
+                var yawQuat = new THREE.Quaternion();
+                var pitchQuat = new THREE.Quaternion();
+                var rotationSpeedRadians = degreesToRadians * sceneView.rotationSpeed;
+
+                // deltaX is negated because a positive change (to the right) generates a negative rotation 
+                // around the vertical z axis (clockwise as viewed from above)
+                yawQuat.setFromAxisAngle( new THREE.Vector3( 0, 0, 1 ), -deltaX * rotationSpeedRadians );
+
+                // deltaY is negated because a positive change (downward) generates a negative rotation 
+                // around the horizontal x axis (clockwise as viewed from the right)
+                pitchQuat.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), -deltaY * rotationSpeedRadians );
+                var yawMatrix = new THREE.Matrix4();
+                yawMatrix.makeRotationFromQuaternion( yawQuat );
+                var pitchMatrix = new THREE.Matrix4();
+                pitchMatrix.makeRotationFromQuaternion( pitchQuat );
+
+                // Perform pitch on camera - right-multiply to keep pitch separate from yaw
+                var cameraMatrix = sceneView.state.cameraInUse.matrix;
+                var cameraPos = new THREE.Vector3();
+                cameraPos.getPositionFromMatrix( cameraMatrix );
+                cameraMatrix.multiply( pitchMatrix );
+                cameraMatrix.setPosition( cameraPos );
+
+                // Perform yaw on nav object - left-multiply to keep yaw separate from pitch
+                var navObjectMatrix = navObject.threeObject.matrix;
+                var navObjectPos = new THREE.Vector3();
+                navObjectPos.getPositionFromMatrix( navObjectMatrix );
+                navObjectMatrix.multiplyMatrices( yawMatrix, navObjectMatrix );
+                navObjectMatrix.setPosition( navObjectPos );
+                navObject.threeObject.updateMatrixWorld( true );
+
+                startMousePosition = currentMousePosition;
             }
         }
 
@@ -1637,14 +1670,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         var sceneView = this;
 
-        // Delete the viewTransform from the old navigation object that doesn't need it anymore
+        // Disable the viewTransform from the old navigation object that doesn't need it anymore
         if ( navObject )
-            delete navObject.viewTransform;
+            navObject.useViewTransform = false;
 
-        // Set the new navigation object and create a viewTransform property on it that is a copy of its
-        // transform property (in its model)
+        // Set the new navigation object and enable use of the viewTransform 
+        // (instead of adopting the model transform directly)
         navObject = node;
-        navObject.viewTransform = matCpy( navObject.threeObject.matrix.elements );
+        navObject.useViewTransform = true;
         
         // Search for a camera in the navigation object and if it exists, make it active
         var cameraIds = sceneView.kernel.find( navObject.ID, 

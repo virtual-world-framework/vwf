@@ -464,7 +464,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         // If this node has a view-specific transform, that will dictate the transform of
                         // the local user's  rendered object.
                         // But if not, the model transform dictates the transform (in the following code)
-                        if ( !node.viewTransform )
+                        if ( !node.useViewTransform )
                         {
                             // Rotate 90 degress around X to convert from VWF Z-up to three.js Y-up.
                             if ( threeObject instanceof THREE.Camera ) {
@@ -519,7 +519,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             if ( thisPosition.distanceTo( lookatPosition ) > 0 )
                             {
                                 node.transform.lookAt( thisPosition, lookatPosition, up );
-                                if ( !node.viewTransform ) {
+                                if ( !node.useViewTransform ) {
                                     threeObject.matrix.lookAt( thisPosition, lookatPosition, up );
                                     threeObject.updateMatrixWorld( true );
                                 }
