@@ -465,6 +465,25 @@ define(
 		{
 			_Editor.CreatePrim('box', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
 		});
+		$('#MenuCreateLine').click(function (e)
+		{
+			_Editor.CreatePrim('line', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+		});
+		$('#MenuCreateCircle').click(function (e)
+		{
+			_Editor.CreatePrim('circle', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+		});
+		$('#MenuCreateStar').click(function (e)
+		{
+			_Editor.CreatePrim('star', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+		});
+		$('#MenuCreateRectangle').click(function (e)
+		{
+			_Editor.CreatePrim('rectangle', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+		});
+		
+		
+		
 		$('#MenuCreateSphere').click(function (e)
 		{
 			_Editor.CreatePrim('sphere', _Editor.GetInsertPoint(), [.5, 1, 1], 'checker.jpg', document.PlayerNumber, '');

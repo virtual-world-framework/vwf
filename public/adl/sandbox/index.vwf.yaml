@@ -640,17 +640,20 @@ scripts:
       
       if(this.cameramode == 'Navigate')
       {
-             
+            
            var campos = [_Editor.findcamera().position.x,_Editor.findcamera().position.y,_Editor.findcamera().position.z];
            var ray = this.GetWorldPickRay(parms);
 
-           var dxy = this.intersectLinePlane(ray,campos,[0,0,0],[0,0,1]);
-           var oldintersectxy = MATH.addVec3(campos,MATH.scaleVec3(ray,dxy));
+          
+         
            
             this.groundplane.PickPriority = 0;
-           oldintersectxy = _Editor.ThreeJSPick(campos,ray,this.PickOptions).point;
+           var oldintersectxy = _Editor.ThreeJSPick(campos,ray,this.PickOptions).point;
             this.groundplane.PickPriority = -1;
-           oldintersectxy = [oldintersectxy.x,oldintersectxy.y,oldintersectxy.z];
+            var dxy2 = this.intersectLinePlane(ray,campos,[0,0,0],[0,0,1]);
+           var oldintersectxy2 = MATH.addVec3(campos,MATH.scaleVec3(ray,dxy2));
+            if(oldintersectxy2[2] > oldintersectxy[2]) oldintersectxy = oldintersectxy2;
+          
            this.navpoint =  oldintersectxy;
       }
      
@@ -739,17 +742,20 @@ scripts:
       
       if(this.cameramode == 'Navigate' && this.middledown == true)
       {   
+           
            var campos = [_Editor.findcamera().position.x,_Editor.findcamera().position.y,_Editor.findcamera().position.z];
            var ray = this.GetWorldPickRay(parms);
-
+        
            var dxy = this.intersectLinePlane(ray,campos,[0,0,this.navpoint[2]],[0,0,1]);
            var newintersectxy = MATH.addVec3(campos,MATH.scaleVec3(ray,dxy));
-           
+           var dxy2 = this.intersectLinePlane(ray,campos,[0,0,0],[0,0,1]);
+           var newintersectxy2 = MATH.addVec3(campos,MATH.scaleVec3(ray,dxy2));
+            if(newintersectxy2[2] > newintersectxy[2]) newintersectxy = newintersectxy2;
            var len  = MATH.subVec3(this.navpoint,newintersectxy)
            
            this.center = MATH.addVec3(this.center,MATH.subVec3(this.navpoint,newintersectxy));
           
-           this.updateCamera();
+         //  this.updateCamera();
       }
       
       this.last_x = parms.clientX/window.screen.width;

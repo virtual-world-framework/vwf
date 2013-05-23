@@ -252,7 +252,13 @@ function InstanceLogin(response,URL)
 				URL.loginData.clients[cid] = instance;
 				global.instances[instance].clients[cid].loginData = URL.loginData;
 				
+				if(global.instances[instance].state.findNode('index-vwf').properties['owner'] == undefined)
+					global.instances[instance].state.findNode('index-vwf').properties['owner'] = URL.loginData.UID;
+					
 				respond(response,200,"Client Logged Into " + instance);
+				
+				
+				
 				return;
 			}else
 			{

@@ -701,7 +701,7 @@ function startVWF(){
 		var instance = namespace;
 		//Get the state and load it.
 		//Now the server has a rough idea of what the simulation is
-		var state = SandboxAPI.getState(instance) || [];
+		var state = SandboxAPI.getState(instance) || [{owner:undefined}];
 		global.instances[namespace].state = {nodes:{}};
 		global.instances[namespace].state.nodes['index-vwf'] = {id:"index-vwf",properties:state[state.length-1],children:{}};
 		

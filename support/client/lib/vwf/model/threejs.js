@@ -1025,10 +1025,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 						if(threeObject.target)
 						{
 							var offset = new THREE.Vector3(0,0,-1);
-							offset.applyMatrix4(threeObject.matrixWorld());
+							offset.applyMatrix4(threeObject.matrixWorld);
 							threeObject.target.position.x = offset.x;
 							threeObject.target.position.y = offset.y;
 							threeObject.target.position.z = offset.z;
+							threeObject.target.updateMatrixWorld(true);
 						}
 					
 					}
@@ -1089,7 +1090,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
                             node.threeObject = newlight;
                             rebuildAllMaterials.call(this);
                         }
-                        
+			node.threeObject.updateMatrixWorld(true);
+			if(node.threeObject.target)
+				node.threeObject.target.updateMatrixWorld(true);
                     }
                     //if(propertyName == 'diffuse')
                     //{
