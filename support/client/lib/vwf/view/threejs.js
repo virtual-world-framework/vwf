@@ -977,10 +977,55 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 pitchMatrix.makeRotationFromQuaternion( pitchQuat );
 
                 // Perform pitch on camera - right-multiply to keep pitch separate from yaw
-                var cameraMatrix = sceneView.state.cameraInUse.matrix;
+                var camera = sceneView.state.cameraInUse;
+                var cameraMatrix = camera.matrix;
                 var cameraPos = new THREE.Vector3();
                 cameraPos.getPositionFromMatrix( cameraMatrix );
                 cameraMatrix.multiply( pitchMatrix );
+                camera.updateMatrixWorld( true );
+
+                // Constrain the camera's pitch to +/- 90 degrees
+                var camWorldMatrix = camera.matrixWorld;
+                var camWorldMatrixElements = camWorldMatrix.elements;
+
+                // We need to do something if zAxis.z is < 0
+                // This can get a little weird because this matrix is in three.js coordinates, but we care
+                // about VWF coordinates:
+                // -the VWF y-axis is the three.js -z axis 
+                // -the VWF z-axis is the three.js y axis
+                if ( camWorldMatrixElements[ 6 ] < 0 ) {
+
+                    var xAxis = goog.vec.Vec3.create();
+                    xAxis = goog.vec.Vec3.setFromArray( xAxis, [ camWorldMatrixElements[ 0 ], 
+                                                                 camWorldMatrixElements[ 1 ], 
+                                                                 camWorldMatrixElements[ 2 ] ] );
+
+                    var yAxis = goog.vec.Vec3.create();
+
+                    // If forward vector is tipped up
+                    if ( camWorldMatrixElements[ 10 ] > 0 ) {
+                        yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
+                    } else {
+                        yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
+                    }
+
+                    // Calculate the zAxis as a crossProduct of x and y
+                    var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
+
+                    // Put these values back in the camera matrix
+                    camWorldMatrixElements[ 4 ] = zAxis[ 0 ];
+                    camWorldMatrixElements[ 5 ] = zAxis[ 1 ];
+                    camWorldMatrixElements[ 6 ] = zAxis[ 2 ];
+                    camWorldMatrixElements[ 8 ] = -yAxis[ 0 ];
+                    camWorldMatrixElements[ 9 ] = -yAxis[ 1 ];
+                    camWorldMatrixElements[ 10 ] = -yAxis[ 2 ];
+
+                    var inverseParentWorldMatrix = new THREE.Matrix4();
+                    inverseParentWorldMatrix.getInverse( camera.parent.matrixWorld );
+                    cameraMatrix.multiplyMatrices( inverseParentWorldMatrix, camWorldMatrix );
+                }
+
+                // Restore camera position so rotation is done around camera center
                 cameraMatrix.setPosition( cameraPos );
 
                 // Perform yaw on nav object - left-multiply to keep yaw separate from pitch
