@@ -1,4 +1,4 @@
-"{
+{
 	"title":"Tool and Editor Windows",
 	"entries": [
 		{
@@ -48,4 +48,4 @@
 			"body": "This window is complex, but powerful. It will show you the VWF nodes that are children of the currently selected object, and also the scene graph nodes that are part of the 3D model, but not replicated by the VWF. You can select the VWF children, and you can convert the scene graph nodes into VWF nodes - allowing you to edit and synchronize their properties. See the <a href=\"hierarchywindow\">Hierarchy  Window</a> article for more information."
 		}
 	]
-}"
+}

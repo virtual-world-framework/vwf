@@ -1,4 +1,4 @@
-"{
+{
 	"title":"Modifiers",
 	"entries": [
 		{
@@ -43,4 +43,4 @@
 			"icon": false
 		}	
 	]
-}"
+}

@@ -1,4 +1,4 @@
-"{
+{
 	"title":"Main Toolbar Buttons",
 	"entries": [
 		{
@@ -205,4 +205,4 @@
 			"body": "Show the Inventory window. See <a href=\"toolwindows\">Tool Windows</a> for more information."
 		}
 	]
-}"
+}

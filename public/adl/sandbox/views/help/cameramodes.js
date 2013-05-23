@@ -1,4 +1,4 @@
-"{
+{
 	"title": "Camera Modes",
 	"entries": [
 		{
@@ -27,4 +27,4 @@
 			"icon": "target.png"
 		}
 	]
-}"
+}

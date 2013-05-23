@@ -1,4 +1,4 @@
-"{
+{
 	"title":"Primitive Objects",
 	"entries": [
 		{
@@ -37,4 +37,4 @@
 			"body": "The plane is a 2 dimensional grid of polygons. The shape is always created such that it's local Z is the normal of the plane. You may specify the number of polygons in each direction of the plane, and its extent in the local X and Y."	
 		}
 	]
-}"
+}

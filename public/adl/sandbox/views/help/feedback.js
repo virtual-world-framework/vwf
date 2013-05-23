@@ -1,4 +1,4 @@
-"{
+{
 	"title": "Feedback",
 	"entries": [
 		{
@@ -22,4 +22,4 @@
 			"icon": false
 		}
 	]
-}"
+}
