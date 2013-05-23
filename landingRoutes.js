@@ -60,9 +60,13 @@ exports.user = function(req, res){
 	res.render('user');
 }
 exports.admin = function(req, res){
-
-	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: 'Admin', fileList: fileList};
-	res.render('admin/admin');
+	//Show index page instead of admin page
+	
+	//res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: 'Admin', fileList: fileList};
+	res.locals = {root: root, title: ''};
+	
+	//res.render('admin/admin');
+	res.render('index');
 }
 exports.help = function(req, res){
 	
@@ -75,9 +79,11 @@ exports.help = function(req, res){
 
 exports.handlePostRequest = function(req, res){
 	
-	fs.exists("public/adl/sandbox/views/create.html", function(exists){
+	var currentIndex = fileList.indexOf(req.params.page);
+	fs.exists('public/adl/sandbox/views/help/'+fileList[currentIndex]+'.js', function(exists){
+		//Disables file editing
+		return;
 		
-		var currentIndex = fileList.indexOf(req.params.page);
 		if(exists && currentIndex >= 0){
 		
 			console.log(fileList[currentIndex]);
