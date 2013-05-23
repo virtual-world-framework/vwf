@@ -128,18 +128,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                 var sceneNode = CreateThreeJSSceneNode(nodeID, childID, childExtendsID);
                 this.state.scenes[childID] = sceneNode;
-                
-                var cam = CreateThreeCamera();
-                sceneNode.camera.threeJScameras[sceneNode.camera.defaultCamID] = cam;
-                sceneNode.camera.ID= sceneNode.camera.defaultCamID;
-
-                sceneNode.threeScene.add(cam);
-                
-                cam.name = 'camera';
-                
-                var camType = "http://vwf.example.com/camera.vwf";
-                
-                vwf.createChild( childID, "camera", { "extends": camType } );
             }
             
             

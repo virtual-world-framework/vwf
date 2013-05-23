@@ -67,10 +67,19 @@ properties:
   ## @property
 
   backgroundColor: [ 200, 200, 200 ]
+  
+  ## Boolean determines whether the use wants a shared camera (true) or independent views (false). Default value is true.
+  ## 
+  ## @name navscene.vwf#usersShareView
+  ## @property
+
+  usersShareView: true
 
 children:
   camera:
     extends: http://vwf.example.com/camera.vwf
+    implements:
+    - http://vwf.example.com/navigable.vwf
     
 methods:
   getActiveCameraComp:

@@ -1,4 +1,4 @@
-# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Copyright 2013 United States Government, as represented by the Secretary of Defense, Under
 # Secretary of Defense (Personnel & Readiness).
 # 
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -17,27 +17,15 @@
 ## @namespace
 
 --- 
-extends: http://vwf.example.com/scene.vwf
+extends: http://vwf.example.com/node.vwf
 properties: 
   
-  ## Navigation mode. Default value is 'walk.' Other options include 'orbit' and 'none.'
+  ## Navigation mode. Default value is 'fly'.  Other options include 'walk' and 'none.'
   ## 
   ## @name navigable.vwf#navmode
   ## @property
 
-  navmode:
-    set: |
-      switch ( value ) {
-        case "walk":
-        case "orbit":
-        case "none":
-          if ( this.setNavMode ) {
-            this.setNavMode( value );
-          }
-          this.navmode = value;
-          break;
-      }
-    value: "walk"
+  navmode: "fly"
 
   ## Owner node of navigable behavior component
   ## 
