@@ -81,7 +81,7 @@ exports.handlePostRequest = function(req, res){
 		if(exists && currentIndex >= 0){
 		
 			console.log(fileList[currentIndex]);
-			fs.writeFile('public/adl/sandbox/views/admin/'+fileList[currentIndex]+'.js', req.body.slice(req.body.indexOf("=")+1), function (err) {
+			fs.writeFile('public/adl/sandbox/views/help/'+fileList[currentIndex]+'.js', req.body.slice(req.body.indexOf("=")+1), function (err) {
 			  if (err) throw err;
 			  console.log('It\'s saved!');
 			});
