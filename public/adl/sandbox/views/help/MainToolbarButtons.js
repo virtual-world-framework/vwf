@@ -124,7 +124,7 @@
 		{
 			"icon": "target.png",
 			"title": "Focus (Camera->Focus Selected)",
-			"body": "Move the camera such that it frames the selected object in the view. This will reset the camera mode to 'Orbit'. TODO: make sure the Orbit {	icon lights as selected when this is clicked."
+			"body": "Move the camera such that it frames the selected object in the view. This will reset the camera mode to 'Orbit'. TODO: make sure the Orbit icon lights as selected when this is clicked."
 		},
 		
 		{

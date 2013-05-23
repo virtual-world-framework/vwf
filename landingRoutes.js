@@ -73,6 +73,27 @@ exports.help = function(req, res){
 	res.render('help/template');
 }
 
+exports.handlePostRequest = function(req, res){
+	
+	fs.exists("public/adl/sandbox/views/create.html", function(exists){
+		
+		var currentIndex = fileList.indexOf(req.params.page);
+		if(exists && currentIndex >= 0){
+		
+			console.log(fileList[currentIndex]);
+			fs.writeFile('public/adl/sandbox/views/admin/'+fileList[currentIndex]+'.js', req.body.slice(req.body.indexOf("=")+1), function (err) {
+			  if (err) throw err;
+			  console.log('It\'s saved!');
+			});
+		}
+		
+		else console.log("Not there");
+	});
+	
+	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: ''};
+	res.render('help/template');
+}
+
 
 
 

@@ -1042,6 +1042,7 @@ function startVWF(){
 		app.engine('.html', require('hogan-express'));
 		
 		app.use(express.methodOverride());
+		
 		app.use (function(req, res, next) {
 			
 		   var data='';
@@ -1070,6 +1071,7 @@ function startVWF(){
 		
 		app.get('/adl/sandbox/help/:page([a-zA-Z]+)', landing.help);
 		app.get('/adl/sandbox/admin', landing.admin);
+		app.post('/adl/sandbox/admin/:page([a-zA-Z]+)', landing.handlePostRequest);
 		
 		app.use(OnRequest);
 		var listen = app.listen(port);
