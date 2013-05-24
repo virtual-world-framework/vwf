@@ -60,21 +60,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
             this.state.prototypes = {}; 
-            this.state.kernel = this.kernel.kernel.kernel;
-
-
-            // shouldn't this just be vwf time? 			
-			//Setup the timer
-			window.performance = window.performance || {};
-			performance.now = (function() {
-			  return performance.now       ||
-					 performance.mozNow    ||
-					 performance.msNow     ||
-					 performance.oNow      ||
-					 performance.webkitNow ||
-					function() { return new Date().getTime(); };
-			})();
-            
+            this.state.kernel = this.kernel.kernel.kernel;            
         },
 
 
@@ -2428,7 +2414,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             particleSystem.updateEuler = function(time)
             {
 				particleSystem.material.uniforms.time.value += time/3333.0;
-                //var timer = performance.now();
                 var time_in_ticks = time/100.0;
                 
                 if(this.lastTime === undefined) this.lastTime = 0;

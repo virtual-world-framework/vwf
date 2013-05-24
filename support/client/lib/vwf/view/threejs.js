@@ -257,7 +257,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     sceneNode.renderer.setViewport(0,0,window.innerWidth,window.innerHeight)
 					
 					view.state.cameraInUse.aspect =  mycanvas.width / mycanvas.height;
-					view.state.cameraInUse.updateProjectionMatrix()
+					view.state.cameraInUse.updateProjectionMatrix();
                     //var cam = self.state.cameraInUse;
                     //if ( cam ) {
                     //    cam.aspect = mycanvas.width / mycanvas.height;
