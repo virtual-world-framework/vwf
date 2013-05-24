@@ -19,6 +19,8 @@ events:
   pointerClick:  
 properties:
   closed:
+  castShadows:
+  receiveShadows:
 scripts:
 - |  
     this.pointerOver = function(e,ed)

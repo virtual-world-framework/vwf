@@ -1308,7 +1308,15 @@ THREE.extend( THREE.Vector3.prototype, {
 		return this;
 
 	},
+	fromArray: function ( arr ) {
 
+		this.x = arr[0];
+		this.y = arr[1];
+		this.z = arr[2];
+
+		return this;
+
+	},
 	setX: function ( x ) {
 
 		this.x = x;
@@ -32075,7 +32083,7 @@ THREE.ShapeGeometry.prototype.addShape = function ( shape, options ) {
 //    2*pi is a closed lathe, less than 2PI is a portion.
 THREE.LatheGeometry = function ( points, segments, phiStart, phiLength ) {
 
-	THREE.Geometry.call( this );
+THREE.Geometry.call( this );
 
 	segments = segments || 12;
 	phiStart = phiStart || 0;
@@ -32084,7 +32092,7 @@ THREE.LatheGeometry = function ( points, segments, phiStart, phiLength ) {
 	var inversePointLength = 1.0 / ( points.length - 1 );
 	var inverseSegments = 1.0 / segments;
 
-	for ( var i = 0, il = segments; i <= il; i ++ ) {
+	for ( var i = 0, il = segments + 5; i <= il; i ++ ) {
 
 		var phi = phiStart + i * inverseSegments * phiLength;
 
@@ -32109,7 +32117,7 @@ THREE.LatheGeometry = function ( points, segments, phiStart, phiLength ) {
 
 	var np = points.length;
 
-	for ( var i = 0, il = segments; i < il; i ++ ) {
+	for ( var i = 0, il = segments + 5; i < il; i ++ ) {
 
 		for ( var j = 0, jl = points.length - 1; j < jl; j ++ ) {
 

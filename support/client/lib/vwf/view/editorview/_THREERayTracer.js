@@ -185,6 +185,42 @@ function vector(a,b,c)
 	a[1] = b[1] - c[1];
 	a[2] = b[2] - c[2];
 }
+
+
+function distanceLineSegment(o,d,v1,v2,hitData)
+{
+	//P(s) = P0 + sU
+	//Q(t) = Q0 + tV
+	
+	var p0 = o;
+	var q0 = v1;
+	var s = 1;
+	var t = MATH.distanceVec3(v1,v2);
+	var v = MATH.toUnitVec3(MATH.subVec3(v2,v1));
+	var u = d;
+    var a = MATH.dotVec3(u,u);
+	var b = MATH.dotVec3(u,v);
+	var c = MATH.dotVec3(v,v);
+	
+	var w0 = MATH.subVec3(p0,q0);
+	
+	var d = MATH.dotVec3(u,w0);
+	var e = MATH.dotVec3(v,w0);
+	
+	var Sc = (b * e - c*d)/(a*c - b*b);
+	var Tc = (a*e - b*d)/(a*c - b*b);
+	
+	if(Tc/t < 0 || Tc/t > 1)
+		return Infinity;
+	
+	var I1 = MATH.addVec3(p0,MATH.scaleVec3(u,Sc));	
+	var I2 = MATH.addVec3(q0,MATH.scaleVec3(v,Tc));
+	hitData.point = I2;
+	hitData.t = Tc;
+	return MATH.distanceVec3(I1,I2);
+}
+
+
 function pointInFrustrum(point,frustrum)
 {
 //checks if cube points are within the frustum planes
@@ -950,6 +986,7 @@ THREE.Geometry.prototype.FrustrumCast = function(frustrum,opts)
 	
 	 if(bbhit.length > 0)
 	 {
+				
 		 //build the octree or the facelist
 		 if(!this.RayTraceAccelerationStructure || this.dirtyMesh)
 		 {
@@ -1044,7 +1081,8 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 	  
 	  
 	  
-		  
+		  if(this instanceof THREE.Mesh)
+		  {
 				//collide with the mesh
 				var ret2 = this.geometry.CPUPick(newo,newd,options);
 				
@@ -1061,9 +1099,33 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 					ret2[i].object = this;
 					ret2[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
 				}
-		  }
+				ret = ret.concat(ret2);
+			}
+			if(this instanceof THREE.Line)
+			{
+				for(var i =0; i < this.geometry.vertices.length-1; i++)
+				{
+					var hitdata = {};
+					
+					var v1 = [this.geometry.vertices[i].x,this.geometry.vertices[i].y,this.geometry.vertices[i].z];
+					var v2 = [this.geometry.vertices[i+1].x,this.geometry.vertices[i+1].y,this.geometry.vertices[i+1].z];
+					var hitdist = distanceLineSegment(newo,newd,v1,v2,hitdata);
+					if(hitdist < .1)
+					{
+					   var hit = {};
+					   hit.point = hitdata.point;
+					   hit.vertindex = hitdata.t < .5?i:i+1;
+					   hit.norm = [0,0,1];
+					   hit.distance = hitdist;
+					   hit.object = this;
+					   hit.priority = this.PickPriority !== undefined ? this.PickPriority :  1;
+					   ret.push(hit);
+					}
+				}
+			}
+	}
+	return ret;  
 	  
-	  return ret.concat(ret2);
 }
 
 function Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr)
@@ -1160,24 +1222,49 @@ THREE.Object3D.prototype.FrustrumCast = function(frustrum,opts)
 			  mat = MATH.inverseMat4(mat);
 			  var tfrustrum = frustrum.transformBy(mat);
 	  
-			//collide with the mesh
-			ret = this.geometry.FrustrumCast(tfrustrum,opts);
-			if(ret.length)
-				mat2 = this.getModelMatrix().slice(0);
-			for(var i = 0; i < ret.length; i++)
-			{	
-				//move the normal and hit point into worldspace
-				
-				ret[i].point = MATH.mulMat4Vec3(mat2,ret[i].point);
-				mat2[3] = 0;
-				mat2[7] = 0;
-				mat2[11] = 0;
-				ret[i].norm = MATH.mulMat4Vec3(mat2,ret[i].norm);
-				ret[i].norm = MATH.scaleVec3(ret[i].norm,1.0/MATH.lengthVec3(ret[i].norm));
-				ret[i].distance = MATH.distanceVec3([0,0,0],ret[i].point);
-				ret[i].object = this;
-				ret[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
+			if(this instanceof THREE.Mesh)
+			{
+				//collide with the mesh
+				ret = this.geometry.FrustrumCast(tfrustrum,opts);
+				if(ret.length)
+					mat2 = this.getModelMatrix().slice(0);
+				for(var i = 0; i < ret.length; i++)
+				{	
+					//move the normal and hit point into worldspace
+					
+					ret[i].point = MATH.mulMat4Vec3(mat2,ret[i].point);
+					mat2[3] = 0;
+					mat2[7] = 0;
+					mat2[11] = 0;
+					ret[i].norm = MATH.mulMat4Vec3(mat2,ret[i].norm);
+					ret[i].norm = MATH.scaleVec3(ret[i].norm,1.0/MATH.lengthVec3(ret[i].norm));
+					ret[i].distance = MATH.distanceVec3([0,0,0],ret[i].point);
+					ret[i].object = this;
+					ret[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
+				}
 			}
+			if(this instanceof THREE.Line)
+			{
+				mat2 = this.getModelMatrix().slice(0);
+				for(var i = 0; i < this.geometry.vertices.length; i++)
+				{
+					var v0 = [this.geometry.vertices[i].x,this.geometry.vertices[i].y,this.geometry.vertices[i].z];
+					if(pointInFrustrum(v0,tfrustrum))
+					{
+						var hit = {};
+						hit.point = MATH.mulMat4Vec3(mat2,v0);
+						mat2[3] = 0;
+						mat2[7] = 0;
+						mat2[11] = 0;
+						hit.norm = MATH.mulMat4Vec3(mat2,[0,0,1]);
+						hit.distance = MATH.distanceVec3([0,0,0],hit.point);
+						hit.object = this;
+						hit.priority = this.PickPriority !== undefined ? this.PickPriority :  1;
+						ret.push(hit);
+					}
+				}
+			}
+			
 	  }
 	  return ret;
 }

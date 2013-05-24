@@ -14,6 +14,8 @@
 
 extends: spline.vwf
 properties:
-  selectedIndex: -1
-  testprop: 'asdf'
-  points: []
+  _length:
+  width:
+  thickness1:
+  thickness2:
+  

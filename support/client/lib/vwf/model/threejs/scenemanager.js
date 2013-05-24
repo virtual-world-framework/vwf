@@ -10,7 +10,7 @@ function SceneManager(scene)
 
 function GetAllLeafMeshes(threeObject,list)
 {
-	if(threeObject instanceof THREE.Mesh)
+	if(threeObject instanceof THREE.Mesh || threeObject instanceof THREE.Line)
 	{
 		list.push(threeObject);
 	}
@@ -197,6 +197,7 @@ SceneManager.prototype.initialize = function(scene)
 		if(this.RenderBatchManager)
 			this.RenderBatchManager.materialUpdated(this);
 	}
+	THREE.Line.prototype.materialUpdated = THREE.Mesh.prototype.materialUpdated;
 	THREE.Object3D.prototype.setStatic = function(_static)
 	{
 		this._static = _static;

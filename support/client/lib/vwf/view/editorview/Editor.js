@@ -1595,10 +1595,19 @@ define(function ()
 		}.bind(this);
 		this.updateGizmoLocation = function ()
 		{
+			if(!this.GetSelectedVWFNode()) return;
 			var childmat = toGMat(this.findviewnode(this.GetSelectedVWFNode().id).matrixWorld);
 			lastpos[0] = [childmat[3], childmat[7], childmat[11]];
 			var gizpos = [0, 0, 0];
 			gizpos = [childmat[3], childmat[7], childmat[11]];
+			
+			
+			//new fix to allow drivers to trick editor with fake transform data
+			var matt2 = vwf.getProperty(this.GetSelectedVWFNode().id,'transform');
+			gizpos = [matt2[12], matt2[13], matt2[14]];
+			
+			
+			
 			for (var s = 1; s < SelectedVWFNodes.length; s++)
 			{
 				//this.findviewnode(SelectedVWFNodes[s].id).updatethis.Matrix();
@@ -2474,6 +2483,7 @@ define(function ()
 		}
 		this.getDefForMaterial = function (currentmat)
 		{
+		   try{
 			var value = {};
 			value.color = {}
 			value.color.r = currentmat.color.r;
@@ -2521,6 +2531,10 @@ define(function ()
 				}
 			}
 			return value;
+			}catch(e)
+			{
+				return this.getDefaultMaterial();
+			}
 		}
 		this.setMaterialByDef = function (currentmat, value)
 		{
@@ -2608,6 +2622,8 @@ define(function ()
 				currentmat[mapname].repeat.y = value.layers[i].scaley;
 				currentmat[mapname].offset.x = value.layers[i].offsetx;
 				currentmat[mapname].offset.y = value.layers[i].offsety;
+				
+				return currentmat;
 			}
 			for (var i in mapnames)
 			{

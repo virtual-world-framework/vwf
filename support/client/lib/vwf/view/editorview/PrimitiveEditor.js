@@ -24,6 +24,7 @@ define(function ()
 			moveable: false,
 			modal: true,
 			resizable: false,
+			resizable: false,
 			open: function ()
 			{
 				$('#ShareWithNames').empty();
@@ -202,7 +203,7 @@ define(function ()
 				console.log(_Editor.getSelectionCount());
 				for (var k = 0; k < _Editor.getSelectionCount(); k++)
 				{
-					if(_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
+					if(_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),_Editor.GetSelectedVWFNode(k).id) == 0)
 					{
 					_Notifier.notify('You do not have permission to edit this object');
 					continue;

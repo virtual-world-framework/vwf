@@ -413,6 +413,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
                 var childNode = this.state.nodes[nodeID];
                 if(childNode)
                 {
+					if(childNode.deletingNode)
+						childNode.deletingNode();
+						
 					if(!childNode.threeObject.initializedFromAsset)
 					{
 						var threeObject = childNode.threeObject;
@@ -3004,7 +3007,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 		this.createNode = function(childID, childSource, childName)
 		{			
 			
-			var APINames = ['callingMethod','settingProperty','gettingProperty','initializingNode','addingChild'];
+			var APINames = ['callingMethod','settingProperty','gettingProperty','initializingNode','addingChild','deletingNode'];
 			var node = null;
 			if(this.factories[childSource])
 				node = this.factories[childSource](childID, childSource, childName);

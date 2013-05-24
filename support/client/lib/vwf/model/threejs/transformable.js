@@ -1,10 +1,16 @@
 (function(){
 		function transformable(childID, childSource, childName)
 		{
+			this.overrideTransform = false;
+			this.DisableTransform = function(){this.overrideTransform = true;}
+			this.EnableTransform = function(){this.overrideTransform = false;}
+			this.TransformEnabled = function(){return !this.overrideTransform;}
 			this.settingProperty = function(propertyName,propertyValue)
 			{
+				if(!this.TransformEnabled()) {console.log('skipping'); return propertyValue};
 				if(propertyName == 'transform')
                 {
+					
 					var threeObject = this.getRoot().parent;
 					
 					var transform = goog.vec.Mat4.createFromArray( propertyValue || [] );
@@ -38,6 +44,7 @@
 			}
 			this.gettingProperty = function(propertyName,propertyValue)
 			{
+				if(!this.TransformEnabled()) {console.log('skipping'); return propertyValue};
 				if(propertyName == 'transform')
                 {
 					var threeObject = this.getRoot().parent;

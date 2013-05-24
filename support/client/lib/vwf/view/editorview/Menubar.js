@@ -186,6 +186,14 @@ define(
 		{
 			_Editor.CreateModifier('push', document.PlayerNumber, true);
 		});
+		$('#MenuCreateExtrude').click(function (e)
+		{
+			_Editor.CreateModifier('extrude', document.PlayerNumber, true);
+		});
+		$('#MenuCreateLathe').click(function (e)
+		{
+			_Editor.CreateModifier('lathe', document.PlayerNumber, true);
+		});
 		$('#MenuCreateTaper').click(function (e)
 		{
 			_Editor.CreateModifier('taper', document.PlayerNumber);
@@ -481,7 +489,14 @@ define(
 		{
 			_Editor.CreatePrim('rectangle', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
 		});
-		
+		$('#MenuCreateLSection').click(function (e)
+		{
+			_Editor.CreatePrim('lsection', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+		});
+		$('#MenuCreateTSection').click(function (e)
+		{
+			_Editor.CreatePrim('tsection', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+		});
 		
 		
 		$('#MenuCreateSphere').click(function (e)

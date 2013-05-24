@@ -3,7 +3,7 @@
 		{
 			
 			this.closed = true;
-			this.steps = -1;
+			
 			this.points = [[0,0,0],[0,1,0],[1,1,0],[1,0,0]]
 			
 			this.callingMethod = function(methodName,args)
@@ -31,7 +31,7 @@
 			}			
 			this.GetMesh = function()
 			{
-				return this.rootnode.children[0];
+				return this.mesh;
 			}
 			this.GetBounds = function()
 			{
@@ -39,15 +39,9 @@
 			}
 			this.updateSelf = function(rebuild)
 			{
-				if(rebuild)
-				{
-				   this.Build();
-				   this.backupMesh();
-				}
-				else
-				{
-					this.restoreMesh();   
-				}
+				
+				this.Build();
+				
 				this.GetMesh().geometry.dirtyMesh = true;
 				this.GetMesh().updateMatrixWorld(true);
 			}
@@ -99,6 +93,7 @@
 			this.Build = function()
 			{
 				var mat;
+				
 				if( this.rootnode.children[0])
 					mat = this.rootnode.children[0].material;
 				else
@@ -123,8 +118,9 @@
 					geo.vertices.push(new THREE.Vector3(line[i][0],line[i][1],line[i][2]));
 				}
 
-				var mesh=  new THREE.Line(geo, new THREE.MeshBasicMaterial('#FFFFFF'));
-				
+				var mesh=  new THREE.Line(geo, new THREE.LineBasicMaterial('#0000FF'));
+				mesh.material.color.r = 0;
+				mesh.material.color.g = 0;
 				
 				
 				this.mesh = mesh;
