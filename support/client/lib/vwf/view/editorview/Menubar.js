@@ -334,6 +334,10 @@ define(
 		{
 			_SnapMoveTool.show();
 		});
+		$('#MenuSplineTools').click(function(e){
+			_SplineTool.show();
+		
+		});
 		$('#MenuViewToggleAO').click(function (e)
 		{
 			if (_Editor.findscene().getFilter2d())

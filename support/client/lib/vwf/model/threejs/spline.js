@@ -24,6 +24,21 @@
 				{
 					return this.updateSelf();
 				}
+				if(methodName == 'pathPercent')
+				{
+					
+					var p = this.spline.getPoint(args[0]);
+					var mat = new THREE.Matrix4();
+					//mat.getInverse(this.getRoot().matrixWorld);
+					p = p.applyMatrix4(this.getRoot().matrixWorld);
+				
+					return [p.x,p.y,p.z];
+				}
+				if(methodName == 'getLength')
+				{
+					
+					return this.spline.getLength();
+				}
 			}	
 			this.initializingNode = function()
 			{
@@ -105,10 +120,10 @@
 				var line = this.BuildLine(mat);
 				
 				
-				var spline = new THREE.SplineCurve3([]);
+				this.spline = new THREE.SplineCurve3([]);
 				for(var i = 0; i < line.length; i++)
 				{
-					spline.points.push(new THREE.Vector3(line[i][0],line[i][1],line[i][2]));
+					this.spline.points.push(new THREE.Vector3(line[i][0],line[i][1],line[i][2]));
 				}
 				var geo = new THREE.Geometry();
 				

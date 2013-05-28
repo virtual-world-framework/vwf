@@ -184,6 +184,9 @@ define(function ()
 		var MouseMoved = false;
 		document.AxisSelected = -1;
 		this.TempPickCallback = null;
+		this.translationPropertyName = 'translation';
+		this.transformPropertyName = 'transform';
+		this.scalePropertyName = 'scale';
 		$(document.body).append('<div id="statusbar" class="statusbar" />');
 		$('#statusbar').css('top', (document.height - 25) + 'px');
 		$('#statusbar').append('<div id="SceneName" class="statusbarElement" />');
@@ -1148,19 +1151,18 @@ define(function ()
 						{
 							var gizoffset = MATH.subVec3([MoveGizmo.position.x, MoveGizmo.position.y, MoveGizmo.position.z], originalGizmoPos);
 							gizoffset = this.TransformOffset(gizposoffset, SelectedVWFNodes[s].id); //this.TransformOffset(gizoffset,SelectedVWFNodes[s].id);
-							var transform = vwf.getProperty(SelectedVWFNodes[s].id, 'transform');
+							var transform = this.getTransformCallback(SelectedVWFNodes[s].id);
 							transform[12] += gizoffset[0];
 							transform[13] += gizoffset[1];
 							transform[14] += gizoffset[2];
 							lastpos[s] = [transform[12], transform[13], transform[14]];
-							var success = this.setProperty(SelectedVWFNodes[s].id, 'transform', transform);
-							if (success) this.waitingForSet.push(SelectedVWFNodes[s].id);
-							if (!success) this.SetLocation(MoveGizmo, originalGizmoPos);
+							var success = this.setTransformCallback(SelectedVWFNodes[s].id, transform);
+							
 						}
 						if (wasScaled && tempscale[0] > 0 && tempscale[1] > 0 && tempscale[2] > 0)
 						{
 							var relScale = MATH.subVec3(tempscale, lastscale[s]);
-							var success = this.setProperty(SelectedVWFNodes[s].id, 'scale', [tempscale[0], tempscale[1], tempscale[2]]);
+							var success = this.setScaleCallback(SelectedVWFNodes[s].id, [tempscale[0], tempscale[1], tempscale[2]]);
 							if (SelectedVWFNodes.length > 1)
 							{
 								var gizoffset = MATH.subVec3(lastpos[s], originalGizmoPos);
@@ -1172,19 +1174,19 @@ define(function ()
 								gizoffset[2] *= tempscale[2];
 								var newloc = MATH.addVec3(originalGizmoPos, gizoffset);
 								lastpos[s] = newloc;
-								this.waitingForSet.push(SelectedVWFNodes[s].id);
-								var success = this.setProperty(SelectedVWFNodes[s].id, 'translation', newloc);
-								if (success) this.waitingForSet.push(SelectedVWFNodes[s].id);
+								
+								var success = this.setTranslationCallback(SelectedVWFNodes[s].id, newloc);
+								
 							}
 							lastscale[s] = tempscale;
 						}
 						if (wasRotated)
 						{
-							var transform = vwf.getProperty(SelectedVWFNodes[s].id, 'transform');
+							var transform = this.getTransformCallback(SelectedVWFNodes[s].id);
 							var x = transform[12];
 							var y = transform[13];
 							var z = transform[14];
-							var scale = vwf.getProperty(SelectedVWFNodes[s].id, 'scale');
+							var scale = this.getScaleCallback(SelectedVWFNodes[s].id);
 							transform[12] = 0;
 							transform[13] = 0;
 							transform[14] = 0;
@@ -1193,8 +1195,8 @@ define(function ()
 							transform[13] = y;
 							transform[14] = z;
 							lastpos[s] = [x, y, z];
-							var success = this.setProperty(SelectedVWFNodes[s].id, 'transform', transform);
-							if (success) this.waitingForSet.push(SelectedVWFNodes[s].id);
+							var success = this.setTransformCallback(SelectedVWFNodes[s].id, transform);
+							
 							if (SelectedVWFNodes.length > 1)
 							{
 								var parentmat = toGMat(self.findviewnode(SelectedVWFNodes[s].id).parent.matrixWorld);
@@ -1205,9 +1207,9 @@ define(function ()
 								gizoffset = MATH.mulMat4Vec3(rotmat, gizoffset);
 								var newloc = MATH.addVec3(parentgizloc, gizoffset);
 								lastpos[s] = newloc;
-								var success = this.setProperty(SelectedVWFNodes[s].id, 'translation', newloc);
+								var success = this.setTranslationCallback(SelectedVWFNodes[s].id, newloc);
 								//console.log(newloc);
-								if (success) this.waitingForSet.push(SelectedVWFNodes[s].id);
+								
 							}
 						}
 						//triggerSelectionTransformed(SelectedVWFNode);
@@ -1260,18 +1262,39 @@ define(function ()
 			  _Notifier.notify('You do not have permission to modify this object');	
 			return ret; 
 		}
-		this.GetInsertPoint = function ()
+		
+		
+		this.GetInsertPoint = function (e)
 		{
-			var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
-			var ray = self.GetCameraCenterRay();
-			var pick = this.ThreeJSPick(campos, ray);
-			var dxy = pick.distance;
-			var newintersectxy = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy));
-			newintersectxy[2] += .01;
-			var dxy2 = this.intersectLinePlane(ray, campos, [0, 0, 0], [0, 0, 1]);
-			var newintersectxy2 = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy2));
-			newintersectxy2[2] += .01;
-			return newintersectxy[2] > newintersectxy2[2] ? newintersectxy : newintersectxy2;
+		var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
+			if(e)
+			{
+				var ray;
+				ray = this.GetWorldPickRay(e);
+				self.GetMoveGizmo().InvisibleToCPUPick = true;
+				var pick = this.ThreeJSPick(campos, ray);
+				self.GetMoveGizmo().InvisibleToCPUPick = false;
+				var dxy = pick.distance;
+				newintersectxy = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy * .99));
+				var dxy2 = this.intersectLinePlane(ray, campos, [0, 0, 0], [0, 0, 1]);
+				var newintersectxy2 = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy2));
+				newintersectxy2[2] += .01;
+				if (newintersectxy2[2] > newintersectxy[2]) newintersectxy = newintersectxy2;
+				return newintersectxy;
+			}
+			else
+			{
+				
+				var ray = self.GetCameraCenterRay();
+				var pick = this.ThreeJSPick(campos, ray);
+				var dxy = pick.distance;
+				var newintersectxy = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy));
+				newintersectxy[2] += .01;
+				var dxy2 = this.intersectLinePlane(ray, campos, [0, 0, 0], [0, 0, 1]);
+				var newintersectxy2 = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy2));
+				newintersectxy2[2] += .01;
+				return newintersectxy[2] > newintersectxy2[2] ? newintersectxy : newintersectxy2;
+			}
 		}
 		this.createChild = function (parent, name, proto, uri, callback)
 		{
@@ -1502,7 +1525,7 @@ define(function ()
 				var tpos = new THREE.Vector3();
 				tpos.getPositionFromMatrix(MoveGizmo.parent.matrixWorld);
 				var originalGizmoPos = [tpos.x, tpos.y, tpos.z];
-				var gizoffset = MATH.subVec3(vwf.getProperty(tocopy[i].id, 'translation'), originalGizmoPos);
+				var gizoffset = MATH.subVec3(vwf.getProperty(tocopy[i].id, this.translationPropertyName), originalGizmoPos);
 				t.properties.transform[12] = gizoffset[0];
 				t.properties.transform[13] = gizoffset[1];
 				t.properties.transform[14] = gizoffset[2];
@@ -1551,6 +1574,44 @@ define(function ()
 				t.properties.transform[14] -= newintersectxy[2];
 			}
 		}
+		this.getTransform = function(id)
+		{
+			return vwf.getProperty(id,this.transformPropertyName);
+		}
+		this.getTranslation = function(id)
+		{
+			return vwf.getProperty(id,this.translationPropertyName);
+		}
+		this.getScale = function(id)
+		{
+			return vwf.getProperty(id,this.scalePropertyName);
+		}
+		this.setTransform = function(id,val)
+		{
+			var success = this.setProperty(id,this.transformPropertyName,val);
+			if (success) this.waitingForSet.push(id);
+			if (!success) this.SetLocation(MoveGizmo, originalGizmoPos);
+			return success;
+		}
+		this.setTranslation = function(id,val)
+		{
+			var success =  this.setProperty(id,this.translationPropertyName,val);	
+			if (success) this.waitingForSet.push(id);
+			if (!success) this.SetLocation(MoveGizmo, originalGizmoPos);
+			return success;
+		}
+		this.setScale = function(id,val)
+		{
+			return this.setProperty(id,this.scalePropertyName,val);
+		}
+		this.setScaleCallback = this.setScale;
+		this.setTransformCallback = this.setTransform;
+		this.setTranslationCallback = this.setTranslation;
+		
+		this.getScaleCallback = this.getScale;
+		this.getTransformCallback = this.getTransform;
+		this.getTranslationCallback = this.getTranslation;
+		
 		this.updateGizmoOrientation = function (updateBasisVectors)
 		{
 			if (CoordSystem == LocalCoords && SelectedVWFNodes[0])
@@ -1603,7 +1664,7 @@ define(function ()
 			
 			
 			//new fix to allow drivers to trick editor with fake transform data
-			var matt2 = vwf.getProperty(this.GetSelectedVWFNode().id,'transform');
+			var matt2 = this.getTransformCallback(this.GetSelectedVWFNode().id);
 			gizpos = [matt2[12], matt2[13], matt2[14]];
 			
 			
@@ -1615,9 +1676,9 @@ define(function ()
 				gizpos[0] += nextchildmat[3];
 				gizpos[1] += nextchildmat[7];
 				gizpos[2] += nextchildmat[11];
-				var trans = vwf.getProperty(SelectedVWFNodes[s].id, 'transform');
+				var trans = this.getTransformCallback(SelectedVWFNodes[s].id);
 				lastpos[s] = [trans[12], trans[13], trans[14]];
-				lastscale[s] = vwf.getProperty(SelectedVWFNodes[s].id, 'scale');
+				lastscale[s] = this.getScaleCallback(SelectedVWFNodes[s].id);
 			}
 			gizpos[0] /= SelectedVWFNodes.length;
 			gizpos[1] /= SelectedVWFNodes.length;
@@ -1786,7 +1847,7 @@ define(function ()
 			{
 				for (var s = 0; s < SelectedVWFNodes.length; s++)
 				{
-					lastscale[s] = vwf.getProperty(SelectedVWFNodes[s].id, 'scale');
+					lastscale[s] = this.getScaleCallback(SelectedVWFNodes[s].id);
 					this.showMoveGizmo();
 					if (this.findviewnode(SelectedVWFNodes[s].id))
 					{

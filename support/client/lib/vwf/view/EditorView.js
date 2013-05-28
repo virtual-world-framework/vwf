@@ -72,6 +72,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/alertify.js-0.3.9/
 					require("vwf/view/editorview/Help").getSingleton();
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/PainterTool.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/AlignTool.js"></script>');
+					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/SplineTool.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.qtip-1.0.0-rc3.min.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/sha256.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.ui.touch-punch.min.js"></script>');
@@ -114,7 +115,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/alertify.js-0.3.9/
 		},
 		satProperty: function (nodeID, propertyName, propertyValue)
 		{
-			if (window._Editor && _Editor.isSelected(nodeID) && propertyName == 'transform')
+			if (window._Editor && _Editor.isSelected(nodeID) && propertyName == _Editor.transformPropertyName)
 			{
 				_Editor.updateBoundsTransform(nodeID);
 				_Editor.waitingForSet.splice(_Editor.waitingForSet.indexOf(nodeID), 1);

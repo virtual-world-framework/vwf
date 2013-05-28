@@ -216,8 +216,10 @@ function distanceLineSegment(o,d,v1,v2,hitData)
 	var I1 = MATH.addVec3(p0,MATH.scaleVec3(u,Sc));	
 	var I2 = MATH.addVec3(q0,MATH.scaleVec3(v,Tc));
 	hitData.point = I2;
-	hitData.t = Tc;
-	return MATH.distanceVec3(I1,I2);
+	var dist = MATH.distanceVec3(I1,I2)
+	hitData.t = Tc/MATH.distanceVec3(v1,v2);
+	
+	return dist;
 }
 
 
@@ -1110,11 +1112,12 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 					var v1 = [this.geometry.vertices[i].x,this.geometry.vertices[i].y,this.geometry.vertices[i].z];
 					var v2 = [this.geometry.vertices[i+1].x,this.geometry.vertices[i+1].y,this.geometry.vertices[i+1].z];
 					var hitdist = distanceLineSegment(newo,newd,v1,v2,hitdata);
-					if(hitdist < .1)
+					if(hitdist < Math.min(MATH.distanceVec3(newo,v1),MATH.distanceVec3(newo,v2))/50 )
 					{
 					   var hit = {};
 					   hit.point = hitdata.point;
 					   hit.vertindex = hitdata.t < .5?i:i+1;
+					   hit.t = hitdata.t;
 					   hit.norm = [0,0,1];
 					   hit.distance = hitdist;
 					   hit.object = this;

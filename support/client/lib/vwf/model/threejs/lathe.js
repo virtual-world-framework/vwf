@@ -31,7 +31,7 @@
 				
 				var geometry = new THREE.LatheGeometry(points,Math.floor(this.steps),0,this.amount*Math.PI*2);
 				var p = mesh.parent;
-				mesh.parent.remove(mesh);
+			//	mesh.parent.remove(mesh);
 				this.mymesh = new THREE.Mesh(geometry,mesh.material)
 				
 				var mat = new THREE.MeshPhongMaterial();

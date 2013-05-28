@@ -26,7 +26,7 @@
 				var shape = new THREE.Shape(points);
 				var geometry = new THREE.ExtrudeGeometry(shape,extrusionSettings);
 				var p = mesh.parent;
-				mesh.parent.remove(mesh);
+			//	mesh.parent.remove(mesh);
 				this.mymesh = new THREE.Mesh(geometry,mesh.material)
 				
 				var mat = new THREE.MeshPhongMaterial();
