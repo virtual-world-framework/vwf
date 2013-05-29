@@ -22,6 +22,7 @@
 \curl -L https://get.rvm.io | sudo bash -s stable --rails --autolibs=enable 
 source /etc/profile
 rvm requirements
+port upgrade outdated
 rvm install 1.9.3
 rvm use 1.9.3
 rvm use 1.9.3 --default
