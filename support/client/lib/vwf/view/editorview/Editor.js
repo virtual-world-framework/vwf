@@ -1389,6 +1389,37 @@ define(function ()
 			}
 			this.createChild(id, GUID(), proto, null, null);
 		}
+		this.CreateBehavior = function(type,owner)
+		{
+			
+			if (this.GetSelectedVWFNode() == null)
+			{
+				_Notifier.notify('no object selected');
+				return;
+			}
+			var ModProto = {
+				extends: type + '.vwf',
+				properties: {
+				}
+			};
+			var proto = ModProto;
+			proto.properties.owner = owner;
+			proto.properties.type = 'behavior';
+			proto.properties.DisplayName = self.GetUniqueName(type);
+			var id = this.GetSelectedVWFNode().id;
+			var owner = vwf.getProperty(id, 'owner');
+			if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
+			{
+				_Notifier.notify('You do not have permission to edit this object');
+				return;
+			}
+			this.createChild(id, GUID(), proto, null, null);
+			window.setTimeout(function ()
+			{
+				$(document).trigger('modifierCreated', self.GetSelectedVWFNode());
+			}, 500);
+		
+		}
 		this.CreateModifier = function (type, owner, subDriver)
 		{
 			if (this.GetSelectedVWFNode() == null)

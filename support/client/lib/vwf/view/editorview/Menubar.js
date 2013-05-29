@@ -231,6 +231,36 @@ define(
 		{
 			_Editor.CreateModifier('stretch', document.PlayerNumber);
 		});
+		
+		$('#MenuCreateBehaviorRotator').click(function (e)
+		{
+			_Editor.CreateBehavior('rotator', _UserManager.GetCurrentUserName());
+		});
+		$('#MenuCreateBehaviorOrbit').click(function (e)
+		{
+			_Editor.CreateBehavior('orbit', _UserManager.GetCurrentUserName());
+		});
+		$('#MenuCreateBehaviorHyperlink').click(function (e)
+		{
+			_Editor.CreateBehavior('hyperlink', _UserManager.GetCurrentUserName());
+		});
+		$('#MenuCreateBehaviorHoverlabel').click(function (e)
+		{
+			_Editor.CreateBehavior('hoverlabel', _UserManager.GetCurrentUserName());
+		});
+		$('#MenuCreateBehaviorPathFollow').click(function (e)
+		{
+			_Editor.CreateBehavior('pathfollow', _UserManager.GetCurrentUserName());
+		});
+		$('#MenuCreateBehaviorClampToGround').click(function (e)
+		{
+			_Editor.CreateBehavior('clamptoground', _UserManager.GetCurrentUserName());
+		});
+		
+		
+		
+		
+		
 		$('#MenuHelpBrowse').click(function (e)
 		{
 			window.open('../vwf/view/editorview/help/help.html', '_blank');

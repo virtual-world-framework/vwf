@@ -15,6 +15,7 @@ extends: http://vwf.example.com/node3.vwf
 methods:
   pathPercent:
   getLength:
+  getPoints:
 events:
   pointerOver:  
   pointerOut:

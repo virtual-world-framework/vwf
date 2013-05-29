@@ -33,7 +33,11 @@
 				if(propertyName == 'points')
 				{
 					return this.points ;
-				}			
+				}
+				if(propertyName == 'type')
+				{	
+					return 'Line';
+				}				
 				if(propertyName == 'EditorData')
 				{
 					return {

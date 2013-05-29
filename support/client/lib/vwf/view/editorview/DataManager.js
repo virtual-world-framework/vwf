@@ -34,22 +34,25 @@ define(function ()
 			name = name.replace(/[^0-9a-zA-Z]/g, '0');
 			return name;
 		}
-		this.DeleteIDs = function (t)
+		this.DeleteIDs = function (t,keepname)
 		{
 			if (t.id != undefined) delete t.id;
-			if (t.name != undefined) delete t.name;
+		
+
+			if(!keepname)
+				if (t.name != undefined) delete t.name;
 			if (t.children)
 			{
 				var children = []
 				for (var i in t.children)
 				{
-					this.DeleteIDs(t.children[i]);
+					this.DeleteIDs(t.children[i],keepname);
 					children.push(t.children[i]);
 					delete t.children[i];
 				}
 				for (var i = 0; i < children.length; i++)
 				{
-					t.children[GUID()] = children[i];
+					t.children[children[i].name || GUID()] = children[i];
 				}
 			}
 			return t;
@@ -173,6 +176,11 @@ define(function ()
 			if (typeof id === "string") return this.DeleteIDs(this.fixExtendsAndArrays(this.GetNode(id)));
 			else return this.DeleteIDs(this.fixExtendsAndArrays(id));
 		}
+		this.getSaveNodePrototype = function (id)
+		{
+			if (typeof id === "string") return this.DeleteIDs(this.fixExtendsAndArrays(this.GetNode(id)),true);
+			else return this.DeleteIDs(this.fixExtendsAndArrays(id),true);
+		}
 		this.saveToServer = function (sync)
 		{
 			if(!sync) sync = false;
@@ -185,7 +193,7 @@ define(function ()
 			var nodes = [];
 			for (var i in scene.children)
 			{
-				var node = this.getCleanNodePrototype(scene.children[i].id);
+				var node = this.getSaveNodePrototype(scene.children[i].id);
 				if (node.extends != "character.vwf" && node.extends != 'http://vwf.example.com/camera.vwf') nodes.push(node);
 				if (node.extends == "character.vwf" && node.properties.ownerClientID == null) nodes.push(node);
 			}
@@ -284,7 +292,7 @@ define(function ()
 			for (var i = 0; i < scene.length - 1; i++)
 			{
 				var node = scene[i];
-				var name = node.properties.DisplayName?node.properties.DisplayName + i:GUID();
+				var name = node.name?node.name:GUID();
 				var callback = null;
 				if(i == scene.length - 2)
 					callback = function(){$(document).trigger('setstatecomplete')};

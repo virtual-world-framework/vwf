@@ -447,7 +447,7 @@ function isPointerEvent(message)
 			for(var i in childnames)
 			{
 				var childComponent = node.children[i];
-				var childName = i;
+				var childName = childComponent.name || i;
 				var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
 				childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
 				childComponent.id = childID;
@@ -743,7 +743,7 @@ function startVWF(){
 		for(var i =0; i < state.length-1; i++)
 		{
 			var childComponent = state[i];
-			var childName = state[i].properties.DisplayName + i;
+			var childName = state[i].name || state[i].properties.DisplayName + i;
 			var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
 			childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
 			state[i].id = childID;

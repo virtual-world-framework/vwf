@@ -44,6 +44,48 @@ function SplineTool()
 	
 	self.activate = function()
 	{
+	
+		var node = vwf.getNode(_Editor.GetSelectedVWFID());
+		
+		if(_Editor.getSelectionCount() != 1)
+		{
+			_Notifier.alert('Select a single line object before using the Spline tool.'); 
+			return;
+		}
+		
+		if(!node || !node.properties || !(node.properties.type == 'Line' || node.properties.type == 'Spline'))
+		{
+			_Notifier.alert('The Spline tools can only be used on a line object. The object selected cannot be edited with this tool.'); 
+			return;
+		}
+		if(node.properties.type == 'Spline')
+		{
+			alertify.confirm('The Spline tools can only be used on a line object. The selected object can be converted into an editable line. This action cannot be undone. Continue?',function(e)
+			{
+				if(!e)
+				{
+					return;
+					
+				}
+				else
+				{
+					
+					var parent = vwf.parent(node.id);
+					var name = node.name
+					var proto = _DataManager.getCleanNodePrototype(node);
+					proto.properties.owner = _UserManager.GetCurrentUserName();
+					proto.properties.points = vwf.callMethod(_Editor.GetSelectedVWFID(),'getPoints');
+					proto.extends = 'line2.vwf';
+					proto.source = "vwf/model/threejs/line.js"
+					_Editor.DeleteSelection();
+					_Editor.createChild(parent,name,proto);
+					_Editor.SelectOnNextCreate();
+				}
+			
+			}); 
+			return;
+		}
+	
 			self.mousemoved = false;
 			self.selectedIndex = 0;
 			self.mouseupCallback = self.selectOrMove;
@@ -452,6 +494,8 @@ function SplineTool()
 	
 	self.show = function()
 	{
+	
+	
 		//$('#SplineToolGUI').dialog('open');
 		$('#SplineToolGUI').prependTo($('#SplineToolGUI').parent());
 		$('#SplineToolGUI').show('blind',function()

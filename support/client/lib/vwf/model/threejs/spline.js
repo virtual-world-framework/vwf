@@ -39,6 +39,11 @@
 					
 					return this.spline.getLength();
 				}
+				if(methodName == 'getPoints')
+				{
+					
+					return this.BuildLine(null);
+				}
 			}	
 			this.initializingNode = function()
 			{
@@ -69,7 +74,7 @@
 			{
 				if(propertyName == 'type')
 				{	
-					return 'Primitive';
+					return 'Spline';
 				}
 				
 			}
