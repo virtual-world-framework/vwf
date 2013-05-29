@@ -531,6 +531,10 @@ define(
 		{
 			_Editor.CreatePrim('tsection', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
 		});
+		$('#MenuCreateTerrain').click(function (e)
+		{
+			_Editor.CreatePrim('terrain', [0,0,0], [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+		});
 		
 		
 		$('#MenuCreateSphere').click(function (e)

@@ -73,6 +73,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/alertify.js-0.3.9/
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/PainterTool.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/AlignTool.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/SplineTool.js"></script>');
+					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/TerrainTool.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.qtip-1.0.0-rc3.min.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/sha256.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.ui.touch-punch.min.js"></script>');
