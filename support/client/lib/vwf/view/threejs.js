@@ -65,15 +65,16 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 initScene.call(this,this.state.scenes[childID]);
             }
 
-            //Temporary workaround until the callback functionality is implemented for kernel.createChild()
-            //Listening specifically for this.findNavObject>>createChild() creating a new navObject if one does not exist.
-            //Can be removed once kernel.createChild callback works properly
-            var sceneView = this;
-            var clientThatIssuedEvent = this.kernel.client();
-            var me = this.kernel.moniker();
-            if (clientThatIssuedEvent == me) 
-                controlNavObject.call( sceneView, sceneView.state.nodes [childID] );
-            //End temporary workaround
+            //TODO: This is a temporary workaround until the callback functionality is implemented for 
+            //      kernel.createChild()
+            //      Listening specifically for this.findNavObject>>createChild() creating a new navObject if 
+            //      one does not exist.
+            //      Can be removed once kernel.createChild callback works properly
+            if ( childName && ( childName == navObjectName ) ) {
+                var sceneView = this;
+                controlNavObject.call( sceneView, sceneView.state.nodes[ childID ] );
+            }
+            //End TODO
         },
 
         initializedNode: function( nodeID, childID ) {
@@ -1723,6 +1724,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
     function controlNavObject( node ) {
       
+        if ( !node ) {
+            this.logger.error( "Attempted to control non-existant navigation object" );
+            return;
+        }
+
         var sceneView = this;
 
         // Disable the viewTransform from the old navigation object that doesn't need it anymore
@@ -1749,6 +1755,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         vwf_view.kernel.getProperty( navObject.ID, "navmode" );
     }
 
+    var navObjectName;
+
     function findNavObject() {
 
         // Find the navigable objects in the scene
@@ -1767,6 +1775,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         for ( var i = 0; i < navObjects.length; i++ )
             if ( navObjects[ i ].owner == thisUserId ) {
                 controlNavObject.call( sceneView, navObjects[ i ] );
+                navObjectName = navObjects[ i ].name;
                 found = true;
                 break;
             }
@@ -1777,6 +1786,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             for ( var i = 0; i < navObjects.length; i++ )
                 if ( !navObjects[ i ].owner ) {
                     controlNavObject.call( sceneView, navObjects[ i ] );
+                    navObjectName = navObjects[ i ].name;
                     found = true;
                     break;
                 }
@@ -1792,10 +1802,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
             };
 
-            sceneView.kernel.createChild( sceneRootID, "navobj_" + thisUserId, navObjectSpec, 
-                                          undefined, undefined, function( nodeID ) {
+            navObjectName = "navobj_" + thisUserId;
+
+            // TODO: The callback function is commented out because callbacks have not yet been implemented
+            //       for createChild - see workaround in createdNode
+            sceneView.kernel.createChild( sceneRootID, navObjectName, navObjectSpec, undefined, undefined /*, 
+                                          function( nodeID ) {
                 controlNavObject.call( sceneView, sceneView.state.nodes[ nodeID ] );
-            } );
+            } */ );
         }
     }
 

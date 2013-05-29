@@ -74,12 +74,6 @@ properties:
   ## @property
 
   usersShareView: true
-
-children:
-  camera:
-    extends: http://vwf.example.com/camera.vwf
-    implements:
-    - http://vwf.example.com/navigable.vwf
     
 methods:
   getActiveCameraComp:
@@ -90,10 +84,21 @@ scripts:
 - |
     this.activeCameraComp = undefined;
     var scene = this;
+
     this.initialize = function() {
+      if ( this.usersShareView ) {
+        this.children.create( "camera", {
+          "extends": "http://vwf.example.com/camera.vwf",
+          "implements": [ "http://vwf.example.com/navigable.vwf" ],
+          "properties": {
+            "navmode": "fly"
+          }
+        } );
+      }
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
       this.lastActiveCamera = this.activeCamera;
     }
+
     this.getChild = function( childName, startingNode ) {
       if(!startingNode) {
         startingNode = this;
@@ -114,12 +119,15 @@ scripts:
       //console.info( "WARNING: SCENE.getChild   CHILD NOT FOUND: " + childName );
       return undefined;
     }
+
     this.getActiveCameraComp = function() {
       return this.activeCameraComp;
     }
+
     this.lastActiveCameraID = function() {
       return this.lastActiveCamera;
     }
+
     this.getActiveCamera = function() {
       if ( !this.activeCameraComp ) {
         if ( this.getChild ) {
