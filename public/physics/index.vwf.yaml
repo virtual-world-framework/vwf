@@ -16,17 +16,6 @@ extends: appscene.vwf
 properties:
   ambientColor: [ 183, 183, 183 ]
   backgroundColor: [ 83, 157, 194 ]
-scripts:
-- |
-    this.initialize = function() {
-      this.camera.translation = [ 30, 138, 40 ];
-      this.camera.rotation = [ 0, 0, 1, 180 ]
-      this.camera.far = 50000.0;  
-      this.translationSpeed = 4;
-    }
-    this.clearButton.events.clearing = this.events.add( function() { 
-      this.clear(); 
-    }, this ); 
 children:
   clearButton:
     extends: http://vwf.example.com/node2.vwf
@@ -61,3 +50,14 @@ children:
       intensity: 0.9
       color: [ 255, 255, 255 ]
       translation: [ 0, 0, 1 ]
+scripts:
+- |
+    this.initialize = function() {
+      // this.camera.translation = [ 30, 138, 40 ];
+      // this.camera.rotation = [ 0, 0, 1, 180 ];
+      // this.camera.far = 50000.0;  
+      this.translationSpeed = 4;
+    }
+    this.clearButton.events.clearing = this.events.add( function() { 
+      this.clear(); 
+    }, this ); 
