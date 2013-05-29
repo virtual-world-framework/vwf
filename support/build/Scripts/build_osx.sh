@@ -1,34 +1,25 @@
 #!/bin/bash
-# Copyright 2013 United States Government, as represented by the 
-Secretary of Defense, Under
+# Copyright 2013 United States Government, as represented by the Secretary of Defense, Under
 # Secretary of Defense (Personnel & Readiness).
 # 
-# Licensed under the Apache License, Version 2.0 (the "License"); you 
-may not use this file except
-# in compliance with the License. You may obtain a copy of the License 
-at
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
 # 
 #   http://www.apache.org/licenses/LICENSE-2.0
 # 
-# Unless required by applicable law or agreed to in writing, software 
-distributed under the License
-# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
-OF ANY KIND, either express
-# or implied. See the License for the specific language governing 
-permissions and limitations under
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
 ###################################################################################################
 # This script installs Virtual World Framework on Apple OS X 
 # This script can be called from a shell prompt using: 
-# sudo curl 
-https://www.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_osx.sh  
-| bash
+# sudo curl https://www.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_osx.sh  | bash
 ###################################################################################################
 
 # Install Ruby using RVM
-\curl -L https://get.rvm.io | sudo bash -s stable --rails 
---autolibs=enable 
+\curl -L https://get.rvm.io | sudo bash -s stable --rails --autolibs=enable 
 source /etc/profile
 rvm requirements
 rvm install 1.9.3
@@ -67,5 +58,4 @@ sudo bundle exec rake
 bundle exec thin start
 hostname=`hostname -s`
 echo "Your System is Now Running at http://$hostname:3000" 
-echo "To start VWF in the future please launch Terminal, Navigate to 
-/var/www/vwf, and type: bundle exec thin start" 
+echo "To start VWF in the future please launch Terminal, Navigate to /var/www/vwf, and type: bundle exec thin start" 
