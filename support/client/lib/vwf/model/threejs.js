@@ -289,11 +289,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             }
 
-            if ( node && node.threeObject )
+            if ( node && node.threeObject ) {
                 // Add a local model-side transform that can stay pure even if the view changes the
                 // transform on the threeObject - objects that don't yet have a threeObject because
                 // a file needs to load create this transform in assetLoaded
-                node.transform = node.threeObject.matrix;
+                node.transform = new THREE.Matrix4();
+                node.transform.elements = matCpy( node.threeObject.matrix.elements );
+            }
 
             // If we do not have a load a model for this node, then we are almost done, so we can update all
             // the driver properties w/ the stop-gap function below.
@@ -1953,7 +1955,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 // Add a local model-side transform that can stay pure even if the view changes the
                 // transform on the threeObject - this already happened in creatingNode for those nodes that
                 // didn't need to load a model
-                node.transform = node.threeObject.matrix;
+                node.transform = new THREE.Matrix4();
+                node.transform.elements = matCpy( node.threeObject.matrix.elements );
             }
 
             // Since prototypes are created before the object, it does not get "setProperty" updates for
