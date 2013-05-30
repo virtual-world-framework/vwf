@@ -26,7 +26,6 @@ rvm requirements
 # sudo port upgrade outdated
 rvm install 1.9.3
 rvm use 1.9.3
-rvm use 1.9.3 --default
 
 # Upgrade RubyGems to the latest version and push upgrade to any Ruby Gems on the system
 gem install rubygems-update
