@@ -22,8 +22,8 @@
 \curl -L https://get.rvm.io | sudo bash -s stable --autolibs=enable 
 source /etc/profile
 rvm requirements
-sudo port selfupdate
-sudo port upgrade outdated
+# sudo port selfupdate
+# sudo port upgrade outdated
 rvm install 1.9.3
 rvm use 1.9.3
 rvm use 1.9.3 --default
