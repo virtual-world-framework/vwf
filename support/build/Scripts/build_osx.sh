@@ -43,11 +43,10 @@ sudo git clone http://www.github.com/virtual-world-framework/vwf /var/www/vwf --
 
 # Download and Install Ruby Gems Referenced by VWF
 cd /var/www/vwf
-sudo bundle install
+bundle install
 
 # Setup correct permissions for build support files
-cd /var/www/vwf/support/build
-sudo chmod 744 -R *
+sudo chmod -R 744 /var/www/vwf/support/build
 
 # Execute Build Process
 cd /var/www/vwf
