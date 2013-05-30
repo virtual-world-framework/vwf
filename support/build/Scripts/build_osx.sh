@@ -40,8 +40,7 @@ gem install bundler
 if [ -d "/var/www/vwf" ];then
 sudo rm -rf /var/www/vwf
 fi
-sudo git clone http://www.github.com/virtual-world-framework/vwf 
-/var/www/vwf --recursive
+sudo git clone http://www.github.com/virtual-world-framework/vwf /var/www/vwf --recursive
 
 # Download and Install Ruby Gems Referenced by VWF
 cd /var/www/vwf
