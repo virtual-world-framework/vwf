@@ -21,9 +21,6 @@
 # Install Ruby using RVM
 \curl -L https://get.rvm.io | bash -s stable --autolibs=enable 
 source ~/.rvm/scripts/rvm
-rvm requirements
-# sudo port selfupdate
-# sudo port upgrade outdated
 rvm install 1.9.3
 rvm use 1.9.3
 
