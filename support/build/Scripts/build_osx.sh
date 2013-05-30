@@ -32,8 +32,12 @@ update_rubygems
 gem install bundler
 
 # Download the latest VWF Master Branch Baseline to the local system
+if [ ! -d "/var/www" ]; then
+  sudo mkdir /var/www
+fi
+
 if [ -d "/var/www/vwf" ];then
-sudo rm -rf /var/www/vwf
+  sudo rm -rf /var/www/vwf
 fi
 sudo git clone http://www.github.com/virtual-world-framework/vwf /var/www/vwf --recursive
 
