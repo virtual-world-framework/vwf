@@ -20,7 +20,7 @@
 
 # Install Ruby using RVM
 \curl -L https://get.rvm.io | bash -s stable --autolibs=enable 
-source /etc/profile
+source ~/.rvm/scripts/rvm
 rvm requirements
 # sudo port selfupdate
 # sudo port upgrade outdated
