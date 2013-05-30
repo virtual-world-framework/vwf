@@ -19,17 +19,12 @@
 ###################################################################################################
 
 # Install Ruby using RVM
-\curl -L https://get.rvm.io | sudo bash -s stable --rails --autolibs=enable 
-source /etc/profile
-rvm requirements
-sudo port selfupdate
-sudo port upgrade outdated
+\curl -L https://get.rvm.io | bash -s stable --autolibs=enable 
+source ~/.rvm/scripts/rvm
 rvm install 1.9.3
 rvm use 1.9.3
-rvm use 1.9.3 --default
 
-# Upgrade RubyGems to the latest version and push upgrade to any Ruby 
-Gems on the system
+# Upgrade RubyGems to the latest version and push upgrade to any Ruby Gems on the system
 gem install rubygems-update
 update_rubygems
 
@@ -37,19 +32,21 @@ update_rubygems
 gem install bundler
 
 # Download the latest VWF Master Branch Baseline to the local system
-if [ -d "/var/www/vwf" ];then
-sudo rm -rf /var/www/vwf
+if [ ! -d "/var/www" ]; then
+  sudo mkdir /var/www
 fi
-sudo git clone http://www.github.com/virtual-world-framework/vwf 
-/var/www/vwf --recursive
+
+if [ -d "/var/www/vwf" ];then
+  sudo rm -rf /var/www/vwf
+fi
+sudo git clone http://www.github.com/virtual-world-framework/vwf /var/www/vwf --recursive
 
 # Download and Install Ruby Gems Referenced by VWF
 cd /var/www/vwf
-sudo bundle install
+bundle install
 
 # Setup correct permissions for build support files
-cd /var/www/vwf/support/build
-sudo chmod 744 -R *
+sudo chmod -R 744 /var/www/vwf/support/build
 
 # Execute Build Process
 cd /var/www/vwf
