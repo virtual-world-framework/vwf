@@ -21,8 +21,8 @@
 # Install Ruby using RVM
 \curl -L https://get.rvm.io | bash -s stable --autolibs=homebrew
 source ~/.rvm/scripts/rvm
-rvm install 1.9.3
-rvm use 1.9.3
+rvm install 1.9.3-p392
+rvm use 1.9.3-p392
 
 # Upgrade RubyGems to the latest version and push upgrade to any Ruby Gems on the system
 gem install rubygems-update
