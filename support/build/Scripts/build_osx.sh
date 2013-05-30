@@ -19,8 +19,10 @@
 ###################################################################################################
 
 # Install Ruby using RVM
-\curl -L https://get.rvm.io | bash -s stable --autolibs=enable 
+\curl -L https://get.rvm.io | bash -s stable --autolibs=enabled 
 source ~/.rvm/scripts/rvm
+rvm autolibs enable
+rvm reload
 rvm install 1.9.3
 rvm use 1.9.3
 
