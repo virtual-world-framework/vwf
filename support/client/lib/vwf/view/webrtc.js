@@ -123,7 +123,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                             remoteClient = this.state.clients[ clientID ];
 
                             if ( remoteClient.createProperty ) {
-                                console.info( "++ 1 ++    createProperty( "+clientID+", "+this.kernel.moniker()+" )" );  
+                                //console.info( "++ 1 ++    createProperty( "+clientID+", "+this.kernel.moniker()+" )" );  
                                 remoteClient.createProperty = false;
                                 this.kernel.createProperty( clientID, this.kernel.moniker() );                                
                             }                          
@@ -135,7 +135,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     if ( this.local.ID )   {
                         if ( client.createProperty ) {
                             client.createProperty = false;
-                            console.info( "++ 2 ++    createProperty( "+childID+", "+this.kernel.moniker()+" )" );
+                            //console.info( "++ 2 ++    createProperty( "+childID+", "+this.kernel.moniker()+" )" );
                             this.kernel.createProperty( childID, this.kernel.moniker() );
                         }
                     }
@@ -164,7 +164,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             //console.info( "webrtc.satProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
 
             if ( client ) {
-                console.info( "webrtc.satProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
+                //console.info( "webrtc.satProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
                 switch( propertyName ) {
                     case "localUrl":
                         if ( propertyValue ) {
@@ -441,8 +441,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 } 
 
                 this.pc.onnegotiationeeded = function( event ) {
-                    debugger;
-                    console.info( "onnegotiationeeded." );
+                    //debugger;
+                    //console.info( "onnegotiationeeded." );
                 }
 
                 this.pc.onaddstream = function( event ) {
@@ -461,12 +461,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 };
 
                 this.pc.onsignalingstatechange = function() {
-                    console.info( "onsignalingstatechange state change." );
+                    //console.info( "onsignalingstatechange state change." );
                 }
 
                 this.pc.oniceconnectionstatechange = function( ) {
                     var state = self.pc.signalingState || self.pc.readyState;
-                    console.info( "peerConnection state change: " + state ); 
+                    //console.info( "peerConnection state change: " + state ); 
                 }
 
                 if ( stream ) {
