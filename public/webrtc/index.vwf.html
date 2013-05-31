@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+
+<!-- Copyright 2012 United States Government, as represented by the Secretary of Defense, Under  -->
+<!-- Secretary of Defense (Personnel & Readiness).                                               -->
+<!--                                                                                             -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file   -->
+<!-- except in compliance with the License. You may obtain a copy of the License at              -->
+<!--                                                                                             -->
+<!--   http://www.apache.org/licenses/LICENSE-2.0                                                -->
+<!--                                                                                             -->
+<!-- Unless required by applicable law or agreed to in writing, software distributed under the   -->
+<!-- License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,   -->
+<!-- either express or implied. See the License for the specific language governing permissions  -->
+<!-- and limitations under the License.                                                          -->
+
+<html>
+  <head>
+	<script type="text/javascript">
+
+		//vwf_view.kernel.callMethod( "index-vwf", "clientCreated", [ vwf_view.kernel.moniker() ] );
+		//$(document).ready( function(){ 
+		//	$( "#loginDialog" ).modal('show');
+		//});
+
+		$( function() {
+
+			$( "#loginDialog" ).dialog( { 
+				"modal": true, 
+				"resizable": false,
+				"draggable": true,
+				"zIndex": 4000,
+				"buttons": {
+					"Login": function() {
+						clientName = $('#userName').val().replace(/ /g,"_");
+						$( this ).dialog( "close" );
+						vwf_view.kernel.callMethod( "index-vwf", "createClient", [ vwf_view.kernel.moniker(), clientName ] );
+					},
+				}
+			} );
+
+			$( "#loginDialog" ).keydown(function(e) {
+				e.stopPropagation();
+			}).keyup(function(e) {
+				if(e.keyCode == $.ui.keyCode.ENTER) {
+				  $(this).parent().find('.ui-dialog-buttonpane button:first').click();
+				}
+				e.stopPropagation();
+			});
+		});
+
+		var videosAdded = 0;
+		function addVideoElement( url, name ) {
+
+			videosAdded++
+			var $container;
+			var divId = name + videosAdded;
+			var videoId = "video-" + divId;
+
+			//$container = ( videosAdded < 5 ) ? $('#panesRight') : $('#panesLeft');
+			$container = $('#videoPanes');
+			$container.append(
+				"<div id='"+ divId + "'>" +
+				"<video id='" + videoId + "' width='320' height='240' src='" + url + "' loop='loop' autoplay = true style='position: absolute; left: 0; top: 0; z-index: 2;' />" +
+				"</div>"
+			);
+			$('#'+divId).draggable();
+
+		}
+
+	</script>	
+  </head>
+  <body>
+
+	<div id="videoPanes"> 
+	</div>
+
+
+	<!-- Dialog boxes that are shown as necessary -->
+	<div id="loginDialog" title="Client Login">
+		<p>Enter your display name:</p>
+		<input id="userName" value="name"><br>
+	</div>
+
+  </body>
+</html>
