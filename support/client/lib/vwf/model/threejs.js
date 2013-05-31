@@ -820,8 +820,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                                 parent.remove(threeObject);
                                 var cam = new THREE.PerspectiveCamera(35,$(document).width()/$(document).height() ,.01,10000);
-                                //cam.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1];
-                                //CopyProperties(threeObject,cam);
                                 cam.far = threeObject.far;
                                 cam.near = threeObject.near;
                                 cam.matrix.elements = matCpy(threeObject.matrix.elements);
@@ -890,6 +888,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     if(propertyName == "color" || propertyName == "diffuse")
                     {
+                        if ( propertyValue instanceof String ) {
+                            propertyValue = propertyValue.replace( /\s/g, '' );
+                        }
                         var vwfColor = new utility.color( propertyValue );
                         if ( vwfColor ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
@@ -915,6 +916,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if(propertyName == 'ambientColor')
                     {
                         var lightsFound = 0;
+                        if ( propertyValue instanceof String ) {
+                            propertyValue = propertyValue.replace( /\s/g, '' );
+                        }
                         var vwfColor = new utility.color( propertyValue );
                         if ( vwfColor ) {
                             for( var i = 0; i < threeObject.__lights.length; i++ )
@@ -940,6 +944,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if ( propertyName == 'backgroundColor' )
                     {
                         if ( node && node.renderer ) {
+                            if ( propertyValue instanceof String ) {
+                                propertyValue = propertyValue.replace( /\s/g, '' );
+                            }
                             var vwfColor = new utility.color( propertyValue );
                             if ( vwfColor ) {
                                 node.renderer.setClearColor( vwfColor.getHex(), vwfColor.alpha() );
@@ -1027,6 +1034,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         threeObject.distance = value;
                     }
                     else if ( propertyName == 'color' ) {
+                        if ( propertyValue instanceof String ) {
+                            propertyValue = propertyValue.replace( /\s/g, '' );
+                        }
                         var vwfColor = new utility.color( propertyValue );
                         if ( vwfColor ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
@@ -1110,7 +1120,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                     
                 if(propertyName ==  "boundingbox")
                 {
-                    value = getBoundingBox.call( this, threeObject, true );
+                    value = getBoundingBox.call( this, threeObject );
                     return value;
                 }
                 if ( propertyName == "centerOffset" )
@@ -2708,16 +2718,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
     }
 
-    function CopyProperties(from,to)
-    {
-        for(var i in from)
-        {
-            if(i != 'parent' && typeof from[i] != 'function')
-            {
-                to[i] = from[i];
-            }
-        }
-    }
     //search the threeObject of the parent sim node for the threeChild with the name of the sim child node
     function findThreeObjectInParent(childID,parentID)
     {
@@ -2760,56 +2760,21 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
    // -- getBoundingBox ------------------------------------------------------------------------------
 
-    function getBoundingBox( object3, local ) {
+    function getBoundingBox( object3 ) {
 
-        //var objWorldTrans = getTransform.call( this, object3, false );
         var bBox = { 
             min: { x: Number.MAX_VALUE, y: Number.MAX_VALUE, z: Number.MAX_VALUE },
             max: { x: -Number.MAX_VALUE, y: -Number.MAX_VALUE, z: -Number.MAX_VALUE }
         };
-        var bObjBox;
 
-        var objectList = [], obj, wldTrans, bx, foundBBox = 0 ;
-        if ( object3.getDescendants ) {
-            objectList = object3.getDescendants();
-        }
-        objectList.push( object3 );
-
-        for ( var j = 0; j < objectList.length; j++ ) {
-
-            bObjBox = { 
-                        min: { x: Number.MAX_VALUE, y: Number.MAX_VALUE, z: Number.MAX_VALUE },
-                        max: { x: -Number.MAX_VALUE, y: -Number.MAX_VALUE, z: -Number.MAX_VALUE }
-                    };
-
-            obj = objectList[ j ];
-            if ( obj ) {
-
-                //wldTrans = getTransform.call( this, obj, false );
-
-                if ( obj.geometry ) {
-                    
-                    if ( obj.geometry.computeBoundingBox ) {
-                        
-                        obj.geometry.computeBoundingBox();
-                        bx = obj.geometry.boundingBox;
-                        foundBBox++;
-
-                        if ( foundBBox > 1 ) {
-                            // TODO
-                            // in this case we need to deal with the offsets of the origins
-                            // each object is in it's on local space which may not have the same origin
-                        } else {
-                            bBox = { 
-                                min: { x: bx.min.x, y: bx.min.y, z: bx.min.z },
-                                max: { x: bx.max.x, y: bx.max.y, z: bx.max.z }
-                            };
-                        }
-
-                    }
-
-                } 
-            }
+        if ( object3 && object3.geometry && object3.geometry.computeBoundingBox ) {
+           
+            object3.geometry.computeBoundingBox();
+            bx = object3.geometry.boundingBox;
+            bBox = { 
+                min: { x: bx.min.x, y: bx.min.y, z: bx.min.z },
+                max: { x: bx.max.x, y: bx.max.y, z: bx.max.z }
+            };
         }
 
         return bBox; 
@@ -2819,7 +2784,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     function getCenterOffset( object3 ) {
         var offset = [ 0, 0, 0 ];
         if ( object3 ) {
-            var bBox = getBoundingBox.call( this, object3, true );
+            var bBox = getBoundingBox.call( this, object3 );
             offset[0] = ( bBox.max.x + bBox.min.x ) * 0.50;
             offset[1] = ( bBox.max.y + bBox.min.y ) * 0.50;
             offset[2] = ( bBox.max.z + bBox.min.z ) * 0.50;
