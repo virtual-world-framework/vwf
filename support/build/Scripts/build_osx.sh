@@ -15,16 +15,14 @@
 ###################################################################################################
 # This script installs Virtual World Framework on Apple OS X 
 # This script can be called from a shell prompt using: 
-# sudo curl https://www.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_osx.sh  | bash
+# sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_osx.sh | bash
 ###################################################################################################
 
 # Install Ruby using RVM
-\curl -L https://get.rvm.io | bash -s stable --autolibs=enabled 
+\curl -L https://get.rvm.io | bash -s stable --autolibs=homebrew
 source ~/.rvm/scripts/rvm
-rvm autolibs enable
-rvm reload
-rvm install 1.9.3
-rvm use 1.9.3
+rvm install 1.9.3-p392
+rvm use 1.9.3-p392
 
 # Upgrade RubyGems to the latest version and push upgrade to any Ruby Gems on the system
 gem install rubygems-update
