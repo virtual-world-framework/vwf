@@ -1051,37 +1051,27 @@
 
             this.logger.debuggx( "setState" );  // TODO: loggableState
 
-            async.series( [
+            // Set the runtime configuration.
 
-                function( series_callback_async /* ( err, results ) */ ) {
+            if ( applicationState.configuration ) {
+                require( "vwf/configuration" ).instance = applicationState.configuration;
+            }
 
-                    // Set the runtime configuration.
+            // Update the internal kernel state.
 
-                    if ( applicationState.configuration ) {
-                        require( "vwf/configuration" ).instance = applicationState.configuration;
-                    }
+            if ( applicationState.kernel ) {
+                if ( applicationState.kernel.time !== undefined ) vwf.now = applicationState.kernel.time;
+            }
 
-                    // Update the internal kernel state.
+            // Create or update global nodes and their descendants.
 
-                    if ( applicationState.kernel ) {
-                        if ( applicationState.kernel.time !== undefined ) vwf.now = applicationState.kernel.time;
-                    }
- 
-                    // Create or update global nodes and their descendants.
+            async.forEach( applicationState.nodes || [], function( nodeComponent, each_callback_async /* ( err ) */ ) {
 
-                    async.forEach( applicationState.nodes || [], function( nodeComponent, each_callback_async /* ( err ) */ ) {
+                vwf.createNode( nodeComponent, function( nodeID ) /* async */ {
+                    each_callback_async( undefined );
+                } );
 
-                        vwf.createNode( nodeComponent, function( nodeID ) /* async */ {
-                            each_callback_async( undefined );
-                        } );
-
-                    }, function( err ) /* async */ {
-                        series_callback_async( err, undefined );
-                    } );
-
-                },
-
-            ], function( err, results ) /* async */ {
+            }, function( err ) /* async */ {
 
                 // Set the message queue.
 
@@ -1488,76 +1478,66 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                 return [ nodeID, JSON.stringify( loggableComponent( nodeComponent ) ) ];
             } );
 
-            async.series( [
+            // Set the internal state.
 
-                function( series_callback_async /* ( err, results ) */ ) {
+            vwf.models.object.internals( nodeID, nodeComponent );
 
-                    // Set the internal state.
+            // Suppress kernel reentry so that we can write the state without coloring from
+            // any scripts.
 
-                    vwf.models.object.internals( nodeID, nodeComponent );
+            vwf.models.kernel.disable();
 
-                    // Suppress kernel reentry so that we can write the state without coloring from
-                    // any scripts.
+            // Create the properties, methods, and events. For each item in each set, invoke
+            // createProperty(), createMethod(), or createEvent() to create the field. Each
 
-                    vwf.models.kernel.disable();
+            // delegates to the models and views as above.
 
-                    // Create the properties, methods, and events. For each item in each set, invoke
-                    // createProperty(), createMethod(), or createEvent() to create the field. Each
+            nodeComponent.properties && jQuery.each( nodeComponent.properties, function( propertyName, propertyValue ) {  // TODO: setProperties should be adapted like this to be used here
 
-                    // delegates to the models and views as above.
+                // Is the property specification directing us to create a new property, or
+                // initialize a property already defined on a prototype?
 
-                    nodeComponent.properties && jQuery.each( nodeComponent.properties, function( propertyName, propertyValue ) {  // TODO: setProperties should be adapted like this to be used here
+                // Create a new property if the property is not defined on a prototype.
+                // Otherwise, initialize the property.
 
-                        // Is the property specification directing us to create a new property, or
-                        // initialize a property already defined on a prototype?
+                var creating = ! nodeHasProperty.call( vwf, nodeID, propertyName ); // not defined on node or prototype
 
-                        // Create a new property if the property is not defined on a prototype.
-                        // Otherwise, initialize the property.
+                // Create or initialize the property.
 
-                        var creating = ! nodeHasProperty.call( vwf, nodeID, propertyName ); // not defined on node or prototype
+                if ( creating ) {
+                    vwf.createProperty( nodeID, propertyName, propertyValue );
+                } else {
+                    vwf.setProperty( nodeID, propertyName, propertyValue );
+                }  // TODO: delete when propertyValue === null in patch
 
-                        // Create or initialize the property.
+            } );
 
-                        if ( creating ) {
-                            vwf.createProperty( nodeID, propertyName, propertyValue );
-                        } else {
-                            vwf.setProperty( nodeID, propertyName, propertyValue );
-                        }  // TODO: delete when propertyValue === null in patch
+            // TODO: methods, events
 
+            // Restore kernel reentry.
+
+            vwf.models.kernel.enable();
+
+            // Create and attach the children. For each child, call createChild() with the
+            // child's component specification. createChild() delegates to the models and
+            // views as before.
+
+            async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
+
+                var creating = ! nodeHasOwnChild.call( vwf, nodeID, childName );
+
+                if ( creating ) {
+                    vwf.createChild( nodeID, childName, nodeComponent.children[childName], undefined, function( childID ) /* async */ {  // TODO: add in original order from nodeComponent.children  // TODO: ensure id matches nodeComponent.children[childName].id  // TODO: propagate childURI + fragment identifier to children of a URI component?
+                        each_callback_async( undefined );
                     } );
-
-                    // TODO: methods, events
-
-                    // Restore kernel reentry.
-
-                    vwf.models.kernel.enable();
-
-                    // Create and attach the children. For each child, call createChild() with the
-                    // child's component specification. createChild() delegates to the models and
-                    // views as before.
-
-                    async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
-
-                        var creating = ! nodeHasOwnChild.call( vwf, nodeID, childName );
-
-                        if ( creating ) {
-                            vwf.createChild( nodeID, childName, nodeComponent.children[childName], undefined, function( childID ) /* async */ {  // TODO: add in original order from nodeComponent.children  // TODO: ensure id matches nodeComponent.children[childName].id  // TODO: propagate childURI + fragment identifier to children of a URI component?
-                                each_callback_async( undefined );
-                            } );
-                        } else {
-                            vwf.setNode( nodeComponent.children[childName].id || nodeComponent.children[childName].patches,
-                                    nodeComponent.children[childName], function( childID ) /* async */ {
-                                each_callback_async( undefined );
-                            } );
-                        }  // TODO: delete when nodeComponent.children[childName] === null in patch
-    
-                    }, function( err ) /* async */ {
-                        series_callback_async( err, undefined );
+                } else {
+                    vwf.setNode( nodeComponent.children[childName].id || nodeComponent.children[childName].patches,
+                            nodeComponent.children[childName], function( childID ) /* async */ {
+                        each_callback_async( undefined );
                     } );
+                }  // TODO: delete when nodeComponent.children[childName] === null in patch
 
-                },
-
-            ], function( err, results ) /* async */ {
+            }, function( err ) /* async */ {
 
                 // Attach the scripts. For each script, load the network resource if the script is
                 // specified as a URI, then once loaded, call execute() to direct any model that
