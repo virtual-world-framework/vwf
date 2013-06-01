@@ -915,11 +915,11 @@
 
         this.receive = function( nodeID, actionName, memberName, parameters, respond, origin ) {
 
-            // origin == "reflector" ?
-            //     this.logger.infogx( "receive", nodeID, actionName, memberName,
-            //         parameters && parameters.length, respond, origin ) :
-            //     this.logger.debuggx( "receive", nodeID, actionName, memberName,
-            //         parameters && parameters.length, respond, origin );
+            origin == "reflector" ?
+                this.logger.infogx( "receive", nodeID, actionName, memberName,
+                    parameters && parameters.length, respond, origin ) :
+                this.logger.debuggx( "receive", nodeID, actionName, memberName,
+                    parameters && parameters.length, respond, origin );
 
 // TODO: delegate parsing and validation to each action.
 
@@ -943,8 +943,8 @@
             respond && this.respond( nodeID, actionName, memberName, parameters,
                 require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ) );
 
-            // origin == "reflector" ?
-            //     this.logger.infou() : this.logger.debugu();
+            origin == "reflector" ?
+                this.logger.infou() : this.logger.debugu();
         };
 
         // -- dispatch -----------------------------------------------------------------------------
