@@ -1347,7 +1347,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
             {
                 var node = this.state.nodes[i];
                 var threeObject = node.threeObject;
-                
+                if(node.ticking)
+					node.ticking();
             }
         }
 
@@ -3007,7 +3008,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 		this.createNode = function(childID, childSource, childName)
 		{			
 			
-			var APINames = ['callingMethod','settingProperty','gettingProperty','initializingNode','addingChild','deletingNode'];
+			var APINames = ['callingMethod','settingProperty','gettingProperty','initializingNode','addingChild','deletingNode','ticking'];
 			var node = null;
 			if(this.factories[childSource])
 				node = this.factories[childSource](childID, childSource, childName);

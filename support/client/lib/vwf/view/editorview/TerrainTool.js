@@ -11,14 +11,16 @@ function TerrainTool()
 	$('#TerrainToolGUI').append("<div id='TerrainToolGUIFalloff'></div>");
 	$('#TerrainToolGUI').append("<div id='TerrainToolGUIRemove'></div>");
 	$('#TerrainToolGUI').append("<div id='TerrainToolGUIDuplicate'></div>");
+	$('#TerrainToolGUI').append("<div id='TerrainToolGUIRandom'></div>");
 	$('#TerrainToolGUI').append("<div id='TerrainToolGUIClear'></div>");
 	$('#TerrainToolGUIEditcontrolPoints').button({label:'Active'});
 	$('#TerrainToolGUIRefine').button({label:'Refine'});	
 	$('#TerrainToolGUIRemove').button({label:'Remove'});
+	$('#TerrainToolGUIRandom').button({label:'Random'});
 	$('#TerrainToolGUIDuplicate').button({label:'Duplicate'});
 	$('#TerrainToolGUIClear').button({label:'Clear'});
 	
-	$('#TerrainToolGUIFalloff').slider({min:0,max:10,step:.01,slide:function(e,ui)
+	$('#TerrainToolGUIFalloff').slider({min:0,max:2,step:.01,slide:function(e,ui)
 	{
 		
 		self.controlPoints[self.selectedIndex].falloff = ui.value;
@@ -27,7 +29,7 @@ function TerrainTool()
 		 _Editor.updateBounds();
 	
 	}});
-	$('#TerrainToolGUIDist').slider({min:0,max:10,step:.01,slide:function(e,ui)
+	$('#TerrainToolGUIDist').slider({min:0,max:100,step:.01,slide:function(e,ui)
 	{
 	 
 		self.controlPoints[self.selectedIndex].dist = ui.value;
@@ -58,7 +60,28 @@ function TerrainTool()
 			 _Editor.updateBounds();
 		
 	});
+	$('#TerrainToolGUIRandom').click(function(e){
+		
+		
+			self.controlPoints = [];
+			for(var i = 0; i < 100; i ++)
+			{
+				var cp2 = {};
+				cp2.x = Math.random() * 1000 - 500
+				cp2.y = Math.random() * 1000 - 500
+				cp2.z = Math.random() * 10
+				cp2.dist = Math.random() * 200
+				cp2.falloff =  Math.random() + .5
+				self.controlPoints.push(cp2);
+			}
+			self.selectedIndex = self.controlPoints.length - 1;
+			_Editor.setProperty(self.selectedID,'controlPoints',self.controlPoints);
+			self.updateDisplay();
 	
+			_Editor.updateGizmoLocation();
+			 _Editor.updateBounds();
+		
+	});
 	$('#TerrainToolGUIClear').click(function(e){
 		
 		
