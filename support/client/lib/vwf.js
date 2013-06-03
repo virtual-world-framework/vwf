@@ -2217,12 +2217,16 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                 // Always complete asynchronously so that the stack doesn't grow from node to node
                 // while createChild() recursively traverses a component.
 
-                queue.suspend( "before completing " + childID ); // suspend the queue
+                if ( callback_async ) {
 
-                callback_async && async.nextTick( function() {
-                    callback_async( childID );
-                    queue.resume( "after completing " + childID ); // suspend the queue
-                } );
+                    queue.suspend( "before completing " + childID ); // suspend the queue
+
+                    async.nextTick( function() {
+                        callback_async( childID );
+                        queue.resume( "after completing " + childID ); // suspend the queue
+                    } );
+
+                }
 
             } );
 
