@@ -1320,7 +1320,7 @@
 
                 function( series_callback_async /* ( err, results ) */ ) {
 
-                    if ( componentIsDescriptor( nodeComponent ) && nodeComponent.includes && componentIsURI( nodeComponent.includes ) ) {
+                    if ( componentIsDescriptor( nodeComponent ) && nodeComponent.includes && componentIsURI( nodeComponent.includes ) ) {  // TODO: for "includes:", accept an already-loaded component (which componentIsURI exludes) since the descriptor will be loaded again
 
                         var prototypeURI = nodeComponent.includes;
 
@@ -1867,21 +1867,50 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                 function( series_callback_async /* ( err, results ) */ ) {
 
                     // Rudimentary support for `{ includes: prototype }`, which absorbs a prototype
-                    // descriptor into the child descriptor before creating the child.
+                    // descriptor into the child descriptor before creating the child. See the notes
+                    // in `createNode` and the `mergeDescriptors` limitations.
 
-                    // See the notes in `createNode` and the `mergeDescriptors` limitations.
+                    // This first task always completes asynchronously (even if it doesn't perform
+                    // an async operation) so that the stack doesn't grow from node to node while
+                    // createChild() recursively traverses a component. If this task is moved,
+                    // replace it with an async stub, or make the next task exclusively async.
 
-                    if ( componentIsDescriptor( childComponent ) && childComponent.includes && componentIsURI( childComponent.includes ) ) {
+                    if ( componentIsDescriptor( childComponent ) && childComponent.includes && componentIsURI( childComponent.includes ) ) {  // TODO: for "includes:", accept an already-loaded component (which componentIsURI exludes) since the descriptor will be loaded again
 
                         var prototypeURI = childComponent.includes;
 
+                        var sync = true; // will loadComponent() complete synchronously?
+
                         loadComponent( prototypeURI, function( prototypeDescriptor ) /* async */ {
+
                             childComponent = mergeDescriptors( childComponent, prototypeDescriptor ); // modifies prototypeDescriptor
-                            series_callback_async( undefined, undefined );
+
+                            if ( sync ) {
+
+                                queue.suspend( "before beginning " + childID ); // suspend the queue
+
+                                async.nextTick( function() {
+                                    series_callback_async( undefined, undefined );
+                                    queue.resume( "after beginning " + childID ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                                } );
+
+                            } else {
+                                series_callback_async( undefined, undefined );
+                            }
+
                         } );
 
+                        sync = false; // not if we got here first
+
                     } else {
-                        series_callback_async( undefined, undefined );
+
+                        queue.suspend( "before beginning " + childID ); // suspend the queue
+
+                        async.nextTick( function() {
+                            series_callback_async( undefined, undefined );
+                            queue.resume( "after beginning " + childID ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                        } );
+
                     }
 
                 },
@@ -2185,7 +2214,16 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                 // ID of its prototype. If this was the root node for the application, the
                 // application is now fully initialized.
 
-                callback_async && callback_async( childID );
+                // Always complete asynchronously so that the stack doesn't grow from node to node
+                // while createChild() recursively traverses a component.
+
+                queue.suspend( "before completing " + childID ); // suspend the queue
+
+                callback_async && async.nextTick( function() {
+                    callback_async( childID );
+                    queue.resume( "after completing " + childID ); // suspend the queue
+                } );
+
             } );
 
             this.logger.debugu();
