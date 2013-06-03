@@ -21,3 +21,4 @@ children:
     properties:
       cameraControllerData:
       cameraViewData: 
+      backgroundColor: 
