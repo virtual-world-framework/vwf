@@ -1,0 +1,9 @@
+---
+children:
+  child:
+    extends:
+      http://vwf.example.com/node.vwf
+    children:
+      child:
+        extends:
+          http://vwf.example.com/node.vwf
