@@ -1,0 +1,4 @@
+# Dummy application to let the async.html test load from /test/depth/async.html.
+
+---
+extends: http://vwf.example.com/node.vwf
