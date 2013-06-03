@@ -115,6 +115,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( navObject && ( nodeID == navObject.ID ) && ( propertyName == "navmode" ) ) { 
                 navmode = propertyValue;
             }
+//if (navObject) view.logger.info("BCB: " + nodeID + " " + propertyName + " " + propertyValue + " " + navObject.ID);
+            if (propertyName == "transform") {
+               receiveModelTransformChanges.call(this, propertyValue);
+            }
         },
 
         // -- gotProperty ------------------------------------------------------------------------------
@@ -166,6 +170,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }           
                 return list;
         }
+        
         function renderScene(time) {
 
             window.requestAnimationFrame( renderScene );
@@ -878,6 +883,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             // Force the camera's world transform to update from its local transform
             camera.updateMatrixWorld( true );
+            setNavigationProperty();
         }
 
         this.rotateCameraByKey = function( msSinceLastFrame ) {
@@ -1817,4 +1823,75 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         }
     }
 
+     
+    // Receive Model Transform Changes algorithm 
+    // 1.0 If (own view changes) then IGNORE (only if no external changes have occurred since the user’s view 
+    //       requested this change – otherwise, will need to treat like 1.1 or 1.2)
+    // 1.1 Elseif (other external changes and no outstanding own view changes) then ADOPT
+    // 1.2 Else Interpolate to the model’s transform (conflict b/w own view and external sourced model changes)
+    
+    var outstandingTransformRequestToBeIgnored = 0;
+    var staleTransformRequestsToBeApplied = 0;
+    
+    function receiveModelTransformChanges( transformMatrix ) {
+
+        if ( this.state.kernel.client() == this.state.kernel.moniker() ) {
+            if ( staleTransformRequestsToBeApplied > 0 ) {
+                staleTransformRequestsToBeApplied--;
+                adoptTransform( transformMatrix );   
+            }
+            else {  // no stale transform requests
+                outstandingTransformRequestToBeIgnored--;
+            }
+        }
+        else { // this transform change request is not from me
+            if ( outstandingTransformRequestToBeIgnored ) {
+                staleTransformRequestsToBeApplied += outstandingTransformRequestToBeIgnored;
+                outstandingTransformRequestToBeIgnored = 0;
+                adoptTransform( transformMatrix );  
+            }
+            else {
+                adoptTransform( transformMatrix );  
+            }
+        }
+
+    function adoptTransform ( transform ) {
+        
+        if ( navObject ) {
+            var transformMatrix = matCpy( transform );
+            var navObjectThree = navObject.threeObject;
+
+            // Rotate 90 degress around X to convert from VWF Z-up to three.js Y-up.
+            if ( navObjectThree instanceof THREE.Camera ) {
+                
+                // Get column y and z out of the matrix
+                var columny = goog.vec.Vec4.create();
+                goog.vec.Mat4.getColumn( transformMatrix, 1, columny );
+                var columnz = goog.vec.Vec4.create();
+                goog.vec.Mat4.getColumn( transformMatrix, 2, columnz );
+
+                // Swap the two columns, negating columny
+                goog.vec.Mat4.setColumn( transformMatrix, 1, columnz );
+                goog.vec.Mat4.setColumn( transformMatrix, 2, goog.vec.Vec4.negate( columny, columny ) );
+            }
+
+            navObjectThree.matrix.elements = transformMatrix;
+            navObjectThree.updateMatrixWorld( true ); 
+        }
+    }
+
+    function matCpy( mat ) {
+        var ret = [];
+        for ( var i =0; i < mat.length; i++ )
+            ret.push( mat[i] );
+
+        // I don't think there is any reason we need to copy the return array
+        return ret;
+    }
+
+    function setNavigationProperty() {
+        vwf_view.kernel.setProperty( navObject.ID );
+        //cameraTransformArray...
+        outstandingTransformRequestToBeIgnored++;
+    }
 });
