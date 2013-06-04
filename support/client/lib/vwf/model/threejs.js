@@ -125,8 +125,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                 sceneNode.threeScene.add(cam);
                 
-                sceneNode.axes = createAxis.call( this, sceneNode.threeScene );
-                
                 cam.name = 'camera';
                 this.state.cameraInUse = cam;
                 var camType = "http://vwf.example.com/camera.vwf";
@@ -1455,42 +1453,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
         threeScene.add( ambient );
     }
-    function createAxis( threeScene ){
-        ///////////////////////////////////////////////
-        //temp mesh for all geometry to test
-        var cubeX = new THREE.Mesh(
-            new THREE.CubeGeometry( 10.00, .30, .30 ),
-            new THREE.MeshLambertMaterial( { color: 0xFF0000, emissive:0xFF0000 } )
-        );
-        cubeX.position.set(5.00,.15,.15);
-
-        var cubeY = new THREE.Mesh(
-            new THREE.CubeGeometry( .30, 10.00, .30 ),
-            new THREE.MeshLambertMaterial( { color: 0x00FF00, emissive:0x00FF00 } )
-        );
-        cubeY.position.set(.15,5.00,.15);
-
-        var cubeZ = new THREE.Mesh(
-            new THREE.CubeGeometry( .30, .30, 10.00 ),
-            new THREE.MeshLambertMaterial( { color: 0x0000FF, emissive:0x0000FF} )
-        );
-        cubeZ.position.set(.15,.15,5.00);
-        
-        var group = new THREE.Object3D();
-        group.name = "axis";
-        cubeX.name = "x";
-        cubeY.name = "y";
-        cubeZ.name = "z";
-
-        group.add(cubeX);
-        group.add(cubeY);
-        group.add(cubeZ);
-        group.vwfID = "TEST DUMMY AXIS GIZMO";
-        
-        threeScene.add(group);
-        return group;
-    }
-
 
     function createCamera( nodeID, childID, childName ) {
 

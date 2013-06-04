@@ -153,12 +153,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
 			var camera = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
 			var pos = camera.localToWorld(new THREE.Vector3(-.4,.275,-1.0))
-			if ( sceneNode.axes !== undefined ) {
-                sceneNode.axes.position = pos;
-                sceneNode.axes.scale = new THREE.Vector3(.005,.005,.005);
-                sceneNode.axes.updateMatrix();
-            }
-
+			
             // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
             // Note: this is a costly operation and should be optimized if possible
             if((now - lastPickTime) > self.pickInterval && !self.disableInputs)
