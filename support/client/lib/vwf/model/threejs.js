@@ -454,6 +454,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         // If this node has a view-specific transform, that will dictate the transform of
                         // the local user's  rendered object.
                         // But if not, the model transform dictates the transform (in the following code)
+                        // TODO: When we generalize the navigation system to allow all nodes to have 
+                        //       model/view properties that diverge, this should be done on the view 
+                        //       side in satProperty
                         if ( !node.useViewTransform )
                         {
                             // Rotate 90 degress around X to convert from VWF Z-up to three.js Y-up.
@@ -1165,16 +1168,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 if(propertyName == 'transform')
                 {
                     value = matCpy( node.transform.elements );
-                    
-                    if ( threeObject instanceof THREE.Camera ) {
-                        var columny = goog.vec.Vec4.create();
-                        goog.vec.Mat4.getColumn( value, 1, columny );
-                        var columnz = goog.vec.Vec4.create();
-                        goog.vec.Mat4.getColumn( value, 2, columnz );
-                        goog.vec.Mat4.setColumn( value, 2, columny );
-                        goog.vec.Mat4.setColumn( value, 1, goog.vec.Vec4.negate( columnz, columnz ) );
-						
-                    }
                     return value;
                 }
                 if(propertyName =='lookAt')
