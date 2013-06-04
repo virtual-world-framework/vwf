@@ -112,13 +112,21 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // -- satProperty ------------------------------------------------------------------------------
 
         satProperty: function ( nodeID, propertyName, propertyValue ) { 
-            if ( navObject && ( nodeID == navObject.ID ) && ( propertyName == "navmode" ) ) { 
-                navmode = propertyValue;
+            if ( navObject && ( nodeID == navObject.ID ) ) {
+                if ( propertyName == "navmode" ) { 
+                    navmode = propertyValue;
+                } else if ( propertyName == "transform" ) {
+
+                    // TODO: When we generalize the navigation system to allow all nodes to have 
+                    //       model/view properties that diverge, we would manage all model changes 
+                    //       here (each node will need its own counter for how many changes have 
+                    //       been made on the view side that have not yet been come in from the 
+                    //       reflector)
+
+                    receiveModelTransformChanges.call( this, propertyValue );
+                }
             }
-//if (navObject) view.logger.info("BCB: " + nodeID + " " + propertyName + " " + propertyValue + " " + navObject.ID);
-            if (propertyName == "transform") {
-               receiveModelTransformChanges.call(this, propertyValue);
-            }
+
         },
 
         // -- gotProperty ------------------------------------------------------------------------------
@@ -127,7 +135,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var clientThatGotProperty = this.kernel.client();
             var me = this.kernel.moniker();
             if ( navObject && ( nodeID == navObject.ID ) &&
-                 ( propertyName == "navmode" ) && ( clientThatGotProperty == me ) ) { 
+                 ( propertyName == "navmode" ) && ( clientThatGotProperty == me ) ) {
+
+                // This was requested from the model from controlNavObject 
                 navmode = propertyValue;
             }
         }
@@ -187,8 +197,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
 
                 // Move the user's camera according to their input
-                self.moveCamera( timepassed );
-                self.rotateCameraByKey( timepassed );
+                self.moveNavObject( timepassed );
+                self.rotateNavObjectByKey( timepassed );
             }
             
             // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
@@ -819,7 +829,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var rotatingRight = false;
         var startMousePosition;
 
-        this.moveCamera = function( msSinceLastFrame ) {
+        this.moveNavObject = function( msSinceLastFrame ) {
 
             var x = 0;
             var y = 0;
@@ -843,19 +853,20 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // one key press doesn't send them off in space
             var dist = this.translationSpeed * Math.min( msSinceLastFrame * 0.001, 0.5 );
 
-            // Get the camera's rotation matrix
+            // Get the camera's rotation matrix in the world's frame of reference
             // (remove its translation component so it is just a rotation matrix)
             var camera = this.state.cameraInUse;
-            var cameraTransformArray = camera.matrix.elements;
-            var camRotMat = goog.vec.Mat4.createFromArray( cameraTransformArray );
-            camRotMat[ 12 ] = 0;
-            camRotMat[ 13 ] = 0;
-            camRotMat[ 14 ] = 0;
+            var cameraWorldTransformArray = camera.matrixWorld.elements;
+            var camWorldRotMat = goog.vec.Mat4.createFromArray( cameraWorldTransformArray );
+            camWorldRotMat[ 12 ] = 0;
+            camWorldRotMat[ 13 ] = 0;
+            camWorldRotMat[ 14 ] = 0;
 
             // Calculate a unit direction vector in the camera's parent's frame of reference
             var moveVectorInCameraFrame = goog.vec.Vec4.createFromValues( x, 0, -y, 1 ); // Accounts for z-up (VWF) to y-up (three.js) change
             moveVectorInCameraFrame = goog.vec.Vec4.createFromValues( x, 0, -y, 1 ); // Accounts for z-up (VWF) to y-up (three.js) change
-            var dir = goog.vec.Mat4.multVec4( camRotMat, moveVectorInCameraFrame,  goog.vec.Vec3.create() );
+            var dir = goog.vec.Mat4.multVec4( camWorldRotMat, moveVectorInCameraFrame,
+                                              goog.vec.Vec3.create() );
             
             // If user is walking, constrain movement to the horizontal plane
             if ( navmode == "walk") {
@@ -864,29 +875,32 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             goog.vec.Vec3.normalize( dir, dir );
             
-            // Extract the camera position so we can add to it
-            var cameraPos = [ cameraTransformArray[ 12 ], 
-                              cameraTransformArray[ 13 ], 
-                              cameraTransformArray[ 14 ] ];
+            // Extract the navObject world position so we can add to it
+            var navThreeObject = navObject.threeObject;
+            var navObjectWorldTransformMatrixArray = navThreeObject.matrixWorld.elements;
+            var navObjectWorldPos = [ navObjectWorldTransformMatrixArray[ 12 ], 
+                                      navObjectWorldTransformMatrixArray[ 13 ], 
+                                      navObjectWorldTransformMatrixArray[ 14 ] ];
             
             // Take the direction and apply a calculated magnitude 
             // to that direction to compute the displacement vector
             var translation = goog.vec.Vec3.scale( dir, dist, goog.vec.Vec3.create() );
 
             // Add the displacement to the current camera position
-            goog.vec.Vec3.add( cameraPos, translation, cameraPos );
+            goog.vec.Vec3.add( navObjectWorldPos, translation, navObjectWorldPos );
 
             // Insert the new camera position in the camera transform
-            cameraTransformArray[ 12 ] = cameraPos [ 0 ];
-            cameraTransformArray[ 13 ] = cameraPos [ 1 ];
-            cameraTransformArray[ 14 ] = cameraPos [ 2 ];
+            navObjectWorldTransformMatrixArray[ 12 ] = navObjectWorldPos [ 0 ];
+            navObjectWorldTransformMatrixArray[ 13 ] = navObjectWorldPos [ 1 ];
+            navObjectWorldTransformMatrixArray[ 14 ] = navObjectWorldPos [ 2 ];
 
-            // Force the camera's world transform to update from its local transform
-            camera.updateMatrixWorld( true );
-            setTransformProperty( cameraTransformArray );
+            // Update the navigation object's local transform from its new world transform
+            setTransformFromWorldTransform( navThreeObject );
+
+            setTransformProperty( navObject, camera.matrix.elements );
         }
 
-        this.rotateCameraByKey = function( msSinceLastFrame ) {
+        this.rotateNavObjectByKey = function( msSinceLastFrame ) {
 
             var direction = 0;
 
@@ -914,25 +928,27 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                 0,   0, 0, 1 ];
             
             // Left multiply the current transform matrix by the rotation transform
-            // and assign the result back to the camera's transform
-            var camera = this.state.cameraInUse;
-            var cameraTransform = camera.matrix.elements;
+            // and assign the result back to the navObject's transform
+            var navThreeObject = navObject.threeObject;
+            var navObjectTransform = navThreeObject.matrix.elements;
 
             // Save the camera position so we can reinstitute it after the rotation
             // (effectively rotating the camera in place rather than around its origin)
-            var cameraPos = [ cameraTransform[ 12 ], cameraTransform[ 13 ], cameraTransform[ 14 ] ];
+            var navObjectPos = [ navObjectTransform[ 12 ], 
+                                 navObjectTransform[ 13 ], 
+                                 navObjectTransform[ 14 ] ];
 
             // Perform the rotation
-            goog.vec.Mat4.multMat( rotation, cameraTransform, cameraTransform );
+            goog.vec.Mat4.multMat( rotation, navObjectTransform, navObjectTransform );
 
             // Put the original camera position back
-            cameraTransform[ 12 ] = cameraPos[ 0 ];
-            cameraTransform[ 13 ] = cameraPos[ 1 ];
-            cameraTransform[ 14 ] = cameraPos[ 2 ];
+            navObjectTransform[ 12 ] = navObjectPos[ 0 ];
+            navObjectTransform[ 13 ] = navObjectPos[ 1 ];
+            navObjectTransform[ 14 ] = navObjectPos[ 2 ];
 
             // Force the camera's world transform to update from its local transform
-            camera.updateMatrixWorld( true );
-            setTransformProperty( cameraTransform );
+            navThreeObject.updateMatrixWorld( true );
+            setTransformProperty( navObject, navObjectTransform );
         }
 
         var handleKeyNavigation = function( keyCode, keyIsDown ) {
@@ -1032,16 +1048,19 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     camWorldMatrixElements[ 9 ] = -yAxis[ 1 ];
                     camWorldMatrixElements[ 10 ] = -yAxis[ 2 ];
 
-                    var inverseParentWorldMatrix = new THREE.Matrix4();
-                    inverseParentWorldMatrix.getInverse( camera.parent.matrixWorld );
-                    cameraMatrix.multiplyMatrices( inverseParentWorldMatrix, camWorldMatrix );
+                    setTransformFromWorldTransform( camera );
                 }
 
                 // Restore camera position so rotation is done around camera center
-                if ( navObject !== camera ) {
-                    setTransformProperty( navObjectMatrix.elements );
-                }
                 cameraMatrix.setPosition( cameraPos );
+
+                // If the navObject is the camera, its new transform will be sent to the reflector 
+                // all at once at the end
+                // If not (here below), we need to send a separate message to the reflector to set 
+                // the pitch on the camera
+                if ( navObject !== cameraNode ) {
+                    setTransformProperty( cameraNode, navObjectMatrix.elements );
+                }
 
                 // Perform yaw on nav object - left-multiply to keep yaw separate from pitch
                 var navObjectMatrix = navObject.threeObject.matrix;
@@ -1050,7 +1069,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 navObjectMatrix.multiplyMatrices( yawMatrix, navObjectMatrix );
                 navObjectMatrix.setPosition( navObjectPos );
                 navObject.threeObject.updateMatrixWorld( true );
-                setTransformProperty( navObjectMatrix.elements );  
+                setTransformProperty( navObject, navObjectMatrix.elements );  
 
                 startMousePosition = currentMousePosition;
             }
@@ -1712,7 +1731,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 key.key = "graveaccent";
                 break;
             case 219:
-                key.key = "openbraket";
+                key.key = "openbracket";
                 key.char = "{";
                 break;
             case 220:
@@ -1720,7 +1739,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 key.char = "\\";
                 break;
             case 221:
-                key.key = "closebraket";
+                key.key = "closebracket";
                 key.char = "}";
                 break;
             case 222:
@@ -1736,11 +1755,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     }
 
     var navObject = undefined;
+    var cameraNode = undefined;
 
     function controlNavObject( node ) {
       
         if ( !node ) {
-            this.logger.error( "Attempted to control non-existant navigation object" );
+            this.logger.error( "Attempted to control non-existent navigation object" );
             return;
         }
 
@@ -1763,7 +1783,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Set the view's active camera
             var rendererState = sceneView.state;
             var cameraId = cameraIds[ 0 ];
-            rendererState.cameraInUse = rendererState.nodes[ cameraId ].threeObject;
+            cameraNode = rendererState.nodes[ cameraId ];
+            rendererState.cameraInUse = cameraNode.threeObject;
         }
 
         // Request the navigation mode from the navigation object
@@ -1859,7 +1880,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 adoptTransform( transformMatrix );  
             }
             else {
-                view.logger.info("BCB: Path 4");  
+                view.logger.info("BCB: Path 4"); 
+
+                // TODO: Smooth the transform toward the matrix specified by the other client
+                //       Be careful: right now this is where a setState will enter when the user
+                //       first joins - perhaps treat that case differently afte detecting that 
+                //       client() is undefined?
+
                 adoptTransform( transformMatrix );
             }
         }
@@ -1892,31 +1919,44 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
     function matCpy( mat ) {
         var ret = [];
-        for ( var i =0; i < mat.length; i++ )
-            ret.push( mat[i] );
-
-        // I don't think there is any reason we need to copy the return array
+        if ( mat ) {
+            for ( var i =0; i < mat.length; i++ )
+                ret.push( mat[ i ] );
+        }
         return ret;
     }
 
-    function setTransformProperty( cameraTransformArray ) {
-        var transform = matCpy( cameraTransformArray );
+    function setTransformProperty( node, transformArray ) {
+        var nodeID = node.ID;
 
-        if ( navObject.threeObject instanceof THREE.Camera ) {
-                                
-            // Get column y and z out of the matrix
-            var columny = goog.vec.Vec4.create();
-            goog.vec.Mat4.getColumn( transform, 1, columny );
-            var columnz = goog.vec.Vec4.create();
-            goog.vec.Mat4.getColumn( transform, 2, columnz );
+        if ( nodeID ) {
 
-            // Swap the two columns, negating columny
-            goog.vec.Mat4.setColumn( transform, 1, goog.vec.Vec4.negate( columnz, columnz ) );
-            goog.vec.Mat4.setColumn( transform, 2, columny );
+            var transform = matCpy( transformArray );
+
+            if ( node.threeObject instanceof THREE.Camera ) {
+                                    
+                // Get column y and z out of the matrix
+                var columny = goog.vec.Vec4.create();
+                goog.vec.Mat4.getColumn( transform, 1, columny );
+                var columnz = goog.vec.Vec4.create();
+                goog.vec.Mat4.getColumn( transform, 2, columnz );
+
+                // Swap the two columns, negating columny
+                goog.vec.Mat4.setColumn( transform, 1, goog.vec.Vec4.negate( columnz, columnz ) );
+                goog.vec.Mat4.setColumn( transform, 2, columny );
+            }
+
+            vwf_view.kernel.setProperty( nodeID, "transform", transform );
+            outstandingTransformRequestToBeIgnored++;
+        } else {
+            view.logger.error( "Cannot set property on node that does not have a valid ID" );
         }
+    }
 
-        vwf_view.kernel.setProperty( navObject.ID, "transform", transform );
-        outstandingTransformRequestToBeIgnored++;
+    function setTransformFromWorldTransform( threeObject ) {
+        var inverseParentWorldMatrix = new THREE.Matrix4();
+        inverseParentWorldMatrix.getInverse( threeObject.parent.matrixWorld );
+        threeObject.matrix.multiplyMatrices( inverseParentWorldMatrix, threeObject.matrixWorld );
     }
 
     
