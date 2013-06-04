@@ -34,6 +34,16 @@ Note: (*) indicates an API change.
 - CHG: Remove catalog files for simple and similar applications. Renamed catalog files for adl humvee until the application is working. Fixes #1950.
 - CHG: Set humvee ground texture (LM logo) visible property to false for lesson.
 - CHG: Update Installation Instructions to contain Java install.
+- NEW: Add stack depth tests. References #2035.
+- CHG: Don't suspend the queue when `createChild` doesn't have a callback. References #2035.
+- CHG: Ensure async breaks occur before and after each createChild(). Keeps the stack from growing from node to node while createChild() recursively traverses a component. The break at the beginning protects the way down, and the break at the end protects the way up. References #2035.
+- CHG: Collapse async.series sequences of length 1. References #2035.
+- CHG: Merge async.series operations without an async mode with those that do. Some intermediate steps in async.series sequences always completed synchronously and didn't actually need async support. Sequences were arranged that way for clarity, but having unnecessary steps in a series sequence is expensive on the stack. These steps have been merged down into the following async step, or merged into the completion function when they were at the end of the sequence. References #2035.
+Remove unused timer that is incompatible w/ Firefox.  Fixes #2033
+
+
+
+
 
 
 
