@@ -17,7 +17,7 @@
 ## @namespace
 
 --- 
-extends: http://vwf.example.com/navscene.vwf
+extends: http://vwf.example.com/scene.vwf
 properties: 
   
   ## Gravity

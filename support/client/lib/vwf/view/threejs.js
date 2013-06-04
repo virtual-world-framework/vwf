@@ -883,7 +883,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             // Force the camera's world transform to update from its local transform
             camera.updateMatrixWorld( true );
-            setNavigationProperty();
+            setTransformProperty( cameraTransformArray );
         }
 
         this.rotateCameraByKey = function( msSinceLastFrame ) {
@@ -932,6 +932,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             // Force the camera's world transform to update from its local transform
             camera.updateMatrixWorld( true );
+            setTransformProperty( cameraTransform );
         }
 
         var handleKeyNavigation = function( keyCode, keyIsDown ) {
@@ -1037,6 +1038,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
 
                 // Restore camera position so rotation is done around camera center
+                if ( navObject !== camera ) {
+                    setTransformProperty( navObjectMatrix.elements );
+                }
                 cameraMatrix.setPosition( cameraPos );
 
                 // Perform yaw on nav object - left-multiply to keep yaw separate from pitch
@@ -1046,6 +1050,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 navObjectMatrix.multiplyMatrices( yawMatrix, navObjectMatrix );
                 navObjectMatrix.setPosition( navObjectPos );
                 navObject.threeObject.updateMatrixWorld( true );
+                setTransformProperty( navObjectMatrix.elements );  
 
                 startMousePosition = currentMousePosition;
             }
@@ -1837,23 +1842,28 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         if ( this.state.kernel.client() == this.state.kernel.moniker() ) {
             if ( staleTransformRequestsToBeApplied > 0 ) {
+                view.logger.info("BCB: Path 1");
                 staleTransformRequestsToBeApplied--;
                 adoptTransform( transformMatrix );   
             }
             else {  // no stale transform requests
+                view.logger.info("BCB: Path 2");
                 outstandingTransformRequestToBeIgnored--;
             }
         }
         else { // this transform change request is not from me
             if ( outstandingTransformRequestToBeIgnored ) {
+                view.logger.info("BCB: Path 3");
                 staleTransformRequestsToBeApplied += outstandingTransformRequestToBeIgnored;
                 outstandingTransformRequestToBeIgnored = 0;
                 adoptTransform( transformMatrix );  
             }
             else {
-                adoptTransform( transformMatrix );  
+                view.logger.info("BCB: Path 4");  
+                adoptTransform( transformMatrix );
             }
         }
+    }
 
     function adoptTransform ( transform ) {
         
@@ -1889,9 +1899,25 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         return ret;
     }
 
-    function setNavigationProperty() {
-        vwf_view.kernel.setProperty( navObject.ID );
-        //cameraTransformArray...
+    function setTransformProperty( cameraTransformArray ) {
+        var transform = matCpy( cameraTransformArray );
+
+        if ( navObject.threeObject instanceof THREE.Camera ) {
+                                
+            // Get column y and z out of the matrix
+            var columny = goog.vec.Vec4.create();
+            goog.vec.Mat4.getColumn( transform, 1, columny );
+            var columnz = goog.vec.Vec4.create();
+            goog.vec.Mat4.getColumn( transform, 2, columnz );
+
+            // Swap the two columns, negating columny
+            goog.vec.Mat4.setColumn( transform, 1, goog.vec.Vec4.negate( columnz, columnz ) );
+            goog.vec.Mat4.setColumn( transform, 2, columny );
+        }
+
+        vwf_view.kernel.setProperty( navObject.ID, "transform", transform );
         outstandingTransformRequestToBeIgnored++;
     }
+
+    
 });
