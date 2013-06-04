@@ -93,6 +93,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                 if ( this.kernel.moniker() == node.moniker ) { 
                     this.local.ID = childID;
+                    jQuery('body').append(
+                        "<div id='videoSurfaces'></div>"
+                    );                   
+
                 } 
             }
 
@@ -268,7 +272,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                 self.kernel.setProperty( self.local.ID, "localUrl", self.local.url );
 
-                displayLocal.call( self );
+                displayLocal.call( self, self.state.clients[ self.local.ID ].displayName );
                 sendOffers.call( self );
             };
 
