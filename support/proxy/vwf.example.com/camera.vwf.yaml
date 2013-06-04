@@ -20,28 +20,6 @@
 extends: http://vwf.example.com/node3.vwf
 properties:
 
-  ## Walk mode navigation (ie. orbit, walk)
-  ## 
-  ## @name camera.vwf#walkMode
-  ## @property
-
-  walkMode:
-    set: |
-      switch ( value ) {
-        case 'orbit':
-        case 'walk':
-          this.walkMode = value;
-          break;
-      }
-    value: "walk"
-
-  ## The point to orbit around in orbit mode
-  ## 
-  ## @name camera.vwf#orbitPoint
-  ## @property
-
-  orbitPoint: [ 0, 0, 0 ]
-
   ## The far clipping plane value
   ## 
   ## @name camera.vwf#far
