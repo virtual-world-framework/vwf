@@ -3328,8 +3328,12 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
         /// @returns {Boolean}
 
         var nodeHasProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-            var node = this.models.javascript.nodes[nodeID];
-            return propertyName in node.properties;
+            var node = this.models.javascript.nodes[ nodeID ];
+            if ( node ) {
+                return propertyName in node.properties;
+            } else {
+                this.logger.error( "Could not find node '" + nodeID + "'" );
+            }
         };
 
         /// Determine if a node has a property with the given name. The node's prototypes are not
