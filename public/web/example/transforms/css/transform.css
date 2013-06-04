@@ -17,7 +17,7 @@
     bottom:5px;
     border:2px solid;
     border-radius:25px;
-    height:275px;	
+    height:280px;	
 }
 
 .tform-options {
@@ -34,4 +34,9 @@
     height:100%;
     vertical-align:top;
     width:285px;
+}
+.tform-grid-label {
+    display:inline-block;
+    text-align:center;
+    width:25%;
 }

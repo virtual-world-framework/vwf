@@ -34,19 +34,21 @@
     <div id="transform-worldtransformation" class="tform-editor">
       <h3 style="color:black">World Transformation</h3>
       <input type="button" name="wtbutton" value="World Transform" id="wtbutton" style="font-size:75%"/></br>
-      <input type="text" name="wt00" size="1" value="1.0"/> <input type="text" name="wt01" size="1" value="0.0"/><input type="text" name="wt02" size="1" value="0.0"/> <input type="text" name="wt03" size="1" value="0.0"/><br/>
-      <input type="text" name="wt10" size="1" value="0.0"/> <input type="text" name="wt11" size="1" value="1.0"/><input type="text" name="wt12" size="1" value="0.0"/> <input type="text" name="wt13" size="1" value="0.0"/><br/>
-      <input type="text" name="wt20" size="1" value="0.0"/> <input type="text" name="wt21" size="1" value="0.0"/><input type="text" name="wt22" size="1" value="1.0"/> <input type="text" name="wt23" size="1" value="0.0"/><br/>
-      <input type="text" name="wt30" size="1" value="0.0"/> <input type="text" name="wt31" size="1" value="0.0"/><input type="text" name="wt32" size="1" value="0.0"/> <input type="text" name="wt33" size="1" value="1.0"/><br/>
+      <div class="tform-grid-label">X</div><div class="tform-grid-label">Y</div><div class="tform-grid-label">Z</div><div class="tform-grid-label">Pos</div></br>
+      <input type="text" name="wt00" size="1" value="1.0"/> <input type="text" name="wt10" size="1" value="0.0"/><input type="text" name="wt20" size="1" value="0.0"/> <input type="text" name="wt30" size="1" value="0.0"/><br/>
+      <input type="text" name="wt01" size="1" value="0.0"/> <input type="text" name="wt11" size="1" value="1.0"/><input type="text" name="wt21" size="1" value="0.0"/> <input type="text" name="wt31" size="1" value="0.0"/><br/>
+      <input type="text" name="wt02" size="1" value="0.0"/> <input type="text" name="wt12" size="1" value="0.0"/><input type="text" name="wt22" size="1" value="1.0"/> <input type="text" name="wt32" size="1" value="0.0"/><br/>
+      <input type="text" name="wt03" size="1" value="0.0"/> <input type="text" name="wt13" size="1" value="0.0"/><input type="text" name="wt23" size="1" value="0.0"/> <input type="text" name="wt33" size="1" value="1.0"/><br/>
       </br>
     </div>
     <div id="transform-transformation" class="tform-editor">
       <h3 style="color:black">Transformation</h3>
       <input type="button" name="trfrmbutton" value="Transform" style="font-size:75%"/><input type="button" name="trfrmtobutton" value="Transform To" style="font-size:75%"/></br>
-      <input type="text" name="trfrm00" size="1" value="1.0"/> <input type="text" name="trfrm01" size="1" value="0.0"/><input type="text" name="trfrm02" size="1" value="0.0"/> <input type="text" name="trfrm03" size="1" value="0.0"/><br/>
-      <input type="text" name="trfrm10" size="1" value="0.0"/> <input type="text" name="trfrm11" size="1" value="1.0"/><input type="text" name="trfrm12" size="1" value="0.0"/> <input type="text" name="trfrm13" size="1" value="0.0"/><br/>
-      <input type="text" name="trfrm20" size="1" value="0.0"/> <input type="text" name="trfrm21" size="1" value="0.0"/><input type="text" name="trfrm22" size="1" value="1.0"/> <input type="text" name="trfrm23" size="1" value="0.0"/><br/>
-      <input type="text" name="trfrm30" size="1" value="0.0"/> <input type="text" name="trfrm31" size="1" value="0.0"/><input type="text" name="trfrm32" size="1" value="0.0"/> <input type="text" name="trfrm33" size="1" value="1.0"/><br/>
+      <div class="tform-grid-label">X</div><div class="tform-grid-label">Y</div><div class="tform-grid-label">Z</div><div class="tform-grid-label">Pos</div></br>
+      <input type="text" name="trfrm00" size="1" value="1.0"/> <input type="text" name="trfrm10" size="1" value="0.0"/><input type="text" name="trfrm20" size="1" value="0.0"/> <input type="text" name="trfrm30" size="1" value="0.0"/><br/>
+      <input type="text" name="trfrm01" size="1" value="0.0"/> <input type="text" name="trfrm11" size="1" value="1.0"/><input type="text" name="trfrm21" size="1" value="0.0"/> <input type="text" name="trfrm31" size="1" value="0.0"/><br/>
+      <input type="text" name="trfrm02" size="1" value="0.0"/> <input type="text" name="trfrm12" size="1" value="0.0"/><input type="text" name="trfrm22" size="1" value="1.0"/> <input type="text" name="trfrm32" size="1" value="0.0"/><br/>
+      <input type="text" name="trfrm03" size="1" value="0.0"/> <input type="text" name="trfrm13" size="1" value="0.0"/><input type="text" name="trfrm23" size="1" value="0.0"/> <input type="text" name="trfrm33" size="1" value="1.0"/><br/>
       </br>
     </div>
     <div id="transform-translation" class="tform-editor">
@@ -92,92 +94,97 @@
   <script src="js/parameterHelpers.js"/>
   <script type="text/javascript">
 
-  //  First, append the transformation panel to the vwf-root div in order to display the 2D controls.
-  $('#transform-panel').appendTo('#vwf-root');
+  //  First, append the transformation panel to vwf-root div in order to display the 2D controls.
+  $( '#transform-panel' ).appendTo( '#vwf-root' );
 
 
   //  Create variables to store the node ids of both the hello and world nodes.
-  var helloNodeId;
-  var worldNodeId;
-  helloNodeId = vwf_view.kernel.find("", "/hello")[0]
-  worldNodeId = vwf_view.kernel.find("", "/world")[0]
+  var helloNodeId = vwf_view.kernel.find( "" , "/hello" )[ 0 ];
+  var worldNodeId = vwf_view.kernel.find( "" , "/world" )[ 0 ];
 
-  //  Create an array of boolean values used to track if the local view has requested an update to the model properties.
-  var requestedUpdate;
-  requestedUpdate = [false, false, false, false, false, false];
+  //  Create an array of boolean values used to track if the local view has requested an update to
+  //  the model properties.
+  var requestedUpdate = [ false, false, false, false, false, false ];
 
 
 
 
   //  Define the requestLoadEditorFromNode function.
   //  This function issues calls to get the properties of the currently selected node.
-  //  Since this is done asynchronously, the fact that this particular view made the requests is tracked via the requestedUpdate variable.
+  //  Since this is done asynchronously, the fact that this particular view made the requests is
+  //  tracked via the requestedUpdate variable.
   //  The actual updates will be dealt with in the gotProperty callback.
-  function requestLoadEditorFromNode() {
-    var nodeId;
-    nodeId = getSelectedNodeId();
-    requestedUpdate = [true, true, true, true, true, true];
-    vwf_view.kernel.getProperty(nodeId, "worldTransform");
-    vwf_view.kernel.getProperty(nodeId, "transform");
-    vwf_view.kernel.getProperty(nodeId, "scale");
-    vwf_view.kernel.getProperty(nodeId, "quaternion");
-    vwf_view.kernel.getProperty(nodeId, "rotation");
-    vwf_view.kernel.getProperty(nodeId, "translation");
-  }
+  function requestLoadEditorFromNode( ) {
+    var nodeId = getSelectedNodeId( );
+    requestedUpdate = [ true, true, true, true, true, true ];
+    vwf_view.kernel.getProperty( nodeId, "worldTransform" );
+    vwf_view.kernel.getProperty( nodeId, "transform" );
+    vwf_view.kernel.getProperty( nodeId, "scale" );
+    vwf_view.kernel.getProperty( nodeId, "quaternion" );
+    vwf_view.kernel.getProperty( nodeId, "rotation" );
+    vwf_view.kernel.getProperty( nodeId, "translation" );
+  };
 
-  // requestLoadEditorFromNode is called initially so that the editors will be loaded with the initial transformation values of the object.
-  requestLoadEditorFromNode();
+  //  requestLoadEditorFromNode is called initially so that the editors will be loaded with the
+  //  initial transformation values of the object.
+  requestLoadEditorFromNode( );
 
-  //  Create a firedEvent callback function. This callback has three arguments. The nodeId that represents the object that fired the event, 
-  //  the eventName that represents the name of the event that occured, and the eventParameters, an array that holds any parameters that are associated
-  //  with that event type. This function is called every time an event is fired.
+  //  Create a firedEvent callback function. This callback has three arguments. The nodeId that
+  //  represents the object that fired the event, the eventName that represents the name of the
+  //  event that occured, and the eventParameters, an array that holds any parameters that are
+  //  associated with that event type. This function is called every time an event is fired.
   //  In this example, we listen for the pointerDown event (representing the mouse being clicked). 
-  //  If the mouse is clicked on the 'hello' or 'world' object, and the object clicked on does not match the object currently selected
-  //  in the 2D HTML interface, then this will change the object currently selected in the 2D HTML interface, and call requestLoadEditorFromNode
-  //  in order to update the editor values to match the new selection.
-  vwf_view.firedEvent = function (nodeId, eventName, eventParameters){
-    if ((eventName == "pointerDown") && (nodeId != getSelectedNodeId()))
-    {
-      if (nodeId == helloNodeId) 
-      {
-        $('input[value="/hello"]').attr("checked", true);
-        requestLoadEditorFromNode();
+  //  If the mouse is clicked on the 'hello' or 'world' object, and the object clicked on does not
+  //  match the object currently selected in the 2D HTML interface, then this will change the
+  //  object currently selected in the 2D HTML interface, and call requestLoadEditorFromNode in
+  //  order to update the editor values to match the new selection.
+  vwf_view.firedEvent = function ( nodeId, eventName, eventParameters ) {
+    if ( ( eventName == "pointerDown" ) && ( nodeId != getSelectedNodeId( ) ) ) {
+      if ( nodeId == helloNodeId ) {
+        $( 'input[value="/hello"]' ).attr( "checked" , true );
+      } else if ( nodeId == worldNodeId ) {
+        $( 'input[value="/world"]' ).attr( "checked" , true );
       }
-      if (nodeId == worldNodeId)
-      {
-        $('input[value="/world"]').attr("checked", true);
-        requestLoadEditorFromNode();
+      requestLoadEditorFromNode( );
+    }
+  };
+
+  //  Create a calledMethod callback function. This function is called whenever a method on a model
+  //  is called. It has three arguments, the nodeId that holds the ID of the node that had the
+  //  method called, the methodName which contains the name of the method, and finally
+  //  methodParamters, an array of the parameters passed to the method. In this example, the
+  //  function is listening for the 'resetToDefault' method. If that method is called, on the
+  //  currently selected object, then the editors will need their values updated to match the new
+  //  reset values, so requestLoadEditorFromNode is called to handle that update.
+  vwf_view.calledMethod = function ( nodeId, methodName, methodParameters ) {
+    if ( nodeId == getSelectedNodeId( ) ) {
+      if ( ( methodName == "resetToDefault" ) || ( methodName == "scaleBy" ) || ( methodName == "scaleTo" ) || ( methodName = "quaterniateBy" ) || ( methodName = "quaterniateTo" ) || ( methodName = "rotateBy" ) || ( methodName == "rotateTo" ) || ( methodName = "translateBy" ) || ( methodName = "translateTo" ) || ( methodName = "transformTo" ) ) {
+        requestLoadEditorFromNode( );
       }
     }
-  }
+  };
 
-  //  Create a calledMethod callback function. This function is called whenever a method on a model is called. It has three arguments,
-  //  the nodeId that holds the ID of the node that had the method called, the methodName which contains the name of the method, and
-  //  finally methodParamters, an array of the parameters passed to the method.
-  //  In this example, the function is listening for the 'resetToDefault' method. If that method is called, on the currently selected object,
-  //  then the editors will need their values updated to match the new reset values, so requestLoadEditorFromNode is called to handle that
-  //  update.
-  vwf_view.calledMethod = function (nodeId, methodName, methodParameters){
-    if ((methodName == "resetToDefault") && (nodeId == getSelectedNodeId()))
-    {
-      requestLoadEditorFromNode();
-    }
-  }
-
-  //  Whenever any of the objectselect radio buttons (used to control what object the 2D controls have selected) are clicked,
-  //  call the requestLoadEditorFromNode to initiate loading the newly selected objects parameters into the editor input fields.
-  $('input[name="objectselect"]').click(function() { requestLoadEditorFromNode() } );
+  //  Whenever any of the objectselect radio buttons (used to control what object the 2D controls
+  //  have selected) are clicked, call the requestLoadEditorFromNode to initiate loading the newly
+  //  selected objects parameters into the editor input fields.
+  $( 'input[name="objectselect"]' ).click( function( ) { 
+    requestLoadEditorFromNode( ); 
+  } );
 
 
 
 
-  //  Define the satProperty callback. This callback is called after a property has been set. Its arguments
-  //  are the nodeId of the node to which the property belongs, the propertyName of the property that has been
-  //  set, and the propertyValue that the value was set to.
-  vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-    if (propertyName == "setPropertyExample")
-    {
-      alert("The setPropertyExample value on node " + nodeId + " was set to the value \"" + propertyValue + "\".");
+  //  Define the satProperty callback. This callback is called after a property has been set. Its
+  //  arguments are the nodeId of the node to which the property belongs, the propertyName of the
+  //  property that has been set, and the propertyValue that the value was set to.
+  vwf_view.satProperty = function ( nodeId, propertyName, propertyValue ) {
+    // If the setPropertyExample property changes, bring up an alert message box to inform the user.
+    if ( propertyName == "setPropertyExample" ) {
+      alert( "The setPropertyExample value on node " + nodeId + " was set to the value \"" + propertyValue + "\"." );
+    //  Otherise, check if the property is a property of the selected node. If it was, request an
+    //  editor update to keep the input fields set to the proper values.
+    } else if ( nodeId == getSelectedNodeId( ) ) {
+      requestLoadEditorFromNode( );
     }
   };
 
@@ -187,76 +194,70 @@
 
   //  Define the editorDisplay function.
   //  Hide the specific transformation div's, and then show only the currently selected div.
-  function editorDisplay() {
-    var toShow = "#" + $('#editing-select').val();
-    $('#transform-scale').css("display", "none");
-    $('#transform-quaternion').css("display", "none");
-    $('#transform-rotation').css("display", "none");
-    $('#transform-translation').css("display", "none");
-    $('#transform-transformation').css("display", "none");
-    $('#transform-worldtransformation').css("display", "none");
-    $('#transform-setpropertyexample').css("display", "none");
-    $(toShow).css("display", "inline-block");
+  function editorDisplay( ) {
+    var toShow = "#" + $( '#editing-select' ).val( );
+    $( '#transform-scale' ).css( "display", "none" );
+    $( '#transform-quaternion' ).css( "display", "none" );
+    $( '#transform-rotation' ).css( "display", "none" );
+    $( '#transform-translation' ).css( "display", "none" );
+    $( '#transform-transformation' ).css( "display", "none" );
+    $( '#transform-worldtransformation' ).css( "display", "none" );
+    $( '#transform-setpropertyexample' ).css( "display", "none" );
+    $( toShow ).css( "display" , "inline-block" );
   }
 
   // editorDisplay is called to hide all but the default editor div at page load.
-  editorDisplay();
+  editorDisplay( );
 
-  // When the drop down for selecting the editor has its current selection changed, call editorDisplay (to hide/show the appropriate editor divs)
-  $('#editing-select').change(editorDisplay);
+  // When the drop down for selecting the editor has its current selection changed, call 
+  // editorDisplay (to hide/show the appropriate editor divs)
+  $( '#editing-select' ).change( editorDisplay );
 
 
 
 
 
   //  Define the gotProperty callback.
-  //  It receives the nodeId of the node that this property belongs to, the propertyName of the property received,
-  //  and finally, property value contains the actual value of the property.
+  //  It receives the nodeId of the node that this property belongs to, the propertyName of the
+  //  property received, and finally, property value contains the actual value of the property.
   //  In this example, this is only used for views updating the input fields of the various div's.
-  vwf_view.gotProperty = function(nodeId, propertyName, propertyValue) {
-    if (nodeId == getSelectedNodeId())
-    {
-      switch (propertyName) {
+  vwf_view.gotProperty = function( nodeId, propertyName, propertyValue ) {
+    if ( nodeId == getSelectedNodeId( ) ) {
+      switch ( propertyName ) {
         case "worldTransform":
-          if (requestedUpdate[0] == true)
-          {
-            requestedUpdate[0] = false;
-            setWorldTransformInputs(propertyValue);
+          if ( requestedUpdate[ 0 ] == true ) {
+            requestedUpdate[ 0 ] = false;
+            setWorldTransformInputs( propertyValue );
           }
           break;
         case "transform":
-          if (requestedUpdate[1] == true)
-          {
-            requestedUpdate[1] = false;
-            setTransformInputs(propertyValue);
+          if ( requestedUpdate [ 1 ] == true ) {
+            requestedUpdate[ 1 ] = false;
+            setTransformInputs( propertyValue );
           }
           break;
         case "scale":
-          if (requestedUpdate[2] == true)
-          {
-            requestedUpdate[2] = false;
-            setScaleInputs(propertyValue);        
+          if ( requestedUpdate[ 2 ] == true ) {
+            requestedUpdate[ 2 ] = false;
+            setScaleInputs( propertyValue );        
           }
           break;
         case "quaternion":
-          if (requestedUpdate[3] == true)
-          {
-            requestedUpdate[3] = false;
-            setQuaternionInputs(propertyValue);
+          if ( requestedUpdate[ 3 ] == true ) {
+            requestedUpdate[ 3 ] = false;
+            setQuaternionInputs( propertyValue );
           }
           break;
         case "rotation":
-          if (requestedUpdate[4] == true)
-          {
-            requestedUpdate[4] = false;
-            setRotationInputs(propertyValue);
+          if ( requestedUpdate[ 4 ] == true ) {
+            requestedUpdate[ 4 ] = false;
+            setRotationInputs( propertyValue );
           }
           break;
         case "translation":
-          if (requestedUpdate[5] == true)
-          {
-            requestedUpdate[5] = false;
-            setTranslationInputs(propertyValue);
+          if ( requestedUpdate[ 5 ] == true ) {
+            requestedUpdate[ 5 ] = false;
+            setTranslationInputs( propertyValue );
           }
           break;
       }
@@ -264,32 +265,32 @@
   }
 
 
-  //  For each of the buttons to set properties or call transformation methods on the selected object, register an appropriate function
-  //  to make the call.
-  $('input[name="sclbutton"]').click(function() { vwf_view.kernel.setProperty(getSelectedNodeId(), "scale", getScaleParameter()); } );
-  $('input[name="sclbybutton"]').click(function() { vwf_view.kernel.callMethod(getSelectedNodeId(), "scaleBy", [getScaleParameter(), getTimePeriodParameter()]); } );
-  $('input[name="scltobutton"]').click(function() { vwf_view.kernel.callMethod(getSelectedNodeId(), "scaleTo", [getScaleParameter(), getTimePeriodParameter()]); } );
-  $('input[name="quatbutton"]').click(function() { vwf_view.kernel.setProperty(getSelectedNodeId(), "quaternion", getQuaternionParameters()); } );
-  $('input[name="quatbybutton"]').click(function() { vwf_view.kernel.callMethod(getSelectedNodeId, "quaterniateBy", [getQuaternionParameters(), getTimePeriodParameter()]); });
-  $('input[name="quattobutton"]').click(function() { vwf_view.kernel.callMethod(getSelectedNodeId, "quaterniateTo", [getQuaternionParameters(), getTimePeriodParameter()]); });
-  $('input[name="rotbutton"]').click(function() { vwf_view.kernel.setProperty(getSelectedNodeId(), "rotation", getRotationParameters()); } );
-  $('input[name="rotbybutton"]').click(function() { vwf_view.kernel.callMethod(getSelectedNodeId(), "rotateBy", [getRotationParameters(), getTimePeriodParameter()]); } );
-  $('input[name="rottobutton"]').click(function() { vwf_view.kernel.callMethod(getSelectedNodeId(), "rotateTo", [getRotationParameters(), getTimePeriodParameter()]); } );
-  $('input[name="trnsltbutton"]').click(function() { vwf_view.kernel.setProperty(getSelectedNodeId(), "translation", getTranslationParameters()); } );
-  $('input[name="trnsltbybutton"]').click(function() { vwf_view.kernel.callMethod(getSelectedNodeId(), "translateBy", [getTranslationParameters(), getTimePeriodParameter()]); } );
-  $('input[name="trnslttobutton"]').click(function() { vwf_view.kernel.callMethod(getSelectedNodeId(), "translateTo", [getTranslationParameters(), getTimePeriodParameter()]); } );
-  $('input[name="trfrmbutton"]').click(function() { vwf_view.kernel.setProperty(getSelectedNodeId(), "transform", getTransformParameters()); } );
-  $('input[name="trfrmtobutton"]').click(function() { vwf_view.kernel.callMethod(getSelectedNodeId(), "transformTo", [getTransformParameters(), getTimePeriodParameter()]); } );
-  $('input[name="wtbutton"]').click(function() { vwf_view.kernel.setProperty(getSelectedNodeId(), "worldTransform", getWorldTransformParameters()); } );
+  //  For each of the buttons to set properties or call transformation methods on the selected
+  // object, register an appropriate function to make the call.
+  $( 'input[name="sclbutton"]' ).click( function( ) { vwf_view.kernel.setProperty( getSelectedNodeId( ), "scale", getScaleParameter( ) ); } );
+  $( 'input[name="sclbybutton"]' ).click( function( ) { vwf_view.kernel.callMethod( getSelectedNodeId( ), "scaleBy", [ getScaleParameter( ), getTimePeriodParameter( ) ] ); } );
+  $( 'input[name="scltobutton"]' ).click( function( ) { vwf_view.kernel.callMethod( getSelectedNodeId( ), "scaleTo", [ getScaleParameter( ), getTimePeriodParameter( ) ] ); } );
+  $( 'input[name="quatbutton"]' ).click( function( ) { vwf_view.kernel.setProperty( getSelectedNodeId( ), "quaternion", getQuaternionParameters( ) ); } );
+  $( 'input[name="quatbybutton"]' ).click( function( ) { vwf_view.kernel.callMethod( getSelectedNodeId( ), "quaterniateBy", [ getQuaternionParameters( ), getTimePeriodParameter( ) ] ); } );
+  $( 'input[name="quattobutton"]' ).click( function( ) { vwf_view.kernel.callMethod( getSelectedNodeId( ), "quaterniateTo", [ getQuaternionParameters( ), getTimePeriodParameter( ) ] ); } );
+  $( 'input[name="rotbutton"]' ).click( function( ) { vwf_view.kernel.setProperty( getSelectedNodeId( ), "rotation", getRotationParameters( ) ); } );
+  $( 'input[name="rotbybutton"]' ).click( function( ) { vwf_view.kernel.callMethod( getSelectedNodeId( ), "rotateBy", [ getRotationParameters( ), getTimePeriodParameter( ) ] ); } );
+  $( 'input[name="rottobutton"]' ).click( function( ) { vwf_view.kernel.callMethod( getSelectedNodeId( ), "rotateTo", [ getRotationParameters( ), getTimePeriodParameter( ) ] ); } );
+  $( 'input[name="trnsltbutton"]' ).click( function( ) { vwf_view.kernel.setProperty( getSelectedNodeId( ), "translation", getTranslationParameters( ) ); } );
+  $( 'input[name="trnsltbybutton"]' ).click( function( ) { vwf_view.kernel.callMethod( getSelectedNodeId( ), "translateBy", [ getTranslationParameters( ), getTimePeriodParameter( ) ] ); } );
+  $( 'input[name="trnslttobutton"]' ).click( function( ) { vwf_view.kernel.callMethod( getSelectedNodeId( ), "translateTo", [ getTranslationParameters( ), getTimePeriodParameter( ) ] ); } );
+  $( 'input[name="trfrmbutton"]' ).click( function( ) { vwf_view.kernel.setProperty( getSelectedNodeId( ), "transform", getTransformParameters( ) ); } );
+  $( 'input[name="trfrmtobutton"]' ).click( function( ) { vwf_view.kernel.callMethod( getSelectedNodeId( ), "transformTo", [ getTransformParameters( ), getTimePeriodParameter( ) ] ); } );
+  $( 'input[name="wtbutton"]' ).click( function( ) { vwf_view.kernel.setProperty( getSelectedNodeId( ), "worldTransform", getWorldTransformParameters( ) ); } );
 
 
-  //  When the reset object button is clicked, make an appropriate callMethod call to call the resetToDefault method on the 
-  //  currently selected object.
-  $('input[name="resetobject"]').click(function() { vwf_view.kernel.callMethod( getSelectedNodeId(), "resetToDefault", []); } );
+  //  When the reset object button is clicked, make an appropriate callMethod call to call the
+  //  resetToDefault method on the currently selected object.
+  $( 'input[name="resetobject"]' ).click( function( ) { vwf_view.kernel.callMethod( getSelectedNodeId( ), "resetToDefault", [ ] ); } );
 
-  //  When the set property demo button is clicked, make an appropriate setProperty call in order to trigger
-  //  the satProperty callback for the demonstration.
-  $('input[name="setpropbutton"]').click(function() { vwf_view.kernel.setProperty( getSelectedNodeId(), "setPropertyExample", getSetPropertyExampleParameter() ) } );
+  //  When the set property demo button is clicked, make an appropriate setProperty call in order
+  //  to trigger the satProperty callback for the demonstration.
+  $( 'input[name="setpropbutton"]' ).click( function( ) { vwf_view.kernel.setProperty( getSelectedNodeId( ), "setPropertyExample", getSetPropertyExampleParameter( ) ) } );
 
 
   </script>
