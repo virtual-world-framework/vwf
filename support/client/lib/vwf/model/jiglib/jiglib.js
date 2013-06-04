@@ -2090,7 +2090,7 @@ jigLib.extend=function(dest,source){
 		var xmx,ymy,zmz,xmy,ymz,zmx,xms,yms,zms;
 
 		//convert from degrees to radians
-		angle=angle/(3.14159*2);
+		angle=angle*(3.14159/180);
 
 		var x = axis[0];
 		var y = axis[1];
@@ -2171,7 +2171,7 @@ jigLib.extend=function(dest,source){
 	 * @type void
 	 **/
 	Matrix3D.prototype.appendRotation=function(angle,axis,pivot){
-		angle=angle/(3.14159*2);
+		angle=angle*(3.14159/180);
 		Vector3DUtil.negate(axis);
 		
 		if (pivot)
