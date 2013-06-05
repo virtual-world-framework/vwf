@@ -17,11 +17,6 @@
   <head>
 	<script type="text/javascript">
 
-		//vwf_view.kernel.callMethod( "index-vwf", "clientCreated", [ vwf_view.kernel.moniker() ] );
-		//$(document).ready( function(){ 
-		//	$( "#loginDialog" ).modal('show');
-		//});
-
 		$( function() {
 
 			$( "#loginDialog" ).dialog( { 
@@ -48,32 +43,9 @@
 			});
 		});
 
-		var videosAdded = 0;
-		function addVideoElement( url, name ) {
-
-			videosAdded++
-			var $container;
-			var divId = name + videosAdded;
-			var videoId = "video-" + divId;
-
-			//$container = ( videosAdded < 5 ) ? $('#panesRight') : $('#panesLeft');
-			$container = $('#videoPanes');
-			$container.append(
-				"<div id='"+ divId + "'>" +
-				"<video id='" + videoId + "' width='320' height='240' src='" + url + "' loop='loop' autoplay = true style='position: absolute; left: 0; top: 0; z-index: 2;' />" +
-				"</div>"
-			);
-			$('#'+divId).draggable();
-
-		}
-
 	</script>	
   </head>
   <body>
-
-	<div id="videoPanes"> 
-	</div>
-
 
 	<!-- Dialog boxes that are shown as necessary -->
 	<div id="loginDialog" title="Client Login">

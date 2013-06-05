@@ -16,4 +16,4 @@ model:
   vwf/model/threejs:
 view:
   vwf/view/threejs: "#vwf-root"
-  vwf/view/webrtc:
+  vwf/view/webrtc: { audio: true, video: true, createVideoElements: true, debug: true }
