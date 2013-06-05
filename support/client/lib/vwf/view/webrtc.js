@@ -278,9 +278,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
         // notify the view 
         // used to customize the video elements
-        if ( addVideoElement ) {
-            addVideoElement( url, name );
-        }
+        //if ( addVideoElement ) {
+        //    addVideoElement( url, name );
+        //}
     }
 
     function displayRemote( url, name ) {
