@@ -69,7 +69,7 @@ function TerrainTool()
 				var cp2 = {};
 				cp2.x = Math.random() * 1000 - 500
 				cp2.y = Math.random() * 1000 - 500
-				cp2.z = Math.random() * 10
+				cp2.z = Math.random() * 30 - 15
 				cp2.dist = Math.random() * 200
 				cp2.falloff =  Math.random() + .5
 				self.controlPoints.push(cp2);

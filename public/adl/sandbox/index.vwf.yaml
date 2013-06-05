@@ -257,6 +257,7 @@ scripts:
        this.sun.shadowBias = -.005
        window._dGround = this.groundplane;
        this.groundplane.name = 'GroundPlane';
+       this.groundplane.visible = false;
        window._dSun = this.sun;
        
        this.sun.updateMatrixWorld(true);
@@ -425,6 +426,7 @@ scripts:
 
                 });
             this.skymaterial.uniforms.texture.value = skyCubeTexture;    
+            this.skymaterial.depthWrite = false;
        }
        
        
