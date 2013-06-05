@@ -84,7 +84,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             switch ( childExtendsID.toLowerCase() ) {
                 case "http-vwf-example-com-cesium-vwf":
                     var outerDiv = jQuery('body').append(
-                    "<div id='cesiumContainer'></div>"
+                    "<div class='cesuim-container' id='cesiumContainer'></div>"
                     //    "<canvas id='glCanvas' width='" + this.width + "px' height='" + this.height + "px'></canvas>"
                     );
                     var head = jQuery('head').append(
