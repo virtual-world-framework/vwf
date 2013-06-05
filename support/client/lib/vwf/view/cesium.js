@@ -37,7 +37,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         // == Module Definition ====================================================================
 
-        initialize: function() {
+        initialize: function( options ) {
 
             if ( !this.state ) {   
                 this.state = {};
@@ -50,6 +50,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
  
             this.cesium = undefined;
+            if ( options === undefined ) { options = {}; }
+
+            this.useCesiumWidget = options.useCesiumWidget !== undefined ? options.useCesiumWidget : true;
+            this.createContainer = options.createContainer !== undefined ? options.createContainer : true;
+            this.containerDiv = options.containerDiv !== undefined ? options.containerDiv : 'cesiumContainer';
 
             this.height = 600;
             this.width = 800;
@@ -83,23 +88,23 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             
             switch ( childExtendsID.toLowerCase() ) {
                 case "http-vwf-example-com-cesium-vwf":
-                    var outerDiv = jQuery('body').append(
-                    "<div class='cesuim-container' id='cesiumContainer'></div>"
-                    //    "<canvas id='glCanvas' width='" + this.width + "px' height='" + this.height + "px'></canvas>"
-                    );
-                    var head = jQuery('head').append(
-                        "<script type='text/javascript' src='Cesium.js'></script>"
-                    );
+                    if ( this.createContainer ) {
+                        jQuery('body').append(
+                            "<div class='cesuim-container' id='"+this.containerDiv+"'></div>"
+                        );
+                    }
+                    //var head = jQuery('head').append(
+                    //    "<script type='text/javascript' src='Cesium.js'></script>"
+                    //);
                     break;
                 case "http-vwf-example-com-node3-vwf":
                     if(childName == "cesiumInstance") {
-                        var useWidget = true;
                         this.state.nodes[ childID ] = node;
                         var view = this;
                         var scene;
 
-                        if ( useWidget ) {
-                            this.cesium = new Cesium.CesiumWidget('cesiumContainer');
+                        if ( this.useCesiumWidget ) {
+                            this.cesium = new Cesium.CesiumWidget( this.containerDiv );
                             scene = this.cesium.scene;
 
                             scene.skyBox.destroy();
@@ -110,7 +115,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         } else {
                             var canvas = document.createElement('canvas');
                             canvas.className = 'fullSize';
-                            document.getElementById('cesiumContainer').appendChild(canvas);
+                            document.getElementById( this.containerDiv ).appendChild(canvas);
 
                             canvas.setAttribute( 'height', this.height );
                             canvas.setAttribute( 'width', this.width );
