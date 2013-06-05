@@ -1917,25 +1917,20 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         if ( this.state.kernel.client() == this.state.kernel.moniker() ) {
             if ( staleTransformRequestsToBeApplied > 0 ) {
-                view.logger.info("BCB: Path 1");
                 staleTransformRequestsToBeApplied--;
                 adoptTransform( transformMatrix );   
             }
             else {  // no stale transform requests
-                view.logger.info("BCB: Path 2");
                 outstandingTransformRequestToBeIgnored--;
             }
         }
         else { // this transform change request is not from me
             if ( outstandingTransformRequestToBeIgnored ) {
-                view.logger.info("BCB: Path 3");
                 staleTransformRequestsToBeApplied += outstandingTransformRequestToBeIgnored;
                 outstandingTransformRequestToBeIgnored = 0;
                 adoptTransform( transformMatrix );  
             }
-            else {
-                view.logger.info("BCB: Path 4"); 
-
+            else { 
                 // TODO: Smooth the transform toward the matrix specified by the other client
                 //       Be careful: right now this is where a setState will enter when the user
                 //       first joins - perhaps treat that case differently afte detecting that 
