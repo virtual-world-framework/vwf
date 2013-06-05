@@ -487,7 +487,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     
                     if ( self.view.debug ) console.log("Remote stream added.  url: " + self.url );
 
-                    displayRemote.call( self, self.url, self.peerNode.displayName );
+                    displayRemote.call( self.view, self.url, self.peerNode.displayName );
                 };
 
                 this.pc.onremovestream = function( event ) {
