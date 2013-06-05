@@ -105,7 +105,20 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         // -- initializedProperty ----------------------------------------------------------------------
 
-        //initializedProperty: function (nodeID, propertyName, propertyValue) { },
+        initializedProperty: function ( nodeID, propertyName, propertyValue ) { 
+            if ( navObject && ( nodeID == navObject.ID ) ) {
+                if ( propertyName == "transform" ) {
+
+                    // TODO: When we generalize the navigation system to allow all nodes to have 
+                    //       model/view properties that diverge, we would manage all model changes 
+                    //       here (each node will need its own counter for how many changes have 
+                    //       been made on the view side that have not yet been come in from the 
+                    //       reflector) - this message is repeated in satProperty
+
+                    receiveModelTransformChanges.call( this, propertyValue );
+                }
+            }
+        },
 
         // TODO: deletedProperty
 
@@ -121,7 +134,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     //       model/view properties that diverge, we would manage all model changes 
                     //       here (each node will need its own counter for how many changes have 
                     //       been made on the view side that have not yet been come in from the 
-                    //       reflector)
+                    //       reflector) - this message is repeated in initializedProperty
 
                     receiveModelTransformChanges.call( this, propertyValue );
                 }
@@ -134,17 +147,35 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         gotProperty: function ( nodeID, propertyName, propertyValue ) { 
             var clientThatGotProperty = this.kernel.client();
             var me = this.kernel.moniker();
-            if ( navObject && ( nodeID == navObject.ID ) &&
-                 ( propertyName == "navmode" ) && ( clientThatGotProperty == me ) ) {
+            if ( clientThatGotProperty == me ) {
+                if ( propertyName == "userObject" ) {
+                    var thisUserId = this.kernel.moniker();
+                    var userObject = propertyValue || {
+                        "extends": "http://vwf.example.com/camera.vwf",
+                        "implements": [ "http://vwf.example.com/navigable.vwf" ],
+                        "properties": {
+                            "owner": thisUserId
+                        }
+                    };
 
-                // This was requested from the model from controlNavObject 
-                navmode = propertyValue;
+                    // TODO: The callback function is commented out because callbacks have not yet been 
+                    //       implemented for createChild - see workaround in createdNode
+                    this.kernel.createChild( this.state.sceneRootID, navObjectName, userObject, 
+                                             undefined, undefined /*,  function( nodeID ) {
+                        controlNavObject.call( this, this.state.nodes[ nodeID ] );
+                    } */ );
+                }
+                if ( navObject && ( nodeID == navObject.ID ) ) {
+
+                    // This was requested from the model from controlNavObject
+                    navmode = propertyValue;
+                }
             }
         }
-    
-    
     } );
+
     // private ===============================================================================
+
     function checkCompatibility() {
         this.compatibilityStatus = { compatible:true, errors:{} }
         var contextNames = ["webgl","experimental-webgl","moz-webgl","webkit-3d"];
@@ -211,8 +242,44 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                 if ( self.lastPickId != newPickId && self.lastEventData )
                 {
+<<<<<<< HEAD
                     view.kernel.dispatchEvent( self.lastPickId, "pointerOut", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                     view.kernel.dispatchEvent( newPickId, "pointerOver", self.lastEventData.eventData, self.lastEventData.eventNodeData );
+=======
+                    var newPick = ThreeJSPick.call( self, mycanvas, sceneNode );
+                    
+                    var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
+                    if ( self.lastPickId != newPickId && self.lastEventData )
+                    {
+                        if ( self.lastPickId ) {
+                            view.kernel.dispatchEvent( self.lastPickId, "pointerOut", 
+                                                       self.lastEventData.eventData, 
+                                                       self.lastEventData.eventNodeData );
+                        }
+                        view.kernel.dispatchEvent( newPickId, "pointerOver",
+                                                   self.lastEventData.eventData, 
+                                                   self.lastEventData.eventNodeData );
+                    }
+                    
+                    self.lastPickId = newPickId
+                    self.lastPick = newPick;
+                    if ( view.lastEventData && 
+                         ( view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || 
+                           view.lastEventData.eventData[0].screenPosition[1] != oldMouseY ) ) {
+                        oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
+                        oldMouseY = view.lastEventData.eventData[0].screenPosition[1];
+                        hovering = false;
+                    }
+                    else if(self.lastEventData && self.mouseOverCanvas && !hovering && self.lastPick) {
+                        var pickId = getPickObjectID.call( view, self.lastPick.object, false );
+                        if(!pickId) {
+                            pickId = view.state.sceneRootID;
+                        }
+                        view.kernel.dispatchEvent( pickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
+                        hovering = true;
+                    }
+                    lastPickTime = now;
+>>>>>>> a5f304d... Fix bug where second user would not always sync to scene.vwf.yaml
                 }
 
                 if ( view.lastEventData && 
@@ -1830,22 +1897,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // If no ownerless navigable objects were found, create one, set its owner to be this user,
         // and take control of it
         if ( !found ) {
-            var navObjectSpec = {
-                "extends": "http://vwf.example.com/camera.vwf",
-                "implements": [ "http://vwf.example.com/navigable.vwf" ],
-                "properties": {
-                    "owner": thisUserId
-                }
-            };
-
             navObjectName = "navobj_" + thisUserId;
-
-            // TODO: The callback function is commented out because callbacks have not yet been implemented
-            //       for createChild - see workaround in createdNode
-            sceneView.kernel.createChild( sceneRootID, navObjectName, navObjectSpec, undefined, undefined /*, 
-                                          function( nodeID ) {
-                controlNavObject.call( sceneView, sceneView.state.nodes[ nodeID ] );
-            } */ );
+            sceneView.kernel.getProperty( sceneRootID, "userObject" );
+            // Creation of the user object occurs in the gotProperty call for userObject
         }
     }
 
