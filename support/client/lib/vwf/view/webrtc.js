@@ -22,7 +22,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
         // == Module Definition ====================================================================
 
-        initialize: function() {
+        initialize: function( options ) {
 
             if ( !this.state ) {   
                 this.state = {};
@@ -35,9 +35,16 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 "stream": undefined, 
             };
 
-            this.captureVideo = true;
-            this.captureAudio = true;
-            this.debug = true;
+            if ( options === undefined ) { options = {}; }
+
+            this.captureVideo = options.video !== undefined  ? options.video : true;
+            this.captureAudio = options.audio !== undefined  ? options.audio : true;
+            this.debug = options.debug !== undefined  ? options.debug : false;
+            this.videoElementsDiv = options.videoElementsDiv !== undefined  ? options.videoElementsDiv : 'videoSurfaces';
+            this.createVideoElements = options.createVideoElements !== undefined  ? options.createVideoElements : true;
+
+
+            this.videosAdded = 0;
 
             this.height = 600;
             this.width = 800;
@@ -93,10 +100,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                 if ( this.kernel.moniker() == node.moniker ) { 
                     this.local.ID = childID;
-                    jQuery('body').append(
-                        "<div id='videoSurfaces'></div>"
-                    );                   
-
+                    
+                    if ( this.videoElementsDiv ) {
+                        jQuery('body').append(
+                            "<div id='"+this.videoElementsDiv+"'></div>"
+                        );                   
+                    }
                 } 
             }
 
@@ -248,6 +257,27 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     }
 
     function displayVideo( url, name ) {
+        
+        if ( this.createVideoElements ) {
+            //debugger;
+            this.videosAdded++
+            var $container;
+            var divId = name + this.videosAdded;
+            var videoId = "video-" + divId;
+
+            //$container = ( videosAdded < 5 ) ? $('#panesRight') : $('#panesLeft');
+            $container = $( "#" + this.videoElementsDiv );
+            $container.append(
+                "<div id='"+ divId + "'>" +
+                "<video class='vwf-webrtc-video' id='" + videoId + "' width='320' height='240' src='" + url + "' loop='loop' autoplay = true style='position: absolute; left: 0; top: 0; z-index: 40;' />" +
+                "</div>"
+            );
+            $('#'+divId).draggable();
+        }
+        
+
+        // notify the view 
+        // used to customize the video elements
         if ( addVideoElement ) {
             addVideoElement( url, name );
         }
