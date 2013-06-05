@@ -15,11 +15,7 @@
 <html>
     <head>
         <title>Cesium VWF Demo</title>
-        <script type="text/javascript" src="Cesium.js"></script>
         <link href="vwf-video.css" rel="stylesheet" type="text/css" />
-        <script type="text/javascript">
-            document.title = "Cesium VWF Demo";
-        </script>
         <style>
           @import url( CesiumWidget.css );
           body {
@@ -29,6 +25,9 @@
           }
         </style>
         <script type="text/javascript">
+
+            document.title = "Cesium VWF Demo";
+
             $( function() {
 
                 $( "#loginDialog" ).dialog( { 
@@ -54,27 +53,6 @@
                     e.stopPropagation();
                 });
             });
-
-            var videosAdded = 0;
-            function addVideoElement( url, name ) {
-
-                //debugger;
-                videosAdded++
-                var $container;
-                var divId = name + videosAdded;
-                var videoId = "video-" + divId;
-
-                //$container = ( videosAdded < 5 ) ? $('#panesRight') : $('#panesLeft');
-                $container = $('#videoSurfaces');
-                $container.append(
-                    "<div id='"+ divId + "'>" +
-                    "<video class='vwf-webrtc-video' id='" + videoId + "' width='320' height='240' src='" + url + "' loop='loop' autoplay = true style='position: absolute; left: 0; top: 0; z-index: 40;' />" +
-                    "</div>"
-                );
-                $('#'+divId).draggable();
-
-            }
-
 
         </script>
     </head>

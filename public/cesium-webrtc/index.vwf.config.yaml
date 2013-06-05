@@ -13,5 +13,5 @@
 
 ---
 view:
-  vwf/view/cesium:
-  vwf/view/webrtc:
+  vwf/view/cesium: { useCesiumWidget: true }
+  vwf/view/webrtc: { audio: true, video: true, createVideoElements: true, false: true }

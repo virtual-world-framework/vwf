@@ -23,7 +23,7 @@ children:
     properties:
       cameraControllerData:
       cameraViewData: 
-      backgroundColor: [ 0, 0, 0, 0]
+      backgroundColor: [ 0, 0, 0, 0 ]
 methods:
   createClient:
 scripts:
