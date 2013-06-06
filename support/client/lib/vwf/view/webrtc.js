@@ -199,6 +199,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         }
                         break; 
 
+
+
                     default:  
                         // propertyName is the moniker of the client that 
                         // this connection supports

@@ -22,3 +22,8 @@ children:
       cameraControllerData:
       cameraViewData: 
       backgroundColor: 
+      skyBox:
+      skyAtmosphere:
+      transition: "3D"
+      imageryProvider: "bingAerialLabel"
+      sun: false
