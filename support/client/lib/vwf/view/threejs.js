@@ -64,17 +64,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 
                 initScene.call(this,this.state.scenes[childID]);
             }
-
-            //TODO: This is a temporary workaround until the callback functionality is implemented for 
-            //      kernel.createChild()
-            //      Listening specifically for this.findNavObject>>createChild() creating a new navObject if 
-            //      one does not exist.
-            //      Can be removed once kernel.createChild callback works properly
-            if ( childName && ( childName == navObjectName ) ) {
-                var sceneView = this;
-                controlNavObject.call( sceneView, sceneView.state.nodes[ childID ] );
-            }
-            //End TODO
         },
 
         initializedNode: function( nodeID, childID ) {
@@ -82,8 +71,22 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // If the node that was initialized is the application node, find the user's navigation object
             var sceneView = this;
             var appID = sceneView.kernel.application();
-            if ( childID == appID )
+            if ( childID == appID ) {
                 findNavObject.call( sceneView );
+            } else {
+
+                //TODO: This is a temporary workaround until the callback functionality is implemented for 
+                //      kernel.createChild()
+                //      Listening specifically for this.findNavObject>>createChild() creating a new navObject if 
+                //      one does not exist.
+                //      Can be removed once kernel.createChild callback works properly
+                var initNode = this.state.nodes[ childID ];
+                if ( initNode && ( initNode.name == navObjectName ) ) {
+                    var sceneView = this;
+                    controlNavObject.call( sceneView, initNode );
+                }
+            }
+            //End TODO
         },
  
  
@@ -149,12 +152,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var me = this.kernel.moniker();
             if ( clientThatGotProperty == me ) {
                 if ( propertyName == "userObject" ) {
-                    var thisUserId = this.kernel.moniker();
                     var userObject = propertyValue || {
                         "extends": "http://vwf.example.com/camera.vwf",
                         "implements": [ "http://vwf.example.com/navigable.vwf" ],
                         "properties": {
-                            "owner": thisUserId
+                            "owner": me
                         }
                     };
 
@@ -1126,7 +1128,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 // If not (here below), we need to send a separate message to the reflector to set 
                 // the pitch on the camera
                 if ( navObject !== cameraNode ) {
-                    setTransformProperty( cameraNode, navObjectMatrix.elements );
+                    setTransformProperty( cameraNode, cameraMatrix.elements );
                 }
 
                 // Perform yaw on nav object - left-multiply to keep yaw separate from pitch
@@ -1947,7 +1949,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var transformMatrix = matCpy( transform );
             var navObjectThree = navObject.threeObject;
 
-            // Rotate 90 degress around X to convert from VWF Z-up to three.js Y-up.
+            // Rotate 90 degrees around X to convert from VWF Z-up to three.js Y-up.
             if ( navObjectThree instanceof THREE.Camera ) {
                 
                 // Get column y and z out of the matrix
