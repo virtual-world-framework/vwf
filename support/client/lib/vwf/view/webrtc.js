@@ -255,10 +255,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     }
 
     function displayLocal( name ) {
-        displayVideo.call( this, this.local.url, name );
+        displayVideo.call( this, this.local.url, name, true );
     }
 
-    function displayVideo( url, name ) {
+    function displayVideo( url, name, muted ) {
         
         if ( this.createVideoElements ) {
             //debugger;
@@ -269,11 +269,27 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             //$container = ( videosAdded < 5 ) ? $('#panesRight') : $('#panesLeft');
             $container = $( "#" + this.videoElementsDiv );
-            $container.append(
-                "<div id='"+ divId + "'>" +
-                "<video class='vwf-webrtc-video' id='" + videoId + "' width='320' height='240' src='" + url + "' loop='loop' autoplay = true style='position: absolute; left: 0; top: 0; z-index: 40;' />" +
-                "</div>"
-            );
+            if ( muted ) {
+                $container.append(
+                    "<div id='"+ divId + "'>" +
+                        "<video class='vwf-webrtc-video' id='" + videoId +
+                            "' width='320' height='240' src='" + url + 
+                            "' loop='loop' autoplay = true muted" +
+                            " style='position: absolute; left: 0; top: 0; z-index: 40;'>" +
+                        "</video>" +
+                    "</div>"
+                );                
+            } else {
+                $container.append(
+                    "<div id='"+ divId + "'>" +
+                        "<video class='vwf-webrtc-video' id='" + videoId +
+                            "' width='320' height='240' src='" + url + 
+                            "' loop='loop' autoplay = true" +
+                            " style='position: absolute; left: 0; top: 0; z-index: 40;'>" +
+                        "</video>" +
+                    "</div>"
+                );
+            }
             $('#'+divId).draggable();
         }
         
@@ -286,7 +302,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     }
 
     function displayRemote( url, name ) {
-        displayVideo.call( this, url, name );
+        displayVideo.call( this, url, name, false );
     }
 
     function capture() {
