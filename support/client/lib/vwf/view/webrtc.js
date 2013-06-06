@@ -299,7 +299,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             };
             
             var successCallback = function( stream ) {
-                self.local.url = webkitURL.createObjectURL( stream );
+                self.local.url = URL.createObjectURL( stream );
                 self.local.stream = stream;
 
                 self.kernel.setProperty( self.local.ID, "localUrl", self.local.url );
@@ -485,7 +485,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     if ( self.view.debug ) console.log("Remote stream added.");
                     
                     self.stream = event.stream;
-                    self.url = webkitURL.createObjectURL( event.stream );
+                    self.url = URL.createObjectURL( event.stream );
                     
                     if ( self.view.debug ) console.log("Remote stream added.  url: " + self.url );
 
