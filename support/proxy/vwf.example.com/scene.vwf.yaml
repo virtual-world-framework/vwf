@@ -74,6 +74,20 @@ properties:
   ## @property
 
   usersShareView: true
+
+  ## Object to be instantiated to represent a user.
+  ## If usersShareView is true, only one is created
+  ## Else, one is created per user
+  ## Defaults to a camera w/ the navigable behavior attached
+  ## 
+  ## @name navscene.vwf#userObject
+  ## @property
+
+  userObject:
+    extends: http://vwf.example.com/camera.vwf
+    implements: [ "http://vwf.example.com/navigable.vwf" ]
+    properties:
+      navmode: fly
     
 methods:
   getActiveCameraComp:
@@ -87,13 +101,7 @@ scripts:
 
     this.initialize = function() {
       if ( this.usersShareView ) {
-        this.children.create( "camera", {
-          "extends": "http://vwf.example.com/camera.vwf",
-          "implements": [ "http://vwf.example.com/navigable.vwf" ],
-          "properties": {
-            "navmode": "fly"
-          }
-        } );
+        this.children.create( "sharedCamera", this.userObject );
       }
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
       this.lastActiveCamera = this.activeCamera;
