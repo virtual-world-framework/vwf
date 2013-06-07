@@ -3,10 +3,10 @@
 		{
 			
 			var self = this;
-			var minTileSize = 50;
-			var maxTileSize = 1500;
-			var worldExtents = 100000;
-			var tileres = 50;
+			var minTileSize = 128;
+			var maxTileSize = 1024;
+			var worldExtents = 65536;
+			var tileres = 1;
 			var SW = 0;
 			var SE = 1;
 			var NW = 3;
@@ -381,8 +381,8 @@
 							this.mat.color.b = .5;
 							this.mat.transparent = true;
 							this.mat.depthcheck = false;
-							//this.mat.wireframe = true;
-							//this.mat.fog = false;
+							this.mat.wireframe = true;
+							this.mat.fog = false;
 							
 				this.getMesh = function(res,size)
 				{
@@ -675,7 +675,7 @@
 								this.mesh.position.x = this.c[0];
 								this.mesh.position.y = this.c[1];
 								this.mesh.position.z = 1;
-								self.BuildTerrainInner(this.mesh);
+								//self.BuildTerrainInner(this.mesh);
 								this.THREENode.add(this.mesh,true);
 								this.mesh.updateMatrixWorld(true);
 							}
@@ -776,8 +776,8 @@
 				this.loosecontains = function(point)
 				{
 					
-					var tempmin = [this.min[0] - (this.max[0] - this.min[0])/1 , this.min[1] - (this.max[1] - this.min[1])/1]
-					var tempmax = [this.max[0] + (this.max[0] - this.min[0])/1 , this.max[1] + (this.max[1] - this.min[1])/1]
+					var tempmin = [this.min[0] - (this.max[0] - this.min[0])/2 , this.min[1] - (this.max[1] - this.min[1])/2]
+					var tempmax = [this.max[0] + (this.max[0] - this.min[0])/2 , this.max[1] + (this.max[1] - this.min[1])/2]
 					if(tempmin[0] < point[0] && tempmax[0] > point[0] && 
 					tempmin[1] < point[1] && tempmax[1] > point[1])
 						return true;
@@ -826,8 +826,12 @@
 				}
 				this.update = function(campos,removelist)
 				{
-				
-					if(this.contains(campos))
+					var cont = false
+					for(var i =0; i < campos.length; i++)
+					{
+						cont = cont || this.contains(campos[i]);
+					}
+					if(cont)
 					{
 						
 						if(!this.isSplit())
@@ -914,7 +918,7 @@
 				this.quadtree = new QuadtreeNode([-worldExtents,-worldExtents],[worldExtents,worldExtents],this.getRoot());
 			
 				this.minSize = 32;
-				this.quadtree.update([1,1],[]);
+				this.quadtree.update([[1,1]],[]);
 				//this.quadtree.balance();
 				this.quadtree.updateMesh();
 				window.terrain = self;
@@ -933,26 +937,32 @@
 				if(this.counter == 30)
 				{
 					this.counter = 0;
-					var x = _Editor.findcamera().position.x;
-					var y = _Editor.findcamera().position.y;
+					var  insertpt = _Editor.GetInsertPoint();
+					var x = insertpt[0];
+					var y = insertpt[1];
 					 
-					 if(this.containing != this.quadtree.containing([x,y]))
+					 if(this.containing != this.quadtree.containing([x,y]).parent)
 					 {
 						
 					
 						
 							self.needRebuild = [];
-						self.removelist.forEach(function(e,i)
-								{
-									if(e && e.parent)
-										e.parent.remove(e);
-								})
-								self.removelist = []
-						this.quadtree.update([x,y],this.removelist);
+					//	self.removelist.forEach(function(e,i)
+					//			{
+					//				if(e && e.parent)
+					//					e.parent.remove(e);
+					//			})
+					//			self.removelist = []
+						this.quadtree.update([[x,y]],this.removelist);
 						
-						this.containing = this.quadtree.containing([x,y]);
+						this.containing = this.quadtree.containing([x,y]).parent;
+						
 						this.quadtree.balance(this.removelist);
 						this.quadtree.balance(this.removelist);
+						this.containing.NN().split(this.removelist);
+						this.containing.SN().split(this.removelist);
+						this.containing.EN().split(this.removelist);
+						this.containing.WN().split(this.removelist);
 						var nodes = this.quadtree.getBottom();
 						
 						
@@ -970,7 +980,11 @@
 								
 						}
 						console.log('Rebuilding Terrain Tiles: ' +self.needRebuild.length);
+						self.needRebuild.sort(function(a,b)
+						{
+							return (a.max[0] - a.min[0]) - (b.max[0] - b.min[0]);
 						
+						});
 						var rebuild = function()
 						{
 							if (self.needRebuild.length > 0)
@@ -1078,11 +1092,11 @@
 							// z +=  Math.max(0, cp.z - Math.pow(cp.z * dist/cp.dist,cp.falloff));
 						// }
 						//z = Math.sin((mx + vert.x)/10) * 10;
-						z = self.SimplexNoise.noise2D((mx + vert.x)/100,(my + vert.y)/100) * 25;
+						z = self.SimplexNoise.noise2D((mx + vert.x)/30,(my + vert.y)/30) * 2.5;
 						vert.z = z;
 					}
 					//var n = vertn.clone().sub(vertx).cross(vertn.clone().sub(verty)).normalize();
-					var n = new THREE.Vector3(vertx1.z - vertx0.z,verty1.z - verty0.z,2)
+					var n = new THREE.Vector3(vertx1.z - vertx0.z,verty1.z - verty0.z,(vertx1.x - vertx0.x)*2)
 					normals.push(n);
 				}
 				

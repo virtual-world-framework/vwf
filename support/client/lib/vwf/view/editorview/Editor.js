@@ -1266,7 +1266,7 @@ define(function ()
 		
 		this.GetInsertPoint = function (e)
 		{
-		var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
+			var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
 			if(e)
 			{
 				var ray;
@@ -1287,7 +1287,7 @@ define(function ()
 				
 				var ray = self.GetCameraCenterRay();
 				var pick = this.ThreeJSPick(campos, ray);
-				var dxy = pick.distance;
+				var dxy = pick?pick.distance:Infinity;
 				var newintersectxy = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy));
 				newintersectxy[2] += .01;
 				var dxy2 = this.intersectLinePlane(ray, campos, [0, 0, 0], [0, 0, 1]);
