@@ -17,4 +17,11 @@
 ## @namespace
 
 --- 
-extends: http://vwf.example.com/node.vwf
+extends: http://vwf.example.com/node2.vwf
+properties:
+  controlClient: "NONE"
+  cameraControllerData:
+  cameraViewData: 
+  backgroundColor: [ 0, 0, 0, 0 ]
+  renderStyle: "3D"
+  imageryProvider: "bingAerialLabel"

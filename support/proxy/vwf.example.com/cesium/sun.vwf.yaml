@@ -11,16 +11,10 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## Cesium sun component
+## 
+## @name sun.vwf
+## @namespace
+
 --- 
-extends: http://vwf.example.com/cesium.vwf
-properties:
-  backgroundColor: [ 0, 0, 0, 0 ]
-  renderStyle: "3D"
-  imageryProvider: "bingAerialLabel"
-children:
-  sky: 
-    extends: http://vwf.example.com/cesium/sun.vwf 
-  atmosphere: 
-    extends: http://vwf.example.com/cesium/atmosphere.vwf 
-  skybox: 
-    extends: http://vwf.example.com/cesium/skybox.vwf 
+extends: http://vwf.example.com/cesium/node3.vwf

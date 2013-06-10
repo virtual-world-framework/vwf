@@ -87899,7 +87899,7 @@ define('Widgets/CesiumWidget/CesiumWidget',['../../Core/buildModuleUrl',
             positiveZ : getDefaultSkyBoxUrl('pz'),
             negativeZ : getDefaultSkyBoxUrl('mz')
         });
-        scene.skyAtmosphere = new SkyAtmosphere(_ellipsoid);
+        scene.skyAtmosphere = new SkyAtmosphere( _ellipsoid );
         scene.sun = new Sun();
 
         //Set the base imagery layer

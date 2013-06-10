@@ -12,5 +12,7 @@
 # the License.
 
 ---
+model:
+  vwf/model/cesium:
 view:
   vwf/view/cesium: { useCesiumWidget: true }
