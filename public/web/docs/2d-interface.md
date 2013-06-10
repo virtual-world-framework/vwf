@@ -86,3 +86,16 @@ To learn more about these events, you can look at the system api for the [view](
 
 -------------------
 
+**Change the Application Title and Favicon**
+
+The default browser title for a VWF application is *Virtual World Framework*. The title may be specified in an application's configuration file as shown below. 
+
+	---
+	info:
+	  title: "Name of Application"
+
+Additionally, the favicon of an application may be set simply by dropping a *favicon.ico* file into the application folder. 
+
+For an example of setting these items, visit the [duck application](../../../duck).
+
+-------------------

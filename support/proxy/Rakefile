@@ -33,6 +33,10 @@ CLOBBER.include "#{DOCUMENTATION}"
 
 task :build => [ :documentation ]
 
+desc "Null Tasks"
+task :full
+task :web
+
 desc "Generate the jsdoc component documentation."
 
 task :documentation do |task|

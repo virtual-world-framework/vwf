@@ -51,7 +51,7 @@ properties:
             if ( temp ) this.activeCameraComp = temp;
           }
         }
-      }
+      } //@ sourceURL=scene.set.activeCamera.vwf
     value: "http-vwf-example-com-camera-vwf-camera"
 
   ## Ambient color
@@ -73,7 +73,6 @@ methods:
   getChild:
   getActiveCamera:
   lastActiveCameraID:
-
 scripts:
 - |
     this.activeCameraComp = undefined;
@@ -86,13 +85,14 @@ scripts:
       if(!startingNode) {
         startingNode = this;
       }
-      for ( var i = 0; i < startingNode.children.length; i++ ) {
+      var len = startingNode.children.length
+      for ( var i = 0; i < len; i++ ) {
         if ( startingNode.children[i].id == childName ) {
           return startingNode.children[i];
         } else if ( startingNode.children[i].name && startingNode.children[i].name == childName ) {
           return startingNode.children[i];        
         } else {
-          var childNode = this.getChild(childName, startingNode.children[i]);
+          var childNode = this.getChild( childName, startingNode.children[i]);
           if(childNode) {
             return childNode;
           }

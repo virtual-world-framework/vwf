@@ -23,7 +23,7 @@ Select a download site from the list. Choose one that seems close and reliable.
 
 At **Select Packages**, click the *View* button once to choose the *Full* view, which is a straight list and is easier to navigate than the default nested category view.
 
-Select the following packages for installation. Use the search box or scroll down the list to find each one. Click once on *Skip* in the *New* column to mark it for installation.
+Select the following packages for installation. Use the search box or scroll down the list to find each one. In the table, find the *New* column.  In this column, you will see packages listed typically with the word *Skip*.  Click on the word *Skip* in the *New* column will change the word to *Install*.  If the word is *Keep*, you already have the package needed installed.  We will want to change the following packages to *Install* by clicking on the word *Skip* to change the word.  Once the following listed packages are all marked for *Install* or *Keep* in the New column of the table, you may continue.
 
 *   curl
 *   gcc-g++
@@ -39,6 +39,10 @@ Select the following packages for installation. Use the search box or scroll dow
 *   libxslt-devel
 
 Click through to *Finish* to close Cygwin setup. Save setup.exe for later since you may need it to add or update packages.
+
+**Install Java**
+
+Please make sure your computer has the latest version of Java installed.  You may install java from http://www.java.com
 
 --------------------------
 
@@ -81,7 +85,7 @@ Then enter these commands:
 
 	bundle install
 	
-	bundle exec rake build
+	bundle exec rake 
 	
 Ignore the warning about sudo not found for bundle install. If you get linker relocation errors, you probably need to tell Cygwin to rebaseall. See [Cygwin rebaseall](http://www.heikkitoivonen.net/blog/2008/11/26/cygwin-upgrades-and-rebaseall) for details. The required rebase and dash packages should already be installed.
 
@@ -205,7 +209,7 @@ Now you can install the RubyGems to the system (as root):
 
 *3.4 Build the Server*
 
-    # sudo bundle exec rake build
+    # sudo bundle exec rake 
 
 *3.5 Launch the Server*
 

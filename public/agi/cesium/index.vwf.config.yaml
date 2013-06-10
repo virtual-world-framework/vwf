@@ -13,4 +13,4 @@
 
 ---
 view:
-  vwf/view/cesium:
+  vwf/view/cesium: { useCesiumWidget: true }

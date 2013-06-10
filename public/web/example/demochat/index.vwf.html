@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Virtual World Framework - Demo Chat</title>
+  </head>
+  <body>
+    <div id="demochat-audio">
+      <audio id='None' class="sounds">
+      </audio>
+      <audio id='Boom' class="sounds">
+        <source src="sounds/boom.wav"></source>
+      </audio>
+      <audio id='Bounce' class="sounds">
+        <source src="sounds/bounce.wav"></source>
+      </audio>
+      <audio id='Burrow' class="sounds">
+        <source src="sounds/burrow.wav"></source>
+      </audio>
+      <audio id='Explosion' class="sounds">
+        <source src="sounds/explosion.wav"></source>
+      </audio>
+      <audio id='Fire' class="sounds">
+        <source src="sounds/fire.wav"></source>
+      </audio>
+      <audio id='FlagAlert' class="sounds">
+        <source src="sounds/flag_alert.wav"></source>
+      </audio>
+      <audio id='FlagDrop' class="sounds">
+        <source src="sounds/flag_drop.wav"></source>
+      </audio>
+      <audio id='FlagGrab' class="sounds">
+        <source src="sounds/flag_grab.wav"></source>
+      </audio>
+      <audio id='FlagLost' class="sounds">
+        <source src="sounds/flag_lost.wav"></source>
+      </audio>
+      <audio id='FlagWon' class="sounds">
+        <source src="sounds/flag_won.wav"></source>
+      </audio>
+      <audio id='Flap' class="sounds">
+        <source src="sounds/flap.wav"></source>
+      </audio>
+      <audio id='Honk' class="sounds">
+        <source src="sounds/honk.wav"></source>
+      </audio>
+      <audio id='Hunt' class="sounds">
+        <source src="sounds/hunt.wav"></source>
+      </audio>
+      <audio id='HuntSelect' class="sounds">
+        <source src="sounds/hunt_select.wav"></source>
+      </audio>
+      <audio id='Ignition' class="sounds">
+        <source src="sounds/ignition.wav"></source>
+      </audio>
+      <audio id='Jump' class="sounds">
+        <source src="sounds/jump.wav"></source>
+      </audio>
+      <audio id='Killteam' class="sounds">
+        <source src="sounds/killteam.wav"></source>
+      </audio>
+      <audio id='Land' class="sounds">
+        <source src="sounds/land.wav"></source>
+      </audio>
+      <audio id='Laser' class="sounds">
+        <source src="sounds/laser.wav"></source>
+      </audio>
+      <audio id='Lock' class="sounds">
+        <source src="sounds/lock.wav"></source>
+      </audio>
+      <audio id='MessageAdmin' class="sounds">
+        <source src="sounds/message_admin.wav"></source>
+      </audio>
+      <audio id='MessagePrivate' class="sounds">
+        <source src="sounds/message_private.wav"></source>
+      </audio>
+      <audio id='MessageTeam' class="sounds">
+        <source src="sounds/message_team.wav"></source>
+      </audio>
+      <audio id='Missile' class="sounds">
+        <source src="sounds/missile.wav"></source>
+      </audio>
+      <audio id='Phantom' class="sounds">
+        <source src="sounds/phantom.wav"></source>
+      </audio>
+      <audio id='Pop' class="sounds">
+        <source src="sounds/pop.wav"></source>
+      </audio>
+      <audio id='Ricochet' class="sounds">
+        <source src="sounds/ricochet.wav"></source>
+      </audio>
+      <audio id='Shock' class="sounds">
+        <source src="sounds/shock.wav"></source>
+      </audio>
+      <audio id='Spree1' class="sounds">
+        <source src="sounds/spree1.wav"></source>
+      </audio>
+      <audio id='Spree2' class="sounds">
+        <source src="sounds/spree2.wav"></source>
+      </audio>
+      <audio id='Spree3' class="sounds">
+        <source src="sounds/spree3.wav"></source>
+      </audio>
+      <audio id='Spree4' class="sounds">
+        <source src="sounds/spree4.wav"></source>
+      </audio>
+      <audio id='Static' class="sounds">
+        <source src="sounds/static.wav"></source>
+      </audio>
+      <audio id='StaticSM' class="sounds">
+        <source src="sounds/static-sm.wav"></source>
+      </audio>
+      <audio id='Steamroller' class="sounds">
+        <source src="sounds/steamroller.wav"></source>
+      </audio>
+      <audio id='Teamgrab' class="sounds">
+        <source src="sounds/teamgrab.wav"></source>
+      </audio>
+      <audio id='Teleport' class="sounds">
+        <source src="sounds/teleport.wav"></source>
+      </audio>
+      <audio id='Thief' class="sounds">
+        <source src="sounds/thief.wav"></source>
+      </audio>
+    </div>
+    <link rel="stylesheet" type="text/css" href="css/demochat.css"/>
+    <div id="logon" class="demochat-logon">
+      </br>
+      Username: <input id="playerNameInput" type="text"/ ></br>
+      Display Color: <input type="color" id="playerTextColor"/></br>
+      Alert Sound: <select id="loginSoundSelect"></select><button type="button" id="loginSoundSelectTest">Test Sound</button></br>
+      <button type="button" id="chatlogin" class="demochat-logonbutton">Login</button></br>
+      <div id="nameexists" class="demochat-warning" style="display:none;">Name already exists!</div>
+      </br>
+    </div>
+    <div id="chatList" class="demochat-chatlist">
+      <h4>Current Users</h4>
+      <div id="chatListInternal">
+      </div>
+    </div>
+    <div id="chatWindow" class="demochat-chatwindow">
+      <div id="chatContent" class="demochat-chatcontent"></div>
+      <textarea id='chatInput' rows='1' class="demochat-chatinput"></textarea>
+    </div>
+    <div id="chatOptions" class="demochat-chatoptions">
+      <div class="demochat-chatInnerOptions" style="align:left">
+        Select New Display Color: <input type="color" id="changeTextColor"/></br>
+        Change Display Name: <input type="text" id="changeDisplayName"/> <button type="button" id="changeDisplayNameButton">Change Name</button></br>
+      </div>
+      <div class="demochat-chatInnerOptions" style="align:right">
+        Select New Alert Sound: <select id="changeSoundSelect"></select><button type="button" id="changeSoundSelectTest">Test Sound</button><button type="button" id="changeSoundButton">Change Sound</button></br>
+        Disconnect: <button type="button" id="disconnect">Disconnect</button></br>
+      </div>
+    </div>
+    <script src="js/heartbeat.js"/>
+    <script src="js/appearance.js"/>
+    <script>
+      // Setup variable to track attempted login attempts.
+      var attemptingLogin = false;
+      var attemptedName = undefined;
+
+      // Store the nodeID of the entire scene for later reference.
+      var sceneId = vwf_view.kernel.find( "", "/" )[ 0 ];
+
+
+      // Display the login interface.
+      displayLogin( );
+
+      // Load the options into the audio selects.
+      loadAudioSelects( );
+
+
+      // Register a function to run when the login button is clicked.
+      $( '#chatlogin' ).click( function( ) {
+        //  Track the display name that we are attempting to login with, as well as the fact we
+        //  attempted a login. 
+        attemptingLogin = true;
+        attemptedName = sanitizeUsername( $( '#playerNameInput' ).val( ) );
+
+        //  Disable the input fields while the login attempt is being made.
+        disableLogonDataEntry( );
+
+        //  Make the actual call to the model to attempt to create the user.
+        vwf_view.kernel.callMethod( sceneId, "createUser", [ attemptedName, $( '#playerTextColor' ).val( ), $( '#loginSoundSelect' ).val( ) ] );
+      });
+      
+      // Register a callback so when the loginSoundSelectTest button is pressed, the sound currently
+      // selected is played.
+      $( '#loginSoundSelectTest' ).click( function ( ) {
+        $( '#' + $( '#loginSoundSelect' ).val( ) )[ 0 ].play( );
+      } );
+
+
+      // Register a callback so when the changeSoundSelectTest button is pressed, the sound currently
+      // selected is played.
+      $( '#changeSoundSelectTest' ).click( function ( ) {
+        $( '#' + $( '#changeSoundSelect' ).val( ) )[ 0 ].play( );
+      } );
+
+
+      // Register a callback so when the changeSoundButton is pressed, the alertSound property of
+      // the user is changed appropriately.
+      $( '#changeSoundButton' ).click( function ( ) {
+        if ( isConnected( ) ) {
+          vwf_view.kernel.setProperty( playerId, "alertSound", $( '#changeSoundSelect' ).val( ) );
+        }
+      } );
+
+      //Register a function to run when the color selector for running chat has its value changed.
+      $( '#changeTextColor' ).change( function( ) {
+        //  Test if we are connected. If so, set the displayColor property on our specific user model
+        if ( isConnected( ) ) {
+          vwf_view.kernel.setProperty( playerId, "displayColor", $( '#changeTextColor' ).val( ) );
+        }
+      } );
+
+
+      //Register function to listen for keydown and keyup of the enter key in the chat message
+      // entry area.
+      $( '#chatInput' ).keydown( function( e ) {
+        // Stop propogation of the event, if it was enter that was pressed and we are connected,
+        // call the sendMessage function.
+        e.stopPropagation( );
+        var code = ( e.keyCode ? e.keyCode : e.which );
+        if ( ( code == 13 ) && ( isConnected( ) ) ) { //Enter
+          vwf_view.kernel.callMethod( playerId, "sendMessage", [ $( this ).val( ) ] );
+        }
+      } ).keyup( function( e ) {
+        // Stop propogation of the event, if it was enter that was released and we are connected,
+        // clear the text entry area.
+        e.stopPropagation( );
+        var code = ( e.keyCode ? e.keyCode : e.which );
+        if ( code == 13 ) { //Enter
+          $( this ).val( '' );
+        }
+      } );
+
+
+      //Register a callback function to respond to clicking the change display name button.
+      $( '#changeDisplayNameButton' ).click( function ( ) {
+        if ( isConnected( ) ) {
+          // Call the renameUser method on the appropriate user.
+          vwf_view.kernel.callMethod( playerId, "renameUser", [ sanitizeUsername( $('#changeDisplayName').val( ) ) ] )
+        }
+      } );
+
+      //Register a callback function for handling clicking the disconnect button.
+      $( '#disconnect' ).click( function( ) {
+        if ( isConnected( ) ) {
+          //First, remove the user.
+          vwf_view.kernel.callMethod( playerId, "removeUser", [ ] );
+          //Reset the web page. Set playerId to undefined, and display the login screen with enabled
+          //inputs.
+          playerId = undefined;
+          enableLogonDataEntry( );
+          displayLogin( );
+          hideUserExistsMessage( );
+        }
+      } );
+
+      //  Register the firedEvent callback handler.
+      vwf_view.firedEvent = function ( nodeId, eventName, eventParameters ) {
+        // Go ahead and generate a time stamp, since most of the scene events need one.
+        var timestampDate = new Date( );
+        var timestamp = timestampDate.toLocaleString( );
+
+        //  If we are connected and receive a userColorChange event, change the display color for that user.
+        if ( ( isConnected( ) ) && ( eventName == "userColorChange" ) ) {
+          changeUserColor( eventParameters[ 0 ], eventParameters[ 1 ] );
+        }
+
+        // If we are connected and receive a userRename event, remove the previous username from the
+        // userList, rename the CSS class for the user, add the new username back into the UserList,
+        // and finally post a system message to the chat window.
+        if ( ( isConnected( ) ) && ( eventName == "userRename" ) )
+        {
+          removeUser( eventParameters[ 0 ] );
+          $( '.' + eventParameters[ 0 ] ).attr( "class", eventParameters[ 1 ] );
+          addUser( eventParameters[ 1 ], eventParameters[ 2 ] );
+          var newLine = "<span class='system' style='color:#000000;'>[SYSTEM] [" + timestamp + "] The user </span><span class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + "'>" + eventParameters[ 0 ] + "</span><span class='system' style='color:#000000;'> has changed their display name to </span><span class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + "'>" + eventParameters[ 1 ] + "</span></br>";
+          $( '#chatContent' ).append( newLine );
+        }
+
+        // If the event came from the user we are logged in as and it is
+        // a playSoundEvent, then play the sound based on the parameter
+        // passed in the event.
+        if ( ( nodeId == playerId ) && ( eventName == "playSoundEvent" ) ) {
+          $( '#' + eventParameters[ 0 ] )[ 0 ].play( );
+        }
+
+        if ( nodeId == sceneId ) {
+          // Recieved an event fired by the scene.
+
+          if ( eventName == "userCreated" ) {
+            //  Handle the user created event.
+            //  First, test if we are already connected, if so, this is another user joining,
+            //  send a message to the chat log about the user joining and add the user to the user list.
+            if ( isConnected( ) ) {
+              var newLine = "<span class='system' style='color:#000000;'>[SYSTEM] [" + timestamp + "] The user </span><span class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + "'>" + eventParameters[ 1 ] + "</span><span class='system' style='color:#000000;'> has joined chat.</span></br>";
+              $( '#chatContent' ).append( newLine );
+              addUser( eventParameters[ 1 ], eventParameters[ 2 ] );
+            }
+
+            //  Test if we are attempting to login ourselves, and if so, if the name we attempted to login with is the one that was just created...
+            if ( ( attemptingLogin == true ) && ( attemptedName == eventParameters[ 1 ] ) ) {
+              //  If this event was our own login, reset the attempting login tracking variables
+              //  start the heartbeat for this particular user.
+              attemptingLogin = false;
+              attemptedName = undefined;
+              startHeartbeat( eventParameters[ 0 ], eventParameters[ 4 ] );
+
+              // Display the chat interface.
+              displayChatInterface( eventParameters[ 2 ] )
+
+              // The fourth(index 3) eventParameter is an array of currently connected users, loop over the list adding them to the user list.
+              for( var index = 0; index < eventParameters[ 3 ].length; index++ ) {
+                addUser( eventParameters[ 3 ][ index ][ 0 ], eventParameters[ 3 ][ index ][ 1 ] );
+              }
+            }
+          }
+
+          //  If the event is of type userCreateFailed, and it was in response to our attempt to log in...
+          if ( ( eventName == "userCreateFailed" ) && ( attemptingLogin == true ) && ( attemptedName == eventParameters[ 0 ] ) ) {
+            //  Reset the attempted login tracking variables.
+            attemptingLogin = false;
+            attemptedName = undefined;
+
+            //  Re-enable the logon data inputs.
+            enableLogonDataEntry( );
+
+            //  Display the display name conflict error message.
+            displayUserExistsMessage( );
+          }
+
+ 
+          //  If the event was a user being removed and we are connected, send an informative message to the chat windows and remove the user from the user list.
+          if ( ( isConnected( ) ) && ( eventName == "userRemoved" ) ) {
+            var newLine = "<span class='system' style='color:#000000;'>[SYSTEM] [" + timestamp + "] The user </span><span class='" + eventParameters[ 0 ] + "' style='color:" + eventParameters[ 1 ] + "'>" + eventParameters[ 0 ] + "</span><span class='system' style='color:#000000;'> has left chat.</span></br>";
+            $( '#chatContent' ).append( newLine );
+            removeUser( eventParameters[ 0 ] );
+          }
+
+          //  If the event was a message from a user and we are connected, display the message in the chat window.
+          if ( ( isConnected( ) ) && ( eventName == "userMessage" ) ) {
+            var newLine = "<span class='" + eventParameters[ 0 ] + "' style='color:" + eventParameters[ 1 ] + "'>[" + eventParameters[ 0 ] + "] [" + timestamp + "] " + eventParameters[ 2 ] + "</span></br>";
+            $( '#chatContent' ).append( newLine );
+          }
+        }
+      };
+
+    </script>
+  </body>
+</html>

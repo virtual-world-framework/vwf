@@ -756,15 +756,15 @@ THREE.ColladaLoader = function () {
 
 						if ( geometry.doubleSided ) {
 
-							if ( !( material3js in double_sided_materials ) ) {
+							if ( !( effect_id in double_sided_materials ) ) {
 
 								var _copied_material = material3js.clone();
 								_copied_material.side = THREE.DoubleSide;
-								double_sided_materials[ material3js ] = _copied_material;
+								double_sided_materials[ effect_id ] = _copied_material;
 
 							}
 
-							material3js = double_sided_materials[ material3js ];
+							material3js = double_sided_materials[ effect_id ];
 
 						}
 
@@ -3159,7 +3159,12 @@ THREE.ColladaLoader = function () {
 									texture.offset.y = cot.texOpts.offsetV;
 									texture.repeat.x = cot.texOpts.repeatU;
 									texture.repeat.y = cot.texOpts.repeatV;
-									props['map'] = texture;
+									if(prop == "specular") {
+										props["specularMap"] = texture;
+									}
+									else {
+										props['map'] = texture;
+									}
 
 									// Texture with baked lighting?
 									if (prop === 'emission') props['emissive'] = 0xffffff;

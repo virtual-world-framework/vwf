@@ -57,7 +57,7 @@ sudo chmod 744 -R *
 
 # Execute Build Process
 cd /var/www/vwf
-sudo bundle exec rake build
+sudo bundle exec rake
 
 # Download, and Setup Ruby Thin Server Service
 # Ruby Thin is configured to install on port 80 and auto-start on reboot

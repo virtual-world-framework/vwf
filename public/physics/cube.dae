@@ -10,74 +10,6 @@
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
-  <library_effects>
-    <effect id="ColorEffectR0G0B0">
-      <profile_COMMON>
-        <technique sid="common">
-          <phong>
-            <ambient>
-              <color>0 0 0 1</color>
-            </ambient>
-            <diffuse>
-              <color>0 0 0 1</color>
-            </diffuse>
-            <specular>
-              <color>1 1 1 1</color>
-            </specular>
-            <shininess>
-              <float>10</float>
-            </shininess>
-            <reflective>
-              <color>0 0 0 1</color>
-            </reflective>
-            <transparent>
-              <color>1 1 1 1</color>
-            </transparent>
-            <transparency>
-              <float>1</float>
-            </transparency>
-          </phong>
-        </technique>
-      </profile_COMMON>
-    </effect>
-    <effect id="ColorEffectR224G86B86">
-      <profile_COMMON>
-        <technique sid="common">
-          <phong>
-            <ambient>
-              <color>0.878431 0.337255 0.337255 1</color>
-            </ambient>
-            <diffuse>
-              <color>0.878431 0.337255 0.337255 1</color>
-            </diffuse>
-            <specular>
-              <color>1 1 1 1</color>
-            </specular>
-            <shininess>
-              <float>10</float>
-            </shininess>
-            <reflective>
-              <color>0 0 0 1</color>
-            </reflective>
-            <transparent>
-              <color>1 1 1 1</color>
-            </transparent>
-            <transparency>
-              <float>1</float>
-            </transparency>
-          </phong>
-        </technique>
-      </profile_COMMON>
-    </effect>
-  </library_effects>
-  <library_materials>
-    <material id="ColorEffectR0G0B0-material" name="ColorEffectR0G0B0-material">
-      <instance_effect url="#ColorEffectR0G0B0"/>
-    </material>
-    <material id="ColorEffectR224G86B86-material" name="ColorEffectR224G86B86-material">
-      <instance_effect url="#ColorEffectR224G86B86"/>
-    </material>
-  </library_materials>
   <library_geometries>
     <geometry id="geom-Box01" name="Box01">
       <mesh>
@@ -141,13 +73,7 @@
       <node id="node-Scene_Root" name="Scene_Root">
         <node id="node-Box01" name="Box01">
           <matrix>1 0 0 0 0 1 0 0 0 0 1 -1.5 0 0 0 1</matrix>
-          <instance_geometry url="#geom-Box01">
-            <bind_material>
-              <technique_common>
-                <instance_material symbol="ColorMaterial" target="#ColorEffectR224G86B86-material"/>
-              </technique_common>
-            </bind_material>
-          </instance_geometry>
+          <instance_geometry url="#geom-Box01" />
         </node>
       </node>
     </visual_scene>

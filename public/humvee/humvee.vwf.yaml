@@ -117,8 +117,6 @@ children:
   AirFan: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 2
@@ -159,8 +157,6 @@ children:
   GearShift: 
     extends: http://vwf.example.com/node3.vwf 
     implements:  
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 2
@@ -219,8 +215,6 @@ children:
   HighLowSelector: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
@@ -265,8 +259,6 @@ children:
   EmergencyBrake: 
     extends: http://vwf.example.com/node3.vwf 
     implements:  
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 2
@@ -309,8 +301,6 @@ children:
   Accelerator: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       animationRate: 3
@@ -346,8 +336,6 @@ children:
   Brake: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       animationRate: 3
@@ -383,8 +371,6 @@ children:
   SteeringWheel: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlValue: 1
@@ -445,8 +431,6 @@ children:
   TurnSignal: 
     extends: http://vwf.example.com/node3.vwf
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
@@ -491,8 +475,6 @@ children:
   Ignition: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
@@ -595,8 +577,6 @@ children:
   AirTemp: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
@@ -659,8 +639,6 @@ children:
   SpeedNeedle: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
@@ -721,8 +699,6 @@ children:
   VoltMeter: 
     extends: http://vwf.example.com/node3.vwf
     implements:
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
@@ -785,8 +761,6 @@ children:
   TempNeedle: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
@@ -849,8 +823,6 @@ children:
   OilNeedle: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
@@ -913,8 +885,6 @@ children:
   FuelNeedle: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
@@ -977,8 +947,6 @@ children:
   DoorPassFront: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 2
@@ -1013,8 +981,6 @@ children:
   DoorPassRear: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 2
@@ -1051,8 +1017,6 @@ children:
   WiperPass: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       animationTime: 0
@@ -1116,8 +1080,6 @@ children:
   WiperDriver: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       animationTime: 0
@@ -1181,8 +1143,6 @@ children:
   GunMount: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 2
@@ -1190,8 +1150,6 @@ children:
       GunMountHatch01: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           controlScale: 2
@@ -1199,8 +1157,6 @@ children:
           GunMountHatch02: 
             extends: http://vwf.example.com/node3.vwf 
             implements: 
-            - http://vwf.example.com/animation.vwf
-            - http://vwf.example.com/node3/animation.vwf
             - http://vwf.example.com/control.vwf
             properties:
               controlScale: 2
@@ -1322,8 +1278,6 @@ children:
   DoorDriverFront: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 2
@@ -1358,8 +1312,6 @@ children:
   RearHatch: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 2
@@ -1394,8 +1346,6 @@ children:
   SpareMount: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 2
@@ -1435,8 +1385,6 @@ children:
   DoorDriverRear: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 2
@@ -1481,8 +1429,6 @@ children:
   TirePassFront: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
@@ -1528,8 +1474,6 @@ children:
   TireDriverFront: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 3
@@ -1580,8 +1524,6 @@ children:
   HoodLatchPass: 
     extends: http://vwf.example.com/node3.vwf
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 2
@@ -1617,8 +1559,6 @@ children:
   HoodLatchDriver: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 2
@@ -1654,8 +1594,6 @@ children:
   Hood: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
-    - http://vwf.example.com/animation.vwf
-    - http://vwf.example.com/node3/animation.vwf
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 2

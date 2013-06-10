@@ -268,13 +268,16 @@
                 { library: "vwf/view/lesson", active: false},
                 { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/view/touch", active: false},
+                { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
+                { library: "vwf/view/cesium", linkedLibraries: ["vwf/view/cesium/Cesium"], active: false },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
                 { library: "vwf/model/threejs/three", active: false },
                 { library: "vwf/model/threejs/js/loaders/ColladaLoader", active: false },
                 { library: "vwf/model/jiglib/jiglib", active: false },
+                { library: "vwf/view/webrtc/adapter", active: false },
                 { library: "vwf/view/google-earth", active: false },
-                { library: "vwf/view/cesium", active: false }
+                { library: "vwf/view/cesium/Cesium", active: false }
             ];
 
             var initializers = {
@@ -293,7 +296,8 @@
                     { library: "vwf/view/lesson", active: false},
                     { library: "vwf/view/touch", active: false},
                     { library: "vwf/view/google-earth", active: false },
-                    { library: "vwf/view/cesium", active: false }
+                    { library: "vwf/view/cesium", active: false },
+                    { library: "vwf/view/webrtc", active: false}
                 ]
             };
             mapLibraryName(requireArray);
@@ -326,6 +330,10 @@
             $.getJSON("admin/config", function(configLibraries) {
                 if(configLibraries && typeof configLibraries == "object") {
                     Object.keys(configLibraries).forEach(function(libraryType) {
+                        if(libraryType == 'info' && configLibraries[libraryType]["title"])
+                        {
+                            $('title').html(configLibraries[libraryType]["title"]);
+                        }
                         if(!userLibraries[libraryType]) {
                             userLibraries[libraryType] = {};
                         }
@@ -908,11 +916,11 @@
 
         this.receive = function( nodeID, actionName, memberName, parameters, respond, origin ) {
 
-            origin == "reflector" ?
-                this.logger.infogx( "receive", nodeID, actionName, memberName,
-                    parameters && parameters.length, respond, origin ) :
-                this.logger.debuggx( "receive", nodeID, actionName, memberName,
-                    parameters && parameters.length, respond, origin );
+            // origin == "reflector" ?
+            //     this.logger.infogx( "receive", nodeID, actionName, memberName,
+            //         parameters && parameters.length, respond, origin ) :
+            //     this.logger.debuggx( "receive", nodeID, actionName, memberName,
+            //         parameters && parameters.length, respond, origin );
 
 // TODO: delegate parsing and validation to each action.
 
@@ -936,8 +944,8 @@
             respond && this.respond( nodeID, actionName, memberName, parameters,
                 require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ) );
 
-            origin == "reflector" ?
-                this.logger.infou() : this.logger.debugu();
+            // origin == "reflector" ?
+            //     this.logger.infou() : this.logger.debugu();
         };
 
         // -- dispatch -----------------------------------------------------------------------------
@@ -1044,92 +1052,67 @@
 
             this.logger.debuggx( "setState" );  // TODO: loggableState
 
-            async.series( [
+            // Set the runtime configuration.
 
-                // Set the runtime configuration.
+            if ( applicationState.configuration ) {
+                require( "vwf/configuration" ).instance = applicationState.configuration;
+            }
 
-                function( series_callback /* ( err, results ) */ ) {
+            // Update the internal kernel state.
 
-                    if ( applicationState.configuration ) {
-                        require( "vwf/configuration" ).instance = applicationState.configuration;
-                    }
+            if ( applicationState.kernel ) {
+                if ( applicationState.kernel.time !== undefined ) vwf.now = applicationState.kernel.time;
+            }
 
-                    series_callback( undefined, undefined );
-                },
+            // Create or update global nodes and their descendants.
 
-                // Update the internal kernel state.
+            async.forEach( applicationState.nodes || [], function( nodeComponent, each_callback_async /* ( err ) */ ) {
 
-                function( series_callback /* ( err, results ) */ ) {
+                vwf.createNode( nodeComponent, function( nodeID ) /* async */ {
+                    each_callback_async( undefined );
+                } );
 
-                    if ( applicationState.kernel ) {
-                        if ( applicationState.kernel.time !== undefined ) vwf.now = applicationState.kernel.time;
-                    }
- 
-                    series_callback( undefined, undefined );
-                },
-
-                // Create or update global nodes and their descendants.
-
-                function( series_callback_async /* ( err, results ) */ ) {
-
-                    async.forEach( applicationState.nodes || [], function( nodeComponent, each_callback_async /* ( err ) */ ) {
-
-                        vwf.createNode( nodeComponent, function( nodeID ) /* async */ {
-                            each_callback_async( undefined );
-                        } );
-
-                    }, function( err ) /* async */ {
-                        series_callback_async( err, undefined );
-                    } );
-
-                },
+            }, function( err ) /* async */ {
 
                 // Set the message queue.
 
-                function( series_callback /* ( err, results ) */ ) {
+                var private_queue = [], fields;
 
-                    var private_queue = [], fields;
+                if ( applicationState.queue ) {
 
-                    if ( applicationState.queue ) {
+                    // Clear the queue, but leave any private direct messages in place. Update
+                    // the queue array in place so that existing references remain valid.  // TODO: move to the queue object
 
-                        // Clear the queue, but leave any private direct messages in place. Update
-                        // the queue array in place so that existing references remain valid.  // TODO: move to the queue object
+                    while ( queue.queue.length > 0 ) {
 
-                        while ( queue.queue.length > 0 ) {
+                        fields = queue.queue.shift();
 
-                            fields = queue.queue.shift();
+                        vwf.logger.debugx( "setState", function() {
+                            return [ "removing", JSON.stringify( loggableFields( fields ) ), "from queue" ];
+                        } );
 
-                            vwf.logger.debugx( "setState", function() {
-                                return [ "removing", JSON.stringify( loggableFields( fields ) ), "from queue" ];
-                            } );
-
-                            fields.respond && private_queue.push( fields );
-
-                        }
-
-                        while ( private_queue.length > 0 ) {
-
-                            fields = private_queue.shift();
-
-                            vwf.logger.debugx( "setState", function() {
-                                return [ "returning", JSON.stringify( loggableFields( fields ) ), "to queue" ];
-                            } );
-
-                            queue.queue.push( fields );
-
-                        }
-
-                        // Set the queue time and add the incoming items to the queue.
-
-                        queue.time = applicationState.queue.time;
-                        queue.insert( applicationState.queue.queue || [] );
+                        fields.respond && private_queue.push( fields );
 
                     }
 
-                    series_callback( undefined, undefined );
-                },
+                    while ( private_queue.length > 0 ) {
 
-            ], function( err, results ) /* async */ {
+                        fields = private_queue.shift();
+
+                        vwf.logger.debugx( "setState", function() {
+                            return [ "returning", JSON.stringify( loggableFields( fields ) ), "to queue" ];
+                        } );
+
+                        queue.queue.push( fields );
+
+                    }
+
+                    // Set the queue time and add the incoming items to the queue.
+
+                    queue.time = applicationState.queue.time;
+                    queue.insert( applicationState.queue.queue || [] );
+
+                }
 
                 callback_async && callback_async();
 
@@ -1341,7 +1324,7 @@
 
                 function( series_callback_async /* ( err, results ) */ ) {
 
-                    if ( componentIsDescriptor( nodeComponent ) && nodeComponent.includes && componentIsURI( nodeComponent.includes ) ) {
+                    if ( componentIsDescriptor( nodeComponent ) && nodeComponent.includes && componentIsURI( nodeComponent.includes ) ) {  // TODO: for "includes:", accept an already-loaded component (which componentIsURI exludes) since the descriptor will be loaded again
 
                         var prototypeURI = nodeComponent.includes;
 
@@ -1379,25 +1362,22 @@
 
                 // nodeComponent is the ID.
 
-                function( series_callback /* ( err, results ) */ ) { // nodeComponent is an ID
+                function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is an ID
 
                     if ( componentIsID( nodeComponent ) ) {  // ID
+
                         nodeID = nodeComponent;
-                        series_callback( undefined, undefined );
-                    } else {  // error
-                        series_callback( undefined, undefined );  // TODO: error
-                    }
 
-                },
-
-                function( series_callback_async /* ( err, results ) */ ) {
-
-                    if ( nodePatch ) {
-                        vwf.setNode( nodeID, nodePatch, function( nodeID ) /* async */ {
+                        if ( nodePatch ) {
+                            vwf.setNode( nodeID, nodePatch, function( nodeID ) /* async */ {
+                                series_callback_async( undefined, undefined );
+                            } );
+                        } else {
                             series_callback_async( undefined, undefined );
-                        } );
-                    } else {
-                        series_callback_async( undefined, undefined );
+                        }
+
+                    } else {  // error
+                        series_callback_async( undefined, undefined );  // TODO: error
                     }
 
                 },
@@ -1499,105 +1479,80 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                 return [ nodeID, JSON.stringify( loggableComponent( nodeComponent ) ) ];
             } );
 
-            async.series( [
+            // Set the internal state.
 
-                function( series_callback /* ( err, results ) */ ) {
+            vwf.models.object.internals( nodeID, nodeComponent );
 
-                    // Set the internal state.
+            // Suppress kernel reentry so that we can write the state without coloring from
+            // any scripts.
 
-                    vwf.models.object.internals( nodeID, nodeComponent );
+            vwf.models.kernel.disable();
 
-                    series_callback( undefined, undefined );
-                },
+            // Create the properties, methods, and events. For each item in each set, invoke
+            // createProperty(), createMethod(), or createEvent() to create the field. Each
 
-                function( series_callback /* ( err, results ) */ ) {
+            // delegates to the models and views as above.
 
-                    // Suppress kernel reentry so that we can write the state without coloring from
-                    // any scripts.
+            nodeComponent.properties && jQuery.each( nodeComponent.properties, function( propertyName, propertyValue ) {  // TODO: setProperties should be adapted like this to be used here
 
-                    vwf.models.kernel.disable();
+                // Is the property specification directing us to create a new property, or
+                // initialize a property already defined on a prototype?
 
-                    // Create the properties, methods, and events. For each item in each set, invoke
-                    // createProperty(), createMethod(), or createEvent() to create the field. Each
+                // Create a new property if the property is not defined on a prototype.
+                // Otherwise, initialize the property.
 
-                    // delegates to the models and views as above.
+                var creating = ! nodeHasProperty.call( vwf, nodeID, propertyName ); // not defined on node or prototype
 
-                    nodeComponent.properties && jQuery.each( nodeComponent.properties, function( propertyName, propertyValue ) {  // TODO: setProperties should be adapted like this to be used here
+                // Create or initialize the property.
 
-                        // Is the property specification directing us to create a new property, or
-                        // initialize a property already defined on a prototype?
+                if ( creating ) {
+                    vwf.createProperty( nodeID, propertyName, propertyValue );
+                } else {
+                    vwf.setProperty( nodeID, propertyName, propertyValue );
+                }  // TODO: delete when propertyValue === null in patch
 
-                        // Create a new property if the property is not defined on a prototype.
-                        // Otherwise, initialize the property.
+            } );
 
-                        var creating = ! nodeHasProperty.call( vwf, nodeID, propertyName ); // not defined on node or prototype
+            // TODO: methods, events
 
-                        // Create or initialize the property.
+            // Restore kernel reentry.
 
-                        if ( creating ) {
-                            vwf.createProperty( nodeID, propertyName, propertyValue );
-                        } else {
-                            vwf.setProperty( nodeID, propertyName, propertyValue );
-                        }  // TODO: delete when propertyValue === null in patch
+            vwf.models.kernel.enable();
 
+            // Create and attach the children. For each child, call createChild() with the
+            // child's component specification. createChild() delegates to the models and
+            // views as before.
+
+            async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
+
+                var creating = ! nodeHasOwnChild.call( vwf, nodeID, childName );
+
+                if ( creating ) {
+                    vwf.createChild( nodeID, childName, nodeComponent.children[childName], undefined, function( childID ) /* async */ {  // TODO: add in original order from nodeComponent.children  // TODO: ensure id matches nodeComponent.children[childName].id  // TODO: propagate childURI + fragment identifier to children of a URI component?
+                        each_callback_async( undefined );
                     } );
-
-                    // TODO: methods, events
-
-                    // Restore kernel reentry.
-
-                    vwf.models.kernel.enable();
-
-                    series_callback( undefined, undefined );
-                },
-
-                function( series_callback_async /* ( err, results ) */ ) {
-
-                    // Create and attach the children. For each child, call createChild() with the
-                    // child's component specification. createChild() delegates to the models and
-                    // views as before.
-
-                    async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
-
-                        var creating = ! nodeHasOwnChild.call( vwf, nodeID, childName );
-
-                        if ( creating ) {
-                            vwf.createChild( nodeID, childName, nodeComponent.children[childName], undefined, function( childID ) /* async */ {  // TODO: add in original order from nodeComponent.children  // TODO: ensure id matches nodeComponent.children[childName].id  // TODO: propagate childURI + fragment identifier to children of a URI component?
-                                each_callback_async( undefined );
-                            } );
-                        } else {
-                            vwf.setNode( nodeComponent.children[childName].id || nodeComponent.children[childName].patches,
-                                    nodeComponent.children[childName], function( childID ) /* async */ {
-                                each_callback_async( undefined );
-                            } );
-                        }  // TODO: delete when nodeComponent.children[childName] === null in patch
-    
-                    }, function( err ) /* async */ {
-                        series_callback_async( err, undefined );
+                } else {
+                    vwf.setNode( nodeComponent.children[childName].id || nodeComponent.children[childName].patches,
+                            nodeComponent.children[childName], function( childID ) /* async */ {
+                        each_callback_async( undefined );
                     } );
+                }  // TODO: delete when nodeComponent.children[childName] === null in patch
 
-                },
+            }, function( err ) /* async */ {
 
-                function( series_callback /* ( err, results ) */ ) {
+                // Attach the scripts. For each script, load the network resource if the script is
+                // specified as a URI, then once loaded, call execute() to direct any model that
+                // manages scripts of this script's type to evaluate the script where it will
+                // perform any immediate actions and retain any callbacks as appropriate for the
+                // script type.
 
-                    // Attach the scripts. For each script, load the network resource if the script is
-                    // specified as a URI, then once loaded, call execute() to direct any model that
-                    // manages scripts of this script's type to evaluate the script where it will
-                    // perform any immediate actions and retain any callbacks as appropriate for the
-                    // script type.
-
-                    nodeComponent.scripts && nodeComponent.scripts.forEach( function( script ) {
-                        if ( valueHasType( script ) ) {
-                            script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
-                        } else {
-                            script && vwf.execute( nodeID, script, undefined ); // TODO: external scripts too // TODO: callback
-                        }
-                    } );
-
-                    series_callback( undefined, undefined );
-                },
-
-            ], function( err, results ) /* async */ {
+                nodeComponent.scripts && nodeComponent.scripts.forEach( function( script ) {
+                    if ( valueHasType( script ) ) {
+                        script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                    } else {
+                        script && vwf.execute( nodeID, script, undefined ); // TODO: external scripts too // TODO: callback
+                    }
+                } );
 
                 callback_async && callback_async( nodeID );
 
@@ -1916,21 +1871,50 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                 function( series_callback_async /* ( err, results ) */ ) {
 
                     // Rudimentary support for `{ includes: prototype }`, which absorbs a prototype
-                    // descriptor into the child descriptor before creating the child.
+                    // descriptor into the child descriptor before creating the child. See the notes
+                    // in `createNode` and the `mergeDescriptors` limitations.
 
-                    // See the notes in `createNode` and the `mergeDescriptors` limitations.
+                    // This first task always completes asynchronously (even if it doesn't perform
+                    // an async operation) so that the stack doesn't grow from node to node while
+                    // createChild() recursively traverses a component. If this task is moved,
+                    // replace it with an async stub, or make the next task exclusively async.
 
-                    if ( componentIsDescriptor( childComponent ) && childComponent.includes && componentIsURI( childComponent.includes ) ) {
+                    if ( componentIsDescriptor( childComponent ) && childComponent.includes && componentIsURI( childComponent.includes ) ) {  // TODO: for "includes:", accept an already-loaded component (which componentIsURI exludes) since the descriptor will be loaded again
 
                         var prototypeURI = childComponent.includes;
 
+                        var sync = true; // will loadComponent() complete synchronously?
+
                         loadComponent( prototypeURI, function( prototypeDescriptor ) /* async */ {
+
                             childComponent = mergeDescriptors( childComponent, prototypeDescriptor ); // modifies prototypeDescriptor
-                            series_callback_async( undefined, undefined );
+
+                            if ( sync ) {
+
+                                queue.suspend( "before beginning " + childID ); // suspend the queue
+
+                                async.nextTick( function() {
+                                    series_callback_async( undefined, undefined );
+                                    queue.resume( "after beginning " + childID ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                                } );
+
+                            } else {
+                                series_callback_async( undefined, undefined );
+                            }
+
                         } );
 
+                        sync = false; // not if we got here first
+
                     } else {
-                        series_callback_async( undefined, undefined );
+
+                        queue.suspend( "before beginning " + childID ); // suspend the queue
+
+                        async.nextTick( function() {
+                            series_callback_async( undefined, undefined );
+                            queue.resume( "after beginning " + childID ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                        } );
+
                     }
 
                 },
@@ -2069,16 +2053,11 @@ if ( ! childComponent.source ) {
 
                 },
 
-                function( series_callback /* ( err, results ) */ ) {
+                function( series_callback_async /* ( err, results ) */ ) {
 
                     // Set the internal state.
 
                     vwf.models.object.internals( childID, childComponent );
-
-                    series_callback( undefined, undefined );
-                },
-
-                function( series_callback /* ( err, results ) */ ) {
 
                     // Suppress kernel reentry so that we can read the state without coloring from
                     // any scripts.
@@ -2158,11 +2137,6 @@ if ( ! childComponent.source ) {
 
                     replicating && vwf.models.kernel.enable();
 
-                    series_callback( undefined, undefined );
-                },
-
-                function( series_callback_async /* ( err, results ) */ ) {
-
                     // Create and attach the children. For each child, call createChild() with the
                     // child's component specification. createChild() delegates to the models and
                     // views as before.
@@ -2180,42 +2154,37 @@ if ( ! childComponent.source ) {
 
                 },
 
-                function( series_callback /* ( err, results ) */ ) {
+            ], function( err, results ) /* async */ {
 
-                    // Suppress kernel reentry so that initialization functions don't make any
-                    // changes during replication.
+                // Suppress kernel reentry so that initialization functions don't make any
+                // changes during replication.
 
-                    replicating && vwf.models.kernel.disable();
+                replicating && vwf.models.kernel.disable();
 
-                    // Attach the scripts. For each script, load the network resource if the script is
-                    // specified as a URI, then once loaded, call execute() to direct any model that
-                    // manages scripts of this script's type to evaluate the script where it will
-                    // perform any immediate actions and retain any callbacks as appropriate for the
-                    // script type.
+                // Attach the scripts. For each script, load the network resource if the script is
+                // specified as a URI, then once loaded, call execute() to direct any model that
+                // manages scripts of this script's type to evaluate the script where it will
+                // perform any immediate actions and retain any callbacks as appropriate for the
+                // script type.
 
-                    childComponent.scripts && childComponent.scripts.forEach( function( script ) {
-                        if ( valueHasType( script ) ) {
-                            script.text && vwf.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
-                        } else {
-                            script && vwf.execute( childID, script, undefined ); // TODO: external scripts too // TODO: callback
-                        }
-                    } );
+                childComponent.scripts && childComponent.scripts.forEach( function( script ) {
+                    if ( valueHasType( script ) ) {
+                        script.text && vwf.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                    } else {
+                        script && vwf.execute( childID, script, undefined ); // TODO: external scripts too // TODO: callback
+                    }
+                } );
 
-                    // Restore kernel reentry.
+                // Restore kernel reentry.
 
-                    replicating && vwf.models.kernel.enable();
+                replicating && vwf.models.kernel.enable();
 
-                    series_callback( undefined, undefined );
-                },
+                // Perform initializations for properties with setter functions. These are
+                // assigned here so that the setters run on a fully-constructed node.
 
-                function( series_callback /* ( err, results ) */ ) {
-
-                    // Perform initializations for properties with setter functions. These are
-                    // assigned here so that the setters run on a fully-constructed node.
-
-                    Object.keys( deferredInitializations ).forEach( function( propertyName ) {
-                        vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
-                    } );
+                Object.keys( deferredInitializations ).forEach( function( propertyName ) {
+                    vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
+                } );
 
 // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
@@ -2223,38 +2192,46 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
     vwf.tickable.nodeIDs.push( childID );
 }
 
-                    // Suppress kernel reentry so that initialization functions don't make any
-                    // changes during replication.
+                // Suppress kernel reentry so that initialization functions don't make any
+                // changes during replication.
 
-                    replicating && vwf.models.kernel.disable();
+                replicating && vwf.models.kernel.disable();
 
-                    // Call initializingNode() on each model and initializedNode() on each view to
-                    // indicate that the node is fully constructed.
+                // Call initializingNode() on each model and initializedNode() on each view to
+                // indicate that the node is fully constructed.
 
-                    vwf.models.forEach( function( model ) {
-                        model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                            childComponent.source, childComponent.type, childIndex, childName );
-                    } );
+                vwf.models.forEach( function( model ) {
+                    model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                        childComponent.source, childComponent.type, childIndex, childName );
+                } );
 
-                    vwf.views.forEach( function( view ) {
-                        view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                            childComponent.source, childComponent.type, childIndex, childName );
-                    } );
+                vwf.views.forEach( function( view ) {
+                    view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                        childComponent.source, childComponent.type, childIndex, childName );
+                } );
 
-                    // Restore kernel reentry.
+                // Restore kernel reentry.
 
-                    replicating && vwf.models.kernel.enable();
-
-                    series_callback( undefined, undefined );
-                },
-
-            ], function( err, results ) /* async */ {
+                replicating && vwf.models.kernel.enable();
 
                 // The node is complete. Invoke the callback method and pass the new node ID and the
                 // ID of its prototype. If this was the root node for the application, the
                 // application is now fully initialized.
 
-                callback_async && callback_async( childID );
+                // Always complete asynchronously so that the stack doesn't grow from node to node
+                // while createChild() recursively traverses a component.
+
+                if ( callback_async ) {
+
+                    queue.suspend( "before completing " + childID ); // suspend the queue
+
+                    async.nextTick( function() {
+                        callback_async( childID );
+                        queue.resume( "after completing " + childID ); // suspend the queue
+                    } );
+
+                }
+
             } );
 
             this.logger.debugu();

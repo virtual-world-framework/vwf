@@ -31,13 +31,13 @@
 /// @module vwf/view/cesium
 /// @requires vwf/view
 
-define( [ "module", "vwf/view" ], function( module, view ) {
+define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
 
     return view.load( module, {
 
         // == Module Definition ====================================================================
 
-        initialize: function() {
+        initialize: function( options ) {
 
             if ( !this.state ) {   
                 this.state = {};
@@ -48,7 +48,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if ( !this.state.nodes ) {   
                 this.state.nodes = {};
             }
- 
+
+            if ( options === undefined ) { options = {}; }
+
+            this.useCesiumWidget = options.useCesiumWidget !== undefined ? options.useCesiumWidget : true;
+            this.createContainer = options.createContainer !== undefined ? options.createContainer : true;
+            this.containerDiv = options.containerDiv !== undefined ? options.containerDiv : 'cesiumContainer';
+
             this.height = 600;
             this.width = 800;
 
@@ -81,138 +87,154 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             
             switch ( childExtendsID.toLowerCase() ) {
                 case "http-vwf-example-com-cesium-vwf":
-                    var outerDiv = jQuery('body').append(
-                        "<canvas id='glCanvas' width='" + this.width + "px' height='" + this.height + "px'></canvas>"
-                    );
-                    var head = jQuery('head').append(
-                        "<script type='text/javascript' src='Cesium.js'></script>"
-                    );
+                    if ( this.createContainer ) {
+                        jQuery('body').append(
+                            "<div class='cesuim-container' id='"+this.containerDiv+"'></div>"
+                        );
+                    }
+                    //var head = jQuery('head').append(
+                    //    "<script type='text/javascript' src='Cesium.js'></script>"
+                    //);
                     break;
                 case "http-vwf-example-com-node3-vwf":
                     if(childName == "cesiumInstance") {
                         this.state.nodes[ childID ] = node;
                         var view = this;
-                       
-                        var canvas = document.getElementById("glCanvas");
-                        var ellipsoid = Cesium.Ellipsoid.WGS84;
-                        var scene = new Cesium.Scene(canvas);
-                        var primitives = scene.getPrimitives();
-                    
-                        // Bing Maps
-                        var bing = new Cesium.BingMapsTileProvider({
-                            server : "dev.virtualearth.net",
-                            mapStyle : Cesium.BingMapsStyle.AERIAL
-                        });
-                    
-                        var cb = new Cesium.CentralBody(ellipsoid);
-                        cb.dayTileProvider = bing;
-                        cb.nightImageSource = "images/land_ocean_ice_lights_2048.jpg";
-                        cb.specularMapSource = "images/earthspec1k.jpg";
-                        if (scene.getContext().getMaximumTextureSize() > 2048) {
-                            cb.cloudsMapSource = "images/earthcloudmaptrans.jpg";
-                            cb.bumpMapSource = "images/earthbump1k.jpg";
+                        var scene;
+
+                        if ( this.useCesiumWidget ) {
+                            node.widget = new Cesium.CesiumWidget( this.containerDiv );
+                            scene = node.widget.scene;
+
+                            scene.skyBox.destroy();
+                            scene.skyBox = undefined;
+                            scene.skyAtmosphere.destroy();
+                            scene.skyAtmosphere = undefined;
+
+                        } else {
+                            var canvas = document.createElement('canvas');
+                            canvas.className = 'fullSize';
+                            document.getElementById( this.containerDiv ).appendChild(canvas);
+
+                            canvas.setAttribute( 'height', this.height );
+                            canvas.setAttribute( 'width', this.width );
+
+                            //canvas.setAttribute('tabindex', '0'); // needed to put focus on the canvas
+                            //canvas.onclick = function() {
+                            //    canvas.focus();
+                            //};
+
+                            scene = new Cesium.Scene( canvas );
+
+                            var primitives = scene.getPrimitives();
+
+                            var ellipsoid = Cesium.Ellipsoid.WGS84;
+                            node.centralBody = new Cesium.CentralBody( ellipsoid );
+                            //node.centralBody.getImageryLayers().addImageryProvider( bing );
+
+                            primitives.setCentralBody( node.centralBody );
                         }
-                        cb.showSkyAtmosphere = true;
-                        cb.showGroundAtmosphere = false;
-                        primitives.setCentralBody(cb);
-                    
-                        scene.getCamera().frustum.near = 1.0;
-                    
-                        scene.getCamera().getControllers().addCentralBody();
-                        
-                        scene.setAnimation(function() {
-                            scene.setSunPosition(Cesium.SunPosition.compute().position);
-                        });
-                        
-                        view = this;
+
                         node.scene = scene;
                         
-                        var spindle = scene.getCamera().getControllers().get(0).spindleController;
-                        var spinHandler = spindle._spinHandler;
-                        var rightZoom = spindle._zoomHandler;
-                        var wheelZoom = spindle._zoomWheel;
-                        var freeLook = scene.getCamera().getControllers().get(0).freeLookController;
-                        var centralBody = scene.getCamera().getControllers().get(0);
-                        var rotateHandler = scene.getCamera().getControllers().get(0)._rotateHandler;
+                        var ctrl = scene.getScreenSpaceCameraController();
+
+                        var spin = ctrl._spinHandler;
+                        var trans = ctrl._tranlateHandler
+                        var look = ctrl._lookHandler;
+                        var rotate = ctrl._rotateHandler;
+                        var zoom = ctrl._zoomHandler;
+                        var zoomWheel = ctrl._zoomWheelHandler;
+                        var pinch = ctrl._pinchHandler;
+
+                        ctrl.enableTranslate = true;
+                        ctrl.enableZoom = true;
+                        ctrl.enableRotate = true;
+                        ctrl.enableTilt = true;
+                        ctrl.enableLook = true;
+
+                        // var look = scene.getCamera().getControllers().get(0).lookController;
+                        // var centralBody = scene.getCamera().getControllers().get(0);
+                        // var rotateHandler = scene.getCamera().getControllers().get(0)._rotateHandler;
                         
-                        (function tick() {
-                            var spinning = spinHandler && spinHandler.isMoving() && spinHandler.getMovement();
-                            var rotating = rotateHandler && rotateHandler.isMoving();
-                            var rightZooming = rightZoom && rightZoom.isMoving();
-                            var wheelZooming = wheelZoom && wheelZoom.isMoving();
-                            var spinMovement = spinHandler.getMovement();
-                            var rotateMovement = rotateHandler.getMovement();
-                            var rightZoomMovement = rightZoom.getMovement();
-                            var wheelZoomMovement = wheelZoom.getMovement();
+                        ( function tick() {
+                            var spinning = spin && spin.isMoving() && spin.getMovement();
+                            var rotating = rotate && rotate.isMoving();
+                            var zooming = zoom && zoom.isMoving();
+                            var zoomWheeling = zoomWheel && zoomWheel.isMoving();
+                            var spinMovement = spin.getMovement();
                             
-                            var freeLookIsMoving = freeLook._handler.isMoving();
-                            var freeLookMovement = freeLook._handler.getMovement();
+                            var rotateMovement = rotate.getMovement();
+                            var zoomMovement = zoom.getMovement();
+                            var zoomWheelMovement = zoomWheel.getMovement();
+                            
+                            var lookIsMoving = look.isMoving();
+                            var lookMovement = look.getMovement();
                             
                             broadcastCameraControllerData.call(view, {
-                            	"spinning": spinning,
-                            	"rotating": rotating,
-                            	"rightZooming": rightZooming,
-                            	"wheelZooming": wheelZooming,
-                            	"spinMovement": spinMovement,
-                            	"spinTouchStart": spinHandler.getButtonPressTime() ? spinHandler.getButtonPressTime().getTime() : undefined,
-                            	"spinTouchRelease": spinHandler.getButtonReleaseTime() ? spinHandler.getButtonReleaseTime().getTime() : undefined,
-                            	"spinLastMovement": spinHandler.getLastMovement(),
-                            	"rotateMovement": rotateMovement,
-                            	"rightZoomMovement": rightZoomMovement,
-                            	"rightZoomTouchStart": rightZoom.getButtonPressTime() ? rightZoom.getButtonPressTime().getTime() : undefined,
-                            	"rightZoomTouchRelease": rightZoom.getButtonReleaseTime() ? rightZoom.getButtonReleaseTime().getTime() : undefined,
-                            	"rightZoomLastMovement": rightZoom.getLastMovement(),
-                            	"wheelZoomMovement": wheelZoomMovement,
-                            	"wheelZoomTouchStart": wheelZoom.getButtonPressTime() ? wheelZoom.getButtonPressTime().getTime() : undefined,
-                            	"wheelZoomTouchRelease": wheelZoom.getButtonReleaseTime() ? wheelZoom.getButtonReleaseTime().getTime() : undefined,
-                            	"wheelZoomLastMovement": wheelZoom.getLastMovement(),
-                            	"freeLookIsMoving": freeLookIsMoving,
-                            	"freeLookMovement": freeLookMovement
+                                "spinning": spinning,
+                                "rotating": rotating,
+                                "zooming": zooming,
+                                "zoomWheeling": zoomWheeling,
+                                "spinMovement": spinMovement,
+                                "spinTouchStart": spin.getButtonPressTime() ? spin.getButtonPressTime().getTime() : undefined,
+                                "spinTouchRelease": spin.getButtonReleaseTime() ? spin.getButtonReleaseTime().getTime() : undefined,
+                                "spinLastMovement": spin.getLastMovement(),
+                                "rotateMovement": rotateMovement,
+                                "zoomMovement": zoomMovement,
+                                "zoomTouchStart": zoom.getButtonPressTime() ? zoom.getButtonPressTime().getTime() : undefined,
+                                "zoomTouchRelease": zoom.getButtonReleaseTime() ? zoom.getButtonReleaseTime().getTime() : undefined,
+                                "zoomLastMovement": zoom.getLastMovement(),
+                                "zoomWheelMovement": zoomWheelMovement,
+                                "zoomWheelTouchStart": zoomWheel.getButtonPressTime() ? zoomWheel.getButtonPressTime().getTime() : undefined,
+                                "zoomWheelTouchRelease": zoomWheel.getButtonReleaseTime() ? zoomWheel.getButtonReleaseTime().getTime() : undefined,
+                                "zoomWheelLastMovement": zoomWheel.getLastMovement(),
+                                "lookIsMoving": lookIsMoving,
+                                "lookMovement": lookMovement
                             });
                             
-                            if (spinning) {
-                            	spindle._spin(spinMovement);
-                            } 
+                            // if ( spinning ) {
+                            //      spin._spin(spinMovement);
+                            // } 
                             
-                            if (rotating) {
-                            	centralBody._rotate(rotateMovement);
-                            }
+                            // if ( rotating ) {
+                            //      centralBody._rotate(rotateMovement);
+                            // }
 
-                            if (rightZooming) {
-                            	spindle._zoom(rightZoomMovement);
-                            }
-                            else if (wheelZooming) {
-                            	spindle._zoom(wheelZoomMovement);
-                            }
+                            // if ( zooming ) {
+                            //      spin._zoom(zoomMovement);
+                            // } else if (zoomWheeling) {
+                            //      spin._zoom(zoomWheelMovement);
+                            // }
                             
-                            if(freeLookIsMoving) {
-                            	freeLook._look(freeLookMovement);
-                            }
-                            
+                            // if ( lookIsMoving ) {
+                            //      look._look(lookMovement);
+                            // }
+                            scene.initializeFrame();
                             scene.render();
                             Cesium.requestAnimationFrame(tick);
                         }());
-    					
-    					var keydownHandler = function(e) {
-    						var keyCode = e.keyCode;
-    						if (keyCode === 82) {	// "R"
-    							console.log("Synchronize views");
-    							var direction = scene.getCamera().direction;
-    							var position = scene.getCamera().position;
-    							var up = scene.getCamera().up;
-    							var right = scene.getCamera().right;
-    							broadcastCameraViewData.call(view, {
-    								"direction": direction,
-    								"position": position,
-    								"up": up,
-    								"right": scene.getCamera().right
-    							});
-    						}
-    					}
-    					document.addEventListener('keydown', keydownHandler, false);
+                        
+                        var keydownHandler = function(e) {
+                            var keyCode = e.keyCode;
+                            if (keyCode === 82) {   // "R"
+                                console.log("Synchronize views");
+                                var direction = scene.getCamera().direction;
+                                var position = scene.getCamera().position;
+                                var up = scene.getCamera().up;
+                                var right = scene.getCamera().right;
+                                broadcastCameraViewData.call(view, {
+                                    "direction": direction,
+                                    "position": position,
+                                    "up": up,
+                                    "right": scene.getCamera().right
+                                });
+                            }
+                        }
+                        document.addEventListener('keydown', keydownHandler, false);
                         
                         document.oncontextmenu = function() { return false; };  
-                    }                  
+                     }                  
             } 
         }, 
 
@@ -228,98 +250,304 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         satProperty: function( nodeID, propertyName, propertyValue ) {
             
             var value, cesiumInstance;
+            var node = this.state.nodes[ nodeID ];
 
-            for(var node in this.state.nodes) {
-                if(this.state.nodes[node].name == "cesiumInstance") {
-                    cesiumInstance = this.state.nodes[node];
+            for ( var n in this.state.nodes ) {
+                if (  this.state.nodes[ n ].name == "cesiumInstance" ) {
+                    cesiumInstance = this.state.nodes[ n ];
                 }
             }
 
             if ( propertyValue ) {
-                if ( propertyName == "controlClient" ) {
+                var scene;
+
+                if ( propertyName == "imageryProvider") {
+                    
+                    var imageProvider = undefined;
+                    var proxy = new DefaultProxy('/proxy/');
+                    //While some sites have CORS on, not all browsers implement it properly, so a proxy is needed anyway;
+                    var proxyIfNeeded = Cesium.FeatureDetection.supportsCrossOriginImagery() ? undefined : proxy;                    
+                    
+                    switch ( propertyValue ) {
+                        case "bingAerial":
+                            imageProvider = new Cesium.BingMapsImageryProvider({
+                                url : 'http://dev.virtualearth.net',
+                                mapStyle : Cesium.BingMapsStyle.AERIAL,
+                                // Some versions of Safari support WebGL, but don't correctly implement
+                                // cross-origin image loading, so we need to load Bing imagery using a proxy.
+                                proxy : proxyIfNeeded
+                            });
+                            break;
+
+                        case "bingAerialLabel":
+                            imageProvider = new Cesium.BingMapsImageryProvider({
+                                url : 'http://dev.virtualearth.net',
+                                mapStyle : Cesium.BingMapsStyle.AERIAL_WITH_LABELS,
+                                proxy : proxyIfNeeded
+                            });
+                            break;
+
+                        case "bingRoad":
+                            imageProvider = new Cesium.BingMapsImageryProvider( {
+                                url: 'http://dev.virtualearth.net',
+                                mapStyle: Cesium.BingMapsStyle.ROAD,
+                                // Some versions of Safari support WebGL, but don't correctly implement
+                                // cross-origin image loading, so we need to load Bing imagery using a proxy.
+                                proxy: proxyIfNeeded
+                            } );                        
+                            break;
+
+                        case "esriWorld":
+                            imageProvider = new Cesium.ArcGisMapServerImageryProvider({
+                                url : 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
+                                proxy : proxy
+                            });                      
+                            break;
+
+                        case "esriStreet":
+                            imageProvider = new Cesium.ArcGisMapServerImageryProvider({
+                                url : 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer',
+                                proxy: new Cesium.DefaultProxy('/proxy/')
+                            } );                       
+                            break;
+
+                        case "esriGeo":
+                            imageProvider = new Cesium.ArcGisMapServerImageryProvider({
+                                url : 'http://services.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/',
+                                proxy : proxy
+                            });                      
+                            break;
+
+                        case "openStreet":
+                            imageProvider = new Cesium.OpenStreetMapImageryProvider({
+                                url : 'http://tile.openstreetmap.org/',
+                                proxy : proxyIfNeeded
+                            });
+                            break;
+
+                        case "mapQuestStreet":
+                            imageProvider = new Cesium.OpenStreetMapImageryProvider({
+                                url: 'http://otile1.mqcdn.com/tiles/1.0.0/osm/',
+                                proxy: proxy
+                            });
+                            break;
+
+                        case "stamen":
+                            imageProvider = new Cesium.OpenStreetMapImageryProvider({
+                                url: 'http://tile.stamen.com/watercolor/',
+                                fileExtension: 'jpg',
+                                proxy: proxy,
+                                credit: 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.'
+                            });
+                            break;
+
+                        case "stamenToner":
+                            imageProvider = new Cesium.OpenStreetMapImageryProvider({
+                                url : 'http://tile.stamen.com/toner/',
+                                credit : 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.',
+                                proxy : proxyIfNeeded
+                            });
+                            break;
+
+                        case "blackMarble":
+                            imageProvider = new Cesium.TileMapServiceImageryProvider({
+                                url : 'http://cesium.agi.com/blackmarble',
+                                maximumLevel : 8,
+                                credit : 'Black Marble imagery courtesy NASA Earth Observatory',
+                                proxy : proxyIfNeeded
+                            });
+                            break;
+
+
+                        case "single":
+                            imageProvider = new Cesium.SingleTileImageryProvider({
+                                url : require.toUrl('Assets/Textures/NE2_LR_LC_SR_W_DR_2048.jpg')
+                            } );
+                            break;
+
+                        case "usInfrared":
+                            imageProvider =  new Cesium.WebMapServiceImageryProvider({
+                                url : 'http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_ir.cgi?',
+                                layers : 'goes_conus_ir',
+                                credit : 'Infrared data courtesy Iowa Environmental Mesonet',
+                                parameters : {
+                                    transparent : 'true',
+                                    format : 'image/png'
+                                },
+                                proxy : new Cesium.DefaultProxy('/proxy/')
+                            })
+                            break;
+
+                        case "usWeather":
+                            imageProvider = new Cesium.WebMapServiceImageryProvider({
+                                url : 'http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?',
+                                layers : 'nexrad-n0r',
+                                credit : 'Radar data courtesy Iowa Environmental Mesonet',
+                                parameters : {
+                                    transparent : 'true',
+                                    format : 'image/png'
+                                },
+                                proxy : new Cesium.DefaultProxy('/proxy/')
+                            })                        
+                            break;
+
+                        case "tms":
+                            imageProvider = new Cesium.TileMapServiceImageryProvider({
+                                    url : '../images/cesium_maptiler/Cesium_Logo_Color'
+                            });
+                            break;
+
+                        case "image":
+                            imageProvider = new Cesium.SingleTileImageryProvider({
+                                url : '../images/Cesium_Logo_overlay.png',
+                                extent : new Cesium.Extent(
+                                        Cesium.Math.toRadians(-115.0),
+                                        Cesium.Math.toRadians(38.0),
+                                        Cesium.Math.toRadians(-107),
+                                        Cesium.Math.toRadians(39.75))
+                            });
+                            break;
+
+                        case "grid":
+                            imageProvider = new Cesium.GridImageryProvider();
+                            break;
+
+                        case "tile":
+                            imageProvider = new Cesium.TileCoordinatesImageryProvider();
+                            break;
+
+                    }
+
+                    if ( imageProvider !== undefined ) {
+                        if ( node && node.widget !== undefined ) {
+                            // how does the widget add an image layer
+                        } else if ( node.centralBody !== undefined ) {
+                            node.centralBody.getImageryLayers().addImageryProvider( imageProvider );
+                        }
+                    }
+
+
+                } else if ( propertyName == "transition" ) {
+                    // using the Cesium.Widget
+                    if ( node.widget ) {
+                        
+                        switch ( propertyValue ) {
+                            case "3D":
+                                node.widget.transitioner.morphTo3D();
+                                break;
+                            case "2D":
+                                node.widget.transitioner.morphTo2D();
+                                break;
+                            case "2.5D":
+                                node.widget.transitioner.morphToColumbusView();
+                                break;
+                        }
+                    } else if ( node.scene ) {
+
+                    }
+
+                } else if ( propertyName == "backgroundColor" ) {
+
+                    if( node.scene ) {
+                        if ( propertyValue instanceof String ) {
+                            propertyValue = propertyValue.replace( /\s/g, '' );
+                        }
+                        var vwfColor = new utility.color( propertyValue );
+                        if ( vwfColor ) {                            
+                            node.scene.backgroundColor = new Cesium.Color( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255, vwfColor.alpha() );
+                        } 
+                    }
+                } else if ( propertyName == "controlClient" ) {
                     this.controlClient = propertyValue;
                     value = propertyValue;
                 } else if ( this.kernel.client() != this.kernel.moniker() ) { 
                     if(cesiumInstance && nodeID == cesiumInstance.ID) {
-                        var scene = cesiumInstance.scene;
+                        scene = cesiumInstance.scene;
                         switch ( propertyName ) {
                             case "cameraViewData":
-                            	var position = Cesium.Cartesian3.clone(propertyValue.position);
-                            	var direction = Cesium.Cartesian3.clone(propertyValue.direction);
-                            	var up = Cesium.Cartesian3.clone(propertyValue.up);
-                            	var right = Cesium.Cartesian3.clone(propertyValue.right);
-                            	var camera = scene.getCamera();
-                            	camera.position = position;
-                            	camera.direction = direction;
-                            	camera.up = up;
-                            	camera.right = right;
-                            	break;
+                                var position = Cesium.Cartesian3.clone(propertyValue.position);
+                                var direction = Cesium.Cartesian3.clone(propertyValue.direction);
+                                var up = Cesium.Cartesian3.clone(propertyValue.up);
+                                var right = Cesium.Cartesian3.clone(propertyValue.right);
+                                var camera = scene.getCamera();
+                                camera.position = position;
+                                camera.direction = direction;
+                                camera.up = up;
+                                camera.right = right;
+                                break;
                             case "cameraControllerData":
-                            	var spindle = scene.getCamera().getControllers().get(0).spindleController;
-                            	var freeLook = scene.getCamera().getControllers().get(0).freeLookController;
-                            	var centralBody = scene.getCamera().getControllers().get(0);
-                            	
-                            	var rightZoom = spindle._zoomHandler;
-                                var wheelZoom = spindle._zoomWheel;
+                                var ctrl = scene.getScreenSpaceCameraController();
+
+                                var spin = ctrl._spinHandler;
+                                var trans = ctrl._tranlateHandler
+                                var look = ctrl._lookHandler;
+                                var rotate = ctrl._rotateHandler;
+                                var zoom = ctrl._zoomHandler;
+                                var zoomWheel = ctrl._zoomWheelHandler;
+                                var pinch = ctrl._pinchHandler;
+
+                                //var spindle = scene.getCamera().getControllers().get(0).spindleController;
+                                //var look = scene.getCamera().getControllers().get(0).lookController;
+                                //var centralBody = scene.getCamera().getControllers().get(0);
                                 
                                 var spinning = propertyValue.spinning;
                                 var rotating = propertyValue.rotating;
-                            	var rightZooming = propertyValue.rightZooming;
-                            	var wheelZooming = propertyValue.wheelZooming;
-                            	var spinMovement = propertyValue.spinMovement;
-                            	var rotateMovement = propertyValue.rotateMovement;
-                            	var rightZoomMovement = propertyValue.rightZoomMovement;
-                            	var wheelZoomMovement = propertyValue.wheelZoomMovement;
-                            	
-                            	var spinTouchStart = propertyValue.spinTouchStart;
-                            	var spinTouchRelease = propertyValue.spinTouchRelease;
-                            	var spinLastMovement = propertyValue.spinLastMovement;
-                            	
-                            	var rightZoomTouchStart = propertyValue.righZoomTouchStart;
-                            	var rightZoomTouchRelease = propertyValue.rightZoomTouchRelease;
-                            	var rightZoomLastMovement = propertyValue.rightZoomLastMovement;
-                            	
-                            	var wheelZoomTouchStart = propertyValue.wheelZoomTouchStart;
-                            	var wheelZoomTouchRelease = propertyValue.wheelZoomTouchRelease;
-                            	var wheelZoomLastMovement = propertyValue.wheelZoomLastMovement;
-                            	
-                            	var freeLookIsMoving = propertyValue.freeLookIsMoving;
-                            	var freeLookMovement = propertyValue.freeLookMovement;
-                            	
+                                var zooming = propertyValue.zooming;
+                                var zoomWheeling = propertyValue.zoomWheeling;
+                                var spinMovement = propertyValue.spinMovement;
+                                var rotateMovement = propertyValue.rotateMovement;
+                                var zoomMovement = propertyValue.zoomMovement;
+                                var zoomWheelMovement = propertyValue.zoomWheelMovement;
+                                
+                                var spinTouchStart = propertyValue.spinTouchStart;
+                                var spinTouchRelease = propertyValue.spinTouchRelease;
+                                var spinLastMovement = propertyValue.spinLastMovement;
+                                
+                                var zoomTouchStart = propertyValue.zoomTouchStart;
+                                var zoomTouchRelease = propertyValue.zoomTouchRelease;
+                                var zoomLastMovement = propertyValue.zoomLastMovement;
+                                
+                                var zoomWheelTouchStart = propertyValue.zoomWheelTouchStart;
+                                var zoomWheelTouchRelease = propertyValue.zoomWheelTouchRelease;
+                                var zoomWheelLastMovement = propertyValue.zoomWheelLastMovement;
+                                
+                                var lookIsMoving = propertyValue.lookIsMoving;
+                                var lookMovement = propertyValue.lookMovement;
+                                
                                 if (spinning) {
-                                	spindle._spin(spinMovement);                                        	
+                                    spin._spin(spinMovement);                                           
                                 }
                                 
                                 if (rotating) {
-                                	centralBody._rotate(rotateMovement);
+                                    rotate._rotate(rotateMovement);
                                 }
 
-                                if (rightZooming) {
-                                	spindle._zoom(rightZoomMovement);
+                                if (zooming) {
+                                    spin._zoom(zoomMovement);
                                 }
-                                else if (wheelZooming) {
-                                	spindle._zoom(wheelZoomMovement);
+                                else if (zoomWheeling) {
+                                    spin._zoom(zoomWheelMovement);
                                 }
                                 
-                                if (!rotating && spindle.inertiaSpin < 1.0) {
+                                if (!rotating && spin.inertiaSpin < 1.0) {
                                     Cesium.CameraHelpers.createInertia(spinTouchStart, spinTouchRelease, spinLastMovement, spindle.inertiaSpin, spindle._spin, spindle, '_lastInertiaSpinMovement');
                                 }
-                                if (!rightZooming && spindle.inertiaZoom < 1.0) {
-                                	Cesium.CameraHelpers.createInertia(rightZoomTouchStart, rightZoomTouchRelease, rightZoomLastMovement, spindle.inertiaZoom, spindle._zoom, spindle, '_lastInertiaZoomMovement');
+                                if (!zooming && spin.inertiaZoom < 1.0) {
+                                    Cesium.CameraHelpers.createInertia(zoomTouchStart, zoomTouchRelease, zoomLastMovement, spindle.inertiaZoom, spindle._zoom, spindle, '_lastInertiaZoomMovement');
                                 }
-                                if (!wheelZooming && spindle.inertiaZoom < 1.0) {
-                                	Cesium.CameraHelpers.createInertia(wheelZoomTouchStart, wheelZoomTouchRelease, wheelZoomLastMovement, spindle.inertiaZoom, spindle._zoom, spindle, '_lastInertiaWheelZoomMovement');
+                                if (!zoomWheeling && spin.inertiaZoom < 1.0) {
+                                    Cesium.CameraHelpers.createInertia(zoomWheelTouchStart, zoomWheelTouchRelease, zoomWheelLastMovement, spindle.inertiaZoom, spindle._zoom, spindle, '_lastInertiaWheelZoomMovement');
                                 }
                                 
-                                if(freeLookIsMoving) {
-                                	freeLook._look(freeLookMovement);
+                                if(lookIsMoving) {
+                                    look._look(lookMovement);
                                 }
                                 
                                 value = propertyValue;
-                            	break;
+                                break;
                         }
                     }
-            	}
+                }
             }
             return value;
         },
@@ -334,7 +562,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }
 
             if(cesiumInstance && nodeID == cesiumInstance.ID) {                  
-            	var scene = cesiumInstance.scene;
+                var scene = cesiumInstance.scene;
                 switch ( propertyName ) {
                     case "cameraViewData":
                         var camera = scene.getCamera();
@@ -353,14 +581,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             return value;
         },
     } );
-	
+    
     function broadcastCameraViewData(cameraData) {
         var node, scene;   
         if ( this.kernel.find("", "//cesiumInstance").length > 0 ) {
             node = this.state.nodes[ this.kernel.find("", "//cesiumInstance")[0] ];
             scene = node.scene;
             if ( scene ) {
-            	this.kernel.setProperty(this.kernel.find("", "//cesiumInstance")[0], "cameraViewData", cameraData);
+                this.kernel.setProperty(this.kernel.find("", "//cesiumInstance")[0], "cameraViewData", cameraData);
             }
         }
     }
@@ -371,7 +599,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             node = this.state.nodes[ this.kernel.find("", "//cesiumInstance")[0] ];
             scene = node.scene;
             if ( scene ) {
-            	this.kernel.setProperty(this.kernel.find("", "//cesiumInstance")[0], "cameraControllerData", cameraControllerData);
+                this.kernel.setProperty(this.kernel.find("", "//cesiumInstance")[0], "cameraControllerData", cameraControllerData);
             }
         }
     }

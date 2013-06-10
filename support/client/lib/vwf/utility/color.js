@@ -115,7 +115,7 @@ define(function(){
 								this.red( p2v( value[0] ) );
 								this.green( p2v( value[1] ) );
 								this.blue( p2v( value[2] ) );
-								this.alpha( parseFloat( value[3] ) || 1 );
+								this.alpha( isNaN( parseFloat( value[3] ) ) ? 1 : parseFloat( value[3] ) );
 								this.output = Color.RGBA;								
 							}
 						} else {
@@ -138,18 +138,19 @@ define(function(){
 								return this;
 							case isRGB.test(value) :
 								var parts = value.match(matchRGB);
+								var alphaIsValid = !( isNaN( parseFloat( parts[5] ) ) );
 								this.red(p2v(parts[1]));
 								this.green(p2v(parts[2]));
 								this.blue(p2v(parts[3]));
-								this.alpha(parseFloat(parts[5]) || 1);
-								this.output = (isPercent.test(parts[1]) ? 2 : 1) + (parts[5] ? 2 : 0);
+								this.alpha( alphaIsValid ? parseFloat( parts[5] ) : 1 );
+								this.output = alphaIsValid ? Color.RGBA : ( isPercent.test( parts[1] ) ? Color.PRGB : Color.RGB );
 								return this;
 							case isHSL.test(value) :  
 								var parts = value.match(matchHSL);
 								this.hue(parseInt(parts[1]));
 								this.saturation(parseInt(parts[2]));
 								this.lightness(parseInt(parts[3]));
-								this.alpha(parseFloat(parts[5]) || 1);
+								this.alpha( isNaN( parseFloat( parts[5] ) ) ? 1 : parseFloat( parts[5] ) );
 								this.output = parts[5] ? 6: 5; 
 								return this;
 							default:

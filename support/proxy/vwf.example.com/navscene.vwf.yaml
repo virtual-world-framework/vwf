@@ -248,7 +248,7 @@ scripts:
         var delta = this.input.pointerDelta();
         var valid = this.navmode == "none" ? false : true;
         if ( valid && !active ) {
-          this.future( 0.1 ).update();
+          this.future( 1/30 ).update();
         }
       } 
       this.input.lastInputTime = this.time;   

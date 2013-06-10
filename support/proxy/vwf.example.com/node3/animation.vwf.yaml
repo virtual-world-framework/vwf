@@ -15,70 +15,402 @@
 ## @namespace
 
 ---
-
 extends:
   http://vwf.example.com/animation.vwf
-
-scripts:
-- |
-  this.initialize = function() {
-
-    // Locate child nodes that extend or implement "http://vwf.example.com/animation/position.vwf"
-    // to identify themselves as animation key positions.
-
-    var positions = this.find( "./element(*,'http://vwf.example.com/animation/position.vwf')" );
-
-    // Fill in missing `animationTime` properties, distributing evenly between the left and right
-    // positions that define `animationTime`.
-
-    // 1: [ - ] => [ 0 ]
-    // 1: [ 0, - ] => [ 0, 1 ]
-    // 1: [ -, 1 ] => [ 0, 1 ]
-    // 1: [ 0, -, - ] => [ 0, 1/2, 1 ]
-    // 1: [ -, -, 1 ] => [ 0, 1/2, 1 ]
-    // 1: [ 0, - , -, 1 ] => [ 0, 1/3 , 2/3, 1 ]
-
-    var leftTime, leftIndex;
-    var rightTime, rightIndex = -Infinity;
-
-    if ( positions.length > 0 ) {
-      
-      positions.sort(function(a, b) {
-        return a.sequence - b.sequence;
-      });
-
-      if ( positions[0].animationTime === null ) {
-        positions[0].animationTime = 0;
-      }
-
-      if ( positions[positions.length-1].animationTime === null ) {
-        positions[positions.length-1].animationTime = this.animationDuration;
-      }
-
-      positions.forEach( function( position, index ) {
-
-        if ( position.animationTime !== null ) {
-
-          leftTime = position.animationTime;
-          leftIndex = index;
-
-        } else {
-
-          if ( index > rightIndex ) {
-            for ( rightIndex = index + 1; rightIndex < positions.length; rightIndex++ ) {
-              if ( ( rightTime = /* assignment! */ positions[rightIndex].animationTime ) !== null ) {
-                break;
-              }
-            }
-          }
-
-          position.animationTime = leftTime + ( rightTime - leftTime ) *
-            ( index - leftIndex )  / ( rightIndex - leftIndex );
-
+methods:
+  animationUpdate:
+    parameters:
+      - time
+      - duration
+  ## Translate by given translation over duration.
+  ## 
+  ## @name node3.animation.vwf#translateBy
+  ## @function
+  ##
+  ## @param {Array} translation
+  ## @param {Number} duration
+  ##
+  ## @returns undefined
+  translateBy:
+    parameters:
+      - translation
+      - duration
+    body: |
+      var startTranslation = this.translation || goog.vec.Vec3.create();
+      var deltaTranslation = this.translationFromValue( translation );
+      var stopTranslation = goog.vec.Vec3.add(
+        startTranslation,
+        deltaTranslation,
+        goog.vec.Vec3.create()
+      );
+      if(duration > 0) {
+        this.animationDuration = duration;
+        this.animationUpdate = function(time, duration) {
+          this.translation = goog.vec.Vec3.lerp(
+            startTranslation, stopTranslation,
+            time >= duration ? 1 : time / duration,
+            goog.vec.Vec3.create()
+          );
         }
+        this.animationPlay();
+      }
+      else {
+        this.translation = stopTranslation;
+      } //@ sourceURL=node3.animation.translateBy.vwf
 
-      }, this );
+  ## Translate to given translation over duration.
+  ## 
+  ## @name node3.animation.vwf#translateTo
+  ## @function
+  ##
+  ## @param {Array} translation
+  ## @param {Number} duration
+  ##
+  ## @returns undefined
+  translateTo:
+    parameters:
+      - translation
+      - duration
+    body: |
+      var startTranslation = this.translation || goog.vec.Vec3.create();
+      var stopTranslation = this.translationFromValue( translation );
+      if(duration > 0) {
+        this.animationDuration = duration;
+        this.animationUpdate = function(time, duration) {
+          this.translation = goog.vec.Vec3.lerp(
+            startTranslation, stopTranslation,
+            duration == 0 ? duration : time / duration,
+            goog.vec.Vec3.create()
+          );
+        }
+        this.animationPlay();
+      }
+      else {
+        this.translation = stopTranslation;
+      } //@ sourceURL=node3.animation.translateTo.vwf
 
-    }
+  ## Rotate by given rotation over duration.
+  ## 
+  ## @name node3.animation.vwf#rotateBy
+  ## @function
+  ## 
+  ## @param {Array} rotation
+  ## @param {Number} [duration]
+  ## @param {String} [frame]
+  ## 
+  ## @returns undefined
+  rotateBy:
+    parameters:
+      - rotation
+      - duration
+      - frame
+    body: |
+      var rotation = this.rotationFromValue( rotation );
+      var deltaQuaternion = goog.vec.Quaternion.fromAngleAxis(
+        rotation[3] * Math.PI / 180,
+        goog.vec.Vec3.createFromValues( rotation[0], rotation[1], rotation[2] ),
+        goog.vec.Quaternion.create()
+      );
+      this.quaterniateBy( deltaQuaternion, duration, frame ); //@ sourceURL=node3.animation.rotateBy.vwf
 
-  } //@ sourceURL=http://vwf.example.com/node3/animation.vwf/scripts~initialize
+  ## Rotate to given rotation over duration.
+  ## 
+  ## @name node3.animation.vwf#rotateTo
+  ## @function
+  ## 
+  ## @param {Array} rotation
+  ## @param {Number} duration
+  ## 
+  ## @returns undefined
+  rotateTo:
+    parameters:
+      - rotation
+      - duration
+    body: |
+      var rotation = this.rotationFromValue( rotation );
+      var stopQuaternion = goog.vec.Quaternion.fromAngleAxis(
+        rotation[3] * Math.PI / 180,
+        goog.vec.Vec3.createFromValues( rotation[0], rotation[1], rotation[2] ),
+        goog.vec.Quaternion.create()
+      );
+      this.quaterniateTo( stopQuaternion, duration ); //@ sourceURL=node3.animation.rotateTo.vwf
+
+  ## Rotate by given quaternion over duration.
+  ## 
+  ## @name node3.animation.vwf#quaterniateBy
+  ## @function
+  ## 
+  ## @param {Array} quaternion
+  ## @param {Number} [duration]
+  ## @param {String} [frame]
+  ## 
+  ## @returns undefined
+  quaterniateBy:
+    parameters:
+      - quaternion
+      - duration
+      - frame
+    body: |
+      var startQuaternion = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
+      var deltaQuaternion = this.quaternionFromValue( quaternion );
+      if ( ! frame || frame == "rotated" ) {
+        var stopQuaternion = goog.vec.Quaternion.concat(
+          deltaQuaternion,
+          startQuaternion,
+          goog.vec.Quaternion.create()
+        );
+      } else if ( frame == "scaled" ) {
+        var stopQuaternion = goog.vec.Quaternion.concat(
+          startQuaternion,
+          deltaQuaternion,
+          goog.vec.Quaternion.create()
+        );
+      }
+      if(duration > 0) {
+        this.animationDuration = duration;
+        this.animationUpdate = function(time, duration) {
+          this.quaternion = goog.vec.Quaternion.slerp(
+            startQuaternion, stopQuaternion,
+            time >= duration ? 1 : time / duration,
+            goog.vec.Quaternion.create()
+          );
+        }
+        this.animationPlay();
+      }
+      else {
+        this.quaternion = stopQuaternion;
+      } //@ sourceURL=node3.animation.quaterniateBy.vwf
+
+  ## Rotate to given quaternion over duration.
+  ## 
+  ## @name node3.animation.vwf#quaterniateTo
+  ## @function
+  ## 
+  ## @param {Array} quaternion
+  ## @param {Number} duration
+  ## 
+  ## @returns undefined
+  quaterniateTo:
+    parameters:
+      - quaternion
+      - duration
+    body: |
+      var startQuaternion = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
+      var stopQuaternion = this.quaternionFromValue( quaternion );
+      if(duration > 0) {
+        this.animationDuration = duration;
+        this.animationUpdate = function(time, duration) {
+          this.quaternion = goog.vec.Quaternion.slerp(
+            startQuaternion, stopQuaternion,
+            duration == 0 ? duration : time / duration,
+            goog.vec.Quaternion.create()
+          );
+        }
+        this.animationPlay();
+      }
+      else {
+        this.quaternion = stopQuaternion;
+      } //@ sourceURL=node3.animation.quaterniateTo.vwf
+
+  ## Scale by given scale over duration.
+  ## 
+  ## @name node3.animation.vwf#scaleBy
+  ## @function
+  ## 
+  ## @param {Array} scale
+  ## @param {Number} duration
+  ## 
+  ## @returns undefined
+  scaleBy:
+    parameters:
+      - scale
+      - duration
+    body: |
+      var startScale = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
+      var deltaScale = this.scaleFromValue( scale );
+      var stopScale = goog.vec.Vec3.createFromValues(
+        startScale[0] * deltaScale[0],
+        startScale[1] * deltaScale[1],
+        startScale[2] * deltaScale[2]
+      );
+      if(duration > 0) {
+        this.animationDuration = duration;
+        this.animationUpdate = function(time, duration) {
+          this.scale = goog.vec.Vec3.lerp(  // TODO: should be geometric interpolation
+            startScale, stopScale,
+            duration == 0 ? duration : time / duration,
+            goog.vec.Vec3.create()
+          );
+        }
+        this.animationPlay();
+      }
+      else {
+        this.scale = stopScale;
+      } //@ sourceURL=node3.animation.scaleBy.vwf
+
+  ## Scale to given scale over duration.
+  ## 
+  ## @name node3.animation.vwf#scaleTo
+  ## @function
+  ## 
+  ## @param {Array} scale
+  ## @param {Number} duration
+  ## 
+  ## @returns undefined
+  scaleTo:
+    parameters:
+      - scale
+      - duration
+    body: |
+      var startScale = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
+      var stopScale = this.scaleFromValue( scale );
+      if(duration > 0) {
+        this.animationDuration = duration;
+        this.animationUpdate = function(time, duration) {
+          this.scale = goog.vec.Vec3.lerp(  // TODO: should be geometric interpolation
+            startScale, stopScale,
+            duration == 0 ? duration : time / duration,
+            goog.vec.Vec3.create()
+          );
+        }
+        this.animationPlay(); 
+      }
+      else {
+        this.scale = stopScale;
+      }//@ sourceURL=node3.animation.scaleTo.vwf
+
+  ## Transform by the given amount over duration.
+  ## 
+  ## @name node3.animation.vwf#transformBy
+  ## @function
+  ##
+  ## @param {Array} transform
+  ## @param {Number} duration
+  ##
+  ## @returns undefined
+  transformBy:
+    parameters:
+      - transform
+      - duration
+    body: |
+      var startTransform = this.transform || goog.vec.Vec3.create();
+      var deltaTransform = this.transformFromValue( transform );
+      // Left multiply by the delta
+      var stopTransform = goog.vec.Mat4.multMat( deltaTransform, startTransform, goog.vec.Mat4.createFloat32() );
+      this.transformTo( stopTransform, duration ); //@ sourceURL=node3.animation.transformBy.vwf
+
+  ## Transform to given transform over duration.
+  ## 
+  ## @name node3.animation.vwf#transformTo
+  ## @function
+  ##
+  ## @param {Array} transform
+  ## @param {Number} duration
+  ##
+  ## @returns undefined
+  transformTo:
+    parameters:
+      - transform
+      - duration
+    body: |
+      var stopTransform = this.transformFromValue( transform ) || goog.vec.Mat4.createIdentity();
+      // Calculate the start and stop translations
+      var startTranslation = this.translation || goog.vec.Vec3.create();
+      var stopTranslation = goog.vec.Vec3.create();
+      goog.vec.Mat4.getColumn( stopTransform, 3, stopTranslation );
+      // Calculate the start and stop quaternion and scale
+      var startScale = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
+      var stopScale = goog.vec.Vec3.create();
+      var startQuaternion = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
+      var stopQuaternion = goog.vec.Quaternion.fromRotationMatrix4(
+        this.unscaledTransform( stopTransform || goog.vec.Mat4.createIdentity(), stopScale, goog.vec.Mat4.create() ),
+        goog.vec.Quaternion.create()
+      );
+      if(duration > 0) {
+        this.animationDuration = duration;
+        // Call the appropriate functions to do the translation and quaterniation (that is totally a word)
+        this.animationUpdate = function(time, duration) {
+          this.translation = goog.vec.Vec3.lerp(
+            startTranslation, stopTranslation,
+            duration == 0 ? duration : time / duration,
+            goog.vec.Vec3.create()
+          );
+          this.quaternion = goog.vec.Quaternion.slerp(
+            startQuaternion, stopQuaternion,
+            duration == 0 ? duration : time / duration,
+            goog.vec.Quaternion.create()
+          );
+          this.scale = goog.vec.Vec3.lerp(  // TODO: should be geometric interpolation
+            startScale, stopScale,
+            duration == 0 ? duration : time / duration,
+            goog.vec.Vec3.create()
+          );
+        }
+        this.animationPlay();
+      }
+      else {
+        this.translation = stopTranslation;
+        this.quaternion = stopQuaternion;
+        this.scale = stopScale;
+      }//@ sourceURL=node3.animation.transformTo.vwf
+
+  ## Transform the world transform by the given amount over duration.
+  ## 
+  ## @name node3.animation.vwf#worldTransformBy
+  ## @function
+  ##
+  ## @param {Array} transform
+  ## @param {Number} duration
+  ##
+  ## @returns undefined
+  worldTransformBy:
+    parameters:
+      - transform
+      - duration
+    body: |
+      var startWorldTransform = this.worldTransform || goog.vec.Vec3.create();
+      var deltaTransform = this.transformFromValue( transform );
+      // Left multiply by the delta
+      var stopWorldTransform = goog.vec.Mat4.multMat( deltaTransform, startWorldTransform, 
+                                                      goog.vec.Mat4.createFloat32() );
+      this.worldTransformTo( stopWorldTransform, duration ) //@ sourceURL=node3.animation.worldTransformBy.vwf
+
+  ## Transform the world transform to given transform over duration.
+  ## 
+  ## @name node3.animation.vwf#worldTransformTo
+  ## @function
+  ##
+  ## @param {Array} transform
+  ## @param {Number} duration
+  ##
+  ## @returns undefined
+  worldTransformTo:
+    parameters:
+      - transform
+      - duration
+    body: |
+      var stopWorldTransform = this.transformFromValue( transform );
+      var stopTransform;
+      if ( this.parent && this.parent.worldTransform ) {
+        // We need to find the local transform that will bring about the desired world transform
+        // The math for this looks like -
+        // (new worldTransform) = (parentWorldTransform) * (transform)
+        // So, if we left multiply both sides by the inverse of the parentWorldTransform...
+        // inv(parentWorldTransform) * (new worldTransform) = (transform)
+        // Find the inverse parent worldTransform
+        var inverseParentWorldTransform = goog.vec.Mat4.createFloat32();
+        if ( goog.vec.Mat4.invert( this.parent.worldTransform, inverseParentWorldTransform ) ) {
+          // Left multiply the new worldTransform by the inverse parent worldTransform
+          stopTransform = goog.vec.Mat4.multMat( inverseParentWorldTransform, stopWorldTransform,
+                                                 goog.vec.Mat4.createFloat32() );
+        }
+        else {
+          stopTransform = goog.vec.Mat4.createIdentity();
+          this.logger.error( "Parent '" + this.parent.id + "' transform matrix is not invertible: " + 
+                             this.parent.transform );
+        }
+      }
+      else {
+        stopTransform = stopWorldTransform;
+      }
+      this.transformTo( stopTransform, duration ); //@ sourceURL=node3.animation.worldTransformTo.vwf
