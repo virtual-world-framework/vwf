@@ -35,7 +35,7 @@ When accessing children of an object, the kernel does not delegate to the object
 
 ## Do not hard-code node ids
 
-From the [view](architecture.html), you will reference nodes by using [*find()*](query.html) to get their nodeIDs and then using that nodeID in [kernel calls](jsdoc/symbols/vwf.api.kernel.html) to get and set properties and call methods.  These nodeIDs are not guaranteed to be identical from one run of the application to the next.  Therefore, you must not hard-code them. For more information on accessing [model](architecture.html) nodes from the [view](architecture.html), read the [*Create a 2D Interface*](2d-interface.html) cookbook recipe.
+From the [view](architecture.html), you will reference nodes by using [*find()*](query.html) to get their nodeIDs and then using that nodeID in [kernel calls](jsdoc/2c8753578a.html) to get and set properties and call methods.  These nodeIDs are not guaranteed to be identical from one run of the application to the next.  Therefore, you must not hard-code them. For more information on accessing [model](architecture.html) nodes from the [view](architecture.html), read the [*Create a 2D Interface*](2d-interface.html) cookbook recipe.
 
 <a name="noAccessHtmlFromModel" />
 
