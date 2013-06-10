@@ -11,18 +11,25 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-## `control/position.vwf` defines a key value for a control.
-
-
-
-
+## `control.position.vwf` defines a key value for a control.
+##
+## @name control.position.vwf
+## @namespace
+##
 ## Key value for a control.
-## Builds on animation
+##
+## Builds on animation.
+##
 ## Time cross-references animation.
+##
 ## Value specifies control value for this position. Node's name is name for that value/position/time.
+##
 ## Attraction is stabiliby for this position. Think of time as a cursor at or between positions.
+##
 ##   - Is attracted to some positions, valleys, detents
+##
 ##   - Is repelled from some positions, hills, springs
+##
 ##   - Is neutral with other positions, free range
 
 ---
@@ -35,6 +42,9 @@ properties:
   ## Positions that don't provide `time` will be automatically distributed along the range between
   ## the siblings that do. If none of a control's positions provide `time`, then the positions will
   ## be distributed evenly throughout the animation--in the range [`0`, *duration*].
+  ## 
+  ## @name control.position.vwf#animationTime
+  ## @property
 
   animationTime:
 
@@ -44,16 +54,22 @@ properties:
   ## Values for intermediate positions and for positions that don't define `value` will be
   ## interpolated from adjacent positions that do. If none of a control's positions define `value`,
   ## then the control will use the position's `time`.
+  ## 
+  ## @name control.position.vwf#controlValue
+  ## @property
 
   controlValue:
 
   ## The attraction or repulsion between the time cursor and this position. "detent" indicates
   ## attraction, "spring" indicates repulsion, and "netural" is neither. The values `1`, `-1` and `0`
   ## may be used to mean `detent`, `spring` and `neutral`, respectively.
-
+  ##
   ## Attracting positions define a detent--a location that the control will tend to snap to.
   ## Repelling positions define a spring-loaded location--one that the control will avoid except
   ## when held there.
+  ## 
+  ## @name control.position.vwf#controlType
+  ## @property
 
   # TODO: held by how?
 
@@ -76,11 +92,14 @@ properties:
     value: 0
 
 
-  # animation positions and control positions are not necessarily coincident, although they typically are
-  # animation data may be missing from control positions if no transform is necessary
-  # control data may be missing from animation positions if value/time == 1, attraction does not change
-
-  # The sequence of the control key value. Key values will be sorted on the sequence to keep the order correct,
-  # because Ruby 1.8.7 doesn't preserve child order in component objects.
+  ## animation positions and control positions are not necessarily coincident, although they typically are
+  ## animation data may be missing from control positions if no transform is necessary
+  ## control data may be missing from animation positions if value/time == 1, attraction does not change
+  ##
+  ## The sequence of the control key value. Key values will be sorted on the sequence to keep the order correct,
+  ## because Ruby 1.8.7 doesn't preserve child order in component objects.
+  ## 
+  ## @name control.position.vwf#sequence
+  ## @property
 
   sequence: 0
