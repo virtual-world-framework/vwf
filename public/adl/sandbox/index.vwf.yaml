@@ -801,7 +801,7 @@ scripts:
             //this.camera.translation = finalpos;
             findcamera().position = to3Vec(finalpos[0],finalpos[1],finalpos[2]);
             findcamera().lookAt(to3Vec(this.center));
-            findcamera().far = 1000;
+            findcamera().far = 5000;
             findcamera().near = .1;
         }else if(this.cameramode == 'FirstPerson')
         {
@@ -828,7 +828,7 @@ scripts:
             //this.camera.translation = finalpos;
             findcamera().position = to3Vec(finalpos[0],finalpos[1],finalpos[2]);
             findcamera().lookAt(to3Vec(this.center));
-            findcamera().far = 1000;
+            findcamera().far = 5000;
             findcamera().near = .3;
             findcamera().updateProjectionMatrix(true);
             this.zoom = .0001;

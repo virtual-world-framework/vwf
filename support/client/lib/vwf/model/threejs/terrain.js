@@ -4,9 +4,9 @@
 			
 			var self = this;
 			var minTileSize = 128;
-			var maxTileSize = 1024;
-			var worldExtents = 65536;
-			var tileres = 1;
+			var maxTileSize = 4092;
+			var worldExtents = 128000;
+			var tileres = 32;
 			var SW = 0;
 			var SE = 1;
 			var NW = 3;
@@ -35,6 +35,13 @@
 
     }
     
+	
+	
+       
+    
+       
+	   
+	
     SimplexNoise.prototype = {
         grad3: new Float32Array([1, 1, 0,
                                 - 1, 1, 0,
@@ -375,30 +382,139 @@
 			{
 				this.tiles = {};
 				
-				this.mat = new THREE.MeshPhongMaterial();
-							this.mat.color.r = .5;
-							this.mat.color.g = .5;
-							this.mat.color.b = .5;
-							this.mat.transparent = true;
-							this.mat.depthcheck = false;
-							this.mat.wireframe = true;
-							this.mat.fog = false;
+				
+				
+				//default material expects all computation done cpu side, just renders
+                // note that since the color, size, spin and orientation are just linear
+                // interpolations, they can be done in the shader
+                var vertShader_default = 
+				
+				
+				
+
+"vec3 mod289(vec3 x) {	  return x - floor(x * (1.0 / 289.0)) * 289.0;	}		vec2 mod289(vec2 x) {	  return x - floor(x * (1.0 / 289.0)) * 289.0;	}		vec3 permute(vec3 x) {	  return mod289(((x*34.0)+1.0)*x);	}		float snoise(vec2 v)	  {	  const vec4 C = vec4(0.211324865405187, 	                      0.366025403784439,  	                     -0.577350269189626,  	                      0.024390243902439); 		  vec2 i  = floor(v + dot(v, C.yy) );	  vec2 x0 = v -   i + dot(i, C.xx);			  vec2 i1;		  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);		  vec4 x12 = x0.xyxy + C.xxzz;	  x12.xy -= i1;			  i = mod289(i); 	  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))			+ i.x + vec3(0.0, i1.x, 1.0 ));		  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);	  m = m*m ;	  m = m*m ;				  vec3 x = 2.0 * fract(p * C.www) - 1.0;	  vec3 h = abs(x) - 0.5;	  vec3 ox = floor(x + 0.5);	  vec3 a0 = x - ox;			  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );			  vec3 g;	  g.x  = a0.x  * x0.x  + h.x  * x0.y;	  g.yz = a0.yz * x12.xz + h.yz * x12.yw;	  return 130.0 * dot(m, g);	}"+
+				
+				"float getNoise(vec2 tpos)"+
+				"{"+
+				"float res = 0.0;"+
+				"res += snoise(vec2(tpos.y / 10000.0,tpos.x/10000.0)) * 1000.0;\n" +
+				"res += snoise(vec2(tpos.y / 1000.0,tpos.x/1000.0)) * 100.0;\n" +
+				"res += snoise(vec2(tpos.y / 100.0,tpos.x/100.0)) * 10.0;\n" +
+				"res += snoise(vec2(tpos.y / 10.0,tpos.x/10.0)) * 1.0;\n" +
+				"return res;"+
+				"}"+
+                "varying vec3 pos;"+
+				"varying vec3 n;"+
+                "void main() {\n"+
+				" pos = position;"+
+				" vec4 tpos = modelMatrix * vec4( position, 1.0 );\n"+
+				" tpos.z = getNoise(vec2(tpos.y,tpos.x)) ;\n" +
+				" float zy0 = getNoise(vec2((tpos.y-1.0),tpos.x)) ;\n" +
+				" float zy1 = getNoise(vec2((tpos.y+1.0) ,tpos.x)) ;\n" +
+				" float zx0 = getNoise(vec2(tpos.y ,(tpos.x-1.0))) ;\n" +
+				" float zx1 = getNoise(vec2(tpos.y ,(tpos.x+1.0))) ;\n" +
+				"n = normalize(vec3(zx0-zx1,zy0-zy1,1.0));"+
+                "   vec4 mvPosition = modelViewMatrix * vec4( position.x,position.y,tpos.z, 1.0 );\n"+
+				
+				
+                "   gl_Position = projectionMatrix * mvPosition;\n"+
+                "}    \n";
+                var fragShader_default = 
+               
+                "uniform samplerCube texture;\n"+
+                "varying vec3 pos;"+
+				"varying vec3 n;"+
+                "void main() {\n"+
+                "   gl_FragColor = vec4(0.5,0.5,0.5,1.0) * dot(n,vec3(0.0,0.707,0.707));\n"+
+                "}\n";
+                
+                //the default shader - the one used by the analytic solver, just has some simple stuff
+                //note that this could be changed to do just life and lifespan, and calculate the 
+                //size and color from to uniforms. Im not going to bother
+                var attributes_default = {
+                   
+                    
+                };
+                var uniforms_default = {
+                   
+                    texture:   { type: "t", value: null },
+                  
+                };
+                //uniforms_default.texture.value.wrapS = uniforms_default.texture.value.wrapT = THREE.RepeatWrapping;
+                this.mat = new THREE.ShaderMaterial( {
+                    uniforms:       uniforms_default,
+                    attributes:     attributes_default,
+                    vertexShader:   vertShader_default,
+                    fragmentShader: fragShader_default
+
+                });
+            //this.ma.uniforms.texture.value = skyCubeTexture;    
+			this.mat = new THREE.MeshPhongMaterial();
+			this.mat.color.r = .5;
+			this.mat.color.g = .5;
+			this.mat.color.b = .5;
+            this.mat.depthCheck = false;
+			this.mat.wireframe = false;
+				
+				
+				this.buildMesh = function(size,res)
+				{
+					
+					var geo = new THREE.Geometry();
+					var step = size/(res+1);
+					var count = 0;
+					for(var i=0; i < size+step; i += step)
+					{
+						for(var j=0; j < size+step; j +=step)
+						{
+							var z = 0;
+							var x = i-size/2;
+							var y = j-size/2;
 							
+							var v = new THREE.Vector3(x,y,z);
+							v.oz = z;
+							geo.vertices.push(v);
+						}
+						count++;
+					}
+					for(var i=0; i < count-2; i++)
+					{
+						for(var j=0; j < count-2; j++)
+						{
+							
+							var f = new THREE.Face4(i*(count) + j,(i+1)*count+j,(i+1)*count+j+1,i*count+j+1)
+							f.vertexNormals.push(new THREE.Vector3(0,0,1));
+							f.vertexNormals.push(new THREE.Vector3(0,0,1));
+							f.vertexNormals.push(new THREE.Vector3(0,0,1));
+							f.vertexNormals.push(new THREE.Vector3(0,0,1));
+							f.normal = new THREE.Vector3(0,0,1);
+							geo.faces.push(f);
+						}
+					}
+					geo.computeCentroids();
+					geo.computeVertexNormals(true);
+					geo.normalsNeedUpdate = true;
+					return geo;
+				}				
 				this.getMesh = function(res,size)
 				{
 					if(this.tiles[res])
 						for(var i = 0; i < this.tiles[res].length; i++)
-							if(!this.tiles[res][i].parent && this.tiles[res][i].size == size)
+							if(this.tiles[res][i].quadnode == null && this.tiles[res][i].size == size)
+							{
+								console.log('reusing tile');
 								return this.tiles[res][i];
+							}
 					if(!this.tiles[res])		
 						this.tiles[res] = [];
 						
-					var newtile = new THREE.Mesh(new THREE.PlaneGeometry(size,size,res,res),this.mat);
+					//var newtile = new THREE.Mesh(new THREE.PlaneGeometry(size,size,res,res),this.mat);
+					var newtile = new THREE.Mesh(this.buildMesh(size,res),this.mat);
 					newtile.geometry.dynamic = true;
 					newtile.size = size;
 					newtile.receiveShadow = true;
 					newtile.castShadow = false;
-					//this.tiles[res].push(newtile);
+					this.tiles[res].push(newtile);
 					return newtile;
 				}
 			}
@@ -516,7 +632,7 @@
 					{
 						if(p.c[0] > this.c[0])
 							p = p.child(SW);
-						if(p.c[0] < this.c[0])
+						else if(p.c[0] < this.c[0])
 							p = p.child(SE);	
 					}
 						
@@ -548,7 +664,7 @@
 					{
 						if(p.c[0] > this.c[0])
 							p = p.child(NW);
-						if(p.c[0] < this.c[0])
+						else if(p.c[0] < this.c[0])
 							p = p.child(NE);	
 					}
 						
@@ -580,7 +696,7 @@
 					{
 						if(p.c[1] > this.c[1])
 							p = p.child(SW);
-						if(p.c[1] < this.c[1])
+						else if(p.c[1] < this.c[1])
 							p = p.child(NW);	
 					}
 					return p;		
@@ -611,13 +727,41 @@
 					{
 						if(p.c[1] > this.c[1])
 							p = p.child(SE);
-						if(p.c[1] < this.c[1])
+						else if(p.c[1] < this.c[1])
 							p = p.child(NE);	
 					}
 					return p;		
 						
 				}
 				this.WN = this.westNeighbor;
+				
+				this.northEastNeighbor = function()
+				{
+					return this.NN().EN();
+						
+				}
+				this.NEN = this.northEastNeighbor;
+				
+				this.southEastNeighbor = function()
+				{
+					return this.SN().EN();
+						
+				}
+				this.SEN = this.southEastNeighbor;
+				
+				this.northWestNeighbor = function()
+				{
+					return this.NN().WN();
+						
+				}
+				this.NWN = this.northWestNeighbor;
+				
+				this.southWestNeighbor = function()
+				{
+					return this.SN().WN();
+						
+				}
+				this.SWN = this.southWestNeighbor;
 				
 				this.getLeavesB = function(list)
 				{
@@ -669,14 +813,32 @@
 							if(this.max[0] - this.min[0] < maxTileSize)
 							{
 								var res = tileres;
+								
 								this.mesh = self.TileCache.getMesh(res,this.max[0] - this.min[0]);
+								
+								if(this.mesh.quadnode)
+								{
+									debugger;
+									this.mesh.quadnode.mesh = null;
+									this.mesh.quadnode.oldmesh = null;
+									this.mesh.quadnode.backupmesh = null;
+								}
+								this.mesh.quadnode = this;
 								if(self.removelist.indexOf(this.mesh)>-1)
 								self.removelist.splice(self.removelist.indexOf(this.mesh),1);
+								
+								
+								
 								this.mesh.position.x = this.c[0];
 								this.mesh.position.y = this.c[1];
 								this.mesh.position.z = 1;
-								//self.BuildTerrainInner(this.mesh);
-								this.THREENode.add(this.mesh,true);
+								self.BuildTerrainInner(this.mesh);
+								if(this.mesh.parent)
+									debugger;
+								
+								if(this.THREENode.children.indexOf(this.mesh) != -1)
+									debugger;
+								this.THREENode.add(this.mesh,true);	
 								this.mesh.updateMatrixWorld(true);
 							}
 						}
@@ -684,7 +846,9 @@
 					{
 						if(this.mesh)
 						{
+							this.mesh.quadnode = null;
 							this.mesh.parent.remove(this.mesh);
+							this.mesh.quadnode = null;
 							this.mesh = null;
 						}
 					}
@@ -712,15 +876,17 @@
 					if(this.setForDesplit)
 					{
 						delete this.setForDesplit;
-						return;
+						
 					}
 					if(this.isSplit())
 						return;
 					if(this.mesh)
 					{
 						//this.mesh.parent.remove(this.mesh);
-						removelist.push(this.mesh);
+						//removelist.push(this.mesh);
+						this.backupmesh = this.mesh;
 						this.mesh = null;
+						
 					}
 					
 					var sw = new QuadtreeNode([this.min[0],this.min[1]],[this.c[0],this.c[1]],this.THREENode,this.depth+1,SW);
@@ -745,7 +911,6 @@
 					//this.walk(function(n)
 					//{
 						
-						
 					
 					//});
 					for(var i=0; i < this.children.length; i++)
@@ -758,6 +923,7 @@
 					{
 						//this.mesh.parent.remove(this.mesh);
 						removelist.push(this.mesh);
+						this.oldmesh = this.mesh;
 						this.mesh = null;
 					}
 					for(var i=0; i < this.children.length; i++)
@@ -824,6 +990,7 @@
 					});
 					return list;	
 				}
+				//walk down the graph, unspliting nodes that to not contain target points, and spliting nodes that do
 				this.update = function(campos,removelist)
 				{
 					var cont = false
@@ -907,19 +1074,14 @@
 				
 				}
 				
-				//this.mesh = new THREE.Mesh(new THREE.PlaneGeometry(100,100,100,100),new THREE.MeshPhongMaterial());
-				//this.mesh.material.color.r = .5;
-				//this.mesh.material.color.g = .5;
-				//this.mesh.material.color.b = .5;
-				//this.geo = this.mesh.geometry;
-				//this.getRoot().add(this.mesh);
+				
 				this.DisableTransform();
 				this.BuildTerrain();
 				this.quadtree = new QuadtreeNode([-worldExtents,-worldExtents],[worldExtents,worldExtents],this.getRoot());
 			
 				this.minSize = 32;
 				this.quadtree.update([[1,1]],[]);
-				//this.quadtree.balance();
+				
 				this.quadtree.updateMesh();
 				window.terrain = self;
 				this.counter = 0;
@@ -929,44 +1091,115 @@
 				this.debug.position.x = pt.c[0];
 				this.debug.position.y = pt.c[1];
 				this.debug.updateMatrixWorld();
+				if(!this.debug.parent)
+					this.getRoot().add(this.debug);
 			}
 			this.removelist = [];
+			this.containingList = [];
+			self.needRebuild = [];
 			this.ticking = function()
 			{
 				this.counter ++;
-				if(this.counter == 30)
+				if(this.counter == 10)
 				{
 					this.counter = 0;
 					var  insertpt = _Editor.GetInsertPoint();
-					var x = insertpt[0];
-					var y = insertpt[1];
+					var campos = _Editor.findcamera().position;
+					var x = campos.x;
+					var y = campos.y;
 					 
-					 if(this.containing != this.quadtree.containing([x,y]).parent)
+					 if(this.containingList.indexOf(this.quadtree.containing([x,y]).parent) == -1)
 					 {
 						
 					
+						while (self.needRebuild.length > 0)
+						{	
+							this.rebuild();
+						}
 						
-							self.needRebuild = [];
-					//	self.removelist.forEach(function(e,i)
-					//			{
-					//				if(e && e.parent)
-					//					e.parent.remove(e);
-					//			})
-					//			self.removelist = []
+							
+				
 						this.quadtree.update([[x,y]],this.removelist);
+					
+						
+					
 						
 						this.containing = this.quadtree.containing([x,y]).parent;
 						
-						this.quadtree.balance(this.removelist);
-						this.quadtree.balance(this.removelist);
+						
+					
+						while(this.containing.NN().depth != this.containing.depth)
+							this.containing.NN().split(this.removelist);
+						while(this.containing.SN().depth != this.containing.depth)
+							this.containing.SN().split(this.removelist);
+						while(this.containing.EN().depth != this.containing.depth)
+							this.containing.EN().split(this.removelist);
+						while(this.containing.WN().depth != this.containing.depth)
+							this.containing.WN().split(this.removelist);
+						
+						
+						while(this.containing.NEN().depth != this.containing.depth)
+							this.containing.NEN().split(this.removelist);
+						while(this.containing.SEN().depth != this.containing.depth)
+							this.containing.SEN().split(this.removelist);
+						while(this.containing.SWN().depth != this.containing.depth)
+							this.containing.SWN().split(this.removelist);
+						while(this.containing.NWN().depth != this.containing.depth)
+							this.containing.NWN().split(this.removelist);
+						
+						
 						this.containing.NN().split(this.removelist);
-						this.containing.SN().split(this.removelist);
 						this.containing.EN().split(this.removelist);
 						this.containing.WN().split(this.removelist);
+						this.containing.SN().split(this.removelist);						
+						
+						this.containing.NEN().split(this.removelist);
+						this.containing.SEN().split(this.removelist);
+						this.containing.NWN().split(this.removelist);
+						this.containing.SWN().split(this.removelist);		
+						
+						var lowergrid = [this.containing,
+										this.containing.NN(),
+										this.containing.EN(),
+										this.containing.SN(),
+										this.containing.WN(),
+										this.containing.NEN(),
+										this.containing.NWN(),
+										this.containing.SEN(),
+										this.containing.SWN()]
+								
+						
+						for(var i = 0; i < lowergrid.length ; i++)
+						{
+							for(var j =0; j < lowergrid[i].children.length; j++)
+							{
+							
+								lowergrid[i].children[j].isMip = true;
+							}
+						
+						}
+						
+						var lowergridinner = [this.containing.NW(),this.containing.NE(),this.containing.SE(),this.containing.SW(),
+										this.containing.NN().SE(),this.containing.NN().SW(),
+										this.containing.EN().NW(),this.containing.EN().SW(),
+										this.containing.SN().NE(),this.containing.SN().NW(),
+										this.containing.WN().SE(),this.containing.WN().NE(),
+										this.containing.NEN().SW(),
+										this.containing.NWN().SE(),
+										this.containing.SEN().NW(),
+										this.containing.SWN().NE()]
+								
+						
+						
+						
+						this.containingList = lowergridinner;		
+						this.quadtree.balance(this.removelist);
+						//this.quadtree.cleanup(this.removelist);
 						var nodes = this.quadtree.getBottom();
 						
 						
-						this.quadtree.cleanup(this.removelist);
+						
+						
 						var newleaves = this.quadtree.getLeaves();
 					
 						for(var i = 0; i <  newleaves.length; i++)
@@ -979,40 +1212,120 @@
 							}
 								
 						}
-						console.log('Rebuilding Terrain Tiles: ' +self.needRebuild.length);
+					
 						self.needRebuild.sort(function(a,b)
 						{
 							return (a.max[0] - a.min[0]) - (b.max[0] - b.min[0]);
 						
 						});
-						var rebuild = function()
+						
+						
+						//walk the parents of the nodes whose meshs are removing, and 
+						//note how may children that nodes has to rebuild
+					var	splitting = [];
+					  this.quadtree.walk(function(n)
+					  {
+						if(n.backupmesh && n.isSplit())
 						{
-							if (self.needRebuild.length > 0)
+							splitting.push(n);
+							
+							var count = 0;
+							n.getLeaves().forEach(function(e)
 							{
-								var tile = self.needRebuild.shift();
-								tile.updateMesh();
-								self.buildTimeout = window.setTimeout(self.rebuild,3);
-								console.log('rebuilding ' + self.needRebuild.length + ' tile');
-							}else
-							{
-								console.log('removing ' + self.removelist.length + ' tile');
-								self.removelist.forEach(function(e,i)
-								{
-									if(e && e.parent)
-										e.parent.remove(e);
-								})
-								self.removelist = []
-							}
-						}.bind(self);
-						self.rebuild = rebuild;
+								if(!e.mesh)
+									count++;
+							
+							});
+							n.waiting_for_rebuild = count;
+						}
+					  
+					  });
+						
+						// self.removelist.forEach(function(e,i)
+								// {
+									// if(e && e.parent)
+										// e.parent.remove(e);
+								// })
+								// self.removelist = []
+						
+						// self.needRebuild.forEach(function(e,i)
+								// {
+									// e.updateMesh();
+								// })
+								// self.needRebuild = []
+						// return;
+						
+						
 						if(self.buildTimeout)
 							window.clearTimeout(self.buildTimeout);
-						self.buildTimeout = window.setTimeout(self.rebuild,3);
+						if (self.needRebuild.length > 0)
+						{	
+							self.buildTimeout = window.setTimeout(self.rebuild,3);
+						}
 						
 					}
 					
 				}
 			}
+			self.rebuild = function()
+						{
+							if (self.needRebuild.length > 0)
+							{
+								var tile = self.needRebuild.shift();
+								
+								
+								//now that I've drawn my tile, I can remove my children.
+								var list = []
+								tile.cleanup(list)
+								list.forEach(function(e)
+								{
+										e.quadnode = null;
+										if(e.parent)
+											e.parent.remove(e);
+								});
+								tile.updateMesh();
+								 var p = tile.parent;
+								 //look up for the node I'm replaceing
+								 while(p && !p.waiting_for_rebuild)
+									p = p.parent;
+								if(p)
+								{							
+								 if(p.waiting_for_rebuild > 1)
+								 {
+								 
+									p.waiting_for_rebuild--;
+									tile.mesh.visible = false;
+									
+								 }
+								 else  if(p.waiting_for_rebuild == 1)
+								 {
+									
+									if(p.backupmesh && p.backupmesh.parent)
+									{
+										p.backupmesh.quadnode = null;
+										p.backupmesh.parent.remove(p.backupmesh);
+										p.backupmesh = null;
+									}
+										
+									delete p.waiting_for_rebuild;
+									p.walk(function(l)
+									{
+										//this really should be true now!
+										if(l.mesh)
+										{
+											l.mesh.visible = true;
+										}	
+									});
+								 }
+								}
+								
+								
+								
+								self.buildTimeout = window.setTimeout(self.rebuild,3);
+								console.log('rebuilding ' + self.needRebuild.length + ' tile');
+							}
+						}.bind(self);
+					
 			this.callingMethod = function(methodName,args)
 			{
 				if(methodName == 'setPoint')
@@ -1075,10 +1388,12 @@
 				{
 					
 					var vertn = geo.vertices[i];
-					var vertx0 = new THREE.Vector3(vertn.x-1,vertn.y,vertn.z);
-					var verty0 = new THREE.Vector3(vertn.x,vertn.y-1,vertn.z);
-					var vertx1 = new THREE.Vector3(vertn.x+1,vertn.y,vertn.z);
-					var verty1 = new THREE.Vector3(vertn.x,vertn.y+1,vertn.z);
+					
+					var vertoffset = Math.abs(geo.vertices[geo.faces[0].a].x - geo.vertices[geo.faces[1].a].x);
+					var vertx0 = new THREE.Vector3(vertn.x-vertoffset,vertn.y,vertn.z);
+					var verty0 = new THREE.Vector3(vertn.x,vertn.y-vertoffset,vertn.z);
+					var vertx1 = new THREE.Vector3(vertn.x+vertoffset,vertn.y,vertn.z);
+					var verty1 = new THREE.Vector3(vertn.x,vertn.y+vertoffset,vertn.z);
 					var verts = [vertn,vertx0,verty0,vertx1,verty1];
 					for(var k = 0; k < verts.length; k++)
 					{
@@ -1092,11 +1407,16 @@
 							// z +=  Math.max(0, cp.z - Math.pow(cp.z * dist/cp.dist,cp.falloff));
 						// }
 						//z = Math.sin((mx + vert.x)/10) * 10;
-						z = self.SimplexNoise.noise2D((mx + vert.x)/30,(my + vert.y)/30) * 2.5;
-						vert.z = z;
+						z = self.SimplexNoise.noise2D((mx + vert.x)/1000,(my + vert.y)/10000) * 250;
+						z += self.SimplexNoise.noise2D((mx + vert.x)/100,(my + vert.y)/1000) * 25;
+						z += self.SimplexNoise.noise2D((mx + vert.x)/50,(my + vert.y)/500) * 10;
+						z += self.SimplexNoise.noise2D((mx + vert.x)/50,(my + vert.y)/50) * 1.0;
+						z += 286;
+						vert.z = z+vert.oz;
 					}
 					//var n = vertn.clone().sub(vertx).cross(vertn.clone().sub(verty)).normalize();
-					var n = new THREE.Vector3(vertx1.z - vertx0.z,verty1.z - verty0.z,(vertx1.x - vertx0.x)*2)
+					var n = new THREE.Vector3(vertx1.z - vertx0.z,verty1.z - verty0.z,2*vertoffset)
+					n.normalize();
 					normals.push(n);
 				}
 				
@@ -1111,7 +1431,8 @@
 				geo.verticesNeedUpdate = true;
 				geo.computeBoundingSphere();
 				geo.computeBoundingBox();
-				geo.normalsNeedUpdate = true
+				
+				//geo.normalsNeedUpdate = true;
 				
 			}
 			
