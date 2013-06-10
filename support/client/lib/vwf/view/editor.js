@@ -310,6 +310,45 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         return childNode;
     };
     
+    var intervalTimer;
+    function updateCameraProperties () {
+
+        var cameraNodeName = "http-vwf-example-com-camera-vwf-camera";
+        
+        if ( this.currentNodeID == cameraNodeName ) {
+            if ( !intervalTimer ) {
+                var self = this;
+                intervalTimer = setInterval( function() {updateProperties.call( self, cameraNodeName )}, 200 );
+            }
+        }
+        else {
+            if ( intervalTimer ) {
+                clearInterval( intervalTimer );
+                intervalTimer = 0;
+            } 
+        }
+    }
+
+    function updateProperties( nodeName ) {
+        var nodeID = nodeName;
+        var properties = getProperties.call( this, this.kernel, nodeID );
+
+        for ( var i in properties ) { 
+            try {
+                var propertyName = properties[i].prop.name;
+                var propertyValue = JSON.stringify( utility.transform( vwf.getProperty( nodeID, propertyName, [] ), utility.transforms.transit ));
+            } catch ( e ) {
+                this.logger.warnx( "satProperty", nodeID, propertyName, propertyValue, "stringify error:", e.message );
+            }
+
+            if ( propertyValue ) {
+                var nodeIDAttribute = $.encoder.encodeForAlphaNumeric( nodeID ); 
+                var propertyNameAttribute = $.encoder.encodeForHTMLAttribute( "id", propertyName, true );
+                $( '#input-' + nodeIDAttribute + '-' + propertyNameAttribute ).val( propertyValue );       
+            }
+        }
+    }
+    
     // -- openEditor ------------------------------------------------------------------------
 
     function openEditor(eView) // invoke with the view as "this"
@@ -946,6 +985,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
             $('#prototypeScripts > div:last').css('border-bottom-width', '3px');
         }
+        updateCameraProperties.call(self);
     }
 
     // -- createScript ----------------------------------------------------------------------
