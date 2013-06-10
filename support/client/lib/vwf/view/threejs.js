@@ -216,6 +216,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         function renderScene(time) {
 
+            var camera = self.state.cameraInUse;
+            if ( !camera ) {
+                self.logger.errorx( "Cannot render because there is no valid camera" );
+                return;
+            }
+
             window.requestAnimationFrame( renderScene );
             var now = ( performance !== undefined && performance.now !== undefined ) ? performance.now() : time;
             var timepassed = now - sceneNode.lastTime;
@@ -244,44 +250,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                 if ( self.lastPickId != newPickId && self.lastEventData )
                 {
-<<<<<<< HEAD
-                    view.kernel.dispatchEvent( self.lastPickId, "pointerOut", self.lastEventData.eventData, self.lastEventData.eventNodeData );
-                    view.kernel.dispatchEvent( newPickId, "pointerOver", self.lastEventData.eventData, self.lastEventData.eventNodeData );
-=======
-                    var newPick = ThreeJSPick.call( self, mycanvas, sceneNode );
-                    
-                    var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
-                    if ( self.lastPickId != newPickId && self.lastEventData )
-                    {
-                        if ( self.lastPickId ) {
-                            view.kernel.dispatchEvent( self.lastPickId, "pointerOut", 
-                                                       self.lastEventData.eventData, 
-                                                       self.lastEventData.eventNodeData );
-                        }
-                        view.kernel.dispatchEvent( newPickId, "pointerOver",
+                    if ( self.lastPickId ) {
+                        view.kernel.dispatchEvent( self.lastPickId, "pointerOut", 
                                                    self.lastEventData.eventData, 
                                                    self.lastEventData.eventNodeData );
                     }
-                    
-                    self.lastPickId = newPickId
-                    self.lastPick = newPick;
-                    if ( view.lastEventData && 
-                         ( view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || 
-                           view.lastEventData.eventData[0].screenPosition[1] != oldMouseY ) ) {
-                        oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
-                        oldMouseY = view.lastEventData.eventData[0].screenPosition[1];
-                        hovering = false;
-                    }
-                    else if(self.lastEventData && self.mouseOverCanvas && !hovering && self.lastPick) {
-                        var pickId = getPickObjectID.call( view, self.lastPick.object, false );
-                        if(!pickId) {
-                            pickId = view.state.sceneRootID;
-                        }
-                        view.kernel.dispatchEvent( pickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
-                        hovering = true;
-                    }
-                    lastPickTime = now;
->>>>>>> a5f304d... Fix bug where second user would not always sync to scene.vwf.yaml
+                    view.kernel.dispatchEvent( newPickId, "pointerOver",
+                                               self.lastEventData.eventData, 
+                                               self.lastEventData.eventNodeData );
                 }
 
                 if ( view.lastEventData && 
@@ -301,7 +277,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 lastPickTime = now;
             }
 
-            renderer.render( scene, self.state.cameraInUse );
+            renderer.render( scene, camera );
 			sceneNode.lastTime = now;
         };
 
@@ -1246,6 +1222,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         if(!this.lastEventData) return;
 
         var threeCam = this.state.cameraInUse;
+        if ( !threeCam ) {
+            this.logger.errorx( "Cannot perform pick because there is no camera to pick from" );
+            return;
+        }
+
         if(!this.raycaster) this.raycaster = new THREE.Raycaster();
         if(!this.projector) this.projector = new THREE.Projector();
         
