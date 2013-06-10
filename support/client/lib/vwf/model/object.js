@@ -265,7 +265,12 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
         // -- uri ----------------------------------------------------------------------------------
 
         uri: function( nodeID ) {
-            return this.objects[nodeID].uri;
+            var node = this.objects[ nodeID ];
+            if ( node ) {
+                return node.uri;
+            } else {
+                this.logger.warnx( "Could not find uri of nonexistent node: '" + nodeID + "'" );
+            }
         },
 
         // -- name ---------------------------------------------------------------------------------
@@ -284,9 +289,14 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
         // -- behaviors ----------------------------------------------------------------------------
 
         behaviors: function( nodeID ) {  // TODO: not for global anchor node 0
-            return this.objects[nodeID].behaviors.map( function( behavior ) {
-                return behavior.id;
-            } );
+            var behaviors = this.objects[nodeID].behaviors;
+            if ( behaviors ) {
+                return behaviors.map( function( behavior ) {
+                    return behavior.id;
+                } );
+            } else {
+                this.logger.warnx( "Node '" + nodeID + "' does not have a valid behaviors array" );
+            }
         },
 
         // -- parent -------------------------------------------------------------------------------
