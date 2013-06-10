@@ -125,8 +125,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                 sceneNode.threeScene.add(cam);
                 
-                sceneNode.axes = createAxis.call( this, sceneNode.threeScene );
-                
                 cam.name = 'camera';
                 this.state.cameraInUse = cam;
                 var camType = "http://vwf.example.com/camera.vwf";
@@ -242,7 +240,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     loadAsset.call( this, parentNode, node, childType, notifyDriverOfPrototypeAndBehaviorProps );     
                 } else if ( childType == "mesh/definition" ) {
                     
-                    callback( false );
+                    //callback( false );
                     node = this.state.nodes[childID] = {
                         name: childName,  
                         //threeObject: threeChild,
@@ -252,6 +250,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         sourceType: childType,
                         type: childExtendsID,
                         sceneID: this.state.sceneRootID,
+                        prototypes: protos,
                     };
                     node.threeObject = new THREE.Object3D(); 
                     node.threeObject.name = childName; 
@@ -271,6 +270,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             //no load callback, maybe don't need this?
                             //loadingCallback: callback,
                             sceneID: this.state.sceneRootID,
+                            prototypes: protos,
                         };
                         if( !node.threeObject )
                             node.threeObject = findThreeObjectInParent.call(this,childName,nodeID);
@@ -371,6 +371,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
+            return this.initializingProperty( nodeID, propertyName, propertyValue );
         },
 
         // -- initializingProperty -----------------------------------------------------------------
@@ -378,7 +379,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var value = undefined;
-            //console.log(["initializingProperty: ",nodeID,propertyName,propertyValue]);
+            //console.info( "initializingProperty( " + nodeID+", "+propertyName+", "+propertyValue + " )" );
 
             if ( propertyValue !== undefined ) {
                 var node = this.state.nodes[ nodeID ];
@@ -386,7 +387,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 if ( node !== undefined ) {
                     switch ( propertyName ) {
                         case "meshDefinition":
-                            createMesh.call( this, node, propertyValue );
+                            createMesh.call( this, node, propertyValue, true );
+                            value = propertyValue; 
                             break;
                         case "texture":
                             // delay the setting of the texture until the actual
@@ -407,7 +409,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
-            //console.log(["settingProperty: ",nodeID,propertyName,propertyValue]);
+            //console.info( "settingProperty( " + nodeID+", "+propertyName+", "+propertyValue + " )" );
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             if( node === undefined ) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
@@ -820,8 +822,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                                 parent.remove(threeObject);
                                 var cam = new THREE.PerspectiveCamera(35,$(document).width()/$(document).height() ,.01,10000);
-                                //cam.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1];
-                                //CopyProperties(threeObject,cam);
                                 cam.far = threeObject.far;
                                 cam.near = threeObject.near;
                                 cam.matrix.elements = matCpy(threeObject.matrix.elements);
@@ -890,6 +890,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     if(propertyName == "color" || propertyName == "diffuse")
                     {
+                        if ( propertyValue instanceof String ) {
+                            propertyValue = propertyValue.replace( /\s/g, '' );
+                        }
                         var vwfColor = new utility.color( propertyValue );
                         if ( vwfColor ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
@@ -900,6 +903,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                         value = vwfColor.toString();
                     }
+
+                    // these properties should possibly be three js specific
+                    if(propertyName == "transparent") {
+                        value = Boolean( propertyValue );
+                        threeObject.transparent = value;
+                    }
+                    if(propertyName == "opacity") {
+                        value = Number( propertyValue );
+                        threeObject.opacity = value;
+                    }
+
                 }
                 if( threeObject instanceof THREE.Scene )
                 {
@@ -915,6 +929,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if(propertyName == 'ambientColor')
                     {
                         var lightsFound = 0;
+                        if ( propertyValue instanceof String ) {
+                            propertyValue = propertyValue.replace( /\s/g, '' );
+                        }
                         var vwfColor = new utility.color( propertyValue );
                         if ( vwfColor ) {
                             for( var i = 0; i < threeObject.__lights.length; i++ )
@@ -940,6 +957,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if ( propertyName == 'backgroundColor' )
                     {
                         if ( node && node.renderer ) {
+                            if ( propertyValue instanceof String ) {
+                                propertyValue = propertyValue.replace( /\s/g, '' );
+                            }
                             var vwfColor = new utility.color( propertyValue );
                             if ( vwfColor ) {
                                 node.renderer.setClearColor( vwfColor.getHex(), vwfColor.alpha() );
@@ -1027,6 +1047,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         threeObject.distance = value;
                     }
                     else if ( propertyName == 'color' ) {
+                        if ( propertyValue instanceof String ) {
+                            propertyValue = propertyValue.replace( /\s/g, '' );
+                        }
                         var vwfColor = new utility.color( propertyValue );
                         if ( vwfColor ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
@@ -1110,7 +1133,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                     
                 if(propertyName ==  "boundingbox")
                 {
-                    value = getBoundingBox.call( this, threeObject, true );
+                    value = getBoundingBox.call( this, threeObject );
                     return value;
                 }
                 if ( propertyName == "centerOffset" )
@@ -1363,6 +1386,53 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         return foundNode;
     }
+
+    function isCubeDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-cube-vwf" );    
+            }
+        }
+        return foundNode;
+    }
+    function isCircleDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-circle-vwf" );    
+            }
+        }
+        return foundNode;
+    }
+    function isPlaneDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-plane-vwf" );    
+            }
+        }
+        return foundNode;
+    }
+    function isSphereDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-sphere-vwf" );    
+            }
+        }
+        return foundNode;
+    }
+    function isCylinderDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-cylinder-vwf" );    
+            }
+        }
+        return foundNode;
+    }
+
     function CreateThreeJSSceneNode(parentID,thisID,extendsID)
     {
         var node = {};
@@ -1445,42 +1515,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
         threeScene.add( ambient );
     }
-    function createAxis( threeScene ){
-        ///////////////////////////////////////////////
-        //temp mesh for all geometry to test
-        var cubeX = new THREE.Mesh(
-            new THREE.CubeGeometry( 10.00, .30, .30 ),
-            new THREE.MeshLambertMaterial( { color: 0xFF0000, emissive:0xFF0000 } )
-        );
-        cubeX.position.set(5.00,.15,.15);
-
-        var cubeY = new THREE.Mesh(
-            new THREE.CubeGeometry( .30, 10.00, .30 ),
-            new THREE.MeshLambertMaterial( { color: 0x00FF00, emissive:0x00FF00 } )
-        );
-        cubeY.position.set(.15,5.00,.15);
-
-        var cubeZ = new THREE.Mesh(
-            new THREE.CubeGeometry( .30, .30, 10.00 ),
-            new THREE.MeshLambertMaterial( { color: 0x0000FF, emissive:0x0000FF} )
-        );
-        cubeZ.position.set(.15,.15,5.00);
-        
-        var group = new THREE.Object3D();
-        group.name = "axis";
-        cubeX.name = "x";
-        cubeY.name = "y";
-        cubeZ.name = "z";
-
-        group.add(cubeX);
-        group.add(cubeY);
-        group.add(cubeZ);
-        group.vwfID = "TEST DUMMY AXIS GIZMO";
-        
-        threeScene.add(group);
-        return group;
-    }
-
 
     function createCamera( nodeID, childID, childName ) {
 
@@ -1669,29 +1703,78 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
         }
     }
-    function createMesh( node, meshDef ) {
+    function createMesh( node, meshDef, doubleSided ) {
         if ( node.threeObject && node.threeObject instanceof THREE.Object3D ) {
-            var i, face;
-            var geo = new THREE.Geometry();
-            var mat = new THREE.MeshBasicMaterial( { color: meshDef.color ? meshDef.color : 0xffffff } )
+            var i, face, geo;
+            var height, width, depth, radius;
+            var vwfColor, colorValue = 0xFFFFFF;    
+            if ( meshDef.color !== undefined ) {
+                vwfColor = new utility.color( meshDef.color );
+                if ( vwfColor ) {
+                    colorValue = vwfColor._decimal;
+                }
+            }
+            var mat = new THREE.MeshLambertMaterial( { "color": colorValue, "ambient": colorValue } );
+           
+            if ( isCubeDefinition.call( this, node.prototypes ) ) {
+                height = meshDef.height || 1;
+                width = meshDef.width || 1;
+                depth = meshDef.depth || 1;
+                geo = new THREE.CubeGeometry( width, height, depth );
+            } else if ( isPlaneDefinition.call( this, node.prototypes ) ) {
+                height = meshDef.height || 1;
+                width = meshDef.width || 1;
+                geo = new THREE.PlaneGeometry( width, height );
+            } else if ( isCircleDefinition.call( this, node.prototypes ) ) {
+                radius = meshDef.radius || 10;
+                geo = new THREE.CircleGeometry( radius );
+            } else if ( isSphereDefinition.call( this, node.prototypes ) ) {
+                radius = meshDef.radius || 10;
+                geo = new THREE.SphereGeometry( radius );
+            } else if ( isCylinderDefinition.call( this, node.prototypes ) ) {
+                height = meshDef.height || 1;
+                if ( meshDef.radius !== undefined ){ 
+                    radius = meshDef.radius || 10;
+                    geo = new THREE.CylinderGeometry( radius, radius, height );
+                } else {
+                    geo = new THREE.CylinderGeometry( meshDef.radiusTop || 10, meshDef.radiusBottom || 10, height );
+                }
+            } else {
+                geo = new THREE.Geometry();
 
-            for ( i = 0; geo.vertices && meshDef.positions && i < meshDef.positions.length; i++ ) {
-                geo.vertices.push( new THREE.Vector3( meshDef.positions[i*3], meshDef.positions[i*3+1],meshDef.positions[i*3+2] ) );   
+                for ( i = 0; geo.vertices && meshDef.positions && ((i*3) < meshDef.positions.length); i++ ) {
+                    //console.info( "     adding vertices: [" + (meshDef.positions[i*3]) + ", " + (meshDef.positions[i*3+1]) + ", "+ (meshDef.positions[i*3+2]) + " ]" )
+                    geo.vertices.push( new THREE.Vector3( meshDef.positions[i*3], meshDef.positions[i*3+1],meshDef.positions[i*3+2] ) );   
+                }
+                for ( i = 0; geo.faces && meshDef.faces && ( (i*3) < meshDef.faces.length ); i++ ) {
+                    //console.info( "     adding face: [" + (meshDef.faces[i*3]) + ", " + (meshDef.faces[i*3+1]) + ", "+ (meshDef.faces[i*3+2]) + " ]" );
+                    face = new THREE.Face3( meshDef.faces[i*3], meshDef.faces[i*3+1],meshDef.faces[i*3+2] );
+                    geo.faces.push( face );
+                    if ( doubleSided ) {
+                        //console.info( "     adding face: [" + (meshDef.faces[i*3+2]) + ", " + (meshDef.faces[i*3+1]) + ", "+ (meshDef.faces[i*3]) + " ]" );
+                        face = new THREE.Face3( meshDef.faces[i*3+2], meshDef.faces[i*3+1],meshDef.faces[i*3] );
+                        geo.faces.push( face );
+                    }
+                } 
+                // TODO: needed doubleSided support for normals
+                for ( i = 0 ; geo.faces && meshDef.normals && i < geo.faces.length; i++ ) {
+                    face = geo.faces[ i ];
+                    //console.info( "     adding face normal: [" + (meshDef.normals[i*3]) + ", " + (meshDef.normals[i*3+1]) + ", "+ (meshDef.normals[i*3+2]) + " ]" );
+                    face.vertexNormals.push( new THREE.Vector3( meshDef.normals[i*3], meshDef.normals[i*3+1],meshDef.normals[i*3+2] ) );   
+                }
+                for ( i = 0; geo.faceVertexUvs && meshDef.uv1 && i < meshDef.uv1.length; i++ ) {
+                    //console.info( "     adding face vertex uv: [" + (meshDef.uv1[i*2]) + ", " + (meshDef.uv1[i*2+1]) + " ]" );
+                    geo.faceVertexUvs.push( new THREE.Vector2( meshDef.uv1[i*2], meshDef.uv1[i*2+1] ) );   
+                }   
             }
-            for ( i = 0; geo.faces && meshDef.faces && ( (i*3) < meshDef.faces.length ); i++ ) {
-                face = new THREE.Face3( meshDef.faces[i*3], meshDef.faces[i*3+1],meshDef.faces[i*3+2] );
-                geo.faces.push( face );   
-            } 
-            for ( i = 0 ; geo.faces && meshDef.normals && i < geo.faces.length; i++ ) {
-                face = geo.faces[ i ];
-                face.vertexNormals.push( new THREE.Vector3( meshDef.normals[i*3], meshDef.normals[i*3+1],meshDef.normals[i*3+2] ) );   
+            if ( geo !== undefined ) {
+                var mesh = new THREE.Mesh( geo, mat );          
+                node.threeObject.add( mesh ); 
+                
+                geo.computeCentroids();
+                geo.computeFaceNormals();                
             }
-            for ( i = 0; geo.faceVertexUvs && meshDef.uv1 && i < meshDef.uv1.length; i++ ) {
-                geo.faceVertexUvs.push( new THREE.Vector2( meshDef.uv1[i*2], meshDef.uv1[i*2+1] ) );   
-            }             
-            node.threeObject.add( new THREE.Mesh( geo, mat ) ); 
-            
-            geo.computeCentroids();
+
         }         
     }
     function loadAsset( parentNode, node, childType, propertyNotifyCallback ) {
@@ -2708,16 +2791,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
     }
 
-    function CopyProperties(from,to)
-    {
-        for(var i in from)
-        {
-            if(i != 'parent' && typeof from[i] != 'function')
-            {
-                to[i] = from[i];
-            }
-        }
-    }
     //search the threeObject of the parent sim node for the threeChild with the name of the sim child node
     function findThreeObjectInParent(childID,parentID)
     {
@@ -2760,56 +2833,21 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
    // -- getBoundingBox ------------------------------------------------------------------------------
 
-    function getBoundingBox( object3, local ) {
+    function getBoundingBox( object3 ) {
 
-        //var objWorldTrans = getTransform.call( this, object3, false );
         var bBox = { 
             min: { x: Number.MAX_VALUE, y: Number.MAX_VALUE, z: Number.MAX_VALUE },
             max: { x: -Number.MAX_VALUE, y: -Number.MAX_VALUE, z: -Number.MAX_VALUE }
         };
-        var bObjBox;
 
-        var objectList = [], obj, wldTrans, bx, foundBBox = 0 ;
-        if ( object3.getDescendants ) {
-            objectList = object3.getDescendants();
-        }
-        objectList.push( object3 );
-
-        for ( var j = 0; j < objectList.length; j++ ) {
-
-            bObjBox = { 
-                        min: { x: Number.MAX_VALUE, y: Number.MAX_VALUE, z: Number.MAX_VALUE },
-                        max: { x: -Number.MAX_VALUE, y: -Number.MAX_VALUE, z: -Number.MAX_VALUE }
-                    };
-
-            obj = objectList[ j ];
-            if ( obj ) {
-
-                //wldTrans = getTransform.call( this, obj, false );
-
-                if ( obj.geometry ) {
-                    
-                    if ( obj.geometry.computeBoundingBox ) {
-                        
-                        obj.geometry.computeBoundingBox();
-                        bx = obj.geometry.boundingBox;
-                        foundBBox++;
-
-                        if ( foundBBox > 1 ) {
-                            // TODO
-                            // in this case we need to deal with the offsets of the origins
-                            // each object is in it's on local space which may not have the same origin
-                        } else {
-                            bBox = { 
-                                min: { x: bx.min.x, y: bx.min.y, z: bx.min.z },
-                                max: { x: bx.max.x, y: bx.max.y, z: bx.max.z }
-                            };
-                        }
-
-                    }
-
-                } 
-            }
+        if ( object3 && object3.geometry && object3.geometry.computeBoundingBox ) {
+           
+            object3.geometry.computeBoundingBox();
+            bx = object3.geometry.boundingBox;
+            bBox = { 
+                min: { x: bx.min.x, y: bx.min.y, z: bx.min.z },
+                max: { x: bx.max.x, y: bx.max.y, z: bx.max.z }
+            };
         }
 
         return bBox; 
@@ -2819,7 +2857,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     function getCenterOffset( object3 ) {
         var offset = [ 0, 0, 0 ];
         if ( object3 ) {
-            var bBox = getBoundingBox.call( this, object3, true );
+            var bBox = getBoundingBox.call( this, object3 );
             offset[0] = ( bBox.max.x + bBox.min.x ) * 0.50;
             offset[1] = ( bBox.max.y + bBox.min.y ) * 0.50;
             offset[2] = ( bBox.max.z + bBox.min.z ) * 0.50;

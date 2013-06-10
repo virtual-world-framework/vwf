@@ -153,19 +153,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
 			var camera = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
 			var pos = camera.localToWorld(new THREE.Vector3(-.4,.275,-1.0))
-			if ( sceneNode.axes !== undefined ) {
-                sceneNode.axes.position = pos;
-                sceneNode.axes.scale = new THREE.Vector3(.005,.005,.005);
-                sceneNode.axes.updateMatrix();
-            }
-
+			
             // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
             // Note: this is a costly operation and should be optimized if possible
             if((now - lastPickTime) > self.pickInterval && !self.disableInputs)
             {
                 sceneNode.frameCount = 0;
             
-                var newPick = ThreeJSPick.call( self, mycanvas, sceneNode );
+                var newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
                 
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
 
@@ -822,7 +817,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
          
     };
 
-    function ThreeJSPick( canvas, sceneNode )
+    function ThreeJSPick( canvas, sceneNode, debug )
     {
         if(!this.lastEventData) return;
         
@@ -855,12 +850,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         this.raycaster.set(pos, directionVector);
         var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
         if (intersects.length) {
+            var target = intersects[0].object;
+            if ( debug ) {
+                for ( var i = 0; i < intersects.length; i++ ) { 
+                    console.info( i + ". " + intersects[i].object.name ) 
+                }
+            }            
             // intersections are, by default, ordered by distance,
             // so we only care for the first one. The intersection
             // object holds the intersection point, the face that's
             // been "hit" by the ray, and the object to which that
             // face belongs. We only care for the object itself.
-            var target = intersects[0].object;
+
             
             var ID = getPickObjectID.call(this,target);
             return intersects[0];

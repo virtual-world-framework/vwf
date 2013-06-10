@@ -268,13 +268,16 @@
                 { library: "vwf/view/lesson", active: false},
                 { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/view/touch", active: false},
+                { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
+                { library: "vwf/view/cesium", linkedLibraries: ["vwf/view/cesium/Cesium"], active: false },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
                 { library: "vwf/model/threejs/three", active: false },
                 { library: "vwf/model/threejs/js/loaders/ColladaLoader", active: false },
                 { library: "vwf/model/jiglib/jiglib", active: false },
+                { library: "vwf/view/webrtc/adapter", active: false },
                 { library: "vwf/view/google-earth", active: false },
-                { library: "vwf/view/cesium", active: false }
+                { library: "vwf/view/cesium/Cesium", active: false }
             ];
 
             var initializers = {
@@ -293,7 +296,8 @@
                     { library: "vwf/view/lesson", active: false},
                     { library: "vwf/view/touch", active: false},
                     { library: "vwf/view/google-earth", active: false },
-                    { library: "vwf/view/cesium", active: false }
+                    { library: "vwf/view/cesium", active: false },
+                    { library: "vwf/view/webrtc", active: false}
                 ]
             };
             mapLibraryName(requireArray);
@@ -912,11 +916,11 @@
 
         this.receive = function( nodeID, actionName, memberName, parameters, respond, origin ) {
 
-            origin == "reflector" ?
-                this.logger.infogx( "receive", nodeID, actionName, memberName,
-                    parameters && parameters.length, respond, origin ) :
-                this.logger.debuggx( "receive", nodeID, actionName, memberName,
-                    parameters && parameters.length, respond, origin );
+            // origin == "reflector" ?
+            //     this.logger.infogx( "receive", nodeID, actionName, memberName,
+            //         parameters && parameters.length, respond, origin ) :
+            //     this.logger.debuggx( "receive", nodeID, actionName, memberName,
+            //         parameters && parameters.length, respond, origin );
 
 // TODO: delegate parsing and validation to each action.
 
@@ -940,8 +944,8 @@
             respond && this.respond( nodeID, actionName, memberName, parameters,
                 require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ) );
 
-            origin == "reflector" ?
-                this.logger.infou() : this.logger.debugu();
+            // origin == "reflector" ?
+            //     this.logger.infou() : this.logger.debugu();
         };
 
         // -- dispatch -----------------------------------------------------------------------------

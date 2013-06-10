@@ -15,17 +15,20 @@
 <html>
     <head>
         <title>Cesium VWF Demo</title>
-        <script type="text/javascript" src="Cesium.js"></script>
+        <style>
+          @import url( CesiumWidget.css );
+          body {
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+          }
+        </style>
         <script type="text/javascript">
             document.title = "Cesium VWF Demo";
-        </script>
+        </script>    
     </head>
     <body>
-        <div style="position: absolute; top: 10px; left: 10px">
-            <a href="http://cesium.agi.com" title="cesium.agi.com" target="_blank">
-                <img src="Cesium_Logo_Color_2.jpg" height="48px"/>
-            </a>
-        </div>
+        <!-- div id="cesiumContainer"></div -->
         <div class="vwf-main-content" align="center"></div>
     </body>
 </html>

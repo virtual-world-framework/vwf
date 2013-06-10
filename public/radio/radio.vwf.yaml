@@ -276,13 +276,9 @@ children:
       ic40Channel: 
         extends: http://vwf.example.com/node3.vwf 
         implements:  
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
-          controlValue: 0
           controlDirection: -1
-          animationTime: 0
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -412,11 +408,10 @@ children:
       ic40Down: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -432,7 +427,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -453,11 +447,10 @@ children:
       ic40P0: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -473,7 +466,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -489,11 +481,10 @@ children:
       ic40P1: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -509,7 +500,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -525,11 +515,10 @@ children:
       ic40P2: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -545,7 +534,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -561,11 +549,10 @@ children:
       ic40P3: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -581,7 +568,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -597,11 +583,10 @@ children:
       ic40PTT: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -617,7 +602,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -633,11 +617,10 @@ children:
       ic40Red: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -653,7 +636,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -669,11 +651,10 @@ children:
       ic40Up: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
           animationRate: 10
+          controlMomentary: true
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 
@@ -689,7 +670,6 @@ children:
             - http://vwf.example.com/control/position.vwf
             properties:
               sequence: 1
-              controlType: "spring"
         scripts:
         - |
           this.animationUpdate = function(time, duration) {
@@ -705,13 +685,9 @@ children:
       ic40Volume: 
         extends: http://vwf.example.com/node3.vwf 
         implements: 
-        - http://vwf.example.com/animation.vwf
-        - http://vwf.example.com/node3/animation.vwf
         - http://vwf.example.com/control.vwf
         properties:
-          controlValue: 0
           controlDirection: -1
-          animationTime: 0
         children: 
           material: 
             extends: http://vwf.example.com/material.vwf 

@@ -34,16 +34,50 @@ Note: (*) indicates an API change.
 - CHG: Remove catalog files for simple and similar applications. Renamed catalog files for adl humvee until the application is working. Fixes #1950.
 - CHG: Set humvee ground texture (LM logo) visible property to false for lesson.
 - CHG: Update Installation Instructions to contain Java install.
-- NEW: Add stack depth tests. References #2035.
+- CHG: Change sandtable to use threejs by default Refs #2087
+- CHG: Change emissive to ambient in CreateMesh material. Refs #1889
+- NEW: Added nodes to test the new threejs primitives
+- NEW: Added double sided to the createMesh in the threejs driver
+- CHG: Cesium Version 17 just released
+- CHG: Fix for the muted property on the local video
+- CHG: Fixed firefox crash due to call to chrome only webkit
+- CHG: Added features via properties to the cesium driver
+- CHG: Remove unneeded properties that cause an animationUpdate to be called before the nodes are fully initialized. Fixes #2096 Update webrtc.js
+- CHG: Fixed this reference that was the wrong object
+- CHG: Fix ColladaLoader to assign specular maps to the specularMap property instead of overwriting the map property. Refs #2092
+- CHG: Updated the agi/cesium application to use the new driver options
+- CHG: Updated the cesium-webrtc application to use the new driver options
+- CHG: Updated the webrtc application to use the new driver options
+- NEW: Created options for the cesium driver
+- NEW: Created options of the webrtc driver
+- CHG: Moved the cesium lib into the vwf/view/cesium folder
+- CHG: Fixed the video canvases z-index, now on top of cesium
+- CHG: Fix load order dependencies in lesson.js view driver. Lesson driver depended on children to be added in the order that they are defined.  Now that children load in parallel, that is not always true (and it broke the humvee lesson) fixes #2084
+- NEW: Added the cesium-webrtc application
+- NEW: Initial checkin of a new demochat example app to serve as an example of the chat and sound recipes.
+- CHG: Update to the transforms example app in order to match coding standard and make changes recommended in code review.
+- CHG: Fix degree to radian conversion
+- CHG: Uncomment out getting velocity property to fix issues when new clients join an app using physics. Fixes #1111
+- CHG: Updated the cesium application with version r16
+- CHG: Remove axes in the threejs driver, since not every app would want them. Fixes #1696
+- CHG: Add stack depth tests. References #2035.
 - CHG: Don't suspend the queue when `createChild` doesn't have a callback. References #2035.
 - CHG: Ensure async breaks occur before and after each createChild(). Keeps the stack from growing from node to node while createChild() recursively traverses a component. The break at the beginning protects the way down, and the break at the end protects the way up. References #2035.
 - CHG: Collapse async.series sequences of length 1. References #2035.
 - CHG: Merge async.series operations without an async mode with those that do. Some intermediate steps in async.series sequences always completed synchronously and didn't actually need async support. Sequences were arranged that way for clarity, but having unnecessary steps in a series sequence is expensive on the stack. These steps have been merged down into the following async step, or merged into the completion function when they were at the end of the sequence. References #2035.
-Remove unused timer that is incompatible w/ Firefox.  Fixes #2033
-
-
-
-
+- CHG: Undo log calls commented out in commit:64cd0fe.
+- CHG: Add new transforms example under public/web/example. The example is designed to demonstrate the lessons taught in the 2D Interface and Transforms cookbook instructions.
+- CHG: Update Gemfile. Minor improvements to OS X build script. Specify the patch level for ruby to match the Rakefile. Defaulting to homebrew and trimming down the RVM calls. Set autolibs to use homebrew. Removed the rvm reload, as the source call on line 23 is the recommended way to reload after an installation
+- CHG: Removed the second autolibs line, as it is a repeat of the option passed on line 22
+- CHG: Remove material from the cube and sphere, so that GLGE won't cache it and reuse it Fixes #1813
+- CHG: Fixed issue in the utility/color.js when with RGBA definitions
+- CHG: Modified for loop to use previously defined length
+- CHG: Moved the @sourceURL ref in OSX installation script.
+- CHG: Whitespace removal from color string definitions - the utility/color.js should handle the white space removal
+- CHG: Remove unused timer that is incompatible w/ Firefox. Fixes #2033
+- CHG: Change radio buttons to momentary controls
+- CHG: Remove lines to implement animation behavior, since that is now done by node3. Refs #1716
+- CHG: Move node3 animations to the new animation behavior. Update node3 to implement animation behavior by default. Refs #1716, #1776
 
 
 

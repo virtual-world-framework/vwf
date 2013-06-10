@@ -422,9 +422,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     case "linVelocityDamping":
                         propertyValue = node.jigLibObj.get_linVelocityDamping();
                         break;    
-        //                    case "velocity":
-        //                       propertyValue = node.jigLibObj.getVelocity( node.jigLibObj.get_position() );
-        //                       break;
+                    case "velocity":
+                        propertyValue = node.jigLibObj.getVelocity( node.jigLibObj.get_position() );
+                        break;
                     case "private":
                         propertyValue = {
                             _currState: node.jigLibObj._currState,

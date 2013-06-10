@@ -23600,7 +23600,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		}
 
-		if ( m_uniforms.flipSided.value !== object.matrixWorldIsMirrored ) {
+		if ( m_uniforms.flipSided && m_uniforms.flipSided.value !== object.matrixWorldIsMirrored ) {
 
 			_gl.uniform1i( p_uniforms.flipSided, object.matrixWorldIsMirrored );
 			m_uniforms.flipSided.value = object.matrixWorldIsMirrored;
