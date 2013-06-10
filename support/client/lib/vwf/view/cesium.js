@@ -94,7 +94,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             if ( isCesiumDefinition.call( this, protos ) ) {
 
-                debugger;
+                //debugger;
                 jQuery( this.parentDiv ).append(
                     "<div class='cesuim-container' id='"+this.containerDiv+"'></div>"
                 );

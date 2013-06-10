@@ -106,7 +106,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 this.state.nodes[ childID ] = createNode();
                 parentNode = findParent( nodeID );
                 if ( parentNode && parentNode.scene ) {
-                    var skyBoxBaseUrl = '../../../Source/Assets/Textures/SkyBox/tycho2t3_80';
+                    var skyBoxBaseUrl = '../vwf/model/Assets/Textures/SkyBox/tycho2t3_80';
                     parentNode.scene.skyBox = new Cesium.SkyBox({
                         positiveX : skyBoxBaseUrl + '_px.jpg',
                         negativeX : skyBoxBaseUrl + '_mx.jpg',
@@ -355,7 +355,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                         transparent : 'true',
                                         format : 'image/png'
                                     },
-                                    proxy : new Cesium.DefaultProxy('/proxy/')
+                                    proxy : proxy
                                 })
                                 break;
 
@@ -368,7 +368,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                         transparent : 'true',
                                         format : 'image/png'
                                     },
-                                    proxy : new Cesium.DefaultProxy('/proxy/')
+                                    proxy : proxy
                                 })                        
                                 break;
 
