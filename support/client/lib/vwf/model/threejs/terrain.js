@@ -453,54 +453,418 @@
 			this.mat.color.r = .5;
 			this.mat.color.g = .5;
 			this.mat.color.b = .5;
-            this.mat.depthCheck = false;
+			this.mat.depthCheck = false;
 			this.mat.wireframe = false;
 				
 				
-				this.buildMesh = function(size,res)
+				
+				this.buildMesh3 = function(size,res)
 				{
 					
 					var geo = new THREE.Geometry();
-					var step = size/(res+1);
+					var step = size/(res);
 					var count = 0;
-					for(var i=0; i < size+step; i += step)
+					for(var i=0; i <= size+step+step; i += step)
 					{
-						for(var j=0; j < size+step; j +=step)
+						
+						for(var j=0; j <= size+step+step; j +=step)
 						{
 							var z = 0;
 							var x = i-size/2;
 							var y = j-size/2;
-							
 							var v = new THREE.Vector3(x,y,z);
-							v.oz = z;
 							geo.vertices.push(v);
 						}
 						count++;
 					}
 					for(var i=0; i < count-2; i++)
 					{
-						for(var j=0; j < count-2; j++)
+						for(var j=0; j < count-3; j++)
 						{
 							
-							var f = new THREE.Face4(i*(count) + j,(i+1)*count+j,(i+1)*count+j+1,i*count+j+1)
-							f.vertexNormals.push(new THREE.Vector3(0,0,1));
-							f.vertexNormals.push(new THREE.Vector3(0,0,1));
-							f.vertexNormals.push(new THREE.Vector3(0,0,1));
-							f.vertexNormals.push(new THREE.Vector3(0,0,1));
-							f.normal = new THREE.Vector3(0,0,1);
-							geo.faces.push(f);
+							var x = i;
+							var y = j;
+							if(i==0)
+							{
+							     if((j/2) - Math.floor(j/2) == 0)
+							     {
+								if(j>0)
+								{
+								var f = new THREE.Face3(x*(count) + y,(x+1)*count+y,(x+1)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+									}
+								var f = new THREE.Face3(x*(count) + y,(x+1)*count+y+1,(x)*count+y+2);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								
+								
+								var f = new THREE.Face3((x+1)*(count) + y+2,(x)*count+y+2,(x+1)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								
+
+														
+							     }
+							}
+							else if(i == count-4)
+							{
+							     if((j/2) - Math.floor(j/2) == 0)
+							     {
+								if(j>0)
+								{
+								var f = new THREE.Face3((x+1)*(count) + y,(x)*count+y+1,(x)*count+y);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+									}
+								var f = new THREE.Face3((x+1)*(count) + y,(x+1)*count+y+2,(x)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								
+								
+								var f = new THREE.Face3((x)*(count) + y+2,(x)*count+y+1,(x+1)*count+y+2);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								
+
+														
+							     }
+							}
+							else if(j==0)
+							{
+							     if((i/2) - Math.floor(i/2) == 0)
+							     {
+								
+								var f = new THREE.Face3((x-2)*(count) + y,(x+0)*count+y,(x-1)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								if( i < count-3)
+								{								
+								var f = new THREE.Face3((x-1)*(count) + y+1,(x+0)*count+y,(x+0)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								}
+
+								if( i < count-3)
+								{
+								var f = new THREE.Face3((x+0)*count+y+0,(x+1)*count+y+1,(x+0)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								}
+								
+							     }
+							}
+							
+							else if( i < count-3)
+							{
+
+								var f = new THREE.Face3(x*(count) + y,(x+1)*count+y,(x+1)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								
+								var f = new THREE.Face3(x*(count) + y,(x+1)*count+y+1,(x)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								//f.vertexNormals.push(new THREE.Vector3(0,0,1));
+							
+							}
+
 						}
 					}
 					geo.computeCentroids();
-					geo.computeVertexNormals(true);
-					geo.normalsNeedUpdate = true;
 					return geo;
-				}				
-				this.getMesh = function(res,size)
+				}
+				
+				this.buildMesh2 = function(size,res)
+				{
+					
+					var geo = new THREE.Geometry();
+					var step = size/(res);
+					var count = 0;
+					for(var i=0; i <= size+step+step; i += step)
+					{
+						
+						for(var j=0; j <= size+step+step; j +=step)
+						{
+							var z = 0;
+							var x = i-size/2;
+							var y = j-size/2;
+							var v = new THREE.Vector3(x,y,z);
+							geo.vertices.push(v);
+						}
+						count++;
+					}
+					for(var i=0; i < count-2; i++)
+					{
+						for(var j=0; j < count-3; j++)
+						{
+							
+							var x = i;
+							var y = j;
+							if(i==0)
+							{
+							     if((j/2) - Math.floor(j/2) == 0)
+							     {
+								if(j>0)
+								{
+								var f = new THREE.Face3(x*(count) + y,(x+1)*count+y,(x+1)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+									}
+								var f = new THREE.Face3(x*(count) + y,(x+1)*count+y+1,(x)*count+y+2);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								
+								
+								var f = new THREE.Face3((x+1)*(count) + y+2,(x)*count+y+2,(x+1)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								
+
+														
+							     }
+							}
+							else if(j==0)
+							{
+							     if((i/2) - Math.floor(i/2) == 0)
+							     {
+								var f = new THREE.Face3((x-2)*(count) + y,(x+0)*count+y,(x-1)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								
+								var f = new THREE.Face3((x-1)*(count) + y+1,(x+0)*count+y,(x+0)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								
+								if( i < count-3)
+								{
+								var f = new THREE.Face3((x+0)*count+y+0,(x+1)*count+y+1,(x+0)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								}
+								
+							     }
+							}
+							
+							else if( i < count-3)
+							{
+
+								var f = new THREE.Face3(x*(count) + y,(x+1)*count+y,(x+1)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								
+								var f = new THREE.Face3(x*(count) + y,(x+1)*count+y+1,(x)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								//f.vertexNormals.push(new THREE.Vector3(0,0,1));
+							
+							}
+
+						}
+					}
+					geo.computeCentroids();
+					return geo;
+				}
+				
+				this.buildMesh1 = function(size,res)
+				{
+					
+					var geo = new THREE.Geometry();
+					var step = size/(res);
+					var count = 0;
+					for(var i=0; i <= size+step+step; i += step)
+					{
+						
+						for(var j=0; j <= size+step+step; j +=step)
+						{
+							var z = 0;
+							var x = i-size/2;
+							var y = j-size/2;
+							var v = new THREE.Vector3(x,y,z);
+							geo.vertices.push(v);
+						}
+						count++;
+					}
+					for(var i=0; i < count-3; i++)
+					{
+						for(var j=0; j < count-3; j++)
+						{
+							
+							var x = i;
+							var y = j;
+							if(i==0 && j < count-3)
+							{
+							     if((j/2) - Math.floor(j/2) == 0)
+							     {
+								var f = new THREE.Face3(x*(count) + y,(x+1)*count+y,(x+1)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+
+								var f = new THREE.Face3(x*(count) + y,(x+1)*count+y+1,(x)*count+y+2);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								
+								var f = new THREE.Face3((x+1)*(count) + y+2,(x)*count+y+2,(x+1)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+
+														
+							     }
+							}
+							else
+							{
+
+								var f = new THREE.Face3(x*(count) + y,(x+1)*count+y,(x+1)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								
+								var f = new THREE.Face3(x*(count) + y,(x+1)*count+y+1,(x)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								//f.vertexNormals.push(new THREE.Vector3(0,0,1));
+							
+							}
+
+						}
+					}
+					geo.computeCentroids();
+					return geo;
+				}
+				this.buildMesh0 = function(size,res)
+				{
+					
+					var geo = new THREE.Geometry();
+					var step = size/(res);
+					var count = 0;
+					for(var i=0; i <= size+step+step; i += step)
+					{
+						
+						for(var j=0; j <= size+step+step; j +=step)
+						{
+							var z = 0;
+							var x = i-size/2;
+							var y = j-size/2;
+							var v = new THREE.Vector3(x,y,z);
+							geo.vertices.push(v);
+						}
+						count++;
+					}
+					
+					for(var i=0; i < count-3; i++)
+					{
+						for(var j=0; j < count-3; j++)
+						{
+							
+							var x = i;
+							var y = j;
+							
+								var f = new THREE.Face3(x*(count) + y,(x+1)*count+y,(x+1)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								
+								var f = new THREE.Face3(x*(count) + y,(x+1)*count+y+1,(x)*count+y+1);//,x*count+y+1)
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								f.vertexNormals.push(new THREE.Vector3(1,0,0));
+								f.vertexNormals.push(new THREE.Vector3(0,0,1));
+								
+								f.normal = new THREE.Vector3(0,0,1);
+								geo.faces.push(f);
+								//f.vertexNormals.push(new THREE.Vector3(0,0,1));
+							
+							
+
+						}
+					}
+					geo.computeCentroids();
+					return geo;
+				}					
+				this.getMesh = function(res,side)
 				{
 					if(this.tiles[res])
 						for(var i = 0; i < this.tiles[res].length; i++)
-							if(this.tiles[res][i].quadnode == null && this.tiles[res][i].size == size)
+							if(this.tiles[res][i].quadnode == null && this.tiles[res][i].side == side)
 							{
 								console.log('reusing tile');
 								return this.tiles[res][i];
@@ -509,9 +873,18 @@
 						this.tiles[res] = [];
 						
 					//var newtile = new THREE.Mesh(new THREE.PlaneGeometry(size,size,res,res),this.mat);
-					var newtile = new THREE.Mesh(this.buildMesh(size,res),this.mat);
+					var newtile;
+					if(side == 0)
+						newtile = new THREE.Mesh(this.buildMesh0(100,res),this.mat);
+					if(side == 1)
+						newtile = new THREE.Mesh(this.buildMesh1(100,res),this.mat);
+					if(side == 2)
+						newtile = new THREE.Mesh(this.buildMesh2(100,res),this.mat);
+					if(side == 3)
+						newtile = new THREE.Mesh(this.buildMesh3(100,res),this.mat);	
 					newtile.geometry.dynamic = true;
-					newtile.size = size;
+					newtile.doublesided = true;
+					newtile.side = side;
 					newtile.receiveShadow = true;
 					newtile.castShadow = false;
 					this.tiles[res].push(newtile);
@@ -814,8 +1187,23 @@
 							{
 								var res = tileres;
 								
-								this.mesh = self.TileCache.getMesh(res,this.max[0] - this.min[0]);
+								var scale = this.max[0] - this.min[0];
 								
+								var lowresside = 0;
+								if(this.NN().depth < this.depth)
+									lowresside++;
+								if(this.SN().depth < this.depth)
+									lowresside++;
+								if(this.EN().depth < this.depth)
+									lowresside++;
+								if(this.WN().depth < this.depth)
+									lowresside++;			
+								
+								this.side == lowresside;
+								this.mesh = self.TileCache.getMesh(res,lowresside);
+								this.mesh.scale.x = scale/100;
+								this.mesh.scale.y = scale/100;
+								this.mesh.scale.z = 1;//scale/100;
 								if(this.mesh.quadnode)
 								{
 									debugger;
@@ -1082,6 +1470,7 @@
 				this.minSize = 32;
 				this.quadtree.update([[1,1]],[]);
 				
+				
 				this.quadtree.updateMesh();
 				window.terrain = self;
 				this.counter = 0;
@@ -1099,6 +1488,7 @@
 			self.needRebuild = [];
 			this.ticking = function()
 			{
+				
 				this.counter ++;
 				if(this.counter == 10)
 				{
@@ -1378,9 +1768,10 @@
 			this.BuildTerrainInner= function(mesh)
 			{
 				//if(!this.geo) return;
-				//return;
+				return;
 				
 				var geo = mesh.geometry;
+				mesh.updateMatrix();
 				var mx = mesh.position.x;
 				var my = mesh.position.y;
 				var normals = [];
@@ -1389,7 +1780,7 @@
 					
 					var vertn = geo.vertices[i];
 					
-					var vertoffset = Math.abs(geo.vertices[geo.faces[0].a].x - geo.vertices[geo.faces[1].a].x);
+					var vertoffset = 1;//Math.abs(geo.vertices[geo.faces[60].a].y - geo.vertices[geo.faces[60].a].y);
 					var vertx0 = new THREE.Vector3(vertn.x-vertoffset,vertn.y,vertn.z);
 					var verty0 = new THREE.Vector3(vertn.x,vertn.y-vertoffset,vertn.z);
 					var vertx1 = new THREE.Vector3(vertn.x+vertoffset,vertn.y,vertn.z);
@@ -1398,7 +1789,8 @@
 					for(var k = 0; k < verts.length; k++)
 					{
 						var z = 0;
-						var vert = verts[k];
+						var vert = verts[k].clone();
+						vert = vert.applyMatrix4(mesh.matrix);
 						// for(var j = 0; j < this.controlPoints.length; j++)
 						// {
 							// var cp = this.controlPoints[j];
@@ -1407,13 +1799,14 @@
 							// z +=  Math.max(0, cp.z - Math.pow(cp.z * dist/cp.dist,cp.falloff));
 						// }
 						//z = Math.sin((mx + vert.x)/10) * 10;
-						z = self.SimplexNoise.noise2D((mx + vert.x)/1000,(my + vert.y)/10000) * 250;
-						z += self.SimplexNoise.noise2D((mx + vert.x)/100,(my + vert.y)/1000) * 25;
-						z += self.SimplexNoise.noise2D((mx + vert.x)/50,(my + vert.y)/500) * 10;
-						z += self.SimplexNoise.noise2D((mx + vert.x)/50,(my + vert.y)/50) * 1.0;
+						z = self.SimplexNoise.noise2D((vert.x)/10000,(vert.y)/1000) * 250;
+						z += self.SimplexNoise.noise2D((vert.x)/1000,(vert.y)/100) * 25;
+						z += self.SimplexNoise.noise2D((vert.x)/500,(vert.y)/50) * 10;
+						z += self.SimplexNoise.noise2D((vert.x)/50,(vert.y)/50) * 1.0;
 						z += 286;
-						vert.z = z+vert.oz;
+						verts[k].z = z;
 					}
+					
 					//var n = vertn.clone().sub(vertx).cross(vertn.clone().sub(verty)).normalize();
 					var n = new THREE.Vector3(vertx1.z - vertx0.z,verty1.z - verty0.z,2*vertoffset)
 					n.normalize();
@@ -1425,14 +1818,14 @@
 					geo.faces[i].vertexNormals[0] = normals[geo.faces[i].a];
 					geo.faces[i].vertexNormals[1] = normals[geo.faces[i].b];
 					geo.faces[i].vertexNormals[2] = normals[geo.faces[i].c];
-					geo.faces[i].vertexNormals[3] = normals[geo.faces[i].d];
+					//geo.faces[i].vertexNormals[3] = normals[geo.faces[i].d];
 				
 				}
 				geo.verticesNeedUpdate = true;
 				geo.computeBoundingSphere();
 				geo.computeBoundingBox();
 				
-				//geo.normalsNeedUpdate = true;
+				geo.normalsNeedUpdate = true;
 				
 			}
 			
