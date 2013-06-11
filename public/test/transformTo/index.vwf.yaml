@@ -108,24 +108,6 @@ children:
               translation: [ 0, -1, 0 ]
               rotation: [ 1, 0, 1, 180 ]
               scale: [ 1, 1, 1 ]
-  dir1:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      lightType: "directional"
-      constantAttenuation: 1
-      rotationOLD: [ -0.79, -3.34, -0.22 ]
-  dir2:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      lightType: "directional"
-      constantAttenuation: 1
-      rotationOLD: [ 0.279, 0.9539, -0.08268 ]
-  dir2:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      lightType: "directional"
-      constantAttenuation: 1
-      rotationOLD: [ 7.478, -20.066, -2.69 ]
 scripts:
 - |
   this.initialize = function() {
