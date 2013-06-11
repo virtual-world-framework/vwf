@@ -21,8 +21,24 @@ properties:
   localUrl:
   remoteUrl: 
   displayName:
+  location:
+  requestLocation: false
 scripts:
 - |
     this.initialize = function() {
       //console.info( "=============== client.initialize ===============" );
+      if ( this.requestLocation ) {
+        var self = this;
+        navigator.geolocation.getCurrentPosition( function( pos ) {
+            var dest = Cesium.Cartographic.fromDegrees( pos.coords.longitude, pos.coords.latitude, 1000.0);
+            dest = ellipsoid.cartographicToCartesian( dest );
+            self.location = dest;
+            var bbDef = {
+              "extends": "http://vwf.example.com/cesium/billboard.vwf",
+            };
+            self.children.create( self.displayName + "-bb", bbDef, function( child ) {
+
+            } );
+        } );
+      }
     }

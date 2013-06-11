@@ -17,4 +17,7 @@
 ## @namespace
 
 --- 
-extends: http://vwf.example.com/node.vwf
+extends: http://vwf.example.com/cesium/node3.vwf
+properties:
+  visible: true
+  texturePath: 

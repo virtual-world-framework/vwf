@@ -18,3 +18,13 @@
 
 --- 
 extends: http://vwf.example.com/cesium/node3.vwf
+properties:
+  visible: true
+  position:
+  pixelOffset:
+  eyeOffset:
+  horizontalOrigin:
+  verticalOrigin:
+  scale:
+  imageIndex:
+  color:

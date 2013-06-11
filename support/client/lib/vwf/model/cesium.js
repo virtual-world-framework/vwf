@@ -66,7 +66,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
             
             var node = undefined, parentNode;
-            var protos = getPrototypes.call( this, kernel, childExtendsID );
+            var protos = getPrototypes.call( this, childExtendsID );
 
             var createNode = function() {
                 return {
@@ -91,19 +91,23 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             
             if ( isCesiumDefinition.call( this, protos ) ) {
+
                 if ( this.state.scenes[ childID ] === undefined ) {
-                    this.state.scenes[ childID ] = createNode();
+                    this.state.scenes[ childID ] = node = createNode();
                 }
-            
+
             } else if ( isAtmosphereDefinition.call( this, protos ) ) {
-                this.state.nodes[ childID ] = createNode();
+
+                this.state.nodes[ childID ] = node = createNode();
                 parentNode = findParent( nodeID );
                 if ( parentNode && parentNode.scene ) {
                     parentNode.scene.skyAtmosphere = new Cesium.SkyAtmosphere();
+                    node.renderObject = parentNode.scene.skyAtmosphere;
                 }
 
             } else if ( isSkyBoxDefinition.call( this, protos ) ) {
-                this.state.nodes[ childID ] = createNode();
+
+                this.state.nodes[ childID ] = node = createNode();
                 parentNode = findParent( nodeID );
                 if ( parentNode && parentNode.scene ) {
                     var skyBoxBaseUrl = '../vwf/model/Assets/Textures/SkyBox/tycho2t3_80';
@@ -115,20 +119,64 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         positiveZ : skyBoxBaseUrl + '_pz.jpg',
                         negativeZ : skyBoxBaseUrl + '_mz.jpg'
                     });
-                }                
+                    node.renderObject = parentNode.scene.skyBox;
+                } 
+
 
             } else if ( isSunDefinition.call( this, protos ) ) {
-                this.state.nodes[ childID ] = createNode();
+
+                this.state.nodes[ childID ] = node = createNode();
                 parentNode = findParent( nodeID );
                 if ( parentNode && parentNode.scene ) {
-                    parentNode.scene.skyBox = new Cesium.Sun();
+                    parentNode.scene.sun = new Cesium.Sun();
+                    node.renderObject = parentNode.scene.sun;
                 } 
+
             } else if ( isBillboardDefinition.call( this, protos ) ) {
-                this.state.nodes[ childID ] = createNode();
+                
+                this.state.nodes[ childID ] = node = createNode();
+                var sceneNode = findSceneNode.call( this, nodeID );
+                var canvas = document.createElement( 'canvas' );
+                canvas.width = 16;
+                canvas.height = 16;
+                var context2D = canvas.getContext( '2d' );
+                context2D.beginPath();
+                context2D.arc( 8, 8, 8, 0, Cesium.Math.TWO_PI, true );
+                context2D.closePath();
+                context2D.fillStyle = 'rgb(255, 255, 255)';
+                context2D.fill();
+
+                var billboard = new Cesium.BillboardCollection();
+                var textureAtlas = scene.getContext().createTextureAtlas( {
+                    image : canvas
+                } );
+                billboard.setTextureAtlas( textureAtlas );
+
+                billboard.add( {
+                    color : Cesium.Color.RED,
+                    scale : 1,
+                    imageIndex: 0
+                } );
+
+                sceneNode.scene.getPrimitives().add( billboard );
+                
+                node.renderObject = billboard;
+                node.scene = sceneNode.scene;
+
+            } else if ( isCameraDefinition.call( this, protos ) ) {
+                this.state.nodes[ childID ] = node = createNode();
                 parentNode = findParent( nodeID );
 
+                var camera = new Camera(canvas);
+                camera.position = new Cartesian3();
+                camera.direction = Cartesian3.UNIT_Z.negate();
+                camera.up = Cartesian3.UNIT_Y;
+                camera.frustum.fovy = CesiumMath.PI_OVER_THREE;
+                camera.frustum.near = 1.0;
+                camera.frustum.far = 2.0;                
+                
             } else if ( isNode3Definition.call( this, protos ) ) {
-                this.state.nodes[ childID ] = createNode();
+                this.state.nodes[ childID ] = node = createNode();
                 parentNode = findParent( nodeID );
                 
             }
@@ -144,11 +192,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             // its prototype (and behavior) properties.  Therefore, we cycle through those properties to
             // notify the drivers of the property values so they can react accordingly
             // TODO: Have the kernel send the "setProperty" updates itself so the driver need not
-            // NOTE: Identical code exists in GLGE driver, so if an change is necessary, it should be made
+            // NOTE: Identical code exists in GLGE, and Threejs drivers, so if an change is necessary, it should be made
             //       there, too
             function notifyDriverOfPrototypeAndBehaviorProps() {
                 var ptPropValue;
-                var protos = getPrototypes.call( this, kernel, childExtendsID );
+                var protos = getPrototypes.call( self, childExtendsID );
                 protos.forEach( function( prototypeID ) {
                     for ( var propertyName in kernel.getProperties( prototypeID ) ) {
                         //console.info( " 1    getting "+propertyName+" of: " + childExtendsID  );
@@ -231,8 +279,144 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
+            var value = propertyValue;
             var node = this.state.nodes[ nodeID ]; 
             if ( node ) {
+
+                if ( node.renderObject === undefined )
+                    return undefined;
+
+                switch ( propertyValue ) {
+
+                    case "visible":
+                        node.renderObject.show = Boolean( propertyValue );
+                        break;
+
+                    case "position":
+                        if ( node.renderObject instanceof Cesium.Camera ) {
+                            node.renderObject.position = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
+                        } else if ( node.renderObject instanceof Cesium.BillboardCollection ) {
+                            var pos = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
+                            node.renderObject.setPosition( pos );
+                        }
+                        break;
+
+                    case "pixelOffset":
+                        var pos = new Cesium.Cartesian2( propertyValue[0], propertyValue[1] );
+                        node.renderObject.setPixelOffset( pos );
+                        break;
+
+                    case "eyeOffset":
+                        var pos = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
+                        node.renderObject.setEyeOffset( pos );
+                        break;
+
+                    case "horizontalOrigin":
+                        switch ( propertyValue ) {
+                            case "left":
+                                node.renderObject.setHorizontalOrigin( HorizontalOrigin.LEFT );
+                                break;
+                            case "right":
+                                node.renderObject.setHorizontalOrigin( HorizontalOrigin.RIGHT );
+                                break;
+                            case "center":
+                                node.renderObject.setHorizontalOrigin( HorizontalOrigin.CENTER );
+                                break;
+                        }
+                        break;
+
+                    case "verticalOrigin": 
+                        switch ( propertyValue ) {
+                            case "top":
+                                node.renderObject.setHorizontalOrigin( VerticalOrigin.TOP );
+                                break;
+                            case "bottom":
+                                node.renderObject.setHorizontalOrigin( VerticalOrigin.BOTTOM );
+                                break;
+                            case "center":
+                                node.renderObject.setHorizontalOrigin( VerticalOrigin.CENTER );
+                                break;
+                        }
+                        break;
+
+                    case "scale":
+                        var val = parseFloat( propertyValue );
+                        node.renderObject.setScale( val );
+                        break;
+
+                    case "imageIndex": 
+                        var val = Number( propertyValue );
+                        node.renderObject.setImageIndex( val );
+                        break;
+
+                    case "color": 
+                        if ( propertyValue instanceof String ) {
+                            propertyValue = propertyValue.replace( /\s/g, '' );
+                        }
+                        var vwfColor = new utility.color( propertyValue );
+                        if ( vwfColor ) {                            
+                            node.renderObject.setColor( { 
+                                red: vwfColor.red() / 255, 
+                                green: vwfColor.green() / 255, 
+                                blue: vwfColor.blue() / 255, 
+                                alpha: vwfColor.alpha() 
+                            } );
+                        } 
+                        break;
+
+                    case "image":
+                        if ( node.renderObject instanceof Cesium.BillboardCollection )
+                        break;
+
+                    case "direction":
+                        if ( node.renderObject instanceof Cesium.Camera ) {
+                            node.renderObject.direction = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
+                        }
+                        break;
+
+                    case "fovy":
+                        if ( node.renderObject instanceof Cesium.Camera ) {
+                            node.renderObject.frustrum.fovy = parseFloat( propertyValue );
+                        }                    
+                        break;
+
+                    case "near":
+                        if ( node.renderObject instanceof Cesium.Camera ) {
+                            node.renderObject.frustrum.near = parseFloat( propertyValue );
+                        }
+                        break;
+
+                    case "far":
+                        if ( node.renderObject instanceof Cesium.Camera ) {
+                            node.renderObject.frustrum.far = parseFloat( propertyValue );
+                        }
+                        break;
+
+                    case "right":
+                        if ( node.renderObject instanceof Cesium.Camera ) {
+                            node.renderObject.right = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
+                        }                    
+                        break;
+
+                    case "transform":
+                        if ( node.renderObject instanceof Cesium.Camera ) {
+                            
+                        }
+                        break;
+
+                    case "up":
+                        if ( node.renderObject instanceof Cesium.Camera ) {
+                            node.renderObject.up = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
+                        }
+                        break;
+
+
+                    default:
+                        value = undefined;
+                        break;
+
+                }
+
 
             } else {
                 node = this.state.scenes[ nodeID ]; 
@@ -240,232 +424,395 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     var scene = node.scene;
 
                     if ( node.widget === undefined && node.centralBody === undefined )
-                        return;
+                        return undefined;
 
-                    if ( propertyName == "imageryProvider" ) {
-                        
-                        var imageProvider = undefined;
-                        var proxy = new Cesium.DefaultProxy('/proxy/');
-                        //While some sites have CORS on, not all browsers implement it properly, so a proxy is needed anyway;
-                        var proxyIfNeeded = Cesium.FeatureDetection.supportsCrossOriginImagery() ? undefined : proxy;                    
-                        
-                        switch ( propertyValue ) {
-                            case "bingAerial":
-                                imageProvider = new Cesium.BingMapsImageryProvider({
-                                    url : 'http://dev.virtualearth.net',
-                                    mapStyle : Cesium.BingMapsStyle.AERIAL,
-                                    // Some versions of Safari support WebGL, but don't correctly implement
-                                    // cross-origin image loading, so we need to load Bing imagery using a proxy.
-                                    proxy : proxyIfNeeded
-                                });
-                                break;
+                    switch ( propertyName ) {
 
-                            case "bingAerialLabel":
-                                imageProvider = new Cesium.BingMapsImageryProvider({
-                                    url : 'http://dev.virtualearth.net',
-                                    mapStyle : Cesium.BingMapsStyle.AERIAL_WITH_LABELS,
-                                    proxy : proxyIfNeeded
-                                });
-                                break;
-
-                            case "bingRoad":
-                                imageProvider = new Cesium.BingMapsImageryProvider( {
-                                    url: 'http://dev.virtualearth.net',
-                                    mapStyle: Cesium.BingMapsStyle.ROAD,
-                                    // Some versions of Safari support WebGL, but don't correctly implement
-                                    // cross-origin image loading, so we need to load Bing imagery using a proxy.
-                                    proxy: proxyIfNeeded
-                                } );                        
-                                break;
-
-                            case "esriWorld":
-                                imageProvider = new Cesium.ArcGisMapServerImageryProvider({
-                                    url : 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
-                                    proxy : proxy
-                                });                      
-                                break;
-
-                            case "esriStreet":
-                                imageProvider = new Cesium.ArcGisMapServerImageryProvider({
-                                    url : 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer',
-                                    proxy: new Cesium.DefaultProxy('/proxy/')
-                                } );                       
-                                break;
-
-                            case "esriGeo":
-                                imageProvider = new Cesium.ArcGisMapServerImageryProvider({
-                                    url : 'http://services.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/',
-                                    proxy : proxy
-                                });                      
-                                break;
-
-                            case "openStreet":
-                                imageProvider = new Cesium.OpenStreetMapImageryProvider({
-                                    url : 'http://tile.openstreetmap.org/',
-                                    proxy : proxyIfNeeded
-                                });
-                                break;
-
-                            case "mapQuestStreet":
-                                imageProvider = new Cesium.OpenStreetMapImageryProvider({
-                                    url: 'http://otile1.mqcdn.com/tiles/1.0.0/osm/',
-                                    proxy: proxy
-                                });
-                                break;
-
-                            case "stamen":
-                                imageProvider = new Cesium.OpenStreetMapImageryProvider({
-                                    url: 'http://tile.stamen.com/watercolor/',
-                                    fileExtension: 'jpg',
-                                    proxy: proxy,
-                                    credit: 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.'
-                                });
-                                break;
-
-                            case "stamenToner":
-                                imageProvider = new Cesium.OpenStreetMapImageryProvider({
-                                    url : 'http://tile.stamen.com/toner/',
-                                    credit : 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.',
-                                    proxy : proxyIfNeeded
-                                });
-                                break;
-
-                            case "blackMarble":
-                                imageProvider = new Cesium.TileMapServiceImageryProvider({
-                                    url : 'http://cesium.agi.com/blackmarble',
-                                    maximumLevel : 8,
-                                    credit : 'Black Marble imagery courtesy NASA Earth Observatory',
-                                    proxy : proxyIfNeeded
-                                });
-                                break;
-
-
-                            case "single":
-                                imageProvider = new Cesium.SingleTileImageryProvider({
-                                    url : require.toUrl('Assets/Textures/NE2_LR_LC_SR_W_DR_2048.jpg')
-                                } );
-                                break;
-
-                            case "usInfrared":
-                                imageProvider =  new Cesium.WebMapServiceImageryProvider({
-                                    url : 'http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_ir.cgi?',
-                                    layers : 'goes_conus_ir',
-                                    credit : 'Infrared data courtesy Iowa Environmental Mesonet',
-                                    parameters : {
-                                        transparent : 'true',
-                                        format : 'image/png'
-                                    },
-                                    proxy : proxy
-                                })
-                                break;
-
-                            case "usWeather":
-                                imageProvider = new Cesium.WebMapServiceImageryProvider({
-                                    url : 'http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?',
-                                    layers : 'nexrad-n0r',
-                                    credit : 'Radar data courtesy Iowa Environmental Mesonet',
-                                    parameters : {
-                                        transparent : 'true',
-                                        format : 'image/png'
-                                    },
-                                    proxy : proxy
-                                })                        
-                                break;
-
-                            case "tms":
-                                imageProvider = new Cesium.TileMapServiceImageryProvider({
-                                        url : '../images/cesium_maptiler/Cesium_Logo_Color'
-                                });
-                                break;
-
-                            case "image":
-                                imageProvider = new Cesium.SingleTileImageryProvider({
-                                    url : '../images/Cesium_Logo_overlay.png',
-                                    extent : new Cesium.Extent(
-                                            Cesium.Math.toRadians(-115.0),
-                                            Cesium.Math.toRadians(38.0),
-                                            Cesium.Math.toRadians(-107),
-                                            Cesium.Math.toRadians(39.75))
-                                });
-                                break;
-
-                            case "grid":
-                                imageProvider = new Cesium.GridImageryProvider();
-                                break;
-
-                            case "tile":
-                                imageProvider = new Cesium.TileCoordinatesImageryProvider();
-                                break;
-
-                        }
-
-                        if ( imageProvider !== undefined ) {
-                            if ( node && node.widget !== undefined ) {
-                                // how does the widget add an image layer
-                                node.widget.centralBody.getImageryLayers().addImageryProvider( imageProvider );
-                            } else if ( node.centralBody !== undefined ) {
-                                node.centralBody.getImageryLayers().addImageryProvider( imageProvider );
-                            }
-                        }
-
-
-                    } else if ( propertyName == "renderStyle" ) {
-                        // using the Cesium.Widget
-                        if ( node.widget ) {
+                        case "imageryProvider":
+                            
+                            var imageProvider = undefined;
+                            var proxy = new Cesium.DefaultProxy('/proxy/');
+                            //While some sites have CORS on, not all browsers implement it properly, so a proxy is needed anyway;
+                            var proxyIfNeeded = Cesium.FeatureDetection.supportsCrossOriginImagery() ? undefined : proxy;                    
                             
                             switch ( propertyValue ) {
-                                case "3D":
-                                    node.widget.transitioner.morphTo3D();
+                                case "bingAerial":
+                                    imageProvider = new Cesium.BingMapsImageryProvider({
+                                        url : 'http://dev.virtualearth.net',
+                                        mapStyle : Cesium.BingMapsStyle.AERIAL,
+                                        // Some versions of Safari support WebGL, but don't correctly implement
+                                        // cross-origin image loading, so we need to load Bing imagery using a proxy.
+                                        proxy : proxyIfNeeded
+                                    });
                                     break;
-                                case "2D":
-                                    node.widget.transitioner.morphTo2D();
+
+                                case "bingAerialLabel":
+                                    imageProvider = new Cesium.BingMapsImageryProvider({
+                                        url : 'http://dev.virtualearth.net',
+                                        mapStyle : Cesium.BingMapsStyle.AERIAL_WITH_LABELS,
+                                        proxy : proxyIfNeeded
+                                    });
                                     break;
-                                case "2.5D":
-                                    node.widget.transitioner.morphToColumbusView();
+
+                                case "bingRoad":
+                                    imageProvider = new Cesium.BingMapsImageryProvider( {
+                                        url: 'http://dev.virtualearth.net',
+                                        mapStyle: Cesium.BingMapsStyle.ROAD,
+                                        // Some versions of Safari support WebGL, but don't correctly implement
+                                        // cross-origin image loading, so we need to load Bing imagery using a proxy.
+                                        proxy: proxyIfNeeded
+                                    } );                        
                                     break;
+
+                                case "esriWorld":
+                                    imageProvider = new Cesium.ArcGisMapServerImageryProvider({
+                                        url : 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
+                                        proxy : proxy
+                                    });                      
+                                    break;
+
+                                case "esriStreet":
+                                    imageProvider = new Cesium.ArcGisMapServerImageryProvider({
+                                        url : 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer',
+                                        proxy: new Cesium.DefaultProxy('/proxy/')
+                                    } );                       
+                                    break;
+
+                                case "esriGeo":
+                                    imageProvider = new Cesium.ArcGisMapServerImageryProvider({
+                                        url : 'http://services.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/',
+                                        proxy : proxy
+                                    });                      
+                                    break;
+
+                                case "openStreet":
+                                    imageProvider = new Cesium.OpenStreetMapImageryProvider({
+                                        url : 'http://tile.openstreetmap.org/',
+                                        proxy : proxyIfNeeded
+                                    });
+                                    break;
+
+                                case "mapQuestStreet":
+                                    imageProvider = new Cesium.OpenStreetMapImageryProvider({
+                                        url: 'http://otile1.mqcdn.com/tiles/1.0.0/osm/',
+                                        proxy: proxy
+                                    });
+                                    break;
+
+                                case "stamen":
+                                    imageProvider = new Cesium.OpenStreetMapImageryProvider({
+                                        url: 'http://tile.stamen.com/watercolor/',
+                                        fileExtension: 'jpg',
+                                        proxy: proxy,
+                                        credit: 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.'
+                                    });
+                                    break;
+
+                                case "stamenToner":
+                                    imageProvider = new Cesium.OpenStreetMapImageryProvider({
+                                        url : 'http://tile.stamen.com/toner/',
+                                        credit : 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.',
+                                        proxy : proxyIfNeeded
+                                    });
+                                    break;
+
+                                case "blackMarble":
+                                    imageProvider = new Cesium.TileMapServiceImageryProvider({
+                                        url : 'http://cesium.agi.com/blackmarble',
+                                        maximumLevel : 8,
+                                        credit : 'Black Marble imagery courtesy NASA Earth Observatory',
+                                        proxy : proxyIfNeeded
+                                    });
+                                    break;
+
+
+                                case "single":
+                                    imageProvider = new Cesium.SingleTileImageryProvider({
+                                        url : require.toUrl('Assets/Textures/NE2_LR_LC_SR_W_DR_2048.jpg')
+                                    } );
+                                    break;
+
+                                case "usInfrared":
+                                    imageProvider =  new Cesium.WebMapServiceImageryProvider({
+                                        url : 'http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_ir.cgi?',
+                                        layers : 'goes_conus_ir',
+                                        credit : 'Infrared data courtesy Iowa Environmental Mesonet',
+                                        parameters : {
+                                            transparent : 'true',
+                                            format : 'image/png'
+                                        },
+                                        proxy : proxy
+                                    })
+                                    break;
+
+                                case "usWeather":
+                                    imageProvider = new Cesium.WebMapServiceImageryProvider({
+                                        url : 'http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?',
+                                        layers : 'nexrad-n0r',
+                                        credit : 'Radar data courtesy Iowa Environmental Mesonet',
+                                        parameters : {
+                                            transparent : 'true',
+                                            format : 'image/png'
+                                        },
+                                        proxy : proxy
+                                    })                        
+                                    break;
+
+                                case "tms":
+                                    imageProvider = new Cesium.TileMapServiceImageryProvider({
+                                            url : '../images/cesium_maptiler/Cesium_Logo_Color'
+                                    });
+                                    break;
+
+                                case "image":
+                                    imageProvider = new Cesium.SingleTileImageryProvider({
+                                        url : '../images/Cesium_Logo_overlay.png',
+                                        extent : new Cesium.Extent(
+                                                Cesium.Math.toRadians(-115.0),
+                                                Cesium.Math.toRadians(38.0),
+                                                Cesium.Math.toRadians(-107),
+                                                Cesium.Math.toRadians(39.75))
+                                    });
+                                    break;
+
+                                case "grid":
+                                    imageProvider = new Cesium.GridImageryProvider();
+                                    break;
+
+                                case "tile":
+                                    imageProvider = new Cesium.TileCoordinatesImageryProvider();
+                                    break;
+
                             }
-                        } else if ( node.scene ) {
 
-                        }
-
-                    } else if ( propertyName == "backgroundColor" ) {
-
-                        if( node.scene ) {
-                            if ( propertyValue instanceof String ) {
-                                propertyValue = propertyValue.replace( /\s/g, '' );
+                            if ( imageProvider !== undefined ) {
+                                if ( node && node.widget !== undefined ) {
+                                    // how does the widget add an image layer
+                                    node.widget.centralBody.getImageryLayers().addImageryProvider( imageProvider );
+                                } else if ( node.centralBody !== undefined ) {
+                                    node.centralBody.getImageryLayers().addImageryProvider( imageProvider );
+                                }
                             }
-                            var vwfColor = new utility.color( propertyValue );
-                            if ( vwfColor ) {                            
-                                node.scene.backgroundColor = new Cesium.Color( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255, vwfColor.alpha() );
-                            } 
-                        }
-                    } else if ( propertyName == "controlClient" ) {
-                        node.controlClient = propertyValue;
-                        value = propertyValue;
+                            value = undefined;
+                            break;
+
+
+                        case "renderStyle":
+                            // using the Cesium.Widget
+                            if ( node.widget ) {
+                                
+                                switch ( propertyValue ) {
+                                    case "3D":
+                                        node.widget.transitioner.morphTo3D();
+                                        break;
+                                    case "2D":
+                                        node.widget.transitioner.morphTo2D();
+                                        break;
+                                    case "2.5D":
+                                        node.widget.transitioner.morphToColumbusView();
+                                        break;
+                                }
+                            } else if ( node.scene ) {
+
+                            }
+                            value = undefined;
+                            break;
+
+                        case "backgroundColor":
+
+                            if( node.scene ) {
+                                if ( propertyValue instanceof String ) {
+                                    propertyValue = propertyValue.replace( /\s/g, '' );
+                                }
+                                var vwfColor = new utility.color( propertyValue );
+                                if ( vwfColor ) {                            
+                                    node.scene.backgroundColor = new Cesium.Color( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255, vwfColor.alpha() );
+                                } 
+                            }
+                            break;
+
+                        case "controlClient":
+                            node.controlClient = propertyValue;
+                            value = propertyValue;
+                            break;
+
+                        default:
+                            value = undefined;
+                            break;
+
                     }
                 }
             }
-
-
-            if( !node ) node = this.state.scenes[ nodeID ]; 
-            var value = undefined;
-
-            if( !node ) return;
-
-
 
             return value;
         },
 
         // -- gettingProperty ----------------------------------------------------------------------
 
-        gettingProperty: function( nodeID, propertyName ) {
+        gettingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var node = this.state.nodes[ nodeID ]; 
             if( !node ) node = this.state.scenes[ nodeID ]; 
             var value = undefined;
 
-            if( !node ) return;
+            if( !node ) return undefined;
+
+            switch ( propertyName ) {
+
+                case "visible":
+                    if ( node.renderObject ) {
+                        value = node.renderObject.show;
+                    }
+                    break;
+                case "position":
+                    if ( node.renderObject ) {
+                        var pos;
+                        if ( node.renderObject instanceof Cesium.Camera ) {
+                            pos = node.renderObject.position;
+                        } else if ( node.renderObject instanceof Cesium.BillboardCollection ) {
+                            pos = node.renderObject.getPosition();
+                        }
+                        if ( pos ) {
+                            value = [ pos.x, pos.y, pos.z ];
+                        }
+                    }
+                    break;
+
+                case "pixelOffset":
+                    if ( node.renderObject ) {
+                        var pos = node.renderObject.getPixelOffset();
+                        value = [ pos.x, pos.y ];
+                    }
+                    break;
+
+                case "eyeOffset":
+                    if ( node.renderObject ) {
+                        var pos = node.renderObject.getEyeOffset();
+                        value = [ pos.x, pos.y, pos.z ];
+                    }
+                case "horizontalOrigin":
+                    if ( node.renderObject ) {
+                        var horzOrigin = node.renderObject.getHorizontalOrigin();
+                        switch ( horzOrigin ) {
+                            case HorizontalOrigin.LEFT:
+                                value = "left";
+                                break;
+                            case HorizontalOrigin.RIGHT:
+                                value = "right";
+                                break;
+                            case HorizontalOrigin.CENTER:
+                                value = "center";
+                                break;
+                        }
+                    }
+                    break;
+
+                case "verticalOrigin": 
+                    if ( node.renderObject ) {
+                        var vertOrigin = node.renderObject.getHorizontalOrigin();
+                        switch ( vertOrigin ) {
+                            case VerticalOrigin.TOP:
+                                value = "top";
+                                break;
+                            case VerticalOrigin.BOTTOM:
+                                value = "bottom";
+                                break;
+                            case VerticalOrigin.CENTER:
+                                value = "center";
+                                break;
+                        }
+                    }
+                    break;
+
+                case "scale":
+                    if ( node.renderObject ) {
+                        value = node.renderObject.getScale();
+                    }
+                    break;
+
+                case "imageIndex": 
+                    if ( node.renderObject ) {
+                        value = node.renderObject.getImageIndex();
+                    }
+                    break;
+
+                case "color": 
+                    if( node.renderObject ) {
+                        var clr = node.renderObject.getColor();
+                        if ( clr.alpha == 1 ) {
+                            value = "rgb("+clr.red+","+clr.green+","+clr.blue+")";
+                        } else {
+                            value = "rgba("+clr.red+","+clr.green+","+clr.blue+","+clr.alpha+")";
+                        }
+                    }
+                    break;
+
+                case "imageryProvider":
+                    break;
+
+                case "renderStyle":
+                    break;
+
+                case "backgroundColor":
+                    if( node.scene ) {
+                        var clr = node.scene.backgroundColor
+                        if ( clr.alpha == 1 ) {
+                            value = "rgb("+clr.red+","+clr.green+","+clr.blue+")";
+                        } else {
+                            value = "rgba("+clr.red+","+clr.green+","+clr.blue+","+clr.alpha+")";
+                        }
+                    }
+                    break;
+
+                case "controlClient":
+                    value = node.controlClient;
+                    break;
+
+                case "direction":
+                    if ( node.renderObject instanceof Cesium.Camera ) {
+                        var vec3 = node.renderObject.direction;
+                        value = [ vec3.x, vec3.y, vec3.z ];
+                    }
+                    break;
+
+                case "fovy":
+                    if ( node.renderObject instanceof Cesium.Camera ) {
+                        value = node.renderObject.frustrum.fovy;
+                    }                    
+                    break;
+
+                case "near":
+                    if ( node.renderObject instanceof Cesium.Camera ) {
+                        value = node.renderObject.frustrum.near;
+                    }
+                    break;
+
+                case "far":
+                    if ( node.renderObject instanceof Cesium.Camera ) {
+                        value = node.renderObject.frustrum.far;
+                    }
+                    break;
+
+                case "right":
+                    if ( node.renderObject instanceof Cesium.Camera ) {
+                        var vec3 = node.renderObject.right;
+                        value = [ vec3.x, vec3.y, vec3.z ];                    }                    
+                    break;
+
+                case "transform":
+                    if ( node.renderObject instanceof Cesium.Camera ) {
+                        
+                    }
+                    break;
+
+                case "up":
+                    if ( node.renderObject instanceof Cesium.Camera ) {
+                        var vec3 = node.renderObject.up;
+                        value = [ vec3.x, vec3.y, vec3.z ]; 
+                    }
+                    break;
+
+            }
 
             return value;
         },
@@ -495,16 +842,31 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     // == PRIVATE  ========================================================================================
     
 
-    function getPrototypes( kernel, extendsID ) {
+    function getPrototypes( extendsID ) {
         var prototypes = [];
         var id = extendsID;
 
         while ( id !== undefined ) {
             prototypes.push( id );
-            id = kernel.prototype( id );
+            id = this.kernel.prototype( id );
         }
                 
         return prototypes;
+    }
+
+    function findSceneNode( node ) {
+        var sceneNode = undefined;
+        var protos = undefined;
+        var parent = findParent.call( this, node.parentID );
+        while ( parent && sceneNode === undefined ) {
+            protos = getPrototypes.call( this, parent.extendsID );
+            if ( protos && isCesiumDefinition.call( this, protos ) ) {
+                sceneNode = parent;
+            } else {
+                parent = findParent.call( this, parent.parentID );
+            }
+        }
+        return sceneNode;
     }
 
     function ifPrototypeGetId( nodeID, childID ) {
@@ -582,6 +944,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         return foundCesium;
     }  
     
+    function isCameraDefinition( prototypes ) {
+        var foundCesium = false;
+        if ( prototypes ) {
+            var len = prototypes.length;
+            for ( var i = 0; i < len && !foundCesium; i++ ) {
+                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-camera-vwf" );    
+            }
+        }
+
+        return foundCesium;
+    } 
+
     function isNode3Definition( prototypes ) {
         var foundCesium = false;
         if ( prototypes ) {
@@ -607,9 +981,5 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
         return vwfColor;        
     }
-
-
-
-
 
 });

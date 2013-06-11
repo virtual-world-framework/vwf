@@ -19,4 +19,11 @@
 --- 
 extends: http://vwf.example.com/cesium/node3.vwf
 properties:
-  visible: true
+  direction:
+  fovy:
+  near:
+  far:
+  position:
+  right:
+  transform:
+  up:

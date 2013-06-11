@@ -89,15 +89,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             };
 
             var kernel = this.kernel;
-            var protos = getPrototypes.call( this, kernel, childExtendsID  )
+            var protos = getPrototypes.call( this, childExtendsID  )
             var node = undefined;
 
             if ( isCesiumDefinition.call( this, protos ) ) {
 
                 //debugger;
-                jQuery( this.parentDiv ).append(
-                    "<div class='cesuim-container' id='"+this.containerDiv+"'></div>"
-                );
+                jQuery( this.parentDiv ).append( "<div class='cesuim-container' id='"+this.containerDiv+"'></div>" );
 
                 if ( this.state.scenes[ childID ] === undefined ) {
                     this.state.scenes[ childID ] = node = createNode();
@@ -136,8 +134,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                     var primitives = scene.getPrimitives();
 
+
                     var ellipsoid = Cesium.Ellipsoid.WGS84;
+
                     node.centralBody = new Cesium.CentralBody( ellipsoid );
+
                     primitives.setCentralBody( node.centralBody );
                 }
 
@@ -388,13 +389,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         },
     } );
  
-    function getPrototypes( kernel, extendsID ) {
+    function getPrototypes( extendsID ) {
         var prototypes = [];
         var id = extendsID;
 
         while ( id !== undefined ) {
             prototypes.push( id );
-            id = kernel.prototype( id );
+            id = this.kernel.prototype( id );
         }
                 
         return prototypes;

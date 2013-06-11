@@ -32,9 +32,10 @@ scripts:
     }
     this.createClient = function( moniker, loginName ) {
       var clientDef = { 
-        "extends": "http://vwf.example.com/client.vwf",
+        "extends": "http://vwf.example.com/cesium/client.vwf",
         "properties": {
           "displayName": loginName,
+          "requestLocation": true
         },
       }
       this.clients.children.create( "client"+moniker, clientDef, function( child ) {

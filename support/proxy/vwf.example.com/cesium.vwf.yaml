@@ -25,3 +25,15 @@ properties:
   backgroundColor: [ 0, 0, 0, 0 ]
   renderStyle: "3D"
   imageryProvider: "bingAerialLabel"
+scripts:
+- |
+    this.initialize = function() {
+      //console.info( "=============== cesium.initialize ===============" );
+      var camDef = {
+      	"extends": "http://vwf.example.com/cesium/camera.vwf"
+      }
+
+      self.children.create( "sharedCamera", camDef, function( child ) {
+
+      } );
+    }
