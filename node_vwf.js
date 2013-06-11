@@ -588,9 +588,9 @@ function startVWF(){
 
 			}
 			// is an admin call, currently only serving instances
-			else if(uri.indexOf('\\admin\\') != -1)
+			else if(uri.indexOf('/admin/'.replace(safePathRE)) != -1)
 			{
-				if(uri.indexOf('\\admin\\instances'))
+				if(uri.indexOf('/admin/instances'.replace(safePathRE)))
 				{
 					var data = {};
 					for(var i in global.instances)
