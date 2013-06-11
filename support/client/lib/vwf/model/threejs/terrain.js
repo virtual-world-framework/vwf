@@ -4,7 +4,7 @@
 			
 			var self = this;
 			var minTileSize = 128;
-			var maxTileSize = 4092;
+			var maxTileSize = 1024;
 			var worldExtents = 128000;
 			var tileres = 32;
 			var SW = 0;
@@ -455,7 +455,7 @@
 			this.mat.color.b = .5;
 			this.mat.depthCheck = false;
 			this.mat.wireframe = false;
-				
+			this.mat.transparent = true;	
 				
 				
 				this.buildMesh3 = function(size,res)
@@ -1174,14 +1174,85 @@
 					
 					return list;
 				}
+				this.sideNeeded = function()
+				{
+					var nn = this.NN();
+					var sn = this.SN();
+					var wn = this.WN();
+					var en = this.EN();
+					
+					var lowresside = 0;
+					if(nn && nn.depth < this.depth)
+						nn = true;
+					else
+						nn = false;
+						
+					if(sn && sn.depth < this.depth)
+						sn = true;
+					else
+						sn = false;
+					if(en && en.depth < this.depth)
+						en = true;
+					else
+						en = false;
+					if(wn && wn.depth < this.depth)
+						wn = true;
+					else
+						wn = false;
+						
+					if(!nn && !sn && !wn &&!en)
+						return 0;
+					if(nn && !sn && !wn &&!en)
+						return 1;
+					if(!nn && sn && !wn &&!en)
+						return 2;
+					if(!nn && !sn && wn &&!en)
+						return 3;
+					if(!nn && !sn && !wn &&en)
+						return 4;		
+					
+					if(nn && !sn && !wn &&en)
+						return 5;
+					if(!nn && sn && !wn &&en)
+						return 6;
+					if(nn && !sn && wn &&!en)
+						return 7;
+					if(!nn && sn && wn &&!en)
+						return 8;
+						
+					return 0;
+				}
+				this.meshNeeded = function(i)
+				{
+					if(i == 0) return 0;
+					if(i<=4) return 1;
+					if(i<=8) return 2;
 				
+				}
+				this.getRotation = function(i)
+				{
+					if(i ==0) return 0;
+					if(i== 1) return -Math.PI/2;
+					if(i== 2) return Math.PI/2;
+					if(i== 4) return Math.PI;
+					if(i== 7) return -Math.PI/2;
+					if(i== 5) return -Math.PI;
+					if(i== 6) return Math.PI/2;
+					return 0;
+				}
 				this.updateMesh = function()
 				{
 					if(!this.isSplit())
 					{
-						if(!this.mesh)
+						var neededSide = this.sideNeeded();
+						if(!this.mesh || neededSide != this.side)
 						{
-							
+							if(this.mesh && neededSide != this.side)
+							{
+								this.mesh.parent.remove(this.mesh);
+								this.mesh.quadnode = null;
+								this.mesh == null;
+							}
 							
 							if(this.max[0] - this.min[0] < maxTileSize)
 							{
@@ -1189,21 +1260,13 @@
 								
 								var scale = this.max[0] - this.min[0];
 								
-								var lowresside = 0;
-								if(this.NN().depth < this.depth)
-									lowresside++;
-								if(this.SN().depth < this.depth)
-									lowresside++;
-								if(this.EN().depth < this.depth)
-									lowresside++;
-								if(this.WN().depth < this.depth)
-									lowresside++;			
 								
-								this.side == lowresside;
-								this.mesh = self.TileCache.getMesh(res,lowresside);
+								this.side = neededSide;
+								this.mesh = self.TileCache.getMesh(res,this.meshNeeded(this.side));
 								this.mesh.scale.x = scale/100;
 								this.mesh.scale.y = scale/100;
 								this.mesh.scale.z = 1;//scale/100;
+								this.mesh.rotation.z = this.getRotation(this.side);
 								if(this.mesh.quadnode)
 								{
 									debugger;
@@ -1220,19 +1283,26 @@
 								this.mesh.position.x = this.c[0];
 								this.mesh.position.y = this.c[1];
 								this.mesh.position.z = 1;
-								self.BuildTerrainInner(this.mesh);
+								self.BuildTerrainInner(this.mesh,(this.max[0] - this.min[0])/tileres);
 								if(this.mesh.parent)
 									debugger;
 								
 								if(this.THREENode.children.indexOf(this.mesh) != -1)
 									debugger;
 								this.THREENode.add(this.mesh,true);	
+								this.mesh.material.depthWrite = true;
+								this.mesh.material.opacity = 1.0;
+								this.mesh.renderDepth = 0;
+								
+								
+								
 								this.mesh.updateMatrixWorld(true);
 							}
 						}
 					}else
 					{
-						if(this.mesh)
+						
+						if(this.mesh  )
 						{
 							this.mesh.quadnode = null;
 							this.mesh.parent.remove(this.mesh);
@@ -1311,6 +1381,8 @@
 					{
 						//this.mesh.parent.remove(this.mesh);
 						removelist.push(this.mesh);
+						if(this.backupmesh)
+						removelist.push(this.backupmesh);
 						this.oldmesh = this.mesh;
 						this.mesh = null;
 					}
@@ -1474,6 +1546,20 @@
 				this.quadtree.updateMesh();
 				window.terrain = self;
 				this.counter = 0;
+				
+				this.getRoot().FrustrumCast = function(frustrum,opts){return {};};
+				this.getRoot().CPUPick = function(o,d,opts){
+				
+				var node = self.quadtree.containing(o);;
+				var mesh = node.mesh;
+				if(mesh)
+					return mesh.CPUPick(o,d,opts);
+				
+				return [];
+				
+				}
+				_SceneManager.specialCaseObjects.push(this.getRoot());
+				
 			}
 			this.Debug = function(pt)
 			{
@@ -1486,11 +1572,12 @@
 			this.removelist = [];
 			this.containingList = [];
 			self.needRebuild = [];
+			this.enabled = true;
 			this.ticking = function()
 			{
 				
 				this.counter ++;
-				if(this.counter == 10)
+				if(this.counter >= 10 && this.enabled)
 				{
 					this.counter = 0;
 					var  insertpt = _Editor.GetInsertPoint();
@@ -1498,7 +1585,7 @@
 					var x = campos.x;
 					var y = campos.y;
 					 
-					 if(this.containingList.indexOf(this.quadtree.containing([x,y]).parent) == -1)
+					 if(this.containingList.indexOf(this.quadtree.containing([x,y]).parent) == -1 )
 					 {
 						
 					
@@ -1508,7 +1595,7 @@
 						}
 						
 							
-				
+						//minTileSize = Math.max(128,Math.pow(2,Math.floor(Math.log(campos.z)/Math.LN2)));
 						this.quadtree.update([[x,y]],this.removelist);
 					
 						
@@ -1580,6 +1667,13 @@
 										this.containing.SWN().NE()]
 								
 						
+						// this is crazy
+					//	for(var i = 0; i < lowergridinner.length ; i++)
+					//	{
+					//		for(var j =0; j < 4; j ++)
+					//			lowergridinner[i].split();
+					//	
+					//	}
 						
 						
 						this.containingList = lowergridinner;		
@@ -1599,6 +1693,10 @@
 							{
 								if(newleaves[i].max[0] - newleaves[i].min[0] < maxTileSize)
 									self.needRebuild.push(newleaves[i]);
+							}
+							else if(newleaves[i].sideNeeded() != newleaves[i].side)
+							{
+								self.needRebuild.push(newleaves[i]);
 							}
 								
 						}
@@ -1669,9 +1767,24 @@
 								tile.cleanup(list)
 								list.forEach(function(e)
 								{
-										e.quadnode = null;
+										
 										if(e.parent)
-											e.parent.remove(e);
+										{
+											// var fade = function()
+											// {
+												// e.material.opacity -= .01;
+												// e.material.depthWrite = false;
+												// e.renderDepth = 1;
+												// if(e.material.opacity <= 0)
+												// {
+													e.quadnode = null;
+													e.parent.remove(e);
+												// }else
+												// window.requestAnimationFrame(fade);
+											// };
+											// window.requestAnimationFrame(fade);
+											
+										}
 								});
 								tile.updateMesh();
 								 var p = tile.parent;
@@ -1692,8 +1805,23 @@
 									
 									if(p.backupmesh && p.backupmesh.parent)
 									{
-										p.backupmesh.quadnode = null;
-										p.backupmesh.parent.remove(p.backupmesh);
+									
+										var e = p.backupmesh;
+										// var fade = function()
+											// {
+												// e.material.opacity -= .01;
+												// e.material.depthWrite = false;
+												// e.renderDepth = 1;
+												// if(e.material.opacity <= 0)
+												// {
+													e.quadnode = null;
+													e.parent.remove(e);
+												// }else
+												// window.requestAnimationFrame(fade);
+											// };
+											// window.requestAnimationFrame(fade);
+											
+										
 										p.backupmesh = null;
 									}
 										
@@ -1765,22 +1893,26 @@
 			
 			}
 			
-			this.BuildTerrainInner= function(mesh)
+			this.BuildTerrainInner= function(mesh,normlen)
 			{
 				//if(!this.geo) return;
-				return;
+				//return;
 				
 				var geo = mesh.geometry;
 				mesh.updateMatrix();
-				var mx = mesh.position.x;
-				var my = mesh.position.y;
+				var invmat = new THREE.Matrix4();
+				
+				invmat = invmat.getInverse(mesh.matrix.clone());
+				invmat.elements[12] = 0;
+				invmat.elements[13] = 0;
+				invmat.elements[14] = 0;
 				var normals = [];
 				for(var i = 0; i < geo.vertices.length; i++)
 				{
 					
 					var vertn = geo.vertices[i];
 					
-					var vertoffset = 1;//Math.abs(geo.vertices[geo.faces[60].a].y - geo.vertices[geo.faces[60].a].y);
+					var vertoffset = 1;
 					var vertx0 = new THREE.Vector3(vertn.x-vertoffset,vertn.y,vertn.z);
 					var verty0 = new THREE.Vector3(vertn.x,vertn.y-vertoffset,vertn.z);
 					var vertx1 = new THREE.Vector3(vertn.x+vertoffset,vertn.y,vertn.z);
@@ -1800,16 +1932,20 @@
 						// }
 						//z = Math.sin((mx + vert.x)/10) * 10;
 						z = self.SimplexNoise.noise2D((vert.x)/10000,(vert.y)/1000) * 250;
+						
 						z += self.SimplexNoise.noise2D((vert.x)/1000,(vert.y)/100) * 25;
 						z += self.SimplexNoise.noise2D((vert.x)/500,(vert.y)/50) * 10;
-						z += self.SimplexNoise.noise2D((vert.x)/50,(vert.y)/50) * 1.0;
-						z += 286;
+						 z += self.SimplexNoise.noise2D((vert.x)/100,(vert.y)/100) * 5.0;
+						//z += 286;
+						if(z < 0)  z/=5;
+						
 						verts[k].z = z;
 					}
 					
 					//var n = vertn.clone().sub(vertx).cross(vertn.clone().sub(verty)).normalize();
 					var n = new THREE.Vector3(vertx1.z - vertx0.z,verty1.z - verty0.z,2*vertoffset)
 					n.normalize();
+					//n = n.applyMatrix4(invmat);
 					normals.push(n);
 				}
 				
@@ -1826,6 +1962,7 @@
 				geo.computeBoundingBox();
 				
 				geo.normalsNeedUpdate = true;
+				geo.dirtyMesh = true;
 				
 			}
 			
