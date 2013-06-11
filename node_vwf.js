@@ -7,7 +7,7 @@ var libpath = require('path'),
 	YAML = require('js-yaml'),
 	SandboxAPI = require('./sandboxAPI'),
 	Shell = require('./ShellInterface'),
-	DAL = require('./dal'),
+	DAL = require('./DAL'),
 	express = require('express'),
 	app = express(),
 	landing = require('./landingRoutes');
@@ -17,7 +17,7 @@ var zlib = require('zlib');
 function findAppName(uri)
 {
 		
-		var current = ".\\"
+		var current = "."+libpath.sep;
 		while(!fs.existsSync(current+"index.vwf.yaml"))
 		{	
 			
@@ -466,13 +466,13 @@ function startVWF(){
 	{
 	
 		try{
-			var path = ".\\public\\";
+			var safePathRE = RegExp('/\//'+(libpath.sep=='/' ? '\/' : '\\')+'/g');
+			var path = "./public".replace(safePathRE);
 			
 			var URL = url.parse(request.url,true);
-			var uri = URL.pathname;
-			//global.log( URL.pathname);
-			uri = uri.replace(/\//g,'\\');
-		
+			var uri = URL.pathname.replace(safePathRE);
+			//global.log( URL.pathname );
+			
 			if(URL.pathname.toLowerCase().indexOf('/vwfdatamanager.svc/') != -1)
 			{
 				//Route to DataServer
@@ -509,9 +509,8 @@ function startVWF(){
 				 {
 					
 						filename = filename.substr(13);
-						filename = ".\\support\\" + filename;
-						filename = filename.replace('vwf.example.com','proxy\\vwf.example.com');
-						
+						filename = "./support/".replace(safePathRE) + filename;
+						filename = filename.replace('vwf.example.com','proxy/vwf.example.com');
 						
 				 }
 				 else
@@ -519,9 +518,9 @@ function startVWF(){
 						
 					 filename = filename.substr(appname.length-2);
 					 if(appname == "")
-						filename = './support/client/lib/index.html'
+						filename = './support/client/lib/index.html'.replace(safePathRE);
 					 else	
-						filename = './support/client/lib/' + filename;
+						filename = './support/client/lib/'.replace(safePathRE) + filename;
 					
 				 }
 
@@ -537,7 +536,7 @@ function startVWF(){
 				{
 					var appname = findAppName(filename);
 					if(!appname)
-						appname = findAppName(filename+"\\");
+						appname = findAppName(filename+libpath.sep);
 					
 					//no instance id is given, new instance
 					if(appname && instance == null)
@@ -569,7 +568,7 @@ function startVWF(){
 					
 					//when loading the bootstrap, you must have an instance that exists in the database
 					global.log(appname);
-					DAL.getInstance(appname.substr(8).replace(/\\/g,'_') + instance + "_",function(data)
+					DAL.getInstance(appname.substr(8).replace(libpath.sep,'_') + instance + "_",function(data)
 					{
 						if(data)
 							ServeFile(request,filename,response,URL);
