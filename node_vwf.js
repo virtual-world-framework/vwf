@@ -161,7 +161,7 @@ function Findinstance(uri)
 		return null;
 	//remove the application name	
 	var minusapp = uri.substr(app.length-2);
-	var parts = minusapp.split('\\');
+	var parts = minusapp.split(libpath.sep);
 	var testapp = parts[0];
 	
 	//Really, any slash delimited string after the app name should work
@@ -181,7 +181,7 @@ function Findinstance(uri)
 //Remove the instance identifer from the URL
 function filterinstance(uri,instance)
 {
-	return uri.replace(instance +'\\','').replace(instance,'\\');
+	return uri.replace(instance+libpath.sep,'').replace(instance,libpath.sep);
 }
 
 function hash(str)
