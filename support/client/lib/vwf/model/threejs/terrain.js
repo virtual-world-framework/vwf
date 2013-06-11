@@ -4,7 +4,7 @@
 			
 			var self = this;
 			var minTileSize = 128;
-			var maxTileSize = 4092;
+			var maxTileSize = 2048;
 			var worldExtents = 128000;
 			var tileres = 32;
 			var SW = 0;
@@ -1414,6 +1414,7 @@
 						if(this.isSplit())
 						{
 							this.deSplit(removelist);
+							
 						}
 					
 					}
@@ -1584,12 +1585,27 @@
 						
 						this.containingList = lowergridinner;		
 						this.quadtree.balance(this.removelist);
+						this.quadtree.balance(this.removelist);
 						//this.quadtree.cleanup(this.removelist);
 						var nodes = this.quadtree.getBottom();
 						
-						
-						
-						
+						//immediately remove old nodes that are now too big
+						this.quadtree.walk(function(n)
+						{
+							if(n.max[0]-n.min[0] > maxTileSize && n.setForDesplit)
+								{
+									
+									var list = [];
+									n.cleanup(list);
+									list.forEach(function(e)
+									{
+										e.parent.remove(e);
+										e.quadnode = null;
+									});
+									n.children = [];
+									delete n.setForDesplit;
+								}
+						});
 						var newleaves = this.quadtree.getLeaves();
 					
 						for(var i = 0; i <  newleaves.length; i++)
@@ -1600,6 +1616,7 @@
 								if(newleaves[i].max[0] - newleaves[i].min[0] < maxTileSize)
 									self.needRebuild.push(newleaves[i]);
 							}
+							
 								
 						}
 					
