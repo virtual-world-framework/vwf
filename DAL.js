@@ -1,14 +1,15 @@
 var nStore = require('nstore');
+var libpath = require('path');
 nStore = nStore.extend(require('nstore/query')());
 var async = require('async');
 var fs = require('fs-extra');
 require('./hash.js');
 var datapath = '';
 
-var DBTablePath = '\\users.db';
+var DBTablePath = libpath.sep+'users.db';
 
 var DB = '';
-
+var safePathRE = RegExp('/\//'+(libpath.sep=='/' ? '\/' : '\\')+'/g');
 
 Array.prototype.getUnique = function(){
    var u = {}, a = [];
@@ -135,7 +136,8 @@ function deleteInventoryItem(userID,inventoryID,cb)
 				DB.remove(inventoryID,function(){
 				
 					//delete file
-					fs.unlink(datapath+'\\Profiles\\'+userID+'_Data\\' + inventoryID,function()
+					var file = datapath + '/Profiles/' + userID + '_Data/' + inventoryID;
+					fs.unlink( file.replace(safePathRE),function()
 					{
 						cb();
 					});
@@ -162,7 +164,7 @@ function getInventoryItemAssetData(userID,inventoryID,cb)
 		}
 		if(inventory.indexOf(inventoryID) != -1)
 		{
-			fs.readFile(datapath + '\\Profiles\\' + userID + '_Data' + '\\' + inventoryID,"utf8",function(err,data)
+			fs.readFile((datapath+'/Profiles/'+userID+'_Data'+'/'+inventoryID).replace(safePathRE),"utf8",function(err,data)
 			{
 				cb(JSON.parse(data));
 			});			
@@ -252,7 +254,8 @@ function addToInventory(userID,data,assetdata,cb)
 			//save the inventory
 			DB.save(Ikey,inventory,function(err)
 			{
-				fs.writeFile(datapath+'\\Profiles\\' + userID + '_Data\\' + key,JSON.stringify(assetdata),function(err)
+				var file = datapath+'/Profiles/' + userID + '_Data/' + key;
+				fs.writeFile( file.replace(safePathRE),JSON.stringify(assetdata),function(err)
 				{
 					cb(key);
 				});	
@@ -400,8 +403,9 @@ function createUser (id,data,cb)
 			{
 			
 				console.log('got here5');
-				global.log(datapath + '\\Profiles\\' + id,0);
-				MakeDirIfNotExist(datapath + '\\Profiles\\' + id+'_Data',function(){
+				var file = (datapath + '/Profiles/' + id).replace(safePathRE);
+				global.log(file,0);
+				MakeDirIfNotExist(file+'_Data',function(){
 						
 					cb2();
 				});
@@ -445,7 +449,7 @@ function deleteUser (id,cb)
 						DB.remove(id,function(err,doc,key)
 						{
 							//delete user folder
-							deleteFolderRecursive(datapath + '\\Profiles\\' + id + '_Data');
+							deleteFolderRecursive((datapath + '/Profiles/' + id).replace(safePathRE) + '_Data');
 							cb();
 						});
 					});
@@ -617,7 +621,7 @@ function saveInstanceState(id,data,cb)
 				function(cb2)
 				{
 				
-					MakeDirIfNotExist(datapath + '\\States\\' + id,function() 
+					MakeDirIfNotExist((datapath+'/States/'+id).replace(safePathRE),function() 
 						{
 							cb2();
 						});
@@ -625,7 +629,7 @@ function saveInstanceState(id,data,cb)
 				},
 				function(cb2)
 				{
-					CheckHash(datapath + '\\States\\' + id+'\\state',data,function(issame)
+					CheckHash((datapath + '/States/' + id+'/state').replace(safePathRE),data,function(issame)
 					{
 						cb2(undefined,issame);
 					});
@@ -634,7 +638,8 @@ function saveInstanceState(id,data,cb)
 				{
 					if(!issame)
 					{
-						RenameFile(datapath + '\\States\\' + id+'\\state',datapath + '\\States\\' + id+'\\statebackup'+GUID(),function()
+						var path = (datapath + '/States/'+id+'/').replace(safePathRE);
+						RenameFile(path+'state',path+'statebackup'+GUID(),function()
 						{
 							cb2(undefined,issame);
 						});
@@ -647,7 +652,7 @@ function saveInstanceState(id,data,cb)
 				{
 					if(!issame)
 					{
-						SaveFile(datapath + '\\States\\' + id+'\\state',data,function()
+						SaveFile((datapath + '/States/' + id+'/state').replace(safePathRE),data,function()
 						{
 							cb2(undefined);
 						});
@@ -699,7 +704,7 @@ function createInstance (id,data,cb)
 					stateIndex.push(id);
 					DB.save('StateIndex',stateIndex,function()
 					{
-						MakeDirIfNotExist(datapath + '\\States\\' + id,function() 
+						MakeDirIfNotExist((datapath + '/States/' + id).replace(safePathRE),function() 
 						{
 							cb(true);
 						});
@@ -718,7 +723,7 @@ function deleteInstance (id,cb)
 		DB.remove(id,function(err,doc,key)
 		{
 			console.log('delete demo folder');
-			deleteFolderRecursive(datapath + '\\States\\' + id);
+			deleteFolderRecursive((datapath + '/States/' + id).replace(safePathRE));
 			cb2();
 		});
 	},
@@ -772,12 +777,13 @@ function clearUsers()
 
 function importUsers()
 {
-	fs.readdir(datapath+"\\Profiles\\",function(err,files){
+	var profilePath = (datapath + '/Profiles/').replace(safePathRE);
+	fs.readdir(profilePath,function(err,files){
 		async.eachSeries(files,
 			function(i,cb)
 			{
 				
-				if(!fs.statSync(datapath+"\\Profiles\\"+i).isDirectory())
+				if(!fs.statSync(profilePath+i).isDirectory())
 				{
 					getUser(i,function(user)
 					{
@@ -787,7 +793,7 @@ function importUsers()
 							cb();	
 						}else
 						{
-							var profile = fs.readFileSync(datapath+"\\Profiles\\"+i,"utf8");
+							var profile = fs.readFileSync(profilePath+i,"utf8");
 							profile = JSON.parse(profile);
 							profile.Password = Hash(profile.Password);
 							var inventory = profile.inventory;
@@ -879,7 +885,7 @@ function importUsers()
 }
 function importStates()
 {
-	fs.readdir(datapath+"\\states\\",function(err,files){
+	fs.readdir((datapath+"/states/").replace(safePathRE),function(err,files){
 		async.each(files,
 			function(i,cb)
 			{
@@ -893,7 +899,7 @@ function importStates()
 					}
 					else
 					{
-						var instdata = fs.readFileSync(datapath+"\\states\\"+i+"\\state",'utf8');
+						var instdata = fs.readFileSync((datapath+"/states/"+i+"/state").replace(safePathRE),'utf8');
 						instdata = JSON.parse(instdata);
 						var statedata = {};
 						statedata.objects = instdata.length;
@@ -930,7 +936,7 @@ function purgeInstances()
 		var data = {}
 		async.each(stateIndex,function(i,cb)
 		{
-			if(!fs.existsSync(datapath +"\\States\\" + i))
+			if(!fs.existsSync((datapath +"/States/" + i).replace(safePathRE)))
 			{
 				console.log('delete instance ' + i);
 				deleteInstance(i,function()
