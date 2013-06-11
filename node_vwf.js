@@ -557,23 +557,26 @@ function startVWF(){
 					//no app name but is directory. Not listing directories, so 404
 					if(!appname)
 					{
-						global.log(filename + "is a directory")
+						console.log(filename + "is a directory")
 						_404(response);
 						
 						return;
 					}
 					
 					//this is the bootstrap html. Must have instnace and appname
-					filename = './support/client/lib/index.html';
+					filename = './support/client/lib/index.html'.replace(safePathRE);
 					
 					//when loading the bootstrap, you must have an instance that exists in the database
-					global.log(appname);
-					DAL.getInstance(appname.substr(8).replace(libpath.sep,'_') + instance + "_",function(data)
+					global.log('Appname:', appname);
+					var instanceName = appname.substr(8).replace(/\//g,'_').replace(/\\/g,'_') + instance + "_";
+					DAL.getInstance(instanceName,function(data)
 					{
 						if(data)
 							ServeFile(request,filename,response,URL);
-						else
+						else {
+							console.log('redirect since no data for', instanceName);
 							redirect(filterinstance(URL.pathname,instance)+"/index.html",response);
+						}
 					});
 					return;
 				}
