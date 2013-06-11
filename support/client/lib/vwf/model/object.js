@@ -317,7 +317,7 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
         children: function( nodeID ) {
             if ( !nodeID ) {
-                this.logger.error( "Cannot retrieve children of nonexistent node");
+                this.logger.errorx( "Cannot retrieve children of nonexistent node");
                 return;
             }
             var node = this.objects[ nodeID ];

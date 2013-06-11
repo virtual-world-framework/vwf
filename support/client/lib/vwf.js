@@ -3129,7 +3129,7 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
         this.children = function( nodeID ) {
             if ( !nodeID ) {
-                this.logger.error( "Cannot retrieve children of nonexistent node" );
+                this.logger.errorx( "Cannot retrieve children of nonexistent node" );
                 return;
             }
             return this.models.object.children( nodeID );
@@ -3144,7 +3144,7 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
         this.descendants = function( nodeID ) {
 
             if ( !nodeID ) {
-                this.logger.error( "Cannot retrieve children of nonexistent node" );
+                this.logger.errorx( "Cannot retrieve children of nonexistent node" );
                 return;
             }
 
