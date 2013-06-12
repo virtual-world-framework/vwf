@@ -4295,13 +4295,26 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                 }, this );
 
-                // Sort by time, then by sequence.  // TODO: we probably want a priority queue here for better performance
+                // Sort by time, then future messages ahead of reflector messages, then by sequence.  // TODO: we probably want a priority queue here for better performance
+                // 
+                // The sort by origin ensures that the queue is processed in a well-defined order
+                // when future messages and reflector messages share the same time, even if the
+                // reflector message has not arrived at the client yet.
+                // 
+                // The sort by sequence number ensures that the messages remain in their arrival
+                // order when the earlier sort keys don't provide the order.
 
                 this.queue.sort( function( a, b ) {
 
-                    return a.time != b.time ?
-                        a.time - b.time :
-                        a.sequence - b.sequence;
+                    if ( a.time != b.time ) {
+                        return a.time - b.time;
+                    } else if ( a.origin != "reflector" && b.origin == "reflector" ) {
+                        return -1;
+                    } else if ( a.origin == "reflector" && b.origin != "reflector" ) {
+                        return 1;
+                    } else {
+                        return a.sequence - b.sequence;
+                    }
 
                 } );
 
