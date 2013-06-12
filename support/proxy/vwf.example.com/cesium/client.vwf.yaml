@@ -23,6 +23,7 @@ properties:
   latitude:
   location:
   requestLocation: false
+  color:
 scripts:
 - |
     this.initialize = function() {
@@ -51,9 +52,11 @@ scripts:
             // this node, nor it's parent are represented in the cesium driver,
             // so the scene must be used to add this child 
             scene.children.create( self.displayName + "-bb", bbDef, function( child ) {
+              
               self.billboard = child;
-              console.info( "setting location to: " + self.location );
+              
               child.position = self.location;
+              child.color = self.color;
             } );
         } );
       }
