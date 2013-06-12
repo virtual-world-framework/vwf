@@ -20,13 +20,11 @@ require "yaml"
 CLOBBER.include('/web/**/*.html')
 CLOBBER.include('/web/*.html')
 
-task :default => [ :clean, :clobber, :full ]
+
 task :default => [ :clean, :clobber, :web ]
 
 desc "Generate the catalog and documentation."
 
-task :build 
-task :full
 task :build do 
 end
 task :full do 
