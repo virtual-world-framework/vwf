@@ -335,11 +335,96 @@
 
           } );
 
+          // setState should remove any messages from the queue that pre-date the setState action,
+          // remove messages generated while initializing nodes during the setState action, insert
+          // messages from the setState incoming queue, and leave messages in place that arrived
+          // after the setState message.
+
+          asyncTest( "setState queue", function() {
+
+            createFixtureQueue( function( fixtureID, cleanup ) {
+
+              // Add reflector and future messages that pre-date the setState message but that would
+              // execute after it at times 2 and 3, respectively. These represent the prior state of
+              // the queue. setState should remove them.
+
+              vwf.plan( fixtureID, "callMethod", "future_", [ [ "f2" ] ], -0.002 );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r3" ] ], -0.003 );
+
+              // Add the setState message at time 1.
+
+              vwf.send( undefined, "setState", undefined, [ {
+
+                // The created node generates a future message during initialize that would run at
+                // time 1, immediately following the setState action. setState should remove it.
+
+                nodes: [
+                  dataURIFromDescriptor( {
+                    extends:
+                      fixtureID,
+                    scripts: [
+                      "this.initialize = function() { " +
+                        "Object.getPrototypeOf( this ).future( 0 ).future_( 'f1' ); " +
+                      "}"
+                    ],
+                  } )
+                ],
+
+                // Include a future message at time 4 and a reflector message at time 5 in the
+                // incoming queue. These should be retained.
+
+                queue: {
+                  time:
+                    vwf.time() + 0.001,
+                  queue: [ {
+                    time: vwf.time() + 0.004,
+                    node: fixtureID,
+                    action: "callMethod",
+                    member: "future_",
+                    parameters: [ [ "f4" ] ],
+                    origin: "future"
+                  }, {
+                    time: vwf.time() + 0.005,
+                    node: fixtureID,
+                    action: "callMethod",
+                    member: "reflector",
+                    parameters: [ [ "r5" ] ],
+                    origin: "reflector"
+                  } ]
+                }
+
+              } ], -0.001 );
+
+              // Add a reflector message at time 1. This represents a new action that the reflector
+              // sent following the setState action. It should be retained and should execute after
+              // setState.
+
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1" ] ], -0.001 );
+
+              // The expected result is that setState runs and doesn't leave a trace (other than the
+              // transformed system state), the following reflector action runs, then the actions
+              // from the incoming queue scheduled later run.
+
+              runFutureAssertions( [
+
+                { relative: 0.010, assertion: function() {
+                    deepEqual( vwf.getProperty( fixtureID, "log" ), [
+                      "r1 executed",      // second reflector action at time 1
+                      "f4 executed",      // future action from the incoming queue at time 4
+                      "r5 executed",      // reflector action from the incoming queue at time 5
+                    ], "setState discarded prior actions, added incoming actions, and retained following actions" ) } },
+
+              ], cleanup );
+
+            } );
+
+          } );
+
           // == Helper functions =====================================================================
 
           // Create a node with a property, a method and an event.
 
-          function createFixture( callback ) {
+          function createFixture( callback /* fixtureID, cleanup */ ) {
 
             vwf.createChild( 0, unique_name( "fixture" ), {
 
@@ -371,10 +456,10 @@
             } );
 
           }
-         
+
           // Create a node with two levels of inheritance and properties to manipulate.
 
-          function createFixtureDerivedBase( callback ) {
+          function createFixtureDerivedBase( callback /* derivedID, baseID, cleanup */ ) {
 
             vwf.createNode( {
 
@@ -409,12 +494,99 @@
 
           }
 
+          // Create a node with methods to be called as reflector and future actions that will keep
+          // a log.
+
+          function createFixtureQueue( callback /* fixtureID, cleanup */ ) {
+
+            vwf.createChild( 0, unique_name( "fixture" ), {
+
+              extends:
+                "http://vwf.example.com/node.vwf",
+              
+              properties: {
+                log: [], // log of methods called on the node
+              },
+
+              methods: {
+
+                // A method to be called as a reflector action. Append the first parameter to the
+                // log to record that this call occurred, then schedule calls to `future` for each
+                // time/tag pair in the `futures` array.
+
+                reflector: {
+
+                  parameters:
+                    [ "tag", "futures" ],
+
+                  body:
+                    "this.methods.log( tag + ' executed' ); " + // the reflector action executes
+                    "while ( ( futures || [] ).length ) { " +
+                      "var time = futures.shift(); " +
+                      "var tag = futures.shift(); " +
+                      "this.methods.log( '- ' + tag + ' scheduled' ); " + // the future action is scheduled
+                      "tag.match( /ff/ ) ? " +
+                        "this.future( time ).methods.futurefuture( tag, tag + 'a' ) : " + // special case for future to call future
+                        "this.future( time ).methods.future_( tag ); " +
+                    "}"
+
+                },
+
+                // A method to be called as a future action. Append the parameter to the log to
+                // record that this called occurred.
+
+                future_: {
+
+                  parameters:
+                    [ "tag" ],
+ 
+                  body:
+                    "this.methods.log( tag + ' executed' )" // the future action executes
+ 
+                },
+
+                // A method to be called as a future action that generates another future action.
+                // Append the first parameter to the log to record that this call occurred, then
+                // schedule an additional call to `future` with the second tag.
+
+                futurefuture: {
+
+                  parameters:
+                    [ "tag1", "tag2" ],
+ 
+                  body:
+                    "this.methods.log( tag1 + ' executed' ); " + // the future action executes
+                    "this.methods.log( '- ' + tag2 + ' scheduled' ); " + // another future action is scheduled
+                    "this.future( 0 ).methods.future_( tag2 )"
+ 
+                },
+
+                // Append a tag to the log.
+
+                log: {
+                  parameters: [ "tag" ],
+                  body: "this.properties.log = this.properties.log.concat( tag )"
+                },
+
+              },
+
+            }, undefined, function( fixtureID ) {
+
+              callback( fixtureID, function() {
+                vwf.deleteNode( fixtureID );
+              } );
+
+            } );
+
+          }
+
           // Create a unique name from a base.
 
-          var sequence = 0;
+          var sequence;
 
           function unique_name( base ) {
-            return base + "-" + ( ++sequence );
+            sequence = sequence ? ++sequence : 1;
+            return base + "-" + sequence;
           }
 
           // Run assertions against actions on the future queue.
@@ -434,22 +606,26 @@
 
             window.vwf_view.ticked = function( time ) {
 
-              // Call our caller's tick just before the assertions.
+              if ( next < assertions.length ) {
 
-              ticked && ticked( time );
+                // Call our caller's tick every time the time changes, just before any assertions.
 
-              // Run any assertions that are ready.
+                ticked && ticked( time );
 
-              while ( next < assertions.length && ready( assertions[next], time ) ) {
-                assertions[next++].assertion();
-              }
+                // Run any assertions that are ready.
 
-              // When finished, unlisten for the kernel tick and tell qunit that we're done.
+                while ( next < assertions.length && ready( assertions[next], time ) ) {
+                  assertions[next++].assertion();
+                }
 
-              if ( next == assertions.length ) {
+              } else {
+
+                // When finished, unlisten for the kernel tick and tell qunit that we're done.
+
                 window.vwf_view.ticked = undefined;
                 cleanup();
                 start();
+
               }
 
             }
@@ -461,8 +637,8 @@
 
             function ready( assertion, time ) {
 
-              return assertion.absolute && time > assertion.absolute ||
-                assertion.relative && time > reference + assertions[next].relative;
+              return assertion.absolute !== undefined && time > assertion.absolute ||
+                assertion.relative !== undefined && time > reference + assertions[next].relative;
               
             }
             
@@ -480,6 +656,14 @@
             }
 
             return number3;            
+          }
+
+          // Convert a component descriptor to a data URI component.
+
+          function dataURIFromDescriptor( descriptor ) {
+
+            return "data:application/json;base64," + btoa( JSON.stringify( descriptor ) );
+
           }
 
         } );
