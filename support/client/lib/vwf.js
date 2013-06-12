@@ -111,8 +111,8 @@
 
         } );
 
-        /// This is the simulation clock, which contains the current time in milliseconds. Time is
-        /// controlled by the reflector and updates here as we receive control messages.
+        /// The simulation clock, which contains the current time in seconds. Time is controlled by
+        /// the reflector and updates here as we receive control messages.
         /// 
         /// @name module:vwf.now
         /// 
@@ -120,8 +120,22 @@
 
         this.now = 0;
 
-        /// The moniker of the client responsible for an action. Will be falsy for actions
-        /// originating in the server, such as time ticks.
+        /// The queue's sequence number for the currently executing action.
+        /// 
+        /// The queue enumerates actions in order of arrival, which is distinct from execution order
+        /// since actions may be scheduled to run in the future. `sequence_` can be used to
+        /// distinguish between actions that were previously placed on the queue for execution at a
+        /// later time, and those that arrived after the current action, regardless of their
+        /// scheduled time.
+        /// 
+        /// @name module:vwf.sequence_
+        /// 
+        /// @private
+
+        this.sequence_ = undefined;
+
+        /// The moniker of the client responsible for the currently executing action. `client_` will
+        /// be falsy for actions originating in the server, such as time ticks.
         /// 
         /// @name module:vwf.client_
         /// 
@@ -970,7 +984,8 @@
                 // Advance time to the message time.
 
                 if ( this.now != fields.time ) {
-                    this.client_ = undefined; // clear after the previous action
+                    this.sequence_ = undefined; // clear after the previous action
+                    this.client_ = undefined;   // clear after the previous action
                     this.now = fields.time;
                     this.tick();
                 }
@@ -978,17 +993,19 @@
                 // Perform the action.
 
                 if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
-                    this.client_ = fields.client; // note the originating client for the duration of the action
+                    this.sequence_ = fields.sequence; // note the message's queue sequence number for the duration of the action
+                    this.client_ = fields.client;     // ... and note the originating client
                     this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, fields.origin );
                 }
 
             }
 
             // Advance time to the most recent time received from the server. Tick if the time
-            // advanced.
+            // changed.
 
             if ( queue.ready() && this.now != queue.time ) {
-                this.client_ = undefined; // clear after the previous action
+                this.sequence_ = undefined; // clear after the previous action
+                this.client_ = undefined;   // clear after the previous action
                 this.now = queue.time;
                 this.tick();
             }
@@ -1076,44 +1093,26 @@
 
             }, function( err ) /* async */ {
 
-                // Set the message queue.
+                // Clear the message queue, except for reflector messages that arrived after the
+                // current action.
 
-                var private_queue = [], fields;
+                queue.filter( function( fields ) {
 
-                if ( applicationState.queue ) {
-
-                    // Clear the queue, but leave any private direct messages in place. Update
-                    // the queue array in place so that existing references remain valid.  // TODO: move to the queue object
-
-                    while ( queue.queue.length > 0 ) {
-
-                        fields = queue.queue.shift();
-
+                    if ( fields.origin === "reflector" && fields.sequence > vwf.sequence_ ) {
+                        return true;
+                    } else {
                         vwf.logger.debugx( "setState", function() {
                             return [ "removing", JSON.stringify( loggableFields( fields ) ), "from queue" ];
                         } );
-
-                        fields.respond && private_queue.push( fields );
-
                     }
 
-                    while ( private_queue.length > 0 ) {
+                } );
 
-                        fields = private_queue.shift();
+                // Set the queue time and add the incoming items to the queue.
 
-                        vwf.logger.debugx( "setState", function() {
-                            return [ "returning", JSON.stringify( loggableFields( fields ) ), "to queue" ];
-                        } );
-
-                        queue.queue.push( fields );
-
-                    }
-
-                    // Set the queue time and add the incoming items to the queue.
-
+                if ( applicationState.queue ) {
                     queue.time = applicationState.queue.time;
                     queue.insert( applicationState.queue.queue || [] );
-
                 }
 
                 callback_async && callback_async();
@@ -3800,15 +3799,21 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
             if ( depth == 0 ) {
 
-                // Omit private direct messages to this client.
+                // Omit any private direct messages for this client, then sort by arrival order
+                // (rather than by time) so that messages will retain the same arrival order when
+                // reinserted.
 
                 return object.filter( function( fields ) {
                     return ! fields.respond && fields.action;  // TODO: fields.action is here to filter out tick messages  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
+                } ).sort( function( fieldsA, fieldsB ) {
+                    return fieldsA.sequence - fieldsB.sequence;
                 } );
 
             } else if ( depth == 1 ) {
 
-                // Remove the sequence fields since they're just local annotations (to stabilize the sort).
+                // Remove the sequence fields since they're just local annotations used to keep
+                // messages ordered by insertion order and aren't directly meaniful outside of this
+                // client.
 
                 var filtered = {};
 
@@ -4281,7 +4286,7 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                     // if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
 
-                        fields.sequence = ++this.sequence; // to stabilize the sort
+                        fields.sequence = ++this.sequence; // track the insertion order for use as a sort key
                         this.queue.push( fields );
 
                     // }
@@ -4292,13 +4297,26 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                 }, this );
 
-                // Sort by time, then by sequence.  // TODO: we probably want a priority queue here for better performance
+                // Sort by time, then future messages ahead of reflector messages, then by sequence.  // TODO: we probably want a priority queue here for better performance
+                // 
+                // The sort by origin ensures that the queue is processed in a well-defined order
+                // when future messages and reflector messages share the same time, even if the
+                // reflector message has not arrived at the client yet.
+                // 
+                // The sort by sequence number ensures that the messages remain in their arrival
+                // order when the earlier sort keys don't provide the order.
 
                 this.queue.sort( function( a, b ) {
 
-                    return a.time != b.time ?
-                        a.time - b.time :
-                        a.sequence - b.sequence;
+                    if ( a.time != b.time ) {
+                        return a.time - b.time;
+                    } else if ( a.origin != "reflector" && b.origin == "reflector" ) {
+                        return -1;
+                    } else if ( a.origin == "reflector" && b.origin != "reflector" ) {
+                        return 1;
+                    } else {
+                        return a.sequence - b.sequence;
+                    }
 
                 } );
 
@@ -4324,6 +4342,21 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                 if ( this.suspension == 0 && this.queue.length > 0 && this.queue[0].time <= this.time ) {
                     return this.queue.shift();                
                 }
+
+            },
+
+            /// Update the queue to include only the messages selected by a filtering function.
+            /// 
+            /// @name module:vwf~queue.filter
+            /// 
+            /// @param {Function} callback
+            ///   `filter` calls `callback( fields )` once for each message in the queue. If
+            ///   `callback` returns a truthy value, the message will be retained. Otherwise it will
+            ///   be removed from the queue.
+
+            filter: function( callback /* fields */ ) {
+
+                this.queue = this.queue.filter( callback );
 
             },
 
@@ -4391,8 +4424,8 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
             suspension: 0,
 
-            /// Sequence counter for tagging messages by arrival order. Messages are sorted by time,
-            /// then by order of arrival.
+            /// Sequence counter for tagging messages by order of arrival. Messages are sorted by
+            /// time, origin, then by arrival order.
             /// 
             /// @name module:vwf~queue.sequence
 

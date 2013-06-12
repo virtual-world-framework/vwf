@@ -21,7 +21,7 @@ require "pathname"
 COMP_SRC = "vwf.example.com"
 DOCUMENTATION = "../../public/web/docs/jsdoc_cmp"
 
-PATTERNS = [ "**/*.vwf.yaml" ]
+PATTERNS = [ "*.vwf.yaml", "*/*.vwf.yaml" ]
 
 chdir COMP_SRC do
     MODULES = FileList.new( PATTERNS ).sort.map do |file|

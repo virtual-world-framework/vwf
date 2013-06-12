@@ -10,7 +10,7 @@ We'll start with the simplest form of a lesson - one with a single correct path.
 
 ### The Task Component
 
-At every step, the lesson will issue a task to the student. The sequence of tasks will form the building blocks of the lesson. The [task component](application.html) serves as the prototype for lesson tasks, and may be used for each required lesson step. 
+At every step, the lesson will issue a task to the student. The sequence of tasks will form the building blocks of the lesson. The [task component](jsdoc_cmp/symbols/lesson.task.vwf.html) serves as the prototype for lesson tasks, and may be used for each required lesson step. 
 
 The task component contains the following properties that can be set in the lesson model file:
 

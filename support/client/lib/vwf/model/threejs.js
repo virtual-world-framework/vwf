@@ -240,7 +240,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     loadAsset.call( this, parentNode, node, childType, notifyDriverOfPrototypeAndBehaviorProps );     
                 } else if ( childType == "mesh/definition" ) {
                     
-                    callback( false );
+                    //callback( false );
                     node = this.state.nodes[childID] = {
                         name: childName,  
                         //threeObject: threeChild,
@@ -250,6 +250,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         sourceType: childType,
                         type: childExtendsID,
                         sceneID: this.state.sceneRootID,
+                        prototypes: protos,
                     };
                     node.threeObject = new THREE.Object3D(); 
                     node.threeObject.name = childName; 
@@ -269,6 +270,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             //no load callback, maybe don't need this?
                             //loadingCallback: callback,
                             sceneID: this.state.sceneRootID,
+                            prototypes: protos,
                         };
                         if( !node.threeObject )
                             node.threeObject = findThreeObjectInParent.call(this,childName,nodeID);
@@ -369,6 +371,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
+            return this.initializingProperty( nodeID, propertyName, propertyValue );
         },
 
         // -- initializingProperty -----------------------------------------------------------------
@@ -376,7 +379,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var value = undefined;
-            //console.log(["initializingProperty: ",nodeID,propertyName,propertyValue]);
+            //console.info( "initializingProperty( " + nodeID+", "+propertyName+", "+propertyValue + " )" );
 
             if ( propertyValue !== undefined ) {
                 var node = this.state.nodes[ nodeID ];
@@ -384,7 +387,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 if ( node !== undefined ) {
                     switch ( propertyName ) {
                         case "meshDefinition":
-                            createMesh.call( this, node, propertyValue );
+                            createMesh.call( this, node, propertyValue, true );
+                            value = propertyValue; 
                             break;
                         case "texture":
                             // delay the setting of the texture until the actual
@@ -405,7 +409,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
-            //console.log(["settingProperty: ",nodeID,propertyName,propertyValue]);
+            //console.info( "settingProperty( " + nodeID+", "+propertyName+", "+propertyValue + " )" );
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             if( node === undefined ) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
@@ -899,6 +903,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                         value = vwfColor.toString();
                     }
+
+                    // these properties should possibly be three js specific
+                    if(propertyName == "transparent") {
+                        value = Boolean( propertyValue );
+                        threeObject.transparent = value;
+                    }
+                    if(propertyName == "opacity") {
+                        value = Number( propertyValue );
+                        threeObject.opacity = value;
+                    }
+
                 }
                 if( threeObject instanceof THREE.Scene )
                 {
@@ -1371,6 +1386,53 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         return foundNode;
     }
+
+    function isCubeDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-cube-vwf" );    
+            }
+        }
+        return foundNode;
+    }
+    function isCircleDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-circle-vwf" );    
+            }
+        }
+        return foundNode;
+    }
+    function isPlaneDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-plane-vwf" );    
+            }
+        }
+        return foundNode;
+    }
+    function isSphereDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-sphere-vwf" );    
+            }
+        }
+        return foundNode;
+    }
+    function isCylinderDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-cylinder-vwf" );    
+            }
+        }
+        return foundNode;
+    }
+
     function CreateThreeJSSceneNode(parentID,thisID,extendsID)
     {
         var node = {};
@@ -1641,29 +1703,78 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
         }
     }
-    function createMesh( node, meshDef ) {
+    function createMesh( node, meshDef, doubleSided ) {
         if ( node.threeObject && node.threeObject instanceof THREE.Object3D ) {
-            var i, face;
-            var geo = new THREE.Geometry();
-            var mat = new THREE.MeshBasicMaterial( { color: meshDef.color ? meshDef.color : 0xffffff } )
+            var i, face, geo;
+            var height, width, depth, radius;
+            var vwfColor, colorValue = 0xFFFFFF;    
+            if ( meshDef.color !== undefined ) {
+                vwfColor = new utility.color( meshDef.color );
+                if ( vwfColor ) {
+                    colorValue = vwfColor._decimal;
+                }
+            }
+            var mat = new THREE.MeshLambertMaterial( { "color": colorValue, "ambient": colorValue } );
+           
+            if ( isCubeDefinition.call( this, node.prototypes ) ) {
+                height = meshDef.height || 1;
+                width = meshDef.width || 1;
+                depth = meshDef.depth || 1;
+                geo = new THREE.CubeGeometry( width, height, depth );
+            } else if ( isPlaneDefinition.call( this, node.prototypes ) ) {
+                height = meshDef.height || 1;
+                width = meshDef.width || 1;
+                geo = new THREE.PlaneGeometry( width, height );
+            } else if ( isCircleDefinition.call( this, node.prototypes ) ) {
+                radius = meshDef.radius || 10;
+                geo = new THREE.CircleGeometry( radius );
+            } else if ( isSphereDefinition.call( this, node.prototypes ) ) {
+                radius = meshDef.radius || 10;
+                geo = new THREE.SphereGeometry( radius );
+            } else if ( isCylinderDefinition.call( this, node.prototypes ) ) {
+                height = meshDef.height || 1;
+                if ( meshDef.radius !== undefined ){ 
+                    radius = meshDef.radius || 10;
+                    geo = new THREE.CylinderGeometry( radius, radius, height );
+                } else {
+                    geo = new THREE.CylinderGeometry( meshDef.radiusTop || 10, meshDef.radiusBottom || 10, height );
+                }
+            } else {
+                geo = new THREE.Geometry();
 
-            for ( i = 0; geo.vertices && meshDef.positions && i < meshDef.positions.length; i++ ) {
-                geo.vertices.push( new THREE.Vector3( meshDef.positions[i*3], meshDef.positions[i*3+1],meshDef.positions[i*3+2] ) );   
+                for ( i = 0; geo.vertices && meshDef.positions && ((i*3) < meshDef.positions.length); i++ ) {
+                    //console.info( "     adding vertices: [" + (meshDef.positions[i*3]) + ", " + (meshDef.positions[i*3+1]) + ", "+ (meshDef.positions[i*3+2]) + " ]" )
+                    geo.vertices.push( new THREE.Vector3( meshDef.positions[i*3], meshDef.positions[i*3+1],meshDef.positions[i*3+2] ) );   
+                }
+                for ( i = 0; geo.faces && meshDef.faces && ( (i*3) < meshDef.faces.length ); i++ ) {
+                    //console.info( "     adding face: [" + (meshDef.faces[i*3]) + ", " + (meshDef.faces[i*3+1]) + ", "+ (meshDef.faces[i*3+2]) + " ]" );
+                    face = new THREE.Face3( meshDef.faces[i*3], meshDef.faces[i*3+1],meshDef.faces[i*3+2] );
+                    geo.faces.push( face );
+                    if ( doubleSided ) {
+                        //console.info( "     adding face: [" + (meshDef.faces[i*3+2]) + ", " + (meshDef.faces[i*3+1]) + ", "+ (meshDef.faces[i*3]) + " ]" );
+                        face = new THREE.Face3( meshDef.faces[i*3+2], meshDef.faces[i*3+1],meshDef.faces[i*3] );
+                        geo.faces.push( face );
+                    }
+                } 
+                // TODO: needed doubleSided support for normals
+                for ( i = 0 ; geo.faces && meshDef.normals && i < geo.faces.length; i++ ) {
+                    face = geo.faces[ i ];
+                    //console.info( "     adding face normal: [" + (meshDef.normals[i*3]) + ", " + (meshDef.normals[i*3+1]) + ", "+ (meshDef.normals[i*3+2]) + " ]" );
+                    face.vertexNormals.push( new THREE.Vector3( meshDef.normals[i*3], meshDef.normals[i*3+1],meshDef.normals[i*3+2] ) );   
+                }
+                for ( i = 0; geo.faceVertexUvs && meshDef.uv1 && i < meshDef.uv1.length; i++ ) {
+                    //console.info( "     adding face vertex uv: [" + (meshDef.uv1[i*2]) + ", " + (meshDef.uv1[i*2+1]) + " ]" );
+                    geo.faceVertexUvs.push( new THREE.Vector2( meshDef.uv1[i*2], meshDef.uv1[i*2+1] ) );   
+                }   
             }
-            for ( i = 0; geo.faces && meshDef.faces && ( (i*3) < meshDef.faces.length ); i++ ) {
-                face = new THREE.Face3( meshDef.faces[i*3], meshDef.faces[i*3+1],meshDef.faces[i*3+2] );
-                geo.faces.push( face );   
-            } 
-            for ( i = 0 ; geo.faces && meshDef.normals && i < geo.faces.length; i++ ) {
-                face = geo.faces[ i ];
-                face.vertexNormals.push( new THREE.Vector3( meshDef.normals[i*3], meshDef.normals[i*3+1],meshDef.normals[i*3+2] ) );   
+            if ( geo !== undefined ) {
+                var mesh = new THREE.Mesh( geo, mat );          
+                node.threeObject.add( mesh ); 
+                
+                geo.computeCentroids();
+                geo.computeFaceNormals();                
             }
-            for ( i = 0; geo.faceVertexUvs && meshDef.uv1 && i < meshDef.uv1.length; i++ ) {
-                geo.faceVertexUvs.push( new THREE.Vector2( meshDef.uv1[i*2], meshDef.uv1[i*2+1] ) );   
-            }             
-            node.threeObject.add( new THREE.Mesh( geo, mat ) ); 
-            
-            geo.computeCentroids();
+
         }         
     }
     function loadAsset( parentNode, node, childType, propertyNotifyCallback ) {
