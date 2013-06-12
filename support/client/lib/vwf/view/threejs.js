@@ -16,7 +16,13 @@
 
 define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
 
+    // Private global variables for navigation
+    var appInitialized;
+    var navObjectRequested;
+    var navObjectName;
     var navmode;
+    var ownerlessNavObjects = [];
+    var numNavCandidates;
 
     return view.load( module, {
 
@@ -72,7 +78,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var sceneView = this;
             var appID = sceneView.kernel.application();
             if ( childID == appID ) {
-                findNavObject.call( sceneView );
+                appInitialized = true;
             } else {
 
                 //TODO: This is a temporary workaround until the callback functionality is implemented for 
@@ -83,6 +89,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 var initNode = this.state.nodes[ childID ];
                 if ( initNode && ( initNode.name == navObjectName ) ) {
                     var sceneView = this;
+                    initNode.owner = sceneView.kernel.moniker();
                     controlNavObject.call( sceneView, initNode );
                 }
             }
@@ -150,28 +157,97 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         gotProperty: function ( nodeID, propertyName, propertyValue ) { 
             var clientThatGotProperty = this.kernel.client();
             var me = this.kernel.moniker();
+            var sceneRootID = this.state.sceneRootID;
             if ( clientThatGotProperty == me ) {
-                if ( propertyName == "userObject" ) {
+                if ( propertyName == "owner") {
+
+                    // Get the navigable object
+                    var navCandidate = this.state.nodes[ nodeID ];
+
+                    // If a node w/ nodeID exists, then this is a real owner value to be processed
+                    // (otherwise it is the behavior itself and should be ignored)
+                    if ( navCandidate ) {
+
+                        // If we haven't already found the navigation object....
+                        if ( !navObject ) {
+                            var owner = propertyValue;
+
+                            // If I'm the owner, take control
+                            // Else, if it doesn't have an owner, push it on the list of ownerless navigation 
+                            // objects that we can pull from if none is found that has an owner of this client
+                            if ( owner == me ) {
+                                controlNavObject.call( this, navCandidate );
+                            } else if ( !owner ) {
+                                ownerlessNavObjects.push( navCandidate );
+                            } 
+                        }
+
+                        // If we did not take control of this navigation object (its owner wasn't this client)
+                        if ( !navObject ) {
+
+                            // Decrement the counter of navigation objects that we are waiting for
+                            numNavCandidates--;
+
+                            // If we're out of navigation candidates for which we might be the owner, see if 
+                            // there are any ownerless nav objects that we could control
+                            // If so, take control
+                            // Else, create one
+                            if ( !numNavCandidates ) {
+                                if ( ownerlessNavObjects.length ) {
+                                    controlNavObject.call( this, ownerlessNavObjects[ 0 ] );
+                                } else {
+
+                                    // Retrieve the userObject property so we may create a navigation object from 
+                                    // it for this user (the rest of the logic is in the gotProperty call for 
+                                    // userObject)
+                                    this.kernel.getProperty( sceneRootID, "userObject" );
+                                }
+                            }
+                        }
+                    }
+                } else if ( propertyName == "userObject" ) {
+
+                    // The userObject property is only requested when the system wishes to create one for this 
+                    // user.  We do that here.
+                    
+                    // Set the userObject from the value received or a default if it is null/undefined
                     var userObject = propertyValue || {
                         "extends": "http://vwf.example.com/camera.vwf",
-                        "implements": [ "http://vwf.example.com/navigable.vwf" ],
-                        "properties": {
-                            "owner": me
-                        }
+                        "implements": [ "http://vwf.example.com/navigable.vwf" ]
                     };
 
+                    // Makes sure that the userObject has a properties field
+                    userObject[ "properties" ] = userObject[ "properties" ] || {};
+
+                    // Set the object's owner to be this object
+                    userObject[ "properties" ][ "owner" ] = me;
+
+                    // Save the name of the object globally so we can recognize it in 
+                    // initializedNode so we can take control of it there
+                    navObjectName = "navobj_" + me;
+
                     // TODO: The callback function is commented out because callbacks have not yet been 
-                    //       implemented for createChild - see workaround in createdNode
-                    this.kernel.createChild( this.state.sceneRootID, navObjectName, userObject, 
-                                             undefined, undefined /*,  function( nodeID ) {
+                    //       implemented for createChild - see workaround in initializedNode
+                    this.kernel.createChild( sceneRootID, navObjectName, userObject, undefined, undefined /*,
+                                             function( nodeID ) {
                         controlNavObject.call( this, this.state.nodes[ nodeID ] );
                     } */ );
-                }
-                if ( navObject && ( nodeID == navObject.ID ) ) {
+                } else if ( navObject && ( nodeID == navObject.ID ) && propertyName == "navmode" ) {
 
                     // This was requested from the model from controlNavObject
                     navmode = propertyValue;
                 }
+            }
+        },
+
+        // -- ticked -----------------------------------------------------------------------------------
+
+        ticked: function() {
+            
+            // Search for the navigation object inside the ...
+            if ( appInitialized && !navObjectRequested ) {
+                navObjectRequested = true;
+                findNavObject.call( this );
             }
         }
     } );
@@ -216,13 +292,17 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         function renderScene(time) {
 
+            // Schedule the next render
+            window.requestAnimationFrame( renderScene );
+
+            // Verify that there is a camera to render from before going any farther
             var camera = self.state.cameraInUse;
             if ( !camera ) {
-                self.logger.errorx( "Cannot render because there is no valid camera" );
+                self.logger.debugx( "Cannot render because there is no valid camera" );
                 return;
             }
 
-            window.requestAnimationFrame( renderScene );
+            
             var now = ( performance !== undefined && performance.now !== undefined ) ? performance.now() : time;
             var timepassed = now - sceneNode.lastTime;
 
@@ -400,8 +480,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // If scene is already loaded, find the user's navigation object
         var sceneView = this;
         var appID = sceneView.kernel.application( true );
-        if ( appID )
-            findNavObject.call( sceneView );
+        if ( appID ) {
+            appInitialized = true;
+        }
     }
     function rebuildAllMaterials(start)
     {
@@ -1051,70 +1132,78 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                 // Perform pitch on camera - right-multiply to keep pitch separate from yaw
                 var camera = sceneView.state.cameraInUse;
-                var cameraMatrix = camera.matrix;
-                var cameraPos = new THREE.Vector3();
-                cameraPos.getPositionFromMatrix( cameraMatrix );
-                cameraMatrix.multiply( pitchMatrix );
-                camera.updateMatrixWorld( true );
+                if ( camera ) {
+                    var cameraMatrix = camera.matrix;
+                    var cameraPos = new THREE.Vector3();
+                    cameraPos.getPositionFromMatrix( cameraMatrix );
+                    cameraMatrix.multiply( pitchMatrix );
+                    camera.updateMatrixWorld( true );
 
-                // Constrain the camera's pitch to +/- 90 degrees
-                var camWorldMatrix = camera.matrixWorld;
-                var camWorldMatrixElements = camWorldMatrix.elements;
+                    // Constrain the camera's pitch to +/- 90 degrees
+                    var camWorldMatrix = camera.matrixWorld;
+                    var camWorldMatrixElements = camWorldMatrix.elements;
 
-                // We need to do something if zAxis.z is < 0
-                // This can get a little weird because this matrix is in three.js coordinates, but we care
-                // about VWF coordinates:
-                // -the VWF y-axis is the three.js -z axis 
-                // -the VWF z-axis is the three.js y axis
-                if ( camWorldMatrixElements[ 6 ] < 0 ) {
+                    // We need to do something if zAxis.z is < 0
+                    // This can get a little weird because this matrix is in three.js coordinates, but we care
+                    // about VWF coordinates:
+                    // -the VWF y-axis is the three.js -z axis 
+                    // -the VWF z-axis is the three.js y axis
+                    if ( camWorldMatrixElements[ 6 ] < 0 ) {
 
-                    var xAxis = goog.vec.Vec3.create();
-                    xAxis = goog.vec.Vec3.setFromArray( xAxis, [ camWorldMatrixElements[ 0 ], 
-                                                                 camWorldMatrixElements[ 1 ], 
-                                                                 camWorldMatrixElements[ 2 ] ] );
+                        var xAxis = goog.vec.Vec3.create();
+                        xAxis = goog.vec.Vec3.setFromArray( xAxis, [ camWorldMatrixElements[ 0 ], 
+                                                                     camWorldMatrixElements[ 1 ], 
+                                                                     camWorldMatrixElements[ 2 ] ] );
 
-                    var yAxis = goog.vec.Vec3.create();
+                        var yAxis = goog.vec.Vec3.create();
 
-                    // If forward vector is tipped up
-                    if ( camWorldMatrixElements[ 10 ] > 0 ) {
-                        yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
-                    } else {
-                        yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
+                        // If forward vector is tipped up
+                        if ( camWorldMatrixElements[ 10 ] > 0 ) {
+                            yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
+                        } else {
+                            yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
+                        }
+
+                        // Calculate the zAxis as a crossProduct of x and y
+                        var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
+
+                        // Put these values back in the camera matrix
+                        camWorldMatrixElements[ 4 ] = zAxis[ 0 ];
+                        camWorldMatrixElements[ 5 ] = zAxis[ 1 ];
+                        camWorldMatrixElements[ 6 ] = zAxis[ 2 ];
+                        camWorldMatrixElements[ 8 ] = -yAxis[ 0 ];
+                        camWorldMatrixElements[ 9 ] = -yAxis[ 1 ];
+                        camWorldMatrixElements[ 10 ] = -yAxis[ 2 ];
+
+                        setTransformFromWorldTransform( camera );
                     }
 
-                    // Calculate the zAxis as a crossProduct of x and y
-                    var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
+                    // Restore camera position so rotation is done around camera center
+                    cameraMatrix.setPosition( cameraPos );
 
-                    // Put these values back in the camera matrix
-                    camWorldMatrixElements[ 4 ] = zAxis[ 0 ];
-                    camWorldMatrixElements[ 5 ] = zAxis[ 1 ];
-                    camWorldMatrixElements[ 6 ] = zAxis[ 2 ];
-                    camWorldMatrixElements[ 8 ] = -yAxis[ 0 ];
-                    camWorldMatrixElements[ 9 ] = -yAxis[ 1 ];
-                    camWorldMatrixElements[ 10 ] = -yAxis[ 2 ];
-
-                    setTransformFromWorldTransform( camera );
-                }
-
-                // Restore camera position so rotation is done around camera center
-                cameraMatrix.setPosition( cameraPos );
-
-                // If the navObject is the camera, its new transform will be sent to the reflector 
-                // all at once at the end
-                // If not (here below), we need to send a separate message to the reflector to set 
-                // the pitch on the camera
-                if ( navObject !== cameraNode ) {
-                    setTransformProperty( cameraNode, cameraMatrix.elements );
+                    // If the navObject is the camera, its new transform will be sent to the reflector 
+                    // all at once at the end
+                    // If not (here below), we need to send a separate message to the reflector to set 
+                    // the pitch on the camera
+                    if ( navObject !== cameraNode ) {
+                        setTransformProperty( cameraNode, cameraMatrix.elements );
+                    }
+                } else {
+                    self.logger.warnx( "There is no camera to move" );
                 }
 
                 // Perform yaw on nav object - left-multiply to keep yaw separate from pitch
-                var navObjectMatrix = navObject.threeObject.matrix;
-                var navObjectPos = new THREE.Vector3();
-                navObjectPos.getPositionFromMatrix( navObjectMatrix );
-                navObjectMatrix.multiplyMatrices( yawMatrix, navObjectMatrix );
-                navObjectMatrix.setPosition( navObjectPos );
-                navObject.threeObject.updateMatrixWorld( true );
-                setTransformProperty( navObject, navObjectMatrix.elements );  
+                if ( navObject ) {
+                    var navObjectMatrix = navObject.threeObject.matrix;
+                    var navObjectPos = new THREE.Vector3();
+                    navObjectPos.getPositionFromMatrix( navObjectMatrix );
+                    navObjectMatrix.multiplyMatrices( yawMatrix, navObjectMatrix );
+                    navObjectMatrix.setPosition( navObjectPos );
+                    navObject.threeObject.updateMatrixWorld( true );
+                    setTransformProperty( navObject, navObjectMatrix.elements );
+                } else {
+                    self.logger.warnx( "There is no navigation object to move" );
+                }
 
                 startMousePosition = currentMousePosition;
             }
@@ -1841,48 +1930,24 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         vwf_view.kernel.getProperty( navObject.ID, "navmode" );
     }
 
-    var navObjectName;
-
     function findNavObject() {
 
         // Find the navigable objects in the scene
         var sceneView = this;
         var sceneRootID = sceneView.state.sceneRootID;
         var navObjectIds = sceneView.kernel.find( sceneRootID,
-                                                  ".//element(*,'http://vwf.example.com/navigable.vwf')" );
-        var navObjects = [];
-        for ( var i = 0; i < navObjectIds.length; i++ )
-            navObjects.push( sceneView.state.nodes[ navObjectIds[ i ] ] );
+                                              ".//element(*,'http://vwf.example.com/navigable.vwf')" );
+        numNavCandidates = navObjectIds.length;
 
-        // Search the navigable objects for one whose owner is this user
-        // If found, take control of it 
-        var found = false;
-        var thisUserId = sceneView.kernel.moniker();
-        for ( var i = 0; i < navObjects.length; i++ )
-            if ( navObjects[ i ].owner == thisUserId ) {
-                controlNavObject.call( sceneView, navObjects[ i ] );
-                navObjectName = navObjects[ i ].name;
-                found = true;
-                break;
+        // If there are navigation objects in the scene, get their owner property values (The rest of the logic
+        // of choosing the correct navigation object is in the gotProperty call for owner)
+        // Else, retrieve the userObject property so we may create a navigation object from it for this user
+        if ( numNavCandidates ) {
+            for ( var i = 0; i < numNavCandidates; i++ ) {
+                sceneView.kernel.getProperty( navObjectIds[ i ], "owner" );
             }
-
-        // If no navigable object was found whose owner is this user, search for one that has no owner
-        // If found, take control of it
-        if ( !found )
-            for ( var i = 0; i < navObjects.length; i++ )
-                if ( !navObjects[ i ].owner ) {
-                    controlNavObject.call( sceneView, navObjects[ i ] );
-                    navObjectName = navObjects[ i ].name;
-                    found = true;
-                    break;
-                }
-
-        // If no ownerless navigable objects were found, create one, set its owner to be this user,
-        // and take control of it
-        if ( !found ) {
-            navObjectName = "navobj_" + thisUserId;
+        } else {
             sceneView.kernel.getProperty( sceneRootID, "userObject" );
-            // Creation of the user object occurs in the gotProperty call for userObject
         }
     }
 
