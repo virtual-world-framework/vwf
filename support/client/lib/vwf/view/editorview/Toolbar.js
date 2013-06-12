@@ -33,7 +33,7 @@ define(
 		createIcon('../vwf/view/editorview/images/icons/logout.png', 'MenuLogIn', 'Log In');
 		createIcon('../vwf/view/editorview/images/icons/login.png', 'MenuLogOut', 'Log Out');
 		createSeperator();
-		createIcon('../vwf/view/editorview/images/icons/Move.png', 'MenuMove', 'Move Tool');
+		createIcon('../vwf/view/editorview/images/icons/move.png', 'MenuMove', 'Move Tool');
 		createIcon('../vwf/view/editorview/images/icons/rotate.png', 'MenuRotate', 'Rotate Tool');
 		createIcon('../vwf/view/editorview/images/icons/scale.png', 'MenuScale', 'Scale Tool');
 		createSeperator();
@@ -61,7 +61,7 @@ define(
 		createSeperator();
 		createIcon('../vwf/view/editorview/images/icons/sphere.png', 'MenuCreateSphere', 'Create Sphere');
 		createIcon('../vwf/view/editorview/images/icons/cube.png', 'MenuCreateBox', 'Create Box');
-		createIcon('../vwf/view/editorview/images/icons/Cylinder.png', 'MenuCreateCylinder', 'Create Cylinder');
+		createIcon('../vwf/view/editorview/images/icons/cylinder.png', 'MenuCreateCylinder', 'Create Cylinder');
 		createIcon('../vwf/view/editorview/images/icons/cone.png', 'MenuCreateCone', 'Create Cone');
 		createIcon('../vwf/view/editorview/images/icons/plane.png', 'MenuCreatePlane', 'Create Plane');
 		createSeperator();
