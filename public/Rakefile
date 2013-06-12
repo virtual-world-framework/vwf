@@ -20,12 +20,13 @@ require "yaml"
 CLOBBER.include('/web/**/*.html')
 CLOBBER.include('/web/*.html')
 
-task :default => [ :clean, :clobber, :full ]
+task :default => [ :clean, :clobber, :web ]
 
 desc "Generate the catalog and documentation."
 
 task :build 
 task :full
+task :clean
 	# Clean the web folders of generated html
 	sh "rm -rf web/*.html web/**/*.html"
 
@@ -111,3 +112,4 @@ file "web/catalog.html" => "web/catalog.html.erb" do |task|
     end
 
 end
+
