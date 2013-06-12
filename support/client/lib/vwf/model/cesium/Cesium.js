@@ -87862,7 +87862,7 @@ define('Widgets/CesiumWidget/CesiumWidget',['../../Core/buildModuleUrl',
      *     })
      * });
      */
-    var CesiumWidget = function(container, options) {
+    var CesiumWidget = function(container, options, canvasOptions) {
         if (typeof container === 'undefined') {
             throw new DeveloperError('container is required.');
         }
@@ -87897,7 +87897,7 @@ define('Widgets/CesiumWidget/CesiumWidget',['../../Core/buildModuleUrl',
         cesiumLogo.className = 'cesium-widget-logo';
         widgetNode.appendChild(cesiumLogo);
 
-        var scene = new Scene(canvas);
+        var scene = new Scene(canvas, canvasOptions);
         scene.getCamera().controller.constrainedAxis = Cartesian3.UNIT_Z;
 
         var _ellipsoid = Ellipsoid.WGS84;
