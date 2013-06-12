@@ -17,8 +17,8 @@ require "tilt"
 require "yaml"
 
 
-CLOBBER.include "web/**/*.html"
-CLOBBER.include "web/*.html"
+CLOBBER.include('/web/**/*.html')
+CLOBBER.include('/web/*.html')
 
 task :default => [ :clean, :clobber, :web ]
 
@@ -27,13 +27,15 @@ desc "Generate the catalog and documentation."
 task :build 
 task :full
 
-task :web => "web/catalog.html" do
+task :web => "web/catalog.html"  do
+
+	# Clean the web folders of generated html
+	sh "rm -rf web/*.html web/**/*.html"
 
     # Add the build tools to the path.
-
     original_path = ENV["PATH"]
     ENV["PATH"] = File.expand_path( "../support/build/Pygments-1.4" ) + ":" + ENV["PATH"]
-
+	
     # Render the Markdown.
 
     FileList[ "web/*.md" ].each do |md|
