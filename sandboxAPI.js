@@ -1168,7 +1168,7 @@ function serve (request, response)
 					   return -1;
 					});
 					var o = {};
-					o.GetTexturesResult = JSON.stringify({root:files}).replace(/\\\\//g,"\\");
+					o.GetTexturesResult = JSON.stringify({root:files}).replace(/\\\\//g,"\\").replace(/\/\//g, '/');
 					global.textures = o;
 					ServeJSON(o,response,URL);
 				});
