@@ -24,7 +24,7 @@ properties:
   cameraViewData: 
   backgroundColor: [ 0, 0, 0, 0 ]
   renderStyle: "3D"
-  imageryProvider: "bingAerialLabel"
+  imageryProvider: 
 scripts:
 - |
     this.initialize = function() {
