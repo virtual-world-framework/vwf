@@ -11,5 +11,9 @@ In order to successfully run the Virtual World Framework, the following browser 
 
 The following browsers are recommended for use:
 
-*   [Chrome 7+](https://www.google.com/intl/en/chrome/browser/)
-*   [Firefox 6+](http://www.mozilla.org/en-US/firefox/new/)
+*   [Chrome 27+](https://www.google.com/intl/en/chrome/browser/)
+*   [Firefox 21+](http://www.mozilla.org/en-US/firefox/new/)
+*   [Opera 15+](http://www.opera.com/developer/next)
+
+*   At this time we have limited support for Internet Explorer 10. Please see our demos of Google Earth and Tile Puzzle 2D to see what can be done with the framework without WebGL.  
+*   Internet Explorer 11 is rumored at this time to support WebGL, and we are constantly looking to the future of modern browsers to determine how well the Virtual World Framework is supported.
