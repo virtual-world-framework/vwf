@@ -432,6 +432,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                     switch ( propertyName ) {
 
+                        case "cameraViewData":
+                            if ( this.kernel.client() != this.kernel.moniker() ) {
+                                var camera = scene.getCamera();
+                                camera.direction = new Cesium.Cartesian3( propertyValue.direction.x, propertyValue.direction.y, propertyValue.direction.z );
+                                camera.position = new Cesium.Cartesian3( propertyValue.position.x, propertyValue.position.y, propertyValue.position.z );
+                                camera.up = new Cesium.Cartesian3( propertyValue.up.x, propertyValue.up.y, propertyValue.up.z );
+                                camera.right = new Cesium.Cartesian3( propertyValue.right.x, propertyValue.right.y, propertyValue.right.z );
+                                this.state.cameraInfo.getCurrent( camera );
+                            }
+                            break;
+
                         case "imageryProvider":
                             
                             var imageProvider = undefined;

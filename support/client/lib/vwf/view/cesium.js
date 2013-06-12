@@ -142,99 +142,65 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
 
                 node.scene = scene;
-                node.canavs = scene.getCanvas();
+                node.canvas = scene.getCanvas();
                 
-                var ctrl = scene.getScreenSpaceCameraController();
+                var camera = scene.getCamera();
+                this.state.cameraInfo = { 
+                    "direction": camera.direction.clone(),
+                    "position": camera.position.clone(),
+                    "up": camera.up.clone(),
+                    "right": camera.right.clone(),
+                    "diff": function( cam ) {
+                        return ( 
+                            ( !Cesium.Cartesian3.equals( this.direction, cam.direction ) ) ||  
+                            ( !Cesium.Cartesian3.equals( this.position, cam.position ) ) ||
+                            ( !Cesium.Cartesian3.equals( this.up, cam.up ) ) ||
+                            ( !Cesium.Cartesian3.equals( this.right, cam.right ) ) 
+                        );
+                    },
+                    "getCurrent": function( cam ) {
+                        this.direction = camera.direction.clone();
+                        this.position = camera.position.clone();
+                        this.up = camera.up.clone();
+                        this.right = camera.right.clone();                        
+                    }
+                };
 
-                var spin = ctrl._spinHandler;
-                var trans = ctrl._tranlateHandler
-                var look = ctrl._lookHandler;
-                var rotate = ctrl._rotateHandler;
-                var zoom = ctrl._zoomHandler;
-                var zoomWheel = ctrl._zoomWheelHandler;
-                var pinch = ctrl._pinchHandler;
-
-                ctrl.enableTranslate = true;
-                ctrl.enableZoom = true;
-                ctrl.enableRotate = true;
-                ctrl.enableTilt = true;
-                ctrl.enableLook = true;
-             
                 ( function tick() {
-                    var spinning = spin && spin.isMoving() && spin.getMovement();
-                    var rotating = rotate && rotate.isMoving();
-                    var zooming = zoom && zoom.isMoving();
-                    var zoomWheeling = zoomWheel && zoomWheel.isMoving();
-                    var spinMovement = spin.getMovement();
-                    
-                    var rotateMovement = rotate.getMovement();
-                    var zoomMovement = zoom.getMovement();
-                    var zoomWheelMovement = zoomWheel.getMovement();
-                    
-                    var lookIsMoving = look.isMoving();
-                    var lookMovement = look.getMovement();
-                    
-                    broadcastCameraControllerData.call(view, {
-                        "spinning": spinning,
-                        "rotating": rotating,
-                        "zooming": zooming,
-                        "zoomWheeling": zoomWheeling,
-                        "spinMovement": spinMovement,
-                        "spinTouchStart": spin.getButtonPressTime() ? spin.getButtonPressTime().getTime() : undefined,
-                        "spinTouchRelease": spin.getButtonReleaseTime() ? spin.getButtonReleaseTime().getTime() : undefined,
-                        "spinLastMovement": spin.getLastMovement(),
-                        "rotateMovement": rotateMovement,
-                        "zoomMovement": zoomMovement,
-                        "zoomTouchStart": zoom.getButtonPressTime() ? zoom.getButtonPressTime().getTime() : undefined,
-                        "zoomTouchRelease": zoom.getButtonReleaseTime() ? zoom.getButtonReleaseTime().getTime() : undefined,
-                        "zoomLastMovement": zoom.getLastMovement(),
-                        "zoomWheelMovement": zoomWheelMovement,
-                        "zoomWheelTouchStart": zoomWheel.getButtonPressTime() ? zoomWheel.getButtonPressTime().getTime() : undefined,
-                        "zoomWheelTouchRelease": zoomWheel.getButtonReleaseTime() ? zoomWheel.getButtonReleaseTime().getTime() : undefined,
-                        "zoomWheelLastMovement": zoomWheel.getLastMovement(),
-                        "lookIsMoving": lookIsMoving,
-                        "lookMovement": lookMovement
-                    });
-                    
-                    // if ( spinning ) {
-                    //      spin._spin(spinMovement);
-                    // } 
-                    
-                    // if ( rotating ) {
-                    //      centralBody._rotate(rotateMovement);
-                    // }
 
-                    // if ( zooming ) {
-                    //      spin._zoom(zoomMovement);
-                    // } else if (zoomWheeling) {
-                    //      spin._zoom(zoomWheelMovement);
-                    // }
-                    
-                    // if ( lookIsMoving ) {
-                    //      look._look(lookMovement);
-                    // }
+                    if ( view.state.cameraInfo.diff( camera ) ){
+                       broadcastCameraViewData.call( view, {
+                           "direction": camera.direction,
+                           "position": camera.position,
+                           "up": camera.up,
+                           "right": camera.right
+                        });                        
+                    }
+
                     scene.initializeFrame();
                     scene.render();
                     Cesium.requestAnimationFrame( tick );
+
+                    view.state.cameraInfo.getCurrent( camera );
                 }());
                 
-                var keydownHandler = function(e) {
-                    var keyCode = e.keyCode;
-                    if (keyCode === 82) {   // "R"
-                        console.log("Synchronize views");
-                        var direction = scene.getCamera().direction;
-                        var position = scene.getCamera().position;
-                        var up = scene.getCamera().up;
-                        var right = scene.getCamera().right;
-                        broadcastCameraViewData.call(view, {
-                            "direction": direction,
-                            "position": position,
-                            "up": up,
-                            "right": scene.getCamera().right
-                        });
-                    }
-                }
-                document.addEventListener('keydown', keydownHandler, false);
+                // var keydownHandler = function(e) {
+                //     var keyCode = e.keyCode;
+                //     if (keyCode === 82) {   // "R"
+                //         console.log("Synchronize views");
+                //         var direction = scene.getCamera().direction;
+                //         var position = scene.getCamera().position;
+                //         var up = scene.getCamera().up;
+                //         var right = scene.getCamera().right;
+                //         broadcastCameraViewData.call(view, {
+                //             "direction": direction,
+                //             "position": position,
+                //             "up": up,
+                //             "right": scene.getCamera().right
+                //         });
+                //     }
+                // }
+                // document.addEventListener('keydown', keydownHandler, false);
                 
                 //document.oncontextmenu = function() { return false; };  
                  
@@ -250,142 +216,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         //initializedProperty: function (nodeID, propertyName, propertyValue) {
         //},        
 
-        satProperty: function( nodeID, propertyName, propertyValue ) {
+        //satProperty: function( nodeID, propertyName, propertyValue ) {
+        //},
+
+        //gotProperty: function( nodeID, propertyName, propertyValue ) {
+        //}
             
-            var value;
-            var node = this.state.nodes[ nodeID ];
-            if ( node === undefined ) {
-                this.state.scenes[ nodeID ];
-            }
-            if ( node === undefined ) { return; }
-
-            if ( propertyValue ) {
-                var scene = node.scene;
-
-                if ( this.kernel.client() != this.kernel.moniker() ) { 
-                    if ( scene ) {
-                        switch ( propertyName ) {
-                            case "cameraViewData":
-                                var position = Cesium.Cartesian3.clone(propertyValue.position);
-                                var direction = Cesium.Cartesian3.clone(propertyValue.direction);
-                                var up = Cesium.Cartesian3.clone(propertyValue.up);
-                                var right = Cesium.Cartesian3.clone(propertyValue.right);
-                                var camera = scene.getCamera();
-                                camera.position = position;
-                                camera.direction = direction;
-                                camera.up = up;
-                                camera.right = right;
-                                break;
-                            case "cameraControllerData":
-                                var ctrl = scene.getScreenSpaceCameraController();
-
-                                var spin = ctrl._spinHandler;
-                                var trans = ctrl._tranlateHandler
-                                var look = ctrl._lookHandler;
-                                var rotate = ctrl._rotateHandler;
-                                var zoom = ctrl._zoomHandler;
-                                var zoomWheel = ctrl._zoomWheelHandler;
-                                var pinch = ctrl._pinchHandler;
-
-                                //var spindle = scene.getCamera().getControllers().get(0).spindleController;
-                                //var look = scene.getCamera().getControllers().get(0).lookController;
-                                //var centralBody = scene.getCamera().getControllers().get(0);
-                                
-                                var spinning = propertyValue.spinning;
-                                var rotating = propertyValue.rotating;
-                                var zooming = propertyValue.zooming;
-                                var zoomWheeling = propertyValue.zoomWheeling;
-                                var spinMovement = propertyValue.spinMovement;
-                                var rotateMovement = propertyValue.rotateMovement;
-                                var zoomMovement = propertyValue.zoomMovement;
-                                var zoomWheelMovement = propertyValue.zoomWheelMovement;
-                                
-                                var spinTouchStart = propertyValue.spinTouchStart;
-                                var spinTouchRelease = propertyValue.spinTouchRelease;
-                                var spinLastMovement = propertyValue.spinLastMovement;
-                                
-                                var zoomTouchStart = propertyValue.zoomTouchStart;
-                                var zoomTouchRelease = propertyValue.zoomTouchRelease;
-                                var zoomLastMovement = propertyValue.zoomLastMovement;
-                                
-                                var zoomWheelTouchStart = propertyValue.zoomWheelTouchStart;
-                                var zoomWheelTouchRelease = propertyValue.zoomWheelTouchRelease;
-                                var zoomWheelLastMovement = propertyValue.zoomWheelLastMovement;
-                                
-                                var lookIsMoving = propertyValue.lookIsMoving;
-                                var lookMovement = propertyValue.lookMovement;
-                                
-                                if (spinning) {
-                                    spin._spin(spinMovement);                                           
-                                }
-                                
-                                if (rotating) {
-                                    rotate._rotate(rotateMovement);
-                                }
-
-                                if (zooming) {
-                                    spin._zoom(zoomMovement);
-                                } else if (zoomWheeling) {
-                                    spin._zoom(zoomWheelMovement);
-                                }
-                                
-                                if (!rotating && spin.inertiaSpin < 1.0) {
-                                    Cesium.CameraHelpers.createInertia(spinTouchStart, spinTouchRelease, spinLastMovement, spindle.inertiaSpin, spindle._spin, spindle, '_lastInertiaSpinMovement');
-                                }
-                                if (!zooming && spin.inertiaZoom < 1.0) {
-                                    Cesium.CameraHelpers.createInertia(zoomTouchStart, zoomTouchRelease, zoomLastMovement, spindle.inertiaZoom, spindle._zoom, spindle, '_lastInertiaZoomMovement');
-                                }
-                                if (!zoomWheeling && spin.inertiaZoom < 1.0) {
-                                    Cesium.CameraHelpers.createInertia(zoomWheelTouchStart, zoomWheelTouchRelease, zoomWheelLastMovement, spindle.inertiaZoom, spindle._zoom, spindle, '_lastInertiaWheelZoomMovement');
-                                }
-                                
-                                if(lookIsMoving) {
-                                    look._look(lookMovement);
-                                }
-                                
-                                value = propertyValue;
-                                break;
-                        }
-                    }
-                }
-            }
-            return value;
-        },
-
-        gotProperty: function( nodeID, propertyName, propertyValue ) {
-            
-            var value;
-            var node = this.state.nodes[ nodeID ];
-            if ( node === undefined ) {
-                this.state.scenes[ nodeID ];
-            }
-            if ( node === undefined ) { return value; }
-
-            if ( node.scene ) {
-
-                var scene = node.scene;
-                switch ( propertyName ) {
-
-                    case "cameraViewData":
-                        var camera = scene.getCamera();
-                        value = { 
-                                    "position": camera.position, 
-                                    "direction": camera.direction, 
-                                    "up": camera.up, 
-                                    "right": camera.right
-                                };
-                        break;
-
-                    case "controlClient":
-                        value = node.controlClient;
-                        break; 
-
-               }
-
-            }
-            propertyValue = value;
-            return value;
-        },
     } );
  
     function getPrototypes( extendsID ) {
@@ -449,24 +285,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     } 
 
     function broadcastCameraViewData(cameraData) {
-        var node, scene;   
-        if ( this.kernel.find("", "//cesiumInstance").length > 0 ) {
-            node = this.state.nodes[ this.kernel.find("", "//cesiumInstance")[0] ];
-            scene = node.scene;
-            if ( scene ) {
-                this.kernel.setProperty(this.kernel.find("", "//cesiumInstance")[0], "cameraViewData", cameraData);
-            }
+        var nodeID, scene;   
+        if ( this.kernel.find( "", "//" ).length > 0 ) {
+            nodeID = this.kernel.find( "", "//" )[ 0 ];
+            this.kernel.setProperty( nodeID, "cameraViewData", cameraData );
         }
     }
     
-    function broadcastCameraControllerData(cameraControllerData) {
-        var node, scene;   
-        if ( this.kernel.find("", "//cesiumInstance").length > 0 ) {
-            node = this.state.nodes[ this.kernel.find("", "//cesiumInstance")[0] ];
-            scene = node.scene;
-            if ( scene ) {
-                this.kernel.setProperty(this.kernel.find("", "//cesiumInstance")[0], "cameraControllerData", cameraControllerData);
-            }
-        }
-    }
 } );
