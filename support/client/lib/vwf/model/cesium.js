@@ -45,7 +45,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             var childURI = nodeID === 0 ? childIndex : undefined;
 
-            this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            //this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
 
             var self = this;
             var kernel = this.kernel;
@@ -81,14 +81,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     prototypes: protos
                 };
             }; 
-            var findParent = function( ID ) {
-                var retNode = self.state.nodes[ ID ];
-                if ( retNode === undefined ) {
-                    retNode = self.state.scenes[ ID ];
-                }
-                return retNode;
-            };          
-
             
             if ( isCesiumDefinition.call( this, protos ) ) {
 
@@ -99,7 +91,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             } else if ( isAtmosphereDefinition.call( this, protos ) ) {
 
                 this.state.nodes[ childID ] = node = createNode();
-                parentNode = findParent( nodeID );
+                parentNode = findParent.call( this, nodeID );
                 if ( parentNode && parentNode.scene ) {
                     parentNode.scene.skyAtmosphere = new Cesium.SkyAtmosphere();
                     node.renderObject = parentNode.scene.skyAtmosphere;
@@ -108,7 +100,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             } else if ( isSkyBoxDefinition.call( this, protos ) ) {
 
                 this.state.nodes[ childID ] = node = createNode();
-                parentNode = findParent( nodeID );
+                parentNode = findParent.call( this, nodeID );
                 if ( parentNode && parentNode.scene ) {
                     var skyBoxBaseUrl = '../vwf/model/Assets/Textures/SkyBox/tycho2t3_80';
                     parentNode.scene.skyBox = new Cesium.SkyBox({
@@ -126,7 +118,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             } else if ( isSunDefinition.call( this, protos ) ) {
 
                 this.state.nodes[ childID ] = node = createNode();
-                parentNode = findParent( nodeID );
+                parentNode = findParent.call( this, nodeID );
                 if ( parentNode && parentNode.scene ) {
                     parentNode.scene.sun = new Cesium.Sun();
                     node.renderObject = parentNode.scene.sun;
@@ -135,7 +127,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             } else if ( isBillboardDefinition.call( this, protos ) ) {
                 
                 this.state.nodes[ childID ] = node = createNode();
-                var sceneNode = findSceneNode.call( this, nodeID );
+                var sceneNode = findSceneNode.call( this, node );
                 var canvas = document.createElement( 'canvas' );
                 canvas.width = 16;
                 canvas.height = 16;
@@ -146,26 +138,31 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 context2D.fillStyle = 'rgb(255, 255, 255)';
                 context2D.fill();
 
-                var billboard = new Cesium.BillboardCollection();
-                var textureAtlas = scene.getContext().createTextureAtlas( {
+                // this is making a collection per billboard, which 
+                // probably isn't exactly what we want, but without an
+                // idea of exactly how we'll be using billboards,
+                // I'm just going to leave this implementation as is
+                var bbCollection = new Cesium.BillboardCollection();
+                var textureAtlas = sceneNode.scene.getContext().createTextureAtlas( {
                     image : canvas
                 } );
-                billboard.setTextureAtlas( textureAtlas );
+                bbCollection.setTextureAtlas( textureAtlas );
 
-                billboard.add( {
+                var bb = bbCollection.add( {
                     color : Cesium.Color.RED,
                     scale : 1,
                     imageIndex: 0
                 } );
 
-                sceneNode.scene.getPrimitives().add( billboard );
+                sceneNode.scene.getPrimitives().add( bbCollection );
                 
-                node.renderObject = billboard;
+                node.bbCollection = bbCollection; 
+                node.renderObject = bb;
                 node.scene = sceneNode.scene;
 
             } else if ( isCameraDefinition.call( this, protos ) ) {
                 this.state.nodes[ childID ] = node = createNode();
-                parentNode = findParent( nodeID );
+                parentNode = findParent.call( this, nodeID );
 
                 var camera = new Camera(canvas);
                 camera.position = new Cartesian3();
@@ -177,7 +174,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 
             } else if ( isNode3Definition.call( this, protos ) ) {
                 this.state.nodes[ childID ] = node = createNode();
-                parentNode = findParent( nodeID );
+                parentNode = findParent.call( this, nodeID );
                 
             }
 
@@ -246,6 +243,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
             var value = undefined;
 
+            //this.logger.infox( "creatingProperty", nodeID, propertyName, propertyValue );
+
             if ( propertyValue !== undefined ) {
                 var node = this.state.nodes[ nodeID ];
                 if ( node === undefined ) node = this.state.scenes[ nodeID ];
@@ -262,6 +261,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var value = undefined;
+
+            //this.logger.infox( "initializingProperty", nodeID, propertyName, propertyValue );
 
             if ( propertyValue !== undefined ) {
                 var node = this.state.nodes[ nodeID ];
@@ -281,12 +282,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             var value = propertyValue;
             var node = this.state.nodes[ nodeID ]; 
+
+            //this.logger.infox( "settingProperty", nodeID, propertyName, propertyValue );
+
             if ( node ) {
 
                 if ( node.renderObject === undefined )
                     return undefined;
 
-                switch ( propertyValue ) {
+                switch ( propertyName ) {
 
                     case "visible":
                         node.renderObject.show = Boolean( propertyValue );
@@ -295,7 +299,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     case "position":
                         if ( node.renderObject instanceof Cesium.Camera ) {
                             node.renderObject.position = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
-                        } else if ( node.renderObject instanceof Cesium.BillboardCollection ) {
+                        } else if ( node.renderObject instanceof Cesium.Billboard ) {
                             var pos = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
                             node.renderObject.setPosition( pos );
                         }
@@ -365,7 +369,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         break;
 
                     case "image":
-                        if ( node.renderObject instanceof Cesium.BillboardCollection )
+                        if ( node.renderObject instanceof Cesium.Billboard )
                         break;
 
                     case "direction":
@@ -669,7 +673,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         var pos;
                         if ( node.renderObject instanceof Cesium.Camera ) {
                             pos = node.renderObject.position;
-                        } else if ( node.renderObject instanceof Cesium.BillboardCollection ) {
+                        } else if ( node.renderObject instanceof Cesium.Billboard ) {
                             pos = node.renderObject.getPosition();
                         }
                         if ( pos ) {
@@ -854,6 +858,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         return prototypes;
     }
 
+    function findParent( ID ) {
+        var retNode = this.state.nodes[ ID ];
+        if ( retNode === undefined ) {
+            retNode = this.state.scenes[ ID ];
+        }
+        return retNode;
+    } 
+
     function findSceneNode( node ) {
         var sceneNode = undefined;
         var protos = undefined;
@@ -937,7 +949,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-billboard-vwf" );    
+                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-billboard-vwf" );  //http-vwf-example-com-cesium-billboard-vwf  
             }
         }
 

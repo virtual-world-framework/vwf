@@ -73,7 +73,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( childExtendsID === undefined )
                 return;
             
-            this.logger.infox( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            //this.logger.infox( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             
             var createNode = function() {
                 return {
@@ -107,7 +107,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 var scene;
 
                 if ( this.useCesiumWidget ) {
-                    node.widget = new Cesium.CesiumWidget( this.containerDiv );
+                    node.widget = new Cesium.CesiumWidget( this.containerDiv, undefined, { "alpha": true } );
                     scene = node.widget.scene;
 
                     scene.sun.destroy();
@@ -117,10 +117,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     scene.skyAtmosphere.destroy();
                     scene.skyAtmosphere = undefined;
 
+
                 } else {
-                    var canvas = document.createElement('canvas');
+                    var canvas = document.createElement( 'canvas' );
                     canvas.className = 'fullSize';
-                    document.getElementById( this.containerDiv ).appendChild(canvas);
+                    document.getElementById( this.containerDiv ).appendChild( canvas );
 
                     canvas.setAttribute( 'height', this.height );
                     canvas.setAttribute( 'width', this.width );
@@ -134,15 +135,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                     var primitives = scene.getPrimitives();
 
-
                     var ellipsoid = Cesium.Ellipsoid.WGS84;
-
                     node.centralBody = new Cesium.CentralBody( ellipsoid );
 
                     primitives.setCentralBody( node.centralBody );
                 }
 
                 node.scene = scene;
+                node.canavs = scene.getCanvas();
                 
                 var ctrl = scene.getScreenSpaceCameraController();
 
@@ -159,7 +159,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 ctrl.enableRotate = true;
                 ctrl.enableTilt = true;
                 ctrl.enableLook = true;
-
              
                 ( function tick() {
                     var spinning = spin && spin.isMoving() && spin.getMovement();
@@ -216,7 +215,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     // }
                     scene.initializeFrame();
                     scene.render();
-                    Cesium.requestAnimationFrame(tick);
+                    Cesium.requestAnimationFrame( tick );
                 }());
                 
                 var keydownHandler = function(e) {
@@ -237,7 +236,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
                 document.addEventListener('keydown', keydownHandler, false);
                 
-                document.oncontextmenu = function() { return false; };  
+                //document.oncontextmenu = function() { return false; };  
                  
             } 
         }, 

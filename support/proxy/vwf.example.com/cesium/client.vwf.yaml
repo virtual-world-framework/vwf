@@ -11,16 +11,16 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-## The component representation of a client
+## The component representation of a cesium client
 ## 
 ## @name client.vwf
 ## @namespace
 
 --- 
+extends: http://vwf.example.com/client.vwf
 properties:
-  localUrl:
-  remoteUrl: 
-  displayName:
+  longitude:
+  latitude:
   location:
   requestLocation: false
 scripts:
@@ -29,15 +29,31 @@ scripts:
       //console.info( "=============== client.initialize ===============" );
       if ( this.requestLocation ) {
         var self = this;
+        this.billboard = undefined;
         navigator.geolocation.getCurrentPosition( function( pos ) {
+            
+            var ellipsoid = Cesium.Ellipsoid.WGS84;
             var dest = Cesium.Cartographic.fromDegrees( pos.coords.longitude, pos.coords.latitude, 1000.0);
             dest = ellipsoid.cartographicToCartesian( dest );
-            self.location = dest;
+            self.location = [ dest.x, dest.y, dest.z ];
+            self.longitude = pos.coords.longitude;
+            self.latitude = pos.coords.latitude;
+            
             var bbDef = {
               "extends": "http://vwf.example.com/cesium/billboard.vwf",
             };
-            self.children.create( self.displayName + "-bb", bbDef, function( child ) {
 
+            var scene = self.parent;
+            while( scene.parent.parent ) {
+              scene = scene.parent;
+            }
+
+            // this node, nor it's parent are represented in the cesium driver,
+            // so the scene must be used to add this child 
+            scene.children.create( self.displayName + "-bb", bbDef, function( child ) {
+              self.billboard = child;
+              console.info( "setting location to: " + self.location );
+              child.position = self.location;
             } );
         } );
       }

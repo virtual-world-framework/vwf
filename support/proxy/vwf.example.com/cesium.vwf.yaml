@@ -33,7 +33,7 @@ scripts:
       	"extends": "http://vwf.example.com/cesium/camera.vwf"
       }
 
-      self.children.create( "sharedCamera", camDef, function( child ) {
-
-      } );
+      //this.children.create( "sharedCamera", camDef, function( child ) {
+      //
+      //} );
     }
