@@ -67,10 +67,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             
             var protos = getPrototypes.call( self, childExtendsID )
    
-            if ( isClientDefinition.call( this, protos ) ) {
+            if ( isClientDefinition.call( this, protos ) && childName ) {
 
                 //console.info( "local moniker: " + this.kernel.moniker() );
-
                 // check if this instance of client and if this client is for this instance
                 // create a login for this 
                 var node = {
