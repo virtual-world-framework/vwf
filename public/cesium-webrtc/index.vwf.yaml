@@ -15,15 +15,12 @@
 extends: http://vwf.example.com/cesium.vwf
 properties:
   controlClient: "NONE"
+  cameraControllerData:
+  cameraViewData: 
+  backgroundColor: [ 0, 0, 0, 0 ]
 children:
   clients:
     extends: http://vwf.example.com/node.vwf
-  cesiumInstance:
-    extends: http://vwf.example.com/node3.vwf
-    properties:
-      cameraControllerData:
-      cameraViewData: 
-      backgroundColor: [ 0, 0, 0, 0 ]
 methods:
   createClient:
 scripts:
