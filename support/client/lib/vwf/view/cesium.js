@@ -95,11 +95,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( isCesiumDefinition.call( this, protos ) ) {
 
                 var cesiumCont = "<div class='cesuim-container' id='"+this.containerDiv+"'></div>";
-                debugger;
+                //debugger;
                 if ( this.parentDiv == 'body' ) {
                     jQuery( this.parentDiv ).append( cesiumCont );
                 } else {
-                    $( "#" + this.parentDiv ).append( cesiumCont );
+                    var outDiv = "<div id='"+this.parentDiv+"'>"+cesiumCont+"</div>"
+                    jQuery( 'body' ).append( outDiv );
                 }
 
                 if ( this.state.scenes[ childID ] === undefined ) {
