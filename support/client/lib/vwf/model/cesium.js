@@ -430,6 +430,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if ( node.widget === undefined && node.centralBody === undefined )
                         return undefined;
 
+                    if ( !propertyValue )
+                        return;
+
                     switch ( propertyName ) {
 
                         case "cameraViewData":
