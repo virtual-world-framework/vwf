@@ -46,14 +46,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             this.videosAdded = 0;
 
-            this.height = 600;
-            this.width = 800;
-
-            if ( window ) {
-                if ( window.innerHeight ) this.height = window.innerHeight - 20;
-                if ( window.innerWidth ) this.width = window.innerWidth - 20;
-                this.window = window;
-            } 
         },
   
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -266,7 +258,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             var divId = name + this.videosAdded;
             var videoId = "video-" + divId;
 
-            //$container = ( videosAdded < 5 ) ? $('#panesRight') : $('#panesLeft');
             $container = $( "#" + this.videoElementsDiv );
             if ( muted ) {
                 $container.append(
