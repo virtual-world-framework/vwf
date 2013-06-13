@@ -14,12 +14,12 @@
 --- 
 extends: http://vwf.example.com/cesium.vwf
 properties:
-  backgroundColor: [ 0, 0, 0, 0 ]
+  backgroundColor:
   renderStyle: "3D"
   imageryProvider: 
 children:
-  sun: 
-    extends: http://vwf.example.com/cesium/sun.vwf 
+  #sun: 
+    #extends: http://vwf.example.com/cesium/sun.vwf 
   atmosphere: 
     extends: http://vwf.example.com/cesium/atmosphere.vwf 
   skybox: 
