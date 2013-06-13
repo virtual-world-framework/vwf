@@ -295,6 +295,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 // a file needs to load create this transform in assetLoaded
                 node.transform = new THREE.Matrix4();
                 node.transform.elements = matCpy( node.threeObject.matrix.elements );
+
+                // If this threeObject is a camera, it has a 90-degree rotation on it to account for the 
+                // different coordinate systems of VWF and three.js.  We need to undo that rotation before 
+                // setting the VWF property.
+                if ( node.threeObject instanceof THREE.Camera ) {
+                                        
+                    var transformArray = node.transform.elements;
+
+                    // Get column y and z out of the matrix
+                    var columny = goog.vec.Vec4.create();
+                    goog.vec.Mat4.getColumn( transformArray, 1, columny );
+                    var columnz = goog.vec.Vec4.create();
+                    goog.vec.Mat4.getColumn( transformArray, 2, columnz );
+
+                    // Swap the two columns, negating columny
+                    goog.vec.Mat4.setColumn( transformArray, 1, goog.vec.Vec4.negate( columnz, columnz ) );
+                    goog.vec.Mat4.setColumn( transformArray, 2, columny );
+                }
             }
 
             // If we do not have a load a model for this node, then we are almost done, so we can update all
@@ -451,41 +469,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         // threeObject's transform to get ahead of the model state without polluting it
                         node.transform.elements = matCpy( transformMatrix );
 
-                        // If this node has a view-specific transform, that will dictate the transform of
-                        // the local user's  rendered object.
-                        // But if not, the model transform dictates the transform (in the following code)
-                        // TODO: When we generalize the navigation system to allow all nodes to have 
-                        //       model/view properties that diverge, this should be done on the view 
-                        //       side in satProperty
-                        if ( !node.useViewTransform )
-                        {
-                            // Rotate 90 degress around X to convert from VWF Z-up to three.js Y-up.
-                            if ( threeObject instanceof THREE.Camera ) {
-                                
-                                // Get column y and z out of the matrix
-                                var columny = goog.vec.Vec4.create();
-                                goog.vec.Mat4.getColumn( transformMatrix, 1, columny );
-                                var columnz = goog.vec.Vec4.create();
-                                goog.vec.Mat4.getColumn( transformMatrix, 2, columnz );
-
-                                // Swap the two columns, negating columny
-                                goog.vec.Mat4.setColumn( transformMatrix, 1, columnz );
-                                goog.vec.Mat4.setColumn( transformMatrix, 2, goog.vec.Vec4.negate( columny, 
-                                                                                                   columny ) );
-                            }
-
-    						if( threeObject instanceof THREE.ParticleSystem )
-    						{	
-                                // I don't see where this function is defined. Maybe a copy-paste bug from
-                                // GLGE driver? - Eric (5/13/13)
-    							threeObject.updateTransform( transformMatrix );
-    						}
-    						
-                            threeObject.matrixAutoUpdate = false;
-                            threeObject.matrix.elements = matCpy( transformMatrix );
-                            threeObject.updateMatrixWorld( true );      
-                        }
-
                         value = propertyValue;
 
 						//because threejs does not do auto tracking of lookat, we must do it manually.
@@ -507,15 +490,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             var up = new THREE.Vector3();
                             up.set(0,0,1);
 
-                            thisPosition.getPositionFromMatrix( threeObject.matrix );
+                            thisPosition.getPositionFromMatrix( node.transform );
                                 
-                            if ( thisPosition.distanceTo( lookatPosition ) > 0 )
-                            {
+                            if ( thisPosition.distanceTo( lookatPosition ) > 0 ) {
                                 node.transform.lookAt( thisPosition, lookatPosition, up );
-                                if ( !node.useViewTransform ) {
-                                    threeObject.matrix.lookAt( thisPosition, lookatPosition, up );
-                                    threeObject.updateMatrixWorld( true );
-                                }
                             }
 
                             value = propertyValue;
@@ -529,16 +507,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if ( typeof propertyValue == 'string' ) {
                             
                             var lookatNode = this.state.nodes[ propertyValue ];
-                            var lookatObject = null;
-                            if ( lookatNode )
-                                if ( lookatNode.threeObject ) 
-                                    lookatObject = lookatNode.threeObject;
-                                else if ( lookatNode.threeScene )
-                                    lookatObject = lookatNode.threeScene;
                             
-                            if ( lookatObject )
+                            if ( lookatNode )
                             {
-                                lookatPosition.getPositionFromMatrix( lookatObject.matrix );
+                                lookatPosition.getPositionFromMatrix( lookatNode.transform );
                                 lookAt( lookatPosition );                          
                             }
                         
@@ -1950,6 +1922,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 // didn't need to load a model
                 node.transform = new THREE.Matrix4();
                 node.transform.elements = matCpy( node.threeObject.matrix.elements );
+
+                // If this threeObject is a camera, it has a 90-degree rotation on it to account for the 
+                // different coordinate systems of VWF and three.js.  We need to undo that rotation before 
+                // setting the VWF property.
+                if ( node.threeObject instanceof THREE.Camera ) {
+                    
+                    var transformArray = node.transform.elements;
+
+                    // Get column y and z out of the matrix
+                    var columny = goog.vec.Vec4.create();
+                    goog.vec.Mat4.getColumn( transformArray, 1, columny );
+                    var columnz = goog.vec.Vec4.create();
+                    goog.vec.Mat4.getColumn( transformArray, 2, columnz );
+
+                    // Swap the two columns, negating columny
+                    goog.vec.Mat4.setColumn( transformArray, 1, goog.vec.Vec4.negate( columnz, columnz ) );
+                    goog.vec.Mat4.setColumn( transformArray, 2, columny );
+                }
             }
 
             // Since prototypes are created before the object, it does not get "setProperty" updates for

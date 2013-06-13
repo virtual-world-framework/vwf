@@ -116,17 +116,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // -- initializedProperty ----------------------------------------------------------------------
 
         initializedProperty: function ( nodeID, propertyName, propertyValue ) { 
-            if ( navObject && ( nodeID == navObject.ID ) ) {
-                if ( propertyName == "transform" ) {
-
-                    // TODO: When we generalize the navigation system to allow all nodes to have 
-                    //       model/view properties that diverge, we would manage all model changes 
-                    //       here (each node will need its own counter for how many changes have 
-                    //       been made on the view side that have not yet been come in from the 
-                    //       reflector) - this message is repeated in satProperty
-
-                    receiveModelTransformChanges.call( this, propertyValue );
-                }
+            if ( propertyName == "transform" ) {
+                receiveModelTransformChanges.call( this, nodeID, propertyValue );
+            } else if ( propertyName == "lookAt") {
+                receiveModelTransformChanges.call( this, nodeID, this.state.nodes[ nodeID ].transform );
             }
         },
 
@@ -135,21 +128,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // -- satProperty ------------------------------------------------------------------------------
 
         satProperty: function ( nodeID, propertyName, propertyValue ) { 
-            if ( navObject && ( nodeID == navObject.ID ) ) {
-                if ( propertyName == "navmode" ) { 
+            if ( propertyName == "navmode" ) { 
+                if ( navObject && ( nodeID == navObject.ID ) ) {
                     navmode = propertyValue;
-                } else if ( propertyName == "transform" ) {
-
-                    // TODO: When we generalize the navigation system to allow all nodes to have 
-                    //       model/view properties that diverge, we would manage all model changes 
-                    //       here (each node will need its own counter for how many changes have 
-                    //       been made on the view side that have not yet been come in from the 
-                    //       reflector) - this message is repeated in initializedProperty
-
-                    receiveModelTransformChanges.call( this, propertyValue );
                 }
+            } else if ( propertyName == "transform" ) {
+                receiveModelTransformChanges.call( this, nodeID, propertyValue );
+            } else if ( propertyName == "lookAt") {
+                receiveModelTransformChanges.call( this, nodeID, this.state.nodes[ nodeID ].transform );
             }
-
         },
 
         // -- gotProperty ------------------------------------------------------------------------------
@@ -1023,7 +1010,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Update the navigation object's local transform from its new world transform
             setTransformFromWorldTransform( navThreeObject );
 
-            setTransformProperty( navObject, camera.matrix.elements );
+            setModelTransformProperty( navObject, navThreeObject.matrix.elements );
         }
 
         this.rotateNavObjectByKey = function( msSinceLastFrame ) {
@@ -1074,7 +1061,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             // Force the camera's world transform to update from its local transform
             navThreeObject.updateMatrixWorld( true );
-            setTransformProperty( navObject, navObjectTransform );
+            setModelTransformProperty( navObject, navObjectTransform );
         }
 
         var handleKeyNavigation = function( keyCode, keyIsDown ) {
@@ -1186,7 +1173,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     // If not (here below), we need to send a separate message to the reflector to set 
                     // the pitch on the camera
                     if ( navObject !== cameraNode ) {
-                        setTransformProperty( cameraNode, cameraMatrix.elements );
+                        setModelTransformProperty( cameraNode, cameraMatrix.elements );
                     }
                 } else {
                     self.logger.warnx( "There is no camera to move" );
@@ -1200,7 +1187,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     navObjectMatrix.multiplyMatrices( yawMatrix, navObjectMatrix );
                     navObjectMatrix.setPosition( navObjectPos );
                     navObject.threeObject.updateMatrixWorld( true );
-                    setTransformProperty( navObject, navObjectMatrix.elements );
+                    setModelTransformProperty( navObject, navObjectMatrix.elements );
                 } else {
                     self.logger.warnx( "There is no navigation object to move" );
                 }
@@ -1905,14 +1892,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         var sceneView = this;
 
-        // Disable the viewTransform from the old navigation object that doesn't need it anymore
-        if ( navObject )
-            navObject.useViewTransform = false;
-
-        // Set the new navigation object and enable use of the viewTransform 
-        // (instead of adopting the model transform directly)
+        // Set the new navigation object
         navObject = node;
-        navObject.useViewTransform = true;
         
         // Search for a camera in the navigation object and if it exists, make it active
         var cameraIds = sceneView.kernel.find( navObject.ID, 
@@ -1958,60 +1939,86 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     // 1.1 Elseif (other external changes and no outstanding own view changes) then ADOPT
     // 1.2 Else Interpolate to the model’s transform (conflict b/w own view and external sourced model changes)
     
-    var outstandingTransformRequestToBeIgnored = 0;
-    var staleTransformRequestsToBeApplied = 0;
-    
-    function receiveModelTransformChanges( transformMatrix ) {
+    function receiveModelTransformChanges( nodeID, transformMatrix ) {
 
-        if ( this.state.kernel.client() == this.state.kernel.moniker() ) {
-            if ( staleTransformRequestsToBeApplied > 0 ) {
-                staleTransformRequestsToBeApplied--;
-                adoptTransform( transformMatrix );   
+        var clientThatSatProperty = this.kernel.client();
+        var me = this.kernel.moniker();
+        var node = this.state.nodes[ nodeID ];
+
+        // If the transform property was initially updated by this view....
+        if ( clientThatSatProperty == me ) {
+            
+            // If updates have come in from other clients between the time that the view updated and now, it is
+            // considered stale and has been overwritten.  Thus, it needs to be applied again.
+            // Else, it has already been applied by the view and can be ignored (just decrement the number of 
+            // outstanding requests)
+            if ( node.staleTransformRequestsToBeApplied ) {
+                node.staleTransformRequestsToBeApplied--;
+                adoptTransform( node, transformMatrix );   
+            } else {  // no stale transform requests
+                if ( node.outstandingTransformRequestToBeIgnored ) {
+                    node.outstandingTransformRequestToBeIgnored--;
+                } else {
+
+                    // We have not created a view-side update that this model-side one corresponds to
+                    // Therefore, we must adopt this update
+                    // (It appears to come from us because it is part of the initialization process)
+                    adoptTransform( node, transformMatrix );
+
+                    // Initialize variable
+                    node.outstandingTransformRequestToBeIgnored = 0;
+                }
             }
-            else {  // no stale transform requests
-                outstandingTransformRequestToBeIgnored--;
-            }
-        }
-        else { // this transform change request is not from me
-            if ( outstandingTransformRequestToBeIgnored ) {
-                staleTransformRequestsToBeApplied += outstandingTransformRequestToBeIgnored;
-                outstandingTransformRequestToBeIgnored = 0;
-                adoptTransform( transformMatrix );  
-            }
-            else { 
+        } else { // this transform change request is not from me
+            
+            // If the view has already made updates that should have been applied after this incoming one, move
+            // them to count of "stale" ones (meaning that they have been undone and will need to be reapplied)
+            // Then overwrite them w/ this incoming transform
+            // Else, just adopt this incoming transform
+            if ( node.outstandingTransformRequestToBeIgnored ) {
+                node.staleTransformRequestsToBeApplied = node.staleTransformRequestsToBeApplied || 0;
+                node.staleTransformRequestsToBeApplied += node.outstandingTransformRequestToBeIgnored;
+                node.outstandingTransformRequestToBeIgnored = 0;
+                adoptTransform( node, transformMatrix );  
+            } else { 
+
                 // TODO: Smooth the transform toward the matrix specified by the other client
                 //       Be careful: right now this is where a setState will enter when the user
                 //       first joins - perhaps treat that case differently afte detecting that 
                 //       client() is undefined?
 
-                adoptTransform( transformMatrix );
+                adoptTransform( node, transformMatrix );
             }
         }
     }
 
-    function adoptTransform ( transform ) {
-        
-        if ( navObject ) {
-            var transformMatrix = matCpy( transform );
-            var navObjectThree = navObject.threeObject;
+    function adoptTransform ( node, transform ) {
 
-            // Rotate 90 degrees around X to convert from VWF Z-up to three.js Y-up.
-            if ( navObjectThree instanceof THREE.Camera ) {
-                
-                // Get column y and z out of the matrix
-                var columny = goog.vec.Vec4.create();
-                goog.vec.Mat4.getColumn( transformMatrix, 1, columny );
-                var columnz = goog.vec.Vec4.create();
-                goog.vec.Mat4.getColumn( transformMatrix, 2, columnz );
+        var transformMatrix = matCpy( transform );
+        var threeObject = node.threeObject;
 
-                // Swap the two columns, negating columny
-                goog.vec.Mat4.setColumn( transformMatrix, 1, columnz );
-                goog.vec.Mat4.setColumn( transformMatrix, 2, goog.vec.Vec4.negate( columny, columny ) );
-            }
+        // Rotate 90 degrees around X to convert from VWF Z-up to three.js Y-up.
+        if ( threeObject instanceof THREE.Camera ) {
+            
+            // Get column y and z out of the matrix
+            var columny = goog.vec.Vec4.create();
+            goog.vec.Mat4.getColumn( transformMatrix, 1, columny );
+            var columnz = goog.vec.Vec4.create();
+            goog.vec.Mat4.getColumn( transformMatrix, 2, columnz );
 
-            navObjectThree.matrix.elements = transformMatrix;
-            navObjectThree.updateMatrixWorld( true ); 
+            // Swap the two columns, negating columny
+            goog.vec.Mat4.setColumn( transformMatrix, 1, columnz );
+            goog.vec.Mat4.setColumn( transformMatrix, 2, goog.vec.Vec4.negate( columny, columny ) );
+
+        } else if( threeObject instanceof THREE.ParticleSystem ) {
+
+            // I don't see where this function is defined. Maybe a copy-paste bug from
+            // GLGE driver? - Eric (5/13/13)
+            threeObject.updateTransform( transformMatrix );
         }
+
+        threeObject.matrix.elements = transformMatrix;
+        threeObject.updateMatrixWorld( true ); 
     }
 
     function matCpy( mat ) {
@@ -2023,13 +2030,16 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         return ret;
     }
 
-    function setTransformProperty( node, transformArray ) {
+    function setModelTransformProperty( node, transformArray ) {
         var nodeID = node.ID;
 
         if ( nodeID ) {
 
             var transform = matCpy( transformArray );
 
+            // If this threeObject is a camera, it has a 90-degree rotation on it to account for the different 
+            // coordinate systems of VWF and three.js.  We need to undo that rotation before setting the VWF 
+            // property.
             if ( node.threeObject instanceof THREE.Camera ) {
                                     
                 // Get column y and z out of the matrix
@@ -2044,7 +2054,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
 
             vwf_view.kernel.setProperty( nodeID, "transform", transform );
-            outstandingTransformRequestToBeIgnored++;
+            node.outstandingTransformRequestToBeIgnored = node.outstandingTransformRequestToBeIgnored || 0;
+            node.outstandingTransformRequestToBeIgnored++;
         } else {
             view.logger.error( "Cannot set property on node that does not have a valid ID" );
         }
@@ -2055,6 +2066,4 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         inverseParentWorldMatrix.getInverse( threeObject.parent.matrixWorld );
         threeObject.matrix.multiplyMatrices( inverseParentWorldMatrix, threeObject.matrixWorld );
     }
-
-    
 });
