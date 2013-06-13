@@ -248,7 +248,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         displayVideo.call( this, this.local.url, name, this.kernel.moniker(), true );
     }
 
-    function displayVideo( url, name, clientMoniker, muted ) {
+    function displayVideo( url, name, destMoniker, muted ) {
         
         if ( this.createVideoElements ) {
             //debugger;
@@ -282,12 +282,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             $('#'+divId).draggable();
         } 
 
-        this.kernel.callMethod( "index-vwf", "newClientVideo", [ { "url": url, "name": name, "muted": muted }, clientMoniker ] );          
+        this.kernel.callMethod( "index-vwf", "newClientVideo", [ { "url": url, "name": name, "muted": muted }, destMoniker ] );          
 
     }
 
-    function displayRemote( url, name ) {
-        displayVideo.call( this, url, name, false );
+    function displayRemote( url, name, destMoniker ) {
+        displayVideo.call( this, url, name, destMoniker, false );
     }
 
     function capture() {

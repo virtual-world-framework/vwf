@@ -54,12 +54,87 @@
                 });
             });
 
+            vwf_view.calledMethod = function( nodeID, methodName, methodParameters, methodValue ) {
+                if ( !methodParameters  ) {
+                    return;
+                }
+
+                console.info( "calledMethod( "+nodeID+", "+methodName+", "+methodParameters[0]+" )" );
+                switch ( methodName ) {
+                    case "newClientVideo":
+                        //debugger;
+                        var moniker = methodParameters[1];
+                        if ( moniker && moniker == this.kernel.moniker() ) {
+                            createVideoElement( methodParameters[0] );
+                        }
+                        break;
+                }
+            }
+
+            var videosAdded = 1;
+            var fullScreenVideo = false;
+            function createVideoElement( value ) {
+                var $container;
+                var divId = value.name + videosAdded++;
+                var videoId = "video-" + divId;
+                var muted = value.muted ? "muted" : "";
+
+                //if ( firefox ) {
+                //    muted = "muted=true";
+                //}
+
+                $container = $( "#webrtc-videos" );
+                if ( value.muted ) {
+                    // this is your local video
+                    // should be muted, firefox isn't accepting muted the 
+                    // latest update to the html5 specification
+                    $container.append(
+                        "<div id='"+ divId + "'>" +
+                            "<video class='vwf-webrtc-video' id='" + videoId +
+                                "' width='320' height='240' src='" + value.url + 
+                                "' loop='loop' autoplay = true " + muted +
+                                " style='position: absolute; left: 0; top: 0; z-index: 8;'>" +
+                            "</video>" +
+                        "</div>"
+                    );
+                    $('#'+divId).draggable();
+                } else {
+                    if ( !fullScreenVideo ) {
+                        $container.append(
+                            "<div id='"+ divId + "'>" +
+                                "<video class='vwf-webrtc-video' id='" + videoId +
+                                    "' width='320' height='240' src='" + value.url + 
+                                    "' loop='loop' autoplay = true" +
+                                    " style='position: absolute; left: 0; top: 0; z-index: -1;width:100%;height:100%;'>" +
+                                "</video>" +
+                            "</div>"
+                        );
+                        fullScreenVideo = true;
+                    } else {
+                        $container.append(
+                            "<div id='"+ divId + "'>" +
+                                "<video class='vwf-webrtc-video' id='" + videoId +
+                                    "' width='320' height='240' src='" + value.url + 
+                                    "' loop='loop' autoplay = true" +
+                                    " style='position: absolute; left: 0; top: 0; z-index: 16;'>" +
+                                "</video>" +
+                            "</div>"
+                        );
+                        $('#'+divId).draggable();
+                    }
+
+                }
+
+            }
+            //return true;
         </script>
     </head>
     <body>
         <div class="vwf-main-content" align="center"></div>
 
-        <!-- Dialog boxes that are shown as necessary -->
+        <div id="webrtc-videos"></div>
+        <!-- div id="cesium-main"></div -->
+
         <div id="loginDialog" title="Client Login">
             <p>Enter your display name:</p>
             <input id="userName" value="name"><br>
