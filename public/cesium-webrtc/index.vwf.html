@@ -59,11 +59,12 @@
                     return;
                 }
 
-                console.info( "calledMethod( "+nodeID+", "+methodName+", "+methodParameters[0]+" )" );
+                //console.info( "calledMethod( "+nodeID+", "+methodName+", "+methodParameters[0]+" )" );
                 switch ( methodName ) {
                     case "newClientVideo":
                         //debugger;
                         var moniker = methodParameters[1];
+                        //console.info( "++++   " + moniker + " == " + this.kernel.moniker() );
                         if ( moniker && moniker == this.kernel.moniker() ) {
                             createVideoElement( methodParameters[0] );
                         }
@@ -100,6 +101,7 @@
                     $('#'+divId).draggable();
                 } else {
                     if ( !fullScreenVideo ) {
+                        //console.info( "create fullscreen video: " + value.url );
                         $container.append(
                             "<div id='"+ divId + "'>" +
                                 "<video class='vwf-webrtc-video' id='" + videoId +
@@ -133,7 +135,6 @@
         <div class="vwf-main-content" align="center"></div>
 
         <div id="webrtc-videos"></div>
-        <!-- div id="cesium-main"></div -->
 
         <div id="loginDialog" title="Client Login">
             <p>Enter your display name:</p>

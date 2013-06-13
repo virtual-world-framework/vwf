@@ -282,6 +282,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             $('#'+divId).draggable();
         } 
 
+        //console.info( "[ { 'url': "+url+", 'name': "+name+", 'muted': "+muted+" }, "+destMoniker+" ]" );
+
         this.kernel.callMethod( "index-vwf", "newClientVideo", [ { "url": url, "name": name, "muted": muted }, destMoniker ] );          
 
     }
@@ -490,7 +492,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     
                     if ( self.view.debug ) console.log("Remote stream added.  url: " + self.url );
 
-                    displayRemote.call( self.view, self.url, self.peerNode.displayName, self.peerNode.moniker );
+                    displayRemote.call( self.view, self.url, self.peerNode.displayName, view.kernel.moniker() );
                 };
 
                 this.pc.onremovestream = function( event ) {
