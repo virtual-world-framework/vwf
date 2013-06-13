@@ -43,7 +43,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             this.videoElementsDiv = options.videoElementsDiv !== undefined  ? options.videoElementsDiv : 'videoSurfaces';
             this.createVideoElements = options.createVideoElements !== undefined  ? options.createVideoElements : true;
 
-
             this.videosAdded = 0;
 
         },
@@ -246,10 +245,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     }
 
     function displayLocal( name ) {
-        displayVideo.call( this, this.local.url, name, true );
+        displayVideo.call( this, this.local.url, name, this.kernel.moniker(), true );
     }
 
-    function displayVideo( url, name, muted ) {
+    function displayVideo( url, name, clientMoniker, muted ) {
         
         if ( this.createVideoElements ) {
             //debugger;
@@ -281,14 +280,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 );
             }
             $('#'+divId).draggable();
-        }
-        
+        } 
 
-        // notify the view 
-        // used to customize the video elements
-        //if ( addVideoElement ) {
-        //    addVideoElement( url, name );
-        //}
+        this.kernel.callMethod( "index-vwf", "newClientVideo", [ { "url": url, "name": name, "muted": muted }, clientMoniker ] );          
+
     }
 
     function displayRemote( url, name ) {
@@ -495,7 +490,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     
                     if ( self.view.debug ) console.log("Remote stream added.  url: " + self.url );
 
-                    displayRemote.call( self.view, self.url, self.peerNode.displayName );
+                    displayRemote.call( self.view, self.url, self.peerNode.displayName, self.peerNode.moniker );
                 };
 
                 this.pc.onremovestream = function( event ) {
