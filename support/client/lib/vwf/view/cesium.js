@@ -94,8 +94,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             if ( isCesiumDefinition.call( this, protos ) ) {
 
-                //debugger;
-                jQuery( this.parentDiv ).append( "<div class='cesuim-container' id='"+this.containerDiv+"'></div>" );
+                var cesiumCont = "<div class='cesuim-container' id='"+this.containerDiv+"'></div>";
+                debugger;
+                if ( this.parentDiv == 'body' ) {
+                    jQuery( this.parentDiv ).append( cesiumCont );
+                } else {
+                    $( "#" + this.parentDiv ).append( cesiumCont );
+                }
 
                 if ( this.state.scenes[ childID ] === undefined ) {
                     this.state.scenes[ childID ] = node = createNode();
@@ -110,12 +115,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     node.widget = new Cesium.CesiumWidget( this.containerDiv, undefined, { "alpha": true } );
                     scene = node.widget.scene;
 
-                    scene.sun.destroy();
-                    scene.sun = undefined;
-                    scene.skyBox.destroy();
-                    scene.skyBox = undefined;
-                    scene.skyAtmosphere.destroy();
-                    scene.skyAtmosphere = undefined;
+                    if ( scene.sun !== undefined ) {
+                        scene.sun.destroy();
+                        scene.sun = undefined;
+                    }
+                    if ( scene.skyBox !== undefined ) {
+                        scene.skyBox.destroy();
+                        scene.skyBox = undefined;
+                    }
+                    if ( scene.skyAtmosphere !== undefined ) {
+                        scene.skyAtmosphere.destroy();
+                        scene.skyAtmosphere = undefined;
+                    }
 
 
                 } else {
