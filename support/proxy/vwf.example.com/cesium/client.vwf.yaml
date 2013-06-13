@@ -69,6 +69,7 @@ scripts:
               child.fillColor = self.color;
               child.verticalOrigin = 'top';
               child.horizontalOrigin = 'center';
+              child.pixelOffset = [ 0, 10, 0 ];
               child.font = '18px Helvetica';
               child.text = self.displayName;
             } );

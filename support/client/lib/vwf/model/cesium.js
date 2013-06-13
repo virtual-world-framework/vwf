@@ -535,6 +535,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         case "imageryProvider":
                             
+                            if ( node.imageryProvider && node.imageryProvider == propertyValue ) {
+                                //we need to probably remember which image providers have been loaded and 
+                                //then just switch the current if the requested has already been loaded
+                                return;
+                            }
+
                             var imageProvider = undefined;
                             var proxy = new Cesium.DefaultProxy('/proxy/');
                             //While some sites have CORS on, not all browsers implement it properly, so a proxy is needed anyway;
@@ -697,6 +703,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 } else if ( node.centralBody !== undefined ) {
                                     node.centralBody.getImageryLayers().addImageryProvider( imageProvider );
                                 }
+                                node.imageryProvider = propertyValue;
                             }
                             value = undefined;
                             break;
@@ -717,8 +724,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                         node.widget.transitioner.morphToColumbusView();
                                         break;
                                 }
-                            } else if ( node.scene ) {
-
+                            } else if ( node.transitioner ) {
+                                switch ( propertyValue ) {
+                                    case "3D":
+                                        node.transitioner.morphTo3D();
+                                        break;
+                                    case "2D":
+                                        node.transitioner.morphTo2D();
+                                        break;
+                                    case "2.5D":
+                                        node.transitioner.morphToColumbusView();
+                                        break;
+                                }
                             }
                             value = undefined;
                             break;
@@ -845,9 +862,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if( node.renderObject ) {
                         var clr = node.renderObject.getColor();
                         if ( clr.alpha == 1 ) {
-                            value = "rgb("+clr.red+","+clr.green+","+clr.blue+")";
+                            value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
                         } else {
-                            value = "rgba("+clr.red+","+clr.green+","+clr.blue+","+clr.alpha+")";
+                            value = "rgba("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+","+clr.alpha+")";
                         }
                     }
                     break;
@@ -862,9 +879,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if( node.renderObject ) {
                             var clr = node.renderObject.getFillColor();
                             if ( clr.alpha == 1 ) {
-                                value = "rgb("+clr.red+","+clr.green+","+clr.blue+")";
+                                value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
                             } else {
-                                value = "rgba("+clr.red+","+clr.green+","+clr.blue+","+clr.alpha+")";
+                                value = "rgba("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+","+clr.alpha+")";
                             }
                         }                      
                         break;
@@ -872,13 +889,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     case "style":
                         if ( node.renderObject instanceof Cesium.Label ) {
                             switch ( node.renderObject.getStyle() ) {
-                                case LabelStyle.FILL:
+                                case Cesium.LabelStyle.FILL:
                                     value = "fill";
                                     break;
-                                case LabelStyle.FILL_AND_OUTLINE:
+                                case Cesium.LabelStyle.FILL_AND_OUTLINE:
                                     value = "filloutline";
                                     break;
-                                case LabelStyle.OUTLINE:
+                                case Cesium.LabelStyle.OUTLINE:
                                     value = "outline";
                                     break;
                             }   
@@ -889,9 +906,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if( node.renderObject ) {
                             var clr = node.renderObject.getOutLineColor();
                             if ( clr.alpha == 1 ) {
-                                value = "rgb("+clr.red+","+clr.green+","+clr.blue+")";
+                                value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
                             } else {
-                                value = "rgba("+clr.red+","+clr.green+","+clr.blue+","+clr.alpha+")";
+                                value = "rgba("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+","+clr.alpha+")";
                             }
                         } 
                         break;
@@ -913,15 +930,28 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     break;
 
                 case "renderStyle":
+                    if ( node.scene && node.scene.mode ) {
+                        switch ( node.renderObject.getStyle() ) {
+                            case Cesium.SceneMode.COLUMBUS_VIEW:
+                                value = "2.5D";
+                                break;
+                            case Cesium.SceneMode.SCENE2D:
+                                value = "2D";
+                                break;
+                            case Cesium.SceneMode.SCENE3D:
+                                value = "3D";
+                                break;
+                        }                          
+                    }
                     break;
 
                 case "backgroundColor":
                     if( node.scene ) {
                         var clr = node.scene.backgroundColor
                         if ( clr.alpha == 1 ) {
-                            value = "rgb("+clr.red+","+clr.green+","+clr.blue+")";
+                            value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
                         } else {
-                            value = "rgba("+clr.red+","+clr.green+","+clr.blue+","+clr.alpha+")";
+                            value = "rgba("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+","+clr.alpha+")";
                         }
                     }
                     break;

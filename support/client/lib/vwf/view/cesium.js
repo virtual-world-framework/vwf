@@ -100,7 +100,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if ( this.parentDiv == 'body' ) {
                     jQuery( this.parentDiv ).append( cesiumCont );
                 } else {
-                    var outDiv = "<div id='"+this.parentDiv+"' class='"+this.parentClass+"'>"+cesiumCont+"</div>"
+                    var outDiv;
+                    if ( this.parentClass !== undefined ) {
+                        outDiv = "<div id='"+this.parentDiv+"' class='"+this.parentClass+"'>"+cesiumCont+"</div>";
+                    } else {
+                        outDiv = "<div id='"+this.parentDiv+"'>"+cesiumCont+"</div>"
+                    }
                     jQuery( 'body' ).append( outDiv );
                 }
 
@@ -114,6 +119,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 var scene, canvas;
 
                 if ( this.useCesiumWidget ) {
+                    
                     node.widget = new Cesium.CesiumWidget( this.containerDiv, undefined, { "alpha": true } );
                     scene = node.widget.scene;
 
@@ -130,7 +136,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         scene.skyAtmosphere = undefined;
                     }
 
-
                 } else {
                     canvas = document.createElement( 'canvas' );
                     canvas.className = 'fullSize';
@@ -139,22 +144,30 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     canvas.setAttribute( 'height', this.height );
                     canvas.setAttribute( 'width', this.width );
 
-                    //canvas.setAttribute('tabindex', '0'); // needed to put focus on the canvas
-                    //canvas.onclick = function() {
-                    //    canvas.focus();
-                    //};
-
                     scene = new Cesium.Scene( canvas, { "alpha": true } );
+
+                    var bing = new Cesium.BingMapsImageryProvider({
+                        url : 'http://dev.virtualearth.net',
+                        mapStyle : Cesium.BingMapsStyle.AERIAL,
+                        // Some versions of Safari support WebGL, but don't correctly implement
+                        // cross-origin image loading, so we need to load Bing imagery using a proxy.
+                        proxy : Cesium.FeatureDetection.supportsCrossOriginImagery() ? undefined : new Cesium.DefaultProxy('/proxy/')
+                    });                    
 
                     var primitives = scene.getPrimitives();
 
                     var ellipsoid = Cesium.Ellipsoid.WGS84;
                     node.centralBody = new Cesium.CentralBody( ellipsoid );
 
+                    node.centralBody.getImageryLayers().addImageryProvider( bing );
+
                     primitives.setCentralBody( node.centralBody );
+
+                    node.transitioner = new Cesium.SceneTransitioner( scene, ellipsoid );
                 }
 
                 node.scene = scene;
+                node.imageryProvider = 'bingAerial';
                 node.canvas = scene.getCanvas();
                 
                 var camera = scene.getCamera();

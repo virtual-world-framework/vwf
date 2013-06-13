@@ -17,6 +17,7 @@ properties:
   controlClient: "NONE"
   cameraControllerData:
   cameraViewData: 
+  imageryProvider: "bingAerial"
   backgroundColor: [ 0, 0, 0, 0 ]
   clientColors: [ [ 0, 0, 255 ], [ 255, 0, 0 ], [ 255, 255, 0 ], [ 0, 255, 0 ], [ 0, 255, 255 ], [ 255, 0, 255 ], [ 255, 153, 0 ], [ 153, 153, 153 ], [ 230, 230, 250 ], [ 0, 0, 0 ] ]
 methods:
@@ -25,8 +26,6 @@ methods:
 children:
   clients:
     extends: http://vwf.example.com/node.vwf
-  atmosphere: 
-    extends: http://vwf.example.com/cesium/atmosphere.vwf 
 scripts:
 - |
     this.initialize = function(){
