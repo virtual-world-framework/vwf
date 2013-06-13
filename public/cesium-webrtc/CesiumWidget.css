@@ -1,3 +1,9 @@
+.cesium-main-div {
+	text-align: center;
+	vertical-align: bottom;
+	width: 64%;
+	height: 64%;
+}
 .cesuim-container {
 	position: absolute;	
 	width: 100%;
