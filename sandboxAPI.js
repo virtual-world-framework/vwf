@@ -995,7 +995,7 @@ function getState(SID)
 {
 	SID = SID.replace(/[\\,\/]/g,'_');
 	var basedir = datapath + libpath.sep;
-	var statedir = (basedir + 'states/' + SID).replace(safePathRE);
+	var statedir = (basedir + 'States/' + SID).replace(safePathRE);
 	var statefile = statedir + '/state'.replace(safePathRE);
 	global.log('serve state ' + statedir,2);
 	if(fs.existsSync(statefile))
