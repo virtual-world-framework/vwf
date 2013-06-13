@@ -53,6 +53,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             this.useCesiumWidget = options.useCesiumWidget !== undefined ? options.useCesiumWidget : true;
             this.parentDiv = options.parentDiv !== undefined ? options.parentDiv : 'body';
+            this.parentClass = options.parentClass !== undefined ? options.parentClass : 'cesium-main-div';
             this.containerDiv = options.containerDiv !== undefined ? options.containerDiv : 'cesiumContainer';
 
             this.height = 600;
@@ -99,7 +100,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if ( this.parentDiv == 'body' ) {
                     jQuery( this.parentDiv ).append( cesiumCont );
                 } else {
-                    var outDiv = "<div id='"+this.parentDiv+"'>"+cesiumCont+"</div>"
+                    var outDiv = "<div id='"+this.parentDiv+"' class='"+this.parentClass+"'>"+cesiumCont+"</div>"
                     jQuery( 'body' ).append( outDiv );
                 }
 
@@ -110,7 +111,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
 
                 var view = this;
-                var scene;
+                var scene, canvas;
 
                 if ( this.useCesiumWidget ) {
                     node.widget = new Cesium.CesiumWidget( this.containerDiv, undefined, { "alpha": true } );
@@ -131,7 +132,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
 
                 } else {
-                    var canvas = document.createElement( 'canvas' );
+                    canvas = document.createElement( 'canvas' );
                     canvas.className = 'fullSize';
                     document.getElementById( this.containerDiv ).appendChild( canvas );
 
@@ -196,6 +197,21 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     view.state.cameraInfo.getCurrent( camera );
                 }());
                 
+                var onResize = function () {
+                    var width = node.canvas.clientWidth;
+                    var height = node.canvas.clientHeight;
+
+                    if ( node.canvas.width === width && node.canvas.height === height ) {
+                        return;
+                    }
+
+                    node.canvas.width = width;
+                    node.canvas.height = height;
+                    camera.frustum.aspectRatio = width / height;
+                };
+                window.addEventListener('resize', onResize, false );
+                onResize();
+
                 // var keydownHandler = function(e) {
                 //     var keyCode = e.keyCode;
                 //     if (keyCode === 82) {   // "R"
