@@ -703,6 +703,8 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         $('#children > div:last').css('border-bottom-width', '3px');
 
         // Add prototype children
+        // TODO: Commented out until prototype children inherit from prototypes
+        /*
         $(topdownTemp).append("<div id='prototypeChildren'></div>");
         var prototypeChildren = getChildren.call( this, this.kernel, node.extendsID ); 
         for ( var key in prototypeChildren)       
@@ -714,8 +716,9 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             $('#' + prototypeChildIDAlpha).click( function(evt) {
                 drillDown.call(self, $(this).attr("data-nodeID"), nodeID);
             });
-        }
-
+        } 
+        */   // END TODO:
+        
         $('#prototypeChildren > div:last').css('border-bottom-width', '3px');
 
         // Add node properties
