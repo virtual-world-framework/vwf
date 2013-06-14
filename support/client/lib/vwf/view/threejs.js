@@ -1060,7 +1060,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             navObjectTransform[ 14 ] = navObjectPos[ 2 ];
 
             // Force the camera's world transform to update from its local transform
-            navThreeObject.updateMatrixWorld( true );
+            updateRenderObjectTransform( navThreeObject );
             setModelTransformProperty( navObject, navObjectTransform );
         }
 
@@ -1124,7 +1124,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     var cameraPos = new THREE.Vector3();
                     cameraPos.getPositionFromMatrix( cameraMatrix );
                     cameraMatrix.multiply( pitchMatrix );
-                    camera.updateMatrixWorld( true );
 
                     // Constrain the camera's pitch to +/- 90 degrees
                     var camWorldMatrix = camera.matrixWorld;
@@ -1167,6 +1166,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                     // Restore camera position so rotation is done around camera center
                     cameraMatrix.setPosition( cameraPos );
+                    updateRenderObjectTransform( camera );
 
                     // If the navObject is the camera, its new transform will be sent to the reflector 
                     // all at once at the end
@@ -1186,7 +1186,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     navObjectPos.getPositionFromMatrix( navObjectMatrix );
                     navObjectMatrix.multiplyMatrices( yawMatrix, navObjectMatrix );
                     navObjectMatrix.setPosition( navObjectPos );
-                    navObject.threeObject.updateMatrixWorld( true );
+                    updateRenderObjectTransform( navObject.threeObject );
                     setModelTransformProperty( navObject, navObjectMatrix.elements );
                 } else {
                     self.logger.warnx( "There is no navigation object to move" );
@@ -2018,7 +2018,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         }
 
         threeObject.matrix.elements = transformMatrix;
-        threeObject.updateMatrixWorld( true ); 
+        updateRenderObjectTransform( threeObject );
     }
 
     function matCpy( mat ) {
@@ -2065,5 +2065,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var inverseParentWorldMatrix = new THREE.Matrix4();
         inverseParentWorldMatrix.getInverse( threeObject.parent.matrixWorld );
         threeObject.matrix.multiplyMatrices( inverseParentWorldMatrix, threeObject.matrixWorld );
+        threeObject.matrixAutoUpdate = false;
+    }
+
+    function updateRenderObjectTransform( threeObject ) {
+        threeObject.updateMatrixWorld( true );
+        threeObject.matrixAutoUpdate = false;
     }
 });
