@@ -231,8 +231,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         ticked: function() {
             
-            // Search for the navigation object inside the ...
-            if ( appInitialized && !navObjectRequested ) {
+            // This is the first place that we know that the entire app is loaded because the queue has been 
+            // resumed (and therefore, it is ticking) - we will search for the user's navigation object here
+
+            // We want to only search for the navigation object if we haven't before (!navObjectRequested),
+            // and we want to make sure that the app has been initialized, and where not at the brief period of
+            // ticking before the app starts loading (appInitialized)
+            if ( !navObjectRequested && appInitialized ) {
                 navObjectRequested = true;
                 findNavObject.call( this );
             }
@@ -1941,9 +1946,17 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     
     function receiveModelTransformChanges( nodeID, transformMatrix ) {
 
+        var node = this.state.nodes[ nodeID ];
+
+        // If the node does not exist in the state's list of nodes, then this update is from a prototype and we
+        // should ignore it
+        if ( !node ) {
+            return;
+        }
+
         var clientThatSatProperty = this.kernel.client();
         var me = this.kernel.moniker();
-        var node = this.state.nodes[ nodeID ];
+        
 
         // If the transform property was initially updated by this view....
         if ( clientThatSatProperty == me ) {
