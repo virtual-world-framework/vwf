@@ -407,14 +407,9 @@
 				"varying vec3 n;"+
                 "void main() {\n"+
 				" pos = position;"+
-				" vec4 tpos = modelMatrix * vec4( position, 1.0 );\n"+
-				" tpos.z = getNoise(vec2(tpos.y,tpos.x)) ;\n" +
-				" float zy0 = getNoise(vec2((tpos.y-1.0),tpos.x)) ;\n" +
-				" float zy1 = getNoise(vec2((tpos.y+1.0) ,tpos.x)) ;\n" +
-				" float zx0 = getNoise(vec2(tpos.y ,(tpos.x-1.0))) ;\n" +
-				" float zx1 = getNoise(vec2(tpos.y ,(tpos.x+1.0))) ;\n" +
-				"n = normalize(vec3(zx0-zx1,zy0-zy1,1.0));"+
-                "   vec4 mvPosition = modelViewMatrix * vec4( position.x,position.y,tpos.z, 1.0 );\n"+
+				
+				"n = normalMatrix * normal;"+
+                "   vec4 mvPosition = modelViewMatrix * vec4( position.x,position.y,position.z, 1.0 );\n"+
 				
 				
                 "   gl_Position = projectionMatrix * mvPosition;\n"+
@@ -422,10 +417,49 @@
                 var fragShader_default = 
                
                 "uniform samplerCube texture;\n"+
+				"#if MAX_DIR_LIGHTS > 0\n"+
+
+				
+				//"#define USE_FOG" : "",
+				//"#define FOG_EXP2" : "",
+			
+				"uniform vec3 directionalLightColor[ MAX_DIR_LIGHTS ];\n"+
+				"uniform vec3 directionalLightDirection[ MAX_DIR_LIGHTS ];\n"+
+				
+				"#endif\n"+
+				"uniform int fogType;"+
+				"uniform vec3 fogColor;"+
+				"uniform float fogDensity;"+
+				"uniform float fogNear;"+
+				"uniform float fogFar;"+
                 "varying vec3 pos;"+
 				"varying vec3 n;"+
                 "void main() {\n"+
-                "   gl_FragColor = vec4(0.5,0.5,0.5,1.0) * dot(n,vec3(0.0,0.707,0.707));\n"+
+				"	vec3 light = vec3(0.0,0.0,0.0);\n"+
+				"	vec4 ambient = vec4(0.5,0.5,0.5,1.0);\n"+
+				"	#if MAX_DIR_LIGHTS > 0\n"+
+				"	light += directionalLightColor[0] * dot(normalize(n), (viewMatrix * vec4(directionalLightDirection[0],0.0)).xyz);\n"+
+				"	#endif\n"+
+                "   gl_FragColor = ambient + vec4(0.5,0.5,0.5,1.0) * vec4(light.xyz,1.0);\n"+
+				"#ifdef USE_FOG\n"+
+
+					"float depth = gl_FragCoord.z / gl_FragCoord.w;\n"+
+
+					"#ifdef FOG_EXP2\n"+
+
+						"const float LOG2 = 1.442695;"+
+						"float fogFactor = exp2( - fogDensity * fogDensity * depth * depth * LOG2 );"+
+						"fogFactor = 1.0 - clamp( fogFactor, 0.0, 1.0 );\n"+
+
+					"#else\n"+
+
+						"float fogFactor = smoothstep( fogNear, fogFar, depth );\n"+
+
+					"#endif\n"+
+
+					"gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );\n"+
+
+				"#endif\n"+
                 "}\n";
                 
                 //the default shader - the one used by the analytic solver, just has some simple stuff
@@ -438,6 +472,30 @@
                 var uniforms_default = {
                    
                     texture:   { type: "t", value: null },
+					ambientLightColor:   { type: "fv", value: [] },
+
+					directionalLightColor:   { type: "fv", value: [] },
+					directionalLightDirection:   { type: "fv", value: [] },
+
+					pointLightColor:   { type: "fv", value: [] },
+					pointLightPosition:   { type: "fv", value: [] },
+					pointLightDistance:   { type: "fv1", value: [] },
+
+					spotLightColor:   { type: "fv", value: [] },
+					spotLightPosition:   { type: "fv", value: [] },
+					spotLightDistance:   { type: "fv", value: [] },
+					spotLightDirection:   { type: "fv1", value: [] },
+					spotLightAngleCos:   { type: "fv1", value: [] },
+					spotLightExponent:   { type: "fv1", value: [] },
+
+					hemisphereLightSkyColor:   { type: "fv", value: [] },
+					hemisphereLightGroundColor:   { type: "fv", value: [] },
+					hemisphereLightDirection:   { type: "fv", value: [] },
+
+					"fogDensity" : { type: "f", value: 0.00025 },
+					"fogNear" : { type: "f", value: 1 },
+					"fogFar" : { type: "f", value: 2000 },
+					"fogColor" : { type: "c", value: new THREE.Color( 0xffffff ) }
                   
                 };
                 //uniforms_default.texture.value.wrapS = uniforms_default.texture.value.wrapT = THREE.RepeatWrapping;
@@ -448,14 +506,15 @@
                     fragmentShader: fragShader_default
 
                 });
+				this.mat.lights = true;
             //this.ma.uniforms.texture.value = skyCubeTexture;    
-			this.mat = new THREE.MeshPhongMaterial();
-			this.mat.color.r = .5;
-			this.mat.color.g = .5;
-			this.mat.color.b = .5;
-			this.mat.depthCheck = false;
-			this.mat.wireframe = false;
-			this.mat.transparent = true;	
+			// this.mat = new THREE.MeshPhongMaterial();
+			// this.mat.color.r = .5;
+			// this.mat.color.g = .5;
+			// this.mat.color.b = .5;
+			// this.mat.depthCheck = false;
+			// this.mat.wireframe = false;
+			// this.mat.transparent = true;	
 				
 				
 				this.buildMesh3 = function(size,res)
@@ -1570,6 +1629,51 @@
 				if(!this.debug.parent)
 					this.getRoot().add(this.debug);
 			}
+			this.cancelUpdates =function()
+			{
+				self.needRebuild = [];
+				this.quadtree.walk(function(n)
+				{
+					if(n.setForDesplit)
+						delete n.setForDesplit;
+					if(n.mesh && n.mesh.visible == false)
+					{
+						n.mesh.parent.remove(n.mesh);
+						n.mesh.quadnode = null;
+						n.mesh.visible = true;
+						n.mesh = null;
+					}
+					if(n.backupmesh)
+					{
+						n.mesh = n.backupmesh;
+						n.mesh.quadnode = n;
+						delete n.backupmesh;
+					}
+					delete n.oldmesh;
+					delete n.waiting_for_rebuild;
+					
+				});
+				this.quadtree.walk(function(n)
+				{
+					
+					if(n.isSplit() && n.mesh)
+					{
+						var list = [];
+						n.children[0].destroy(list);
+						n.children[1].destroy(list);
+						n.children[2].destroy(list);
+						n.children[3].destroy(list);
+						n.children = [];
+						list.forEach(function(e)
+						{
+							e.quadnode = null;
+							e.parent.remove(e);
+						});
+					}
+					
+					
+				});
+			}
 			this.removelist = [];
 			this.containingList = [];
 			self.needRebuild = [];
@@ -1586,13 +1690,13 @@
 					var x = campos.x;
 					var y = campos.y;
 					 
-					 if(this.containingList.indexOf(this.quadtree.containing([x,y]).parent) == -1 )
+					 if(this.containingList.indexOf(this.quadtree.containing([x,y])) == -1 )
 					 {
 						
-					
-						while (self.needRebuild.length > 0)
+						
+						if (self.needRebuild.length > 0)
 						{	
-							this.rebuild();
+							this.cancelUpdates();
 						}
 						
 							
@@ -1948,10 +2052,11 @@
 						// }
 						//z = Math.sin((mx + vert.x)/10) * 10;
 						z = self.SimplexNoise.noise2D((vert.x)/10000,(vert.y)/1000) * 250;
-						
 						z += self.SimplexNoise.noise2D((vert.x)/1000,(vert.y)/100) * 25;
+						z += self.SimplexNoise.noise2D((vert.x)/1000,(vert.y)/5000) * 50;
 						z += self.SimplexNoise.noise2D((vert.x)/500,(vert.y)/50) * 10;
 						 z += self.SimplexNoise.noise2D((vert.x)/100,(vert.y)/100) * 5.0;
+						 z += self.SimplexNoise.noise2D((vert.x)/10,(vert.y)/10) * 0.5;
 						//z += 286;
 						if(z < 0)  z/=5;
 						
