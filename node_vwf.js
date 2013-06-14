@@ -7,7 +7,7 @@ var libpath = require('path'),
 	YAML = require('js-yaml'),
 	SandboxAPI = require('./sandboxAPI'),
 	Shell = require('./ShellInterface'),
-	DAL = require('./dal'),
+	DAL = require('./DAL'),
 	express = require('express'),
 	app = express(),
 	landing = require('./landingRoutes');
@@ -17,7 +17,7 @@ var zlib = require('zlib');
 function findAppName(uri)
 {
 		
-		var current = ".\\"
+		var current = "."+libpath.sep;
 		while(!fs.existsSync(current+"index.vwf.yaml"))
 		{	
 			
@@ -161,7 +161,7 @@ function Findinstance(uri)
 		return null;
 	//remove the application name	
 	var minusapp = uri.substr(app.length-2);
-	var parts = minusapp.split('\\');
+	var parts = minusapp.split(libpath.sep);
 	var testapp = parts[0];
 	
 	//Really, any slash delimited string after the app name should work
@@ -181,7 +181,7 @@ function Findinstance(uri)
 //Remove the instance identifer from the URL
 function filterinstance(uri,instance)
 {
-	return uri.replace(instance +'\\','').replace(instance,'\\');
+	return uri.replace(instance+libpath.sep,'').replace(instance,libpath.sep);
 }
 
 function hash(str)
@@ -466,13 +466,13 @@ function startVWF(){
 	{
 	
 		try{
-			var path = ".\\public\\";
+			var safePathRE = RegExp('/\//'+(libpath.sep=='/' ? '\/' : '\\')+'/g');
+			var path = "./public".replace(safePathRE);
 			
 			var URL = url.parse(request.url,true);
-			var uri = URL.pathname;
-			//global.log( URL.pathname);
-			uri = uri.replace(/\//g,'\\');
-		
+			var uri = URL.pathname.replace(safePathRE);
+			//global.log( URL.pathname );
+			
 			if(URL.pathname.toLowerCase().indexOf('/vwfdatamanager.svc/') != -1)
 			{
 				//Route to DataServer
@@ -509,9 +509,8 @@ function startVWF(){
 				 {
 					
 						filename = filename.substr(13);
-						filename = ".\\support\\" + filename;
-						filename = filename.replace('vwf.example.com','proxy\\vwf.example.com');
-						
+						filename = "./support/".replace(safePathRE) + filename;
+						filename = filename.replace('vwf.example.com','proxy/vwf.example.com');
 						
 				 }
 				 else
@@ -519,9 +518,9 @@ function startVWF(){
 						
 					 filename = filename.substr(appname.length-2);
 					 if(appname == "")
-						filename = './support/client/lib/index.html'
+						filename = './support/client/lib/index.html'.replace(safePathRE);
 					 else	
-						filename = './support/client/lib/' + filename;
+						filename = './support/client/lib/'.replace(safePathRE) + filename;
 					
 				 }
 
@@ -537,7 +536,7 @@ function startVWF(){
 				{
 					var appname = findAppName(filename);
 					if(!appname)
-						appname = findAppName(filename+"\\");
+						appname = findAppName(filename+libpath.sep);
 					
 					//no instance id is given, new instance
 					if(appname && instance == null)
@@ -558,23 +557,26 @@ function startVWF(){
 					//no app name but is directory. Not listing directories, so 404
 					if(!appname)
 					{
-						global.log(filename + "is a directory")
+						console.log(filename + "is a directory")
 						_404(response);
 						
 						return;
 					}
 					
 					//this is the bootstrap html. Must have instnace and appname
-					filename = './support/client/lib/index.html';
+					filename = './support/client/lib/index.html'.replace(safePathRE);
 					
 					//when loading the bootstrap, you must have an instance that exists in the database
-					global.log(appname);
-					DAL.getInstance(appname.substr(8).replace(/\\/g,'_') + instance + "_",function(data)
+					global.log('Appname:', appname);
+					var instanceName = appname.substr(8).replace(/\//g,'_').replace(/\\/g,'_') + instance + "_";
+					DAL.getInstance(instanceName,function(data)
 					{
 						if(data)
 							ServeFile(request,filename,response,URL);
-						else
+						else {
+							console.log('redirect since no data for', instanceName);
 							redirect(filterinstance(URL.pathname,instance)+"/index.html",response);
+						}
 					});
 					return;
 				}
@@ -589,9 +591,9 @@ function startVWF(){
 
 			}
 			// is an admin call, currently only serving instances
-			else if(uri.indexOf('\\admin\\') != -1)
+			else if(uri.indexOf('/admin/'.replace(safePathRE)) != -1)
 			{
-				if(uri.indexOf('\\admin\\instances'))
+				if(uri.indexOf('/admin/instances'.replace(safePathRE)))
 				{
 					var data = {};
 					for(var i in global.instances)

@@ -7,7 +7,8 @@ var libpath = require('path'),
 	YAML = require('js-yaml');
 	require('./hash.js');
 	
-var datapath = 'C:\\VWFData';
+var safePathRE = RegExp('/\//'+(libpath.sep=='/' ? '\/' : '\\')+'/g');
+var datapath = '.'+libpath.sep+'data';
 var DAL = null;	
 // default path to data. over written by setup flags
 
@@ -531,7 +532,7 @@ function CheckPassword(UID,Password, callback)
 //Check that the UID is the author of the asset
 function CheckAuthor(UID,assetFilename, callback)
 {
-	var basedir = datapath + "\\GlobalAssets\\";
+	var basedir = datapath + "/GlobalAssets/".replace(safePathRE);
 	
 	if(!fs.existsSync(assetFilename))
 	{
@@ -558,7 +559,7 @@ function CheckAuthor(UID,assetFilename, callback)
 //Check that the UID is the owner of the state
 function CheckOwner(UID,stateFilename, callback)
 {
-	var basedir = datapath + "\\GlobalAssets\\";
+	var basedir = datapath + "/GlobalAssets/".replace(safePathRE);
 	
 	if(!fs.existsSync(stateFilename))
 	{
@@ -649,7 +650,7 @@ function DeleteProfile(URL,filename,response)
 var deleteFolderRecursive = function(path) {
   if( fs.existsSync(path) ) {
     fs.readdirSync(path).forEach(function(file,index){
-      var curPath = path + "/" + file;
+      var curPath = path + libpath.sep + file;
       if(fs.statSync(curPath).isDirectory()) { // recurse
         deleteFolderRecursive(curPath);
       } else { // delete file
@@ -692,8 +693,8 @@ function CopyState(URL,filename,newname,response)
 		return;
 	}
 	
-	filename = datapath+"\\states\\" + filename;
-	newname = datapath+"\\states\\" + newname;
+	filename = datapath+"/states/".replace(safePathRE) + filename;
+	newname = datapath+"/states/".replace(safePathRE) + newname;
 
 	
 	CheckPassword(UID,P,function(e){
@@ -898,11 +899,11 @@ function RecurseDirs(startdir, currentdir, files)
 	
 	for(var i =0; i<files.length; i++)
 	{
-		if(fs.statSync(startdir + currentdir + "\\"+ files[i]).isDirectory())
+		if(fs.statSync(startdir + currentdir + libpath.sep+ files[i]).isDirectory())
 		{
 			var o = {};
-			var newfiles = fs.readdirSync(startdir + currentdir + "\\" + files[i]+"\\");
-			var tdir = currentdir ? currentdir + "\\" + files[i] : files[i];
+			var newfiles = fs.readdirSync(startdir + currentdir + libpath.sep + files[i]+libpath.sep);
+			var tdir = currentdir ? currentdir + libpath.sep + files[i] : files[i];
 			RecurseDirs(startdir,tdir,newfiles);
 			newfiles.sort(function(a,b){
 			   if(typeof a == "string" && typeof b == "string") return (a<b ? -1 : 1);
@@ -912,8 +913,8 @@ function RecurseDirs(startdir, currentdir, files)
 			});
 			for(var j = 0; j < newfiles.length; j++)
 				if(typeof newfiles[j] == "string")
-					newfiles[j] = currentdir + "\\" + files[i] + "\\" + newfiles[j];
-			o[currentdir ? currentdir + "\\" + files[i] : files[i]] = newfiles;
+					newfiles[j] = currentdir + libpath.sep + files[i] + libpath.sep + newfiles[j];
+			o[currentdir ? currentdir + libpath.sep + files[i] : files[i]] = newfiles;
 			files[i] = o;
 		}
 	}
@@ -993,11 +994,13 @@ function createState(URL,data,response)
 function getState(SID)
 {
 	SID = SID.replace(/[\\,\/]/g,'_');
-	var basedir = datapath + "\\";
-	global.log('serve state ' + basedir+"states\\" + SID,2);
-	if(fs.existsSync(basedir+"states\\" + SID+'\\state'))
+	var basedir = datapath + libpath.sep;
+	var statedir = (basedir + 'States/' + SID).replace(safePathRE);
+	var statefile = statedir + '/state'.replace(safePathRE);
+	global.log('serve state ' + statedir,2);
+	if(fs.existsSync(statefile))
 	{
-		file = fs.readFileSync(basedir+"states\\" + SID+'\\state','utf8');
+		file = fs.readFileSync(statefile,'utf8');
 		return JSON.parse(file);
 	}
 	return null;
@@ -1075,20 +1078,20 @@ function serve (request, response)
 	 
 	console.log(UID);
 	 
-	var basedir = datapath + "\\";
+	var basedir = datapath + libpath.sep;
 	global.log(command,UID,3);
 	if(request.method == "GET")
 	{
 		switch(command)
 		{	
 			case "texture":{
-				global.FileCache.ServeFile(request,basedir+"textures\\" + URL.query.UID,response,URL);		
+				global.FileCache.ServeFile(request,basedir+"Textures"+libpath.sep+ URL.query.UID,response,URL);		
 			} break;
 			case "thumbnail":{
-				global.FileCache.ServeFile(request,basedir+"thumbnails\\" + URL.query.UID,response,URL);		
+				global.FileCache.ServeFile(request,basedir+"Thumbnails"+libpath.sep + URL.query.UID,response,URL);		
 			} break;
 			case "state":{
-				ServeFile(basedir+"states\\" + SID+'\\state',response,URL,'GetStateResult');		
+				ServeFile((basedir+"States/"+SID+'/state').replace(safePathRE),response,URL,'GetStateResult');		
 			} break;
 			case "statedata":{
 				DAL.getInstance(SID,function(state)
@@ -1156,8 +1159,8 @@ function serve (request, response)
 					ServeJSON(global.textures,response,URL);
 					return;
 				}
-				fs.readdir(basedir+"textures\\",function(err,files){
-					RecurseDirs(basedir+"textures\\", "",files);
+				fs.readdir(basedir+"Textures"+libpath.sep,function(err,files){
+					RecurseDirs(basedir+"Textures"+libpath.sep, "",files);
 					files.sort(function(a,b){
 					   if(typeof a == "string" && typeof b == "string") return (a<b ? -1 : 1);
 					   if(typeof a == "object" && typeof b == "string") return  1;
@@ -1165,7 +1168,7 @@ function serve (request, response)
 					   return -1;
 					});
 					var o = {};
-					o.GetTexturesResult = JSON.stringify({root:files}).replace(/\\\\/g,"\\");
+					o.GetTexturesResult = JSON.stringify({root:files}).replace(/\\\\/g,"\\").replace(/\/\//g, '/');
 					global.textures = o;
 					ServeJSON(o,response,URL);
 				});
@@ -1258,7 +1261,7 @@ function serve (request, response)
 				 deleteGlobalInventoryItem(URL,response);
 			}break;
 			case "profile":{
-				DeleteProfile(URL, basedir+"profiles\\"+UID,response);
+				DeleteProfile(URL, basedir+"Profiles"+libpath.sep+UID,response);
 			}break;
 			default:
 			{

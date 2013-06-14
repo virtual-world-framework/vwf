@@ -77,7 +77,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
             this.delayedProperties = {};
 			this.subDriverFactory = new SubDriverFactory();
 			$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/_THREERayTracer.js"></script>');
-			$(document.head).append('<script type="text/javascript" src="vwf/model/threejs/SceneManager.js"></script>');
+			$(document.head).append('<script type="text/javascript" src="vwf/model/threejs/scenemanager.js"></script>');
             
         },
 
@@ -3090,6 +3090,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 		
 		this.factories['vwf/model/threejs/prim.js'] = this.loadSubDriver('vwf/model/threejs/prim.js');
 		this.factories['vwf/model/threejs/modifier.js'] = this.loadSubDriver('vwf/model/threejs/modifier.js');
-		this.factories['vwf/model/threejs/materialdef.js'] = this.loadSubDriver('vwf/model/threejs/materialdef.js');
+		this.factories['vwf/model/threejs/materialDef.js'] = this.loadSubDriver('vwf/model/threejs/materialDef.js');
 	}
 });
