@@ -22,24 +22,50 @@ properties:
   clientColors: [ [ 0, 0, 255 ], [ 255, 0, 0 ], [ 255, 255, 0 ], [ 0, 255, 0 ], [ 0, 255, 255 ], [ 255, 0, 255 ], [ 255, 153, 0 ], [ 153, 153, 153 ], [ 230, 230, 250 ], [ 0, 0, 0 ] ]
 methods:
   createClient:
+  locationCaptured:
+  findClient:
   newClientVideo:
 children:
   clients:
     extends: http://vwf.example.com/node.vwf
 scripts:
 - |
-    this.initialize = function(){
+    this.initialize = function() {
     }
-    this.createClient = function( moniker, loginName ) {
+    this.createClient = function( moniker, loginName, location ) {
+      var self = this;
       var clientDef = { 
         "extends": "http://vwf.example.com/cesium/client.vwf",
         "properties": {
           "displayName": loginName,
-          "requestLocation": true,
           "color": this.clientColors.shift()
         },
       }
-      this.clients.children.create( "client"+moniker, clientDef, function( child ) {
-
+      this.clients.children.create( "client"+moniker, clientDef, function( child ){
+        child.createMarkers( moniker == self.moniker );
       } );
-    } //@ sourceURL = webrtc.vwf
+    }
+    this.findClient = function( moniker ) {
+      var client = undefined;
+      var clientMoniker = "";
+      var len = this.clients.children.length;
+      for ( var i = 0; i < len && client === undefined; i++ ) {
+        clientMoniker = this.clients.children[i].name;
+        clientMoniker = clientMoniker.substr( 6, clientMoniker.length-1 );
+        if ( moniker == clientMoniker ) {
+          client = this.clients.children[i];
+        }
+      }
+      return client;
+    } 
+    this.locationCaptured = function( parms ) {
+      //debugger;
+      var client = this.findClient( parms.moniker );
+      if ( client !== undefined ) {
+        client.location = parms.location;
+        client.longitude = parms.longitude;
+        client.latitude = parms.latitude;
+      } else {
+        this.future( 2.0 ).locationCaptured( parms );
+      }
+    } //@ sourceURL = index.vwf

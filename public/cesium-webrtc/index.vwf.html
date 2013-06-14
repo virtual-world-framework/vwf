@@ -39,7 +39,23 @@
                         "Login": function() {
                             clientName = $('#userName').val().replace(/ /g,"_");
                             $( this ).dialog( "close" );
-                            vwf_view.kernel.callMethod( "index-vwf", "createClient", [ vwf_view.kernel.moniker(), clientName ] );
+                            var parms = [ vwf_view.kernel.moniker(), clientName ];
+                            vwf_view.kernel.callMethod( "index-vwf", "createClient", parms );
+                            
+                            navigator.geolocation.getCurrentPosition( function( pos ) {
+                                var ellipsoid = Cesium.Ellipsoid.WGS84;
+                                var dest = Cesium.Cartographic.fromDegrees( pos.coords.longitude, pos.coords.latitude, 1000.0 );
+                                dest = ellipsoid.cartographicToCartesian( dest );
+
+                                parms = {
+                                    "location": [ dest.x, dest.y, dest.z ],
+                                    "longitude": pos.coords.longitude,
+                                    "latitude": pos.coords.latitude,
+                                    "moniker": vwf_view.kernel.moniker()                             
+                                }
+                                vwf_view.kernel.callMethod( "index-vwf", "locationCaptured", [ parms ] );
+
+                            } );
                         },
                     }
                 } );
