@@ -354,6 +354,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 }
                 
             }
+			renderer.clear();
+			renderer.render(backgroundScene,sceneNode.camera.threeJScameras[sceneNode.camera.ID]);
             renderer.render(scene,sceneNode.camera.threeJScameras[sceneNode.camera.ID]);
 			$(document).trigger('postrender',[vp,wh,ww]);
 			sceneNode.lastTime = now;
@@ -437,6 +439,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 				sceneNode.renderer.autoUpdateScene = false;
 				sceneNode.renderer.setSize($('#index-vwf').width(),$('#index-vwf').height());
 				sceneNode.renderer.shadowMapEnabled = true;
+				sceneNode.renderer.autoClear = false;
 				sceneNode.renderer.setClearColor({r:0,g:0,b:0},1.0);
             }else
             {
@@ -459,9 +462,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             var view = this;
             var scene = sceneNode.threeScene;
+			var backgroundScene = new THREE.Scene();
+			
             var renderer = sceneNode.renderer;
             var scenenode = sceneNode;
             window._dScene = scene;
+			window._dbackgroundScene = backgroundScene;
             window._dRenderer = renderer;
 			window._dSceneNode = sceneNode;
             sceneNode.frameCount = 0; // needed for estimating when we're pick-safe

@@ -507,6 +507,7 @@
 
                 });
 				this.mat.lights = true;
+				this.mat.fog = true;
             //this.ma.uniforms.texture.value = skyCubeTexture;    
 			// this.mat = new THREE.MeshPhongMaterial();
 			// this.mat.color.r = .5;
