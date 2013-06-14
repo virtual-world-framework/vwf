@@ -207,16 +207,8 @@ children:
     type: model/vnd.collada+xml
   screen2:
     extends: http://vwf.example.com/node3.vwf
-    source: joc/screenTest.dae
+    source: joc/screens.dae
     type: model/vnd.collada+xml
-    properties:
-      translation: [-695, 543, 33]
-      scale: [36, 22, 22]
-    children:
-      material:
-        extends: http://vwf.example.com/material.vwf
-        properties:
-          texture: videos/Afghanistan_AC-130_gunship.mp4
   Server:
     extends: http://vwf.example.com/node3.vwf
     source: joc/Server.DAE
