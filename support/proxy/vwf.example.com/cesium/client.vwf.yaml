@@ -67,7 +67,7 @@ scripts:
         
         self.label = child;
         
-        child.position = self
+        child.position = self.location;
         child.fillColor = self.color;
         child.verticalOrigin = 'top';
         child.horizontalOrigin = 'center';
