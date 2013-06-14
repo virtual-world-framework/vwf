@@ -2065,7 +2065,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var inverseParentWorldMatrix = new THREE.Matrix4();
         inverseParentWorldMatrix.getInverse( threeObject.parent.matrixWorld );
         threeObject.matrix.multiplyMatrices( inverseParentWorldMatrix, threeObject.matrixWorld );
-        threeObject.matrixAutoUpdate = false;
+        updateRenderObjectTransform( threeObject );
     }
 
     function updateRenderObjectTransform( threeObject ) {
