@@ -383,140 +383,152 @@
 				this.tiles = {};
 				
 				
+						//default material expects all computation done cpu side, just renders
+						// note that since the color, size, spin and orientation are just linear
+						// interpolations, they can be done in the shader
+						var vertShader_default = 
+						
+						
+						
+
+						"vec3 mod289(vec3 x) {	  return x - floor(x * (1.0 / 289.0)) * 289.0;	}		vec2 mod289(vec2 x) {	  return x - floor(x * (1.0 / 289.0)) * 289.0;	}		vec3 permute(vec3 x) {	  return mod289(((x*34.0)+1.0)*x);	}		float snoise(vec2 v)	  {	  const vec4 C = vec4(0.211324865405187, 	                      0.366025403784439,  	                     -0.577350269189626,  	                      0.024390243902439); 		  vec2 i  = floor(v + dot(v, C.yy) );	  vec2 x0 = v -   i + dot(i, C.xx);			  vec2 i1;		  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);		  vec4 x12 = x0.xyxy + C.xxzz;	  x12.xy -= i1;			  i = mod289(i); 	  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))			+ i.x + vec3(0.0, i1.x, 1.0 ));		  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);	  m = m*m ;	  m = m*m ;				  vec3 x = 2.0 * fract(p * C.www) - 1.0;	  vec3 h = abs(x) - 0.5;	  vec3 ox = floor(x + 0.5);	  vec3 a0 = x - ox;			  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );			  vec3 g;	  g.x  = a0.x  * x0.x  + h.x  * x0.y;	  g.yz = a0.yz * x12.xz + h.yz * x12.yw;	  return 130.0 * dot(m, g);	}"+
+						
+						"float getNoise(vec2 tpos)"+
+						"{"+
+						"float res = 0.0;"+
+						"res += snoise(vec2(tpos.y / 10000.0,tpos.x/10000.0)) * 1000.0;\n" +
+						"res += snoise(vec2(tpos.y / 1000.0,tpos.x/1000.0)) * 100.0;\n" +
+						"res += snoise(vec2(tpos.y / 100.0,tpos.x/100.0)) * 10.0;\n" +
+						"res += snoise(vec2(tpos.y / 10.0,tpos.x/10.0)) * 1.0;\n" +
+						"return res;"+
+						"}"+
+						"varying vec3 pos;"+
+						"varying vec3 n;"+
+						"uniform float blendPercent;\n" + 
+						"attribute vec3 everyOtherNormal;\n"+
+						"attribute float everyOtherZ;\n"+
+						"void main() {\n"+
+						" pos = position;"+
+						
+						"n = normalMatrix *  mix(everyOtherNormal,normal,blendPercent);\n;"+
+						" float z = mix(everyOtherZ,position.z,blendPercent);\n"+
+						"   vec4 mvPosition = modelViewMatrix * vec4( position.x,position.y,z, 1.0 );\n"+
+						
+						
+						"   gl_Position = projectionMatrix * mvPosition;\n"+
+						"}    \n";
+						var fragShader_default = 
+					   
+						"uniform samplerCube texture;\n"+
+						"#if MAX_DIR_LIGHTS > 0\n"+
+
+						
+						//"#define USE_FOG" : "",
+						//"#define FOG_EXP2" : "",
+					
+						"uniform vec3 directionalLightColor[ MAX_DIR_LIGHTS ];\n"+
+						"uniform vec3 directionalLightDirection[ MAX_DIR_LIGHTS ];\n"+
+						
+						"#endif\n"+
+						"uniform int fogType;"+
+						"uniform vec3 fogColor;"+
+						"uniform float fogDensity;"+
+						"uniform float fogNear;"+
+						"uniform float fogFar;"+
+						"varying vec3 pos;"+
+						"varying vec3 n;"+
+						"void main() {\n"+
+						"	vec3 light = vec3(0.0,0.0,0.0);\n"+
+						"	vec4 ambient = vec4(0.5,0.5,0.5,1.0);\n"+
+						"	#if MAX_DIR_LIGHTS > 0\n"+
+						"	light += directionalLightColor[0] * dot(normalize(n), (viewMatrix * vec4(directionalLightDirection[0],0.0)).xyz);\n"+
+						"	#endif\n"+
+						"   gl_FragColor = ambient + vec4(0.5,0.5,0.5,1.0) * vec4(light.xyz,1.0);\n"+
+						"#ifdef USE_FOG\n"+
+
+							"float depth = gl_FragCoord.z / gl_FragCoord.w;\n"+
+
+							"#ifdef FOG_EXP2\n"+
+
+								"const float LOG2 = 1.442695;"+
+								"float fogFactor = exp2( - fogDensity * fogDensity * depth * depth * LOG2 );"+
+								"fogFactor = 1.0 - clamp( fogFactor, 0.0, 1.0 );\n"+
+
+							"#else\n"+
+
+								"float fogFactor = smoothstep( fogNear, fogFar, depth );\n"+
+
+							"#endif\n"+
+
+							"gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );\n"+
+
+						"#endif\n"+
+						"}\n";
+						
+						//the default shader - the one used by the analytic solver, just has some simple stuff
+						//note that this could be changed to do just life and lifespan, and calculate the 
+						//size and color from to uniforms. Im not going to bother
+						
+						
+						//uniforms_default.texture.value.wrapS = uniforms_default.texture.value.wrapT = THREE.RepeatWrapping;
+				 
+				this.getMat = function()
+				{	
 				
-				//default material expects all computation done cpu side, just renders
-                // note that since the color, size, spin and orientation are just linear
-                // interpolations, they can be done in the shader
-                var vertShader_default = 
-				
-				
-				
+							var uniforms_default = {
+						   
+							texture:   { type: "t", value: null },
+							ambientLightColor:   { type: "fv", value: [] },
 
-"vec3 mod289(vec3 x) {	  return x - floor(x * (1.0 / 289.0)) * 289.0;	}		vec2 mod289(vec2 x) {	  return x - floor(x * (1.0 / 289.0)) * 289.0;	}		vec3 permute(vec3 x) {	  return mod289(((x*34.0)+1.0)*x);	}		float snoise(vec2 v)	  {	  const vec4 C = vec4(0.211324865405187, 	                      0.366025403784439,  	                     -0.577350269189626,  	                      0.024390243902439); 		  vec2 i  = floor(v + dot(v, C.yy) );	  vec2 x0 = v -   i + dot(i, C.xx);			  vec2 i1;		  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);		  vec4 x12 = x0.xyxy + C.xxzz;	  x12.xy -= i1;			  i = mod289(i); 	  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))			+ i.x + vec3(0.0, i1.x, 1.0 ));		  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);	  m = m*m ;	  m = m*m ;				  vec3 x = 2.0 * fract(p * C.www) - 1.0;	  vec3 h = abs(x) - 0.5;	  vec3 ox = floor(x + 0.5);	  vec3 a0 = x - ox;			  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );			  vec3 g;	  g.x  = a0.x  * x0.x  + h.x  * x0.y;	  g.yz = a0.yz * x12.xz + h.yz * x12.yw;	  return 130.0 * dot(m, g);	}"+
-				
-				"float getNoise(vec2 tpos)"+
-				"{"+
-				"float res = 0.0;"+
-				"res += snoise(vec2(tpos.y / 10000.0,tpos.x/10000.0)) * 1000.0;\n" +
-				"res += snoise(vec2(tpos.y / 1000.0,tpos.x/1000.0)) * 100.0;\n" +
-				"res += snoise(vec2(tpos.y / 100.0,tpos.x/100.0)) * 10.0;\n" +
-				"res += snoise(vec2(tpos.y / 10.0,tpos.x/10.0)) * 1.0;\n" +
-				"return res;"+
-				"}"+
-                "varying vec3 pos;"+
-				"varying vec3 n;"+
-                "void main() {\n"+
-				" pos = position;"+
-				
-				"n = normalMatrix * normal;"+
-                "   vec4 mvPosition = modelViewMatrix * vec4( position.x,position.y,position.z, 1.0 );\n"+
-				
-				
-                "   gl_Position = projectionMatrix * mvPosition;\n"+
-                "}    \n";
-                var fragShader_default = 
-               
-                "uniform samplerCube texture;\n"+
-				"#if MAX_DIR_LIGHTS > 0\n"+
+							directionalLightColor:   { type: "fv", value: [] },
+							directionalLightDirection:   { type: "fv", value: [] },
 
-				
-				//"#define USE_FOG" : "",
-				//"#define FOG_EXP2" : "",
-			
-				"uniform vec3 directionalLightColor[ MAX_DIR_LIGHTS ];\n"+
-				"uniform vec3 directionalLightDirection[ MAX_DIR_LIGHTS ];\n"+
-				
-				"#endif\n"+
-				"uniform int fogType;"+
-				"uniform vec3 fogColor;"+
-				"uniform float fogDensity;"+
-				"uniform float fogNear;"+
-				"uniform float fogFar;"+
-                "varying vec3 pos;"+
-				"varying vec3 n;"+
-                "void main() {\n"+
-				"	vec3 light = vec3(0.0,0.0,0.0);\n"+
-				"	vec4 ambient = vec4(0.5,0.5,0.5,1.0);\n"+
-				"	#if MAX_DIR_LIGHTS > 0\n"+
-				"	light += directionalLightColor[0] * dot(normalize(n), (viewMatrix * vec4(directionalLightDirection[0],0.0)).xyz);\n"+
-				"	#endif\n"+
-                "   gl_FragColor = ambient + vec4(0.5,0.5,0.5,1.0) * vec4(light.xyz,1.0);\n"+
-				"#ifdef USE_FOG\n"+
+							pointLightColor:   { type: "fv", value: [] },
+							pointLightPosition:   { type: "fv", value: [] },
+							pointLightDistance:   { type: "fv1", value: [] },
 
-					"float depth = gl_FragCoord.z / gl_FragCoord.w;\n"+
+							spotLightColor:   { type: "fv", value: [] },
+							spotLightPosition:   { type: "fv", value: [] },
+							spotLightDistance:   { type: "fv", value: [] },
+							spotLightDirection:   { type: "fv1", value: [] },
+							spotLightAngleCos:   { type: "fv1", value: [] },
+							spotLightExponent:   { type: "fv1", value: [] },
 
-					"#ifdef FOG_EXP2\n"+
+							hemisphereLightSkyColor:   { type: "fv", value: [] },
+							hemisphereLightGroundColor:   { type: "fv", value: [] },
+							hemisphereLightDirection:   { type: "fv", value: [] },
 
-						"const float LOG2 = 1.442695;"+
-						"float fogFactor = exp2( - fogDensity * fogDensity * depth * depth * LOG2 );"+
-						"fogFactor = 1.0 - clamp( fogFactor, 0.0, 1.0 );\n"+
+							"fogDensity" : { type: "f", value: 0.00025 },
+							"fogNear" : { type: "f", value: 1 },
+							"fogFar" : { type: "f", value: 2000 },
+							"fogColor" : { type: "c", value: new THREE.Color( 0xffffff ) },
+							"blendPercent" : { type: "f", value: 0.00000 },
+						  
+						};	  
+						var attributes_default = {
+							everyOtherNormal: { type: 'v3', value: [] },
+							everyOtherZ: { type: 'f', value: [] },
+						};
+						var mat = new THREE.ShaderMaterial( {
+							uniforms:       uniforms_default,
+							attributes:     attributes_default,
+							vertexShader:   vertShader_default,
+							fragmentShader: fragShader_default
 
-					"#else\n"+
-
-						"float fogFactor = smoothstep( fogNear, fogFar, depth );\n"+
-
-					"#endif\n"+
-
-					"gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );\n"+
-
-				"#endif\n"+
-                "}\n";
-                
-                //the default shader - the one used by the analytic solver, just has some simple stuff
-                //note that this could be changed to do just life and lifespan, and calculate the 
-                //size and color from to uniforms. Im not going to bother
-                var attributes_default = {
-                   
-                    
-                };
-                var uniforms_default = {
-                   
-                    texture:   { type: "t", value: null },
-					ambientLightColor:   { type: "fv", value: [] },
-
-					directionalLightColor:   { type: "fv", value: [] },
-					directionalLightDirection:   { type: "fv", value: [] },
-
-					pointLightColor:   { type: "fv", value: [] },
-					pointLightPosition:   { type: "fv", value: [] },
-					pointLightDistance:   { type: "fv1", value: [] },
-
-					spotLightColor:   { type: "fv", value: [] },
-					spotLightPosition:   { type: "fv", value: [] },
-					spotLightDistance:   { type: "fv", value: [] },
-					spotLightDirection:   { type: "fv1", value: [] },
-					spotLightAngleCos:   { type: "fv1", value: [] },
-					spotLightExponent:   { type: "fv1", value: [] },
-
-					hemisphereLightSkyColor:   { type: "fv", value: [] },
-					hemisphereLightGroundColor:   { type: "fv", value: [] },
-					hemisphereLightDirection:   { type: "fv", value: [] },
-
-					"fogDensity" : { type: "f", value: 0.00025 },
-					"fogNear" : { type: "f", value: 1 },
-					"fogFar" : { type: "f", value: 2000 },
-					"fogColor" : { type: "c", value: new THREE.Color( 0xffffff ) }
-                  
-                };
-                //uniforms_default.texture.value.wrapS = uniforms_default.texture.value.wrapT = THREE.RepeatWrapping;
-                this.mat = new THREE.ShaderMaterial( {
-                    uniforms:       uniforms_default,
-                    attributes:     attributes_default,
-                    vertexShader:   vertShader_default,
-                    fragmentShader: fragShader_default
-
-                });
-				this.mat.lights = true;
-				this.mat.fog = true;
-            //this.ma.uniforms.texture.value = skyCubeTexture;    
-			// this.mat = new THREE.MeshPhongMaterial();
-			// this.mat.color.r = .5;
-			// this.mat.color.g = .5;
-			// this.mat.color.b = .5;
-			// this.mat.depthCheck = false;
-			// this.mat.wireframe = false;
-			// this.mat.transparent = true;	
-				
+						});
+						mat.lights = true;
+						mat.fog = true;
+						//mat.wireframe = true;
+						return mat;
+					//this.ma.uniforms.texture.value = skyCubeTexture;    
+					// this.mat = new THREE.MeshPhongMaterial();
+					// this.mat.color.r = .5;
+					// this.mat.color.g = .5;
+					// this.mat.color.b = .5;
+					// this.mat.depthCheck = false;
+					// this.mat.wireframe = false;
+					// this.mat.transparent = true;	
+				}
 				
 				this.buildMesh3 = function(size,res)
 				{
@@ -935,18 +947,26 @@
 					//var newtile = new THREE.Mesh(new THREE.PlaneGeometry(size,size,res,res),this.mat);
 					var newtile;
 					if(side == 0)
-						newtile = new THREE.Mesh(this.buildMesh0(100,res),this.mat);
+						newtile = new THREE.Mesh(this.buildMesh0(100,res),this.getMat());
 					if(side == 1)
-						newtile = new THREE.Mesh(this.buildMesh1(100,res),this.mat);
+						newtile = new THREE.Mesh(this.buildMesh1(100,res),this.getMat());
 					if(side == 2)
-						newtile = new THREE.Mesh(this.buildMesh2(100,res),this.mat);
+						newtile = new THREE.Mesh(this.buildMesh2(100,res),this.getMat());
 					if(side == 3)
-						newtile = new THREE.Mesh(this.buildMesh3(100,res),this.mat);	
+						newtile = new THREE.Mesh(this.buildMesh3(100,res),this.getMat());	
 					newtile.geometry.dynamic = true;
 					newtile.doublesided = true;
 					newtile.side = side;
 					newtile.receiveShadow = true;
 					newtile.castShadow = false;
+					
+					for(var i = 0; i < newtile.geometry.vertices.length; i++)
+					{
+						newtile.material.attributes.everyOtherZ.value.push(0);
+						newtile.material.attributes.everyOtherNormal.value.push(new THREE.Vector3(0,0,1));
+					}
+					newtile.material.attributes.everyOtherZ.needsUpdate = true;
+					newtile.material.attributes.everyOtherNormal.needsUpdate = true;
 					this.tiles[res].push(newtile);
 					return newtile;
 				}
@@ -1886,28 +1906,52 @@
 								//now that I've drawn my tile, I can remove my children.
 								var list = []
 								tile.cleanup(list)
+								
+								tile.updateMesh();
+								if(list.length > 0)
+								tile.mesh.visible = false;
+								var o = tile.mesh;
 								list.forEach(function(e)
 								{
 										
 										if(e.parent)
 										{
-											// var fade = function()
-											// {
-												// e.material.opacity -= .01;
-												// e.material.depthWrite = false;
-												// e.renderDepth = 1;
-												// if(e.material.opacity <= 0)
-												// {
-													e.quadnode = null;
+											 var fade = function()
+											 {
+												e.material.uniforms.blendPercent.value -= .01;
+												 if(e.material.uniforms.blendPercent.value > 0)
+												 {
+													window.requestAnimationFrame(fade);
+												 }else
+												 {
 													e.parent.remove(e);
-												// }else
-												// window.requestAnimationFrame(fade);
-											// };
-											// window.requestAnimationFrame(fade);
+													e.quadnode = null;
+													o.visible = true
+												 }
+											 };
+											 window.requestAnimationFrame(fade);
 											
 										}
 								});
-								tile.updateMesh();
+								
+								var e = tile.mesh;
+								e.material.uniforms.blendPercent.value = 1;
+								 // var fade = function()
+								 // {
+									
+									 // e.material.uniforms.blendPercent.value += .01;
+									 // if(e.material.uniforms.blendPercent.value < 1)
+									 // {
+										
+										// window.requestAnimationFrame(fade);
+									 // }
+									
+								 // };
+											
+								
+								// tile.fade = window.requestAnimationFrame(fade);
+								
+								
 								 var p = tile.parent;
 								 //look up for the node I'm replaceing
 								 while(p && !p.waiting_for_rebuild)
@@ -1919,6 +1963,7 @@
 								 
 									p.waiting_for_rebuild--;
 									tile.mesh.visible = false;
+									window.cancelAnimationFrame(tile.fade);
 									
 								 }
 								 else  if(p.waiting_for_rebuild == 1)
@@ -1953,6 +1998,19 @@
 										if(l.mesh)
 										{
 											l.mesh.visible = true;
+											var o = l.mesh;
+											 o.material.uniforms.blendPercent.value = 0;
+											 var fade = function()
+											 {
+												
+												o.material.uniforms.blendPercent.value += .01;
+												 if(o.material.uniforms.blendPercent.value < 1)
+												 {
+													window.requestAnimationFrame(fade);
+												 }
+												
+											 };
+											 window.requestAnimationFrame(fade);
 										}	
 									});
 								 }
@@ -2027,58 +2085,141 @@
 				invmat.elements[12] = 0;
 				invmat.elements[13] = 0;
 				invmat.elements[14] = 0;
+				var res = Math.floor(Math.sqrt(geo.vertices.length));
 				var normals = [];
-				for(var i = 0; i < geo.vertices.length; i++)
+				var heights = [];
+				
+				var vertoffset1 = geo.vertices[4*res].clone().applyMatrix4(mesh.matrix).x - geo.vertices[6*res].clone().applyMatrix4(mesh.matrix).x;
+						var vertoffset2 = geo.vertices[4*res].clone().applyMatrix4(mesh.matrix).y - geo.vertices[6*res].clone().applyMatrix4(mesh.matrix).y;
+						var vertoffset = 1;//Math.max(Math.abs(vertoffset1),Math.abs(vertoffset2));
+						
+				for(var j = 0; j < res; j++)
+				{
+					normals[j] = [];
+					heights[j] = [];
+					for(var l = 0; l < res; l++)
+					{
+					
+						var i = j * res + l;
+						var vertn = geo.vertices[i];
+						
+						
+						
+						var vertx0 = new THREE.Vector3(vertn.x-vertoffset,vertn.y,vertn.z);
+						var verty0 = new THREE.Vector3(vertn.x,vertn.y-vertoffset,vertn.z);
+						var vertx1 = new THREE.Vector3(vertn.x+vertoffset,vertn.y,vertn.z);
+						var verty1 = new THREE.Vector3(vertn.x,vertn.y+vertoffset,vertn.z);
+						var verts = [vertn,vertx0,verty0,vertx1,verty1];
+						for(var k = 0; k < verts.length; k++)
+						{
+							var z = 0;
+							var vert = verts[k].clone();
+							vert = vert.applyMatrix4(mesh.matrix);
+							// for(var j = 0; j < this.controlPoints.length; j++)
+							// {
+								// var cp = this.controlPoints[j];
+								// var dist = Math.sqrt(((vert.x + mx) - cp.x) * ((vert.x + mx) - cp.x) + ((vert.y + my) - cp.y) * ((vert.y + my) - cp.y));
+								// dist = Math.max(dist,0);
+								// z +=  Math.max(0, cp.z - Math.pow(cp.z * dist/cp.dist,cp.falloff));
+							// }
+							//z = Math.sin((mx + vert.x)/10) * 10;
+							z = self.SimplexNoise.noise2D((vert.x)/10000,(vert.y)/1000) * 250;
+							z += self.SimplexNoise.noise2D((vert.x)/1000,(vert.y)/100) * 25;
+							z += self.SimplexNoise.noise2D((vert.x)/1000,(vert.y)/5000) * 50;
+							z += self.SimplexNoise.noise2D((vert.x)/500,(vert.y)/50) * 10;
+							 z += self.SimplexNoise.noise2D((vert.x)/100,(vert.y)/100) * 5.0;
+							 z += self.SimplexNoise.noise2D((vert.x)/10,(vert.y)/10) * 0.5;
+							//z += 286;
+							if(z < 0)  z/=5;
+							
+							verts[k].z = z;
+						}
+						
+						//var n = vertn.clone().sub(vertx).cross(vertn.clone().sub(verty)).normalize();
+						var n = new THREE.Vector3(vertx1.z - vertx0.z,verty1.z - verty0.z,2*vertoffset)
+						n.normalize();
+						//n = n.applyMatrix4(invmat);
+						normals[j][l] = n;
+						heights[j][l] = vertn.z;
+					}	
+				}
+				
+				for(var i = 0; i < geo.faces.length; i++)
+				{	
+						geo.faces[i].vertexNormals[0] = normals[Math.floor(geo.faces[i].a/(res))][geo.faces[i].a % res ];
+						geo.faces[i].vertexNormals[1] =  normals[Math.floor(geo.faces[i].b/res)][geo.faces[i].b % res ];
+						geo.faces[i].vertexNormals[2] =  normals[Math.floor(geo.faces[i].c/res)][geo.faces[i].c % res ];;
+						//geo.faces[i].vertexNormals[3] = normals[geo.faces[i].d];	
+				}
+				
+				for(var j = 0; j < res; j++)
 				{
 					
-					var vertn = geo.vertices[i];
-					
-					var vertoffset = 1;
-					var vertx0 = new THREE.Vector3(vertn.x-vertoffset,vertn.y,vertn.z);
-					var verty0 = new THREE.Vector3(vertn.x,vertn.y-vertoffset,vertn.z);
-					var vertx1 = new THREE.Vector3(vertn.x+vertoffset,vertn.y,vertn.z);
-					var verty1 = new THREE.Vector3(vertn.x,vertn.y+vertoffset,vertn.z);
-					var verts = [vertn,vertx0,verty0,vertx1,verty1];
-					for(var k = 0; k < verts.length; k++)
+					for(var l = 0; l < res; l++)
 					{
-						var z = 0;
-						var vert = verts[k].clone();
-						vert = vert.applyMatrix4(mesh.matrix);
-						// for(var j = 0; j < this.controlPoints.length; j++)
-						// {
-							// var cp = this.controlPoints[j];
-							// var dist = Math.sqrt(((vert.x + mx) - cp.x) * ((vert.x + mx) - cp.x) + ((vert.y + my) - cp.y) * ((vert.y + my) - cp.y));
-							// dist = Math.max(dist,0);
-							// z +=  Math.max(0, cp.z - Math.pow(cp.z * dist/cp.dist,cp.falloff));
-						// }
-						//z = Math.sin((mx + vert.x)/10) * 10;
-						z = self.SimplexNoise.noise2D((vert.x)/10000,(vert.y)/1000) * 250;
-						z += self.SimplexNoise.noise2D((vert.x)/1000,(vert.y)/100) * 25;
-						z += self.SimplexNoise.noise2D((vert.x)/1000,(vert.y)/5000) * 50;
-						z += self.SimplexNoise.noise2D((vert.x)/500,(vert.y)/50) * 10;
-						 z += self.SimplexNoise.noise2D((vert.x)/100,(vert.y)/100) * 5.0;
-						 z += self.SimplexNoise.noise2D((vert.x)/10,(vert.y)/10) * 0.5;
-						//z += 286;
-						if(z < 0)  z/=5;
 						
-						verts[k].z = z;
+						
+							if(l % 2 ==1 && j % 2 !=1)
+							{
+								var z00 = heights[j-0 >= 0? j-0 : j][l+1 < res? l+1 : l];
+								var z11 = heights[j+0 < res? j+0 : j][l-1 >= 0? l-1 : l];
+								var z = (z00+ z11)/2;
+								
+								
+								var n00 = normals[j-0 >= 0? j-0 : j][l+1 < res? l+1 : l];
+								var n11 = normals[j+0 < res? j+0 : j][l-1 >= 0? l-1 : l];
+								
+								
+								var norm = n00.clone().add(n11).multiplyScalar(.5);
+								
+								mesh.material.attributes.everyOtherNormal.value[j * res + l] = norm;
+								mesh.material.attributes.everyOtherZ.value[j * res + l] = z;
+							}
+							else if(l % 2 !=1 && j % 2 ==1)
+							{
+								var z00 = heights[j-1 >= 0? j-1 : j][l+0 < res? l+0 : l];
+								var z11 = heights[j+1 < res? j+1 : j][l-0 >= 0? l-0 : l];
+								var z = (z00+ z11)/2;
+								
+								
+								var n00 = normals[j-1 >= 0? j-1 : j][l+0 < res? l+0 : l];
+								var n11 = normals[j+1 < res? j+1 : j][l-0 >= 0? l-0 : l];
+								
+								
+								var norm = n00.clone().add(n11).multiplyScalar(.5);
+								
+								mesh.material.attributes.everyOtherNormal.value[j * res + l] = norm;
+								mesh.material.attributes.everyOtherZ.value[j * res + l] = z;
+							}
+							else if(l % 2 ==1 && j % 2 ==1)
+							{
+								var z00 = heights[j-1 >= 0? j-1 : j][l+1 < res? l+1 : l];
+								var z11 = heights[j+1 < res? j+1 : j][l-1 >= 0? l-1 : l];
+								var z001 = heights[j+1 < res? j+1 : j][l+1 < res? l+1 : l];
+								var z111 = heights[j-1 >= 0? j-1 : j][l-1 >= 0? l-1 : l];
+								var z = (z00+ z11 + z001 + z111)/4;
+								
+								
+								var n00 = normals[j-1 >= 0? j-1 : j][l+1 < res? l+1 : l];
+								var n11 = normals[j+1 < res? j+1 : j][l-1 >= 0? l-1 : l];
+								var n001 = normals[j+1 < res? j+1 : j][l+1 < res? l+1 : l];
+								var n111 = normals[j-1 >= 0? j-1 : j][l-1 >= 0? l-1 : l];
+								
+								var norm = n00.clone().add(n11).add(n111).add(n001).multiplyScalar(.25);
+								
+								mesh.material.attributes.everyOtherNormal.value[j * res + l] = norm;
+								mesh.material.attributes.everyOtherZ.value[j * res + l] = z;
+							}
+							else
+							{
+								mesh.material.attributes.everyOtherNormal.value[j * res + l] = normals[j][l];
+								mesh.material.attributes.everyOtherZ.value[j * res + l]  = heights[j][l];
+							}
+						
 					}
-					
-					//var n = vertn.clone().sub(vertx).cross(vertn.clone().sub(verty)).normalize();
-					var n = new THREE.Vector3(vertx1.z - vertx0.z,verty1.z - verty0.z,2*vertoffset)
-					n.normalize();
-					//n = n.applyMatrix4(invmat);
-					normals.push(n);
 				}
-				
-				for(var i =0; i < geo.faces.length; i++)
-				{	
-					geo.faces[i].vertexNormals[0] = normals[geo.faces[i].a];
-					geo.faces[i].vertexNormals[1] = normals[geo.faces[i].b];
-					geo.faces[i].vertexNormals[2] = normals[geo.faces[i].c];
-					//geo.faces[i].vertexNormals[3] = normals[geo.faces[i].d];
-				
-				}
+				mesh.material.attributes.everyOtherNormal.needsUpdate = true;
+				mesh.material.attributes.everyOtherZ.needsUpdate = true;
 				geo.verticesNeedUpdate = true;
 				geo.computeBoundingSphere();
 				geo.computeBoundingBox();
