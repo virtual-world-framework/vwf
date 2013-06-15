@@ -117,10 +117,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                 var view = this;
                 var scene, canvas;
+                var cesiumOptions = { "contextOptions": { "alpha": true }, }; 
 
                 if ( this.useCesiumWidget ) {
-                    
-                    node.widget = new Cesium.CesiumWidget( this.containerDiv, undefined, { "alpha": true } );
+                    debugger;
+                    node.widget = new Cesium.CesiumWidget( this.containerDiv, cesiumOptions );
                     scene = node.widget.scene;
 
                     if ( scene.sun !== undefined ) {
@@ -137,6 +138,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     }
 
                 } else {
+
+                    // the manual creation, has an error with the 
+                    // camera syncronization
                     canvas = document.createElement( 'canvas' );
                     canvas.className = 'fullSize';
                     document.getElementById( this.containerDiv ).appendChild( canvas );
@@ -144,7 +148,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     canvas.setAttribute( 'height', this.height );
                     canvas.setAttribute( 'width', this.width );
 
-                    scene = new Cesium.Scene( canvas, { "alpha": true } );
+                    scene = new Cesium.Scene( canvas, cesiumOptions.contextOptions );
 
                     var bing = new Cesium.BingMapsImageryProvider({
                         url : 'http://dev.virtualearth.net',
