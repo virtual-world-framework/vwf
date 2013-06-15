@@ -120,7 +120,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 var cesiumOptions = { "contextOptions": { "alpha": true }, }; 
 
                 if ( this.useCesiumWidget ) {
-                    debugger;
                     node.widget = new Cesium.CesiumWidget( this.containerDiv, cesiumOptions );
                     scene = node.widget.scene;
 

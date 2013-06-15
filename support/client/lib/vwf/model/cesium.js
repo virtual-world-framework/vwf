@@ -713,16 +713,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             // using the Cesium.Widget
                             if ( node.widget ) {
                                 
-                                switch ( propertyValue ) {
-                                    case "3D":
-                                        node.widget.transitioner.morphTo3D();
-                                        break;
-                                    case "2D":
-                                        node.widget.transitioner.morphTo2D();
-                                        break;
-                                    case "2.5D":
-                                        node.widget.transitioner.morphToColumbusView();
-                                        break;
+                                var currentRS = this.gettingProperty( nodeID, propertyName );
+                                if ( currentRS != propertyValue ) {
+                                    switch ( propertyValue ) {
+                                        case "3D":
+                                            node.widget._transitioner.to3D();
+                                            break;
+                                        case "2D":
+                                            node.widget._transitioner.to2D();
+                                            break;
+                                        case "2.5D":
+                                            node.widget._transitioner.toColumbusView();
+                                            break;
+                                    }
                                 }
                             } else if ( node.transitioner ) {
                                 switch ( propertyValue ) {
@@ -931,7 +934,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                 case "renderStyle":
                     if ( node.scene && node.scene.mode ) {
-                        switch ( node.renderObject.getStyle() ) {
+                        switch ( node.scene.mode ) {
                             case Cesium.SceneMode.COLUMBUS_VIEW:
                                 value = "2.5D";
                                 break;
