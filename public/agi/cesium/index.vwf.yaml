@@ -16,7 +16,7 @@ extends: http://vwf.example.com/cesium.vwf
 properties:
   backgroundColor:
   renderStyle: "3D"
-  imageryProvider: 
+  imageryProvider: "bingAerial"
 children:
   #sun: 
     #extends: http://vwf.example.com/cesium/sun.vwf 
