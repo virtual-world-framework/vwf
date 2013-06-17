@@ -119,7 +119,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( propertyName == "transform" ) {
                 receiveModelTransformChanges.call( this, nodeID, propertyValue );
             } else if ( propertyName == "lookAt") {
-                receiveModelTransformChanges.call( this, nodeID, this.state.nodes[ nodeID ].transform );
+
+                var node = this.state.nodes[ nodeID ];
+
+                // If the state knows about the node, it is in the scene and should be updated
+                // Otherwise, it is a prototype and can be ignored
+                if ( node ) {
+                    receiveModelTransformChanges.call( this, nodeID, node.transform );
+                }
             }
         },
 
@@ -135,7 +142,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             } else if ( propertyName == "transform" ) {
                 receiveModelTransformChanges.call( this, nodeID, propertyValue );
             } else if ( propertyName == "lookAt") {
-                receiveModelTransformChanges.call( this, nodeID, this.state.nodes[ nodeID ].transform );
+
+                var node = this.state.nodes[ nodeID ];
+
+                // If the state knows about the node, it is in the scene and should be updated
+                // Otherwise, it is a prototype and can be ignored
+                if ( node ) {
+                    receiveModelTransformChanges.call( this, nodeID, node.transform );
+                }
             }
         },
 
@@ -449,11 +463,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             rebuildAllMaterials.call(this);
             if(sceneNode.renderer.setFaceCulling)
                 sceneNode.renderer.setFaceCulling( THREE.CullFaceBack );
-
-            // Set the camera that the view will render from
-            // It starts here as that dictated by the model until the view tells it otherwise
-            var modelCameraInfo = sceneNode.camera;
-            this.state.cameraInUse = modelCameraInfo.threeJScameras[ modelCameraInfo.ID ];
 
             // Schedule the renderer.
             var scene = sceneNode.threeScene;
