@@ -27,6 +27,7 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 				this.rtc.localPlayer = document.createElement('video');
 				this.rtc.localPlayer.setAttribute('width', '640');
 				this.rtc.localPlayer.setAttribute('height', '480');
+				this.rtc.localPlayer.setAttribute('style', 'width:640;height:480;');
 				$(this.rtc.localPlayer).dialog();
 
 				this.rtcTarget = params.target;
@@ -40,15 +41,21 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 					if(this.rtcTarget == null)
 						this.rtcTarget = params.sender;
 
-					if( this.rtc.peerConn == null ){
+					if( !this.rtc.initialized )
+					{
 						this.rtc.remotePlayer = document.createElement('video');
 						this.rtc.remotePlayer.setAttribute('width', '640');
 						this.rtc.remotePlayer.setAttribute('height', '480');
+						this.rtc.remotePlayer.setAttribute('style', 'width:640;height:480;');
 						$(this.rtc.remotePlayer).dialog();
+
 						this.rtc.initialize({'video':true, 'audio':true});
+						//debugger;
 					}
-					else
+					else {
 						this.rtc.receiveMessage(params.rtcData);
+						//debugger;
+					}
 				}
 			}
 		},

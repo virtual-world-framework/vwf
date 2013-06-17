@@ -17,6 +17,7 @@ function MyRTC(localPlayer, remotePlayer, channelSendCallback, channelReceiveCal
 	// set flags and session variables
 	this.peerConn = null;
 	this.localStream = null;
+	this.initialized = false;
 	this.isMediaSet = false;
 	this.isRemoteStreamStarted = false;
 	this.readyToOffer = false;
@@ -39,6 +40,8 @@ function MyRTC(localPlayer, remotePlayer, channelSendCallback, channelReceiveCal
  */
 MyRTC.prototype.initialize = function( params )
 {
+	this.initialized = true;
+
 	// register socket message callback
 	if( this.registerReceiveCallback ){
 		this.registerReceiveCallback( bind_safetydance(this, this.receiveMessage) );
