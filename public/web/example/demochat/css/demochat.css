@@ -71,6 +71,9 @@
 {
   position:absolute;
   bottom:25px;
+  top:0px;
+  width:100%;
+  overflow-y:scroll;
   align:bottom;
 }
 
