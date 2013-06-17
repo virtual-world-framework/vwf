@@ -24,6 +24,11 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 
 			if( name == 'rtcCall' )
 			{
+				this.rtc.localPlayer = document.createElement('video');
+				this.rtc.localPlayer.setAttribute('width', '640');
+				this.rtc.localPlayer.setAttribute('height', '480');
+				$(this.rtc.localPlayer).dialog();
+
 				this.rtcTarget = params.target;
 				this.rtc.initialize({'video':true, 'audio':true});
 			}
@@ -32,13 +37,18 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 			{
 				if(_UserManager.GetCurrentUserName() == params.target)
 				{
-					if(this.rtcTraget == null)
-						this.rtcTraget = params.sender;
+					if(this.rtcTarget == null)
+						this.rtcTarget = params.sender;
 
-					if( this.rtc.peerConn == null )
+					if( this.rtc.peerConn == null ){
+						this.rtc.remotePlayer = document.createElement('video');
+						this.rtc.remotePlayer.setAttribute('width', '640');
+						this.rtc.remotePlayer.setAttribute('height', '480');
+						$(this.rtc.remotePlayer).dialog();
 						this.rtc.initialize({'video':true, 'audio':true});
+					}
 					else
-						this.rtc.receiveCallback(params.rtcData);
+						this.rtc.receiveMessage(params.rtcData);
 				}
 			}
 		},
