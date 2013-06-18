@@ -65,10 +65,14 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
           "action" => "setState",
           "parameters" => [ {
             "configuration" =>
-              { "environment" => ENV['RACK_ENV'] || "development" },
-            "nodes" =>
-              [ env["vwf.application"] ]
+              { "environment" => ENV['RACK_ENV'] || "development" }
           } ]
+
+        send "time" => session[:transport].time,
+          "action" => "createNode",
+          "parameters" => [
+            env["vwf.application"]
+          ]
 
       end
 
