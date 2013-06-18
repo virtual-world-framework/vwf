@@ -535,6 +535,40 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             }
                             break;
 
+                        case "terrainProvider":
+                            if ( node.terrainProvider && node.terrainProvider == propertyValue ) {
+                                break;
+                            }
+
+                            var terrainProvider = undefined;
+                            switch ( propertyValue ) {
+                                case "cesium":
+                                    node.terrainProvider = propertyValue;
+                                    terrainProvider = new Cesium.CesiumTerrainProvider({
+                                        url : 'http://cesium.agi.com/smallterrain',
+                                        credit : 'Terrain data courtesy Analytical Graphics, Inc.'
+                                    });                                    
+                                    break;
+                                case "vr":
+                                    node.terrainProvider = propertyValue;
+                                    terrainProvider = new Cesium.VRTheWorldTerrainProvider({
+                                        url : 'http://www.vr-theworld.com/vr-theworld/tiles1.0.0/73/',
+                                        credit : 'Terrain data courtesy VT MÄK'
+                                    });                                    
+                                    break;
+                                default:
+                                    node.terrainProvider = "ellipsoid";
+                                    break;
+
+                            }
+
+                            if ( terrainProvider !== undefined ) {
+                                node.centralBody.depthTestAgainstTerrain = true;
+                                node.centralBody.terrainProvider = terrainProvider;
+                            }
+                            break;
+
+
                         case "imageryProvider":
                             
                             if ( node.imageryProvider && node.imageryProvider == propertyValue ) {
@@ -932,6 +966,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
 
                 case "imageryProvider":
+                    break;
+                    
+                case "terrainProvider":
                     break;
 
                 case "renderStyle":
