@@ -154,10 +154,6 @@
     <script src="js/heartbeat.js"/>
     <script src="js/appearance.js"/>
     <script>
-      // Setup variable to track attempted login attempts.
-      var attemptingLogin = false;
-      var attemptedName = undefined;
-
       // Store the nodeID of the entire scene for later reference.
       var sceneId = vwf_view.kernel.find( "", "/" )[ 0 ];
 
@@ -171,16 +167,11 @@
 
       // Register a function to run when the login button is clicked.
       $( '#chatlogin' ).click( function( ) {
-        //  Track the display name that we are attempting to login with, as well as the fact we
-        //  attempted a login. 
-        attemptingLogin = true;
-        attemptedName = sanitizeUsername( $( '#playerNameInput' ).val( ) );
-
         //  Disable the input fields while the login attempt is being made.
         disableLogonDataEntry( );
 
         //  Make the actual call to the model to attempt to create the user.
-        vwf_view.kernel.callMethod( sceneId, "createUser", [ attemptedName, $( '#playerTextColor' ).val( ), $( '#loginSoundSelect' ).val( ) ] );
+        vwf_view.kernel.callMethod( sceneId, "createUser", [ sanitizeUsername( $( '#playerNameInput' ).val( ) ), $( '#playerTextColor' ).val( ), $( '#loginSoundSelect' ).val( ), vwf_view.kernel.moniker( ) ] );
       });
       
       // Register a callback so when the loginSoundSelectTest button is pressed, the sound currently
@@ -277,6 +268,12 @@
         }
         var timestamp = timestampDate.getMonth() + "/" + timestampDate.getDate() + " " + timestampHours + ":" + timestampMinutes + ":" +  timestampSeconds + " " + timestampPeriod;
 
+        
+        // If the event that triggered this event handler was the creation of a new user,
+        // And the event issued from this client, grab the camera from the new object to use for this user
+        var clientThatIssuedEvent = this.kernel.client( );
+        var me = this.kernel.moniker( );
+        
         //  If we are connected and receive a userColorChange event, change the display color for that user.
         if ( ( isConnected( ) ) && ( eventName == "userColorChange" ) ) {
           changeUserColor( eventParameters[ 0 ], eventParameters[ 1 ] );
@@ -317,13 +314,9 @@
               $( '#chatContent' ).append( newLine );
               addUser( eventParameters[ 1 ], eventParameters[ 2 ] );
             }
-
-            //  Test if we are attempting to login ourselves, and if so, if the name we attempted to login with is the one that was just created...
-            if ( ( attemptingLogin == true ) && ( attemptedName == eventParameters[ 1 ] ) ) {
-              //  If this event was our own login, reset the attempting login tracking variables
+            else if ( clientThatIssuedEvent == me ) {
+              //  If this event was our own login,
               //  start the heartbeat for this particular user.
-              attemptingLogin = false;
-              attemptedName = undefined;
               startHeartbeat( eventParameters[ 0 ], eventParameters[ 4 ] );
 
               // Display the chat interface.
@@ -337,11 +330,7 @@
           }
 
           //  If the event is of type userCreateFailed, and it was in response to our attempt to log in...
-          if ( ( eventName == "userCreateFailed" ) && ( attemptingLogin == true ) && ( attemptedName == eventParameters[ 0 ] ) ) {
-            //  Reset the attempted login tracking variables.
-            attemptingLogin = false;
-            attemptedName = undefined;
-
+          if ( ( eventName == "userCreateFailed" ) && ( clientThatIssuedEvent == me ) ) {
             //  Re-enable the logon data inputs.
             enableLogonDataEntry( );
 

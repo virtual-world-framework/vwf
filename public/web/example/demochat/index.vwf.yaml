@@ -87,7 +87,7 @@ children:
       };
 scripts:
 - |
-  this.createUser = function( userName, userColor, userSound ) {
+  this.createUser = function( userName, userColor, userSound, viewHandle ) {
     //First, test if the userName is valid.
     if ( this.users.testUsername( userName ) == false ) {
       // Raise event that the username wasn't usable.
@@ -101,6 +101,7 @@ scripts:
         "extends": "demochatuser.vwf",
         "properties": {
           "displayName": userName,
+          "viewHandle": viewHandle,
           "displayColor": userColor,
           "alertSound": userSound,
           "lastHeartbeat": this.time
