@@ -151,7 +151,7 @@ properties:
   animationPlaying:
 
     set: |
-      if ( this.animationStartTime$ && ! this.animationPauseTime$ ) {
+      if ( this.animationStartTime$ != null && this.animationPauseTime$ == null ) {
         if ( ! value ) {
           // Mark as paused at the current time.
           this.animationPauseTime$ = this.time;
@@ -189,8 +189,7 @@ properties:
       }
 
     get: |
-      return !! this.animationStartTime$ &&
-        ! this.animationPauseTime$;
+      return this.animationStartTime$ != null && this.animationPauseTime$ == null;
 
   ## The most recent value of `animationTime` recognized by this behavior.
   ## 
