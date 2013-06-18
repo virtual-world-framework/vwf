@@ -261,7 +261,13 @@
       vwf_view.firedEvent = function ( nodeId, eventName, eventParameters ) {
         // Go ahead and generate a time stamp, since most of the scene events need one.
         var timestampDate = new Date( );
-        var timestamp = timestampDate.toLocaleString( );
+		var timestampHours = timestampDate.getHours();
+		var timestampPeriod = "AM";
+		if ( timestampHours > 12 ) {
+		  timestampHours = timestampHours - 12;
+		  timestampPeriod = "PM"
+		}
+        var timestamp = timestampDate.getMonth() + "/" + timestampDate.getDate() + " " + timestampHours + ":" + timestampDate.getMinutes() + ":" +  timestampDate.getSeconds() + " " + timestampPeriod;
 
         //  If we are connected and receive a userColorChange event, change the display color for that user.
         if ( ( isConnected( ) ) && ( eventName == "userColorChange" ) ) {
@@ -341,7 +347,7 @@
 
           //  If the event was a message from a user and we are connected, display the message in the chat window.
           if ( ( isConnected( ) ) && ( eventName == "userMessage" ) ) {
-            var newLine = "<span class='" + eventParameters[ 0 ] + "' style='color:" + eventParameters[ 1 ] + "'>[" + eventParameters[ 0 ] + "] [" + timestamp + "] " + eventParameters[ 2 ] + "</span></br>";
+		    var newLine = "<div class='" + eventParameters[ 0 ] + "' style='width:300px;color:" + eventParameters[ 1 ] + ";float:left;'>[" + eventParameters[ 0 ] + "] [" + timestamp + "] </div><div class='" + eventParameters[ 0 ] + "' style='color:" + eventParameters[ 1 ] + "'>" + eventParameters[ 2 ] + "</div>";
             $( '#chatContent' ).append( newLine );
           }
         }
