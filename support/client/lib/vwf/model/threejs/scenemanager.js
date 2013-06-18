@@ -29,8 +29,8 @@ SceneManager.prototype.rebuild = function(mo,md)
 	maxDepth = md;
 	var children = this.root.getChildren();
 	this.root.deinitialize();
-	this.min = [-130,-130,-120];
-	this.max = [130,130,140];
+	this.min = [-64000,-64000,-64000];
+	this.max = [64000,64000,64000];
 	this.root = new SceneManagerRegion(this.min,this.max,0,this.scene,0);
 	for(var i =0; i < children.length; i++)
 		this.root.addChild(children[i]);
@@ -134,8 +134,8 @@ SceneManager.prototype.getTexture = function(src)
 }
 SceneManager.prototype.initialize = function(scene)
 {
-	this.min = [-130,-130,-120];
-	this.max = [130,130,140];
+	this.min = [-64000,-64000,-64000];
+	this.max = [64000,64000,64000];
 	this.BatchManagers = [];
 	this.specialCaseObjects = [];
 	this.tempDebatchList = [];

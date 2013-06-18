@@ -474,7 +474,10 @@
 						"}    \n";
 						var fragShader_default = 
 					   
-						"uniform sampler2D diffuseMap;\n"+
+						"uniform sampler2D grassSampler;\n"+
+						"uniform sampler2D cliffSampler;\n"+
+						"uniform sampler2D dirtSampler;\n"+
+						"uniform sampler2D snowSampler;\n"+
 						"#if MAX_DIR_LIGHTS > 0\n"+
 
 						
@@ -493,21 +496,21 @@
 						"varying vec3 pos;"+
 						"varying vec3 n;"+
 						"varying vec3 wN;"+
-						"vec4 getTexture(sampler2D texture,vec3 coords, vec3 norm)" +
+						"vec4 getTexture(vec3 coords, vec3 norm)" +
 						"{"+
 							//"coords /= 100.0;\n"+
-							"vec2 c0 = fract(coords.xy/10.0)/2.0 + (vec2(0.0,0.0));\n"+
-							"vec2 c1 = fract(coords.xy/10.0)/2.0 + (vec2(0.0,0.5));\n"+
-							"vec2 c2 = fract(coords.xy/10.0)/2.0 + (vec2(0.5,0.0));\n"+
-							"vec2 c3 = fract(coords.xy/30.0)/2.0 + (vec2(0.5,0.5));\n"+
-							"vec2 c0a = fract(coords.xy/100.0)/2.0 + (vec2(0.0,0.0));\n"+
-							"vec2 c1a = fract(coords.xy/100.0)/2.0 + (vec2(0.0,0.5));\n"+
-							"vec2 c2a = fract(coords.xy/100.0)/2.0 + (vec2(0.5,0.0));\n"+
-							"vec2 c3a = fract(coords.xy/300.0)/2.0 + (vec2(0.5,0.5));\n"+
-							"vec4 color0 =.5*texture2D(texture,c0) +  .5*texture2D(texture,c0a);\n"+
-							"vec4 color1 =.5*texture2D(texture,c1) +  .5*texture2D(texture,c1a);\n"+
-							"vec4 color2 = .5*texture2D(texture,c2) +  .5*texture2D(texture,c2a);\n"+
-							"vec4 color3 = .5*texture2D(texture,c3) +  .5*texture2D(texture,c3a);\n"+
+							"vec2 c0 = (coords.xy/10.0)/2.0 ;\n"+
+							"vec2 c1 = (coords.xy/10.0)/2.0 ;\n"+
+							"vec2 c2 = (coords.xy/10.0)/2.0 ;\n"+
+							"vec2 c3 = (coords.xy/30.0)/2.0 ;\n"+
+							"vec2 c0a = (coords.xy/20.0)/2.0 ;\n"+
+							"vec2 c1a = (coords.xy/100.0)/2.0 ;\n"+
+							"vec2 c2a = (coords.xy/100.0)/2.0 ;\n"+
+							"vec2 c3a = (coords.xy/300.0)/2.0 ;\n"+
+							"vec4 grass =.5*texture2D(grassSampler,c0) +  .5*texture2D(grassSampler,c0a);\n"+
+							"vec4 cliff =.5*texture2D(cliffSampler,c1) +  .5*texture2D(cliffSampler,c1a);\n"+
+							"vec4 dirt = .5*texture2D(dirtSampler,c2) +  .5*texture2D(dirtSampler,c2a);\n"+
+							"vec4 snow = .5*texture2D(snowSampler,c3) +  .5*texture2D(snowSampler,c3a);\n"+
 							"float side = pow(abs(dot(norm,(viewMatrix * vec4(0.0,0.0,1.0,0.0)).xyz)),4.0 * min(3.0,abs(pos.z/55.0)));\n"+
 							"float bottom = 1.0-smoothstep(-20.0,60.0,pos.z);\n"+
 							"float top = clamp(0.0,1.0,(smoothstep(100.0,140.0,pos.z)));\n"+
@@ -515,7 +518,7 @@
 							
 							
 							"vec4 mix =  normalize(vec4(side*3.0,bottom,middle,top)) ;\n"+
-							"return mix.r * color3 + mix.g * color0 + mix.b * color1 + mix.a * color2;\n"+
+							"return mix.r * grass + mix.g * grass + mix.b * cliff + mix.a * snow;\n"+
 						"}"+
 						"void main() {\n"+
 						"	vec3 light = vec3(0.0,0.0,0.0);\n"+
@@ -523,7 +526,7 @@
 						"	#if MAX_DIR_LIGHTS > 0\n"+
 						"	light += directionalLightColor[0] * dot(n, (viewMatrix * vec4(directionalLightDirection[0],0.0)).xyz);\n"+
 						"	#endif\n"+
-						"	vec4 diffuse = getTexture(diffuseMap,pos,n);\n"+
+						"	vec4 diffuse = getTexture(pos,n);\n"+
 						"	diffuse.a = 1.0;\n"+
 						"   gl_FragColor = ambient * diffuse + diffuse * vec4(light.xyz,1.0);\n"+
 						"#ifdef USE_FOG\n"+
@@ -579,13 +582,16 @@
 							hemisphereLightSkyColor:   { type: "fv", value: [] },
 							hemisphereLightGroundColor:   { type: "fv", value: [] },
 							hemisphereLightDirection:   { type: "fv", value: [] },
-							diffuseMap:   { type: "t", value: _SceneManager.getTexture( "terrain/TerrainAtlasDiffuse1.png" ) },
+							grassSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/grass.jpg" ) },
+							cliffSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/cliff.jpg" ) },
+							dirtSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/dirt.jpg" ) },
+							snowSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/snow.jpg" ) },
 							"fogDensity" : { type: "f", value: 0.00025 },
 							"fogNear" : { type: "f", value: 1 },
 							"fogFar" : { type: "f", value: 2000 },
 							"fogColor" : { type: "c", value: new THREE.Color( 0xffffff ) },
 							"blendPercent" : { type: "f", value: 0.00000 },
-						  
+						
 						};	  
 						var attributes_default = {
 							everyOtherNormal: { type: 'v3', value: [] },
@@ -600,9 +606,11 @@
 						});
 						mat.lights = true;
 						mat.fog = true;
-						uniforms_default.diffuseMap.value.minFilter = THREE.NearestFilter;
-						uniforms_default.diffuseMap.value.maxFilter = THREE.NearestFilter;
-						uniforms_default.diffuseMap.value.wrapS = uniforms_default.diffuseMap.value.wrapT = THREE.RepeatWrapping;
+						
+						uniforms_default.grassSampler.value.wrapS = uniforms_default.grassSampler.value.wrapT = THREE.RepeatWrapping;
+						uniforms_default.cliffSampler.value.wrapS = uniforms_default.cliffSampler.value.wrapT = THREE.RepeatWrapping;
+						uniforms_default.dirtSampler.value.wrapS = uniforms_default.dirtSampler.value.wrapT = THREE.RepeatWrapping;
+						uniforms_default.snowSampler.value.wrapS = uniforms_default.snowSampler.value.wrapT = THREE.RepeatWrapping;
 						//mat.wireframe = true;
 						return mat;
 						
