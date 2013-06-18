@@ -156,7 +156,20 @@
     <script>
       // Store the nodeID of the entire scene for later reference.
       var sceneId = vwf_view.kernel.find( "", "/" )[ 0 ];
-
+      var userDetails = {};
+      
+      
+      var debugInformation = function( ) {
+        vwf_view.logger.warn("Debug requested locally, printing view level information with local moniker " + vwf_view.kernel.moniker( ) + ".");
+        var userIndex = 1;
+        for ( var nodeId in userDetails ) {
+          if ( userDetails[ nodeId ] != undefined ) {
+            vwf_view.logger.warn("  (" + userIndex + ")  Node Id:'" + nodeId + "'  User Name: '" + userDetails[ nodeId ][ "displayName" ] + "'  View Handle: '" + userDetails[ nodeId ][ "viewHandle" ] + "'  Last Heartbeat: '" + userDetails[ nodeId ][ "lastHeartbeat" ] + "'");
+            userIndex++;
+          }
+        }
+        vwf_view.kernel.callMethod( sceneId, "debug", [ vwf_view.kernel.moniker( ) ] );
+      }
 
       // Display the login interface.
       displayLogin( );
@@ -213,7 +226,12 @@
         e.stopPropagation( );
         var code = ( e.keyCode ? e.keyCode : e.which );
         if ( ( code == 13 ) && ( isConnected( ) ) ) { //Enter
-          vwf_view.kernel.callMethod( playerId, "sendMessage", [ $( this ).val( ) ] );
+          if ( $( this ).val( ) == "/debug" ) {
+            debugInformation( );
+          }
+          else {
+            vwf_view.kernel.callMethod( playerId, "sendMessage", [ $( this ).val( ) ] );
+          }
         }
       } ).keyup( function( e ) {
         // Stop propogation of the event, if it was enter that was released and we are connected,
@@ -238,7 +256,7 @@
       $( '#disconnect' ).click( function( ) {
         if ( isConnected( ) ) {
           //First, remove the user.
-          vwf_view.kernel.callMethod( playerId, "removeUser", [ ] );
+          vwf_view.kernel.deleteNode( playerId );
           //Reset the web page. Set playerId to undefined, and display the login screen with enabled
           //inputs.
           playerId = undefined;
@@ -248,52 +266,112 @@
         }
       } );
 
+      vwf_view.deletedNode = function ( nodeId ) {
+        if ( isConnected( ) ) {
+          var timestamp = getTimestamp();
+          if ( userDetails[ nodeId ] != undefined ) {
+            var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='" + userDetails[ nodeId ][ "displayName" ] + "' style='color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left'>" + userDetails[ nodeId ][ "displayName" ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has left chat.</div></br>";
+            $( '#chatContent' ).append( newLine );
+            removeUser( userDetails[ nodeId ][ "displayName" ] );
+            userDetails[ nodeId ] = undefined;
+          }
+        }
+      };
+      
+      vwf_view.satProperty = function ( nodeId, propertyName, propertyValue ) {
+        if ( isConnected( ) ) {
+          var timestamp = getTimestamp();
+          if ( propertyName == "displayName" ) {
+            if ( userDetails[ nodeId ] != undefined ) {
+              if ( userDetails[ nodeId ][ propertyName ] != propertyValue ) {
+                //Display name has been changed.
+ 
+                removeUser( userDetails[ nodeId ][ "displayName" ] );
+ 
+                $( '.' + userDetails[ nodeId ][ "displayName" ] ).attr( "class", propertyValue );
+ 
+                addUser( propertyValue, userDetails[ nodeId ][ "displayColor" ] );
+          
+                var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='system'           style='color:#000000;float:left;'>The user </div><div class='" + propertyValue + "' style='color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left;margin-left:5px;'>" + userDetails[ nodeId ][ "displayName" ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has changed their display name to</div><div class='" + propertyValue + "' style='color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left;margin-left:5px;'>" + propertyValue + "</div><div class='system' style='color:#000000;float:left;'>.</div></br>";
+
+
+                $( '#chatContent' ).append( newLine );
+
+                userDetails[ nodeId ][ propertyName ] = propertyValue;
+              }
+            }
+          }
+          else if ( propertyName == "displayColor" ) {
+            if ( userDetails[ nodeId ] != undefined ) {
+              if ( userDetails[ nodeId ][ propertyName ] != propertyValue ) {
+                //Display color has been changed.
+                userDetails[ nodeId ][ propertyName ] = propertyValue;
+                changeUserColor( userDetails[ nodeId ][ "displayName" ], userDetails[ nodeId ][ "displayColor" ]);
+              }
+            }
+          }
+          else if ( ( propertyName == "viewHandle" ) || ( propertyName == "lastHeartbeat" ) ) {
+            if ( userDetails[ nodeId ] != undefined ) {
+              userDetails[ nodeId ][ propertyName ] = propertyValue;
+            }
+          }
+        }
+      };
+      
+      vwf_view.gotProperties = function ( nodeId, properties ) {
+        var clientThatIssuedEvent = this.kernel.client( );
+        var me = this.kernel.moniker( );
+        if ( clientThatIssuedEvent == me ) {
+          if ( ( properties[ "displayName" ] != undefined ) && ( properties[ "displayColor" ] != undefined ) ) {
+            var timestamp = getTimestamp();
+            userDetails[ nodeId ] = { "displayName": properties[ "displayName" ], "displayColor": properties[ "displayColor" ] };
+            var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='" + properties[ "displayName" ] + "' style='color:" + properties[ "displayColor" ] + ";float:left'>" + properties[ "displayName" ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has joined chat.</div></br>";
+              $( '#chatContent' ).append( newLine );
+              addUser( properties[ "displayName" ], properties[ "displayColor" ] );
+          }
+        }
+      };
+      
+      vwf_view.gotProperty = function ( nodeId, propertyName, propertyValue ) {
+        if ( ( propertyName == "viewHandle" ) && ( isConnected( ) ) ) {
+          if ( userDetails[ nodeId ] != undefined ) {
+            if ( ( userDetails[ nodeId ][ "viewHandle" ] != undefined ) && ( userDetails[ nodeId ][ "viewHandle" ] != propertyValue ) ) {
+              vwf_view.logger.warn( "View Handle for nodeId " + nodeId + " just changed!  New view handle is " + propertyValue + "." );
+              debugInformation( );
+            }
+            userDetails[ nodeId ][ "viewHandle" ] = propertyValue;
+          }
+          else {
+            vwf_view.logger.warn( "View received heartbeat for user we don't know about, with nodeId " + nodeId );
+            debugInformation( );
+            vwf_view.kernel.getProperties( nodeId );
+          }
+          if ( isConnected( ) && ( nodeId == playerId ) ) {
+            var me = this.kernel.moniker( );
+            if ( propertyValue != me ) {
+              playerId = undefined;
+              this.logger.warn( "Received heartbeat for our User, but its viewHandle did not match. (Received view handle: " + propertyValue + ")" );
+              debugInformation( );
+              isConnected( );
+            }
+          }
+        }
+      }
+
+      
+      
       //  Register the firedEvent callback handler.
       vwf_view.firedEvent = function ( nodeId, eventName, eventParameters ) {
         // Go ahead and generate a time stamp, since most of the scene events need one.
-        var timestampDate = new Date( );
-		    var timestampHours = timestampDate.getHours();
-		    var timestampPeriod = "AM";
-		    if ( timestampHours > 12 ) {
-		      timestampHours = timestampHours - 12;
-		      timestampPeriod = "PM"
-	 	    }
-		    var timestampMinutes = timestampDate.getMinutes();
-		    if ( timestampMinutes < 10 ) {
-		      timestampMinutes = "0" + timestampMinutes;
-		    }
-		    var timestampSeconds = timestampDate.getSeconds();
-        if ( timestampSeconds < 10 ) {
-          timestampSeconds = "0" + timestampSeconds;
-        }
-        var timestamp = timestampDate.getMonth() + "/" + timestampDate.getDate() + " " + timestampHours + ":" + timestampMinutes + ":" +  timestampSeconds + " " + timestampPeriod;
+        var timestamp = getTimestamp();
 
-        
+       
         // If the event that triggered this event handler was the creation of a new user,
         // And the event issued from this client, grab the camera from the new object to use for this user
         var clientThatIssuedEvent = this.kernel.client( );
         var me = this.kernel.moniker( );
         
-        //  If we are connected and receive a userColorChange event, change the display color for that user.
-        if ( ( isConnected( ) ) && ( eventName == "userColorChange" ) ) {
-          changeUserColor( eventParameters[ 0 ], eventParameters[ 1 ] );
-        }
 
-        // If we are connected and receive a userRename event, remove the previous username from the
-        // userList, rename the CSS class for the user, add the new username back into the UserList,
-        // and finally post a system message to the chat window.
-        if ( ( isConnected( ) ) && ( eventName == "userRename" ) )
-        {
-          removeUser( eventParameters[ 0 ] );
-          $( '.' + eventParameters[ 0 ] ).attr( "class", eventParameters[ 1 ] );
-          addUser( eventParameters[ 1 ], eventParameters[ 2 ] );
-          
-          
-          var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='system' style='color:#000000;float:left;'>The user </div><div class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + ";float:left;margin-left:5px;'>" + eventParameters[ 0 ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has changed their display name to</div><div class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + ";float:left;margin-left:5px;'>" + eventParameters[ 1 ] + "</div><div class='system' style='color:#000000;float:left;'>.</div></br>";
-
-          //var newLine = "<span class='system' style='color:#000000;'>[SYSTEM] [" + timestamp + "] The user </span><span class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + "'>" + eventParameters[ 0 ] + "</span><span class='system' style='color:#000000;'> has changed their display name to </span><span class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + "'>" + eventParameters[ 1 ] + "</span></br>";
-          $( '#chatContent' ).append( newLine );
-        }
 
         // If the event came from the user we are logged in as and it is
         // a playSoundEvent, then play the sound based on the parameter
@@ -304,12 +382,15 @@
 
         if ( nodeId == sceneId ) {
           // Recieved an event fired by the scene.
-
+          
           if ( eventName == "userCreated" ) {
             //  Handle the user created event.
+            
             //  First, test if we are already connected, if so, this is another user joining,
             //  send a message to the chat log about the user joining and add the user to the user list.
             if ( isConnected( ) ) {
+              //  First, store the user information.
+              userDetails[ eventParameters[ 0 ] ] = { "displayName": eventParameters[ 1 ], "displayColor": eventParameters[ 2 ] };
               var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + ";float:left'>" + eventParameters[ 1 ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has joined chat.</div></br>";
               $( '#chatContent' ).append( newLine );
               addUser( eventParameters[ 1 ], eventParameters[ 2 ] );
@@ -324,7 +405,8 @@
 
               // The fourth(index 3) eventParameter is an array of currently connected users, loop over the list adding them to the user list.
               for( var index = 0; index < eventParameters[ 3 ].length; index++ ) {
-                addUser( eventParameters[ 3 ][ index ][ 0 ], eventParameters[ 3 ][ index ][ 1 ] );
+                userDetails[ eventParameters[ 3 ][ index ][ 0 ] ] = { "displayName": eventParameters[ 3 ][ index ][ 1 ], "displayColor": eventParameters[ 3 ][ index ][ 2 ] };
+                addUser( eventParameters[ 3 ][ index ][ 1 ], eventParameters[ 3 ][ index ][ 2 ] );
               }
             }
           }
@@ -336,14 +418,6 @@
 
             //  Display the display name conflict error message.
             displayUserExistsMessage( );
-          }
-
- 
-          //  If the event was a user being removed and we are connected, send an informative message to the chat windows and remove the user from the user list.
-          if ( ( isConnected( ) ) && ( eventName == "userRemoved" ) ) {
-		        var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='" + eventParameters[ 0 ] + "' style='color:" + eventParameters[ 1 ] + ";float:left'>" + eventParameters[ 0 ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has left chat.</div></br>";
-            $( '#chatContent' ).append( newLine );
-            removeUser( eventParameters[ 0 ] );
           }
 
           //  If the event was a message from a user and we are connected, display the message in the chat window.

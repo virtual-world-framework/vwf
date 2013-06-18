@@ -150,3 +150,23 @@ function loadAudioSelects( ) {
         $( '#loginSoundSelect' ).append( newOption );
     }
 }
+
+
+function getTimestamp( ) {
+  var timestampDate = new Date( );
+	var timestampHours = timestampDate.getHours();
+	var timestampPeriod = "AM";
+	if ( timestampHours > 12 ) {
+	  timestampHours = timestampHours - 12;
+	  timestampPeriod = "PM"
+	}
+	var timestampMinutes = timestampDate.getMinutes();
+	if ( timestampMinutes < 10 ) {
+	  timestampMinutes = "0" + timestampMinutes;
+	}
+	var timestampSeconds = timestampDate.getSeconds();
+  if ( timestampSeconds < 10 ) {
+    timestampSeconds = "0" + timestampSeconds;
+  }
+  return timestampDate.getMonth() + "/" + timestampDate.getDate() + " " + timestampHours + ":" + timestampMinutes + ":" +  timestampSeconds + " " + timestampPeriod;
+}

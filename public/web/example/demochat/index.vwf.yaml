@@ -23,6 +23,9 @@ properties:
 methods:
 # The createUser method is used to create users when loggin in.
   createUser:
+# The debug method is used to provide model side debug tally of
+# users for debugging connection issues.
+  debug:
 events:
 # The userCreateFailed event is raised when user creation fails.
 # Currently only uniqueness of name is tested, so that is the only
@@ -34,9 +37,6 @@ events:
 # member arrays with display name/display color pairs of currently existing users in order to
 # populate the current user list, and finally the heartbeatInterval.
   userCreated:
-# The userRemoved event fires when users are removed, either by manually disconnecting or due
-# to their heartbeat timing out. The event has two arguments, the display name and display color.
-  userRemoved:
 # The userMessage event is posted when a user sends a message to the chat.
   userMessage:
 children:
@@ -81,12 +81,20 @@ children:
         // userRemoved event to inform the various views, then delete
         // the timed out User.
         toRemove.forEach( function ( entry ) {
-          myParent.userRemoved( entry.displayName, entry.displayColor );
           vwf.deleteNode( entry.id );
         } );
       };
 scripts:
 - |
+  this.debug = function( viewHandle ) {
+    var me = this;
+    var childIndex = 1;
+    me.logger.warn( "Model level debug response, request from User whose view has moniker " + viewHandle + "." );
+    me.users.children.forEach( function ( entry ) {
+      me.logger.warn( "  (" + childIndex + ") Node Id: '" + entry.id + "'  User Name: '" + entry.displayName + "' View Handle: '" + entry.viewHandle + "' Last Heartbeat: '" + entry.lastHeartbeat + "'");
+      childIndex++;
+    } );
+  };
   this.createUser = function( userName, userColor, userSound, viewHandle ) {
     //First, test if the userName is valid.
     if ( this.users.testUsername( userName ) == false ) {
@@ -111,7 +119,7 @@ scripts:
       this.users.children.create( userName, userDef, function( node ) {
         var userList = [ ];
         node.parent.children.forEach( function( entry ) {
-          userList.push( [ entry.displayName, entry.displayColor ] );
+          userList.push( [ entry.id, entry.displayName, entry.displayColor ] );
         } );
         this.parent.userCreated( node.id, node.displayName, node.displayColor, userList, node.parent.parent.heartbeatInterval );
       } );

@@ -1,27 +1,24 @@
 ---
 extends: http://vwf.example.com/node.vwf
 properties:
-  displayColor:
-    set: | # calculate and set the value
-      this.userColorChange(this.displayName, value);
-      this.displayColor = value;
-    get: | # calculate and return the value
-      return this.displayColor;
-    value:
-      "#000000"
+  displayColor: "#000000"
   displayName: ""
-  viewHandle: ""
+  viewHandle:
+      set: |
+        this.viewHandle = value;
+      get: |
+        this.lastHeartbeat = vwf.time();
+        return this.viewHandle;
+      value:
+        ""
   lastHeartbeat: undefined
   alertSound: "None"
 methods:
   renameUser:
   playSound:
   testMessageForName:
-  removeUser:
   sendMessage:
 events:
-  userColorChange:
-  userRename:
   playSoundEvent:
 scripts:
 - |
@@ -51,16 +48,11 @@ scripts:
     } );
     this.parent.parent.userMessage( this.displayName, this.displayColor, this.escapeHtml( message ) );
   };
-  // Trigger the userRemoved event, then delete yourself.
-  this.removeUser = function( ) {
-    this.parent.parent.userRemoved( this.displayName, this.displayColor );
-    vwf.deleteNode( this.id );
-  };
-  //Test the requested new username. If it is a valid username, raise the 
-  // userRename event, then change our displayName.
+
+  
+  //Test the requested new username. If it is a valid username then change our displayName.
   this.renameUser = function( newName ) {
     if ( this.parent.testUsername( newName ) ) {
-      this.userRename( this.displayName, newName, this.displayColor );
       this.displayName = newName;
     }
   };

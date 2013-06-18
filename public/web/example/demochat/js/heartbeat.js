@@ -42,7 +42,7 @@ function startHeartbeat( newPlayerId, heartbeatInterval ) {
 
 function heartbeat( ) {
     if ( isConnected( ) ) {
-        vwf_view.kernel.setProperty( playerId, "lastHeartbeat", vwf_view.kernel.time( ) );
+        vwf_view.kernel.getProperty( playerId, "viewHandle", vwf_view.kernel.time( ) );
     }
     else {
         clearInterval( heartbeatId );
@@ -51,7 +51,15 @@ function heartbeat( ) {
 
 function isConnected( ) {
   if ( playerId != undefined ) {
-    return true;
+    if ( vwf_view.kernel.find( "", "/users/*" ).indexOf( playerId ) > -1 ) {
+      return true;
+    }
+    vwf_view.logger.warn( "Tested connection with playerId " + playerId + " but could not find playerId" );
+    debugInformation( );
+    playerId = undefined;
+    displayLogin( );
+    enableLogonDataEntry( );
+    hideUserExistsMessage( );
   }
   return false;
 }
