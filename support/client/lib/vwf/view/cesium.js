@@ -116,6 +116,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
 
                 var view = this;
+                var drawResizeDelay;
                 var scene, canvas;
                 var cesiumOptions = { "contextOptions": { "alpha": true }, }; 
 
@@ -135,6 +136,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         scene.skyAtmosphere.destroy();
                         scene.skyAtmosphere = undefined;
                     }
+                    drawResizeDelay = 40;
 
                 } else {
 
@@ -206,6 +208,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         });                        
                     }
 
+                    if ( drawResizeDelay ) {
+                        drawResizeDelay--;
+                        if ( drawResizeDelay == 0 ) {
+                            console.info( " ||||| == resize ==  ||||| " );
+                            node.widget.resize();
+                            drawResizeDelay = undefined;
+                        }
+                    }
+
                     scene.initializeFrame();
                     scene.render();
                     Cesium.requestAnimationFrame( tick );
@@ -213,41 +224,24 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     view.state.cameraInfo.getCurrent( camera );
                 }());
                 
-                var onResize = function () {
-                    var width = node.canvas.clientWidth;
-                    var height = node.canvas.clientHeight;
+                if ( !this.useCesiumWidget ) {
+                    var onResize = function () {
+                        var width = node.canvas.clientWidth;
+                        var height = node.canvas.clientHeight;
 
-                    if ( node.canvas.width === width && node.canvas.height === height ) {
-                        return;
-                    }
+                        if ( node.canvas.width === width && node.canvas.height === height ) {
+                            return;
+                        }
 
-                    node.canvas.width = width;
-                    node.canvas.height = height;
-                    camera.frustum.aspectRatio = width / height;
-                };
-                window.addEventListener('resize', onResize, false );
-                onResize();
+                        node.canvas.width = width;
+                        node.canvas.height = height;
+                        camera.frustum.aspectRatio = width / height;
+                    };
+                    window.addEventListener( 'resize', onResize, false );
+                    onResize();
 
-                // var keydownHandler = function(e) {
-                //     var keyCode = e.keyCode;
-                //     if (keyCode === 82) {   // "R"
-                //         console.log("Synchronize views");
-                //         var direction = scene.getCamera().direction;
-                //         var position = scene.getCamera().position;
-                //         var up = scene.getCamera().up;
-                //         var right = scene.getCamera().right;
-                //         broadcastCameraViewData.call(view, {
-                //             "direction": direction,
-                //             "position": position,
-                //             "up": up,
-                //             "right": scene.getCamera().right
-                //         });
-                //     }
-                // }
-                // document.addEventListener('keydown', keydownHandler, false);
-                
-                //document.oncontextmenu = function() { return false; };  
-                 
+                    //document.oncontextmenu = function() { return false; };  
+                } 
             } 
         }, 
 
