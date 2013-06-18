@@ -48,55 +48,52 @@ MyRTC.prototype.initialize = function( params )
 		this.registerReceiveCallback = undefined;
 	}
 	
-	if( this.localStream == null )
-	{
-		// set which media to stream
-		var mediaDescription = {};
-		if( params.video == true )
-			mediaDescription.video = true;
-		if( params.audio == true )
-			mediaDescription.audio = true;
+	// set which media to stream
+	var mediaDescription = {};
+	if( params.video == true )
+		mediaDescription.video = true;
+	if( params.audio == true )
+		mediaDescription.audio = true;
 			
-		// initialize webcam if available
-		if( this.getUserMedia )
-		{
-			if( this.localStream == null ){
-				// try to bind to camera and microphone
-				this.getUserMedia(
-					mediaDescription,
-					
-					// on success, bind webcam to local vid feed
-					bind_safetydance( this, function(stream)
-					{
-						console.log('Binding local camera');
-						this.attachStreamToFrame(stream, this.localPlayer);
-						this.localStream = stream;
-						if( this.trySetLocalMedia() ){
-							if( this.readyToOffer ){
-								this.readyToOffer = false;
-								this.makeOffer();
-							}
-							else if( this.readyToAnswer ){
-								this.readyToAnswer = false;
-								this.makeAnswer();
-								this.readyForIce = true;
-								this.onIceCreation();
-							}
+	// initialize webcam if available
+	if( this.getUserMedia )
+	{
+		if( this.localStream == null ){
+			// try to bind to camera and microphone
+			this.getUserMedia(
+				mediaDescription,
+				
+				// on success, bind webcam to local vid feed
+				bind_safetydance( this, function(stream)
+				{
+					console.log('Binding local camera');
+					this.attachStreamToFrame(stream, this.localPlayer);
+					this.localStream = stream;
+					if( this.trySetLocalMedia() ){
+						if( this.readyToOffer ){
+							this.readyToOffer = false;
+							this.makeOffer();
 						}
-					}),
+						else if( this.readyToAnswer ){
+							this.readyToAnswer = false;
+							this.makeAnswer();
+							this.readyForIce = true;
+							this.onIceCreation();
+						}
+					}
+				}),
 					
-					// otherwise just print an error
-					bind_safetydance( this, function(error){
-						console.error('An error occurred while binding webcam: ', error);
-						this.isMediaSet = true;
-					})
-				);
-			}
+				// otherwise just print an error
+				bind_safetydance( this, function(error){
+					console.error('An error occurred while binding webcam: ', error);
+					this.isMediaSet = true;
+				})
+			);
 		}
-		else {
-			console.error('getUserMedia not supported by this browser');
-			this.isMediaSet = true;
-		}
+	}
+	else {
+		console.error('getUserMedia not supported by this browser');
+		this.isMediaSet = true;
 	}
 	
 	// inform peers of availability
@@ -114,6 +111,7 @@ MyRTC.prototype.disconnect = function()
 	}
 	if( this.localStream ){
 		this.localStream.stop();
+		this.localStream = null;
 	}
 	this.initialized = false;
 	this.isMediaSet = false;
@@ -345,7 +343,6 @@ MyRTC.prototype.attachStreamToFrame = function(stream, frame)
 	else {
 		frame.src = (this.URL && this.URL.createObjectURL(stream)) || stream;
 	}
-	
 	frame.play();
 }
 
