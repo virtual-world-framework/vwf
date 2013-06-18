@@ -535,7 +535,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         case "imageryProvider":
                             
-                            debugger;
                             if ( node.imageryProvider && node.imageryProvider == propertyValue ) {
                                 //we need to probably remember which image providers have been loaded and 
                                 //then just switch the current if the requested has already been loaded
