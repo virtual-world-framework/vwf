@@ -496,18 +496,12 @@ scripts:
       }
     }
     this.distance = function(){
-      var dist = this.translationSpeed * 10;
-      if(this.timeElapsed() > 0) {
-        dist = dist * this.timeElapsed();
-      }
+      var dist = this.translationSpeed * 10 * this.timeElapsed();
       return dist;
     }
     this.angularDistance = function() {
       // Should take 4 seconds to go around 360 degrees
-      var dist = this.rotationSpeed * 90;
-      if(this.timeElapsed() > 0) {
-        dist = dist * this.timeElapsed();
-      }
+      var dist = this.rotationSpeed * 90 * this.timeElapsed();
       return dist;
     }
     this.cameraZ = function( dir ) {
@@ -553,7 +547,6 @@ scripts:
         var x = this.orbitRadius * Math.sin( phi ) * Math.cos( theta );
         var y = this.orbitRadius * Math.sin( phi ) * Math.sin( theta );
         var z = this.orbitRadius * Math.cos( phi );
-        
         this.activeCameraComp.translation = [ x, y, z ];
       }
     }
