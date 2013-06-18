@@ -261,13 +261,21 @@
       vwf_view.firedEvent = function ( nodeId, eventName, eventParameters ) {
         // Go ahead and generate a time stamp, since most of the scene events need one.
         var timestampDate = new Date( );
-		var timestampHours = timestampDate.getHours();
-		var timestampPeriod = "AM";
-		if ( timestampHours > 12 ) {
-		  timestampHours = timestampHours - 12;
-		  timestampPeriod = "PM"
-		}
-        var timestamp = timestampDate.getMonth() + "/" + timestampDate.getDate() + " " + timestampHours + ":" + timestampDate.getMinutes() + ":" +  timestampDate.getSeconds() + " " + timestampPeriod;
+		    var timestampHours = timestampDate.getHours();
+		    var timestampPeriod = "AM";
+		    if ( timestampHours > 12 ) {
+		      timestampHours = timestampHours - 12;
+		      timestampPeriod = "PM"
+	 	    }
+		    var timestampMinutes = timestampDate.getMinutes();
+		    if ( timestampMinutes < 10 ) {
+		      timestampMinutes = "0" + timestampMinutes;
+		    }
+		    var timestampSeconds = timestampDate.getSeconds();
+        if ( timestampSeconds < 10 ) {
+          timestampSeconds = "0" + timestampSeconds;
+        }
+        var timestamp = timestampDate.getMonth() + "/" + timestampDate.getDate() + " " + timestampHours + ":" + timestampMinutes + ":" +  timestampSeconds + " " + timestampPeriod;
 
         //  If we are connected and receive a userColorChange event, change the display color for that user.
         if ( ( isConnected( ) ) && ( eventName == "userColorChange" ) ) {
@@ -282,7 +290,11 @@
           removeUser( eventParameters[ 0 ] );
           $( '.' + eventParameters[ 0 ] ).attr( "class", eventParameters[ 1 ] );
           addUser( eventParameters[ 1 ], eventParameters[ 2 ] );
-          var newLine = "<span class='system' style='color:#000000;'>[SYSTEM] [" + timestamp + "] The user </span><span class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + "'>" + eventParameters[ 0 ] + "</span><span class='system' style='color:#000000;'> has changed their display name to </span><span class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + "'>" + eventParameters[ 1 ] + "</span></br>";
+          
+          
+          var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='system' style='color:#000000;float:left;'>The user </div><div class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + ";float:left;margin-left:5px;'>" + eventParameters[ 0 ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has changed their display name to</div><div class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + ";float:left;margin-left:5px;'>" + eventParameters[ 1 ] + "</div><div class='system' style='color:#000000;float:left;'>.</div></br>";
+
+          //var newLine = "<span class='system' style='color:#000000;'>[SYSTEM] [" + timestamp + "] The user </span><span class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + "'>" + eventParameters[ 0 ] + "</span><span class='system' style='color:#000000;'> has changed their display name to </span><span class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + "'>" + eventParameters[ 1 ] + "</span></br>";
           $( '#chatContent' ).append( newLine );
         }
 
@@ -301,7 +313,7 @@
             //  First, test if we are already connected, if so, this is another user joining,
             //  send a message to the chat log about the user joining and add the user to the user list.
             if ( isConnected( ) ) {
-              var newLine = "<span class='system' style='color:#000000;'>[SYSTEM] [" + timestamp + "] The user </span><span class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + "'>" + eventParameters[ 1 ] + "</span><span class='system' style='color:#000000;'> has joined chat.</span></br>";
+              var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + ";float:left'>" + eventParameters[ 1 ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has joined chat.</div></br>";
               $( '#chatContent' ).append( newLine );
               addUser( eventParameters[ 1 ], eventParameters[ 2 ] );
             }
@@ -340,14 +352,14 @@
  
           //  If the event was a user being removed and we are connected, send an informative message to the chat windows and remove the user from the user list.
           if ( ( isConnected( ) ) && ( eventName == "userRemoved" ) ) {
-            var newLine = "<span class='system' style='color:#000000;'>[SYSTEM] [" + timestamp + "] The user </span><span class='" + eventParameters[ 0 ] + "' style='color:" + eventParameters[ 1 ] + "'>" + eventParameters[ 0 ] + "</span><span class='system' style='color:#000000;'> has left chat.</span></br>";
+		        var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='" + eventParameters[ 0 ] + "' style='color:" + eventParameters[ 1 ] + ";float:left'>" + eventParameters[ 0 ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has left chat.</div></br>";
             $( '#chatContent' ).append( newLine );
             removeUser( eventParameters[ 0 ] );
           }
 
           //  If the event was a message from a user and we are connected, display the message in the chat window.
           if ( ( isConnected( ) ) && ( eventName == "userMessage" ) ) {
-		    var newLine = "<div class='" + eventParameters[ 0 ] + "' style='width:300px;color:" + eventParameters[ 1 ] + ";float:left;'>[" + eventParameters[ 0 ] + "] [" + timestamp + "] </div><div class='" + eventParameters[ 0 ] + "' style='color:" + eventParameters[ 1 ] + "'>" + eventParameters[ 2 ] + "</div>";
+		        var newLine = "<div class='" + eventParameters[ 0 ] + "' style='width:250px;color:" + eventParameters[ 1 ] + ";float:left;'>[" + eventParameters[ 0 ] + "] [<span style='font-size:75%'>" + timestamp + "</span>] </div><div class='" + eventParameters[ 0 ] + "' style='color:" + eventParameters[ 1 ] + "'>" + eventParameters[ 2 ] + "</div>";
             $( '#chatContent' ).append( newLine );
           }
         }
