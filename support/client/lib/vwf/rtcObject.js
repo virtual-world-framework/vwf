@@ -105,6 +105,27 @@ MyRTC.prototype.initialize = function( params )
 }
 
 
+MyRTC.prototype.disconnect = function()
+{
+	// reset all state variables to pristine state
+	if( this.peerConn ){
+		this.peerConn.close();
+		this.peerConn = null;
+	}
+	if( this.localStream ){
+		this.localStream.stop();
+	}
+	this.initialized = false;
+	this.isMediaSet = false;
+	this.isRemoteStreamStarted = false;
+	this.readyToOffer = false;
+	this.readyToAnswer = false;
+	this.readyForIce = false;
+	
+	console.log('Peer connection disconnected');
+}
+
+
 MyRTC.prototype.receiveMessage = function( msg )
 {
 	console.log('Message received of type '+msg.type+': ', msg);
@@ -225,17 +246,11 @@ MyRTC.prototype.createPeerConnection = function()
 		// if disconnected, reset and wait for connection
 		else if( evt.currentTarget.iceConnectionState == 'disconnected' )
 		{
-			// reset all state variables to pristine state
-			this.peerConn.close();
-			this.peerConn = null;
-			this.isRemoteStreamStarted = false;
-			this.readyForIce = false;
-			this.isMediaSet = false;
-			this.remotePlayer.src = 'avatar.png';
-			
+			this.disconnect();
+
 			// reinitialize
-			console.log('Peer connection lost, resetting');
-			this.initialize();
+			//console.log('Peer connection lost, resetting');
+			//this.initialize();
 		}
 	});
 	

@@ -25,10 +25,14 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 			if( name == 'rtcCall' )
 			{
 				this.rtc.localPlayer = document.createElement('video');
-				this.rtc.localPlayer.setAttribute('width', '640');
-				this.rtc.localPlayer.setAttribute('height', '480');
-				this.rtc.localPlayer.setAttribute('style', 'width:640;height:480;');
-				$(this.rtc.localPlayer).dialog();
+				$(this.rtc.localPlayer).dialog({width: 320, height: 240,
+					close: function(event,ui){
+						this.rtc.disconnect();
+						var payload = {target: this.rtcTarget, sender: _UserManager.GetCurrentUserName()};
+						vwf_view.kernel.callMethod('index-vwf', 'rtcDisconnect', payload);
+						this.rtcTarget = null;
+					}.bind(this)
+				});
 
 				this.rtcTarget = params.target;
 				this.rtc.initialize({'video':true, 'audio':true});
@@ -44,18 +48,22 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 					if( !this.rtc.initialized )
 					{
 						this.rtc.remotePlayer = document.createElement('video');
-						this.rtc.remotePlayer.setAttribute('width', '640');
-						this.rtc.remotePlayer.setAttribute('height', '480');
-						this.rtc.remotePlayer.setAttribute('style', 'width:640;height:480;');
-						$(this.rtc.remotePlayer).dialog();
+						$(this.rtc.remotePlayer).dialog({width: 320, height: 240});
 
 						this.rtc.initialize({'video':true, 'audio':true});
-						//debugger;
 					}
 					else {
 						this.rtc.receiveMessage(params.rtcData);
-						//debugger;
 					}
+				}
+			}
+			else if( name == 'rtcDisconnect' )
+			{
+				if( _UserManager.GetCurrentUserName() == params.target )
+				{
+					this.rtc.disconnect();
+					$(this.rtc.remotePlayer).dialog("close");
+					this.rtcTarget = null;
 				}
 			}
 		},
