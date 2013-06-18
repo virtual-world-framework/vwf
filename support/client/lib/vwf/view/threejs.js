@@ -505,6 +505,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 pointerDownID = pointerPickID ? pointerPickID : sceneID;
                 sceneView.kernel.dispatchEvent( pointerDownID, "pointerDown", event.eventData, event.eventNodeData );
             }
+            e.preventDefault();
         }
 
         canvas.onmouseup = function( e ) {
@@ -567,6 +568,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 sceneView.kernel.dispatchEvent( pointerDownID, "pointerUp", eData.eventData, eData.eventNodeData );
             }
             pointerDownID = undefined;
+            e.preventDefault();
         }
 
         canvas.onmouseover = function( e ) {
@@ -576,6 +578,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 pointerOverID = pointerPickID ? pointerPickID : sceneID;
                 sceneView.kernel.dispatchEvent( pointerOverID, "pointerOver", eData.eventData, eData.eventNodeData );
             }
+            e.preventDefault();
         }
 
         canvas.onmousemove = function( e ) {
@@ -604,6 +607,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     }
                 }
             }
+            e.preventDefault();
         }
 
         canvas.onmouseout = function( e ) {
@@ -612,6 +616,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 pointerOverID = undefined;
             }
             self.mouseOverCanvas = false;
+            e.preventDefault();
         }
 
         canvas.setAttribute("onmousewheel", '');
