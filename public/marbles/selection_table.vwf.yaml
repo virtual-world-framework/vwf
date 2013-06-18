@@ -1,0 +1,146 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+#
+#
+# The selection_table represents an activity in the marbles application.
+# Activities are any interactable activity in the marbles gamespace. They generally are directly 
+# interfaced with by the user model.  While a user is 'attached' to an activity, the various
+# user input from its view is directed via the correlated user node to the activity, so as to
+# keep track of which user is responsible for what action.
+# The selection table activity is a table with example marbles laid out on it, which the user can
+# select for use certain marbles games.
+
+--- 
+extends: http://vwf.example.com/node3.vwf
+properties:
+methods:
+#The first four methods are default methods all activities should implement, and handle when
+#the user forwards the appropriate event to the activity model for handling.
+#The parameters are nodeId, and eventParameters (which are passed through from the normal
+# keyDown/keyUp/pointerDown/pointerUp events) followed by a user parameter (the actual user
+# object for the user that the event originated from).
+  handleKeyDown:
+  handleKeyUp:
+  handlePointerDown:
+  handlePointerUp:
+# The activitySelected method should takes the same three arguments as the previous
+# handle methods. It is called when a user that is not currently engaged in an activity
+# generates a pointerUp event. The user expects a boolean return value. If true is returned
+# the user will attempt to attach to and perform this activity. 
+  activitySelected:
+# The attachUser method is invoked with a single argument, the user that is to be attached.
+# If it is valid for the user to begin the activity, it is the attachUser method's responsibility
+# to update the user.attachedTo parameter to be set to this activities nodeId. This function should
+# handle all appropriate 'a user just joined this activity' functions (such as adjusting the users
+# viewpoint to the initial viewpoint location, for example).
+  attachUser:
+# The detachUser method is invoked with a single argument, the user that is to be detached.
+# If it is valid for the user to cease the activity, it is the detachUser method's responsibility
+# to update the user.attachedTo parameter to be set to an empty string. This function should
+# handle all appropriate 'a user just left this activity' functions (such as adjusting the users
+# viewpoint to a 'looking away' viewpoint location, for example).
+  detachUser:
+events:
+scripts:
+- |
+  //  Definitions of the available marbles. 
+  // This is an array of arrays.  Each marble array has two members, first the name, second the position offset from the root selection table.
+  var marbleDefinitions = [ [ "iguana", [ -0.19855445, -0.3003475, 0.7615084 ] ], [ "mummy", [ -0.19893115, -0.1262005, 0.7615084 ] ], [ "sun", [ -0.19709815, 0.044425, 0.7615084 ] ], [ "dragonfly", [ 0.01371915, -0.3003475, 0.7615084 ] ], [ "milkyway", [ 0.01276165, -0.1262005, 0.7615084 ] ], [ "rooster", [ 0.01397615, 0.0433335, 0.7615084 ] ], [ "blueberryfreeze", [ 0.21983765, -0.3003475, 0.7615084 ] ], [ "jungle", [ 0.22029365, -0.1262625, 0.7615084 ] ], [ "octopus", [ 0.22029365, 0.0421805, 0.7615084 ] ] ];
+
+  //  An initial viewpoint and exit viewpoint are defined relative to the selection_tables location.
+  var marbleSelectionViewPoint = [ 1.0000032186508179, 0, 0, 0, 0, 0.5591943860054016, -0.8290396928787231, 0, 0, 0.8290374279022217, 0.5591927766799927, 0 , 0, -1.189525, 2.4, 1 ];
+  var marbleDeselectionViewPoint = [-1.0000032186508179, 1.2246103242893175e-16, 0, 0, -1.2246095301959295e-16, -1.0000026226043701, 0, 0, 0, 0, 0.9999998211860657, 0, 0, -1.21, 2.3, 1]
+
+
+  //  During initialization, generate all of the selection pairs of marbles.
+  this.initialize = function( ) {
+    var me = this;
+    if( this.children.length == 0 ) {
+      for( var newMarbleIndex = 0; newMarbleIndex < marbleDefinitions.length; newMarbleIndex++ ) {
+        var newMarbleName = marbleDefinitions[ newMarbleIndex ][ 0 ] + "_selection";
+        var newMarbleDef = { 
+          "source": "models/" + marbleDefinitions[ newMarbleIndex ][ 0 ] + "marble_selection.DAE", 
+          "extends": "solitaire_marble.vwf",
+          "type": "model/vnd.collada+xml",
+          "properties": { 
+            "translation": marbleDefinitions[ newMarbleIndex ][ 1 ],
+            "marbleType": marbleDefinitions[ newMarbleIndex ][ 0 ],
+            "private": null
+          }
+        };
+        me.children.create( newMarbleName, newMarbleDef, undefined );
+      }
+    }
+  };
+
+  //When detaching a user, change the viewpoint (transform the deselect viewpoint based on the
+  //selection_tables transform) of the user. Then set the users attachedTo to an empty string.
+  this.detachUser = function( user ) {
+    var userViewpoint = goog.vec.Mat4.multMat( this.transform, marbleDeselectionViewPoint, goog.vec.Mat4.create( ) );
+    user.transformTo( userViewpoint, 3 );
+    user.attachedTo = "";
+  };
+
+  //When attaching a user, change the viewpoint (transform the select viewpoint based on the
+  //selection_tables transform) of the user. Then set the users attachedTo to the selection_tables node ID.
+  this.attachUser = function( user ) {
+    var userViewpoint = goog.vec.Mat4.multMat( this.transform, marbleSelectionViewPoint, goog.vec.Mat4.create( ) );
+    user.transformTo( userViewpoint, 3 );
+    user.attachedTo = this.id;
+  };
+
+
+  // Since multiple users can use a selection table at once, the only thing to test to see if this
+  // activity was selected, is testing if the nodeId is either the selection_table or any
+  // of its marbles (its only children are its marbles, so testing if the parent of the node clicked
+  // is me is the sameas testing for each marble individually).
+  // Users currently maintain a nodeId to actual node lookup table for use by the models only...
+  // This is used to get the node from the nodeId.
+  this.activitySelected = function( nodeId, eventParameters, user ) {
+    var me = this;
+    var node = user.getObject( nodeId );
+    if ( node != undefined ) {
+      if ( ( node === me ) || ( node.parent === me ) ) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+
+  //When the mouse is clicked while browsing the selection table, if the mouse was clicked on
+  // one of the marbles, then set the selectedMarble of the user according to the marble type
+  // that was clicked on.
+  this.handlePointerDown = function( nodeId, eventParameters, user ) {
+    var me = this;
+    var node = user.getObject( nodeId );
+    if ( node != undefined ) {
+      if ( ( node.parent === me ) && ( node.marbleType != undefined ) ){
+        user.selectedMarbles = node.marbleType;
+      }
+    }
+  };
+
+  this.handlePointerUp = function( nodeId, eventParameters, user ) {
+  };
+
+  this.handleKeyDown = function( nodeId, eventParameters, user ) {
+  };
+
+  //When the user presses the escape buton, detach the user.
+  this.handleKeyUp = function( nodeId, eventParameters, user ) {
+    if( eventParameters[ 0 ][ 'keysUp' ][ 'escape' ] )
+    {
+      this.detachUser( user );
+    }
+  };

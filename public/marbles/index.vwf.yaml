@@ -1,0 +1,117 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: http://vwf.example.com/navscene.vwf
+properties:
+methods:
+# createUser method creates a user tied to a specific view
+# it takes two parameters, username to be created and the view's kernel.moniker.
+  createUser:
+events:
+# The userCreated event fires when a new user is created. The event has one parameter,
+# the ID of the user node created.
+  userCreated:
+children:
+# The scene is the non-interactive background portion of the garden.
+  scene:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/garden.DAE
+    type: model/vnd.collada+xml
+    properties:
+      rotation: [ 1, 0, 0, 0 ]
+# Activities represent various activities a user can take part in.
+# The general architectural concept is that user's view interacts
+# with the user node model, and that model interacts with the
+# appropriate activity.
+  activities:
+    extends:  http://vwf.example.com/node3.vwf
+    properties:
+    methods:
+    events:
+    children:
+      selection_table:
+        extends: selection_table.vwf
+        source: models/selection_table.DAE
+        type: model/vnd.collada+xml
+        properties:
+          translation: [ 0.97221035, 4.589525, 0 ]
+      solitaire_board:
+        extends: solitaire_game.vwf
+        source: models/solitaire_table.DAE
+        type: model/vnd.collada+xml
+        properties:
+          rotation: [ 1, 0, 0, 0 ]
+          translation: [ 4.215422, 2.596678, 0.0 ]
+  dir1:
+    extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
+    properties:
+      lightType: "point"
+      enable: true
+      distance: 2000
+      intensity: 2
+      color: [ 128, 128, 128 ]
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
+      translation: [ -400, 400, -900 ]
+  dir2:
+    extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
+    properties:
+      lightType: "point"
+      enable: true
+      distance: 2000
+      intensity: 2
+      color: [ 128, 128, 128 ]
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
+      translation: [ 400, 400, 900 ]
+scripts:
+- |
+  var initialCam = [0.798465371131897, -0.6020503044128418, 0, 0, 0.6020503044128418, 0.798465371131897, 0, 0, 0, 0, 1, 0, -1.1765320301055908, -0.9326445460319519, 1.2000001668930054, 1];
+  this.initialize = function() {
+    this.camera.transform = initialCam;
+
+    this.camera.far = this.camera.far * 4;
+    this.maxSpeed = 2;
+    this.translationSpeed = 0.2;
+    this.rotationSpeed = 0.4;
+  };
+
+
+  //Create user implementation.
+  this.createUser = function( userName, viewHandle ) {
+    //User's username and view handle are passed in as arguments.
+    // Initial position is set to the default initialCam transformation.
+    //users extend the user prototype.
+    var userDef = { 
+      "properties": {
+        "userName": userName,
+        "viewHandle": viewHandle,
+        "transform": initialCam
+      },
+      "extends": "user.vwf",
+      "children": {}     
+     };
+
+
+    // Create the user object, passing a callback that fires an event upon completion
+    this.children.create( userName, userDef, function( node ) {
+      this.userCreated( node.id );
+    });
+  };
