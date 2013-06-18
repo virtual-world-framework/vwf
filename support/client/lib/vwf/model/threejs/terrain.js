@@ -377,7 +377,58 @@
 
 
     };
-	self.SimplexNoise = new SimplexNoise();
+	
+	self.Random = function(seed)
+    {
+        function Rc4Random(seed)
+        {
+            var keySchedule = [];
+            var keySchedule_i = 0;
+            var keySchedule_j = 0;
+            
+            function init(seed) {
+                for (var i = 0; i < 256; i++)
+                    keySchedule[i] = i;
+                
+                var j = 0;
+                for (var i = 0; i < 256; i++)
+                {
+                    j = (j + keySchedule[i] + seed.charCodeAt(i % seed.length)) % 256;
+                    
+                    var t = keySchedule[i];
+                    keySchedule[i] = keySchedule[j];
+                    keySchedule[j] = t;
+                }
+            }
+            init(seed);
+            
+            function getRandomByte() {
+                keySchedule_i = (keySchedule_i + 1) % 256;
+                keySchedule_j = (keySchedule_j + keySchedule[keySchedule_i]) % 256;
+                
+                var t = keySchedule[keySchedule_i];
+                keySchedule[keySchedule_i] = keySchedule[keySchedule_j];
+                keySchedule[keySchedule_j] = t;
+                
+                return keySchedule[(keySchedule[keySchedule_i] + keySchedule[keySchedule_j]) % 256];
+            }
+            
+            this.getRandomNumber = function() {
+                var number = 0;
+                var multiplier = 1;
+                for (var i = 0; i < 8; i++) {
+                    number += getRandomByte() * multiplier;
+                    multiplier *= 256;
+                }
+                return number / 18446744073709551616;
+            }.bind(this);
+            this.Random = this.getRandomNumber;
+			this.random = this.getRandomNumber;
+        }
+        return new Rc4Random(seed +"");
+    }
+	
+	self.SimplexNoise = new SimplexNoise(self.Random(12312).random);
 			function TileCache()
 			{
 				this.tiles = {};
@@ -404,22 +455,26 @@
 						"}"+
 						"varying vec3 pos;"+
 						"varying vec3 n;"+
+						"varying vec3 wN;"+
 						"uniform float blendPercent;\n" + 
+					
 						"attribute vec3 everyOtherNormal;\n"+
 						"attribute float everyOtherZ;\n"+
 						"void main() {\n"+
-						" pos = position;"+
-						
-						"n = normalMatrix *  mix(everyOtherNormal,normal,blendPercent);\n;"+
+						" pos = (modelMatrix * vec4(position,1.0)).xyz; \n"+
+						" pos.z += getNoise(pos.xy*200.0)/50.0; \n"+
+						"wN = mix(everyOtherNormal,normal,blendPercent);\n"+
+						"n = normalMatrix *  wN\n;"+
+						"n = normalize(n);\n"+
 						" float z = mix(everyOtherZ,position.z,blendPercent);\n"+
 						"   vec4 mvPosition = modelViewMatrix * vec4( position.x,position.y,z, 1.0 );\n"+
-						
+					
 						
 						"   gl_Position = projectionMatrix * mvPosition;\n"+
 						"}    \n";
 						var fragShader_default = 
 					   
-						"uniform samplerCube texture;\n"+
+						"uniform sampler2D diffuseMap;\n"+
 						"#if MAX_DIR_LIGHTS > 0\n"+
 
 						
@@ -437,13 +492,40 @@
 						"uniform float fogFar;"+
 						"varying vec3 pos;"+
 						"varying vec3 n;"+
+						"varying vec3 wN;"+
+						"vec4 getTexture(sampler2D texture,vec3 coords, vec3 norm)" +
+						"{"+
+							//"coords /= 100.0;\n"+
+							"vec2 c0 = fract(coords.xy/10.0)/2.0 + (vec2(0.0,0.0));\n"+
+							"vec2 c1 = fract(coords.xy/10.0)/2.0 + (vec2(0.0,0.5));\n"+
+							"vec2 c2 = fract(coords.xy/10.0)/2.0 + (vec2(0.5,0.0));\n"+
+							"vec2 c3 = fract(coords.xy/30.0)/2.0 + (vec2(0.5,0.5));\n"+
+							"vec2 c0a = fract(coords.xy/100.0)/2.0 + (vec2(0.0,0.0));\n"+
+							"vec2 c1a = fract(coords.xy/100.0)/2.0 + (vec2(0.0,0.5));\n"+
+							"vec2 c2a = fract(coords.xy/100.0)/2.0 + (vec2(0.5,0.0));\n"+
+							"vec2 c3a = fract(coords.xy/300.0)/2.0 + (vec2(0.5,0.5));\n"+
+							"vec4 color0 =.5*texture2D(texture,c0) +  .5*texture2D(texture,c0a);\n"+
+							"vec4 color1 =.5*texture2D(texture,c1) +  .5*texture2D(texture,c1a);\n"+
+							"vec4 color2 = .5*texture2D(texture,c2) +  .5*texture2D(texture,c2a);\n"+
+							"vec4 color3 = .5*texture2D(texture,c3) +  .5*texture2D(texture,c3a);\n"+
+							"float side = pow(abs(dot(norm,(viewMatrix * vec4(0.0,0.0,1.0,0.0)).xyz)),4.0 * min(3.0,abs(pos.z/55.0)));\n"+
+							"float bottom = 1.0-smoothstep(-20.0,60.0,pos.z);\n"+
+							"float top = clamp(0.0,1.0,(smoothstep(100.0,140.0,pos.z)));\n"+
+							"float middle = 1.0 - bottom - top;\n"+
+							
+							
+							"vec4 mix =  normalize(vec4(side*3.0,bottom,middle,top)) ;\n"+
+							"return mix.r * color3 + mix.g * color0 + mix.b * color1 + mix.a * color2;\n"+
+						"}"+
 						"void main() {\n"+
 						"	vec3 light = vec3(0.0,0.0,0.0);\n"+
-						"	vec4 ambient = vec4(0.5,0.5,0.5,1.0);\n"+
+						"	vec4 ambient = vec4(0.3,0.3,0.3,1.0);\n"+
 						"	#if MAX_DIR_LIGHTS > 0\n"+
-						"	light += directionalLightColor[0] * dot(normalize(n), (viewMatrix * vec4(directionalLightDirection[0],0.0)).xyz);\n"+
+						"	light += directionalLightColor[0] * dot(n, (viewMatrix * vec4(directionalLightDirection[0],0.0)).xyz);\n"+
 						"	#endif\n"+
-						"   gl_FragColor = ambient + vec4(0.5,0.5,0.5,1.0) * vec4(light.xyz,1.0);\n"+
+						"	vec4 diffuse = getTexture(diffuseMap,pos,n);\n"+
+						"	diffuse.a = 1.0;\n"+
+						"   gl_FragColor = ambient * diffuse + diffuse * vec4(light.xyz,1.0);\n"+
 						"#ifdef USE_FOG\n"+
 
 							"float depth = gl_FragCoord.z / gl_FragCoord.w;\n"+
@@ -477,7 +559,7 @@
 				
 							var uniforms_default = {
 						   
-							texture:   { type: "t", value: null },
+						
 							ambientLightColor:   { type: "fv", value: [] },
 
 							directionalLightColor:   { type: "fv", value: [] },
@@ -497,7 +579,7 @@
 							hemisphereLightSkyColor:   { type: "fv", value: [] },
 							hemisphereLightGroundColor:   { type: "fv", value: [] },
 							hemisphereLightDirection:   { type: "fv", value: [] },
-
+							diffuseMap:   { type: "t", value: _SceneManager.getTexture( "terrain/TerrainAtlasDiffuse1.png" ) },
 							"fogDensity" : { type: "f", value: 0.00025 },
 							"fogNear" : { type: "f", value: 1 },
 							"fogFar" : { type: "f", value: 2000 },
@@ -518,9 +600,12 @@
 						});
 						mat.lights = true;
 						mat.fog = true;
+						uniforms_default.diffuseMap.value.minFilter = THREE.NearestFilter;
+						uniforms_default.diffuseMap.value.maxFilter = THREE.NearestFilter;
+						uniforms_default.diffuseMap.value.wrapS = uniforms_default.diffuseMap.value.wrapT = THREE.RepeatWrapping;
 						//mat.wireframe = true;
 						return mat;
-					//this.ma.uniforms.texture.value = skyCubeTexture;    
+						
 					// this.mat = new THREE.MeshPhongMaterial();
 					// this.mat.color.r = .5;
 					// this.mat.color.g = .5;
@@ -1311,6 +1396,7 @@
 				}
 				this.getRotation = function(i)
 				{
+					
 					if(i ==0) return 0;
 					if(i== 1) return -Math.PI/2;
 					if(i== 2) return Math.PI/2;
@@ -1653,6 +1739,24 @@
 			this.cancelUpdates =function()
 			{
 				self.needRebuild = [];
+				
+				this.quadtree.walk(function(n)
+				{
+					if(n.fadelist)
+					{
+						n.fadelist.forEach(function(e)
+						{
+							e.parent.remove(e);
+							e.quadnode = null;
+							window.cancelAnimationFrame(e.fadeHandle);
+						});
+						n.fadelist = null;
+						if(n.mesh)
+						n.mesh.visible = true;
+					}
+					
+				});
+				
 				this.quadtree.walk(function(n)
 				{
 					if(n.setForDesplit)
@@ -1913,23 +2017,26 @@
 								var o = tile.mesh;
 								list.forEach(function(e)
 								{
-										
+										tile.fadelist = list;
 										if(e.parent)
 										{
+											e.quadnode.mesh = null;
+											e.material.uniforms.blendPercent.value = 1;
 											 var fade = function()
 											 {
 												e.material.uniforms.blendPercent.value -= .01;
 												 if(e.material.uniforms.blendPercent.value > 0)
 												 {
-													window.requestAnimationFrame(fade);
+													e.fadeHandle = window.requestAnimationFrame(fade);
 												 }else
 												 {
 													e.parent.remove(e);
 													e.quadnode = null;
 													o.visible = true
+													tile.fadelist = null;
 												 }
 											 };
-											 window.requestAnimationFrame(fade);
+											 e.fadeHandle = window.requestAnimationFrame(fade);
 											
 										}
 								});
@@ -1973,19 +2080,10 @@
 									{
 									
 										var e = p.backupmesh;
-										// var fade = function()
-											// {
-												// e.material.opacity -= .01;
-												// e.material.depthWrite = false;
-												// e.renderDepth = 1;
-												// if(e.material.opacity <= 0)
-												// {
-													e.quadnode = null;
-													e.parent.remove(e);
-												// }else
-												// window.requestAnimationFrame(fade);
-											// };
-											// window.requestAnimationFrame(fade);
+									
+										e.quadnode = null;
+										e.parent.remove(e);
+										
 											
 										
 										p.backupmesh = null;
@@ -2115,24 +2213,33 @@
 							var z = 0;
 							var vert = verts[k].clone();
 							vert = vert.applyMatrix4(mesh.matrix);
-							// for(var j = 0; j < this.controlPoints.length; j++)
-							// {
-								// var cp = this.controlPoints[j];
-								// var dist = Math.sqrt(((vert.x + mx) - cp.x) * ((vert.x + mx) - cp.x) + ((vert.y + my) - cp.y) * ((vert.y + my) - cp.y));
-								// dist = Math.max(dist,0);
-								// z +=  Math.max(0, cp.z - Math.pow(cp.z * dist/cp.dist,cp.falloff));
-							// }
-							//z = Math.sin((mx + vert.x)/10) * 10;
-							z = self.SimplexNoise.noise2D((vert.x)/10000,(vert.y)/1000) * 250;
+							
+							
+							z = self.SimplexNoise.noise2D((vert.x)/10000,(vert.y)/1000) * 15;
+							z = z*z;
+							z += self.SimplexNoise.noise2D((vert.x)/100000,(vert.y)/100000) * 450;
+							z += self.SimplexNoise.noise2D((vert.x)/10000,(vert.y)/100000) * 250;
 							z += self.SimplexNoise.noise2D((vert.x)/1000,(vert.y)/100) * 25;
 							z += self.SimplexNoise.noise2D((vert.x)/1000,(vert.y)/5000) * 50;
 							z += self.SimplexNoise.noise2D((vert.x)/500,(vert.y)/50) * 10;
 							 z += self.SimplexNoise.noise2D((vert.x)/100,(vert.y)/100) * 5.0;
-							 z += self.SimplexNoise.noise2D((vert.x)/10,(vert.y)/10) * 0.5;
-							//z += 286;
-							if(z < 0)  z/=5;
+							 z += self.SimplexNoise.noise2D((vert.x)/20,(vert.y)/20) * 1.5;
+							var canynon = self.SimplexNoise.noise2D((vert.x)/2000,(vert.y)/10000) * -50;
+								if(canynon < -30)
+								{
+									canynon += 30;
+									canynon *= canynon;
+									}
+								else
+									canynon = 0;
+								z-= canynon;	
+							if(z < 0)  
+							{
+								z/=5;
+								
+							}
 							
-							verts[k].z = z;
+							verts[k].z = z + 30;
 						}
 						
 						//var n = vertn.clone().sub(vertx).cross(vertn.clone().sub(verty)).normalize();
@@ -2158,7 +2265,14 @@
 					for(var l = 0; l < res; l++)
 					{
 						
-						
+						if(l ==0 || j == 0 || j == res-3 || l == res-3)
+						{
+							
+							mesh.material.attributes.everyOtherNormal.value[j * res + l] = normals[j][l];
+							mesh.material.attributes.everyOtherZ.value[j * res + l]  = heights[j][l];
+						}
+						else
+						{
 							if(l % 2 ==1 && j % 2 !=1)
 							{
 								var z00 = heights[j-0 >= 0? j-0 : j][l+1 < res? l+1 : l];
@@ -2170,7 +2284,7 @@
 								var n11 = normals[j+0 < res? j+0 : j][l-1 >= 0? l-1 : l];
 								
 								
-								var norm = n00.clone().add(n11).multiplyScalar(.5);
+								var norm = n00.clone().add(n11).multiplyScalar(.5).normalize();
 								
 								mesh.material.attributes.everyOtherNormal.value[j * res + l] = norm;
 								mesh.material.attributes.everyOtherZ.value[j * res + l] = z;
@@ -2186,7 +2300,7 @@
 								var n11 = normals[j+1 < res? j+1 : j][l-0 >= 0? l-0 : l];
 								
 								
-								var norm = n00.clone().add(n11).multiplyScalar(.5);
+								var norm = n00.clone().add(n11).multiplyScalar(.5).normalize();
 								
 								mesh.material.attributes.everyOtherNormal.value[j * res + l] = norm;
 								mesh.material.attributes.everyOtherZ.value[j * res + l] = z;
@@ -2205,16 +2319,19 @@
 								var n001 = normals[j+1 < res? j+1 : j][l+1 < res? l+1 : l];
 								var n111 = normals[j-1 >= 0? j-1 : j][l-1 >= 0? l-1 : l];
 								
-								var norm = n00.clone().add(n11).add(n111).add(n001).multiplyScalar(.25);
+								var norm = n00.clone().add(n11).add(n111).add(n001).multiplyScalar(.25).normalize();
 								
 								mesh.material.attributes.everyOtherNormal.value[j * res + l] = norm;
 								mesh.material.attributes.everyOtherZ.value[j * res + l] = z;
 							}
 							else
 							{
+							
+							
 								mesh.material.attributes.everyOtherNormal.value[j * res + l] = normals[j][l];
 								mesh.material.attributes.everyOtherZ.value[j * res + l]  = heights[j][l];
 							}
+						}
 						
 					}
 				}
