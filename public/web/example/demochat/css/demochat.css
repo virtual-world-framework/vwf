@@ -81,7 +81,9 @@
 {
   position:absolute;
   bottom:0%;
-  width:99%;
+  right:0px;
+  left:0px;
+  resize:none;
 }
 
 .demochat-chatoptions

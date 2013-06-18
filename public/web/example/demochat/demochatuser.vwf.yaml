@@ -24,6 +24,22 @@ events:
   playSoundEvent:
 scripts:
 - |
+  var entityMap = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '&#x2F;'
+  };
+
+  this.escapeHtml = function( string ) {
+    return String( string ).replace( /[&<>"'\/]/g, function ( s ) {
+      return entityMap[ s ];
+    } );
+  };
+
+
   // For each user, test the message to be sent (test if the users name is in the
   // message and posts an event to play an alert sound for the user if it is).
   // Then actually post the userMessage event to send the message to the various
@@ -32,7 +48,7 @@ scripts:
     this.parent.children.forEach( function ( entry ) {
       entry.testMessageForName( message );
     } );
-    this.parent.parent.userMessage( this.displayName, this.displayColor, message );
+    this.parent.parent.userMessage( this.displayName, this.displayColor, this.escapeHtml( message ) );
   };
   // Trigger the userRemoved event, then delete yourself.
   this.removeUser = function( ) {
