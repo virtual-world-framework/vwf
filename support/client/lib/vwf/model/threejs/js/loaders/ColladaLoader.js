@@ -3094,6 +3094,7 @@ THREE.ColladaLoader = function () {
 				case 'diffuse':
 				case 'specular':
 				case 'transparent':
+				case 'bump':
 
 					this[ child.nodeName ] = ( new ColorOrTexture() ).parse( child );
 					break;
@@ -3108,6 +3109,10 @@ THREE.ColladaLoader = function () {
 					if ( f.length > 0 )
 						this[ child.nodeName ] = parseFloat( f[ 0 ].textContent );
 
+					break;
+
+				case "technique":
+					this.parse(child);
 					break;
 
 				default:
@@ -3135,6 +3140,7 @@ THREE.ColladaLoader = function () {
 				case 'emission':
 				case 'diffuse':
 				case 'specular':
+				case 'bump':
 
 					var cot = this[ prop ];
 
@@ -3161,6 +3167,9 @@ THREE.ColladaLoader = function () {
 									texture.repeat.y = cot.texOpts.repeatV;
 									if(prop == "specular") {
 										props["specularMap"] = texture;
+									}
+									else if(prop == "bump") {
+										props["bumpMap"] = texture;
 									}
 									else {
 										props['map'] = texture;
@@ -3513,10 +3522,11 @@ THREE.ColladaLoader = function () {
 				case 'lambert':
 				case 'blinn':
 				case 'phong':
-
 					this.shader = ( new Shader( child.nodeName, this ) ).parse( child );
 					break;
-
+				case 'extra':
+					this.shader.parse( child );
+					break;
 				default:
 					break;
 
