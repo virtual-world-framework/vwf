@@ -9,8 +9,28 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 
 		initialize : function()
 		{
+			// create the video window
+			var width = 320, height = 240;
+			this.vidFrame = document.createElement('div');
+			$(this.vidFrame).attr('id', 'vidFrame');
+			$(this.vidFrame).append( '<video id="remote"/>' );
+			$(this.vidFrame).append( '<video id="self" muted/>' );
+			$(this.vidFrame).dialog({width: 'auto', height: 'auto', autoOpen: false});
+
 			// create a new rtc object on view initialization
-			this.rtc = new RTCObject(null,null,this.send.bind(this),null);
+			this.rtc = new RTCObject(
+				$(this.vidFrame).find('#self')[0],
+				$(this.vidFrame).find('#remote')[0],
+				this.send.bind(this),null
+			);
+
+			// hook the close to rtc.disconnect
+			$(this.vidFrame).on('dialogclose', function(event,ui){
+				this.rtc.disconnect();
+				var payload = {target: this.rtcTarget, sender: _UserManager.GetCurrentUserName()};
+				vwf_view.kernel.callMethod('index-vwf', 'rtcDisconnect', payload);
+				this.rtcTarget = null;
+			}.bind(this));
 		},
 
 
@@ -24,16 +44,7 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 
 			if( name == 'rtcCall' )
 			{
-				this.rtc.localPlayer = document.createElement('video');
-				$(this.rtc.localPlayer).dialog({width: 320, height: 240,
-					close: function(event,ui){
-						this.rtc.disconnect();
-						var payload = {target: this.rtcTarget, sender: _UserManager.GetCurrentUserName()};
-						vwf_view.kernel.callMethod('index-vwf', 'rtcDisconnect', payload);
-						this.rtcTarget = null;
-					}.bind(this)
-				});
-
+				$(this.vidFrame).dialog('open');
 				this.rtcTarget = params.target;
 				this.rtc.initialize({'video':true, 'audio':true});
 			}
@@ -47,9 +58,7 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 
 					if( !this.rtc.initialized )
 					{
-						this.rtc.remotePlayer = document.createElement('video');
-						$(this.rtc.remotePlayer).dialog({width: 320, height: 240});
-
+						$(this.vidFrame).dialog('open');
 						this.rtc.initialize({'video':true, 'audio':true});
 					}
 					else {
@@ -62,7 +71,7 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 				if( _UserManager.GetCurrentUserName() == params.target )
 				{
 					this.rtc.disconnect();
-					$(this.rtc.remotePlayer).dialog("close");
+					$(this.vidFrame).dialog("close");
 					this.rtcTarget = null;
 				}
 			}
