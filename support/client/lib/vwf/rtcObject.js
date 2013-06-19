@@ -87,6 +87,16 @@ MyRTC.prototype.initialize = function( params )
 				bind_safetydance( this, function(error){
 					console.error('An error occurred while binding webcam: ', error);
 					this.isMediaSet = true;
+					if( this.readyToOffer ){
+						this.readyToOffer = false;
+						this.makeOffer();
+					}
+					else if( this.readyToAnswer ){
+						this.readyToAnswer = false;
+						this.makeAnswer();
+						this.readyForIce = true;
+						this.onIceCreation();
+					}
 				})
 			);
 		}

@@ -14,18 +14,17 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 			this.vidFrame = document.createElement('div');
 			$(this.vidFrame).attr('id', 'vidFrame');
 			$(this.vidFrame).attr('id', '');
-			$(this.vidFrame).append( '<video id="remote"/>' );
-			$(this.vidFrame).append( '<video id="self" muted/>' );
+			$(this.vidFrame).append( '<video id="remote" poster="/adl/sandbox/vwf/view/webrtc/avatar.png"/>' );
+			$(this.vidFrame).append( '<video id="self" poster="/adl/sandbox/vwf/view/webrtc/avatar.png" muted/>' );
 
 			// style the video window
 			//$(this.vidFrame).css('padding', '30px');
 			$(this.vidFrame).find('video').css('position', 'absolute');
+			$(this.vidFrame).find('video').css('border', 'solid black 1px');
 			$(this.vidFrame).find('#remote').attr('width', '320px');
 			$(this.vidFrame).find('#remote').attr('height', '240px');
-			$(this.vidFrame).find('#remote').css('border', 'solid black 1px');
 			$(this.vidFrame).find('#self').attr('width', '80px');
 			$(this.vidFrame).find('#self').attr('height', '60px');
-			$(this.vidFrame).find('#self').css('border', 'solid black 1px');
 
 			// create the dialog box
 			$(this.vidFrame).dialog({width: width+40, height: height+40, autoOpen: false});
@@ -40,6 +39,7 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 			// hook the close to rtc.disconnect
 			$(this.vidFrame).on('dialogclose', function(event,ui){
 				this.rtc.disconnect();
+				$(this.vidFrame).find('video').attr('src', '/adl/sandbox/vwf/view/webrtc/avatar.png');
 				var payload = {target: this.rtcTarget, sender: _UserManager.GetCurrentUserName()};
 				vwf_view.kernel.callMethod('index-vwf', 'rtcDisconnect', payload);
 				this.rtcTarget = null;
@@ -87,6 +87,7 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 				{
 					this.rtc.disconnect();
 					$(this.vidFrame).dialog("close");
+					$(this.vidFrame).find('video').attr('src', '/adl/sandbox/vwf/view/webrtc/avatar.png');
 					this.rtcTarget = null;
 				}
 			}
