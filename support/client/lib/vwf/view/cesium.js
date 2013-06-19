@@ -116,7 +116,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
 
                 var view = this;
-                var drawResizeDelay;
+                var forceResizeDelay;
                 var scene, canvas;
                 var cesiumOptions = { "contextOptions": { "alpha": true }, }; 
 
@@ -136,7 +136,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         scene.skyAtmosphere.destroy();
                         scene.skyAtmosphere = undefined;
                     }
-                    drawResizeDelay = 40;
+                    forceResizeDelay = 80;
 
                 } else {
 
@@ -208,12 +208,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         });                        
                     }
 
-                    if ( drawResizeDelay ) {
-                        drawResizeDelay--;
-                        if ( drawResizeDelay == 0 ) {
+                    if ( forceResizeDelay ) {
+                        forceResizeDelay--;
+                        if ( forceResizeDelay == 0 ) {
                             console.info( " ||||| == resize ==  ||||| " );
                             node.widget.resize();
-                            drawResizeDelay = undefined;
+                            forceResizeDelay = undefined;
                         }
                     }
 
