@@ -16,6 +16,8 @@
 
 define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
 
+    var self;
+
     // Private global variables for navigation
     var appInitialized;
     var navObjectRequested;
@@ -75,8 +77,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         initializedNode: function( nodeID, childID ) {
 
             // If the node that was initialized is the application node, find the user's navigation object
-            var sceneView = this;
-            var appID = sceneView.kernel.application();
+            var appID = this.kernel.application();
             if ( childID == appID ) {
                 appInitialized = true;
             } else {
@@ -88,9 +89,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 //      Can be removed once kernel.createChild callback works properly
                 var initNode = this.state.nodes[ childID ];
                 if ( initNode && ( initNode.name == navObjectName ) ) {
-                    var sceneView = this;
-                    initNode.owner = sceneView.kernel.moniker();
-                    controlNavObject.call( sceneView, initNode );
+                    initNode.owner = this.kernel.moniker();
+                    controlNavObject( initNode );
                 }
             }
             //End TODO
@@ -117,7 +117,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         initializedProperty: function ( nodeID, propertyName, propertyValue ) { 
             if ( propertyName == "transform" ) {
-                receiveModelTransformChanges.call( this, nodeID, propertyValue );
+                receiveModelTransformChanges( nodeID, propertyValue );
             } else if ( propertyName == "lookAt") {
 
                 var node = this.state.nodes[ nodeID ];
@@ -125,7 +125,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 // If the state knows about the node, it is in the scene and should be updated
                 // Otherwise, it is a prototype and can be ignored
                 if ( node ) {
-                    receiveModelTransformChanges.call( this, nodeID, node.transform );
+                    nodeLookAt( node );
                 }
             }
         },
@@ -140,7 +140,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     navmode = propertyValue;
                 }
             } else if ( propertyName == "transform" ) {
-                receiveModelTransformChanges.call( this, nodeID, propertyValue );
+                receiveModelTransformChanges( nodeID, propertyValue );
             } else if ( propertyName == "lookAt") {
 
                 var node = this.state.nodes[ nodeID ];
@@ -148,7 +148,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 // If the state knows about the node, it is in the scene and should be updated
                 // Otherwise, it is a prototype and can be ignored
                 if ( node ) {
-                    receiveModelTransformChanges.call( this, nodeID, node.transform );
+                    nodeLookAt( node );
                 }
             }
         },
@@ -177,7 +177,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                             // Else, if it doesn't have an owner, push it on the list of ownerless navigation 
                             // objects that we can pull from if none is found that has an owner of this client
                             if ( owner == me ) {
-                                controlNavObject.call( this, navCandidate );
+                                controlNavObject( navCandidate );
                             } else if ( !owner ) {
                                 ownerlessNavObjects.push( navCandidate );
                             } 
@@ -195,7 +195,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                             // Else, create one
                             if ( !numNavCandidates ) {
                                 if ( ownerlessNavObjects.length ) {
-                                    controlNavObject.call( this, ownerlessNavObjects[ 0 ] );
+                                    controlNavObject( ownerlessNavObjects[ 0 ] );
                                 } else {
 
                                     // Retrieve the userObject property so we may create a navigation object from 
@@ -231,7 +231,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     //       implemented for createChild - see workaround in initializedNode
                     this.kernel.createChild( sceneRootID, navObjectName, userObject, undefined, undefined /*,
                                              function( nodeID ) {
-                        controlNavObject.call( this, this.state.nodes[ nodeID ] );
+                        controlNavObject( this.state.nodes[ nodeID ] );
                     } */ );
                 } else if ( navObject && ( nodeID == navObject.ID ) && propertyName == "navmode" ) {
 
@@ -253,7 +253,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // ticking before the app starts loading (appInitialized)
             if ( !navObjectRequested && appInitialized ) {
                 navObjectRequested = true;
-                findNavObject.call( this );
+                findNavObject();
             }
         }
     } );
@@ -280,7 +280,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
     function initScene( sceneNode ) {
     
-        var self = this;
+        self = this;
         var lastPickTime = 0;
         
         function GetParticleSystems(node,list)
@@ -321,9 +321,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         pss[i].update(timepassed);
                 }
 
-                // Move the user's camera according to their input
-                self.moveNavObject( timepassed );
-                self.rotateNavObjectByKey( timepassed );
+                if ( navmode != "none" ) {
+
+                    // Move the user's camera according to their input
+                    self.moveNavObject( timepassed );
+                    self.rotateNavObjectByKey( timepassed );
+                    
+                    // Turn the camera to look back at its lookat object or position after moving/rotating it
+                    nodeLookAt( cameraNode );
+                }
             }
             
             // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
@@ -530,8 +536,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var container = document.getElementById("container");
         var sceneCanvas = canvas;
         //var mouse = new GLGE.MouseInput( sceneCanvas );
-
-        var self = this;
 
         var getEventData = function( e, debug ) {
             var returnData = { eventData: undefined, eventNodeData: undefined };
@@ -781,7 +785,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if ( mouseLeftDown || mouseRightDown || mouseMiddleDown ) {
                 
                     // TODO: Navigation - see main "TODO: Navigation" comment for explanation
-                    handleMouseNavigation( eData.eventData );
+                    if ( ( navmode != "none" ) && !( cameraNode.lookatval ) ) {
+                        handleMouseNavigation( eData.eventData );
+                    }
                     // END TODO
 
                     sceneView.kernel.dispatchEvent( pointerDownID, "pointerMove", eData.eventData, eData.eventNodeData );
@@ -1900,22 +1906,20 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     function controlNavObject( node ) {
       
         if ( !node ) {
-            this.logger.error( "Attempted to control non-existent navigation object" );
+            self.logger.error( "Attempted to control non-existent navigation object" );
             return;
         }
-
-        var sceneView = this;
 
         // Set the new navigation object
         navObject = node;
         
         // Search for a camera in the navigation object and if it exists, make it active
-        var cameraIds = sceneView.kernel.find( navObject.ID, 
-                                               "descendant-or-self::element(*,'http://vwf.example.com/camera.vwf')" );
+        var cameraIds = self.kernel.find( navObject.ID, 
+                                          "descendant-or-self::element(*,'http://vwf.example.com/camera.vwf')" );
         if ( cameraIds.length ) {
 
             // Set the view's active camera
-            var rendererState = sceneView.state;
+            var rendererState = self.state;
             var cameraId = cameraIds[ 0 ];
             cameraNode = rendererState.nodes[ cameraId ];
             rendererState.cameraInUse = cameraNode.threeObject;
@@ -1928,10 +1932,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     function findNavObject() {
 
         // Find the navigable objects in the scene
-        var sceneView = this;
-        var sceneRootID = sceneView.state.sceneRootID;
-        var navObjectIds = sceneView.kernel.find( sceneRootID,
-                                              ".//element(*,'http://vwf.example.com/navigable.vwf')" );
+        var sceneRootID = self.state.sceneRootID;
+        var navObjectIds = self.kernel.find( sceneRootID,
+                                             ".//element(*,'http://vwf.example.com/navigable.vwf')" );
         numNavCandidates = navObjectIds.length;
 
         // If there are navigation objects in the scene, get their owner property values (The rest of the logic
@@ -1939,10 +1942,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // Else, retrieve the userObject property so we may create a navigation object from it for this user
         if ( numNavCandidates ) {
             for ( var i = 0; i < numNavCandidates; i++ ) {
-                sceneView.kernel.getProperty( navObjectIds[ i ], "owner" );
+                self.kernel.getProperty( navObjectIds[ i ], "owner" );
             }
         } else {
-            sceneView.kernel.getProperty( sceneRootID, "userObject" );
+            self.kernel.getProperty( sceneRootID, "userObject" );
         }
     }
 
@@ -1955,7 +1958,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     
     function receiveModelTransformChanges( nodeID, transformMatrix ) {
 
-        var node = this.state.nodes[ nodeID ];
+        var node = self.state.nodes[ nodeID ];
 
         // If the node does not exist in the state's list of nodes, then this update is from a prototype and we
         // should ignore it
@@ -1963,8 +1966,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             return;
         }
 
-        var clientThatSatProperty = this.kernel.client();
-        var me = this.kernel.moniker();
+        var clientThatSatProperty = self.kernel.client();
+        var me = self.kernel.moniker();
         
 
         // If the transform property was initially updated by this view....
@@ -2019,19 +2022,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var transformMatrix = matCpy( transform );
         var threeObject = node.threeObject;
 
-        // Rotate 90 degrees around X to convert from VWF Z-up to three.js Y-up.
-        if ( threeObject instanceof THREE.Camera ) {
-            
-            // Get column y and z out of the matrix
-            var columny = goog.vec.Vec4.create();
-            goog.vec.Mat4.getColumn( transformMatrix, 1, columny );
-            var columnz = goog.vec.Vec4.create();
-            goog.vec.Mat4.getColumn( transformMatrix, 2, columnz );
-
-            // Swap the two columns, negating columny
-            goog.vec.Mat4.setColumn( transformMatrix, 1, columnz );
-            goog.vec.Mat4.setColumn( transformMatrix, 2, goog.vec.Vec4.negate( columny, columny ) );
-
+        if ( threeObject instanceof THREE.Camera ) {  
+            convertCameraTransformFromVWFtoThreejs( transformMatrix );
         } else if( threeObject instanceof THREE.ParticleSystem ) {
 
             // I don't see where this function is defined. Maybe a copy-paste bug from
@@ -2040,6 +2032,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         }
 
         threeObject.matrix.elements = transformMatrix;
+        nodeLookAt( node );
         updateRenderObjectTransform( threeObject );
     }
 
@@ -2084,14 +2077,108 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     }
 
     function setTransformFromWorldTransform( threeObject ) {
-        var inverseParentWorldMatrix = new THREE.Matrix4();
-        inverseParentWorldMatrix.getInverse( threeObject.parent.matrixWorld );
-        threeObject.matrix.multiplyMatrices( inverseParentWorldMatrix, threeObject.matrixWorld );
+        var parent = threeObject.parent;
+        if ( parent ) {
+            var inverseParentWorldMatrix = new THREE.Matrix4();
+            inverseParentWorldMatrix.getInverse( parent.matrixWorld );
+            threeObject.matrix.multiplyMatrices( inverseParentWorldMatrix, threeObject.matrixWorld );
+        } else {
+            threeObject.matrix.elements = matCpy( threeObject.matrixWorld.elements );
+        }
         updateRenderObjectTransform( threeObject );
     }
 
     function updateRenderObjectTransform( threeObject ) {
-        threeObject.updateMatrixWorld( true );
+        
+        // Tell three.js not to update the transform matrix from position and rotation values (which are older)
         threeObject.matrixAutoUpdate = false;
+
+        // Update the object's world transform
+        threeObject.updateMatrixWorld( true );
+    }
+
+    // Function to make the object continuously look at a position or node
+    // (for use when setting 'transform' or 'lookAt')
+    // An almost identical function is copied in model/threejs.js, so if any modifications are made here, they 
+    // should be made there, also
+    function nodeLookAt( node ) {
+
+        // Function to make the object look at a particular position
+        // (For use in the following conditional)
+        var lookAtWorldPosition = function( targetWorldPos ) {
+            
+            // Get the eye position
+            var eye = new THREE.Vector3();
+            eye.getPositionFromMatrix( node.threeObject.matrixWorld );
+
+            var look = new THREE.Vector3();
+            look.subVectors( targetWorldPos, eye );
+                
+            if ( look.length() > 0 ) {
+                look.normalize();
+
+                // Set the up vector to be z
+                var roughlyUp = new THREE.Vector3();
+                roughlyUp.set( 0, 0, 1 );
+
+                var right = new THREE.Vector3();
+                right.crossVectors( look, roughlyUp );
+                if ( right.length() == 0 ) {
+                    look.x += 0.0001;
+                    right.crossVectors( look, roughlyUp );
+                }
+                right.normalize();
+
+                var up = new THREE.Vector3();
+                up.crossVectors( right, look );
+
+                var worldTransform = node.threeObject.matrixWorld.elements;
+                worldTransform[ 0 ] = right.x; worldTransform[ 4 ] = look.x; worldTransform[ 8 ] = up.x;
+                worldTransform[ 1 ] = right.y; worldTransform[ 5 ] = look.y; worldTransform[ 9 ] = up.y;
+                worldTransform[ 2 ] = right.z; worldTransform[ 6 ] = look.z; worldTransform[ 10 ] = up.z;
+                
+                setTransformFromWorldTransform( node.threeObject );
+
+                if ( node.threeObject instanceof THREE.Camera ) {
+                    convertCameraTransformFromVWFtoThreejs( node.threeObject.matrix.elements );
+                    updateRenderObjectTransform( node.threeObject );
+                }
+            }
+        }
+
+        // The position for the object to look at - to be set in the following conditional
+        var targetWorldPos = new THREE.Vector3();
+
+        //Threejs does not currently support auto tracking the lookat,
+        //instead, we'll take the position of the node and look at that.
+        if ( typeof node.lookatval == 'string' ) {
+            
+            var lookatNode = self.state.nodes[ node.lookatval ];
+            
+            if ( lookatNode )
+            {
+                targetWorldPos.getPositionFromMatrix( lookatNode.threeObject.matrixWorld );
+                lookAtWorldPosition( targetWorldPos );                         
+            }
+        
+        } else if ( node.lookatval instanceof Array ) {
+            targetWorldPos.set( node.lookatval[0], node.lookatval[1], node.lookatval[2] );
+            lookAtWorldPosition( targetWorldPos );   
+        }
+    }
+
+    function convertCameraTransformFromVWFtoThreejs( transform ) {
+
+        // Rotate 90 degrees around X to convert from VWF Z-up to three.js Y-up.
+
+        // Get column y and z out of the matrix
+        var columny = goog.vec.Vec4.create();
+        goog.vec.Mat4.getColumn( transform, 1, columny );
+        var columnz = goog.vec.Vec4.create();
+        goog.vec.Mat4.getColumn( transform, 2, columnz );
+
+        // Swap the two columns, negating columny
+        goog.vec.Mat4.setColumn( transform, 1, columnz );
+        goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
     }
 });

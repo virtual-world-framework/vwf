@@ -49,6 +49,7 @@
     
 define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function( module, model, utility, Color ) {
 
+    var self;
 
     return model.load( module, {
 
@@ -58,6 +59,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         initialize: function() {
             
+            self = this;
+
             checkCompatibility.call(this);
 
             this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
@@ -73,7 +76,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback ) {
-            var self = this;
+            self = this;
 
             // If the parent nodeID is 0, this node is attached directly to the root and is therefore either 
             // the scene or a prototype.  In either of those cases, save the uri of the new node
@@ -456,9 +459,97 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //console.log(["       settingProperty: ",nodeID,propertyName,propertyValue]);
             if ( propertyValue !== undefined ) 
             {
-                var self = this;
+                self = this;
                 if ( threeObject instanceof THREE.Object3D )
                 {
+                    // Function to make the object continuously look at a position or node
+                    // (for use when setting 'transform' or 'lookAt')
+                    // An almost identical function is copied in view/threejs.js, so if any modifications are made here, they 
+                    // should be made there, also
+                    var lookAt = function( lookAtValue ) {
+
+                        // Function to make the object look at a particular position
+                        // (For use in the following conditional)
+                        var lookAtWorldPosition = function( targetWorldPos ) {
+                            
+                            // Get the eye position
+                            var eye = new THREE.Vector3();
+                            var worldTransform = getWorldTransform( node );
+                            eye.getPositionFromMatrix( worldTransform );
+
+                            var look = new THREE.Vector3();
+                            look.subVectors( targetWorldPos, eye );
+                                
+                            if ( look.length() > 0 ) {
+                                look.normalize();
+
+                                // Set the up vector to be z
+                                var roughlyUp = new THREE.Vector3();
+                                roughlyUp.set( 0, 0, 1 );
+
+                                var right = new THREE.Vector3();
+                                right.crossVectors( look, roughlyUp );
+                                if ( right.length() == 0 ) {
+                                    look.x += 0.0001;
+                                    right.crossVectors( look, roughlyUp );
+                                }
+                                right.normalize();
+
+                                var up = new THREE.Vector3();
+                                up.crossVectors( right, look );
+
+                                var worldTransformArray = worldTransform.elements;
+                                worldTransformArray[ 0 ] = right.x;  
+                                worldTransformArray[ 1 ] = right.y; 
+                                worldTransformArray[ 2 ] = right.z; 
+                                worldTransformArray[ 4 ] = look.x;
+                                worldTransformArray[ 5 ] = look.y; 
+                                worldTransformArray[ 6 ] = look.z; 
+                                worldTransformArray[ 8 ] = up.x;
+                                worldTransformArray[ 9 ] = up.y;
+                                worldTransformArray[ 10 ] = up.z;
+
+                                setWorldTransform( node, worldTransform );
+                            }
+                        }
+
+                        // The position for the object to look at - to be set in the following conditional
+                        var targetWorldPos = new THREE.Vector3();
+
+                        //Threejs does not currently support auto tracking the lookat,
+                        //instead, we'll take the position of the node and look at that.
+                        if ( typeof lookAtValue == 'string' ) {
+                            
+                            // We use '' to denote that there is no object to look at.
+                            // Therefore, we only care if it is something other than that.
+                            if ( lookAtValue != '' ) {
+                                var lookatNode = self.state.nodes[ lookAtValue ];
+                                
+                                if ( lookatNode )
+                                {
+                                    node.lookatval = lookAtValue;
+                                    var targetWorldTransform = getWorldTransform( lookatNode );
+                                    targetWorldPos.getPositionFromMatrix( targetWorldTransform );
+                                    lookAtWorldPosition( targetWorldPos );                         
+                                } else {
+                                    self.logger.errorx( "Lookat node does not exist: '" + lookAtValue + "'" );
+                                }
+                            }
+                        
+                        } else if ( lookAtValue instanceof Array ) {
+                            node.lookatval = lookAtValue;
+                            targetWorldPos.set( lookAtValue[0], lookAtValue[1], lookAtValue[2] );
+                            lookAtWorldPosition( targetWorldPos );   
+                        } else if ( !lookAtValue ) {
+                            node.lookatval = null;
+                        } else {
+                            self.logger.errorx( "Invalid lookat property value: '" + lookAtValue + "'" );
+                        }
+                        return node.lookatval;
+                    }
+
+                    // Begin handling properties
+
                     if ( propertyName == 'transform' )
                     {
                         //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
@@ -474,58 +565,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 						//because threejs does not do auto tracking of lookat, we must do it manually.
 						//after updating the matrix for an ojbect, if it's looking at something, update to lookat from
 						//the new position
-						if ( threeObject.lookatval )
-						{
-							this.settingProperty( nodeID, 'lookAt', threeObject.lookatval );
+						if ( node.lookatval ) {
+							lookAt( node.lookatval );
 						}
                     }
                     else if ( propertyName == 'lookAt' ) {
-
-						threeObject.lookatval = propertyValue;
-
-                        // Function to make the object look at a particular position
-                        // (For use in the following conditional)
-                        var lookAt = function( lookatPosition ) {
-                            var thisPosition = new THREE.Vector3();
-                            var up = new THREE.Vector3();
-                            up.set(0,0,1);
-
-                            thisPosition.getPositionFromMatrix( node.transform );
-                                
-                            if ( thisPosition.distanceTo( lookatPosition ) > 0 ) {
-                                node.transform.lookAt( thisPosition, lookatPosition, up );
-                            }
-
-                            value = propertyValue;
-                        }
-
-                        // The position for the object to look at - to be set in the following conditional
-                        var lookatPosition = new THREE.Vector3();
-
-                        //Threejs does not currently support auto tracking the lookat,
-                        //instead, we'll take the position of the node and look at that.
-                        if ( typeof propertyValue == 'string' ) {
-                            
-                            var lookatNode = this.state.nodes[ propertyValue ];
-                            
-                            if ( lookatNode )
-                            {
-                                lookatPosition.getPositionFromMatrix( lookatNode.transform );
-                                lookAt( lookatPosition );                          
-                            }
-                        
-                        } 
-                        else if ( propertyValue instanceof Array ) {
-                            lookatPosition.set( propertyValue[0], propertyValue[1], propertyValue[2] );
-                            lookAt( lookatPosition );   
-                        }
-                        else {
-							if ( !propertyValue ) {
-								delete threeObject.lookatval;
-                                value = "";
-							}
-						}
-                    
+                        value = lookAt( propertyValue );
                     }
                     else if ( propertyName == 'visible' )
                     {
@@ -1144,7 +1189,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
                 if(propertyName =='lookAt')
                 {
-                    value = threeObject.lookatval;
+                    value = node.lookatval;
                     return value;
                 }                 
                 if(propertyName ==  "boundingbox")
@@ -2338,7 +2383,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				
 				//the sise
                 this.shaderMaterial_default.attributes.size.value.push(1);
-                var self = this;
+                self = this;
 				//set the size - stored per vertex
                 particle.setSize = function(s)
                 {
@@ -2905,6 +2950,31 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
     }
 
+    function getWorldTransform( node ) {
+        var parent = self.state.nodes[ node.parentID ];
+        if ( parent ) {
+            var worldTransform = new THREE.Matrix4();
+            return worldTransform.multiplyMatrices( getWorldTransform( parent ), node.transform );
+        } else {
+            return node.transform;
+        }
+    }
+
+    function setWorldTransform( node, worldTransform ) {
+        if ( node.parent ) {
+            var parentInverse = goog.vec.Mat4.create();
+            if ( goog.vec.Mat4.invert( getWorldTransform( node.parent ), parentInverse ) ) {
+                node.transform = goog.vec.Mat4.multMat( parentInverse, worldTransform, 
+                                                        goog.vec.Mat4.create() );
+            } else {
+                self.logger.errorx( "Parent world transform is not invertible - did not set world transform " +
+                                    "on node '" + node.id + "'" );
+            }
+        } else {
+            node.transform = worldTransform;
+        }
+    }
+
    // -- getBoundingBox ------------------------------------------------------------------------------
 
     function getBoundingBox( object3 ) {
@@ -2917,7 +2987,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         if ( object3 && object3.geometry && object3.geometry.computeBoundingBox ) {
            
             object3.geometry.computeBoundingBox();
-            bx = object3.geometry.boundingBox;
+            var bx = object3.geometry.boundingBox;
             bBox = { 
                 min: { x: bx.min.x, y: bx.min.y, z: bx.min.z },
                 max: { x: bx.max.x, y: bx.max.y, z: bx.max.z }
@@ -3003,7 +3073,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     function UTF8JsonLoader(node,callback)
     {
         
-        var self = this;
+        self = this;
         this.url = node.source;
         this.callback = callback;
         this.children=[];
