@@ -40,7 +40,8 @@ define(function ()
 		$('#userprofiletitle').prepend('<img class="headericon" src="../vwf/view/editorview/images/icons/user.png" />');
 		$("#UserProfileWindow").append("<div id='FollowUser'></div>");
 		$("#UserProfileWindow").append("<div id='PrivateMessage'></div>");
-		
+		$("#UserProfileWindow").append("<div id='CallUser'></div>");
+
 		$("#userprofileclose").click(function ()
 		{
 			$("#UserProfileWindow").hide('blind', function ()
@@ -82,6 +83,15 @@ define(function ()
 		{
 			setupPmWindow(_UserManager.SelectedProfile.Username);
 		});
+
+		$("#CallUser").button({
+			label: 'Video Call'
+		});
+		$("#CallUser").click(function ()
+		{
+			vwf.callMethod('index-vwf', 'rtcCall', {target: _UserManager.SelectedProfile.Username});
+		});
+
 		$(document).on('setstatecomplete',function()
 		{
 			
@@ -155,10 +165,12 @@ define(function ()
 			}
 			$('#EditProfile').hide();
 			$('#PrivateMessage').show();
+			$('#CallUser').show();
 			if (this.SelectedProfile.Username == this.GetCurrentUserName())
 			{
 				$('#EditProfile').show();
 				$('#PrivateMessage').hide();
+				$('#CallUser').hide();
 			}
 		}
 		this.GetCurrentUserName = function ()
