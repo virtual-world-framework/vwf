@@ -252,6 +252,7 @@
 
             var requireArray = [
                 { library: "domReady", active: true },
+				{ library: "/socket.io/socket.io.js", active: true },
                 { library: "vwf/configuration", active: true },
                 { library: "vwf/kernel/model", active: true },
                 { library: "vwf/model/javascript", active: true },
@@ -644,7 +645,7 @@
 
             try {
 
-                socket = new io.Socket( undefined, {
+              /*  socket = new io.Socket( undefined, {
 
                     // The socket is relative to the application path.
 
@@ -675,7 +676,8 @@
                         // "jsonp-polling": { timeout: 90000 },
                     }
 
-                } );
+                } );*/
+				socket = io.connect("ws://"+window.location.host);
 
             } catch ( e ) {
 
@@ -705,7 +707,7 @@
 
                     vwf.logger.infox( "-socket", "connected" );
 
-                    vwf.moniker_ = this.transport.sessionid;
+                     vwf.moniker_ = this.json.namespace.socket.sessionid;
 
                 } );
 
@@ -725,7 +727,7 @@
 
                         // Unpack the arguments.
 
-                        var fields = JSON.parse( message );
+                        var fields = message;//JSON.parse( message );
 
                         fields.time = Number( fields.time );
                         // TODO: other message validation (check node id, others?)
@@ -770,7 +772,7 @@
 
                 // Start communication with the reflector. 
 
-                socket.connect();  // TODO: errors can occur here too, particularly if a local client contains the socket.io files but there is no server; do the loopback here instead of earlier in response to new io.Socket.
+               // socket.connect();  // TODO: errors can occur here too, particularly if a local client contains the socket.io files but there is no server; do the loopback here instead of earlier in response to new io.Socket.
 
             } else if ( component_uri_or_json_or_object ) {
 
