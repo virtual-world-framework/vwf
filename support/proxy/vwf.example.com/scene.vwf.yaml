@@ -90,6 +90,7 @@ properties:
       navmode: fly
     
 methods:
+  initializeActiveCamera:
   getActiveCameraComp:
   getChild:
   getActiveCamera:
@@ -102,8 +103,12 @@ scripts:
     this.initialize = function() {
       if ( this.usersShareView ) {
         this.children.create( "sharedCamera", this.userObject );
+        this.future( 0 ).initializeActiveCamera();
       }
-      this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
+    }
+
+    this.initializeActiveCamera = function() {
+      this.activeCamera = this.sharedCamera.id;
       this.lastActiveCamera = this.activeCamera;
     }
 
