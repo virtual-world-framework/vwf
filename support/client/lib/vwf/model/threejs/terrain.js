@@ -454,15 +454,20 @@
 						"return res;"+
 						"}"+
 						"varying vec3 pos;"+
+						"varying vec3 npos;"+
 						"varying vec3 n;"+
 						"varying vec3 wN;"+
 						"uniform float blendPercent;\n" + 
+
+
+
 					
 						"attribute vec3 everyOtherNormal;\n"+
 						"attribute float everyOtherZ;\n"+
 						"void main() {\n"+
 						" pos = (modelMatrix * vec4(position,1.0)).xyz; \n"+
-						" pos.z += getNoise(pos.xy*200.0)/50.0; \n"+
+						"npos = pos;\n"+
+						"npos.z += getNoise(pos.xy*200.0)/50.0; \n"+
 						"wN = mix(everyOtherNormal,normal,blendPercent);\n"+
 						"n = normalMatrix *  wN\n;"+
 						"n = normalize(n);\n"+
@@ -487,15 +492,44 @@
 						"uniform vec3 directionalLightColor[ MAX_DIR_LIGHTS ];\n"+
 						"uniform vec3 directionalLightDirection[ MAX_DIR_LIGHTS ];\n"+
 						
+						
+		"uniform vec3 fogColor;"+				
+"vec3 horizonColor;\n"+
+"vec3 zenithColor;\n"+
+"vec3 sunColor;\n"+
+"vec3 atmosphereColor(vec3 rayDirection){\n"+
+"    float a = max(0.0, dot(rayDirection, vec3(0.0, 1.0, 0.0)));\n"+
+"    vec3 skyColor = mix(horizonColor, zenithColor, a);\n"+
+"    float sunTheta = max( dot(rayDirection, -directionalLightDirection[0].xzy), 0.0 );\n"+
+"    return skyColor+directionalLightColor[0]*4.0*pow(sunTheta, 16.0)*0.5;\n"+
+"}\n"+
+
+"vec3 applyFog(vec3 albedo, float dist, vec3 rayOrigin, vec3 rayDirection){\n"+
+"    float fogDensity = 0.00036;\n"+
+"    float vFalloff = 20.0;\n"+ 
+"    float fog = exp((-rayOrigin.y*vFalloff)*fogDensity) * (1.0-exp(-dist*rayDirection.y*vFalloff*fogDensity))/(rayDirection.y*vFalloff);\n"+
+"    return mix(albedo, fogColor, clamp(fog, 0.0, 1.0));\n"+
+"}\n"+
+
+"vec3 aerialPerspective(vec3 albedo, float dist, vec3 rayOrigin, vec3 rayDirection){\n"+
+"    float atmosphereDensity = 0.00025;\n"+
+"    vec3 atmosphere = atmosphereColor(rayDirection)+vec3(0.0, 0.02, 0.04); \n"+
+"    vec3 color = mix(albedo, atmosphere, clamp(1.0-exp(-dist*atmosphereDensity), 0.0, 1.0));\n"+
+"    return applyFog(color, dist, rayOrigin, rayDirection);\n"+
+"}						\n"+
+						
+						
+						
 						"#endif\n"+
 						"uniform int fogType;"+
-						"uniform vec3 fogColor;"+
+						
 						"uniform float fogDensity;"+
 						"uniform float fogNear;"+
 						"uniform float fogFar;"+
 						"varying vec3 pos;"+
 						"varying vec3 n;"+
 						"varying vec3 wN;"+
+						"varying vec3 npos;"+
 						"vec4 getTexture(vec3 coords, vec3 norm)" +
 						"{"+
 							//"coords /= 100.0;\n"+
@@ -511,9 +545,9 @@
 							"vec4 cliff =.5*texture2D(cliffSampler,c1) +  .5*texture2D(cliffSampler,c1a);\n"+
 							"vec4 dirt = .5*texture2D(dirtSampler,c2) +  .5*texture2D(dirtSampler,c2a);\n"+
 							"vec4 snow = .5*texture2D(snowSampler,c3) +  .5*texture2D(snowSampler,c3a);\n"+
-							"float side = pow(abs(dot(norm,(viewMatrix * vec4(0.0,0.0,1.0,0.0)).xyz)),4.0 * min(3.0,abs(pos.z/55.0)));\n"+
-							"float bottom = 1.0-smoothstep(-20.0,60.0,pos.z);\n"+
-							"float top = clamp(0.0,1.0,(smoothstep(100.0,140.0,pos.z)));\n"+
+							"float side = pow(abs(dot(norm,(viewMatrix * vec4(0.0,0.0,1.0,0.0)).xyz)),4.0 * min(3.0,abs(npos.z/55.0)));\n"+
+							"float bottom = 1.0-smoothstep(-20.0,60.0,npos.z);\n"+
+							"float top = clamp(0.0,1.0,(smoothstep(100.0,140.0,npos.z)));\n"+
 							"float middle = 1.0 - bottom - top;\n"+
 							
 							
@@ -526,7 +560,7 @@
 						"	#if MAX_DIR_LIGHTS > 0\n"+
 						"	light += directionalLightColor[0] * dot(n, (viewMatrix * vec4(directionalLightDirection[0],0.0)).xyz);\n"+
 						"	#endif\n"+
-						"	vec4 diffuse = getTexture(pos,n);\n"+
+						"	vec4 diffuse = getTexture(npos,n);\n"+
 						"	diffuse.a = 1.0;\n"+
 						"   gl_FragColor = ambient * diffuse + diffuse * vec4(light.xyz,1.0);\n"+
 						"#ifdef USE_FOG\n"+
@@ -538,15 +572,17 @@
 								"const float LOG2 = 1.442695;"+
 								"float fogFactor = exp2( - fogDensity * fogDensity * depth * depth * LOG2 );"+
 								"fogFactor = 1.0 - clamp( fogFactor, 0.0, 1.0 );\n"+
-
+								"fogFactor *= 1.0-smoothstep(0.0,1000.0,pos.z);\n"+
 							"#else\n"+
 
 								"float fogFactor = smoothstep( fogNear, fogFar, depth );\n"+
 
 							"#endif\n"+
 
-							"gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );\n"+
-
+							//"gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );\n"+
+							"horizonColor = fogColor;\n"+
+							"zenithColor = vec3(0.78, 0.82, 0.999);\n"+
+							"gl_FragColor.xyz = aerialPerspective(gl_FragColor.xyz, distance(pos,cameraPosition),cameraPosition.xzy, normalize(pos-cameraPosition).xzy);\n"+
 						"#endif\n"+
 						"}\n";
 						
