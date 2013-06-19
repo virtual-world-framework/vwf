@@ -262,7 +262,6 @@ scripts:
     }
     this.pointerWheel = function( parms, pickInfo ) {
       this.input.pointerEventTime = this.time;
-      this.input.lastInputTime = this.time;
 
       this.input.lastPointerInfo = this.input.pointerInfo;
       this.input.pointerInfo = parms;      
@@ -298,6 +297,7 @@ scripts:
           );
         }
       }
+      this.input.lastInputTime = this.time;
     }
     this.keyDown = function( parms ) {
       var active = this.input.futureActive();

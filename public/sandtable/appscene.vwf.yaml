@@ -45,7 +45,7 @@ properties:
           break;
       }
     value: "orbit"
-  translationSpeed: 4.0
+  translationSpeed: 40.0
   nodesCreated: 
   lineIndex: 1
   cubeIndex: 1
