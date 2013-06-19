@@ -12,10 +12,12 @@
 # the License.
 
 --- 
-extends: http://vwf.example.com/navtouch.vwf
+extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
   rotationSpeed: 10
+methods:
+  initializeCamera:
 children:
   plane:
     extends: plane.vwf
@@ -52,6 +54,10 @@ children:
 scripts:
 - |
     this.initialize = function(){
-      this.camera.transform = [ 1,0,0,0,0,1,-0.000185691867955029,0,0,0.000185691867955029,1,0,0,-30,0,1 ];
+      this.future( 0 ).initializeCamera();
       this.dir1.translation = [ 0, -100, 0 ];
+    }
+
+    this.initializeCamera = function() {
+      this.sharedCamera.translation = [ 0, -30, 0 ];
     }

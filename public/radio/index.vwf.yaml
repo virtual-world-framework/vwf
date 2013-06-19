@@ -12,16 +12,11 @@
 # the License.
 
 --- 
-extends: http://vwf.example.com/navscene.vwf
+extends: http://vwf.example.com/scene.vwf
 properties:
   ambientColor: [ 183, 183, 183 ]
-  navmode: none
-scripts:
-- text: |
-    this.initialize = function() {
-      this.camera.transform = [ 0.8791424632072449,-0.4765590727329254,0,0,0.44338271021842957,0.8179396390914917,-0.36658763885498047,0,0.17470066249370575,0.3222827613353729,0.9303835034370422,0,-3.814249038696289,-7.036417007446289,3.153610944747925,1 ];
-      this.camera.lookAt = this.children.sceneCenter.id;
-    } //@ sourceURL=index.vwf
+methods:
+  initializeCamera:
 children:
   Omni01:
     extends: http://vwf.example.com/light.vwf
@@ -43,3 +38,17 @@ children:
     extends: http://vwf.example.com/node3.vwf
   radio: 
     includes: radio.vwf
+scripts:
+- |
+    this.initialize = function() {
+      this.future( 0 ).initializeCamera();
+    } //@ sourceURL=index.vwf
+
+    this.initializeCamera = function() {
+      this.sharedCamera.transform = [  0.879, -0.477,  0,     0, 
+                                       0.443,  0.818, -0.367, 0, 
+                                       0.175,  0.322,  0.93,  0, 
+                                      -3.814, -7.036,  3.154, 1 ];
+      this.sharedCamera.lookAt = this.sceneCenter.id;
+      this.sharedCamera.navmode = "none";
+    }

@@ -12,11 +12,11 @@
 # the License.
 
 --- 
-extends: http://vwf.example.com/navscene.vwf
+extends: http://vwf.example.com/scene.vwf
 properties:
-  navmode: walk
   spinning: true
 methods:
+  initializeCamera:
   spin:
 children:
   sceneCenter:
@@ -50,9 +50,18 @@ children:
 scripts:
 - |
     this.initialize = function(){
-      this.camera.transform = [ 1,0,0,0,0,1,0,0,0,0,1,0,0,-150,0,1 ];
+      this.future(0).initializeCamera();
       this.future(1.0).spin();
     }
+
+    this.initializeCamera = function() {
+      this.sharedCamera.transform = [ 1,    0, 0, 0,
+                                      0,    1, 0, 0,
+                                      0,    0, 1, 0,
+                                      0, -150, 0, 1 ];
+      this.sharedCamera.navmode = "walk";
+    }
+
     this.spin = function() {
       if ( this.spinning ) {
         this.lightGroup.rotateBy( [ 0, 0, 1, 0.5 ] );
