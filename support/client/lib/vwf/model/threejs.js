@@ -992,6 +992,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 {
                     if(propertyName == 'activeCamera')
                     {
+
+                        // TODO: This should probably happen in the view driver since it is altering the
+                        //       view-side cameraInUse property
+
                         if( this.state.scenes[this.state.sceneRootID].camera.threeJScameras[propertyValue] )
                         {
                             // If the view is currently using the model's activeCamera, update it to the new activeCamera
@@ -2383,7 +2387,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				
 				//the sise
                 this.shaderMaterial_default.attributes.size.value.push(1);
-                self = this;
+                var self = this;
 				//set the size - stored per vertex
                 particle.setSize = function(s)
                 {
