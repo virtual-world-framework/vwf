@@ -16,4 +16,4 @@ model:
   vwf/model/cesium:
 view:
   vwf/view/cesium: { useCesiumWidget: true, parentDiv: 'cesium-main' }
-  vwf/view/webrtc: { audio: true, video: true, createVideoElements: false, debug: false, videoElementsDiv: undefined }
+  vwf/view/webrtc: { audio: true, video: true, createVideoElements: false, debug: true, videoElementsDiv: undefined }
