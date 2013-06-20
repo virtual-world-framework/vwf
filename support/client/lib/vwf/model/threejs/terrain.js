@@ -500,7 +500,7 @@
 "vec3 atmosphereColor(vec3 rayDirection){\n"+
 "    float a = max(0.0, dot(rayDirection, vec3(0.0, 1.0, 0.0)));\n"+
 "    vec3 skyColor = mix(horizonColor, zenithColor, a);\n"+
-"    float sunTheta = max( dot(rayDirection, -directionalLightDirection[0].xzy), 0.0 );\n"+
+"    float sunTheta = max( dot(rayDirection, directionalLightDirection[0].xzy), 0.0 );\n"+
 "    return skyColor+directionalLightColor[0]*4.0*pow(sunTheta, 16.0)*0.5;\n"+
 "}\n"+
 
@@ -556,9 +556,9 @@
 						"}"+
 						"void main() {\n"+
 						"	vec3 light = vec3(0.0,0.0,0.0);\n"+
-						"	vec4 ambient = vec4(0.3,0.3,0.3,1.0);\n"+
+						"	vec4 ambient = vec4(0.5,0.5,0.5,1.0);\n"+
 						"	#if MAX_DIR_LIGHTS > 0\n"+
-						"	light += directionalLightColor[0] * dot(n, (viewMatrix * vec4(directionalLightDirection[0],0.0)).xyz);\n"+
+						"	light += directionalLightColor[0] * clamp(0.0,1.0,dot(n, (viewMatrix * vec4(directionalLightDirection[0],0.0)).xyz));\n"+
 						"	#endif\n"+
 						"	vec4 diffuse = getTexture(npos,n);\n"+
 						"	diffuse.a = 1.0;\n"+
@@ -2287,7 +2287,7 @@
 						}
 						
 						//var n = vertn.clone().sub(vertx).cross(vertn.clone().sub(verty)).normalize();
-						var n = new THREE.Vector3(vertx1.z - vertx0.z,verty1.z - verty0.z,2*vertoffset)
+						var n = new THREE.Vector3(-(vertx1.z - vertx0.z),-(verty1.z - verty0.z),2*vertoffset)
 						n.normalize();
 						//n = n.applyMatrix4(invmat);
 						normals[j][l] = n;
