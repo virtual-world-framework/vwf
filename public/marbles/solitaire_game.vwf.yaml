@@ -32,6 +32,9 @@ properties:
   gameUnderway: false
 #The selectedMarble property is used to track what, if any, marble is currently selected.
   selectedMarble: ""
+  userDirection:
+  userDistance:
+  userHeight:
 methods:
 #The first four methods are default methods all activities should implement, and handle when
 #the user forwards the appropriate event to the activity model for handling.
@@ -94,7 +97,49 @@ scripts:
    // These are currently world transforms... Need to be updated.
    var solitairePlayingViewPoint = [ 1.0000032186508179, 0, 0, 0, 0, 0.5591943860054016, -0.8290396928787231, 0, 0, 0.8290374279022217, 0.5591927766799927, 0 , 4.2, 2.2, 1.5,1 ];
    var solitaireExitingViewPoint = [ 1.0000032186508179, 0, 0, 0, 0, 0.5591943860054016, -0.8290396928787231, 0, 0, 0.8290374279022217, 0.5591927766799927, 0 , 4.2, 2.2, 1.5,1 ];
+   var degreeConversion = Math.PI / 180;
+   
 
+   
+  this.calculateInitialDirection = function ( cameraPos ) {
+    var xDiff = cameraPos[ 0 ] - this.translation[ 0 ];
+    var yDiff = cameraPos[ 1 ] - this.translation[ 1 ];
+    var result = Math.atan2( yDiff, xDiff ) / degreeConversion;
+    return result;
+  };
+  this.calculateViewpoint = function ( direction, distance, height ) {
+    var actualDirection = direction * degreeConversion;
+    var invertedDirection = actualDirection + ( Math.PI / 2 );
+    var newPosition = [ Math.cos( actualDirection ) * distance, Math.sin( actualDirection ) * distance, height ];
+    var actualHeight =  0.83 - height;
+    var actualDistance = Math.sqrt( ( ( distance * distance ) + ( actualHeight * actualHeight ) ) );
+    var xRotation = Math.asin( actualHeight / actualDistance );
+    var xRotCos = Math.cos( xRotation );
+    var xRotSin = Math.sin( xRotation );
+    var zRotCos = Math.cos( invertedDirection );
+    var zRotSin = Math.sin( invertedDirection );
+    var viewpointMatrix = [ zRotCos, zRotSin, 0, 0, -( xRotCos * zRotSin ), xRotCos * zRotCos, xRotSin, 0, xRotSin * zRotSin, -( xRotSin * zRotCos ), xRotCos, 0, newPosition[ 0 ], newPosition[ 1 ], newPosition[ 2 ], 1 ];
+
+    return viewpointMatrix;
+  };
+  
+  this.calculateExitViewpoint = function ( direction, distance ) {
+    var actualDirection = direction * degreeConversion - ( Math.PI / 2 );
+    //var invertedDirection = actualDirection + ( Math.PI / 2 );
+    var newPosition = [ Math.cos( actualDirection ) * distance, Math.sin( actualDirection ) * distance, 0.7 ];
+    var zRotCos = Math.cos( actualDirection );
+    var zRotSin = Math.sin( actualDirection );
+    var viewpointMatrix = [ zRotCos, zRotSin, 0, 0, -zRotSin, zRotCos, 0, 0, 0, 0, 1, 0, newPosition[ 0 ], newPosition[ 1 ], newPosition[ 2 ], 1 ];
+
+    return viewpointMatrix;
+  };
+  
+  this.updateUserPosition = function ( user, time ) {
+    var viewpointMatrix = this.calculateViewpoint( this.userDirection, this.userDistance, this.userHeight );
+    var userViewpoint = goog.vec.Mat4.multMat( this.transform, viewpointMatrix , goog.vec.Mat4.create( ) );
+    user.transformTo( userViewpoint, time );
+  };
+  
   // Define a patterns array that holds the names of the different marble pattern types.
   var patterns = [ "blueberryfreeze", "dragonfly", "iguana", "jungle", "milkyway", "mummy", "octopus", "rooster", "sun" ];
 
@@ -169,13 +214,16 @@ scripts:
   // Fire the solitaireUserLeft event so that the users view will hide the solitaire panel.
   this.detachUser = function( user ) {
     if ( this.gameOccupiedBy == user.id ) {
-      var userViewpoint = solitaireExitingViewPoint; //goog.vec.Mat4.multMat( this.transform, solitaireExitingViewPoint, goog.vec.Mat4.create( ) );
+      var viewpointMatrix = this.calculateExitViewpoint( this.userDirection, this.userDistance );
+      var userViewpoint = goog.vec.Mat4.multMat( this.transform, viewpointMatrix , goog.vec.Mat4.create( ) );
       user.transformTo( userViewpoint, 3 );
-      user.attachedTo = "";
-      this.gameOccupiedBy = "";
+
+      user.future(3).attachedTo = "";
+      this.future(3).gameOccupiedBy = "";
       this.solitaireUserLeft( user.viewHandle );
     }
   };
+  
 
   //When attaching a user, first test if this solitaire game is already occupied, if it is
   // ignore the attempt, otherwise change the viewpoint of the user. Then set the users 
@@ -185,8 +233,14 @@ scripts:
   this.attachUser = function( user ) {
     if ( this.gameOccupiedBy == "" ) {
       this.gameOccupiedBy = user.id;
-      var userViewpoint = solitairePlayingViewPoint; //goog.vec.Mat4.multMat( this.transform, solitairePlayingViewPoint, goog.vec.Mat4.create( ) );
-      user.transformTo( userViewpoint, 3 );
+      var newAngle = this.calculateInitialDirection( user.translation );
+      this.userDirection = newAngle;
+      this.userHeight = 1.5;
+      this.userDistance = 0.4;
+      this.updateUserPosition( user, 3 );
+      
+      //var userViewpoint = solitairePlayingViewPoint; //goog.vec.Mat4.multMat( this.transform, solitairePlayingViewPoint, goog.vec.Mat4.create( ) );
+      //user.transformTo( userViewpoint, 3 );
       user.attachedTo = this.id;
       this.solitaireUserJoined( user.viewHandle );     
     }
@@ -256,9 +310,33 @@ scripts:
 
   //When the user presses the escape buton, detach the user.
   this.handleKeyUp = function( nodeId, eventParameters, user ) {
+    var callUpdateUserPosition = false;
     if( eventParameters[ 0 ][ 'keysUp' ][ 'escape' ] )
     {
+      this.logger.warn("Detach!");
       this.detachUser( user );
+    }
+    else if ( eventParameters[ 0 ][ "keysUp" ][ "W" ] ) {
+      this.userDistance = this.userDistance - 0.06;
+      callUpdateUserPosition = true;
+    } else if ( eventParameters[ 0 ][ "keysUp" ][ "S" ] ) {
+      this.userDistance = this.userDistance + 0.06;
+      callUpdateUserPosition = true;
+    } else if ( eventParameters[ 0 ][ "keysUp" ][ "A" ] ) {
+      this.userDirection = this.userDirection - 10;
+      callUpdateUserPosition = true;
+    } else if ( eventParameters[ 0 ][ "keysUp" ][ "D" ] ) {
+      this.userDirection = this.userDirection + 10;
+      callUpdateUserPosition = true;
+    } else if ( eventParameters[ 0 ][ "keysUp" ][ "R" ] ) {
+      this.userHeight = this.userHeight + 0.06;
+      callUpdateUserPosition = true;
+    } else if ( eventParameters[ 0 ][ "keysUp" ][ "C" ] ) {
+      this.userHeight = this.userHeight - 0.06;
+      callUpdateUserPosition = true;
+    }
+    if ( callUpdateUserPosition == true ) {
+      this.updateUserPosition( user, 0.2 );
     }
   };
 
