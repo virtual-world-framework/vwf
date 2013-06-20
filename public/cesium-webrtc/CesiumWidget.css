@@ -18,7 +18,7 @@
 }
 
 .cesium-widget-logo {
-	background-image: url(../Images/Cesium_Logo_overlay.png);
+	background-image: url(../images/Cesium_Logo_overlay.png);
 	display: block;
 	position: absolute;
 	bottom: 4px;
