@@ -1817,10 +1817,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 // Initialize the key frame animations
                 for(var i = 0; i < animations.length; i++) {
                     var animation = animations[i];
+                    // Save references to the animations on the node that is animated, so that it can play separately
+                    if(animation.node.animations == undefined) {
+                        animation.node.animations = [];
+                    }
+                    if(animation.node.kfAnimations == undefined) {
+                        animation.node.kfAnimations = [];
+                    }
+                    animation.node.animations.push(animation);
                     animHandler.add(animation);
                     var kfAnimation = new THREE.KeyFrameAnimation(animation.node, animation.name);
                     kfAnimation.timeScale = 1;
                     asset.kfAnimations.push(kfAnimation);
+                    animation.node.kfAnimations.push(kfAnimation);
                     for(var h = 0; h < kfAnimation.hierarchy.length; h++) {
                         var keys = kfAnimation.data.hierarchy[h].keys;
                         var sids = kfAnimation.data.hierarchy[h].sids;
