@@ -18,6 +18,65 @@
 
 --- 
 extends: http://vwf.example.com/node.vwf
+implements:
+- http://vwf.example.com/animation.vwf
 properties:
   visible: true
-  position: [ 0, 0, 0 ]
+methods:
+  translateBy:
+  translateTo:
+scripts:
+  - |
+    this.translationFromValue = function( value ) {
+      return value && value.length >= 3 ?
+        value :
+        goog.vec.Vec3.create();
+    }  
+    this.translateBy = function( translation, duration ) {
+      var pos = this.position; 
+      var startPosition = goog.vec.Vec3.createFloat32FromArray( pos );
+      var deltaPosition = goog.vec.Vec3.createFloat32FromArray( translation );
+      var stopPosition = goog.vec.Vec3.add(
+        startPosition,
+        deltaPosition,
+        goog.vec.Vec3.create()
+      );
+      if( duration > 0 ) {
+        this.animationDuration = duration;
+        this.animationUpdate = function( time, duration ) {
+          this.position = goog.vec.Vec3.lerp(
+            startPosition, stopPosition,
+            time >= duration ? 1 : time / duration,
+            goog.vec.Vec3.create()
+          );
+        }
+        this.animationPlay();
+      }
+      else {
+        this.position = stopPosition;
+      } 
+    } 
+    this.translateTo = function( translation, duration ) {
+      var pos = this.position; 
+      var startPosition = goog.vec.Vec3.createFloat32FromArray( pos );
+      var stopPosition = goog.vec.Vec3.createFloat32FromArray( translation );
+      var deltaPosition = goog.vec.Vec3.subtract(
+        startPosition,
+        stopPosition,
+        goog.vec.Vec3.create()
+      );
+      if( duration > 0 ) {
+        this.animationDuration = duration;
+        this.animationUpdate = function( time, duration ) {
+          this.position = goog.vec.Vec3.lerp(
+            startPosition, stopPosition,
+            time >= duration ? 1 : time / duration,
+            goog.vec.Vec3.create()
+          );
+        }
+        this.animationPlay();
+      }
+      else {
+        this.position = stopPosition;
+      } 
+    } //@ sourceURL=cesium.node3.vwf
