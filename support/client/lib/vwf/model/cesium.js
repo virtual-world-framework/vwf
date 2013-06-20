@@ -225,7 +225,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         //console.info( " 1    getting "+propertyName+" of: " + childExtendsID  );
                         ptPropValue = kernel.getProperty( childExtendsID, propertyName );
                         if ( ptPropValue !== undefined && ptPropValue !== null && childID !== undefined && childID !== null) {
-                            //console.info( " 1    setting "+propertyName+" of: " + nodeID + " to " + ptPropValue );
+                            //console.info( " 1    setting "+propertyName+" of: " + childID + " to " + ptPropValue );
                             self.settingProperty( childID, propertyName, ptPropValue );
                         }
                     }
@@ -235,7 +235,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         //console.info( "     2    getting "+propertyName+" of: " + behaviorID  );
                         ptPropValue = kernel.getProperty( behaviorID, propertyName );
                         if ( ptPropValue !== undefined && ptPropValue !== null && childID !== undefined && childID !== null) {
-                            //console.info( "     2    setting "+propertyName+" of: " + nodeID + " to " + ptPropValue );
+                            //console.info( "     2    setting "+propertyName+" of: " + childID + " to " + ptPropValue );
                             self.settingProperty( childID, propertyName, ptPropValue );
                         }
                     }
@@ -314,6 +314,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if ( node ) {
 
                 //if ( nodeID == "http-vwf-example-com-cesium-camera-vwf-camera" )
+                //if ( propertyName == "position" )
                 //    debugger;
 
                 if ( node.renderObject !== undefined && propertyValue !== undefined ) {
@@ -469,7 +470,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
 
                         case "image":
-                            if ( node.renderObject instanceof Cesium.Billboard )
+                            if ( node.renderObject instanceof Cesium.Billboard ) {
+                                // set and image on the billboard
+                                // TODO
+                            }
                             break;
 
                         case "direction":
@@ -481,19 +485,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "fovy":
-                            if ( node.renderObject instanceof Cesium.Camera ) {
+                            if ( node.renderObject instanceof Cesium.Camera && node.renderObject.frustrum ) {
                                 node.renderObject.frustrum.fovy = parseFloat( propertyValue );
                             }                    
                             break;
 
                         case "near":
-                            if ( node.renderObject instanceof Cesium.Camera ) {
+                            if ( node.renderObject instanceof Cesium.Camera && node.renderObject.frustrum ) {
                                 node.renderObject.frustrum.near = parseFloat( propertyValue );
                             }
                             break;
 
                         case "far":
-                            if ( node.renderObject instanceof Cesium.Camera ) {
+                            if ( node.renderObject instanceof Cesium.Camera && node.renderObject.frustrum ) {
                                 node.renderObject.frustrum.far = parseFloat( propertyValue );
                             }
                             break;
@@ -508,7 +512,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         case "transform":
                             if ( node.renderObject instanceof Cesium.Camera ) {
-                                
+                                node.renderObject.transform = arrayToMatrix.call( this, propertyValue );
                             }
                             break;
 
@@ -942,61 +946,61 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     break;
 
-                    case "font":
-                        if ( node.renderObject instanceof Cesium.Label ) {
-                            node.renderObject.setFont( propertyValue );    
+                case "font":
+                    if ( node.renderObject instanceof Cesium.Label ) {
+                        node.renderObject.setFont( propertyValue );    
+                    }
+                    break;
+
+                case "fillColor":
+                    if( node.renderObject ) {
+                        var clr = node.renderObject.getFillColor();
+                        if ( clr.alpha == 1 ) {
+                            value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
+                        } else {
+                            value = "rgba("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+","+clr.alpha+")";
                         }
-                        break;
+                    }                      
+                    break;
 
-                    case "fillColor":
-                        if( node.renderObject ) {
-                            var clr = node.renderObject.getFillColor();
-                            if ( clr.alpha == 1 ) {
-                                value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
-                            } else {
-                                value = "rgba("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+","+clr.alpha+")";
-                            }
-                        }                      
-                        break;
+                case "style":
+                    if ( node.renderObject instanceof Cesium.Label ) {
+                        switch ( node.renderObject.getStyle() ) {
+                            case Cesium.LabelStyle.FILL:
+                                value = "fill";
+                                break;
+                            case Cesium.LabelStyle.FILL_AND_OUTLINE:
+                                value = "filloutline";
+                                break;
+                            case Cesium.LabelStyle.OUTLINE:
+                                value = "outline";
+                                break;
+                        }   
+                    }    
+                    break;
 
-                    case "style":
-                        if ( node.renderObject instanceof Cesium.Label ) {
-                            switch ( node.renderObject.getStyle() ) {
-                                case Cesium.LabelStyle.FILL:
-                                    value = "fill";
-                                    break;
-                                case Cesium.LabelStyle.FILL_AND_OUTLINE:
-                                    value = "filloutline";
-                                    break;
-                                case Cesium.LabelStyle.OUTLINE:
-                                    value = "outline";
-                                    break;
-                            }   
-                        }    
-                        break;
+                case "outlineColor":
+                    if( node.renderObject ) {
+                        var clr = node.renderObject.getOutLineColor();
+                        if ( clr.alpha == 1 ) {
+                            value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
+                        } else {
+                            value = "rgba("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+","+clr.alpha+")";
+                        }
+                    } 
+                    break;
 
-                    case "outlineColor":
-                        if( node.renderObject ) {
-                            var clr = node.renderObject.getOutLineColor();
-                            if ( clr.alpha == 1 ) {
-                                value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
-                            } else {
-                                value = "rgba("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+","+clr.alpha+")";
-                            }
-                        } 
-                        break;
+                case "outlineWidth":
+                    if ( node.renderObject instanceof Cesium.Label ) {
+                        value = node.renderObject.getOutlineWidth();    
+                    }    
+                    break;
 
-                    case "outlineWidth":
-                        if ( node.renderObject instanceof Cesium.Label ) {
-                            value = node.renderObject.getOutlineWidth();    
-                        }    
-                        break;
-
-                    case "text":
-                        if ( node.renderObject instanceof Cesium.Label ) {
-                            value = node.renderObject.getText();    
-                        }    
-                        break;
+                case "text":
+                    if ( node.renderObject instanceof Cesium.Label ) {
+                        value = node.renderObject.getText();    
+                    }    
+                    break;
 
 
                 case "imageryProvider":
@@ -1093,7 +1097,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                 case "transform":
                     if ( node.renderObject instanceof Cesium.Camera ) {
-                        
+                        value = matrixToArray.call( this, node.renderObject.transform );
                     }
                     break;
 
@@ -1312,4 +1316,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         return vwfColor;        
     }
 
+    function matrixToArray( mat ) {
+        return [ mat['0'], mat['1'], mat['2'], mat['3'], mat['4'], mat['5'], mat['6'], mat['7'], mat['8'], mat['9'], mat['10'], mat['11'], mat['12'], mat['13'], mat['14'], mat['15'] ];
+    }
+
+
+    function arrayToMatrix( arry ) {
+        return Cesium.Matrix4.fromRowMajorArray( arry );
+    }
 });
