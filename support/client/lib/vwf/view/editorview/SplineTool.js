@@ -353,8 +353,9 @@ function SplineTool()
 		 return trans.elements;
 	}
 	self.getTranslation = function(id)
-	{
-		//return self.points[self.selectedIndex];
+	{	
+		var mat = self.getTransform(id);
+		return [mat[12],mat[13],mat[14]];
 	}
 	self.getScale = function(id)
 	{
