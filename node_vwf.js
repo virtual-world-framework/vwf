@@ -3,8 +3,8 @@ var libpath = require('path'),
     fs = require('fs'),
     url = require("url"),
     mime = require('mime'),
-	sio = require('socket.io'),
-	YAML = require('js-yaml'),
+    sio = require('socket.io'),
+    YAML = require('js-yaml'),
     zlib = require('zlib');
 	
 // pick the application name out of the URL by finding the index.vwf.yaml
@@ -386,72 +386,11 @@ function getNamespace(socket)
 	  return namespace;
 
 }
-function checkOwner(node,name)
-{
-	var level = 0;
-	if(!node.properties) node.properties = {};
-	if(!node.properties.permission) node.properties.permission = {}
-	var permission = node.properties['permission'];
-	var owner = node.properties['owner'];
-	if(owner == name)
-	{
-		level = Infinity;
-		return level;
-	}
-	if(permission)
-	{
-		level = Math.max(level?level:0,permission[name]?permission[name]:0,permission['Everyone']?permission['Everyone']:0);
-	}
-	var parent = node.parent;
-	if(parent)
-		level = Math.max(level?level:0,checkOwner(parent,name));
-	return level?level:0;	
-	
-}
+
 function strEndsWith(str, suffix) {
     return str.match(suffix+"$")==suffix;
 }
 
-function isPointerEvent(message)
-{
-	if(!message) return false;
-	if(!message.member) return false;
-	
-	return (message.member == 'pointerMove' || 
-			   message.member == 'pointerHover' ||
-			   message.member == 'pointerEnter' ||
-			   message.member == 'pointerLeave' ||
-			   message.member == 'pointerOver' ||
-			   message.member == 'pointerOut' ||
-			   message.member == 'pointerUp' ||
-			   message.member == 'pointerDown' ||
-			   message.member == 'pointerWheel'
-			   )
-
-}
-//change up the ID of the loaded scene so that they match what the client will have
-		var fixIDs = function(node)
-		{
-			if(node.children)
-			var childnames = {};
-			for(var i in node.children)
-			{
-				childnames[i] = null;
-			}
-			for(var i in childnames)
-			{
-				var childComponent = node.children[i];
-				var childName = childComponent.name || i;
-				var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
-				childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
-				childComponent.id = childID;
-				node.children[childID] = childComponent;
-				node.children[childID].parent = node;
-				delete node.children[i];
-				fixIDs(childComponent);
-			}
-		}
-		
 //Start the VWF server
 function startVWF(){
 	
@@ -476,19 +415,14 @@ function startVWF(){
 			
 			var filename = libpath.join(path, uri);
 			var instance = Findinstance(filename);
-			//global.log(instance);
+			
 			//remove the instance identifier from the request
 			filename = filterinstance(filename,instance);
 			
 			//file is not found - serve index or map to support files
 			//file is also not a yaml document
-			var c1;
-			var c2;
-			
-			
-			//global.log(filename);
-			c1 = libpath.existsSync(filename);
-			c2 = libpath.existsSync(filename+".yaml");
+			var c1 = libpath.existsSync(filename);
+			var c2 = libpath.existsSync(filename+".yaml");
 			if(!c1 && !c2)
 			{
 					
@@ -515,9 +449,7 @@ function startVWF(){
 
 			}
 			//file does exist, serve normally 
-			var c3 = libpath.existsSync(filename);
-			var c4 = libpath.existsSync(filename +".yaml");
-			if(c3)
+			if(libpath.existsSync(filename))
 			{
 				//if requesting directory, setup instance
 				//also, redirect to current instnace name of does not end in slash
@@ -530,11 +462,10 @@ function startVWF(){
 					//no instance id is given, new instance
 					if(appname && instance == null)
 					{			
-						//GenerateNewInstance(request,response,appname);
+						
+						RedirectToInstance(request,response,appname,makeid());
 						
 						
-						redirect(URL.pathname+"/index.html",response);
-						//console.log('redirect ' + appname+"./index.html");
 						return;
 					}
 					//instance needs to end in a slash, so redirect but keep instance id
@@ -567,7 +498,7 @@ function startVWF(){
 				ServeFile(request,filename,response,URL);
 				
 			}
-			else if(c4)
+			else if(libpath.existsSync(filename +".yaml"))
 			{
 				//was not found, but found if appending .yaml. Serve as yaml
 				ServeYAML(filename +".yaml",response,URL);
@@ -671,7 +602,7 @@ function startVWF(){
 	  }
 	 
 	  //add the new client to the instance data
-      global.instances[namespace].clients[socket.id] = socket;	 
+          global.instances[namespace].clients[socket.id] = socket;	 
 	  
 	  socket.pending = true;
 	  socket.pendingList = [];
@@ -681,64 +612,13 @@ function startVWF(){
 	  if(Object.keys(global.instances[namespace].clients).length == 1)
 	  {
 		
-		//socket.emit('message',{"action":"getState","respond":true,"time":global.instances[namespace].time});
+		
 		
 		var instance = namespace;
 		//Get the state and load it.
 		//Now the server has a rough idea of what the simulation is
-		var state =  [{owner:undefined}];
-		global.instances[namespace].state = {nodes:{}};
-		global.instances[namespace].state.nodes['index-vwf'] = {id:"index-vwf",properties:state[state.length-1],children:{}};
+
 		
-		global.instances[namespace].state.findNode = function(id,parent)
-		{
-			var ret = null;
-			if(!parent) parent = this.nodes['index-vwf'];
-			if(parent.id == id)
-				ret = parent;
-			else if(parent.children)
-			{
-				for(var i in parent.children)
-				{
-					ret = this.findNode(id, parent.children[i]);
-					if(ret) return ret;
-				}
-			}
-			return ret;
-		}
-		global.instances[namespace].state.deleteNode = function(id,parent)
-		{
-			if(!parent) parent = this.nodes['index-vwf'];
-			if(parent.children)
-			{
-				for(var i in parent.children)
-				{
-					if( i == id)
-					{
-						delete parent.children[i];
-						return
-					}
-				}
-			}
-		}
-		
-		
-		
-		//only really doing this to keep track of the ownership
-		for(var i =0; i < state.length-1; i++)
-		{
-			var childComponent = state[i];
-			var childName = state[i].name || state[i].properties.DisplayName + i;
-			var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
-			childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
-			state[i].id = childID;
-			global.instances[namespace].state.nodes['index-vwf'].children[childID] = state[i];
-			global.instances[namespace].state.nodes['index-vwf'].children[childID].parent = global.instances[namespace].state.nodes['index-vwf'];
-			fixIDs(state[i]);
-		}
-		//global.log(Object.keys(global.instances[namespace].state.nodes['index-vwf'].children));
-		
-		//this is a blank world, go ahead and load the default
 		socket.emit('message',{"action":"createNode","parameters":["index.vwf"],"time":global.instances[namespace].time});
 		socket.pending = false;
 	  }
@@ -761,162 +641,9 @@ function startVWF(){
 			{
 				return;
 			}
-			//global.log(message);
+			
 			message.client = socket.id;
 			
-			
-			//Log all message if level is high enough
-		   if(isPointerEvent(message))
-		   {
-				global.instances[namespace].Log(JSON.stringify(message), 4);
-		   }
-		   else
-		   {
-				global.instances[namespace].Log(JSON.stringify(message), 3);
-		   }
-			
-				
-	/*			
-			var sendingclient = global.instances[namespace].clients[socket.id];
-			
-			//do not accept messages from clients that have not been claimed by a user
-			//currently, allow getstate from anonymous clients
-			if(!sendingclient.loginData && message.action != "getState" && message.member != "latencyTest")
-			{
-				if(isPointerEvent(message))
-					global.instances[namespace].Error('DENIED ' + JSON.stringify(message), 4);
-				else
-					global.instances[namespace].Error('DENIED ' + JSON.stringify(message), 2);				
-				return;
-			}
-			if(message.action == 'callMethod' && message.node =='index-vwf' && message.member=='PM')
-			{
-				var textmessage = JSON.parse(message.parameters[0]);
-				if(textmessage.receiver == '*System*')
-				{
-					var red, blue, reset;
-					red   = '\u001b[31m';
-					blue  = '\u001b[33m';
-					reset = '\u001b[0m';
-					global.log(blue + textmessage.sender + ": " + textmessage.text + reset,0);
-					
-				}
-				for(var i in global.instances[namespace].clients)
-				{
-					var client = global.instances[namespace].clients[i];
-					if(client && client.loginData && (client.loginData.UID == textmessage.receiver || client.loginData.UID == textmessage.sender))
-					{	
-						client.emit('message',message);
-						
-					}
-						
-				}
-				
-				
-				return;
-			}
-			//We'll only accept a setProperty if the user has ownership of the object
-			if(message.action == "setProperty")
-			{
-			      var node = global.instances[namespace].state.findNode(message.node);
-				  if(!node)
-				  {
-					global.instances[namespace].Log('server has no record of ' + message.node,1);
-					return;
-				  }
-				  if(checkOwner(node,sendingclient.loginData.UID))
-				  {	
-						//We need to keep track internally of the properties
-						//mostly just to check that the user has not messed with the ownership manually
-						if(!node.properties)
-							node.properties = {};
-						node.properties[message.member] = message.parameters[0];
-						global.instances[namespace].Log("Set " +message.member +" of " +node.id+" to " + message.parameters[0],2);
-				  }
-				  else
-				  {
-					global.instances[namespace].Error('permission denied for modifying ' + node.id,1);
-					return;
-				  }
-			}
-			//We'll only accept a any of these if the user has ownership of the object
-			if(message.action == "createMethod" || message.action == "createProperty" || message.action == "createEvent" || 
-				message.action == "deleteMethod" || message.action == "deleteProperty" || message.action == "deleteEvent")
-			{
-			      var node = global.instances[namespace].state.findNode(message.node);
-				  if(!node)
-				  {
-					global.instances[namespace].Error('server has no record of ' + message.node,1);
-					return;
-				  }
-				  if(checkOwner(node,sendingclient.loginData.UID))
-				  {	
-						global.instances[namespace].Log("Do " +message.action +" of " +node.id,2);
-				  }
-				  else
-				  {
-					global.instances[namespace].Error('permission denied for '+message.action+' on ' + node.id,1);
-					return;
-				  }
-			}
-			//We'll only accept a deleteNode if the user has ownership of the object
-			if(message.action == "deleteNode")
-			{
-				  var node = global.instances[namespace].state.findNode(message.node);
-				  if(!node)
-				  {
-					global.instances[namespace].Error('server has no record of ' + message.node,1);
-					return;
-				  }
-				  if(checkOwner(node,sendingclient.loginData.UID))
-				  {	
-						//we do need to keep some state data, and note that the node is gone
-						global.instances[namespace].state.deleteNode(message.node)
-						global.instances[namespace].Log("deleted " +node.id,1);
-				  }
-				  else
-				  {
-					global.instances[namespace].Error('permission denied for deleting ' + node.id,1);
-					return;
-				  }
-			}
-			//We'll only accept a createChild if the user has ownership of the object
-			//Note that you now must share a scene with a user!!!!
-			if(message.action == "createChild")
-			{
-				  global.instances[namespace].Log(message,1);
-				  var node = global.instances[namespace].state.findNode(message.node);
-				  if(!node)
-				  {
-					global.instances[namespace].Error('server has no record of ' + message.node,1);
-					return;
-				  }
-				  //Keep a record of the new node
-				  if(checkOwner(node,sendingclient.loginData.UID) || message.node == 'index-vwf')
-				  {	
-						var childComponent = JSON.parse(JSON.stringify(message.parameters[0]));
-						if(!childComponent) return;
-						var childName = message.member;
-						if(!childName) return;
-						var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
-						childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
-						childComponent.id = childID;
-						if(!node.children) node.children = {};
-						node.children[childID] = childComponent;
-						node.children[childID].parent = node;
-						if(!childComponent.properties)
-							childComponent.properties = {};
-						fixIDs(node.children[childID]);
-						global.instances[namespace].Log("created " + childID,1);
-				  }
-				  else
-				  {
-					global.instances[namespace].Error('permission denied for creating child ' + node.id,1);
-					return;
-				  }
-			}
-			
-*/
 			//distribute message to all clients on given instance
 			for(var i in global.instances[namespace].clients)
 			{
@@ -952,36 +679,16 @@ function startVWF(){
 	  
 	  //When a client disconnects, go ahead and remove the instance data
 	  socket.on('disconnect', function () {
-		  
-		  var loginData = global.instances[namespace].clients[socket.id].loginData;
-		  global.log(socket.id,loginData )
 		  global.instances[namespace].clients[socket.id] = null;	
 		  delete global.instances[namespace].clients[socket.id];
 		  //if it's the last client, delete the data and the timer
-		  
-		  if(loginData)
-		  {
-			  delete loginData.clients[socket.id];
-			  for(var i in global.instances[namespace].clients)
-			  {
-					var avatarID = 'character-vwf-'+loginData.UID;
-					//deleting node for avatar
-					global.error("Unexpected disconnect. Deleting node for user avatar " + loginData.UID);
-					var cl = global.instances[namespace].clients[i];
-					cl.emit('message',{"action":"deleteNode","node":avatarID,"time":global.instances[namespace].time});
-					global.instances[namespace].state.deleteNode(avatarID);					
-			  }
-		  }
-		  
-		  
+
 		  if(Object.keys(global.instances[namespace].clients).length == 0)
 		  {
 			clearInterval(global.instances[namespace].timerID);
 			delete global.instances[namespace];
 		  }
-
-		});
-		  
+	  });
 	}
 	//create the server
 	
@@ -1002,10 +709,7 @@ function startVWF(){
 	global.logLevel = p >= 0 ? process.argv[p+1] : 1;
 	global.log(brown+'LogLevel = ' +  global.logLevel+reset,0);	
 	
-	var adminUID = 'admin';
 	
-	p = process.argv.indexOf('-a');
-	adminUID = p >= 0 ? process.argv[p+1] : adminUID;	
 	
 	p = process.argv.indexOf('-nocache');
 	if(p >= 0)
@@ -1014,24 +718,15 @@ function startVWF(){
 	   console.log('server cache disabled');
 	}
 	
-		
-		global.sessions = [];
-		global.adminUID = adminUID;
-		
-		var srv = http.createServer(OnRequest).listen(port);
-		
-		
 
-		
-		
-		global.log(brown+'Admin is "' + global.adminUID+"\""+reset,0);
-		global.log(brown+'Serving on port ' + port+reset,0);
-		
-		
-		//create socket server
-		sio = sio.listen(srv,{log:false});
-		sio.set('transports', ['websocket']);
-		sio.sockets.on('connection', WebSocketConnection);
+	var srv = http.createServer(OnRequest).listen(port);
+	global.log(brown+'Serving on port ' + port+reset,0);
+	
+	
+	//create socket server
+	sio = sio.listen(srv,{log:false});
+	sio.set('transports', ['websocket']);
+	sio.sockets.on('connection', WebSocketConnection);
 	
 
 }
