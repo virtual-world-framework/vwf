@@ -3,59 +3,17 @@ extends: http://vwf.example.com/node.vwf
 properties:
   displayColor: "#000000"
   displayName: ""
-  viewHandle:
-      set: |
-        this.viewHandle = value;
-      get: |
-        this.lastHeartbeat = vwf.time();
-        return this.viewHandle;
-      value:
-        ""
+  viewHandle: undefined
   lastHeartbeat: undefined
   alertSound: "None"
 methods:
   renameUser:
   playSound:
   testMessageForName:
-  sendMessage:
 events:
   playSoundEvent:
 scripts:
 - |
-  var entityMap = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': '&quot;',
-    "'": '&#39;',
-    "/": '&#x2F;'
-  };
-
-  this.escapeHtml = function( string ) {
-    return String( string ).replace( /[&<>"'\/]/g, function ( s ) {
-      return entityMap[ s ];
-    } );
-  };
-
-
-  // For each user, test the message to be sent (test if the users name is in the
-  // message and posts an event to play an alert sound for the user if it is).
-  // Then actually post the userMessage event to send the message to the various
-  // views.
-  this.sendMessage = function( message ) {
-    this.parent.children.forEach( function ( entry ) {
-      entry.testMessageForName( message );
-    } );
-    this.parent.parent.userMessage( this.displayName, this.displayColor, this.escapeHtml( message ) );
-  };
-
-  
-  //Test the requested new username. If it is a valid username then change our displayName.
-  this.renameUser = function( newName ) {
-    if ( this.parent.testUsername( newName ) ) {
-      this.displayName = newName;
-    }
-  };
   //When playSound is called on this user, raise the playSoundEvent event with
   //the current alertSound property as its parameter.
   this.playSound = function( ) {

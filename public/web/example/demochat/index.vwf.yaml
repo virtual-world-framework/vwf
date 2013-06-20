@@ -26,6 +26,28 @@ methods:
 # The debug method is used to provide model side debug tally of
 # users for debugging connection issues.
   debug:
+# The sendMessage method is used for users to send messages.
+# It takes three arguments. The message, the user's expected node ID
+# and the user's expected view handle.
+  sendMessage:
+# The userColorChange method takes three arguments.
+# The color to change to, the users expected node ID and the user's
+# expected view handle.
+  userColorChange:
+# The userSoundChange method takes three arguments.
+# The sound to change to, the user's expected node ID and the user's
+# expected view handle.
+  userSoundChange:
+# The renameUser method takes three arguments.
+# The name to change to, the user's expected node ID and the user's
+# expected view handle.
+  renameUser:
+# The removeUser method takes two arguments.
+# The user's expected node ID and view handle.
+  removeUser:
+# The heartbeatUser method takes two arguments.
+# The user's expected node ID and view handle.
+  heartbeatUser:
 events:
 # The userCreateFailed event is raised when user creation fails.
 # Currently only uniqueness of name is tested, so that is the only
@@ -39,6 +61,9 @@ events:
   userCreated:
 # The userMessage event is posted when a user sends a message to the chat.
   userMessage:
+# The userMissing event is posted whenever a call is made for a user that is
+# not found.
+  userMissing:
 children:
 # The users child is used to contain the users that are currently connected.
 # It provides a tick function that deals with removing users whose heartbeat
@@ -95,6 +120,98 @@ scripts:
       childIndex++;
     } );
   };
+  
+  
+  var entityMap = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '&#x2F;'
+  };
+
+  this.escapeHtml = function( string ) {
+    return String( string ).replace( /[&<>"'\/]/g, function ( s ) {
+      return entityMap[ s ];
+    } );
+  };
+  
+  this.retrieveUser = function ( userNode, userView ) {
+    var user = undefined;
+    for ( var childIndex = 0; childIndex < this.users.children.length; childIndex++ ) {
+      if ( ( this.users.children[ childIndex ].id == userNode ) && ( this.users.children[ childIndex ].viewHandle == userView ) ) {
+        user = this.users.children[ childIndex ];
+        break;
+      }
+      if ( this.users.children[ childIndex ].id == userNode ) {
+        vwf.logger.warn( "RetrieveUser found node id " + userNode + " but expected view handle " + userView + " and instead found " + this.users.children[ childIndex ].viewHandle );
+      }
+      if ( this.users.children[ childIndex ].viewHandle == userView ) {
+        vwf.logger.warn( "RetrieveUser found view handle " + userView + " but expected node id " + userNode + " and instead found " + this.users.children[ childIndex ].id );
+      }
+    }
+    if ( user == undefined ) {
+      vwf.logger.warn( "RetrieveUser could not find node id " + userNode + " with view handle " + userView );
+      this.userMissing( userNode, userView );
+    }
+    return user;
+  };
+  
+  
+  // The Send Message method. 
+  // First attempt to retrieve the messaging user, if the user exists then
+  // for each user, test the message to be sent (test if the users name is in the
+  // message and posts an event to play an alert sound for the user if it is).
+  // Then actually post the userMessage event to send the message to the various
+  // views.
+  this.sendMessage = function( message, userNode, userView ) {
+    var user = this.retrieveUser( userNode, userView );
+    if ( user != undefined ) {
+      this.users.children.forEach( function ( entry ) {
+        entry.testMessageForName( message );
+      } );
+      this.userMessage( user.displayName, user.displayColor, this.escapeHtml( message ) );
+    }
+  };
+
+  this.userColorChange = function( color, userNode, userView ) {
+    var user = this.retrieveUser( userNode, userView );
+    if ( user != undefined ) {
+      user.displayColor = color;
+    }
+  };
+  
+  this.userSoundChange = function( sound, userNode, userView ) {
+    var user = this.retrieveUser( userNode, userView );
+    if ( user != undefined ) {
+      user.alertSound = sound;
+    }
+  };
+  
+  this.renameUser = function( newName, userNode, userView ) {
+    var user = this.retrieveUser( userNode, userView );
+    if ( user != undefined ) {
+      if ( this.users.testUsername( newName ) ) {
+        user.displayName = newName;
+      }
+    }
+  };
+  
+  this.removeUser = function( userNode, userView ) {
+    var user = this.retrieveUser( userNode, userView );
+    if ( user != undefined ) {
+      vwf.deleteNode( userNode );
+    }
+  };
+
+  this.heartbeatUser = function( userNode, userView ) {
+    var user = this.retrieveUser( userNode, userView );
+    if ( user != undefined ) {
+      user.lastHeartbeat = vwf.time();
+    }
+  };
+  
   this.createUser = function( userName, userColor, userSound, viewHandle ) {
     //First, test if the userName is valid.
     if ( this.users.testUsername( userName ) == false ) {
@@ -112,7 +229,7 @@ scripts:
           "viewHandle": viewHandle,
           "displayColor": userColor,
           "alertSound": userSound,
-          "lastHeartbeat": this.time
+          "lastHeartbeat": vwf.time()
         },
         "children": { } 
       };

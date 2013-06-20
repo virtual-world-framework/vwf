@@ -565,6 +565,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 for(var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++) {
                                     node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
                                 }
+                                // TODO: Currently assuming 30 fps
                                 node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * 30) ] = 1;
                             }
                         }
@@ -1153,6 +1154,28 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                        "vertexIndices": getMeshVertexIndices.call( this, meshList[i] ),
                                        "scale": scale 
                                     } );
+                    }
+                    return value;
+                }
+
+                if(propertyName == "animationDuration") {
+                    var animationDuration = 0;
+                    if(node.threeObject.animations) {
+                        for(var i=0, il = node.threeObject.animations.length; i < il; i++) {
+                            if(node.threeObject.animations[i].length > animationDuration) {
+                                animationDuration = node.threeObject.animations[i].length;
+                            }
+                        }
+                        value = animationDuration;
+                    }
+                    else if(node.threeObject.animatedMesh) {
+                        for(var i=0, il = node.threeObject.animatedMesh.length; i < il; i++) {
+                            if(node.threeObject.animatedMesh[i].morphTargetInfluences.length > animationDuration) {
+                                animationDuration = node.threeObject.animatedMesh[i].morphTargetInfluences.length;
+                            }
+                        }
+                        // TODO: Currently assuming 30 fps
+                        value = animationDuration / 30;
                     }
                     return value;
                 }
