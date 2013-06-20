@@ -28,6 +28,8 @@ methods:
 children:
   camera:
     extends: http://vwf.example.com/cesium/camera.vwf
+    properties:
+      position: [ 0, -14261948, 11360974 ]
   clients:
     extends: http://vwf.example.com/node.vwf
 scripts:
