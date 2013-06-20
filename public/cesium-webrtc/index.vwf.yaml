@@ -26,6 +26,8 @@ methods:
   findClient:
   newClientVideo:
 children:
+  camera:
+    extends: http://vwf.example.com/cesium/camera.vwf
   clients:
     extends: http://vwf.example.com/node.vwf
 scripts:

@@ -18,6 +18,8 @@ properties:
   renderStyle: "3D"
   imageryProvider: "bingAerial"
 children:
+  camera:
+    extends: http://vwf.example.com/cesium/camera.vwf
   #sun: 
     #extends: http://vwf.example.com/cesium/sun.vwf 
   atmosphere: 
