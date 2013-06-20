@@ -14,8 +14,10 @@
 --- 
 extends: http://vwf.example.com/scene.vwf
 properties:
-  navmode: none
   counter:
+methods:
+  initializeCamera:
+  update: 
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -24,18 +26,6 @@ children:
     properties:
       translation: 
         - 50
-        - 0
-        - 0 
-  camera:
-    extends: http://vwf.example.com/camera.vwf
-    properties:
-      translation: 
-        - 0
-        - 600
-        - 50
-      rotation: 
-        - 0 
-        - 1
         - 0
         - 0
   dir5:
@@ -57,8 +47,6 @@ children:
        - 0
        - 0
        - 0 
-methods:
-  update:      
 scripts:
 - | 
     this.initialize = function()
@@ -69,11 +57,17 @@ scripts:
         //light should be from frontfrom front.
         //looks like this is being over ridden in the scene.yaml
         
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
         //vwf.setProperty('http-vwf-example-com-light-vwf-dir5','translation',[0,100,0]);
         //vwf.setProperty('http-vwf-example-com-node3-vwf-duck','translation',[0,0,0]);
         //this.counter = 0;
+
+        this.future(0).initializeCamera();
+    }
+    this.initializeCamera = function()
+    {
+        this.camera.rotation = [0,1,0,0];
+        this.camera.translation = [0,-600,50];
+        this.camera.navmode = "none";
     }
     this.update = function()
     {

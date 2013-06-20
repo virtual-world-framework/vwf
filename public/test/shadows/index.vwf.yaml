@@ -14,8 +14,10 @@
 --- 
 extends: http://vwf.example.com/scene.vwf
 properties:
-  navmode: none
   enableShadows: true
+methods:
+  initializeCamera:
+  update:
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -24,8 +26,6 @@ children:
     properties:
       castShadows: true
       receiveShadows: true
-  camera:
-    extends: http://vwf.example.com/camera.vwf
   dir1:
     extends: http://vwf.example.com/light.vwf
     implements:
@@ -38,18 +38,11 @@ children:
       castShadows: true  
       glge-constantAttenuation: 1
       rotation: [ 1, 0, 0, -45 ]
-      translation: [ 0, -1000, 1000]
-methods:
-  update:      
+      translation: [ 0, -1000, 1000]      
 scripts:
 - | 
     this.initialize = function()
     {
-       
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
-        this.camera.far = 800;
-        
         this.enableShadows = true;
         //vwf.setProperty(this.id,'enableShadows',true);
         this.duck.castShadows = true;
@@ -57,9 +50,17 @@ scripts:
         this.duck.receiveShadows = true;
         this.duck.rotation = [1,0,0,0];
         this.counter = 0;
+        this.future(0).initializeCamera();
         this.future(0.1).update();
-       
     }
+
+    this.initializeCamera = function() {
+        this.camera.rotation = [0,1,0,0];
+        this.camera.translation = [0,-600,50];
+        this.camera.far = 800;
+        this.camera.navmode = "none";
+    }
+
     this.update = function()
     {
         this.counter++;

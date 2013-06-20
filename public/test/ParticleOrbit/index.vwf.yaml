@@ -13,8 +13,11 @@
 
 --- 
 extends: http://vwf.example.com/scene.vwf
-properties:
-  navmode: none
+methods:
+  initializeCamera:
+  update:
+events:
+  pointerMove:
 children:
   system:
     extends: http://vwf.example.com/particlesystem.vwf
@@ -80,9 +83,6 @@ children:
       minOrientation: 3
       maxSpin: 9
       minSpin: 3    
-  camera:
-    extends: http://vwf.example.com/camera.vwf
-    properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
     implements:
@@ -98,22 +98,22 @@ children:
       glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
-methods:
-  update:
-events:
-  pointerMove:
 scripts:
 - | 
     this.initialize = function()
     {
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-800,150];
         this.dir1.translation = [0,-100,0];
         this.system.translation = [-257.94303797468353, 0, 108.73741994510519];
         this.system2.translation = [257.94303797468353, 0, 92];
         this.counter = 0;
+        this.future(0).initializeCamera();
         this.future(.05).update();
-    } //@ sourceURL=index.vwf
+    }
+    this.initializeCamera = function() {
+        this.camera.rotation = [0,1,0,0];
+        this.camera.translation = [0,-800,150];
+        this.camera.navmode = "none";
+    }
     this.update = function()
     {
         this.counter++;
@@ -125,4 +125,4 @@ scripts:
         this.system.translation = [e.position[0]*550.0-275.0,0,-e.position[1]*400+250];
     
     
-    }
+    } //@ sourceURL=index.vwf

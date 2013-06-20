@@ -12,11 +12,12 @@
 # the License.
 
 --- 
-extends: http://vwf.example.com/navscene.vwf
+extends: http://vwf.example.com/scene.vwf
 properties:
   backgroundColor: [200, 200, 200]
   ambientColor: [200, 200, 200]
 methods:
+  initializeCamera:
   log:
   toleranceTest:
 children:
@@ -111,10 +112,8 @@ children:
 scripts:
 - |
   this.initialize = function() {
-    this.camera.transform = [  -0.834, -0.550, 0,     0,
-                                0.550, -0.834, 0,     0,
-                                0,      0,     1,     0,
-                               -7.478, 20.066, 2.690, 1]
+    
+    this.future(0).initializeCamera();
     
     // Perform transforms that will get all cubes back to an identity tranform.  Matrix math for the following was
     // computed using these sites:
@@ -225,6 +224,13 @@ scripts:
     this.in( 5 ).toleranceTest();
   } 
 
+  this.initializeCamera = function() {
+    this.camera.transform = [ -0.834, -0.550, 0,     0,
+                               0.550, -0.834, 0,     0,
+                               0,      0,     1,     0,
+                              -7.478, 20.066, 2.690, 1 ];
+  }
+
   this.printWorldTransform = function( node3 ) {
     if ( !node3 ) {
       this.logger.error( "node3 is not valid - cannot print transform");
@@ -259,5 +265,4 @@ scripts:
       } 
     }
     this.logger.info("Test Passed. " + testName + " is within " + tolerance + " tolerance.");
-  }
-   
+  } //@ sourceURL=index.vwf

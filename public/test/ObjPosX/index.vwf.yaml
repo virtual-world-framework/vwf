@@ -14,16 +14,15 @@
 --- 
 extends: http://vwf.example.com/scene.vwf
 properties:
-  navmode: none
   counter:
+methods:
+  initializeCamera:
+  update:  
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
     source: duck.dae
     type: model/vnd.collada+xml
-  camera:
-    extends: http://vwf.example.com/camera.vwf
-    properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
     implements:
@@ -39,18 +38,23 @@ children:
       glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
-methods:
-  update:      
+   
 scripts:
 - | 
     this.initialize = function()
     {
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
         this.dir1.translation = [0,-100,0];
         this.counter = 0;
+        this.future(0).initializeCamera();
         this.future(0.2).update();
     }
+
+    this.initializeCamera = function() {
+        this.camera.rotation = [0,1,0,0];
+        this.camera.translation = [0,-600,50];
+        this.camera.navmode = "none";
+    }
+
     this.update = function()
     {
         this.counter++;

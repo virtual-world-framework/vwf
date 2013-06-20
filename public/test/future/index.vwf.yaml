@@ -13,8 +13,9 @@
 
 --- 
 extends: http://vwf.example.com/scene.vwf
-properties:
-  navmode: none
+methods:
+  initializeCamera:
+  update: 
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -39,20 +40,24 @@ children:
       glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
-methods:
-  update:      
 scripts:
 - | 
     this.initialize = function()
     {
-      this.counter = 0;
+        this.counter = 0;
+
+        this.future(0).initializeCamera();
         this.future(0.2).update();
-       
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
-        
+
         this.threeobject = vwf.views[0].state.nodes[this.duck.id].threeObject;
     }
+
+    this.initializeCamera = function() {
+        this.camera.rotation = [0,1,0,0];
+        this.camera.translation = [0,-600,50];
+        this.camera.navmode = "none";
+    }
+
     this.update = function()
     {
         this.counter++;
