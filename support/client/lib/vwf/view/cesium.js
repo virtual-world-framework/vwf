@@ -176,36 +176,77 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 node.canvas = scene.getCanvas();
                 
                 var camera = scene.getCamera();
-                this.state.cameraInfo = { 
-                    "direction": camera.direction.clone(),
-                    "position": camera.position.clone(),
-                    "up": camera.up.clone(),
-                    "right": camera.right.clone(),
-                    "diff": function( cam ) {
-                        return ( 
-                            ( !Cesium.Cartesian3.equals( this.direction, cam.direction ) ) ||  
-                            ( !Cesium.Cartesian3.equals( this.position, cam.position ) ) ||
-                            ( !Cesium.Cartesian3.equals( this.up, cam.up ) ) ||
-                            ( !Cesium.Cartesian3.equals( this.right, cam.right ) ) 
-                        );
-                    },
-                    "getCurrent": function( cam ) {
-                        this.direction = camera.direction.clone();
-                        this.position = camera.position.clone();
-                        this.up = camera.up.clone();
-                        this.right = camera.right.clone();                        
-                    }
-                };
 
                 ( function tick() {
 
-                    if ( view.state.cameraInfo.diff( camera ) ){
-                       broadcastCameraViewData.call( view, {
-                           "direction": camera.direction,
-                           "position": camera.position,
-                           "up": camera.up,
-                           "right": camera.right
-                        });                        
+                    if ( view.state.cameraInfo ) {
+                        var diffs = view.state.cameraInfo.diff( camera );
+                        if ( diffs !== undefined ){
+                           broadcastCameraViewData.call( view, diffs );                        
+                        } 
+                    } else {
+                        view.state.cameraInfo = { 
+                            "initialized": false,
+                            "direction": undefined,
+                            "position": undefined,
+                            "up": undefined,
+                            "right": undefined,
+                            //"direction": camera.direction.clone(),
+                            //"position": camera.position.clone(),
+                            //"up": camera.up.clone(),
+                            //"right": camera.right.clone(),
+                            "diff": function( cam ) {
+                                var retObj = undefined;
+
+                                if ( this.initialized ) {
+                                    if ( !Cesium.Cartesian3.equals( this.direction, cam.direction ) ){
+                                        retObj = { "direction": [ cam.direction.x, cam.direction.y, cam.direction.z ] };    
+                                    } 
+                                    if ( !Cesium.Cartesian3.equals( this.position, cam.position ) ) {
+                                        if ( retObj === undefined ) {
+                                            retObj = { "position": [ cam.position.x, cam.position.y, cam.position.z ] };
+                                        } else {
+                                            retObj.position = [ cam.position.x, cam.position.y, cam.position.z ];
+                                        }
+                                    }
+                                    if ( !Cesium.Cartesian3.equals( this.up, cam.up ) ) {
+                                        if ( retObj === undefined ) {
+                                            retObj = { "up": [ cam.up.x, cam.up.y, cam.up.z ] };
+                                        } else {
+                                            retObj.up = [ cam.up.x, cam.up.y, cam.up.z ];
+                                        }
+                                    }
+                                    if ( !Cesium.Cartesian3.equals( this.right, cam.right ) ) {
+                                        if ( retObj === undefined ) {
+                                            retObj = { "right": [ cam.right.x, cam.right.y, cam.right.z ] };
+                                        } else {
+                                            retObj.right = [ cam.right.x, cam.right.y, cam.right.z ];
+                                        }
+                                    }                                                                        
+                                }
+                                //return ( this.initialized &&
+                                //    ( ( !Cesium.Cartesian3.equals( this.direction, cam.direction ) ) ||  
+                                //    ( !Cesium.Cartesian3.equals( this.position, cam.position ) ) ||
+                                //    ( !Cesium.Cartesian3.equals( this.up, cam.up ) ) ||
+                                //    ( !Cesium.Cartesian3.equals( this.right, cam.right ) ) )
+                                //);
+
+                                return retObj;
+                            },
+                            "getCurrent": function( cam ) {
+                                this.direction = camera.direction.clone();
+                                this.position = camera.position.clone();
+                                this.up = camera.up.clone();
+                                this.right = camera.right.clone();                        
+                            },
+                            "isInitialized": function() {
+                                this.initialized = ( ( this.direction != undefined ) &&
+                                                     ( this.position != undefined ) &&
+                                                     ( this.up != undefined ) &&
+                                                     ( this.right != undefined ) );
+
+                            }
+                        };
                     }
 
                     if ( forceResizeDelay ) {
@@ -214,6 +255,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                             console.info( " ||||| == resize ==  ||||| " );
                             node.widget.resize();
                             forceResizeDelay = undefined;
+                            view.state.cameraInfo.initialized = true;
                         }
                     }
 
@@ -221,7 +263,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     scene.render();
                     Cesium.requestAnimationFrame( tick );
 
-                    view.state.cameraInfo.getCurrent( camera );
+                    if ( forceResizeDelay === undefined ) {
+                        view.state.cameraInfo.getCurrent( camera );
+                    }
                 }());
                 
                 if ( !this.useCesiumWidget ) {
