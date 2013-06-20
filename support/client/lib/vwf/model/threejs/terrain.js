@@ -19,7 +19,7 @@
 	
     function loadScript	(url)
     {
-	debugger;
+	
 	var xhr = $.ajax(url,{async:false});
 	return eval(xhr.responseText);
     
@@ -1054,12 +1054,11 @@
 						var neededSide = this.sideNeeded();
 						if(!this.mesh || neededSide != this.side)
 						{
+							var badsidemesh = null;
 							if(this.mesh && neededSide != this.side)
 							{
-								if(this.mesh.parent)
-								this.mesh.parent.remove(this.mesh);
-								this.mesh.quadnode = null;
-								this.mesh == null;
+								badsidemesh = this.mesh;
+								this.mesh = null;
 							}
 							
 							if(this.max[0] - this.min[0] < maxTileSize)
@@ -1082,16 +1081,19 @@
 								this.mesh.position.x = this.c[0];
 								this.mesh.position.y = this.c[1];
 								this.mesh.position.z = 1;
+								
+								rebuilt = true;	
+								this.mesh.updateMatrixWorld(true);
+								this.THREENode.add(this.mesh,true);	
+								this.mesh.visible = false;
 								self.BuildTerrainInner(this.mesh,(this.max[0] - this.min[0])/tileres,function()
 								{
-									rebuilt = true;
-									
-									this.THREENode.add(this.mesh,true);	
-									this.mesh.material.depthWrite = true;
-									this.mesh.material.opacity = 1.0;
-									this.mesh.renderDepth = 0;
-									
-									this.mesh.updateMatrixWorld(true);
+									this.mesh.visible = true;
+									if(badsidemesh)
+									{
+										badsidemesh.parent.remove(badsidemesh);
+										badsidemesh.quadnode = null;
+									}
 									cb(rebuilt);
 								}.bind(this));
 								return;
@@ -1339,7 +1341,9 @@
 				
 				}
 				this.terrainGenerator = loadScript("vwf/model/threejs/terrainGenerator.js");
+				window._dTerrainGenerator = this.terrainGenerator;
 				
+				this.terrainGenerator.init();
 				this.DisableTransform();
 				this.BuildTerrain();
 				this.quadtree = new QuadtreeNode([-worldExtents,-worldExtents],[worldExtents,worldExtents],this.getRoot());
@@ -1348,7 +1352,7 @@
 				this.quadtree.update([[1,1]],[]);
 				
 				
-				this.quadtree.updateMesh();
+				//this.quadtree.updateMesh();
 				window.terrain = self;
 				this.counter = 0;
 				
@@ -1363,6 +1367,7 @@
 				return [];
 				
 				}
+				self.rebuild();
 				_SceneManager.specialCaseObjects.push(this.getRoot());
 				
 			}
@@ -1377,6 +1382,7 @@
 			this.cancelUpdates =function()
 			{
 				self.needRebuild = [];
+				self.terrainGenerator.cancel();
 				
 				this.quadtree.walk(function(n)
 				{
@@ -1462,7 +1468,7 @@
 						
 						this.currentMinRes = minRes;
 						
-						minTileSize = Math.max(minRes,64);
+						minTileSize = Math.max(minRes,128);
 						//cant resize the max side on the fly -- tiles in update have already made choice
 						//maxTileSize = Math.max(maxRes,2048);
 						if (self.needRebuild.length > 0)
@@ -1617,12 +1623,13 @@
 						
 					
 						
-						if(self.buildTimeout)
-							window.clearTimeout(self.buildTimeout);
-						if (self.needRebuild.length > 0)
-						{	
-							self.buildTimeout = window.setTimeout(self.rebuild,3);
-						}
+					//	if(self.buildTimeout)
+					//		window.clearTimeout(self.buildTimeout);
+					//	if (self.needRebuild.length > 0)
+					//	{	
+					//		self.buildTimeout = window.setTimeout(self.rebuild,3);
+					//		
+					//	}
 						
 					}
 					
@@ -1630,8 +1637,10 @@
 			}
 			self.rebuild = function()
 			{
-				if (self.needRebuild.length > 0)
+				
+				if (self.needRebuild.length > 0 && self.terrainGenerator.countFreeWorkers() > 0)
 				{
+					
 					var tile = self.needRebuild.shift();
 					//async rebuild
 					
@@ -1732,11 +1741,13 @@
 						}
 						
 						
+						//self.rebuild();
 						
-						self.buildTimeout = window.setTimeout(self.rebuild,3);
-						console.log('rebuilding ' + self.needRebuild.length + ' tile');
+						//console.log('rebuilding ' + self.needRebuild.length + ' tile');
 					});
+					
 				}
+			   self.buildTimeout = window.setTimeout(self.rebuild,3);	
 			}.bind(self);
 					
 			this.callingMethod = function(methodName,args)
@@ -1790,7 +1801,7 @@
 			
 			this.BuildTerrainInner= function(mesh,normlen,cb)
 			{
-			     debugger;
+			    
 			     this.terrainGenerator.generateTerrain(mesh,normlen,cb);
 			}
 			
