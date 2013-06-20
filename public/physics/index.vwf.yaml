@@ -59,10 +59,10 @@ scripts:
     }
 
     this.initializeCamera = function() {
-      this.sharedCamera.translation = [ 30, 138, 40 ];
-      this.sharedCamera.rotation = [ 0, 0, 1, 180 ];
-      this.sharedCamera.far = 50000.0;
-      this.sharedCamera.translationSpeed = 4;
+      this.camera.translation = [ 30, 138, 40 ];
+      this.camera.rotation = [ 0, 0, 1, 180 ];
+      this.camera.far = 50000.0;
+      this.camera.translationSpeed = 4;
     }
 
     this.clearButton.events.clearing = this.events.add( function() { 

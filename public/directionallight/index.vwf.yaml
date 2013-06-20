@@ -55,11 +55,11 @@ scripts:
     }
 
     this.initializeCamera = function() {
-      this.sharedCamera.transform = [ 1,    0, 0, 0,
-                                      0,    1, 0, 0,
-                                      0,    0, 1, 0,
-                                      0, -150, 0, 1 ];
-      this.sharedCamera.navmode = "walk";
+      this.camera.transform = [ 1,    0, 0, 0,
+                                0,    1, 0, 0,
+                                0,    0, 1, 0,
+                                0, -150, 0, 1 ];
+      this.camera.navmode = "walk";
     }
 
     this.spin = function() {

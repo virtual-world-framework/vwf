@@ -102,13 +102,13 @@ scripts:
 
     this.initialize = function() {
       if ( this.usersShareView ) {
-        this.children.create( "sharedCamera", this.userObject );
+        this.children.create( "camera", this.userObject );
         this.future( 0 ).initializeActiveCamera();
       }
     }
 
     this.initializeActiveCamera = function() {
-      this.activeCamera = this.sharedCamera.id;
+      this.activeCamera = this.camera.id;
       this.lastActiveCamera = this.activeCamera;
     }
 

@@ -588,12 +588,12 @@ scripts:
     
     this.initializeCamera = function() {
       
-      this.sharedCamera.transform = [ -1,      0,      0,     0,
-                                       0,     -0.5,   -0.866, 0,
-                                       0,     -0.866,  0.5,   0,
-                                       0.089, 32.294, 69.995, 1 ];
-      this.sharedCamera.near = 1;
-      this.sharedCamera.navmode = "none";
+      this.camera.transform = [ -1,      0,      0,     0,
+                                 0,     -0.5,   -0.866, 0,
+                                 0,     -0.866,  0.5,   0,
+                                 0.089, 32.294, 69.995, 1 ];
+      this.camera.near = 1;
+      this.camera.navmode = "none";
     }
 
     this.shuffle = function() {

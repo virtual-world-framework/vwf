@@ -54,8 +54,8 @@ scripts:
     }
 
     this.initializeCamera = function() {
-      this.sharedCamera.translation = [ 0, -15, 0 ];
-      this.sharedCamera.navmode = "walk";
+      this.camera.translation = [ 0, -15, 0 ];
+      this.camera.navmode = "walk";
     }
 
     this.spin = function() {

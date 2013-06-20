@@ -45,10 +45,10 @@ scripts:
     } //@ sourceURL=index.vwf
 
     this.initializeCamera = function() {
-      this.sharedCamera.transform = [  0.879, -0.477,  0,     0, 
-                                       0.443,  0.818, -0.367, 0, 
-                                       0.175,  0.322,  0.93,  0, 
-                                      -3.814, -7.036,  3.154, 1 ];
-      this.sharedCamera.lookAt = this.sceneCenter.id;
-      this.sharedCamera.navmode = "none";
+      this.camera.transform = [  0.879, -0.477,  0,     0, 
+                                 0.443,  0.818, -0.367, 0, 
+                                 0.175,  0.322,  0.93,  0, 
+                                -3.814, -7.036,  3.154, 1 ];
+      this.camera.lookAt = this.sceneCenter.id;
+      this.camera.navmode = "none";
     }

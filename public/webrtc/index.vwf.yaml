@@ -33,7 +33,7 @@ scripts:
     }
 
     this.initializeCamera = function() {
-      this.sharedCamera.navmode = "none";
+      this.camera.navmode = "none";
     }
 
     this.createClient = function( moniker, loginName ) {

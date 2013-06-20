@@ -78,9 +78,9 @@ scripts:
     }
 
     this.initializeCamera = function() {
-      this.sharedCamera.transform = [ -1,   0,  0, 0, 
-                                       0,  -1,  0, 0, 
-                                       0,   0,  1, 0, 
-                                      16, 600, 90, 1 ];
-      this.sharedCamera.far *= 4;
+      this.camera.transform = [ -1,   0,  0, 0, 
+                                 0,  -1,  0, 0, 
+                                 0,   0,  1, 0, 
+                                16, 600, 90, 1 ];
+      this.camera.far *= 4;
     }
