@@ -42,7 +42,7 @@ function startHeartbeat( newPlayerId, heartbeatInterval ) {
 
 function heartbeat( ) {
     if ( isConnected( ) ) {
-        vwf_view.kernel.getProperty( playerId, "viewHandle", vwf_view.kernel.time( ) );
+        vwf_view.kernel.callMethod( sceneId, "heartbeatUser", [ playerId, vwf_view.kernel.moniker() ] );
     }
     else {
         clearInterval( heartbeatId );

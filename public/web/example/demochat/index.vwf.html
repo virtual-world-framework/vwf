@@ -205,7 +205,7 @@
       // the user is changed appropriately.
       $( '#changeSoundButton' ).click( function ( ) {
         if ( isConnected( ) ) {
-          vwf_view.kernel.setProperty( playerId, "alertSound", $( '#changeSoundSelect' ).val( ) );
+          vwf_view.kernel.callMethod( sceneId, "userSoundChange", [ $( '#changeSoundSelect' ).val( ), playerId, vwf_view.kernel.moniker( ) ] );
         }
       } );
 
@@ -213,7 +213,7 @@
       $( '#changeTextColor' ).change( function( ) {
         //  Test if we are connected. If so, set the displayColor property on our specific user model
         if ( isConnected( ) ) {
-          vwf_view.kernel.setProperty( playerId, "displayColor", $( '#changeTextColor' ).val( ) );
+          vwf_view.kernel.callMethod( sceneId, "userColorChange", [ $( '#changeTextColor' ).val( ), playerId, vwf_view.kernel.moniker( ) ] );
         }
       } );
 
@@ -229,8 +229,8 @@
           if ( $( this ).val( ) == "/debug" ) {
             debugInformation( );
           }
-          else {
-            vwf_view.kernel.callMethod( playerId, "sendMessage", [ $( this ).val( ) ] );
+          else if ( $( this ).val( ) != "" ) {
+            vwf_view.kernel.callMethod( sceneId, "sendMessage", [ $( this ).val( ), playerId, vwf_view.kernel.moniker( ) ] );
           }
         }
       } ).keyup( function( e ) {
@@ -248,7 +248,7 @@
       $( '#changeDisplayNameButton' ).click( function ( ) {
         if ( isConnected( ) ) {
           // Call the renameUser method on the appropriate user.
-          vwf_view.kernel.callMethod( playerId, "renameUser", [ sanitizeUsername( $('#changeDisplayName').val( ) ) ] )
+          vwf_view.kernel.callMethod( sceneId, "renameUser", [ sanitizeUsername( $('#changeDisplayName').val( ) ), playerId, vwf_view.kernel.moniker( ) ] )
         }
       } );
 
@@ -256,7 +256,7 @@
       $( '#disconnect' ).click( function( ) {
         if ( isConnected( ) ) {
           //First, remove the user.
-          vwf_view.kernel.deleteNode( playerId );
+          vwf_view.kernel.callMethod( sceneId, "removeUser", [ playerId, vwf_view.kernel.moniker( ) ] );
           //Reset the web page. Set playerId to undefined, and display the login screen with enabled
           //inputs.
           playerId = undefined;
@@ -330,35 +330,7 @@
               addUser( properties[ "displayName" ], properties[ "displayColor" ] );
           }
         }
-      };
-      
-      vwf_view.gotProperty = function ( nodeId, propertyName, propertyValue ) {
-        if ( ( propertyName == "viewHandle" ) && ( isConnected( ) ) ) {
-          if ( userDetails[ nodeId ] != undefined ) {
-            if ( ( userDetails[ nodeId ][ "viewHandle" ] != undefined ) && ( userDetails[ nodeId ][ "viewHandle" ] != propertyValue ) ) {
-              vwf_view.logger.warn( "View Handle for nodeId " + nodeId + " just changed!  New view handle is " + propertyValue + "." );
-              debugInformation( );
-            }
-            userDetails[ nodeId ][ "viewHandle" ] = propertyValue;
-          }
-          else {
-            vwf_view.logger.warn( "View received heartbeat for user we don't know about, with nodeId " + nodeId );
-            debugInformation( );
-            vwf_view.kernel.getProperties( nodeId );
-          }
-          if ( isConnected( ) && ( nodeId == playerId ) ) {
-            var me = this.kernel.moniker( );
-            if ( propertyValue != me ) {
-              playerId = undefined;
-              this.logger.warn( "Received heartbeat for our User, but its viewHandle did not match. (Received view handle: " + propertyValue + ")" );
-              debugInformation( );
-              isConnected( );
-            }
-          }
-        }
-      }
-
-      
+      };      
       
       //  Register the firedEvent callback handler.
       vwf_view.firedEvent = function ( nodeId, eventName, eventParameters ) {
@@ -407,6 +379,26 @@
               for( var index = 0; index < eventParameters[ 3 ].length; index++ ) {
                 userDetails[ eventParameters[ 3 ][ index ][ 0 ] ] = { "displayName": eventParameters[ 3 ][ index ][ 1 ], "displayColor": eventParameters[ 3 ][ index ][ 2 ] };
                 addUser( eventParameters[ 3 ][ index ][ 1 ], eventParameters[ 3 ][ index ][ 2 ] );
+              }
+            }
+          }
+
+          if ( eventName == "userMissing" ) {
+            if ( ( playerId == eventParameters[ 0 ] ) && ( vwf_view.kernel.moniker( ) == eventParameters[ 1 ] ) ) {
+              vwf_view.logger.warn( "Recieved user missing that matches my node id " + playerId + " and view handle " + vwf_view.kernel.moniker( ) );
+              debugInformation( );
+              playerId = undefined;
+              displayLogin( );
+              enableLogonDataEntry( );
+              hideUserExistsMessage( );
+            }
+            else if ( isConnected ( ) ) {
+              var timestamp = getTimestamp();
+              if ( userDetails[ nodeId ] != undefined ) {
+                var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='" + userDetails[ nodeId ][ "displayName" ] + "' style='color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left'>" + userDetails[ nodeId ][ "displayName" ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has left chat.</div></br>";
+                $( '#chatContent' ).append( newLine );
+                removeUser( userDetails[ nodeId ][ "displayName" ] );
+                userDetails[ nodeId ] = undefined;
               }
             }
           }
