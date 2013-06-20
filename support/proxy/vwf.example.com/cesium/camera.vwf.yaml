@@ -19,11 +19,11 @@
 --- 
 extends: http://vwf.example.com/cesium/node3.vwf
 properties:
-  direction:
+  direction: [ 0, 0.8944271909999159, -0.4472135954999579 ]
   fovy:
   near:
   far:
-  position:
-  right:
+  position: [ 0, -14261947.901806576, 7130973.950903288 ]
+  right: [ 0.9999999999999999, 0, 0 ]
   transform:
-  up:
+  up: [ 0, 0.4472135954999579, 0.8944271909999159 ]
