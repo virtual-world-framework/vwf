@@ -37,11 +37,12 @@ children:
             this.logger.info( "Step 1 entering", this );
             var radio = this.find( "/radio" )[ 0 ];
             radio.Radio.ic40Volume.pointerUp = radio.events.add( function() {
-              radio.Radio.ic40Volume.pointerUp = radio.events.flush( this );
-              this.logger.info("BCBB: ", radio.Radio);
-              this.logger.info( "Step 1 completed" );
-              this.completed();
-              this.logger.info( "Step 1 after completed");
+              if (radio.Radio.ic40Volume.controlValue == 0) {
+                radio.Radio.ic40Volume.pointerUp = radio.events.flush( this );
+                this.logger.info( "Step 1 completed" );
+                this.completed();
+                this.logger.info( "Step 1 after completed");
+              }  
             }, this );
           } //@ sourceURL=step1.entering
       selectRedButton:
@@ -55,10 +56,15 @@ children:
               this.logger.info( "Step 2 entering" );
               var radio = this.find( "/radio" )[ 0 ];
               radio.Radio.ic40Red.pointerClick = radio.events.add( function() {
-                radio.Radio.ic40Red.pointerClick = radio.events.flush( this );
-                this.logger.info( "Step 2 completed" );
-                this.completed();
-                this.logger.info( "Step 2 after completed");
+                if ( radio.powerOn ) {
+                  if (radio.menuMode !== "channel") {
+                  radio.menuMode = "channel";
+                  }
+                  radio.Radio.ic40Red.pointerClick = radio.events.flush( this );
+                  this.logger.info( "Step 2 completed" );
+                  this.completed();
+                  this.logger.info( "Step 2 after completed");
+                }
               }, this );
             } //@ sourceURL=step2.entering
       selectUpButton:
@@ -69,13 +75,18 @@ children:
           scripts:
           - |
             this.entering = function() {
-              this.logger.info( "Step 2 entering" );
+              this.logger.info( "Step 3 entering" );
               var radio = this.find( "/radio" )[ 0 ];
               radio.Radio.ic40Up.pointerClick = radio.events.add( function() {
-                radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
-                this.logger.info( "Step 3 completed" );
-                this.completed();
-                this.logger.info( "Step 3 after completed");
+                if ( radio.powerOn ) {
+                  if (radio.menuMode !== "backLight") {
+                  radio.menuMode = "backLight";
+                  }
+                  radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
+                  this.logger.info( "Step 3 completed" );
+                  this.completed();
+                  this.logger.info( "Step 3 after completed");
+                }
               }, this );
             } //@ sourceURL=step3.entering
       selectRedButton2:
@@ -86,13 +97,18 @@ children:
           scripts:
           - |
             this.entering = function() {
-              this.logger.info( "Step 2 entering" );
+              this.logger.info( "Step 4 entering" );
               var radio = this.find( "/radio" )[ 0 ];
               radio.Radio.ic40Red.pointerClick = radio.events.add( function() {
-                radio.Radio.ic40Red.pointerClick = radio.events.flush( this );
-                this.logger.info( "Step 3 completed" );
-                this.completed();
-                this.logger.info( "Step 3 after completed");
+                if ( radio.powerOn ) {
+                  if (radio.menuMode !== "backLight") {
+                    radio.menuMode = "backLight";
+                  }
+                  radio.Radio.ic40Red.pointerClick = radio.events.flush( this );
+                  this.logger.info( "Step 4 completed" );
+                  this.completed();
+                  this.logger.info( "Step 4 after completed");
+                }
               }, this );
             } //@ sourceURL=step3.entering#          
       selectUpButton2:
@@ -108,12 +124,16 @@ children:
               this.logger.info( "Step 5 entering" );
               var radio = this.find( "/radio" )[ 0 ];
               radio.Radio.ic40Up.pointerClick = radio.events.add( function() {
-                this.logger.info("BCB3: ", radio.squelch );
-                if (radio.squelch >= 70) 
-                {
-                  radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
-                  this.completed();
-                  this.logger.info( "Step 5 after completed");
+                if ( radio.powerOn ) {
+                  if (radio.menuMode !== "squelch") {
+                    radio.menuMode = "squelch";
+                  }                
+                  if (radio.squelch >= 70) 
+                  {
+                    radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
+                    this.completed();
+                    this.logger.info( "Step 5 after completed");
+                  }
                 }
               } , this );
             } //@ sourceURL=step3.entering#   
