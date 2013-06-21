@@ -105,3 +105,49 @@
   display: inline-block;
   margin:10px;
 }
+
+.demochat-colorwidget
+{
+  display:inline-block;
+  background-color: #000000;
+  width:40px;
+  height:40px;
+  vertical-align:middle;
+  border-color:#CCCCCC;
+  border-style:inset;
+  border-radius:4px;
+}
+
+.colorOuterWidget {
+	position: relative;
+	height: 36px;
+  width: 36px;
+}
+
+.colorSelector {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 36px;
+	height: 36px;
+	background: url(../images/select2.png);
+}
+
+.colorSelector div {
+	position: absolute;
+	top: 4px;
+	left: 4px;
+	width: 28px;
+	height: 28px;
+	background: url(../images/select2.png) center;
+}
+
+
+.colorpickerHolder {
+	top: 32px;
+	left: 0;
+	width: 356px;
+	height: 0;
+	overflow: hidden;
+	position: absolute;
+}

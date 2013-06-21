@@ -126,7 +126,7 @@
     <div id="logon" class="demochat-logon">
       </br>
       Username: <input id="playerNameInput" type="text"/ ></br>
-      Display Color: <input type="color" id="playerTextColor"/></br>
+      <div> <div style="display:inline-block; height:36px;vertical-align:0%"> Display Color: </div> <div id="newUserColor" class="demochat-colorwidget"></div> </div>
       Alert Sound: <select id="loginSoundSelect"></select><button type="button" id="loginSoundSelectTest">Test Sound</button></br>
       <button type="button" id="chatlogin" class="demochat-logonbutton">Login</button></br>
       <div id="nameexists" class="demochat-warning" style="display:none;">Name already exists!</div>
@@ -143,7 +143,7 @@
     </div>
     <div id="chatOptions" class="demochat-chatoptions">
       <div class="demochat-chatInnerOptions" style="align:left">
-        Select New Display Color: <input type="color" id="changeTextColor"/></br>
+        <div> <div style="display:inline-block; height:36px;vertical-align:0%"> Select New Display Color: </div> <div id="changeTextColor" class="demochat-colorwidget"></div> </div>
         Change Display Name: <input type="text" id="changeDisplayName"/> <button type="button" id="changeDisplayNameButton">Change Name</button></br>
       </div>
       <div class="demochat-chatInnerOptions" style="align:right">
@@ -153,7 +153,27 @@
     </div>
     <script src="js/heartbeat.js"/>
     <script src="js/appearance.js"/>
+    <link rel="stylesheet" media="screen" type="text/css" href="css/colorpicker.css" />
+    <script src="js/colorpicker.js"/>
     <script>
+      $( '#newUserColor' ).ColorPicker( {
+			  flat: false,
+			  color: '#000000',
+			  onSubmit: function( hsb, hex, rgb ) {
+				  $( '#newUserColor' ).css( 'backgroundColor', '#' + hex );
+			  }
+		  } );
+      $( '#changeTextColor' ).ColorPicker( {
+			  flat: false,
+			  color: '#000000',
+			  onSubmit: function( hsb, hex, rgb ) {
+				  $( '#changeTextColor' ).css( 'backgroundColor', '#' + hex );
+          if ( isConnected( ) ) {
+            vwf_view.kernel.callMethod( sceneId, "userColorChange", [ $( '#changeTextColor' ).css( 'backgroundColor' ), playerId, vwf_view.kernel.moniker( ) ] );
+          }
+			  }
+		  } );
+      
       // Store the nodeID of the entire scene for later reference.
       var sceneId = vwf_view.kernel.find( "", "/" )[ 0 ];
       var userDetails = {};
@@ -184,7 +204,8 @@
         disableLogonDataEntry( );
 
         //  Make the actual call to the model to attempt to create the user.
-        vwf_view.kernel.callMethod( sceneId, "createUser", [ sanitizeUsername( $( '#playerNameInput' ).val( ) ), $( '#playerTextColor' ).val( ), $( '#loginSoundSelect' ).val( ), vwf_view.kernel.moniker( ) ] );
+        vwf_view.kernel.callMethod( sceneId, "createUser", [ sanitizeUsername( $( '#playerNameInput' ).val( ) ), $( '#newUserColor' ).css( 'backgroundColor' ) , $( '#loginSoundSelect' ).val( ), vwf_view.kernel.moniker( ) ] );
+        $( '#changeTextColor' ).css( 'backgroundColor', $( '#newUserColor' ).css( 'backgroundColor' ) )
       });
       
       // Register a callback so when the loginSoundSelectTest button is pressed, the sound currently
@@ -209,13 +230,6 @@
         }
       } );
 
-      //Register a function to run when the color selector for running chat has its value changed.
-      $( '#changeTextColor' ).change( function( ) {
-        //  Test if we are connected. If so, set the displayColor property on our specific user model
-        if ( isConnected( ) ) {
-          vwf_view.kernel.callMethod( sceneId, "userColorChange", [ $( '#changeTextColor' ).val( ), playerId, vwf_view.kernel.moniker( ) ] );
-        }
-      } );
 
 
       //Register function to listen for keydown and keyup of the enter key in the chat message
