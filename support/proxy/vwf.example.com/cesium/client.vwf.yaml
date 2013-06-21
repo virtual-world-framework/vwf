@@ -48,6 +48,8 @@ scripts:
         "extends": "http://vwf.example.com/cesium/label.vwf",
       };
 
+      //debugger;
+
       var scene = self.parent;
       while( scene.parent.parent ) {
         scene = scene.parent;
@@ -59,7 +61,7 @@ scripts:
         
         self.billboard = child;
         
-        child.position = this.location;
+        child.position = self.location;
         child.color = self.color;
       } );
 
@@ -77,6 +79,7 @@ scripts:
       } );      
     }
     this.updateMarkers = function( pos ) {
+      //debugger;
       if ( this.billboard ) {
         this.billboard.position = pos;
       }
