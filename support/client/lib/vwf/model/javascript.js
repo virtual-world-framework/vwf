@@ -368,9 +368,9 @@ var scriptText = " \
 
                 if ( parseInt( childName ).toString() !== childName ) {
                     node.children[childName] = child;
-node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                    ( node[childName] = child );
                 }
+node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+                ( node[childName] = child );
 
             }
 
