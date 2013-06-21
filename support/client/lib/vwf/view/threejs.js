@@ -25,6 +25,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var navmode;
     var ownerlessNavObjects = [];
     var numNavCandidates;
+    var translationSpeed = 100; // Units per second
+    var rotationSpeed = 90; // Degrees per second
 
     return view.load( module, {
 
@@ -135,9 +137,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // -- satProperty ------------------------------------------------------------------------------
 
         satProperty: function ( nodeID, propertyName, propertyValue ) { 
-            if ( propertyName == "navmode" ) { 
-                if ( navObject && ( nodeID == navObject.ID ) ) {
+            if ( navObject && ( nodeID == navObject.ID ) ) {
+                if ( propertyName == "navmode" ) { 
                     navmode = propertyValue;
+                } else if ( propertyName == "translationSpeed" ) {
+                    translationSpeed = propertyValue;
+                } else if ( propertyName == "rotationSpeed" ) {
+                    rotationSpeed = propertyValue;
                 }
             } else if ( propertyName == "transform" ) {
                 receiveModelTransformChanges( nodeID, propertyValue );
@@ -233,10 +239,17 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                              function( nodeID ) {
                         controlNavObject( this.state.nodes[ nodeID ] );
                     } */ );
-                } else if ( navObject && ( nodeID == navObject.ID ) && propertyName == "navmode" ) {
+                } else if ( navObject && ( nodeID == navObject.ID ) ) {
+                    
+                    // These were requested in controlNavObject
 
-                    // This was requested from the model from controlNavObject
-                    navmode = propertyValue;
+                    if ( propertyName == "navmode" ) {
+                        navmode = propertyValue;
+                    } else if ( propertyName == "translationSpeed" ) {
+                        translationSpeed = propertyValue;
+                    } else if ( propertyName == "rotationSpeed" ) {
+                        rotationSpeed = propertyValue;
+                    }
                 }
             }
         },
@@ -951,8 +964,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // TODO: Navigation - This section should become a view component as soon as that system is available
         //       When altering this, search for other sections that say "TODO: Navigation"
 
-        this.translationSpeed = 100; // Units per second
-        this.rotationSpeed = 90; // Degrees per second
         var degreesToRadians = Math.PI / 180;
         var movingForward = false;
         var movingBack = false;
@@ -984,7 +995,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Compute the distance traveled in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
             // one key press doesn't send them off in space
-            var dist = this.translationSpeed * Math.min( msSinceLastFrame * 0.001, 0.5 );
+            var dist = translationSpeed * Math.min( msSinceLastFrame * 0.001, 0.5 );
 
             // Get the camera's rotation matrix in the world's frame of reference
             // (remove its translation component so it is just a rotation matrix)
@@ -1050,7 +1061,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Compute the distance rotated in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
             // one key press doesn't send them off in space
-            var theta = direction * ( this.rotationSpeed * degreesToRadians ) * 
+            var theta = direction * ( rotationSpeed * degreesToRadians ) * 
                         Math.min( msSinceLastFrame * 0.001, 0.5 );
 
             var cos = Math.cos( theta );
@@ -1123,7 +1134,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 var deltaY = currentMousePosition[ 1 ] - startMousePosition [ 1 ];
                 var yawQuat = new THREE.Quaternion();
                 var pitchQuat = new THREE.Quaternion();
-                var rotationSpeedRadians = degreesToRadians * sceneView.rotationSpeed;
+                var rotationSpeedRadians = degreesToRadians * rotationSpeed;
 
                 // deltaX is negated because a positive change (to the right) generates a negative rotation 
                 // around the vertical z axis (clockwise as viewed from above)
@@ -1925,8 +1936,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             rendererState.cameraInUse = cameraNode.threeObject;
         }
 
-        // Request the navigation mode from the navigation object
+        // Request properties from the navigation object
         vwf_view.kernel.getProperty( navObject.ID, "navmode" );
+        vwf_view.kernel.getProperty( navObject.ID, "translationSpeed" );
+        vwf_view.kernel.getProperty( navObject.ID, "rotationSpeed" );
     }
 
     function findNavObject() {

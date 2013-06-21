@@ -27,6 +27,20 @@ properties:
 
   navmode: "fly"
 
+  ## Speed at which the object translates in units per second
+  ## 
+  ## @name navigable.vwf#translationSpeed
+  ## @property
+
+  translationSpeed: 100
+
+  ## Speed at which the object rotates in degress per second
+  ## 
+  ## @name navigable.vwf#rotationSpeed
+  ## @property
+
+  rotationSpeed: 90
+
   ## Owner node of navigable behavior component
   ## 
   ## @name navigable.vwf#owner
