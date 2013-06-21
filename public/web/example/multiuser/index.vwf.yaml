@@ -18,6 +18,8 @@ properties:
   userObject:
     extends: http://vwf.example.com/node3.vwf
     implements: [ "http://vwf.example.com/navigable.vwf" ]
+    properties:
+      translationSpeed: 10000
     children:     
       camera:
         extends: http://vwf.example.com/camera.vwf
