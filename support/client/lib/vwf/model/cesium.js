@@ -579,25 +579,29 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                         terrainProvider = new Cesium.CesiumTerrainProvider({
                                             url : 'http://cesium.agi.com/smallterrain',
                                             credit : 'Terrain data courtesy Analytical Graphics, Inc.'
-                                        });                                    
+                                        });  
+                                        node.centralBody.depthTestAgainstTerrain = true;                                  
                                         break;
                                     case "vr":
                                         node.terrainProvider = propertyValue;
                                         terrainProvider = new Cesium.VRTheWorldTerrainProvider({
                                             url : 'http://www.vr-theworld.com/vr-theworld/tiles1.0.0/73/',
                                             credit : 'Terrain data courtesy VT MÄK'
-                                        });                                    
+                                        }); 
+                                        node.centralBody.depthTestAgainstTerrain = true;                                   
                                         break;
                                     default:
+                                        terrainProvider = new Cesium.EllipsoidTerrainProvider();
                                         node.terrainProvider = "ellipsoid";
+                                        node.centralBody.depthTestAgainstTerrain = false;
                                         break;
 
                                 }
 
                                 if ( terrainProvider !== undefined ) {
-                                    node.centralBody.depthTestAgainstTerrain = true;
                                     node.centralBody.terrainProvider = terrainProvider;
                                 }
+                                
                                 value = undefined;
                                 break;
 
