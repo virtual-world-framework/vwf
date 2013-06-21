@@ -137,6 +137,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // -- satProperty ------------------------------------------------------------------------------
 
         satProperty: function ( nodeID, propertyName, propertyValue ) { 
+            
+            // If this is this user's navObject, pay attention to changes in navmode, translationSpeed, and 
+            // rotationSpeed
             if ( navObject && ( nodeID == navObject.ID ) ) {
                 if ( propertyName == "navmode" ) { 
                     navmode = propertyValue;
@@ -145,7 +148,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 } else if ( propertyName == "rotationSpeed" ) {
                     rotationSpeed = propertyValue;
                 }
-            } else if ( propertyName == "transform" ) {
+            }
+
+            // Pay attention to these properties for all nodes
+            if ( propertyName == "transform" ) {
                 receiveModelTransformChanges( nodeID, propertyValue );
             } else if ( propertyName == "lookAt") {
 
