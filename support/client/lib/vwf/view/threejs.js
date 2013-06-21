@@ -346,8 +346,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     self.moveNavObject( timepassed );
                     self.rotateNavObjectByKey( timepassed );
                     
-                    // Turn the camera to look back at its lookat object or position after moving/rotating it
-                    nodeLookAt( cameraNode );
+                    // If the camera has been created, turn it to look back at its lookat position after 
+                    // moving/rotating
+                    if ( cameraNode ) {
+                        nodeLookAt( cameraNode );
+                    }
                 }
             }
             
@@ -2121,6 +2124,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     // An almost identical function is copied in model/threejs.js, so if any modifications are made here, they 
     // should be made there, also
     function nodeLookAt( node ) {
+
+        if ( !node ) {
+            self.logger.warnx( "nodeLookAt: Node does not exist" );
+            return;
+        }
 
         // Function to make the object look at a particular position
         // (For use in the following conditional)
