@@ -36,13 +36,19 @@ scripts:
 - |
     this.initialize = function() {
     }
-    this.createClient = function( moniker, loginName, location ) {
+    this.createClient = function( moniker, loginName ) {
+      console.info( "createClient( "+moniker+", "+loginName+" )" );
       var self = this;
+      
+      var clr, colorList = this.clientColors;
+      clr = colorList.shift();
+      this.clientColors = colorList;
+
       var clientDef = { 
         "extends": "http://vwf.example.com/cesium/client.vwf",
         "properties": {
           "displayName": loginName,
-          "color": this.clientColors.shift()
+          "color": clr
         },
       }
       this.clients.children.create( "client"+moniker, clientDef, function( child ){
@@ -63,7 +69,6 @@ scripts:
       return client;
     } 
     this.locationCaptured = function( parms ) {
-      //debugger;
       var client = this.findClient( parms.moniker );
       if ( client !== undefined ) {
         client.location = parms.location;
