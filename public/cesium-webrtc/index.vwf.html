@@ -26,7 +26,7 @@
         </style>
         <script type="text/javascript">
 
-            document.title = "Cesium VWF Demo";
+            document.title = "Cesium - Webrtc VWF Demo";
 
             $( function() {
 
@@ -49,6 +49,7 @@
                             };
 
                             function gotLocation( pos ) {
+                                debugger;
                                 var ellipsoid = Cesium.Ellipsoid.WGS84;
                                 var dest = Cesium.Cartographic.fromDegrees( pos.coords.longitude, pos.coords.latitude, 1000.0 );
                                 dest = ellipsoid.cartographicToCartesian( dest );
@@ -133,7 +134,7 @@
                         $container.append(
                             "<div id='"+ divId + "'>" +
                                 "<video class='vwf-webrtc-video' id='" + videoId +
-                                    "' width='320' height='240' src='" + value.url + 
+                                    "' width='640' height='480' src='" + value.url + 
                                     "' loop='loop' autoplay = true" +
                                     " style='position: absolute; left: 0; top: 0; z-index: -1;width:100%;height:100%;'>" +
                                 "</video>" +
