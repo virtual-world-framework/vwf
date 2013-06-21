@@ -267,9 +267,19 @@ methods:
 
   # Play the animation from the start.
 
-  animationPlay: |
-    this.animationTime = 0;
-    this.animationPlaying = true;
+  animationPlay:
+    parameters:
+      - startTime
+      - stopTime
+    body: |
+      if(!isNaN(stopTime)) {
+        this.animationStopTime = stopTime;
+      }
+      if(!isNaN(startTime)) {
+        this.animationStartTime = startTime;
+      }
+      this.animationTime = 0;
+      this.animationPlaying = true;
 
   # Pause the animation at the current position.
 
