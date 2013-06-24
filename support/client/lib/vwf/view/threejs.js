@@ -807,8 +807,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if ( mouseLeftDown || mouseRightDown || mouseMiddleDown ) {
                 
                     // TODO: Navigation - see main "TODO: Navigation" comment for explanation
-                    if ( ( navmode != "none" ) && !( cameraNode.lookatval ) ) {
-                        handleMouseNavigation( eData.eventData );
+                    if ( navmode != "none" ) {
+                        if ( cameraNode ) {
+                            if ( !cameraNode.lookatval ) {
+                                handleMouseNavigation( eData.eventData );
+                            }
+                        } else {
+                            self.logger.warnx( "canvas.onmousemove: camera does not exist" );
+                        }
                     }
                     // END TODO
 
