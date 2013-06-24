@@ -207,20 +207,6 @@ scripts:
     
     //this.in( 4 ).log();
 
-    this.toleranceTest = function() {
-      var self = this;
-      var transformByTestCube = cube1;
-      var transformToTestCube = cube2;
-      var worldTransformByTestCube = cube3;
-      var worldTransformToTestCube = cube4;
-      
-      this.logger.info("Four passed tests should log to the console after a 5 second delay.");
-      testWorldTransformTolerance.call(self, transformByTestCube, "transformBy" );
-      testWorldTransformTolerance.call(self, transformToTestCube, "transformTo" );
-      testWorldTransformTolerance.call(self, worldTransformByTestCube, "worldTransformBy" );
-      testWorldTransformTolerance.call(self, worldTransformToTestCube, "worldTransformTo" );
-    }
- 
     this.in( 5 ).toleranceTest();
   } 
 
@@ -233,7 +219,7 @@ scripts:
 
   this.printWorldTransform = function( node3 ) {
     if ( !node3 ) {
-      this.logger.error( "node3 is not valid - cannot print transform");
+      this.logger.error( "node3 is not valid - cannot print transform" );
       return;
     }
     var trans = node3.worldTransform;
@@ -247,10 +233,24 @@ scripts:
       this.logger.error( "node3.worldTransform is not valid - cannot print" );
   }
 
+  this.toleranceTest = function() {
+    var self = this;
+    var transformByTestCube = this.grandparent1.parent1.cube1;
+    var transformToTestCube = this.grandparent2.parent2.cube2;
+    var worldTransformByTestCube = this.grandparent3.parent3.cube3;
+    var worldTransformToTestCube = this.grandparent4.parent4.cube4;
+    
+    this.logger.info("Four passed tests should log to the console after a 5 second delay.");
+    testWorldTransformTolerance.call( self, transformByTestCube, "transformBy" );
+    testWorldTransformTolerance.call( self, transformToTestCube, "transformTo" );
+    testWorldTransformTolerance.call( self, worldTransformByTestCube, "worldTransformBy" );
+    testWorldTransformTolerance.call( self, worldTransformToTestCube, "worldTransformTo" );
+  }
+
   function testWorldTransformTolerance( node, testName ) {
     
     if ( !node || node.worldTransform.length !== 16 ) {
-      this.logger.error( "node is not valid - cannot test delta tolerance");
+      this.logger.error( "node is not valid - cannot test delta tolerance" );
       return;
     }
     
@@ -258,11 +258,11 @@ scripts:
     var testMatrix = [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ];
     var trans = node.worldTransform;
     
-    for (var i = 0; i < trans.length; i++ ) {
+    for ( var i = 0; i < trans.length; i++ ) {
       if (( Math.abs (trans[i] - testMatrix[i] )) > tolerance ) {
-        this.logger.info("Test Failed. " + testName + " tolerance check is beyond " + tolerance + " bounds");
+        this.logger.info( "Test Failed. " + testName + " tolerance check is beyond " + tolerance + " bounds" );
         return;
       } 
     }
-    this.logger.info("Test Passed. " + testName + " is within " + tolerance + " tolerance.");
+    this.logger.info( "Test Passed. " + testName + " is within " + tolerance + " tolerance." );
   } //@ sourceURL=index.vwf
