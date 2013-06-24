@@ -195,6 +195,9 @@ scripts:
             break;
         }
       }
+
+      // Disable view-side navigation so navscene.vwf can do the navigation
+      this.camera.navmode = "none";
     }
     this.changeNavMode = function( state ) {
       if ( state == 1 ) {
