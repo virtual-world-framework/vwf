@@ -176,7 +176,6 @@ scripts:
     return false;
   };
 
-
   // Implement a helper function that translates a grid position and selected boolean
   // and returns an x/y/z translation.
   this.marblePosition = function( gridPosition, selected ) {
@@ -187,25 +186,25 @@ scripts:
     else {
       switch ( gridPosition[ 0 ] ) {
         case 0:
-          posResult[ 0 ] = 4.043994 - 4.215422;
+          posResult[ 0 ] = -0.171428;
           break;
         case 1:
-          posResult[ 0 ] = 4.101136 - 4.215422;
+          posResult[ 0 ] = -0.114286;
           break;
         case 2:
-          posResult[ 0 ] = 4.158278 - 4.215422;
+          posResult[ 0 ] = -0.057144;
           break;
         case 3:
-          posResult[ 0 ] = 4.215422 - 4.215422;
+          posResult[ 0 ] = 0.0;
           break;
         case 4:
-          posResult[ 0 ] = 4.272565 - 4.215422;
+          posResult[ 0 ] = 0.057143;
           break;
         case 5:
-          posResult[ 0 ] = 4.329707 - 4.215422;
+          posResult[ 0 ] = 0.114285;
           break;
         case 6:
-          posResult[ 0 ] = 4.386849 - 4.215422;
+          posResult[ 0 ] = 0.171427;
           break;
         default:
           posResult[ 0 ] = 0.0;
@@ -213,25 +212,25 @@ scripts:
 
       switch ( gridPosition[ 1 ] ) {
         case 0:
-          posResult[ 1 ] = 2.543117 - 2.70601;
+          posResult[ 1 ] = -0.162893;
           break;
         case 1:
-          posResult[ 1 ] = 2.596678 - 2.70601;
+          posResult[ 1 ] = -0.109332;
           break;
         case 2:
-          posResult[ 1 ] = 2.651719 - 2.70601;
+          posResult[ 1 ] = -0.054291;
           break;
         case 3:
-          posResult[ 1 ] = 2.70601 - 2.70601;
+          posResult[ 1 ] = 0.0;
           break;
         case 4:
-          posResult[ 1 ] = 2.758854 - 2.70601;
+          posResult[ 1 ] = 0.052844;
           break;
         case 5:
-          posResult[ 1 ] = 2.810966 - 2.70601;
+          posResult[ 1 ] = 0.104956;
           break;
         case 6:
-          posResult[ 1 ] = 2.864527 - 2.70601;
+          posResult[ 1 ] = 0.158517;
           break;
         default:
           posResult[ 1 ] = 0.0;

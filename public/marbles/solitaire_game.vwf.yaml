@@ -99,6 +99,8 @@ scripts:
    var solitaireExitingViewPoint = [ 1.0000032186508179, 0, 0, 0, 0, 0.5591943860054016, -0.8290396928787231, 0, 0, 0.8290374279022217, 0.5591927766799927, 0 , 4.2, 2.2, 1.5,1 ];
    var degreeConversion = Math.PI / 180;
    
+  var xValues = [ -0.171428, -0.114286, -0.057144, 0.0, 0.057143, 0.114285, 0.171427 ];
+  var yValue = [-0.162893, -0.109332, -0.054291, 0.0, 0.052844, 0.104956, 0.158517 ];
 
    
   this.calculateInitialDirection = function ( cameraPos ) {
@@ -259,6 +261,31 @@ scripts:
     return false;
   };
 
+  
+  this.emptyPosition = function( location ) {
+    var invertedTransform = goog.vec.Mat4.create();
+    var positionMatrix = [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, location[ 0 ], location[ 1 ], location[ 2 ], 1 ];
+    if ( goog.vec.Mat4.invert( this.worldTransform, invertedTransform ) ) {
+      var relativeMatrix = goog.vec.Mat4.multMat( positionMatrix, invertedTransform, goog.vec.Mat4.create() );
+      var relativePos = [ relativeMatrix[ 12 ], relativeMatrix[ 13 ], relativeMatrix[ 14 ] ];
+      if ( ( relativePos[ 2 ] >= 0.838818 - 0.026 ) && ( relativePos[ 2 ] <= 0.838818 + 0.026 ) ) {
+        for ( var xIndex = 0; xIndex < 7; xIndex++ ) {
+          for ( var yIndex = 0; yIndex < 7; yIndex++ ) {
+            if ( ( ( xIndex > 1 ) && ( xIndex < 5 ) ) || ( ( yIndex > 1 ) && ( yIndex < 5 ) ) ) {
+              if ( this.children[ 0 ].lookupMarble( this, [ xIndex, yIndex ] ) == undefined ) {
+                var comparePos = this.children[ 0 ].marblePosition( [ xIndex, yIndex ], false );
+                if ( ( relativePos[ 0 ] >= comparePos[ 0 ] - 0.022 ) && ( relativePos[ 0 ] <= comparePos[ 0 ] + 0.022 ) && ( relativePos[ 1 ] >= comparePos[ 1 ] - 0.022 ) && ( relativePos[ 1 ] <= comparePos[ 1 ] + 0.022 ) ) {
+                  return [ xIndex, yIndex ];
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return undefined;
+  }
+  
   // There are a few possibilities for clicking interaction with the solitaire
   // game. If the game itself is clicked on, and no game is currently underway
   // start a new game.
@@ -272,6 +299,36 @@ scripts:
   this.handlePointerDown = function( nodeId, eventParameters, user ) {
     var me = this;
     var node = user.getObject( nodeId );
+    //Check for clicking empty solitaire board sockets. Can't test node being clicked. Only receive
+    // interpretable click location when the scene is clicked... First, check if game is underway,
+    // a marble is selected, and the event parameters have enough arguments, since these are quick
+    // checks... (only need to do this when game is underway with marble selected, because the only
+    // 'use' for clicking an empty socket is an attempt to move a marble into it.)
+    if ( ( eventParameters.length == 3 ) && ( this.gameUnderway == true )  && ( me.selectedMarble != "" ) ){
+      // Grab the selected marble. Make certain it's valid.
+      var selectedMarble = user.getObject( me.selectedMarble );
+      if ( selectedMarble != undefined ) {
+        // Double check the event parameters, we want the initial scene level event with a global position...
+        if ( ( eventParameters[ 2 ] == "capture" ) && ( eventParameters[ 1 ][ 'globalPosition' ] != undefined ) ){
+          // Call the empyPosition helper, that returns the 'solitairePosition' board coordinates if it is an empty
+          // position, if not it returns undefined. Test if it was an empty position.
+          var emptyPositionClicked = this.emptyPosition( eventParameters[ 1 ][ 'globalPosition' ] );
+          if ( emptyPositionClicked != undefined ) {
+            // We received a click in an empty position. See if it is a valid jump location
+            // aka, a position which is the same in X or Y, and two off in the other axis.
+            if ( ( ( selectedMarble.solitairePosition[ 0 ] == emptyPositionClicked[ 0 ] ) && ( Math.abs( selectedMarble.solitairePosition[ 1 ] - emptyPositionClicked[ 1 ] ) == 2 ) ) || ( ( selectedMarble.solitairePosition[ 1 ] == emptyPositionClicked[ 1 ] ) && ( Math.abs( selectedMarble.solitairePosition[ 0 ] - emptyPositionClicked[ 0 ] ) == 2 ) ) ) {
+              // So, we're in a valid jump position, check for a marble between the selected marble
+              // and the clicked position, if there is one, leap it.
+              var marbleBetween = selectedMarble.lookupMarble( this, [ ( emptyPositionClicked[ 0 ] + selectedMarble.solitairePosition[ 0 ] ) / 2, ( emptyPositionClicked[ 1 ] + selectedMarble.solitairePosition[ 1 ] ) / 2 ] );
+              if ( marbleBetween != undefined ) {
+                selectedMarble.leapMarble( marbleBetween );
+                this.future(1.0).checkGame( user );                
+              }
+            }
+          }
+        }
+      }
+    }
     if ( node != undefined ) {
       if ( me.gameUnderway == false ) {
         if ( node === me ) {
