@@ -25,6 +25,8 @@ properties:
         this.drive();
       }
     value: "none"
+methods:
+  initializeCamera:
 children:
   humvee:
     extends: http://vwf.example.com/node3.vwf
@@ -96,10 +98,18 @@ methods:
 scripts:
 - |
   this.initialize = function() {
+
+    // Wait until the queue resumes to set camera properties, so we are sure that the camera has been created
+    // TODO: When we can assume that initialize doesn't complete until all created nodes are in place, this
+    //       will no longer need to be a future call because we will be able to assume that the camera exists
+    this.future( 0 ).initializeCamera();
+  }
+
+  this.initializeCamera = function() {
     this.camera.translation = [ -500, -500, 235 ];
     this.camera.lookAt = this.humvee.id;
   }
-- |
+
   this.drive = function() {
     if(this.driveDirection != "none")
     {
@@ -122,20 +132,20 @@ scripts:
       this.future( 0.05 ).drive();
     }
   }
-- |
+
   this.driveForward = function() {
 
   }
-- |
+
   this.driveReverse = function() {
 
   }
-- |
+
   this.driveLeft = function() {
     this.humvee.MaxScene.Humvee.Tire01.rotation = [ 0, 0, 1, 25 ];
     this.humvee.MaxScene.Humvee.Tire02.rotation = [ 0, 0, 1, 25 ];
   }
-- |
+
   this.driveRight = function() {
     this.humvee.MaxScene.Humvee.Tire01.rotation = [ 0, 0, 1, -25 ];
     this.humvee.MaxScene.Humvee.Tire02.rotation = [ 0, 0, 1, -25 ];
