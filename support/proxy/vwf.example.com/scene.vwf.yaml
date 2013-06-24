@@ -145,9 +145,6 @@ scripts:
       if ( !this.activeCameraComp ) {
         if ( this.getChild ) {
           this.activeCameraComp = this.getChild( this.activeCamera );
-          if ( !this.activeCameraComp ) {
-             this.activeCameraComp = this.camera;
-          }
         }
       }
       return this.activeCameraComp;
