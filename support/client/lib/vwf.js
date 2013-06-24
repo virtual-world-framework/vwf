@@ -3425,7 +3425,20 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
         var nodeHasOwnChild = function( nodeID, childName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
             var node = this.models.javascript.nodes[nodeID];
-            return node.children.hasOwnProperty( childName );  // TODO: this is peeking inside of vwf-model-javascript
+            var hasChild = false;
+            if ( parseInt( childName ).toString() !== childName ) {
+                hasChild = node.children.hasOwnProperty( childName );  // TODO: this is peeking inside of vwf-model-javascript
+            }
+            else {
+                // Children with numeric names do not get added as properties of the children array, so loop over the children
+                // to check manually
+                for(var i=0, il=node.children.length; i<il;i++) {
+                    if(childName === node.children[i].name) {
+                        hasChild = true; 
+                    }
+                }
+            }
+            return hasChild;
         };
 
         /// Determine if a component specifier is a URI.
