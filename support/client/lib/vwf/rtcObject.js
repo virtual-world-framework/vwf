@@ -108,7 +108,7 @@ MyRTC.prototype.initialize = function( params )
 	
 	// inform peers of availability
 	console.log('Sending syn');
-	this.sendMessage({'type': 'syn'});
+	this.sendMessage({'type': 'syn', 'mediaDescription': mediaDescription});
 }
 
 

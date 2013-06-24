@@ -41,6 +41,8 @@ define(function ()
 		$("#UserProfileWindow").append("<div id='FollowUser'></div>");
 		$("#UserProfileWindow").append("<div id='PrivateMessage'></div>");
 		$("#UserProfileWindow").append("<div id='CallUser'></div>");
+		$("#UserProfileWindow").append("<div id='VideoCallUser'></div>");
+
 
 		$("#userprofileclose").click(function ()
 		{
@@ -85,11 +87,17 @@ define(function ()
 		});
 
 		$("#CallUser").button({
+			label: 'Voice Call'
+		});
+		$("#CallUser").click(function (){
+			vwf.callMethod('index-vwf', 'rtcCall', {target: _UserManager.SelectedProfile.Username});
+		});
+
+		$("#VideoCallUser").button({
 			label: 'Video Call'
 		});
-		$("#CallUser").click(function ()
-		{
-			vwf.callMethod('index-vwf', 'rtcCall', {target: _UserManager.SelectedProfile.Username});
+		$("#VideoCallUser").click(function (){
+			vwf.callMethod('index-vwf', 'rtcVideoCall', {target: _UserManager.SelectedProfile.Username});
 		});
 
 		$(document).on('setstatecomplete',function()

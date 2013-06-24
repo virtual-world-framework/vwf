@@ -12,8 +12,6 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 			// create the video window
 			var width = 320, height = 240;
 			this.vidFrame = document.createElement('div');
-			$(this.vidFrame).attr('id', 'vidFrame');
-			$(this.vidFrame).attr('id', '');
 			$(this.vidFrame).append( '<video id="remote" poster="/adl/sandbox/vwf/view/webrtc/avatar.png"/>' );
 			$(this.vidFrame).append( '<video id="self" poster="/adl/sandbox/vwf/view/webrtc/avatar.png" muted/>' );
 
@@ -21,10 +19,24 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 			//$(this.vidFrame).css('padding', '30px');
 			$(this.vidFrame).find('video').css('position', 'absolute');
 			$(this.vidFrame).find('video').css('border', 'solid black 1px');
-			$(this.vidFrame).find('#remote').attr('width', '320px');
-			$(this.vidFrame).find('#remote').attr('height', '240px');
-			$(this.vidFrame).find('#self').attr('width', '80px');
-			$(this.vidFrame).find('#self').attr('height', '60px');
+			$(this.vidFrame).find('#remote').attr('width', width+'px');
+			$(this.vidFrame).find('#remote').attr('height', height+'px');
+			$(this.vidFrame).find('#self').attr('width', (width/4)+'px');
+			$(this.vidFrame).find('#self').attr('height', (height/4)+'px');
+
+			// create the accept/reject window
+			$(this.vidFrame).append( '<div id="messagePanel"/>' );
+			$(this.vidFrame).find('#messagePanel').append( '<p id="message">Incoming video call from Herpderp!</p>' );
+			$(this.vidFrame).find('#messagePanel').append( '<input type="button" id="accept" value="Accept"/>' );
+			$(this.vidFrame).find('#messagePanel').append( '<input type="button" id="reject" value="Reject"/>' );
+			
+			// style the accept/reject window
+			$(this.vidFrame).find( '#messagePanel' ).css({
+				'position': 'absolute',
+				'width': width+2+'px',
+				'height': height+2+'px',
+				'background-color': '#fff',
+			});
 
 			// create the dialog box
 			$(this.vidFrame).dialog({width: width+40, height: height+40, autoOpen: false});
@@ -44,6 +56,22 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 				vwf_view.kernel.callMethod('index-vwf', 'rtcDisconnect', payload);
 				this.rtcTarget = null;
 			}.bind(this));
+
+			$(this.vidFrame).find( '#messagePanel input#accept' ).button().click(function(evt)
+			{
+				$(this.vidFrame).find('#messagePanel').css('z-index', -1);
+				this.rtc.initialize(this.mode);
+			}.bind(this));
+
+			$(this.vidFrame).find( '#messagePanel input#reject' ).button().click(function(evt)
+			{
+				// send rejection notice
+				vwf_view.kernel.callMethod('index-vwf', 'rtcDisconnect',
+					{target: this.rtcTarget, sender: _UserManager.GetCurrentUserName()}
+				);
+				$(this.vidFrame).dialog('close');
+				this.rtcTarget = null;
+			}.bind(this));
 		},
 
 
@@ -55,12 +83,15 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 			if( id != 'index-vwf' )
 				return;
 
-			if( name == 'rtcCall' )
+			if( name == 'rtcCall' || name == 'rtcVideoCall' )
 			{
 				this.rtcTarget = params.target;
-				$(this.vidFrame).dialog('option', 'title', 'Video chat with '+this.rtcTarget);
+				this.mode = {'audio':true, 'video':name=='rtcVideoCall'};
+				var typeWord = this.mode.video ? 'Video' : 'Voice';
+				$(this.vidFrame).dialog('option', 'title', typeWord+' chat with '+this.rtcTarget);
+				$(this.vidFrame).find('#messagePanel').css('z-index', -1);
 				$(this.vidFrame).dialog('open');
-				this.rtc.initialize({'video':true, 'audio':true});
+				this.rtc.initialize(this.mode);
 			}
 
 			else if( name == 'rtcData' )
@@ -72,9 +103,13 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 
 					if( !this.rtc.initialized )
 					{
-						$(this.vidFrame).dialog('option', 'title', 'Video chat with '+this.rtcTarget);
+						this.mode = params.rtcData.mediaDescription;
+						var typeWord = params.rtcData.mediaDescription.video ? 'Video' : 'Voice';
+						$(this.vidFrame).dialog('option', 'title', typeWord+' chat with '+this.rtcTarget);
+						$(this.vidFrame).find('#messagePanel').css('z-index', 1);
+						$(this.vidFrame).find('#message').html('Incoming '+typeWord.toLowerCase()+' call from '+this.rtcTarget);
 						$(this.vidFrame).dialog('open');
-						this.rtc.initialize({'video':true, 'audio':true});
+						//this.rtc.initialize( params.rtcData.mediaDescription );
 					}
 					else {
 						this.rtc.receiveMessage(params.rtcData);
