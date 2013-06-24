@@ -2054,8 +2054,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         }
 
         threeObject.matrix.elements = transformMatrix;
-        nodeLookAt( node );
         updateRenderObjectTransform( threeObject );
+        nodeLookAt( node );
     }
 
     function matCpy( mat ) {
