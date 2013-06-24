@@ -207,7 +207,7 @@ children:
     type: model/vnd.collada+xml
   screen2:
     extends: http://vwf.example.com/node3.vwf
-    source: joc/screens.dae
+    source: joc/screens.DAE
     type: model/vnd.collada+xml
   Server:
     extends: http://vwf.example.com/node3.vwf
