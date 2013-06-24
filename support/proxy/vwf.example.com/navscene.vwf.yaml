@@ -112,6 +112,15 @@ methods:
 
   ## For internal use only - needs to be public for future calls
   ## 
+  ## @name navscene.vwf#disableViewSideNav
+  ## @function
+  ## 
+  ## @returns undefined
+
+  disableViewSideNav:
+
+  ## For internal use only - needs to be public for future calls
+  ## 
   ## @name navscene.vwf#setNavMode
   ## @function
   ## 
@@ -167,6 +176,9 @@ scripts:
       // created
       // TODO: When we can assume that initialize doesn't complete until all created nodes are in place, this
       //       will no longer need to be a future call because we will be able to assume that the camera exists
+      
+      // Disable view-side navigation so navscene.vwf can do the navigation
+      this.future( 0 ).disableViewSideNav();
       this.future( 0 ).setNavMode( this.navmode );
     }
     this.timeElapsed = function() {
@@ -175,6 +187,10 @@ scripts:
         timeElapsed = 1;  
       }
       return timeElapsed;
+    }
+    this.disableViewSideNav = function() {
+      if ( this.camera )
+        this.camera.navmode = "none";
     }
     this.setNavMode = function( mode ) {
       if (!this.activeCameraComp) {
@@ -195,9 +211,6 @@ scripts:
             break;
         }
       }
-
-      // Disable view-side navigation so navscene.vwf can do the navigation
-      this.camera.navmode = "none";
     }
     this.changeNavMode = function( state ) {
       if ( state == 1 ) {
