@@ -34,7 +34,7 @@ children:
     scripts:
     - |
         this.pointerClick = function() {
-          if( this.material.color == "rgb(255,0,0)" )
+          if( this.material.color == "rgb(255, 0, 0)" )
           {
             this.material.color = "blue";
           }
@@ -59,7 +59,7 @@ children:
     scripts:
     - |
         this.pointerClick = function() {
-          if( this.material.color == "rgb(255,0,0)" )
+          if( this.material.color == "rgb(255, 0, 0)" )
           {
             this.material.color = "blue";
           }
