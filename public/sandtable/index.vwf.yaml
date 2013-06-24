@@ -353,7 +353,9 @@ scripts:
       this.camera.far = 500000;
       this.camera.near = 2;
       this.camera.lookAt = this.children.sceneCenter.id;
-      this.camera.translationSpeed = 10000;
+
+      // Disable view-side navigation so navscene.vwf can do the navigation
+      this.camera.navmode = "none";
     }
     this.toolbar.selectedColorChanged = this.events.add( function( color ) {
     }, this );
