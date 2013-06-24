@@ -52,6 +52,7 @@ properties:
   coneIndex: 1
   pushpinIndex: 1
 methods:
+  initializeMouseMode:
   clear: |
     if ( this.nodesCreated ) {
       for ( var i = 0; i < this.nodesCreated.length; i++ ){
@@ -94,9 +95,17 @@ scripts:
     // functions
     this.initialize = function() {
       this.lastDrawPoint = undefined;
-      this.mouseMode = "orbit";
       this.minDistanceSquared = this.minDrawDistance * this.minDrawDistance;
       this.nodesCreated = [];
+
+      // Wait until the queue resumes to set the mouse mode, so that we are sure that the camera has been 
+      // created
+      // TODO: When we can assume that initialize doesn't complete until all created nodes are in place, this
+      //       will no longer need to be a future call because we will be able to assume that the camera exists
+      this.future( 0 ).initializeMouseMode();
+    }
+    this.initializeMouseMode = function() {
+      this.mouseMode = "orbit";
     }
     this.pointerDown = function( parms, pickInfo ){
       if ( pickInfo ) {
