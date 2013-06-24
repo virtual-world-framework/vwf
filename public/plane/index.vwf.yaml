@@ -13,9 +13,6 @@
 
 --- 
 extends: http://vwf.example.com/scene.vwf
-properties:
-  navmode: none
-  rotationSpeed: 10
 methods:
   initializeCamera:
 children:
