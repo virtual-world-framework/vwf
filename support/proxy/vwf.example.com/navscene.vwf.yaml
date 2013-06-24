@@ -110,6 +110,15 @@ methods:
 
   getCameraAt:
 
+  ## For internal use only - needs to be public for future calls
+  ## 
+  ## @name navscene.vwf#setNavMode
+  ## @function
+  ## 
+  ## @returns undefined
+
+  setNavMode:
+
 scripts:
 - |
     var counter = 1;
@@ -153,7 +162,12 @@ scripts:
         lastUpdateTime: undefined,
         lastInputTime: undefined,
       };
-      this.setNavMode( this.navmode );
+
+      // Wait until the queue resumes to set the navigation mode, so that we are sure that the camera has been
+      // created
+      // TODO: When we can assume that initialize doesn't complete until all created nodes are in place, this
+      //       will no longer need to be a future call because we will be able to assume that the camera exists
+      this.future( 0 ).setNavMode( this.navmode );
     }
     this.timeElapsed = function() {
       var timeElapsed = this.time - this.input.lastInputTime;
