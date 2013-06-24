@@ -3,7 +3,8 @@
 		{
 			
 			var self = this;
-			var minTileSize = 128;
+			var totalmintilesize = 128;
+			var minTileSize = totalmintilesize;
 			var maxTileSize = 2048;
 			var worldExtents = 128000;
 			var tileres = 32;
@@ -57,7 +58,8 @@
 
 
 
-					
+						"varying vec3 debug;\n"+
+						"uniform vec3 debugColor;\n"+
 						"attribute vec3 everyOtherNormal;\n"+
 						"attribute float everyOtherZ;\n"+
 						"void main() {\n"+
@@ -70,7 +72,7 @@
 						" float z = mix(everyOtherZ,position.z,blendPercent);\n"+
 						"   vec4 mvPosition = modelViewMatrix * vec4( position.x,position.y,z, 1.0 );\n"+
 					
-						
+						"debug = debugColor;\n"+
 						"   gl_Position = projectionMatrix * mvPosition;\n"+
 						"}    \n";
 						var fragShader_default = 
@@ -122,6 +124,7 @@
 						"uniform float fogDensity;"+
 						"uniform float fogNear;"+
 						"uniform float fogFar;"+
+						"varying vec3 debug;\n"+
 						"varying vec3 pos;"+
 						"varying vec3 n;"+
 						"varying vec3 wN;"+
@@ -180,6 +183,7 @@
 							"zenithColor = vec3(0.78, 0.82, 0.999);\n"+
 							"gl_FragColor.xyz = aerialPerspective(gl_FragColor.xyz, distance(pos,cameraPosition),cameraPosition.xzy, normalize(pos-cameraPosition).xzy);\n"+
 						"#endif\n"+
+					//	"gl_FragColor = vec4(debug,1.0);\n"+
 						"}\n";
 						
 						//the default shader - the one used by the analytic solver, just has some simple stuff
@@ -223,6 +227,7 @@
 							"fogFar" : { type: "f", value: 2000 },
 							"fogColor" : { type: "c", value: new THREE.Color( 0xffffff ) },
 							"blendPercent" : { type: "f", value: 0.00000 },
+							debugColor : { type: "c", value: new THREE.Color( 0xffff0f ) },
 						
 						};	  
 						var attributes_default = {
@@ -663,7 +668,7 @@
 						for(var i = 0; i < this.tiles[res].length; i++)
 							if(this.tiles[res][i].quadnode == null && this.tiles[res][i].side == side)
 							{
-								console.log('reusing tile');
+							//	console.log('reusing tile');
 								return this.tiles[res][i];
 							}
 					if(!this.tiles[res])		
@@ -679,6 +684,7 @@
 						newtile = new THREE.Mesh(this.buildMesh2(100,res),this.getMat());
 					if(side == 3)
 						newtile = new THREE.Mesh(this.buildMesh3(100,res),this.getMat());	
+					
 					newtile.geometry.dynamic = true;
 					newtile.doublesided = true;
 					newtile.side = side;
@@ -1046,21 +1052,36 @@
 					if(i== 6) return Math.PI/2;
 					return 0;
 				}
+				this.debug = function(r,g,b)
+				{
+					if(this.mesh)
+					{
+						this.mesh.material.uniforms.debugColor.value.r = r;
+						this.mesh.material.uniforms.debugColor.value.g = g;
+						this.mesh.material.uniforms.debugColor.value.b = b;
+					}
+				}
 				this.updateMesh = function(cb)
 				{
 					var rebuilt = false;
 					if(!this.isSplit())
 					{
+						//if I'm a leaf node, but the side I need (for sticthing) is not the one I have, or I have no mesh (because I'm new) generate my mesh
 						var neededSide = this.sideNeeded();
 						if(!this.mesh || neededSide != this.side)
 						{
-							var badsidemesh = null;
+							//if were just switching sides, backup the old mesh
+							//it will be shown when the new one is ready
+							this.badsidemesh = null;
 							if(this.mesh && neededSide != this.side)
 							{
-								badsidemesh = this.mesh;
+								this.debug(1,0,0);
+								this.badsidemesh = this.mesh;
 								this.mesh = null;
 							}
 							
+							//if I'm a leaf, and I'm small enough
+							//note, we should never arrive here for meshes that don't need an update.
 							if(this.max[0] - this.min[0] < maxTileSize)
 							{
 								var res = tileres;
@@ -1068,12 +1089,14 @@
 								var scale = this.max[0] - this.min[0];
 								
 								this.side = neededSide;
+								//get the right mesh off the cache
 								this.mesh = self.TileCache.getMesh(res,this.meshNeeded(this.side));
+								//scale and rotate to fit
 								this.mesh.scale.x = scale/100;
 								this.mesh.scale.y = scale/100;
 								this.mesh.scale.z = 1;//scale/100;
 								this.mesh.rotation.z = this.getRotation(this.side);
-								
+								this.debug(0,0,0);
 								this.mesh.quadnode = this;
 								if(self.removelist.indexOf(this.mesh)>-1)
 								self.removelist.splice(self.removelist.indexOf(this.mesh),1);
@@ -1082,26 +1105,58 @@
 								this.mesh.position.y = this.c[1];
 								this.mesh.position.z = 1;
 								
+								//go ahead and add it to the world
 								rebuilt = true;	
 								this.mesh.updateMatrixWorld(true);
 								this.THREENode.add(this.mesh,true);	
 								this.mesh.visible = false;
-								self.BuildTerrainInner(this.mesh,(this.max[0] - this.min[0])/tileres,function()
+								this.mesh.waitingForRebuild = true;
+								
+								// displace the mesh
+								// the callback will indicate if this mesh was canceled before the thread returned with the updated mesh
+								self.BuildTerrainInner(this.mesh,(this.max[0] - this.min[0])/tileres,function(cancel)
 								{
-									this.mesh.visible = true;
-									if(badsidemesh)
+									
+									
+									if(!cancel)
 									{
-										badsidemesh.parent.remove(badsidemesh);
-										badsidemesh.quadnode = null;
+										this.debug(.5,.5,.5);
+										this.mesh.waitingForRebuild = false;
+										//so, the mesh has been updated, go ahead and make it visible
+										this.mesh.visible = true;
+										//if there is a badside mesh, then this is an instant swap, and badside mesh can be removed
+										if(this.badsidemesh)
+										{
+											this.badsidemesh.parent.remove(this.badsidemesh);
+											this.badsidemesh.quadnode = null;
+											this.badsidemesh = null;
+										}
+										//go head and callback into the rebuild look to deal with fadein/out stuff, and dispatch the next tile update
+										cb(this);
+									}else
+									{
+										//so, we got canceled before the worker returned
+										//the worker will finish, but the callback will not fire when it does, and the data will just be lost
+										if(this.badsidemesh)
+										{
+											//if we were doing a side swap (for seam stitching) just forgot it, hide the new tile, link back to the old
+											this.mesh.parent.remove(this.mesh);
+											this.mesh.quadnode = null;
+											this.mesh = this.badsidemesh;
+											this.badsidemesh = null;
+											
+										}
 									}
-									cb(rebuilt);
 								}.bind(this));
+								
+								//prevents CB from happening immediately. very important
 								return;
 							}
 						}
 					}else
 					{
-						
+						//if I'm not split (not a leaf) but have a mesh, that mesh needs to be removed
+						//changes in the way updates are dispatched means we should never execute here
 						if(this.mesh  )
 						{
 							this.mesh.quadnode = null;
@@ -1111,11 +1166,10 @@
 							this.mesh = null;
 						}
 					}
+					
+					//go ahead and callback (should not get here)
 					if(cb)
 						cb(rebuilt);
-				//	if(this.isSplit())
-				//	for(var i=0; i < this.children.length; i++)
-				//		this.children[i].updateMesh();
 				}
 				this.cleanup = function(removelist)
 				{
@@ -1343,7 +1397,9 @@
 				this.terrainGenerator = loadScript("vwf/model/threejs/terrainGenerator.js");
 				window._dTerrainGenerator = this.terrainGenerator;
 				
-				this.terrainGenerator.init();
+				this.terrainType = 'NoiseTerrainAlgorithm';
+				this.terrainParams = 12312;
+				this.terrainGenerator.init(this.terrainType,this.terrainParams);
 				this.DisableTransform();
 				this.BuildTerrain();
 				this.quadtree = new QuadtreeNode([-worldExtents,-worldExtents],[worldExtents,worldExtents],this.getRoot());
@@ -1367,7 +1423,7 @@
 				return [];
 				
 				}
-				self.rebuild();
+				
 				_SceneManager.specialCaseObjects.push(this.getRoot());
 				
 			}
@@ -1386,6 +1442,8 @@
 				
 				this.quadtree.walk(function(n)
 				{
+					if(n.waitingForRebuild)
+						debugger;
 					if(n.fadelist)
 					{
 						n.fadelist.forEach(function(e)
@@ -1468,7 +1526,7 @@
 						
 						this.currentMinRes = minRes;
 						
-						minTileSize = Math.max(minRes,128);
+						minTileSize = totalmintilesize;//Math.max(minRes,totalmintilesize);
 						//cant resize the max side on the fly -- tiles in update have already made choice
 						//maxTileSize = Math.max(maxRes,2048);
 						if (self.needRebuild.length > 0)
@@ -1622,7 +1680,7 @@
 					  });
 						
 					
-						
+					self.rebuild();	
 					//	if(self.buildTimeout)
 					//		window.clearTimeout(self.buildTimeout);
 					//	if (self.needRebuild.length > 0)
@@ -1635,119 +1693,132 @@
 					
 				}
 			}
-			self.rebuild = function()
+			
+			self.rebuildCallback = function(tile)
 			{
+				//now that I've drawn my tile, I can remove my children.
+				var list = []
+				tile.cleanup(list)
+				tile.debug(0,0,0);
 				
-				if (self.needRebuild.length > 0 && self.terrainGenerator.countFreeWorkers() > 0)
+				if(list.length > 0)
+				tile.mesh.visible = false;
+				var o = tile.mesh;
+				list.forEach(function(e)
 				{
-					
-					var tile = self.needRebuild.shift();
-					//async rebuild
-					
-					var rebuilt = tile.updateMesh(function()
+					tile.fadelist = list;
+					if(e.parent)
 					{
-						//now that I've drawn my tile, I can remove my children.
-						var list = []
-						tile.cleanup(list)
-						
-						
-						if(list.length > 0)
-						tile.mesh.visible = false;
-						var o = tile.mesh;
-						list.forEach(function(e)
-						{
-							tile.fadelist = list;
-							if(e.parent)
-							{
-								e.quadnode.mesh = null;
-								e.material.uniforms.blendPercent.value = 1;
-								 var fade = function()
-								 {
-									e.material.uniforms.blendPercent.value -= .01;
-									 if(e.material.uniforms.blendPercent.value > 0)
-									 {
-										e.fadeHandle = window.requestAnimationFrame(fade);
-									 }else
-									 {
-										if(e.parent)
-										e.parent.remove(e);
-										e.quadnode = null;
-										o.visible = true
-										tile.fadelist = null;
-									 }
-								 };
-								 e.fadeHandle = window.requestAnimationFrame(fade);
-								
-							}
-						});
-						
-						var e = tile.mesh;
+						e.material.uniforms.debugColor.value.r = 0;
+						e.material.uniforms.debugColor.value.g = 0;
+						e.material.uniforms.debugColor.value.b = 1;
+						e.quadnode.mesh = null;
 						e.material.uniforms.blendPercent.value = 1;
-						
-						 var p = tile.parent;
-						 //look up for the node I'm replaceing
-						 while(p && !p.waiting_for_rebuild)
-							p = p.parent;
-						if(p)
-						{							
-						 if(p.waiting_for_rebuild > 1)
+						 var fade = function()
 						 {
-						 
-							p.waiting_for_rebuild--;
-							tile.mesh.visible = false;
-							window.cancelAnimationFrame(tile.fade);
-							
-						 }
-						 else  if(p.waiting_for_rebuild == 1)
-						 {
-							
-							if(p.backupmesh && p.backupmesh.parent)
-							{
-							
-								var e = p.backupmesh;
-							
-								e.quadnode = null;
+							e.material.uniforms.blendPercent.value -= .1;
+							 if(e.material.uniforms.blendPercent.value > 0)
+							 {
+								e.fadeHandle = window.requestAnimationFrame(fade);
+							 }else
+							 {
 								if(e.parent)
 								e.parent.remove(e);
+								e.quadnode = null;
+								o.visible = true
 								
-									
 								
-								p.backupmesh = null;
-							}
+								tile.fadelist = null;
+							 }
+						 };
+						 e.fadeHandle = window.requestAnimationFrame(fade);
+						
+					}
+				});
+				
+				var e = tile.mesh;
+				e.material.uniforms.blendPercent.value = 1;
+				
+				 var p = tile.parent;
+				 //look up for the node I'm replaceing
+				 while(p && !p.waiting_for_rebuild)
+					p = p.parent;
+				if(p)
+				{							
+				 if(p.waiting_for_rebuild > 1)
+				 {
+				 
+					p.waiting_for_rebuild--;
+					tile.mesh.visible = false;
+					window.cancelAnimationFrame(tile.fade);
+					p.debug(1,.5,.5);
+				 }
+				 else  if(p.waiting_for_rebuild == 1)
+				 {
+					
+					if(p.backupmesh && p.backupmesh.parent)
+					{
+					
+						var e = p.backupmesh;
+					
+						e.quadnode = null;
+						if(e.parent)
+						e.parent.remove(e);
+						
+							
+						
+						p.backupmesh = null;
+					}
+						
+					delete p.waiting_for_rebuild;
+					p.walk(function(l)
+					{
+						//this really should be true now!
+						if(l.mesh)
+						{
+							l.debug(0,1,1);
+							l.mesh.visible = true;
+							var o = l.mesh;
+							 o.material.uniforms.blendPercent.value = 0;
+							 var fade = function()
+							 {
 								
-							delete p.waiting_for_rebuild;
-							p.walk(function(l)
-							{
-								//this really should be true now!
-								if(l.mesh)
-								{
-									l.mesh.visible = true;
-									var o = l.mesh;
-									 o.material.uniforms.blendPercent.value = 0;
-									 var fade = function()
-									 {
-										
-										o.material.uniforms.blendPercent.value += .01;
-										 if(o.material.uniforms.blendPercent.value < 1)
-										 {
-											window.requestAnimationFrame(fade);
-										 }
-										
-									 };
-									 window.requestAnimationFrame(fade);
-								}	
-							});
-						 }
-						}
-						
-						
-						//self.rebuild();
-						
-						//console.log('rebuilding ' + self.needRebuild.length + ' tile');
+								o.material.uniforms.blendPercent.value += .1;
+								 if(o.material.uniforms.blendPercent.value < 1)
+								 {
+									window.requestAnimationFrame(fade);
+								 }else
+								 {
+								 l.debug(0,0,0);
+								 }
+								
+							 };
+							 window.requestAnimationFrame(fade);
+						}	
 					});
+				 }
+				}
+				
+				
+				self.rebuild();
+				
+				//console.log('rebuilding ' + self.needRebuild.length + ' tile');
+			}.bind(self)
+			
+			self.rebuild = function()
+			{
+				console.log(self.needRebuild.length  , self.terrainGenerator.countFreeWorkers());
+				while(self.terrainGenerator.countFreeWorkers() > 0 && self.needRebuild.length > 0)
+			//	if (self.needRebuild.length > 0 && self.terrainGenerator.countFreeWorkers() > 0)
+				{
+					
+					var tile1 = self.needRebuild.shift();
+					//async rebuild
+					tile1.debug(0,1,0);
+					tile1.updateMesh(self.rebuildCallback);
 					
 				}
-			   self.buildTimeout = window.setTimeout(self.rebuild,3);	
+			  // self.buildTimeout = window.setTimeout(self.rebuild,3);	
 			}.bind(self);
 					
 			this.callingMethod = function(methodName,args)
