@@ -68,7 +68,8 @@ properties:
 
   backgroundColor: [ 200, 200, 200 ]
   
-  ## Boolean determines whether the use wants a shared camera (true) or independent views (false). Default value is true.
+  ## Boolean determines whether the use wants a shared camera (true) or independent views (false).
+  ## Defaults to true
   ## 
   ## @name navscene.vwf#usersShareView
   ## @property
@@ -88,6 +89,14 @@ properties:
     implements: [ "http://vwf.example.com/navigable.vwf" ]
     properties:
       navmode: fly
+
+  ## Boolean determines whether the users own avatars should be visible to themselves
+  ## Defaults to false
+  ## 
+  ## @name navscene.vwf#makeOwnAvatarVisible
+  ## @property
+
+  makeOwnAvatarVisible: false
     
 methods:
   initializeActiveCamera:
