@@ -28,6 +28,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var translationSpeed = 100; // Units per second
     var rotationSpeed = 90; // Degrees per second
 
+    // DEBUG: Are clients' monikers changing and that's why we see skips and hops?
+    var monikerArray = [];
+    // END DEBUG 
+
     return view.load( module, {
 
         initialize: function( options ) {
@@ -1983,7 +1987,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     //       requested this change – otherwise, will need to treat like 1.1 or 1.2)
     // 1.1 Elseif (other external changes and no outstanding own view changes) then ADOPT
     // 1.2 Else Interpolate to the model’s transform (conflict b/w own view and external sourced model changes)
-    
+
     function receiveModelTransformChanges( nodeID, transformMatrix ) {
 
         var node = self.state.nodes[ nodeID ];
@@ -1997,6 +2001,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var clientThatSatProperty = self.kernel.client();
         var me = self.kernel.moniker();
         
+        // DEBUG: Are clients' monikers changing and that's why we see skips and hops?
+        if ( monikerArray.indexOf( clientThatSatProperty ) == -1 ) {
+            monikerArray.push( clientThatSatProperty );
+            self.logger.warnx( "receiveModelTransformChanges: " + monikerArray );
+        }
+        // END DEBUG
 
         // If the transform property was initially updated by this view....
         if ( clientThatSatProperty == me ) {
@@ -2023,7 +2033,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
             }
         } else { // this transform change request is not from me
-            
+
             // If the view has already made updates that should have been applied after this incoming one, move
             // them to count of "stale" ones (meaning that they have been undone and will need to be reapplied)
             // Then overwrite them w/ this incoming transform
