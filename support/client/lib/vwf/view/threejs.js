@@ -27,6 +27,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var numNavCandidates;
     var translationSpeed = 100; // Units per second
     var rotationSpeed = 90; // Degrees per second
+    var makeOwnAvatarVisible = false;
 
     // DEBUG: Are clients' monikers changing and that's why we see skips and hops?
     var monikerArray = [];
@@ -133,6 +134,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if ( node ) {
                     nodeLookAt( node );
                 }
+            } else if ( ( nodeID == this.kernel.application() ) && 
+                        ( propertyName == "makeOwnAvatarVisible" ) ) {
+                makeOwnAvatarVisible = propertyValue;
+                if ( navObject ) {
+                    setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
+                }
             }
         },
 
@@ -151,6 +158,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     translationSpeed = propertyValue;
                 } else if ( propertyName == "rotationSpeed" ) {
                     rotationSpeed = propertyValue;
+                }
+            } else if ( ( nodeID == this.kernel.application() ) && 
+                        ( propertyName == "makeOwnAvatarVisible" ) ) {
+                makeOwnAvatarVisible = propertyValue;
+                if ( navObject ) {
+                    setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
                 }
             }
 
@@ -249,6 +262,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                              function( nodeID ) {
                         controlNavObject( this.state.nodes[ nodeID ] );
                     } */ );
+                } else if ( propertyName == "makeOwnAvatarVisible" ) {
+                    makeOwnAvatarVisible = propertyValue;
+                    if ( navObject ) {
+                        setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
+                    }
                 } else if ( navObject && ( nodeID == navObject.ID ) ) {
                     
                     // These were requested in controlNavObject
@@ -1940,9 +1958,19 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             return;
         }
 
+        // If there is already a navObject, make that object opaque if we had made it transparent
+        if ( navObject && !makeOwnAvatarVisible ) {
+            setVisibleRecursively( navObject.threeObject, true );
+        }
+
         // Set the new navigation object
         navObject = node;
         
+        // Set the 3D model transparent if requested
+        if ( !makeOwnAvatarVisible ) {
+            setVisibleRecursively( navObject.threeObject, false );
+        }
+
         // Search for a camera in the navigation object and if it exists, make it active
         var cameraIds = self.kernel.find( navObject.ID, 
                                           "descendant-or-self::element(*,'http://vwf.example.com/camera.vwf')" );
@@ -1974,10 +2002,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // Else, retrieve the userObject property so we may create a navigation object from it for this user
         if ( numNavCandidates ) {
             for ( var i = 0; i < numNavCandidates; i++ ) {
-                self.kernel.getProperty( navObjectIds[ i ], "owner" );
+                vwf_view.kernel.getProperty( navObjectIds[ i ], "owner" );
             }
         } else {
-            self.kernel.getProperty( sceneRootID, "userObject" );
+            vwf_view.kernel.getProperty( sceneRootID, "makeOwnAvatarVisible" );
+            vwf_view.kernel.getProperty( sceneRootID, "userObject" );
         }
     }
 
@@ -2223,5 +2252,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // Swap the two columns, negating columny
         goog.vec.Mat4.setColumn( transform, 1, columnz );
         goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
+    }
+
+    function setVisibleRecursively( threeObject, visible ) {
+        if ( !threeObject ) {
+            return;
+        }
+        threeObject.visible = visible;
+        for ( var i = 0; i < threeObject.children.length; i++ ) {
+            setVisibleRecursively( threeObject.children[ i ], visible );
+        }
     }
 });
