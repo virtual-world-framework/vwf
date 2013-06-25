@@ -24,12 +24,32 @@ events:
   userCreated:
 children:
 # The scene is the non-interactive background portion of the garden.
-  scene:
+  terrain:
     extends: http://vwf.example.com/node3.vwf
-    source: models/garden.DAE
+    source: models/groundPlane.DAE
     type: model/vnd.collada+xml
     properties:
       rotation: [ 1, 0, 0, 0 ]
+  walls:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/stoneWalls.DAE
+    type: model/vnd.collada+xml
+    properties:
+      rotation: [ 1, 0, 0, 0 ]
+  furniture:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/marbleFurniture.DAE
+    type: model/vnd.collada+xml
+    properties:
+      rotation: [ 1, 0, 0, 0 ]
+      scale: 1
+  unsupportedGames:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/games.DAE
+    type: model/vnd.collada+xml
+    properties:
+      rotation: [ 1, 0, 0, 0 ]
+      scale: 1
 # Activities represent various activities a user can take part in.
 # The general architectural concept is that user's view interacts
 # with the user node model, and that model interacts with the
@@ -40,47 +60,40 @@ children:
     methods:
     events:
     children:
-      selection_table:
+      selection_table_1:
         extends: selection_table.vwf
         source: models/selection_table.DAE
         type: model/vnd.collada+xml
         properties:
-          translation: [ 0.97221035, 4.589525, 0 ]
-      solitaire_board:
+          transform: [ -0.707107, -0.7071065, 0, 0, 0.7071065, -0.707107, 0, 0, 0, 0, 1, 0, -4.214666, -9.89909, 0.3974555, 1 ]
+      selection_table_2:
+        extends: selection_table.vwf
+        source: models/selection_table.DAE
+        type: model/vnd.collada+xml
+        properties:
+          transform: [ 0.7071068, 0.7071068, 0, 0, -0.7071068, 0.7071068, 0, 0, 0, 0, 1, 0, 3.941558, 9.861572, 0.3974555, 1 ]
+      solitaire_board_1:
         extends: solitaire_game.vwf
-        source: models/solitaire_table.DAE
+        source: models/solitaire_board.DAE
         type: model/vnd.collada+xml
         properties:
           rotation: [ 1, 0, 0, 0 ]
-          translation: [ 4.215422, 2.596678, 0.0 ]
-  dir1:
+          translation: [ -7.429945, -7.816388, 0.8209709 ]
+      solitaire_board_2:
+        extends: solitaire_game.vwf
+        source: models/solitaire_board.DAE
+        type: model/vnd.collada+xml
+        properties:
+          rotation: [ 1, 0, 0, 0 ]
+          translation: [ 7.061623, 8.292849, 0.8209709 ]
+  light:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
-      lightType: "point"
-      enable: true
-      distance: 2000
-      intensity: 2
-      color: [ 128, 128, 128 ]
-      glge-constantAttenuation: 0.3
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001  
-      translation: [ -400, 400, -900 ]
-  dir2:
+      translation: [ 0, 0, 1.5 ]
+  light_2:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
-      lightType: "point"
-      enable: true
-      distance: 2000
-      intensity: 2
-      color: [ 128, 128, 128 ]
-      glge-constantAttenuation: 0.3
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001  
-      translation: [ 400, 400, 900 ]
+      translation: [7.397893905639648,7.316537857055664,2.1273322105407715]
 scripts:
 - |
   var initialCam = [0.798465371131897, -0.6020503044128418, 0, 0, 0.6020503044128418, 0.798465371131897, 0, 0, 0, 0, 1, 0, -1.1765320301055908, -0.9326445460319519, 1.2000001668930054, 1];
@@ -108,7 +121,6 @@ scripts:
       "extends": "user.vwf",
       "children": {}     
      };
-
 
     // Create the user object, passing a callback that fires an event upon completion
     this.children.create( userName, userDef, function( node ) {

@@ -22,6 +22,7 @@
 --- 
 extends: http://vwf.example.com/node3.vwf
 properties:
+  moveMarbleTime: 0.7
 #The selected property determines whether or not a specific marble is selected.
 # The set function handles updating the parent solitaire game if available, animating
 # or simply immediately moving the marble to the appropriate new location if there was
@@ -57,15 +58,15 @@ properties:
         //Test if the value has changed.
         if ( this.selected != value ) {
           valueChanged = true;
-
-          // If the value has changed, then we'll need to update the game's selected marble.
-          if ( value == true ) {
-            this.parent.selectedMarble = this.id;
-          }
-          else {
-            this.parent.selectedMarble = "";
-          }
         }
+        // We may need to update the game's selected marble.
+        if ( value == true ) {
+          this.parent.selectedMarble = this.id;
+        }
+        else if ( this.parent.selectedMarble == this.id ) {
+          this.parent.selectedMarble = "";
+        }
+        
         this.selected = value;     
       }
 
@@ -75,7 +76,9 @@ properties:
           this.moveMarbleInstantly();
         }
         else {
+          this.parent.incrementLock();
           this.moveMarble();
+          this.parent.future(this.moveMarbleTime * 1.1).decrementLock();
         }
       }
     get: | # Get whether the marble is selected.
@@ -97,7 +100,9 @@ properties:
         this.moveMarbleInstantly();
       }
       else {
+        this.parent.incrementLock()
         this.moveMarble(); 
+        this.parent.future(this.moveMarbleTime * 1.1).decrementLock();
       }
     get: | # Get the grid position.
       return this.solitairePosition;
@@ -179,71 +184,16 @@ scripts:
   // Implement a helper function that translates a grid position and selected boolean
   // and returns an x/y/z translation.
   this.marblePosition = function( gridPosition, selected ) {
-    var posResult = [0, 0, 0];
-    if ( ( gridPosition == undefined ) || ( ( gridPosition[ 0 ] == 0 ) && ( gridPosition[ 1 ] == 0 ) ) ) {
-      posResult[ 2 ] = -5;
-    }
-    else {
-      switch ( gridPosition[ 0 ] ) {
-        case 0:
-          posResult[ 0 ] = -0.171428;
-          break;
-        case 1:
-          posResult[ 0 ] = -0.114286;
-          break;
-        case 2:
-          posResult[ 0 ] = -0.057144;
-          break;
-        case 3:
-          posResult[ 0 ] = 0.0;
-          break;
-        case 4:
-          posResult[ 0 ] = 0.057143;
-          break;
-        case 5:
-          posResult[ 0 ] = 0.114285;
-          break;
-        case 6:
-          posResult[ 0 ] = 0.171427;
-          break;
-        default:
-          posResult[ 0 ] = 0.0;
-      };
-
-      switch ( gridPosition[ 1 ] ) {
-        case 0:
-          posResult[ 1 ] = -0.162893;
-          break;
-        case 1:
-          posResult[ 1 ] = -0.109332;
-          break;
-        case 2:
-          posResult[ 1 ] = -0.054291;
-          break;
-        case 3:
-          posResult[ 1 ] = 0.0;
-          break;
-        case 4:
-          posResult[ 1 ] = 0.052844;
-          break;
-        case 5:
-          posResult[ 1 ] = 0.104956;
-          break;
-        case 6:
-          posResult[ 1 ] = 0.158517;
-          break;
-        default:
-          posResult[ 1 ] = 0.0;
-      };
-
-      if ( selected == true ) {
-        posResult[ 2 ] = 0.908818;
-      }
-      else {
-        posResult[ 2 ] = 0.838818;
+    var posResult = undefined;
+    if ( ( gridPosition != undefined ) && selected != undefined ) {
+      if ( this.positionOnBoard( gridPosition ) ) {
+        var zIndex = 0;
+        if ( selected == true ) {
+          zIndex = 1;
+        }
+        posResult = [ this.parent.xCoords[ gridPosition[ 0 ] ], this.parent.yCoords[ gridPosition[ 1 ] ], this.parent.zCoords[ zIndex ] ];
       }
     }
-
     return posResult;
   };
 
@@ -272,16 +222,40 @@ scripts:
         if ( ( this.positionOnBoard( potentialNewPosition ) == true ) && (  me.lookupMarble( me.parent, potentialNewPosition ) == undefined ) ) {
           toLeap.solitairePosition = [ 0, 0 ];
           me.solitairePosition = potentialNewPosition;
-          me.future(1.0).selected = false;
+          me.future(this.moveMarbleTime * 1.1).selected = false;
         }
       }
     }
   };
 
   this.moveMarble = function( ) {
-    this.translateTo( this.marblePosition( this.solitairePosition, this.selected ), 1 );
+    var newPosition = this.marblePosition( this.solitairePosition, this.selected );
+    if ( newPosition == undefined ) {
+      if ( this.parent != undefined ) {
+        var stowedPos = [ this.parent.xCoords[ 0 ] , this.parent.yCoords[ 1 ], -this.parent.zCoords[ 1 ] ];
+        this.translation = stowedPos;
+      }
+      this.visible = false;
+      }
+    else
+    {
+      this.visible = true;
+      this.translateTo( newPosition, this.moveMarbleTime );
+    }
   };
 
   this.moveMarbleInstantly = function( ) {
-    this.translation = this.marblePosition( this.solitairePosition, this.selected );
+    var newPosition = this.marblePosition( this.solitairePosition, this.selected );
+    if ( newPosition == undefined ) {
+      if ( this.parent != undefined ) {
+        var stowedPos = [ this.parent.xCoords[ 0 ] , this.parent.yCoords[ 1 ], -this.parent.zCoords[ 1 ] ];
+        this.translation = stowedPos;
+      }
+      this.visible = false;
+    }
+    else
+    {
+      this.visible = true;
+      this.translation = newPosition;
+    }
   };

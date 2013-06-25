@@ -23,6 +23,7 @@
 --- 
 extends: http://vwf.example.com/node3.vwf
 properties:
+  marbleDefinitions: [ [ "dragonfly", "dragonfly_marble_shooter.DAE", [ -0.199, -0.279, 0.353 ] ], [ "dragonfly", "dragonfly_marble_standard.DAE", [ -0.199, -0.32, 0.353 ] ], [ "sun", "sun_marble_shooter.DAE", [ -0.199, -0.107, 0.353 ] ], [ "sun", "sun_marble_standard.DAE", [ -0.199, -0.148, 0.353 ] ], [ "blueberryfreeze", "blueberryfreeze_marble_shooter.DAE", [ -0.199, 0.063, 0.353 ] ], [ "blueberryfreeze", "blueberryfreeze_marble_standard.DAE", [ -0.199, 0.022, 0.353 ] ], [ "mummy", "mummy_marble_shooter.DAE", [ 0.013, -0.279, 0.353 ] ], [ "mummy", "mummy_marble_standard.DAE", [ 0.013, -0.32, 0.353 ] ], [ "iguana", "iguana_marble_shooter.DAE", [ 0.013, -0.107, 0.353 ] ], [ "iguana", "iguana_marble_standard.DAE", [ 0.013, -0.148, 0.353 ] ], [ "milkyway", "milkyway_marble_shooter.DAE", [ 0.013, 0.063, 0.353 ] ], [ "milkyway", "milkyway_marble_standard.DAE", [ 0.013, 0.022, 0.353 ] ], [ "rooster", "rooster_marble_shooter.DAE", [ 0.22, -0.279, 0.353 ] ], [ "rooster", "rooster_marble_standard.DAE", [ 0.22, -0.32, 0.353 ] ], [ "jungle", "jungle_marble_shooter.DAE", [ 0.22, -0.107, 0.353 ] ], [ "jungle", "jungle_marble_standard.DAE", [ 0.22, -0.148, 0.353 ] ], [ "octopus", "octopus_marble_shooter.DAE", [ 0.22, 0.063, 0.353 ] ], [ "octopus", "octopus_marble_standard.DAE", [ 0.22, 0.022, 0.353 ] ] ]
 methods:
 #The first four methods are default methods all activities should implement, and handle when
 #the user forwards the appropriate event to the activity model for handling.
@@ -53,28 +54,28 @@ methods:
 events:
 scripts:
 - |
-  //  Definitions of the available marbles. 
-  // This is an array of arrays.  Each marble array has two members, first the name, second the position offset from the root selection table.
-  var marbleDefinitions = [ [ "iguana", [ -0.19855445, -0.3003475, 0.7615084 ] ], [ "mummy", [ -0.19893115, -0.1262005, 0.7615084 ] ], [ "sun", [ -0.19709815, 0.044425, 0.7615084 ] ], [ "dragonfly", [ 0.01371915, -0.3003475, 0.7615084 ] ], [ "milkyway", [ 0.01276165, -0.1262005, 0.7615084 ] ], [ "rooster", [ 0.01397615, 0.0433335, 0.7615084 ] ], [ "blueberryfreeze", [ 0.21983765, -0.3003475, 0.7615084 ] ], [ "jungle", [ 0.22029365, -0.1262625, 0.7615084 ] ], [ "octopus", [ 0.22029365, 0.0421805, 0.7615084 ] ] ];
+
 
   //  An initial viewpoint and exit viewpoint are defined relative to the selection_tables location.
-  var marbleSelectionViewPoint = [ 1.0000032186508179, 0, 0, 0, 0, 0.5591943860054016, -0.8290396928787231, 0, 0, 0.8290374279022217, 0.5591927766799927, 0 , 0, -1.189525, 2.4, 1 ];
+  var marbleSelectionViewPoint = [ 1.0000032186508179, 0, 0, 0, 0, 0.5591943860054016, -0.8290396928787231, 0, 0, 0.8290374279022217, 0.5591927766799927, 0 , 0, -1.189525, 2.03, 1 ];
   var marbleDeselectionViewPoint = [-1.0000032186508179, 1.2246103242893175e-16, 0, 0, -1.2246095301959295e-16, -1.0000026226043701, 0, 0, 0, 0, 0.9999998211860657, 0, 0, -1.21, 2.3, 1]
 
 
   //  During initialization, generate all of the selection pairs of marbles.
   this.initialize = function( ) {
     var me = this;
+
+
     if( this.children.length == 0 ) {
-      for( var newMarbleIndex = 0; newMarbleIndex < marbleDefinitions.length; newMarbleIndex++ ) {
-        var newMarbleName = marbleDefinitions[ newMarbleIndex ][ 0 ] + "_selection";
+      for( var newMarbleIndex = 0; newMarbleIndex < this.marbleDefinitions.length; newMarbleIndex++ ) {
+        var newMarbleName = this.marbleDefinitions[ newMarbleIndex ][ 0 ] + "_selection_" + newMarbleIndex;
         var newMarbleDef = { 
-          "source": "models/" + marbleDefinitions[ newMarbleIndex ][ 0 ] + "marble_selection.DAE", 
-          "extends": "solitaire_marble.vwf",
+          "source": "models/" + this.marbleDefinitions[ newMarbleIndex ][ 1 ], 
+          "extends": "http://vwf.example.com/node3.vwf",
           "type": "model/vnd.collada+xml",
           "properties": { 
-            "translation": marbleDefinitions[ newMarbleIndex ][ 1 ],
-            "marbleType": marbleDefinitions[ newMarbleIndex ][ 0 ],
+            "translation": this.marbleDefinitions[ newMarbleIndex ][ 2 ],
+            "marbleType": this.marbleDefinitions[ newMarbleIndex ][ 0 ],
             "private": null
           }
         };

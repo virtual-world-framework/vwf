@@ -35,6 +35,14 @@ properties:
   userDirection:
   userDistance:
   userHeight:
+  xCoords: [ -0.171, -0.114, -0.057, 0.0, 0.057, 0.114, 0.171 ]
+  yCoords: [ -0.162, -0.109, -0.054, 0.001, 0.054, 0.106, 0.159 ]
+  zCoords: [ 0.017, 0.087]
+  marbleBoundingDistance: 0.022
+  initialUserHeightAbove: 0.65
+  initialUserDistanceFrom: 0.4
+  interfaceLock: 0
+  marbleTypes: [ "marble_solitaire_A1.DAE", "marble_solitaire_A2.DAE", "marble_solitaire_A3.DAE", "marble_solitaire_B1.DAE", "marble_solitaire_B2.DAE", "marble_solitaire_B3.DAE", "marble_solitaire_C0.DAE", "marble_solitaire_C1.DAE", "marble_solitaire_C2.DAE", "marble_solitaire_C3.DAE", "marble_solitaire_C4.DAE", "marble_solitaire_C5.DAE", "marble_solitaire_C6.DAE", "marble_solitaire_D0.DAE", "marble_solitaire_D1.DAE", "marble_solitaire_D2.DAE", "marble_solitaire_D3.DAE", "marble_solitaire_D4.DAE", "marble_solitaire_D5.DAE", "marble_solitaire_D6.DAE", "marble_solitaire_E0.DAE", "marble_solitaire_E1.DAE", "marble_solitaire_E2.DAE", "marble_solitaire_E3.DAE", "marble_solitaire_E4.DAE", "marble_solitaire_E5.DAE", "marble_solitaire_E6.DAE", "marble_solitaire_F1.DAE", "marble_solitaire_F2.DAE", "marble_solitaire_F3.DAE", "marble_solitaire_G1.DAE", "marble_solitaire_G2.DAE", "marble_solitaire_G3.DAE" ]
 methods:
 #The first four methods are default methods all activities should implement, and handle when
 #the user forwards the appropriate event to the activity model for handling.
@@ -75,6 +83,8 @@ methods:
 # The createMarbles method tests if the marbles already exist. If they do not, then they are
 # created. They are created in their default 'off of the board' location.
   createMarbles:
+  incrementLock:
+  decrementLock:
 events:
   # The solitaireUserJoined and solitaireUserLeft events are triggered when a user joins or
   # leaves the solitaire game. They are used to trigger the solitaire panel being shown/hidden
@@ -93,6 +103,14 @@ scripts:
     this.createMarbles( );
   };
 
+  this.incrementLock = function() {
+    this.interfaceLock = this.interfaceLock + 1;
+  };
+  
+  this.decrementLock = function() {
+    this.interfaceLock = this.interfaceLock - 1;
+  };
+  
    // Store initial viewpoint as well as the exiting viewpoint.
    // These are currently world transforms... Need to be updated.
    var solitairePlayingViewPoint = [ 1.0000032186508179, 0, 0, 0, 0, 0.5591943860054016, -0.8290396928787231, 0, 0, 0.8290374279022217, 0.5591927766799927, 0 , 4.2, 2.2, 1.5,1 ];
@@ -109,11 +127,12 @@ scripts:
     var result = Math.atan2( yDiff, xDiff ) / degreeConversion;
     return result;
   };
+  
   this.calculateViewpoint = function ( direction, distance, height ) {
     var actualDirection = direction * degreeConversion;
     var invertedDirection = actualDirection + ( Math.PI / 2 );
     var newPosition = [ Math.cos( actualDirection ) * distance, Math.sin( actualDirection ) * distance, height ];
-    var actualHeight =  0.83 - height;
+    var actualHeight =  -height;
     var actualDistance = Math.sqrt( ( ( distance * distance ) + ( actualHeight * actualHeight ) ) );
     var xRotation = Math.asin( actualHeight / actualDistance );
     var xRotCos = Math.cos( xRotation );
@@ -143,7 +162,7 @@ scripts:
   };
   
   // Define a patterns array that holds the names of the different marble pattern types.
-  var patterns = [ "blueberryfreeze", "dragonfly", "iguana", "jungle", "milkyway", "mummy", "octopus", "rooster", "sun" ];
+  var patterns = [ "marble_solitaire_A1.DAE", "marble_solitaire_A2.DAE", "marble_solitaire_A3.DAE", "marble_solitaire_B1.DAE", "marble_solitaire_B2.DAE", "marble_solitaire_B3.DAE", "marble_solitaire_C0.DAE", "marble_solitaire_C1.DAE", "marble_solitaire_C2.DAE", "marble_solitaire_C3.DAE", "marble_solitaire_C4.DAE", "marble_solitaire_C5.DAE", "marble_solitaire_C6.DAE", "marble_solitaire_D0.DAE", "marble_solitaire_D1.DAE", "marble_solitaire_D2.DAE", "marble_solitaire_D3.DAE", "marble_solitaire_D4.DAE", "marble_solitaire_D5.DAE", "marble_solitaire_D6.DAE", "marble_solitaire_E0.DAE", "marble_solitaire_E1.DAE", "marble_solitaire_E2.DAE", "marble_solitaire_E3.DAE", "marble_solitaire_E4.DAE", "marble_solitaire_E5.DAE", "marble_solitaire_E6.DAE", "marble_solitaire_F1.DAE", "marble_solitaire_F2.DAE", "marble_solitaire_F3.DAE", "marble_solitaire_G1.DAE", "marble_solitaire_G2.DAE", "marble_solitaire_G3.DAE" ];
 
 
   //Method to start a new solitaire game.
@@ -195,7 +214,7 @@ scripts:
       for ( var patternIndex = 0; patternIndex < 32; patternIndex++ ) {
         var newMarbleName = "solitaireMarble" + patternIndex;
         var solitaireMarbleTemplate = { 
-          "source": "models/" + patterns[ patternIndex % 9 ] + "marble_shooter.DAE", 
+          "source": "models/" + this.marbleTypes[ patternIndex % this.marbleTypes.length ], 
           "extends": "solitaire_marble.vwf",
           "type": "model/vnd.collada+xml",
           "properties": { 
@@ -218,10 +237,12 @@ scripts:
     if ( this.gameOccupiedBy == user.id ) {
       var viewpointMatrix = this.calculateExitViewpoint( this.userDirection, this.userDistance );
       var userViewpoint = goog.vec.Mat4.multMat( this.transform, viewpointMatrix , goog.vec.Mat4.create( ) );
+      this.incrementLock();
       user.transformTo( userViewpoint, 3 );
 
       user.future(3).attachedTo = "";
       this.future(3).gameOccupiedBy = "";
+      this.future(3).decrementLock();
       this.solitaireUserLeft( user.viewHandle );
     }
   };
@@ -237,9 +258,11 @@ scripts:
       this.gameOccupiedBy = user.id;
       var newAngle = this.calculateInitialDirection( user.translation );
       this.userDirection = newAngle;
-      this.userHeight = 1.5;
-      this.userDistance = 0.4;
+      this.userHeight = this.initialUserHeightAbove;
+      this.userDistance = this.initialUserDistanceFrom;
+      this.incrementLock();
       this.updateUserPosition( user, 3 );
+      this.future(3).decrementLock();
       
       //var userViewpoint = solitairePlayingViewPoint; //goog.vec.Mat4.multMat( this.transform, solitairePlayingViewPoint, goog.vec.Mat4.create( ) );
       //user.transformTo( userViewpoint, 3 );
@@ -268,13 +291,13 @@ scripts:
     if ( goog.vec.Mat4.invert( this.worldTransform, invertedTransform ) ) {
       var relativeMatrix = goog.vec.Mat4.multMat( positionMatrix, invertedTransform, goog.vec.Mat4.create() );
       var relativePos = [ relativeMatrix[ 12 ], relativeMatrix[ 13 ], relativeMatrix[ 14 ] ];
-      if ( ( relativePos[ 2 ] >= 0.838818 - 0.026 ) && ( relativePos[ 2 ] <= 0.838818 + 0.026 ) ) {
+      if ( ( relativePos[ 2 ] >= ( -( this.marbleBoundingDistance + 0.02 ) ) ) && ( relativePos[ 2 ] <= ( ( this.marbleBoundingDistance + 0.02 ) ) ) ) {
         for ( var xIndex = 0; xIndex < 7; xIndex++ ) {
           for ( var yIndex = 0; yIndex < 7; yIndex++ ) {
             if ( ( ( xIndex > 1 ) && ( xIndex < 5 ) ) || ( ( yIndex > 1 ) && ( yIndex < 5 ) ) ) {
               if ( this.children[ 0 ].lookupMarble( this, [ xIndex, yIndex ] ) == undefined ) {
                 var comparePos = this.children[ 0 ].marblePosition( [ xIndex, yIndex ], false );
-                if ( ( relativePos[ 0 ] >= comparePos[ 0 ] - 0.022 ) && ( relativePos[ 0 ] <= comparePos[ 0 ] + 0.022 ) && ( relativePos[ 1 ] >= comparePos[ 1 ] - 0.022 ) && ( relativePos[ 1 ] <= comparePos[ 1 ] + 0.022 ) ) {
+                if ( ( relativePos[ 0 ] >= comparePos[ 0 ] - this.marbleBoundingDistance ) && ( relativePos[ 0 ] <= comparePos[ 0 ] + this.marbleBoundingDistance ) && ( relativePos[ 1 ] >= comparePos[ 1 ] - this.marbleBoundingDistance ) && ( relativePos[ 1 ] <= comparePos[ 1 ] + this.marbleBoundingDistance ) ) {
                   return [ xIndex, yIndex ];
                 }
               }
@@ -297,6 +320,9 @@ scripts:
   // status. (Delay is so animation is mostly complete before message
   // to user is displayed.)
   this.handlePointerDown = function( nodeId, eventParameters, user ) {
+    if ( this.interfaceLock > 0 ) {
+      return;
+    }
     var me = this;
     var node = user.getObject( nodeId );
     //Check for clicking empty solitaire board sockets. Can't test node being clicked. Only receive
@@ -310,7 +336,7 @@ scripts:
       if ( selectedMarble != undefined ) {
         // Double check the event parameters, we want the initial scene level event with a global position...
         if ( ( eventParameters[ 2 ] == "capture" ) && ( eventParameters[ 1 ][ 'globalPosition' ] != undefined ) ){
-          // Call the empyPosition helper, that returns the 'solitairePosition' board coordinates if it is an empty
+          // Call the emptyPosition helper, that returns the 'solitairePosition' board coordinates if it is an empty
           // position, if not it returns undefined. Test if it was an empty position.
           var emptyPositionClicked = this.emptyPosition( eventParameters[ 1 ][ 'globalPosition' ] );
           if ( emptyPositionClicked != undefined ) {
@@ -360,17 +386,25 @@ scripts:
   };
 
   this.handlePointerUp = function( nodeId, eventParameters, user ) {
+    if ( this.interfaceLock > 0 ) {
+      return;
+    }
   };
 
   this.handleKeyDown = function( nodeId, eventParameters, user ) {
+    if ( this.interfaceLock > 0 ) {
+      return;
+    }
   };
 
   //When the user presses the escape buton, detach the user.
   this.handleKeyUp = function( nodeId, eventParameters, user ) {
+    if ( this.interfaceLock > 0 ) {
+      return;
+    }
     var callUpdateUserPosition = false;
     if( eventParameters[ 0 ][ 'keysUp' ][ 'escape' ] )
     {
-      this.logger.warn("Detach!");
       this.detachUser( user );
     }
     else if ( eventParameters[ 0 ][ "keysUp" ][ "W" ] ) {
