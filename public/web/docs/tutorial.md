@@ -15,24 +15,30 @@ ________________________________________________________________________________
 
 Stage 1 - Primitive Scene
 --------
-In the first stage, we'll add in a basic primitive collada file, and set up the initial camera position. The application will contain the default navigation of a walk mode.
+In the first stage, we'll add in a basic primitive collada file, and set up the initial camera position. The application will contain the default navigation of a fly mode.
 
 The following code creates a child node of the application named blueCube, of type node3, and defines the source file. In the scripts section, the camera transform is initialized, and will be set during the application load. 
 
 	---
-	extends: http://vwf.example.com/navscene.vwf
+	extends: http://vwf.example.com/scene.vwf
 	children:
 	  blueCube:
 	    extends: http://vwf.example.com/node3.vwf
 	    source: models/BlueCube.dae
 	    type: model/vnd.collada+xml
+	methods:
+	  initializeCamera:
 	scripts:
 	- |
 	  this.initialize = function() {
-	    this.camera.translation = [ 0,-100,0 ];
+	    this.future( 0 ).initializeCamera();
 	  }
 
-The above is all that is needed to create an application. The default walk mode allows the user to navigate with the standard WASD keys, as well as Q and E to rotate and R and C to move up and down. 
+	  this.initializeCamera = function() {
+	    this.camera.translation = [ 0, -100, 0 ];
+	  }
+
+The above is all that is needed to create an application. The default fly mode allows the user to navigate with the standard WASD keys, as well as Q and E to rotate. 
 
 Example: [Primitive Scene](../../tutorial/00)
 
@@ -40,19 +46,25 @@ ________________________________________________________________________________
 
 Stage 2 - Terrain Model and Orbit Navigation
 --------
-In the second stage, we'll replace the blue cube with a higher fidelity terrain model, set some overall scene properties, and update the navigation mode to orbit around a single point. 
+In the second stage, we will:
 
-Since the terrain model in this case is of a much higher fidelity, we can add some properties to set its position, rotation, and scale. 
+*   Set the background color scene property to an RGB value to give the appearance of sky
+*   Use the navscene component and navmode scene property to change the navigation mode to orbit around a single point
+*   Replace the blue cube with a terrain model
+*   Set the terrain's position, rotation, and scale
+*   Add a "sceneCenter" child to the application (setting its translation property)
+*   Tell the camera to always look at sceneCenter by setting the camera's "lookat" property to the id of sceneCenter
+*   Set other camera properties in the initializeCamera function, including "far" and "near", setting up clipping planes for this much larger terrain model. 
 
-We can then add in some global properties. Here the active camera is explicitly defined, an RGB value is set for the background color to give the appearance of sky, and the navmode is set to 'orbit', as opposed to the default value of 'walk'. 
-
-For this navigation mode, we can add an additional child to the application, called 'sceneCenter', setting a translation property. This point will then be used to set the 'lookAt' property for the camera. Additional camera properties are set in the initialize function, including 'far' and 'near', setting up the clipping planes for this much larger terrain model. 
+The code to do so is as follows:
 
 	---
 	extends: http://vwf.example.com/navscene.vwf
 	properties:
 	  backgroundColor: [ 83, 157, 194 ]
 	  navmode: "orbit"
+	methods:
+	  initializeCamera:
 	children:
 	  flat_terrain:
 	    extends: http://vwf.example.com/node3.vwf
@@ -68,6 +80,10 @@ For this navigation mode, we can add an additional child to the application, cal
 	scripts:
 	- |
 	  this.initialize = function() {
+	    this.future( 0 ).initializeCamera();
+	  }
+
+	  this.initializeCamera = function() {
 	    this.camera.translation = [ 0, 20000, 10000 ];
 	    this.camera.far = 500000;
 	    this.camera.near = 2;
@@ -115,6 +131,10 @@ In the third stage, we'll add an additional child node for a predator vehicle ca
 	scripts:
 	- |
 	  this.initialize = function() {
+	    this.future( 0 ).initializeCamera();
+	  }
+	  
+	  this.initializeCamera = function() {
 	    this.camera.translation = [ 0, 20000, 10000 ];
 	    this.camera.far = 500000;
 	    this.camera.near = 2;
@@ -172,11 +192,16 @@ In the yaml file, we'll add a mouseMode property with a setter. This property wi
 	scripts:
 	- |
 	  this.initialize = function() {
+	    this.future( 0 ).initializeCamera();
+	  }
+	  
+	  this.initializeCamera = function() {
 	    this.camera.translation = [ 0, 20000, 10000 ];
 	    this.camera.far = 500000;
 	    this.camera.near = 2;
 	    this.camera.lookAt = this.sceneCenter.id;
 	  }
+
 	  var pushpinIndex = 1;
 	  var pushpin = {
 	    extends: "http://vwf.example.com/node3.vwf",
@@ -186,11 +211,13 @@ In the yaml file, we'll add a mouseMode property with a setter. This property wi
 	      scale: 6
 	    },
 	  };
+
 	  this.pointerUp = function( parms, pickInfo ){
 	    if( this.mouseMode == "pindrop") {
 	        this.pindrop( pickInfo );
 	    }
 	  }
+	  
 	  this.pindrop = function( pickInfo ) {
 	    if ( pickInfo && pickInfo.globalPosition ) {
 	      pushpin.properties.translation = pickInfo.globalPosition;
