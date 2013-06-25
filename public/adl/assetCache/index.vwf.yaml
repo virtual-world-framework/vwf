@@ -19,21 +19,31 @@ properties:
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
+    implements:
+    - http://vwf.example.com/animation.vwf
     source: usmale.dae
     type: model/vnd.collada+xml
     properties:
       rotation: [ 1, 0, 0, 0 ]
       translation: [1,0,0]
-      # spin-on-click configuration parameters
-      spin-rate: 1
-      spin-axis: [ 0, 0, 1 ]
-    # # 1: Uncomment to jump up on each click
-    # scripts:
-    # - |
-    #   this.pointerClick = function() {
-    #     var rot = this.rotation;
-    #     this.rotation = [ rot[0], rot[1] , rot[2], rot[3] + 1 ];
-    #   }
+  duck1:
+    extends: http://vwf.example.com/node3.vwf
+    implements:
+    - http://vwf.example.com/animation.vwf
+    source: usmale.dae
+    type: model/vnd.collada+xml
+    properties:
+      rotation: [ 1, 0, 0, 0 ]
+      translation: [0,0,0]
+  duck2:
+    extends: http://vwf.example.com/node3.vwf
+    implements:
+    - http://vwf.example.com/animation.vwf
+    source: usmale.dae
+    type: model/vnd.collada+xml
+    properties:
+      rotation: [ 1, 0, 0, 0 ]
+      translation: [-1,0,0]    
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -72,4 +82,5 @@ scripts:
        
       this.camera.transform = [ -1,0,0,0, 0,-1,0,0, 0,0,1,0, 0,0,0,1 ];
       this.camera.far = this.camera.far * 4;
+      this.duck2.animationPlay();
     }

@@ -560,12 +560,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
 
                     if(propertyName == "animationTimeUpdated") {
-                        if(node.threeObject.animatedMesh && propertyValue !== undefined) {
-                            for(var i = 0; i < node.threeObject.animatedMesh.length; i++) {
-                                for(var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++) {
-                                    node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
+						
+                        if(node.threeObject.children[0] && node.threeObject.children[0].animatedMesh && propertyValue !== undefined) {
+                            for(var i = 0; i < node.threeObject.children[0].animatedMesh.length; i++) {
+                                for(var j = 0; j < node.threeObject.children[0].animatedMesh[i].morphTargetInfluences.length; j++) {
+                                    node.threeObject.children[0].animatedMesh[i].morphTargetInfluences[j] = 0;
                                 }
-                                node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * 30) ] = 1;
+                                node.threeObject.children[0].animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * 30) ] = 1;
                             }
                         }
                         else if(node.threeObject.kfAnimations && propertyValue !== undefined) {
@@ -1804,7 +1805,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
             if(asset.scene)
                 asset = asset.scene;
-			asset.matrix = new THREE.Matrix4();
+			//asset.matrix = new THREE.Matrix4();
 			asset.updateMatrixWorld();
             nodeCopy.threeObject.add(asset);
 
@@ -1837,10 +1838,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             kfAnimation.data.hierarchy[h].node.updateMatrix();
                             obj.matrixWorldNeedsUpdate = true;
                         }
-                    }
+                    } 
                     kfAnimation.play(false, 0);
                 }
             }
+			
             if(animatedMesh) {
                 asset.animatedMesh = animatedMesh;
             }
@@ -1900,8 +1902,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			
         }
         node.name = childName;
-        sceneNode.srcAssetObjects.push( node );
-        sceneNode.pendingLoads++;
+       // sceneNode.srcAssetObjects.push( node );
+        //sceneNode.pendingLoads++;
         
        
 		//create an Object3D to hold the asset
@@ -1922,7 +1924,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
              
         }
-		debugger;
+		
 		//create an asset registry if one does not exist for this driver
 		if(!this.assetRegistry)
 		{
@@ -1958,14 +1960,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			//call up the correct loader/parser
 			if(childType == "model/vnd.collada+xml")
 			{
-				$(document).trigger('BeginParse',['Loading...',node.source]);
+				
 				node.parse = true;
 				node.loader = new THREE.ColladaLoader();
+				node.loader.options.convertUpAxis = true;
+				node.loader.options.upAxis = "Z";
+				
 				node.loader.load(node.source,node.assetLoaded.bind(this));
 			}
 			if(childType == "model/vnd.osgjs+json+compressed")
 			{
-				alertify.log('Downloading ' + node.source);
+				
 				node.loader = new UTF8JsonLoader(node,node.assetLoaded.bind(this));
 			}
 			
@@ -1975,39 +1980,60 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 		else if(reg.loaded == true && reg.pending == false)
 		{
 			node.threeObject.add(reg.node.clone());
-			$(document).trigger('EndParse');
+			nodeCopy.loadingCallback( true ); 
+			
 		}
 		//if it's pending but not done, register a callback so that when it is done, it can be attached.
 		else if(reg.loaded == false && reg.pending == true)
 		{	
 			sceneNode.srcAssetObjects.push( node.threeObject );
 			node.threeObject.vwfID = nodeID;
-			sceneNode.pendingLoads++;
+			//sceneNode.pendingLoads++;
 		
 		     //Do we need this when we have an async load? currently seems to break things
              //this pauses the queue. Resume by calling with true
-			 callback( false );
+			 //callback( false );
 			
 			//so, not necessary to do all the other VWF node goo stuff, as that will be handled by the node that requseted
 			//the asset in teh first place
 			//
-			var tcal = callback;
+			//var tcal = callback;
 			reg.callbacks.push(function(node)
 			{
 				
 				//just clone the node and attach it.
 				//this should not clone the geometry, so much lower memory.
 				//seems to take near nothing to duplicated animated avatar
-				$(document).trigger('EndParse');
-				nodeCopy.threeObject.add(node.clone());
+				
+				
+				var n = node.clone();
+				var skins = []
+				walkGraph(n,function(node){
+					if(node instanceof THREE.SkinnedMesh)
+					{
+						skins.push(node);
+					}
+				
+				});
+				n.animatedMesh = skins;
+				
+				nodeCopy.threeObject.add(n);
 				nodeCopy.threeObject.updateMatrixWorld(true);
-				nodeCopy.threeObject.sceneManagerUpdate();
-				tcal( true );
+				propertyNotifyCallback();
+				nodeCopy.loadingCallback( true ); 
+				
 			});
 		}
             
         
     }
+	function walkGraph(root,cb)
+	{
+		if(root)
+			cb(root);
+		for(var i =0; i < root.children.length; i ++)
+			walkGraph(root.children[i],cb);
+	}
     function getObjectID( objectToLookFor, bubbleUp, debug ) {
 
         var objectIDFound = -1;
