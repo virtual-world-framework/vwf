@@ -4,6 +4,8 @@
 extends: http://vwf.example.com/navscene.vwf
 properties:
   ambientColor: [ 250, 250, 250 ]
+methods:
+  initializeCamera:
 children:
   BackDesk_PaperCover:
     extends: http://vwf.example.com/node3.vwf
@@ -228,9 +230,13 @@ children:
 scripts:
 - |
   this.initialize = function() {
+    this.translationSpeed = 5;
+    this.rotationSpeed = 0.333;
+    this.future( 0 ).initializeCamera();
+  } 
+
+  this.initializeCamera = function() {
     this.camera.near = 1;
     this.camera.translation = [ -296.55, -118.78, 70.80 ]; 
     this.camera.rotation = [0,0,-1,19.261152267456055];
-    this.translationSpeed = 5;
-    this.rotationSpeed = 0.333;
-  } //@ sourceURL=index.vwf
+  }//@ sourceURL=index.vwf

@@ -40,6 +40,7 @@ properties:
       } );
       return scoreBoard;
 methods:
+  initializeCamera:
   createPlayer:
   fireLaser:
   sendChat:
@@ -181,6 +182,9 @@ scripts:
   };
 
   this.initialize = function() {
+    this.future( 0 ).initializeCamera();
+  }
+  this.initializeCamera = function() {
     this.camera.translation = [ 0, 0, 800 ];
     this.camera.far = 1000000;
     this.camera.near = 1;
