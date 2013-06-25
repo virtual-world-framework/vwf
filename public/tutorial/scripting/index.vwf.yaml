@@ -27,6 +27,11 @@ properties:
     value: "none"
 methods:
   initializeCamera:
+  drive:
+  driveForward:
+  driveReverse:
+  driveLeft:
+  driveRight:
 children:
   humvee:
     extends: http://vwf.example.com/node3.vwf
@@ -89,12 +94,6 @@ children:
       glge-quadraticAttenuation: 10
       glge-specular: false # the highlights are way too hot (materials or light?)
       rotation: [ -1, 0, 0, 200 ]
-methods:
-  drive:
-  driveForward:
-  driveReverse:
-  driveLeft:
-  driveRight:
 scripts:
 - |
   this.initialize = function() {
