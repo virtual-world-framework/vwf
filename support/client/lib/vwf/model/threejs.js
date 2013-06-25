@@ -1804,8 +1804,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
             if(asset.scene)
                 asset = asset.scene;
-
-            nodeCopy.threeObject = asset;
+			asset.matrix = new THREE.Matrix4();
+			asset.updateMatrixWorld();
+            nodeCopy.threeObject.add(asset);
 
             asset.name = childName;
             asset.vwfID = nodeID;
@@ -1856,11 +1857,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 meshes[i].geometry.uvsNeedUpdate = true;
             }
             
-            parentObject3.add( asset );
+			//because we use a new node to hold the transforms, we don't need this. it's already added.
+            //parentObject3.add( nodeCopy.threeObject );
             if ( asset.updateMatrixWorld ) asset.updateMatrixWorld(true);
             
-            nodeCopy.threeObject.matrixAutoUpdate = false;
-
+            nodeCopy.threeObject.matrixAutoUpdate = true;
+			
             for ( var j = 0; j < sceneNode.srcAssetObjects.length; j++ ) {
                 if ( sceneNode.srcAssetObjects[j] == nodeCopy ){
                     sceneNode.srcAssetObjects.splice( j, 1 );
@@ -1879,11 +1881,39 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 //console.info( "========= LOADED ========== "+node.name+" ========= LOADED ==========" );
                 nodeCopy.loadingCallback( true );                    
             }
+			
+			
+			//get the entry from the asset registry
+			reg = threeModel.assetRegistry[nodeCopy.source];
+			//it's not pending, and it is loaded
+			reg.pending = false;
+			reg.loaded = true;
+			//store this asset in the registry
+			reg.node = asset;
+			
+			//if any callbacks were waiting on the asset, call those callbacks
+			for(var i = 0; i < reg.callbacks.length; i++)
+				reg.callbacks[i](asset);
+			//nothing should be waiting on callbacks now.	
+			reg.callbacks = [];	
+			
+			
         }
         node.name = childName;
         sceneNode.srcAssetObjects.push( node );
         sceneNode.pendingLoads++;
         
+       
+		//create an Object3D to hold the asset
+        if(!node.threeObject)
+		{
+            node.threeObject = new THREE.Object3D();
+			node.threeObject.matrixAutoUpdate = true;
+			node.threeObject.updateMatrixWorld(true);
+			
+		}
+       
+        //link up the Object3D into the scene graph
         if ( parentNode && parentNode.threeObject ) {
             parentNode.threeObject.add(node.threeObject);
          } else if ( sceneNode ) {
@@ -1892,20 +1922,89 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
              
         }
-        ////////////////////////////////////
-        //manually call callback, since there is no async load currently
-        //assetLoaded(node.threeObject);
-        if(childType == "model/vnd.collada+xml")
-        {
-            node.loader = new THREE.ColladaLoader();
-            node.loader.options.convertUpAxis = true;
-            node.loader.options.upAxis = "Z";
-            node.loader.load(node.source, node.assetLoaded.bind( this ) );
-        }
-        if(childType == "model/vnd.osgjs+json+compressed")
-        {
-            node.loader = new UTF8JsonLoader(node, node.assetLoaded.bind( this ) );
-        }
+		debugger;
+		//create an asset registry if one does not exist for this driver
+		if(!this.assetRegistry)
+		{
+			this.assetRegistry = {};
+		}
+		// if there is no entry in the registry, create one
+		if(!this.assetRegistry[node.source])
+		{
+			//its new, so not waiting, and not loaded
+			this.assetRegistry[node.source] = {};
+			this.assetRegistry[node.source].loaded = false;
+			this.assetRegistry[node.source].pending = false;
+			this.assetRegistry[node.source].callbacks = [];
+		}
+		//grab the registry entry for this asset
+		var reg = this.assetRegistry[node.source];
+		
+		//if the asset entry is not loaded and not pending, you'll have to actaully go download and parse it
+		if(reg.loaded == false && reg.pending == false)
+		{
+			//thus, it becomes pending
+			reg.pending = true;
+			
+			sceneNode.srcAssetObjects.push( node.threeObject );
+			node.threeObject.vwfID = nodeID;
+			sceneNode.pendingLoads++;
+		
+		     //Do we need this when we have an async load? currently seems to break things
+			 //NOTE: yes, need to prevent the queue from advancing - I think
+             //this pauses the queue. Resume by calling with true
+			 //callback( false );
+		
+			//call up the correct loader/parser
+			if(childType == "model/vnd.collada+xml")
+			{
+				$(document).trigger('BeginParse',['Loading...',node.source]);
+				node.parse = true;
+				node.loader = new THREE.ColladaLoader();
+				node.loader.load(node.source,node.assetLoaded.bind(this));
+			}
+			if(childType == "model/vnd.osgjs+json+compressed")
+			{
+				alertify.log('Downloading ' + node.source);
+				node.loader = new UTF8JsonLoader(node,node.assetLoaded.bind(this));
+			}
+			
+			
+		}
+		//if the asset registry entry is not pending and it is loaded, then just grab a copy, no download or parse necessary
+		else if(reg.loaded == true && reg.pending == false)
+		{
+			node.threeObject.add(reg.node.clone());
+			$(document).trigger('EndParse');
+		}
+		//if it's pending but not done, register a callback so that when it is done, it can be attached.
+		else if(reg.loaded == false && reg.pending == true)
+		{	
+			sceneNode.srcAssetObjects.push( node.threeObject );
+			node.threeObject.vwfID = nodeID;
+			sceneNode.pendingLoads++;
+		
+		     //Do we need this when we have an async load? currently seems to break things
+             //this pauses the queue. Resume by calling with true
+			 callback( false );
+			
+			//so, not necessary to do all the other VWF node goo stuff, as that will be handled by the node that requseted
+			//the asset in teh first place
+			//
+			var tcal = callback;
+			reg.callbacks.push(function(node)
+			{
+				
+				//just clone the node and attach it.
+				//this should not clone the geometry, so much lower memory.
+				//seems to take near nothing to duplicated animated avatar
+				$(document).trigger('EndParse');
+				nodeCopy.threeObject.add(node.clone());
+				nodeCopy.threeObject.updateMatrixWorld(true);
+				nodeCopy.threeObject.sceneManagerUpdate();
+				tcal( true );
+			});
+		}
             
         
     }
