@@ -1,7 +1,7 @@
 new (function(){
 
 	   
-	var MAXWORKERS =  1;   
+	var MAXWORKERS =  8;   
 
 	
 	this.terrainDataReceived = function(dataBack,mesh,readers,cb)

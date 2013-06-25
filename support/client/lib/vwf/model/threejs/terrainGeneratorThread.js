@@ -2,10 +2,9 @@ self.init = function(data)
 {
   if(!self.THREE)
   {
-    importScripts('jquery.nodom.js');
+   
 	importScripts('three.js');
-	importScripts('ColladaLoader.js');
-	importScripts('UTF8JSONLoader.js');
+	
 	
 	var generateType = data.type;
 	
@@ -91,7 +90,7 @@ this.generateTerrainSimWorker = function(datain,buffers)
 						
 						var vert = verts[k].clone();
 						vert = vert.applyMatrix4(matrix);
-						verts[k].z = this.terrainAlgorithm.displace(vert);
+						verts[k].z = this.terrainAlgorithm.displace(vert,matrix);
 					}
 					
 					//var n = vertn.clone().sub(vertx).cross(vertn.clone().sub(verty)).normalize();
