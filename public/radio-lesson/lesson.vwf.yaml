@@ -61,7 +61,7 @@ children:
             this.logger.info( "Step 2 entering" );
             var radio = this.find( "/radio" )[ 0 ];
             radio.Radio.ic40Red.pointerClick = radio.events.add( function() {
-              if ( radio.powerOn && radio.menuMode == "channel" /*&& image is correct*/) {
+              if ( radio.powerOn && radio.menuMode == "channel" ) {
                 radio.Radio.ic40Red.pointerClick = radio.events.flush( this );
                 this.logger.info( "Step 2 completed" );
                 this.completed();
@@ -85,7 +85,7 @@ children:
               this.logger.info( "Step 3 entering" );
               var radio = this.find( "/radio" )[ 0 ];
               radio.Radio.ic40Up.pointerClick = radio.events.add( function() {
-                if ( radio.powerOn && radio.menuMode == "backLight" /*&& image is correct*/) {
+                if ( radio.powerOn && radio.menuMode == "backLight" ) {
                   radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
                   this.logger.info( "Step 3 completed" );
                   this.completed();
@@ -109,7 +109,7 @@ children:
               this.logger.info( "Step 4 entering" );
               var radio = this.find( "/radio" )[ 0 ];
               radio.Radio.ic40Red.pointerClick = radio.events.add( function() {
-                if ( radio.powerOn && radio.menuMode == "backLight" /*&& image is correct*/) {
+                if ( radio.powerOn && radio.menuMode == "backLight" ) {
                   radio.Radio.ic40Red.pointerClick = radio.events.flush( this );
                   this.logger.info( "Step 4 completed" );
                   this.completed();
@@ -135,8 +135,8 @@ children:
               this.logger.info( "Step 5 entering" );
               var radio = this.find( "/radio" )[ 0 ];
               radio.Radio.ic40Up.pointerClick = radio.events.add( function() {
-                if ( radio.powerOn && radio.menuMode == "squelch" /*&& image is correct*/) {                
-                  if (radio.squelch >= 70) 
+                if ( radio.powerOn && radio.menuMode == "squelch" ) {              
+                  if (radio.squelch >= 60) 
                   {
                     radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
                     this.completed();
