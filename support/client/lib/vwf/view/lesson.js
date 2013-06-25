@@ -171,11 +171,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         },
 
         firedEvent: function (nodeId, eventName, eventParameters) {
-            if(nodeId == vwf.find('', '/lesson')[0])
+            if(nodeId == vwf_view.kernel.find('', '/lesson')[0])
             {
                 switch (eventName) {
                   case "entering":
-                    this.currentTaskName = vwf.name(nodeId);
+                    this.currentTaskName = vwf_view.kernel.name(nodeId);
                     this.progressWidth = 10;
                     $('#lessonProgressBar').css('display', 'block');
                     $('#lessonProgressBar').css('width', '10px');
@@ -203,7 +203,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             {
                 switch (eventName) {
                   case "entering":
-                    this.currentTaskName = vwf.name(nodeId);
+                    this.currentTaskName = vwf_view.kernel.name(nodeId);
                     var stepDivName = '#' + nodeId.replace(/\:/g, "_").replace(/\./g, "-");
                     if($(stepDivName).length) $(stepDivName).trigger('click');
                     break;
@@ -232,7 +232,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     function updateLessonInstructions(lessonSteps) 
     {
-        var lessonID = vwf.find('', '/lesson')[0];
+        var lessonID = vwf_view.kernel.find('', '/lesson')[0];
 
         var processSubSubSteps = function( parentStepID, childStepID ) {
             var text = lessonSteps[childStepID];
@@ -245,12 +245,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 if( $('#div--' + htmlParent).html() != "" ) $('#div--' + htmlParent).append("<br />");
                 $('#div--' + htmlParent).append(text + "<br />");
             }
-            vwf.find( childStepID, "./*", function( childSubStepID ) {
+            vwf_view.kernel.find( childStepID, "./*", function( childSubStepID ) {
                 processSubSubSteps( childStepID, childSubStepID );
             } );
         };
 
-        vwf.find( lessonID, "./*", function( step ) {
+        vwf_view.kernel.find( lessonID, "./*", function( step ) {
 
             var stepText = lessonSteps[step];
             if ( stepText ) {
@@ -262,13 +262,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 $('#accordion').append("<br />");
             }
 
-            vwf.find( step, "./*", function( substep ) {
+            vwf_view.kernel.find( step, "./*", function( substep ) {
                 var substepText = lessonSteps[substep];
                 if ( substepText ) {
                     $('#accordion--'+step.replace(/\:/g, "_").replace(/\./g, "-")).append("<h2><a id='" + substep.replace(/\:/g, "_").replace(/\./g, "-") + "' href='#'>" + substepText + "</a></h2>");
                     $('#accordion--'+step.replace(/\:/g, "_").replace(/\./g, "-")).append("<div id='div--" + substep.replace(/\:/g, "_").replace(/\./g, "-") + "'></div>");
                 }
-                vwf.find( substep, "./*", function( subsubstep ) {
+                vwf_view.kernel.find( substep, "./*", function( subsubstep ) {
                     processSubSubSteps( substep, subsubstep );
                 } );
             } );
@@ -281,21 +281,21 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     function startLesson()
     {
-        vwf_view.kernel.callMethod(vwf.find('','/lesson')[0], 'enter', []);
+        vwf_view.kernel.callMethod(vwf_view.kernel.find('','/lesson')[0], 'enter', []);
     }
 
     // -- nextTask --------------------------------------------------------------------------
 
     function nextTask()
     {
-        vwf_view.kernel.callMethod(vwf.find('','//'+this.currentTaskName)[0], 'next', []);
+        vwf_view.kernel.callMethod(vwf_view.kernel.find('','//'+this.currentTaskName)[0], 'next', []);
     }
 
     // -- completeLesson --------------------------------------------------------------------
 
     function completeLesson()
     {
-        vwf_view.kernel.callMethod(vwf.find('','/lesson')[0], 'exit', []);
+        vwf_view.kernel.callMethod(vwf_view.kernel.find('','/lesson')[0], 'exit', []);
     }
 
 } );
