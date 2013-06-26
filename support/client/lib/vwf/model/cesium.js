@@ -244,7 +244,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 parentNode = findParent.call( this, nodeID );
 
                 if ( parentNode && parentNode.cesiumObj instanceof Cesium.DynamicObject ) {
-                    node.cesiumObj = parentNode.cesiumObj.polylgon;
+                    node.cesiumObj = parentNode.cesiumObj.polygon;
                 } else {  
                     var primitives = sceneNode.scene.getPrimitives();
                     node.cesiumObj = new Cesium.Polygon();
@@ -255,20 +255,30 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             } else if ( isMaterial.call( this, protos ) ) { 
 
                 this.state.nodes[ childID ] = node = createNode();
+                sceneNode = findSceneNode.call( this, node );
                 var parentNode = this.state.nodes[ nodeID ];
                 if ( parentNode && parentNode.cesiumObj ) {
-                    node.cesiumObj = parentNode.cesiumObj.getMaterial();
+                    if ( parentNode.cesiumObj.getMaterial ) {
+                        node.cesiumObj = parentNode.cesiumObj.getMaterial();
+                    } else {
+                        node.cesiumObj = parentNode.cesiumObj.material;
+                    }
                 }
                
-                // some material types will require a context, need to 
-                // create a way of grabbing existing vs creating new
-                var context = undefined;
+                node.context = undefined;
 
                 // if undefined or the wrong type, create a new material and
                 // set on the parent node 
-                if ( node.cesiumObj === undefined || ( childType && node.cesiumObj.type != childType ) ) {
-                    node.cesiumObj = Cesium.Material.fromType( context, childType );
-                    parentNode.cesiumObj.setMaterial( node.cesiumObj );
+                if ( node.cesiumObj === undefined || ( childType && node.cesiumObj.type != childType.type ) ) {
+                    if ( childType && childType.context ) {
+                        node.context = sceneNode.scene.getContext();
+                    }
+                    node.cesiumObj = Cesium.Material.fromType( node.context, childType.type );
+                    if ( parentNode.cesiumObj.setMaterial ) {
+                        parentNode.cesiumObj.setMaterial( node.cesiumObj );
+                    } else {
+                        parentNode.cesiumObj.material = node.cesiumObj;
+                    }
                 }                
 
             } else if ( isCamera.call( this, protos ) ) {
@@ -279,8 +289,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 if ( childName == "camera" ) {
                     node.cesiumObj = sceneNode.scene.getCamera();
                 } else {
-                    var camera = new Camera(canvas);
-                    camera.position = new Cartesian3();
+                    var camera = new Cesium.Camera(canvas);
+                    camera.position = new Cesium.Cartesian3();
                     camera.direction = Cartesian3.UNIT_Z.negate();
                     camera.up = Cartesian3.UNIT_Y;
                     camera.frustum.fovy = CesiumMath.PI_OVER_THREE;
@@ -771,6 +781,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         case "uniforms":
                             if ( node.cesiumObj instanceof Cesium.Material ) {
                                 
+                                debugger;
                                 // the uniforms properties are based upon the material type
                                 // check the Material spec at http://cesium.agi.com/refdoc.html
                                 // for more information
@@ -827,33 +838,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         
                         case "extent":
                             if ( node.cesiumObj instanceof Cesium.Polygon ) {
-                                var ext, height, rotation;
-                                if ( propertyValue instanceof Array ) {
+                                debugger;
+                                var pv = propertyValue;
+                                if ( pv instanceof Array ) {
+                                    switch ( pv.length ) {
+                                        case 4:
+                                            node.cesiumObj.configureExtent( new Cesium.Extent( pv[0], pv[1], pv[2], pv[3] ) );
+                                            break;
+                                        case 6:
+                                            node.cesiumObj.configureExtent( new Cesium.Extent( pv[0], pv[1], pv[2], pv[3], pv[4], pv[5] ) );
+                                            break;
 
-                                    if ( propertyValue.length == 3 ) {
-                                        ext = propertyValue[ 0 ];
-                                        height = propertyValue[ 1 ];
-                                        rotation = propertyValue[ 2 ];
-                                    } else if ( propertyValue.length == 6 ) {
-                                        ext = [];
-                                        ext[ 0 ] = propertyValue[ 0 ];
-                                        ext[ 1 ] = propertyValue[ 1 ];
-                                        ext[ 2 ] = propertyValue[ 2 ];
-                                        ext[ 3 ] = propertyValue[ 3 ];
-                                        height = propertyValue[ 4 ];
-                                        rotation = propertyValue[ 5 ];
-                                    }
-
-                                    if ( ext !== undefined ) {
-
-                                        node.cesiumObj.configureExtent( new Cesium.Extent( 
-                                            Cesium.CesiumMath.toRadians( ext[0] ),
-                                            Cesium.CesiumMath.toRadians( ext[1] ),
-                                            Cesium.CesiumMath.toRadians( ext[2] ),
-                                            Cesium.CesiumMath.toRadians( ext[3] ),
-                                            height,
-                                            Cesium.CesiumMath.toRadians( rotation )                                        
-                                        ) );    
                                     }
                                 }
                             }
@@ -1892,3 +1887,21 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         return Cesium.Matrix4.fromRowMajorArray( arry );
     }
 });
+
+
+/*
+        var consoleCartesianArray = function( a ) {
+            var s = "[ "
+            var len = a.length;
+            for ( var i = 0; i < len; i++ ) {
+                s += "[ ";
+                s += a[i].x + ", ";
+                s += a[i].y + ", ";
+                s += a[i].z;
+                s += " ], ";
+            }    
+            s += " ]"    
+                
+            console.info( s );
+        }
+*/

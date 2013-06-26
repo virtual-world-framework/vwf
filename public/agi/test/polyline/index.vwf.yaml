@@ -38,9 +38,8 @@ children:
         children:
           material:
             extends: http://vwf.example.com/cesium/material.vwf
-            type: "PolylineOutline"
+            type: { "context": false, "type": "PolylineOutline" }
             properties:
-              type: "PolylineOutline"
               uniforms: { outlineWidth: 5.0 }
         properties: 
           positions: [ [ -1266325.9090166606, -4725992.63139102, 4077985.572200376 ], [ -873872.1809211032, -4955975.412327532, 3905443.9684191025 ], [ -1353734.0802592523, -5052204.367465052, 3637866.9093780955 ], [ -940141.3436007592, -5331806.509833952, 3360431.4341223263 ] ]    
@@ -50,9 +49,8 @@ children:
         children:
           material:
             extends: http://vwf.example.com/cesium/material.vwf
-            type: "PolylineGlow"
+            type: { "context": false, "type": 'PolylineGlow' }
             properties:
-              type: "PolylineGlow"
               uniforms: { innerWidth: 3.0, color: "rgb(255,128,0)" }
         properties: 
           positions: [ [ -481819.31349724, -5507219.953754014, 3170373.735383637 ], [ 426427.5649314474, -4874089.370505605, 4077985.572200376 ] ]    
@@ -65,9 +63,7 @@ children:
         children:
           material:
             extends: http://vwf.example.com/cesium/material.vwf
-            type: "PolylineArrow"
-            properties:
-              type: "PolylineArrow"
+            type: { "context": false, "type": 'PolylineArrow' }
         properties: 
           positions: [ [ 0, 0, 0 ], [ 1000000.0, 0, 0 ] ]
           width: 10
