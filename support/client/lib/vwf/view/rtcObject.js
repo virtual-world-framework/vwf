@@ -59,6 +59,10 @@ MyRTC.prototype.initialize = function( params )
 	if( this.getUserMedia )
 	{
 		if( this.localStream == null ){
+
+			// remind user to click 'allow'
+			$('#permission-reminder').show( 'bounce', {'direction': 'down'}, 'slow' );
+
 			// try to bind to camera and microphone
 			this.getUserMedia(
 				mediaDescription,
@@ -66,7 +70,9 @@ MyRTC.prototype.initialize = function( params )
 				// on success, bind webcam to local vid feed
 				bind_safetydance( this, function(stream)
 				{
+					$('#permission-reminder').hide( 'fade', 'fast' );
 					console.log('Binding local camera');
+
 					this.attachStreamToFrame(stream, this.localPlayer);
 					this.localStream = stream;
 					if( this.trySetLocalMedia() ){
@@ -84,8 +90,11 @@ MyRTC.prototype.initialize = function( params )
 				}),
 					
 				// otherwise just print an error
-				bind_safetydance( this, function(error){
+				bind_safetydance( this, function(error)
+				{
+					$('#permission-reminder').hide( 'fade', 'fast' );
 					console.error('An error occurred while binding webcam: ', error);
+
 					this.isMediaSet = true;
 					if( this.readyToOffer ){
 						this.readyToOffer = false;

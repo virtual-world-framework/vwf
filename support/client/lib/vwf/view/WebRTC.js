@@ -16,9 +16,11 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 			$(this.vidFrame).append( '<video id="self" poster="/adl/sandbox/vwf/view/webrtc/avatar.png" muted/>' );
 
 			// style the video window
-			//$(this.vidFrame).css('padding', '30px');
-			$(this.vidFrame).find('video').css('position', 'absolute');
-			$(this.vidFrame).find('video').css('border', 'solid black 1px');
+			$(this.vidFrame).css('overflow', '30px');
+			$(this.vidFrame).find('video').css({
+				'position': 'absolute',
+				'border': 'solid black 1px'
+			});
 			$(this.vidFrame).find('#remote').attr('width', width+'px');
 			$(this.vidFrame).find('#remote').attr('height', height+'px');
 			$(this.vidFrame).find('#self').attr('width', (width/4)+'px');
@@ -38,8 +40,18 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 				'background-color': '#fff',
 			});
 
+			// style the big red arrow
+			$(this.vidFrame).append( '<img id="permission-reminder" src="/adl/sandbox/images/up-arrow.png"/>' );
+			$(this.vidFrame).find('#permission-reminder').css({
+				'position': 'fixed',
+				'top': '-10px',
+				'left': '100px',
+				'display': 'none'
+			});
+			
 			// create the dialog box
-			$(this.vidFrame).dialog({width: width+40, height: height+40, autoOpen: false, resizable: false});
+			$(this.vidFrame).dialog({width: width+40, height: height+40, autoOpen: false, resizable: false, dialogClass: 'visible-overflow'});
+			$('.visible-overflow').css('overflow', 'visible');
 
 			// create a new rtc object on view initialization
 			this.rtc = new RTCObject(
