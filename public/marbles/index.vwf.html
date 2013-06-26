@@ -27,7 +27,6 @@
 <script type="text/javascript">
     
   var view = this;
-
 	// The user login dialog
   $( '#login' ).dialog( {
     title: 'Login',
@@ -49,7 +48,9 @@
 
           // Call the function in the model to create the new user object
           var kernel = vwf_view.kernel;
-          kernel.callMethod( kernel.application( ), "createUser", [ userName, kernel.moniker( ) ] );
+          view.myUserObjectId = vwf_view.kernel.find("","/navobj_" + vwf_view.kernel.moniker())[0];
+          kernel.setProperty( view.myUserObjectId, "userName", userName );
+          kernel.callMethod( view.myUserObjectId, "initializeObjectLookup", [ ] );
         }
       }
     }
@@ -84,31 +85,12 @@
     var clientThatIssuedEvent = this.kernel.client( );
     var me = this.kernel.moniker( );
 
-    if ( ( eventName == "userCreated" ) && ( clientThatIssuedEvent == me ) ) {
-      // Save the reference to the user object - this belongs to this user
-      view.myUserObjectId = eventParameters[ 0 ];
-
-      // Set the aspect ration on the camera to match that of the html canvas
-      var cameraId = view.myUserObjectId;
-      var applicationId = vwf_view.kernel.application( );
-      var canvas = $( "#" + applicationId );
-      vwf_view.kernel.setProperty( cameraId, "aspect", canvas.width( ) / canvas.height( ) );
-
-      // Tell the renderer to render from this camera for this user
-      var rendererState = vwf_view.kernel.kernel.views[ "vwf/view/threejs" ].state;
-      rendererState.cameraInUse = rendererState.nodes[ cameraId ].threeObject;
-
-      // Save the camera id for future use
-      var sceneNode = rendererState.scenes[ applicationId ];
-      sceneNode.camera.ID = cameraId;
-      vwf_view.kernel.callMethod( view.myUserObjectId, "initializeObjectLookup", [ ] );
-    } 
-    else if ( ( eventName == "solitaireUserJoined" ) && ( eventParameters[ 0 ] == me ) ) {
+    if ( ( eventName == "solitaireUserJoined" ) && ( eventParameters[ 0 ] == view.myUserObjectId ) ) {
       //If the event that triggered the event handler was this user joining an instance of the
       //solitaire activity, then show the solitaire panel.
       $( '#solitaire-panel' ).show( );
     }
-    else if ( ( eventName == "solitaireUserLeft" ) && ( eventParameters[ 0 ] == me ) ) {
+    else if ( ( eventName == "solitaireUserLeft" ) && ( eventParameters[ 0 ] == view.myUserObjectId ) ) {
       //If the event that triggered the event handler was this user leaving an instance of the
       //solitaire activity, then hide the solitaire panel.
       $( '#solitaire-panel' ).hide( );

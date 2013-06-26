@@ -12,16 +12,25 @@
 # the License.
 
 --- 
-extends: http://vwf.example.com/navscene.vwf
+extends: http://vwf.example.com/scene.vwf
 properties:
+  usersShareView: false
+  userObject:
+    extends: user.vwf
+    implements: [ "http://vwf.example.com/navigable.vwf" ]
+    properties:
+      translationSpeed: 7
+      navmode: "none"
+      translation: [ 0, 0, 0.7 ]
+    children:     
+      camera:
+        extends: http://vwf.example.com/camera.vwf
+        properties:
+          translation: [ 0, 0, 0 ]
+          far: 1000
+          near: 0.4
 methods:
-# createUser method creates a user tied to a specific view
-# it takes two parameters, username to be created and the view's kernel.moniker.
-  createUser:
 events:
-# The userCreated event fires when a new user is created. The event has one parameter,
-# the ID of the user node created.
-  userCreated:
 children:
 # The scene is the non-interactive background portion of the garden.
   terrain:
@@ -72,13 +81,13 @@ children:
         type: model/vnd.collada+xml
         properties:
           transform: [ 0.7071068, 0.7071068, 0, 0, -0.7071068, 0.7071068, 0, 0, 0, 0, 1, 0, 3.941558, 9.861572, 0.3974555, 1 ]
-      solitaire_board_1:
-        extends: solitaire_game.vwf
-        source: models/solitaire_board.DAE
-        type: model/vnd.collada+xml
-        properties:
-          rotation: [ 1, 0, 0, 0 ]
-          translation: [ -7.429945, -7.816388, 0.8209709 ]
+#      solitaire_board_1:
+#        extends: solitaire_game.vwf
+#        source: models/solitaire_board.DAE
+#        type: model/vnd.collada+xml
+#        properties:
+#          rotation: [ 1, 0, 0, 0 ]
+#          translation: [ -7.429945, -7.816388, 0.8209709 ]
       solitaire_board_2:
         extends: solitaire_game.vwf
         source: models/solitaire_board.DAE
@@ -104,26 +113,4 @@ scripts:
     this.maxSpeed = 2;
     this.translationSpeed = 0.2;
     this.rotationSpeed = 0.4;
-  };
-
-
-  //Create user implementation.
-  this.createUser = function( userName, viewHandle ) {
-    //User's username and view handle are passed in as arguments.
-    // Initial position is set to the default initialCam transformation.
-    //users extend the user prototype.
-    var userDef = { 
-      "properties": {
-        "userName": userName,
-        "viewHandle": viewHandle,
-        "transform": initialCam
-      },
-      "extends": "user.vwf",
-      "children": {}     
-     };
-
-    // Create the user object, passing a callback that fires an event upon completion
-    this.children.create( userName, userDef, function( node ) {
-      this.userCreated( node.id );
-    });
   };

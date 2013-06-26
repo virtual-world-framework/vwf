@@ -208,26 +208,29 @@ scripts:
   //Method to create marbles.
   // If the marbles have not yet been created, loop and create them.
   this.createMarbles = function( ) {
-    if ( this.children.length == 0 ) {
-      var myNode = this;
-      var patternIndex = 0;
-      for ( var patternIndex = 0; patternIndex < 32; patternIndex++ ) {
-        var newMarbleName = "solitaireMarble" + patternIndex;
-        var solitaireMarbleTemplate = { 
-          "source": "models/" + this.marbleTypes[ patternIndex % this.marbleTypes.length ], 
-          "extends": "solitaire_marble.vwf",
-          "type": "model/vnd.collada+xml",
-          "properties": { 
-            "selected": false,
-            "private": null
-            }
-        };
-
-        myNode.children.create( newMarbleName, solitaireMarbleTemplate, function( newObj ) {
-          newObj.moveMarbleInstantly( );
-        } );
+    var myNode = this;
+    var patternIndex = 0;
+    for ( var patternIndex = 0; patternIndex < 32; patternIndex++ ) {
+      var newMarbleName = "solitaireMarble" + patternIndex;
+      var solitaireMarbleTemplate = { 
+        "source": "models/" + this.marbleTypes[ patternIndex % this.marbleTypes.length ], 
+        "extends": "solitaire_marble.vwf",
+        "type": "model/vnd.collada+xml",
+        "properties": { 
+          "selected": false,
+          "private": null
+          }
       };
-    }
+      
+      myNode.children.create( newMarbleName, solitaireMarbleTemplate, function( newObj ) {
+        if ( newObj.moveMarbleInstantly != undefined ) {
+          newObj.moveMarbleInstantly( );
+        }
+        else {
+          this.logger.warn("Create marbles in game undefined.");
+        }
+      } );
+    };
   };
 
   //When detaching a user, change the viewpoint of the user. Then set the users attachedTo to an
@@ -243,7 +246,7 @@ scripts:
       user.future(3).attachedTo = "";
       this.future(3).gameOccupiedBy = "";
       this.future(3).decrementLock();
-      this.solitaireUserLeft( user.viewHandle );
+      this.solitaireUserLeft( user.id );
     }
   };
   
@@ -267,7 +270,7 @@ scripts:
       //var userViewpoint = solitairePlayingViewPoint; //goog.vec.Mat4.multMat( this.transform, solitairePlayingViewPoint, goog.vec.Mat4.create( ) );
       //user.transformTo( userViewpoint, 3 );
       user.attachedTo = this.id;
-      this.solitaireUserJoined( user.viewHandle );     
+      this.solitaireUserJoined( user.id );     
     }
   };
 

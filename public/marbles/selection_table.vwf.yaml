@@ -89,7 +89,7 @@ scripts:
   this.detachUser = function( user ) {
     var userViewpoint = goog.vec.Mat4.multMat( this.transform, marbleDeselectionViewPoint, goog.vec.Mat4.create( ) );
     user.transformTo( userViewpoint, 3 );
-    user.attachedTo = "";
+    user.future(3).attachedTo = "";
   };
 
   //When attaching a user, change the viewpoint (transform the select viewpoint based on the

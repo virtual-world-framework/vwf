@@ -72,13 +72,16 @@ properties:
 
       //If the value changed, move the marble (animate or not based on moveInstant)
       if ( valueChanged == true ) {
-        if ( moveInstant ) { 
+        if ( ( moveInstant ) && ( this.moveMarbleInstantly != undefined ) ) { 
           this.moveMarbleInstantly();
         }
-        else {
+        else if ( (moveInstant == false) && ( this.moveMarble != undefined ) ) {
           this.parent.incrementLock();
           this.moveMarble();
           this.parent.future(this.moveMarbleTime * 1.1).decrementLock();
+        }
+        if ( this.moveMarbleInstantly == undefined ) {
+          this.logger.warn("Set selected undefined!");
         }
       }
     get: | # Get whether the marble is selected.
@@ -97,7 +100,12 @@ properties:
       this.solitairePosition = value;
       // Finally, move the marble based on the new position.
       if ( moveInstant ) { 
-        this.moveMarbleInstantly();
+        if ( this.moveMarbleInstantly != undefined ) {
+          this.moveMarbleInstantly();
+        }
+        else {
+          this.logger.warn("Set solitaire position undefined!");
+        }
       }
       else {
         this.parent.incrementLock()
