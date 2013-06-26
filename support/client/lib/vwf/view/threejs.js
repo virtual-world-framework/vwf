@@ -737,7 +737,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             e.preventDefault();
         }
 
-        canvas.onmouseup = function( e ) {
+        // Listen for onmouseup from the document (instead of the canvas like all the other mouse events)
+        // because it will catch mouseup events that occur outside the window, whereas canvas.onmouseup does
+        // not.
+        document.onmouseup = function( e ) {
             var ctrlDown = e.ctrlKey;
             var atlDown = e.altKey;
             var ctrlAndAltDown = ctrlDown && atlDown;
