@@ -143,9 +143,11 @@ properties:
 
   animationRate:  # TODO: allow changes while playing
     set: |
-      var duration = this.animationDuration, rate = value;
+      var duration = this.animationDuration, rate = value, startFrame = this.animationStartFrame, stopFrame = this.animationStopFrame;
       this.animationRate = rate;
       this.animationDuration$ = ( rate >= 0 ? duration : -duration ) / rate;
+      this.animationStartFrame = startFrame;
+      this.animationStopFrame = stopFrame;
     value: 1
 
   ## Automatically replay the animation from the start after reaching the end.
@@ -262,6 +264,33 @@ properties:
     set: |
       this.animationStopTime = value ? Math.min( Math.max( 0, value ), this.animationDuration ) : value;
     value: null
+
+  ## The frame that the animation should start at. Setting this value automatically updates the "animationStartTime"
+  ## to the "animationStartFrame" / "fps"
+
+  animationStartFrame:
+    set: |
+      this.animationStartTime = value / this.fps;
+    get: |
+      return Math.floor(this.animationStartTime * this.fps);
+
+  ## The frame that the animation should stop at. Setting this value automatically updates the "animationStopTime"
+  ## to the "animationStopFrame" / "fps"
+
+  animationStopFrame:
+    set: |
+      this.animationStopTime = value / this.fps;
+    get: |
+      return Math.floor(this.animationStopTime * this.fps);
+
+  ## The animation playback rate in frames per second. Setting this value automatically updates the "animationRate"
+  ## to "fps" / 30
+
+  fps: 
+    set: |
+      this.animationRate = value / 30;
+    get: |
+      return this.animationRate * 30;
 
 methods:
 

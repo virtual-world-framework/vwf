@@ -625,21 +625,23 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                     else if ( propertyName == "animationTimeUpdated" ) {
                         if(node.threeObject.animatedMesh && propertyValue !== undefined) {
+                            var fps = this.state.kernel.getProperty( nodeID, "fps");
                             for(var i = 0; i < node.threeObject.animatedMesh.length; i++) {
                                 for(var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++) {
                                     node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
                                 }
-                                // TODO: Currently assuming 30 fps
-                                node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * 30) ] = 1;
+                                node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * fps) ] = 1;
                             }
                         }
                         else if(node.threeObject.kfAnimations && propertyValue !== undefined) {
                             // The update in THREE.KeyFrameAnimation takes a delta time, so reset the animation to the beginning, 
-                            // and pass the current VWF animation time
-                           for(var i = 0; i < node.threeObject.kfAnimations.length; i++) {
+                            // and pass the current VWF animation time. Multiply the time by the animation rate so that the threejs
+                            // animation objects are in sync with VWf time.
+                            var animationRate = this.state.kernel.getProperty( nodeID, "animationRate" );
+                            for(var i = 0; i < node.threeObject.kfAnimations.length; i++) {
                                 node.threeObject.kfAnimations[i].stop()
                                 node.threeObject.kfAnimations[i].play(false, 0);
-                                node.threeObject.kfAnimations[i].update(propertyValue);
+                                node.threeObject.kfAnimations[i].update(propertyValue * animationRate);
                             } 
                         }
                     }
@@ -1233,13 +1235,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         value = animationDuration;
                     }
                     else if(node.threeObject.animatedMesh) {
+                        var fps = this.state.kernel.getProperty( nodeID, "fps");
                         for(var i=0, il = node.threeObject.animatedMesh.length; i < il; i++) {
                             if(node.threeObject.animatedMesh[i].morphTargetInfluences.length > animationDuration) {
                                 animationDuration = node.threeObject.animatedMesh[i].morphTargetInfluences.length;
                             }
                         }
-                        // TODO: Currently assuming 30 fps
-                        value = animationDuration / 30;
+                        value = animationDuration / fps;
                     }
                     return value;
                 }
