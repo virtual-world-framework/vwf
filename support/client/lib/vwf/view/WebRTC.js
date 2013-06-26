@@ -43,9 +43,11 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 			// style the big red arrow
 			$(this.vidFrame).append( '<img id="permission-reminder" src="/adl/sandbox/images/up-arrow.png"/>' );
 			$(this.vidFrame).find('#permission-reminder').css({
+				'width': '60px',
+				'height': '180px',
 				'position': 'fixed',
-				'top': '-10px',
-				'left': '100px',
+				'top': '0px',
+				'left': '150px',
 				'display': 'none'
 			});
 			
