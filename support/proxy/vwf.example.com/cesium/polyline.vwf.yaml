@@ -18,10 +18,7 @@
 
 --- 
 extends: http://vwf.example.com/cesium/node3.vwf
-children:
-  material:
-    includes: http://vwf.example.com/cesium/material.vwf
 properties:
-  visible: true
   width: 1.0
   positions:
+  

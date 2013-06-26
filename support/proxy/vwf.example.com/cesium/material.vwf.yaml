@@ -11,13 +11,15 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-## Cesium polyline collection component
+## Cesium material component
 ## 
-## @name polyline collection.vwf
+## @name material.vwf
 ## @namespace
 
 --- 
 extends: http://vwf.example.com/node.vwf
 properties:
-  modelMatrix:
-  
+  fabric:
+  shaderSource:
+  uniforms:
+  type:

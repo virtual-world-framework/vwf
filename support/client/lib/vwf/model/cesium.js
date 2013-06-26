@@ -49,6 +49,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             //this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
 
+
             var self = this;
             var kernel = this.kernel;
 
@@ -209,7 +210,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                 if ( parentNode && parentNode.renderObject instanceof Cesium.DynamicObject ) {
                     node.renderObject = parentNode.renderObject.polyline;
-                } else {                
+                } else { 
+                    var primitives = sceneNode.scene.getPrimitives();               
                     if ( parentNode.renderObject && parentNode.renderObject instanceof Cesium.PolylineCollection ) {
                         node.polylineCollection = parentNode.renderObject;
                     }
@@ -218,9 +220,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         node.polylineCollection = new Cesium.PolylineCollection();
                     }
 
-                    node.renderObject = new Cesium.Polyline( childSource, node.polylineCollection );
+                    node.renderObject = node.polylineCollection.add( childSource );
+                    primitives.add( node.polylineCollection );
                 }
-                
                 node.scene = sceneNode.scene;  
             
             } else if ( isPolygon.call( this, protos ) ) { 
@@ -232,22 +234,23 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 if ( parentNode && parentNode.renderObject instanceof Cesium.DynamicObject ) {
                     node.renderObject = parentNode.renderObject.polylgon;
                 } else {  
-                    if ( parentNode.renderObject && parentNode.renderObject instanceof Cesium.PolylineCollection ) {
-                        node.polylineCollection = parentNode.renderObject;
-                    }
-                    if ( node.polylineCollection === undefined ) {
-                        node.polylineCollection = new Cesium.PolylineCollection();
-                    }                
+                    var primitives = sceneNode.scene.getPrimitives();
                     node.renderObject = new Cesium.Polygon();
+                    primitives.add( node.renderObject );
                 }
                 node.scene = sceneNode.scene; 
 
             } else if ( isMaterial.call( this, protos ) ) { 
 
+                //debugger;
                 this.state.nodes[ childID ] = node = createNode();
                 var parentNode = this.state.nodes[ nodeID ];
                 if ( parentNode && parentNode.renderObject ) {
                     node.renderObject = parentNode.renderObject.material;
+                }
+                if ( childType !== undefined ) {
+                    var context = undefined;
+                    node.renderObject = parentNode.renderObject.material = Cesium.Material.fromType( context, childType );
                 }
 
             } else if ( isCamera.call( this, protos ) ) {
@@ -689,7 +692,70 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
                         case "type":
                             if ( node.renderObject instanceof Cesium.Material ) {
-                                node.renderObject.type = propertyValue;    
+                                // best to set the type in the fabric
+
+                                // switch ( propertyValue ) {
+                                //     case "Color":
+                                //     case "Image":
+                                //     case "DiffuseMap":
+                                //     case "AlphaMap":
+                                //     case "SpecularMap":
+                                //     case "EmissionMap":
+                                //     case "BumpMap":
+                                //     case "NormalMap":
+                                //     case "Reflection":
+                                //     case "Refraction":
+                                //     case "Fresnel":
+                                //     case "Brick":
+                                //     case "Wood":
+                                //     case "Asphalt":
+                                //     case "Cement":
+                                //     case "Grass":
+                                //     case "Grid":
+                                //     case "Stripe":
+                                //     case "Checkerboard":
+                                //     case "Dot":
+                                //     case "Tiedye":
+                                //     case "Facet":
+                                //     case "Blob":
+                                //     case "Water":
+                                //     case "RimLighting":
+                                //     case "erosion":
+                                //     case "Fade":
+                                //     case "PolylineArrow":
+                                //     case "PolylineGlow":
+                                //     case "PolylineOutline":
+                                //     default:
+                                //         node.renderObject = Cesium.Material.fromType( undefined, propertyValue );
+                                //         break;
+                                // }
+
+                                if ( node.renderObject.type != propertyValue ) {
+                                    node.renderObject.type = propertyValue;    
+                                }
+                            }
+                            break;
+
+                        case "uniforms":
+                            if ( node.renderObject instanceof Cesium.Material ) {
+                                // this can be used 
+                                var uni = node.renderObject.uniforms;
+                                if ( uni ) {
+                                    if ( propertyValue instanceof Object ) {
+                                        for( var prop in propertyValue ) {
+                                            switch( prop ) {
+                                                case "color":
+                                                    var vwfColor = new utility.color( propertyValue );
+                                                    if ( vwfColor ) {                            
+                                                        uni.color = new Cesium.Color( vwfColor.red() / 255, vwfColor.green() / 255, vwfColor.blue() / 255, vwfColor.alpha() );                                                    }                                                      
+                                                    break;
+                                                default:
+                                                    uni[ prop ] = propertyValue[ prop ];
+                                                    break;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             break;
 
@@ -698,15 +764,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 node.renderObject.shaderSource = propertyValue;
                             }
                             break;
-                        //case "uniforms":
-                        //    if ( node.renderObject instanceof Cesium.Material ) {
-                        //        // this can be used 
-                        //    }
-                        //    break;
-
+ 
                         case "positions":
                             if ( node.renderObject instanceof Cesium.Polyline || node.renderObject instanceof Cesium.Polygon ) {
-                                node.renderObject.setPositions( propertyValue );
+                                var points = [];
+                                if ( propertyValue instanceof Array ) {
+                                    var len = propertyValue.length;
+                                    for ( var i = 0; i < len; i++ ) {
+                                        points.push( new Cesium.Cartesian3( propertyValue[i][0], propertyValue[i][1], propertyValue[i][2] ) );
+                                    }
+                                }
+                                node.renderObject.setPositions( points );
                             }
                             break;
 
@@ -1415,16 +1483,43 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     break;
 
-                //case "uniforms":
-                //    if ( node.renderObject instanceof Cesium.Material ) {
-                //        // this can be used 
-                //    }
-                //    break;
+                case "uniforms":
+                    if ( node.renderObject instanceof Cesium.Material ) {
+                        // this can be used 
+                        var uni = node.renderObject.uniforms;
+                        if ( uni ) {
+                            value = {};
+                            for ( var prop in uni ) {
+                                if ( uni.hasOwnProperty( prop ) ) {
+                                    switch( prop ) {
+                                        case "color":
+                                            var clr = uni[ prop ];
+                                            if ( clr.alpha == 1 ) {
+                                                value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
+                                            } else {
+                                                value = "rgba("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+","+clr.alpha+")";
+                                            }                                       
+                                            break;
+                                        default:
+                                            value[ prop ] = uni[ prop ];
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
 
                 case "positions":
                     //if ( node.renderObject instanceof Cesium.Polyline || node.renderObject instanceof Cesium.Polygon ) {
                     if ( node.renderObject.getPositions ) {
-                        value = node.renderObject.getPositions();
+                        var cesiumPoints = node.renderObject.getPositions();
+                        var len = cesiumPoints.length;
+
+                        value = [];
+                        for ( var i = 0; i < len; i++ ) {
+                            value.push( [ cesiumPoints[i].x, cesiumPoints[i].y, cesiumPoints[i].z ] );
+                        }
                     }
                     break;
 
@@ -1664,7 +1759,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-polylinecollection-vwf" );   
+                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-polylineCollection-vwf" );   
             }
         }
 
