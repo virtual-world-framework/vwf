@@ -797,7 +797,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         consoleScene.call( this, sceneNode.threeScene, 0 ); 
                     }                    
                 }
-                sceneView.kernel.dispatchEvent( pointerDownID, "pointerUp", eData.eventData, eData.eventNodeData );
+                if ( pointerDownID ) {
+                    sceneView.kernel.dispatchEvent( pointerDownID, "pointerUp", eData.eventData, 
+                                                    eData.eventNodeData );
+                }
             }
 
             if ( !( mouseLeftDown || mouseRightDown || mouseMiddleDown ) ) {
