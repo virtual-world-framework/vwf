@@ -816,10 +816,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var eData = getEventData( e, false );
             if ( eData ) {
                 pointerOverID = pointerPickID ? pointerPickID : sceneID;
-                var buttonStates = eData.eventData[ 0 ].buttons;
-                mouseLeftDown = buttonStates.left;
-                mouseRightDown = buttonStates.right;
-                mouseMiddleDown = buttonStates.middle;
                 sceneView.kernel.dispatchEvent( pointerOverID, "pointerOver", eData.eventData, eData.eventNodeData );
             }
             e.preventDefault();
