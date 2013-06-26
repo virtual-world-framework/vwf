@@ -956,6 +956,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 return false;
         }
         
+        window.onblur = function() {
+
+            // Stop all key movement when window goes out of focus since key events are now going to a
+            // different window
+            movingForward = false;
+            movingBack = false;
+            movingLeft = false;
+            movingRight = false;
+            rotatingLeft = false;
+            rotatingRight = false;
+        }
+
         if(typeof canvas.onmousewheel == "function") {
             canvas.removeAttribute("onmousewheel");
             canvas.onmousewheel = function( e ) {
