@@ -29,10 +29,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var rotationSpeed = 90; // Degrees per second
     var makeOwnAvatarVisible = false;
 
-    // DEBUG: Are clients' monikers changing and that's why we see skips and hops?
-    var monikerArray = [];
-    // END DEBUG 
-
     return view.load( module, {
 
         initialize: function( options ) {
@@ -2043,13 +2039,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         var clientThatSatProperty = self.kernel.client();
         var me = self.kernel.moniker();
-        
-        // DEBUG: Are clients' monikers changing and that's why we see skips and hops?
-        if ( monikerArray.indexOf( clientThatSatProperty ) == -1 ) {
-            monikerArray.push( clientThatSatProperty );
-            self.logger.warnx( "receiveModelTransformChanges: " + monikerArray );
-        }
-        // END DEBUG
 
         // If the transform property was initially updated by this view....
         if ( clientThatSatProperty == me ) {
