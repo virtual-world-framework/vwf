@@ -164,12 +164,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
         "parameters" => [ fields["result"] ]
       }
 
-      while client = session[:pending][:clients].shift
-        logger.debug "VWF::Application::Reflector#receive #{ object_id } " +
-          "resuming #{client.id} (#{ session[:pending][:clients].length } suspended)"
-      end
-
-      clients.each do |client|
+      session[:pending][:clients].each do |client|
 
         # Set the state in the new client.
 
@@ -189,6 +184,32 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
         # client.send "time" => time, "action" => "getState", "parameters" => [ true, true ], "respond" => true
 
       end
+
+      while client = session[:pending][:clients].shift
+        logger.debug "VWF::Application::Reflector#receive #{ object_id } " +
+          "resuming #{client.id} (#{ session[:pending][:clients].length } suspended)"
+      end
+
+      # clients.each do |client|
+
+      #   # Set the state in the new client.
+
+      #   logger.debug "VWF::Application::Reflector#receive #{ object_id } " +
+      #     "setting state in #{client.id}"
+
+      #   client.send fields_setState
+
+      #   # Deliver any messages that arrived after the client joined but before we received the
+      #   # state from the reference client.
+
+      #   session[:pending][:messages].each do |fields_pending|
+      #     client.send fields_pending.merge "time" => time
+      #   end
+
+      #   # client.send "time" => time, "action" => "hashState", "respond" => true
+      #   # client.send "time" => time, "action" => "getState", "parameters" => [ true, true ], "respond" => true
+
+      # end
 
       session.delete :pending
 
