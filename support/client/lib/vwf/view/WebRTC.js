@@ -1,9 +1,9 @@
 /*
- * WebRTC.js : Behaves as a wrapper for vwf/rtcObject
+ * WebRTC.js : Behaves as a wrapper for vwf/view/rtcObject
  * Maps simple 1:1 signal model to a broadcast model using target and sender ids
  */
 
-define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCObject ) {
+define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, RTCObject ) {
 
 	return view.load( module, {
 
@@ -39,7 +39,7 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 			});
 
 			// create the dialog box
-			$(this.vidFrame).dialog({width: width+40, height: height+40, autoOpen: false});
+			$(this.vidFrame).dialog({width: width+40, height: height+40, autoOpen: false, resizable: false});
 
 			// create a new rtc object on view initialization
 			this.rtc = new RTCObject(
@@ -55,22 +55,20 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 				var payload = {target: this.rtcTarget, sender: _UserManager.GetCurrentUserName()};
 				vwf_view.kernel.callMethod('index-vwf', 'rtcDisconnect', payload);
 				this.rtcTarget = null;
+				console.log('Panel closed, initialized =', this.rtc.initialized);
 			}.bind(this));
 
 			$(this.vidFrame).find( '#messagePanel input#accept' ).button().click(function(evt)
 			{
+				console.log('Call accepted');
 				$(this.vidFrame).find('#messagePanel').css('z-index', -1);
 				this.rtc.initialize(this.mode);
 			}.bind(this));
 
 			$(this.vidFrame).find( '#messagePanel input#reject' ).button().click(function(evt)
 			{
-				// send rejection notice
-				vwf_view.kernel.callMethod('index-vwf', 'rtcDisconnect',
-					{target: this.rtcTarget, sender: _UserManager.GetCurrentUserName()}
-				);
+				console.log('Call rejected');
 				$(this.vidFrame).dialog('close');
-				this.rtcTarget = null;
 			}.bind(this));
 		},
 
@@ -103,6 +101,7 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 
 					if( !this.rtc.initialized )
 					{
+						console.log('Unexpected RTC call, prompting to accept');
 						this.mode = params.rtcData.mediaDescription;
 						var typeWord = params.rtcData.mediaDescription.video ? 'Video' : 'Voice';
 						$(this.vidFrame).dialog('option', 'title', typeWord+' chat with '+this.rtcTarget);
@@ -120,10 +119,9 @@ define( [ "module", "vwf/view", "vwf/rtcObject" ], function( module, view, RTCOb
 			{
 				if( _UserManager.GetCurrentUserName() == params.target )
 				{
-					this.rtc.disconnect();
+					console.log('Remote disconnect, clean up');
 					$(this.vidFrame).dialog("close");
 					$(this.vidFrame).find('video').attr('src', '/adl/sandbox/vwf/view/webrtc/avatar.png');
-					this.rtcTarget = null;
 				}
 			}
 		},

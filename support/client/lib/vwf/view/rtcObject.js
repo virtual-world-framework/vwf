@@ -136,8 +136,6 @@ MyRTC.prototype.disconnect = function()
 
 MyRTC.prototype.receiveMessage = function( msg )
 {
-	console.log('Message received of type '+msg.type+': ', msg);
-	
 	if( msg.type == 'syn' ){
 		// initialize peer connection
 		this.createPeerConnection();
