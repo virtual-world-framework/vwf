@@ -61,9 +61,12 @@ MyRTC.prototype.initialize = function( params )
 		if( this.localStream == null ){
 
 			// remind user to click 'allow'
-			var reminderTimeout = setTimeout( function(){
-				$('#permission-reminder').show( 'bounce', {'direction': 'down', 'distance': 80}, 'slow' );
-			}, 5000 );
+			var reminderTimeout;
+			if( this.detectedBrowser == 'chrome' ){
+				reminderTimeout = setTimeout( function(){
+					$('#permission-reminder').show( 'bounce', {'direction': 'down', 'distance': 80}, 'slow' );
+				}, 5000 );
+			}
 
 			// try to bind to camera and microphone
 			this.getUserMedia(
@@ -73,8 +76,11 @@ MyRTC.prototype.initialize = function( params )
 				bind_safetydance( this, function(stream)
 				{
 					// get rid of reminder
-					clearTimeout(reminderTimeout);
-					$('#permission-reminder').hide( 'fade', 'fast' );
+					if( this.detectedBrowser == 'chrome' ){
+						clearTimeout(reminderTimeout);
+						$('#permission-reminder').hide( 'fade', 'fast' );
+					}
+
 					console.log('Binding local camera');
 
 					this.attachStreamToFrame(stream, this.localPlayer);
