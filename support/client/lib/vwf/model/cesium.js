@@ -781,7 +781,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         case "uniforms":
                             if ( node.cesiumObj instanceof Cesium.Material ) {
                                 
-                                debugger;
                                 // the uniforms properties are based upon the material type
                                 // check the Material spec at http://cesium.agi.com/refdoc.html
                                 // for more information
@@ -838,7 +837,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         
                         case "extent":
                             if ( node.cesiumObj instanceof Cesium.Polygon ) {
-                                debugger;
                                 var pv = propertyValue;
                                 if ( pv instanceof Array ) {
                                     switch ( pv.length ) {
@@ -858,6 +856,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         case "height":
                             if ( node.cesiumObj instanceof Cesium.Polygon ) {
                                 node.cesiumObj.height = Number( propertyValue );
+                            }
+                            break; 
+
+                        case "hierarchy":
+                            if ( node.cesiumObj instanceof Cesium.Polygon ) {
+                                node.cesiumObj.configureFromPolygonHierarchy( propertyValue );
                             }
                             break; 
 
