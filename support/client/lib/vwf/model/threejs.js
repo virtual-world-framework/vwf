@@ -561,12 +561,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                     if(propertyName == "animationTimeUpdated") {
 						
-                        if(node.threeObject.children[0] && node.threeObject.children[0].animatedMesh && propertyValue !== undefined) {
-                            for(var i = 0; i < node.threeObject.children[0].animatedMesh.length; i++) {
-                                for(var j = 0; j < node.threeObject.children[0].animatedMesh[i].morphTargetInfluences.length; j++) {
-                                    node.threeObject.children[0].animatedMesh[i].morphTargetInfluences[j] = 0;
+                        if( node.threeObject.animatedMesh && propertyValue !== undefined) {
+                            for(var i = 0; i < node.threeObject.animatedMesh.length; i++) {
+                                for(var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++) {
+                                    node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
                                 }
-                                node.threeObject.children[0].animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * 30) ] = 1;
+                                node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * 30) ] = 1;
                             }
                         }
                         else if(node.threeObject.kfAnimations && propertyValue !== undefined) {
@@ -1794,24 +1794,37 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var removed = false;
             
             var animations, animatedMesh;
+			
             if(asset.animations && asset.animations.length > 0) {
                 animations = asset.animations;
             }
-            if(asset.skins && asset.skins.length > 0) {
-                animatedMesh = asset.skins;
-            }
-
-            //possibly deal with setting intial scale and rotation here, if threejs does something strange by default
-            //collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
+           
+            
             if(asset.scene)
                 asset = asset.scene;
-			//asset.matrix = new THREE.Matrix4();
+			;	
 			asset.updateMatrixWorld();
-            nodeCopy.threeObject.add(asset);
-
-            asset.name = childName;
-            asset.vwfID = nodeID;
-            asset.matrixAutoUpdate = false;
+			//this is weird - should we be throwing away the asset root matrix completely? seems like we are
+			//nodeCopy.threeObject.matrix = asset.matrix.clone();	
+			asset.matrix = new THREE.Matrix4();
+			asset.matrixAutoUpdate = false;
+			
+            nodeCopy.threeObject = asset.clone();
+			
+			animatedMesh = []
+			walkGraph(nodeCopy.threeObject,function(node){
+					if(node instanceof THREE.SkinnedMesh)
+					{
+						animatedMesh.push(node);
+					}
+				
+				});
+			nodeCopy.threeObject.animatedMesh = animatedMesh;
+			nodeCopy.threeObject.updateMatrixWorld();
+			parentObject3.add(nodeCopy.threeObject);
+            nodeCopy.threeObject.name = childName;
+            nodeCopy.threeObject.vwfID = nodeID;
+            nodeCopy.threeObject.matrixAutoUpdate = false;
             if(animations) {
                 var animHandler = THREE.AnimationHandler;
                 asset.kfAnimations = [];
@@ -1859,11 +1872,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 meshes[i].geometry.uvsNeedUpdate = true;
             }
             
-			//because we use a new node to hold the transforms, we don't need this. it's already added.
-            //parentObject3.add( nodeCopy.threeObject );
+			
             if ( asset.updateMatrixWorld ) asset.updateMatrixWorld(true);
             
-            nodeCopy.threeObject.matrixAutoUpdate = true;
+            nodeCopy.threeObject.matrixAutoUpdate = false;
 			
             for ( var j = 0; j < sceneNode.srcAssetObjects.length; j++ ) {
                 if ( sceneNode.srcAssetObjects[j] == nodeCopy ){
@@ -1902,29 +1914,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			
         }
         node.name = childName;
-       // sceneNode.srcAssetObjects.push( node );
-        //sceneNode.pendingLoads++;
-        
-       
-		//create an Object3D to hold the asset
-        if(!node.threeObject)
-		{
-            node.threeObject = new THREE.Object3D();
-			node.threeObject.matrixAutoUpdate = true;
-			node.threeObject.updateMatrixWorld(true);
-			
-		}
-       
-        //link up the Object3D into the scene graph
-        if ( parentNode && parentNode.threeObject ) {
-            parentNode.threeObject.add(node.threeObject);
-         } else if ( sceneNode ) {
-            if ( sceneNode.threeScene ) {
-                sceneNode.threeScene.add( node.threeObject );
-            }
-             
-        }
-		
+      
 		//create an asset registry if one does not exist for this driver
 		if(!this.assetRegistry)
 		{
@@ -1949,7 +1939,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			reg.pending = true;
 			
 			sceneNode.srcAssetObjects.push( node.threeObject );
-			node.threeObject.vwfID = nodeID;
+			//node.threeObject.vwfID = nodeID;
 			sceneNode.pendingLoads++;
 		
 		     //Do we need this when we have an async load? currently seems to break things
@@ -1979,15 +1969,39 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 		//if the asset registry entry is not pending and it is loaded, then just grab a copy, no download or parse necessary
 		else if(reg.loaded == true && reg.pending == false)
 		{
-			node.threeObject.add(reg.node.clone());
-			nodeCopy.loadingCallback( true ); 
+			var asset = (reg.node.clone());
+			var n = node.clone();
+				var skins = []
+				walkGraph(n,function(node){
+					if(node instanceof THREE.SkinnedMesh)
+					{
+						skins.push(node);
+					}
+				
+				});
+				n.animatedMesh = skins;
+				
+				nodeCopy.threeObject = asset;
+				
+				
+				//this is weird - should we be throwing away the asset root matrix completely? seems like we are
+				//nodeCopy.threeObject.matrix = asset.matrix.clone();	
+				nodeCopy.threeObject.matrix = new THREE.Matrix4();
+				nodeCopy.threeObject.matrixAutoUpdate = false;
+				parentObject3.add(nodeCopy.threeObject);
+				nodeCopy.threeObject.name = childName;
+				nodeCopy.threeObject.vwfID = nodeID;
+				nodeCopy.threeObject.matrixAutoUpdate = false;
+				nodeCopy.threeObject.updateMatrixWorld(true);
+				propertyNotifyCallback();
+				nodeCopy.loadingCallback( true ); 
 			
 		}
 		//if it's pending but not done, register a callback so that when it is done, it can be attached.
 		else if(reg.loaded == false && reg.pending == true)
 		{	
 			sceneNode.srcAssetObjects.push( node.threeObject );
-			node.threeObject.vwfID = nodeID;
+			
 			//sceneNode.pendingLoads++;
 		
 		     //Do we need this when we have an async load? currently seems to break things
@@ -2005,7 +2019,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				//this should not clone the geometry, so much lower memory.
 				//seems to take near nothing to duplicated animated avatar
 				
-				
 				var n = node.clone();
 				var skins = []
 				walkGraph(n,function(node){
@@ -2017,7 +2030,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				});
 				n.animatedMesh = skins;
 				
-				nodeCopy.threeObject.add(n);
+				nodeCopy.threeObject = n;
+				
+				//this is weird - should we be throwing away the asset root matrix completely? seems like we are
+				//nodeCopy.threeObject.matrix = asset.matrix.clone();	
+				nodeCopy.threeObject.matrix = new THREE.Matrix4();
+				nodeCopy.threeObject.matrixAutoUpdate = false;
+
+				parentObject3.add(nodeCopy.threeObject);
+				nodeCopy.threeObject.name = childName;
+				nodeCopy.threeObject.vwfID = nodeID;
+				nodeCopy.threeObject.matrixAutoUpdate = false;
+				
 				nodeCopy.threeObject.updateMatrixWorld(true);
 				propertyNotifyCallback();
 				nodeCopy.loadingCallback( true ); 
