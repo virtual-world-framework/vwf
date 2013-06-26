@@ -33,8 +33,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
             this.state.prototypes = {}; 
-          
-        
+
+
+            // turns on logger debugger console messages 
+            
+            this.debug = {
+                "creation": false,
+                "initializing": false,
+                "parenting": false,
+                "properties": false,
+                "setting": false,
+                "getting": false
+            };
+       
         },
 
 
@@ -47,8 +58,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             var childURI = nodeID === 0 ? childIndex : undefined;
 
-            //this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
-
+            if ( this.debug.creation ) {
+                this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            }
 
             var self = this;
             var kernel = this.kernel;
@@ -242,16 +254,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             } else if ( isMaterial.call( this, protos ) ) { 
 
-                //debugger;
                 this.state.nodes[ childID ] = node = createNode();
                 var parentNode = this.state.nodes[ nodeID ];
                 if ( parentNode && parentNode.renderObject ) {
-                    node.renderObject = parentNode.renderObject.material;
+                    node.renderObject = parentNode.renderObject.getMaterial();
                 }
-                if ( childType !== undefined ) {
-                    var context = undefined;
-                    node.renderObject = parentNode.renderObject.material = Cesium.Material.fromType( context, childType );
-                }
+               
+                // some material types will require a context, need to 
+                // create a way of grabbing existing vs creating new
+                var context = undefined;
+
+                // if undefined or the wrong type, create a new material and
+                // set on the parent node 
+                if ( node.renderObject === undefined || ( childType && node.renderObject.type != childType ) ) {
+                    node.renderObject = Cesium.Material.fromType( context, childType );
+                    parentNode.renderObject.setMaterial( node.renderObject );
+                }                
 
             } else if ( isCamera.call( this, protos ) ) {
                 this.state.nodes[ childID ] = node = createNode();
@@ -360,6 +378,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             };
 
         },
+
+        initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childIndex, childName ) {
+
+            if ( this.debug.initializing ) {
+                this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            } 
+        },
          
         // -- deletingNode -------------------------------------------------------------------------
 
@@ -386,7 +412,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
             var value = undefined;
 
-            //this.logger.infox( "creatingProperty", nodeID, propertyName, propertyValue );
+            if ( this.debug.properties ) {
+                this.logger.infox( "C === creatingProperty ", nodeID, propertyName, propertyValue );
+            }
 
             if ( propertyValue !== undefined ) {
                 var node = this.state.nodes[ nodeID ];
@@ -419,7 +447,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             var value = undefined;
 
-            //this.logger.infox( "initializingProperty", nodeID, propertyName, propertyValue );
+            if ( this.debug.properties ) {
+                this.logger.infox( "  I === initializingProperty ", nodeID, propertyName, propertyValue );
+            }
 
             if ( propertyValue !== undefined ) {
                 var node = this.state.nodes[ nodeID ];
@@ -454,13 +484,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var value = propertyValue;
             var node = this.state.nodes[ nodeID ]; 
 
-            //this.logger.infox( "S   settingProperty", nodeID, propertyName, propertyValue );
+            if ( this.debug.properties || this.debug.setting ) {
+                this.logger.infox( "    S === settingProperty ", nodeID, propertyName, propertyValue );
+            }
 
             if ( node ) {
 
-                //if ( nodeID == "http-vwf-example-com-cesium-camera-vwf-camera" )
-                //if ( propertyName == "position" )
-                //    debugger;
+                // if ( node.extendsID == "http-vwf-example-com-cesium-material-vwf" ) {
+                //     debugger;
+                // }
 
                 if ( node.renderObject !== undefined && propertyValue !== undefined ) {
 
@@ -738,16 +770,25 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         case "uniforms":
                             if ( node.renderObject instanceof Cesium.Material ) {
-                                // this can be used 
+                                
+                                // the uniforms properties are based upon the material type
+                                // check the Material spec at http://cesium.agi.com/refdoc.html
+                                // for more information
                                 var uni = node.renderObject.uniforms;
                                 if ( uni ) {
                                     if ( propertyValue instanceof Object ) {
                                         for( var prop in propertyValue ) {
                                             switch( prop ) {
                                                 case "color":
-                                                    var vwfColor = new utility.color( propertyValue );
-                                                    if ( vwfColor ) {                            
-                                                        uni.color = new Cesium.Color( vwfColor.red() / 255, vwfColor.green() / 255, vwfColor.blue() / 255, vwfColor.alpha() );                                                    }                                                      
+                                                    var vwfColor = new utility.color( propertyValue[ prop ] );
+                                                    if ( vwfColor ) { 
+                                                        uni.color = new Cesium.Color( 
+                                                            vwfColor.red() / 255, 
+                                                            vwfColor.green() / 255,
+                                                            vwfColor.blue() / 255, 
+                                                            vwfColor.alpha() 
+                                                        );
+                                                    }                                                      
                                                     break;
                                                 default:
                                                     uni[ prop ] = propertyValue[ prop ];
@@ -1200,7 +1241,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if( !node ) node = this.state.scenes[ nodeID ]; 
             var value = undefined;
 
-            //this.logger.infox( "G   gettingProperty", nodeID, propertyName, propertyValue );
+            if ( this.debug.properties || this.debug.getting ) {
+                this.logger.infox( "   G === gettingProperty ", nodeID, propertyName, propertyValue );
+            }
 
             if( !node ) return undefined;
 
