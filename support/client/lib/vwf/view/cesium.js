@@ -136,7 +136,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         scene.skyAtmosphere.destroy();
                         scene.skyAtmosphere = undefined;
                     }
-                    forceResizeDelay = 80;
+                    //forceResizeDelay = 80;
 
                 } else {
 
