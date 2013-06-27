@@ -26,6 +26,11 @@ properties:
   renderStyle: "3D"
   imageryProvider: "bingAerial"
   terrainProvider:
+  enableLook: 
+  enableRotate: 
+  enableTilt: 
+  enableTranslate: 
+  enableZoom: 
 scripts:
 - |
     this.initialize = function() {

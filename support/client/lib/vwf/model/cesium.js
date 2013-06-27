@@ -36,7 +36,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
 
             // turns on logger debugger console messages 
-            
             this.debug = {
                 "creation": false,
                 "initializing": false,
@@ -426,21 +425,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 this.logger.infox( "C === creatingProperty ", nodeID, propertyName, propertyValue );
             }
 
-            if ( propertyValue !== undefined ) {
+            if ( validPropertyValue.call( this, propertyValue ) ) {
                 var node = this.state.nodes[ nodeID ];
                 if ( node === undefined ) node = this.state.scenes[ nodeID ];
                 if ( node !== undefined ) {
                     switch ( propertyName ) {
-                        case "fabric":
-                            if ( node.cesiumObj instanceof Cesium.Material ) {
-
-                            }
-                            break;
-                        case "type":
-                            if ( node.cesiumObj instanceof Cesium.Material ) {
-                                
-                            }
-                            break;
                         default:
                             value = this.settingProperty( nodeID, propertyName, propertyValue );
                             break;
@@ -461,21 +450,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 this.logger.infox( "  I === initializingProperty ", nodeID, propertyName, propertyValue );
             }
 
-            if ( propertyValue !== undefined ) {
+            if ( validPropertyValue.call( this, propertyValue ) ) {
                 var node = this.state.nodes[ nodeID ];
                 if ( node === undefined ) node = this.state.scenes[ nodeID ];
                 if ( node !== undefined ) {
                     switch ( propertyName ) {
-                        case "fabric":
-                            if ( node.cesiumObj instanceof Cesium.Material ) {
-                                
-                            }
-                            break;
-                        case "type":
-                            if ( node.cesiumObj instanceof Cesium.Material ) {
-                                
-                            }
-                            break;
                         default:
                             value = this.settingProperty( nodeID, propertyName, propertyValue );
                             break;
@@ -504,8 +483,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 //     debugger;
                 // }
 
-                if ( node.cesiumObj !== undefined && propertyValue !== undefined ) {
-
+                if ( node.cesiumObj !== undefined && validPropertyValue.call( this, propertyValue ) ) {
 
                     switch ( propertyName ) {
 
@@ -924,7 +902,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 if ( node ) {
                     var scene = node.scene;
 
-                    if ( ( node.widget !== undefined || node.centralBody !== undefined ) && propertyValue ) {
+                    if ( ( node.widget !== undefined || node.centralBody !== undefined ) && validPropertyValue.call( this, propertyValue ) ) {
 
                         switch ( propertyName ) {
 
@@ -932,19 +910,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 if ( this.kernel.client() != this.kernel.moniker() ) {
                                     var camera = scene.getCamera();
                                     if ( propertyValue.direction ) {
-                                        //this.logger.infox( "S   settingProperty", propertyValue.direction[0], propertyValue.direction[1], propertyValue.direction[2] );
                                         camera.direction = new Cesium.Cartesian3( propertyValue.direction[0], propertyValue.direction[1], propertyValue.direction[2] );
                                     }
                                     if ( propertyValue.position ) { 
-                                        //this.logger.infox( "S   settingProperty", propertyValue.position[0], propertyValue.position[1], propertyValue.position[2] );
                                         camera.position = new Cesium.Cartesian3( propertyValue.position[0], propertyValue.position[1], propertyValue.position[2] );
                                     }
                                     if ( propertyValue.up ) { 
-                                        //this.logger.infox( "S   settingProperty", propertyValue.up[0], propertyValue.up[1], propertyValue.up[2] );
                                         camera.up = new Cesium.Cartesian3( propertyValue.up[0], propertyValue.up[1], propertyValue.up[2] );
                                     }
                                     if ( propertyValue.right ) {
-                                        //this.logger.infox( "S   settingProperty", propertyValue.right[0], propertyValue.right[1], propertyValue.right[2] );
+
                                         camera.right = new Cesium.Cartesian3( propertyValue.right[0], propertyValue.right[1], propertyValue.right[2] );
                                     }
                                     this.state.cameraInfo.getCurrent( camera );
@@ -1212,6 +1187,52 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                     } 
                                 }
                                 break;
+
+                            case "enableLook": 
+                                if( node.scene ) {
+                                    var controller = node.scene.getScreenSpaceController();
+                                    if ( controller ) {
+                                        controller.enableLook = Boolean( propertyValue );
+                                    }
+                                }
+                                break;
+
+                            case "enableRotate": 
+                                if( node.scene ) {
+                                    var controller = node.scene.getScreenSpaceController();
+                                    if ( controller ) {
+                                        controller.enableRotate = Boolean( propertyValue );
+                                    }
+                                }
+                                break;
+
+                            case "enableTilt":
+                                if( node.scene ) {
+                                    var controller = node.scene.getScreenSpaceController();
+                                    if ( controller ) {
+                                        controller.enableTilt = Boolean( propertyValue );
+                                    }
+                                }
+                                break; 
+
+                            case "enableTranslate":
+                                if( node.scene ) {
+                                    var controller = node.scene.getScreenSpaceController();
+                                    if ( controller ) {
+                                        controller.enableTranslate = Boolean( propertyValue );
+                                    }
+                                } 
+                                break;
+
+                            case "enableZoom": 
+                                if( node.scene ) {
+                                    var controller = node.scene.getScreenSpaceController();
+                                    if ( controller ) {
+                                        controller.enableZoom = Boolean( propertyValue );
+                                    }
+                                }
+                                break;
+
 
                             case "controlClient":
                                 node.controlClient = propertyValue;
@@ -1613,6 +1634,47 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     break;   
 
+                case "enableLook": 
+                    if( node.scene ) {
+                        var controller = node.scene.getScreenSpaceController();
+                        if ( controller ) {
+                            value = controller.enableLook;
+                        }
+                    }
+                    break;
+                case "enableRotate": 
+                    if( node.scene ) {
+                        var controller = node.scene.getScreenSpaceController();
+                        if ( controller ) {
+                            value = controller.enableRotate;
+                        }
+                    }
+                    break;
+                case "enableTilt":
+                    if( node.scene ) {
+                        var controller = node.scene.getScreenSpaceController();
+                        if ( controller ) {
+                            value = controller.enableTilt;
+                        }
+                    }
+                    break; 
+                case "enableTranslate":
+                    if( node.scene ) {
+                        var controller = node.scene.getScreenSpaceController();
+                        if ( controller ) {
+                            value = controller.enableTranslate;
+                        }
+                    } 
+                    break;
+                case "enableZoom": 
+                    if( node.scene ) {
+                        var controller = node.scene.getScreenSpaceController();
+                        if ( controller ) {
+                            value = controller.enableZoom;
+                        }
+                    }
+                    break;
+
 
             }
 
@@ -1890,6 +1952,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     function arrayToMatrix( arry ) {
         return Cesium.Matrix4.fromRowMajorArray( arry );
     }
+
+    function validPropertyValue( obj ) {
+      var objType = ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
+      return ( objType != 'null' && objType != 'undefined' );
+    }
+
 });
 
 
