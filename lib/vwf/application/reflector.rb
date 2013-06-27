@@ -159,10 +159,8 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
       logger.debug "VWF::Application::Reflector#receive #{id} received state"
 
-      time = session[:pending][:time]
-
       fields_setState = {
-        "time" => time,
+        "time" => session[:pending][:time],
         "action" => "setState",
         "parameters" => [ fields["result"] ]
       }
@@ -182,7 +180,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
         # state from the reference client.
 
         session[:pending][:messages].each do |fields_pending|
-          client.send fields_pending.merge "time" => time
+          client.send fields_pending
         end
 
         # client.send "time" => time, "action" => "hashState", "respond" => true
