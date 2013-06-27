@@ -60,7 +60,7 @@ new (function(){
 		geo.verticesNeedUpdate = true;
 		geo.computeBoundingSphere();
 		geo.computeBoundingBox();
-				
+		//geo.computeVertexNormals(true);		
 		geo.normalsNeedUpdate = true;
 		geo.dirtyMesh = true;
 		if(cb)

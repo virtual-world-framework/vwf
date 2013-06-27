@@ -5,7 +5,7 @@
 			var self = this;
 			var totalmintilesize = 16;
 			var minTileSize = totalmintilesize;
-			var maxTileSize = 2048;
+			var maxTileSize = 8192;
 			var worldExtents = 128000;
 			var updateEvery = 15;
 	
@@ -203,14 +203,20 @@
 					var campos = _Editor.findcamera().position;
 					var x = campos.x;
 					var y = campos.y;
-					var minRes = Math.pow(2,Math.floor(Math.log(campos.z)/Math.LN2)-1);
+					
+					var hit = this.getRoot().CPUPick([x,y,10000],[0,0,-1],{});
+					var height = 0;
+					if(hit && hit[0])
+						height = hit[0].point[2];
+					var minRes = Math.pow(2,Math.floor(Math.log(Math.max(1.0,campos.z - height))/Math.LN2)-1);
+					minTileSize = Math.max(minRes,totalmintilesize);
 					var maxRes = Math.pow(2,Math.floor(Math.log(campos.z)/Math.LN2)+4);
-					 if((this.containingList.indexOf(this.quadtree.containing([x,y])) == -1 || this.currentMinRes != minRes) && this.needRebuild.length == 0)
+					 if((this.containingList.indexOf(this.quadtree.containing([x,y])) == -1 || this.currentMinRes != minTileSize) && this.needRebuild.length == 0)
 					 {
 						
 						
 						
-						minTileSize = Math.max(minRes,totalmintilesize);
+						
 						this.currentMinRes = minTileSize;
 						//maxTileSize = Math.max(maxRes,2048);
 						this.quadtree.updateMinMax(minTileSize,maxTileSize);

@@ -487,13 +487,15 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 							for(var i=0; i < n.children.length; i++)
 							n.children[i].destroy(removelist);
 							n.children = [];
+							n._issplit =  false;
 							delete n.setForDesplit;
 						}
 					});
 				}
-				this.isSplit = function() {if(this.setForDesplit) return false; return this.children.length > 0;}
+				this.isSplit = function() {if(this.setForDesplit) return false; return this._issplit;}
 				this.split = function(removelist)
 				{
+					
 					if(this.setForDesplit)
 					{
 						delete this.setForDesplit;
@@ -525,7 +527,7 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 					this.children[NW] = nw;
 					this.children[NE] = ne;
 					
-					
+					this._issplit =  true;
 				}
 				this.updateMinMax = function(min,max)
 				{
@@ -542,6 +544,7 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 						
 					
 					//});
+					
 					for(var i=0; i < this.children.length; i++)
 						this.children[i].deSplit(removelist);
 					this.setForDesplit = true;

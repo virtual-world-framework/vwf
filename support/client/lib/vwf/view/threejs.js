@@ -355,8 +355,21 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 
             }
 			renderer.clear();
-			renderer.render(backgroundScene,sceneNode.camera.threeJScameras[sceneNode.camera.ID]);
-            renderer.render(scene,sceneNode.camera.threeJScameras[sceneNode.camera.ID]);
+			var cam = sceneNode.camera.threeJScameras[sceneNode.camera.ID]
+			var far = cam.far;
+			var near = cam.near;
+			
+			renderer.render(backgroundScene,cam);
+			renderer.clear(false,true,false);
+			cam.near = cam.far;
+			cam.far = far * 10;
+			cam.updateProjectionMatrix();
+			renderer.render(scene,cam);
+			renderer.clear(false,true,false);
+			cam.near = near;
+			cam.far = far;
+			cam.updateProjectionMatrix();
+            renderer.render(scene,cam);
 			$(document).trigger('postrender',[vp,wh,ww]);
 			sceneNode.lastTime = now;
         };

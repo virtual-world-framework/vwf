@@ -107,11 +107,12 @@ function TileCache()
 						
 						"vec4 getMix(vec3 norm)" +
 						"{"+
-						"float side = pow(abs(dot(norm,(viewMatrix * vec4(0.0,0.0,1.0,0.0)).xyz)),4.0 * min(3.0,abs(npos.z/55.0)));\n"+
+						"float side = min(1.0,pow(1.0-abs(dot(norm,(viewMatrix * vec4(0.0,0.0,1.0,0.0)).xyz)),3.0) * 10.0);\n"+
 							"float bottom = 1.0-smoothstep(-20.0,60.0,npos.z);\n"+
 							"float top = clamp(0.0,1.0,(smoothstep(100.0,140.0,npos.z)));\n"+
-							"float middle = 1.0 - bottom - top;\n"+
-							"vec4 mixvec =  normalize(vec4(side*3.0,bottom,middle,top)) ;\n"+
+							"float middle = clamp(0.0,1.0,(1.0 - bottom - top));\n"+
+							"bottom = clamp(0.0,1.0,mix(bottom,0.0,npos.z/100.0));\n"+
+							"vec4 mixvec =  normalize(vec4(bottom,middle,side* 4.0,top)) ;\n"+
 							"return mixvec;\n"+
 						"}"+
 						"vec4 getTexture(vec3 coords, vec3 norm, vec4 mixvec)" +
@@ -119,7 +120,7 @@ function TileCache()
 							//"coords /= 100.0;\n"+
 							"vec2 c0 = (coords.xy/10.0)/2.0 ;\n"+
 							"vec2 c1 = (coords.xy/10.0)/2.0 ;\n"+
-							"c1.y *= .5;\n"+
+							"c1.y /= .5;\n"+
 							"vec2 c2 = (coords.xy/10.0)/2.0 ;\n"+
 							"vec2 c3 = (coords.xy/30.0)/2.0 ;\n"+
 							"vec2 c0a = (coords.xy/20.0)/2.0 ;\n"+
@@ -132,26 +133,28 @@ function TileCache()
 							"vec4 snow = .5*texture2D(snowSampler,c3) +  .5*texture2D(snowSampler,c3a);\n"+
 							"vec4 noise = texture2D(noiseSampler,c0);\n"+
 							
-							"grass = mix(grass,cliff/4.0,noise.r*noise.r*noise.r);"+
+							"vec4 grass1 = mix(grass,cliff/4.0,noise.r*noise.r*noise.r);"+
 							"snow = mix(snow,dirt/4.0,noise.g*noise.r*noise.b);"+
 							
-							"return mixvec.r * grass + mixvec.g * grass + mixvec.b * cliff + mixvec.a * snow;\n"+
+							"return mixvec.r * grass1 + mixvec.g * grass1 + (mixvec.b) * cliff/2.0 + mixvec.a * snow;\n"+
 						"}"+
 						"void main() {\n"+
+						"	vec3 nn = normalize(viewMatrix * vec4(wN,0.0)).xyz;\n"+
 						"	vec3 light = vec3(0.0,0.0,0.0);\n"+
 						"	vec4 ambient = vec4(0.5,0.5,0.5,1.0);\n"+
-						"vec4 mixvec =  getMix(n) ;\n"+
+						"vec4 noise = texture2D(noiseSampler,(npos.xy/10.0)/2.0);\n"+
+						"vec4 mixvec =  getMix(nn + (noise.rgb - .5)/10.0) ;\n"+
 						"	#if MAX_DIR_LIGHTS > 0\n"+
 						"   vec3 vLightDir = (viewMatrix * vec4(directionalLightDirection[0],0.0)).xyz;\n"+
 						"   vec3 vEyeDir = (viewMatrix * vec4(normalize(pos-cameraPosition ),0.0)).xyz;\n"+
-						"   vec3 vReflectDir = reflect(vLightDir,n);\n"+
-						"   float phong =pow( max(0.0,dot(vReflectDir,vEyeDir)),8.0 )* mixvec.a;\n"+
-						"	light += directionalLightColor[0] * clamp(0.0,1.0,dot(n, vLightDir));\n"+
+						"   vec3 vReflectDir = reflect(vLightDir,nn);\n"+
+						"   float phong =pow( max(0.0,dot(vReflectDir,vEyeDir)),4.0 )* mixvec.a;\n"+
+						"	light += directionalLightColor[0] * clamp(0.0,1.0,dot(nn, vLightDir));\n"+
 						"	#endif\n"+
 						
 						"	vec4 diffuse = getTexture(npos,n,mixvec);\n"+
 						"	diffuse.a = 1.0;\n"+
-						"   gl_FragColor = ambient * diffuse + diffuse * vec4(light.xyz,1.0) + phong * vec4(1.0,1.0,1.0,1.0);\n"+
+						"   gl_FragColor = ambient * diffuse + diffuse * vec4(light.xyz,1.0) + phong * vec4(0.4,0.4,0.4,1.0);\n"+
 						"#ifdef USE_FOG\n"+
 
 							"float depth = gl_FragCoord.z / gl_FragCoord.w;\n"+
@@ -171,6 +174,7 @@ function TileCache()
 							//"gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );\n"+
 							"horizonColor = fogColor;\n"+
 							"zenithColor = vec3(0.78, 0.82, 0.999);\n"+
+							//"gl_FragColor.xyz = nn;\n"+
 							"gl_FragColor.xyz = aerialPerspective(gl_FragColor.xyz, distance(pos,cameraPosition),cameraPosition.xzy, normalize(pos-cameraPosition).xzy);\n"+
 						"#endif\n"+
 					//	"gl_FragColor = vec4(debug,1.0);\n"+

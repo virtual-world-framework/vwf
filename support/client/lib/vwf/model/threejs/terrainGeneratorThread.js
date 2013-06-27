@@ -52,7 +52,7 @@ this.generateTerrainSimWorker = function(datain,buffers)
 	var 	vertoffset = 1;
 			var invmat = new THREE.Matrix4();
 			
-			invmat = invmat.getInverse(matrix);
+			invmat = invmat.getInverse(matrix.clone().setPosition(new THREE.Vector3()));
 			invmat.elements[12] = 0;
 			invmat.elements[13] = 0;
 			invmat.elements[14] = 0;
@@ -76,27 +76,41 @@ this.generateTerrainSimWorker = function(datain,buffers)
 				{
 				
 					var i = j * res + l;
-					var vertn = vertices[i];
+					var vertn = vertices[i].clone();
 					
-					
+					vertn = vertn.applyMatrix4(matrix);
 					
 					var vertx0 = new THREE.Vector3(vertn.x-vertoffset,vertn.y,vertn.z);
 					var verty0 = new THREE.Vector3(vertn.x,vertn.y-vertoffset,vertn.z);
 					var vertx1 = new THREE.Vector3(vertn.x+vertoffset,vertn.y,vertn.z);
 					var verty1 = new THREE.Vector3(vertn.x,vertn.y+vertoffset,vertn.z);
-					var verts = [vertn,vertx0,verty0,vertx1,verty1];
+					var vert11 = new THREE.Vector3(vertn.x,vertn.y+vertoffset,vertn.z);
+					var vert00 = new THREE.Vector3(vertn.x,vertn.y+vertoffset,vertn.z);
+					var verts = [vertn,vertx0,verty0,vertx1,verty1,vert11,vert00];
+					var norms = [];
 					for(var k = 0; k < verts.length; k++)
 					{
 						
 						var vert = verts[k].clone();
-						vert = vert.applyMatrix4(matrix);
-						verts[k].z = this.terrainAlgorithm.displace(vert,matrix);
+						var vert2 = verts[k].clone();
+						var vert3 = verts[k].clone();
+						vert2.x += vertoffset;
+						vert3.y += vertoffset;
+						var z1 = this.terrainAlgorithm.displace(vert,matrix);
+						var z2 = this.terrainAlgorithm.displace(vert2,matrix);
+						var z3 = this.terrainAlgorithm.displace(vert3,matrix);
+						
+						var n = new THREE.Vector3((z1-z2),(z1-z3),vertoffset)
+						norms.push(n);
+						verts[k].z = z1;
 					}
-					
+					vertices[i].z = vertn.z
 					//var n = vertn.clone().sub(vertx).cross(vertn.clone().sub(verty)).normalize();
-					var n = new THREE.Vector3(-(vertx1.z - vertx0.z),-(verty1.z - verty0.z),2*vertoffset)
+					var n = norms[1].add(norms[2]).add(norms[3]).add(norms[4]).add(norms[5]);
+					n = n.multiplyScalar(1/6);
 					n.normalize();
 					//n = n.applyMatrix4(invmat);
+					n.normalize();
 					normals[j][l] = n;
 					heights[j][l] = vertn.z;
 				}	
