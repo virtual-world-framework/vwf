@@ -23,9 +23,16 @@
 <div id="solitaire-message">
 </div>
 
+<!-- The following div provides status information to the user from the selection table activity.-->
+<div id="selection-panel" style="position:absolute; bottom: 10%; top: 80%; right:10%; left:10%; background:#AAA;opacity:1.0;text-align:left;">
+  <span>Marble Type:</span><span id="selection-panel-marble-name">Nothing Selected</span><span id="selection-panel-marble-image" style="margin-left:5px;vertical-align:-50%"></span><br>
+  <button id="selection-deselect">Deselect Marble</button>
+</div>
+
+
 
 <script type="text/javascript">
-    
+
   var view = this;
 	// The user login dialog
   $( '#login' ).dialog( {
@@ -60,6 +67,10 @@
   // During page load, hide the solitaire panel.
   $( '#solitaire-panel' ).hide( );
 
+  // During page load, hide the selection panel.
+  $( '#selection-panel' ).hide( );
+
+  
   // When the solitaire New Game button is clicked, call the solitaireNewGame method on the
   // solitaire game by way of this views user, using the callActivityMethod user method.
   $( '#solitaire-newgame' ).click( function ( ) {
@@ -76,7 +87,21 @@
     } 
   } );
 
+  var updateSelectionPanel = function ( marbleName, marbleImage ) {
+    $( '#selection-panel-marble-name' ).html( marbleName );
+    if ( marbleImage != undefined ) {
+      $( '#selection-panel-marble-image' ).html( "<img src='" + marbleImage + "' alt='" + marbleName + " image' style='height:50%'/>" );
+    }
+    else {
+      $( '#selection-panel-marble-image' ).html( "" );
+    }
+  };
 
+  $( '#selection-deselect' ).click( function ( ) {
+    if ( view.myUserObjectId != undefined ) {
+      vwf_view.kernel.callMethod( view.myUserObjectId, "callActivityMethod", [ "selectionDeselect", [ ] ] );
+    }
+  } );
 
   // The event handler that is called whenever an event is fired from the model
   vwf_view.firedEvent = function( nodeId, eventName, eventParameters ) {
@@ -101,6 +126,20 @@
       //div.
       $( '#solitaire-message' ).html( eventParameters[ 1 ] );
       $( '#solitaire-message' ).dialog( { 'title':'Solitaire', 'height':'auto', 'modal':true, 'resizable':false, 'draggable':false } );
+    }
+    else if ( ( eventName == "selectionUserJoined" ) && ( eventParameters[ 0 ] == view.myUserObjectId ) ) {
+      //If the event that triggered the event handler was this user joining an instance of the
+      //solitaire activity, then show the solitaire panel.
+      updateSelectionPanel( eventParameters[ 1 ], eventParameters[ 2 ] );
+      $( '#selection-panel' ).show( );
+    }
+    else if ( ( eventName == "selectionUserLeft" ) && ( eventParameters[ 0 ] == view.myUserObjectId ) ) {
+      //If the event that triggered the event handler was this user leaving an instance of the
+      //solitaire activity, then hide the solitaire panel.
+      $( '#selection-panel' ).hide( );
+    }
+    else if ( ( eventName == "selectionMadeChoice" ) && ( eventParameters[ 0 ] == view.myUserObjectId ) ) {
+      updateSelectionPanel( eventParameters[ 1 ], eventParameters[ 2 ] );
     }
     else if ( ( view.myUserObjectId ) && ( clientThatIssuedEvent == me ) ) {
       //If the event originated from me, and was not already caught.

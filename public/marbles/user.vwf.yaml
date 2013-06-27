@@ -49,7 +49,7 @@ properties:
 # SelectedMarbles are the current stand in for how a users selected marbles for games are stored in
 # the user model. This will need to be updated and refined once activities that employ 'user owned'
 # marbles are implemented, and the design needs for the marbles can be better defined.
-  selectedMarbles: ""
+  selectedMarbles: undefined
 methods:
 # The four 'handle' methods are called by the correlated view when the appropriate event is raised.
 # The events will either be handled directly by the user itself, or if the user is currently 
@@ -83,7 +83,7 @@ scripts:
     }
     objectLookup = {};
     objectLookup[ rootNode.id ] = rootNode;
-    objectLookupHelper( objectLookup, rootNode );
+    this.objectLookupHelper( objectLookup, rootNode );
     return objectLookup[ nodeId ];
   };
 
