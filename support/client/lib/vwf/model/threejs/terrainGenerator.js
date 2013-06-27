@@ -121,7 +121,7 @@ new (function(){
 				this.currentBuffers[i]=[e.data.data.vertices,e.data.data.normals,e.data.data.everyOtherZ,e.data.data.everyOtherNormal];
 				//if(!this.readers[i])
 				{
-					console.log("init readers " + i);
+					
 					this.readers[i] = [];
 					this.readers[i][0] = new Float32Array(e.data.data.vertices);
 					this.readers[i][1] = new Float32Array(e.data.data.normals);

@@ -4,6 +4,7 @@
 			var NW = 3;
 			var NE = 2;
 			var self;
+ var perfectstitch = true;
  
 function quadtreesetSelf(s) { self = s};
 function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
@@ -370,12 +371,22 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 					{
 						//if I'm a leaf node, but the side I need (for sticthing) is not the one I have, or I have no mesh (because I'm new) generate my mesh
 						var neededSide = this.sideNeeded();
-						if(!this.mesh || neededSide != this.side)
+						
+						if(this.mesh && (neededSide != this.side && perfectstitch == false) )
+						{
+							this.side = neededSide;
+							this.mesh.material.uniforms.side.value = this.side;
+							
+							
+							cb(this);
+							return;
+						}
+						else if(!this.mesh || (neededSide != this.side) )
 						{
 							//if were just switching sides, backup the old mesh
 							//it will be shown when the new one is ready
 							this.badsidemesh = null;
-							if(this.mesh && neededSide != this.side)
+							if(this.mesh && neededSide != this.side && perfectstitch == true)
 							{
 								this.debug(1,0,0);
 								this.badsidemesh = this.mesh;
@@ -392,12 +403,20 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 								
 								this.side = neededSide;
 								//get the right mesh off the cache
-								this.mesh = self.TileCache.getMesh(res,this.meshNeeded(this.side));
+								if(perfectstitch == true)
+									this.mesh = self.TileCache.getMesh(res,this.meshNeeded(this.side));
+								else
+									this.mesh = self.TileCache.getMesh(res,this.meshNeeded(0));
+								if(perfectstitch == true)
+									this.mesh.material.uniforms.side.value = this.side;	
+								else
+									this.mesh.material.uniforms.side.value = -1;	
 								//scale and rotate to fit
 								this.mesh.scale.x = scale/100;
 								this.mesh.scale.y = scale/100;
 								this.mesh.scale.z = 1;//scale/100;
-								this.mesh.rotation.z = this.getRotation(this.side);
+								if(perfectstitch == true)
+									this.mesh.rotation.z = this.getRotation(this.side);
 								this.debug(0,0,0);
 								this.mesh.quadnode = this;
 								if(self.removelist.indexOf(this.mesh)>-1)
@@ -492,7 +511,7 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 						}
 					});
 				}
-				this.isSplit = function() {if(this.setForDesplit) return false; return this._issplit;}
+				this.isSplit = function() {if(this.setForDesplit) return false; return this.children.length > 0}
 				this.split = function(removelist)
 				{
 					

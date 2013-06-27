@@ -32,16 +32,32 @@ function TileCache()
 
 						"varying vec3 debug;\n"+
 						"uniform vec3 debugColor;\n"+
+						"uniform float side;\n"+
 						"attribute vec3 everyOtherNormal;\n"+
 						"attribute float everyOtherZ;\n"+
 						"void main() {\n"+
 						" pos = (modelMatrix * vec4(position,1.0)).xyz; \n"+
 						"npos = pos;\n"+
 						"npos.z += getNoise(pos.xy*200.0)/50.0; \n"+
+						
+						"float  edgeblend = 0.0;"+
+						
+						"debug = vec3(0.0,0.0,0.0);\n"+
+						" if(side == 1.0 && position.y > 49.0) {edgeblend = 1.0; debug = vec3(1.0,1.0,1.0);}\n" +
+						" if(side == 2.0 && position.y < -49.0) {edgeblend = 1.0; debug = vec3(1.0,1.0,1.0);}\n" +
+						" if(side == 3.0 && position.x < -49.0) {edgeblend = 1.0; debug = vec3(1.0,1.0,1.0);}\n" +
+						" if(side == 4.0 && position.x > 49.0) {edgeblend = 1.0; debug = vec3(1.0,1.0,1.0);}\n" +
+						" if(side == 5.0 && (position.y > 49.0 || position.x > 49.0)) {edgeblend = 1.0; debug = vec3(1.0,1.0,1.0);}\n" +
+						" if(side == 5.0 && (position.y > 49.0 || position.x > 49.0)) {edgeblend = 1.0; debug = vec3(1.0,1.0,1.0);}\n" +
+						" if(side == 6.0 && (position.y < -49.0 || position.x > 49.0)) {edgeblend = 1.0; debug = vec3(1.0,1.0,1.0);}\n" +
+						" if(side == 7.0 && (position.y > 49.0 || position.x < -49.0)) {edgeblend = 1.0; debug = vec3(1.0,1.0,1.0);}\n" +
+						" if(side == 8.0 && (position.y < -49.0 || position.x < -49.0)) {edgeblend = 1.0; debug = vec3(1.0,1.0,1.0);}\n" +
+						
+						" float z = mix(everyOtherZ,position.z,blendPercent);\n"+
 						"wN = mix(everyOtherNormal,normal,blendPercent);\n"+
+						"if(edgeblend == 1.0) {z=everyOtherZ;wN = everyOtherNormal; }\n"+
 						"n = normalMatrix *  wN\n;"+
 						"n = normalize(n);\n"+
-						" float z = mix(everyOtherZ,position.z,blendPercent);\n"+
 						"   vec4 mvPosition = modelViewMatrix * vec4( position.x,position.y,z, 1.0 );\n"+
 					
 						"debug = debugColor;\n"+
@@ -217,6 +233,7 @@ function TileCache()
 							dirtSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/dirt.jpg" ) },
 							snowSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/snow.jpg" ) },
 							noiseSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/bestnoise.png" ) },
+							"side" : { type: "f", value: 0 },
 							"fogDensity" : { type: "f", value: 0.00025 },
 							"fogNear" : { type: "f", value: 1 },
 							"fogFar" : { type: "f", value: 2000 },
@@ -238,7 +255,7 @@ function TileCache()
 						});
 						mat.lights = true;
 						mat.fog = true;
-						
+						//mat.wireframe = true;
 						uniforms_default.grassSampler.value.wrapS = uniforms_default.grassSampler.value.wrapT = THREE.RepeatWrapping;
 						uniforms_default.cliffSampler.value.wrapS = uniforms_default.cliffSampler.value.wrapT = THREE.RepeatWrapping;
 						uniforms_default.dirtSampler.value.wrapS = uniforms_default.dirtSampler.value.wrapT = THREE.RepeatWrapping;
@@ -691,7 +708,7 @@ function TileCache()
 					newtile.side = side;
 					newtile.receiveShadow = true;
 					newtile.castShadow = false;
-					
+					newtile.material.uniforms.side.value = side;
 					for(var i = 0; i < newtile.geometry.vertices.length; i++)
 					{
 						newtile.material.attributes.everyOtherZ.value.push(0);

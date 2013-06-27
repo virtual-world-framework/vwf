@@ -3,12 +3,12 @@
 		{
 			
 			var self = this;
-			var totalmintilesize = 16;
+			var totalmintilesize = 32;
 			var minTileSize = totalmintilesize;
-			var maxTileSize = 8192;
+			var maxTileSize = 2048;
 			var worldExtents = 128000;
 			var updateEvery = 15;
-	
+			
 			
 			
 	
@@ -211,7 +211,7 @@
 					var minRes = Math.pow(2,Math.floor(Math.log(Math.max(1.0,campos.z - height))/Math.LN2)-1);
 					minTileSize = Math.max(minRes,totalmintilesize);
 					var maxRes = Math.pow(2,Math.floor(Math.log(campos.z)/Math.LN2)+4);
-					 if((this.containingList.indexOf(this.quadtree.containing([x,y])) == -1 || this.currentMinRes != minTileSize) && this.needRebuild.length == 0)
+					 if((this.containingList.indexOf(this.quadtree.containing([x,y])) == -1 || this.currentMinRes != minTileSize))
 					 {
 						
 						
@@ -222,9 +222,11 @@
 						this.quadtree.updateMinMax(minTileSize,maxTileSize);
 						//cant resize the max side on the fly -- tiles in update have already made choice
 						
-						if (self.needRebuild.length > 0)
+						if (self.needRebuild.length > 0 || this.terrainGenerator.countBusyWorkers() > 0)
 						{	
 							this.cancelUpdates();
+							//wait for next loop
+							return;
 						}
 						
 							
@@ -378,13 +380,7 @@
 						
 					
 					self.rebuild();	
-					//	if(self.buildTimeout)
-					//		window.clearTimeout(self.buildTimeout);
-					//	if (self.needRebuild.length > 0)
-					//	{	
-					//		self.buildTimeout = window.setTimeout(self.rebuild,3);
-					//		
-					//	}
+					
 						
 					}
 					
@@ -510,7 +506,7 @@
 			
 			self.rebuild = function()
 			{
-				console.log(self.needRebuild.length  , self.terrainGenerator.countFreeWorkers());
+				
 				while(self.terrainGenerator.countFreeWorkers() > 0 && self.needRebuild.length > 0)
 			//	if (self.needRebuild.length > 0 && self.terrainGenerator.countFreeWorkers() > 0)
 				{

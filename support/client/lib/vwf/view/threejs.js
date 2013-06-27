@@ -369,7 +369,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			cam.near = near;
 			cam.far = far;
 			cam.updateProjectionMatrix();
-            renderer.render(scene,cam);
+			renderer.render(scene,cam);
 			$(document).trigger('postrender',[vp,wh,ww]);
 			sceneNode.lastTime = now;
         };
