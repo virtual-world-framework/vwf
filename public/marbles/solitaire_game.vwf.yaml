@@ -85,6 +85,7 @@ methods:
   createMarbles:
   incrementLock:
   decrementLock:
+  handleInit:
 events:
   # The solitaireUserJoined and solitaireUserLeft events are triggered when a user joins or
   # leaves the solitaire game. They are used to trigger the solitaire panel being shown/hidden
@@ -99,8 +100,15 @@ events:
 scripts:
  - |
   //When initialized, create marbles.
+  this.handleInit = function( ) {
+    if ( this.children.length == 0 ) {
+      this.createMarbles( );
+    }
+  }
   this.initialize = function( ) {
-    this.createMarbles( );
+    if ( this.id != "solitaire_game.vwf" ) {
+      this.future(3.0).handleInit();
+    }
   };
 
   this.incrementLock = function() {

@@ -81,13 +81,13 @@ children:
         type: model/vnd.collada+xml
         properties:
           transform: [ 0.7071068, 0.7071068, 0, 0, -0.7071068, 0.7071068, 0, 0, 0, 0, 1, 0, 3.941558, 9.861572, 0.3974555, 1 ]
-#      solitaire_board_1:
-#        extends: solitaire_game.vwf
-#        source: models/solitaire_board.DAE
-#        type: model/vnd.collada+xml
-#        properties:
-#          rotation: [ 1, 0, 0, 0 ]
-#          translation: [ -7.429945, -7.816388, 0.8209709 ]
+      solitaire_board_1:
+        extends: solitaire_game.vwf
+        source: models/solitaire_board.DAE
+        type: model/vnd.collada+xml
+        properties:
+          rotation: [ 1, 0, 0, 0 ]
+          translation: [ -7.429945, -7.816388, 0.8209709 ]
       solitaire_board_2:
         extends: solitaire_game.vwf
         source: models/solitaire_board.DAE
