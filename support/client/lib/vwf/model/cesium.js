@@ -324,22 +324,26 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         break;
 
                     case "model/vnd.cesium.czml+xml":
-                        node.dynObjs = new Cesium.DynamicObjectCollection();
+                        if ( sceneNode && sceneNode.widget ) {
+                            sceneNode.widget.loadCzml( childSource );
+                        } else {
+                            node.dynObjs = new Cesium.DynamicObjectCollection();
 
-                        // Create the standard CZML visualizer collection
-                        node.visualizers = Cesium.VisualizerCollection.createCzmlStandardCollection( sceneNode.scene, node.dynObjs );
+                            // Create the standard CZML visualizer collection
+                            node.visualizers = Cesium.VisualizerCollection.createCzmlStandardCollection( sceneNode.scene, node.dynObjs );
 
-                        // Process the CZML, which populates the collection with DynamicObjects
-                        Cesium.processCzml( childSource, node.dynObjs );
+                            // Process the CZML, which populates the collection with DynamicObjects
+                            Cesium.processCzml( childSource, node.dynObjs );
 
-                        //// Figure out the time span of the data
-                        //var availability = dynObjs.computeAvailability();
+                            //// Figure out the time span of the data
+                            //var availability = dynObjs.computeAvailability();
 
-                        //// Set the clock range
-                        //clock.startTime = availability.start.clone();
-                        //clock.currentTime = availability.start.clone();
-                        //clock.stopTime = availability.stop.clone();
-                        //clock.clockRange = Cesium.ClockRange.LOOP_STOP;
+                            //// Set the clock range
+                            //clock.startTime = availability.start.clone();
+                            //clock.currentTime = availability.start.clone();
+                            //clock.stopTime = availability.stop.clone();
+                            //clock.clockRange = Cesium.ClockRange.LOOP_STOP;
+                        }
                         break;
 
                     default:
@@ -978,6 +982,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 //While some sites have CORS on, not all browsers implement it properly, so a proxy is needed anyway;
                                 var proxyIfNeeded = Cesium.FeatureDetection.supportsCrossOriginImagery() ? undefined : proxy;                    
                                 
+                                debugger;
+
                                 switch ( propertyValue ) {
                                     case "bingAerial":
                                         imageProvider = new Cesium.BingMapsImageryProvider({
