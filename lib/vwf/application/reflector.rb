@@ -34,7 +34,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
   def connect
 
-    # first
+    # The first client to join the instance.
 
     if clients.length == 1 # coming from 0
 
@@ -76,11 +76,13 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
       end
 
-    # second
+    # The second client to join the instance, or the next client to join after earlier clients have
+    # fully connected.
 
     elsif session[:pending].nil?
 
-      # xxx
+      # Create space to store clients waiting for replication and any messages that we receive
+      # before they are fully connected.
 
       logger.debug "VWF::Application::Reflector#connect #{id} " +
           "connecting and suspending (1 suspended)"
@@ -106,9 +108,12 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
         "action" => "getState",
         "respond" => true
 
-    # pending
+    # Additional clients that join the instance when at least one earlier client is waiting for
+    # replication.
 
     else
+
+      # Save this client with the others waiting for replication.
 
       logger.debug "VWF::Application::Reflector#connect #{id} " +
           "connecting and suspending (#{ session[:pending][:clients].length + 1 } suspended)"
@@ -141,8 +146,6 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
     end
 
   end
-
-  # xxx
 
   def receive fields
 
@@ -221,40 +224,46 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
   def disconnect
 
-    if session[:pending]
+    # Just log the disconnection if no clients are waiting for replication.
 
-      if session[:pending][:clients].include? self
-
-        logger.debug "VWF::Application::Reflector#disconnect #{id} " +
-          "disconnecting (suspended) (#{ session[:pending][:clients].length } suspended)"
-
-        session[:pending][:clients].delete self
-        session.delete :pending if session[:pending][:clients].empty?
-
-      elsif session[:pending][:source] == self
-
-        logger.debug "VWF::Application::Reflector#disconnect #{id} " +
-          "disconnecting (source) (#{ session[:pending][:clients].length } suspended)"
-
-        # The disconnecting client was to provide state data for pending clients. Put the pending
-        # clients aside so that we can replay their connections and choose a new source.
-
-        session[:stasis] = session[:pending][:clients]
-        session.delete :pending
-
-      else
-
-        logger.debug "VWF::Application::Reflector#disconnect #{id} " +
-          "disconnecting (#{ session[:pending][:clients].length } suspended)"
-
-      end
-
-    else
+    if ! session[:pending]
 
       logger.debug "VWF::Application::Reflector#disconnect #{id} " +
           "disconnecting"
 
+    # If the disconnecting client was waiting for replication, remove it from the `pending` list.
+    # Completely remove the `pending` object if no other clients are waiting.
+
+    elsif session[:pending][:clients].include? self
+
+      logger.debug "VWF::Application::Reflector#disconnect #{id} " +
+        "disconnecting (suspended) (#{ session[:pending][:clients].length } suspended)"
+
+      session[:pending][:clients].delete self
+      session.delete :pending if session[:pending][:clients].empty?
+
+    # If the disconnecting client was the replication source for other clients waiting for
+    # replication, put the pending clients aside so that we can replay their connections and choose
+    # a new source.
+
+    elsif session[:pending][:source] == self
+
+      logger.debug "VWF::Application::Reflector#disconnect #{id} " +
+        "disconnecting (source) (#{ session[:pending][:clients].length } suspended)"
+
+      session[:stasis] = session[:pending][:clients]
+      session.delete :pending
+
+    # Otherwise, just log the disconnection.
+
+    else
+
+      logger.debug "VWF::Application::Reflector#disconnect #{id} " +
+        "disconnecting (#{ session[:pending][:clients].length } suspended)"
+
     end
+
+    # Stop the timer after the last disconnection from this instance.
 
     if clients.length == 1 # going to 0
       cancel_tick
