@@ -107,7 +107,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 this.state.nodes[ childID ] = node = createNode();
                 parentNode = findParent.call( this, nodeID );
                 if ( parentNode && parentNode.scene ) {
-                    parentNode.scene.skyAtmosphere = new Cesium.SkyAtmosphere();
+                    if ( !parentNode.scene.skyAtmosphere ) {
+                        parentNode.scene.skyAtmosphere = new Cesium.SkyAtmosphere();
+                    }
                     node.cesiumObj = parentNode.scene.skyAtmosphere;
                 }
 
@@ -116,15 +118,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 this.state.nodes[ childID ] = node = createNode();
                 parentNode = findParent.call( this, nodeID );
                 if ( parentNode && parentNode.scene ) {
-                    var skyBoxBaseUrl = '../vwf/model/Assets/Textures/SkyBox/tycho2t3_80';
-                    parentNode.scene.skyBox = new Cesium.SkyBox({
-                        positiveX : skyBoxBaseUrl + '_px.jpg',
-                        negativeX : skyBoxBaseUrl + '_mx.jpg',
-                        positiveY : skyBoxBaseUrl + '_py.jpg',
-                        negativeY : skyBoxBaseUrl + '_my.jpg',
-                        positiveZ : skyBoxBaseUrl + '_pz.jpg',
-                        negativeZ : skyBoxBaseUrl + '_mz.jpg'
-                    });
+                    if ( !parentNode.scene.skyBox ) {
+                        var skyBoxBaseUrl = '../vwf/model/Assets/Textures/SkyBox/tycho2t3_80';
+                        parentNode.scene.skyBox = new Cesium.SkyBox({
+                            positiveX : skyBoxBaseUrl + '_px.jpg',
+                            negativeX : skyBoxBaseUrl + '_mx.jpg',
+                            positiveY : skyBoxBaseUrl + '_py.jpg',
+                            negativeY : skyBoxBaseUrl + '_my.jpg',
+                            positiveZ : skyBoxBaseUrl + '_pz.jpg',
+                            negativeZ : skyBoxBaseUrl + '_mz.jpg'
+                        });
+                    }
                     node.cesiumObj = parentNode.scene.skyBox;
                 } 
 
@@ -134,12 +138,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 this.state.nodes[ childID ] = node = createNode();
                 parentNode = findParent.call( this, nodeID );
                 if ( parentNode && parentNode.scene ) {
-                    parentNode.scene.sun = new Cesium.Sun();
+                    if ( !parentNode.scene.sun ) { 
+                        parentNode.scene.sun = new Cesium.Sun(); 
+                    }
                     node.cesiumObj = parentNode.scene.sun;
                 } 
 
             } else if ( isBillboard.call( this, protos ) ) {
-
 
                 this.state.nodes[ childID ] = node = createNode();
                 sceneNode = findSceneNode.call( this, node );
@@ -155,7 +160,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     context2D.beginPath();
                     context2D.arc( 8, 8, 8, 0, Cesium.Math.TWO_PI, true );
                     context2D.closePath();
-                    context2D.fillStyle = 'rgb(255, 255, 255)';
+                    context2D.fillStyle = 'rgb(255,255,255)';
                     context2D.fill();
 
                     // this is making a collection per billboard, which 
