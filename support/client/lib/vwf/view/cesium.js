@@ -116,7 +116,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
 
                 var view = this;
-                //var forceResizeDelay;
+                var forceResizeDelay = 60;
                 var scene, canvas;
                 var cesiumOptions = { "contextOptions": { "alpha": true }, }; 
 
@@ -138,7 +138,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         break;
                     
                     default:
-                        node.cesiumRendererType = "scene";
                         // the manual creation, has an error with the 
                         // camera syncronization
                         canvas = document.createElement( 'canvas' );
@@ -248,23 +247,23 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         };
                     }
 
-                    // if ( forceResizeDelay ) {
-                    //     forceResizeDelay--;
-                    //     if ( forceResizeDelay == 0 ) {
-                    //         console.info( " ||||| == resize ==  ||||| " );
-                    //         node.cesiumRenderer.resize();
-                    //         forceResizeDelay = undefined;
-                    //         view.state.cameraInfo.initialized = true;
-                    //     }
-                    // }
+                    if ( forceResizeDelay ) {
+                        forceResizeDelay--;
+                        if ( forceResizeDelay == 0 ) {
+                            //console.info( " ||||| == resize ==  ||||| " );
+                            node.cesiumWidget.resize();
+                            forceResizeDelay = undefined;
+                            view.state.cameraInfo.initialized = true;
+                        }
+                    }
 
                     scene.initializeFrame();
                     scene.render();
                     Cesium.requestAnimationFrame( tick );
 
-                    //if ( forceResizeDelay === undefined ) {
-                    //    view.state.cameraInfo.getCurrent( camera );
-                    //}
+                    if ( forceResizeDelay === undefined ) {
+                       view.state.cameraInfo.getCurrent( camera );
+                    }
                 }());
                 
                 if ( !this.useCesiumWidget ) {
