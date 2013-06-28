@@ -51,7 +51,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             if ( options === undefined ) { options = {}; }
 
-            this.useCesiumWidget = options.useCesiumWidget !== undefined ? options.useCesiumWidget : true;
+            this.cesiumObjectDef = options.cesium !== undefined ? options.cesium : 'widget';
             this.parentDiv = options.parentDiv !== undefined ? options.parentDiv : 'body';
             this.parentClass = options.parentClass !== undefined ? options.parentClass : 'cesium-main-div';
             this.containerDiv = options.containerDiv !== undefined ? options.containerDiv : 'cesiumContainer';
@@ -116,62 +116,61 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
 
                 var view = this;
-                var forceResizeDelay;
+                //var forceResizeDelay;
                 var scene, canvas;
                 var cesiumOptions = { "contextOptions": { "alpha": true }, }; 
 
-                if ( this.useCesiumWidget ) {
-                    node.widget = new Cesium.CesiumWidget( this.containerDiv, cesiumOptions );
-                    scene = node.widget.scene;
 
-                    if ( scene.sun !== undefined ) {
-                        scene.sun.destroy();
-                        scene.sun = undefined;
-                    }
-                    if ( scene.skyBox !== undefined ) {
-                        scene.skyBox.destroy();
-                        scene.skyBox = undefined;
-                    }
-                    if ( scene.skyAtmosphere !== undefined ) {
-                        scene.skyAtmosphere.destroy();
-                        scene.skyAtmosphere = undefined;
-                    }
-                    //forceResizeDelay = 80;
 
-                } else {
+                switch ( this.cesiumObjectDef ) {
 
-                    // the manual creation, has an error with the 
-                    // camera syncronization
-                    canvas = document.createElement( 'canvas' );
-                    canvas.className = 'fullSize';
-                    document.getElementById( this.containerDiv ).appendChild( canvas );
+                    case 'widget':
+                        node.cesiumWidget = new Cesium.CesiumWidget( this.containerDiv, cesiumOptions );
+                        node.centralBody = node.cesiumWidget.centralBody;
+                        node.scene = scene = node.cesiumWidget.scene;
+                        break;
 
-                    canvas.setAttribute( 'height', this.height );
-                    canvas.setAttribute( 'width', this.width );
+                    case 'viewer':
+                        node.cesiumViewer = new Cesium.Viewer( this.containerDiv );
+                        node.cesiumWidget = node.cesiumViewer.cesiumWidget;
+                        node.centralBody = node.cesiumViewer.centralBody;
+                        node.scene = scene = node.cesiumViewer.scene;
+                        break;
+                    
+                    default:
+                        node.cesiumRendererType = "scene";
+                        // the manual creation, has an error with the 
+                        // camera syncronization
+                        canvas = document.createElement( 'canvas' );
+                        canvas.className = 'fullSize';
+                        document.getElementById( this.containerDiv ).appendChild( canvas );
 
-                    scene = new Cesium.Scene( canvas, cesiumOptions.contextOptions );
+                        canvas.setAttribute( 'height', this.height );
+                        canvas.setAttribute( 'width', this.width );
 
-                    var bing = new Cesium.BingMapsImageryProvider({
-                        url : 'http://dev.virtualearth.net',
-                        mapStyle : Cesium.BingMapsStyle.AERIAL,
-                        // Some versions of Safari support WebGL, but don't correctly implement
-                        // cross-origin image loading, so we need to load Bing imagery using a proxy.
-                        proxy : Cesium.FeatureDetection.supportsCrossOriginImagery() ? undefined : new Cesium.DefaultProxy('/proxy/')
-                    });                    
+                        node.scene = scene = new Cesium.Scene( canvas, cesiumOptions.contextOptions );
 
-                    var primitives = scene.getPrimitives();
+                        var bing = new Cesium.BingMapsImageryProvider({
+                            url : 'http://dev.virtualearth.net',
+                            mapStyle : Cesium.BingMapsStyle.AERIAL,
+                            // Some versions of Safari support WebGL, but don't correctly implement
+                            // cross-origin image loading, so we need to load Bing imagery using a proxy.
+                            proxy : Cesium.FeatureDetection.supportsCrossOriginImagery() ? undefined : new Cesium.DefaultProxy('/proxy/')
+                        });                    
 
-                    var ellipsoid = Cesium.Ellipsoid.WGS84;
-                    node.centralBody = new Cesium.CentralBody( ellipsoid );
+                        var primitives = scene.getPrimitives();
 
-                    node.centralBody.getImageryLayers().addImageryProvider( bing );
+                        var ellipsoid = Cesium.Ellipsoid.WGS84;
+                        node.centralBody = new Cesium.CentralBody( ellipsoid );
 
-                    primitives.setCentralBody( node.centralBody );
+                        node.centralBody.getImageryLayers().addImageryProvider( bing );
 
-                    node.transitioner = new Cesium.SceneTransitioner( scene, ellipsoid );
+                        primitives.setCentralBody( node.centralBody );
+
+                        node.transitioner = new Cesium.SceneTransitioner( scene, ellipsoid );
+                        break;
                 }
 
-                node.scene = scene;
                 node.imageryProvider = 'bingAerial';
                 node.canvas = scene.getCanvas();
                 
@@ -249,23 +248,23 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         };
                     }
 
-                    if ( forceResizeDelay ) {
-                        forceResizeDelay--;
-                        if ( forceResizeDelay == 0 ) {
-                            console.info( " ||||| == resize ==  ||||| " );
-                            node.widget.resize();
-                            forceResizeDelay = undefined;
-                            view.state.cameraInfo.initialized = true;
-                        }
-                    }
+                    // if ( forceResizeDelay ) {
+                    //     forceResizeDelay--;
+                    //     if ( forceResizeDelay == 0 ) {
+                    //         console.info( " ||||| == resize ==  ||||| " );
+                    //         node.cesiumRenderer.resize();
+                    //         forceResizeDelay = undefined;
+                    //         view.state.cameraInfo.initialized = true;
+                    //     }
+                    // }
 
                     scene.initializeFrame();
                     scene.render();
                     Cesium.requestAnimationFrame( tick );
 
-                    if ( forceResizeDelay === undefined ) {
-                        view.state.cameraInfo.getCurrent( camera );
-                    }
+                    //if ( forceResizeDelay === undefined ) {
+                    //    view.state.cameraInfo.getCurrent( camera );
+                    //}
                 }());
                 
                 if ( !this.useCesiumWidget ) {

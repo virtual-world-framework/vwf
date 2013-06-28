@@ -324,8 +324,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         break;
 
                     case "model/vnd.cesium.czml+xml":
-                        if ( sceneNode && sceneNode.widget ) {
-                            sceneNode.widget.loadCzml( childSource );
+                        if ( sceneNode && sceneNode.cesiumViewer ) {
+                            sceneNode.cesiumViewer.loadCzml( childSource );
                         } else {
                             node.dynObjs = new Cesium.DynamicObjectCollection();
 

@@ -15,4 +15,4 @@
 model:
   vwf/model/cesium:
 view:
-  vwf/view/cesium: { useCesiumWidget: true }
+  vwf/view/cesium: { cesium: 'widget' }

@@ -30,6 +30,16 @@ children:
     extends: http://vwf.example.com/cesium/camera.vwf
     properties:
       position: [ 0, -14261948, 11360974 ]
+  #sun: 
+    #extends: http://vwf.example.com/cesium/sun.vwf 
+  atmosphere: 
+    extends: http://vwf.example.com/cesium/atmosphere.vwf 
+    properties:
+      visible: false
+  skybox: 
+    extends: http://vwf.example.com/cesium/skybox.vwf 
+    properties:
+      visible: false
   clients:
     extends: http://vwf.example.com/node.vwf
 scripts:
