@@ -11,15 +11,15 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 		{
 			var html = 
 '<div id="vidFrame">'+
-'	<div id="vidPanel" style="">'+
+'	<div id="vidPanel" style="position: absolute; top: 10px; left: 10px;">'+
 '		<video id="remote" width="320" height="240" '+
-'			style="position: absolute; border: solid black 1px;" '+
+'			style="position: absolute;" '+
 '			poster="/adl/sandbox/vwf/view/webrtc/avatar.png"/>'+
 '		<video id="self" width="80" height="60" '+
-'			style="position: absolute; border: solid black 1px;" '+
+'			style="position: absolute;" '+
 '			poster="/adl/sandbox/vwf/view/webrtc/avatar.png" muted/>'+
 '	</div>'+
-'	<div id="messagePanel" style="position: absolute; width=322px; height=242px; background-color: #fff">'+
+'	<div id="messagePanel" style="position: absolute; top: 10px; left: 10px; background-color: #fff">'+
 '		<p id="message">'+
 '			Incoming message from Herp Derp'+
 '		</p>'+
@@ -56,7 +56,7 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 			// hook up the accept and reject buttons
 			$('#vidFrame #messagePanel input#accept').button().click(function(evt){
 				console.log('Call accepted');
-				$('#vidFrame').find('#messagePanel').css('z-index', -1);
+				$('#vidFrame #messagePanel').css('z-index', -1);
 				this.rtc.initialize(this.mode);
 			}.bind(this));
 
@@ -66,8 +66,24 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 			}.bind(this));
 
 			// hook up the resize handler
-			$('#vidFrame').on( 'dialogresize', function(evt){
-				console.log('Resized to', evt);
+			$('#vidFrame').on( 'dialogresize', function(evt,ui)
+			{
+				// calc new dimensions
+				var ratio = 4/3;
+				var ratioSize = {};
+				if( (ui.size.width-40)*(1+1/ratio) < (ui.size.height-40)*(1+ratio) ){
+					ratioSize.width = ui.size.width-40;
+					ratioSize.height = (ui.size.width-40)*(1/ratio);
+				}
+				else {
+					ratioSize.width = (ui.size.height-40)*ratio;
+					ratioSize.height = ui.size.height-40;
+				}
+
+				// set the dimensions of window frames
+				$('#vidFrame > div').css(ratioSize)
+				$('#vidFrame > #vidPanel > video#remote').css(ratioSize);
+				$('#vidFrame > #vidPanel > video#self').css({width: ratioSize.width/4, height: ratioSize.height/4});
 			});
 		},
 
