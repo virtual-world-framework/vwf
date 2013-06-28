@@ -150,7 +150,7 @@ scripts:
           if ( ( currentString[ 0 ] == "w" ) || ( currentString[ 0 ] == "W" ) ) {
             currentString = "http://" + currentString;
           }
-          result = result + "<a href='" + currentString + "'>" + currentString + "</a>";
+          result = result + "<a href='" + currentString + "' target='_blank'>" + currentString + "</a>";
           notFinished = false;
         }
         else
@@ -160,7 +160,7 @@ scripts:
           if ( ( newAhrefString[ 0 ] == "w" ) || ( newAhrefString[ 0 ] == "W" ) ) {
             newAhrefString = "http://" + newAhrefString;
           }
-          result = result + "<a href='" + newAhrefString + "'>" + newAhrefString + "</a>";
+          result = result + "<a href='" + newAhrefString + "' target='_blank'>" + newAhrefString + "</a>";
         }
       }
       else {
