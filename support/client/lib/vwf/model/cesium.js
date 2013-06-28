@@ -987,8 +987,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 //While some sites have CORS on, not all browsers implement it properly, so a proxy is needed anyway;
                                 var proxyIfNeeded = Cesium.FeatureDetection.supportsCrossOriginImagery() ? undefined : proxy;                    
                                 
-                                debugger;
-
                                 switch ( propertyValue ) {
                                     case "bingAerial":
                                         imageProvider = new Cesium.BingMapsImageryProvider({
