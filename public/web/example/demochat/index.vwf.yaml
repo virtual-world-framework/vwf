@@ -131,6 +131,47 @@ scripts:
     "/": '&#x2F;'
   };
 
+  
+   this.cleanupString = function( inputString ) {
+    var currentString = inputString;
+    var findChunkStart = new RegExp( "(?=[Hh][Tt][Tt][Pp]://|[Hh][Tt][Tt][Pp][Ss]://|[Ww][Ww][Ww]\\.).*" );
+    var findChunkEnd = new RegExp("[^\\w\\.\\~\\-\\:\\/\\?\\#\\[\\]\\@\\!\\$\\&\\'\\(\\)\\*\\+\\,\\;\\=]");
+    var result = "";
+    var notFinished = true;
+    while ( notFinished ) {
+      var nextChunkIndex = currentString.search( findChunkStart )
+      if ( nextChunkIndex == -1 ) {
+        result = result + this.escapeHtml( currentString );
+        notFinished = false;
+      }
+      else if ( nextChunkIndex == 0 ) {
+        var newAhrefEnd = currentString.search( findChunkEnd );
+        if ( newAhrefEnd == -1 ) {
+          if ( ( currentString[ 0 ] == "w" ) || ( currentString[ 0 ] == "W" ) ) {
+            currentString = "http://" + currentString;
+          }
+          result = result + "<a href='" + currentString + "'>" + currentString + "</a>";
+          notFinished = false;
+        }
+        else
+        {
+          var newAhrefString = currentString.substr( 0, newAhrefEnd )
+          currentString = currentString.substr( newAhrefEnd );
+          if ( ( newAhrefString[ 0 ] == "w" ) || ( newAhrefString[ 0 ] == "W" ) ) {
+            newAhrefString = "http://" + newAhrefString;
+          }
+          result = result + "<a href='" + newAhrefString + "'>" + newAhrefString + "</a>";
+        }
+      }
+      else {
+        var newEscapedString = this.escapeHtml( currentString.substr( 0, nextChunkIndex ) );
+        currentString = currentString.substr( nextChunkIndex );
+        result = result + newEscapedString;
+      }
+    }
+    return result;
+  };
+  
   this.escapeHtml = function( string ) {
     return String( string ).replace( /[&<>"'\/]/g, function ( s ) {
       return entityMap[ s ];
@@ -171,7 +212,7 @@ scripts:
       this.users.children.forEach( function ( entry ) {
         entry.testMessageForName( message );
       } );
-      this.userMessage( user.displayName, user.displayColor, this.escapeHtml( message ) );
+      this.userMessage( user.displayName, user.displayColor, this.cleanupString( message ) );
     }
   };
 
