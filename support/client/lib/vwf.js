@@ -2155,37 +2155,42 @@ if ( ! childComponent.source ) {
 
                 },
 
-            ], function( err, results ) /* async */ {
+                function( series_callback_async /* ( err, results ) */ ) {
 
-                // Suppress kernel reentry so that initialization functions don't make any
-                // changes during replication.
+                    // Watch for any async kernel calls generated as we run the scripts and wait for
+                    // them complete before completing the node.
 
-                replicating && vwf.models.kernel.disable();
+                    vwf.models.kernel.capturingAsyncs( function() {
 
-                // Attach the scripts. For each script, load the network resource if the script is
-                // specified as a URI, then once loaded, call execute() to direct any model that
-                // manages scripts of this script's type to evaluate the script where it will
-                // perform any immediate actions and retain any callbacks as appropriate for the
-                // script type.
+                        // Suppress kernel reentry so that initialization functions don't make any
+                        // changes during replication.
 
-                childComponent.scripts && childComponent.scripts.forEach( function( script ) {
-                    if ( valueHasType( script ) ) {
-                        script.text && vwf.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
-                    } else {
-                        script && vwf.execute( childID, script, undefined ); // TODO: external scripts too // TODO: callback
-                    }
-                } );
+                        replicating && vwf.models.kernel.disable();
 
-                // Restore kernel reentry.
+                        // Attach the scripts. For each script, load the network resource if the script is
+                        // specified as a URI, then once loaded, call execute() to direct any model that
+                        // manages scripts of this script's type to evaluate the script where it will
+                        // perform any immediate actions and retain any callbacks as appropriate for the
+                        // script type.
 
-                replicating && vwf.models.kernel.enable();
+                        childComponent.scripts && childComponent.scripts.forEach( function( script ) {
+                            if ( valueHasType( script ) ) {
+                                script.text && vwf.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                            } else {
+                                script && vwf.execute( childID, script, undefined ); // TODO: external scripts too // TODO: callback
+                            }
+                        } );
 
-                // Perform initializations for properties with setter functions. These are
-                // assigned here so that the setters run on a fully-constructed node.
+                        // Restore kernel reentry.
 
-                Object.keys( deferredInitializations ).forEach( function( propertyName ) {
-                    vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
-                } );
+                        replicating && vwf.models.kernel.enable();
+
+                        // Perform initializations for properties with setter functions. These are
+                        // assigned here so that the setters run on a fully-constructed node.
+
+                        Object.keys( deferredInitializations ).forEach( function( propertyName ) {
+                            vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
+                        } );
 
 // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
@@ -2193,27 +2198,37 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
     vwf.tickable.nodeIDs.push( childID );
 }
 
-                // Suppress kernel reentry so that initialization functions don't make any
-                // changes during replication.
+                        // Suppress kernel reentry so that initialization functions don't make any
+                        // changes during replication.
 
-                replicating && vwf.models.kernel.disable();
+                        replicating && vwf.models.kernel.disable();
 
-                // Call initializingNode() on each model and initializedNode() on each view to
-                // indicate that the node is fully constructed.
+                        // Call initializingNode() on each model and initializedNode() on each view to
+                        // indicate that the node is fully constructed.
 
-                vwf.models.forEach( function( model ) {
-                    model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                        childComponent.source, childComponent.type, childIndex, childName );
-                } );
+                        vwf.models.forEach( function( model ) {
+                            model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                childComponent.source, childComponent.type, childIndex, childName );
+                        } );
 
-                vwf.views.forEach( function( view ) {
-                    view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                        childComponent.source, childComponent.type, childIndex, childName );
-                } );
+                        vwf.views.forEach( function( view ) {
+                            view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                childComponent.source, childComponent.type, childIndex, childName );
+                        } );
 
-                // Restore kernel reentry.
+                        // Restore kernel reentry.
 
-                replicating && vwf.models.kernel.enable();
+                        replicating && vwf.models.kernel.enable();
+
+                    }, function() {
+
+                        series_callback_async( undefined, undefined );
+
+                    } );
+
+                },
+
+            ], function( err, results ) /* async */ {
 
                 // The node is complete. Invoke the callback method and pass the new node ID and the
                 // ID of its prototype. If this was the root node for the application, the
@@ -2228,7 +2243,7 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                     async.nextTick( function() {
                         callback_async( childID );
-                        queue.resume( "after completing " + childID ); // suspend the queue
+                        queue.resume( "after completing " + childID ); // resume the queue; may invoke dispatch(), so call last before returning to the host
                     } );
 
                 }

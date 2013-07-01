@@ -44,7 +44,7 @@
 
       ], function( ready, testUtility ) {
 
-        // Test the JavaScript node proxy.
+        // Test the JavaScript node proxy and node initialization.
 
         ready( function() {
 
@@ -100,6 +100,311 @@
 
                 { relative: 0.004, assertion: function() {
                     equal( vwf.execute( fixtureID, "this.result" ), "d-child", "children override nothing" ) } },
+
+              ] );
+
+            } );
+
+          } );
+
+          // Completion order when `node.initialize` creates child nodes.
+
+          // The child callbacks should arrive after the parent's `initialize` in the order the
+          // children were created, and all children created by the parent's `initialize` should be
+          // ready and visible before the first callback runs.
+
+          asyncTest( "Initialize creating children", function() {
+
+            vwf.createChild( 0, testUtility.uniqueName( "fixture" ), {
+
+              // A custom prototype shared by the parent and children to store the log. The dummy
+              // property is to make this prototype different so that it won't be shared with the
+              // other tests.
+
+              extends: {
+                properties: {
+                  "initialize-creating-children": true,
+                  log: [],
+                }
+              },
+
+              scripts: [
+                'this.initialize = function() { ' +
+                  'Object.getPrototypeOf( this ).log.push( "parent before" ); ' +
+                  'this.children.create( "child1", { ' +
+                  '}, function( child ) { ' +
+                    'Object.getPrototypeOf( this ).log.push( "child1 callback " + this.childNames() ); ' +
+                  '} ); ' +
+                  'this.children.create( "child2", { ' +
+                  '}, function( child ) { ' +
+                    'Object.getPrototypeOf( this ).log.push( "child2 callback " + this.childNames() ); ' +
+                  '} ); ' +
+                  'Object.getPrototypeOf( this ).log.push( "parent after" ); ' +
+                '}; ' +
+                'this.childNames = function() { ' +
+                  'return this.children.map( function( child ) { return child.name } ).join( "+" ); ' +
+                '};'
+              ]
+
+            }, undefined, function( parentID ) {
+
+              vwf.execute( parentID, 'Object.getPrototypeOf( this ).log.push( "parent callback" )' );
+
+              deepEqual( vwf.execute( parentID, "Object.getPrototypeOf( this ).log" ), [
+                "parent before",                    // initialize begins
+                "parent after",                     // initialize ends before children complete
+                "child1 callback child1+child2",    // first child callback (both children ready)
+                "child2 callback child1+child2",    // second child callback (both children ready)
+                "parent callback",                  // parent completes after children complete
+              ], "initialize runs, then children complete, then parent completes" );
+
+              start();
+
+            } );
+
+          } );
+
+          // Completion order when `node.initialize` creates child nodes with `initialize` functions
+          // that create child nodes.
+
+          asyncTest( "Initialize creating children with initialize that creates children", function() {
+
+            vwf.createChild( 0, testUtility.uniqueName( "fixture" ), {
+
+              // A custom prototype shared by the parent and children to store the log. The dummy
+              // property is to make this prototype different so that it won't be shared with the
+              // other tests.
+
+              extends: {
+                properties: {
+                  "initialize-creating-children-with-initialize-that-creates-children": true,
+                  log: [],
+                }
+              },
+
+              scripts: [
+                'this.initialize = function() { ' +
+                  'Object.getPrototypeOf( this ).log.push( "parent before" ); ' +
+                  'this.children.create( "child1", { ' +
+                    'extends: Object.getPrototypeOf( this ).id, ' +
+                    'scripts: [ ' +
+                      '\'this.initialize = function() { ' +
+                        'this.children.create( "child1a", { ' +
+                        '}, function( child ) { ' +
+                          'Object.getPrototypeOf( this ).log.push( "child1a callback " + this.childNames() ); ' +
+                        '} ); ' +
+                        'this.children.create( "child1b", { ' +
+                        '}, function( child ) { ' +
+                          'Object.getPrototypeOf( this ).log.push( "child1b callback " + this.childNames() ); ' +
+                        '} ); ' +
+                      '}; ' +
+                      'this.childNames = function() { ' +
+                        'return this.children.map( function( child ) { return child.name } ).join( "+" ); ' +
+                      '}; \'' +
+                    '] ' +
+                  '}, function( child ) { ' +
+                    'Object.getPrototypeOf( this ).log.push( "child1 callback " + this.childNames() ); ' +
+                  '} ); ' +
+                  'this.children.create( "child2", { ' +
+                  '}, function( child ) { ' +
+                    'Object.getPrototypeOf( this ).log.push( "child2 callback " + this.childNames() ); ' +
+                  '} ); ' +
+                  'Object.getPrototypeOf( this ).log.push( "parent after" ); ' +
+                '}; ' +
+                'this.childNames = function() { ' +
+                  'return this.children.map( function( child ) { return child.name } ).join( "+" ); ' +
+                '};'
+              ]
+
+            }, undefined, function( parentID ) {
+
+              vwf.execute( parentID, 'Object.getPrototypeOf( this ).log.push( "parent callback" )' );
+
+              deepEqual( vwf.execute( parentID, "Object.getPrototypeOf( this ).log" ), [
+                "parent before",                    // initialize begins
+                "parent after",                     // initialize ends before children complete
+                "child1a callback child1a+child1b", // child1's first child completes (both grandchildren ready)
+                "child1b callback child1a+child1b", // child1's second child completes (both grandchildren ready)
+                "child1 callback child1+child2",    // child1 completes after child1 children complete (child1 & child2 ready)
+                "child2 callback child1+child2",    // child2 completes after child2 children complete (child1 & child2 ready)
+                "parent callback",                  // parent completes after children complete
+              ], "initialize runs, then first grandchildren complete, then children complete, then parent completes" );
+
+              start();
+
+            } );
+
+          } );
+
+          // Completion order when a non-async action creates nodes.
+
+          // The node callbacks should arrive after the action completes but before the next action
+          // is started.
+
+          asyncTest( "Non-async action creating nodes", function() {
+
+            vwf.createChild( 0, testUtility.uniqueName( "fixture" ), {
+
+              // A custom prototype shared by the parent and children to store the log. The dummy
+              // property is to make this prototype different so that it won't be shared with the
+              // other tests.
+
+              extends: {
+                properties: {
+                  "action-creating-nodes": true,
+                  log: [],
+                }
+              },
+
+              methods: {
+                m1:
+                  'Object.getPrototypeOf( this ).log.push( "method1 before" ); ' +
+                  'this.children.create( "child1", { ' +
+                  '}, function( child ) { ' +
+                    'Object.getPrototypeOf( this ).log.push( "child1 callback " + this.childNames() ); ' +
+                  '} ); ' +
+                  'Object.getPrototypeOf( this ).log.push( "method1 after" );',
+                m2:
+                  'Object.getPrototypeOf( this ).log.push( "method2 before" ); ' +
+                  'this.children.create( "child2", { ' +
+                  '}, function( child ) { ' +
+                    'Object.getPrototypeOf( this ).log.push( "child2 callback " + this.childNames() ); ' +
+                  '} ); ' +
+                  'Object.getPrototypeOf( this ).log.push( "method2 after" );',
+                n:
+                  'Object.getPrototypeOf( this ).log.push( "future method" );',
+              },
+
+              scripts: [
+                'this.childNames = function() { ' +
+                  'return this.children.map( function( child ) { return child.name } ).join( "+" ); ' +
+                '};'
+              ]
+
+            }, undefined, function( parentID ) {
+
+              vwf.execute( parentID, "this.m1()" ); // m1() and m2() should both run to completion
+              vwf.execute( parentID, "this.m2()" ); // ... before the children they create complete
+
+              vwf.execute( parentID, "this.future( 0.001 ).n()" ); // next action starts after the children complete
+
+              deepEqual( vwf.execute( parentID, "Object.getPrototypeOf( this ).log" ), [
+                "method1 before",                   // m1 begins
+                "method1 after",                    // ... and ends without interruption
+                "method2 before",                   // m2 begins immedately after
+                "method2 after",                    // ... and ends without interruption
+              ], "action completes before the children" );
+
+              testUtility.runFutureAssertions( [
+
+                // Called when time leaves t+0, after actions at time t+0 run.
+
+                { relative: 0, assertion: function() {
+                    deepEqual( vwf.execute( parentID, "Object.getPrototypeOf( this ).log" ), [
+                      "method1 before",
+                      "method1 after",
+                      "method2 before",
+                      "method2 after",
+                      "child1 callback child1+child2", // m1 and m2 children complete in the order
+                      "child2 callback child1+child2", // ... started, after the action
+                    ], "children complete after the action" ) } },
+
+                // Called when time leaves t+0.001.
+
+                { relative: 0.001, assertion: function() {
+                    deepEqual( vwf.execute( parentID, "Object.getPrototypeOf( this ).log" ), [
+                      "method1 before",
+                      "method1 after",
+                      "method2 before",
+                      "method2 after",
+                      "child1 callback child1+child2",
+                      "child2 callback child1+child2",
+                      "future method",              // children complete before the next action
+                    ], "children complete before the next action" ) } },
+
+              ] );
+
+            } );
+
+          } );
+
+          // Completion order when multiple non-async actions create nodes.
+
+          // The node callbacks should arrive after each action completes but before the one starts.
+
+          asyncTest( "Multiple non-async actions creating nodes", function() {
+
+            vwf.createChild( 0, testUtility.uniqueName( "fixture" ), {
+
+              // A custom prototype shared by the parent and children to store the log. The dummy
+              // property is to make this prototype different so that it won't be shared with the
+              // other tests.
+
+              extends: {
+                properties: {
+                  "multiple-actions-creating-nodes": true,
+                  log: [],
+                }
+              },
+
+              methods: {
+                m1:
+                  'Object.getPrototypeOf( this ).log.push( "method1 before" ); ' +
+                  'this.children.create( "child1", { ' +
+                  '}, function( child ) { ' +
+                    'Object.getPrototypeOf( this ).log.push( "child1 callback " + this.childNames() ); ' +
+                  '} ); ' +
+                  'Object.getPrototypeOf( this ).log.push( "method1 after" );',
+                m2:
+                  'Object.getPrototypeOf( this ).log.push( "method2 before" ); ' +
+                  'this.children.create( "child2", { ' +
+                  '}, function( child ) { ' +
+                    'Object.getPrototypeOf( this ).log.push( "child2 callback " + this.childNames() ); ' +
+                  '} ); ' +
+                  'Object.getPrototypeOf( this ).log.push( "method2 after" );',
+                n:
+                  'Object.getPrototypeOf( this ).log.push( "future method" );',
+              },
+
+              scripts: [
+                'this.childNames = function() { ' +
+                  'return this.children.map( function( child ) { return child.name } ).join( "+" ); ' +
+                '};'
+              ]
+
+            }, undefined, function( parentID ) {
+
+              vwf.execute( parentID, "this.future( 0 ).m1()" ); // m1's child should complete after m1 and before m2
+              vwf.execute( parentID, "this.future( 0 ).m2()" ); // m2's child should complete after m2 but still within time t+0
+
+              vwf.execute( parentID, "this.future( 0.001 ).n()" ); // next action starts after m1 & m2 children complete
+
+              testUtility.runFutureAssertions( [
+
+                // Called when time leaves t+0, after actions at time t+0 run.
+
+                { relative: 0, assertion: function() {
+                    deepEqual( vwf.execute( parentID, "Object.getPrototypeOf( this ).log" ), [
+                      "method1 before",             // m1 begins
+                      "method1 after",              // ... and ends without interruption
+                      "child1 callback child1",     // m1 child completes after the m1 action before starting m2
+                      "method2 before",             // m2 begins
+                      "method2 after",              // ... and ends without interruption
+                      "child2 callback child1+child2", // m2 child completes after the m2 action
+                    ], "children complete after each action" ) } },
+
+                // Called when time leaves t+0.001.
+
+                { relative: 0.001, assertion: function() {
+                    deepEqual( vwf.execute( parentID, "Object.getPrototypeOf( this ).log" ), [
+                      "method1 before",
+                      "method1 after",
+                      "child1 callback child1",
+                      "method2 before",
+                      "method2 after",
+                      "child2 callback child1+child2",
+                      "future method",              // children complete before the next action
+                    ], "children complete before the next action" ) } },
 
               ] );
 
