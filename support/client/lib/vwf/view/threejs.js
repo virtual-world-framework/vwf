@@ -28,6 +28,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var translationSpeed = 100; // Units per second
     var rotationSpeed = 90; // Degrees per second
     var makeOwnAvatarVisible = false;
+    var pointerLockImplemented = "pointerLockElement" in document ||
+                                 "mozPointerLockElement" in document ||
+                                 "webkitPointerLockElement" in document;
+    var pointerLocked = false;
 
     return view.load( module, {
 
@@ -530,7 +534,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         if ( appID ) {
             appInitialized = true;
         }
-    }
+    } // initScene
+
     function rebuildAllMaterials(start)
     {
         
@@ -577,6 +582,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var sceneCanvas = canvas;
         //var mouse = new GLGE.MouseInput( sceneCanvas );
 
+        canvas.requestPointerLock = canvas.requestPointerLock ||
+                                    canvas.mozRequestPointerLock ||
+                                    canvas.webkitRequestPointerLock ||
+                                    function() {};
+        document.exitPointerLock = document.exitPointerLock ||
+                                   document.mozExitPointerLock ||
+                                   document.webkitExitPointerLock ||
+                                   function() {};
+
         var getEventData = function( e, debug ) {
             var returnData = { eventData: undefined, eventNodeData: undefined };
             var pickInfo = self.lastPick;
@@ -617,6 +631,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 position: [ mousePos.x / sceneView.width, mousePos.y / sceneView.height ],
                 screenPosition: [ mousePos.x, mousePos.y ]
             } ];
+
+            if ( pointerLocked ) {
+                returnData.eventData.movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+                returnData.eventData.movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
+            }
 
             var camera = sceneView.state.cameraInUse;
             var worldCamPos, worldCamTrans, camInverse;
@@ -711,7 +730,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         canvas.onmousedown = function( e ) {
            switch( e.button ) {
-                case 2: 
+                case 2:
+                    if ( pointerLockImplemented ) {
+                        canvas.requestPointerLock();
+                    }
                     mouseRightDown = true;
                     break;
                 case 1: 
@@ -742,7 +764,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var ctrlAndAltDown = ctrlDown && atlDown;
 
             switch( e.button ) {
-                case 2: 
+                case 2:
+                    if ( pointerLockImplemented ) {
+                        document.exitPointerLock();
+                    }
                     mouseRightDown = false;
                     break;
                 case 1: 
@@ -1020,6 +1045,20 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var rotatingRight = false;
         var startMousePosition;
 
+        var onPointerLockChange = function() {
+            if ( document.pointerLockElement === canvas ||
+                 document.mozPointerLockElement === canvas ||
+                 document.webkitPointerLockElement === canvas ) {
+                pointerLocked = true;
+            } else {
+                pointerLocked = false;
+            }
+        }
+
+        document.addEventListener( "pointerlockchange", onPointerLockChange, false);
+        document.addEventListener( "mozpointerlockchange", onPointerLockChange, false);
+        document.addEventListener( "webkitpointerlockchange", onPointerLockChange, false);
+
         this.moveNavObject = function( msSinceLastFrame ) {
 
             var x = 0;
@@ -1175,10 +1214,19 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         var handleMouseNavigation = function( mouseEventData ) {
 
-            if ( mouseEventData[ 0 ].buttons.right ) {
+            var deltaX = 0;
+            var deltaY = 0;
+
+            if ( pointerLocked ) {
+                deltaX = mouseEventData.movementX / sceneView.width;
+                deltaY = mouseEventData.movementY / sceneView.height;
+            } else if ( mouseEventData[ 0 ].buttons.right ) {
                 var currentMousePosition = mouseEventData[ 0 ].position;
-                var deltaX = currentMousePosition[ 0 ] - startMousePosition [ 0 ];
-                var deltaY = currentMousePosition[ 1 ] - startMousePosition [ 1 ];
+                deltaX = currentMousePosition[ 0 ] - startMousePosition [ 0 ];
+                deltaY = currentMousePosition[ 1 ] - startMousePosition [ 1 ];
+            }
+
+            if ( deltaX || deltaY ) {
                 var yawQuat = new THREE.Quaternion();
                 var pitchQuat = new THREE.Quaternion();
                 var rotationSpeedRadians = degreesToRadians * rotationSpeed;
