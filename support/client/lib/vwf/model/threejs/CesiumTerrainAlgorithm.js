@@ -1,6 +1,6 @@
 function CesiumTerrainAlgorithm(seed) 
 {	
-	importScripts("jquery.nodom.js");
+	
 	this.heightCache  = {res:[]};
 	this.getHeight = function(x,y,res)
 	{
@@ -77,5 +77,31 @@ function CesiumTerrainAlgorithm(seed)
 	{
 		return this.getHeight(vert.x,vert.y,matrix[0]);
 	}
-	
+	this.init = function()
+	{
+		importScripts("jquery.nodom.js");
+	}
+	//This can generate data on the main thread, and it will be passed to the coppies in the thread pool
+	this.poolInit = function()
+	{
+		
+	}
+	//This is the settings data, set both main and pool side
+	this.setAlgorithmData = function(seed)
+	{
+		
+	}
+	this.setAlgorithmDataPool = function(seed)
+	{
+		
+		
+	}
+	this.getAlgorithmDataPool = function(seed)
+	{
+		
+	}
+	this.forceTileRebuildCallback = function()
+	{
+		return true;
+	}
 }

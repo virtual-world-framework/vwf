@@ -1,27 +1,28 @@
 self.init = function(data)
 {
+  var generateType = data.type;
   if(!self.THREE)
   {
-   
 	importScripts('three.js');
-	
-	
-	var generateType = data.type;
-	
-	importScripts(generateType + '.js');
-	this.terrainAlgorithm = new (eval(generateType))(data.params);
-	console.log('init complete');
   }
+  importScripts(generateType + '.js');
+
+  this.terrainAlgorithm = new (eval(generateType))(data.params);
+  console.log('init complete');
   
 }
 
+self.threadInit = function(data)
+{
+  this.terrainAlgorithm.init(data);
+  console.log('terrainAlgorithm init complete');
+}
 
-
-
-	
-	
-	
-
+self.setAlgorithmData = function(data)
+{
+  this.terrainAlgorithm.setAlgorithmData(data);
+  console.log('terrainAlgorithm setdata complete');
+}
 
 
 this.vertices = [];
@@ -49,7 +50,7 @@ this.generateTerrainSimWorker = function(datain,buffers)
 	}
 	
 	
-	var 	vertoffset = .1;
+	var 	vertoffset = 10;
 			var invmat = new THREE.Matrix4();
 			
 			invmat = invmat.getInverse(matrix.clone().setPosition(new THREE.Vector3()));

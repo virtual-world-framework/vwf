@@ -60,7 +60,7 @@ new (function(){
 		geo.verticesNeedUpdate = true;
 		geo.computeBoundingSphere();
 		geo.computeBoundingBox();
-		//geo.computeVertexNormals(true);		
+				
 		geo.normalsNeedUpdate = true;
 		geo.dirtyMesh = true;
 		if(cb)
@@ -70,6 +70,8 @@ new (function(){
 
 	this.countFreeWorkers = function()
 	{
+		if(this.waitingForInit === true)
+			return 0;
 		var i = 0;
 		for(var j = 0; j < MAXWORKERS; j++)
 		{
@@ -80,6 +82,8 @@ new (function(){
 	}
 	this.countBusyWorkers = function()
 	{
+		if(this.waitingForInit === true)
+			return MAXWORKERS;
 		return MAXWORKERS - this.countFreeWorkers();
 	}
 	this.sendTerrainRequest = function(data,mesh,cb)
@@ -159,15 +163,76 @@ new (function(){
 		this.currentID =  [];
 		this.currentBuffers = [];
 		this.readers = [];
+		
+		loadScript('vwf/model/threejs/' + type + '.js');
+		
+		this.terrainAlgorithm = new (eval(type))();
+		var poolSideData;
+		var poolparams = this.terrainAlgorithm.setAlgorithmDataPool(params);
+		
+		var init = function(psd)
+		{
+			this.waitingForInit = false;
+			for(var i = 0; i < MAXWORKERS; i++)
+			{
+				this.worker[i] = new Worker("vwf/model/threejs/terrainGeneratorThread.js");
+				this.worker[i].addEventListener('message',this.message.bind(this));
+				this.worker[i].postMessage({command:'init',data:{type:type,params:(poolparams || params)}});
+				this.worker[i].postMessage({command:'threadInit',data:psd});
+				this.worker[i].postMessage({command:'setAlgorithmData',data:(poolparams || params)});
+				this.currentCB[i] =  null;
+				this.currentMesh[i] = null;
+				this.currentID[i] =  null;
+				this.currentBuffers[i] = [];
+			}
+		}.bind(this);
+		
+		if(this.terrainAlgorithm.poolInit)
+			poolSideData = this.terrainAlgorithm.poolInit(init);
+		
+		
+		
+		if(poolSideData === false) 
+			this.waitingForInit = true;
+		else
+		{
+		    init(poolSideData);	
+		}
+		
+		
+	}
+	
+	this.getMaterialUniforms = function(mesh,matrix)
+	{
+		if(this.terrainAlgorithm.getMaterialUniforms)
+			return this.terrainAlgorithm.getMaterialUniforms(mesh,matrix);
+		return null;	
+	}
+	this.getDiffuseFragmentShader = function(mesh,matrix)
+	{
+		if(this.terrainAlgorithm.getDiffuseFragmentShader)
+			return this.terrainAlgorithm.getDiffuseFragmentShader(mesh,matrix);
+		return null;	
+	}
+	this.updateMaterial = function(m)
+	{
+		if(this.terrainAlgorithm.updateMaterial)
+			this.terrainAlgorithm.updateMaterial(m);
+	}
+	this.reInit = function(type,params)
+	{
+		this.init(type,params);
+	}
+	this.getAlgorithmParams = function()
+	{
+		return this.terrainAlgorithm.getAlgorithmDataPool();
+	}
+	this.setAlgorithmParams = function(params)
+	{
+		var poolparams = this.terrainAlgorithm.setAlgorithmDataPool(params);
 		for(var i = 0; i < MAXWORKERS; i++)
 		{
-			this.worker[i] = new Worker("vwf/model/threejs/terrainGeneratorThread.js");
-			this.worker[i].addEventListener('message',this.message.bind(this));
-			this.worker[i].postMessage({command:'init',data:{type:type,params:params}});
-			this.currentCB[i] =  null;
-			this.currentMesh[i] = null;
-			this.currentID[i] =  null;
-			this.currentBuffers[i] = [];
+			this.worker[i].postMessage({command:'setAlgorithmData',data:(poolparams || params)});
 		}
 	}
 	this.test = function()

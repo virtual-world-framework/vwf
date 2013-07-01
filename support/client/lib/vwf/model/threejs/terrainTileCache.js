@@ -63,13 +63,9 @@ function TileCache()
 					//	"debug = debugColor;\n"+
 						"   gl_Position = projectionMatrix * mvPosition;\n"+
 						"}    \n";
-						var fragShader_default = 
+						var fragShader_default_start = 
 					   
-						"uniform sampler2D grassSampler;\n"+
-						"uniform sampler2D cliffSampler;\n"+
-						"uniform sampler2D dirtSampler;\n"+
-						"uniform sampler2D snowSampler;\n"+
-						"uniform sampler2D noiseSampler;\n"+
+						
 						
 						
 						"#if MAX_DIR_LIGHTS > 0\n"+
@@ -82,36 +78,36 @@ function TileCache()
 						"uniform vec3 directionalLightDirection[ MAX_DIR_LIGHTS ];\n"+
 						
 						
-		"uniform vec3 fogColor;"+	
-"uniform int fogType;"+
-						
-						"uniform float fogDensity;"+
-						"uniform float fogNear;"+
-						"uniform float fogFar;"+		
-"vec3 horizonColor;\n"+
-"vec3 zenithColor;\n"+
-"vec3 sunColor;\n"+
-"vec3 atmosphereColor(vec3 rayDirection){\n"+
-"    float a = max(0.0, dot(rayDirection, vec3(0.0, 1.0, 0.0)));\n"+
-"    vec3 skyColor = mix(horizonColor, zenithColor, a);\n"+
-"    float sunTheta = max( dot(rayDirection, directionalLightDirection[0].xzy), 0.0 );\n"+
-"    return skyColor+directionalLightColor[0]*4.0*pow(sunTheta, 16.0)*0.5;\n"+
-"}\n"+
+						"uniform vec3 fogColor;"+	
+						"uniform int fogType;"+
+												
+												"uniform float fogDensity;"+
+												"uniform float fogNear;"+
+												"uniform float fogFar;"+		
+						"vec3 horizonColor;\n"+
+						"vec3 zenithColor;\n"+
+						"vec3 sunColor;\n"+
+						"vec3 atmosphereColor(vec3 rayDirection){\n"+
+						"    float a = max(0.0, dot(rayDirection, vec3(0.0, 1.0, 0.0)));\n"+
+						"    vec3 skyColor = mix(horizonColor, zenithColor, a);\n"+
+						"    float sunTheta = max( dot(rayDirection, directionalLightDirection[0].xzy), 0.0 );\n"+
+						"    return skyColor+directionalLightColor[0]*4.0*pow(sunTheta, 16.0)*0.5;\n"+
+						"}\n"+
 
-"vec3 applyFog(vec3 albedo, float dist, vec3 rayOrigin, vec3 rayDirection){\n"+
-"    float fogDensityA = fogDensity ;\n"+
-"    float vFalloff = 20.0;\n"+ 
-"    float fog = exp((-rayOrigin.y*vFalloff)*fogDensityA) * (1.0-exp(-dist*rayDirection.y*vFalloff*fogDensityA))/(rayDirection.y*vFalloff);\n"+
-"    return mix(albedo, fogColor, clamp(fog, 0.0, 1.0));\n"+
-"}\n"+
+						"vec3 applyFog(vec3 albedo, float dist, vec3 rayOrigin, vec3 rayDirection){\n"+
+						"    float fogDensityA = fogDensity ;\n"+
+						"    float vFalloff = 20.0;\n"+ 
+						"    float fog = exp((-rayOrigin.y*vFalloff)*fogDensityA) * (1.0-exp(-dist*rayDirection.y*vFalloff*fogDensityA))/(rayDirection.y*vFalloff);\n"+
+						"    return mix(albedo, fogColor, clamp(fog, 0.0, 1.0));\n"+
+						"}\n"+
 
-"vec3 aerialPerspective(vec3 albedo, float dist, vec3 rayOrigin, vec3 rayDirection){\n"+
-"    float atmosphereDensity = 0.00025;\n"+
-"    vec3 atmosphere = atmosphereColor(rayDirection)+vec3(0.0, 0.02, 0.04); \n"+
-"    atmosphere = mix( atmosphere, atmosphere*.75, clamp(1.0-exp(-dist*atmosphereDensity), 0.0, 1.0));\n"+
-"    vec3 color = mix( applyFog(albedo, dist, rayOrigin, rayDirection), atmosphere, clamp(1.0-exp(-dist*atmosphereDensity), 0.0, 1.0));\n"+
-"    return color;\n"+
-"}						\n"+
+						"vec3 aerialPerspective(vec3 albedo, float dist, vec3 rayOrigin, vec3 rayDirection){\n"+
+						"    float atmosphereDensity = 0.00025;\n"+
+						"    vec3 atmosphere = atmosphereColor(rayDirection)+vec3(0.0, 0.02, 0.04); \n"+
+						"    atmosphere = mix( atmosphere, atmosphere*.75, clamp(1.0-exp(-dist*atmosphereDensity), 0.0, 1.0));\n"+
+						"    vec3 color = mix( applyFog(albedo, dist, rayOrigin, rayDirection), atmosphere, clamp(1.0-exp(-dist*atmosphereDensity), 0.0, 1.0));\n"+
+						"    return color;\n"+
+						"}						\n"+
 						
 						
 						
@@ -121,58 +117,31 @@ function TileCache()
 						"varying vec3 pos;"+
 						"varying vec3 n;"+
 						"varying vec3 wN;"+
-						"varying vec3 npos;"+
+						"varying vec3 npos;";
 						
-						"vec4 getMix(vec3 norm)" +
-						"{"+
-						"float side = min(1.0,pow(1.0-abs(dot(norm,(viewMatrix * vec4(0.0,0.0,1.0,0.0)).xyz)),3.0) * 10.0);\n"+
-							"float bottom = 1.0-smoothstep(-20.0,60.0,npos.z);\n"+
-							"float top = clamp(0.0,1.0,(smoothstep(100.0,140.0,npos.z)));\n"+
-							"float middle = clamp(0.0,1.0,(1.0 - bottom - top));\n"+
-							"bottom = clamp(0.0,1.0,mix(bottom,0.0,npos.z/100.0));\n"+
-							"vec4 mixvec =  normalize(vec4(bottom,middle,side* 4.0,top)) ;\n"+
-							"return mixvec;\n"+
-						"}"+
-						"vec4 getTexture(vec3 coords, vec3 norm, vec4 mixvec)" +
-						"{"+
-							//"coords /= 100.0;\n"+
-							"vec2 c0 = (coords.xy/10.0)/2.0 ;\n"+
-							"vec2 c1 = (coords.xy/10.0)/2.0 ;\n"+
-							"c1.y /= .5;\n"+
-							"vec2 c2 = (coords.xy/10.0)/2.0 ;\n"+
-							"vec2 c3 = (coords.xy/30.0)/2.0 ;\n"+
-							"vec2 c0a = (coords.xy/20.0)/2.0 ;\n"+
-							"vec2 c1a = (coords.xy/100.0)/2.0 ;\n"+
-							"vec2 c2a = (coords.xy/100.0)/2.0 ;\n"+
-							"vec2 c3a = (coords.xy/300.0)/2.0 ;\n"+
-							"vec4 grass =.5*texture2D(grassSampler,c0) +  .5*texture2D(grassSampler,c0a);\n"+
-							"vec4 cliff =.5*texture2D(cliffSampler,c1) +  .5*texture2D(cliffSampler,c1a);\n"+
-							"vec4 dirt = .5*texture2D(dirtSampler,c2) +  .5*texture2D(dirtSampler,c2a);\n"+
-							"vec4 snow = .5*texture2D(snowSampler,c3) +  .5*texture2D(snowSampler,c3a);\n"+
-							"vec4 noise = texture2D(noiseSampler,c0);\n"+
-							
-							"vec4 grass1 = mix(grass,cliff/4.0,noise.r*noise.r*noise.r);"+
-							"snow = mix(snow,dirt/4.0,noise.g*noise.r*noise.b);"+
-							
-							"return mixvec.r * grass1 + mixvec.g * grass1 + (mixvec.b) * cliff/2.0 + mixvec.a * snow;\n"+
-						"}"+
+						
+						
+						
+						var fragShader_default_end = 
+						
+						
 						"void main() {\n"+
 						"	vec3 nn = normalize(viewMatrix * vec4(wN,0.0)).xyz;\n"+
 						"	vec3 light = vec3(0.0,0.0,0.0);\n"+
 						"	vec4 ambient = vec4(0.5,0.5,0.5,1.0);\n"+
-						"vec4 noise = texture2D(noiseSampler,(npos.xy/10.0)/2.0);\n"+
-						"vec4 mixvec =  getMix(nn + (noise.rgb - .5)/10.0) ;\n"+
+						
+						
 						"	#if MAX_DIR_LIGHTS > 0\n"+
 						"   vec3 vLightDir = (viewMatrix * vec4(directionalLightDirection[0],0.0)).xyz;\n"+
 						"   vec3 vEyeDir = (viewMatrix * vec4(normalize(pos-cameraPosition ),0.0)).xyz;\n"+
 						"   vec3 vReflectDir = reflect(vLightDir,nn);\n"+
-						"   float phong =pow( max(0.0,dot(vReflectDir,vEyeDir)),4.0 )* mixvec.a;\n"+
+						"   float phong =pow( max(0.0,dot(vReflectDir,vEyeDir)),4.0 );\n"+
 						"	light += directionalLightColor[0] * clamp(0.0,1.0,dot(nn, vLightDir));\n"+
 						"	#endif\n"+
 						
-						"	vec4 diffuse = getTexture(npos,n,mixvec);\n"+
+						"	vec4 diffuse = getTexture(npos,nn);\n"+
 						"	diffuse.a = 1.0;\n"+
-						"   gl_FragColor = ambient * diffuse + diffuse * vec4(light.xyz,1.0) + phong * vec4(0.4,0.4,0.4,1.0);\n"+
+						"   gl_FragColor = ambient * diffuse + diffuse * vec4(light.xyz,1.0) + 0.0 * vec4(0.4,0.4,0.4,1.0);\n"+
 						"#ifdef USE_FOG\n"+
 
 							"float depth = gl_FragCoord.z / gl_FragCoord.w;\n"+
@@ -204,10 +173,18 @@ function TileCache()
 						
 						
 						//uniforms_default.texture.value.wrapS = uniforms_default.texture.value.wrapT = THREE.RepeatWrapping;
-				 
+				
+				this.getDefaultDiffuseString = function()
+				{
+					return "vec4 getTexture(vec3 coords, vec3 norm) {return vec4(1.0,1.0,1.0,1.0);}\n";
+		
+				}
 				this.getMat = function()
 				{	
-				
+						
+						var algorithmShaderString = this.terrainGenerator.getDiffuseFragmentShader();
+						var algorithmUniforms = this.terrainGenerator.getMaterialUniforms();
+						
 							var uniforms_default = {
 						   
 						
@@ -230,10 +207,7 @@ function TileCache()
 							hemisphereLightSkyColor:   { type: "fv", value: [] },
 							hemisphereLightGroundColor:   { type: "fv", value: [] },
 							hemisphereLightDirection:   { type: "fv", value: [] },
-							grassSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/grass.jpg" ) },
-							cliffSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/cliff.jpg" ) },
-							dirtSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/dirt.jpg" ) },
-							snowSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/snow.jpg" ) },
+							
 							noiseSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/bestnoise.png" ) },
 							"side" : { type: "f", value: 0 },
 							"fogDensity" : { type: "f", value: 0.00025 },
@@ -243,7 +217,9 @@ function TileCache()
 							"blendPercent" : { type: "f", value: 0.00000 },
 							debugColor : { type: "c", value: new THREE.Color( 0xffff0f ) },
 						
-						};	  
+						};	 
+						for(var i in algorithmUniforms)
+							uniforms_default[i] = algorithmUniforms[i];
 						var attributes_default = {
 							everyOtherNormal: { type: 'v3', value: [] },
 							everyOtherZ: { type: 'f', value: [] },
@@ -252,16 +228,13 @@ function TileCache()
 							uniforms:       uniforms_default,
 							attributes:     attributes_default,
 							vertexShader:   vertShader_default,
-							fragmentShader: fragShader_default
+							fragmentShader: (fragShader_default_start + (algorithmShaderString || this.getDefaultDiffuseString()) + fragShader_default_end)
 
 						});
 						mat.lights = true;
 						mat.fog = true;
 						
-						uniforms_default.grassSampler.value.wrapS = uniforms_default.grassSampler.value.wrapT = THREE.RepeatWrapping;
-						uniforms_default.cliffSampler.value.wrapS = uniforms_default.cliffSampler.value.wrapT = THREE.RepeatWrapping;
-						uniforms_default.dirtSampler.value.wrapS = uniforms_default.dirtSampler.value.wrapT = THREE.RepeatWrapping;
-						uniforms_default.snowSampler.value.wrapS = uniforms_default.snowSampler.value.wrapT = THREE.RepeatWrapping;
+						
 						uniforms_default.noiseSampler.value.wrapS = uniforms_default.noiseSampler.value.wrapT = THREE.RepeatWrapping;
 						//mat.wireframe = true;
 						return mat;
@@ -679,8 +652,15 @@ function TileCache()
 				}				
 				this.returnMesh = function(mesh)	
 				{
-					//mesh.geometry.dispose();
-					//mesh.material.dispose();
+				
+					if(mesh.quadnode)
+						mesh.quadnode = null;
+					if(mesh.parent)
+						mesh.parent.remove(mesh);
+				}
+				this.clear = function()
+				{
+					this.tiles = [];
 				}
 				this.getMesh = function(res,side)
 				{
