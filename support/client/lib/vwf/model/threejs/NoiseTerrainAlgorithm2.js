@@ -1,34 +1,17 @@
-function NoiseTerrainAlgorithm(seed) 
+function NoiseTerrainAlgorithm2(seed) 
 {	importScripts('simplexNoise.js');
 	this.displace= function(vert)
 	{
 		var z = 0;
-		z = this.SimplexNoise.noise2D((vert.x)/10000,(vert.y)/1000) * 15;
-		z = z*z;
-		z += this.SimplexNoise.noise2D((vert.x)/100000,(vert.y)/100000) * 450;
-		z += this.SimplexNoise.noise2D((vert.x)/10000,(vert.y)/100000) * 250;
-		z += this.SimplexNoise.noise2D((vert.x)/1000,(vert.y)/100) * 25;
-		z += this.SimplexNoise.noise2D((vert.x)/1000,(vert.y)/5000) * 50;
-		z += this.SimplexNoise.noise2D((vert.x)/500,(vert.y)/50) * 10;
-		 z += this.SimplexNoise.noise2D((vert.x)/100,(vert.y)/100) * 5.0;
-		 z += this.SimplexNoise.noise2D((vert.x)/20,(vert.y)/20) * 1.5;
-		 z += this.SimplexNoise.noise2D((vert.x)/5,(vert.y)/5) * .25;
-		  z += this.SimplexNoise.noise2D((vert.x)/2,(vert.y)/2) * .15;
-		var canynon = this.SimplexNoise.noise2D((vert.x)/2000,(vert.y)/10000) * -50;
-			if(canynon < -30)
-			{
-				canynon += 30;
-				canynon *= canynon;
-				}
-			else
-				canynon = 0;
-			z-= canynon;	
-		if(z < 0)  
-		{
-			z/=5;
-			
-		}
-		return z + 30;
+		z = this.SimplexNoise.noise2D((vert.x)/10000,(vert.y)/10000);
+		z += 1;
+		z /= 2;
+			z = Math.sqrt(z);
+		z = z * 450;
+		for(var i =0; i < 15; i ++)
+			z -= (this.SimplexNoise.noise2D((vert.x)/(30 * i),(vert.y)/(30 * i)) + 1)/2 * 3.5 * i;
+		if( z < 0) z = 0;	
+		return z;
 	}
 	this.Random = function(seed)
     {

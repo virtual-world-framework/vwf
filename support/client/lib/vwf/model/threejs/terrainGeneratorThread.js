@@ -49,7 +49,7 @@ this.generateTerrainSimWorker = function(datain,buffers)
 	}
 	
 	
-	var 	vertoffset = 1;
+	var 	vertoffset = .1;
 			var invmat = new THREE.Matrix4();
 			
 			invmat = invmat.getInverse(matrix.clone().setPosition(new THREE.Vector3()));
@@ -122,13 +122,13 @@ this.generateTerrainSimWorker = function(datain,buffers)
 				for(var l = 0; l < res; l++)
 				{
 					//remove when not perect stitching
-					if(l ==0 || j == 0 || j == res-3 || l == res-3)
-					{
-						
-						everyOtherNormal[j * res + l] = normals[j][l];
-						everyOtherZ[j * res + l]  = heights[j][l];
-					}
-					else
+					//if(l ==0 || j == 0 || j == res-3 || l == res-3)
+					//{
+					//	
+					//	everyOtherNormal[j * res + l] = normals[j][l];
+					//	everyOtherZ[j * res + l]  = heights[j][l];
+					//}
+					//else
 					{
 						if(l % 2 ==1 && j % 2 !=1)
 						{

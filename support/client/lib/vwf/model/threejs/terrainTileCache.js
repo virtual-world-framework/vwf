@@ -60,7 +60,7 @@ function TileCache()
 						"n = normalize(n);\n"+
 						"   vec4 mvPosition = modelViewMatrix * vec4( position.x,position.y,z, 1.0 );\n"+
 					
-						"debug = debugColor;\n"+
+					//	"debug = debugColor;\n"+
 						"   gl_Position = projectionMatrix * mvPosition;\n"+
 						"}    \n";
 						var fragShader_default = 
@@ -82,7 +82,12 @@ function TileCache()
 						"uniform vec3 directionalLightDirection[ MAX_DIR_LIGHTS ];\n"+
 						
 						
-		"uniform vec3 fogColor;"+				
+		"uniform vec3 fogColor;"+	
+"uniform int fogType;"+
+						
+						"uniform float fogDensity;"+
+						"uniform float fogNear;"+
+						"uniform float fogFar;"+		
 "vec3 horizonColor;\n"+
 "vec3 zenithColor;\n"+
 "vec3 sunColor;\n"+
@@ -94,27 +99,24 @@ function TileCache()
 "}\n"+
 
 "vec3 applyFog(vec3 albedo, float dist, vec3 rayOrigin, vec3 rayDirection){\n"+
-"    float fogDensity = 0.00036;\n"+
+"    float fogDensityA = fogDensity ;\n"+
 "    float vFalloff = 20.0;\n"+ 
-"    float fog = exp((-rayOrigin.y*vFalloff)*fogDensity) * (1.0-exp(-dist*rayDirection.y*vFalloff*fogDensity))/(rayDirection.y*vFalloff);\n"+
+"    float fog = exp((-rayOrigin.y*vFalloff)*fogDensityA) * (1.0-exp(-dist*rayDirection.y*vFalloff*fogDensityA))/(rayDirection.y*vFalloff);\n"+
 "    return mix(albedo, fogColor, clamp(fog, 0.0, 1.0));\n"+
 "}\n"+
 
 "vec3 aerialPerspective(vec3 albedo, float dist, vec3 rayOrigin, vec3 rayDirection){\n"+
 "    float atmosphereDensity = 0.00025;\n"+
 "    vec3 atmosphere = atmosphereColor(rayDirection)+vec3(0.0, 0.02, 0.04); \n"+
-"    vec3 color = mix(albedo, atmosphere, clamp(1.0-exp(-dist*atmosphereDensity), 0.0, 1.0));\n"+
-"    return applyFog(color, dist, rayOrigin, rayDirection);\n"+
+"    atmosphere = mix( atmosphere, atmosphere*.75, clamp(1.0-exp(-dist*atmosphereDensity), 0.0, 1.0));\n"+
+"    vec3 color = mix( applyFog(albedo, dist, rayOrigin, rayDirection), atmosphere, clamp(1.0-exp(-dist*atmosphereDensity), 0.0, 1.0));\n"+
+"    return color;\n"+
 "}						\n"+
 						
 						
 						
 						"#endif\n"+
-						"uniform int fogType;"+
 						
-						"uniform float fogDensity;"+
-						"uniform float fogNear;"+
-						"uniform float fogFar;"+
 						"varying vec3 debug;\n"+
 						"varying vec3 pos;"+
 						"varying vec3 n;"+
@@ -193,7 +195,7 @@ function TileCache()
 							//"gl_FragColor.xyz = nn;\n"+
 							"gl_FragColor.xyz = aerialPerspective(gl_FragColor.xyz, distance(pos,cameraPosition),cameraPosition.xzy, normalize(pos-cameraPosition).xzy);\n"+
 						"#endif\n"+
-					//	"gl_FragColor = vec4(debug,1.0);\n"+
+						//"gl_FragColor = vec4(debug,1.0);\n"+
 						"}\n";
 						
 						//the default shader - the one used by the analytic solver, just has some simple stuff
@@ -255,7 +257,7 @@ function TileCache()
 						});
 						mat.lights = true;
 						mat.fog = true;
-						//mat.wireframe = true;
+						
 						uniforms_default.grassSampler.value.wrapS = uniforms_default.grassSampler.value.wrapT = THREE.RepeatWrapping;
 						uniforms_default.cliffSampler.value.wrapS = uniforms_default.cliffSampler.value.wrapT = THREE.RepeatWrapping;
 						uniforms_default.dirtSampler.value.wrapS = uniforms_default.dirtSampler.value.wrapT = THREE.RepeatWrapping;
@@ -677,8 +679,8 @@ function TileCache()
 				}				
 				this.returnMesh = function(mesh)	
 				{
-					mesh.geometry.dispose();
-					mesh.material.dispose();
+					//mesh.geometry.dispose();
+					//mesh.material.dispose();
 				}
 				this.getMesh = function(res,side)
 				{
@@ -687,6 +689,7 @@ function TileCache()
 							if(this.tiles[res][i].quadnode == null && this.tiles[res][i].side == side)
 							{
 							//	console.log('reusing tile');
+							
 								return this.tiles[res][i];
 							}
 					if(!this.tiles[res])		
@@ -718,7 +721,7 @@ function TileCache()
 					newtile.material.attributes.everyOtherNormal.needsUpdate = true;
 					//so, it appears that it might just be better to generate a new one than store it 
 					//memory / cpu tradeoff
-					//this.tiles[res].push(newtile);
+					this.tiles[res].push(newtile);
 					return newtile;
 				}
 			}

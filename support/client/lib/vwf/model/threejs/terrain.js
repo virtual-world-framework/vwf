@@ -3,10 +3,11 @@
 		{
 			
 			var self = this;
-			var totalmintilesize = 32;
+			var totalmintilesize = 8;
+			var tileres = 32;
 			var minTileSize = totalmintilesize;
 			var maxTileSize = 2048;
-			var worldExtents = 128000;
+			var worldExtents = 2048;
 			var updateEvery = 15;
 			
 			
@@ -24,6 +25,7 @@
 	loadScript(   "vwf/model/threejs/terrainTileCache.js");
 	loadScript(   "vwf/model/threejs/terrainQuadtree.js");
 		quadtreesetSelf(this);	
+		quadtreesetRes(tileres);
 			self.TileCache = new TileCache();
 			self.debug = new THREE.Mesh(new THREE.SphereGeometry(3));
 			self.debug2 = new THREE.Mesh(new THREE.SphereGeometry(3));
@@ -72,7 +74,7 @@
 				this.terrainGenerator = loadScript("vwf/model/threejs/terrainGenerator.js");
 				window._dTerrainGenerator = this.terrainGenerator;
 				
-				this.terrainType = 'NoiseTerrainAlgorithm';
+				this.terrainType = 'CesiumTerrainAlgorithm';
 				this.terrainParams = 12312;
 				this.terrainGenerator.init(this.terrainType,this.terrainParams);
 				this.DisableTransform();
@@ -91,6 +93,7 @@
 				this.getRoot().CPUPick = function(o,d,opts){
 				
 				var node = self.quadtree.containing(o);;
+				if(!node) return;
 				var mesh = node.mesh;
 				if(mesh)
 					return mesh.CPUPick(o,d,opts);
@@ -235,40 +238,49 @@
 					
 						
 					
+						var cont = this.quadtree.containing([x,y]);
+						if(!cont) return;
+						this.containing = cont.parent;
 						
-						this.containing = this.quadtree.containing([x,y]).parent;
 						
 						
 					
-						while(this.containing.NN().depth != this.containing.depth)
+						while(this.containing.NN() && this.containing.NN().depth != this.containing.depth)
 							this.containing.NN().split(this.removelist);
-						while(this.containing.SN().depth != this.containing.depth)
+						while(this.containing.SN() && this.containing.SN().depth != this.containing.depth)
 							this.containing.SN().split(this.removelist);
-						while(this.containing.EN().depth != this.containing.depth)
+						while(this.containing.EN() && this.containing.EN().depth != this.containing.depth)
 							this.containing.EN().split(this.removelist);
-						while(this.containing.WN().depth != this.containing.depth)
+						while(this.containing.WN() && this.containing.WN().depth != this.containing.depth)
 							this.containing.WN().split(this.removelist);
 						
 						
-						while(this.containing.NEN().depth != this.containing.depth)
+						while(this.containing.NEN() &&  this.containing.NEN().depth != this.containing.depth)
 							this.containing.NEN().split(this.removelist);
-						while(this.containing.SEN().depth != this.containing.depth)
+						while(this.containing.SEN() && this.containing.SEN().depth != this.containing.depth)
 							this.containing.SEN().split(this.removelist);
-						while(this.containing.SWN().depth != this.containing.depth)
+						while(this.containing.SWN() && this.containing.SWN().depth != this.containing.depth)
 							this.containing.SWN().split(this.removelist);
-						while(this.containing.NWN().depth != this.containing.depth)
+						while(this.containing.NWN() && this.containing.NWN().depth != this.containing.depth)
 							this.containing.NWN().split(this.removelist);
 						
+						if(this.containing.NN())
+							this.containing.NN().split(this.removelist);
+						if(this.containing.EN())
+							this.containing.EN().split(this.removelist);
+						if(this.containing.WN())
+							this.containing.WN().split(this.removelist);
+						if(this.containing.SN())
+							this.containing.SN().split(this.removelist);						
 						
-						this.containing.NN().split(this.removelist);
-						this.containing.EN().split(this.removelist);
-						this.containing.WN().split(this.removelist);
-						this.containing.SN().split(this.removelist);						
-						
-						this.containing.NEN().split(this.removelist);
-						this.containing.SEN().split(this.removelist);
-						this.containing.NWN().split(this.removelist);
-						this.containing.SWN().split(this.removelist);		
+						if(this.containing.NEN())
+							this.containing.NEN().split(this.removelist);
+						if(this.containing.SEN())
+							this.containing.SEN().split(this.removelist);
+						if(this.containing.NWN())
+							this.containing.NWN().split(this.removelist);
+						if(this.containing.SWN())
+							this.containing.SWN().split(this.removelist);		
 						
 						var lowergrid = [this.containing,
 										this.containing.NN(),
@@ -283,6 +295,7 @@
 						
 						for(var i = 0; i < lowergrid.length ; i++)
 						{
+							if(lowergrid[i])
 							for(var j =0; j < lowergrid[i].children.length; j++)
 							{
 							
@@ -291,15 +304,39 @@
 						
 						}
 						
-						var lowergridinner = [this.containing.NW(),this.containing.NE(),this.containing.SE(),this.containing.SW(),
-										this.containing.NN().SE(),this.containing.NN().SW(),
-										this.containing.EN().NW(),this.containing.EN().SW(),
-										this.containing.SN().NE(),this.containing.SN().NW(),
-										this.containing.WN().SE(),this.containing.WN().NE(),
-										this.containing.NEN().SW(),
-										this.containing.NWN().SE(),
-										this.containing.SEN().NW(),
-										this.containing.SWN().NE()]
+						var lowergridinner = [this.containing.NW(),this.containing.NE(),this.containing.SE(),this.containing.SW()];
+						if(this.containing.NN())
+						{
+							lowergridinner.push(this.containing.NN().SE());
+							lowergridinner.push(this.containing.NN().SW());
+						}
+						if(this.containing.EN())
+						{
+							lowergridinner.push(this.containing.EN().NW());
+							lowergridinner.push(this.containing.EN().SW());
+						}
+						if(this.containing.SN())
+						{
+							lowergridinner.push(this.containing.SN().NE());
+							lowergridinner.push(this.containing.SN().NW());
+						}
+						if(this.containing.WN())
+						{
+							lowergridinner.push(this.containing.WN().SE());
+							lowergridinner.push(this.containing.WN().NE());
+						}
+							
+										
+										
+										
+						if(this.containing.NEN())				
+							lowergridinner.push(this.containing.NEN().SW());
+						if(this.containing.NWN())
+							lowergridinner.push(this.containing.NWN().SE());
+						if(this.containing.SEN())
+							lowergridinner.push(this.containing.SEN().NW());
+						if(this.containing.SWN())
+							lowergridinner.push(this.containing.SWN().NE());
 								
 						
 					
@@ -422,7 +459,7 @@
 									self.TileCache.returnMesh(e);
 								}
 								o.visible = true
-								
+								o.material.uniforms.blendPercent.value = 1;
 								
 								tile.fadelist = null;
 							 }
@@ -489,6 +526,7 @@
 								 }else
 								 {
 								 l.debug(0,0,0);
+								 o.material.uniforms.blendPercent.value = 1;
 								 }
 								
 							 };

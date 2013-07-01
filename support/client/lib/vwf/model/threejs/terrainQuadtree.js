@@ -1,12 +1,13 @@
-			var tileres = 16;
+			var tileres = 32;
 			var SW = 0;
 			var SE = 1;
 			var NW = 3;
 			var NE = 2;
 			var self;
- var perfectstitch = true;
+ var perfectstitch = false;
  
 function quadtreesetSelf(s) { self = s};
+function quadtreesetRes(s) {tileres = s;}
 function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 			{
 				
@@ -224,28 +225,40 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 				
 				this.northEastNeighbor = function()
 				{
-					return this.NN().EN();
+					var nn = this.NN();
+					if(nn)
+					return nn.EN();
+					return null;
 						
 				}
 				this.NEN = this.northEastNeighbor;
 				
 				this.southEastNeighbor = function()
 				{
-					return this.SN().EN();
+					var sn = this.SN();
+					if(sn)
+					return sn.EN();
+					return null;
 						
 				}
 				this.SEN = this.southEastNeighbor;
 				
 				this.northWestNeighbor = function()
 				{
-					return this.NN().WN();
+					var nn = this.NN();
+					if(nn)
+					return nn.WN();
+					return null;
 						
 				}
 				this.NWN = this.northWestNeighbor;
 				
 				this.southWestNeighbor = function()
 				{
-					return this.SN().WN();
+					var sn = this.SN();
+					if(sn)
+					return sn.WN();
+					return null;
 						
 				}
 				this.SWN = this.southWestNeighbor;
@@ -406,8 +419,8 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 								if(perfectstitch == true)
 									this.mesh = self.TileCache.getMesh(res,this.meshNeeded(this.side));
 								else
-									this.mesh = self.TileCache.getMesh(res,this.meshNeeded(0));
-								if(perfectstitch == true)
+									this.mesh = self.TileCache.getMesh(res,0);
+								if(perfectstitch == false)
 									this.mesh.material.uniforms.side.value = this.side;	
 								else
 									this.mesh.material.uniforms.side.value = -1;	
@@ -454,6 +467,7 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 											this.badsidemesh = null;
 											
 										}
+										this.mesh.geometry.dirtyMesh = true;
 										//go head and callback into the rebuild look to deal with fadein/out stuff, and dispatch the next tile update
 										cb(this);
 									}else
@@ -587,8 +601,8 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 					
 					var tempmin = this.min;
 					var tempmax = this.max;
-					if(tempmin[0] < point[0] && tempmax[0] > point[0] && 
-					tempmin[1] < point[1] && tempmax[1] > point[1])
+					if(tempmin[0] <= point[0] && tempmax[0] > point[0] && 
+					tempmin[1] <= point[1] && tempmax[1] > point[1])
 						return true;
 					return false;
 				}
