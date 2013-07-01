@@ -43,7 +43,6 @@ properties:
   makeOwnAvatarVisible: true
   userObject:
     extends: tank.vwf
-    implements: [ "http://vwf.example.com/navigable.vwf" ]
     properties:
       active: false
       laserCount: 0
