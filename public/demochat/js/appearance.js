@@ -41,7 +41,7 @@
 //  function displayLogin():  Display the logon div and hide the non-logon div's.
 function displayLogin( ) {
     //Clear any user list or current chat content from those divs.
-    $( '#chatContent' ).empty( );
+    $( '#chatTable' ).empty( );
     $( '#chatListInternal' ).empty( );
     //Hide the non-login divs.
     $( '#chatWindow' ).hide( );

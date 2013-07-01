@@ -139,7 +139,7 @@
     </div>
     <div id="chatWindow" class="demochat-chatwindow">
       <div id="chatContent" class="demochat-chatcontent">
-        <table id="chatTable" style="border:0px;margin:0px;padding:0px;width:100%;">        
+        <table id="chatTable" style="border:0px;margin:0px;padding:0px;width:100%;">       
         </table>
       </div>
       <textarea id='chatInput' rows='1' class="demochat-chatinput"></textarea>
@@ -306,7 +306,7 @@
           if ( userDetails[ nodeId ] != undefined ) {
             var newLine = "<tr><td style='width:250px;max-width:250px;'><div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='" + userDetails[ nodeId ][ "displayName" ] + "' style='color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left'>" + userDetails[ nodeId ][ "displayName" ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has left chat.</div></td></tr>";
             var updateScroll = autoScroll( );
-            $( '#chatContent' ).append( newLine );
+            $( '#chatTable' ).append( newLine );
             if ( updateScroll ) {
               scrollToBottom( );
             }
@@ -333,7 +333,7 @@
                 var newLine = "<tr><td style='width:250px;max-width:250px;'><div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='system'           style='color:#000000;float:left;'>The user </div><div class='" + propertyValue + "' style='color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left;margin-left:5px;'>" + userDetails[ nodeId ][ "displayName" ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has changed their display name to</div><div class='" + propertyValue + "' style='color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left;margin-left:5px;'>" + propertyValue + "</div><div class='system' style='color:#000000;float:left;'>.</div></td></tr>";
 
                 var updateScroll = autoScroll( );
-                $( '#chatContent' ).append( newLine );
+                $( '#chatTable' ).append( newLine );
                 if ( updateScroll ) {
                   scrollToBottom( );
                 }               
@@ -368,7 +368,7 @@
             userDetails[ nodeId ] = { "displayName": properties[ "displayName" ], "displayColor": properties[ "displayColor" ] };
             var newLine = "<tr><td style='width:250px;max-width:250px;'><div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='" + properties[ "displayName" ] + "' style='color:" + properties[ "displayColor" ] + ";float:left'>" + properties[ "displayName" ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has joined chat.</div></td></tr>";
             var updateScroll = autoScroll( );
-            $( '#chatContent' ).append( newLine );
+            $( '#chatTable' ).append( newLine );
             if ( updateScroll ) {
               scrollToBottom( );
             }
@@ -410,7 +410,7 @@
               userDetails[ eventParameters[ 0 ] ] = { "displayName": eventParameters[ 1 ], "displayColor": eventParameters[ 2 ] };
               var newLine = "<tr><td style='width:250px;max-width:250px;'><div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + ";float:left'>" + eventParameters[ 1 ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has joined chat.</div></td></tr>";
               var updateScroll = autoScroll( );
-              $( '#chatContent' ).append( newLine );
+              $( '#chatTable' ).append( newLine );
               if ( updateScroll ) {
                 scrollToBottom( );
               }
@@ -446,7 +446,7 @@
               if ( userDetails[ nodeId ] != undefined ) {
                 var newLine = "<tr><td style='width:250px;max-width:250px;'><div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='" + userDetails[ nodeId ][ "displayName" ] + "' style='color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left'>" + userDetails[ nodeId ][ "displayName" ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has left chat.</div></td></tr>";
                 var updateScroll = autoScroll( );
-                $( '#chatContent' ).append( newLine );
+                $( '#chatTable' ).append( newLine );
                 if ( updateScroll ) {
                   scrollToBottom( );
                 }
@@ -469,7 +469,7 @@
           if ( ( isConnected( ) ) && ( eventName == "userMessage" ) ) {
 		        var newLine = "<tr><td style='width:250px;max-width:250px;'><div class='" + eventParameters[ 0 ] + "' style='width:250px;color:" + eventParameters[ 1 ] + ";float:left;'>[" + eventParameters[ 0 ] + "] [<span style='font-size:75%'>" + timestamp + "</span>] </div></td><td style='width:100%''><div class='" + eventParameters[ 0 ] + "' style='color:" + eventParameters[ 1 ] + "'>" + eventParameters[ 2 ] + "</div></td></tr>";
             var updateScroll = autoScroll( );
-            $( '#chatContent' ).append( newLine );
+            $( '#chatTable' ).append( newLine );
             if ( updateScroll ) {
               scrollToBottom( );
             }
