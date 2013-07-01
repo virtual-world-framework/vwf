@@ -98,6 +98,11 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 
 			if( name == 'rtcCall' || name == 'rtcVideoCall' )
 			{
+				if( params.target == _UserManager.GetCurrentUserName() ){
+					console.log('Cannot call yourself');
+					return;
+				}
+
 				this.rtcTarget = params.target;
 				this.mode = {'audio':true, 'video':name=='rtcVideoCall'};
 				var typeWord = this.mode.video ? 'Video' : 'Voice';
