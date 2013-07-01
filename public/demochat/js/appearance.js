@@ -156,10 +156,13 @@ function getTimestamp( ) {
   var timestampDate = new Date( );
 	var timestampHours = timestampDate.getHours();
 	var timestampPeriod = "AM";
-	if ( timestampHours > 12 ) {
+	if ( timestampHours > 11 ) {
 	  timestampHours = timestampHours - 12;
 	  timestampPeriod = "PM"
 	}
+  if ( timestampHours == 0 ) {
+    timestampHours = 12;
+  }
 	var timestampMinutes = timestampDate.getMinutes();
 	if ( timestampMinutes < 10 ) {
 	  timestampMinutes = "0" + timestampMinutes;
@@ -168,5 +171,5 @@ function getTimestamp( ) {
   if ( timestampSeconds < 10 ) {
     timestampSeconds = "0" + timestampSeconds;
   }
-  return timestampDate.getMonth() + "/" + timestampDate.getDate() + " " + timestampHours + ":" + timestampMinutes + ":" +  timestampSeconds + " " + timestampPeriod;
+  return timestampDate.getMonth() + 1 + "/" + timestampDate.getDate() + " " + timestampHours + ":" + timestampMinutes + ":" +  timestampSeconds + " " + timestampPeriod;
 }
