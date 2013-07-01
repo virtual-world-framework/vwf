@@ -19,7 +19,7 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 '			style="position: absolute;" '+
 '			poster="/adl/sandbox/vwf/view/webrtc/avatar.png" muted/>'+
 '	</div>'+
-'	<div id="messagePanel" style="position: absolute; top: 10px; left: 10px; background-color: #fff">'+
+'	<div id="messagePanel" style="position: absolute; top: 10px; left: 10px; width: 320px; height: 240px; background-color: #fff">'+
 '		<p id="message">'+
 '			Incoming message from Herp Derp'+
 '		</p>'+
