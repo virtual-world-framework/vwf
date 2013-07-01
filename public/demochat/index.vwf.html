@@ -125,7 +125,7 @@
     <link rel="stylesheet" type="text/css" href="css/demochat.css"/>
     <div id="logon" class="demochat-logon">
       </br>
-      Username: <input id="playerNameInput" type="text"/ ></br>
+      Username: <input id="playerNameInput" type="text" maxlength="32"/></br>
       <div> <div style="display:inline-block; height:36px;vertical-align:0%"> Display Color: </div> <div id="newUserColor" class="demochat-colorwidget"></div> </div>
       Alert Sound: <select id="loginSoundSelect"></select><button type="button" id="loginSoundSelectTest">Test Sound</button></br>
       <button type="button" id="chatlogin" class="demochat-logonbutton">Login</button></br>
@@ -144,7 +144,7 @@
     <div id="chatOptions" class="demochat-chatoptions">
       <div class="demochat-chatInnerOptions" style="align:left">
         <div> <div style="display:inline-block; height:36px;vertical-align:0%"> Select New Display Color: </div> <div id="changeTextColor" class="demochat-colorwidget"></div> </div>
-        Change Display Name: <input type="text" id="changeDisplayName"/> <button type="button" id="changeDisplayNameButton">Change Name</button></br>
+        Change Display Name: <input type="text" id="changeDisplayName" maxlength="32"/> <button type="button" id="changeDisplayNameButton">Change Name</button></br>
       </div>
       <div class="demochat-chatInnerOptions" style="align:right">
         Select New Alert Sound: <select id="changeSoundSelect"></select><button type="button" id="changeSoundSelectTest">Test Sound</button><button type="button" id="changeSoundButton">Change Sound</button></br>
@@ -174,6 +174,13 @@
 			  }
 		  } );
       
+      
+      $( '#playerNameInput' ).keyup( function( ) {
+        $( '#playerNameInput' ).val( sanitizeUsername( $( '#playerNameInput' ).val( ) ) );
+      });
+      $( '#changeDisplayName' ).keyup( function( ) {
+        $( '#changeDisplayName' ).val( sanitizeUsername( $( '#changeDisplayName' ).val( ) ) );
+      });
       
       var autoScroll = function ( ) {
         return $('#chatContent')[0].scrollHeight - $('#chatContent')[0].scrollTop == $('#chatContent').height();

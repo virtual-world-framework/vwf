@@ -129,7 +129,7 @@ function removeUser( userName ) {
 //  function sanitizeUserName(userName): Takes a username, strips non alpha-numeric characters.
 function sanitizeUsername( userName ) {
     userName = userName.replace( / /g, "_" );
-    userName = userName.replace( /([^0-9A-Za-z])/g, "" );
+    userName = userName.replace( /([^0-9A-Za-z\-\_])/g, "" );
     return userName;
 }
 
