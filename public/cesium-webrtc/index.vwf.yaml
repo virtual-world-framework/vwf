@@ -26,6 +26,27 @@ methods:
   findClient:
   newClientVideo:
 children:
+  toolbar:
+    properties:
+      selectedColor:
+        set: |
+          this.selectedColor = value;
+          this.selectedColorChanged( value );
+        value:
+          "black"
+      inputMode:
+        set: |
+          this.inputMode = value;
+          this.inputModeChanged( value );
+        value:
+          "orbit"
+    methods:
+      clear: |
+        this.clearing();
+    events:
+      selectedColorChanged:
+      inputModeChanged:
+      clearing:
   camera:
     extends: http://vwf.example.com/cesium/camera.vwf
     properties:
@@ -48,6 +69,15 @@ scripts:
 - |
     this.initialize = function() {
     }
+    
+    this.toolbar.selectedColorChanged = this.events.add( function( color ) { }, this );
+
+    this.toolbar.inputModeChanged = this.events.add( function( mode ) { }, this );
+
+    this.toolbar.events.clearing = this.events.add( function() { 
+      this.clear(); 
+    }, this );
+
     this.createClient = function( moniker, loginName ) {
       console.info( "createClient( "+moniker+", "+loginName+" )" );
       var self = this;
