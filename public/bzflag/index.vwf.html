@@ -30,7 +30,7 @@
 						{
 							if($('#userNameInput').val().length > 0) {
 								playerName = $('#userNameInput').val();
-								vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [$('#userNameInput').val()]);
+								vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [$('#userNameInput').val(), vwf.moniker()]);
 								$('#userName').html(playerName + ":&nbsp;");
 								preloadImages();
 								$(this).dialog("close");
@@ -40,20 +40,10 @@
 						{
 							playerNode = $('#selectPlayerInput').val();
 							playerName = $("#selectPlayerInput option[value='" + playerNode + "']").text();
-							vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [playerName]);
+							vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [playerName, vwf.moniker()]);
 							$('#userName').html(playerName + ":&nbsp;");
 							preloadImages();
 							$(this).dialog("close");
-
-							// Set Player Camera
-							var playerCameraID = vwf_view.kernel.find(playerNode, playerName+"Camera")[0];
-						    var viewState = vwf_view.kernel.kernel.views[0].state;
-						    var glgeCamera = viewState.nodes[ playerCameraID ].glgeObject;
-						    glgeCamera.setAspect(canvas.width / canvas.height);
-						    viewState.cameraInUse = glgeCamera;
-						    viewState.cameraInUseID = playerCameraID;
-						    viewState.scenes[sceneNode].glgeScene.setCamera(glgeCamera);
-						    viewState.scenes[sceneNode].camera.ID = playerCameraID;
 						}
 					}
 				},

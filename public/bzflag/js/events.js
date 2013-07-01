@@ -51,17 +51,8 @@ var laserImages = ["images/blue_bolt.png", "images/green_bolt.png", "images/hunt
 
 vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplementsIDs,
     childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
-    if(childName == playerName) {
+    if(childName == "navobj_" + vwf.moniker()) {
         playerNode = childID;
-    }
-    else if(childName == (playerName + "Camera")) {
-        var viewState = vwf.views["vwf/view/glge"].state;
-        var glgeCamera = viewState.nodes[ childID ].glgeObject;
-        glgeCamera.setAspect(canvas.width / canvas.height);
-        viewState.cameraInUse = glgeCamera;
-        viewState.cameraInUseID = childID;
-        viewState.scenes[sceneNode].glgeScene.setCamera(glgeCamera);
-        viewState.scenes[sceneNode].camera.ID = childID;
     }
 }
 
