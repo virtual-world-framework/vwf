@@ -3033,8 +3033,26 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             max: { x: -Number.MAX_VALUE, y: -Number.MAX_VALUE, z: -Number.MAX_VALUE }
         };
 
-        if ( object3 && object3.geometry && object3.geometry.computeBoundingBox ) {
-           
+        if (object3 instanceof THREE.Object3D)
+        {
+            object3.traverse (function (mesh)
+            {
+                if (mesh instanceof THREE.Mesh)
+                {
+                    mesh.geometry.computeBoundingBox ();
+                    var meshBoundingBox = mesh.geometry.boundingBox;
+
+                    // compute overall bbox
+                    bBox.min.x = Math.min (bBox.min.x, meshBoundingBox.min.x);
+                    bBox.min.y = Math.min (bBox.min.y, meshBoundingBox.min.y);
+                    bBox.min.z = Math.min (bBox.min.z, meshBoundingBox.min.z);
+                    bBox.max.x = Math.max (bBox.max.x, meshBoundingBox.max.x);
+                    bBox.max.y = Math.max (bBox.max.y, meshBoundingBox.max.y);
+                    bBox.max.z = Math.max (bBox.max.z, meshBoundingBox.max.z);
+                }
+            });
+        }
+        else if ( object3 && object3.geometry && object3.geometry.computeBoundingBox ) {
             object3.geometry.computeBoundingBox();
             var bx = object3.geometry.boundingBox;
             bBox = { 
@@ -3043,8 +3061,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             };
         }
 
-        return bBox; 
-           
+        return bBox;
     }
 
     function getCenterOffset( object3 ) {

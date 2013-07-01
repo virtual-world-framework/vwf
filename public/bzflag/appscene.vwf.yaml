@@ -64,12 +64,12 @@ scripts:
   this.collisionDetection = function(deltaTranslation, player) {
     var collision = false;
     var playerBoundingBox = player.cachedBoundingBox;
-    playerBoundingBox.max[0] += deltaTranslation[0];
-    playerBoundingBox.min[0] += deltaTranslation[0];
-    playerBoundingBox.max[1] += deltaTranslation[1];
-    playerBoundingBox.min[1] += deltaTranslation[1];
-    playerBoundingBox.max[2] += deltaTranslation[2];
-    playerBoundingBox.min[2] += deltaTranslation[2];
+    playerBoundingBox.max.x += deltaTranslation[0];
+    playerBoundingBox.min.x += deltaTranslation[0];
+    playerBoundingBox.max.y += deltaTranslation[1];
+    playerBoundingBox.min.y += deltaTranslation[1];
+    playerBoundingBox.max.z += deltaTranslation[2];
+    playerBoundingBox.min.z += deltaTranslation[2];
 
     collision = this.checkForStaticCollision(playerBoundingBox) ||
         this.checkForDynamicCollision(player, playerBoundingBox, this.players.children);
@@ -79,10 +79,10 @@ scripts:
     var minX, minY, maxX, maxY;
     var worldSize = this.worldSize / 2;
     
-    minX = ((playerBoundingBox.min[0] + worldSize) / this.collisionMapScaleFactor) | 0;
-    minY = ((worldSize - playerBoundingBox.min[1]) / this.collisionMapScaleFactor) | 0;
-    maxX = ((playerBoundingBox.max[0] + worldSize) / this.collisionMapScaleFactor) | 0;
-    maxY = ((worldSize - playerBoundingBox.max[1]) / this.collisionMapScaleFactor) | 0;
+    minX = ((playerBoundingBox.min.x + worldSize) / this.collisionMapScaleFactor) | 0;
+    minY = ((worldSize - playerBoundingBox.min.y) / this.collisionMapScaleFactor) | 0;
+    maxX = ((playerBoundingBox.max.x + worldSize) / this.collisionMapScaleFactor) | 0;
+    maxY = ((worldSize - playerBoundingBox.max.y) / this.collisionMapScaleFactor) | 0;
 
     if(minX < 0 || minY < 0 || maxX > this.collisionMapSize || maxY > this.collisionMapSize) {
       return this.bz_world;
@@ -107,13 +107,13 @@ scripts:
     for(var i=0;i<sceneObjects.length;i++) {
       if(player.id != sceneObjects[i].id && (!player.parentTank || player.parentTank != sceneObjects[i].id) && sceneObjects[i].active != false) {
         var sceneBoundingBox = sceneObjects[i].cachedBoundingBox ? sceneObjects[i].cachedBoundingBox : sceneObjects[i].worldBoundingBox;
-        if(sceneBoundingBox.max[0] == Infinity || sceneBoundingBox.max[1] == Infinity || sceneBoundingBox.max[2] == Infinity || 
-            sceneBoundingBox.min[0] == -Infinity || sceneBoundingBox.min[1] == -Infinity || sceneBoundingBox.min[2] == -Infinity) {
+        if(sceneBoundingBox.max.x == Infinity || sceneBoundingBox.max.y == Infinity || sceneBoundingBox.max.z == Infinity || 
+            sceneBoundingBox.min.x == -Infinity || sceneBoundingBox.min.y == -Infinity || sceneBoundingBox.min.z == -Infinity) {
           continue;
         }
-        if(playerBoundingBox.max[0] < sceneBoundingBox.min[0] || playerBoundingBox.min[0] > sceneBoundingBox.max[0] ||
-              playerBoundingBox.max[1] < sceneBoundingBox.min[1] || playerBoundingBox.min[1] > sceneBoundingBox.max[1] || 
-              playerBoundingBox.max[2] < sceneBoundingBox.min[2] || playerBoundingBox.min[2] > sceneBoundingBox.max[2]) {
+        if(playerBoundingBox.max.x < sceneBoundingBox.min.x || playerBoundingBox.min.x > sceneBoundingBox.max.x ||
+              playerBoundingBox.max.y < sceneBoundingBox.min.y || playerBoundingBox.min.y > sceneBoundingBox.max.y || 
+              playerBoundingBox.max.z < sceneBoundingBox.min.z || playerBoundingBox.min.z > sceneBoundingBox.max.z) {
           continue;
         }
         return sceneObjects[i];

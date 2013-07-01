@@ -721,11 +721,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         var bbox;
                         if ( glgeObject.getBoundingVolume ) {
                             bbox = glgeObject.getBoundingVolume( true );
-                            value = { min: [ bbox.limits[0], bbox.limits[2], bbox.limits[4] ], max: [ bbox.limits[1], bbox.limits[3], bbox.limits[5] ] };
-                        } else {
-                            bbox = getLocalBoundingBox.call( this, glgeObject );
-                            value = { min: [ bbox.xMin, bbox.yMin, bbox.zMin], max: [ bbox.xMax, bbox.yMax, bbox.zMax] };
-                        }
+                            value = { min: { x: bbox.limits[0], y: bbox.limits[2], z: bbox.limits[4] }, max: { x: bbox.limits[1], y: bbox.limits[3], z: bbox.limits[5] } };
+                        } 
                         break;
 
                     case "centerOffset":
