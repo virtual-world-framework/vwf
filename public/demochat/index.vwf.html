@@ -159,18 +159,20 @@
       $( '#newUserColor' ).ColorPicker( {
 			  flat: false,
 			  color: '#000000',
-			  onSubmit: function( hsb, hex, rgb ) {
+			  onSubmit: function( hsb, hex, rgb, el) {
 				  $( '#newUserColor' ).css( 'backgroundColor', '#' + hex );
+          $( el ).ColorPickerHide();
 			  }
 		  } );
       $( '#changeTextColor' ).ColorPicker( {
 			  flat: false,
 			  color: '#000000',
-			  onSubmit: function( hsb, hex, rgb ) {
+			  onSubmit: function( hsb, hex, rgb, el ) {
 				  $( '#changeTextColor' ).css( 'backgroundColor', '#' + hex );
           if ( isConnected( ) ) {
             vwf_view.kernel.callMethod( sceneId, "userColorChange", [ $( '#changeTextColor' ).css( 'backgroundColor' ), playerId, vwf_view.kernel.moniker( ) ] );
           }
+          $( el ).ColorPickerHide();
 			  }
 		  } );
       
