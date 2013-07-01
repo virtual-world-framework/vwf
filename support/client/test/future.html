@@ -30,6 +30,7 @@
       }, [
 
         "domReady",
+        "utility.js",
 
         "vwf/configuration",
         "vwf/kernel/model",
@@ -41,7 +42,7 @@
         "vwf/utility",
         "logger",
 
-      ], function( ready ) {
+      ], function( ready, testUtility ) {
 
         // Test the kernel "future" interface.
 
@@ -102,7 +103,7 @@
 
               // Wait and test.
 
-              runFutureAssertions( function( time ) {
+              testUtility.runFutureAssertions( function( time ) {
 
                 vwf.execute( fixtureID, "this.mark( 'tick' )" ); // tick, just before assertions
                 
@@ -146,7 +147,7 @@
               vwf.execute( fixtureID, "this.at( " + time2 + " ).property = 'at'" );
               vwf.execute( fixtureID, "this.future( " + "0.013" + " ).property = 'future'" );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { absolute: time1, assertion: function() {
                     equal( vwf.getProperty( fixtureID, "property" ), "in", "relative" ) } },
@@ -222,7 +223,7 @@
 
               equal( vwf.getProperty( fixtureID, "property" ), undefined, "future queued" );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.001, assertion: function() {
                     equal( vwf.getProperty( fixtureID, "property" ), "property", "future property" ) } },
@@ -254,7 +255,7 @@
 
               equal( vwf.getProperty( fixtureID, "property" ), undefined, "future queued" );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.001, assertion: function() {
                     equal( vwf.getProperty( fixtureID, "property" ), "property", "future property" ) } },
@@ -288,7 +289,7 @@
               equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived queued" ); // still inherited
               equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.001, assertion: function() {
                     equal( vwf.getProperty( derivedID, "derived" ), "derived updated", "derived in derived executed" ) } },
@@ -320,7 +321,7 @@
               equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived queued" ); // still inherited
               equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.001, assertion: function() {
                     equal( vwf.getProperty( derivedID, "derived" ), "derived updated", "derived in derived executed" ) } },
@@ -357,7 +358,7 @@
               vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
               vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0, "f0" ] ] ], 0 );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.010, assertion: function() {
                     deepEqual( vwf.getProperty( fixtureID, "log" ), [
@@ -382,7 +383,7 @@
               vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
               vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0.001, "f1" ] ] ], 0 );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.010, assertion: function() {
                     deepEqual( vwf.getProperty( fixtureID, "log" ), [
@@ -407,7 +408,7 @@
               vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
               vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0, "f0a", 0, "f0b" ] ] ], 0 );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.010, assertion: function() {
                     deepEqual( vwf.getProperty( fixtureID, "log" ), [
@@ -434,7 +435,7 @@
               vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
               vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0.001, "f1a", 0.001, "f1b" ] ] ], 0 );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.010, assertion: function() {
                     deepEqual( vwf.getProperty( fixtureID, "log" ), [
@@ -465,7 +466,7 @@
               vwf.execute( fixtureID, "this.methods.log( '- r1 scheduled' )" );
               vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1" ] ], -0.001 );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.010, assertion: function() {
                     deepEqual( vwf.getProperty( fixtureID, "log" ), [
@@ -493,7 +494,7 @@
               vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
               vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0.001, "f1" ] ] ], 0 );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.000, assertion: function() {
                     vwf.execute( fixtureID, "this.methods.log( '- r1 scheduled' )" );
@@ -531,7 +532,7 @@
               vwf.execute( fixtureID, "this.methods.log( '- r1b scheduled' )" );
               vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1b" ] ], -0.001 );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.010, assertion: function() {
                     deepEqual( vwf.getProperty( fixtureID, "log" ), [
@@ -563,7 +564,7 @@
               vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
               vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0.001, "f1a", 0.001, "f1b" ] ] ], 0 );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.000, assertion: function() {
                     vwf.execute( fixtureID, "this.methods.log( '- r1a scheduled' )" );
@@ -610,7 +611,7 @@
               vwf.execute( fixtureID, "this.methods.log( '- r1b scheduled' )" );
               vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1b" ] ], -0.001 );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.020, assertion: function() {
                     deepEqual( vwf.getProperty( fixtureID, "log" ), [
@@ -647,7 +648,7 @@
               vwf.execute( fixtureID, "this.methods.log( '- r1 scheduled' )" );
               vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1" ] ], -0.001 );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.010, assertion: function() {
                     deepEqual( vwf.getProperty( fixtureID, "log" ), [
@@ -691,7 +692,7 @@
                 // time 1, immediately following the setState action. setState should remove it.
 
                 nodes: [
-                  dataURIFromDescriptor( {
+                  testUtility.dataURIFromDescriptor( {
                     extends:
                       fixtureID,
                     scripts: [
@@ -737,7 +738,7 @@
               // transformed system state), the following reflector action runs, then the actions
               // from the incoming queue scheduled later run.
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.010, assertion: function() {
                     deepEqual( vwf.getProperty( fixtureID, "log" ), [
@@ -758,7 +759,7 @@
 
           function createFixture( callback /* fixtureID, cleanup */ ) {
 
-            vwf.createChild( 0, unique_name( "fixture" ), {
+            vwf.createChild( 0, testUtility.uniqueName( "fixture" ), {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -831,7 +832,7 @@
 
           function createFixtureQueue( callback /* fixtureID, cleanup */ ) {
 
-            vwf.createChild( 0, unique_name( "fixture" ), {
+            vwf.createChild( 0, testUtility.uniqueName( "fixture" ), {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -912,70 +913,6 @@
 
           }
 
-          // Create a unique name from a base.
-
-          var sequence;
-
-          function unique_name( base ) {
-            sequence = sequence ? ++sequence : 1;
-            return base + "-" + sequence;
-          }
-
-          // Run assertions against actions on the future queue.
-
-          function runFutureAssertions( ticked, assertions, cleanup ) {
-
-            // Interpret runFutureAssertions( assertions, cleanup ) as
-            // runFutureAssertions( undefined, assertions, cleanup )
-
-            if ( typeof ticked != "function" && ! ( ticked instanceof Function ) ) {
-              cleanup = assertions;
-              assertions = ticked;
-              ticked = undefined;
-            }
-
-            // Listen for the kernel tick.
-
-            window.vwf_view.ticked = function( time ) {
-
-              if ( next < assertions.length ) {
-
-                // Call our caller's tick every time the time changes, just before any assertions.
-
-                ticked && ticked( time );
-
-                // Run any assertions that are ready.
-
-                while ( next < assertions.length && ready( assertions[next], time ) ) {
-                  assertions[next++].assertion();
-                }
-
-              } else {
-
-                // When finished, unlisten for the kernel tick and tell qunit that we're done.
-
-                window.vwf_view.ticked = undefined;
-                cleanup();
-                start();
-
-              }
-
-            }
-
-            var reference = vwf.time();
-            var next = 0;
-
-            // Time to run the next one?
-
-            function ready( assertion, time ) {
-
-              return assertion.absolute !== undefined && time > assertion.absolute ||
-                assertion.relative !== undefined && time > reference + assertions[next].relative;
-              
-            }
-            
-          }
-
           // Convert a number to a Number object that expresses itself in 3-point fixed precision
           // when referenced in string context.
 
@@ -988,14 +925,6 @@
             }
 
             return number3;            
-          }
-
-          // Convert a component descriptor to a data URI component.
-
-          function dataURIFromDescriptor( descriptor ) {
-
-            return "data:application/json;base64," + btoa( JSON.stringify( descriptor ) );
-
           }
 
         } );

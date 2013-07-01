@@ -30,6 +30,7 @@
       }, [
 
         "domReady",
+        "utility.js",
 
         "vwf/configuration",
         "vwf/kernel/model",
@@ -41,7 +42,7 @@
         "vwf/utility",
         "logger",
 
-      ], function( ready, configuration ) {
+      ], function( ready, testUtility, configuration ) {
 
         // Test node replication.
 
@@ -59,7 +60,7 @@
 
             // The descriptor, and a data URI referencing it.
 
-            uri: dataURIFromDescriptor( {
+            uri: testUtility.dataURIFromDescriptor( {
               properties: {
                 p: { // numbers externally, strings internally
                   set: "this.p = value.toString()", // number to string
@@ -231,7 +232,7 @@
 
             // The descriptor, and a data URI referencing it.
 
-            uri: dataURIFromDescriptor( {
+            uri: testUtility.dataURIFromDescriptor( {
               properties: {
                 p: {
                   set: "this.p = value.toString()",
@@ -328,7 +329,7 @@
 
             // The descriptor, and a data URI referencing it.
 
-            uri: dataURIFromDescriptor( {
+            uri: testUtility.dataURIFromDescriptor( {
               scripts: [
                 "this.initialize = function() { " +
                   "this.children.create( 'c', { " +
@@ -520,14 +521,6 @@
           } );
 
           // == Helper functions ===================================================================
-
-          // Convert a component descriptor to a data URI component.
-
-          function dataURIFromDescriptor( descriptor ) {
-
-            return "data:application/json;base64," + btoa( JSON.stringify( descriptor ) );
-
-          }
 
           // Generate the random state object given a parent's state and a node ID. If the node
           // doesn't have a parent, use the global random seed. This mimics the prng initialization

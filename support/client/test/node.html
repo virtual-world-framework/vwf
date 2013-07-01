@@ -30,6 +30,7 @@
       }, [
 
         "domReady",
+        "utility.js",
 
         "vwf/configuration",
         "vwf/kernel/model",
@@ -41,7 +42,7 @@
         "vwf/utility",
         "logger",
 
-      ], function( ready ) {
+      ], function( ready, testUtility ) {
 
         // Test the JavaScript node proxy.
 
@@ -86,7 +87,7 @@
               vwf.execute( fixtureID, "this.future( 0.003 ).c()" );
               vwf.execute( fixtureID, "this.d.future( 0.004 ).p" );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.001, assertion: function() {
                     equal( vwf.execute( fixtureID, "this.result" ), "a-property", "properties override methods" ) } },
@@ -112,7 +113,7 @@
 
           function createFixture( callback ) {
 
-            vwf.createChild( 0, unique_name( "fixture" ), {
+            vwf.createChild( 0, testUtility.uniqueName( "fixture" ), {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -154,63 +155,6 @@
 
             } );
 
-          }
-
-          // Create a unique name from a base.
-
-          var sequence = 0;
-
-          function unique_name( base ) {
-            return base + "-" + ( ++sequence );
-          }
-
-          // Run assertions against actions on the future queue.
-
-          function runFutureAssertions( ticked, assertions ) {
-
-            // Interpret runFutureAssertions( assertions ) as
-            // runFutureAssertions( undefined, assertions )
-
-            if ( typeof ticked != "function" && ! ( ticked instanceof Function ) ) {
-              assertions = ticked;
-              ticked = undefined;
-            }
-
-            // Listen for the kernel tick.
-
-            window.vwf_view.ticked = function( time ) {
-
-              // Call our caller's tick just before the assertions.
-
-              ticked && ticked( time );
-
-              // Run any assertions that are ready.
-
-              while ( next < assertions.length && ready( assertions[next], time ) ) {
-                assertions[next++].assertion();
-              }
-
-              // When finished, unlisten for the kernel tick and tell qunit that we're done.
-
-              if ( next == assertions.length ) {
-                window.vwf_view.ticked = undefined;
-                start();
-              }
-
-            }
-
-            var reference = vwf.time();
-            var next = 0;
-
-            // Time to run the next one?
-
-            function ready( assertion, time ) {
-
-              return assertion.absolute && time > assertion.absolute ||
-                assertion.relative && time > reference + assertions[next].relative;
-              
-            }
-            
           }
 
         } );

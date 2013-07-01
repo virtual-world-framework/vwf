@@ -30,6 +30,7 @@
       }, [
 
         "domReady",
+        "utility.js",
 
         "vwf/configuration",
         "vwf/kernel/model",
@@ -40,7 +41,7 @@
         "vwf/utility",
         "logger",
 
-      ], function( ready ) {
+      ], function( ready, testUtility ) {
 
         // Test properties.
 
@@ -208,14 +209,6 @@
 
             } );
 
-          }
-         
-          // Create a unique name from a base.
-
-          var sequence = 0;
-
-          function unique_name( base ) {
-            return base + "-" + ( ++sequence );
           }
 
         } );
