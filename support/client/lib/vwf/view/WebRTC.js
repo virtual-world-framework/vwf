@@ -18,6 +18,8 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 '		<video id="self" width="80" height="60" '+
 '			style="position: absolute;" '+
 '			poster="/adl/sandbox/vwf/view/webrtc/avatar.png" muted/>'+
+'		<input id="chatButton" type="button" value="Send Message" '+
+'			style="position: absolute; left: 210px;"/>'+
 '	</div>'+
 '	<div id="messagePanel" style="position: absolute; top: 10px; left: 10px; width: 320px; height: 240px; background-color: #fff">'+
 '		<p id="message">'+
@@ -26,6 +28,8 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 '		<input id="accept" type="button" value="Accept"/>'+
 '		<input id="reject" type="button" value="Reject"/>'+
 '	</div>'+
+//'	<div id="buttonPanel">'+
+//'	</div>'+
 '	<img id="permission-reminder" src="/adl/sandbox/images/up-arrow.png"'+
 '		style="width: 60px; height: 180px; position: fixed; top: 0px; left: 150px; display: none;"/>'+
 '</div>'
@@ -65,6 +69,11 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 				$('#vidFrame').dialog('close');
 			}.bind(this));
 
+			// hook up the PM button
+			$('#vidFrame #chatButton').button().click(function(evt){
+				setupPmWindow(this.rtcTarget);
+			}.bind(this));
+
 			// hook up the resize handler
 			$('#vidFrame').on( 'dialogresize', function(evt,ui)
 			{
@@ -84,6 +93,7 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 				$('#vidFrame > div').css(ratioSize)
 				$('#vidFrame > #vidPanel > video#remote').css(ratioSize);
 				$('#vidFrame > #vidPanel > video#self').css({width: ratioSize.width/4, height: ratioSize.height/4});
+				$('#vidFrame > #vidPanel > input#chatButton').css({left: ratioSize.width - $('#vidFrame #chatButton').width() - 30});
 			});
 		},
 
@@ -98,11 +108,6 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 
 			if( name == 'rtcCall' || name == 'rtcVideoCall' )
 			{
-				if( params.target == _UserManager.GetCurrentUserName() ){
-					console.log('Cannot call yourself');
-					return;
-				}
-
 				this.rtcTarget = params.target;
 				this.mode = {'audio':true, 'video':name=='rtcVideoCall'};
 				var typeWord = this.mode.video ? 'Video' : 'Voice';
