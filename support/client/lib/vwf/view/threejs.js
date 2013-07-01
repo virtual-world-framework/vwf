@@ -731,7 +731,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         canvas.onmousedown = function( e ) {
            switch( e.button ) {
                 case 2:
-                    if ( pointerLockImplemented ) {
+                    if ( pointerLockImplemented && ( navmode != "none" ) ) {
                         canvas.requestPointerLock();
                     }
                     mouseRightDown = true;
@@ -765,7 +765,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             switch( e.button ) {
                 case 2:
-                    if ( pointerLockImplemented ) {
+                    if ( pointerLockImplemented && ( navmode != "none" ) ) {
                         document.exitPointerLock();
                     }
                     mouseRightDown = false;
