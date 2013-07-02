@@ -102,6 +102,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     this.state.scenes[ childID ] = node = createNode();
                 }
 
+            } else if ( isCentralBody.call( this, protos ) ) {
+
+                this.state.nodes[ childID ] = node = createNode();
+                parentNode = findParent.call( this, nodeID );
+                if ( parentNode && parentNode.centralBody ) {
+                    node.cesiumObj = parentNode.centralBody;
+                    node.cesiumObj.vwfID = childID;
+                }                
+
             } else if ( isAtmosphere.call( this, protos ) ) {
 
                 this.state.nodes[ childID ] = node = createNode();
@@ -902,11 +911,112 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         //    
                         //    }
                         //    break;
+
+
+
                         case "viewFrom":
                             if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
                                node.cesiumObj.viewFrom = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
                             }
-                            break;                            
+                            break;
+
+                        case "northPoleColor":
+                            if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                                if ( propertyValue instanceof String ) {
+                                    propertyValue = propertyValue.replace( /\s/g, '' );
+                                }
+                                var vwfColor = new utility.color( propertyValue );
+                                if ( vwfColor ) {                            
+                                    node.cesiumObj.northPoleColor = new Cesium.Cartesian3( 
+                                        vwfColor.red() / 255, 
+                                        vwfColor.green() / 255, 
+                                        vwfColor.blue() / 255 
+                                    );
+                                }
+                            } 
+                            break;
+
+                        case "southPoleColor":
+                            if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                                if ( propertyValue instanceof String ) {
+                                    propertyValue = propertyValue.replace( /\s/g, '' );
+                                }
+                                var vwfColor = new utility.color( propertyValue );
+                                if ( vwfColor ) {                            
+                                    node.cesiumObj.southPoleColor = new Cesium.Cartesian3( 
+                                        vwfColor.red() / 255, 
+                                        vwfColor.green() / 255, 
+                                        vwfColor.blue() / 255 
+                                    );
+                                }
+                            } 
+                            break;
+                            
+                        case "logoOffset":
+                            if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                                node.cesiumObj.logoOffset = new Cesium.Cartesian2( Number( propertyValue[0], propertyValue[1] ) );
+                            }
+                            break;
+
+                        case "tileCacheSize":
+                            if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                                node.cesiumObj.tileCacheSize = Number( propertyValue );
+                            }
+                            break;  
+
+                        case "oceanNormalMapUrl":
+                            if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                                node.cesiumObj.oceanNormalMapUrl =  propertyValue;
+                            }
+                            break;
+
+                        case "depthTestAgainstTerrain":
+                            if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                                node.cesiumObj.depthTestAgainstTerrain = Boolean( propertyValue );
+                            }
+                            break;
+
+                        case "terrainProvider":
+                            if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                                if ( node.terrainProvider && node.terrainProvider == propertyValue ) {
+                                    break;
+                                }
+
+                                var terrainProvider = undefined;
+                                switch ( propertyValue ) {
+                                    case "cesium":
+                                        node.terrainProvider = propertyValue;
+                                        terrainProvider = new Cesium.CesiumTerrainProvider({
+                                            url : 'http://cesium.agi.com/smallterrain',
+                                            credit : 'Terrain data courtesy Analytical Graphics, Inc.'
+                                        });  
+                                        node.centralBody.depthTestAgainstTerrain = true;                                  
+                                        break;
+                                    case "vr":
+                                        node.terrainProvider = propertyValue;
+                                        terrainProvider = new Cesium.VRTheWorldTerrainProvider({
+                                            url : 'http://www.vr-theworld.com/vr-theworld/tiles1.0.0/73/',
+                                            credit : 'Terrain data courtesy VT MÄK'
+                                        }); 
+                                        node.centralBody.depthTestAgainstTerrain = true;                                   
+                                        break;
+                                    default:
+                                        terrainProvider = new Cesium.EllipsoidTerrainProvider();
+                                        node.terrainProvider = "ellipsoid";
+                                        node.cesiumObj.depthTestAgainstTerrain = false;
+                                        break;
+
+                                }
+
+                                if ( terrainProvider !== undefined ) {
+                                    node.cesiumObj.terrainProvider = terrainProvider;
+                                }
+                            }
+                            
+                            value = undefined;
+                            break;
+
+
 
                         default:
                             value = undefined;
@@ -947,43 +1057,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 }
                                 break;
 
-                            case "terrainProvider":
-                                if ( node.terrainProvider && node.terrainProvider == propertyValue ) {
-                                    break;
-                                }
-
-                                var terrainProvider = undefined;
-                                switch ( propertyValue ) {
-                                    case "cesium":
-                                        node.terrainProvider = propertyValue;
-                                        terrainProvider = new Cesium.CesiumTerrainProvider({
-                                            url : 'http://cesium.agi.com/smallterrain',
-                                            credit : 'Terrain data courtesy Analytical Graphics, Inc.'
-                                        });  
-                                        node.centralBody.depthTestAgainstTerrain = true;                                  
-                                        break;
-                                    case "vr":
-                                        node.terrainProvider = propertyValue;
-                                        terrainProvider = new Cesium.VRTheWorldTerrainProvider({
-                                            url : 'http://www.vr-theworld.com/vr-theworld/tiles1.0.0/73/',
-                                            credit : 'Terrain data courtesy VT MÄK'
-                                        }); 
-                                        node.centralBody.depthTestAgainstTerrain = true;                                   
-                                        break;
-                                    default:
-                                        terrainProvider = new Cesium.EllipsoidTerrainProvider();
-                                        node.terrainProvider = "ellipsoid";
-                                        node.centralBody.depthTestAgainstTerrain = false;
-                                        break;
-
-                                }
-
-                                if ( terrainProvider !== undefined ) {
-                                    node.centralBody.terrainProvider = terrainProvider;
-                                }
-                                
-                                value = undefined;
-                                break;
 
 
                             case "imageryProvider":
@@ -1445,6 +1518,47 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 case "terrainProvider":
                     break;
 
+                case "northPoleColor":
+                    if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                        var clr = node.cesiumObj.northPoleColor;
+                        value = "rgb(" + ( clr.x*255 ) + "," + (clr.y*255) + "," + (clr.z*255) + ")";
+                    } 
+                    break;
+
+                case "southPoleColor":
+                    if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                        var clr = node.cesiumObj.southPoleColor;
+                        value = "rgb(" + ( clr.x*255 ) + "," + (clr.y*255) + "," + (clr.z*255) + ")";
+                    } 
+                    break;
+                    break;
+                    
+                case "logoOffset":
+                    if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                        var pos = node.cesiumObj.logoOffset;
+                        value = [ pos.x, pos.y ];
+                    }
+                    break;
+
+                case "tileCacheSize":
+                    if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                        value = node.cesiumObj.tileCacheSize;
+                    }
+                    break;  
+
+                case "oceanNormalMapUrl":
+                    if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                        value = node.cesiumObj.oceanNormalMapUrl;
+                    }
+                    break;
+
+                case "depthTestAgainstTerrain":
+                    if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                        value = node.cesiumObj.depthTestAgainstTerrain;
+                    }
+                    break;
+
+
                 case "cameraViewData":
                     if ( node.scene ) {
                         var camera = node.scene.getCamera();
@@ -1807,6 +1921,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         return foundCesium;
     }
 
+    function isCentralBody( prototypes ) {
+        var foundCesium = false;
+        if ( prototypes ) {
+            var len = prototypes.length;
+            for ( var i = 0; i < len && !foundCesium; i++ ) {
+                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-centralBody-vwf" );    
+            }
+        }
+
+        return foundCesium;
+    }
+
     function isSun( prototypes ) {
         var foundCesium = false;
         if ( prototypes ) {
@@ -1860,7 +1986,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-dynamicobject-vwf" );   
+                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-dynamicObject-vwf" );   
             }
         }
 

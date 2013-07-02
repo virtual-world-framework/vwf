@@ -11,20 +11,19 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## Cesium centralObject component
+## 
+## @name centralObject.vwf
+## @namespace
+
 --- 
-extends: http://vwf.example.com/cesium.vwf
+extends: http://vwf.example.com/cesium/node3.vwf
 properties:
-  backgroundColor:
-  renderStyle: "3D"
-  imageryProvider: "bingAerial"
-children:
-  camera:
-    extends: http://vwf.example.com/cesium/camera.vwf
-  earth:
-    extends: http://vwf.example.com/cesium/centralBody.vwf
-  sun: 
-    extends: http://vwf.example.com/cesium/sun.vwf 
-  atmosphere: 
-    extends: http://vwf.example.com/cesium/atmosphere.vwf 
-  skybox: 
-    extends: http://vwf.example.com/cesium/skybox.vwf 
+  visible: true
+  terrainProvider: 
+  depthAgainstTerrain: 
+  logoOffset:
+  northPoleColor:
+  southPoleColor:
+  oceanNormalMap:
+  tileCacheSize: 100

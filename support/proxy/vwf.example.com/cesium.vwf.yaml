@@ -25,7 +25,6 @@ properties:
   backgroundColor: [ 0, 0, 0, 0 ]
   renderStyle: "3D"
   imageryProvider: "bingAerial"
-  terrainProvider:
   enableLook: 
   enableRotate: 
   enableTilt: 

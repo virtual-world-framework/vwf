@@ -53,6 +53,8 @@ children:
     extends: http://vwf.example.com/cesium/camera.vwf
     properties:
       position: [ 0, -14261948, 11360974 ]
+  earth:
+    extends: http://vwf.example.com/cesium/centralBody.vwf 
   sun: 
     extends: http://vwf.example.com/cesium/sun.vwf 
     properties:
@@ -70,6 +72,7 @@ children:
 scripts:
 - |
     this.initialize = function() {
+      this.lastDrawPosition = undefined;
     }
     
     this.toolbar.selectedColorChanged = this.events.add( function( color ) {
@@ -148,14 +151,42 @@ scripts:
             this.dropPin( pickInfo.globalPosition )
           }
           break;
+      }
+    } 
+    this.pointerDown = function( pointerInfo, pickInfo ) {
+      switch ( this.toolbar.inputMode ) {
         case "draw":
           if ( pickInfo.globalPosition ) {
             this.draw( pickInfo.globalPosition )
           }
           break;
       }
-    } 
+    }
+    this.pointerMove = function( pointerInfo, pickInfo ) {
+      switch ( this.toolbar.inputMode ) {
+        case "draw":
+          if ( pickInfo.globalPosition ) {
+            this.draw( pickInfo.globalPosition )
+          }
+          break;
+      }      
+    }    
+    this.pointerUp = function( pointerInfo, pickInfo ) {
+      switch ( this.toolbar.inputMode ) {
+        case "draw":
+          if ( pickInfo.globalPosition ) {
+            this.draw( pickInfo.globalPosition )
+          }
+          break;
+      }
+      this.lastDrawPosition = undefined; 
+    }
     this.draw = function( pos ) {
+      if ( this.lastDrawPosition === undefined ) {
+        this.lastDrawPosition = pos;
+      } else {
+
+      }
     }
     this.dropPin = function( pos ) {
       var self = this;
