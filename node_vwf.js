@@ -832,6 +832,32 @@ function startVWF(){
 				
 				return;
 			}
+
+			// only allow users to hang up their own RTC calls
+			var rtcMessages = ['rtcCall', 'rtcVideoCall', 'rtcData', 'rtcDisconnect'];
+			if( message.action == 'callMethod' && message.node == 'index-vwf' && rtcMessages.indexOf(message.member) != -1 )
+			{
+				var params = message.parameters[0];
+
+				// allow no transmitting of the 'rtc*Call' messages; purely client-side
+				if( rtcMessages.slice(0,2).indexOf(message.member) != -1 )
+					return;
+
+				// route messages by the 'target' param, verifying 'sender' param
+				if( rtcMessages.slice(2).indexOf(message.member) != -1 &&
+					sendingclient.loginData && 
+					params.sender == sendingclient.loginData.UID
+				){
+					for( var i in global.instances[namespace].clients ){
+						var client = global.instances[namespace].clients[i];
+						if( client && client.loginData && client.loginData.UID == params.target )
+							client.emit('message', message);
+					}
+				}
+				return;
+			}
+
+
 			//We'll only accept a setProperty if the user has ownership of the object
 			if(message.action == "setProperty")
 			{
