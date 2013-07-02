@@ -368,6 +368,27 @@ define(
 			_SplineTool.show();
 		
 		});
+		
+		
+		$('#MenuViewToggleWireframe').click(function (e)
+		{
+			
+			if (_Editor.findscene().overrideMaterial)
+			{
+				_Editor.findscene().overrideMaterial = null;
+			}
+			else
+			{
+				_Editor.findscene().overrideMaterial = new THREE.MeshPhongMaterial();
+				_Editor.findscene().overrideMaterial.wireframe = true;
+				_Editor.findscene().overrideMaterial.color.r = 0;
+				_Editor.findscene().overrideMaterial.color.g = 0;
+				_Editor.findscene().overrideMaterial.color.b = 0;
+				_Editor.findscene().overrideMaterial.fog = false;
+			}
+		});
+		
+		
 		$('#MenuViewToggleAO').click(function (e)
 		{
 			if (_Editor.findscene().getFilter2d())

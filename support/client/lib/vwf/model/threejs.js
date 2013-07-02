@@ -1161,10 +1161,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
                     if(propertyName == 'transform')
                     {
                         
-                        
                         var value = matCpy(threeObject.matrix.elements); 
 						
-						if ( threeObject instanceof THREE.Camera ) {
+			if ( threeObject instanceof THREE.Camera ) {
                             var columny = goog.vec.Vec4.create();
                             goog.vec.Mat4.getColumn( value, 1, columny );
                             var columnz = goog.vec.Vec4.create();
@@ -1173,59 +1172,34 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
                             goog.vec.Mat4.setColumn( value, 1, goog.vec.Vec4.negate( columnz, columnz ) );
                         }
 						
-						var ret =  value;
-						return ret;
+			var ret =  value;
+			return ret;
                         
                     
                     }
-					if(propertyName =='localMatrix')
+		    if(propertyName == 'worldtransform')
                     {
-                        
-                        var flip = false;
-                            if(threeObject.parent instanceof THREE.Scene)
-                            {                           
-								flip = true;
-                            }
-                        var elements = matCpy(threeObject.matrix.elements); 
+                        threeObject.updateMatrixWorld(true);
+                        var value = matCpy(threeObject.matrixWorld.elements); 
 						
+			if ( threeObject instanceof THREE.Camera ) {
+                            var columny = goog.vec.Vec4.create();
+                            goog.vec.Mat4.getColumn( value, 1, columny );
+                            var columnz = goog.vec.Vec4.create();
+                            goog.vec.Mat4.getColumn( value, 2, columnz );
+                            goog.vec.Mat4.setColumn( value, 2, columny );
+                            goog.vec.Mat4.setColumn( value, 1, goog.vec.Vec4.negate( columnz, columnz ) );
+                        }
 						
-						var ret =  unTransformMatrix(elements,flip,threeObject instanceof THREE.Camera);	
-						return ret;
-                        
-                    
-                    }
-					if(propertyName =='parentLocalMatrix')
-                    {
-                        
-                        var flip = false;
-                            if(threeObject.parent.parent instanceof THREE.Scene)
-                            {                           
-								flip = true;
-                            }
-                        var elements = matCpy(threeObject.parent.matrix.elements); 
-						
-						
-						var ret =  unTransformMatrix(elements,flip,threeObject instanceof THREE.Camera);	
-						return ret;
+			var ret =  value;
+			return ret;
                         
                     
                     }
-					if(propertyName == 'worldMatrix')
-					{
-						var flip = !(threeObject instanceof THREE.Scene);
-						threeObject.updateMatrixWorld(true);
-                        var elements = matCpy(threeObject.matrixWorld.elements); 
-						var ret =  unTransformMatrix(elements,flip,threeObject instanceof THREE.Camera);	
-						return ret;
-					}
-					if(propertyName == 'parentWorldMatrix')
-					{
-						var flip = !(threeObject.parent instanceof THREE.Scene);
-						threeObject.parent.updateMatrixWorld(true);
-                        var elements = matCpy(threeObject.parent.matrixWorld.elements); 
-						var ret =  unTransformMatrix(elements,flip,threeObject instanceof THREE.Camera);	
-						return ret;
-					}						
+		    
+	            
+		   
+								
                     if(propertyName ==  "boundingbox")
                     {
                         value = getBoundingBox.call( this, threeObject, true );
@@ -1692,6 +1666,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
             geo.computeCentroids();
         }         
     }
+	//This function actuall fetches the mesh, does the decode, and loads it
     function loadAsset( parentNode, node, childType,callback ) {
 
         var nodeCopy = node; 
@@ -1700,7 +1675,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
         var threeModel = this;
         var sceneNode = this.state.scenes[ this.state.sceneRootID ];
 		
-		
+		//callback for failure of asset parse
 		function assetFailed(err)
 		{
 			$(document).trigger('EndParse');
@@ -1708,6 +1683,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 				_Notifier.alert('error loading asset');
 		}
 		
+		//callback for sucess of asset parse
         function assetLoaded( asset ) { 
 			if(node.parse)
 				$(document).trigger('EndParse');
@@ -1718,26 +1694,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
             if(asset.scene)
                 asset = asset.scene;
             var removed = false;
-           
-            //SetMaterialAmbients.call(threeModel,asset);
-			//asset.rotation.z = Math.PI;
-			
-            
-			
-			var meshes =[];
-			GetAllLeafMeshes(asset,meshes);
-		
-			
-			for(var i =0; i < meshes.length; i++)
-			{
-				//fixMissingUVs(meshes[i]);	
-				
-			}
-			
-		//	window.setTimeout(function(){
+         
 			nodeCopy.threeObject.add(asset);
-			
-		//	},500);
 			
             nodeCopy.threeObject.matrixAutoUpdate = false;
             //no idea what this is doing here
@@ -1752,14 +1710,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
             } 
             if ( removed ) {
                 if ( sceneNode.srcAssetObjects.length == 0 ) {
-                    //vwf.setProperty( MATHModel.state.sceneRootID, "loadDone", true );
+                    
                     loadComplete.call( threeModel );
                 }
 
                 var id = nodeCopy.vwfID;
                 if ( !id ) id = getObjectID.call( threeModel, asset, true, false );
                 if ( id && id != "" ){
-                    //MATHModel.kernel.callMethod( id, "loadComplete" );
+                   
                     if ( threeModel.state.nodes[id] ) {
                         var assetNode = threeModel.state.nodes[id];
                         //finally, here is the async callback
@@ -1771,55 +1729,61 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
                 }
             }
 			
+			//get the entry from the asset registry
 			reg = threeModel.assetRegistry[nodeCopy.source];
+			//it's not pending, and it is loaded
 			reg.pending = false;
 			reg.loaded = true;
+			//store this asset in the registry
 			reg.node = asset;
 			
+			//if any callbacks were waiting on the asset, call those callbacks
 			for(var i = 0; i < reg.callbacks.length; i++)
 				reg.callbacks[i](asset);
+			//nothing should be waiting on callbacks now.	
 			reg.callbacks = [];	
         }
         node.name = childName;
+		//create an Object3D to hold the asset
         if(!node.threeObject)
 		{
             node.threeObject = new THREE.Object3D();
 			node.threeObject.matrixAutoUpdate = false;
-			
-		
 			node.threeObject.updateMatrixWorld(true);
 			
 		}
        
-        
+        //link up the Object3D into the scene graph
         if ( parentNode && parentNode.threeObject ) {
             parentNode.threeObject.add(node.threeObject);
          } else if ( sceneNode ) {
-//          if ( !sceneNode.MATHScene ) {
-//              this.initScene.call( this, sceneNode );
-//          }
             if ( sceneNode.threeScene ) {
                 sceneNode.threeScene.add( node.threeObject );
             }
              
         }
 		
-		
+		//create an asset registry if one does not exist for this driver
 		if(!this.assetRegistry)
 		{
 			this.assetRegistry = {};
 		}
+		// if there is no entry in the registry, create one
 		if(!this.assetRegistry[node.source])
 		{
+			//its new, so not waiting, and not loaded
 			this.assetRegistry[node.source] = {};
 			this.assetRegistry[node.source].loaded = false;
 			this.assetRegistry[node.source].pending = false;
 			this.assetRegistry[node.source].callbacks = [];
 		}
+		//grab the registry entry for this asset
 		var reg = this.assetRegistry[node.source];
 		
+		//if the asset entry is not loaded and not pending, you'll have to actaully go download and parse it
 		if(reg.loaded == false && reg.pending == false)
 		{
+			//thus, it becomes pending
 			reg.pending = true;
 			
 			sceneNode.srcAssetObjects.push( node.threeObject );
@@ -1827,9 +1791,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 			sceneNode.pendingLoads++;
 		
 		     //Do we need this when we have an async load? currently seems to break things
+			 //NOTE: yes, need to prevent the queue from advancing - I think
              //this pauses the queue. Resume by calling with true
 			 callback( false );
 		
+			//call up the correct loader/parser
 			if(childType == "model/vnd.collada+xml")
 			{
 				$(document).trigger('BeginParse',['Loading...',node.source]);
@@ -1844,11 +1810,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 			}
 			
 			
-		}else if(reg.loaded == true && reg.pending == false)
+		}
+		//if the asset registry entry is not pending and it is loaded, then just grab a copy, no download or parse necessary
+		else if(reg.loaded == true && reg.pending == false)
 		{
 			node.threeObject.add(reg.node.clone());
 			$(document).trigger('EndParse');
 		}
+		//if it's pending but not done, register a callback so that when it is done, it can be attached.
 		else if(reg.loaded == false && reg.pending == true)
 		{	
 			sceneNode.srcAssetObjects.push( node.threeObject );
@@ -1858,12 +1827,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 		     //Do we need this when we have an async load? currently seems to break things
              //this pauses the queue. Resume by calling with true
 			 callback( false );
-		
+			
+			//so, not necessary to do all the other VWF node goo stuff, as that will be handled by the node that requseted
+			//the asset in teh first place
+			//
 			var tcal = callback;
 			reg.callbacks.push(function(node)
 			{
 				
-				
+				//just clone the node and attach it.
+				//this should not clone the geometry, so much lower memory.
+				//seems to take near nothing to duplicated animated avatar
 				$(document).trigger('EndParse');
 				nodeCopy.threeObject.add(node.clone());
 				nodeCopy.threeObject.updateMatrixWorld(true);

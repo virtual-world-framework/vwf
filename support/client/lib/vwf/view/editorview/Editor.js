@@ -1611,7 +1611,8 @@ define(function ()
 		}
 		this.getTranslation = function(id)
 		{
-			return vwf.getProperty(id,this.translationPropertyName);
+			var mat = matCpy(this.findviewnode(id).matrixWorld.elements);
+			return [mat[12],mat[13],mat[14]];
 		}
 		this.getScale = function(id)
 		{
@@ -1695,8 +1696,8 @@ define(function ()
 			
 			
 			//new fix to allow drivers to trick editor with fake transform data
-			var matt2 = this.getTransformCallback(this.GetSelectedVWFNode().id);
-			gizpos = [matt2[12], matt2[13], matt2[14]];
+			var matt2 = this.getTranslationCallback(this.GetSelectedVWFNode().id);
+			gizpos = matt2;//[matt2[12], matt2[13], matt2[14]];
 			
 			
 			
@@ -1707,7 +1708,7 @@ define(function ()
 				gizpos[0] += nextchildmat[3];
 				gizpos[1] += nextchildmat[7];
 				gizpos[2] += nextchildmat[11];
-				var trans = this.getTransformCallback(SelectedVWFNodes[s].id);
+				var trans = this.getTranslationCallback(SelectedVWFNodes[s].id);
 				lastpos[s] = [trans[12], trans[13], trans[14]];
 				lastscale[s] = this.getScaleCallback(SelectedVWFNodes[s].id);
 			}

@@ -441,7 +441,7 @@ scripts:
            this.skycube.InvisibleToCPUPick = false;
            this.skycube.depthWrite = false;
            this.skycube.depthCheck = false;
-           findscene().add(this.skycube);
+           _dbackgroundScene.add(this.skycube);
            window._dSky = this.skycube;
        }
         

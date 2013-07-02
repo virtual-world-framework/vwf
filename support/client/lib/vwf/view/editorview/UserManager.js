@@ -102,11 +102,12 @@ define(function ()
 
 		$(document).on('setstatecomplete',function()
 		{
-			
+				
 				if(this.GetCurrentUserName()) return;
 				$.ajax('/vwfDataManager.svc/logindata',
 				{
 					cache:false,
+					async:true,
 					success:function(data,status,xhr)
 					{
 						var logindata = JSON.parse(xhr.responseText);
@@ -118,6 +119,7 @@ define(function ()
 						}
 						else
 						{
+							if(vwf.models[0].model.nodes['character-vwf-' + username] == undefined)
 							this.Login(username);
 						}
 						
