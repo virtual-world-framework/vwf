@@ -91,6 +91,7 @@
 		this.setMeshParams = function(min,max,size,res)
 		{
 			totalmintilesize = min;
+			minTileSize = totalmintilesize;
 			tileres = res;
 			maxTileSize = max;
 			worldExtents = size;
@@ -102,6 +103,8 @@
 			});
 			quadtreesetRes(tileres);
 			this.quadtree = new QuadtreeNode([-worldExtents,-worldExtents],[worldExtents,worldExtents],this.getRoot(),0,-1,minTileSize,maxTileSize);
+			this.terrainGenerator.reInit(this.terrainType,this.terrainParams);
+			this.TileCache.clear();
 		}
 		this.setTerrainAlgorithm = function(algo,params)
 		{
@@ -245,7 +248,7 @@
 				if(hit && hit[0])
 				height = hit[0].point[2];
 				var minRes = Math.pow(2,Math.floor(Math.log(Math.max(1.0,campos.z - height))/Math.LN2)-1);
-				minTileSize = Math.max(minRes,totalmintilesize);
+			//	minTileSize = Math.max(minRes,totalmintilesize);
 				var maxRes = Math.pow(2,Math.floor(Math.log(campos.z)/Math.LN2)+4);
 				if((this.containingList.indexOf(this.quadtree.containing([x,y])) == -1 || this.currentMinRes != minTileSize))
 				{

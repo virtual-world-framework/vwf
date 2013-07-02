@@ -112,7 +112,7 @@ new (function(){
 		{
 			
 			var i = this.currentID.indexOf(e.data.id);
-			if(this.currentMesh[i] &&  this.currentCB[i]  && i != -1)
+			if(this.currentCB[i]  && i != -1)
 			{
 				
 				var cb = this.currentCB[i];
@@ -123,7 +123,7 @@ new (function(){
 			
 		
 				this.currentBuffers[i]=[e.data.data.vertices,e.data.data.normals,e.data.data.everyOtherZ,e.data.data.everyOtherNormal];
-				//if(!this.readers[i])
+				if(mesh)
 				{
 					
 					this.readers[i] = [];
@@ -131,13 +131,11 @@ new (function(){
 					this.readers[i][1] = new Float32Array(e.data.data.normals);
 					this.readers[i][2] = new Float32Array(e.data.data.everyOtherZ);
 					this.readers[i][3] = new Float32Array(e.data.data.everyOtherNormal);
+					this.terrainDataReceived(e.data.data,mesh,this.readers[i],cb);
+				}else
+				{
+					console.log("response from canceled tile");
 				}
-				
-				this.terrainDataReceived(e.data.data,mesh,this.readers[i],cb);	
-				
-			}else
-			{
-				console.log("response from canceled tile");
 			}
 		}
 		
@@ -148,14 +146,18 @@ new (function(){
 		{
 			if(this.currentCB[i])
 				this.currentCB[i](true);
-			this.currentCB[i] =  null;
+			
 			this.currentMesh[i] = null;
-			this.currentID[i] =  null;
-			this.currentBuffers[i] = [];
+			
 		}
 	}
 	this.init = function(type,params)
 	{
+		for(var i = 0; i < MAXWORKERS; i++)
+		{
+			if(this.worker && this.worker[i])
+				this.worker[i].terminate();
+		}
 		
 		this.worker = [];
 		this.currentCB =  [];
