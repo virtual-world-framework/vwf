@@ -1164,13 +1164,14 @@
                 // Global node and descendant deltas.
 
                 nodes: [  // TODO: all global objects
+                    require( "vwf/utility" ).transform( this.getNode( "http-vwf-example-com-clients-vwf", full ), require( "vwf/utility" ).transforms.transit ),
                     require( "vwf/utility" ).transform( this.getNode( applicationID, full ), require( "vwf/utility" ).transforms.transit ),
                 ],
 
                 // `createNode` annotations, keyed by `nodes` indexes.
 
                 annotations: {
-                    0: "application",
+                    1: "application",
                 },
 
                 // Message queue.
