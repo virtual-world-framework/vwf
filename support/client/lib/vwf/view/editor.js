@@ -366,7 +366,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 var topdownName = this.topdownName;
                 var topdownTemp = this.topdownTemp;
 
-                if( this.currentNodeID == '' )
+                if( !this.currentNodeID )
                 {
                     this.currentNodeID = vwf_view.kernel.find("", "/")[0];
                 }
@@ -666,13 +666,19 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
     function drill(nodeID, drillBackID) // invoke with the view as "this"
     {
+        var node = this.nodes[ nodeID ];
+
+        if ( !node ) {
+            this.logger.errorx( "drill: Cannot find node '" + nodeID + "'" );
+            return;
+        }
+
         var self = this;
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
         var nodeIDAlpha = $.encoder.encodeForAlphaNumeric(nodeID);
 
         $(topdownName).html(''); // Clear alternate div first to ensure content is added correctly
-        var node = this.nodes[ nodeID ];
         this.currentNodeID = nodeID;
 
         if(!drillBackID) drillBackID = node.parentID;
