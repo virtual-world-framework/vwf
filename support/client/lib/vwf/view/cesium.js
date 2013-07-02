@@ -418,7 +418,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 var camPos = scene.getCamera().position;
                 var eventID = eventObj ? eventObj.vwfID : "index-vwf";
                 var eData = { 
-                    "eventData": {  
+                    "eventData": [ {  
                         "button": button,
                         "clicks": clickCount,
                         "buttons": {
@@ -434,7 +434,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                             },
                         "position": [ pos.x / width, pos.y / height ],
                         "screenPosition": [ pos.x, pos.y ]
-                    },
+                    } ],
                     "eventNodeData": { "": [ {
                         "distance": undefined,
                         "origin": [ camPos.x, camPos.y, camPos.z ],
