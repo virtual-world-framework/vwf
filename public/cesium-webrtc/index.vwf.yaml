@@ -25,6 +25,8 @@ methods:
   locationCaptured:
   findClient:
   newClientVideo:
+  dropPin:
+  draw:
 children:
   toolbar:
     properties:
@@ -70,9 +72,28 @@ scripts:
     this.initialize = function() {
     }
     
-    this.toolbar.selectedColorChanged = this.events.add( function( color ) { }, this );
+    this.toolbar.selectedColorChanged = this.events.add( function( color ) {
+    }, this );
 
-    this.toolbar.inputModeChanged = this.events.add( function( mode ) { }, this );
+    this.toolbar.inputModeChanged = this.events.add( function( mode ) {
+      
+      this.enableLook = ( mode == "orbit" ); 
+      this.enableRotate = ( mode == "orbit" ); 
+      this.enableTilt = ( mode == "orbit" ); 
+      this.enableTranslate = ( mode == "orbit" ); 
+      this.enableZoom = ( mode == "orbit" ); 
+
+      switch( mode ) {
+        case "orbit":
+          break;
+
+        case "draw":
+          break;
+
+        case "pindrop":
+          break;
+      }
+    }, this );
 
     this.toolbar.events.clearing = this.events.add( function() { 
       this.clear(); 
@@ -119,4 +140,31 @@ scripts:
       } else {
         this.future( 2.0 ).locationCaptured( parms );
       }
+    }
+    this.pointerClick = function( pointerInfo, pickInfo ) {
+      switch ( this.toolbar.inputMode ) {
+        case "pindrop":
+          if ( pickInfo.globalPosition ) {
+            this.dropPin( pickInfo.globalPosition )
+          }
+          break;
+        case "draw":
+          if ( pickInfo.globalPosition ) {
+            this.draw( pickInfo.globalPosition )
+          }
+          break;
+      }
+    } 
+    this.draw = function( pos ) {
+    }
+    this.dropPin = function( pos ) {
+      var self = this;
+      var bbDef = {
+        "extends": "http://vwf.example.com/cesium/billboard.vwf",
+      };
+      var len = this.children.length;
+      this.children.create( "pushPin" + len, bbDef, function( child ) {
+        child.position = pos;
+        child.color = self.toolbar.selectedColor;
+      } );
     } //@ sourceURL = index.vwf

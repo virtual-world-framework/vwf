@@ -31,6 +31,15 @@ properties:
   enableTilt: 
   enableTranslate: 
   enableZoom: 
+events:
+  pointerClick:
+  pointerDoubleClick:
+  pointerDown:
+  pointerMove:
+  pointerUp:
+  pointerEnter:
+  pointerOver:
+  pointerLeave:  
 scripts:
 - |
     this.initialize = function() {

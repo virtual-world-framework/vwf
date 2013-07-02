@@ -111,6 +111,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         parentNode.scene.skyAtmosphere = new Cesium.SkyAtmosphere();
                     }
                     node.cesiumObj = parentNode.scene.skyAtmosphere;
+                    node.cesiumObj.vwfID = childID;
                 }
 
             } else if ( isSkyBox.call( this, protos ) ) {
@@ -130,6 +131,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         });
                     }
                     node.cesiumObj = parentNode.scene.skyBox;
+                    node.cesiumObj.vwfID = childID;
                 } 
 
 
@@ -142,6 +144,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         parentNode.scene.sun = new Cesium.Sun(); 
                     }
                     node.cesiumObj = parentNode.scene.sun;
+                    node.cesiumObj.vwfID = childID;
                 } 
 
             } else if ( isBillboard.call( this, protos ) ) {
@@ -183,6 +186,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     
                     node.bbCollection = bbCollection; 
                     node.cesiumObj = bb;
+                    node.cesiumObj.vwfID = childID;
                     
                 }
                 node.scene = sceneNode.scene;
@@ -207,6 +211,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                     node.labelCollection = labels; 
                     node.cesiumObj = lbl;
+                    node.cesiumObj.vwfID = childID;
                 }
                 node.scene = sceneNode.scene;                
 
@@ -216,7 +221,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 sceneNode = findSceneNode.call( this, node );
 
                 node.cesiumObj = new Cesium.PolylineCollection();
-                node.scene = sceneNode.scene;     
+                node.scene = sceneNode.scene; 
+                node.cesiumObj.vwfID = childID;    
 
             } else if ( isPolyline.call( this, protos ) ) { 
 
@@ -238,6 +244,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                     node.cesiumObj = node.polylineCollection.add( childSource );
                     primitives.add( node.polylineCollection );
+                    node.cesiumObj.vwfID = childID;
                 }
                 node.scene = sceneNode.scene;  
             
@@ -253,6 +260,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     var primitives = sceneNode.scene.getPrimitives();
                     node.cesiumObj = new Cesium.Polygon();
                     primitives.add( node.cesiumObj );
+                    node.cesiumObj.vwfID = childID;
                 }
                 node.scene = sceneNode.scene; 
 
@@ -267,6 +275,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     } else {
                         node.cesiumObj = parentNode.cesiumObj.material;
                     }
+                    node.cesiumObj.vwfID = childID;
                 }
                
                 node.context = undefined;
@@ -302,6 +311,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     camera.frustum.far = 2.0;  
                     node.cesiumObj = camera;              
                 }
+                node.cesiumObj.vwfID = childID;
                 
             } else if ( isDynamicObject.call( this, protos ) ) {
                 this.state.nodes[ childID ] = node = createNode();
@@ -312,8 +322,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                     if ( parentNode.dynObjs ) {
                         node.cesiumObj = parentNode.dynObjs.getObject( childName );
+                        node.cesiumObj.vwfID = childID;
                     }
                 }
+
               
             } else if ( isNode3.call( this, protos ) ) {
                 this.state.nodes[ childID ] = node = createNode();

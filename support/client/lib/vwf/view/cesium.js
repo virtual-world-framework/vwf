@@ -120,8 +120,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 var scene, canvas;
                 var cesiumOptions = { "contextOptions": { "alpha": true }, }; 
 
-
-
                 switch ( this.cesiumObjectDef ) {
 
                     case 'widget':
@@ -172,7 +170,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                 node.imageryProvider = 'bingAerial';
                 node.canvas = scene.getCanvas();
+                scene.vwfID = childID;
                 
+                initializeMouseEvents.call( this, scene, node );
+
                 var camera = scene.getCamera();
 
                 ( function tick() {
@@ -370,6 +371,295 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             nodeID = this.kernel.find( "", "//" )[ 0 ];
             this.kernel.setProperty( nodeID, "cameraViewData", cameraData );
         }
+    }
+
+    function initializeMouseEvents( scene, node ) {
+        
+        this.state.mouse = { 
+            "handler": undefined,
+            "leftDown": false, 
+            "leftDownID": undefined, 
+            "middleDown": false ,
+            "middleDownID": undefined, 
+            "rightDown": false,
+            "rightDownID": undefined,
+            "pinching": false,
+            "scene": scene,
+            "lastPosition": [ -1, -1 ],
+            "buttonDown": function() {
+                if ( this.leftDown ) {
+                    return "left";
+                } else if ( this.rightDown ) {
+                    return "right";
+                } else if ( this.middleDown ) {
+                    return "middle";
+                }
+
+                return undefined;
+            } 
+        };
+        var overID = undefined;
+        var downID = undefined;
+        var lastOverID = undefined;
+        
+        this.state.mouse.handler = new Cesium.ScreenSpaceEventHandler( scene.getCanvas() );
+        
+        if ( this.state.mouse.handler ) {
+            var mouse = this.state.mouse.handler;  
+            var self = this; 
+
+            var pick = function( button, clickCount, event, pos ) {
+                
+                var height = scene.getCanvas().height;
+                var width = scene.getCanvas().width;
+                var eventObj = self.state.mouse.scene.pick( pos );
+                var ellipsoid = node.centralBody.getEllipsoid();
+                var cartesian = scene.getCamera().controller.pickEllipsoid( pos, ellipsoid );
+                var camPos = scene.getCamera().position;
+                var eventID = eventObj ? eventObj.vwfID : "index-vwf";
+                var eData = { 
+                    "eventData": {  
+                        "button": button,
+                        "clicks": clickCount,
+                        "buttons": {
+                                "left": self.state.mouse.leftDown,
+                                "middle": self.state.mouse.middleDown,
+                                "right": self.state.mouse.rightDown
+                            },
+                        "modifiers": {
+                                "alt": false,
+                                "ctrl": false,
+                                "shift": false,
+                                "meta": false
+                            },
+                        "position": [ pos.x / width, pos.y / height ],
+                        "screenPosition": [ pos.x, pos.y ]
+                    },
+                    "eventNodeData": { "": [ {
+                        "distance": undefined,
+                        "origin": [ camPos.x, camPos.y, camPos.z ],
+                        "id": eventObj,
+                        "globalPosition": cartesian ? [ cartesian.x, cartesian.y, cartesian.z ] : undefined,
+                        "globalNormal": undefined,
+                        "globalSource": [ camPos.x, camPos.y, camPos.z ],            
+                    } ] },
+                };
+
+
+
+                if ( event == "down" ) {
+                    switch( button ) {
+                        case "left":
+                            self.state.mouse.leftDownID = eventID;
+                            break;
+                        case "middle":
+                            self.state.mouse.middleDownID = eventID;
+                            break;
+                        case "right":
+                            self.state.mouse.rightDownID = eventID;
+                            break;
+                    }
+                    downID = eventID;
+
+                } else if ( ( event == "up" ) || ( event == "drag" ) ) {
+                    switch( button ) {
+                        case "left":
+                            eventID = self.state.mouse.leftDownID;
+                            break;
+                        case "middle":
+                            eventID = self.state.mouse.middleDownID;
+                            break;
+                        case "right":
+                            eventID = self.state.mouse.rightDownID;
+                            break;
+                    }
+                } else if ( event == "move" ) {
+                    overID = eventID;
+                }
+
+                if ( eventID ) {
+
+                    scene.getCamera().controller.pickEllipsoid( pos, ellipsoid );
+
+                    var id = eventID;
+                    while ( id ) {
+                        eData.eventNodeData[ id ] = [ {
+                            "distance": undefined,
+                            "origin": scene.getCamera().position,
+                            "globalPosition": cartesian ? [ cartesian.x, cartesian.y, cartesian.z ] : undefined,
+                            "globalNormal": undefined,
+                            "globalSource": scene.getCamera().position,            
+                        } ];
+
+                        //id = undefined;
+                        if ( self.state.nodes[ id ] ) {
+                            id = self.state.nodes[ id ].parentID;
+                        } else {
+                            id = undefined;
+                        }
+                    }
+                }
+                return eData;
+            }
+
+
+            // left click
+            mouse.setInputAction( function( movement ) {
+                
+                var eData = pick( "left", 1, "click", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerClick", eData.eventData, eData.eventNodeData );
+
+            }, Cesium.ScreenSpaceEventType.LEFT_CLICK );
+            
+            // left double click
+            mouse.setInputAction( function( movement ) {
+
+                var eData = pick( "left", 2, "click", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerDoubleClick", eData.eventData, eData.eventNodeData );
+
+            }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK );
+            
+            // left up
+            mouse.setInputAction( function( movement ) {
+                
+                self.state.mouse.leftDown = false;
+                var eData = pick( "left", 0, "up", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerUp", eData.eventData, eData.eventNodeData );
+                self.state.mouse.leftDownID = undefined;
+
+            }, Cesium.ScreenSpaceEventType.LEFT_UP );
+
+            // left down
+            mouse.setInputAction( function( movement ) {
+                
+                self.state.mouse.leftDown = true;
+                var eData = pick( "left", 0, "down", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerDown", eData.eventData, eData.eventNodeData );
+            
+            }, Cesium.ScreenSpaceEventType.LEFT_DOWN );
+
+            // mouse move
+            mouse.setInputAction( function( movement ) {
+                var bd = self.state.mouse.buttonDown();
+                if ( bd ) {
+                    var eData = pick( bd, 0, "drag", movement.endPosition );
+                    self.kernel.dispatchEvent( downID, "pointerMove", eData.eventData, eData.eventNodeData );
+                } else {
+                    var eData = pick( "", 0, "move", movement.endPosition );
+                    if ( lastOverID === undefined && overID !== undefined ) {
+                        self.kernel.dispatchEvent( overID, "pointerEnter", eData.eventData, eData.eventNodeData );
+                        lastOverID = overID;
+                    } else if ( overID ) {
+                        if ( overID !== lastOverID ) {
+                            self.kernel.dispatchEvent( lastOverID, "pointerLeave", eData.eventData, eData.eventNodeData );
+                            self.kernel.dispatchEvent( overID, "pointerEnter", eData.eventData, eData.eventNodeData );
+                            lastOverID = overID;
+                        } else {
+                            self.kernel.dispatchEvent( overID, "pointerOver", eData.eventData, eData.eventNodeData );
+                        }
+                    }
+                }   
+            }, Cesium.ScreenSpaceEventType.MOUSE_MOVE );
+
+
+            // middle click
+            mouse.setInputAction( function( movement ) {
+
+                var eData = pick( "middle", 1, "click", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerClick", eData.eventData, eData.eventNodeData );
+                
+            }, Cesium.ScreenSpaceEventType.MIDDLE_CLICK );
+            
+            // middle double click
+            mouse.setInputAction( function( movement ) {
+
+                var eData = pick( "middle", 2, "click", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerDoubleClick", eData.eventData, eData.eventNodeData );
+                
+            }, Cesium.ScreenSpaceEventType.MIDDLE_DOUBLE_CLICK );
+            
+            // middle up
+            mouse.setInputAction( function( movement ) {
+
+                self.state.mouse.middleDown = false;
+                var eData = pick( "middle", 1, "up", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerUp", eData.eventData, eData.eventNodeData );
+                self.state.mouse.middleDownID = undefined;
+
+            }, Cesium.ScreenSpaceEventType.MIDDLE_UP );
+
+            // middle down
+            mouse.setInputAction( function( movement ) {
+
+                self.state.mouse.middleDown = true;
+                var eData = pick( "middle", 0, "down", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerDown", eData.eventData, eData.eventNodeData );
+
+            }, Cesium.ScreenSpaceEventType.MIDDLE_DOWN );
+
+
+            // right click
+            mouse.setInputAction( function( movement ) {
+
+                var eData = pick( "right", 1, "click", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerClick", eData.eventData, eData.eventNodeData );
+                
+            }, Cesium.ScreenSpaceEventType.RIGHT_CLICK );
+            
+            // right double click
+            mouse.setInputAction( function( movement ) {
+
+                var eData = pick( "right", 2, "click", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerDoubleClick", eData.eventData, eData.eventNodeData );
+
+            }, Cesium.ScreenSpaceEventType.RIGHT_DOUBLE_CLICK );
+            
+            // right up
+            mouse.setInputAction( function( movement ) {
+
+                self.state.mouse.rightDown = false;
+                var eData = pick( "right", 0, "up", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerUp", eData.eventData, eData.eventNodeData );
+                self.state.mouse.rightDownID = undefined;
+
+            }, Cesium.ScreenSpaceEventType.RIGHT_UP );
+
+            // right down
+            mouse.setInputAction( function( movement ) {
+
+                self.state.mouse.rightDown = true;
+                var eData = pick( "right", 0, "down", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerDown", eData.eventData, eData.eventNodeData );
+
+            }, Cesium.ScreenSpaceEventType.RIGHT_DOWN );
+
+
+            // pinch start
+            mouse.setInputAction( function( movement ) {
+
+                self.state.mouse.pinching = true;
+
+            }, Cesium.ScreenSpaceEventType.PINCH_START );
+            
+            // pinch move
+            mouse.setInputAction( function( movement ) {
+
+            }, Cesium.ScreenSpaceEventType.PINCH_MOVE );
+
+            // pinch end
+            mouse.setInputAction( function( movement ) {
+
+                self.state.mouse.pinching = false;
+
+            }, Cesium.ScreenSpaceEventType.PINCH_END );
+
+            // wheel
+            mouse.setInputAction( function( movement ) {
+
+            }, Cesium.ScreenSpaceEventType.WHEEL );
+
+        }
+
     }
     
 } );
