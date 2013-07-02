@@ -377,7 +377,7 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 						this.mesh.material.uniforms.debugColor.value.b = b;
 					}
 				}
-				this.updateMesh = function(cb)
+				this.updateMesh = function(cb,force)
 				{
 					var rebuilt = false;
 					if(!this.isSplit())
@@ -391,15 +391,15 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 							this.mesh.material.uniforms.side.value = this.side;
 							
 							
-							cb(this);
+							cb(this,force);
 							return;
 						}
-						else if(!this.mesh || (neededSide != this.side) )
+						else if(!this.mesh || (neededSide != this.side) || force )
 						{
 							//if were just switching sides, backup the old mesh
 							//it will be shown when the new one is ready
 							this.badsidemesh = null;
-							if(this.mesh && neededSide != this.side && perfectstitch == true)
+							if((this.mesh && neededSide != this.side && perfectstitch == true))
 							{
 								this.debug(1,0,0);
 								this.badsidemesh = this.mesh;
@@ -410,42 +410,47 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 							//note, we should never arrive here for meshes that don't need an update.
 							if(this.max[0] - this.min[0] < this.maxTileSize)
 							{
-								var res = tileres;
-								
-								var scale = this.max[0] - this.min[0];
-								
-								this.side = neededSide;
-								//get the right mesh off the cache
-								if(perfectstitch == true)
-									this.mesh = self.TileCache.getMesh(res,this.meshNeeded(this.side));
-								else
-									this.mesh = self.TileCache.getMesh(res,0);
-								if(perfectstitch == false)
-									this.mesh.material.uniforms.side.value = this.side;	
-								else
-									this.mesh.material.uniforms.side.value = -1;	
-								//scale and rotate to fit
-								this.mesh.scale.x = scale/100;
-								this.mesh.scale.y = scale/100;
-								this.mesh.scale.z = 1;//scale/100;
-								if(perfectstitch == true)
-									this.mesh.rotation.z = this.getRotation(this.side);
-								this.debug(0,0,0);
-								this.mesh.quadnode = this;
-								if(self.removelist.indexOf(this.mesh)>-1)
-								self.removelist.splice(self.removelist.indexOf(this.mesh),1);
-								
-								this.mesh.position.x = this.c[0];
-								this.mesh.position.y = this.c[1];
-								this.mesh.position.z = 1;
-								
-								//go ahead and add it to the world
-								rebuilt = true;	
-								this.mesh.updateMatrixWorld(true);
-								this.THREENode.add(this.mesh,true);	
-								this.mesh.visible = false;
-								this.mesh.waitingForRebuild = true;
-								
+								if(!force)
+								{
+									var res = tileres;
+									
+									var scale = this.max[0] - this.min[0];
+									
+									this.side = neededSide;
+									//get the right mesh off the cache
+									
+									if(perfectstitch == true)
+										this.mesh = self.TileCache.getMesh(res,this.meshNeeded(this.side));
+									else
+										this.mesh = self.TileCache.getMesh(res,0);
+									if(perfectstitch == false)
+										this.mesh.material.uniforms.side.value = this.side;	
+									else
+										this.mesh.material.uniforms.side.value = -1;	
+									//scale and rotate to fit
+									this.mesh.scale.x = scale/100;
+									this.mesh.scale.y = scale/100;
+									this.mesh.scale.z = 1;//scale/100;
+									if(perfectstitch == true)
+										this.mesh.rotation.z = this.getRotation(this.side);
+									this.debug(0,0,0);
+									this.mesh.quadnode = this;
+									if(self.removelist.indexOf(this.mesh)>-1)
+									self.removelist.splice(self.removelist.indexOf(this.mesh),1);
+									
+									this.mesh.position.x = this.c[0];
+									this.mesh.position.y = this.c[1];
+									this.mesh.position.z = 1;
+									
+									//go ahead and add it to the world
+									rebuilt = true;	
+									this.mesh.updateMatrixWorld(true);
+									this.THREENode.add(this.mesh,true);	
+									this.mesh.visible = false;
+									this.mesh.waitingForRebuild = true;
+									self.terrainGenerator.updateMaterial(this.mesh);
+								}
+									
 								// displace the mesh
 								// the callback will indicate if this mesh was canceled before the thread returned with the updated mesh
 								self.BuildTerrainInner(this.mesh,(this.max[0] - this.min[0])/tileres,function(cancel)
@@ -468,8 +473,9 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 											
 										}
 										this.mesh.geometry.dirtyMesh = true;
+										
 										//go head and callback into the rebuild look to deal with fadein/out stuff, and dispatch the next tile update
-										cb(this);
+										cb(this,force);
 									}else
 									{
 										//so, we got canceled before the worker returned
@@ -508,7 +514,7 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 					
 					//go ahead and callback (should not get here)
 					if(cb)
-						cb(rebuilt);
+						cb(rebuilt,force);
 				}
 				this.cleanup = function(removelist)
 				{
