@@ -38,6 +38,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         initialize: function( options ) {
             
+            self = this;
+
             checkCompatibility.call(this);
 
             this.pickInterval = 10;
@@ -1342,7 +1344,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var numClicks = Math.abs( wheelDelta / 120 );
 
             // Prepare variables for calculation
-            var dist = Math.max( distanceToTarget || 0, 2 * self.state.cameraInUse.near );
+            var dist = Math.max( distanceToTarget || translationSpeed, 2 * self.state.cameraInUse.near );
             var percentDistRemainingEachStep = 0.8;
             var amountToMove = 0;
 
