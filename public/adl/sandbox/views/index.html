@@ -1,43 +1,4 @@
 	<div class="row" style="margin-top:30px;">
-		<div class="span4">
-			<div class="row">
-				<div class="span1" data-bind="visible:user().isLoggedIn">
-					<a href="{{root}}/create" class="coldstate" id="newinstancebutton"><img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"/></a>
-				</div>
-				<div class="span3">
-					<input id="filter" class="span3" style="width:89%; float:left;" type="text" placeholder="Filter Results" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
-				</div>
-			</div>
-			<div class="row" id="activeRow">
-				<div id="activeInstances" class="span4" data-bind="foreach:worldObjects">
-				
-					<div data-bind="visible:isHidden" style="width:97.5%;">
-						
-						<div>
-							<a data-bind="text:title,attr:{href:'#collapse'+$index()}, css:hotState()?'alert-success':'coldstate'">Title</a>
-						</div>
-						<div data-bind="attr:{id:'collapse'+$index()}">
-						
-							<div>								
-								<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
-									<div class="description" data-bind="text:description"></div>
-									<div class="owner" data-bind="text:'Created by: ' + owner"></div>
-									<div class="objects" data-bind="text:objects +' objects currently in world'"></div>
-									<div class="lastModified" data-bind="text:lastUpdate"></div>
-									<div class="stateid" data-bind="text:id"></div>
-								</a>
-								
-								<div class="editstate">
-									<a class="loadWorld" data-bind="attr:{href:'{{root}}/'+id}">Load World</a>
-									<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
-									<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
 		<div class="span8">
 			<p>
 				Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in
@@ -45,6 +6,48 @@
 				new world" 
 			</p>
 			<iframe width="560" height="315" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
+		</div>
+		<div class="span12">
+			<div class="row">
+				<div class="span1 offset8" data-bind="visible:user().isLoggedIn">
+					<a href="{{root}}/create" class="coldstate" id="newinstancebutton"><img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"/></a>
+				</div>
+				<div class="span3">
+					<input id="filter" class="span3" style="width:89%; float:left;" type="text" placeholder="Filter Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
+				</div>
+			</div>
+			<div class="row" id="activeRow" data-bind="foreach:worldObjects">				
+				<div data-bind="visible:isHidden" class="span3">
+					<div class="worldBox">
+						<div>
+							<a data-bind="text:title" class="coldstate">Title</a>
+							<span class="owner" data-bind="text:' - ' + owner"></span>
+						</div>
+						<div>								
+							<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
+								<div class="description" data-bind="text:description"></div>
+								<div class="objects" data-bind="text:objects +' objects currently in world'"></div>
+								<div class="lastModified" data-bind="text:lastUpdate"></div>
+								<div class="stateid" data-bind="text:id"></div>
+							</a>
+							
+							<div class="editstate">
+								<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState()">Active</a>
+								<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
+								<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="span1 offset5">
+					<a class="btn"><i class="icon-chevron-left"></i></a>
+				</div>				
+				<div class="span1">
+					<a class="btn"><i class="icon-chevron-right"></i></a>
+				</div>
+			</div>
 		</div>
 	</div>
 	<script>

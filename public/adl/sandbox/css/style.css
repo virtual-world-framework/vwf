@@ -11,11 +11,21 @@ a{
 	text-decoration: none;
 }
 
-#activeInstances{
+.worldBox{
 
-	max-height: 500px;
-	overflow-y: scroll;
-	width:90%;
+	border: 1px solid #eee;
+	margin-bottom: 21px;
+	border-radius: 8px;
+	padding: 5px 5px 9px 5px;
+}
+
+.activeWorld{
+
+	background-color: #EAFFEA;
+	border: 1px solid #A0CFA0;
+	border-radius: 5px;
+	padding: 2px 10px;
+
 }
 
 #wrapper{
