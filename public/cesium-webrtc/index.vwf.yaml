@@ -54,8 +54,6 @@ children:
     extends: http://vwf.example.com/cesium/camera.vwf
     properties:
       position: [ 0, -14261948, 11360974 ]
-  earth:
-    extends: http://vwf.example.com/cesium/centralBody.vwf 
   sun: 
     extends: http://vwf.example.com/cesium/sun.vwf 
     properties:
@@ -70,6 +68,8 @@ children:
       visible: false
   clients:
     extends: http://vwf.example.com/node.vwf
+  earth:
+    extends: http://vwf.example.com/cesium/centralBody.vwf 
 scripts:
 - |
     this.initialize = function() {
@@ -155,7 +155,7 @@ scripts:
       }
     }
     this.pointerClick = function( pointerInfo, pickInfo ) {
-      //debugger;
+      debugger;
       switch ( this.toolbar.inputMode ) {
         case "pindrop":
           if ( pickInfo.globalPosition ) {
@@ -209,4 +209,4 @@ scripts:
         child.position = pos;
         child.color = self.toolbar.selectedColor;
       } );
-    } //@ sourceURL = index.vwf
+    } //@ sourceURL=index.vwf

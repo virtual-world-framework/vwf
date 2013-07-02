@@ -414,9 +414,19 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 var width = scene.getCanvas().width;
                 var eventObj = self.state.mouse.scene.pick( pos );
                 var ellipsoid = node.centralBody.getEllipsoid();
-                var cartesian = scene.getCamera().controller.pickEllipsoid( pos, ellipsoid );
+                var globePoint = scene.getCamera().controller.pickEllipsoid( pos, ellipsoid );
                 var camPos = scene.getCamera().position;
-                var eventID = eventObj ? eventObj.vwfID : "index-vwf";
+                var rootID = self.kernel.find( "", "/" )[0];
+                var eventID;
+                
+                if ( eventObj ) {
+                    eventID = eventObj.vwfID;
+                } else if ( globePoint !== undefined ) {
+                    eventID = self.kernel.find( rootID, "earth" )[0];
+                } else {
+                    eventID = rootID;
+                }
+
                 var eData = { 
                     "eventData": [ {  
                         "button": button,
@@ -439,7 +449,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         "distance": undefined,
                         "origin": [ camPos.x, camPos.y, camPos.z ],
                         "id": eventObj,
-                        "globalPosition": cartesian ? [ cartesian.x, cartesian.y, cartesian.z ] : undefined,
+                        "globalPosition": globePoint ? [ globePoint.x, globePoint.y, globePoint.z ] : undefined,
                         "globalNormal": undefined,
                         "globalSource": [ camPos.x, camPos.y, camPos.z ],            
                     } ] },
@@ -490,7 +500,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         eData.eventNodeData[ id ] = [ {
                             "distance": undefined,
                             "origin": scene.getCamera().position,
-                            "globalPosition": cartesian ? [ cartesian.x, cartesian.y, cartesian.z ] : undefined,
+                            "globalPosition": globePoint ? [ globePoint.x, globePoint.y, globePoint.z ] : undefined,
                             "globalNormal": undefined,
                             "globalSource": scene.getCamera().position,            
                         } ];
@@ -511,6 +521,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             mouse.setInputAction( function( movement ) {
                 
                 var eData = pick( "left", 1, "click", movement.position );
+                console.info( "1     dispatchEvent( "+downID+", pointerClick, .. )" );
                 self.kernel.dispatchEvent( downID, "pointerClick", eData.eventData, eData.eventNodeData );
 
             }, Cesium.ScreenSpaceEventType.LEFT_CLICK );
@@ -519,6 +530,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             mouse.setInputAction( function( movement ) {
 
                 var eData = pick( "left", 2, "click", movement.position );
+                console.info( "1     dispatchEvent( "+downID+", pointerDoubleClick, .. )" );
                 self.kernel.dispatchEvent( downID, "pointerDoubleClick", eData.eventData, eData.eventNodeData );
 
             }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK );
@@ -528,7 +540,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 
                 self.state.mouse.leftDown = false;
                 var eData = pick( "left", 0, "up", movement.position );
-                self.kernel.dispatchEvent( downID, "pointerUp", eData.eventData, eData.eventNodeData );
+                if ( downID !== undefined ) {
+                    console.info( "1     dispatchEvent( "+downID+", pointerUp, .. )" );
+                    self.kernel.dispatchEvent( downID, "pointerUp", eData.eventData, eData.eventNodeData );
+                }
                 self.state.mouse.leftDownID = undefined;
 
             }, Cesium.ScreenSpaceEventType.LEFT_UP );
@@ -538,6 +553,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 
                 self.state.mouse.leftDown = true;
                 var eData = pick( "left", 0, "down", movement.position );
+                console.info( "1     dispatchEvent( "+downID+", pointerDown, .. )" );
                 self.kernel.dispatchEvent( downID, "pointerDown", eData.eventData, eData.eventNodeData );
             
             }, Cesium.ScreenSpaceEventType.LEFT_DOWN );

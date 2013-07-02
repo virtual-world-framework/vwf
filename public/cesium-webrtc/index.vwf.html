@@ -186,13 +186,15 @@
 
 
           function setColor(color) {
-            vwf_view.kernel.find( "", "/toolbar", function( toolbarID ) {
+            var rootID = vwf_view.kernel.find( "", "/" )[0];
+            vwf_view.kernel.find( rootID, "toolbar", function( toolbarID ) {
               vwf_view.kernel.setProperty( toolbarID, "selectedColor", color );
             });
             highlightColor( color );
           }
 
           function highlightColor( color ) {
+            var rootID = vwf_view.kernel.find( "", "/" )[0];
             document.getElementById('black').style.border = "2px solid black";
             document.getElementById('red').style.border = "2px solid black";
             document.getElementById('yellow').style.border = "2px solid black";
@@ -220,24 +222,25 @@
                 vColor = [ 0, 0, 0 ];
                 break;
             }
-            vwf_view.kernel.setProperty( vwf_view.kernel.find( "", "/" )[0], "lineColor", vColor );
+            //vwf_view.kernel.setProperty( rootID, "selectedColor", vColor );
           }
 
           function setMode(mode) {
-            //debugger;
-            vwf_view.kernel.find(vwf_view.kernel.find("", "/")[0], "toolbar", function(toolbarID) {
+            var rootID = vwf_view.kernel.find( "", "/" )[0];
+            vwf_view.kernel.find( rootID, "toolbar", function(toolbarID) {
+              //debugger;
               vwf_view.kernel.setProperty( toolbarID, "inputMode", mode );
             });
             highlightMode(mode);
           }
 
           function highlightMode(mode) {
-            document.getElementById('orbit').style.border = "2px solid black";
-            document.getElementById('draw').style.border = "2px solid black";
-            document.getElementById('pindrop').style.border = "2px solid black";
+            document.getElementById( 'orbit' ).style.border = "2px solid black";
+            document.getElementById( 'draw' ).style.border = "2px solid black";
+            document.getElementById( 'pindrop' ).style.border = "2px solid black";
 
-            document.getElementById(mode).style.border = "3px solid red";
-            vwf_view.kernel.setProperty(vwf_view.kernel.find("", "/")[0], "mouseMode", mode);
+            document.getElementById( mode ).style.border = "3px solid red";
+            //vwf_view.kernel.setProperty( vwf_view.kernel.find("", "/")[0], "inputMode", mode );
           }
 
           function clearOverlay() {
