@@ -32,6 +32,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                  "mozPointerLockElement" in document ||
                                  "webkitPointerLockElement" in document;
     var pointerLocked = false;
+    var pickDirectionVector;
 
     return view.load( module, {
 
@@ -1009,6 +1010,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         id = pointerOverID; 
                         
                     sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
+
+                    if ( navmode == "fly" ) {
+                        handleScroll( e.wheelDelta, eData.eventNodeData[ "" ][ 0 ].distance );
+                    }
                 }
             };
         }
@@ -1029,6 +1034,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         id = pointerOverID; 
                         
                     sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
+
+                    // TODO: Implement scrolling for browsers where onmousewheel is not implemented
+                    // if ( navmode == "fly" ) {
+                    //     handleScroll();
+                    // }
                 }
             });
         }
@@ -1220,7 +1230,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( pointerLocked ) {
                 deltaX = mouseEventData.movementX / sceneView.width;
                 deltaY = mouseEventData.movementY / sceneView.height;
-            } else if ( mouseEventData[ 0 ].buttons.right ) {
+            } else if ( mouseEventData[ 0 ].buttons.right && startMousePosition ) {
                 var currentMousePosition = mouseEventData[ 0 ].position;
                 deltaX = currentMousePosition[ 0 ] - startMousePosition [ 0 ];
                 deltaY = currentMousePosition[ 1 ] - startMousePosition [ 1 ];
@@ -1320,6 +1330,39 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                 startMousePosition = currentMousePosition;
             }
+        }
+
+        function handleScroll( wheelDelta, distanceToTarget ) {
+            
+            if ( !pickDirectionVector ) {
+                return;
+            }
+
+            // wheelDelta has a value of 120 for every click
+            var numClicks = Math.abs( wheelDelta / 120 );
+
+            // Prepare variables for calculation
+            var dist = Math.max( distanceToTarget || 0, 2 * self.state.cameraInUse.near );
+            var percentDistRemainingEachStep = 0.8;
+            var amountToMove = 0;
+
+            // If wheelDelta is positive, user pushed wheel forward - move toward the object
+            // Else, user pulled wheel back - move away from object
+            if ( wheelDelta > 0 ) { 
+                amountToMove = dist * ( 1 - Math.pow( percentDistRemainingEachStep, numClicks ) );
+            } else {
+                amountToMove = dist * ( 1 - Math.pow( 1 / percentDistRemainingEachStep, numClicks ) );
+            }
+
+            var navThreeObject = navObject.threeObject;
+            var worldTransformArray = navThreeObject.matrixWorld.elements;
+            worldTransformArray[ 12 ] += amountToMove * pickDirectionVector.x;
+            worldTransformArray[ 13 ] += amountToMove * pickDirectionVector.y;
+            worldTransformArray[ 14 ] += amountToMove * pickDirectionVector.z;
+
+            setTransformFromWorldTransform( navThreeObject );
+
+            setModelTransformProperty( navObject, navThreeObject.matrix.elements );
         }
 
         // END TODO
@@ -1441,19 +1484,19 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var x = ( mousepos.x ) * 2 - 1;
         var y = -( mousepos.y ) * 2 + 1;
 
-        var directionVector = new THREE.Vector3();
+        pickDirectionVector = new THREE.Vector3();
         
         //console.info( "mousepos = " + x + ", " + y );
-        directionVector.set( x, y, 0.5 );
+        pickDirectionVector.set( x, y, 0.5 );
         
-        this.projector.unprojectVector(directionVector, threeCam);
+        this.projector.unprojectVector(pickDirectionVector, threeCam);
         var pos = new THREE.Vector3();
-        pos.getPositionFromMatrix( threeCam.matrix );
-        directionVector.sub(pos);
-        directionVector.normalize();
+        pos.getPositionFromMatrix( threeCam.matrixWorld );
+        pickDirectionVector.sub(pos);
+        pickDirectionVector.normalize();
         
         
-        this.raycaster.set(pos, directionVector);
+        this.raycaster.set(pos, pickDirectionVector);
         var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
         if (intersects.length) {
             var target = intersects[0].object;
