@@ -50,8 +50,7 @@
                             };
 
                             function gotLocation( pos ) {
-                                //debugger;
-                                var ellipsoid = Cesium.Ellipsoid.WGS84;
+                                 var ellipsoid = Cesium.Ellipsoid.WGS84;
                                 var dest = Cesium.Cartographic.fromDegrees( pos.coords.longitude, pos.coords.latitude, 1000.0 );
                                 dest = ellipsoid.cartographicToCartesian( dest );
 
@@ -92,7 +91,6 @@
                 //console.info( "calledMethod( "+nodeID+", "+methodName+", "+methodParameters[0]+" )" );
                 switch ( methodName ) {
                     case "newClientVideo":
-                        //debugger;
                         var moniker = methodParameters[1];
                         //console.info( "++++   " + moniker + " == " + this.kernel.moniker() );
                         if ( moniker && moniker == this.kernel.moniker() ) {
@@ -228,7 +226,6 @@
           function setMode(mode) {
             var rootID = vwf_view.kernel.find( "", "/" )[0];
             vwf_view.kernel.find( rootID, "toolbar", function(toolbarID) {
-              //debugger;
               vwf_view.kernel.setProperty( toolbarID, "inputMode", mode );
             });
             highlightMode(mode);

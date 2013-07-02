@@ -251,7 +251,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     if ( forceResizeDelay ) {
                         forceResizeDelay--;
                         if ( forceResizeDelay == 0 ) {
-                            //console.info( " ||||| == resize ==  ||||| " );
                             node.cesiumWidget.resize();
                             forceResizeDelay = undefined;
                             view.state.cameraInfo.initialized = true;
@@ -521,7 +520,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             mouse.setInputAction( function( movement ) {
                 
                 var eData = pick( "left", 1, "click", movement.position );
-                console.info( "1     dispatchEvent( "+downID+", pointerClick, .. )" );
                 self.kernel.dispatchEvent( downID, "pointerClick", eData.eventData, eData.eventNodeData );
 
             }, Cesium.ScreenSpaceEventType.LEFT_CLICK );
@@ -530,7 +528,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             mouse.setInputAction( function( movement ) {
 
                 var eData = pick( "left", 2, "click", movement.position );
-                console.info( "1     dispatchEvent( "+downID+", pointerDoubleClick, .. )" );
                 self.kernel.dispatchEvent( downID, "pointerDoubleClick", eData.eventData, eData.eventNodeData );
 
             }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK );
@@ -541,7 +538,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 self.state.mouse.leftDown = false;
                 var eData = pick( "left", 0, "up", movement.position );
                 if ( downID !== undefined ) {
-                    console.info( "1     dispatchEvent( "+downID+", pointerUp, .. )" );
                     self.kernel.dispatchEvent( downID, "pointerUp", eData.eventData, eData.eventNodeData );
                 }
                 self.state.mouse.leftDownID = undefined;
@@ -553,7 +549,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 
                 self.state.mouse.leftDown = true;
                 var eData = pick( "left", 0, "down", movement.position );
-                console.info( "1     dispatchEvent( "+downID+", pointerDown, .. )" );
                 self.kernel.dispatchEvent( downID, "pointerDown", eData.eventData, eData.eventNodeData );
             
             }, Cesium.ScreenSpaceEventType.LEFT_DOWN );

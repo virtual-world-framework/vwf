@@ -78,7 +78,6 @@ scripts:
       
       // these properties should be getting set 
       // by the initialization process, but it's not happening
-      //debugger;
       this.toolbar.inputMode = "orbit";
       this.toolbar.selectedColor = "black";
     }
@@ -155,7 +154,6 @@ scripts:
       }
     }
     this.pointerClick = function( pointerInfo, pickInfo ) {
-      debugger;
       switch ( this.toolbar.inputMode ) {
         case "pindrop":
           if ( pickInfo.globalPosition ) {
