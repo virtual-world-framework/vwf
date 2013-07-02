@@ -13,8 +13,9 @@
 
 --- 
 extends: http://vwf.example.com/scene.vwf
-properties:
-  navmode: none
+methods:
+  initializeCamera:
+  update:
 children:
   system2:
     extends: http://vwf.example.com/particlesystem.vwf
@@ -90,9 +91,6 @@ children:
       emitterSize: [ 1 , 1 , 100]
       image: spark.jpg     
       solver: 'Euler'      
-  camera:
-    extends: http://vwf.example.com/camera.vwf
-    properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
     implements:
@@ -108,19 +106,22 @@ children:
       glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
-methods:
-  update:
 scripts:
 - | 
     this.initialize = function()
     {
+        this.dir1.translation = [0,-100,0];
+        this.counter = 0;
+        this.future(0).initializeCamera();
+        this.future(.05).update();
+    }
+
+    this.initializeCamera = function() {
         this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
-        this.dir1.translation = [0,-100,0];
-       
-        this.counter = 0;
-        this.future(.05).update();
-    } //@ sourceURL=index.vwf
+        this.camera.navmode = "none";
+    }
+
     this.update = function()
     {
         this.counter++;
@@ -129,4 +130,4 @@ scripts:
       //  this.system3.translation = [(Math.random() -.5) * 300,0,(Math.random() -.5) * 300];
       //  this.system4.translation = [(Math.random() -.5) * 300,0,(Math.random() -.5) * 300];
       //  this.future(2).update();
-    }
+    } //@ sourceURL=index.vwf

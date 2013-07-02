@@ -16,8 +16,9 @@ extends: http://vwf.example.com/navtouch.vwf
 properties:
   ambientColor: [ 183, 183, 183 ]
   navmode: "orbit"
-  speed: 4.0
+  translationSpeed: 40
 methods:
+  initializeCamera:
   switchCameraView: 
 children:
   humvee:
@@ -47,14 +48,17 @@ children:
 scripts:
 - |
   this.initialize = function() {
-    this.camera.translation = [ -320, -360, 164 ];
-    this.camera.lookAt = this.humvee.id;
-    this.camera.far = 3000;
-    this.camera.near = 1;
     this.humvee.interiorCamera.transform = [-0.31940966844558716, 0.9476123452186584, -5.816936266000994e-8, 0,
       -0.9332156777381897, -0.3145570456981659, -0.17364755272865295, 0,
       -0.1645519733428955, -0.05546514317393303, 0.9848077297210693, 0,
       -1.3992034196853638, -11.587126731872559, 75.94760131835938, 1];
+    this.future( 0 ).initializeCamera();
+  }
+  this.initializeCamera = function() {
+    this.camera.translation = [ -320, -360, 164 ];
+    this.camera.lookAt = this.humvee.id;
+    this.camera.far = 3000;
+    this.camera.near = 1;
   }
   this.switchCameraView = function(view) {
     if(view == "exterior") {

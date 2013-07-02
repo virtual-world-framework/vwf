@@ -13,8 +13,8 @@
 
 --- 
 extends: http://vwf.example.com/scene.vwf
-properties:
-  navmode: none
+methods:
+  initializeCamera:
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -44,8 +44,6 @@ children:
             this.material.color = [127* (1+Math.sin(this.counter/100)),127* (1+Math.sin(this.counter/20)),127* (1+Math.sin(this.counter/30)),1];
             this.future(0.2).update();
          }
-  camera:
-    extends: http://vwf.example.com/camera.vwf
   dir1:
     extends: http://vwf.example.com/light.vwf
     implements:
@@ -63,7 +61,12 @@ scripts:
 - | 
     this.initialize = function()
     {
+        this.duck.translation = [0,0,0];
+        this.future(0).initializeCamera();
+    }
+
+    this.initializeCamera = function() {
         this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
-        this.duck.translation = [0,0,0];
+        this.camera.navmode = "none";
     }

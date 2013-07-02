@@ -14,10 +14,10 @@
 --- 
 extends: http://vwf.example.com/scene.vwf
 properties:
-  navmode: none
   counter: 0
   activeCamera:
 methods:
+  initializeCamera:
   update: 
 children:
   duck:
@@ -26,6 +26,7 @@ children:
     type: model/vnd.collada+xml
   camera:
     extends: http://vwf.example.com/camera.vwf
+    implements: [ "http://vwf.example.com/navigable.vwf" ]
     properties:
       rotation: [0,1,0,0]
       translation: [0,-600,50]
@@ -59,9 +60,16 @@ scripts:
         this.dir1.translation = [0,-100,0];
         this.duck.translation = [0,0,0];
 
+        this.future(0).initializeCamera();
+
         //vwf.setProperty('index-vwf','activeCamera','camera2');
         this.future(0.2).update();
     }
+
+    this.initializeCamera = function() {
+        this.camera.navmode = "none";
+    }
+
     this.update = function()
     {
         if(this.counter == 0)

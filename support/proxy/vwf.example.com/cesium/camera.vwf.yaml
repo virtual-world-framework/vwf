@@ -1,0 +1,62 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+## Cesium sun component
+## 
+## @name sun.vwf
+## @namespace
+
+--- 
+extends: http://vwf.example.com/cesium/node3.vwf
+properties:
+  direction: [ 0, 0.8944271909999159, -0.4472135954999579 ]
+  fovy:
+  near: 1.0
+  far: 500000000.0
+  position: [ 0, -14261947.901806576, 7130973.950903288 ]
+  right: [ 0.9999999999999999, 0, 0 ]
+  transform: [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ]
+  up: [ 0, 0.4472135954999579, 0.8944271909999159 ]
+methods:
+  resetCamera:
+scripts:
+  - | 
+    this.initialize = function() {
+      this.originalLocation = {
+        "direction": this.direction,
+        "position": this.position,
+        "up": this.up,
+        "right": this.right
+      }
+    }
+    this.findScene = function( node ) {
+      var scene = node.parent;
+      while ( scene.parent && scene.parent.parent ) {
+        scene = scene.parent;
+      }
+      return scene;
+    }
+    this.resetCamera = function() {
+        if ( this.originalLocation ) {
+          this.position = this.originalLocation.position;
+          this.direction = this.originalLocation.direction;
+          this.up = this.originalLocation.up;
+          this.right = this.originalLocation.right;
+        }
+        this
+        //var scene = this.findScene( this );
+        //if ( scene && this.originalLocation ) {
+        //    scene.cameraViewData = this.originalLocation;
+        //}
+    } //@ sourceURL=cesium.camera.vwf
+

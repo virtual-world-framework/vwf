@@ -34,7 +34,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
   def connect
 
-    # first
+    # The first client to join the instance.
 
     if clients.length == 1 # coming from 0
 
@@ -44,8 +44,8 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
       # Initialize the client configuration from the runtime environment.
 
-      logger.debug "VWF::Application::Reflector#connect #{ object_id } " +
-          "launching #{id} from #{ env["vwf.application"] }"
+      logger.debug "VWF::Application::Reflector#connect #{id} " +
+          "launching from #{ env["vwf.application"] }"
 
       # TODO: check for file format not that json exists
       if( File.exists?("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json"))
@@ -65,21 +65,27 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
           "action" => "setState",
           "parameters" => [ {
             "configuration" =>
-              { "environment" => ENV['RACK_ENV'] || "development" },
-            "nodes" =>
-              [ env["vwf.application"] ]
+              { "environment" => ENV['RACK_ENV'] || "development" }
           } ]
+
+        send "time" => session[:transport].time,
+          "action" => "createNode",
+          "parameters" => [
+            env["vwf.application"]
+          ]
 
       end
 
-    # second
+    # The second client to join the instance, or the next client to join after earlier clients have
+    # fully connected.
 
     elsif session[:pending].nil?
 
-      # xxx
+      # Create space to store clients waiting for replication and any messages that we receive
+      # before they are fully connected.
 
-      logger.debug "VWF::Application::Reflector#connect #{ object_id } " +
-          "connecting #{id} and suspending (1 suspended)"
+      logger.debug "VWF::Application::Reflector#connect #{id} " +
+          "connecting and suspending (1 suspended)"
 
       session[:pending] = {
         :time => session[:transport].time,
@@ -95,19 +101,22 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
       # source.send "time" => time, "action" => "hashState", "respond" => true
 
-      logger.debug "VWF::Application::Reflector#connect #{ object_id } " +
+      logger.debug "VWF::Application::Reflector#connect #{id} " +
           "requesting state from #{source.id}"
 
       source.send "time" => time,
         "action" => "getState",
         "respond" => true
 
-    # pending
+    # Additional clients that join the instance when at least one earlier client is waiting for
+    # replication.
 
     else
 
-      logger.debug "VWF::Application::Reflector#connect #{ object_id } " +
-          "connecting #{id} and suspending (#{ session[:pending][:clients].length + 1 } suspended)"
+      # Save this client with the others waiting for replication.
+
+      logger.debug "VWF::Application::Reflector#connect #{id} " +
+          "connecting and suspending (#{ session[:pending][:clients].length + 1 } suspended)"
 
       session[:pending][:clients].push self
 
@@ -138,8 +147,6 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
   end
 
-  # xxx
-
   def receive fields
 
     log fields, :receive
@@ -150,26 +157,21 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     if fields["action"] == "getState" && session[:pending] && session[:pending][:source] == self
 
-      logger.debug "VWF::Application::Reflector#receive #{ object_id } received state from #{id}"
-
-      time = session[:pending][:time]
+      logger.debug "VWF::Application::Reflector#receive #{id} received state"
 
       fields_setState = {
-        "time" => time,
+        "time" => session[:pending][:time],
         "action" => "setState",
         "parameters" => [ fields["result"] ]
       }
 
-      while client = session[:pending][:clients].shift
-        logger.debug "VWF::Application::Reflector#receive #{ object_id } " +
-          "resuming #{client.id} (#{ session[:pending][:clients].length } suspended)"
-      end
+      # Send the setState message to each of the new clients
 
-      clients.each do |client|
+      session[:pending][:clients].each do |client|
 
         # Set the state in the new client.
 
-        logger.debug "VWF::Application::Reflector#receive #{ object_id } " +
+        logger.debug "VWF::Application::Reflector#receive #{id} " +
           "setting state in #{client.id}"
 
         client.send fields_setState
@@ -178,12 +180,17 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
         # state from the reference client.
 
         session[:pending][:messages].each do |fields_pending|
-          client.send fields_pending.merge "time" => time
+          client.send fields_pending
         end
 
         # client.send "time" => time, "action" => "hashState", "respond" => true
         # client.send "time" => time, "action" => "getState", "parameters" => [ true, true ], "respond" => true
 
+      end
+
+      session[:pending][:clients].each do |client|
+        logger.debug "VWF::Application::Reflector#receive #{id} " +
+          "resuming #{client.id} (#{ session[:pending][:clients].length } suspended)"
       end
 
       session.delete :pending
@@ -215,40 +222,46 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
   def disconnect
 
-    if session[:pending]
+    # Just log the disconnection if no clients are waiting for replication.
 
-      if session[:pending][:clients].include? self
+    if ! session[:pending]
 
-        logger.debug "VWF::Application::Reflector#disconnect #{ object_id } " +
-          "disconnecting #{id}+ (#{ session[:pending][:clients].length } suspended)"
+      logger.debug "VWF::Application::Reflector#disconnect #{id} " +
+          "disconnecting"
 
-        session[:pending][:clients].delete self
-        session.delete :pending if session[:pending][:clients].empty?
+    # If the disconnecting client was waiting for replication, remove it from the `pending` list.
+    # Completely remove the `pending` object if no other clients are waiting.
 
-      elsif session[:pending][:source] == self
+    elsif session[:pending][:clients].include? self
 
-        logger.debug "VWF::Application::Reflector#disconnect #{ object_id } " +
-          "disconnecting #{id}* (#{ session[:pending][:clients].length } suspended)"
+      logger.debug "VWF::Application::Reflector#disconnect #{id} " +
+        "disconnecting (suspended) (#{ session[:pending][:clients].length } suspended)"
 
-        # The disconnecting client was to provide state data for pending clients. Put the pending
-        # clients aside so that we can replay their connections and choose a new source.
+      session[:pending][:clients].delete self
+      session.delete :pending if session[:pending][:clients].empty?
 
-        session[:stasis] = session[:pending][:clients]
-        session.delete :pending
+    # If the disconnecting client was the replication source for other clients waiting for
+    # replication, put the pending clients aside so that we can replay their connections and choose
+    # a new source.
 
-      else
+    elsif session[:pending][:source] == self
 
-        logger.debug "VWF::Application::Reflector#disconnect #{ object_id } " +
-          "disconnecting #{id} (#{ session[:pending][:clients].length } suspended)"
+      logger.debug "VWF::Application::Reflector#disconnect #{id} " +
+        "disconnecting (source) (#{ session[:pending][:clients].length } suspended)"
 
-      end
+      session[:stasis] = session[:pending][:clients]
+      session.delete :pending
+
+    # Otherwise, just log the disconnection.
 
     else
 
-      logger.debug "VWF::Application::Reflector#disconnect #{ object_id } " +
-          "disconnecting #{id}"
+      logger.debug "VWF::Application::Reflector#disconnect #{id} " +
+        "disconnecting (#{ session[:pending][:clients].length } suspended)"
 
     end
+
+    # Stop the timer after the last disconnection from this instance.
 
     if clients.length == 1 # going to 0
       cancel_tick
@@ -286,7 +299,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       fields = message
       message = JSON.generate fields, :max_nesting => 100
 
-      logger.debug "VWF::Application::Reflector#broadcast #{ object_id } " +
+      logger.debug "VWF::Application::Reflector#broadcast #{id} " +
           "#{ message_for_log message }" if log
 
       clients.each do |client| # established clients: same as in super
@@ -399,7 +412,7 @@ private
 
   def schedule_tick
 
-    logger.debug "VWF::Application::Reflector#schedule_tick #{ object_id } #{id}"
+    logger.debug "VWF::Application::Reflector#schedule_tick #{id}"
 
     transport = session[:transport] = Transport.new
 
@@ -413,7 +426,7 @@ private
   
   def cancel_tick
 
-    logger.debug "VWF::Application::Reflector#cancel_tick #{ object_id } #{id}"
+    logger.debug "VWF::Application::Reflector#cancel_tick #{id}"
 
     session[:timer].cancel
     session.delete :timer

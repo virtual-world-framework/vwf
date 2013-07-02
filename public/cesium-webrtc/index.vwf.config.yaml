@@ -12,6 +12,8 @@
 # the License.
 
 ---
+model:
+  vwf/model/cesium:
 view:
-  vwf/view/cesium: { useCesiumWidget: true }
-  vwf/view/webrtc: { audio: true, video: true, createVideoElements: true, false: true }
+  vwf/view/cesium: { cesium: 'widget', parentDiv: 'cesium-main' }
+  vwf/view/webrtc: { audio: true, video: true, createVideoElements: false, debug: true, videoElementsDiv: undefined }

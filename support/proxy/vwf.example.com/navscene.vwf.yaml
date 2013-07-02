@@ -110,6 +110,24 @@ methods:
 
   getCameraAt:
 
+  ## For internal use only - needs to be public for future calls
+  ## 
+  ## @name navscene.vwf#disableViewSideNav
+  ## @function
+  ## 
+  ## @returns undefined
+
+  disableViewSideNav:
+
+  ## For internal use only - needs to be public for future calls
+  ## 
+  ## @name navscene.vwf#setNavMode
+  ## @function
+  ## 
+  ## @returns undefined
+
+  setNavMode:
+
 scripts:
 - |
     var counter = 1;
@@ -153,7 +171,15 @@ scripts:
         lastUpdateTime: undefined,
         lastInputTime: undefined,
       };
-      this.setNavMode( this.navmode );
+
+      // Wait until the queue resumes to set the navigation mode, so that we are sure that the camera has been
+      // created
+      // TODO: When we can assume that initialize doesn't complete until all created nodes are in place, this
+      //       will no longer need to be a future call because we will be able to assume that the camera exists
+      
+      // Disable view-side navigation so navscene.vwf can do the navigation
+      this.future( 0 ).disableViewSideNav();
+      this.future( 0 ).setNavMode( this.navmode );
     }
     this.timeElapsed = function() {
       var timeElapsed = this.time - this.input.lastInputTime;
@@ -161,6 +187,10 @@ scripts:
         timeElapsed = 1;  
       }
       return timeElapsed;
+    }
+    this.disableViewSideNav = function() {
+      if ( this.camera )
+        this.camera.navmode = "none";
     }
     this.setNavMode = function( mode ) {
       if (!this.activeCameraComp) {
@@ -262,7 +292,6 @@ scripts:
     }
     this.pointerWheel = function( parms, pickInfo ) {
       this.input.pointerEventTime = this.time;
-      this.input.lastInputTime = this.time;
 
       this.input.lastPointerInfo = this.input.pointerInfo;
       this.input.pointerInfo = parms;      
@@ -298,6 +327,7 @@ scripts:
           );
         }
       }
+      this.input.lastInputTime = this.time;
     }
     this.keyDown = function( parms ) {
       var active = this.input.futureActive();
@@ -496,18 +526,12 @@ scripts:
       }
     }
     this.distance = function(){
-      var dist = this.translationSpeed * 10;
-      if(this.timeElapsed() > 0) {
-        dist = dist * this.timeElapsed();
-      }
+      var dist = this.translationSpeed * 10 * this.timeElapsed();
       return dist;
     }
     this.angularDistance = function() {
       // Should take 4 seconds to go around 360 degrees
-      var dist = this.rotationSpeed * 90;
-      if(this.timeElapsed() > 0) {
-        dist = dist * this.timeElapsed();
-      }
+      var dist = this.rotationSpeed * 90 * this.timeElapsed();
       return dist;
     }
     this.cameraZ = function( dir ) {
@@ -522,6 +546,9 @@ scripts:
     this.updateRadius = function() {
       var pos = this.activeCameraComp.translation || [ 1, 1, 1 ];
       var oldRadius = this.orbitRadius;
+
+      // Assuming the orbit center is the origin, the radius is just the length of the line segment from the
+      // origin to the active camera component
       this.orbitRadius = Math.sqrt( (pos[0] * pos[0]) + (pos[1] * pos[1]) + (pos[2] * pos[2]) );
       var dist2D = Math.sqrt( (pos[0] * pos[0]) + (pos[1] * pos[1]) );
       
@@ -553,7 +580,6 @@ scripts:
         var x = this.orbitRadius * Math.sin( phi ) * Math.cos( theta );
         var y = this.orbitRadius * Math.sin( phi ) * Math.sin( theta );
         var z = this.orbitRadius * Math.cos( phi );
-        
         this.activeCameraComp.translation = [ x, y, z ];
       }
     }
@@ -587,6 +613,9 @@ scripts:
         trans[2] = 0;
 
         if ( goog.vec.Vec3.magnitudeSquared( trans ) > goog.vec.EPSILON ) {
+
+          // TODO: Clean this up - right now the two vectors are added together and both vectors are replaced 
+          //       w/ the result.  That's probably not the desired behavior.
           this.activeCameraComp.translation = goog.vec.Vec3.add(
             this.activeCameraComp.translation,
             goog.vec.Vec3.scale(
@@ -649,4 +678,4 @@ scripts:
         }
       } 
       this.input.lastInputTime = this.time;
-    } //@ sourceURL=navScene.vwf
+    } //@ sourceURL=navscene.vwf

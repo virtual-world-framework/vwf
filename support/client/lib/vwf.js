@@ -111,8 +111,8 @@
 
         } );
 
-        /// This is the simulation clock, which contains the current time in milliseconds. Time is
-        /// controlled by the reflector and updates here as we receive control messages.
+        /// The simulation clock, which contains the current time in seconds. Time is controlled by
+        /// the reflector and updates here as we receive control messages.
         /// 
         /// @name module:vwf.now
         /// 
@@ -120,8 +120,22 @@
 
         this.now = 0;
 
-        /// The moniker of the client responsible for an action. Will be falsy for actions
-        /// originating in the server, such as time ticks.
+        /// The queue's sequence number for the currently executing action.
+        /// 
+        /// The queue enumerates actions in order of arrival, which is distinct from execution order
+        /// since actions may be scheduled to run in the future. `sequence_` can be used to
+        /// distinguish between actions that were previously placed on the queue for execution at a
+        /// later time, and those that arrived after the current action, regardless of their
+        /// scheduled time.
+        /// 
+        /// @name module:vwf.sequence_
+        /// 
+        /// @private
+
+        this.sequence_ = undefined;
+
+        /// The moniker of the client responsible for the currently executing action. `client_` will
+        /// be falsy for actions originating in the server, such as time ticks.
         /// 
         /// @name module:vwf.client_
         /// 
@@ -258,6 +272,7 @@
                 { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], active: false },
                 { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
                 { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
+                { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
                 { library: "vwf/model/scenejs", active: true },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
@@ -269,7 +284,7 @@
                 { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/view/touch", active: false},
                 { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
-                { library: "vwf/view/cesium", linkedLibraries: ["vwf/view/cesium/Cesium"], active: false },
+                { library: "vwf/view/cesium", active: false },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
                 { library: "vwf/model/threejs/three", active: false },
@@ -277,7 +292,7 @@
                 { library: "vwf/model/jiglib/jiglib", active: false },
                 { library: "vwf/view/webrtc/adapter", active: false },
                 { library: "vwf/view/google-earth", active: false },
-                { library: "vwf/view/cesium/Cesium", active: false }
+                { library: "vwf/model/cesium/Cesium", active: false }
             ];
 
             var initializers = {
@@ -286,6 +301,7 @@
                     { library: "vwf/model/jiglib", active: false },
                     { library: "vwf/model/glge", active: false },
                     { library: "vwf/model/threejs", active: false },
+                    { library: "vwf/model/cesium", active: false },
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [
@@ -968,7 +984,8 @@
                 // Advance time to the message time.
 
                 if ( this.now != fields.time ) {
-                    this.client_ = undefined; // clear after the previous action
+                    this.sequence_ = undefined; // clear after the previous action
+                    this.client_ = undefined;   // clear after the previous action
                     this.now = fields.time;
                     this.tick();
                 }
@@ -976,17 +993,19 @@
                 // Perform the action.
 
                 if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
-                    this.client_ = fields.client; // note the originating client for the duration of the action
+                    this.sequence_ = fields.sequence; // note the message's queue sequence number for the duration of the action
+                    this.client_ = fields.client;     // ... and note the originating client
                     this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, fields.origin );
                 }
 
             }
 
             // Advance time to the most recent time received from the server. Tick if the time
-            // advanced.
+            // changed.
 
             if ( queue.ready() && this.now != queue.time ) {
-                this.client_ = undefined; // clear after the previous action
+                this.sequence_ = undefined; // clear after the previous action
+                this.client_ = undefined;   // clear after the previous action
                 this.now = queue.time;
                 this.tick();
             }
@@ -1074,44 +1093,26 @@
 
             }, function( err ) /* async */ {
 
-                // Set the message queue.
+                // Clear the message queue, except for reflector messages that arrived after the
+                // current action.
 
-                var private_queue = [], fields;
+                queue.filter( function( fields ) {
 
-                if ( applicationState.queue ) {
-
-                    // Clear the queue, but leave any private direct messages in place. Update
-                    // the queue array in place so that existing references remain valid.  // TODO: move to the queue object
-
-                    while ( queue.queue.length > 0 ) {
-
-                        fields = queue.queue.shift();
-
+                    if ( fields.origin === "reflector" && fields.sequence > vwf.sequence_ ) {
+                        return true;
+                    } else {
                         vwf.logger.debugx( "setState", function() {
                             return [ "removing", JSON.stringify( loggableFields( fields ) ), "from queue" ];
                         } );
-
-                        fields.respond && private_queue.push( fields );
-
                     }
 
-                    while ( private_queue.length > 0 ) {
+                } );
 
-                        fields = private_queue.shift();
+                // Set the queue time and add the incoming items to the queue.
 
-                        vwf.logger.debugx( "setState", function() {
-                            return [ "returning", JSON.stringify( loggableFields( fields ) ), "to queue" ];
-                        } );
-
-                        queue.queue.push( fields );
-
-                    }
-
-                    // Set the queue time and add the incoming items to the queue.
-
+                if ( applicationState.queue ) {
                     queue.time = applicationState.queue.time;
                     queue.insert( applicationState.queue.queue || [] );
-
                 }
 
                 callback_async && callback_async();
@@ -2154,37 +2155,42 @@ if ( ! childComponent.source ) {
 
                 },
 
-            ], function( err, results ) /* async */ {
+                function( series_callback_async /* ( err, results ) */ ) {
 
-                // Suppress kernel reentry so that initialization functions don't make any
-                // changes during replication.
+                    // Watch for any async kernel calls generated as we run the scripts and wait for
+                    // them complete before completing the node.
 
-                replicating && vwf.models.kernel.disable();
+                    vwf.models.kernel.capturingAsyncs( function() {
 
-                // Attach the scripts. For each script, load the network resource if the script is
-                // specified as a URI, then once loaded, call execute() to direct any model that
-                // manages scripts of this script's type to evaluate the script where it will
-                // perform any immediate actions and retain any callbacks as appropriate for the
-                // script type.
+                        // Suppress kernel reentry so that initialization functions don't make any
+                        // changes during replication.
 
-                childComponent.scripts && childComponent.scripts.forEach( function( script ) {
-                    if ( valueHasType( script ) ) {
-                        script.text && vwf.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
-                    } else {
-                        script && vwf.execute( childID, script, undefined ); // TODO: external scripts too // TODO: callback
-                    }
-                } );
+                        replicating && vwf.models.kernel.disable();
 
-                // Restore kernel reentry.
+                        // Attach the scripts. For each script, load the network resource if the script is
+                        // specified as a URI, then once loaded, call execute() to direct any model that
+                        // manages scripts of this script's type to evaluate the script where it will
+                        // perform any immediate actions and retain any callbacks as appropriate for the
+                        // script type.
 
-                replicating && vwf.models.kernel.enable();
+                        childComponent.scripts && childComponent.scripts.forEach( function( script ) {
+                            if ( valueHasType( script ) ) {
+                                script.text && vwf.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                            } else {
+                                script && vwf.execute( childID, script, undefined ); // TODO: external scripts too // TODO: callback
+                            }
+                        } );
 
-                // Perform initializations for properties with setter functions. These are
-                // assigned here so that the setters run on a fully-constructed node.
+                        // Restore kernel reentry.
 
-                Object.keys( deferredInitializations ).forEach( function( propertyName ) {
-                    vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
-                } );
+                        replicating && vwf.models.kernel.enable();
+
+                        // Perform initializations for properties with setter functions. These are
+                        // assigned here so that the setters run on a fully-constructed node.
+
+                        Object.keys( deferredInitializations ).forEach( function( propertyName ) {
+                            vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
+                        } );
 
 // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
@@ -2192,27 +2198,37 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
     vwf.tickable.nodeIDs.push( childID );
 }
 
-                // Suppress kernel reentry so that initialization functions don't make any
-                // changes during replication.
+                        // Suppress kernel reentry so that initialization functions don't make any
+                        // changes during replication.
 
-                replicating && vwf.models.kernel.disable();
+                        replicating && vwf.models.kernel.disable();
 
-                // Call initializingNode() on each model and initializedNode() on each view to
-                // indicate that the node is fully constructed.
+                        // Call initializingNode() on each model and initializedNode() on each view to
+                        // indicate that the node is fully constructed.
 
-                vwf.models.forEach( function( model ) {
-                    model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                        childComponent.source, childComponent.type, childIndex, childName );
-                } );
+                        vwf.models.forEach( function( model ) {
+                            model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                childComponent.source, childComponent.type, childIndex, childName );
+                        } );
 
-                vwf.views.forEach( function( view ) {
-                    view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                        childComponent.source, childComponent.type, childIndex, childName );
-                } );
+                        vwf.views.forEach( function( view ) {
+                            view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                childComponent.source, childComponent.type, childIndex, childName );
+                        } );
 
-                // Restore kernel reentry.
+                        // Restore kernel reentry.
 
-                replicating && vwf.models.kernel.enable();
+                        replicating && vwf.models.kernel.enable();
+
+                    }, function() {
+
+                        series_callback_async( undefined, undefined );
+
+                    } );
+
+                },
+
+            ], function( err, results ) /* async */ {
 
                 // The node is complete. Invoke the callback method and pass the new node ID and the
                 // ID of its prototype. If this was the root node for the application, the
@@ -2227,7 +2243,7 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                     async.nextTick( function() {
                         callback_async( childID );
-                        queue.resume( "after completing " + childID ); // suspend the queue
+                        queue.resume( "after completing " + childID ); // resume the queue; may invoke dispatch(), so call last before returning to the host
                     } );
 
                 }
@@ -3127,6 +3143,12 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
         /// @see {@link module:vwf/api/kernel.children}
 
         this.children = function( nodeID ) {
+
+            if ( nodeID === undefined ) {
+                this.logger.errorx( "children", "cannot retrieve children of nonexistent node" );
+                return;
+            }
+
             return this.models.object.children( nodeID );
         };
 
@@ -3137,6 +3159,11 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
         /// @see {@link module:vwf/api/kernel.descendants}
 
         this.descendants = function( nodeID ) {
+
+            if ( nodeID === undefined ) {
+                this.logger.errorx( "descendants", "cannot retrieve children of nonexistent node" );
+                return;
+            }
 
             var descendants = [];
 
@@ -3318,8 +3345,12 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
         /// @returns {Boolean}
 
         var nodeHasProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-            var node = this.models.javascript.nodes[nodeID];
-            return propertyName in node.properties;
+            var node = this.models.javascript.nodes[ nodeID ];
+            if ( node ) {
+                return propertyName in node.properties;
+            } else {
+                this.logger.error( "Could not find node '" + nodeID + "'" );
+            }
         };
 
         /// Determine if a node has a property with the given name. The node's prototypes are not
@@ -3411,7 +3442,20 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
         var nodeHasOwnChild = function( nodeID, childName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
             var node = this.models.javascript.nodes[nodeID];
-            return node.children.hasOwnProperty( childName );  // TODO: this is peeking inside of vwf-model-javascript
+            var hasChild = false;
+            if ( parseInt( childName ).toString() !== childName ) {
+                hasChild = node.children.hasOwnProperty( childName );  // TODO: this is peeking inside of vwf-model-javascript
+            }
+            else {
+                // Children with numeric names do not get added as properties of the children array, so loop over the children
+                // to check manually
+                for(var i=0, il=node.children.length; i<il;i++) {
+                    if(childName === node.children[i].name) {
+                        hasChild = true; 
+                    }
+                }
+            }
+            return hasChild;
         };
 
         /// Determine if a component specifier is a URI.
@@ -3798,15 +3842,21 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
             if ( depth == 0 ) {
 
-                // Omit private direct messages to this client.
+                // Omit any private direct messages for this client, then sort by arrival order
+                // (rather than by time) so that messages will retain the same arrival order when
+                // reinserted.
 
                 return object.filter( function( fields ) {
                     return ! fields.respond && fields.action;  // TODO: fields.action is here to filter out tick messages  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
+                } ).sort( function( fieldsA, fieldsB ) {
+                    return fieldsA.sequence - fieldsB.sequence;
                 } );
 
             } else if ( depth == 1 ) {
 
-                // Remove the sequence fields since they're just local annotations (to stabilize the sort).
+                // Remove the sequence fields since they're just local annotations used to keep
+                // messages ordered by insertion order and aren't directly meaniful outside of this
+                // client.
 
                 var filtered = {};
 
@@ -4279,7 +4329,7 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                     // if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
 
-                        fields.sequence = ++this.sequence; // to stabilize the sort
+                        fields.sequence = ++this.sequence; // track the insertion order for use as a sort key
                         this.queue.push( fields );
 
                     // }
@@ -4290,13 +4340,26 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                 }, this );
 
-                // Sort by time, then by sequence.  // TODO: we probably want a priority queue here for better performance
+                // Sort by time, then future messages ahead of reflector messages, then by sequence.  // TODO: we probably want a priority queue here for better performance
+                // 
+                // The sort by origin ensures that the queue is processed in a well-defined order
+                // when future messages and reflector messages share the same time, even if the
+                // reflector message has not arrived at the client yet.
+                // 
+                // The sort by sequence number ensures that the messages remain in their arrival
+                // order when the earlier sort keys don't provide the order.
 
                 this.queue.sort( function( a, b ) {
 
-                    return a.time != b.time ?
-                        a.time - b.time :
-                        a.sequence - b.sequence;
+                    if ( a.time != b.time ) {
+                        return a.time - b.time;
+                    } else if ( a.origin != "reflector" && b.origin == "reflector" ) {
+                        return -1;
+                    } else if ( a.origin == "reflector" && b.origin != "reflector" ) {
+                        return 1;
+                    } else {
+                        return a.sequence - b.sequence;
+                    }
 
                 } );
 
@@ -4322,6 +4385,21 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                 if ( this.suspension == 0 && this.queue.length > 0 && this.queue[0].time <= this.time ) {
                     return this.queue.shift();                
                 }
+
+            },
+
+            /// Update the queue to include only the messages selected by a filtering function.
+            /// 
+            /// @name module:vwf~queue.filter
+            /// 
+            /// @param {Function} callback
+            ///   `filter` calls `callback( fields )` once for each message in the queue. If
+            ///   `callback` returns a truthy value, the message will be retained. Otherwise it will
+            ///   be removed from the queue.
+
+            filter: function( callback /* fields */ ) {
+
+                this.queue = this.queue.filter( callback );
 
             },
 
@@ -4389,8 +4467,8 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
             suspension: 0,
 
-            /// Sequence counter for tagging messages by arrival order. Messages are sorted by time,
-            /// then by order of arrival.
+            /// Sequence counter for tagging messages by order of arrival. Messages are sorted by
+            /// time, origin, then by arrival order.
             /// 
             /// @name module:vwf~queue.sequence
 

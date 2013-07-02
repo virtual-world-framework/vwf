@@ -47,7 +47,7 @@ methods:
   update: 
 scripts:
 - |
-  var collisionMapCanvas, collisionMapContext;
+  var collisionMapCanvas, collisionMapContext, collisionMapImageData;
 
   this.initialize = function() {
     collisionMapCanvas = document.createElement('canvas');
@@ -57,6 +57,7 @@ scripts:
     var collisionMapImage = new Image();
     collisionMapImage.onload = function() {
         collisionMapContext.drawImage(collisionMapImage, 0, 0);
+        collisionMapImageData = collisionMapContext.getImageData(0, 0, collisionMapCanvas.width, collisionMapCanvas.height);
     }
     collisionMapImage.src = this.collisionMapPath;
   }
@@ -76,29 +77,27 @@ scripts:
   }
   this.checkForStaticCollision = function(playerBoundingBox) {
     var minX, minY, maxX, maxY;
-    minX = Math.round((playerBoundingBox.min[0] + this.worldSize / 2) / this.collisionMapScaleFactor);
-    minY = Math.round((this.worldSize / 2 - playerBoundingBox.min[1]) / this.collisionMapScaleFactor);
-    maxX = Math.round((playerBoundingBox.max[0] + this.worldSize / 2) / this.collisionMapScaleFactor);
-    maxY = Math.round((this.worldSize / 2 - playerBoundingBox.max[1]) / this.collisionMapScaleFactor);
+    var worldSize = this.worldSize / 2;
+    
+    minX = ((playerBoundingBox.min[0] + worldSize) / this.collisionMapScaleFactor) | 0;
+    minY = ((worldSize - playerBoundingBox.min[1]) / this.collisionMapScaleFactor) | 0;
+    maxX = ((playerBoundingBox.max[0] + worldSize) / this.collisionMapScaleFactor) | 0;
+    maxY = ((worldSize - playerBoundingBox.max[1]) / this.collisionMapScaleFactor) | 0;
 
     if(minX < 0 || minY < 0 || maxX > this.collisionMapSize || maxY > this.collisionMapSize) {
       return this.bz_world;
     }
     else {
-      var imageData = collisionMapContext.getImageData(minX, minY, 1, 1);
-      if(imageData.data[3] != 0) {
+      if(collisionMapImageData.data[4 * (minX + 525 * minY) + 3] != 0) {
         return this.bz_world;
       }
-      imageData = collisionMapContext.getImageData(minX, maxY, 1, 1);
-      if(imageData.data[3] != 0) {
+      if(collisionMapImageData.data[4 * (minX + 525 * maxY) + 3] != 0) {
         return this.bz_world;
       }
-      imageData = collisionMapContext.getImageData(maxX, minY, 1, 1);
-      if(imageData.data[3] != 0) {
+      if(collisionMapImageData.data[4 * (maxX + 525 * minY) + 3] != 0) {
         return this.bz_world;
       }
-      imageData = collisionMapContext.getImageData(maxX, maxY, 1, 1);
-      if(imageData.data[3] != 0) {
+      if(collisionMapImageData.data[4 * (maxX + 525 * maxY) + 3] != 0) {
         return this.bz_world;
       }
     }

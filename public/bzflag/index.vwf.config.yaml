@@ -15,4 +15,4 @@
 model:
   vwf/model/glge:
 view:
-  vwf/view/glge: "#vwf-root"
+  vwf/view/glge: { application-root: "#vwf-root", experimental-disable-inputs: true }

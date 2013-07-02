@@ -11,13 +11,16 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## @name lesson.task.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/node.vwf
 properties:
 
   ## Text to display to the user to explain the task
   ## 
-  ## @name task.vwf#text
+  ## @name lesson.task.vwf#text
   ## @property
 
   text:
@@ -25,21 +28,21 @@ properties:
   ## Search string used to find a node3 that represents the transform that the camera will move to at the 
   ## beginning of this task
   ## 
-  ## @name task.vwf#cameraPoseRef
+  ## @name lesson.task.vwf#cameraPoseRef
   ## @property
 
   cameraPoseRef:
 
   ## xpath reference to the top node of the scene that the lesson listens to for task completion events
   ## 
-  ## @name task.vwf#scenePath
+  ## @name lesson.task.vwf#scenePath
   ## @property
 
   scenePath:
 
   ## Index of the currently active subtask
   ## 
-  ## @name task.vwf#taskIndex
+  ## @name lesson.task.vwf#taskIndex
   ## @property
 
   taskIndex:
@@ -48,28 +51,28 @@ methods:
 
   ## Method to begin the task
   ## 
-  ## @name task.vwf#enter
+  ## @name lesson.task.vwf#enter
   ## @function
 
   enter:
 
   ## Method to step to the next task
   ## 
-  ## @name task.vwf#next
+  ## @name lesson.task.vwf#next
   ## @function
 
   next:
 
   ## Method to exit the task
   ## 
-  ## @name task.vwf#exit
+  ## @name lesson.task.vwf#exit
   ## @function
 
   exit:
 
   # ## Method to step to the previous task
   # ## 
-  # ## @name task.vwf#previous
+  # ## @name lesson.task.vwf#previous
   # ## @function
 
   # previous:
@@ -78,28 +81,28 @@ events:
 
   ## Event fired on the task to let itself and others know that it is beginning
   ## 
-  ## @name task.vwf#entering
+  ## @name lesson.task.vwf#entering
   ## @event
 
   entering:
 
   ## Event fired by the task to signify that its completion criteria has been met
   ## 
-  ## @name task.vwf#completed
+  ## @name lesson.task.vwf#completed
   ## @event
 
   completed:
 
   ## Event fired on the task to let it and others know that it is ending
   ## 
-  ## @name task.vwf#exiting
+  ## @name lesson.task.vwf#exiting
   ## @event
 
   exiting:
 
   ## Event fired on the task to let it and others know that the camera transform is complete
   ## 
-  ## @name task.vwf#cameraTransformComplete
+  ## @name lesson.task.vwf#cameraTransformComplete
   ## @event
 
   cameraTransformComplete:
@@ -199,4 +202,4 @@ scripts:
     // Fire the exiting event
     this.exiting();
 
-  } //@ sourceURL=task.vwf
+  } //@ sourceURL=lesson.task.vwf

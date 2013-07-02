@@ -124,18 +124,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 };
 				
                 if ( sceneNode.glgeScene.camera ) {
-                        sceneNode.camera.glgeCameras[ sceneNode.camera.defaultCamID ] = sceneNode.glgeScene.camera;
-                } else {
-                    var cam = new GLGE.Camera();
-                    sceneNode.glgeScene.setCamera( cam );
-                    sceneNode.camera.glgeCameras[ sceneNode.camera.defaultCamID ] = cam;
-                }
-                sceneNode.glgeScene.camera.name = "camera";
-                this.state.cameraInUse = sceneNode.glgeScene.camera;
-                initCamera.call( this, sceneNode.glgeScene.camera );
-
-                var camType = "http://vwf.example.com/camera.vwf";
-                vwf.createChild( childID, "camera", { "extends": camType } );    
+                    sceneNode.camera.glgeCameras[ sceneNode.camera.defaultCamID ] = sceneNode.glgeScene.camera;
+                    sceneNode.glgeScene.camera.name = "camera";
+                    this.state.cameraInUse = sceneNode.glgeScene.camera;
+                    initCamera.call( this, sceneNode.glgeScene.camera );
+                }   
 
                 var model = this;
                 var xmlDocLoadedCallback = callback;

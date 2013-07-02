@@ -11,7 +11,10 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-## `animation/position.vwf` defines a key value for an animation.
+## `animation.position.vwf` defines a key value for an animation.
+##
+## @name animation.position.vwf
+## @namespace
 
 ---
 
@@ -23,24 +26,32 @@ properties:
   ## Positions that don't provide `time` will be automatically distributed along the range between
   ## the siblings that do. If none of a node's animation positions provide `time`, then the
   ## positions will be distributed evenly throughout the animation--in the range [`0`, *duration*].
+  ## 
+  ## @name animation.position.vwf#animationTime
+  ## @property
 
   animationTime:
 
   ## The animated node's transform at this position. The node's transform will be set to this value
   ## when the animations reaches this position. Transforms for intermediate postions will be
   ## interpolated from the transforms of the adjacent positions.
+  ##
+  ## if no times, distribute evenly over number of children
+  ## transforms optional; only for node3 animations, and may be provided by asset or by node's update
+  ## 
+  ## @name animation.position.vwf#animationTransform
+  ## @property
 
   animationTransform:
 
-  # if no times, distribute evenly over number of children
-  # transforms optional; only for node3 animations, and may be provided by asset or by node's update
-
-
-  # animation positions and control positions are not necessarily coincident, although they typically are
-  # animation data may be missing from control positions if no transform is necessary
-  # control data may be missing from animation positions if value/time == 1, attraction does not change
-
-  # The sequence of the animation key value. Key values will be sorted on the sequence to keep the order correct,
-  # because Ruby 1.8.7 doesn't preserve child order in component objects.
+  ## animation positions and control positions are not necessarily coincident, although they typically are
+  ## animation data may be missing from control positions if no transform is necessary
+  ## control data may be missing from animation positions if value/time == 1, attraction does not change
+  ##
+  ## The sequence of the animation key value. Key values will be sorted on the sequence to keep the order correct,
+  ## because Ruby 1.8.7 doesn't preserve child order in component objects.
+  ## 
+  ## @name animation.position.vwf#sequence
+  ## @property
 
   sequence: 0

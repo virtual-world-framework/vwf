@@ -30,6 +30,7 @@
       }, [
 
         "domReady",
+        "utility.js",
 
         // This is the common model implementation and an example model that connects the
         // simulation to a WebGL scene manager.
@@ -43,7 +44,7 @@
         "vwf/utility",
         "logger",
 
-      ], function( ready ) {
+      ], function( ready, testUtility ) {
 
         ready( function() {
 
@@ -135,7 +136,7 @@
                 node.properties = node.properties || {};
                 node.properties.property = node.properties.property || null;
 
-                vwf.createChild( 0, unique_name( "node" ), node, undefined, function( nodeID ) {
+                vwf.createChild( 0, testUtility.uniqueName( "node" ), node, undefined, function( nodeID ) {
                     callback( nodeID, prototypeID, function() {
                       vwf.deleteNode( nodeID );
                       vwf.deleteNode( prototypeID );
@@ -171,14 +172,6 @@
 
             create_node_prototype( node, prototype, callback /* ( nodeID, prototypeID ) */ );
 
-          }
-
-          // Create a unique name from a base.
-
-          var sequence = 0;
-
-          function unique_name( base ) {
-            return base + "-" + ( ++sequence );
           }
 
         } );

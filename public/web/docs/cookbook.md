@@ -2,10 +2,8 @@
 
 --------------
 
- **Coming soon!** - This will be an index page for all the cookbook recipes.  Some already exist.  Try the links to the left.
+The cookbook is a collection of "recipes" to teach the user how to create some basic functionality within the Virtual World Framework. Try the links to the left to view the current recipes. 
 
- And then check back on Mar. 10 to see the completed product.
-
- (It will be our Daylight Saving Time gift to you)
+Check back often, and if there are any suggestions or comments, please post to the [forum](../forum.html).
 
 --------------

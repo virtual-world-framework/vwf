@@ -265,7 +265,12 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
         // -- uri ----------------------------------------------------------------------------------
 
         uri: function( nodeID ) {
-            return this.objects[nodeID].uri;
+            var node = this.objects[ nodeID ];
+            if ( node ) {
+                return node.uri;
+            } else {
+                this.logger.warnx( "Could not find uri of nonexistent node: '" + nodeID + "'" );
+            }
         },
 
         // -- name ---------------------------------------------------------------------------------
@@ -284,27 +289,48 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
         // -- behaviors ----------------------------------------------------------------------------
 
         behaviors: function( nodeID ) {  // TODO: not for global anchor node 0
-            return this.objects[nodeID].behaviors.map( function( behavior ) {
-                return behavior.id;
-            } );
+            var behaviors = this.objects[nodeID].behaviors;
+            if ( behaviors ) {
+                return behaviors.map( function( behavior ) {
+                    return behavior.id;
+                } );
+            } else {
+                this.logger.warnx( "Node '" + nodeID + "' does not have a valid behaviors array" );
+            }
         },
 
         // -- parent -------------------------------------------------------------------------------
 
         parent: function( nodeID, initializedOnly ) {
 
-            var object = this.objects[nodeID];
+            var object = this.objects[ nodeID ];
 
-            return ! initializedOnly || object.initialized ?
-                object.parent && object.parent.id || 0 : undefined;
+            if ( object ) {
+                return ( !initializedOnly || object.initialized ) ?
+                    ( object.parent && object.parent.id || 0 ) : undefined;
+            } else {
+                this.logger.error( "Cannot find node: '" + nodeID + "'" );
+            }
         },
 
         // -- children -----------------------------------------------------------------------------
 
         children: function( nodeID ) {
-            return this.objects[nodeID].children.map( function( child ) {
-                return child.id;
-            } );
+
+            if ( nodeID === undefined ) {
+                this.logger.errorx( "children", "cannot retrieve children of nonexistent node");
+                return;
+            }
+
+            var node = this.objects[ nodeID ];
+
+            if ( node )
+                return node.children.map( function( child ) {
+                    return child.id;
+                } );
+            else
+                this.logger.error( "Cannot find node: " + nodeID );
+
         },
 
         // == Special utilities ====================================================================
@@ -325,7 +351,7 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
             var object = this.objects[nodeID];
 
             if ( internals ) { // set
-                object.sequence = internals.sequence || 0;
+                object.sequence = internals.sequence !== undefined ? internals.sequence : object.sequence;
                 jQuery.extend( object.prng.state, internals.random || {} );
             } else { // get
                 internals = {};

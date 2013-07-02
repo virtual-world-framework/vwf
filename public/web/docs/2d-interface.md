@@ -18,7 +18,7 @@ Inside that file, you can place any valid html, but you must obey two rules:
 
 The view (html) can access the model (yaml) through the vwf_view.kernel object. Thus, the html can watch what happens within the simulation and make changes to it such as setting properties, calling methods, and firing events. 
 
-The [vwf.api.kernel](jsdoc/symbols/vwf.api.kernel.html) in the [system API](system.html) contains the list of kernel calls that can be made from the html.
+The [vwf/api/kernel](jsdoc/2c8753578a.html) in the [system API](system.html) contains the list of kernel calls that can be made from the html.
 
 The following sections show some examples.
 
@@ -31,7 +31,7 @@ To set a property on an object, we first find a reference to that object and the
 	var nodeId = vwf_view.find( ... );
 	vwf_view.kernel.setProperty( nodeId, "property1", value );
 
-Explanations of the parameters can be found in the [find](query.html) and [setProperty](jsdoc/symbols/vwf.api.kernel.html#setProperty) documentation.  Note that the call to [find](query.html) returns immediately, but [setProperty](jsdoc/symbols/vwf.api.kernel.html#setProperty) and the other kernel calls in this recipe are asynchronous.  You can know when the property has been set by creating an event handler for the [satProperty](jsdoc/symbols/vwf.api.view.html#satProperty) event - more on that under [*Monitor the Model from HTML*](#monitor) - and yes ... we know that *sat* is not really the past tense of *set*.
+Explanations of the parameters can be found in the [find](query.html) and [setProperty](jsdoc/2c8753578a.html#setProperty) documentation.  Note that the call to *find* returns immediately, but *setProperty* and the other kernel calls in this recipe are asynchronous.  You can know when the property has been set by creating an event handler for the [satProperty](jsdoc/a2d7e1ef81.html#satProperty) event - more on that under [*Monitor the Model from HTML*](#monitor) - and yes ... we know that *sat* is not really the past tense of *set*.
 
 -------------------
 
@@ -45,7 +45,7 @@ Pass parameters to the method by passing an array of values as a third parameter
 
 	vwf_view.kernel.callMethod( nodeId, "method1", [ parameter1, parameter2, etc ] );
 
-Explanations of the parameters can be found in the [callMethod](jsdoc/symbols/vwf.api.kernel.html#callMethod)  API description.
+Explanations of the parameters can be found in the [callMethod](jsdoc/2c8753578a.html#callMethod)  API description.
 
 -------------------
 
@@ -55,7 +55,7 @@ Create a model component from the view like so:
 
 	vwf_view.kernel.createChild( nodeId, "componentName", component, undefined, callback );
 
-Explanations of the parameters can be found in the [createChild](jsdoc/symbols/vwf.api.kernel.html#createChild) API description.
+Explanations of the parameters can be found in the [createChild](jsdoc/2c8753578a.html#createChild) API description.
 
 -------------------
 
@@ -82,7 +82,7 @@ Similarly, the html can monitor other application updates, such as those listed 
 * Node created - vwf_view.createdNode = function ...
 * Node deleted - vwf_view.deletedNode = function ...
 
-To learn more about these events, you can look at the system api for the [view](jsdoc/symbols/vwf.api.view.html).  Earlier we mentioned that calls to set a property and call a method are asynchronous.  If you would like to know when the action has completed, you may do so in [satProperty](jsdoc/symbols/vwf.api.view.html#satProperty)/[calledMethod](jsdoc/symbols/vwf.api.view.html#calledMethod)/etc.  However, remember that you will get calls into those event handlers for every property/method/etc that is set/called/etc.
+To learn more about these events, you can look at the system api for the [view](jsdoc/a2d7e1ef81.html).  Earlier we mentioned that calls to set a property and call a method are asynchronous.  If you would like to know when the action has completed, you may do so in [satProperty](jsdoc/a2d7e1ef81.html#satProperty)/[calledMethod](jsdoc/a2d7e1ef81.html#calledMethod)/etc.  However, remember that you will get calls into those event handlers for every property/method/etc that is set/called/etc.
 
 -------------------
 

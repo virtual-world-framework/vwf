@@ -12,19 +12,17 @@
 # the License.
 
 --- 
-extends: http://vwf.example.com/navscene.vwf
+extends: http://vwf.example.com/scene.vwf
 properties:
-  navmode: none
   counter: 0
 methods:
+  initializeCamera:
   move:
 children:
   zup:
     extends: http://vwf.example.com/node3.vwf
     source: zup.dae
     type: model/vnd.collada+xml
-  camera:
-    extends: http://vwf.example.com/camera.vwf
   dir1:
     extends: http://vwf.example.com/light.vwf
     properties:
@@ -39,14 +37,20 @@ scripts:
 - | 
     this.initialize = function()
     {
-        //this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
         this.dir1.translation = [0,-100,0];
         this.zup.translation = [0,0,0];
         this.zup.translation = [0,0,0];
         this.counter = 0;
+        this.future(0).initializeCamera();
         this.future(0.053).move();
     }
+
+    this.initializeCamera = function() {
+        //this.camera.rotation = [0,1,0,0];
+        this.camera.translation = [0,-600,50];
+        this.camera.navmode = "none";
+    }
+
     this.move = function()
     {
         this.zup.translation = [0,0,Math.sin(this.time/1.6)];

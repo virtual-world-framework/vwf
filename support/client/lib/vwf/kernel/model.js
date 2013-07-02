@@ -49,7 +49,95 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.state.blocked = false;
             return blocked;
         },
-        
+
+        /// Invoke a task and record any async actions that it initiates. After the actions have
+        /// completed, execute their callbacks, then call a completion callback.
+        /// 
+        /// @param {Function} task
+        ///   The task to execute and monitor for async actions. `task` is invoked with no
+        ///   arguments.
+        /// @param {Function} callback
+        ///   Invoked after the async actions have completed.
+        /// @param {Object} [that]
+        ///   The `this` value for the `task` and `callback` functions.
+
+        capturingAsyncs: function( task, callback, that ) {
+
+            // Create an array to capture the callbacks and results from async actions. When
+            // `this.state.asyncs` exists, async actions hand off their callbacks to `asyncs.defer`.
+
+            var asyncs = this.state.asyncs = [];
+
+            asyncs.defer = defer;
+            asyncs.completed = 0;
+
+            asyncs.callback = callback;
+            asyncs.that = that;
+
+            // Invoke the task.
+
+            task.call( that );
+
+            // Detach the array from `this.state.asyncs` to stop capturing async actions.
+
+            this.state.asyncs = undefined;
+
+            // If there were no async actions, call the completion callback immediately.
+
+            if ( asyncs.completed == asyncs.length ) {
+                asyncs.callback.call( asyncs.that );
+            }
+
+            /// The `this.state.asyncs` array `defer` method.
+            /// 
+            /// Wrap a callback function with a new function that will defer the original callback
+            /// until a collection of actions have completed, then call the deferred callbacks
+            /// followed by a completion callback.
+
+            function defer( callback /* result */ ) {
+
+                var self = this;
+
+                // Save the original callback. The wrapping callback will save the result here when
+                // received.
+
+                var deferred = {
+                    callback: callback /* result */,
+                    result: undefined
+                };
+
+                this.push( deferred );
+
+                // Return a new callback in place of the original. Record the result, then if all
+                // actions have completed, call the original callbacks, then call the completion
+                // function.
+
+                return function( result ) {
+
+                    deferred.result = result;
+
+                    if ( ++self.completed == self.length ) {
+
+                        // Call the original callbacks.
+
+                        self.forEach( function( deferred ) {
+                            deferred.callback && deferred.callback( deferred.result );
+                        } );
+
+                        // Call the completion callback.
+
+                        if ( self.callback ) {
+                            self.callback.call( self.that );
+                        }
+
+                    }
+
+                }
+
+            };
+
+        },
+
     }, function( modelFunctionName ) {
 
         // == Model API ============================================================================
@@ -72,17 +160,23 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             case "createNode":
 
-                return function( nodeComponent, when, callback /* ( nodeID ) */ ) {
+                return function( nodeComponent, when, callback /* nodeID */ ) {
 
                     if ( this.state.enabled ) {
 
                         if ( when === undefined ) {
+
+                            if ( this.state.asyncs ) {
+                                callback = this.state.asyncs.defer( callback /* nodeID */ );
+                            }
+
                             return this.kernel[kernelFunctionName]( nodeComponent, function( nodeID ) {
                                 callback && callback( nodeID );
                             } );
+
                         } else {
                             this.kernel.plan( undefined, kernelFunctionName, undefined,
-                                [ nodeComponent ], when, callback /* ( result ) */ );
+                                [ nodeComponent ], when, callback /* result */ );
                         }
 
                     } else {
@@ -101,7 +195,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, undefined,
-                                undefined, when, callback /* ( result ) */ );
+                                undefined, when, callback /* result */ );
                         }
 
                     } else {
@@ -115,17 +209,23 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             case "createChild":
 
-                return function( nodeID, childName, childComponent, childURI, when, callback /* ( childID ) */ ) {
+                return function( nodeID, childName, childComponent, childURI, when, callback /* childID */ ) {
 
                     if ( this.state.enabled ) {
 
                         if ( when === undefined ) {
+
+                            if ( this.state.asyncs ) {
+                                callback = this.state.asyncs.defer( callback /* childID */ );
+                            }
+
                             return this.kernel[kernelFunctionName]( nodeID, childName, childComponent, childURI, function( childID ) {
                                 callback && callback( childID );
                             } );
+
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, childName,
-                                [ childComponent, childURI ], when, callback /* ( result ) */ );
+                                [ childComponent, childURI ], when, callback /* result */ );
                         }
 
                     } else {
@@ -144,7 +244,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID, childID, childName );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, undefined,
-                                [ childID, childName ], when, callback /* ( result ) */ );  // TODO: swap childID & childName?
+                                [ childID, childName ], when, callback /* result */ );  // TODO: swap childID & childName?
                         }
 
                     } else {
@@ -163,7 +263,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID, childID );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, undefined,
-                                [ childID ], when, callback /* ( result ) */ );  // TODO: swap childID & childName?
+                                [ childID ], when, callback /* result */ );  // TODO: swap childID & childName?
                         }
 
                     } else {
@@ -182,7 +282,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID, properties );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, undefined,
-                                [ properties ], when, callback /* ( result ) */ );
+                                [ properties ], when, callback /* result */ );
                         }
 
                     } else {
@@ -201,7 +301,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, undefined,
-                                undefined, when, callback /* ( result ) */ );
+                                undefined, when, callback /* result */ );
                         }
 
                     } else {
@@ -220,7 +320,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID, propertyName, propertyValue, propertyGet, propertySet );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, propertyName,
-                                [ propertyValue, propertyGet, propertySet ], when, callback /* ( result ) */ );  // TODO: { value: propertyValue, get: propertyGet, set: propertySet } ? -- vwf.receive() needs to parse
+                                [ propertyValue, propertyGet, propertySet ], when, callback /* result */ );  // TODO: { value: propertyValue, get: propertyGet, set: propertySet } ? -- vwf.receive() needs to parse
                         }
 
                     } else {
@@ -241,7 +341,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID, propertyName, propertyValue );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, propertyName,
-                                [ propertyValue ], when, callback /* ( result ) */ );
+                                [ propertyValue ], when, callback /* result */ );
                         }
 
                     } else {
@@ -260,7 +360,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID, propertyName );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, propertyName,
-                                undefined, when, callback /* ( result ) */ );
+                                undefined, when, callback /* result */ );
                         }
 
                     } else {
@@ -279,7 +379,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID, methodName, methodParameters, methodBody );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, methodName,
-                                [ methodParameters, methodBody ], when, callback /* ( result ) */ );  // TODO: { parameters: methodParameters, body: methodBody } ? -- vwf.receive() needs to parse
+                                [ methodParameters, methodBody ], when, callback /* result */ );  // TODO: { parameters: methodParameters, body: methodBody } ? -- vwf.receive() needs to parse
                         }
 
                     } else {
@@ -300,7 +400,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID, methodName, methodParameters );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, methodName,
-                                [ methodParameters ], when, callback /* ( result ) */ );
+                                [ methodParameters ], when, callback /* result */ );
                         }
 
                     } else {
@@ -319,7 +419,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID, eventName, eventParameters );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, eventName,
-                                [ eventParameters ], when, callback /* ( result ) */ );
+                                [ eventParameters ], when, callback /* result */ );
                         }
 
                     } else {
@@ -340,7 +440,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID, eventName, eventParameters );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, eventName,
-                                [ eventParameters ], when, callback /* ( result ) */ );
+                                [ eventParameters ], when, callback /* result */ );
                         }
 
                     } else {
@@ -359,7 +459,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID, eventName, eventParameters, eventNodeParameters );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, eventName,
-                                [ eventParameters, eventNodeParameters ], when, callback /* ( result ) */ );
+                                [ eventParameters, eventNodeParameters ], when, callback /* result */ );
                         }
 
                     } else {
@@ -378,7 +478,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID, scriptText, scriptType );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, undefined,
-                                [ scriptText, scriptType ], when, callback /* ( result ) */ );  // TODO: { text: scriptText, type: scriptType } ? -- vwf.receive() needs to parse
+                                [ scriptText, scriptType ], when, callback /* result */ );  // TODO: { text: scriptText, type: scriptType } ? -- vwf.receive() needs to parse
                         }
 
                     } else {
@@ -397,7 +497,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, undefined,
-                                undefined, when, callback /* ( result ) */ );
+                                undefined, when, callback /* result */ );
                         }
 
                     } else {
@@ -416,7 +516,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             return this.kernel[kernelFunctionName]( nodeID, seed );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, undefined,
-                                [ seed ], when, callback /* ( result ) */ );
+                                [ seed ], when, callback /* result */ );
                         }
 
                     } else {

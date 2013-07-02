@@ -78,10 +78,9 @@ SERVICE='iptables'
 APPCHK=$(ps aux | grep -c $SERVICE)
 if [ $APPCHK != '0' ];
 then
-sudo service iptables stop
 sudo echo "IMPORTANT NOTE:"
-sudo echo "IPTables has been disabled to allow port 80 traffic. Please configure your iptables to allow port 80 traffic"
-sudo echo "and restart your service if you are required to use this internal server firewall package."
-fi
-
+sudo echo "IPTables has been detected. You will need to allow port 80 traffic. Please configure your iptables to allow port 80 traffic"
+sudo echo "and restart your service. Your System is Now Running at http://$hostname but may be blocked."
+else
 sudo echo "Your System is Now Running at http://$hostname"
+fi

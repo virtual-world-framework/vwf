@@ -30,6 +30,7 @@
       }, [
 
         "domReady",
+        "utility.js",
 
         "vwf/configuration",
         "vwf/kernel/model",
@@ -41,7 +42,7 @@
         "vwf/utility",
         "logger",
 
-      ], function( ready ) {
+      ], function( ready, testUtility ) {
 
         // Test the kernel "future" interface.
 
@@ -102,7 +103,7 @@
 
               // Wait and test.
 
-              runFutureAssertions( function( time ) {
+              testUtility.runFutureAssertions( function( time ) {
 
                 vwf.execute( fixtureID, "this.mark( 'tick' )" ); // tick, just before assertions
                 
@@ -146,7 +147,7 @@
               vwf.execute( fixtureID, "this.at( " + time2 + " ).property = 'at'" );
               vwf.execute( fixtureID, "this.future( " + "0.013" + " ).property = 'future'" );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { absolute: time1, assertion: function() {
                     equal( vwf.getProperty( fixtureID, "property" ), "in", "relative" ) } },
@@ -222,7 +223,7 @@
 
               equal( vwf.getProperty( fixtureID, "property" ), undefined, "future queued" );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.001, assertion: function() {
                     equal( vwf.getProperty( fixtureID, "property" ), "property", "future property" ) } },
@@ -254,7 +255,7 @@
 
               equal( vwf.getProperty( fixtureID, "property" ), undefined, "future queued" );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.001, assertion: function() {
                     equal( vwf.getProperty( fixtureID, "property" ), "property", "future property" ) } },
@@ -288,7 +289,7 @@
               equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived queued" ); // still inherited
               equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.001, assertion: function() {
                     equal( vwf.getProperty( derivedID, "derived" ), "derived updated", "derived in derived executed" ) } },
@@ -320,7 +321,7 @@
               equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived queued" ); // still inherited
               equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" );
 
-              runFutureAssertions( [
+              testUtility.runFutureAssertions( [
 
                 { relative: 0.001, assertion: function() {
                     equal( vwf.getProperty( derivedID, "derived" ), "derived updated", "derived in derived executed" ) } },
@@ -335,13 +336,430 @@
 
           } );
 
+          // -- Interactions between reflector messages and future messages ------------------------
+
+          // The queue is must retain a well-defined order when future actions and reflector actions
+          // share the same time, even when reflector messages have not arrived at the client yet.
+          // 
+          // For a sequence of messages having the same time:
+          // 
+          //   - New future messages are inserted after other future messages and before any
+          //     reflector messages.
+          //     
+          //   - New reflector messages are appended after any future messages and after any other
+          //     reflector messages.
+
+          // r0( f0 ) => r0 f0
+
+          asyncTest( "Reflector action generating a future action for the same time", function() {
+
+            createFixtureQueue( function( fixtureID, cleanup ) {
+
+              vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0, "f0" ] ] ], 0 );
+
+              testUtility.runFutureAssertions( [
+
+                { relative: 0.010, assertion: function() {
+                    deepEqual( vwf.getProperty( fixtureID, "log" ), [
+                      "- r0 scheduled",   // at time 0, for time 0
+                      "r0 executed",      // at time 0
+                      "- f0 scheduled",   // at time 0, for time 0
+                      "f0 executed",      // at time 0
+                    ], "reflector action then future action" ) } },
+
+              ], cleanup );
+
+            } );
+
+          } );
+
+          // r0( f1 ) => r0 f1
+
+          asyncTest( "Reflector action generating a future action for a later time", function() {
+
+            createFixtureQueue( function( fixtureID, cleanup ) {
+
+              vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0.001, "f1" ] ] ], 0 );
+
+              testUtility.runFutureAssertions( [
+
+                { relative: 0.010, assertion: function() {
+                    deepEqual( vwf.getProperty( fixtureID, "log" ), [
+                      "- r0 scheduled",   // at time 0, for time 0
+                      "r0 executed",      // at time 0
+                      "- f1 scheduled",   // at time 0, for time 1
+                      "f1 executed"       // at time 1
+                    ], "reflector action then future action" ) } },
+
+              ], cleanup );
+
+            } );
+
+          } );
+
+          // r0( f0a, f0b ) => r0 f0a f0b
+
+          asyncTest( "Reflector action generating multiple future actions for the same time", function() {
+
+            createFixtureQueue( function( fixtureID, cleanup ) {
+
+              vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0, "f0a", 0, "f0b" ] ] ], 0 );
+
+              testUtility.runFutureAssertions( [
+
+                { relative: 0.010, assertion: function() {
+                    deepEqual( vwf.getProperty( fixtureID, "log" ), [
+                      "- r0 scheduled",   // at time 0, for time 0
+                      "r0 executed",      // at time 0
+                      "- f0a scheduled",  // at time 0, for time 0
+                      "- f0b scheduled",  // at time 0, for time 0
+                      "f0a executed",     // at time 0
+                      "f0b executed",     // at time 0
+                    ], "reflector action then future actions in the order of arrival" ) } },
+
+              ], cleanup );
+
+            } );
+
+          } );
+
+          // r0( f1a, f1b ) => r0 f1a f1b
+
+          asyncTest( "Reflector action generating multiple future actions for the same later time", function() {
+
+            createFixtureQueue( function( fixtureID, cleanup ) {
+
+              vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0.001, "f1a", 0.001, "f1b" ] ] ], 0 );
+
+              testUtility.runFutureAssertions( [
+
+                { relative: 0.010, assertion: function() {
+                    deepEqual( vwf.getProperty( fixtureID, "log" ), [
+                      "- r0 scheduled",   // at time 0, for time 0
+                      "r0 executed",      // at time 0
+                      "- f1a scheduled",  // at time 0, for time 1
+                      "- f1b scheduled",  // at time 0, for time 1
+                      "f1a executed",     // at time 1
+                      "f1b executed",     // at time 1
+                    ], "reflector action then future actions in the order of arrival" ) } },
+
+              ], cleanup );
+
+            } );
+
+          } );
+
+          // r0( f1 ) r1 ...  => r0 f1 r1
+
+          asyncTest( "Reflector action generating a future action for a later time, with a reflector " +
+            "action for that same time arriving beforehand", function() {
+
+            createFixtureQueue( function( fixtureID, cleanup ) {
+
+              vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0.001, "f1" ] ] ], 0 );
+
+              vwf.execute( fixtureID, "this.methods.log( '- r1 scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1" ] ], -0.001 );
+
+              testUtility.runFutureAssertions( [
+
+                { relative: 0.010, assertion: function() {
+                    deepEqual( vwf.getProperty( fixtureID, "log" ), [
+                      "- r0 scheduled",   // at time 0, for time 0
+                      "- r1 scheduled",   // at time 0, for time 1
+                      "r0 executed",      // at time 0
+                      "- f1 scheduled",   // at time 0, for time 1
+                      "f1 executed",      // at time 1
+                      "r1 executed",      // at time 1
+                    ], "reflector action, later future action, then bounding reflector action" ) } },
+
+              ], cleanup );
+
+            } );
+
+          } );
+
+          // r0( f1 ) ... r1 => r0 f1 r1
+
+          asyncTest( "Reflector action generating a future action for a later time, with a reflector " +
+              "action for that same time arriving afterwards", function() {
+
+            createFixtureQueue( function( fixtureID, cleanup ) {
+
+              vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0.001, "f1" ] ] ], 0 );
+
+              testUtility.runFutureAssertions( [
+
+                { relative: 0.000, assertion: function() {
+                    vwf.execute( fixtureID, "this.methods.log( '- r1 scheduled' )" );
+                    vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1" ] ], -0.001 ) } },
+
+                { relative: 0.010, assertion: function() {
+                    deepEqual( vwf.getProperty( fixtureID, "log" ), [
+                      "- r0 scheduled",   // at time 0, for time 0
+                      "r0 executed",      // at time 0
+                      "- f1 scheduled",   // at time 0, for time 1
+                      "- r1 scheduled",   // at time 0+, for time 1
+                      "f1 executed",      // at time 1
+                      "r1 executed",      // at time 1
+                    ], "reflector action, later future action, then bounding reflector action" ) } },
+
+              ], cleanup );
+
+            } );
+
+          } );
+
+          // r0( f1a, f1b ) r1a r1b ... => r0 f1a f1b r1a r1b
+
+          asyncTest( "Reflector action generating multiple future actions for the same later time, " +
+            "with multiple reflector actions for that time arriving beforehand", function() {
+
+            createFixtureQueue( function( fixtureID, cleanup ) {
+
+              vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0.001, "f1a", 0.001, "f1b" ] ] ], 0 );
+
+              vwf.execute( fixtureID, "this.methods.log( '- r1a scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1a" ] ], -0.001 );
+
+              vwf.execute( fixtureID, "this.methods.log( '- r1b scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1b" ] ], -0.001 );
+
+              testUtility.runFutureAssertions( [
+
+                { relative: 0.010, assertion: function() {
+                    deepEqual( vwf.getProperty( fixtureID, "log" ), [
+                      "- r0 scheduled",   // at time 0, for time 0
+                      "- r1a scheduled",  // at time 0, for time 1
+                      "- r1b scheduled",  // at time 0, for time 1
+                      "r0 executed",      // at time 0
+                      "- f1a scheduled",  // at time 0, for time 1
+                      "- f1b scheduled",  // at time 0, for time 1
+                      "f1a executed",     // at time 1
+                      "f1b executed",     // at time 1
+                      "r1a executed",     // at time 1
+                      "r1b executed",     // at time 1
+                    ], "reflector action, later future actions, then bounding reflector actions" ) } },
+
+              ], cleanup );
+
+            } );
+
+          } );
+
+          // r0( f1a, f1b ) ... r1a r1b => r0 f1a f1b r1a r1b
+
+          asyncTest( "Reflector action generating multiple future actions for the same later time, " +
+            "with multiple reflector actions for that time arriving afterwards", function() {
+
+            createFixtureQueue( function( fixtureID, cleanup ) {
+
+              vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0.001, "f1a", 0.001, "f1b" ] ] ], 0 );
+
+              testUtility.runFutureAssertions( [
+
+                { relative: 0.000, assertion: function() {
+                    vwf.execute( fixtureID, "this.methods.log( '- r1a scheduled' )" );
+                    vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1a" ] ], -0.001 ) } },
+
+                { relative: 0.000, assertion: function() {
+                    vwf.execute( fixtureID, "this.methods.log( '- r1b scheduled' )" );
+                    vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1b" ] ], -0.001 ) } },
+
+                { relative: 0.010, assertion: function() {
+                    deepEqual( vwf.getProperty( fixtureID, "log" ), [
+                      "- r0 scheduled",   // at time 0, for time 0
+                      "r0 executed",      // at time 0
+                      "- f1a scheduled",  // at time 0, for time 1
+                      "- f1b scheduled",  // at time 0, for time 1
+                      "- r1a scheduled",  // at time 0+, for time 1
+                      "- r1b scheduled",  // at time 0+, for time 1
+                      "f1a executed",     // at time 1
+                      "f1b executed",     // at time 1
+                      "r1a executed",     // at time 1
+                      "r1b executed",     // at time 1
+                    ], "reflector action, later future actions, then bounding reflector actions" ) } },
+
+              ], cleanup );
+
+            } );
+
+          } );
+
+          // r0( f1 ) r1a( f1a ) r1b ... => r0 f1 r1a f1a r1b
+
+          asyncTest( "Reflector action generating a future action for a later time, " +
+            "with a reflector action for that same time generating a future action for the same time, " +
+            "followed by another reflector action for that same time", function() {
+
+            createFixtureQueue( function( fixtureID, cleanup ) {
+
+              vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0.001, "f1" ] ] ], 0 );
+
+              vwf.execute( fixtureID, "this.methods.log( '- r1a scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1a", [ 0, "f1a" ] ] ], -0.001 );
+
+              vwf.execute( fixtureID, "this.methods.log( '- r1b scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1b" ] ], -0.001 );
+
+              testUtility.runFutureAssertions( [
+
+                { relative: 0.020, assertion: function() {
+                    deepEqual( vwf.getProperty( fixtureID, "log" ), [
+                      "- r0 scheduled",   // at time 0, for time 0
+                      "- r1a scheduled",  // at time 0, for time 1
+                      "- r1b scheduled",  // at time 0, for time 1
+                      "r0 executed",      // at time 0
+                      "- f1 scheduled",   // at time 0, for time 1
+                      "f1 executed",      // at time 1
+                      "r1a executed",     // at time 1
+                      "- f1a scheduled",  // at time 1, for time 1
+                      "f1a executed",     // at time 1
+                      "r1b executed",     // at time 1
+                    ], "reflector action, future action, first bounding reflector action, " +
+                        "its future action, then second bounding reflector action" ) } },
+
+              ], cleanup );
+
+            } );
+
+          } );
+
+          // r0( ff1( ff1a ) ) r1 ... => r0 ff1 ff1a r1
+
+          asyncTest( "Reflector action generating a future action for a later time, " +
+            "which generates a future action for that same time, " +
+            "followed by another reflector action for the same time", function() {
+
+            createFixtureQueue( function( fixtureID, cleanup ) {
+
+              vwf.execute( fixtureID, "this.methods.log( '- r0 scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r0", [ 0.001, "ff1" ] ] ], 0 );
+
+              vwf.execute( fixtureID, "this.methods.log( '- r1 scheduled' )" );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1" ] ], -0.001 );
+
+              testUtility.runFutureAssertions( [
+
+                { relative: 0.010, assertion: function() {
+                    deepEqual( vwf.getProperty( fixtureID, "log" ), [
+                      "- r0 scheduled",   // at time 0, for time 0
+                      "- r1 scheduled",   // at time 0, for time 1
+                      "r0 executed",      // at time 0
+                      "- ff1 scheduled",  // at time 0, for time 1
+                      "ff1 executed",     // at time 1
+                      "- ff1a scheduled",  // at time 1, for time 1
+                      "ff1a executed",     // at time 1
+                      "r1 executed",      // at time 1
+                    ], "reflector action, future action, its future action, then bounding reflector action" ) } },
+
+              ], cleanup );
+
+            } );
+
+          } );
+
+          // setState should remove any messages from the queue that pre-date the setState action,
+          // remove messages generated while initializing nodes during the setState action, insert
+          // messages from the setState incoming queue, and leave messages in place that arrived
+          // after the setState message.
+
+          asyncTest( "setState queue", function() {
+
+            createFixtureQueue( function( fixtureID, cleanup ) {
+
+              // Add reflector and future messages that pre-date the setState message but that would
+              // execute after it at times 2 and 3, respectively. These represent the prior state of
+              // the queue. setState should remove them.
+
+              vwf.plan( fixtureID, "callMethod", "future_", [ [ "f2" ] ], -0.002 );
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r3" ] ], -0.003 );
+
+              // Add the setState message at time 1.
+
+              vwf.send( undefined, "setState", undefined, [ {
+
+                // The created node generates a future message during initialize that would run at
+                // time 1, immediately following the setState action. setState should remove it.
+
+                nodes: [
+                  testUtility.dataURIFromDescriptor( {
+                    extends:
+                      fixtureID,
+                    scripts: [
+                      "this.initialize = function() { " +
+                        "Object.getPrototypeOf( this ).future( 0 ).future_( 'f1' ); " +
+                      "}"
+                    ],
+                  } )
+                ],
+
+                // Include a future message at time 4 and a reflector message at time 5 in the
+                // incoming queue. These should be retained.
+
+                queue: {
+                  time:
+                    vwf.time() + 0.001,
+                  queue: [ {
+                    time: vwf.time() + 0.004,
+                    node: fixtureID,
+                    action: "callMethod",
+                    member: "future_",
+                    parameters: [ [ "f4" ] ],
+                    origin: "future"
+                  }, {
+                    time: vwf.time() + 0.005,
+                    node: fixtureID,
+                    action: "callMethod",
+                    member: "reflector",
+                    parameters: [ [ "r5" ] ],
+                    origin: "reflector"
+                  } ]
+                }
+
+              } ], -0.001 );
+
+              // Add a reflector message at time 1. This represents a new action that the reflector
+              // sent following the setState action. It should be retained and should execute after
+              // setState.
+
+              vwf.send( fixtureID, "callMethod", "reflector", [ [ "r1" ] ], -0.001 );
+
+              // The expected result is that setState runs and doesn't leave a trace (other than the
+              // transformed system state), the following reflector action runs, then the actions
+              // from the incoming queue scheduled later run.
+
+              testUtility.runFutureAssertions( [
+
+                { relative: 0.010, assertion: function() {
+                    deepEqual( vwf.getProperty( fixtureID, "log" ), [
+                      "r1 executed",      // second reflector action at time 1
+                      "f4 executed",      // future action from the incoming queue at time 4
+                      "r5 executed",      // reflector action from the incoming queue at time 5
+                    ], "setState discarded prior actions, added incoming actions, and retained following actions" ) } },
+
+              ], cleanup );
+
+            } );
+
+          } );
+
           // == Helper functions =====================================================================
 
           // Create a node with a property, a method and an event.
 
-          function createFixture( callback ) {
+          function createFixture( callback /* fixtureID, cleanup */ ) {
 
-            vwf.createChild( 0, unique_name( "fixture" ), {
+            vwf.createChild( 0, testUtility.uniqueName( "fixture" ), {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -371,10 +789,10 @@
             } );
 
           }
-         
+
           // Create a node with two levels of inheritance and properties to manipulate.
 
-          function createFixtureDerivedBase( callback ) {
+          function createFixtureDerivedBase( callback /* derivedID, baseID, cleanup */ ) {
 
             vwf.createNode( {
 
@@ -409,63 +827,90 @@
 
           }
 
-          // Create a unique name from a base.
+          // Create a node with methods to be called as reflector and future actions that will keep
+          // a log.
 
-          var sequence = 0;
+          function createFixtureQueue( callback /* fixtureID, cleanup */ ) {
 
-          function unique_name( base ) {
-            return base + "-" + ( ++sequence );
-          }
+            vwf.createChild( 0, testUtility.uniqueName( "fixture" ), {
 
-          // Run assertions against actions on the future queue.
-
-          function runFutureAssertions( ticked, assertions, cleanup ) {
-
-            // Interpret runFutureAssertions( assertions, cleanup ) as
-            // runFutureAssertions( undefined, assertions, cleanup )
-
-            if ( typeof ticked != "function" && ! ( ticked instanceof Function ) ) {
-              cleanup = assertions;
-              assertions = ticked;
-              ticked = undefined;
-            }
-
-            // Listen for the kernel tick.
-
-            window.vwf_view.ticked = function( time ) {
-
-              // Call our caller's tick just before the assertions.
-
-              ticked && ticked( time );
-
-              // Run any assertions that are ready.
-
-              while ( next < assertions.length && ready( assertions[next], time ) ) {
-                assertions[next++].assertion();
-              }
-
-              // When finished, unlisten for the kernel tick and tell qunit that we're done.
-
-              if ( next == assertions.length ) {
-                window.vwf_view.ticked = undefined;
-                cleanup();
-                start();
-              }
-
-            }
-
-            var reference = vwf.time();
-            var next = 0;
-
-            // Time to run the next one?
-
-            function ready( assertion, time ) {
-
-              return assertion.absolute && time > assertion.absolute ||
-                assertion.relative && time > reference + assertions[next].relative;
+              extends:
+                "http://vwf.example.com/node.vwf",
               
-            }
-            
+              properties: {
+                log: [], // log of methods called on the node
+              },
+
+              methods: {
+
+                // A method to be called as a reflector action. Append the first parameter to the
+                // log to record that this call occurred, then schedule calls to `future` for each
+                // time/tag pair in the `futures` array.
+
+                reflector: {
+
+                  parameters:
+                    [ "tag", "futures" ],
+
+                  body:
+                    "this.methods.log( tag + ' executed' ); " + // the reflector action executes
+                    "while ( ( futures || [] ).length ) { " +
+                      "var time = futures.shift(); " +
+                      "var tag = futures.shift(); " +
+                      "this.methods.log( '- ' + tag + ' scheduled' ); " + // the future action is scheduled
+                      "tag.match( /ff/ ) ? " +
+                        "this.future( time ).methods.futurefuture( tag, tag + 'a' ) : " + // special case for future to call future
+                        "this.future( time ).methods.future_( tag ); " +
+                    "}"
+
+                },
+
+                // A method to be called as a future action. Append the parameter to the log to
+                // record that this called occurred.
+
+                future_: {
+
+                  parameters:
+                    [ "tag" ],
+ 
+                  body:
+                    "this.methods.log( tag + ' executed' )" // the future action executes
+ 
+                },
+
+                // A method to be called as a future action that generates another future action.
+                // Append the first parameter to the log to record that this call occurred, then
+                // schedule an additional call to `future` with the second tag.
+
+                futurefuture: {
+
+                  parameters:
+                    [ "tag1", "tag2" ],
+ 
+                  body:
+                    "this.methods.log( tag1 + ' executed' ); " + // the future action executes
+                    "this.methods.log( '- ' + tag2 + ' scheduled' ); " + // another future action is scheduled
+                    "this.future( 0 ).methods.future_( tag2 )"
+ 
+                },
+
+                // Append a tag to the log.
+
+                log: {
+                  parameters: [ "tag" ],
+                  body: "this.properties.log = this.properties.log.concat( tag )"
+                },
+
+              },
+
+            }, undefined, function( fixtureID ) {
+
+              callback( fixtureID, function() {
+                vwf.deleteNode( fixtureID );
+              } );
+
+            } );
+
           }
 
           // Convert a number to a Number object that expresses itself in 3-point fixed precision

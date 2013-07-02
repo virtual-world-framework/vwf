@@ -13,8 +13,9 @@
 
 --- 
 extends: http://vwf.example.com/scene.vwf
-properties:
-  navmode: none
+methods:
+  initializeCamera:
+  update:
 children:
   system:
     extends: http://vwf.example.com/particlesystem.vwf
@@ -34,9 +35,6 @@ children:
       depthTest: false
       particleCount: 4500
       solver: 'AnalyticShader'
-  camera:
-    extends: http://vwf.example.com/camera.vwf
-    properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
     implements:
@@ -52,19 +50,23 @@ children:
       glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
-methods:
-  update:
 scripts:
 - | 
     this.initialize = function()
     {
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
         this.dir1.translation = [0,-100,0];
         this.system.translation = [0,0,0];
         this.counter = 0;
+        this.future(0).initializeCamera();
         this.future(.05).update();
     } //@ sourceURL=index.vwf
+    
+    this.initializeCamera = function() {
+        this.camera.rotation = [0,1,0,0];
+        this.camera.translation = [0,-600,50];
+        this.camera.navmode = "none";
+    }
+
     this.update = function()
     {
         this.counter++;

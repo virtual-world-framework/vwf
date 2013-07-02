@@ -13,8 +13,8 @@
 
 --- 
 extends: http://vwf.example.com/scene.vwf
-properties:
-  navmode: none
+methods:
+  initializeCamera:
 children:
   box:
     extends: http://vwf.example.com/physics3.vwf
@@ -30,9 +30,6 @@ children:
       mass: 400 
       linVelocityDamping: [ 1, 1, 1, 0 ] 
       restitution: 0.10
-  camera:
-    extends: http://vwf.example.com/camera.vwf
-    properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
     implements:
@@ -59,8 +56,12 @@ scripts:
 - | 
     this.initialize = function()
     {
-       
-        //this.camera.rotation = [0,100,100];
-        this.camera.translation = [0,0,100];
-        this.camera.rotation = [1,0,0,-90];
+      this.future(0).initializeCamera();
+    }
+
+    this.initializeCamera = function() {
+      //this.camera.rotation = [0,100,100];
+      this.camera.translation = [0,0,100];
+      this.camera.rotation = [1,0,0,-90];
+      this.camera.navmode = "none"; 
     }
