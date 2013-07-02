@@ -58,10 +58,20 @@ define(
 				$('#PM' + e).dialog(
 				{
 					title: "Chat with " + s,
-					autoOpen: true
+					autoOpen: true,
+					height: 180
 				});
 				$('#PM' + e).attr('receiver', s);
-				var setup = '<div class="text ui-widget-content ui-corner-all" style="background-image: -webkit-linear-gradient(top, white 0%, #D9EEEF 100%);width: 99%;top: 0%; height:80%;padding:0px;margin:0px;position: absolute;overflow-y:auto">' + '<table id="ChatLog' + e + '" style="width:100%;background-color: transparent;">' + '</table>' + '</div>' + '<input type="text" name="ChatInput" id="ChatInput' + e + '" class="text ui-widget-content ui-corner-all" style="width: 99%;top: 82%;position: absolute;padding: 0px;font-size: 1.2em;"/>';
+				var setup = 
+'<div class="text ui-widget-content ui-corner-all" '+
+'	style="background-image: -webkit-linear-gradient(top, white 0%, #D9EEEF 100%);width: 99%;top: 0%;'+
+'	height:80%;padding:0px;margin:0px;position: absolute;overflow-y:auto">' + 
+'	<table id="ChatLog' + e + '" style="width:100%;background-color: transparent;">' + 
+'	</table>' + 
+'</div>' + 
+'<input type="text" name="ChatInput" id="ChatInput' + e + '" class="text ui-widget-content ui-corner-all" '+
+	'style="width: 99%;top: 82%;position: absolute;padding: 0px;font-size: 1.2em;"/>'
+				;
 				$('#PM' + e).append(setup);
 				$('#ChatInput' + e).attr('receiver', s);
 				$('#ChatInput' + e).keypress(function (e)
@@ -90,6 +100,26 @@ define(
 				$('#ChatInput' + e).change(function (e)
 				{
 					e.stopImmediatePropagation();
+				});
+
+				// set up the dialog buttons
+				$('#PM'+e).dialog('option', 'buttons', {
+					'Close': function(evt,ui){
+						$(this).dialog('close');
+					},
+					'Video Call': function(evt,ui){
+						vwf.callMethod('index-vwf', 'rtcVideoCall', {'target': $('#ChatInput'+e).attr('receiver')});
+					},
+					'Call': function(evt,ui){
+						vwf.callMethod('index-vwf', 'rtcCall', {'target': $('#ChatInput'+e).attr('receiver')});
+					},
+					'Send': function(evt,ui){
+						var input = $('#ChatInput'+e);
+						var text = input.val();
+						var rec = input.attr('receiver');
+						SendPM(text,rec);
+						input.val('');
+					}
 				});
 			}
 		}
