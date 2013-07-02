@@ -70,6 +70,13 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
                 childName, childComponent, childURI, callback );  // TODO: remap callback parameter
         },
 
+        // -- deleteChild --------------------------------------------------------------------------
+
+        deleteChild: function( node, childName ) {
+            return this.kernel.deleteChild( this.model_to_kernel[this.object_id(node)] || node,
+                childName );
+        },
+
         // -- addChild -----------------------------------------------------------------------------
 
         addChild: function( node, child, childName ) {

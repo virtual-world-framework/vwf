@@ -108,6 +108,15 @@ define( function() {
 
         createChild: [ /* nodeID, childName, childComponent, childURI, callback( childID ) */ ],
 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} childName
+        /// 
+        /// @returns {}
+
+        deleteChild: [ /* nodeID, childName */ ],
+
         /// addChild calls addingChild() on each model. The child is considered added after each model has
         /// run.  Additionally, it calls addedChild() on each view. The view is being notified that a 
         /// child has been added.

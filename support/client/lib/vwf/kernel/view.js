@@ -80,6 +80,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         [ childComponent, childURI ], when || 0, callback /* result */ );
                 };
 
+            case "deleteChild":
+
+                return function( nodeID, childName, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, childName,
+                        undefined, when || 0, callback /* result */ );
+                };
+
             case "addChild":
             
                 return function( nodeID, childID, childName, when, callback ) {

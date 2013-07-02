@@ -246,6 +246,25 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 };
 
+            case "deleteChild":
+
+                return function( nodeID, childName, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, childName );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, childName,
+                                undefined, when, callback /* result */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
             case "addChild":
 
                 return function( nodeID, childID, childName, when, callback ) {

@@ -2283,6 +2283,24 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
             this.logger.debugu();
         };
 
+        // -- deleteChild --------------------------------------------------------------------------
+
+        /// @name module:vwf.deleteChild
+        /// 
+        /// @see {@link module:vwf/api/kernel.deleteChild}
+
+        this.deleteChild = function( nodeID, childName ) {
+
+            var childID = this.children( nodeID ).filter( function( childID ) {
+                return this.name( childID ) === childName;
+            }, this )[0];
+
+            if ( childID !== undefined ) {
+                return this.deleteNode( childID );
+            }
+
+        }
+
         // -- addChild -----------------------------------------------------------------------------
 
         /// @name module:vwf.addChild
