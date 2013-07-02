@@ -71,7 +71,8 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
         send "time" => session[:transport].time,
           "action" => "createNode",
           "parameters" => [
-            env["vwf.application"]
+            env["vwf.application"],
+            "application"
           ]
 
       end

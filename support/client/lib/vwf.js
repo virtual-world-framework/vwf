@@ -798,7 +798,7 @@
                 // TODO: add note that this is only for a self-determined application; with socket, wait for reflection server to tell us.
                 // TODO: maybe depends on component_uri_or_json_or_object too; when to override and not connect to reflection server?
 
-                this.createNode( component_uri_or_json_or_object );
+                this.createNode( component_uri_or_json_or_object, "application" );
 
             } else {  // TODO: also do this if component_uri_or_json_or_object was invalid and createNode() failed
 
@@ -1085,11 +1085,25 @@
 
             // Create or update global nodes and their descendants.
 
-            async.forEach( applicationState.nodes || [], function( nodeComponent, each_callback_async /* ( err ) */ ) {
+            var nodes = applicationState.nodes || [];
+            var annotations = applicationState.annotations || {};
 
-                vwf.createNode( nodeComponent, function( nodeID ) /* async */ {
+            var nodeIndex = 0;
+
+            async.forEachSeries( nodes, function( nodeComponent, each_callback_async /* ( err ) */ ) {
+
+                // Look up a possible annotation for this node. For backward compatibility, if the
+                // state has exactly one node and doesn't contain an annotations object, assume the
+                // node is the application.
+
+                var nodeAnnotation = nodes.length > 1 || applicationState.annotations ?
+                    annotations[nodeIndex] : "application";
+
+                vwf.createNode( nodeComponent, nodeAnnotation, function( nodeID ) /* async */ {
                     each_callback_async( undefined );
                 } );
+
+                nodeIndex++;
 
             }, function( err ) /* async */ {
 
@@ -1152,6 +1166,12 @@
                 nodes: [  // TODO: all global objects
                     require( "vwf/utility" ).transform( this.getNode( applicationID, full ), require( "vwf/utility" ).transforms.transit ),
                 ],
+
+                // `createNode` annotations, keyed by `nodes` indexes.
+
+                annotations: {
+                    0: "application",
+                },
 
                 // Message queue.
 
@@ -1240,10 +1260,19 @@
         /// 
         /// @see {@link module:vwf/api/kernel.createNode}
 
-        this.createNode = function( nodeComponent, callback_async /* ( nodeID ) */ ) {
+        this.createNode = function( nodeComponent, nodeAnnotation, callback_async /* ( nodeID ) */ ) {
+
+            // Interpret `createNode( nodeComponent, callback )` as
+            // `createNode( nodeComponent, undefined, callback )`. (`nodeAnnotation` was added in
+            // 0.6.12.)
+
+            if ( typeof nodeAnnotation == "function" || nodeAnnotation instanceof Function ) {
+                callback_async = nodeAnnotation;
+                nodeAnnotation = undefined;
+            }
 
             this.logger.debuggx( "createNode", function() {
-                return [ JSON.stringify( loggableComponent( nodeComponent ) ) ];
+                return [ JSON.stringify( loggableComponent( nodeComponent ) ), nodeAnnotation ];
             } );
 
             var nodePatch;
@@ -1350,7 +1379,7 @@
 
                         // Create the node as an unnamed child global object.
 
-                        vwf.createChild( 0, undefined, nodeDescriptor, nodeURI, function( nodeID ) /* async */ {
+                        vwf.createChild( 0, nodeAnnotation, nodeDescriptor, nodeURI, function( nodeID ) /* async */ {
                             nodeComponent = nodeID;
                             series_callback_async( undefined, undefined );
                         } );
@@ -1850,9 +1879,10 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
 }
             }
 
-            // Record the application root ID. The application is the first (global) node created.  // TODO: this would be better if made more explicit from the caller (possibly using a special `childName` marker, but that would require the "this is the application" annotation to pass through `createNode`; since `createNode` and `createChild` should probably merge to simplify the patches: and includes: support, this can wait)
+            // Record the application root ID. The application is the first global node annotated as
+            // "application".
 
-            if ( ! applicationID ) {
+            if ( nodeID === 0 && childName == "application" && ! applicationID ) {
                 applicationID = childID;
             }
 

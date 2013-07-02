@@ -49,8 +49,8 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- createNode ---------------------------------------------------------------------------
 
-        createNode: function( nodeComponent, callback /* ( nodeID ) */ ) {
-            return this.kernel.createNode( nodeComponent, callback );  // TODO: remap callback parameter
+        createNode: function( nodeComponent, nodeAnnotation, callback /* ( nodeID ) */ ) {
+            return this.kernel.createNode( nodeComponent, nodeAnnotation, callback );   // TODO remap callback parameter (nodeAnnotation is optional and callback may be second argument)
         },
 
         // -- deleteNode ---------------------------------------------------------------------------

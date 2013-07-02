@@ -51,11 +51,12 @@ define( function() {
         /// @function
         /// 
         /// @param {String|Object} nodeComponent
+        /// @param {String} [nodeAnnotation]
         /// @param {module:vwf/api/kernel~nodeCallback} [callback]
         /// 
         /// @returns {}
 
-        createNode: [ /* nodeComponent, callback( nodeID ) */ ],
+        createNode: [ /* nodeComponent, nodeAnnotation, callback( nodeID ) */ ],
 
         /// Delete a node.
         /// 

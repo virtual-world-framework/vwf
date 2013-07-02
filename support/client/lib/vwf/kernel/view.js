@@ -44,9 +44,23 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             case "createNode":
 
-                return function( nodeComponent, when, callback /* nodeID */ ) {
+                return function( nodeComponent, nodeAnnotation, when, callback /* nodeID */ ) {
+
+                    // Interpret `createNode( nodeComponent, when, callback )` as
+                    // `createNode( nodeComponent, undefined, when, callback )`. (`nodeAnnotation`
+                    // was added in 0.6.12.)
+
+                    if ( typeof when == "function" || when instanceof Function ) {
+                        callback = when;
+                        when = nodeAnnotation;
+                        nodeAnnotation = undefined;
+                    }
+
+                    // Make the call.
+
                     this.kernel.send( undefined, kernelFunctionName, undefined,
-                        [ nodeComponent ], when || 0, callback /* result */ );
+                        [ nodeComponent, nodeAnnotation ], when || 0, callback /* result */ );
+
                 };
 
             case "deleteNode":
