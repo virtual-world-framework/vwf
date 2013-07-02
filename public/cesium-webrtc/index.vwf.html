@@ -193,7 +193,6 @@
           }
 
           function highlightColor( color ) {
-            debugger;
             document.getElementById('black').style.border = "2px solid black";
             document.getElementById('red').style.border = "2px solid black";
             document.getElementById('yellow').style.border = "2px solid black";
@@ -225,6 +224,7 @@
           }
 
           function setMode(mode) {
+            //debugger;
             vwf_view.kernel.find(vwf_view.kernel.find("", "/")[0], "toolbar", function(toolbarID) {
               vwf_view.kernel.setProperty( toolbarID, "inputMode", mode );
             });
@@ -256,10 +256,10 @@
 
         jQuery('#toolbar').mouseenter( function(evt) { 
             evt.stopPropagation(); 
-            if(!mousePressed) 
-            {
+            //if(!mousePressed) 
+            //{
               // $('#toolbar').stop().delay(200).animate({ opacity:0.8 }, 1500);
-            }
+            //}
             return false; 
         });
 

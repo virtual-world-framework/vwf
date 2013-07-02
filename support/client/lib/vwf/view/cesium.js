@@ -96,7 +96,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( isCesiumDefinition.call( this, protos ) ) {
 
                 var cesiumCont = "<div class='cesuim-container' id='"+this.containerDiv+"'></div>";
-                //debugger;
+
                 if ( this.parentDiv == 'body' ) {
                     jQuery( this.parentDiv ).append( cesiumCont );
                 } else {
@@ -464,22 +464,26 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 } else if ( ( event == "up" ) || ( event == "drag" ) ) {
                     switch( button ) {
                         case "left":
-                            eventID = self.state.mouse.leftDownID;
+                            if ( self.state.mouse.leftDownID !== undefined ) {
+                                eventID = self.state.mouse.leftDownID;
+                            }
                             break;
                         case "middle":
-                            eventID = self.state.mouse.middleDownID;
+                            if ( self.state.mouse.middleDownID !== undefined ) {
+                                eventID = self.state.mouse.middleDownID;
+                            }
                             break;
                         case "right":
-                            eventID = self.state.mouse.rightDownID;
+                            if ( self.state.mouse.rightDownID !== undefined ) {
+                                eventID = self.state.mouse.rightDownID;
+                            }
                             break;
                     }
                 } else if ( event == "move" ) {
                     overID = eventID;
                 }
 
-                if ( eventID ) {
-
-                    scene.getCamera().controller.pickEllipsoid( pos, ellipsoid );
+                if ( eventID && eventID != "index-vwf" ) {
 
                     var id = eventID;
                     while ( id ) {

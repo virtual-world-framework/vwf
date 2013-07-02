@@ -1284,7 +1284,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                             case "enableLook": 
                                 if( node.scene ) {
-                                    var controller = node.scene.getScreenSpaceController();
+                                    var controller = node.scene.getScreenSpaceCameraController();
                                     if ( controller ) {
                                         controller.enableLook = Boolean( propertyValue );
                                     }
@@ -1293,7 +1293,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                             case "enableRotate": 
                                 if( node.scene ) {
-                                    var controller = node.scene.getScreenSpaceController();
+                                    var controller = node.scene.getScreenSpaceCameraController();
                                     if ( controller ) {
                                         controller.enableRotate = Boolean( propertyValue );
                                     }
@@ -1302,7 +1302,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                             case "enableTilt":
                                 if( node.scene ) {
-                                    var controller = node.scene.getScreenSpaceController();
+                                    var controller = node.scene.getScreenSpaceCameraController();
                                     if ( controller ) {
                                         controller.enableTilt = Boolean( propertyValue );
                                     }
@@ -1311,7 +1311,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                             case "enableTranslate":
                                 if( node.scene ) {
-                                    var controller = node.scene.getScreenSpaceController();
+                                    var controller = node.scene.getScreenSpaceCameraController();
                                     if ( controller ) {
                                         controller.enableTranslate = Boolean( propertyValue );
                                     }
@@ -1320,7 +1320,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                             case "enableZoom": 
                                 if( node.scene ) {
-                                    var controller = node.scene.getScreenSpaceController();
+                                    var controller = node.scene.getScreenSpaceCameraController();
                                     if ( controller ) {
                                         controller.enableZoom = Boolean( propertyValue );
                                     }
@@ -1771,7 +1771,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                 case "enableLook": 
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceController();
+                        var controller = node.scene.getScreenSpaceCameraController();
                         if ( controller ) {
                             value = controller.enableLook;
                         }
@@ -1779,7 +1779,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     break;
                 case "enableRotate": 
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceController();
+                        var controller = node.scene.getScreenSpaceCameraController();
                         if ( controller ) {
                             value = controller.enableRotate;
                         }
@@ -1787,7 +1787,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     break;
                 case "enableTilt":
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceController();
+                        var controller = node.scene.getScreenSpaceCameraController();
                         if ( controller ) {
                             value = controller.enableTilt;
                         }
@@ -1795,7 +1795,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     break; 
                 case "enableTranslate":
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceController();
+                        var controller = node.scene.getScreenSpaceCameraController();
                         if ( controller ) {
                             value = controller.enableTranslate;
                         }
@@ -1803,7 +1803,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     break;
                 case "enableZoom": 
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceController();
+                        var controller = node.scene.getScreenSpaceCameraController();
                         if ( controller ) {
                             value = controller.enableZoom;
                         }

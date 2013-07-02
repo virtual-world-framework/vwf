@@ -29,19 +29,20 @@ methods:
   draw:
 children:
   toolbar:
+    extends: http://vwf.example.com/node.vwf
     properties:
       selectedColor:
         set: |
           this.selectedColor = value;
           this.selectedColorChanged( value );
-        value:
-          "black"
+        get: |
+          return this.selectedColor;
+        value: "black"
       inputMode:
         set: |
           this.inputMode = value;
           this.inputModeChanged( value );
-        value:
-          "orbit"
+        value: "orbit"
     methods:
       clear: |
         this.clearing();
@@ -72,7 +73,14 @@ children:
 scripts:
 - |
     this.initialize = function() {
+      console.info( "=============== cesium-webrtc.initialize ===============" );
       this.lastDrawPosition = undefined;
+      
+      // these properties should be getting set 
+      // by the initialization process, but it's not happening
+      //debugger;
+      this.toolbar.inputMode = "orbit";
+      this.toolbar.selectedColor = "black";
     }
     
     this.toolbar.selectedColorChanged = this.events.add( function( color ) {
@@ -80,6 +88,8 @@ scripts:
 
     this.toolbar.inputModeChanged = this.events.add( function( mode ) {
       
+      if ( mode === undefined ) return;
+
       this.enableLook = ( mode == "orbit" ); 
       this.enableRotate = ( mode == "orbit" ); 
       this.enableTilt = ( mode == "orbit" ); 
@@ -145,6 +155,7 @@ scripts:
       }
     }
     this.pointerClick = function( pointerInfo, pickInfo ) {
+      //debugger;
       switch ( this.toolbar.inputMode ) {
         case "pindrop":
           if ( pickInfo.globalPosition ) {
