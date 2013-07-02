@@ -262,7 +262,6 @@ children:
     - http://vwf.example.com/control.vwf
     properties:
       controlScale: 2
-      animationRate: 2
     children: 
       Untitled_029: 
         extends: http://vwf.example.com/node3.vwf 
@@ -281,6 +280,7 @@ children:
         - http://vwf.example.com/control/position.vwf
         properties:
           sequence: 1
+          animationTime: 1
     scripts:
     - |
       this.animationUpdate = function(time, duration) {
