@@ -17,10 +17,13 @@ properties:
   backgroundColor:
   renderStyle: "3D"
   imageryProvider: "bingAerialLabel"
-  terrainProvider: "cesium"
 children:
   camera:
     extends: http://vwf.example.com/cesium/camera.vwf
+  earth:
+    extends: http://vwf.example.com/cesium/centralBody.vwf
+    properties:
+      terrainProvider: "cesium"
   sun: 
     extends: http://vwf.example.com/cesium/sun.vwf 
   atmosphere: 

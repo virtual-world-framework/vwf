@@ -14,7 +14,6 @@
 --- 
 extends: http://vwf.example.com/cesium.vwf
 properties:
-  backgroundColor:
   renderStyle: "3D"
   imageryProvider: "bingAerial"
 children:

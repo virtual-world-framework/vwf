@@ -987,7 +987,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                             url : 'http://cesium.agi.com/smallterrain',
                                             credit : 'Terrain data courtesy Analytical Graphics, Inc.'
                                         });  
-                                        node.centralBody.depthTestAgainstTerrain = true;                                  
+                                        node.cesiumObj.depthTestAgainstTerrain = true;                                  
                                         break;
                                     case "vr":
                                         node.terrainProvider = propertyValue;
@@ -995,7 +995,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                             url : 'http://www.vr-theworld.com/vr-theworld/tiles1.0.0/73/',
                                             credit : 'Terrain data courtesy VT MÄK'
                                         }); 
-                                        node.centralBody.depthTestAgainstTerrain = true;                                   
+                                        node.cesiumObj.depthTestAgainstTerrain = true;                                   
                                         break;
                                     default:
                                         terrainProvider = new Cesium.EllipsoidTerrainProvider();
