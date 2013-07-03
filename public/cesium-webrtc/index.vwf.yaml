@@ -24,7 +24,7 @@ properties:
     set: |
       this.minDrawDistance = value;
       this.minDistanceSquared = value * value;  
-    value: 2000   
+    value: 80000   
 methods:
   createClient:
   locationCaptured:
@@ -79,7 +79,7 @@ scripts:
 - |
     this.initialize = function() {
       console.info( "=============== cesium-webrtc.initialize ===============" );
-      this.lastDrawPosition = undefined;
+      this.lastDrawPoint = undefined;
       this.polyLineCollection = undefined;
       
       // these properties should be getting set 
@@ -162,40 +162,60 @@ scripts:
       }
     }
     this.pointerClick = function( pointerInfo, pickInfo ) {
-      switch ( this.toolbar.inputMode ) {
-        case "pindrop":
-          if ( pickInfo.globalPosition ) {
-            this.dropPin( pickInfo.globalPosition )
-          }
-          break;
-      }
-    } 
-    this.pointerDown = function( pointerInfo, pickInfo ) {
-      
-      switch ( this.toolbar.inputMode ) {
-        
-        case "draw":
-          if ( pickInfo && pickInfo.globalPosition ) {
-            this.lastDrawPoint = { pickInfo: pickInfo };
-          } else {
-            this.lastDrawPoint = undefined;
+
+      switch ( pointerInfo.button ) {
+        case "left":
+          switch ( this.toolbar.inputMode ) {
+            case "pindrop":
+              if ( pickInfo.globalPosition ) {
+                this.dropPin( pickInfo.globalPosition )
+              }
+              break;
           }
           break;
       }
 
+    } 
+    this.pointerDown = function( pointerInfo, pickInfo ) {
+      
+      switch ( pointerInfo.button ) {
+          case "left":
+            switch ( this.toolbar.inputMode ) {
+              
+              case "draw":
+                if ( pickInfo && pickInfo.globalPosition ) {
+                  this.lastDrawPoint = { pickInfo: pickInfo };
+                } else {
+                  this.lastDrawPoint = undefined;
+                }
+                break;
+            }          
+            break;
+      }
+
     }
     this.pointerMove = function( pointerInfo, pickInfo ) {
-      switch ( this.toolbar.inputMode ) {
-        case "draw":
-          if ( pickInfo.globalPosition ) {
-            if ( this.distanceFromLast( pickInfo ) > this.minDistanceSquared ) {
-              this.draw( pickInfo )
-            }
+      
+      switch ( pointerInfo.button ) {
+        
+        case "left":
+          switch ( this.toolbar.inputMode ) {
+            case "draw":
+              if ( pickInfo.globalPosition ) {
+                var dist = this.distanceFromLast( pickInfo );
+                console.info( "dist = " + dist + "       this.minDistanceSquared = " + this.minDistanceSquared );
+                if ( dist > this.minDistanceSquared ) {
+                  this.draw( pickInfo )
+                }
+              }
+              break;
           }
           break;
-      } 
+      }
+
     }    
     this.pointerUp = function( pointerInfo, pickInfo ) {
+      
       switch ( this.toolbar.inputMode ) {
         case "draw":
           if ( pickInfo.globalPosition ) {
@@ -203,10 +223,15 @@ scripts:
           }
           break;
       }
-      this.lastDrawPosition = undefined; 
+      this.lastDrawPoint = undefined;
+      this.polyLineCollection = undefined;
+
     }
     this.draw = function( pickInfo ) {
-      if ( false && pickInfo && pickInfo.globalPosition ) {
+
+      if ( pickInfo && pickInfo.globalPosition ) {
+        var self = this;
+        var len;
         if ( this.lastDrawPoint ) {
           var start = this.lastDrawPoint.pickInfo.globalPosition;
           var end = pickInfo.globalPosition;
@@ -218,33 +243,37 @@ scripts:
                 "extends": "http://vwf.example.com/cesium/material.vwf",
                 "type": { "context": false, "type": 'PolylineGlow' },
                 "properties": {
-                  "uniforms": { "innerWidth": 3.0, "color": this.toolbar.selectedColor }
+                  "uniforms": { "innerWidth": 4.0, "color": this.toolbar.selectedColor }
                 },
               },
             },
             "properties": {
               "positions": [ [ start[0], start[1], start[2] ], [ end[0], end[1], end[2] ] ],    
-              "width": 8,
+              "width": 8
             },
           };
 
           if ( this.polyLineCollection === undefined ) {
-             var collection =  { "extends": "http://vwf.example.com/cesium/polylineCollection.vwf" };
-
+             var collection =  { 
+              "extends": "http://vwf.example.com/cesium/polylineCollection.vwf", 
+            };
+            len = this.children.length;
+            this.children.create( "lineCollection" + len, collection, function( child ) {
+              self.polyLineCollection = child;
+              child.children.create( "line0", line );
+            } );
 
           } else {
-            var len = this.polyLineCollection.children.length;
-            this.polyLineCollection.children.create( "line" + len, line, function( child ) {
-            } );             
+            len = this.polyLineCollection.children.length;
+            this.polyLineCollection.children.create( "line" + len, line );             
           }
-
-
-         
-
+          this.lastDrawPoint = { pickInfo: pickInfo };
         }
       }
+
     }
     this.dropPin = function( pos ) {
+
       var self = this;
       var bbDef = {
         "extends": "http://vwf.example.com/cesium/billboard.vwf",
@@ -254,8 +283,10 @@ scripts:
         child.position = pos;
         child.color = self.toolbar.selectedColor;
       } );
+
     }
     this.distanceFromLast = function( pickInfo ) {
+
       var distSquared = 0;
       if ( pickInfo && pickInfo.globalPosition ) {
         if ( this.lastDrawPoint ) {
@@ -265,4 +296,5 @@ scripts:
         }
       }
       return distSquared;
+
     } //@ sourceURL=index.vwf
