@@ -59,6 +59,15 @@ MyRTC.prototype.initialize = function( params )
 	if( this.getUserMedia )
 	{
 		if( this.localStream == null ){
+
+			// remind user to click 'allow'
+			var reminderTimeout;
+			if( this.detectedBrowser == 'chrome' ){
+				reminderTimeout = setTimeout( function(){
+					$('#permission-reminder').show( 'bounce', {'direction': 'down', 'distance': 80}, 'slow' );
+				}, 5000 );
+			}
+
 			// try to bind to camera and microphone
 			this.getUserMedia(
 				mediaDescription,
@@ -66,7 +75,14 @@ MyRTC.prototype.initialize = function( params )
 				// on success, bind webcam to local vid feed
 				bind_safetydance( this, function(stream)
 				{
+					// get rid of reminder
+					if( this.detectedBrowser == 'chrome' ){
+						clearTimeout(reminderTimeout);
+						$('#permission-reminder').hide( 'fade', 'fast' );
+					}
+
 					console.log('Binding local camera');
+
 					this.attachStreamToFrame(stream, this.localPlayer);
 					this.localStream = stream;
 					if( this.trySetLocalMedia() ){
@@ -84,8 +100,13 @@ MyRTC.prototype.initialize = function( params )
 				}),
 					
 				// otherwise just print an error
-				bind_safetydance( this, function(error){
+				bind_safetydance( this, function(error)
+				{
+					// get rid of reminder
+					clearTimeout(reminderTimeout);
+					$('#permission-reminder').hide( 'fade', 'fast' );
 					console.error('An error occurred while binding webcam: ', error);
+
 					this.isMediaSet = true;
 					if( this.readyToOffer ){
 						this.readyToOffer = false;
@@ -108,7 +129,7 @@ MyRTC.prototype.initialize = function( params )
 	
 	// inform peers of availability
 	console.log('Sending syn');
-	this.sendMessage({'type': 'syn'});
+	this.sendMessage({'type': 'syn', 'mediaDescription': mediaDescription});
 }
 
 
@@ -136,8 +157,6 @@ MyRTC.prototype.disconnect = function()
 
 MyRTC.prototype.receiveMessage = function( msg )
 {
-	console.log('Message received of type '+msg.type+': ', msg);
-	
 	if( msg.type == 'syn' ){
 		// initialize peer connection
 		this.createPeerConnection();
