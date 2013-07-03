@@ -272,11 +272,14 @@ scripts:
             this.children.create( "lineCollection" + len, collection, function( child ) {
               self.polyLineCollection = child;
               child.children.create( "line0", line );
+              this.markupAdded.push( child.id );
             } );
 
           } else {
             len = this.polyLineCollection.children.length;
-            this.polyLineCollection.children.create( "line" + len, line );             
+            this.polyLineCollection.children.create( "line" + len, line, function( child ) {
+              this.parent.markupAdded.push( child.id );
+            } );             
           }
           this.lastDrawPoint = { pickInfo: pickInfo };
         }
@@ -309,23 +312,4 @@ scripts:
       }
       return distSquared;
 
-    }
-    this.getChild = function( childName, startingNode ) {
-      if(!startingNode) {
-        startingNode = this;
-      }
-      var len = startingNode.children.length;
-      for ( var i = 0; i < len; i++ ) {
-        if ( startingNode.children[i].id == childName ) {
-          return startingNode.children[i];
-        } else if ( startingNode.children[i].name && startingNode.children[i].name == childName ) {
-          return startingNode.children[i];        
-        } else {
-          var childNode = this.getChild( childName, startingNode.children[i]);
-          if(childNode) {
-            return childNode;
-          }
-        }
-      }
-      return undefined;
     } //@ sourceURL=index.vwf
