@@ -16,7 +16,7 @@
 					<input id="filter" class="span3" style="width:89%; float:left;" type="text" placeholder="Filter Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
 				</div>
 			</div>
-			<div class="row" id="activeRow" data-bind="foreach:worldObjects">				
+			<div class="row" id="activeRow" data-bind="foreach:displayWorldObjects">				
 				<div data-bind="visible:isHidden" class="span3">
 					<div class="worldBox">
 						<div>
@@ -42,10 +42,10 @@
 			</div>
 			<div class="row">
 				<div class="span1 offset5">
-					<a class="btn"><i class="icon-chevron-left"></i></a>
+					<a class="btn" data-bind="click:getPreviousPage, css:previousDisabled?'disabled btn':'btn'"><i class="icon-chevron-left"></i></a>
 				</div>				
 				<div class="span1">
-					<a class="btn"><i class="icon-chevron-right"></i></a>
+					<a class="btn" data-bind="click:getNextPage, css:nextDisabled?'disabled btn':'btn'"><i class="icon-chevron-right"></i></a>
 				</div>
 			</div>
 		</div>
@@ -60,7 +60,7 @@
 
 				window.setInterval(function(){
 					showStates();
-				},60000);
+				},10000);
 
 			});
 		});

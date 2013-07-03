@@ -25,23 +25,48 @@
     <script type="text/javascript">
 		var filter = '';
 		var root = '{{root}}';
-		var vwfPortalModel = {
-		
-			user: ko.observable({
+		var pageIndex = 0;
+		var pageLength = 8;
+		var vwfPortalModel = new function(){
+			var self = this;
+			self.user = ko.observable({
 				isLoggedIn: false,
 				isAdmin: false,
 				username: 'Guest'
-			}),
+			});
 			
-			filterVal: ko.computed({
+			self.filterVal = ko.computed({
 				read:  function(){ return ''; }, 
 				write: function(str){ 
 					filter = str;
+					pageIndex = 0;
 					showStates(); 
 				}	
-			}).extend({throttle:750}),
+			}).extend({throttle:500});
 			
-			worldObjects: ko.observableArray()
+			self.worldObjects = ko.observableArray([]);
+			self.displayWorldObjects = ko.observableArray([]);
+			self.getNextPage = function(){
+				self.getPage(1);
+			};
+			self.getPreviousPage = function(){
+				if(pageIndex > 0){
+					self.getPage(-1);
+				}
+			};
+			self.getPage = function(i){
+				if(i == 0){
+				
+					console.log("hi");
+				}
+				if((pageIndex+i)*pageLength < self.worldObjects().length){
+					pageIndex += i;
+					self.displayWorldObjects(self.worldObjects.slice(pageIndex*pageLength, (pageIndex+1)*pageLength));
+				}
+				
+			};
+			self.previousDisabled = ko.observable(true),
+			self.nextDisabled = ko.observable(true)
 		};
 		
 		function checkFilter(textArr)
@@ -90,6 +115,8 @@
 						e[keys[i]].lastUpdate = e[keys[i]].lastUpdate?e[keys[i]].lastUpdate:(new Date()).toString();
 						vwfPortalModel.worldObjects()[saveIndex] = e[keys[i]];	
 					}
+					
+					vwfPortalModel.getPage(0);
 				}
 				
 				vwfPortalModel.worldObjects.valueHasMutated();
