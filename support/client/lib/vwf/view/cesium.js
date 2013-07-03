@@ -190,10 +190,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                             "position": undefined,
                             "up": undefined,
                             "right": undefined,
-                            //"direction": camera.direction.clone(),
-                            //"position": camera.position.clone(),
-                            //"up": camera.up.clone(),
-                            //"right": camera.right.clone(),
                             "diff": function( cam ) {
                                 var retObj = undefined;
 
@@ -223,12 +219,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                         }
                                     }                                                                        
                                 }
-                                //return ( this.initialized &&
-                                //    ( ( !Cesium.Cartesian3.equals( this.direction, cam.direction ) ) ||  
-                                //    ( !Cesium.Cartesian3.equals( this.position, cam.position ) ) ||
-                                //    ( !Cesium.Cartesian3.equals( this.up, cam.up ) ) ||
-                                //    ( !Cesium.Cartesian3.equals( this.right, cam.right ) ) )
-                                //);
 
                                 return retObj;
                             },
@@ -447,7 +437,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     "eventNodeData": { "": [ {
                         "distance": undefined,
                         "origin": [ camPos.x, camPos.y, camPos.z ],
-                        "id": eventObj,
+                        "id": eventID,
                         "globalPosition": globePoint ? [ globePoint.x, globePoint.y, globePoint.z ] : undefined,
                         "globalNormal": undefined,
                         "globalSource": [ camPos.x, camPos.y, camPos.z ],            
@@ -492,10 +482,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     overID = eventID;
                 }
 
-                if ( eventID && eventID != "index-vwf" ) {
+                if ( eventID && eventID != rootID ) {
 
                     var id = eventID;
-                    while ( id ) {
+                    while ( id && id != rootID ) {
                         eData.eventNodeData[ id ] = [ {
                             "distance": undefined,
                             "origin": scene.getCamera().position,
