@@ -156,6 +156,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // rotationSpeed
             if ( navObject && ( nodeID == navObject.ID ) ) {
                 if ( propertyName == "navmode" ) { 
+                    if ( ( propertyValue == "none" ) && ( navmode != "none" ) && pointerLockImplemented ) {
+                        document.exitPointerLock();
+                    }
                     navmode = propertyValue;
                 } else if ( propertyName == "translationSpeed" ) {
                     translationSpeed = propertyValue;
