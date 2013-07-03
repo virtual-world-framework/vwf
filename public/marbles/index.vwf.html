@@ -10,6 +10,7 @@
 <!-- License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,   -->
 <!-- either express or implied. See the License for the specific language governing permissions  -->
 <!-- and limitations under the License.                                                          -->
+<link rel="stylesheet" type="text/css" href="css/marbles.css"/>
 
 
 <!-- The following div provides buttons for controlling the solitaire activity.                  -->
@@ -44,6 +45,8 @@
     modal: true,
     resizable: false,
     draggable: false,
+    closeOnEscape: false,
+    dialogClass: "no-close",
     buttons: {
       "Login": function( ) {
         var userName = $( "#userName" ).val( );
