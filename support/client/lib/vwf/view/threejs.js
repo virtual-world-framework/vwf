@@ -995,12 +995,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             rotatingRight = false;
         }
 
-        if(typeof canvas.onmousewheel == "function") {
+        // As of this writing, Chrome uses canvas.onmousewheel
+        // Firefox uses canvas.onwheel
+        if ( canvas.onmousewheel !== undefined ) {
             canvas.removeAttribute("onmousewheel");
             canvas.onmousewheel = function( e ) {
                 var eData = getEventData( e, false );
                 if ( eData ) {
-                    eData.eventNodeData[""][0].wheel = {
+                    var eventNodeData = eData.eventNodeData[ "" ][ 0 ];
+                    eventNodeData.wheel = {
                         delta: e.wheelDelta / -40,
                         deltaX: e.wheelDeltaX / -40,
                         deltaY: e.wheelDeltaY / -40,
@@ -1014,20 +1017,26 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
 
                     if ( navmode == "fly" ) {
-                        handleScroll( e.wheelDelta, eData.eventNodeData[ "" ][ 0 ].distance );
+                        handleScroll( eventNodeData.wheel.delta, eventNodeData.distance );
                     }
                 }
             };
-        }
-        else {
+        } else if ( canvas.onwheel !== undefined ) {
             canvas.removeAttribute("onmousewheel");
-            canvas.addEventListener('DOMMouseScroll', function( e ) {
+            canvas.onwheel = function( e ) {
                 var eData = getEventData( e, false );
                 if ( eData ) {
-                    eData.eventNodeData[""][0].wheel = {
-                        delta: e.detail,
-                        deltaX: e.detail,
-                        deltaY: e.detail,
+                    
+                    if ( e.deltaMode != 1 ) {
+                        self.logger.warnx( "canvas.onwheel: This browser uses an unsupported deltaMode: " + 
+                                           e.deltaMode );
+                    }
+
+                    var eventNodeData = eData.eventNodeData[ "" ][ 0 ];
+                    eventNodeData.wheel = {
+                        delta: e.deltaY,
+                        deltaX: e.deltaX,
+                        deltaY: e.deltaY,
                     };
                     var id = sceneID;
                     if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
@@ -1037,12 +1046,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         
                     sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
 
-                    // TODO: Implement scrolling for browsers where onmousewheel is not implemented
-                    // if ( navmode == "fly" ) {
-                    //     handleScroll();
-                    // }
+                    if ( navmode == "fly" ) {
+                        handleScroll( eventNodeData.wheel.delta, eventNodeData.distance );
+                    }
                 }
-            });
+            };
+        } else {
+            this.logger.warnx( "initInputEvents: Neither onmousewheel nor onwheel are supported in this " +
+                               "browser so mouse scrolling is not supported - request that the VWF team " +
+                               "support the DOMMouseScroll event to support your browser" );
         }
 
         // TODO: Navigation - This section should become a view component as soon as that system is available
@@ -1340,17 +1352,17 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 return;
             }
 
-            // wheelDelta has a value of 120 for every click
-            var numClicks = Math.abs( wheelDelta / 120 );
+            // wheelDelta has a value of 3 for every click
+            var numClicks = Math.abs( wheelDelta / 3 );
 
             // Prepare variables for calculation
             var dist = Math.max( distanceToTarget || translationSpeed, 2 * self.state.cameraInUse.near );
             var percentDistRemainingEachStep = 0.8;
             var amountToMove = 0;
 
-            // If wheelDelta is positive, user pushed wheel forward - move toward the object
+            // If wheelDelta is negative, user pushed wheel forward - move toward the object
             // Else, user pulled wheel back - move away from object
-            if ( wheelDelta > 0 ) { 
+            if ( wheelDelta < 0 ) { 
                 amountToMove = dist * ( 1 - Math.pow( percentDistRemainingEachStep, numClicks ) );
             } else {
                 amountToMove = dist * ( 1 - Math.pow( 1 / percentDistRemainingEachStep, numClicks ) );
