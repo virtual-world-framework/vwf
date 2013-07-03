@@ -995,7 +995,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             rotatingRight = false;
         }
 
-        // As of this writing, Chrome uses canvas.onmousewheel
+        // As of this writing, Chrome and Opera Next use canvas.onmousewheel
         // Firefox uses canvas.onwheel
         if ( canvas.onmousewheel !== undefined ) {
             canvas.removeAttribute("onmousewheel");
