@@ -115,10 +115,6 @@ scripts:
       }
     }, this );
 
-    this.toolbar.events.clearing = this.events.add( function() { 
-      this.clear(); 
-    }, this );
-
     this.createClient = function( moniker, loginName ) {
       console.info( "createClient( "+moniker+", "+loginName+" )" );
       var self = this;
