@@ -25,6 +25,7 @@ properties:
       this.minDrawDistance = value;
       this.minDistanceSquared = value * value;  
     value: 80000   
+    markupAdded: 
 methods:
   createClient:
   locationCaptured:
@@ -50,6 +51,19 @@ children:
         value: "orbit"
     methods:
       clear: |
+        if ( this.parent.markupAdded ) {
+          var childToDelete = undefined;
+          for ( var i = 0; i < this.parent.markupAdded.length; i++ ) {
+            for ( var j = 0; j < this.parent.children.length; j++ ) {
+              if ( this.parent.children[j].id == this.parent.markupAdded[i] ) {
+                childToDelete = this.parent.children[j];
+                this.parent.children.delete( childToDelete );
+                break;
+              }
+            }
+          }
+          this.parent.markupAdded = [];
+        }
         this.clearing();
     events:
       selectedColorChanged:
@@ -81,6 +95,7 @@ scripts:
       console.info( "=============== cesium-webrtc.initialize ===============" );
       this.lastDrawPoint = undefined;
       this.polyLineCollection = undefined;
+      this.markupAdded = [];
       
       // these properties should be getting set 
       // by the initialization process, but it's not happening
@@ -278,6 +293,7 @@ scripts:
       this.children.create( "pushPin" + len, bbDef, function( child ) {
         child.position = pos;
         child.color = self.toolbar.selectedColor;
+        this.markupAdded.push( child.id );
       } );
 
     }
@@ -293,4 +309,23 @@ scripts:
       }
       return distSquared;
 
+    }
+    this.getChild = function( childName, startingNode ) {
+      if(!startingNode) {
+        startingNode = this;
+      }
+      var len = startingNode.children.length;
+      for ( var i = 0; i < len; i++ ) {
+        if ( startingNode.children[i].id == childName ) {
+          return startingNode.children[i];
+        } else if ( startingNode.children[i].name && startingNode.children[i].name == childName ) {
+          return startingNode.children[i];        
+        } else {
+          var childNode = this.getChild( childName, startingNode.children[i]);
+          if(childNode) {
+            return childNode;
+          }
+        }
+      }
+      return undefined;
     } //@ sourceURL=index.vwf
