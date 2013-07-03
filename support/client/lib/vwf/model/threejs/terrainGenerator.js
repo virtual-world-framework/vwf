@@ -257,6 +257,7 @@ new (function(){
 		var data = {};
 		data.vertices = vertices;
 		mesh.updateMatrix();
+		
 		data.matrix = mesh.matrix.clone().elements;
 		
 		this.sendTerrainRequest(data,mesh,cb);

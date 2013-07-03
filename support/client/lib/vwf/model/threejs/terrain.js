@@ -248,7 +248,7 @@
 				if(hit && hit[0])
 				height = hit[0].point[2];
 				var minRes = Math.pow(2,Math.floor(Math.log(Math.max(1.0,campos.z - height))/Math.LN2)-1);
-			//	minTileSize = Math.max(minRes,totalmintilesize);
+				minTileSize = Math.max(minRes,totalmintilesize);
 				var maxRes = Math.pow(2,Math.floor(Math.log(campos.z)/Math.LN2)+4);
 				if((this.containingList.indexOf(this.quadtree.containing([x,y])) == -1 || this.currentMinRes != minTileSize))
 				{
@@ -485,7 +485,7 @@
 						e.material.uniforms.blendPercent.value = 1;
 						var fade = function()
 						{
-							e.material.uniforms.blendPercent.value -= .1;
+							e.material.uniforms.blendPercent.value -= .1 * window.deltaTime/100;
 							if(e.material.uniforms.blendPercent.value > 0)
 							{
 								e.fadeHandle = window.requestAnimationFrame(fade);
@@ -558,7 +558,7 @@
 								var fade = function()
 								{
 									
-									o.material.uniforms.blendPercent.value += .1;
+									o.material.uniforms.blendPercent.value += .1 * window.deltaTime/100;
 									if(o.material.uniforms.blendPercent.value < 1)
 									{
 										window.requestAnimationFrame(fade);

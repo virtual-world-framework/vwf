@@ -272,6 +272,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             sceneNode.frameCount++;
 				var now = ( window.performance !== undefined && window.performance.now !== undefined ) ? window.performance.now() : time;
 			var timepassed = now - sceneNode.lastTime;
+			window.deltaTime = timepassed;
 			if(_SceneManager)
 				_SceneManager.update(timepassed);
 			var pss = GetParticleSystems(sceneNode.threeScene);
@@ -363,9 +364,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			renderer.clear(false,true,false);
 			cam.near = cam.far;
 			cam.far = far * 10;
-			cam.updateProjectionMatrix();
-			renderer.render(scene,cam);
-			renderer.clear(false,true,false);
+		//	cam.updateProjectionMatrix();
+		//	renderer.render(scene,cam);
+		//	renderer.clear(false,true,false);
 			cam.near = near;
 			cam.far = far;
 			cam.updateProjectionMatrix();

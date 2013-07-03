@@ -56,11 +56,12 @@ function TileCache()
 						" float z = mix(everyOtherZ,position.z,blendPercent);\n"+
 						"wN = mix(everyOtherNormal,normal,blendPercent);\n"+
 						"if(edgeblend == 1.0) {z=everyOtherZ;wN = everyOtherNormal; }\n"+
+						
 						"n = normalMatrix *  wN\n;"+
 						"n = normalize(n);\n"+
 						"   vec4 mvPosition = modelViewMatrix * vec4( position.x,position.y,z, 1.0 );\n"+
 					
-					//	"debug = debugColor;\n"+
+						"debug = wN;\n"+
 						"   gl_Position = projectionMatrix * mvPosition;\n"+
 						"}    \n";
 						var fragShader_default_start = 
@@ -126,7 +127,7 @@ function TileCache()
 						
 						
 						"void main() {\n"+
-						"	vec3 nn = normalize(viewMatrix * vec4(wN,0.0)).xyz;\n"+
+						"	vec3 nn = (viewMatrix * normalize(vec4(wN,0.0))).xyz;\n"+
 						"	vec3 light = vec3(0.0,0.0,0.0);\n"+
 						"	vec4 ambient = vec4(0.5,0.5,0.5,1.0);\n"+
 						

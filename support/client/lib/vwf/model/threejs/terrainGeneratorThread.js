@@ -30,6 +30,7 @@ this.normals = [];
 this.everyOtherZ = [];
 this.everyOtherNormal = [];
 this.normals = [];
+this.normalsL2 = [];
 this.heights = [];
 this.generateTerrainSimWorker = function(datain,buffers)
 {
@@ -50,7 +51,8 @@ this.generateTerrainSimWorker = function(datain,buffers)
 	}
 	
 	
-	var 	vertoffset = 10;
+	var 	vertoffset = 4 * datain.matrix[0];
+		vertoffset2 = vertoffset * 2;
 			var invmat = new THREE.Matrix4();
 			
 			invmat = invmat.getInverse(matrix.clone().setPosition(new THREE.Vector3()));
@@ -59,6 +61,7 @@ this.generateTerrainSimWorker = function(datain,buffers)
 			invmat.elements[14] = 0;
 			var res = Math.floor(Math.sqrt(vertices.length));
 			normals.length=0;
+			normalsL2.length=0;
 			heights.length=0;
 			
 	
@@ -68,6 +71,11 @@ this.generateTerrainSimWorker = function(datain,buffers)
 					normals[j] = [];
 				else
 					normals[j].length = 0;
+					
+				if(!normalsL2[j])
+					normalsL2[j] = [];
+				else
+					normalsL2[j].length = 0;
 					
 				if(!heights[j])
 					heights[j] = [];
@@ -85,9 +93,17 @@ this.generateTerrainSimWorker = function(datain,buffers)
 					var verty0 = new THREE.Vector3(vertn.x,vertn.y-vertoffset,vertn.z);
 					var vertx1 = new THREE.Vector3(vertn.x+vertoffset,vertn.y,vertn.z);
 					var verty1 = new THREE.Vector3(vertn.x,vertn.y+vertoffset,vertn.z);
-					var vert11 = new THREE.Vector3(vertn.x,vertn.y+vertoffset,vertn.z);
+					var vert11 = new THREE.Vector3(vertn.x+vertoffset,vertn.y+vertoffset,vertn.z);
 					var vert00 = new THREE.Vector3(vertn.x,vertn.y+vertoffset,vertn.z);
-					var verts = [vertn,vertx0,verty0,vertx1,verty1,vert11,vert00];
+					
+					var vertx02 = new THREE.Vector3(vertn.x-vertoffset2,vertn.y,vertn.z);
+					var verty02 = new THREE.Vector3(vertn.x,vertn.y-vertoffset2,vertn.z);
+					var vertx12 = new THREE.Vector3(vertn.x+vertoffset2,vertn.y,vertn.z);
+					var verty12 = new THREE.Vector3(vertn.x,vertn.y+vertoffset2,vertn.z);
+					var vert112 = new THREE.Vector3(vertn.x,vertn.y+vertoffset2,vertn.z);
+					var vert002 = new THREE.Vector3(vertn.x+vertoffset2,vertn.y+vertoffset2,vertn.z);
+					
+					var verts = [vertn,vertx0,verty0,vertx1,verty1,vert11,vert00,vertx02,verty02,vertx12,verty12,vert112,vert002];
 					var norms = [];
 					for(var k = 0; k < verts.length; k++)
 					{
@@ -95,24 +111,43 @@ this.generateTerrainSimWorker = function(datain,buffers)
 						var vert = verts[k].clone();
 						var vert2 = verts[k].clone();
 						var vert3 = verts[k].clone();
-						vert2.x += vertoffset;
-						vert3.y += vertoffset;
+						if(k < 6)
+						{
+							vert2.x += vertoffset;
+							vert3.y += vertoffset;
+						}
+						else
+						{
+							vert2.x += vertoffset2;
+							vert3.y += vertoffset2;
+						}
 						var z1 = this.terrainAlgorithm.displace(vert,matrix);
 						var z2 = this.terrainAlgorithm.displace(vert2,matrix);
 						var z3 = this.terrainAlgorithm.displace(vert3,matrix);
 						
-						var n = new THREE.Vector3((z1-z2),(z1-z3),vertoffset)
+						var n;
+						if(k < 6)
+							n = new THREE.Vector3((z1-z2),(z1-z3),vertoffset);
+						else
+							n = new THREE.Vector3((z1-z2),(z1-z3),vertoffset2);
+						n.normalize();
 						norms.push(n);
 						verts[k].z = z1;
 					}
 					vertices[i].z = vertn.z
 					//var n = vertn.clone().sub(vertx).cross(vertn.clone().sub(verty)).normalize();
 					var n = norms[1].add(norms[2]).add(norms[3]).add(norms[4]).add(norms[5]);
-					n = n.multiplyScalar(1/6);
+					n = n.multiplyScalar(1/5);
 					n.normalize();
+					
+					var n2 = norms[6].add(norms[7]).add(norms[8]).add(norms[9]).add(norms[10]);
+					n2 = n2.multiplyScalar(1/5);
+					n2.normalize();
 					//n = n.applyMatrix4(invmat);
-					n.normalize();
+					
+					
 					normals[j][l] = n;
+					normalsL2[j][l] = n2;
 					heights[j][l] = vertn.z;
 				}	
 			}
@@ -123,13 +158,7 @@ this.generateTerrainSimWorker = function(datain,buffers)
 				for(var l = 0; l < res; l++)
 				{
 					//remove when not perect stitching
-					//if(l ==0 || j == 0 || j == res-3 || l == res-3)
-					//{
-					//	
-					//	everyOtherNormal[j * res + l] = normals[j][l];
-					//	everyOtherZ[j * res + l]  = heights[j][l];
-					//}
-					//else
+					
 					{
 						if(l % 2 ==1 && j % 2 !=1)
 						{
@@ -138,8 +167,8 @@ this.generateTerrainSimWorker = function(datain,buffers)
 							var z = (z00+ z11)/2;
 							
 							
-							var n00 = normals[j-0 >= 0? j-0 : j][l+1 < res? l+1 : l];
-							var n11 = normals[j+0 < res? j+0 : j][l-1 >= 0? l-1 : l];
+							var n00 = normalsL2[j-0 >= 0? j-0 : j][l+1 < res? l+1 : l];
+							var n11 = normalsL2[j+0 < res? j+0 : j][l-1 >= 0? l-1 : l];
 							
 							
 							var norm = n00.clone().add(n11).multiplyScalar(.5).normalize();
@@ -154,8 +183,8 @@ this.generateTerrainSimWorker = function(datain,buffers)
 							var z = (z00+ z11)/2;
 							
 							
-							var n00 = normals[j-1 >= 0? j-1 : j][l+0 < res? l+0 : l];
-							var n11 = normals[j+1 < res? j+1 : j][l-0 >= 0? l-0 : l];
+							var n00 = normalsL2[j-1 >= 0? j-1 : j][l+0 < res? l+0 : l];
+							var n11 = normalsL2[j+1 < res? j+1 : j][l-0 >= 0? l-0 : l];
 							
 							
 							var norm = n00.clone().add(n11).multiplyScalar(.5).normalize();
@@ -172,10 +201,10 @@ this.generateTerrainSimWorker = function(datain,buffers)
 							var z = (z00+ z11 + z001 + z111)/4;
 							
 							
-							var n00 = normals[j-1 >= 0? j-1 : j][l+1 < res? l+1 : l];
-							var n11 = normals[j+1 < res? j+1 : j][l-1 >= 0? l-1 : l];
-							var n001 = normals[j+1 < res? j+1 : j][l+1 < res? l+1 : l];
-							var n111 = normals[j-1 >= 0? j-1 : j][l-1 >= 0? l-1 : l];
+							var n00 = normalsL2[j-1 >= 0? j-1 : j][l+1 < res? l+1 : l];
+							var n11 = normalsL2[j+1 < res? j+1 : j][l-1 >= 0? l-1 : l];
+							var n001 = normalsL2[j+1 < res? j+1 : j][l+1 < res? l+1 : l];
+							var n111 = normalsL2[j-1 >= 0? j-1 : j][l-1 >= 0? l-1 : l];
 							
 							var norm = n00.clone().add(n11).add(n111).add(n001).multiplyScalar(.25).normalize();
 							
@@ -186,9 +215,23 @@ this.generateTerrainSimWorker = function(datain,buffers)
 						{
 						
 						
-							everyOtherNormal[j * res + l] = normals[j][l];
+							everyOtherNormal[j * res + l] = normalsL2[j][l];
 							everyOtherZ[j * res + l]  = heights[j][l];
 						}
+						
+						if(vertices[j * res + l].x > .95 || vertices[j * res + l].x < .05 || vertices[j * res + l].y > .95 || vertices[j * res + l].y < .05)
+						{
+						var n00 = normalsL2[j-1 >= 0? j-1 : j][l+1 < res? l+1 : l];
+							var n11 = normalsL2[j+1 < res? j+1 : j][l-1 >= 0? l-1 : l];
+							var n001 = normalsL2[j+1 < res? j+1 : j][l+1 < res? l+1 : l];
+							var n111 = normalsL2[j-1 >= 0? j-1 : j][l-1 >= 0? l-1 : l];
+							
+							var norm = n00.clone().add(n11).add(n111).add(n001).multiplyScalar(.25).normalize();
+						everyOtherNormal[j * res + l] = norm;;
+						//everyOtherZ[j * res + l]  = heights[j][l];
+						}
+						
+					
 					}
 					
 				}
