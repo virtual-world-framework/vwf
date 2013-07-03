@@ -7,6 +7,7 @@ div.wrapper {
 	position:absolute;
 	bottom:30px;
 	pointer-events:none;
+	-webkit-transform: rotateY(180deg);
 }
 div.toolstyle {
 	border-style:solid;

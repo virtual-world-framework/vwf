@@ -127,6 +127,7 @@
 
             var videosAdded = 1;
             var fullScreenVideo = false;
+            var fullScreenVideoDiv = undefined;
             function createVideoElement( value ) {
                 var $container;
                 var divId = value.name + videosAdded++;
@@ -165,6 +166,17 @@
                             "</div>"
                         );
                         fullScreenVideo = true;
+                        fullScreenVideoDiv = videoId;
+                        // Create a second mini video window for when zoomed in on the earth
+                        $container.append(
+                            "<div id='sm-"+ divId + "'>" +
+                                "<video class='vwf-webrtc-video' id='sm-" + videoId +
+                                    "' width='320' height='240' src='" + value.url + 
+                                    "' loop='loop' autoplay = true" +
+                                    " style='position: absolute; right: 0px; top: 0px; z-index: 16; visibility: hidden'>" +
+                                "</video>" +
+                            "</div>"
+                        );
                     } else {
                         $container.append(
                             "<div id='"+ divId + "'>" +
@@ -182,6 +194,17 @@
 
             }
 
+            function swapVideo(showMain) {
+                if ( fullScreenVideo ) {
+                    if ( showMain ) {
+                        $('#'+fullScreenVideoDiv).css('visibility', 'visible');
+                        $('#sm-'+fullScreenVideoDiv).css('visibility', 'hidden');
+                    } else {
+                        $('#'+fullScreenVideoDiv).css('visibility', 'hidden');
+                        $('#sm-'+fullScreenVideoDiv).css('visibility', 'visible');
+                    }
+                }
+            }
 
           function setColor(color) {
             var rootID = vwf_view.kernel.find( "", "/" )[0];

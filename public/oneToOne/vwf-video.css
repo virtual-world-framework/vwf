@@ -1,4 +1,4 @@
 .vwf-webrtc-video {
     position: absolute;
-    left: 0;
+    -webkit-transform: rotateY(180deg);
 }
