@@ -324,7 +324,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
     function initScene( sceneNode ) {
     
-        self = this;
         var lastPickTime = 0;
         
         function GetParticleSystems(node,list)
