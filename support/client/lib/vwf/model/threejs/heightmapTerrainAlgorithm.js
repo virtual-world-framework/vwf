@@ -7,34 +7,93 @@ function heightmapTerrainAlgorithm()
 		console.log('data received');
 		this.height = data.height;
 		this.width = data.width;
+		this.min = data.min;
+		importScripts('simplexNoise.js');
+		importScripts('Rc4Random.js');
+		this.SimplexNoise = new SimplexNoise((new Rc4Random(1 +"")).random);
 	}
 	//This can generate data on the main thread, and it will be passed to the coppies in the thread pool
 	this.poolInit = function(cb)
 	{	
 		
-		canvas = document.createElement('canvas');
-		
-		var img = new Image();
-		img.src = 'terrain/deathvally.jpeg';
-		img.onload = function()
+		this.type = 'bt';
+		if(this.type == 'img')
 		{
+			canvas = document.createElement('canvas');
 			
-			this.height = img.naturalHeight;
-			this.width = img.naturalWidth;
-			canvas.height = this.height;
-			canvas.width = this.width;
-			var context = canvas.getContext('2d');
-			context.drawImage(img, 0, 0);
-			var data = context.getImageData(0, 0, this.height, this.width).data;
-			
-			var array = new Uint8Array(this.height*this.width);
-			for(var i =0; i < this.height*this.width * 4; i+=4)
-				array[Math.floor(i/4)] = Math.pow(data[i]/255.0,2.2) * 255;
-			cb({height:this.height,width:this.width,data:array});
+			var img = new Image();
+			img.src = 'terrain/deathvally.jpeg';
+			img.onload = function()
+			{
+				
+				this.height = img.naturalHeight;
+				this.width = img.naturalWidth;
+				canvas.height = this.height;
+				canvas.width = this.width;
+				var context = canvas.getContext('2d');
+				context.drawImage(img, 0, 0);
+				var data = context.getImageData(0, 0, this.height, this.width).data;
+				
+				var array = new Uint8Array(this.height*this.width);
+				for(var i =0; i < this.height*this.width * 4; i+=4)
+					array[Math.floor(i/4)] = Math.pow(data[i]/255.0,2.2) * 255;
+				cb({height:this.height,width:this.width,min:0,data:array});
+			}
+		}
+		if(this.type == 'bt')
+		{
+			var buff;
+			var self2 = this;
+			var xhr = new XMLHttpRequest();
+			xhr.responseType = 'arraybuffer';
+			xhr.onload = function(e) {
+				if (xhr.status === 200) {
+				  buff = xhr.response;
+				  self2.parseBT(buff,cb);
+				} else
+				{
+					cb(null);
+				}
+			};
+			xhr.open('GET', "terrain/deathvally.bt");
+			xhr.send();
 		}
 		
 		//signal the pool that we need an async startup
 		return false;
+	}
+	this.parseBT = function(arraybuf,cb)
+	{
+		
+		var DV = new DataView(arraybuf);
+		this.width = DV.getInt32(10,true);
+		this.height = DV.getInt32(14,true);
+		var dataSize = DV.getInt16(18,true);
+		var isfloat = DV.getInt16(20,true);
+		var scale = DV.getFloat32(62,true);
+		var data;
+		if(isfloat == 1)
+		{
+			data = new Float32Array(this.width*this.height);
+		}
+		else
+		{
+			data = new Int16Array(this.width*this.height);
+		}
+		var min = Infinity;
+		for(var i =0; i < this.width*this.height; i++)
+		{
+			if(isfloat == 1)
+			{
+				data[i] = DV.getFloat32(256 + 4 * i,true);			
+			}else
+			{
+				data[i] = DV.getInt16(256 + 2 * i,true);
+			}
+			if(data[i] < min)
+				min = data[i];
+		}
+		cb({height:this.height,width:this.width,min:min,data:data});
 	}
 	//This is the settings data, set both main and pool side
 	this.setAlgorithmData = function(seed)
@@ -87,7 +146,10 @@ function heightmapTerrainAlgorithm()
 	//This is the displacement function, which is called in paralell by the thread pool
 	this.displace= function(vert)
 	{
-		return this.sampleBiCubic((vert.x+ 2500) / 5000 ,(vert.y + 2500) / 5000  ) * 1.5 - 30|| 0;
+		var z = this.SimplexNoise.noise2D((vert.x)/100,(vert.y)/100) * 4.5;
+		z += this.SimplexNoise.noise2D((vert.x)/300,(vert.y)/300) * 4.5;
+		z += this.SimplexNoise.noise2D((vert.x)/10,(vert.y)/10) * 0.5;
+		return this.sampleBiCubic((vert.x+ 2500) / 5000 ,(vert.y + 2500) / 5000  ) * 1.0 - this.min + z|| 0;
 	}
 	this.at = function(x,y)
 	{

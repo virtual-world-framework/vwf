@@ -485,7 +485,7 @@
 						e.material.uniforms.blendPercent.value = 1;
 						var fade = function()
 						{
-							e.material.uniforms.blendPercent.value -= .1 * window.deltaTime/100;
+							e.material.uniforms.blendPercent.value -= .1 * window.deltaTime/30;
 							if(e.material.uniforms.blendPercent.value > 0)
 							{
 								e.fadeHandle = window.requestAnimationFrame(fade);
@@ -558,7 +558,7 @@
 								var fade = function()
 								{
 									
-									o.material.uniforms.blendPercent.value += .1 * window.deltaTime/100;
+									o.material.uniforms.blendPercent.value += .1 * window.deltaTime/30;
 									if(o.material.uniforms.blendPercent.value < 1)
 									{
 										window.requestAnimationFrame(fade);
