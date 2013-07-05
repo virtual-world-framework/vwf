@@ -24,7 +24,8 @@ properties:
     set: |
       this.minDrawDistance = value;
       this.minDistanceSquared = value * value;  
-    value: 80000   
+    value: 80000
+  markupAdded: 
 methods:
   createClient:
   locationCaptured:
@@ -50,7 +51,19 @@ children:
         value: "orbit"
     methods:
       clear: |
-        this.clearing();
+        if ( this.parent.markupAdded ) {
+          var childToDelete = undefined;
+          for ( var i = 0; i < this.parent.markupAdded.length; i++ ) {
+            for ( var j = 0; j < this.parent.children.length; j++ ) {
+              if ( this.parent.children[j].id == this.parent.markupAdded[i] ) {
+                childToDelete = this.parent.children[j];
+                this.parent.children.delete( childToDelete );
+                break;
+              }
+            }
+          }
+          this.parent.markupAdded = [];
+        }
     events:
       selectedColorChanged:
       inputModeChanged:
@@ -81,6 +94,7 @@ scripts:
       console.info( "=============== cesium-webrtc.initialize ===============" );
       this.lastDrawPoint = undefined;
       this.polyLineCollection = undefined;
+      this.markupAdded = [];
       
       // these properties should be getting set 
       // by the initialization process, but it's not happening
@@ -261,11 +275,14 @@ scripts:
             this.children.create( "lineCollection" + len, collection, function( child ) {
               self.polyLineCollection = child;
               child.children.create( "line0", line );
+              this.markupAdded.push( child.id );
             } );
 
           } else {
             len = this.polyLineCollection.children.length;
-            this.polyLineCollection.children.create( "line" + len, line );             
+            this.polyLineCollection.children.create( "line" + len, line, function( child ) {
+              this.parent.markupAdded.push( child.id );
+            } );
           }
           this.lastDrawPoint = { pickInfo: pickInfo };
         }
@@ -282,6 +299,7 @@ scripts:
       this.children.create( "pushPin" + len, bbDef, function( child ) {
         child.position = pos;
         child.color = self.toolbar.selectedColor;
+        this.markupAdded.push( child.id );
       } );
 
     }
