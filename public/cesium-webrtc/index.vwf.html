@@ -17,6 +17,7 @@
         <title>Cesium VWF Demo</title>
         <link href="vwf-video.css" rel="stylesheet" type="text/css" />
         <link href="toolbar.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" type="text/css" href="bootstrap.css" />
         <style>
           @import url( CesiumWidget.css );
           body {
@@ -193,14 +194,14 @@
 
           function highlightColor( color ) {
             var rootID = vwf_view.kernel.find( "", "/" )[0];
-            document.getElementById('black').style.border = "2px solid black";
-            document.getElementById('red').style.border = "2px solid black";
-            document.getElementById('yellow').style.border = "2px solid black";
-            document.getElementById('green').style.border = "2px solid black";
-            document.getElementById('blue').style.border = "2px solid black";
+            document.getElementById('black').style.border = "none";
+            document.getElementById('red').style.border = "none";
+            document.getElementById('yellow').style.border = "none";
+            document.getElementById('green').style.border = "none";
+            document.getElementById('blue').style.border = "none";
 
             if ( document.getElementById( color ) ) {
-                document.getElementById( color ).style.border = "3px solid orange";
+                document.getElementById( color ).style.border = "1px solid white";
             }
             var vColor;
             switch( color ) {
@@ -231,11 +232,11 @@
           }
 
           function highlightMode(mode) {
-            document.getElementById( 'orbit' ).style.border = "2px solid black";
-            document.getElementById( 'draw' ).style.border = "2px solid black";
-            document.getElementById( 'pindrop' ).style.border = "2px solid black";
+            document.getElementById( 'orbit' ).style.border = "none";
+            document.getElementById( 'draw' ).style.border = "none";
+            document.getElementById( 'pindrop' ).style.border = "none";
 
-            document.getElementById( mode ).style.border = "3px solid red";
+            document.getElementById( mode ).style.border = "1px solid red";
           }
 
           function clearOverlay() {
@@ -267,15 +268,15 @@
     <body>
         <div id="wrapper" class="wrapper">
           <div class="toolstyle" id="toolbar">
-            <img id="orbit" src="images/spin.png" style="border:3px solid red" alt="orbit" onclick="setMode('orbit')"/>
-            <img id="draw" src="images/draw.png" style="border:2px solid black" alt="draw" onclick="setMode('draw')"/>
-            <img id="pindrop" src="images/pindrop.png" style="border:2px solid black" alt="pindrop" onclick="setMode('pindrop')"/>
-            <img id="black" src="images/black.png" style="border:3px solid orange" alt="black" onclick="setColor('black')"/>
-            <img id="red" src="images/red.png" style="border:2px solid black" alt="red" onclick="setColor('red')"/>
-            <img id="yellow" src="images/yellow.png" style="border:2px solid black" alt="yellow" onclick="setColor('yellow')"/>
-            <img id="green" src="images/green.png" style="border:2px solid black" alt="green" onclick="setColor('green')"/>
-            <img id="blue" src="images/blue.png" style="border:2px solid black" alt="blue" onclick="setColor('blue')"/>
-            <span id="clear"><img src="images/clear.png" style="border:2px solid black" alt="clear" onclick="clearOverlay()"/></span>
+            <i id="orbit" class="icon-large icon-globe icon-white" alt="orbit" onclick="setMode('orbit')" />
+            <i id="draw" class="icon-pencil icon-white" alt="draw" onclick="setMode('draw')" />
+            <i id="pindrop" class="icon-map-marker icon-white" alt="pindrop" onclick="setMode('pindrop')" />
+            <img id="black" src="images/black.png" alt="black" onclick="setColor('black')" />
+            <img id="red" src="images/red.png" alt="red" onclick="setColor('red')" />
+            <img id="yellow" src="images/yellow.png" alt="yellow" onclick="setColor('yellow')" />
+            <img id="green" src="images/green.png" alt="green" onclick="setColor('green')" />
+            <img id="blue" src="images/blue.png" alt="blue" onclick="setColor('blue')" />
+            <img id="clear" src="images/clear.png" alt="clear" onclick="clearOverlay()" />
           </div>
         </div>
         <div class="vwf-main-content" align="center"></div>
