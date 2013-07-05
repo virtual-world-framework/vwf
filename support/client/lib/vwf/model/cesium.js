@@ -428,8 +428,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
          
         // -- deletingNode -------------------------------------------------------------------------
 
-        //deletingNode: function( nodeID ) {
-        //},
+        deletingNode: function( nodeID ) {
+            if ( this.state.nodes[ nodeID ] ) {
+                var node = this.state.nodes[ nodeID ];
+                var scene = this.state.scenes[ node.sceneID ];
+                
+                var sceneNode = findSceneNode.call( this, node );
+ 
+                if ( node.bbCollection ) {
+                    sceneNode.scene.getPrimitives().remove(node.bbCollection);
+                }
+
+                delete this.state.nodes[ nodeID ];
+            }
+        },
 
         // -- addingChild ------------------------------------------------------------------------
         
