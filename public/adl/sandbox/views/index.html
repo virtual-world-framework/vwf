@@ -9,18 +9,18 @@
 		</div>
 		<div class="span12">
 			<div class="row">
-				<div class="span1 offset8" data-bind="visible:user().isLoggedIn">
-					<a href="{{root}}/create" class="coldstate" id="newinstancebutton"><img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"/></a>
+				<div class="span1 offset8">
+					<a href="{{root}}/create" class="coldstate" id="newinstancebutton" data-bind="visible:user().isLoggedIn"><img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"/></a>
 				</div>
 				<div class="span3">
-					<input id="filter" class="span3" style="width:89%; float:left;" type="text" placeholder="Filter Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
+					<input id="filter" class="span3" style="width:89%; float:right;" type="text" placeholder="Filter Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
 				</div>
 			</div>
 			<div class="row" id="activeRow" data-bind="foreach:displayWorldObjects">				
 				<div data-bind="visible:isVisible" class="span3">
 					<div class="worldBox">
 						<div>
-							<a data-bind="text:$root.getShorterStr(title, 20)">Title</a>
+							<a data-bind="attr:{href:'{{root}}/'+id}, text:$root.getShorterStr(title, 20)" href="">Title</a>
 							<span class="owner" data-bind="text:' - ' + owner"></span>
 						</div>
 						<div>								
@@ -40,11 +40,11 @@
 					</div>
 				</div>
 			</div>
-			<div class="row">
-				<div class="span1 offset5">
+			<div class="row" style="margin-bottom:45px;">
+				<div class="span1 offset4" style="text-align:right;">
 					<a class="btn" data-bind="click:getPreviousPage, css:previousDisabled()?'disabled btn':'btn'"><i class="icon-chevron-left"></i></a>
 				</div>				
-				<div class="span1">
+				<div class="span1 offset2">
 					<a class="btn" data-bind="click:getNextPage, css:nextDisabled()?'disabled btn':'btn'"><i class="icon-chevron-right"></i></a>
 				</div>
 			</div>

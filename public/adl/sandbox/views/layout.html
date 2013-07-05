@@ -23,10 +23,11 @@
 	<script type="text/javascript" src="{{root}}/vwf/view/editorview/sha256.js"></script>
 
     <script type="text/javascript">
-		var filter = '';
+		"use strict";
+		var filter = ''
 		var root = '{{root}}';
 		var pageIndex = 0;
-		var pageLength = 12;
+		var pageLength = 8;
 		var vwfPortalModel = new function(){
 			var self = this;
 			self.getShorterStr = function(a, length){
