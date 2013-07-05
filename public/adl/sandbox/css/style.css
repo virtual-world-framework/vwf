@@ -17,6 +17,7 @@ a{
 	margin-bottom: 21px;
 	border-radius: 8px;
 	padding: 5px 5px 9px 5px;
+	max-height: 165px;
 }
 
 .activeWorld{
@@ -139,6 +140,7 @@ a{
 }
 .description
 {
+	color: gray;
 	margin-top: 1em;
 }
 .owner
