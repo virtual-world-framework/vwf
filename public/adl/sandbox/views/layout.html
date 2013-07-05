@@ -54,6 +54,10 @@
 					self.getPage(-1);
 				}
 			};
+			
+			self.previousDisabled = ko.observable(true);
+			self.nextDisabled = ko.observable(true);
+			
 			self.getPage = function(i){
 				if(i == 0){
 				
@@ -64,9 +68,19 @@
 					self.displayWorldObjects(self.worldObjects.slice(pageIndex*pageLength, (pageIndex+1)*pageLength));
 				}
 				
+				if((pageIndex+1)*pageLength < self.worldObjects().length){
+					self.nextDisabled(false);
+				}
+				
+				else self.nextDisabled(true);
+				
+				if(pageIndex > 0){
+					self.previousDisabled(false);
+				}
+				else self.previousDisabled(true);
+				
 			};
-			self.previousDisabled = ko.observable(true),
-			self.nextDisabled = ko.observable(true)
+
 		};
 		
 		function checkFilter(textArr)
@@ -115,10 +129,9 @@
 						e[keys[i]].lastUpdate = e[keys[i]].lastUpdate?e[keys[i]].lastUpdate:(new Date()).toString();
 						vwfPortalModel.worldObjects()[saveIndex] = e[keys[i]];	
 					}
-					
-					vwfPortalModel.getPage(0);
 				}
 				
+				vwfPortalModel.getPage(0);
 				vwfPortalModel.worldObjects.valueHasMutated();
 				setTimeout(function(){$(".accordion").css("visibility","visible")}, 300);
 				
