@@ -207,84 +207,88 @@
                 }
             }
 
-          function setColor(color) {
-            var rootID = vwf_view.kernel.find( "", "/" )[0];
-            vwf_view.kernel.find( rootID, "toolbar", function( toolbarID ) {
-              vwf_view.kernel.setProperty( toolbarID, "selectedColor", color );
-            });
-            highlightColor( color );
-          }
-
-          function highlightColor( color ) {
-            var rootID = vwf_view.kernel.find( "", "/" )[0];
-            document.getElementById('black').style.border = "none";
-            document.getElementById('red').style.border = "none";
-            document.getElementById('yellow').style.border = "none";
-            document.getElementById('green').style.border = "none";
-            document.getElementById('blue').style.border = "none";
-
-            if ( document.getElementById( color ) ) {
-                document.getElementById( color ).style.border = "1px solid white";
+            function setColor(color) {
+                var rootID = vwf_view.kernel.find( "", "/" )[0];
+                vwf_view.kernel.find( rootID, "toolbar", function( toolbarID ) {
+                    vwf_view.kernel.setProperty( toolbarID, "selectedColor", color );
+                });
+                highlightColor( color );
             }
-            var vColor;
-            switch( color ) {
-              case "red":
-                vColor = [ 255, 0, 0 ];
-                break;
-              case "yellow":
-                vColor = [ 255, 255, 0 ];
-                break;
-              case "green":
-                vColor = [ 0, 255, 0 ];
-                break;
-              case "blue":
-                  vColor = [ 0, 0, 255 ];
-                break;
-              default:
-                vColor = [ 0, 0, 0 ];
-                break;
+
+            function highlightColor( color ) {
+                var rootID = vwf_view.kernel.find( "", "/" )[0];
+                document.getElementById('black').style.border = "none";
+                document.getElementById('red').style.border = "none";
+                document.getElementById('yellow').style.border = "none";
+                document.getElementById('green').style.border = "none";
+                document.getElementById('blue').style.border = "none";
+
+                if ( document.getElementById( color ) ) {
+                    document.getElementById( color ).style.border = "1px solid white";
+                }
+                var vColor;
+                switch( color ) {
+                  case "red":
+                    vColor = [ 255, 0, 0 ];
+                    break;
+                  case "yellow":
+                    vColor = [ 255, 255, 0 ];
+                    break;
+                  case "green":
+                    vColor = [ 0, 255, 0 ];
+                    break;
+                  case "blue":
+                      vColor = [ 0, 0, 255 ];
+                    break;
+                  default:
+                    vColor = [ 0, 0, 0 ];
+                    break;
+                }
             }
-          }
 
-          function setMode(mode) {
-            var rootID = vwf_view.kernel.find( "", "/" )[0];
-            vwf_view.kernel.find( rootID, "toolbar", function(toolbarID) {
-              vwf_view.kernel.setProperty( toolbarID, "inputMode", mode );
+            function setMode(mode) {
+                var rootID = vwf_view.kernel.find( "", "/" )[0];
+                vwf_view.kernel.find( rootID, "toolbar", function(toolbarID) {
+                    vwf_view.kernel.setProperty( toolbarID, "inputMode", mode );
+                });
+                highlightMode(mode);
+            }
+
+            function highlightMode(mode) {
+                document.getElementById( 'orbit' ).style.border = "none";
+                document.getElementById( 'draw' ).style.border = "none";
+                document.getElementById( 'pindrop' ).style.border = "none";
+
+                document.getElementById( mode ).style.border = "1px solid red";
+            }
+
+            function clearOverlay() {
+                var rootID = vwf_view.kernel.find( "", "/" )[0];
+                vwf_view.kernel.find( rootID, "toolbar", function(toolbarID) {
+                  vwf_view.kernel.callMethod( toolbarID, "clear" );
+                });
+                setColor('black');
+                setMode('orbit');
+            }
+
+            function calibrate() {
+                
+            }
+
+            jQuery('#toolbar').mouseleave( function(evt) { 
+                evt.stopPropagation(); 
+                // $('#toolbar').stop().delay(200).animate({ opacity:0.0 }, 1500);
+                return false; 
+            }); 
+
+            jQuery('#toolbar').mouseenter( function(evt) { 
+                evt.stopPropagation(); 
+                //if(!mousePressed) 
+                //{
+                  // $('#toolbar').stop().delay(200).animate({ opacity:0.8 }, 1500);
+                //}
+                return false; 
             });
-            highlightMode(mode);
-          }
-
-          function highlightMode(mode) {
-            document.getElementById( 'orbit' ).style.border = "none";
-            document.getElementById( 'draw' ).style.border = "none";
-            document.getElementById( 'pindrop' ).style.border = "none";
-
-            document.getElementById( mode ).style.border = "1px solid red";
-          }
-
-          function clearOverlay() {
-            var rootID = vwf_view.kernel.find( "", "/" )[0];
-            vwf_view.kernel.find( rootID, "toolbar", function(toolbarID) {
-              vwf_view.kernel.callMethod( toolbarID, "clear" );
-            });
-            setColor('black');
-            setMode('orbit');
-        }
-
-        jQuery('#toolbar').mouseleave( function(evt) { 
-            evt.stopPropagation(); 
-            // $('#toolbar').stop().delay(200).animate({ opacity:0.0 }, 1500);
-            return false; 
-        }); 
-
-        jQuery('#toolbar').mouseenter( function(evt) { 
-            evt.stopPropagation(); 
-            //if(!mousePressed) 
-            //{
-              // $('#toolbar').stop().delay(200).animate({ opacity:0.8 }, 1500);
-            //}
-            return false; 
-        });
 
         </script>
     </head>
@@ -299,7 +303,8 @@
             <img id="yellow" src="images/yellow.png" alt="yellow" onclick="setColor('yellow')" />
             <img id="green" src="images/green.png" alt="green" onclick="setColor('green')" />
             <img id="blue" src="images/blue.png" alt="blue" onclick="setColor('blue')" />
-            <img id="clear" src="images/clear.png" alt="clear" onclick="clearOverlay()" />
+            <button id="reset" class="btn btn-info" style="font-size:12px;padding-top:0px;padding-bottom:0px" onclick="clearOverlay()">Reset</button>
+            <button id="calibrate" class="btn btn-info" style="font-size:12px;padding-top:0px;padding-bottom:0px" onclick="calibrate()">Calibrate</button>
           </div>
         </div>
         <div class="vwf-main-content" align="center"></div>
