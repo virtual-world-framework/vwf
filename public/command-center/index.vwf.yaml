@@ -35,10 +35,214 @@ children:
     extends: http://vwf.example.com/node3.vwf
     source: joc/Chain_Lowpoly.DAE
     type: model/vnd.collada+xml
-  ClassroomChair:
+  ChairFrontRow1:
     extends: http://vwf.example.com/node3.vwf
-    source: joc/ClassroomChair.DAE
+    source: joc/ClassroomChairSingle.DAE
     type: model/vnd.collada+xml
+    properties:
+      translation: [0, 90, 0]
+      scale: 42
+  ChairFrontRow2:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [50, 90, 0]
+      scale: 42
+  ChairFrontRow3:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [100, 90, 0]
+      scale: 42
+  ChairFrontRow4:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [-50, 90, 0]
+      scale: 42
+  ChairFrontRow5:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [-100, 90, 0]
+      scale: 42
+  ChairFrontRow6:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [0, -37, 16]
+      scale: 42
+  ChairBackRow1:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [50, -37, 16]
+      scale: 42
+  ChairBackRow2:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [100, -37, 16]
+      scale: 42
+  ChairBackRow3:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [150, -37, 16]
+      scale: 42
+  ChairBackRow4:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [-50, -37, 16]
+      scale: 42
+  ChairBackRow5:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [-100, -37, 16]
+      scale: 42
+  ChairBackRow6:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [-150, -37, 16]
+      scale: 42
+  ChairBackRow7:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [200, -37, 16]
+      scale: 42
+  ChairBackRow8:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [250, -37, 16]
+      scale: 42
+  ChairBackRow9:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [-200, -37, 16]
+      scale: 42
+  ChairBackRow10:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [-250, -37, 16]
+      scale: 42
+  ChairRightRow1:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [160, 150, 0]
+      rotation: [0, 0, 1, 65]
+      scale: 42
+  ChairRightRow2:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [192, 215, 0]
+      rotation: [0, 0, 1, 65]
+      scale: 42
+  ChairRightRow3:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [224, 280, 0]
+      rotation: [0, 0, 1, 65]
+      scale: 42
+  ChairRightRow4:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [256, 345, 0]
+      rotation: [0, 0, 1, 65]
+      scale: 42
+  ChairRight1:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [272, 183, 0]
+      rotation: [0, 0, -1, 90]
+      scale: 42
+  ChairRight2:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [272, 260, 0]
+      rotation: [0, 0, -1, 90]
+      scale: 42 
+  ChairLeftRow1:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [-162, 152, 0]
+      rotation: [0, 0, -1, 65]
+      scale: 42
+  ChairLeftRow2:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [-195, 217, 0]
+      rotation: [0, 0, -1, 65]
+      scale: 42
+  ChairLeftRow3:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [-225, 285, 0]
+      rotation: [0, 0, -1, 65]
+      scale: 42
+  ChairLeftRow4:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [-255, 350, 0]
+      rotation: [0, 0, -1, 65]
+      scale: 42      
+  ChairLeft1:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [-272, 183, 0]
+      rotation: [0, 0, 1, 90]
+      scale: 42
+  ChairLeft2:
+    extends: http://vwf.example.com/node3.vwf
+    source: joc/ClassroomChairSingle.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [-272, 260, 0]
+      rotation: [0, 0, 1, 90]
+      scale: 42         
   closed_doors:
     extends: http://vwf.example.com/node3.vwf
     source: joc/closed_doors.DAE
