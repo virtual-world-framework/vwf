@@ -63,7 +63,7 @@ children:
             }
           }
           this.parent.markupAdded = [];
-          this.parent.camera.position = [ 0, -14261948, 11360974 ];
+          this.parent.camera.resetCamera();
         }
         this.clearing();
     events:
