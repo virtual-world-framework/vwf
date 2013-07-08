@@ -48,9 +48,11 @@
 			self.filterVal = ko.computed({
 				read:  function(){ return ''; }, 
 				write: function(str){ 
-					filter = str;
-					pageIndex = 0;
-					showStates(); 
+					if(filter != str){
+						filter = str;
+						pageIndex = 0;
+						showStates(); 
+					}
 				}	
 			}).extend({throttle:500});
 			
@@ -92,11 +94,15 @@
 		
 		function checkFilter(textArr)
 		{
-			for(var i = 0; i < textArr.length; i++){
-				if(textArr[i] && textArr[i].toLowerCase().indexOf(filter.toLowerCase()) != -1)
-					return true;
-			}
-			return false;	
+			if(filter != ""){
+				for(var i = 0; i < textArr.length; i++){
+					if(textArr[i] && textArr[i].toLowerCase().indexOf(filter.toLowerCase()) != -1)
+						return true;
+				}
+				return false;
+			}			
+			
+			else return true;
 		}
 		
 		function getFlatIdArr(resetHotstate){
