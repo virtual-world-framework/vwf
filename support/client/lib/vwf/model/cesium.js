@@ -527,19 +527,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     switch ( propertyName ) {
 
                         case "visible":
-                            if ( node.cesiumObj.setShow ) {
-                                node.cesiumObj.setShow( Boolean( propertyValue ) );
-                            } else {
+                            if ( node.cesiumObj.hasOwnProperty( propertyName ) ) {
                                 node.cesiumObj.show = Boolean( propertyValue );
+                            } else if ( node.cesiumObj.setShow ) {
+                                node.cesiumObj.setShow( Boolean( propertyValue ) );
                             }
                             break;
 
                         case "position":
-                            if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
-                                node.cesiumObj.position = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
-                            } else if ( node.cesiumObj instanceof Cesium.Camera ) {
-                                node.cesiumObj.position = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
-                                this.state.cameraInfo.position = node.cesiumObj.position;
+                            //console.info( "dist = " + ( Math.sqrt( (propertyValue[0] * propertyValue[0]) + (propertyValue[1] * propertyValue[1]) + (propertyValue[2] * propertyValue[2]) )  ) )
+                            if ( node.cesiumObj.hasOwnProperty( propertyName ) ) {
+                                node.cesiumObj.position = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );                                
+                                if ( node.cesiumObj instanceof Cesium.Camera ) {
+                                    this.state.cameraInfo.position = node.cesiumObj.position;
+                                }
                             } else if ( node.cesiumObj.setPosition ) {
                                 var pos = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
                                 node.cesiumObj.setPosition( pos );
