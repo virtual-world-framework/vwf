@@ -14,8 +14,8 @@ new (function(){
 		var everyOtherNormal =readers[3];
 		
 		var ai,aj,ac,bi,bj,bc,ci,cj,cc;
-		var res = Math.floor(Math.sqrt(geo.vertices.length));
-		 for(var i = 0; i < geo.faces.length; i++)
+		var res = mesh.res;
+		 for(var i = 0; i < (mesh.res - 3) * (mesh.res - 3) * 2; i++)
 		 {	
 			 ai = Math.floor(geo.faces[i].a/(res));
 			 aj = geo.faces[i].a % res ;
@@ -37,22 +37,61 @@ new (function(){
 			 geo.faces[i].vertexNormals[2].x =  normals[cc];
 			 geo.faces[i].vertexNormals[2].y =  normals[cc+1];
 			 geo.faces[i].vertexNormals[2].z =  normals[cc+2];
-		 }
+		}
 		
-		for(var i = 0; i < mesh.material.attributes.everyOtherNormal.value.length; i++)
+		 for(var i = (mesh.res - 3) * (mesh.res - 3) * 2; i < geo.faces.length; i++)
+		 {	
+			
+			 ai = Math.floor((geo.vertices[geo.faces[i].a].topedge || geo.faces[i].a)/(res));
+			 aj = geo.faces[i].a % res ;
+			 ac = (ai * res + aj) * 3;
+			 geo.faces[i].vertexNormals[0].x =  normals[ac];
+			 geo.faces[i].vertexNormals[0].y =  normals[ac+1];
+			 geo.faces[i].vertexNormals[0].z =  normals[ac+2];
+			 
+			 bi = Math.floor((geo.vertices[geo.faces[i].b].topedge || geo.faces[i].b)/(res));
+			 bj = geo.faces[i].b % res ;
+			 bc = (bi * res + bj) * 3;
+			 geo.faces[i].vertexNormals[1].x =  normals[bc];
+			 geo.faces[i].vertexNormals[1].y =  normals[bc+1];
+			 geo.faces[i].vertexNormals[1].z =  normals[bc+2];
+			 
+			 ci = Math.floor((geo.vertices[geo.faces[i].c].topedge || geo.faces[i].c)/(res));
+			 cj = geo.faces[i].c % res ;
+			 cc = (ci * res + cj) * 3;
+			 geo.faces[i].vertexNormals[2].x =  normals[cc];
+			 geo.faces[i].vertexNormals[2].y =  normals[cc+1];
+			 geo.faces[i].vertexNormals[2].z =  normals[cc+2];
+		}
+		
+		for(var i = 0; i < mesh.res * mesh.res; i++)
 		{
 			mesh.material.attributes.everyOtherNormal.value[i].x = everyOtherNormal[i*3];
 			mesh.material.attributes.everyOtherNormal.value[i].y = everyOtherNormal[i*3+1];
 			mesh.material.attributes.everyOtherNormal.value[i].z = everyOtherNormal[i*3+2];
 		}
-		for(var i = 0; i < mesh.material.attributes.everyOtherZ.value.length; i++)
+		for(var i = 0; i < mesh.res * mesh.res; i++)
 		{
 			mesh.material.attributes.everyOtherZ.value[i] = everyOtherZ[i];
 		}
-		for(var i = 0; i < mesh.geometry.vertices.length; i++)
+		for(var i = 0; i < mesh.res * mesh.res; i++)
 		{
-		
 			mesh.geometry.vertices[i].z = vertices[i*3+2];
+		}
+		
+		for(var i = mesh.res * mesh.res; i < mesh.geometry.vertices.length; i++)
+		{
+			mesh.material.attributes.everyOtherNormal.value[i].x = everyOtherNormal[(mesh.geometry.vertices[i].topedge)*3];
+			mesh.material.attributes.everyOtherNormal.value[i].y = everyOtherNormal[(mesh.geometry.vertices[i].topedge)*3+1];
+			mesh.material.attributes.everyOtherNormal.value[i].z = everyOtherNormal[(mesh.geometry.vertices[i].topedge)*3+2];
+		}
+		for(var i = mesh.res * mesh.res; i < mesh.geometry.vertices.length; i++)
+		{
+			mesh.material.attributes.everyOtherZ.value[i] = everyOtherZ[(mesh.geometry.vertices[i].topedge)] - (mesh.scale.x) * 5;
+		}
+		for(var i = mesh.res * mesh.res; i < mesh.geometry.vertices.length; i++)
+		{
+			mesh.geometry.vertices[i].z = vertices[(mesh.geometry.vertices[i].topedge)*3+2] - (mesh.scale.x) * 5;
 		}
 		
 		mesh.material.attributes.everyOtherNormal.needsUpdate = true;
@@ -103,6 +142,11 @@ new (function(){
 		var request = {command:'generateTerrain',data:data,id:this.currentID[i],buffers:this.currentBuffers[i]};
 		this.worker[i].postMessage(request,request.buffers);
 		
+	}
+	this.sample = function(vert)
+	{
+		if(this.waitingForInit == true) return 0;
+		return this.terrainAlgorithm.displace(vert);
 	}
 	this.message = function(e)
 	{
@@ -169,24 +213,36 @@ new (function(){
 		loadScript('vwf/model/threejs/' + type + '.js');
 		
 		this.terrainAlgorithm = new (eval(type))();
+		
+		this.terrainAlgorithm.importScript = function(url)
+		{
+			
+			var xhr = $.ajax("vwf/model/threejs/" + url,{async:false});
+			return eval(xhr.responseText);
+			
+		
+		}.bind(this.terrainAlgorithm);
+		
 		var poolSideData;
-		var poolparams = this.terrainAlgorithm.setAlgorithmDataPool(params);
+		
 		
 		var init = function(psd)
 		{
 			this.waitingForInit = false;
+			this.terrainAlgorithm.init(psd);
+			this.terrainAlgorithm.setAlgorithmDataPool(params);
 			for(var i = 0; i < MAXWORKERS; i++)
 			{
 				this.worker[i] = new Worker("vwf/model/threejs/terrainGeneratorThread.js");
 				this.worker[i].addEventListener('message',this.message.bind(this));
-				this.worker[i].postMessage({command:'init',data:{type:type,params:(poolparams || params)}});
+				this.worker[i].postMessage({command:'init',data:{type:type,params:(params)}});
 				this.worker[i].postMessage({command:'threadInit',data:psd});
-				this.worker[i].postMessage({command:'setAlgorithmData',data:(poolparams || params)});
+				this.worker[i].postMessage({command:'setAlgorithmData',data:(params)});
 				this.currentCB[i] =  null;
 				this.currentMesh[i] = null;
 				this.currentID[i] =  null;
 				this.currentBuffers[i] = [];
-			}
+			} 
 		}.bind(this);
 		
 		if(this.terrainAlgorithm.poolInit)
@@ -225,17 +281,18 @@ new (function(){
 	{
 		this.init(type,params);
 	}
-	this.getAlgorithmParams = function()
+	this.getAlgorithmData = function()
 	{
 		return this.terrainAlgorithm.getAlgorithmDataPool();
 	}
-	this.setAlgorithmParams = function(params)
+	this.setAlgorithmData = function(params,updatelist)
 	{
-		var poolparams = this.terrainAlgorithm.setAlgorithmDataPool(params);
+		var list = this.terrainAlgorithm.setAlgorithmDataPool(params,updatelist);
 		for(var i = 0; i < MAXWORKERS; i++)
 		{
-			this.worker[i].postMessage({command:'setAlgorithmData',data:(poolparams || params)});
+			this.worker[i].postMessage({command:'setAlgorithmData',data:(params)});
 		}
+		return list;
 	}
 	this.test = function()
 	{
@@ -248,7 +305,7 @@ new (function(){
 		
 		var vertices = [];
 		
-		for(var i = 0; i < mesh.geometry.vertices.length; i++)
+		for(var i = 0; i < mesh.res * mesh.res; i++)
 		{
 			vertices.push(mesh.geometry.vertices[i].x);
 			vertices.push(mesh.geometry.vertices[i].y);

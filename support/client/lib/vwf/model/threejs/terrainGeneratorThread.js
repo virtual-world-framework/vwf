@@ -8,6 +8,10 @@ self.init = function(data)
   importScripts(generateType + '.js');
 
   this.terrainAlgorithm = new (eval(generateType))(data.params);
+  this.terrainAlgorithm.importScript = function(url)
+  {
+	importScripts(url);
+  }
   console.log('init complete');
   
 }

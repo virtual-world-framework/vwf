@@ -19,3 +19,5 @@ methods:
   getPointCount:
 properties:
   controlPoints: []
+  terrainType: 
+  terrainParams: 

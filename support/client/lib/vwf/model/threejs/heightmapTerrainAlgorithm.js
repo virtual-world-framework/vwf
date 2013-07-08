@@ -1,5 +1,6 @@
 function heightmapTerrainAlgorithm() 
 {	
+	
 	//this init is called from each thread, and gets data from the poolInit function.
 	this.init = function(data)
 	{
@@ -8,8 +9,9 @@ function heightmapTerrainAlgorithm()
 		this.height = data.height;
 		this.width = data.width;
 		this.min = data.min;
-		importScripts('simplexNoise.js');
-		importScripts('Rc4Random.js');
+		this.type = 'bt';
+		this.importScript('simplexNoise.js');
+		this.importScript('Rc4Random.js');
 		this.SimplexNoise = new SimplexNoise((new Rc4Random(1 +"")).random);
 	}
 	//This can generate data on the main thread, and it will be passed to the coppies in the thread pool
@@ -36,8 +38,18 @@ function heightmapTerrainAlgorithm()
 				
 				var array = new Uint8Array(this.height*this.width);
 				for(var i =0; i < this.height*this.width * 4; i+=4)
-					array[Math.floor(i/4)] = Math.pow(data[i]/255.0,2.2) * 255;
-				cb({height:this.height,width:this.width,min:0,data:array});
+					array[Math.floor(i/4)] = Math.pow(data[i]/255.0,1.0) * 255;
+				var data = new Uint8Array(this.height*this.width);
+				for(var i = 0; i < this.width; i++)
+				{
+					for(var j = 0; j < this.height; j++)
+					{
+						var c = i * this.width + j;
+						var c2 = j * this.height + i;
+						data[c] = array[c2];
+					}
+				}
+				cb({height:this.height,width:this.width,min:0,data:data});
 			}
 		}
 		if(this.type == 'bt')
@@ -93,6 +105,8 @@ function heightmapTerrainAlgorithm()
 			if(data[i] < min)
 				min = data[i];
 		}
+		this.min = min;
+		this.data = data;
 		cb({height:this.height,width:this.width,min:min,data:data});
 	}
 	//This is the settings data, set both main and pool side
@@ -101,21 +115,17 @@ function heightmapTerrainAlgorithm()
 		this.seed = seed;
 	}
 	//this sets the values on the pool side. Keep these cached here, so the engine can query them without an async call
-	this.setAlgorithmDataPool = function(seed)
+	//updatelist is the existing tiles. Return tiles in an array  that will need an update after the property set. This will 
+	//allow the engine to only schedule tile updates that are necessary.
+	this.setAlgorithmDataPool = function(seed,updateList)
 	{
 		this.seed = seed;
+		return updateList;
 	}
 	//the engine will read the data values here
 	this.getAlgorithmDataPool = function(seed)
 	{
 		return this.seed;
-	}
-	//The system might choose to not rebuild a tile after a param change by returning false
-	//Note, you'll have to watch this to make sure that you're not canceling a needed tile.
-	//actually, you'll need some additional data to make the choice, which the engine does not currently provide.
-	this.forceTileRebuildCallback = function()
-	{
-		return true;
 	}
 	//This will allow you to setup shader variables that will be merged into the the terrain shader
 	this.getMaterialUniforms = function(mesh,matrix)
@@ -123,9 +133,11 @@ function heightmapTerrainAlgorithm()
 		var uniforms_default = {
 		diffuseSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/deathvallydiffuse.jpeg" ) },
 		dirtSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/dirt.jpg" ) },
+		brushSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/scrub.jpg" ) },
 		};
 		uniforms_default.diffuseSampler.value.wrapS = uniforms_default.diffuseSampler.value.wrapT = THREE.RepeatWrapping;
 		uniforms_default.dirtSampler.value.wrapS = uniforms_default.dirtSampler.value.wrapT = THREE.RepeatWrapping;
+		uniforms_default.brushSampler.value.wrapS = uniforms_default.brushSampler.value.wrapT = THREE.RepeatWrapping;
 		return uniforms_default;
 	}
 	//This funciton allows you to compute the diffuse surface color however you like. 
@@ -135,11 +147,17 @@ function heightmapTerrainAlgorithm()
 		return (
 		"uniform sampler2D diffuseSampler;\n"+
 		"uniform sampler2D dirtSampler;\n"+
+		"uniform sampler2D brushSampler;\n"+
 		"vec4 getTexture(vec3 coords, vec3 norm)" +
 		"{"+
-			"vec4 diffuse = texture2D(diffuseSampler,((coords.yx * vec2(1.0,-1.0) + 2500.0)/5000.0));\n"+
-			"vec4 near = texture2D(dirtSampler,((coords.yx / 10.0)));\n"+
+			"vec4 diffuse = texture2D(diffuseSampler,((coords.yx * vec2(1.0,1.0) + 2500.0)/5000.0));\n"+
+			"vec4 dirt = texture2D(dirtSampler,((coords.yx / 10.0)));\n"+
+			"vec4 brush = texture2D(brushSampler,((coords.yx / 5.0)));\n"+
 			"float minamt = smoothstep(0.0,100.0,distance(cameraPosition , coords));\n"+
+			"float dirtdot = dot(diffuse,vec4(182.0/255.0,179.0/255.0,164.0/255.0,1.0));\n"+
+			"dirtdot = clamp(0.0,1.0,pow(max(.5,dirtdot)-.5,9.5)/100.0);\n"+
+			
+			"vec4 near = mix(brush,dirt,dirtdot);\n"+
 			"return mix(near,diffuse,minamt);\n"+
 		"}")
 	}
@@ -149,13 +167,14 @@ function heightmapTerrainAlgorithm()
 		var z = this.SimplexNoise.noise2D((vert.x)/100,(vert.y)/100) * 4.5;
 		z += this.SimplexNoise.noise2D((vert.x)/300,(vert.y)/300) * 4.5;
 		z += this.SimplexNoise.noise2D((vert.x)/10,(vert.y)/10) * 0.5;
-		return this.sampleBiCubic((vert.x+ 2500) / 5000 ,(vert.y + 2500) / 5000  ) * 1.0 - this.min + z|| 0;
+		var h = this.type == 'img'?2.2:1.0;
+		return this.sampleBiCubic((vert.x+ 2500) / 5000 ,(vert.y + 2500) / 5000  ) * h - this.min + z|| 0;
 	}
 	this.at = function(x,y)
 	{
 		if( x > this.height || x < 0) return 0;
 		if( y > this.width || y < 0) return 0;
-		var i = x * this.height  + y;
+		var i = y * this.width  + x;
 		return this.data[i];
 	}
 	this.sampleBiLinear = function(u,v)

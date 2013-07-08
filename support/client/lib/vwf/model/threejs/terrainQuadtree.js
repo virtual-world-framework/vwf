@@ -377,6 +377,75 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 						this.mesh.material.uniforms.debugColor.value.b = b;
 					}
 				}
+				this.intersectBounds = function(o,d)
+				{	
+						//TODO: are these loose bounds necessary?
+						var min = [this.min[0]-.00,this.min[1]-.00,-Infinity];
+						var max = [this.max[0]+.00,this.max[1]+.00,Infinity];
+						var dirfrac = [0,0,0];
+						var t;
+						// d is unit direction vector of ray
+						dirfrac[0] = 1.0 / d[0];
+						dirfrac[1] = 1.0 / d[1];
+						dirfrac[2] = 1.0 / d[2];
+						// this.min is the corner of AABB with Math.minimal coordinates - left bottom, this.max is Math.maximal corner
+						// o is origin of ray
+						var t1 = (min[0] - o[0])*dirfrac[0];
+						var t2 = (max[0] - o[0])*dirfrac[0];
+						var t3 = (min[1] - o[1])*dirfrac[1];
+						var t4 = (max[1] - o[1])*dirfrac[1];
+						var t5 = (min[2] - o[2])*dirfrac[2];
+						var t6 = (max[2] - o[2])*dirfrac[2];
+
+						var tMathmin = Math.max(Math.max(Math.min(t1, t2), Math.min(t3, t4)), Math.min(t5, t6));
+						var tMathmax = Math.min(Math.min(Math.max(t1, t2), Math.max(t3, t4)), Math.max(t5, t6));
+
+						// if tMath.max < 0, ray (line) is intersecting AABB, but whole AABB is behing us
+						if (tMathmax < 0)
+						{
+							t = tMathmax;
+							return false;
+						}
+
+						// if tMath.min > tMath.max, ray doesn't intersect AABB
+						if (tMathmin > tMathmax)
+						{
+							t = tMathmax;
+							return false;
+						}
+
+						t = tMathmin;
+						return true; 
+				    
+				   
+				    return true; // if we made it here, there was an intersection - YAY
+
+				}
+				this.CPUPick = function(o,d,opts)
+				{
+				
+					
+					var hits = [];
+					
+					if(!this.intersectBounds(o,d))
+						return hits;
+					
+					if(this.mesh)
+					{
+						hits = this.mesh.CPUPick(o,d,opts);
+					}else
+					{
+						if(this.NE())
+						hits = hits.concat(this.NE().CPUPick(o,d,opts));
+						if(this.NW())
+						hits = hits.concat(this.NW().CPUPick(o,d,opts));
+						if(this.SE())
+						hits = hits.concat(this.SE().CPUPick(o,d,opts));
+						if(this.SW())
+						hits = hits.concat(this.SW().CPUPick(o,d,opts));
+					}
+					return hits;
+				}
 				this.updateMesh = function(cb,force)
 				{
 					var rebuilt = false;

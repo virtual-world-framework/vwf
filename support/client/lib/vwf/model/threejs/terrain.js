@@ -23,15 +23,8 @@
 		loadScript(   "vwf/model/threejs/terrainQuadtree.js");
 		
 		
-		this.settingProperty = function(propertyName,propertyValue)
-		{
-			if(propertyName == 'controlPoints')
-			{
-				this.controlPoints = propertyValue;
-				
-			}
-		}
 		
+		this.init = false;
 		this.initializingNode = function()
 		{
 			window.requestAnimationFrame(this.update);
@@ -43,14 +36,19 @@
 			quadtreesetRes(tileres);
 			self.TileCache = new TileCache();
 			
+			
+			
 			this.terrainGenerator = loadScript("vwf/model/threejs/terrainGenerator.js");
 			
 			self.TileCache.terrainGenerator = this.terrainGenerator;
 			
-			this.terrainType = 'NoiseTerrainAlgorithm';
+			if(!this.terrainType)
+				this.terrainType = 'NoiseTerrainAlgorithm';
 			this.terrainParams = 12312;
 			
 			this.terrainGenerator.init(this.terrainType,this.terrainParams);
+			
+			
 			this.DisableTransform();
 			
 			this.quadtree = new QuadtreeNode([-worldExtents,-worldExtents],[worldExtents,worldExtents],this.getRoot(),0,-1,minTileSize,maxTileSize);
@@ -66,27 +64,71 @@
 			this.getRoot().FrustrumCast = function(frustrum,opts){return {};};
 			this.getRoot().CPUPick = function(o,d,opts){
 				
-				var node = self.quadtree.containing(o);;
-				if(!node) return;
-				var mesh = node.mesh;
-				if(mesh)
-				return mesh.CPUPick(o,d,opts);
 				
-				return [];
+				if(d[0] == 0 && d[1] == 0 && d[2] == -1)
+				{
+				     
+				     var point = new THREE.Vector3(o[0],o[1],o[2]);
+				     var z = self.terrainGenerator.sample(point) + 1;
+				   //  if(z > o[2]) return [];
+				     point.z =  z;
+				    
+				     return[
+				     {
+				      distance:Math.abs(o[2] - point.z),
+				      face:null,
+				      normal:[0,0,1],
+				      object:self.getRoot(),
+				      point:[point.x,point.y,point.z],
+				      priority:1
+				     
+				     }
+				     ]
+				
+				}else
+				{
+					
+					
+					
+						var hits = self.quadtree.CPUPick(o,d,opts);
+					//	for(var i = 0; i < hits.length; i++)
+					//	{
+							
+					//		var point = new THREE.Vector3(hits[i].point[0],hits[i].point[1],hits[i].point[2]);
+					//		var z = self.terrainGenerator.sample(point);
+					//		point[2] = z || point.z;
+					//	}
+						return hits;
+					
+				}
 				
 			}
 			
 			_SceneManager.specialCaseObjects.push(this.getRoot());
+			this.init = true;
 			
 		}
-		this.setAlgorithmParams = function(data)
+		this.setAlgorithmData = function(data)
 		{
-			this.terrainGenerator.setAlgorithmParams(data);
-			this.rebuildAll();
+			
+			this.terrainParams = data;
+			if(!this.init) return;
+			this.cancelUpdates();
+			this.quadtree.walk(function(n){
+			
+				if(n.mesh)
+					self.needRebuild.push(n);
+			
+			});
+			var rebuildlist = this.terrainGenerator.setAlgorithmData(data,self.needRebuild);
+			self.needRebuild = rebuildlist || self.needRebuild;
+			self.rebuild(true);	
+			
 		}
-		this.getAlgorithmParams = function()
+		this.getAlgorithmData = function()
 		{
-			return this.terrainGenerator.getAlgorithmParams();
+			if(!this.init) return;
+			return this.terrainGenerator.getAlgorithmData();
 		}
 		this.setMeshParams = function(min,max,size,res)
 		{
@@ -95,6 +137,7 @@
 			tileres = res;
 			maxTileSize = max;
 			worldExtents = size;
+			if(!this.init) return;
 			this.cancelUpdates();
 			this.quadtree.walk(function(n)
 			{
@@ -108,9 +151,11 @@
 		}
 		this.setTerrainAlgorithm = function(algo,params)
 		{
-			this.cancelUpdates();
+			
 			this.terrainType = algo;
 			this.terrainParams = params;
+			if(!this.init) return;
+			this.cancelUpdates();
 			this.terrainGenerator.reInit(this.terrainType,this.terrainParams);
 			this.TileCache.clear();
 			
@@ -585,20 +630,11 @@
 		{
 			
 			while(self.terrainGenerator.countFreeWorkers() > 0 && self.needRebuild.length > 0)
-			
 			{
 				
-				var tile1 = self.needRebuild.shift();
-				var needUpdate = true;
-				
-				if(self.terrainGenerator.forceTileRebuildCallback && force)
-					needUpdate = self.terrainGenerator.forceTileRebuildCallback(tile1);
-				if(needUpdate)
-				{				
-					tile1.debug(0,1,0);
-					tile1.updateMesh(self.rebuildCallback,force);
-				}
-				
+				var tile1 = self.needRebuild.shift();			
+				tile1.debug(0,1,0);
+				tile1.updateMesh(self.rebuildCallback,force);
 			}
 				
 		}.bind(self);
@@ -654,6 +690,22 @@
 			{
 				return this.controlPoints.length;
 			}
+			
+		}
+		this.settingProperty = function(propertyName,propertyValue)
+		{
+			if(propertyName == 'controlPoints')
+			{
+				this.controlPoints = propertyValue;
+			}
+			if(propertyName == 'terrainType')
+			{	
+				self.setTerrainAlgorithm(propertyValue,this.terrainParams);
+			}
+			if(propertyName == 'terrainParams')
+			{		 
+				self.setAlgorithmData(propertyValue);
+			}
 		}
 		this.gettingProperty = function(propertyName)
 		{
@@ -665,7 +717,15 @@
 			if(propertyName == 'type')
 			{	
 				return 'Terrain';
-			}					
+			}
+			if(propertyName == 'terrainType')
+			{	
+				return this.terrainType;	
+			}
+			if(propertyName == 'terrainParams')
+			{		 
+				return this.terrainParams;
+			}			
 		}
 		
 		//must be defined by the object

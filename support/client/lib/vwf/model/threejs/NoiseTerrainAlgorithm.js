@@ -1,10 +1,13 @@
 function NoiseTerrainAlgorithm() 
 {	
+	
+		
 	this.init = function(data)
 	{
+		
 		console.log(data);
-		importScripts('simplexNoise.js');
-		importScripts('Rc4Random.js');
+		this.importScript('simplexNoise.js');
+		this.importScript('Rc4Random.js');
 	}
 	//This can generate data on the main thread, and it will be passed to the coppies in the thread pool
 	this.poolInit = function()
@@ -18,7 +21,7 @@ function NoiseTerrainAlgorithm()
 	}
 	this.setAlgorithmDataPool = function(seed)
 	{
-		this.seed = seed;
+		this.SimplexNoise = new SimplexNoise((new Rc4Random(seed +"")).random);
 	}
 	this.getAlgorithmDataPool = function(seed)
 	{

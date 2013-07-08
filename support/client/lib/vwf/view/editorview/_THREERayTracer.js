@@ -514,7 +514,7 @@ BoundingBoxRTAS.prototype.intersect = function(o,d)
 		}
 
 		t = tMathmin;
-		return [true]; 
+		
     
    
     return [true]; // if we made it here, there was an intersection - YAY
