@@ -59,12 +59,12 @@
 			self.worldObjects = ko.observableArray([]);
 			self.displayWorldObjects = ko.observableArray([]);
 			self.getNextPage = function(){
-				self.getPage(1);
+				if(self.nextDisabled() === false)
+					self.getPage(1);
 			};
 			self.getPreviousPage = function(){
-				if(pageIndex > 0){
+				if(self.previousDisabled() === false)
 					self.getPage(-1);
-				}
 			};
 			
 			self.previousDisabled = ko.observable(true);
@@ -72,11 +72,9 @@
 			
 			self.getPage = function(i){
 				var worldObjectsLength = getArrVisibleLength(self.worldObjects());
-				if((pageIndex+i)*pageLength < worldObjectsLength){
-					pageIndex += i;
-					self.displayWorldObjects(getArrVisible(self.worldObjects(), pageIndex*pageLength));
-				}
-				
+				pageIndex += i;
+				self.displayWorldObjects(getArrVisible(self.worldObjects(), pageIndex*pageLength));
+			
 				if((pageIndex+1)*pageLength < worldObjectsLength){
 					self.nextDisabled(false);
 				}
@@ -140,16 +138,16 @@
 			return tempArr;
 		};
 		
-		function showStates()
-		{
-			$.getJSON("./vwfDataManager.svc/states",function(e)
-			{
+		function showStates(){
+		
+			$.getJSON("./vwfDataManager.svc/states",function(e){
+				
 				var keys = Object.keys(e);
 				var tempArr = getFlatIdArr();
 				var saveIndex = 0;
 
-				for(var i = 0; i < keys.length; i++)
-				{
+				for(var i = 0; i < keys.length; i++){
+					
 					var id = keys[i].substr(13,16);
 					e[keys[i]].id = id;
 					e[keys[i]].isVisible = checkFilter([e[keys[i]].title, e[keys[i]].description, e[keys[i]].owner]);
@@ -172,16 +170,16 @@
 				setTimeout(function(){$(".accordion").css("visibility","visible")}, 300);
 				
 				
-				$.getJSON("./admin/instances",function(e)
-				{
+				$.getJSON("./admin/instances",function(e){
+				
 					//Get all world IDs in flat array form
 					var tempArr = getFlatIdArr(true);
 					var keys = Object.keys(e);
 					var saveIndex = 0;
 					
 					//Iterate through keys, get index of world id which matches key, set its hotState to true
-					for(var i = 0; i < keys.length; i++)
-					{
+					for(var i = 0; i < keys.length; i++){
+					
 						var id = keys[i].substr(13,16);
 						saveIndex = tempArr.indexOf(id);
 						
@@ -198,8 +196,8 @@
 			$.ajax('/vwfDataManager.svc/logindata',
 			{
 				cache:false,
-				success:function(data,status,xhr)
-				{
+				success:function(data,status,xhr){
+					
 					data = JSON.parse(xhr.responseText);
 					vwfPortalModel.user().username = data.username;
 					vwfPortalModel.user().isAdmin = data.admin;

@@ -40,6 +40,11 @@
 					</div>
 				</div>
 			</div>
+			<div class="row" style="margin-top:45px;margin-bottom:70px;" data-bind="visible:displayWorldObjects().length==0">	
+				<div class="span4 offset4" style="text-align:center;">
+					<span style="font-weight:bold;">No worlds found</span>
+				</div>
+			</div>
 			<div class="row" style="margin-bottom:45px;">
 				<div class="span1 offset4" style="text-align:right;">
 					<a class="btn" data-bind="click:getPreviousPage, css:previousDisabled()?'disabled btn':'btn'"><i class="icon-chevron-left"></i></a>
