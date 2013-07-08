@@ -63,6 +63,7 @@ children:
             }
           }
           this.parent.markupAdded = [];
+          this.parent.camera.resetCamera();
         }
     events:
       selectedColorChanged:
