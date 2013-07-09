@@ -104,9 +104,22 @@
             var distanceToEarthCenter = 0;
 
             vwf_view.satProperty = function( nodeId, propertyName, propertyValue ) {
-                
                 var rootID = vwf_view.kernel.find( "", "/" )[0];
-                if ( vwf_view.kernel.test( rootID, "camera", nodeId ) ) {
+                if ( nodeId == rootID ) {
+                    switch( propertyName ) {
+                        case "cameraViewData":
+                            var pos = propertyValue.position;
+                            if ( pos ) {
+                                var currentDist = ( pos[0] * pos[0] )+( pos[1] * pos[1] )+( pos[2] * pos[2] ); 
+                                if ( currentDist < 110000000000000 ) {
+                                    swapVideo(false);
+                                } else {
+                                    swapVideo(true);
+                                }
+                            }                            
+                            break;
+                    }
+                } else if ( vwf_view.kernel.test( rootID, "camera", nodeId ) ) {
                     if ( propertyValue ) {
                         switch( propertyName ) {
                             case "position":  
