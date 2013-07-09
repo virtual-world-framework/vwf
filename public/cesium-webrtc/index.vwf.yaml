@@ -71,8 +71,6 @@ children:
       clearing:
   camera:
     extends: http://vwf.example.com/cesium/camera.vwf
-    properties:
-      position: [ 0, -14261948, 11360974 ]
   sun: 
     extends: http://vwf.example.com/cesium/sun.vwf 
     properties:
