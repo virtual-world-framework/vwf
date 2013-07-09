@@ -11,7 +11,7 @@
     or implied. See the License for the specific language governing permissions and limitations under
     the License. */
 
-.demochat-logon
+.chat-logon
 {
   position:absolute;
   top:35%;
@@ -24,7 +24,7 @@
   opacity:1.0
 }
 
-.demochat-logonbutton
+.chat-logonbutton
 {
   display: inline-block;
   position: relative;
@@ -38,12 +38,12 @@
   background: #FF0;
 }
 
-.demochat-warning
+.chat-warning
 {
   color:#FF0000;
 }
 
-.demochat-chatlist
+.chat-chatlist
 {
   position:absolute;
   top:5%;
@@ -54,7 +54,7 @@
   opacity:1.0;
 }
 
-.demochat-chatwindow
+.chat-chatwindow
 {
   position:absolute;
   top:5%;
@@ -67,7 +67,7 @@
   min-height: 154px;
 }
 
-.demochat-chatcontent
+.chat-chatcontent
 {
   position:absolute;
   bottom:18px;
@@ -77,7 +77,7 @@
   align:bottom;
 }
 
-.demochat-chatinput
+.chat-chatinput
 {
   position:absolute;
   bottom:0%;
@@ -89,7 +89,7 @@
   resize:none;
 }
 
-.demochat-chatoptions
+.chat-chatoptions
 {
   position:absolute;
   bottom: 5%;
@@ -103,13 +103,13 @@
   min-height: 93px;
 }
 
-.demochat-chatInnerOptions
+.chat-chatInnerOptions
 {
   display: inline-block;
   margin:10px;
 }
 
-.demochat-colorwidget
+.chat-colorwidget
 {
   display:inline-block;
   background-color: #000000;

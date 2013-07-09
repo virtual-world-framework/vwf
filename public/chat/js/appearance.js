@@ -16,7 +16,7 @@
 
 
 //  This javascript file contains functions for managing the appearance and UI of the 
-//  demochat program.
+//  chat program.
 
 
 

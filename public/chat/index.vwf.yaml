@@ -310,7 +310,7 @@ scripts:
       //sends an appropriate userCreated event.
       var newTime = this.users.usersTime;
       var userDef = { 
-        "extends": "demochatuser.vwf",
+        "extends": "chatuser.vwf",
         "properties": {
           "displayName": userName,
           "viewHandle": viewHandle,
