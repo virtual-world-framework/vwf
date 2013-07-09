@@ -1092,7 +1092,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 node = this.state.scenes[ nodeID ]; 
                 var scene = node.scene;
 
-                if ( ( node.widget !== undefined || node.centralBody !== undefined ) && validPropertyValue.call( this, propertyValue ) ) {
+                if ( ( node.cesiumWidget !== undefined || node.centralBody !== undefined ) && validPropertyValue.call( this, propertyValue ) ) {
 
                     switch ( propertyName ) {
 
@@ -1281,9 +1281,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             }
 
                             if ( imageProvider !== undefined ) {
-                                if ( node && node.widget !== undefined ) {
+                                if ( node && node.cesiumWidget !== undefined ) {
                                     // how does the widget add an image layer
-                                    node.widget.centralBody.getImageryLayers().addImageryProvider( imageProvider );
+                                    node.cesiumWidget.centralBody.getImageryLayers().addImageryProvider( imageProvider );
                                 } else if ( node.centralBody !== undefined ) {
                                     node.centralBody.getImageryLayers().addImageryProvider( imageProvider );
                                 }
@@ -1295,19 +1295,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         case "renderStyle":
                             // using the Cesium.Widget
-                            if ( node.widget ) {
+                            if ( node.cesiumWidget ) {
                                 
                                 var currentRS = this.gettingProperty( nodeID, propertyName );
                                 if ( currentRS != propertyValue ) {
                                     switch ( propertyValue ) {
                                         case "3D":
-                                            node.widget._transitioner.to3D();
+                                            node.cesiumWidget._transitioner.to3D();
                                             break;
                                         case "2D":
-                                            node.widget._transitioner.to2D();
+                                            node.cesiumWidget._transitioner.to2D();
                                             break;
                                         case "2.5D":
-                                            node.widget._transitioner.toColumbusView();
+                                            node.cesiumWidget._transitioner.toColumbusView();
                                             break;
                                     }
                                 }
