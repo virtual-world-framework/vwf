@@ -247,10 +247,6 @@ children:
     extends: http://vwf.example.com/node3.vwf
     source: joc/closed_doors.DAE
     type: model/vnd.collada+xml
-  computer_case:
-    extends: http://vwf.example.com/node3.vwf
-    source: joc/computer_case.DAE
-    type: model/vnd.collada+xml
   computer_monitor_center:
     extends: http://vwf.example.com/node3.vwf
     source: joc/computer_monitor_center.DAE
