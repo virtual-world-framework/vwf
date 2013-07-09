@@ -164,11 +164,31 @@ children:
   light:
     extends: http://vwf.example.com/light.vwf
     properties:
-      translation: [ 0, 0, 1.5 ]
+      translation: [ 0, -10.0, 4.0 ]      
+      intensity: 0.8
+      distance: 24
+      color: "#999999"
   light_2:
     extends: http://vwf.example.com/light.vwf
     properties:
-      translation: [7.397893905639648,7.316537857055664,2.1273322105407715]
+      translation: [ 0, 10.0, 4.0 ]      
+      intensity: 0.8
+      distance: 24
+      color: "#999999"
+  light_3:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ -10, 0.0, 4.0 ]      
+      intensity: 0.8
+      distance: 24
+      color: "#999999"
+  light_4:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 10, 0.0, 4.0 ]      
+      intensity: 0.8
+      distance: 24
+      color: "#999999"
 scripts:
 - |
   var initialCam = [0.798465371131897, -0.6020503044128418, 0, 0, 0.6020503044128418, 0.798465371131897, 0, 0, 0, 0, 1, 0, -1.1765320301055908, -0.9326445460319519, 1.2000001668930054, 1];
