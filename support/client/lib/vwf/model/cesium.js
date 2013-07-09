@@ -30,8 +30,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             if ( options === undefined ) { options = {}; }
 
-            this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
-            this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
+            this.state.scenes = {}; // id => { scene: Cesium.Scene }
+            this.state.nodes = {}; // id => { name: string, cesiumObj:  }
             this.state.prototypes = {}; 
 
 
