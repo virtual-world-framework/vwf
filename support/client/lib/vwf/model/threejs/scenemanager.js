@@ -51,6 +51,8 @@ SceneManager.prototype.addToRoot = function(child)
 }
 SceneManager.prototype.CPUPick = function(o,d,opts)
 {
+	if(d[0] == 0 && d[1] ==0 && d[2] == 0)
+		return null;
 	//console.profile("PickProfile");
 
 	var hitlist = this.root.CPUPick(o,d,opts || new THREE.CPUPickOptions());
