@@ -101,8 +101,23 @@
                 }
             }
 
-            vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-                if ( vwf_view.kernel.test( vwf_view.kernel.find( "", "/" )[0], "toolbar", nodeId ) ) {
+            var distanceToEarthCenter = 0;
+
+            vwf_view.satProperty = function( nodeId, propertyName, propertyValue ) {
+                
+                var rootID = vwf_view.kernel.find( "", "/" )[0];
+                if ( vwf_view.kernel.test( rootID, "camera", nodeId ) ) {
+                    if ( propertyValue ) {
+                        switch( propertyName ) {
+                            case "position":  
+                                var currentDist = ( propertyValue[0] * propertyValue[0] )+( propertyValue[1] * propertyValue[1] )+( propertyValue[2] * propertyValue[2] ); 
+                                if ( distanceToEarthCenter == currentDist ) {
+                                    distanceToEarthCenter = currentDist;
+                                }
+                                break;
+                        }
+                    }                    
+                } else if ( vwf_view.kernel.test( rootID, "toolbar", nodeId ) ) {
                     if ( propertyValue ) {
                         switch (propertyName) {
                             case "selectedColor":
