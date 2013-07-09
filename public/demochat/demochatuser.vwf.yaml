@@ -17,7 +17,7 @@ scripts:
   //When playSound is called on this user, raise the playSoundEvent event with
   //the current alertSound property as its parameter.
   this.playSound = function( ) {
-    this.playSoundEvent( this.alertSound );
+    this.playSoundEvent( this.alertSound, this.displayName );
   };
   //Perform a regular expression search on a message for my displayName as a self contained
   //word. If found, call the playSound method on myself.

@@ -159,6 +159,11 @@
     <link rel="stylesheet" media="screen" type="text/css" href="css/colorpicker.css" />
     <script src="js/colorpicker.js"/>
     <script>
+      // Store the nodeID of the entire scene for later reference.
+      var sceneId = vwf_view.kernel.find( "", "/" )[ 0 ];
+      var userDetails = {};
+
+      
       $( '#newUserColor' ).ColorPicker( {
 			  flat: false,
 			  color: '#000000',
@@ -167,13 +172,14 @@
           $( el ).ColorPickerHide();
 			  }
 		  } );
+
       $( '#changeTextColor' ).ColorPicker( {
 			  flat: false,
 			  color: '#000000',
 			  onSubmit: function( hsb, hex, rgb, el ) {
 				  $( '#changeTextColor' ).css( 'backgroundColor', '#' + hex );
           if ( isConnected( ) ) {
-            vwf_view.kernel.callMethod( sceneId, "userColorChange", [ $( '#changeTextColor' ).css( 'backgroundColor' ), playerId, vwf_view.kernel.moniker( ) ] );
+            vwf_view.kernel.callMethod( sceneId, "userColorChange", [ $( '#changeTextColor' ).css( 'backgroundColor' ), localUsername ] );
           }
           $( el ).ColorPickerHide();
 			  }
@@ -181,10 +187,17 @@
       
       
       $( '#playerNameInput' ).keyup( function( ) {
-        $( '#playerNameInput' ).val( sanitizeUsername( $( '#playerNameInput' ).val( ) ) );
+        var sanitizedUsername = sanitizeUsername( $( '#playerNameInput' ).val( ) );        
+        if ( sanitizedUsername != $( '#playerNameInput' ).val( ) ) {
+          $( '#playerNameInput' ).val( sanitizeUsername( $( '#playerNameInput' ).val( ) ) );
+        }
       });
+      
       $( '#changeDisplayName' ).keyup( function( ) {
-        $( '#changeDisplayName' ).val( sanitizeUsername( $( '#changeDisplayName' ).val( ) ) );
+        var sanitizedUsername = sanitizeUsername( $( '#changeDisplayName' ).val( ) );
+        if ( sanitizedUsername != $( '#changeDisplayName' ).val( ) ) {
+          $( '#changeDisplayName' ).val( sanitizeUsername( $( '#changeDisplayName' ).val( ) ) );
+        }
       });
       
       var autoScroll = function ( ) {
@@ -194,17 +207,15 @@
       var scrollToBottom = function ( ) {
         $('#chatContent')[0].scrollTop = $('#chatContent')[0].scrollHeight;
       };
-      // Store the nodeID of the entire scene for later reference.
-      var sceneId = vwf_view.kernel.find( "", "/" )[ 0 ];
-      var userDetails = {};
+
       
       
       var debugInformation = function( ) {
         vwf_view.logger.warn("Debug requested locally, printing view level information with local moniker " + vwf_view.kernel.moniker( ) + ".");
         var userIndex = 1;
-        for ( var nodeId in userDetails ) {
-          if ( userDetails[ nodeId ] != undefined ) {
-            vwf_view.logger.warn("  (" + userIndex + ")  Node Id:'" + nodeId + "'  User Name: '" + userDetails[ nodeId ][ "displayName" ] + "'  View Handle: '" + userDetails[ nodeId ][ "viewHandle" ] + "'  Last Heartbeat: '" + userDetails[ nodeId ][ "lastHeartbeat" ] + "'");
+        for ( var name in userDetails ) {
+          if ( userDetails[ name ] != undefined ) {
+            vwf_view.logger.warn("  (" + userIndex + ")  Name:'" + name + "'  User Name: '" + userDetails[ name ][ "displayName" ] + "'  View Handle: '" + userDetails[ name ][ "viewHandle" ] + "'  Last Heartbeat: '" + userDetails[ name ][ "lastHeartbeat" ] + "'");
             userIndex++;
           }
         }
@@ -246,7 +257,7 @@
       // the user is changed appropriately.
       $( '#changeSoundButton' ).click( function ( ) {
         if ( isConnected( ) ) {
-          vwf_view.kernel.callMethod( sceneId, "userSoundChange", [ $( '#changeSoundSelect' ).val( ), playerId, vwf_view.kernel.moniker( ) ] );
+          vwf_view.kernel.callMethod( sceneId, "userSoundChange", [ $( '#changeSoundSelect' ).val( ), localUsername ] );
         }
       } );
 
@@ -264,7 +275,7 @@
             debugInformation( );
           }
           else if ( $( this ).val( ) != "" ) {
-            vwf_view.kernel.callMethod( sceneId, "sendMessage", [ $( this ).val( ), playerId, vwf_view.kernel.moniker( ) ] );
+            vwf_view.kernel.callMethod( sceneId, "sendMessage", [ $( this ).val( ), localUsername ] );
           }
         }
       } ).keyup( function( e ) {
@@ -282,7 +293,7 @@
       $( '#changeDisplayNameButton' ).click( function ( ) {
         if ( isConnected( ) ) {
           // Call the renameUser method on the appropriate user.
-          vwf_view.kernel.callMethod( sceneId, "renameUser", [ sanitizeUsername( $('#changeDisplayName').val( ) ), playerId, vwf_view.kernel.moniker( ) ] )
+          vwf_view.kernel.callMethod( sceneId, "renameUser", [ sanitizeUsername( $('#changeDisplayName').val( ) ), localUsername ] )
         }
       } );
 
@@ -290,82 +301,24 @@
       $( '#disconnect' ).click( function( ) {
         if ( isConnected( ) ) {
           //First, remove the user.
-          vwf_view.kernel.callMethod( sceneId, "removeUser", [ playerId, vwf_view.kernel.moniker( ) ] );
+          vwf_view.kernel.callMethod( sceneId, "removeUser", [ localUsername ] );
           //Reset the web page. Set playerId to undefined, and display the login screen with enabled
           //inputs.
-          playerId = undefined;
           enableLogonDataEntry( );
           displayLogin( );
           hideUserExistsMessage( );
         }
       } );
 
-      vwf_view.deletedNode = function ( nodeId ) {
-        if ( isConnected( ) ) {
-          var timestamp = getTimestamp();
-          if ( userDetails[ nodeId ] != undefined ) {
-            var newLine = "<tr><td style='vertical-align:top;width:250px;max-width:250px;'><div class='system' style='color:#000000;width:250px;float:left'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='" + userDetails[ nodeId ][ "displayName" ] + "' style='word-wrap:break-word;color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left'>" + userDetails[ nodeId ][ "displayName" ] + "</div><div class='system' style='word-wrap:break-word;color:#000000;margin-left:5px;float:left;'> has left chat.</div></td></tr>";
-            var updateScroll = autoScroll( );
-            $( '#chatTable' ).append( newLine );
-            if ( updateScroll ) {
-              scrollToBottom( );
-            }
-            removeUser( userDetails[ nodeId ][ "displayName" ] );
-            userDetails[ nodeId ] = undefined;
-          }
-        }
-      };
-      
-      vwf_view.satProperty = function ( nodeId, propertyName, propertyValue ) {
-        if ( isConnected( ) ) {
-          var timestamp = getTimestamp();
-          if ( propertyName == "displayName" ) {
-            if ( userDetails[ nodeId ] != undefined ) {
-              if ( userDetails[ nodeId ][ propertyName ] != propertyValue ) {
-                //Display name has been changed.
- 
-                removeUser( userDetails[ nodeId ][ "displayName" ] );
- 
-                $( '.' + userDetails[ nodeId ][ "displayName" ] ).attr( "class", propertyValue );
- 
-                addUser( propertyValue, userDetails[ nodeId ][ "displayColor" ] );
-          
-                var newLine = "<tr><td style='vertical-align:top;width:250px;max-width:250px;'><div class='system' style='word-wrap:break-word;color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='system' style='word-wrap:break-word;color:#000000;float:left;'>The user </div><div class='" + propertyValue + "' style='word-wrap:break-word;color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left;margin-left:5px;'>" + userDetails[ nodeId ][ "displayName" ] + "</div><div class='system' style='word-wrap:break-word;color:#000000;margin-left:5px;float:left;'> has changed their display name to</div><div class='" + propertyValue + "' style='word-wrap:break-word;color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left;margin-left:5px;'>" + propertyValue + "</div><div class='system' style='word-wrap:break-word;color:#000000;float:left;'>.</div></td></tr>";
-
-                var updateScroll = autoScroll( );
-                $( '#chatTable' ).append( newLine );
-                if ( updateScroll ) {
-                  scrollToBottom( );
-                }               
-
-                userDetails[ nodeId ][ propertyName ] = propertyValue;
-              }
-            }
-          }
-          else if ( propertyName == "displayColor" ) {
-            if ( userDetails[ nodeId ] != undefined ) {
-              if ( userDetails[ nodeId ][ propertyName ] != propertyValue ) {
-                //Display color has been changed.
-                userDetails[ nodeId ][ propertyName ] = propertyValue;
-                changeUserColor( userDetails[ nodeId ][ "displayName" ], userDetails[ nodeId ][ "displayColor" ]);
-              }
-            }
-          }
-          else if ( ( propertyName == "viewHandle" ) || ( propertyName == "lastHeartbeat" ) ) {
-            if ( userDetails[ nodeId ] != undefined ) {
-              userDetails[ nodeId ][ propertyName ] = propertyValue;
-            }
-          }
-        }
-      };
-      
+     
+            
       vwf_view.gotProperties = function ( nodeId, properties ) {
         var clientThatIssuedEvent = this.kernel.client( );
         var me = this.kernel.moniker( );
         if ( clientThatIssuedEvent == me ) {
           if ( ( properties[ "displayName" ] != undefined ) && ( properties[ "displayColor" ] != undefined ) ) {
             var timestamp = getTimestamp();
-            userDetails[ nodeId ] = { "displayName": properties[ "displayName" ], "displayColor": properties[ "displayColor" ] };
+            userDetails[ properties[ "displayName" ] ] = { "displayName": properties[ "displayName" ], "displayColor": properties[ "displayColor" ] };
             var newLine = "<tr><td style='vertical-align:top;width:250px;max-width:250px;'><div class='system' style='word-wrap:break-word;color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='" + properties[ "displayName" ] + "' style='word-wrap:break-word;color:" + properties[ "displayColor" ] + ";float:left'>" + properties[ "displayName" ] + "</div><div class='system' style='word-wrap:break-word;color:#000000;margin-left:5px;float:left;'> has joined chat.</div></td></tr>";
             var updateScroll = autoScroll( );
             $( '#chatTable' ).append( newLine );
@@ -393,8 +346,10 @@
         // If the event came from the user we are logged in as and it is
         // a playSoundEvent, then play the sound based on the parameter
         // passed in the event.
-        if ( ( nodeId == playerId ) && ( eventName == "playSoundEvent" ) ) {
-          $( '#' + eventParameters[ 0 ] )[ 0 ].play( );
+        if ( ( eventName == "playSoundEvent" ) && ( isConnected( ) ) ) {
+          if ( eventParameters[ 1 ] == localUsername ) {
+            $( '#' + eventParameters[ 0 ] )[ 0 ].play( );
+          }
         }
 
         if ( nodeId == sceneId ) {
@@ -407,7 +362,7 @@
             //  send a message to the chat log about the user joining and add the user to the user list.
             if ( isConnected( ) ) {
               //  First, store the user information.
-              userDetails[ eventParameters[ 0 ] ] = { "displayName": eventParameters[ 1 ], "displayColor": eventParameters[ 2 ] };
+              userDetails[ eventParameters[ 1 ] ] = { "displayName": eventParameters[ 1 ], "displayColor": eventParameters[ 2 ], "viewHandle": eventParameters[ 4 ] };
               var newLine = "<tr><td style='vertical-align:top;width:250px;max-width:250px;'><div class='system' style='word-wrap:break-word;color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='" + eventParameters[ 1 ] + "' style='word-wrap:break-word;color:" + eventParameters[ 2 ] + ";float:left'>" + eventParameters[ 1 ] + "</div><div class='system' style='word-wrap:break-word;color:#000000;margin-left:5px;float:left;'> has joined chat.</div></td></tr>";
               var updateScroll = autoScroll( );
               $( '#chatTable' ).append( newLine );
@@ -417,41 +372,43 @@
               addUser( eventParameters[ 1 ], eventParameters[ 2 ] );
             }
             else if ( clientThatIssuedEvent == me ) {
+              localUsername = eventParameters[ 1 ];
               //  If this event was our own login,
               //  start the heartbeat for this particular user.
-              startHeartbeat( eventParameters[ 0 ], eventParameters[ 4 ] );
+              startHeartbeat( eventParameters[ 4 ] );
 
               // Display the chat interface.
               displayChatInterface( eventParameters[ 2 ] )
 
               // The fourth(index 3) eventParameter is an array of currently connected users, loop over the list adding them to the user list.
               for( var index = 0; index < eventParameters[ 3 ].length; index++ ) {
-                userDetails[ eventParameters[ 3 ][ index ][ 0 ] ] = { "displayName": eventParameters[ 3 ][ index ][ 1 ], "displayColor": eventParameters[ 3 ][ index ][ 2 ] };
+                userDetails[ eventParameters[ 3 ][ index ][ 1 ] ] = { "displayName": eventParameters[ 3 ][ index ][ 1 ], "displayColor": eventParameters[ 3 ][ index ][ 2 ], "viewHandle": eventParameters[ 3 ][ index ][ 3 ] };
                 addUser( eventParameters[ 3 ][ index ][ 1 ], eventParameters[ 3 ][ index ][ 2 ] );
               }
             }
           }
 
           if ( eventName == "userMissing" ) {
-            if ( ( playerId == eventParameters[ 0 ] ) && ( vwf_view.kernel.moniker( ) == eventParameters[ 1 ] ) ) {
-              vwf_view.logger.warn( "Recieved user missing that matches my node id " + playerId + " and view handle " + vwf_view.kernel.moniker( ) );
+            if ( localUsername == eventParameters[ 0 ] )  {
+              vwf_view.logger.warn( "Recieved user missing that matches my user name " + localUsername );
               debugInformation( );
-              playerId = undefined;
+              localUsername = undefined;
               displayLogin( );
               enableLogonDataEntry( );
               hideUserExistsMessage( );
             }
             else if ( isConnected ( ) ) {
               var timestamp = getTimestamp();
-              if ( userDetails[ nodeId ] != undefined ) {
-                var newLine = "<tr><td style='vertical-align:top;width:250px;max-width:250px;'><div class='system' style='word-wrap:break-word;color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='" + userDetails[ nodeId ][ "displayName" ] + "' style='word-wrap:break-word;color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left'>" + userDetails[ nodeId ][ "displayName" ] + "</div><div class='system' style='word-wrap:break-word;color:#000000;margin-left:5px;float:left;'> has left chat.</div></td></tr>";
+              if ( userDetails[ eventParameters[ 0 ] ] != undefined ) {
+                vwf_view.logger.warn("User missing via user missing event!");
+                var newLine = "<tr><td style='vertical-align:top;width:250px;max-width:250px;'><div class='system' style='word-wrap:break-word;color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='" + userDetails[ eventParameters[ 0 ] ][ "displayName" ] + "' style='word-wrap:break-word;color:" + userDetails[ eventParameters[ 0 ] ][ "displayColor" ] + ";float:left'>" + userDetails[ eventParameters[ 0 ] ][ "displayName" ] + "</div><div class='system' style='word-wrap:break-word;color:#000000;margin-left:5px;float:left;'> has left chat.</div></td></tr>";
                 var updateScroll = autoScroll( );
                 $( '#chatTable' ).append( newLine );
                 if ( updateScroll ) {
                   scrollToBottom( );
                 }
-                removeUser( userDetails[ nodeId ][ "displayName" ] );
-                userDetails[ nodeId ] = undefined;
+                removeUser( userDetails[ eventParameters[ 0 ] ][ "displayName" ] );
+                userDetails[ eventParameters[ 0 ] ] = undefined;
               }
             }
           }
@@ -461,10 +418,27 @@
             //  Re-enable the logon data inputs.
             enableLogonDataEntry( );
 
+            localUsername = undefined;
+
             //  Display the display name conflict error message.
             displayUserExistsMessage( );
           }
-
+          
+          if ( ( eventName == "userDeleted" ) && ( isConnected( ) ) ) {
+            var timestamp = getTimestamp();
+            if ( userDetails[ eventParameters[ 0 ] ] != undefined ) {
+              vwf_view.logger.warn("User left during user deleted event.");
+              var newLine = "<tr><td style='vertical-align:top;width:250px;max-width:250px;'><div class='system' style='color:#000000;width:250px;float:left'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='" + userDetails[ eventParameters[ 0 ] ][ "displayName" ] + "' style='word-wrap:break-word;color:" + userDetails[ eventParameters[ 0 ] ][ "displayColor" ] + ";float:left'>" + userDetails[ eventParameters[ 0 ] ][ "displayName" ] + "</div><div class='system' style='word-wrap:break-word;color:#000000;margin-left:5px;float:left;'> has left chat.</div></td></tr>";
+              var updateScroll = autoScroll( );
+              $( '#chatTable' ).append( newLine );
+              if ( updateScroll ) {
+                scrollToBottom( );
+              }
+              removeUser( userDetails[ eventParameters[ 0 ] ][ "displayName" ] );
+              userDetails[ eventParameters[ 0 ] ] = undefined;
+            }
+          }
+            
           //  If the event was a message from a user and we are connected, display the message in the chat window.
           if ( ( isConnected( ) ) && ( eventName == "userMessage" ) ) {
 		        var newLine = "<tr><td style='vertical-align:top;width:250px;max-width:250px;'><div class='" + eventParameters[ 0 ] + "' style='word-wrap:break-word;width:250px;color:" + eventParameters[ 1 ] + ";float:left;'>[" + eventParameters[ 0 ] + "] [<span style='font-size:75%'>" + timestamp + "</span>] </div></td><td style='width:100%''><div class='" + eventParameters[ 0 ] + "' style='word-wrap:break-word;color:" + eventParameters[ 1 ] + "'>" + eventParameters[ 2 ] + "</div></td></tr>";
@@ -474,6 +448,43 @@
               scrollToBottom( );
             }
           }
+          
+          if ( ( isConnected( ) ) && ( eventName == "userRenamed" ) ) {
+            alert("Help!");
+            if ( eventParameters[ 1 ] == localUsername ) {
+              localUsername = eventParameters[ 0 ];
+            }
+            if ( userDetails[ eventParameters[ 1 ] ] != undefined ) {
+              userDetails[ eventParameters[ 0 ] ] = userDetails[ eventParameters[ 1 ] ];
+              userDetails[ eventParameters[ 1 ] ] = undefined;
+              userDetails[ eventParameters[ 0 ] ][ "displayName" ] = eventParameters[ 0 ];
+              
+              removeUser( eventParameters[ 1 ] );
+              $( '.' + eventParameters[ 1 ] ).attr( "class", eventParameters[ 0 ] );
+              addUser( eventParameters[ 0 ], userDetails[ eventParameters[ 0 ] ][ "displayColor" ] );
+              
+              
+              var newLine = "<tr><td style='vertical-align:top;width:250px;max-width:250px;'><div class='system' style='word-wrap:break-word;color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='system' style='word-wrap:break-word;color:#000000;float:left;'>The user </div><div class='" + eventParameters[ 0 ] + "' style='word-wrap:break-word;color:" + userDetails[ eventParameters[ 0 ] ][ "displayColor" ] + ";float:left;margin-left:5px;'>" + eventParameters[ 1 ] + "</div><div class='system' style='word-wrap:break-word;color:#000000;margin-left:5px;float:left;'> has changed their display name to</div><div class='" + eventParameters[ 0 ] + "' style='word-wrap:break-word;color:" + userDetails[ eventParameters[ 0 ] ][ "displayColor" ] + ";float:left;margin-left:5px;'>" + eventParameters[ 0 ] + "</div><div class='system' style='word-wrap:break-word;color:#000000;float:left;'>.</div></td></tr>";
+
+              var updateScroll = autoScroll( );
+              $( '#chatTable' ).append( newLine );
+              if ( updateScroll ) {
+                scrollToBottom( );
+              }        
+            }
+          }
+          
+          if ( ( eventName == "userColorChanged" ) && ( isConnected( ) ) ) {
+            if ( userDetails[ eventParameters[ 0 ] ] != undefined ) {
+              if ( userDetails[ eventParameters[ 0 ] ][ "displayColor" ] != eventParameters[ 1 ] ) {
+                //Display color has been changed.
+                userDetails[ eventParameters[ 0 ] ][ "displayColor" ] = eventParameters[ 1 ];
+                changeUserColor( eventParameters[ 0 ], userDetails[ eventParameters[ 0 ] ][ "displayColor" ] );
+              }
+            }
+          }
+          
+          
         }
       };
 

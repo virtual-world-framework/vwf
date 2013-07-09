@@ -31,35 +31,32 @@
 //                           or not.
 
 
-var playerId = undefined;
 var heartbeatId = undefined;
+var localUsername = undefined;
 
-function startHeartbeat( newPlayerId, heartbeatInterval ) {
-    playerId = newPlayerId;
+function startHeartbeat( heartbeatInterval ) {
     heartbeatId = setInterval( heartbeat, heartbeatInterval );
 }
 
+function stopHeartbeat( ) {
+    if ( heartbeatId != undefined ) {
+        clearInterval( heartbeatId );
+        heartbeatId = undefined;
+    }
+}
 
 function heartbeat( ) {
     if ( isConnected( ) ) {
-        vwf_view.kernel.callMethod( sceneId, "heartbeatUser", [ playerId, vwf_view.kernel.moniker() ] );
+        vwf_view.kernel.callMethod( sceneId, "heartbeatUser", [ localUsername ] );
     }
     else {
-        clearInterval( heartbeatId );
+        stopHeartbeat( );
     }
 }
 
 function isConnected( ) {
-  if ( playerId != undefined ) {
-    if ( vwf_view.kernel.find( "", "/users/*" ).indexOf( playerId ) > -1 ) {
-      return true;
+    if ( localUsername != undefined ) {
+        return true;
     }
-    vwf_view.logger.warn( "Tested connection with playerId " + playerId + " but could not find playerId" );
-    debugInformation( );
-    playerId = undefined;
-    displayLogin( );
-    enableLogonDataEntry( );
-    hideUserExistsMessage( );
-  }
-  return false;
+    return false;
 }

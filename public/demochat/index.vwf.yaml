@@ -64,6 +64,9 @@ events:
 # The userMissing event is posted whenever a call is made for a user that is
 # not found.
   userMissing:
+  userDeleted:
+  userRenamed:
+  userColorChanged:
 children:
 # The users child is used to contain the users that are currently connected.
 # It provides a tick function that deals with removing users whose heartbeat
@@ -71,11 +74,14 @@ children:
 # is already in use.
   users:
     extends:  http://vwf.example.com/node.vwf
+    properties:
+      usersTime: undefined
     methods:
       testUsername:
       tick:
     scripts:
     - |
+      this.badTimes = [];
       this.testUsername = function( userName ) {
         //Loop over children, test if userName is equal to children's
         //names. Return true if there is no match(the name is good),
@@ -89,16 +95,39 @@ children:
         return nameGood;
       };
       this.tick = function( ) {
+        var newTime = vwf.time();
+        var actuallyRemove = true;
+        var resetHeartbeats = false;
+        if ( this.usersTime == undefined ) {
+          this.usersTime = newTime
+        }
+        else if ( newTime < this.usersTime ) {
+          actuallyRemove = false;
+          resetHeartbeats = true;
+        }
+        else if ( newTime - this.usersTime > 1.0 ) {
+          if ( this.badTimes.indexOf( newTime ) == -1 ) {
+            this.badTimes.push( newTime );
+          }
+          return;
+        }
+        else if ( this.badTimes.indexOf( newTime ) > -1 ) {
+          return;
+        }
+        this.usersTime = newTime;
         // When the model is tick-ed, first set up an array to hold
         // children to be removed, and calculate the current heartbeat
         // cutoff (now - heartbeatTimeout).
         var myParent = this.parent;
         var toRemove = [ ];
-        var curTimeCutoff = this.time - this.parent.heartbeatTimeout;
+        var curTimeCutoff = this.usersTime - this.parent.heartbeatTimeout;
         // Loop over children, testing their latest heartbeat, add to
         // the array of children to be removed if they fail the test.
         this.children.forEach( function ( entry ) {
-          if ( entry.lastHeartbeat < curTimeCutoff ) {
+          if ( resetHeartbeats == true ) {
+            entry.lastHeartbeat = myParent.usersTime;
+          }
+          else if ( ( entry.lastHeartbeat < curTimeCutoff ) && ( actuallyRemove == true ) ) {
             toRemove.push( entry );
           }
         } );
@@ -106,6 +135,8 @@ children:
         // userRemoved event to inform the various views, then delete
         // the timed out User.
         toRemove.forEach( function ( entry ) {
+          vwf.logger.warn("About to delete user with name " + entry.displayName + " and heartbeat time " + entry.lastHeartbeat + " when curTimeCutoff is " + curTimeCutoff );
+          myParent.userDeleted( entry.displayName );
           vwf.deleteNode( entry.id );
         } );
       };
@@ -178,23 +209,17 @@ scripts:
     } );
   };
   
-  this.retrieveUser = function ( userNode, userView ) {
+  this.retrieveUser = function ( userName ) {
     var user = undefined;
     for ( var childIndex = 0; childIndex < this.users.children.length; childIndex++ ) {
-      if ( ( this.users.children[ childIndex ].id == userNode ) && ( this.users.children[ childIndex ].viewHandle == userView ) ) {
+      if ( this.users.children[ childIndex ].displayName == userName ) {
         user = this.users.children[ childIndex ];
         break;
       }
-      if ( this.users.children[ childIndex ].id == userNode ) {
-        vwf.logger.warn( "RetrieveUser found node id " + userNode + " but expected view handle " + userView + " and instead found " + this.users.children[ childIndex ].viewHandle );
-      }
-      if ( this.users.children[ childIndex ].viewHandle == userView ) {
-        vwf.logger.warn( "RetrieveUser found view handle " + userView + " but expected node id " + userNode + " and instead found " + this.users.children[ childIndex ].id );
-      }
     }
     if ( user == undefined ) {
-      vwf.logger.warn( "RetrieveUser could not find node id " + userNode + " with view handle " + userView );
-      this.userMissing( userNode, userView );
+      vwf.logger.warn( "RetrieveUser could not find user name " + userName );
+      this.userMissing( userName );
     }
     return user;
   };
@@ -206,50 +231,70 @@ scripts:
   // message and posts an event to play an alert sound for the user if it is).
   // Then actually post the userMessage event to send the message to the various
   // views.
-  this.sendMessage = function( message, userNode, userView ) {
-    var user = this.retrieveUser( userNode, userView );
+  this.sendMessage = function( message, userName ) {
+    var user = this.retrieveUser( userName );
     if ( user != undefined ) {
       this.users.children.forEach( function ( entry ) {
         entry.testMessageForName( message );
       } );
       this.userMessage( user.displayName, user.displayColor, this.cleanupString( message ) );
     }
+    else {
+      vwf.logger.warn("Send message failed to retrieve user: " + userName );
+    }
   };
 
-  this.userColorChange = function( color, userNode, userView ) {
-    var user = this.retrieveUser( userNode, userView );
+  this.userColorChange = function( color, userName ) {
+    var user = this.retrieveUser( userName );
     if ( user != undefined ) {
       user.displayColor = color;
+      this.userColorChanged( userName, color );
+    }
+    else {
+      vwf.logger.warn( "Color change failed to retrieve user: " + userName );
     }
   };
   
-  this.userSoundChange = function( sound, userNode, userView ) {
-    var user = this.retrieveUser( userNode, userView );
+  this.userSoundChange = function( sound, userName ) {
+    var user = this.retrieveUser( userName );
     if ( user != undefined ) {
       user.alertSound = sound;
     }
+    else {
+      vwf.logger.warn( "Sound Change failed to retrieve user: " + userName );
+    }
   };
   
-  this.renameUser = function( newName, userNode, userView ) {
-    var user = this.retrieveUser( userNode, userView );
+  this.renameUser = function( newName, oldName ) {
+    var user = this.retrieveUser( oldName );
     if ( user != undefined ) {
       if ( this.users.testUsername( newName ) ) {
         user.displayName = newName;
+        this.userRenamed( newName, oldName );
       }
+    }
+    else {
+      vwf.logger.warn( "Rename user failed to retrieve user: " + userName );
     }
   };
   
-  this.removeUser = function( userNode, userView ) {
-    var user = this.retrieveUser( userNode, userView );
+  this.removeUser = function( userName ) {
+    var user = this.retrieveUser( userName );
     if ( user != undefined ) {
-      vwf.deleteNode( userNode );
+      vwf.deleteNode( user.id );
+    }
+    else {
+      vwf.logger.warn( "Remove user failed to retrieve user: " + userName );
     }
   };
 
-  this.heartbeatUser = function( userNode, userView ) {
-    var user = this.retrieveUser( userNode, userView );
+  this.heartbeatUser = function( userName ) {
+    var user = this.retrieveUser( userName );
     if ( user != undefined ) {
-      user.lastHeartbeat = vwf.time();
+      user.lastHeartbeat = this.users.usersTime;
+    }
+    else {
+      vwf.logger.warn( "Heartbeat user failed to retrieve user: " + userName );
     }
   };
   
@@ -263,6 +308,7 @@ scripts:
       //If the username is valid, create the new user as a child of users.
       //Provide a callback function that when the user creation is finished,
       //sends an appropriate userCreated event.
+      var newTime = this.users.usersTime;
       var userDef = { 
         "extends": "demochatuser.vwf",
         "properties": {
@@ -270,16 +316,16 @@ scripts:
           "viewHandle": viewHandle,
           "displayColor": userColor,
           "alertSound": userSound,
-          "lastHeartbeat": vwf.time()
+          "lastHeartbeat": newTime
         },
         "children": { } 
       };
       this.users.children.create( userName, userDef, function( node ) {
         var userList = [ ];
         node.parent.children.forEach( function( entry ) {
-          userList.push( [ entry.id, entry.displayName, entry.displayColor ] );
+          userList.push( [ entry.id, entry.displayName, entry.displayColor, entry.viewHandle ] );
         } );
-        this.parent.userCreated( node.id, node.displayName, node.displayColor, userList, node.parent.parent.heartbeatInterval );
+        this.parent.userCreated( node.id, node.displayName, node.displayColor, userList, node.parent.parent.heartbeatInterval, node.viewHandle );
       } );
     }
   } //@ sourceURL=index.vwf
