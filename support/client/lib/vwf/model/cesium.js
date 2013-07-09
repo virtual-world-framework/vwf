@@ -40,6 +40,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 "creation": false,
                 "initializing": false,
                 "parenting": false,
+                "deleting": false,
                 "properties": false,
                 "setting": false,
                 "getting": false
@@ -231,7 +232,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                 node.cesiumObj = new Cesium.PolylineCollection();
                 node.scene = sceneNode.scene; 
-                node.cesiumObj.vwfID = childID;    
+                node.cesiumObj.vwfID = childID;  
+                //node.scene.getPrimitives().add( node.cesiumObj );  
 
             } else if ( isPolyline.call( this, protos ) ) { 
 
@@ -252,7 +254,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
 
                     node.cesiumObj = node.polylineCollection.add( childSource );
-                    primitives.add( node.polylineCollection );
+                    if ( !primitives.contains( node.polylineCollection ) ) {
+                        primitives.add( node.polylineCollection );
+                    }
                     node.cesiumObj.vwfID = childID;
                 }
                 node.scene = sceneNode.scene;  
@@ -429,15 +433,60 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- deletingNode -------------------------------------------------------------------------
 
         deletingNode: function( nodeID ) {
+            
+            if ( this.debug.deleting ) {
+                this.logger.infox( "deletingNode", nodeID );
+            }
+
             if ( this.state.nodes[ nodeID ] ) {
                 var node = this.state.nodes[ nodeID ];
                 var scene = this.state.scenes[ node.sceneID ];
                 
                 var sceneNode = findSceneNode.call( this, node );
- 
-                if ( node.bbCollection ) {
-                    sceneNode.scene.getPrimitives().remove(node.bbCollection);
+                
+                //debugger;
+
+                if ( node.cesiumObj ) {
+                    if ( node.cesiumObj instanceof Cesium.Billboard ) {
+                        if ( node.bbCollection ) {
+                            node.bbCollection.remove( node.cesiumObj );
+                            if ( node.bbCollection.getLength() == 0 ) {
+                                sceneNode.scene.getPrimitives().remove( node.bbCollection );
+                            }
+                            node.bbCollection = undefined;
+                            node.cesiumObj = undefined;
+                        }
+                        node.cesiumObj = undefined;
+                    } else if ( node.cesiumObj instanceof Cesium.Label ) {
+                        if ( node.labelCollection ) {
+                            node.labelCollection.remove( node.cesiumObj );
+                            if ( node.labelCollection.getLength() == 0 ) {
+                                sceneNode.scene.getPrimitives().remove( node.labelCollection );
+                            }
+                            node.labelCollection = undefined;
+                            node.cesiumObj = undefined;
+                        }
+                        node.cesiumObj = undefined;
+                    } else if ( node.cesiumObj instanceof Cesium.Polyline ) {
+                        var parentNode = this.state.nodes[ node.parentID ]; 
+                        if ( parentNode ) {
+                            if ( parentNode.cesiumObj instanceof Cesium.PolylineCollection ) {
+                                // this should work, but there's an error in Cesium
+                                // when an object is removed the member isn't deleted
+                                // then later when the collection is removed, the _polylines
+                                // var has a series of null references
+                                //parentNode.cesiumObj.remove( node.cesiumObj );
+                                node.cesiumObj = undefined;
+                            }
+                        }
+                    } else if ( node.cesiumObj instanceof Cesium.PolylineCollection ) {
+                        //debugger;
+                        sceneNode.scene.getPrimitives().remove( node.cesiumObj );
+                        node.cesiumObj = undefined;
+                    }
                 }
+
+
 
                 delete this.state.nodes[ nodeID ];
             }
@@ -527,7 +576,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     switch ( propertyName ) {
 
                         case "visible":
-                            if ( node.cesiumObj.hasOwnProperty( propertyName ) ) {
+                            if ( node.cesiumObj.hasOwnProperty( 'show' ) ) {
                                 node.cesiumObj.show = Boolean( propertyValue );
                             } else if ( node.cesiumObj.setShow ) {
                                 node.cesiumObj.setShow( Boolean( propertyValue ) );

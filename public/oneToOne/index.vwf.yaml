@@ -56,8 +56,7 @@ children:
           for ( var i = 0; i < this.parent.markupAdded.length; i++ ) {
             for ( var j = 0; j < this.parent.children.length; j++ ) {
               if ( this.parent.children[j].id == this.parent.markupAdded[i] ) {
-                childToDelete = this.parent.children[j];
-                this.parent.children.delete( childToDelete );
+                this.parent.deleteNode( this.parent.children[j] ); 
                 break;
               }
             }
@@ -98,11 +97,6 @@ scripts:
       this.polyLineCollection = undefined;
       this.markupAdded = [];
       
-      // these properties should be getting set 
-      // by the initialization process, but it's not happening
-      //this.toolbar.inputMode = "orbit";
-      //this.toolbar.selectedColor = "black";
-
       this.minDistanceSquared = this.minDrawDistance * this.minDrawDistance;
     }
     
@@ -313,4 +307,13 @@ scripts:
       }
       return distSquared;
 
+    } 
+    this.deleteNode = function( node ) {
+      var len = node.children.length;
+      for ( var i = len-1; i >=0; i-- ) {
+        this.deleteNode( node.children[i] );
+      }
+      if ( node.parent ) {
+        node.parent.children.delete( node );
+      }
     } //@ sourceURL=index.vwf
