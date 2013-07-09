@@ -21,6 +21,7 @@
     <script type="text/javascript" src="{{root}}/js/knockout-2.2.1.js"></script>
 	<script type="text/javascript" src="{{root}}/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="{{root}}/vwf/view/editorview/sha256.js"></script>
+	<script type="text/javascript" src="{{root}}/js/moment.min.js"></script>
 
     <script type="text/javascript">
 		"use strict";
@@ -87,7 +88,6 @@
 				else self.previousDisabled(true);
 				
 			};
-
 		};
 		
 		function checkFilter(textArr)
@@ -138,6 +138,11 @@
 			return tempArr;
 		};
 		
+		function removeAgoFromMoment(date){
+			var temp = moment(date).fromNow();
+			return temp.substr(0, temp.length - 4);
+		};
+		
 		function showStates(){
 		
 			$.getJSON("./vwfDataManager.svc/states",function(e){
@@ -156,15 +161,12 @@
 					saveIndex = tempArr.indexOf(id);
 					saveIndex = saveIndex > -1 ? saveIndex : i;
 					
-					//If the incoming and currently displayed objects are not the same, then something must have chaged. Update
-					if(JSON.stringify(vwfPortalModel.worldObjects()[saveIndex]) != JSON.stringify(e[keys[i]])){
-						
-						e[keys[i]].hotState = ko.observable(false);
-						e[keys[i]].lastUpdate = e[keys[i]].lastUpdate?e[keys[i]].lastUpdate:(new Date()).toString();
-						e[keys[i]].description = e[keys[i]].description ? e[keys[i]].description : "No description";
-						
-						vwfPortalModel.worldObjects()[saveIndex] = e[keys[i]];	
-					}
+					e[keys[i]].hotState = ko.observable(false);
+					e[keys[i]].lastUpdate = e[keys[i]].lastUpdate?removeAgoFromMoment(e[keys[i]].lastUpdate):removeAgoFromMoment(new Date());
+					e[keys[i]].description = e[keys[i]].description ? e[keys[i]].description : "No description";
+					e[keys[i]].editVisible = ko.observable(false);
+					
+					vwfPortalModel.worldObjects()[saveIndex] = e[keys[i]];	
 				}
 				
 				vwfPortalModel.getPage(0);

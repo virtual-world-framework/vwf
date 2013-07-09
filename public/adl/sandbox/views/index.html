@@ -18,26 +18,25 @@
 			</div>
 			<div class="row" id="activeRow" data-bind="foreach:displayWorldObjects">				
 				<div data-bind="visible:isVisible" class="span3">
-					<div class="worldBox">
-						<div>
+					<div class="worldBox" data-bind="event: {mouseover:function(){editVisible(true)}, mouseout:function(){editVisible(false)}}">
+						<div style="margin-bottom: 10px;">
 							<a data-bind="attr:{href:'{{root}}/'+id}, text:$root.getShorterStr(title, 20)" href="">Title</a>
 							<span class="owner" data-bind="text:' - ' + owner"></span>
 						</div>
 						<div>								
 							<div class="worldInfo">
 								<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
-									<div class="description" data-bind="text:$root.getShorterStr(description, 38)"></div>
-									<div class="objects" data-bind="text:objects +' objects'"></div>
-									<div class="lastModified" data-bind="text:$root.getShorterStr(lastUpdate, 37)"></div>
-									<div class="stateid"></div>
+									<span class="description" data-bind="text:$root.getShorterStr(description, 30)"></span>
+									&nbsp;<span class="lastModified stateid" data-bind="text:' (' + lastUpdate + ')' "></span>
+									<div class="objects" data-bind="text: objects + (objects == 1 ? ' object ' : ' objects')"></div>
 								</a>
 							</div>
-							<div class="editstate" data-bind="css:$root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin)?'editstate':'editstateGuest'">
+							<div class="editstate" data-bind="css:'editstateGuest'">
 								<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState()">Active</a>
 								
 								<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) -->
-									<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
-									<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
+									<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}, visible: editVisible"></a>
+									<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}, visible: editVisible"></a>	
 								<!-- /ko -->
 							</div>
 						</div>
@@ -67,9 +66,9 @@
 					
 				showStates();
 
-				window.setInterval(function(){
-					showStates();
-				},10000);
+				//window.setInterval(function(){
+				//	showStates();
+				//},10000);
 
 			});
 		});
