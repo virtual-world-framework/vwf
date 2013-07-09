@@ -27,9 +27,9 @@
 							<div class="worldInfo">
 								<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
 									<div class="description" data-bind="text:$root.getShorterStr(description, 38)"></div>
-									<div class="objects" data-bind="text:objects +' objects currently in world'"></div>
+									<div class="objects" data-bind="text:objects +' objects'"></div>
 									<div class="lastModified" data-bind="text:$root.getShorterStr(lastUpdate, 37)"></div>
-									<div class="stateid" data-bind="text:id"></div>
+									<div class="stateid"></div>
 								</a>
 							</div>
 							<div class="editstate" data-bind="css:$root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin)?'editstate':'editstateGuest'">
