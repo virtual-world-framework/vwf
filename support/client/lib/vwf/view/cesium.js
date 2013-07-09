@@ -190,7 +190,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                             "position": undefined,
                             "up": undefined,
                             "right": undefined,
-                            "earthDistance": 0,
+                            //"earthDistance": 0,
                             "equals": function( v1, v2 ) {
                                 return ( ( Math.round( v1.x ) == Math.round( v2.x ) ) && ( Math.round( v1.y ) == Math.round( v2.y ) ) && ( Math.round( v1.z ) == Math.round( v2.z ) ) );
                             },
@@ -207,13 +207,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                         } else {
                                             retObj.position = [ cam.position.x, cam.position.y, cam.position.z ];
                                         }
-                                        var dist = Math.round( this.calcDistanceToOrigin( cam ) );
-                                        var tolerance = 2;
-                                        if ( dist <= this.earthDistance - tolerance || dist >= this.earthDistance + tolerance ) {
+                                        //var dist = Math.round( this.calcDistanceToOrigin( cam ) );
+                                        //var tolerance = 2;
+                                        //if ( dist <= this.earthDistance - tolerance || dist >= this.earthDistance + tolerance ) {
                                             // is there a way to fire an event from here?
                                             // console.info( "change in the distance to earth:" + this.earthDistance );  
-                                        }
-                                        this.earthDistance = dist; 
+                                        //}
+                                        //this.earthDistance = dist; 
                                     }
                                     if ( !Cesium.Cartesian3.equals( this.up, cam.up ) ) {
                                         if ( retObj === undefined ) {
@@ -232,13 +232,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                 }
                                 return retObj;
                             },
-                            "calcDistanceToOrigin": function( obj ) {
-                                if ( obj.position ){
-                                    var p = obj.position;
-                                    return Math.sqrt( ( p.x * p.x ) + ( p.y * p.y ) + ( p.z * p.z ) );
-                                }
-                                return undefined;
-                            },
+                            // "calcDistanceToOrigin": function( obj ) {
+                            //     if ( obj.position ){
+                            //         var p = obj.position;
+                            //         return Math.sqrt( ( p.x * p.x ) + ( p.y * p.y ) + ( p.z * p.z ) );
+                            //     }
+                            //     return undefined;
+                            // },
                             "getCurrent": function( cam ) {
                                 this.direction = camera.direction.clone();
                                 this.position = camera.position.clone();
