@@ -2,3 +2,6 @@
     position: absolute;
     -webkit-transform: rotateY(180deg);
 }
+#loginDialog {
+    -webkit-transform: rotateY(180deg);
+}
