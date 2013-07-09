@@ -151,22 +151,26 @@
 		}
 		this.setTerrainAlgorithm = function(algo,params)
 		{
-			
-			this.terrainType = algo;
-			this.terrainParams = params;
-			if(!this.init) return;
-			this.cancelUpdates();
-			this.terrainGenerator.reInit(this.terrainType,this.terrainParams);
-			this.TileCache.clear();
-			
-			this.quadtree.walk(function(n)
+			try{
+				loadScript('vwf/model/threejs/' + algo + '.js');
+				this.terrainType = algo;
+				this.terrainParams = params;
+				if(!this.init) return;
+				this.cancelUpdates();
+				this.terrainGenerator.reInit(this.terrainType,this.terrainParams);
+				this.TileCache.clear();
+				
+				this.quadtree.walk(function(n)
+				{
+					if(n.mesh)
+						self.TileCache.returnMesh(n.mesh);
+				});
+				quadtreesetRes(tileres);
+				this.quadtree = new QuadtreeNode([-worldExtents,-worldExtents],[worldExtents,worldExtents],this.getRoot(),0,-1,minTileSize,maxTileSize);
+			}catch(e)
 			{
-				if(n.mesh)
-					self.TileCache.returnMesh(n.mesh);
-			});
-			quadtreesetRes(tileres);
-			this.quadtree = new QuadtreeNode([-worldExtents,-worldExtents],[worldExtents,worldExtents],this.getRoot(),0,-1,minTileSize,maxTileSize);
-			
+				console.log('terrain algorithm not found');
+			}
 		}
 		this.cancelUpdates =function()
 		{
@@ -710,6 +714,10 @@
 		this.gettingProperty = function(propertyName)
 		{
 			
+			var algoprops = this.terrainGenerator.getAlgorithmData();
+			if(algoprops[propertyName] != undefined)
+				return algoprops[propertyName];
+				
 			if(propertyName == 'controlPoints')
 			{
 				return this.controlPoints ;
@@ -725,6 +733,74 @@
 			if(propertyName == 'terrainParams')
 			{		 
 				return this.terrainParams;
+			}
+			if(propertyName == 'Extents')
+			{		 
+				return worldExtents;
+			}
+			if(propertyName == 'tileRes')
+			{		 
+				return tileres;
+			}
+			if(propertyName == 'maxTileSize')
+			{		 
+				return maxTileSize;
+			}
+			if(propertyName == 'minTileSize')
+			{		 
+				return totalmintilesize;
+			}
+			if(propertyName == 'EditorData')
+			{
+
+					var editordata = {
+						_active:{displayname : 'Enabled',property:'enabled',type:'check',min:-10,max:10,step:.01},
+						extents:{
+								displayname : 'Extents (meters^2)',
+								property:'Extents',
+								type:'slider',
+								min:1024,
+								max:1048576,
+								step:1024
+						},
+						tileRes:{
+								displayname : 'Tile Res',
+								property:'tileRes',
+								type:'slider',
+								min:2,
+								max:26,
+								step:2
+						},
+						maxTileSize:{
+								displayname : 'Max Tile Size (m^2)',
+								property:'maxTileSize',
+								type:'slider',
+								min:256,
+								max:4096,
+								step:256
+						},
+						minTileSize:{
+								displayname : 'Min Tile Size (m^2)',
+								property:'minTileSize',
+								type:'slider',
+								min:16,
+								max:256,
+								step:16
+						},
+						_generator:{
+								displayname : 'Terrain Generator',
+								property:'terrainType',
+								type:'text'
+						}
+					}
+					
+					var algodata = this.terrainGenerator.getEditorData();
+					for(i in algodata)
+					{
+						editordata[i] = algodata[i];
+					}
+					return editordata;
+
 			}			
 		}
 		

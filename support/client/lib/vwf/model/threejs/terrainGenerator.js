@@ -210,9 +210,16 @@ new (function(){
 		this.currentBuffers = [];
 		this.readers = [];
 		
+		try{
 		loadScript('vwf/model/threejs/' + type + '.js');
-		
+		}catch(e)
+		{
+			type = 'NoiseTerrainAlgorithm';
+			loadScript('vwf/model/threejs/' + type + '.js');
+		}
 		this.terrainAlgorithm = new (eval(type))();
+		
+		
 		
 		this.terrainAlgorithm.importScript = function(url)
 		{
@@ -246,7 +253,7 @@ new (function(){
 		}.bind(this);
 		
 		if(this.terrainAlgorithm.poolInit)
-			poolSideData = this.terrainAlgorithm.poolInit(init);
+			poolSideData = this.terrainAlgorithm.poolInit(init,params);
 		
 		
 		
@@ -284,6 +291,10 @@ new (function(){
 	this.getAlgorithmData = function()
 	{
 		return this.terrainAlgorithm.getAlgorithmDataPool();
+	}
+	this.getEditorData = function()
+	{
+		return this.terrainAlgorithm.getEditorData();
 	}
 	this.setAlgorithmData = function(params,updatelist)
 	{

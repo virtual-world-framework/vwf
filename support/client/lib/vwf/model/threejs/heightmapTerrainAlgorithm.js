@@ -10,6 +10,7 @@ function heightmapTerrainAlgorithm()
 		this.width = data.width;
 		this.min = data.min;
 		this.type = 'bt';
+		this.url = 'terrain/deathvally.bt';
 		this.importScript('simplexNoise.js');
 		this.importScript('Rc4Random.js');
 		this.SimplexNoise = new SimplexNoise((new Rc4Random(1 +"")).random);
@@ -19,12 +20,13 @@ function heightmapTerrainAlgorithm()
 	{	
 		
 		this.type = 'bt';
+		this.url = 'terrain/deathvally.bt';
 		if(this.type == 'img')
 		{
 			canvas = document.createElement('canvas');
 			
 			var img = new Image();
-			img.src = 'terrain/deathvally.jpeg';
+			img.src = this.url;
 			img.onload = function()
 			{
 				
@@ -67,7 +69,7 @@ function heightmapTerrainAlgorithm()
 					cb(null);
 				}
 			};
-			xhr.open('GET', "terrain/deathvally.bt");
+			xhr.open('GET', this.url);
 			xhr.send();
 		}
 		
@@ -110,9 +112,20 @@ function heightmapTerrainAlgorithm()
 		cb({height:this.height,width:this.width,min:min,data:data});
 	}
 	//This is the settings data, set both main and pool side
-	this.setAlgorithmData = function(seed)
+	this.getEditorData = function(data)
 	{
-		this.seed = seed;
+		return {
+		heightmapSrc:{
+								displayname : 'HeightMap URL',
+								property:'url',
+								type:'text'
+						}
+		}
+	}
+	//This is the settings data, set both main and pool side
+	this.setAlgorithmData = function(data)
+	{
+		
 	}
 	//this sets the values on the pool side. Keep these cached here, so the engine can query them without an async call
 	//updatelist is the existing tiles. Return tiles in an array  that will need an update after the property set. This will 
@@ -125,7 +138,10 @@ function heightmapTerrainAlgorithm()
 	//the engine will read the data values here
 	this.getAlgorithmDataPool = function(seed)
 	{
-		return this.seed;
+		return {
+			url:this.url
+		
+		};
 	}
 	//This will allow you to setup shader variables that will be merged into the the terrain shader
 	this.getMaterialUniforms = function(mesh,matrix)
@@ -161,6 +177,7 @@ function heightmapTerrainAlgorithm()
 			"return mix(near,diffuse,minamt);\n"+
 		"}")
 	}
+	
 	//This is the displacement function, which is called in paralell by the thread pool
 	this.displace= function(vert)
 	{

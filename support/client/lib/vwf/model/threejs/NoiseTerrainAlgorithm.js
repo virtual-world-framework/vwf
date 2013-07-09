@@ -31,6 +31,10 @@ function NoiseTerrainAlgorithm()
 	{
 		return true;
 	}
+	this.getEditorData = function()
+	{
+	
+	}
 	this.getMaterialUniforms = function(mesh,matrix)
 	{
 		var uniforms_default = {
