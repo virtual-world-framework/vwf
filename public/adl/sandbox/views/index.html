@@ -32,10 +32,13 @@
 									<div class="stateid" data-bind="text:id"></div>
 								</a>
 							</div>
-							<div class="editstate">
+							<div class="editstate" data-bind="css:$root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin)?'editstate':'editstateGuest'">
 								<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState()">Active</a>
-								<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
-								<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
+								
+								<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) -->
+									<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
+									<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
+								<!-- /ko -->
 							</div>
 						</div>
 					</div>

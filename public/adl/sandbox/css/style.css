@@ -190,7 +190,7 @@ a{
 	box-shadow: 5px 5px 5px;
 }
 
-.editstate
+.editstate, .editstateGuest
 {
 	display: block;
 	border-top: 1px solid #eee;
@@ -202,7 +202,12 @@ a{
 	padding-bottom: 20px;
 }
 
-.editstate a
+.editstateGuest{
+	
+	border-top: none;
+}
+
+.editstate a, .editstateGuest a
 {
 	text-align:right;
 	float:right;

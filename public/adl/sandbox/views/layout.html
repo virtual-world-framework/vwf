@@ -162,6 +162,7 @@
 						e[keys[i]].hotState = ko.observable(false);
 						e[keys[i]].lastUpdate = e[keys[i]].lastUpdate?e[keys[i]].lastUpdate:(new Date()).toString();
 						e[keys[i]].description = e[keys[i]].description ? e[keys[i]].description : "No description";
+						
 						vwfPortalModel.worldObjects()[saveIndex] = e[keys[i]];	
 					}
 				}
