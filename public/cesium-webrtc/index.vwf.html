@@ -89,20 +89,42 @@
                     return;
                 }
 
+
+                // going to use the default windows created by the driver
                 //console.info( "calledMethod( "+nodeID+", "+methodName+", "+methodParameters[0]+" )" );
-                switch ( methodName ) {
-                    case "newClientVideo":
-                        var moniker = methodParameters[1];
-                        //console.info( "++++   " + moniker + " == " + this.kernel.moniker() );
-                        if ( moniker && moniker == this.kernel.moniker() ) {
-                            createVideoElement( methodParameters[0] );
-                        }
-                        break;
-                }
+                // switch ( methodName ) {
+                //     case "newClientVideo":
+                //         var moniker = methodParameters[1];
+                //         //console.info( "++++   " + moniker + " == " + this.kernel.moniker() );
+                //         if ( moniker && moniker == this.kernel.moniker() ) {
+                //             createVideoElement( methodParameters[0] );
+                //         }
+                //         break;
+                // }
             }
 
-            vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-                if ( vwf_view.kernel.test( vwf_view.kernel.find( "", "/" )[0], "toolbar", nodeId ) ) {
+            var distanceToEarthCenter = 0;
+
+            vwf_view.satProperty = function( nodeId, propertyName, propertyValue ) {
+                var rootID = vwf_view.kernel.find( "", "/" )[0];
+                if ( nodeId == rootID ) {
+                    switch( propertyName ) {
+                        case "cameraViewData":
+                            var pos = propertyValue.position;
+                            if ( pos ) {
+                                distanceToEarth( ( pos[0] * pos[0] )+( pos[1] * pos[1] )+( pos[2] * pos[2] ) ); 
+                            }                            
+                            break;
+                    }
+                } else if ( vwf_view.kernel.test( rootID, "camera", nodeId ) ) {
+                    if ( propertyValue ) {
+                        switch( propertyName ) {
+                            case "position":  
+                                distanceToEarth( ( propertyValue[0] * propertyValue[0] )+( propertyValue[1] * propertyValue[1] )+( propertyValue[2] * propertyValue[2] ) ); 
+                                break;
+                        }
+                    }                    
+                } else if ( vwf_view.kernel.test( rootID, "toolbar", nodeId ) ) {
                     if ( propertyValue ) {
                         switch (propertyName) {
                             case "selectedColor":
@@ -113,6 +135,13 @@
                                 break;
                         }
                     }
+                }
+            }
+
+            function distanceToEarth( dist ) {
+                if ( distanceToEarthCenter != dist ) {
+                    
+                    distanceToEarthCenter = dist;
                 }
             }
 
