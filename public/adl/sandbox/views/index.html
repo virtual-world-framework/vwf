@@ -34,9 +34,9 @@
 							<div class="editstate" data-bind="css:'editstateGuest'">
 								<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState()">Active</a>
 								
-								<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) -->
-									<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}, visible: editVisible"></a>
-									<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}, visible: editVisible"></a>	
+								<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible -->
+									<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
+									<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
 								<!-- /ko -->
 							</div>
 						</div>
@@ -66,9 +66,9 @@
 					
 				showStates();
 
-				//window.setInterval(function(){
-				//	showStates();
-				//},10000);
+				window.setInterval(function(){
+					showStates();
+				},10000);
 
 			});
 		});
