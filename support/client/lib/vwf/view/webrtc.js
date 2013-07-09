@@ -41,7 +41,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             this.captureAudio = options.audio !== undefined  ? options.audio : true;
             this.stereo = options.stereo !== undefined  ? options.stereo : false;
             this.videoElementsDiv = options.videoElementsDiv !== undefined  ? options.videoElementsDiv : 'videoSurfaces';
-            this.createVideoElements = options.createVideoElements !== undefined  ? options.createVideoElements : true;
+            this.videoProperties = options.videoProperties !== undefined  ? options.videoProperties : {};
             this.debug = options.debug !== undefined  ? options.debug : false;
 
             this.videosAdded = 0;
@@ -252,7 +252,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     function displayVideo( url, name, destMoniker, muted ) {
         
-        if ( this.createVideoElements ) {
+        if ( this.videoProperties.create ) {
             //debugger;
             this.videosAdded++
             var $container;
