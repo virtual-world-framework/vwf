@@ -92,7 +92,7 @@ children:
 scripts:
 - |
     this.initialize = function() {
-      console.info( "=============== cesium-webrtc.initialize ===============" );
+      //console.info( "=============== cesium-webrtc.initialize ===============" );
       this.lastDrawPoint = undefined;
       this.polyLineCollection = undefined;
       this.markupAdded = [];
