@@ -142,6 +142,7 @@
             );
 
             var videosAdded = 1;
+            var localVideoDiv = undefined;
             var fullScreenVideo = false;
             var fullScreenVideoDiv = undefined;
             function createVideoElement( value ) {
@@ -169,6 +170,17 @@
                         "</div>"
                     );
                     $('#'+divId).draggable();
+                    // Create a larger video window for calibration purposes (only visible during calibration)
+                    $container.append(
+                        "<div id='calibrate-"+ divId + "'>" +
+                            "<video class='vwf-webrtc-video' id='calibrate-" + videoId +
+                                "' width='640' height='480' src='" + value.url + 
+                                "' loop='loop' autoplay = true" +
+                                " style='position: absolute; left: 0; top: 0; z-index: -8; width: 100%; height: 60%; visibility: hidden'>" +
+                            "</video>" +
+                        "</div>"
+                    );
+                    localVideoDiv = 'calibrate-'+videoId;
                 } else {
                     if ( !fullScreenVideo ) {
                         //console.info( "create fullscreen video: " + value.url );
@@ -177,7 +189,7 @@
                                 "<video class='vwf-webrtc-video' id='" + videoId +
                                     "' width='640' height='480' src='" + value.url + 
                                     "' loop='loop' autoplay = true" +
-                                    " style='position: absolute; left: 0; top: 0; z-index: -1;width:100%;height:60%;'>" +
+                                    " style='position: absolute; left: 0; top: 0; z-index: -1; width: 100%; height: 60%;'>" +
                                 "</video>" +
                             "</div>"
                         );
@@ -286,9 +298,39 @@
                 setMode('orbit');
             }
 
+            var calibrateMode = false;
             function calibrate() {
-                
+                if ( $('#calibrate').html() == "Calibrate" ) {
+                    $('#calibrate').html("Complete");
+                    $('#'+localVideoDiv).css("visibility", "visible");
+                    $('#'+fullScreenVideoDiv).css("visibility", "hidden");
+                    calibrateMode = true;
+                } else {
+                    $('#calibrate').html("Calibrate");
+                    $('#'+localVideoDiv).css("visibility", "hidden");
+                    $('#'+fullScreenVideoDiv).css("visibility", "visible");
+                    calibrateMode = false;
+                }
             }
+
+            $(document).keypress(function (e) {
+                if ( calibrateMode ) {
+                    // 38: Up arrow, not getting picked up
+                    // 40: Down arrow, not getting picked up
+                    // console.info(e.keyCode);
+
+                    var top = parseInt( $('#'+localVideoDiv).css("top") );
+
+                    if ( e.keyCode == '119' ) { // W
+                        top--;
+                    } else if ( e.keyCode == '115' ) { // S
+                        top++;
+                    }
+
+                    $('#'+localVideoDiv).css("top", top);
+                    $('#'+fullScreenVideoDiv).css("top", top);
+                }
+            });
 
             jQuery('#toolbar').mouseleave( function(evt) { 
                 evt.stopPropagation(); 
