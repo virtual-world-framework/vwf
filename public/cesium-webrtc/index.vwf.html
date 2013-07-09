@@ -140,9 +140,30 @@
 
             function distanceToEarth( dist ) {
                 if ( distanceToEarthCenter != dist ) {
-                    
+                    debugger;
+                    var rootID = vwf_view.kernel.find( "", "/" )[0];
+                    var minLineLength = undefined;
+                    var min = 6350000 * 6350000;
+                    var max = 17500000 * 17500000;
+                    //console.info( "dist to Origin changed: " + dist );
                     distanceToEarthCenter = dist;
+                    if ( dist < min ) {
+                        minLineLength = 200;
+                    } else if ( dist > max ) {
+                        minLineLength = 80000;
+                    } else {
+                        minLineLength = 200 + ( 79800 * ( ( dist - min ) / ( max - min ) ) );
+                    }
+                    if ( minLineLength ) {
+                        vwf_view.kernel.setProperty( rootID, "minDrawDistance", minLineLength );
+                    }
                 }
+
+                // default: Math.sqrt( 312905820319949.9 ) = 17689144.137576297 
+                //          Math.sqrt( 6400000000 ) = 80000 
+                // closest: Math.sqrt( 40601075714271 ) =  6371897.34
+                //          Math.sqrt( 40000 ) = 200                      
+
             }
 
             // vwf_view doesn't currently get messages from the document launch. Force a property update
