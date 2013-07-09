@@ -261,7 +261,7 @@ children:
     implements:  
     - http://vwf.example.com/control.vwf
     properties:
-      controlScale: 2
+      controlScale: 0
     children: 
       Untitled_029: 
         extends: http://vwf.example.com/node3.vwf 
