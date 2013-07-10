@@ -27,13 +27,14 @@ properties:
         case "pindrop":        
           break;
         default:
-          this.logger.warnx( "inputMode.set: draw and pindrop are the only supported input modes" );
+          this.logger.warnx( "inputMode.set: 'draw' and 'pindrop' are the only supported input modes" );
           break;
       } //@ sourceURL=inputMode.set
-    value: "draw"
-  nodesCreated: 
+    value: draw
+  nodesCreated: []
   lineIndex: 1
   pushpinIndex: 1
+  selectedColor: black
 methods:
   initializeCamera:
   initializeInputMode:
@@ -47,20 +48,6 @@ methods:
   draw:
   pindrop:
 children:
-  toolbar:
-    properties:
-      selectedColor:
-        set: |
-          this.selectedColor = value;
-          this.selectedColorChanged( value );
-        value:
-          "black"
-    methods:
-      clear: |
-        this.clearing();
-    events:
-      selectedColorChanged:
-      clearing:
   flat_terrain:
     extends: http://vwf.example.com/node3.vwf
     source: models/vwf_terrain.dae
@@ -382,11 +369,8 @@ scripts:
       this.camera.near = 2;
       this.camera.translationSpeed = 10000;
     }
-    this.toolbar.selectedColorChanged = this.events.add( function( color ) {
-    }, this );
-    this.toolbar.events.clearing = this.events.add( function() { 
-      this.clear(); 
-    }, this );
+
+
     var line = {
       "extends": "http://vwf.example.com/node3.vwf",
       "type": "definition/mesh",

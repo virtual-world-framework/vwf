@@ -22,11 +22,10 @@
       var inputMode;
       var mouseLeftDown = false;
       var minDistanceSquared;
+      var appID = vwf_view.kernel.application();
 
       function setColor(color) {
-        vwf_view.kernel.find("", "/toolbar", function(toolbarID) {
-          vwf_view.kernel.setProperty( toolbarID, "selectedColor", color );
-        });
+        vwf_view.kernel.setProperty( appID, "selectedColor", color );
         highlightColor(color);
       }
 
@@ -72,9 +71,7 @@
       }
 
       function clearOverlay() {
-        vwf_view.kernel.find(vwf_view.kernel.find("", "/")[0], "toolbar", function(toolbarID) {
-          vwf_view.kernel.callMethod( toolbarID, "clear" );
-        });
+        vwf_view.kernel.callMethod( appID, "clear" );
         setColor('black');
         setMode('draw');
       }
@@ -166,11 +163,9 @@
 
       // Get the initial values for inputMode and selectedColor (the logic for changing the view is in gotProperty)
 
-      vwf_view.kernel.getProperty( vwf_view.kernel.application(), "inputMode" );
-      vwf_view.kernel.getProperty( vwf_view.kernel.application(), "minDrawDistance" );
-      vwf_view.kernel.find(vwf_view.kernel.find("", "/")[0], "toolbar", function(toolbarID) {
-        vwf_view.kernel.getProperty( toolbarID, "selectedColor" );
-      }); //@ sourceURL=index.vwf.html
+      vwf_view.kernel.getProperty( appID, "inputMode" );
+      vwf_view.kernel.getProperty( appID, "minDrawDistance" );
+      vwf_view.kernel.getProperty( appID, "selectedColor" ); //@ sourceURL=index.vwf.html
 
     </script>
   </head>
