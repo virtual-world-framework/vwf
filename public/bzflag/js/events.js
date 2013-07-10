@@ -58,63 +58,17 @@ vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplements
 
 canvas.onmousedown = function(e) {
     if(playerNode) {
-        switch( e.button ) {
-            case 2: 
-                buttonStates.right = true;
-                break;
-            case 1: 
-                buttonStates.middle = true;
-                break;
-            case 0:
-                buttonStates.left = true;
-                break;
-        };
-        var eData = getMouseEventData( e );
-        if ( eData ) {
-            vwf_view.kernel.callMethod(sceneNode, "fireLaser", [playerName]);
-        }
+        vwf_view.kernel.callMethod(sceneNode, "fireLaser", [playerName]);
     }
 }
 
 canvas.onmouseup = undefined;
 
-canvas.onmouseover = function(e) {
-    if(playerNode) {
-        var eData = getMouseEventData( e, false );
-        if ( eData ) {
-            // input.lastPointerInfo = input.pointerInfo;
-            // input.pointerInfo = eData;
-            // input.lastInputTime = vwf_view.kernel.time(); 
-            // input.moveActive = true;
-            // updateModel((+new Date));
-        }
-    }
-}
+canvas.onmouseover = undefined;
 
-canvas.onmouseout = function(e) {
-    if(playerNode) {
-        var eData = getMouseEventData( e, false );
-        if ( eData ) {
-            // input.lastPointerInfo = input.pointerInfo;
-            // input.pointerInfo = undefined;
-            // input.lastInputTime = vwf_view.kernel.time(); 
-            // input.moveActive = false;
-        }
-    }
-}
+canvas.onmouseout = undefined;
 
-canvas.onmousemove = function(e) {
-    if(playerNode) {
-        var eData = getMouseEventData( e, false );
-        if ( eData ) {
-            // input.pointerEventTime = vwf_view.kernel.time();
-            // input.lastInputTime = input.pointerEventTime;
-            // input.lastPointerInfo = input.pointerInfo;
-            // input.pointerInfo = eData;
-            // input.lastInputTime = vwf_view.kernel.time(); 
-        }
-    }
-}
+canvas.onmousemove = undefined;
 
 canvas.onmousewheel = undefined;
 
