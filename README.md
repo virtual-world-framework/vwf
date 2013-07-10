@@ -1,7 +1,7 @@
 ADL Sandbox
 ===========
 
-The ADL sandbox is a fork of the [Virtual World Framework](https://github.com/virtual-world-framework/vwf)
+The ADL sandbox is an application based on the [Virtual World Framework](https://github.com/virtual-world-framework/vwf)
 with multiplayer simulation and content authoring capabilities. The whole application runs in native Javascript,
 so no plugins or installs are required.
 
