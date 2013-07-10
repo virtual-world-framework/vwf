@@ -447,6 +447,13 @@ define(
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Navigate');
 		});
 		
+		$('#MenuCameraFly').click(function (e)
+		{
+			clearCameraModeIcons();
+			$('#MenuCameraNavigateicon').css('background', '#9999FF');
+			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Free');
+			vwf.models[0].model.nodes['index-vwf'].flying = true;
+		});
 		
 		$('#MenuCameraNone').click(function (e)
 		{

@@ -1081,6 +1081,15 @@ scripts:
     this.prerender = function()
     {
         
+        
+        
+        if(this.cameramode == 'Free' && this.flying == true)
+        { 
+            this.center = MATH.addVec3(this.center,MATH.scaleVec3(this.GetCameraCenterRay(),window.deltaTime/30.0));
+            document.title = 1/(window.deltaTime/30.0);
+        }
+        
+        
         this.updateCamera();
     }
     this.postrender = function(e,viewprojection, wh, ww)
