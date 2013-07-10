@@ -38,6 +38,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var yawMatrix;
     var translation;
     var positionUnderMouseClick;
+    var boundingBox = undefined;
     // End Navigation
 
     return view.load( module, {
@@ -154,6 +155,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if ( navObject ) {
                     setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
                 }
+            } else if ( ( nodeID == this.kernel.application() ) &&
+                        ( propertyName == "boundingBox" ) ) {
+                boundingBox = propertyValue;
             }
         },
 
@@ -182,6 +186,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if ( navObject ) {
                     setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
                 }
+            } else if ( ( nodeID == this.kernel.application() ) &&
+                        ( propertyName == "boundingBox" ) ) {
+                boundingBox = propertyValue;
             }
 
             // Pay attention to these properties for all nodes
@@ -284,6 +291,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     if ( navObject ) {
                         setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
                     }
+                } else if ( propertyName == "boundingBox" ) {
+                    boundingBox = propertyValue;
                 } else if ( navObject && ( nodeID == navObject.ID ) ) {
                     
                     // These were requested in controlNavObject
@@ -1206,6 +1215,27 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 // Add the displacement to the current navObject position
                 goog.vec.Vec3.add( navObjectWorldPos, deltaTranslation, navObjectWorldPos );
 
+                if ( boundingBox != undefined ) {
+                    if ( navObjectWorldPos[ 0 ] < boundingBox[ 0 ][ 0 ] ) {
+                        navObjectWorldPos[ 0 ] = boundingBox[ 0 ][ 0 ];
+                    }
+                    else if ( navObjectWorldPos[ 0 ] > boundingBox[ 0 ][ 1 ] ) {
+                        navObjectWorldPos[ 0 ] = boundingBox[ 0 ][ 1 ];
+                    }
+                    if ( navObjectWorldPos[ 1 ] < boundingBox[ 1 ][ 0 ] ) {
+                        navObjectWorldPos[ 1 ] = boundingBox[ 1 ][ 0 ];
+                    }
+                    else if ( navObjectWorldPos[ 1 ] > boundingBox[ 1 ][ 1 ] ) {
+                        navObjectWorldPos[ 1 ] = boundingBox[ 1 ][ 1 ];
+                    }
+                    if ( navObjectWorldPos[ 2 ] < boundingBox[ 2 ][ 0 ] ) {
+                        navObjectWorldPos[ 2 ] = boundingBox[ 2 ][ 0 ];
+                    }
+                    else if ( navObjectWorldPos[ 2 ] > boundingBox[ 2 ][ 1 ] ) {
+                        navObjectWorldPos[ 2 ] = boundingBox[ 2 ][ 1 ];
+                    }
+                }
+                
                 // Insert the new navObject position into the translation array
                 var translationArray = translation.elements;
                 translationArray[ 12 ] = navObjectWorldPos [ 0 ];
@@ -1508,7 +1538,26 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             translationArray[ 12 ] += amountToMove * pickDirectionVector.x;
             translationArray[ 13 ] += amountToMove * pickDirectionVector.y;
             translationArray[ 14 ] += amountToMove * pickDirectionVector.z;
-
+            if ( boundingBox != undefined ) {
+                if ( translationArray[ 12 ] < boundingBox[ 0 ][ 0 ] ) {
+                    translationArray[ 12 ] = boundingBox[ 0 ][ 0 ];
+                }
+                else if ( translationArray[ 12 ] > boundingBox[ 0 ][ 1 ] ) {
+                    translationArray[ 12 ] = boundingBox[ 0 ][ 1 ];
+                }
+                if ( translationArray[ 13 ] < boundingBox[ 1 ][ 0 ] ) {
+                    translationArray[ 13 ] = boundingBox[ 1 ][ 0 ];
+                }
+                else if ( translationArray[ 13 ] > boundingBox[ 1 ][ 1 ] ) {
+                    translationArray[ 13 ] = boundingBox[ 1 ][ 1 ];
+                }
+                if ( translationArray[ 14 ] < boundingBox[ 2 ][ 0 ] ) {
+                    translationArray[ 14 ] = boundingBox[ 2 ][ 0 ];
+                }
+                else if ( translationArray[ 14 ] > boundingBox[ 2 ][ 1 ] ) {
+                    translationArray[ 14 ] = boundingBox[ 2 ][ 1 ];
+                }
+            }
             var navThreeObject = navObject.threeObject;
             var worldTransformArray = navThreeObject.matrixWorld.elements;
             worldTransformArray[ 12 ] = translationArray[ 12 ];
@@ -2261,6 +2310,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
         } else {
             vwf_view.kernel.getProperty( sceneRootID, "makeOwnAvatarVisible" );
+            vwf_view.kernel.getProperty( sceneRootID, "boundingBox" );
             vwf_view.kernel.getProperty( sceneRootID, "userObject" );
         }
     }
@@ -2421,7 +2471,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     // An almost identical function is copied in model/threejs.js, so if any modifications are made here, they 
     // should be made there, also
     function nodeLookAt( node ) {
-
         if ( !node ) {
             self.logger.warnx( "nodeLookAt: Node does not exist" );
             return;
@@ -2430,7 +2479,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // Function to make the object look at a particular position
         // (For use in the following conditional)
         var lookAtWorldPosition = function( targetWorldPos ) {
-            
             // Get the eye position
             var eye = new THREE.Vector3();
             var threeObject = node.threeObject;
@@ -2683,18 +2731,40 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 translationArray[ 12 ] = newTranslationInWorldArray[ 12 ];
                 translationArray[ 13 ] = newTranslationInWorldArray[ 13 ];
                 translationArray[ 14 ] = newTranslationInWorldArray[ 14 ];
-
+                var boundByBoundingBox = false;
+                if ( boundingBox != undefined ) {
+                    if ( translationArray[ 12 ] < boundingBox[ 0 ][ 0 ] ) {
+                        boundByBoundingBox = true;
+                    }
+                    else if ( translationArray[ 12 ] > boundingBox[ 0 ][ 1 ] ) {
+                        boundByBoundingBox = true;
+                    }
+                    if ( translationArray[ 13 ] < boundingBox[ 1 ][ 0 ] ) {
+                        boundByBoundingBox = true;
+                   }
+                    else if ( translationArray[ 13 ] > boundingBox[ 1 ][ 1 ] ) {
+                        boundByBoundingBox = true;
+                    }
+                    if ( translationArray[ 14 ] < boundingBox[ 2 ][ 0 ] ) {
+                        boundByBoundingBox = true;
+                    }
+                    else if ( translationArray[ 14 ] > boundingBox[ 2 ][ 1 ] ) {
+                        boundByBoundingBox = true;
+                    }
+                }
                 // -------------------------------------------------
                 // Put all components together and set the new pose
                 // -------------------------------------------------
-                                    
                 var navThreeObject = navObject.threeObject;
-                var navObjectWorldMatrix = navThreeObject.matrixWorld;
-                navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
-                navObjectWorldMatrix.multiplyMatrices( translation, navObjectWorldMatrix );
-                if ( navThreeObject instanceof THREE.Camera ) {
-                    var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
-                    navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
+                if ( boundByBoundingBox == false ) {
+                    var navObjectWorldMatrix = navThreeObject.matrixWorld;
+                    navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
+                    navObjectWorldMatrix.multiplyMatrices( translation, navObjectWorldMatrix );
+                
+                    if ( navThreeObject instanceof THREE.Camera ) {
+                        var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
+                        navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
+                    }
                 }
                 setTransformFromWorldTransform( navThreeObject );
                 setModelTransformProperty( navObject, navThreeObject.matrix.elements );
