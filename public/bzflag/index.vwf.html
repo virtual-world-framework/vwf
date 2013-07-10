@@ -74,7 +74,7 @@
 				draggable: false,
 				buttons: {
 					"Yes": function () {
-						vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [playerName]);
+						vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [playerName, vwf.moniker()]);
 						$(this).dialog("close");
 					},
 					"No": function () {

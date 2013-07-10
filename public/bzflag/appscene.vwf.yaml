@@ -45,6 +45,8 @@ properties:
 
 methods:
   update: 
+  findPlayers:
+  findPlayerByName: 
 scripts:
 - |
   var collisionMapCanvas, collisionMapContext, collisionMapImageData;
@@ -72,7 +74,7 @@ scripts:
     playerBoundingBox.min.z += deltaTranslation[2];
 
     collision = this.checkForStaticCollision(playerBoundingBox) ||
-        this.checkForDynamicCollision(player, playerBoundingBox, this.players.children);
+        this.checkForDynamicCollision(player, playerBoundingBox, this.findPlayers());
     return collision;
   }
   this.checkForStaticCollision = function(playerBoundingBox) {
@@ -120,4 +122,18 @@ scripts:
       }
     }
     return false;
+  }
+  this.findPlayers = function() {
+    return this.find(".//element(*,'http://vwf.example.com/navigable.vwf')");
+  }
+  this.findPlayerByName = function(playerName) {
+    var players = this.findPlayers();
+    var playerObject = undefined;
+    for(var i = 0, il = players.length; i < il; i++) {
+      if(players[i].playerName == playerName) {
+        playerObject = players[i];
+        break;
+      }
+    }
+    return playerObject;
   }
