@@ -32,8 +32,6 @@ scripts:
       minLifeTime: 1000,
       startSize: 400,
       endSize: 400,
-      startColor: "#ffffff",
-      endColor: "#ffffff",
       loop: false,
       image: "images/explode.png",
       maxEndAcceleration: [ 0.006, 0.006, 0.006 ],
@@ -41,6 +39,18 @@ scripts:
       minVelocity: [ -0.2, -0.2, -0.2 ],
       maxVelocity: [ 0.2, 0.2, 0.2 ],
       translation: [],
+      sizeRange: 0,
+      startColor: [ 1, 1, 1, 1],
+      endColor: [ 1, 1, 1, 1],
+      colorRange: [ .2, .1, .1, 0],
+      additive: false,
+      depthTest: false,
+      depthWrite: false,
+      maxOrientation: 0,
+      minOrientation: 0,
+      emitterSize: [ 500 , 0 , 500.0 ],
+      emitterType: "point",
+      textureTiles: 1,
     }
   }
   this.initialize = function() {
@@ -94,7 +104,7 @@ scripts:
               trans,
               trans
             );
-            this.laserParticle.translation = this.translation;
+            this.laserParticle.worldTransform = this.worldTransform;
           }
           else {
             if(this.parent.parent.bz_world.id != collision.id) {
@@ -144,7 +154,7 @@ scripts:
   this.explode = function() {
     this.children.delete(this.laserParticle);
     var newExplosion = $.extend(true, {}, explosion);
-    newExplosion.properties.translation = [this.translation[0], this.translation[1], this.translation[2]];
+    newExplosion.properties.worldTransform = this.worldTransform;
     this.children.create(this.name + "Explosion", newExplosion);
     this.future(5.0).clean();
   }

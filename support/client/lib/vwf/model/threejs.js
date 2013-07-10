@@ -554,7 +554,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
                         var transformMatrix = goog.vec.Mat4.createFromArray( propertyValue || [] );
-						
+						if(threeObject instanceof THREE.ParticleSystem)
+                        {   
+                            threeObject.updateTransform(propertyValue);
+                        }
                         // Store the value locally
                         // It must be stored separately from the threeObject so the view can change the
                         // threeObject's transform to get ahead of the model state without polluting it
@@ -781,11 +784,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         else
                         {
                             ps.shaderMaterial_default.blending = THREE.NormalBlending;  
-                            ps.shaderMaterial_default.transparent = false;
+                            ps.shaderMaterial_default.transparent = true;
                             ps.shaderMaterial_analytic.blending = THREE.NormalBlending; 
-                            ps.shaderMaterial_analytic.transparent = false;
+                            ps.shaderMaterial_analytic.transparent = true;
 						    ps.shaderMaterial_interpolate.blending = THREE.NormalBlending; 
-                            ps.shaderMaterial_interpolate.transparent = false;
+                            ps.shaderMaterial_interpolate.transparent = true;
                         }
 
                         ps.shaderMaterial_default.needsUpdate = true;   

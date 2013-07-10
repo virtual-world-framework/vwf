@@ -43,6 +43,7 @@ properties:
   makeOwnAvatarVisible: true
   userObject:
     extends: tank.vwf
+    implements: [ "http://vwf.example.com/navigable.vwf" ]
     properties:
       active: false
       laserCount: 0
@@ -51,6 +52,8 @@ properties:
       startingTranslation: []
       translation: []
       scale: 0.5
+      translationSpeed: 400
+      rotationSpeed: 0.3
     children:     
       camera:
         extends: http://vwf.example.com/camera.vwf
@@ -134,11 +137,25 @@ scripts:
           minLifeTime: 170000,
           startSize: 400,
           endSize: 400,
-          startColor: "#ffffff",
-          endColor: "#ffffff",
           loop: true,
+          translation: [],
+          minVelocity: [ 0, 0, 0.0],
+          maxVelocity: [ 0, 0, 0],
+          maxAcceleration: [ 0, 0, 0.0],
+          minAcceleration: [ 0, 0, 0.0],
+          sizeRange: 0,
+          startColor: [ 1, 1, 1, 1],
+          endColor: [ 1, 1, 1, 1],
+          colorRange: [ .2, .1, .1, 0],
+          additive: false,
+          depthTest: false,
+          depthWrite: false,
+          maxOrientation: 0,
+          minOrientation: 0,
+          emitterSize: [ 500 , 0 , 500.0 ],
+          emitterType: "point",
+          textureTiles: 1,
           image: "",
-          translation: []
         }
       }
     }
@@ -176,6 +193,7 @@ scripts:
       this.playerJoined( playerName );
       this.colorIndex += 1;
     }
+    console.info(this);
   }
   this.fireLaser = function(playerName) {
     var player = this.children[this.players[playerName]];
