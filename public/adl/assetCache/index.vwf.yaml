@@ -76,6 +76,8 @@ children:
       glge-linearAttenuation: 0.00000001
       glge-quadraticAttenuation: 0.0000001  
       translation: [ 400, 400, 900 ]
+methods:
+  tick:
 scripts:
 - |
     this.initialize = function(){
@@ -83,4 +85,29 @@ scripts:
       this.camera.transform = [ -1,0,0,0, 0,-1,0,0, 0,0,1,0, 0,0,0,1 ];
       this.camera.far = this.camera.far * 4;
       this.duck2.animationPlay();
+      this.count = 0;
+    }
+    this.tick = function()
+    {
+        this.count++;
+        if(this.count % 100 == 0)
+        {
+            
+            this.children.create('testnew',{
+            
+              
+              'extends': "http://vwf.example.com/node3.vwf",
+              implements:[ "http://vwf.example.com/animation.vwf" ],
+            source: "usmale.dae",
+            type: "model/vnd.collada+xml",
+            properties:
+            {
+              rotation: [ 1, 0, 0, 0 ],
+              translation: [(Math.random() - .5) * 10,(Math.random() - .5) * 10,(Math.random() - .5) * 10]
+            }
+            
+            
+            });
+        
+        }
     }

@@ -1969,8 +1969,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 		//if the asset registry entry is not pending and it is loaded, then just grab a copy, no download or parse necessary
 		else if(reg.loaded == true && reg.pending == false)
 		{
+			
 			var asset = (reg.node.clone());
-			var n = node.clone();
+			var n = asset;
 				var skins = []
 				walkGraph(n,function(node){
 					if(node instanceof THREE.SkinnedMesh)
@@ -1994,7 +1995,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				nodeCopy.threeObject.matrixAutoUpdate = false;
 				nodeCopy.threeObject.updateMatrixWorld(true);
 				propertyNotifyCallback();
-				nodeCopy.loadingCallback( true ); 
+				window.setTimeout(function(){
+					nodeCopy.loadingCallback( true ); 
+				},10);
 			
 		}
 		//if it's pending but not done, register a callback so that when it is done, it can be attached.
