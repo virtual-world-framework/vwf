@@ -1552,17 +1552,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
     }
 
-    //changing this function significantly from the GLGE code. Will search heirarchy down until encountering a matching chile
-    //will look into nodes that don't match.... this might not be desirable
-     function FindChildByName( obj, childName, childType, recursive ) {
+    // Changing this function significantly from the GLGE code
+    // Will search hierarchy down until encountering a matching child
+    // Will look into nodes that don't match.... this might not be desirable
+    function FindChildByName( obj, childName, childType, recursive ) {
         
         var child = undefined;
         if ( recursive ) {
+
+            // TODO: If the obj itself has the child name, the object will be returned by this function
+            //       I don't think this this desirable.
+
             if( nameTest.call( this, obj, childName ) ) {
                 child = obj;
             } else if ( obj.children && obj.children.length > 0) {
                 for( var i = 0; i < obj.children.length && child === undefined; i++ ) {
-                    child = FindChildByName( obj.children[i], childName, childType );
+                    child = FindChildByName( obj.children[i], childName, childType, true );
                 }
             }
         } else {
