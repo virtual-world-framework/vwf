@@ -26,27 +26,23 @@ properties:
       this.minDrawDistance = value;
       this.minDistanceSquared = value * value;  
     value: 200    
-  mouseMode: 
+  inputMode: 
     set: |
       switch( value ) {
-        case "look":
         case "orbit":
         case "draw":
         case "pindrop":
-          this.mouseMode = value;
+          this.inputMode = value;
           if ( value == "orbit" ) {
             this.navmode = "orbit";
-          } else if ( value == "look" ) {
-            this.navmode = "walk";
-            this.dragModeMove = false;
           } else {
             this.navmode = "none";
           }          
           break;
         default:
-          this.logger.debug( "WARNING: walk, look, and draw are the only supported mouseMode" );
+          this.logger.debug( "WARNING: orbit, draw, and pindrop are the only supported inputMode" );
           break;
-      }
+      } //@ sourceURL=inputMode.set
     value: "orbit"
   translationSpeed: 40.0
   nodesCreated: 
@@ -56,7 +52,7 @@ properties:
   pushpinIndex: 1
 methods:
   initializeCamera:
-  initializeMouseMode:
+  initializeInputMode:
   clear: |
     if ( this.nodesCreated ) {
       for ( var i = 0; i < this.nodesCreated.length; i++ ){
@@ -73,18 +69,11 @@ children:
           this.selectedColorChanged( value );
         value:
           "black"
-      inputMode:
-        set: |
-          this.inputMode = value;
-          this.inputModeChanged( value );
-        value:
-          "orbit"
     methods:
       clear: |
         this.clearing();
     events:
       selectedColorChanged:
-      inputModeChanged:
       clearing:
   flat_terrain:
     extends: http://vwf.example.com/node3.vwf
@@ -399,7 +388,7 @@ scripts:
       // created
       // TODO: When we can assume that initialize doesn't complete until all created nodes are in place, this
       //       will no longer need to be a future call because we will be able to assume that the camera exists
-      this.future( 0 ).initializeMouseMode();
+      this.future( 0 ).initializeInputMode();
       this.future( 0 ).initializeCamera();
     }
     this.initializeCamera = function() {
@@ -409,8 +398,6 @@ scripts:
       this.camera.lookAt = this.children.sceneCenter.id;
     }
     this.toolbar.selectedColorChanged = this.events.add( function( color ) {
-    }, this );
-    this.toolbar.inputModeChanged = this.events.add( function( mode ) {
     }, this );
     this.toolbar.events.clearing = this.events.add( function() { 
       this.clear(); 
@@ -445,8 +432,8 @@ scripts:
         scale: [ 6, 6, 6.6 ], 
       },    
     };
-    this.initializeMouseMode = function() {
-      this.mouseMode = "orbit";
+    this.initializeInputMode = function() {
+      this.inputMode = "orbit";
     }
     this.pointerDown = function( parms, pickInfo ){
       if ( pickInfo ) {
@@ -457,7 +444,7 @@ scripts:
     }
     this.pointerMove = function( parms, pickInfo ){
       if ( this.pointerIsDown() ) {
-        switch( this.mouseMode ) {
+        switch( this.inputMode ) {
           case "draw":
             if ( this.distanceFromLast( pickInfo ) > this.minDistanceSquared ) {
               this.draw( pickInfo );
@@ -467,7 +454,7 @@ scripts:
       }
     }
     this.pointerUp = function( parms, pickInfo ){
-      switch ( this.mouseMode ) {
+      switch ( this.inputMode ) {
         case "pindrop":
           this.pindrop( pickInfo );
           break;  
