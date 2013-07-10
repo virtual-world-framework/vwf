@@ -29,6 +29,7 @@
 <div id="selection-panel" style="position:absolute; bottom: 10%; top: 80%; right:10%; left:10%; background:#AAA;opacity:1.0;text-align:left;">
   <span>Marble Type:</span><span id="selection-panel-marble-name">Nothing Selected</span><span id="selection-panel-marble-image" style="margin-left:5px;vertical-align:-50%"></span><br>
   <button id="selection-deselect">Deselect Marble</button>
+  <button id="selection-exit">Exit Selection</button>
 </div>
 
 
@@ -99,6 +100,12 @@
     }
   } );
 
+  $( '#selection-exit' ).click( function ( ) {
+    if ( view.myUserObjectId != undefined ) {
+      vwf_view.kernel.callMethod( view.myUserObjectId, "callActivityMethod", [ "detachUser", [ ] ] );
+    }
+  } );
+  
   var updateSelectionPanel = function ( marbleName, marbleImage ) {
     $( '#selection-panel-marble-name' ).html( marbleName );
     if ( marbleImage != undefined ) {
