@@ -6,11 +6,14 @@ function heightmapTerrainAlgorithm()
 	{
 		this.data = data.data;
 		console.log('data received');
-		this.height = data.height;
-		this.width = data.width;
+		this.dataHeight = data.dataHeight;
+		this.dataWidth = data.dataWidth;
+		this.worldLength = 13500;
+		this.worldWidth = 9500;
 		this.min = data.min;
+		console.log('from thread: min is ' + this.min);
 		this.type = 'bt';
-		this.url = 'terrain/deathvally.bt';
+		this.url = 'terrain/River.bt';
 		this.importScript('simplexNoise.js');
 		this.importScript('Rc4Random.js');
 		this.SimplexNoise = new SimplexNoise((new Rc4Random(1 +"")).random);
@@ -20,7 +23,7 @@ function heightmapTerrainAlgorithm()
 	{	
 		
 		this.type = 'bt';
-		this.url = 'terrain/deathvally.bt';
+		this.url = 'terrain/River.bt';
 		if(this.type == 'img')
 		{
 			canvas = document.createElement('canvas');
@@ -30,28 +33,28 @@ function heightmapTerrainAlgorithm()
 			img.onload = function()
 			{
 				
-				this.height = img.naturalHeight;
-				this.width = img.naturalWidth;
-				canvas.height = this.height;
-				canvas.width = this.width;
+				this.dataHeight = img.naturalHeight;
+				this.dataWidth = img.naturalWidth;
+				canvas.height = this.dataHeight;
+				canvas.width = this.dataWidth;
 				var context = canvas.getContext('2d');
 				context.drawImage(img, 0, 0);
-				var data = context.getImageData(0, 0, this.height, this.width).data;
+				var data = context.getImageData(0, 0, this.dataHeight, this.dataWidth).data;
 				
-				var array = new Uint8Array(this.height*this.width);
-				for(var i =0; i < this.height*this.width * 4; i+=4)
+				var array = new Uint8Array(this.dataHeight*this.dataWidth);
+				for(var i =0; i < this.dataHeight*this.dataWidth * 4; i+=4)
 					array[Math.floor(i/4)] = Math.pow(data[i]/255.0,1.0) * 255;
-				var data = new Uint8Array(this.height*this.width);
-				for(var i = 0; i < this.width; i++)
+				var data = new Uint8Array(this.dataHeight*this.dataWidth);
+				for(var i = 0; i < this.dataWidth; i++)
 				{
-					for(var j = 0; j < this.height; j++)
+					for(var j = 0; j < this.dataHeight; j++)
 					{
-						var c = i * this.width + j;
-						var c2 = j * this.height + i;
+						var c = i * this.dataWidth + j;
+						var c2 = j * this.dataHeight + i;
 						data[c] = array[c2];
 					}
 				}
-				cb({height:this.height,width:this.width,min:0,data:data});
+				cb({dataHeight:this.dataHeight,dataWidth:this.dataWidth,min:0,data:data});
 			}
 		}
 		if(this.type == 'bt')
@@ -80,22 +83,22 @@ function heightmapTerrainAlgorithm()
 	{
 		
 		var DV = new DataView(arraybuf);
-		this.width = DV.getInt32(10,true);
-		this.height = DV.getInt32(14,true);
+		this.dataWidth = DV.getInt32(10,true);
+		this.dataHeight = DV.getInt32(14,true);
 		var dataSize = DV.getInt16(18,true);
 		var isfloat = DV.getInt16(20,true);
 		var scale = DV.getFloat32(62,true);
 		var data;
 		if(isfloat == 1)
 		{
-			data = new Float32Array(this.width*this.height);
+			data = new Float32Array(this.dataWidth*this.dataHeight);
 		}
 		else
 		{
-			data = new Int16Array(this.width*this.height);
+			data = new Int16Array(this.dataWidth*this.dataHeight);
 		}
 		var min = Infinity;
-		for(var i =0; i < this.width*this.height; i++)
+		for(var i =0; i < this.dataWidth*this.dataHeight; i++)
 		{
 			if(isfloat == 1)
 			{
@@ -109,7 +112,7 @@ function heightmapTerrainAlgorithm()
 		}
 		this.min = min;
 		this.data = data;
-		cb({height:this.height,width:this.width,min:min,data:data});
+		cb({dataHeight:this.dataHeight,dataWidth:this.dataWidth,min:min,data:data});
 	}
 	//This is the settings data, set both main and pool side
 	this.getEditorData = function(data)
@@ -147,7 +150,7 @@ function heightmapTerrainAlgorithm()
 	this.getMaterialUniforms = function(mesh,matrix)
 	{
 		var uniforms_default = {
-		diffuseSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/deathvallydiffuse.jpeg" ) },
+		diffuseSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/River.jpg" ) },
 		dirtSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/dirt.jpg" ) },
 		brushSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/scrub.jpg" ) },
 		};
@@ -166,7 +169,8 @@ function heightmapTerrainAlgorithm()
 		"uniform sampler2D brushSampler;\n"+
 		"vec4 getTexture(vec3 coords, vec3 norm)" +
 		"{"+
-			"vec4 diffuse = texture2D(diffuseSampler,((coords.yx * vec2(1.0,1.0) + 2500.0)/5000.0));\n"+
+			"vec4 diffuse = texture2D(diffuseSampler,((coords.yx * vec2(1.0,1.0) + vec2("+((this.worldWidth)/2).toFixed(5)+","+((this.worldLength)/2).toFixed(5)+"))/vec2("+((this.worldWidth)).toFixed(5)+","+((this.worldLength)).toFixed(5)+")));\n"+
+			//"vec4 diffuse = texture2D(diffuseSampler,((coords.yx * vec2(1.0,1.0) + vec2(6750.0,4750.0))/vec2(13500.0,9500.0)));\n"+
 			"vec4 dirt = texture2D(dirtSampler,((coords.yx / 10.0)));\n"+
 			"vec4 brush = texture2D(brushSampler,((coords.yx / 5.0)));\n"+
 			"float minamt = smoothstep(0.0,100.0,distance(cameraPosition , coords));\n"+
@@ -185,21 +189,21 @@ function heightmapTerrainAlgorithm()
 		z += this.SimplexNoise.noise2D((vert.x)/300,(vert.y)/300) * 4.5;
 		z += this.SimplexNoise.noise2D((vert.x)/10,(vert.y)/10) * 0.5;
 		var h = this.type == 'img'?2.2:1.0;
-		return this.sampleBiCubic((vert.x+ 2500) / 5000 ,(vert.y + 2500) / 5000  ) * h - this.min + z|| 0;
+		return this.sampleBiCubic((vert.x+ (this.worldLength/2)) / this.worldLength ,(vert.y + (this.worldWidth/2)) / this.worldWidth  ) * h  + z|| 0;
 	}
 	this.at = function(x,y)
 	{
-		if( x > this.height || x < 0) return 0;
-		if( y > this.width || y < 0) return 0;
-		var i = y * this.width  + x;
-		return this.data[i];
+		if( x >= this.dataHeight || x < 0) return 0;
+		if( y >= this.dataWidth || y < 0) return 0;
+		var i = y * this.dataWidth  + x;
+		return this.data[i]  - this.min;
 	}
 	this.sampleBiLinear = function(u,v)
 	{
 		//u = u - Math.floor(u);
 		//v = v - Math.floor(v);
-		u = u * this.height - .5;
-		v = v * this.width - .5;
+		u = u * this.dataWidth - .5;
+		v = v * this.dataHeight - .5;
 		var x = Math.floor(u);
 		var y = Math.floor(v);
 		var u_ratio = u -x;
@@ -225,11 +229,11 @@ function heightmapTerrainAlgorithm()
 	}
 	this.sampleBiCubic = function(u,v)
 	{
-		var y = Math.floor(u * this.height);
-		var x = Math.floor(v * this.width);
+		var y = Math.floor(u * this.dataHeight);
+		var x = Math.floor(v * this.dataWidth);
 		
-		u = (u * this.height) - Math.floor(u * this.height);
-		v = (v * this.width) - Math.floor(v * this.height);
+		u = (u * this.dataHeight) - Math.floor(u * this.dataHeight);
+		v = (v * this.dataWidth) - Math.floor(v * this.dataHeight);
 		var p = [];
 		var t = x;
 		x = y;
