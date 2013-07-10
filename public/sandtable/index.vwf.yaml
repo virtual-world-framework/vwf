@@ -12,7 +12,7 @@
 # the License.
 
 --- 
-extends: http://vwf.example.com/navtouch.vwf
+extends: http://vwf.example.com/scene.vwf
 type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
@@ -25,21 +25,14 @@ properties:
   inputMode: 
     set: |
       switch( value ) {
-        case "orbit":
         case "draw":
-        case "pindrop":
-          this.inputMode = value;
-          if ( value == "orbit" ) {
-            this.navmode = "orbit";
-          } else {
-            this.navmode = "none";
-          }          
+        case "pindrop":        
           break;
         default:
-          this.logger.debug( "WARNING: orbit, draw, and pindrop are the only supported inputMode" );
+          this.logger.warnx( "inputMode.set: draw and pindrop are the only supported input modes" );
           break;
       } //@ sourceURL=inputMode.set
-    value: "orbit"
+    value: "draw"
   translationSpeed: 40.0
   nodesCreated: 
   lineIndex: 1
@@ -80,8 +73,6 @@ children:
     properties:
       translation: [ 0, 0, -150 ]
       scale: [ 0.008, 0.008, 0.020 ]
-  sceneCenter:
-    extends: http://vwf.example.com/node3.vwf
   light1:
     extends: http://vwf.example.com/light.vwf
     implements:
@@ -388,10 +379,13 @@ scripts:
       this.future( 0 ).initializeCamera();
     }
     this.initializeCamera = function() {
-      this.camera.translation = [ 0, 20000, 10000 ];
+      this.camera.transform = [ -1,     0,         0,     0,
+                                 0,    -0.894,    -0.447, 0,
+                                 0,    -0.447,     0.894, 0,
+                                 0, 20000,     10000,     1 ];
       this.camera.far = 500000;
       this.camera.near = 2;
-      this.camera.lookAt = this.children.sceneCenter.id;
+      this.camera.translationSpeed = 10000;
     }
     this.toolbar.selectedColorChanged = this.events.add( function( color ) {
     }, this );
@@ -429,7 +423,7 @@ scripts:
       },    
     };
     this.initializeInputMode = function() {
-      this.inputMode = "orbit";
+      this.inputMode = "draw";
     }
     this.draw = function( lastDrawPoint, pickInfo ) {
       if ( pickInfo && pickInfo.globalPosition ) {
