@@ -41,7 +41,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 "initializing": false,
                 "parenting": false,
                 "deleting": false,
-                "properties": false,
+                "properties": true,
                 "setting": false,
                 "getting": false
             };
@@ -1752,9 +1752,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                         case "color":
                                             var clr = uni[ prop ];
                                             if ( clr.alpha == 1 ) {
-                                                value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
+                                                value[ prop ] = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
                                             } else {
-                                                value = "rgba("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+","+clr.alpha+")";
+                                                value[ prop ] = "rgba("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+","+clr.alpha+")";
                                             }                                       
                                             break;
                                         default:
