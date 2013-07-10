@@ -159,6 +159,7 @@
 					if(e.hasOwnProperty(tmpKey))
 						keys.push(tmpKey);
 				}
+
 				var tempArr = getFlatIdArr();
 				var saveIndex = 0;
 
@@ -175,11 +176,13 @@
 					e[keys[i]].hotState = ko.observable(false);
 					e[keys[i]].lastUpdate = e[keys[i]].lastUpdate?removeAgoFromMoment(e[keys[i]].lastUpdate):removeAgoFromMoment(new Date());
 					e[keys[i]].description = e[keys[i]].description ? e[keys[i]].description : "No description";
+					e[keys[i]].updates = e[keys[i]].updates > 0 ? e[keys[i]].updates : 0;
 					e[keys[i]].editVisible = ko.observable(false);
 					
 					vwfPortalModel.worldObjects()[saveIndex] = e[keys[i]];	
 				}
 				
+				vwfPortalModel.worldObjects().sort(sortArrByUpdates);
 				vwfPortalModel.getPage(0);
 				vwfPortalModel.worldObjects.valueHasMutated();				
 				
@@ -207,6 +210,10 @@
 					}
 				});
 			});
+		}
+		
+		function sortArrByUpdates(a, b){
+			return b.updates - a.updates;
 		}
 		
 		function getLoginInfo(defaultCb, failCb){
