@@ -13,406 +13,401 @@
 <!-- and limitations under the License.                                                          -->
 
 <html>
-    <head>
-        <title>Cesium VWF Demo</title>
-        <link href="vwf-video.css" rel="stylesheet" type="text/css" />
-        <link href="toolbar.css" rel="stylesheet" type="text/css" />
-        <link rel="stylesheet" type="text/css" href="bootstrap.css" />
-        <style>
-          @import url( CesiumWidget.css );
-          body {
-            padding: 0;
-            margin: 0;
-            overflow: hidden;
-          }
-        </style>
-        <script type="text/javascript">
+  <head>
+    <title>Cesium VWF Demo</title>
+    <link href="vwf-video.css" rel="stylesheet" type="text/css" />
+    <link href="toolbar.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="bootstrap.css" />
+    <style>
+      @import url( CesiumWidget.css );
+      body {
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+    <script type="text/javascript">
 
-            document.title = "Cesium - Webrtc VWF Demo";
+      document.title = "Cesium - Webrtc VWF Demo";
 
-            $( function() {
+        $( function() {
 
-                $( "#loginDialog" ).dialog( { 
-                    "modal": true, 
-                    "resizable": false,
-                    "draggable": true,
-                    "zIndex": 4000,
-                    "buttons": {
-                        "Login": function() {
-                            clientName = $('#userName').val().replace(/ /g,"_");
-                            $( this ).dialog( "close" );
-                            var parms = [ vwf_view.kernel.moniker(), clientName ];
-                            vwf_view.kernel.callMethod( "index-vwf", "createClient", parms );
+          $( "#loginDialog" ).dialog( { 
+            "modal": true, 
+            "resizable": false,
+            "draggable": true,
+            "zIndex": 4000,
+            "buttons": {
+              "Login": function() {
+                clientName = $('#userName').val().replace(/ /g,"_");
+                $( this ).dialog( "close" );
+                var parms = [ vwf_view.kernel.moniker(), clientName ];
+                vwf_view.kernel.callMethod( "index-vwf", "createClient", parms );
                             
-                            var options = {
-                              enableHighAccuracy: true,
-                              timeout: 6000,
-                              maximumAge: 0
-                            };
+                var options = {
+                  enableHighAccuracy: true,
+                  timeout: 6000,
+                  maximumAge: 0
+                };
 
-                            function gotLocation( pos ) {
-                                 var ellipsoid = Cesium.Ellipsoid.WGS84;
-                                var dest = Cesium.Cartographic.fromDegrees( pos.coords.longitude, pos.coords.latitude, 1000.0 );
-                                dest = ellipsoid.cartographicToCartesian( dest );
+                function gotLocation( pos ) {
+                  var ellipsoid = Cesium.Ellipsoid.WGS84;
+                  var dest = Cesium.Cartographic.fromDegrees( pos.coords.longitude, pos.coords.latitude, 1000.0 );
+                  dest = ellipsoid.cartographicToCartesian( dest );
 
-                                parms = {
-                                    "location": [ dest.x, dest.y, dest.z ],
-                                    "longitude": pos.coords.longitude,
-                                    "latitude": pos.coords.latitude,
-                                    "moniker": vwf_view.kernel.moniker()                             
-                                }
-                                vwf_view.kernel.callMethod( "index-vwf", "locationCaptured", [ parms ] );
+                  parms = {
+                    "location": [ dest.x, dest.y, dest.z ],
+                    "longitude": pos.coords.longitude,
+                    "latitude": pos.coords.latitude,
+                    "moniker": vwf_view.kernel.moniker()                             
+                  }
+                  vwf_view.kernel.callMethod( "index-vwf", "locationCaptured", [ parms ] );
+                };
 
-                            };
+                function errorLocation(err) {
+                  console.warn('ERROR(' + err.code + '): ' + err.message);
+                };                            
 
-                            function errorLocation(err) {
-                              console.warn('ERROR(' + err.code + '): ' + err.message);
-                            };                            
-
-                            navigator.geolocation.getCurrentPosition( gotLocation, errorLocation, options );
-                        },
-                    }
-                } );
-                $( "#loginDialog" ).parent().css("-webkit-transform", "rotateY(180deg)");
-
-                $( "#loginDialog" ).keydown(function(e) {
-                    e.stopPropagation();
-                }).keyup(function(e) {
-                    if(e.keyCode == $.ui.keyCode.ENTER) {
-                      $(this).parent().find('.ui-dialog-buttonpane button:first').click();
-                    }
-                    e.stopPropagation();
-                });
-            });
-
-            vwf_view.calledMethod = function( nodeID, methodName, methodParameters, methodValue ) {
-                if ( !methodParameters  ) {
-                    return;
-                }
-
-                //console.info( "calledMethod( "+nodeID+", "+methodName+", "+methodParameters[0]+" )" );
-                switch ( methodName ) {
-                    case "newClientVideo":
-                        var moniker = methodParameters[1];
-                        //console.info( "++++   " + moniker + " == " + this.kernel.moniker() );
-                        if ( moniker && moniker == this.kernel.moniker() ) {
-                            createVideoElement( methodParameters[0] );
-                        }
-                        break;
-                }
+                navigator.geolocation.getCurrentPosition( gotLocation, errorLocation, options );
+              },
             }
+          } );
+          $( "#loginDialog" ).parent().css("-webkit-transform", "rotateY(180deg)");
 
-            var distanceToEarthCenter = 0;
-
-            vwf_view.satProperty = function( nodeId, propertyName, propertyValue ) {
-                var rootID = vwf_view.kernel.find( "", "/" )[0];
-                if ( nodeId == rootID ) {
-                    switch( propertyName ) {
-                        case "cameraViewData":
-                            var pos = propertyValue.position;
-                            if ( pos ) {
-                                var currentDist = ( pos[0] * pos[0] )+( pos[1] * pos[1] )+( pos[2] * pos[2] ); 
-                                distanceToEarth( currentDist );
-                                if ( currentDist < 110000000000000 ) {
-                                    swapVideo(false);
-                                } else {
-                                    swapVideo(true);
-                                }
-                            }                            
-                            break;
-                    }
-                } else if ( vwf_view.kernel.test( rootID, "camera", nodeId ) ) {
-                    if ( propertyValue ) {
-                        switch( propertyName ) {
-                            case "position":  
-                                var currentDist = ( propertyValue[0] * propertyValue[0] )+( propertyValue[1] * propertyValue[1] )+( propertyValue[2] * propertyValue[2] ); 
-                                distanceToEarth( currentDist );
-                                break;
-                        }
-                    }                    
-                } else if ( vwf_view.kernel.test( rootID, "toolbar", nodeId ) ) {
-                    if ( propertyValue ) {
-                        switch (propertyName) {
-                            case "selectedColor":
-                                highlightColor( propertyValue );
-                                break;
-                            case "inputMode":
-                                highlightMode( propertyValue );
-                                break;
-                        }
-                    }
-                }
+          $( "#loginDialog" ).keydown(function(e) {
+            e.stopPropagation();
+          }).keyup(function(e) {
+            if(e.keyCode == $.ui.keyCode.ENTER) {
+              $(this).parent().find('.ui-dialog-buttonpane button:first').click();
             }
+            e.stopPropagation();
+          });
+        });
 
-            function distanceToEarth( dist ) {
-                if ( distanceToEarthCenter != dist ) {
-                    debugger;
-                    var rootID = vwf_view.kernel.find( "", "/" )[0];
-                    var minLineLength = undefined;
-                    var min = 6350000 * 6350000;
-                    var max = 17500000 * 17500000;
-                    //console.info( "dist to Origin changed: " + dist );
-                    distanceToEarthCenter = dist;
-                    if ( dist < min ) {
-                        minLineLength = 200;
-                    } else if ( dist > max ) {
-                        minLineLength = 80000;
-                    } else {
-                        minLineLength = 200 + ( 79800 * ( ( dist - min ) / ( max - min ) ) );
-                    }
-                    if ( minLineLength ) {
-                        vwf_view.kernel.setProperty( rootID, "minDrawDistance", minLineLength );
-                    }
-                }
+        vwf_view.calledMethod = function( nodeID, methodName, methodParameters, methodValue ) {
+          if ( !methodParameters  ) {
+            return;
+          }
 
-                // default: Math.sqrt( 312905820319949.9 ) = 17689144.137576297 
-                //          Math.sqrt( 6400000000 ) = 80000 
-                // closest: Math.sqrt( 40601075714271 ) =  6371897.34
-                //          Math.sqrt( 40000 ) = 200                      
+          //console.info( "calledMethod( "+nodeID+", "+methodName+", "+methodParameters[0]+" )" );
+          switch ( methodName ) {
+            case "newClientVideo":
+              var moniker = methodParameters[1];
+              //console.info( "++++   " + moniker + " == " + this.kernel.moniker() );
+              if ( moniker && moniker == this.kernel.moniker() ) {
+                createVideoElement( methodParameters[0] );
+              }
+              break;
+          }
+        }
 
+        var distanceToEarthCenter = 0;
+
+        vwf_view.satProperty = function( nodeId, propertyName, propertyValue ) {
+          var rootID = vwf_view.kernel.find( "", "/" )[0];
+          if ( nodeId == rootID ) {
+            switch( propertyName ) {
+              case "cameraViewData":
+                var pos = propertyValue.position;
+                if ( pos ) {
+                  var currentDist = ( pos[0] * pos[0] )+( pos[1] * pos[1] )+( pos[2] * pos[2] ); 
+                  distanceToEarth( currentDist );
+                  if ( currentDist < 110000000000000 ) {
+                    swapVideo(false);
+                  } else {
+                    swapVideo(true);
+                  }
+                }                            
+                break;
             }
+          } else if ( vwf_view.kernel.test( rootID, "camera", nodeId ) ) {
+            if ( propertyValue ) {
+              switch( propertyName ) {
+                case "position":  
+                  var currentDist = ( propertyValue[0] * propertyValue[0] )+( propertyValue[1] * propertyValue[1] )+( propertyValue[2] * propertyValue[2] ); 
+                  distanceToEarth( currentDist );
+                  break;
+              }
+            }                    
+          } else if ( vwf_view.kernel.test( rootID, "toolbar", nodeId ) ) {
+            if ( propertyValue ) {
+              switch (propertyName) {
+                case "selectedColor":
+                  highlightColor( propertyValue );
+                  break;
+                case "inputMode":
+                  highlightMode( propertyValue );
+                  break;
+              }
+            }
+          }
+        }
 
-            // vwf_view doesn't currently get messages from the document launch. Force a property update
-            // so that vwf_view.satProperty() can update the toolbar with the current values.
+        function distanceToEarth( dist ) {
+          if ( distanceToEarthCenter != dist ) {
+            debugger;
+            var rootID = vwf_view.kernel.find( "", "/" )[0];
+            var minLineLength = undefined;
+            var min = 6350000 * 6350000;
+            var max = 17500000 * 17500000;
+            //console.info( "dist to Origin changed: " + dist );
+            distanceToEarthCenter = dist;
+            if ( dist < min ) {
+              minLineLength = 200;
+            } else if ( dist > max ) {
+              minLineLength = 80000;
+            } else {
+              minLineLength = 200 + ( 79800 * ( ( dist - min ) / ( max - min ) ) );
+            }
+            if ( minLineLength ) {
+              vwf_view.kernel.setProperty( rootID, "minDrawDistance", minLineLength );
+            }
+          }
 
-            vwf_view.kernel.find( vwf_view.kernel.find("", "/")[0], "toolbar", 
-                function(toolbarID) {
-                    vwf_view.kernel.execute( toolbarID, "this.selectedColor = this.selectedColor" );
-                    vwf_view.kernel.execute( toolbarID, "this.inputMode = this.inputMode" );
-                }
+          // default: Math.sqrt( 312905820319949.9 ) = 17689144.137576297 
+          //          Math.sqrt( 6400000000 ) = 80000 
+          // closest: Math.sqrt( 40601075714271 ) =  6371897.34
+          //          Math.sqrt( 40000 ) = 200                      
+
+        }
+
+        // vwf_view doesn't currently get messages from the document launch. Force a property update
+        // so that vwf_view.satProperty() can update the toolbar with the current values.
+
+        vwf_view.kernel.find( vwf_view.kernel.find("", "/")[0], "toolbar", 
+          function(toolbarID) {
+            vwf_view.kernel.execute( toolbarID, "this.selectedColor = this.selectedColor" );
+            vwf_view.kernel.execute( toolbarID, "this.inputMode = this.inputMode" );
+          }
+        );
+
+        var videosAdded = 1;
+        var localVideoDiv = undefined;
+        var fullScreenVideo = false;
+        var fullScreenVideoDiv = undefined;
+        function createVideoElement( value ) {
+          var $container;
+          var divId = value.name + videosAdded++;
+          var videoId = "video-" + divId;
+          var muted = value.muted ? "muted" : "";
+
+          //if ( firefox ) {
+          //    muted = "muted=true";
+          //}
+
+          $container = $( "#webrtc-videos" );
+          if ( value.muted ) {
+            // this is your local video
+            // should be muted, firefox isn't accepting muted the 
+            // latest update to the html5 specification
+            $container.append(
+              "<div id='"+ divId + "'>" +
+                "<video class='vwf-webrtc-video' id='" + videoId +
+                  "' width='320' height='240' src='" + value.url + 
+                  "' loop='loop' autoplay = true " + muted +
+                  " style='position: absolute; left: 0; top: 0; z-index: 8;'>" +
+                "</video>" +
+              "</div>"
             );
-
-            var videosAdded = 1;
-            var localVideoDiv = undefined;
-            var fullScreenVideo = false;
-            var fullScreenVideoDiv = undefined;
-            function createVideoElement( value ) {
-                var $container;
-                var divId = value.name + videosAdded++;
-                var videoId = "video-" + divId;
-                var muted = value.muted ? "muted" : "";
-
-                //if ( firefox ) {
-                //    muted = "muted=true";
-                //}
-
-                $container = $( "#webrtc-videos" );
-                if ( value.muted ) {
-                    // this is your local video
-                    // should be muted, firefox isn't accepting muted the 
-                    // latest update to the html5 specification
-                    $container.append(
-                        "<div id='"+ divId + "'>" +
-                            "<video class='vwf-webrtc-video' id='" + videoId +
-                                "' width='320' height='240' src='" + value.url + 
-                                "' loop='loop' autoplay = true " + muted +
-                                " style='position: absolute; left: 0; top: 0; z-index: 8;'>" +
-                            "</video>" +
-                        "</div>"
-                    );
-                    $('#'+divId).draggable();
-                    // Create a larger video window for calibration purposes (only visible during calibration)
-                    $container.append(
-                        "<div id='calibrate-"+ divId + "'>" +
-                            "<video class='vwf-webrtc-video' id='calibrate-" + videoId +
-                                "' width='640' height='480' src='" + value.url + 
-                                "' loop='loop' autoplay = true" +
-                                " style='position: absolute; left: 0; top: 0; z-index: -8; width: 100%; height: 60%; visibility: hidden'>" +
-                            "</video>" +
-                        "</div>"
-                    );
-                    localVideoDiv = 'calibrate-'+videoId;
-                } else {
-                    if ( !fullScreenVideo ) {
-                        //console.info( "create fullscreen video: " + value.url );
-                        $container.append(
-                            "<div id='"+ divId + "'>" +
-                                "<video class='vwf-webrtc-video' id='" + videoId +
-                                    "' width='640' height='480' src='" + value.url + 
-                                    "' loop='loop' autoplay = true" +
-                                    " style='position: absolute; left: 0; top: 0; z-index: -1; width: 100%; height: 60%;'>" +
-                                "</video>" +
-                            "</div>"
-                        );
-                        fullScreenVideo = true;
-                        fullScreenVideoDiv = videoId;
-                        // Create a second mini video window for when zoomed in on the earth
-                        $container.append(
-                            "<div id='sm-"+ divId + "'>" +
-                                "<video class='vwf-webrtc-video' id='sm-" + videoId +
-                                    "' width='320' height='240' src='" + value.url + 
-                                    "' loop='loop' autoplay = true" +
-                                    " style='position: absolute; right: 0px; top: 0px; z-index: 16; visibility: hidden'>" +
-                                "</video>" +
-                            "</div>"
-                        );
-                    } else {
-                        $container.append(
-                            "<div id='"+ divId + "'>" +
-                                "<video class='vwf-webrtc-video' id='" + videoId +
-                                    "' width='320' height='240' src='" + value.url + 
-                                    "' loop='loop' autoplay = true" +
-                                    " style='position: absolute; left: 0; top: 0; z-index: 16;'>" +
-                                "</video>" +
-                            "</div>"
-                        );
-                        $('#'+divId).draggable();
-                    }
-
-                }
-
+            $('#'+divId).draggable();
+            // Create a larger video window for calibration purposes (only visible during calibration)
+            $container.append(
+              "<div id='calibrate-"+ divId + "'>" +
+                "<video class='vwf-webrtc-video' id='calibrate-" + videoId +
+                  "' width='640' height='480' src='" + value.url + 
+                  "' loop='loop' autoplay = true" +
+                  " style='position: absolute; left: 0; top: 0; z-index: -8; width: 100%; height: 60%; visibility: hidden'>" +
+                "</video>" +
+              "</div>"
+            );
+            localVideoDiv = 'calibrate-'+videoId;
+          } else {
+            if ( !fullScreenVideo ) {
+              //console.info( "create fullscreen video: " + value.url );
+              $container.append(
+                "<div id='"+ divId + "'>" +
+                  "<video class='vwf-webrtc-video' id='" + videoId +
+                    "' width='640' height='480' src='" + value.url + 
+                    "' loop='loop' autoplay = true" +
+                    " style='position: absolute; left: 0; top: 0; z-index: -1; width: 100%; height: 60%;'>" +
+                  "</video>" +
+                "</div>"
+              );
+              fullScreenVideo = true;
+              fullScreenVideoDiv = videoId;
+              // Create a second mini video window for when zoomed in on the earth
+              $container.append(
+                "<div id='sm-"+ divId + "'>" +
+                  "<video class='vwf-webrtc-video' id='sm-" + videoId +
+                    "' width='320' height='240' src='" + value.url + 
+                    "' loop='loop' autoplay = true" +
+                    " style='position: absolute; right: 0px; top: 0px; z-index: 16; visibility: hidden'>" +
+                  "</video>" +
+                "</div>"
+              );
+            } else {
+              $container.append(
+                "<div id='"+ divId + "'>" +
+                  "<video class='vwf-webrtc-video' id='" + videoId +
+                    "' width='320' height='240' src='" + value.url + 
+                    "' loop='loop' autoplay = true" +
+                    " style='position: absolute; left: 0; top: 0; z-index: 16;'>" +
+                  "</video>" +
+                "</div>"
+              );
+              $('#'+divId).draggable();
             }
+          }
+        }
 
-            function swapVideo(showMain) {
-                if ( fullScreenVideo ) {
-                    if ( showMain ) {
-                        $('#'+fullScreenVideoDiv).css('visibility', 'visible');
-                        $('#sm-'+fullScreenVideoDiv).css('visibility', 'hidden');
-                    } else {
-                        $('#'+fullScreenVideoDiv).css('visibility', 'hidden');
-                        $('#sm-'+fullScreenVideoDiv).css('visibility', 'visible');
-                    }
-                }
+        function swapVideo(showMain) {
+          if ( fullScreenVideo ) {
+            if ( showMain ) {
+              $('#'+fullScreenVideoDiv).css('visibility', 'visible');
+              $('#sm-'+fullScreenVideoDiv).css('visibility', 'hidden');
+            } else {
+              $('#'+fullScreenVideoDiv).css('visibility', 'hidden');
+              $('#sm-'+fullScreenVideoDiv).css('visibility', 'visible');
             }
+          }
+        }
 
-            function setColor(color) {
-                var rootID = vwf_view.kernel.find( "", "/" )[0];
-                vwf_view.kernel.find( rootID, "toolbar", function( toolbarID ) {
-                    vwf_view.kernel.setProperty( toolbarID, "selectedColor", color );
-                });
-                highlightColor( color );
+        function setColor(color) {
+          var rootID = vwf_view.kernel.find( "", "/" )[0];
+          vwf_view.kernel.find( rootID, "toolbar", function( toolbarID ) {
+            vwf_view.kernel.setProperty( toolbarID, "selectedColor", color );
+          });
+          highlightColor( color );
+        }
+
+        function highlightColor( color ) {
+          var rootID = vwf_view.kernel.find( "", "/" )[0];
+          document.getElementById('black').style.border = "none";
+          document.getElementById('red').style.border = "none";
+          document.getElementById('yellow').style.border = "none";
+          document.getElementById('green').style.border = "none";
+          document.getElementById('blue').style.border = "none";
+
+          if ( document.getElementById( color ) ) {
+            document.getElementById( color ).style.border = "1px solid white";
+          }
+          var vColor;
+          switch( color ) {
+            case "red":
+              vColor = [ 255, 0, 0 ];
+              break;
+            case "yellow":
+              vColor = [ 255, 255, 0 ];
+              break;
+            case "green":
+              vColor = [ 0, 255, 0 ];
+              break;
+            case "blue":
+              vColor = [ 0, 0, 255 ];
+              break;
+            default:
+              vColor = [ 0, 0, 0 ];
+              break;
             }
+          }
 
-            function highlightColor( color ) {
-                var rootID = vwf_view.kernel.find( "", "/" )[0];
-                document.getElementById('black').style.border = "none";
-                document.getElementById('red').style.border = "none";
-                document.getElementById('yellow').style.border = "none";
-                document.getElementById('green').style.border = "none";
-                document.getElementById('blue').style.border = "none";
-
-                if ( document.getElementById( color ) ) {
-                    document.getElementById( color ).style.border = "1px solid white";
-                }
-                var vColor;
-                switch( color ) {
-                  case "red":
-                    vColor = [ 255, 0, 0 ];
-                    break;
-                  case "yellow":
-                    vColor = [ 255, 255, 0 ];
-                    break;
-                  case "green":
-                    vColor = [ 0, 255, 0 ];
-                    break;
-                  case "blue":
-                      vColor = [ 0, 0, 255 ];
-                    break;
-                  default:
-                    vColor = [ 0, 0, 0 ];
-                    break;
-                }
-            }
-
-            function setMode(mode) {
-                var rootID = vwf_view.kernel.find( "", "/" )[0];
-                vwf_view.kernel.find( rootID, "toolbar", function(toolbarID) {
-                    vwf_view.kernel.setProperty( toolbarID, "inputMode", mode );
-                });
-                highlightMode(mode);
-            }
-
-            function highlightMode(mode) {
-                document.getElementById( 'orbit' ).style.border = "none";
-                document.getElementById( 'draw' ).style.border = "none";
-                document.getElementById( 'pindrop' ).style.border = "none";
-
-                document.getElementById( mode ).style.border = "1px solid red";
-            }
-
-            function clearOverlay() {
-                var rootID = vwf_view.kernel.find( "", "/" )[0];
-                vwf_view.kernel.find( rootID, "toolbar", function(toolbarID) {
-                  vwf_view.kernel.callMethod( toolbarID, "clear" );
-                });
-                setColor('black');
-                setMode('orbit');
-            }
-
-            var calibrateMode = false;
-            function calibrate() {
-                if ( $('#calibrate').html() == "Calibrate" ) {
-                    $('#calibrate').html("Complete");
-                    $('#'+localVideoDiv).css("visibility", "visible");
-                    $('#'+fullScreenVideoDiv).css("visibility", "hidden");
-                    calibrateMode = true;
-                } else {
-                    $('#calibrate').html("Calibrate");
-                    $('#'+localVideoDiv).css("visibility", "hidden");
-                    $('#'+fullScreenVideoDiv).css("visibility", "visible");
-                    calibrateMode = false;
-                }
-            }
-
-            $(document).keypress(function (e) {
-                if ( calibrateMode ) {
-                    // 38: Up arrow, not getting picked up
-                    // 40: Down arrow, not getting picked up
-                    // console.info(e.keyCode);
-
-                    var top = parseInt( $('#'+localVideoDiv).css("top") );
-
-                    if ( e.keyCode == '119' ) { // W
-                        top--;
-                    } else if ( e.keyCode == '115' ) { // S
-                        top++;
-                    }
-
-                    $('#'+localVideoDiv).css("top", top);
-                    $('#'+fullScreenVideoDiv).css("top", top);
-                }
+          function setMode(mode) {
+            var rootID = vwf_view.kernel.find( "", "/" )[0];
+            vwf_view.kernel.find( rootID, "toolbar", function(toolbarID) {
+              vwf_view.kernel.setProperty( toolbarID, "inputMode", mode );
             });
+            highlightMode(mode);
+          }
 
-            jQuery('#toolbar').mouseleave( function(evt) { 
-                evt.stopPropagation(); 
-                // $('#toolbar').stop().delay(200).animate({ opacity:0.0 }, 1500);
-                return false; 
-            }); 
+          function highlightMode(mode) {
+            document.getElementById( 'orbit' ).style.border = "none";
+            document.getElementById( 'draw' ).style.border = "none";
+            document.getElementById( 'pindrop' ).style.border = "none";
 
-            jQuery('#toolbar').mouseenter( function(evt) { 
-                evt.stopPropagation(); 
-                //if(!mousePressed) 
-                //{
-                  // $('#toolbar').stop().delay(200).animate({ opacity:0.8 }, 1500);
-                //}
-                return false; 
+            document.getElementById( mode ).style.border = "1px solid red";
+          }
+
+          function clearOverlay() {
+            var rootID = vwf_view.kernel.find( "", "/" )[0];
+            vwf_view.kernel.find( rootID, "toolbar", function(toolbarID) {
+              vwf_view.kernel.callMethod( toolbarID, "clear" );
             });
+            setColor('black');
+            setMode('orbit');
+          }
 
-        </script>
-    </head>
-    <body>
-        <div id="wrapper" class="wrapper">
-          <div class="toolstyle" id="toolbar">
-            <i id="orbit" class="icon-globe icon-white" alt="orbit" onclick="setMode('orbit')" />
-            <i id="draw" class="icon-pencil icon-white" alt="draw" onclick="setMode('draw')" />
-            <i id="pindrop" class="icon-map-marker icon-white" alt="pindrop" onclick="setMode('pindrop')" />
-            <img id="black" src="images/black.png" alt="black" onclick="setColor('black')" />
-            <img id="red" src="images/red.png" alt="red" onclick="setColor('red')" />
-            <img id="yellow" src="images/yellow.png" alt="yellow" onclick="setColor('yellow')" />
-            <img id="green" src="images/green.png" alt="green" onclick="setColor('green')" />
-            <img id="blue" src="images/blue.png" alt="blue" onclick="setColor('blue')" />
-            <button id="reset" class="btn btn-info" style="font-size:12px;padding-top:0px;padding-bottom:0px" onclick="clearOverlay()">Reset</button>
-            <button id="calibrate" class="btn btn-info" style="font-size:12px;padding-top:0px;padding-bottom:0px" onclick="calibrate()">Calibrate</button>
-          </div>
+          var calibrateMode = false;
+          function calibrate() {
+            if ( $('#calibrate').html() == "Calibrate" ) {
+              $('#calibrate').html("Complete");
+              $('#'+localVideoDiv).css("visibility", "visible");
+              $('#'+fullScreenVideoDiv).css("visibility", "hidden");
+              calibrateMode = true;
+            } else {
+              $('#calibrate').html("Calibrate");
+              $('#'+localVideoDiv).css("visibility", "hidden");
+              $('#'+fullScreenVideoDiv).css("visibility", "visible");
+              calibrateMode = false;
+            }
+          }
+
+          $(document).keypress(function (e) {
+            if ( calibrateMode ) {
+              // 38: Up arrow, not getting picked up
+              // 40: Down arrow, not getting picked up
+              // console.info(e.keyCode);
+
+              var top = parseInt( $('#'+localVideoDiv).css("top") );
+
+              if ( e.keyCode == '119' ) { // W
+                top--;
+              } else if ( e.keyCode == '115' ) { // S
+                top++;
+              }
+
+              $('#'+localVideoDiv).css("top", top);
+              $('#'+fullScreenVideoDiv).css("top", top);
+            }
+          });
+
+          jQuery('#toolbar').mouseleave( function(evt) { 
+            evt.stopPropagation(); 
+            // $('#toolbar').stop().delay(200).animate({ opacity:0.0 }, 1500);
+            return false; 
+          }); 
+
+          jQuery('#toolbar').mouseenter( function(evt) { 
+            evt.stopPropagation(); 
+            //if(!mousePressed) 
+            //{
+              // $('#toolbar').stop().delay(200).animate({ opacity:0.8 }, 1500);
+            //}
+            return false; 
+          });
+    </script>
+  </head>
+  <body>
+      <div id="wrapper" class="wrapper">
+        <div class="toolstyle" id="toolbar">
+          <i id="orbit" class="icon-globe icon-white" alt="orbit" onclick="setMode('orbit')" />
+          <i id="draw" class="icon-pencil icon-white" alt="draw" onclick="setMode('draw')" />
+          <i id="pindrop" class="icon-map-marker icon-white" alt="pindrop" onclick="setMode('pindrop')" />
+          <img id="black" src="images/black.png" alt="black" onclick="setColor('black')" />
+          <img id="red" src="images/red.png" alt="red" onclick="setColor('red')" />
+          <img id="yellow" src="images/yellow.png" alt="yellow" onclick="setColor('yellow')" />
+          <img id="green" src="images/green.png" alt="green" onclick="setColor('green')" />
+          <img id="blue" src="images/blue.png" alt="blue" onclick="setColor('blue')" />
+          <button id="reset" class="btn btn-info" style="font-size:12px;padding-top:0px;padding-bottom:0px" onclick="clearOverlay()">Reset</button>
+          <button id="calibrate" class="btn btn-info" style="font-size:12px;padding-top:0px;padding-bottom:0px" onclick="calibrate()">Calibrate</button>
         </div>
-        <div class="vwf-main-content" align="center"></div>
+      </div>
+    <div class="vwf-main-content" align="center"></div>
 
-        <div id="webrtc-videos"></div>
+    <div id="webrtc-videos"></div>
 
-        <div id="loginDialog" title="Client Login">
-            <p>Enter your display name:</p>
-            <input id="userName" value="name"><br>
-        </div>
-
-    </body>
+    <div id="loginDialog" title="Client Login">
+      <p>Enter your display name:</p>
+      <input id="userName" value="name"><br>
+    </div>
+  </body>
 </html>
