@@ -153,7 +153,12 @@
 		
 			$.getJSON("./vwfDataManager.svc/states",function(e){
 				
-				var keys = Object.keys(e);
+				var keys = [];
+				for(var tmpKey in e){
+				
+					if(e.hasOwnProperty(tmpKey))
+						keys.push(tmpKey);
+				}
 				var tempArr = getFlatIdArr();
 				var saveIndex = 0;
 
@@ -164,7 +169,7 @@
 					e[keys[i]].isVisible = checkFilter([e[keys[i]].title, e[keys[i]].description, e[keys[i]].owner]);
 					
 					//The incoming data elements may not be in the same order as existing elements, get proper index
-					saveIndex = tempArr.indexOf(id);
+					saveIndex = $.inArray(id, tempArr);
 					saveIndex = saveIndex > -1 ? saveIndex : i;
 					
 					e[keys[i]].hotState = ko.observable(false);
@@ -182,7 +187,12 @@
 				
 					//Get all world IDs in flat array form
 					var tempArr = getFlatIdArr(true);
-					var keys = Object.keys(e);
+					var keys = [];
+					for(var tmpKey in e){
+				
+						if(e.hasOwnProperty(tmpKey))
+							keys.push(tmpKey);
+					}
 					var saveIndex = 0;
 					
 					//Iterate through keys, get index of world id which matches key, set its hotState to true
