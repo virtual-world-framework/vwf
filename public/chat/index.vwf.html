@@ -304,6 +304,8 @@
           vwf_view.kernel.callMethod( sceneId, "removeUser", [ localUsername ] );
           //Reset the web page. Set playerId to undefined, and display the login screen with enabled
           //inputs.
+          stopHeartbeat();
+          localUsername = undefined;
           enableLogonDataEntry( );
           displayLogin( );
           hideUserExistsMessage( );
@@ -393,6 +395,7 @@
               vwf_view.logger.warn( "Recieved user missing that matches my user name " + localUsername );
               debugInformation( );
               localUsername = undefined;
+              stopHeartbeat();
               displayLogin( );
               enableLogonDataEntry( );
               hideUserExistsMessage( );

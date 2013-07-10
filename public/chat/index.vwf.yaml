@@ -281,6 +281,7 @@ scripts:
   this.removeUser = function( userName ) {
     var user = this.retrieveUser( userName );
     if ( user != undefined ) {
+      this.userDeleted( user.displayName );
       vwf.deleteNode( user.id );
     }
     else {
