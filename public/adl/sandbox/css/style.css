@@ -193,6 +193,23 @@ a{
 	box-shadow: 5px 5px 5px;
 }
 
+.featuredWorlds{
+	height:100%;
+	padding: 0;
+	background-color:#eee;
+	border:  1px #e6e6e6 solid;
+	border-radius: 5px;
+	
+}
+
+.featuredInstance{
+
+	padding: 10px;
+	height: 28%;
+	border-bottom: 1px #dfdfdf solid;
+	border-top: 1px #f7f7f7 solid;
+}
+
 .editstate, .editstateGuest
 {
 	display: block;

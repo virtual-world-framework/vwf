@@ -1,5 +1,5 @@
-	<div class="row" style="margin-top:30px;">
-		<div class="span8">
+	<div class="row" style="margin-top:30px;height:426px;">
+		<div class="span6">
 			<p>
 				Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in
 				"cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a
@@ -7,6 +7,18 @@
 			</p>
 			<iframe width="560" height="315" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
 		</div>
+		<div class="span6" style="height:100%;">
+			<div class="featuredWorlds" data-bind="foreach:displayWorldObjects.slice(0,3)">
+				<div class="featuredInstance">
+
+					<h4 style="margin-top:0;" data-bind="text:title"></h4>
+					<img style="width: 90px;height:90px;" src="{{root}}/img/qmark.png" />
+				
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row" style="margin-top:30px;">
 		<div class="span12">
 			<div class="row">
 				<div class="span1 offset8">
@@ -66,9 +78,9 @@
 					
 				showStates();
 
-				window.setInterval(function(){
-					showStates();
-				},10000);
+			//	window.setInterval(function(){
+			//		showStates();
+			//	},10000);
 
 			});
 		});
