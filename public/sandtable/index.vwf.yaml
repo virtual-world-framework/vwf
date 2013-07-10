@@ -19,7 +19,6 @@ properties:
   lineWidth: 32
   lineColor: [ 0, 0, 0 ]
   lineHeight: 100
-  objScale: 200
   minDrawDistance: 200    
   inputMode: 
     set: |
@@ -32,11 +31,8 @@ properties:
           break;
       } //@ sourceURL=inputMode.set
     value: "draw"
-  translationSpeed: 40.0
   nodesCreated: 
   lineIndex: 1
-  cubeIndex: 1
-  coneIndex: 1
   pushpinIndex: 1
 methods:
   initializeCamera:
@@ -528,64 +524,7 @@ scripts:
         } );
 
         this.pushpinIndex++;        
-        
-        //var pt = parms.pickInfo.coord;
-        //var dim = this.objScale;
-        //this.createCube( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), dim, dim, dim, this.lineColor, true );
-        //this.createCone( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), (dim*0.3), dim, this.lineColor, 18, true );
-        //this.createLine( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), pt[0], pt[1], pt[2], this.lineWidth*0.3, [ 0, 0, 0 ], true );
       }
-    }
-    this.createCube = function( x, y, z, dx, dy, dz, color, temp ) {
-      var pos = [];
-      var faces;
-      
-      pos.push( x + ( 0.5 * dx ) );
-      pos.push( y + ( 0.5 * dy ) );  // 0
-      pos.push( z + ( 0.5 * dz ) );
-      
-      pos.push( x + ( -0.5 * dx ) );
-      pos.push( y + ( 0.5 * dy ) );  // 1
-      pos.push( z + ( 0.5 * dz ) );
-      
-      pos.push( x + ( -0.5 * dx ) );
-      pos.push( y + ( -0.5 * dy ) ); // 2
-      pos.push( z + ( 0.5 * dz ) ); 
-      
-      pos.push( x + ( 0.5 * dx ) );
-      pos.push( y + ( -0.5 * dy ) ); // 3
-      pos.push( z + ( 0.5 * dz ) );
-      
-      pos.push( x + ( 0.5 * dx ) );
-      pos.push( y + ( 0.5 * dy ) ); // 4
-      pos.push( z + ( -0.5 * dz ) );
-      
-      pos.push( x + ( -0.5 * dx ) );
-      pos.push( y + ( 0.5 * dy ) );  // 5
-      pos.push( z + ( -0.5 * dz ) );
-      
-      pos.push( x + ( -0.5 * dx ) );
-      pos.push( y + ( -0.5 * dy ) );  // 6
-      pos.push( z + ( -0.5 * dz ) );
-      
-      pos.push( x + ( 0.5 * dx ) );
-      pos.push( y + ( -0.5 * dy ) ); // 7
-      pos.push( z + ( -0.5 * dz ) );      
-      
-      faces = [ 1, 0, 3, 1, 3, 2, 3, 0, 4, 3, 4, 7, 2, 3, 7, 2, 7, 6, 6, 7, 4, 6, 4, 5, 1, 2, 6, 1, 6, 5, 0, 1, 5, 0, 5, 4 ];
-
-      cube.properties.meshDefinition.positions = pos;
-      cube.properties.meshDefinition.faces = faces;
-      cube.properties.meshDefinition.color = color;
-      
-      this.children.create( "cube"+this.cubeIndex, cube, function( newObj ) {
-        if ( temp ) {
-          this.nodesCreated.push( newObj.id );
-          this.nodesCreated = this.nodesCreated;
-        }
-      } );
-
-      this.cubeIndex++;
     }
     this.createLine = function( x1, y1, z1, x2, y2, z2, thickness, color, temp ) {
       var pos = [];
@@ -658,39 +597,4 @@ scripts:
       } );
 
       this.lineIndex++;    
-    }
-    this.createCone = function( x, y, z, radius, height, color, accuracy, temp ) {
-      var pos = [];
-      var faces = [];
-      var pt = 1;
-      
-      pos.push( x );
-      pos.push( y );
-      pos.push( z + height );      
-      
-      for ( var theta = 0; theta <= 2 * Math.PI; theta += Math.PI / accuracy ) {
-        pos.push( x + ( radius * Math.cos( theta ) ) );
-        pos.push( y + ( radius * Math.sin( theta ) ) );
-        pos.push( z );
-        pos.push( x + ( radius * Math.cos( theta - Math.PI / accuracy ) ) );
-        pos.push( y + ( radius * Math.sin( theta - Math.PI / accuracy ) ) );
-        pos.push( z );
-        
-        faces.push( 0 );
-        faces.push( pt );
-        faces.push( pt + 1 );
-        pt += 2;
-      }
-      cone.properties.meshDefinition.positions = pos;
-      cone.properties.meshDefinition.faces = faces;
-      cone.properties.meshDefinition.color = color;
-      
-      this.children.create( "cone"+this.coneIndex, cone, function( newObj ) {
-        if ( temp ) {
-          this.nodesCreated.push( newObj.id );
-          this.nodesCreated = this.nodesCreated;
-        }
-      } );
-
-      this.coneIndex++; 
     } //@ sourceURL=index.vwf
