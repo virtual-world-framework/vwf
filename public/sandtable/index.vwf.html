@@ -24,7 +24,7 @@
       var minDistanceSquared;
       var appID = vwf_view.kernel.application();
 
-      function setColor(color) {
+      function setColor( color ) {
         vwf_view.kernel.setProperty( appID, "selectedColor", color );
         highlightColor(color);
       }
@@ -55,11 +55,11 @@
             vColor = [0, 0, 0];
             break;
         }
-        vwf_view.kernel.setProperty(vwf_view.kernel.find("", "/")[0], "lineColor", vColor);
+        vwf_view.kernel.setProperty( appID, "lineColor", vColor );
       }
 
       function setMode(mode) {
-        vwf_view.kernel.setProperty( vwf_view.kernel.find("", "/")[0], "inputMode", mode );
+        vwf_view.kernel.setProperty( appID, "inputMode", mode );
         highlightMode(mode);
       }
 
@@ -87,7 +87,7 @@
       function processPropertyChange( propertyName, propertyValue ) {
         switch (propertyName) {
           case "selectedColor":
-            highlightColor(propertyValue);
+            highlightColor( propertyValue );
             break;
           case "inputMode":
             inputMode = propertyValue;
@@ -122,7 +122,7 @@
                 switch ( inputMode ) {
                   case "pindrop":
                     pickInfo = parameters[ 1 ];
-                    vwf_view.kernel.callMethod( vwf_view.kernel.application(), "pindrop", [ pickInfo ] );
+                    vwf_view.kernel.callMethod( appID, "pindrop", [ pickInfo ] );
                     break;  
                 }
                 lastDrawPoint = undefined;
@@ -135,8 +135,7 @@
                   case "draw":
                     pickInfo = parameters[ 1 ];
                     if ( distanceFromLast( pickInfo ) > minDistanceSquared ) {
-                      vwf_view.kernel.callMethod( vwf_view.kernel.application(), "draw", [ lastDrawPoint, 
-                                                                                           pickInfo ] );
+                      vwf_view.kernel.callMethod( appID, "draw", [ lastDrawPoint, pickInfo ] );
                       lastDrawPoint.pickInfo = pickInfo;
                     }
                     break;

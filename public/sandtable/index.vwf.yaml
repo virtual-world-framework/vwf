@@ -37,18 +37,11 @@ properties:
   selectedColor: black
 methods:
   initializeCamera:
-  initializeInputMode:
   clear: |
-    if ( this.nodesCreated ) {
-      for ( var i = 0; i < this.nodesCreated.length; i++ ){
-        this.children.delete( this.getChild(this.nodesCreated[i]) );
-      }
-      this.nodesCreated = [];  
-    }
   draw:
   pindrop:
 children:
-  flat_terrain:
+  terrain:
     extends: http://vwf.example.com/node3.vwf
     source: models/vwf_terrain.dae
     type: model/vnd.collada+xml
@@ -70,66 +63,6 @@ children:
       glge-quadraticAttenuation: 0.0000001  
   predator1:
     extends: http://vwf.example.com/node3.vwf 
-    methods:
-      animate: 
-    scripts:
-      - |
-          this.initialize = function() {
-
-            this.path = [];
-            var len = 0, pos, x, y, z = 1200;
-
-            for ( var theta = 0; theta < 2 * Math.PI && len < (( 2*180 )-1); theta += Math.PI / 180 ) {
-              x = 10000 * Math.cos( theta );
-              y = 10000 * Math.sin( theta );
-              len = this.path.length;
-              pos = [ x, y, z ];
-              this.path.push( { translation: pos, time: 1 } );
-            }
-            this.nextPathIndex = ( this.lastPathIndex || 0 ) + 1;
-            this.timeSinceLast = this.time;
-            this.planeGroup1.translation = this.path[ this.lastPathIndex || 0 ].translation;
-            this.goal1.translation = this.path[ this.nextPathIndex || 0 ].translation;
-
-            this.animating = true;
-          }
-          this.animate = function() {
-            var time = this.time;
-            var len = this.path.length;
-            var timeElasped = time - this.timeSinceLast;
-            var lastPathPoint = this.path[ this.lastPathIndex ];
-            var nextPathPoint = this.path[ this.nextPathIndex ];
-            var goalPointIndex = this.nextPathIndex + 1;
-            if ( goalPointIndex >= this.path.length )
-              goalPointIndex = 0;
-            var goalPathPoint = this.path[ goalPointIndex ];
-            var percentDone = timeElasped / nextPathPoint.time;
-            if ( percentDone > 0.975 )
-              percentDone = 1;
-             
-            function interpolate( beforeCoord, afterCoord, percent ) {
-              return beforeCoord + percent * (afterCoord - beforeCoord);
-            }
-            
-            var newX = interpolate( nextPathPoint.translation[0], goalPathPoint.translation[0], percentDone );
-            var newY = interpolate( nextPathPoint.translation[1], goalPathPoint.translation[1], percentDone );
-            this.goal1.translation = [ newX, newY, 1200 ]; 
-            
-            newX = interpolate( lastPathPoint.translation[0], nextPathPoint.translation[0], percentDone );
-            newY = interpolate( lastPathPoint.translation[1], nextPathPoint.translation[1], percentDone );
-            this.planeGroup1.translation = [ newX, newY, 1200 ];
-            
-            var zRot = [ goalPathPoint.translation[0] - newX, goalPathPoint.translation[1] - newY, 0 ];
-            this.planeGroup1.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5)) * 180 / Math.PI ]; 
-            
-            if ( percentDone == 1 ) {
-              this.lastPathIndex += 1;
-              this.timeSinceLast = time;
-            }
-            if ( this.animating ) {
-              this.future( 0.1 ).animate();
-            } 		  
-          } //@ sourceURL=predator1.vwf
     properties:
       translation: [ 0, 0, 1200 ]
       lastPathIndex:
@@ -155,6 +88,8 @@ children:
           }
           this.animating = value;
         value: false
+    methods:
+      animate: 
     children:
       goal1:
         extends: http://vwf.example.com/node3.vwf 
@@ -179,125 +114,69 @@ children:
             properties:
               translation: [ 0, -300, -1100 ]
               scale: [ 8, 8, 16 ]
-  predator2:
-    extends: http://vwf.example.com/node3.vwf 
-    methods:
-      animate:
     scripts:
     - |
-        this.initialize = function() {
-          console.info( "================ predator2 ================" );
+      this.initialize = function() {
 
-          this.path = [];
-          var len, pos, x = 0, y = 0, z = 12000;
-          var radius = 5000;
-          var step = 200;
+        this.path = [];
+        var len = 0, pos, x, y, z = 1200;
 
-          y = 0;
-          for ( var x = radius - 200; x > -radius; x -= step ) {
-            pos = [ x, 0, 1200 ];
-            len = this.path.length;
-            this.path.push( { translation: pos, time: 1 } );
-          }
-
-          for ( var theta = 1.5 * Math.PI; theta > 0; theta -= Math.PI / 90 ) {
-            x = -radius + ( radius * Math.cos( theta ) );
-            y = radius + ( radius * Math.sin( theta ) );
-            len = this.path.length;
-            pos = [ x, y, z ];
-            this.path.push( { translation: pos, time: 2 } );
-          } 
-
-          x = 0;
-          for ( var y = radius - step; y > -radius ; y -= step ) {
-            pos = [ 0, y, 1200 ];
-            len = this.path.length;
-            this.path.push( { translation: pos, time: 1 } );
-          }
-
-          for ( var theta = 2 * Math.PI; theta > 0.5 * Math.PI; theta -= Math.PI / 90 ) {
-            x = -radius + (radius * Math.cos( theta ) );
-            y = -radius + (radius * Math.sin( theta ) );
-            len = this.path.length;
-            pos = [ x, y, z ];
-            this.path.push( { translation: pos, time: 2 } );
-          } 
-
-          y = 0;
-          for ( var x = -radius + step; x < radius; x += step ) {
-            pos = [ x, 0, 1200 ];
-            len = this.path.length;
-            this.path.push( { translation: pos, time: 1 } );
-          }            
-
-          for ( var theta = 1.5 * Math.PI; theta < 3.0 * Math.PI; theta += Math.PI / 90 ) {
-            x = radius + (radius * Math.cos( theta ) );
-            y = radius + (radius * Math.sin( theta ) );
-            len = this.path.length;
-            pos = [ x, y, z ];
-            this.path.push( { translation: pos, time: 2 } );
-          }
-          
-          x = 0;
-          for ( var y = radius - step; y > -radius; y -= step ) {
-            pos = [ 0, y, 1200 ];
-            len = this.path.length;
-            this.path.push( { translation: pos, time: 1 } );
-          }
-
-          for ( var theta = 1.0 * Math.PI; theta < 2.5 * Math.PI; theta += Math.PI / 90 ) {
-            x = radius + ( radius * Math.cos( theta ) );
-            y = -radius + ( radius * Math.sin( theta ) );
-            len = this.path.length;
-            pos = [ x, y, z ];
-            this.path.push( { translation: pos, time: 2 } );
-          }            
-         
-          this.nextPathIndex = ( this.lastPathIndex || 0 ) + 1;
-          this.timeSinceLast = this.time;
-          this.planeGroup2.translation = this.path[ this.lastPathIndex || 0 ].translation;
-          this.goal2.translation = this.path[ this.nextPathIndex || 0 ].translation;
-          
-          this.animating = true;
+        for ( var theta = 0; theta < 2 * Math.PI && len < (( 2*180 )-1); theta += Math.PI / 180 ) {
+          x = 10000 * Math.cos( theta );
+          y = 10000 * Math.sin( theta );
+          len = this.path.length;
+          pos = [ x, y, z ];
+          this.path.push( { translation: pos, time: 1 } );
         }
-        this.animate = function() {
-          var time = this.time;
-          var len = this.path.length;
-          var timeElasped = time - this.timeSinceLast;
-          var lastPathPoint = this.path[ this.lastPathIndex ];
-          var nextPathPoint = this.path[ this.nextPathIndex ];
-          var goalPointIndex = this.nextPathIndex + 1;
-          if ( goalPointIndex >= this.path.length )
-            goalPointIndex = 0;
-          var goalPathPoint = this.path[ goalPointIndex ];
-          var percentDone = timeElasped / nextPathPoint.time;
-          if ( percentDone > 0.975 )
-            percentDone = 1;
+        this.nextPathIndex = ( this.lastPathIndex || 0 ) + 1;
+        this.timeSinceLast = this.time;
+        this.planeGroup1.translation = this.path[ this.lastPathIndex || 0 ].translation;
+        this.goal1.translation = this.path[ this.nextPathIndex || 0 ].translation;
+
+        this.animating = true;
+      }
+
+      this.animate = function() {
+        var time = this.time;
+        var len = this.path.length;
+        var timeElasped = time - this.timeSinceLast;
+        var lastPathPoint = this.path[ this.lastPathIndex ];
+        var nextPathPoint = this.path[ this.nextPathIndex ];
+        var goalPointIndex = this.nextPathIndex + 1;
+        if ( goalPointIndex >= this.path.length ) {
+          goalPointIndex = 0;
+        }
+        var goalPathPoint = this.path[ goalPointIndex ];
+        var percentDone = timeElasped / nextPathPoint.time;
+        if ( percentDone > 0.975 ) {
+          percentDone = 1;
+        }
+         
+        function interpolate( beforeCoord, afterCoord, percent ) {
+          return beforeCoord + percent * (afterCoord - beforeCoord);
+        }
         
-          function interpolate( beforeCoord, afterCoord, percent ) {
-            return beforeCoord + percent * (afterCoord - beforeCoord);
-          }
-          var newX = interpolate( nextPathPoint.translation[0], goalPathPoint.translation[0], percentDone );
-          var newY = interpolate( nextPathPoint.translation[1], goalPathPoint.translation[1], percentDone );
-          this.goal2.translation = [ newX, newY, 1200 ]; 
-          
-          newX = interpolate( lastPathPoint.translation[0], nextPathPoint.translation[0], percentDone );
-          newY = interpolate( lastPathPoint.translation[1], nextPathPoint.translation[1], percentDone );
-          this.planeGroup2.translation = [ newX, newY, 1200 ];
-
-          var zRot = [ goalPathPoint.translation[0] - newX, goalPathPoint.translation[1] - newY, 0 ];
-          this.planeGroup2.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5)) * 180 / Math.PI ];
-
-          if ( percentDone == 1 ) {
-            this.lastPathIndex += 1;
-            var newPt = this.path[ this.lastPathIndex ].translation;
-            var goalPt = this.path[ this.nextPathIndex ].translation;
-            this.timeSinceLast = time;
-          }
-          if ( this.animating ) {
-            this.future( 0.1 ).animate();
-          }          
-        } //@ sourceURL=predator2.vwf
+        var newX = interpolate( nextPathPoint.translation[0], goalPathPoint.translation[0], percentDone );
+        var newY = interpolate( nextPathPoint.translation[1], goalPathPoint.translation[1], percentDone );
+        this.goal1.translation = [ newX, newY, 1200 ]; 
+        
+        newX = interpolate( lastPathPoint.translation[0], nextPathPoint.translation[0], percentDone );
+        newY = interpolate( lastPathPoint.translation[1], nextPathPoint.translation[1], percentDone );
+        this.planeGroup1.translation = [ newX, newY, 1200 ];
+        
+        var zRot = [ goalPathPoint.translation[0] - newX, goalPathPoint.translation[1] - newY, 0 ];
+        this.planeGroup1.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5)) * 180 / Math.PI ]; 
+        
+        if ( percentDone == 1 ) {
+          this.lastPathIndex += 1;
+          this.timeSinceLast = time;
+        }
+        if ( this.animating ) {
+          this.future( 0.1 ).animate();
+        }       
+      } //@ sourceURL=predator1.vwf
+  predator2:
+    extends: http://vwf.example.com/node3.vwf 
     properties:
       translation: [ 0, 0, 1500 ]
       lastPathIndex:
@@ -324,6 +203,8 @@ children:
           }
           this.animating = value;
         value: false
+    methods:
+      animate:
     children:
       goal2:
         extends: http://vwf.example.com/node3.vwf 
@@ -348,16 +229,129 @@ children:
             properties:
               translation: [ 0, -300, -1100 ]
               scale: [ 8, 8, 16 ]
+    scripts:
+    - |
+      this.initialize = function() {
+        console.info( "================ predator2 ================" );
+
+        this.path = [];
+        var len, pos, x = 0, y = 0, z = 12000;
+        var radius = 5000;
+        var step = 200;
+
+        y = 0;
+        for ( var x = radius - 200; x > -radius; x -= step ) {
+          pos = [ x, 0, 1200 ];
+          len = this.path.length;
+          this.path.push( { translation: pos, time: 1 } );
+        }
+
+        for ( var theta = 1.5 * Math.PI; theta > 0; theta -= Math.PI / 90 ) {
+          x = -radius + ( radius * Math.cos( theta ) );
+          y = radius + ( radius * Math.sin( theta ) );
+          len = this.path.length;
+          pos = [ x, y, z ];
+          this.path.push( { translation: pos, time: 2 } );
+        } 
+
+        x = 0;
+        for ( var y = radius - step; y > -radius ; y -= step ) {
+          pos = [ 0, y, 1200 ];
+          len = this.path.length;
+          this.path.push( { translation: pos, time: 1 } );
+        }
+
+        for ( var theta = 2 * Math.PI; theta > 0.5 * Math.PI; theta -= Math.PI / 90 ) {
+          x = -radius + (radius * Math.cos( theta ) );
+          y = -radius + (radius * Math.sin( theta ) );
+          len = this.path.length;
+          pos = [ x, y, z ];
+          this.path.push( { translation: pos, time: 2 } );
+        } 
+
+        y = 0;
+        for ( var x = -radius + step; x < radius; x += step ) {
+          pos = [ x, 0, 1200 ];
+          len = this.path.length;
+          this.path.push( { translation: pos, time: 1 } );
+        }            
+
+        for ( var theta = 1.5 * Math.PI; theta < 3.0 * Math.PI; theta += Math.PI / 90 ) {
+          x = radius + (radius * Math.cos( theta ) );
+          y = radius + (radius * Math.sin( theta ) );
+          len = this.path.length;
+          pos = [ x, y, z ];
+          this.path.push( { translation: pos, time: 2 } );
+        }
+        
+        x = 0;
+        for ( var y = radius - step; y > -radius; y -= step ) {
+          pos = [ 0, y, 1200 ];
+          len = this.path.length;
+          this.path.push( { translation: pos, time: 1 } );
+        }
+
+        for ( var theta = 1.0 * Math.PI; theta < 2.5 * Math.PI; theta += Math.PI / 90 ) {
+          x = radius + ( radius * Math.cos( theta ) );
+          y = -radius + ( radius * Math.sin( theta ) );
+          len = this.path.length;
+          pos = [ x, y, z ];
+          this.path.push( { translation: pos, time: 2 } );
+        }            
+       
+        this.nextPathIndex = ( this.lastPathIndex || 0 ) + 1;
+        this.timeSinceLast = this.time;
+        this.planeGroup2.translation = this.path[ this.lastPathIndex || 0 ].translation;
+        this.goal2.translation = this.path[ this.nextPathIndex || 0 ].translation;
+        
+        this.animating = true;
+      }
+      this.animate = function() {
+        var time = this.time;
+        var len = this.path.length;
+        var timeElasped = time - this.timeSinceLast;
+        var lastPathPoint = this.path[ this.lastPathIndex ];
+        var nextPathPoint = this.path[ this.nextPathIndex ];
+        var goalPointIndex = this.nextPathIndex + 1;
+        if ( goalPointIndex >= this.path.length )
+          goalPointIndex = 0;
+        var goalPathPoint = this.path[ goalPointIndex ];
+        var percentDone = timeElasped / nextPathPoint.time;
+        if ( percentDone > 0.975 )
+          percentDone = 1;
+      
+        function interpolate( beforeCoord, afterCoord, percent ) {
+          return beforeCoord + percent * (afterCoord - beforeCoord);
+        }
+        var newX = interpolate( nextPathPoint.translation[0], goalPathPoint.translation[0], percentDone );
+        var newY = interpolate( nextPathPoint.translation[1], goalPathPoint.translation[1], percentDone );
+        this.goal2.translation = [ newX, newY, 1200 ]; 
+        
+        newX = interpolate( lastPathPoint.translation[0], nextPathPoint.translation[0], percentDone );
+        newY = interpolate( lastPathPoint.translation[1], nextPathPoint.translation[1], percentDone );
+        this.planeGroup2.translation = [ newX, newY, 1200 ];
+
+        var zRot = [ goalPathPoint.translation[0] - newX, goalPathPoint.translation[1] - newY, 0 ];
+        this.planeGroup2.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5)) * 180 / Math.PI ];
+
+        if ( percentDone == 1 ) {
+          this.lastPathIndex += 1;
+          var newPt = this.path[ this.lastPathIndex ].translation;
+          var goalPt = this.path[ this.nextPathIndex ].translation;
+          this.timeSinceLast = time;
+        }
+        if ( this.animating ) {
+          this.future( 0.1 ).animate();
+        }          
+      } //@ sourceURL=predator2.vwf
 scripts:
 - |
     this.initialize = function() {
-      this.nodesCreated = [];
 
       // Wait until the queue resumes to set the mouse mode, so that we are sure that the camera has been 
       // created
       // TODO: When we can assume that initialize doesn't complete until all created nodes are in place, this
       //       will no longer need to be a future call because we will be able to assume that the camera exists
-      this.future( 0 ).initializeInputMode();
       this.future( 0 ).initializeCamera();
     }
     this.initializeCamera = function() {
@@ -370,6 +364,14 @@ scripts:
       this.camera.translationSpeed = 10000;
     }
 
+    this.clear = function() {
+      if ( this.nodesCreated ) {
+        for ( var i = 0; i < this.nodesCreated.length; i++ ){
+          this.children.delete( this.getChild(this.nodesCreated[i]) );
+        }
+        this.nodesCreated = [];  
+      }
+    }
 
     var line = {
       "extends": "http://vwf.example.com/node3.vwf",
@@ -401,9 +403,6 @@ scripts:
         scale: [ 6, 6, 6.6 ], 
       },    
     };
-    this.initializeInputMode = function() {
-      this.inputMode = "draw";
-    }
     this.draw = function( lastDrawPoint, pickInfo ) {
       if ( pickInfo && pickInfo.globalPosition ) {
         if ( lastDrawPoint ) {
@@ -508,77 +507,6 @@ scripts:
         } );
 
         this.pushpinIndex++;        
+        
       }
-    }
-    this.createLine = function( x1, y1, z1, x2, y2, z2, thickness, color, temp ) {
-      var pos = [];
-      var faces;
-      
-      var diff = goog.vec.Vec3.createFromArray( [ x2 - x1, y2 - y1, z2 - z1 ] );
-      var up = goog.vec.Vec3.createFromArray( [ 0, 1, 0 ] );
-      var right = goog.vec.Vec3.createFromArray( [ 1, 0, 0 ] );
-      var top = goog.vec.Vec3.createFromArray( [ 0, 0, 0 ] );
-      
-      goog.vec.Vec3.normalize( diff, diff );
-
-      if ( Math.abs( goog.vec.Vec3.dot( up, diff, goog.vec.Vec3.create() ) ) < .999 ) // diff far enough from up? (.999==2.5 degrees)
-      { // then we can cross with up
-        goog.vec.Vec3.cross( diff, up, right );
-      }
-      else
-      { //too colinear with up, so start w/ a different axis
-        goog.vec.Vec3.cross( diff, right, right );
-      }
-      goog.vec.Vec3.cross( diff, right, top );
-      goog.vec.Vec3.normalize( right, right );
-      goog.vec.Vec3.normalize( top, top );
-      goog.vec.Vec3.scale( right, thickness, right );
-      goog.vec.Vec3.scale( top, thickness, top );              
-      
-      pos.push( x1 + right[0] );  // 0
-      pos.push( y1 + right[1] );  // 0
-      pos.push( z1 + right[2] );  // 0
-      
-      pos.push( x2 + right[0] );  // 1
-      pos.push( y2 + right[1] );  // 1
-      pos.push( z2 + right[2] );  // 1
-      
-      pos.push( x1 - right[0] );  // 2
-      pos.push( y1 - right[1] );  // 2
-      pos.push( z1 - right[2] );  // 2
-      
-      pos.push( x2 - right[0] );  // 3
-      pos.push( y2 - right[1] );  // 3
-      pos.push( z2 - right[2] );  // 3
-      
-      pos.push( x1 + top[0] );  // 4
-      pos.push( y1 + top[1] );  // 4
-      pos.push( z1 + top[2] );  // 4
-      
-      pos.push( x2 + top[0] );  // 5
-      pos.push( y2 + top[1] );  // 5
-      pos.push( z2 + top[2] );  // 5
-      
-      pos.push( x1 - top[0] );  // 6
-      pos.push( y1 - top[1] );  // 6
-      pos.push( z1 - top[2] );  // 6
-      
-      pos.push( x2 - top[0] );  // 7
-      pos.push( y2 - top[1] );  // 7
-      pos.push( z2 - top[2] );  // 7
-      
-      faces = [ 0, 1, 3, 0, 3, 2, 4, 5, 7, 4, 7, 6 ];
-      
-      line.properties.meshDefinition.positions = pos;
-      line.properties.meshDefinition.faces = faces;
-      line.properties.meshDefinition.color = color;
-      
-      this.children.create( "line"+this.lineIndex, line, function( newObj ) {
-        if ( temp ) {
-          this.nodesCreated.push( newObj.id );
-          this.nodesCreated = this.nodesCreated;
-        }
-      } );
-
-      this.lineIndex++;    
     } //@ sourceURL=index.vwf
