@@ -18,7 +18,7 @@
 			</div>
 			<div class="row" id="activeRow" data-bind="foreach:displayWorldObjects">				
 				<div data-bind="visible:isVisible" class="span3">
-					<div class="worldBox" data-bind="event: {mouseover:function(){editVisible(true)}, mouseout:function(){editVisible(false)}}">
+					<div class="worldBox" data-bind="event: {mouseover:$root.handleEditDisplay, mouseout:$root.handleEditDisplay}">
 						<div style="margin-bottom: 10px;">
 							<a data-bind="attr:{href:'{{root}}/'+id}, text:$root.getShorterStr(title, 20)" href="">Title</a>
 							<span class="owner" data-bind="text:' - ' + owner"></span>
@@ -31,7 +31,7 @@
 									<div class="objects" data-bind="text: objects + (objects == 1 ? ' object ' : ' objects')"></div>
 								</a>
 							</div>
-							<div class="editstate" data-bind="css:'editstateGuest'">
+							<div class="editstateGuest">
 								<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState()">Active</a>
 								
 								<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible -->

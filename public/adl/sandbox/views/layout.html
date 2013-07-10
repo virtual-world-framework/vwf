@@ -88,6 +88,12 @@
 				else self.previousDisabled(true);
 				
 			};
+			
+			self.handleEditDisplay = function(obj, e){
+				if(($(e.relatedTarget).hasClass("editstatedata") ||  $(e.relatedTarget).hasClass("editstatedelete")) && e.type == "mouseout")
+					return;
+				obj.editVisible(e.type === "mouseover");
+			};
 		};
 		
 		function checkFilter(textArr)
