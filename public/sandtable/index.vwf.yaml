@@ -21,11 +21,7 @@ properties:
   lineColor: [ 0, 0, 0 ]
   lineHeight: 100
   objScale: 200
-  minDrawDistance:
-    set: |
-      this.minDrawDistance = value;
-      this.minDistanceSquared = value * value;  
-    value: 200    
+  minDrawDistance: 200    
   inputMode: 
     set: |
       switch( value ) {
@@ -60,6 +56,8 @@ methods:
       }
       this.nodesCreated = [];  
     }
+  draw:
+  pindrop:
 children:
   toolbar:
     properties:
@@ -380,8 +378,6 @@ children:
 scripts:
 - |
     this.initialize = function() {
-      this.lastDrawPoint = undefined;
-      this.minDistanceSquared = this.minDrawDistance * this.minDrawDistance;
       this.nodesCreated = [];
 
       // Wait until the queue resumes to set the mouse mode, so that we are sure that the camera has been 
@@ -435,36 +431,10 @@ scripts:
     this.initializeInputMode = function() {
       this.inputMode = "orbit";
     }
-    this.pointerDown = function( parms, pickInfo ){
-      if ( pickInfo ) {
-        this.lastDrawPoint = { pickInfo: pickInfo };
-      } else {
-        this.lastDrawPoint = undefined;
-      }
-    }
-    this.pointerMove = function( parms, pickInfo ){
-      if ( this.pointerIsDown() ) {
-        switch( this.inputMode ) {
-          case "draw":
-            if ( this.distanceFromLast( pickInfo ) > this.minDistanceSquared ) {
-              this.draw( pickInfo );
-            }
-            break;
-        }
-      }
-    }
-    this.pointerUp = function( parms, pickInfo ){
-      switch ( this.inputMode ) {
-        case "pindrop":
-          this.pindrop( pickInfo );
-          break;  
-      }
-      this.lastDrawPoint = undefined;    
-    }
-    this.draw = function( pickInfo ) {
+    this.draw = function( lastDrawPoint, pickInfo ) {
       if ( pickInfo && pickInfo.globalPosition ) {
-        if ( this.lastDrawPoint ) {
-          var start = this.lastDrawPoint.pickInfo.globalPosition;
+        if ( lastDrawPoint ) {
+          var start = lastDrawPoint.pickInfo.globalPosition;
           var end = pickInfo.globalPosition;
           var sp = goog.vec.Vec3.createFromArray( [ start[0], start[1], start[2] + this.lineHeight ] );
           var ep = goog.vec.Vec3.createFromArray( [ end[0], end[1], end[2] + this.lineHeight ] );
@@ -538,8 +508,6 @@ scripts:
           } );
 
           this.lineIndex++;
-          
-          this.lastDrawPoint.pickInfo = pickInfo;
         }
         
       }
@@ -574,17 +542,6 @@ scripts:
         //this.createCone( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), (dim*0.3), dim, this.lineColor, 18, true );
         //this.createLine( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), pt[0], pt[1], pt[2], this.lineWidth*0.3, [ 0, 0, 0 ], true );
       }
-    }
-    this.distanceFromLast = function( pickInfo ) {
-      var distSquared = 0;
-      if ( pickInfo && pickInfo.globalPosition ) {
-        if ( this.lastDrawPoint ) {
-          var p1 = pickInfo.globalPosition;
-          var p2 = this.lastDrawPoint.pickInfo.globalPosition;
-          distSquared = Math.pow( p1[0] - p2[0], 2 ) + Math.pow( p1[1] - p2[1], 2 );
-        }
-      }
-      return distSquared;
     }
     this.createCube = function( x, y, z, dx, dy, dz, color, temp ) {
       var pos = [];
