@@ -13,7 +13,6 @@
 
 --- 
 extends: http://vwf.example.com/scene.vwf
-type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
   backgroundColor: [ 135, 196, 250 ]
