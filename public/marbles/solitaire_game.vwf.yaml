@@ -101,13 +101,26 @@ scripts:
  - |
   //When initialized, create marbles.
   this.handleInit = function( ) {
-    if ( this.children.length == 0 ) {
+    var myNode = this;
+    if ( myNode.marbles == undefined ) {
+      var marblesTemplate = { 
+        "extends": "http://vwf.example.com/node3.vwf",
+        "properties": { 
+          "private": null
+          }
+      };
+      
+      myNode.children.create( "marbles", marblesTemplate, function( newObj ) {
+        this.future(1.5).handleInit();
+      } );
+    }
+    else if ( this.marbles.children.length == 0 ) {
       this.createMarbles( );
     }
   }
   this.initialize = function( ) {
     if ( this.id != "solitaire_game.vwf" ) {
-      this.future(3.0).handleInit();
+      this.future(1.5).handleInit();
     }
   };
 
@@ -185,9 +198,9 @@ scripts:
     me.gameUnderway = false;
     for ( var xIndex = 0; xIndex < 7; xIndex++ ) {
       for ( var yIndex = 0; yIndex < 7; yIndex++ ) {
-        if ( ( this.children[ childrenIndex ].positionOnBoard( [ xIndex, yIndex ] ) ) && !( ( xIndex == 3 ) && ( yIndex == 3 ) ) ) {
-          this.children[ childrenIndex ].solitairePosition = [ xIndex, yIndex ];
-          this.children[ childrenIndex ].selected = false;
+        if ( ( this.marbles.children[ childrenIndex ].positionOnBoard( [ xIndex, yIndex ] ) ) && !( ( xIndex == 3 ) && ( yIndex == 3 ) ) ) {
+          this.marbles.children[ childrenIndex ].solitairePosition = [ xIndex, yIndex ];
+          this.marbles.children[ childrenIndex ].selected = false;
           childrenIndex++;
           if ( childrenIndex > 31 ) {
             xIndex = 7;
@@ -207,8 +220,8 @@ scripts:
     var me = this;
     me.gameUnderway = false;
     for ( var childrenIndex = 0; childrenIndex < 32; childrenIndex++ ) {
-      this.children[ childrenIndex ].solitairePosition = [ 0, 0 ];
-      this.children[ childrenIndex ].selected = false;
+      this.marbles.children[ childrenIndex ].solitairePosition = [ 0, 0 ];
+      this.marbles.children[ childrenIndex ].selected = false;
     };
     me.selectedMarble = "";
   };
@@ -216,7 +229,7 @@ scripts:
   //Method to create marbles.
   // If the marbles have not yet been created, loop and create them.
   this.createMarbles = function( ) {
-    var myNode = this;
+    var myNode = this.marbles;
     var patternIndex = 0;
     for ( var patternIndex = 0; patternIndex < 32; patternIndex++ ) {
       var newMarbleName = "solitaireMarble" + patternIndex;
@@ -306,8 +319,8 @@ scripts:
         for ( var xIndex = 0; xIndex < 7; xIndex++ ) {
           for ( var yIndex = 0; yIndex < 7; yIndex++ ) {
             if ( ( ( xIndex > 1 ) && ( xIndex < 5 ) ) || ( ( yIndex > 1 ) && ( yIndex < 5 ) ) ) {
-              if ( this.children[ 0 ].lookupMarble( this, [ xIndex, yIndex ] ) == undefined ) {
-                var comparePos = this.children[ 0 ].marblePosition( [ xIndex, yIndex ], false );
+              if ( this.marbles.children[ 0 ].lookupMarble( this, [ xIndex, yIndex ] ) == undefined ) {
+                var comparePos = this.marbles.children[ 0 ].marblePosition( [ xIndex, yIndex ], false );
                 if ( ( relativePos[ 0 ] >= comparePos[ 0 ] - this.marbleBoundingDistance ) && ( relativePos[ 0 ] <= comparePos[ 0 ] + this.marbleBoundingDistance ) && ( relativePos[ 1 ] >= comparePos[ 1 ] - this.marbleBoundingDistance ) && ( relativePos[ 1 ] <= comparePos[ 1 ] + this.marbleBoundingDistance ) ) {
                   return [ xIndex, yIndex ];
                 }
@@ -373,8 +386,8 @@ scripts:
         }
       }
       else {
-        if ( me.selectedMarble == "" ) {
-          if ( node.parent === me ) {
+        if ( ( me.selectedMarble == "" ) && ( node.parent != undefined ) ) {
+          if ( node.parent.parent === me ) {
             node.selected = true;
           }
           else {
@@ -384,11 +397,13 @@ scripts:
           if ( nodeId == me.selectedMarble ) {
             node.selected = false;
           }
-          else if ( node.parent === me ) {
-            var selectedMarble = user.getObject( me.selectedMarble );
-            if ( selectedMarble != undefined ) {
-              selectedMarble.leapMarble( node );
-              me.future(1.0).checkGame( user );
+          else if ( node.parent != undefined ) {
+            if ( node.parent.parent === me ) {
+              var selectedMarble = user.getObject( me.selectedMarble );
+              if ( selectedMarble != undefined ) {
+                selectedMarble.leapMarble( node );
+                me.future(1.0).checkGame( user );
+              }
             }
           }
         }
@@ -454,9 +469,9 @@ scripts:
     var me = this;
     if ( me.gameUnderway == true ) {
       var marblesOnBoard = [ ];
-      for ( var childIndex = 0; childIndex < me.children.length; childIndex++ ) {
-        if ( me.children[ childIndex ].onBoard() == true ) {
-          marblesOnBoard.push( me.children[ childIndex ] );
+      for ( var childIndex = 0; childIndex < me.marbles.children.length; childIndex++ ) {
+        if ( me.marbles.children[ childIndex ].onBoard() == true ) {
+          marblesOnBoard.push( me.marbles.children[ childIndex ] );
         }
       }
       if ( marblesOnBoard.length == 1 ) {

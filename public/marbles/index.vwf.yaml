@@ -42,12 +42,30 @@ children:
     type: model/vnd.collada+xml
     properties:
       rotation: [ 1, 0, 0, 0 ]
+    children:
+      grass:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.01
+      brick_green:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.01
+      flagstone_pavers:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.01
   walls:
     extends: http://vwf.example.com/node3.vwf
     source: models/stoneWalls.DAE
     type: model/vnd.collada+xml
     properties:
       rotation: [ 1, 0, 0, 0 ]
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.015
   furniture:
     extends: http://vwf.example.com/node3.vwf
     source: models/marbleFurniture.DAE
@@ -55,6 +73,11 @@ children:
     properties:
       rotation: [ 1, 0, 0, 0 ]
       scale: 1
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.015
   unsupportedGames:
     extends: http://vwf.example.com/node3.vwf
     source: models/games.DAE
@@ -62,6 +85,19 @@ children:
     properties:
       rotation: [ 1, 0, 0, 0 ]
       scale: 1
+    children:
+      wood_fine01:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.01
+      field_playing01:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.01
+      target_practice:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.01
   background:
     extends: http://vwf.example.com/node3.vwf
     source: models/skydome.dae
@@ -151,13 +187,23 @@ children:
         source: models/selection_table.DAE
         type: model/vnd.collada+xml
         properties:
-          transform: [ -0.707107, -0.7071065, 0, 0, 0.7071065, -0.707107, 0, 0, 0, 0, 1, 0, -4.214666, -9.89909, 0.3974555, 1 ]
+          transform: [-0.7009091973304749,0.7132503390312195,0,0,-0.7132503390312195,-0.7009091973304749,0,0,0,0,1,0,-4.21466588973999,-9.899089813232422,0.39745551347732544,1]
+        children:
+          material:
+            extends: http://vwf.example.com/material.vwf
+            properties:
+              bumpScale: 0.01
       selection_table_2:
         extends: selection_table.vwf
         source: models/selection_table.DAE
         type: model/vnd.collada+xml
         properties:
-          transform: [ 0.7071068, 0.7071068, 0, 0, -0.7071068, 0.7071068, 0, 0, 0, 0, 1, 0, 3.941558, 9.861572, 0.3974555, 1 ]
+          transform: [0.7071067094802856,-0.7071067094802856,0,0,0.7071067094802856,0.7071067094802856,0,0,0,0,1,0,3.9415578842163086,9.861572265625,0.39745551347732544,1]
+        children:
+          material:
+            extends: http://vwf.example.com/material.vwf
+            properties:
+              bumpScale: 0.01
       solitaire_board_1:
         extends: solitaire_game.vwf
         source: models/solitaire_board.DAE
@@ -165,6 +211,11 @@ children:
         properties:
           rotation: [ 1, 0, 0, 0 ]
           translation: [ -7.429945, -7.816388, 0.8209709 ]
+        children:
+          material:
+            extends: http://vwf.example.com/material.vwf
+            properties:
+              bumpScale: 0.01
       solitaire_board_2:
         extends: solitaire_game.vwf
         source: models/solitaire_board.DAE
@@ -172,6 +223,11 @@ children:
         properties:
           rotation: [ 1, 0, 0, 0 ]
           translation: [ 7.061623, 8.292849, 0.8209709 ]
+        children:
+          material:
+            extends: http://vwf.example.com/material.vwf
+            properties:
+              bumpScale: 0.01
   light_1:
     extends: http://vwf.example.com/light.vwf
     properties:
