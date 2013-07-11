@@ -37,9 +37,9 @@ properties:
   selectedColor: black
 methods:
   initializeCamera:
-  clear:
   draw:
   pindrop:
+  clear:
 children:
   terrain:
     extends: http://vwf.example.com/node3.vwf
@@ -346,165 +346,160 @@ children:
       } //@ sourceURL=predator2.vwf
 scripts:
 - |
-    this.initialize = function() {
+  // Create object definitions for line and pushpin to be used to dynamically create these objects as the user
+  // draws lines and places pushpins
 
-      // TODO: When we can assume that initialize doesn't complete until all created nodes are in place, this
-      //       will no longer need to be a future call because we will be able to assume that the camera exists
-      this.future( 0 ).initializeCamera();
+  var line = {
+    "extends": "http://vwf.example.com/node3.vwf",
+    "type": "definition/mesh",
+    "properties": { 
+      "meshDefinition": { positions: [], faces: [], color: [] }
     }
-    this.initializeCamera = function() {
-      this.camera.transform = [ -1,     0,         0,     0,
-                                 0,    -0.894,    -0.447, 0,
-                                 0,    -0.447,     0.894, 0,
-                                 0, 20000,     10000,     1 ];
-      this.camera.far = 500000;
-      this.camera.near = 2;
-      this.camera.translationSpeed = 10000;
-    }
+  };
 
-    this.clear = function() {
-      if ( this.nodesCreated ) {
-        for ( var i = 0; i < this.nodesCreated.length; i++ ){
-          this.children.delete( this.getChild(this.nodesCreated[i]) );
+  var pushpin = {
+    extends: "http://vwf.example.com/node3.vwf",
+    source: "models/pushpinblack.dae",
+    type: "model/vnd.collada+xml",
+    properties: { 
+      positions: [],
+      scale: [ 6, 6, 6.6 ], 
+    },    
+  };
+
+  // Function definitions
+
+  this.initialize = function() {
+
+    // TODO: When we can assume that initialize doesn't complete until all created nodes are in place, this
+    //       will no longer need to be a future call because we will be able to assume that the camera exists
+    this.future( 0 ).initializeCamera();
+  }
+
+  this.initializeCamera = function() {
+    this.camera.transform = [ -1,     0,         0,     0,
+                               0,    -0.894,    -0.447, 0,
+                               0,    -0.447,     0.894, 0,
+                               0, 20000,     10000,     1 ];
+    this.camera.far = 500000;
+    this.camera.near = 2;
+    this.camera.translationSpeed = 10000;
+  }
+
+  this.draw = function( lastDrawPoint, pickInfo ) {
+    if ( pickInfo && pickInfo.globalPosition ) {
+      if ( lastDrawPoint ) {
+        var start = lastDrawPoint.pickInfo.globalPosition;
+        var end = pickInfo.globalPosition;
+        var sp = goog.vec.Vec3.createFromArray( [ start[0], start[1], start[2] + this.lineHeight ] );
+        var ep = goog.vec.Vec3.createFromArray( [ end[0], end[1], end[2] + this.lineHeight ] );
+         
+        var pos = [];
+        var faces;
+        
+        var diff = goog.vec.Vec3.createFromArray( [ ep[0] - sp[0], ep[1] - sp[1], ep[2] - sp[2] ] );
+        var up = goog.vec.Vec3.createFromArray( [ 0, 1, 0 ] );
+        var right = goog.vec.Vec3.createFromArray( [ 1, 0, 0 ] );
+        var top = goog.vec.Vec3.createFromArray( [ 0, 0, 0 ] );
+        
+        goog.vec.Vec3.normalize( diff, diff );
+
+        if ( Math.abs( goog.vec.Vec3.dot( up, diff, goog.vec.Vec3.create() ) ) < .999 ) // diff far enough from up? (.999==2.5 degrees)
+        { // then we can cross with up
+          goog.vec.Vec3.cross( diff, up, right );
         }
-        this.nodesCreated = [];  
-      }
-    }
-
-    var line = {
-      "extends": "http://vwf.example.com/node3.vwf",
-      "type": "definition/mesh",
-      "properties": { 
-        "meshDefinition": { positions: [], faces: [], color: [] }
-      }
-    };
-    var cube = {
-      "extends": "http://vwf.example.com/node3.vwf",
-      "type": "definition/mesh",
-      "properties": { 
-        "meshDefinition": { positions: [], faces: [], color: [] }
-      }
-    }; 
-    var cone = {
-      "extends": "http://vwf.example.com/node3.vwf",
-      "type": "definition/mesh",
-      "properties": { 
-        "meshDefinition": { positions: [], faces: [], color: [] }
-      }
-    };
-    var pushpin = {
-      extends: "http://vwf.example.com/node3.vwf",
-      source: "models/pushpinblack.dae",
-      type: "model/vnd.collada+xml",
-      properties: { 
-        positions: [],
-        scale: [ 6, 6, 6.6 ], 
-      },    
-    };
-    this.draw = function( lastDrawPoint, pickInfo ) {
-      if ( pickInfo && pickInfo.globalPosition ) {
-        if ( lastDrawPoint ) {
-          var start = lastDrawPoint.pickInfo.globalPosition;
-          var end = pickInfo.globalPosition;
-          var sp = goog.vec.Vec3.createFromArray( [ start[0], start[1], start[2] + this.lineHeight ] );
-          var ep = goog.vec.Vec3.createFromArray( [ end[0], end[1], end[2] + this.lineHeight ] );
-           
-          var pos = [];
-          var faces;
-          
-          var diff = goog.vec.Vec3.createFromArray( [ ep[0] - sp[0], ep[1] - sp[1], ep[2] - sp[2] ] );
-          var up = goog.vec.Vec3.createFromArray( [ 0, 1, 0 ] );
-          var right = goog.vec.Vec3.createFromArray( [ 1, 0, 0 ] );
-          var top = goog.vec.Vec3.createFromArray( [ 0, 0, 0 ] );
-          
-          goog.vec.Vec3.normalize( diff, diff );
-
-          if ( Math.abs( goog.vec.Vec3.dot( up, diff, goog.vec.Vec3.create() ) ) < .999 ) // diff far enough from up? (.999==2.5 degrees)
-          { // then we can cross with up
-            goog.vec.Vec3.cross( diff, up, right );
-          }
-          else
-          { //too colinear with up, so start w/ a different axis
-            goog.vec.Vec3.cross( diff, right, right );
-          }
-          top = goog.vec.Vec3.cross( diff, right, top );
-          goog.vec.Vec3.normalize( right, right );
-          goog.vec.Vec3.normalize( top, top );
-          goog.vec.Vec3.scale( right, this.lineWidth, right );
-          goog.vec.Vec3.scale( top, this.lineWidth, top );              
-          
-          pos.push( sp[0] + right[0] );  // 0
-          pos.push( sp[1] + right[1] );  // 0
-          pos.push( sp[2] + right[2] );  // 0
-          
-          pos.push( ep[0] + right[0] );  // 1
-          pos.push( ep[1] + right[1] );  // 1
-          pos.push( ep[2] + right[2] );  // 1
-          
-          pos.push( sp[0] - right[0] );  // 2
-          pos.push( sp[1] - right[1] );  // 2
-          pos.push( sp[2] - right[2] );  // 2
-          
-          pos.push( ep[0] - right[0] );  // 3
-          pos.push( ep[1] - right[1] );  // 3
-          pos.push( ep[2] - right[2] );  // 3
-          
-          pos.push( sp[0] + top[0] );  // 4
-          pos.push( sp[1] + top[1] );  // 4
-          pos.push( sp[2] + top[2] );  // 4
-          
-          pos.push( ep[0] + top[0] );  // 5
-          pos.push( ep[1] + top[1] );  // 5
-          pos.push( ep[2] + top[2] );  // 5
-          
-          pos.push( sp[0] - top[0] );  // 6
-          pos.push( sp[1] - top[1] );  // 6
-          pos.push( sp[2] - top[2] );  // 6
-          
-          pos.push( ep[0] - top[0] );  // 7
-          pos.push( ep[1] - top[1] );  // 7
-          pos.push( ep[2] - top[2] );  // 7
-          
-          faces = [ 0, 1, 3, 0, 3, 2, 4, 5, 7, 4, 7, 6 ];
-          
-          var newLine = $.extend(true, {}, line);
-          newLine.properties.meshDefinition.positions = pos;
-          newLine.properties.meshDefinition.faces = faces;
-          newLine.properties.meshDefinition.color = this.lineColor;
-          
-          this.children.create( "line"+this.lineIndex, newLine, function( newObj ) {
-            this.nodesCreated.push( newObj.id );
-            this.nodesCreated = this.nodesCreated;
-          } );
-
-          this.lineIndex++;
+        else
+        { //too colinear with up, so start w/ a different axis
+          goog.vec.Vec3.cross( diff, right, right );
         }
+        top = goog.vec.Vec3.cross( diff, right, top );
+        goog.vec.Vec3.normalize( right, right );
+        goog.vec.Vec3.normalize( top, top );
+        goog.vec.Vec3.scale( right, this.lineWidth, right );
+        goog.vec.Vec3.scale( top, this.lineWidth, top );              
         
-      }
-    }
-    this.pindrop = function( pickInfo ) {
-      
-      if ( pickInfo && pickInfo.globalPosition ) {
-        pushpin.properties.translation = pickInfo.globalPosition;
+        pos.push( sp[0] + right[0] );  // 0
+        pos.push( sp[1] + right[1] );  // 0
+        pos.push( sp[2] + right[2] );  // 0
         
-        if ( this.lineColor[0] == 255 && this.lineColor[1] == 0 && this.lineColor[2] == 0 ) 
-          pushpin.source = "models/pushPinRed.dae";
-        else if ( this.lineColor[0] == 0 && this.lineColor[1] == 255 && this.lineColor[2] == 0 ) 
-          pushpin.source = "models/pushPinGreen.dae";
-        else if ( this.lineColor[0] == 0 && this.lineColor[1] == 0 && this.lineColor[2] == 255 ) 
-          pushpin.source = "models/pushPinBlue.dae";
-        else if ( this.lineColor[0] == 0 && this.lineColor[1] == 0 && this.lineColor[2] == 0 ) 
-          pushpin.source = "models/pushPinBlack.dae";
-        else 
-          pushpin.source = "models/pushPinYellow.dae";
+        pos.push( ep[0] + right[0] );  // 1
+        pos.push( ep[1] + right[1] );  // 1
+        pos.push( ep[2] + right[2] );  // 1
         
-        var name = "pushpin"+this.pushpinIndex;
-        this.children.create( name, pushpin, function( newObj ) {
+        pos.push( sp[0] - right[0] );  // 2
+        pos.push( sp[1] - right[1] );  // 2
+        pos.push( sp[2] - right[2] );  // 2
+        
+        pos.push( ep[0] - right[0] );  // 3
+        pos.push( ep[1] - right[1] );  // 3
+        pos.push( ep[2] - right[2] );  // 3
+        
+        pos.push( sp[0] + top[0] );  // 4
+        pos.push( sp[1] + top[1] );  // 4
+        pos.push( sp[2] + top[2] );  // 4
+        
+        pos.push( ep[0] + top[0] );  // 5
+        pos.push( ep[1] + top[1] );  // 5
+        pos.push( ep[2] + top[2] );  // 5
+        
+        pos.push( sp[0] - top[0] );  // 6
+        pos.push( sp[1] - top[1] );  // 6
+        pos.push( sp[2] - top[2] );  // 6
+        
+        pos.push( ep[0] - top[0] );  // 7
+        pos.push( ep[1] - top[1] );  // 7
+        pos.push( ep[2] - top[2] );  // 7
+        
+        faces = [ 0, 1, 3, 0, 3, 2, 4, 5, 7, 4, 7, 6 ];
+        
+        var newLine = $.extend(true, {}, line);
+        newLine.properties.meshDefinition.positions = pos;
+        newLine.properties.meshDefinition.faces = faces;
+        newLine.properties.meshDefinition.color = this.lineColor;
+        
+        this.children.create( "line"+this.lineIndex, newLine, function( newObj ) {
           this.nodesCreated.push( newObj.id );
           this.nodesCreated = this.nodesCreated;
         } );
 
-        this.pushpinIndex++;        
-        
+        this.lineIndex++;
       }
-    } //@ sourceURL=index.vwf
+      
+    }
+  }
+
+  this.pindrop = function( pickInfo ) {
+    
+    if ( pickInfo && pickInfo.globalPosition ) {
+      pushpin.properties.translation = pickInfo.globalPosition;
+      
+      if ( this.lineColor[0] == 255 && this.lineColor[1] == 0 && this.lineColor[2] == 0 ) 
+        pushpin.source = "models/pushPinRed.dae";
+      else if ( this.lineColor[0] == 0 && this.lineColor[1] == 255 && this.lineColor[2] == 0 ) 
+        pushpin.source = "models/pushPinGreen.dae";
+      else if ( this.lineColor[0] == 0 && this.lineColor[1] == 0 && this.lineColor[2] == 255 ) 
+        pushpin.source = "models/pushPinBlue.dae";
+      else if ( this.lineColor[0] == 0 && this.lineColor[1] == 0 && this.lineColor[2] == 0 ) 
+        pushpin.source = "models/pushPinBlack.dae";
+      else 
+        pushpin.source = "models/pushPinYellow.dae";
+      
+      var name = "pushpin"+this.pushpinIndex;
+      this.children.create( name, pushpin, function( newObj ) {
+        this.nodesCreated.push( newObj.id );
+        this.nodesCreated = this.nodesCreated;
+      } );
+
+      this.pushpinIndex++;        
+      
+    }
+  } 
+
+  this.clear = function() {
+    if ( this.nodesCreated ) {
+      for ( var i = 0; i < this.nodesCreated.length; i++ ){
+        this.children.delete( this.getChild(this.nodesCreated[i]) );
+      }
+      this.nodesCreated = [];  
+    }
+  } //@ sourceURL=index.vwf
