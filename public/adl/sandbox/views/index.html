@@ -1,28 +1,29 @@
-	<div class="row" style="margin-top:30px;height:426px;">
+	<div class="row" style="margin-top:30px;height:426px;clear:both;">
 		<div class="span7">
-			<p>
-				Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in
-				"cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a
-				new world" 
-			</p>
-			<iframe width="560" height="315" style="display:block;margin:34px auto;width:80%" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
+			<div style="height: 114px;">
+				<p>
+					Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in
+					"cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a
+					new world" 
+				</p>
+			</div>
+			<iframe width="560" height="315" style="display:block;margin:0px auto;width:80%" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
 		</div>
 		<div class="span5" style="height:100%;">
 			<div class="featuredWorlds" data-bind="foreach:displayWorldObjects.slice(0,3)">
 				<div class="featuredInstance" data-bind="css : $index() == 2 ? 'featuredInstanceLast' : 'featuredInstance'">
-
-					
 					<div class="span2" style="margin-left:10px;">
-						<img data-bind="attr:{src:screen}" style="width:140px;" />
+						<a data-bind="attr:{href:'{{root}}/'+id}"><img data-bind="attr:{src:screen}" style="width:140px;" /></a>
 					</div>
-					<div class="span2">
-						<h4 style="margin-top:0;" data-bind="text:title"></h4>
-						<p data-bind="text:description"></p>
-						<div style="text-align:right;">
-							<a  href="/" >Load World</a>
+					<div class="span2" style="overflow:hidden;">
+						<div style="height:102px;">
+							<h4 style="margin-top:0;"><a style="color:inherit;" data-bind="text:title, attr:{href:'{{root}}/'+id}"></a></h4>
+							<p data-bind="text:description"></p>
 						</div>
 					</div>
-				
+					<!--<div style="text-align:right;width:100%;float:left;">
+						<a href="/" data-bind="attr:{href:'{{root}}/'+id}">Load World</a>
+					</div>-->
 				</div>
 			</div>
 		</div>
