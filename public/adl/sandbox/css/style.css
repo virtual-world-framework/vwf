@@ -210,6 +210,10 @@ a{
 	border-top: 1px #f7f7f7 solid;
 }
 
+.featuredInstanceLast{
+
+	border-bottom: none;
+}
 .editstate, .editstateGuest
 {
 	display: block;

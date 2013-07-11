@@ -183,6 +183,15 @@
 				}
 				
 				vwfPortalModel.worldObjects().sort(sortArrByUpdates);
+				
+				/////////////////////////////////////////////////////////////
+					
+					vwfPortalModel.worldObjects()[2].screen = '{{root}}/img/dfac_small.png';
+					vwfPortalModel.worldObjects()[1].screen = '{{root}}/img/desertworld_small.png';
+					vwfPortalModel.worldObjects()[0].screen = '{{root}}/img/terrain_small.png';
+				/////////////////////////////////////////////////////////////
+				
+				
 				vwfPortalModel.getPage(0);
 				vwfPortalModel.worldObjects.valueHasMutated();				
 				

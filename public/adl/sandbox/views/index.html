@@ -1,18 +1,27 @@
 	<div class="row" style="margin-top:30px;height:426px;">
-		<div class="span6">
+		<div class="span7">
 			<p>
 				Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in
 				"cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a
 				new world" 
 			</p>
-			<iframe width="560" height="315" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
+			<iframe width="560" height="315" style="display:block;margin:34px auto;width:80%" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
 		</div>
-		<div class="span6" style="height:100%;">
+		<div class="span5" style="height:100%;">
 			<div class="featuredWorlds" data-bind="foreach:displayWorldObjects.slice(0,3)">
-				<div class="featuredInstance">
+				<div class="featuredInstance" data-bind="css : $index() == 2 ? 'featuredInstanceLast' : 'featuredInstance'">
 
-					<h4 style="margin-top:0;" data-bind="text:title"></h4>
-					<img style="width: 90px;height:90px;" src="{{root}}/img/qmark.png" />
+					
+					<div class="span2" style="margin-left:10px;">
+						<img data-bind="attr:{src:screen}" style="width:140px;" />
+					</div>
+					<div class="span2">
+						<h4 style="margin-top:0;" data-bind="text:title"></h4>
+						<p data-bind="text:description"></p>
+						<div style="text-align:right;">
+							<a  href="/" >Load World</a>
+						</div>
+					</div>
 				
 				</div>
 			</div>
@@ -21,11 +30,13 @@
 	<div class="row" style="margin-top:30px;">
 		<div class="span12">
 			<div class="row">
-				<div class="span1 offset8">
-					<a href="{{root}}/create" class="coldstate" id="newinstancebutton" data-bind="visible:user().isLoggedIn"><img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"/></a>
+				<div class="span1 offset8" style="text-align:right;">
+					<a href="{{root}}/create" class="coldstate" id="newinstancebutton" data-bind="visible:user().isLoggedIn">
+						<img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"/>
+					</a>
 				</div>
 				<div class="span3">
-					<input id="filter" class="span3" style="width:89%; float:right;" type="text" placeholder="Filter Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
+					<input id="filter" class="span3" style="width:90%;" type="text" placeholder="Filter Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
 				</div>
 			</div>
 			<div class="row" id="activeRow" data-bind="foreach:displayWorldObjects">				
