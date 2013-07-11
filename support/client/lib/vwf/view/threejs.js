@@ -1522,7 +1522,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var numClicks = Math.abs( wheelDelta / 3 );
 
             // Prepare variables for calculation
-            var dist = Math.max( distanceToTarget || translationSpeed, 2 * self.state.cameraInUse.near );
+            var dist = Math.min( Math.max( distanceToTarget || translationSpeed, 
+                                           2 * self.state.cameraInUse.near ),
+                                 9 * translationSpeed );
             var percentDistRemainingEachStep = 0.8;
             var amountToMove = 0;
 
