@@ -603,7 +603,17 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             //login.call(self, $('#userName').val(), $('#password').val());
 
             var moniker = vwf_view.kernel.moniker();
-            var client = vwf_view.kernel.findClients("", "/" + moniker)[0];
+            var clients = vwf_view.kernel.findClients("", "/*");
+            var client = undefined;
+            for (var i=0; i < clients.length; i++)
+            {
+                if ( clients[i].indexOf(moniker) != -1 )
+                {
+                    client = clients[i];
+                    break;
+                }
+            }
+            // var client = vwf_view.kernel.findClients("", "/" + moniker)[0];
             
             if ( client ) {
                 vwf_view.kernel.setProperty( client, "displayName", $('#userName').val() );
