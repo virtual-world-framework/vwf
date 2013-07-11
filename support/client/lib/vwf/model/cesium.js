@@ -15,7 +15,7 @@
 
   
     
-define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function( module, model, utility, Color ) {
+define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/cesium/Cesium" ], function( module, model, utility, Color, Cesium ) {
 
 
     return model.load( module, {

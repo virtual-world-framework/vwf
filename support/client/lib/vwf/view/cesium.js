@@ -31,7 +31,7 @@
 /// @module vwf/view/cesium
 /// @requires vwf/view
 
-define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
+define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], function( module, view, utility, Cesium ) {
 
     return view.load( module, {
 
