@@ -3295,6 +3295,44 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
         };
 
+        // -- findClients ------------------------------------------------------------------------------
+
+        /// Locate client nodes matching a search pattern. 
+        ///
+        /// @name module:vwf.findClients
+        ///
+        /// @param {ID} nodeID
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
+        /// @param {String} matchPattern
+        ///   The search pattern.
+        /// @param {Function} [callback]
+        ///   A callback to receive the search results. If callback is provided, find invokes
+        ///   callback( matchID ) for each match. Otherwise the result is returned as an array.
+        /// 
+        /// @returns {ID[]|undefined}
+        ///   If callback is provided, undefined; otherwise an array of the node ids of the result.
+        /// 
+        /// @see {@link module:vwf/api/kernel.clients}
+
+        this.findClients = function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
+
+            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
+                "http-vwf-example-com-clients-vwf", nodeID, xpathResolver, this );
+
+            if ( callback ) {
+
+                matchIDs.forEach( function( matchID ) {
+                    callback( matchID );
+                } );
+
+            } else { 
+
+                return matchIDs;
+            }
+
+        };
+
         /// Test a node against a search pattern. See vwf.api.kernel#test for details.
         /// 
         /// @name module:vwf.test

@@ -221,6 +221,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             case "find":
             case "test":
+            case "findClients":
 
                 return function() {
                     return this.kernel[kernelFunctionName].apply( this.kernel, arguments );
