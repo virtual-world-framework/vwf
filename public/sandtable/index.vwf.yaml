@@ -37,7 +37,7 @@ properties:
   selectedColor: black
 methods:
   initializeCamera:
-  clear: |
+  clear:
   draw:
   pindrop:
 children:
@@ -348,8 +348,6 @@ scripts:
 - |
     this.initialize = function() {
 
-      // Wait until the queue resumes to set the mouse mode, so that we are sure that the camera has been 
-      // created
       // TODO: When we can assume that initialize doesn't complete until all created nodes are in place, this
       //       will no longer need to be a future call because we will be able to assume that the camera exists
       this.future( 0 ).initializeCamera();
