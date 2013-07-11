@@ -184,7 +184,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
             
             } else if ( protos && isMaterialDefinition.call( this, protos ) ) {
-                
+
                 node = this.state.nodes[childID] = {
                     name: childName,
                     threeObject: parentNode.threeObject,
@@ -193,7 +193,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     type: childExtendsID,
                     sourceType: childType,
                 };
-                node.threeMaterial = GetMaterial(node.threeObject);
+                node.threeMaterial = GetMaterial(node.threeObject, childName);
                 if(!node.threeMaterial)
                 {   
                     node.threeMaterial = new THREE.MeshPhongMaterial();
@@ -988,6 +988,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         value = Number( propertyValue );
                         threeObject.opacity = value;
                     }
+                    if (propertyName == "bumpScale" ) {
+                        value = Number( propertyValue );
+                        threeObject.bumpScale = value;
+                    }
 
                 }
                 if( threeObject instanceof THREE.Scene )
@@ -1702,23 +1706,57 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         return ret;
     }
     //do a depth first search of the children, return the first material
-    function GetMaterial(threeObject)
+    function GetMaterial(threeObject, optionalName)
     {
+        var potentialResult = undefined;
         //something must be pretty seriously wrong if no threeobject
         if(!threeObject)
+        {
             return null;
-        
-        if(threeObject && threeObject.material)
-            return threeObject.material;
+        }        
+        if(threeObject && threeObject.material) {
+            if ( threeObject.material instanceof THREE.Material ) {
+                if ( ( optionalName == undefined ) || ( threeObject.material.name == optionalName ) ) {
+                    return threeObject.material;
+                }
+                else if ( potentialResult == undefined ) {
+                    potentialResult = threeObject.material;
+                }
+            }
+            else if ( threeObject.material instanceof THREE.MeshFaceMaterial ) {
+                if ( threeObject.material.materials ) {
+                    for ( var i = 0; i < threeObject.material.materials.length; i++ ) {
+                        if ( threeObject.material.materials[ i ] instanceof THREE.Material ) {
+                            if ( ( optionalName == undefined ) || ( threeObject.material.materials[ i ].name == optionalName ) ) {
+                                return threeObject.material.materials[ i ];
+                            }
+                            else if ( potentialResult == undefined ) {
+                                potentialResult = threeObject.material.materials[ i ];
+                            }
+                        }
+                    }
+                }
+            }
+        }
         if(threeObject.children)
         {
             var ret = null;
             for(var i=0; i < threeObject.children.length; i++)
             {
-                ret = GetMaterial(threeObject.children[i])
-                if(ret) return ret;
+                ret = GetMaterial(threeObject.children[i], optionalName);
+                if ( ret ) {
+                    if ( ( optionalName == undefined ) || ( ret.name == optionalName ) ) {
+                        return ret;
+                    }
+                    else if ( potentialResult == undefined ) {
+                        potentialResult = ret;
+                    }
+                }
             }               
         }       
+        if ( potentialResult != undefined ) {
+            return potentialResult;
+        }
         return null;
     }
     
