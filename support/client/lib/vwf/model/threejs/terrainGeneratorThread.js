@@ -311,11 +311,11 @@ self.generateTerrain = function(terraindata,id,buffers)
   
 	var data = self.generateTerrainSimWorker(terraindata,buffers);
 	
-	//self.setTimeout(function()
-	//{
+	self.setTimeout(function()
+	{
 		var response = {command:'terrainData',data:data,id:id};
 		self.postMessage(response,[response.data.vertices,response.data.normals,response.data.everyOtherZ,response.data.everyOtherNormal]);
-	//},Math.random() * 30);
+	},Math.random() * 100);
 }
   
 self.addEventListener('message', function(e) {

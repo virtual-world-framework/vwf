@@ -183,6 +183,7 @@ function TileCache()
 				this.getMat = function()
 				{	
 						
+						
 						var algorithmShaderString = this.terrainGenerator.getDiffuseFragmentShader();
 						var algorithmUniforms = this.terrainGenerator.getMaterialUniforms();
 						
@@ -238,6 +239,7 @@ function TileCache()
 						
 						uniforms_default.noiseSampler.value.wrapS = uniforms_default.noiseSampler.value.wrapT = THREE.RepeatWrapping;
 						//mat.wireframe = true;
+						
 						return mat;
 						
 					// this.mat = new THREE.MeshPhongMaterial();

@@ -6,6 +6,9 @@ new (function(){
 	
 	this.terrainDataReceived = function(dataBack,mesh,readers,cb)
 	{
+	
+		var now = performance.now();
+		this.regencount++;
 		var geo = mesh.geometry;
 		
 		var vertices = readers[0];
@@ -101,7 +104,11 @@ new (function(){
 		geo.computeBoundingBox();
 				
 		geo.normalsNeedUpdate = true;
-		geo.dirtyMesh = true;
+	//	geo.dirtyMesh = true;
+		
+		var time = performance.now() - now;
+		this.totalregentime += time;
+		console.log(this.totalregentime/this.regencount);
 		if(cb)
 		  cb();
 	
@@ -202,6 +209,9 @@ new (function(){
 			if(this.worker && this.worker[i])
 				this.worker[i].terminate();
 		}
+		
+		this.regencount = 0;
+		this.totalregentime = 0;
 		
 		this.worker = [];
 		this.currentCB =  [];

@@ -362,7 +362,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			
 			renderer.render(backgroundScene,cam);
 			renderer.clear(false,true,false);
-			cam.near = cam.far;
+			cam.near = cam.far - (cam.far - cam.near)/100.0;
 			cam.far = far * 10;
 			cam.updateProjectionMatrix();
 			renderer.render(scene,cam);
