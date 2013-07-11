@@ -49,8 +49,49 @@
         ready( function() {
 
           vwf.initialize(
-            /* models */ [ "vwf/model/javascript", "vwf/model/object" ],
-            /*  views */ [ "vwf/view/document" ]
+
+            // Models
+
+            [
+              "vwf/model/javascript", 
+              /* scriptModel */         // scriptModel will go here
+              /* sceneModel */          // sceneModel will go here
+              "vwf/model/object",
+            ],
+
+            // Views
+
+            [
+              "vwf/view/document"
+            ]
+
+          );
+
+          // Insert the test-specific `scriptModel` and `sceneModel` drivers.
+          // 
+          // These drivers implement a specific set of properties for testing propagation and change
+          // flags for properties delegated to other properties and properties handled by drivers
+          // above the default model/object property store.
+          // 
+          //   - ps is a value property handled by model/test/scene
+          //   - po is a value property handled by model/object
+          //   - qs delegates as a string value to qs handled by model/test/scene
+          //   - qo delegates as a string value to qo handled by model/object
+          //   - rs/ro delegate to ss/so which delegate to ts/to in model/test/script
+          //   - us/uo delegate to vs/vo which delegate back to us/uo in model/test/script
+          // 
+          //         ▾    ▾    ▾    ▾    ▾    ▾    ▾    ▾    ▾    ▾    ▾    ▾    ▾    ▾    
+          // script: ▾    qs   rs ▸ ss ▸ ▾    us ▸ vs   ▾    qo   ro ▸ so ▸ ▾    uo ▸ vo   
+          //         ▾    ▾    ◦    ◦    ▾    ◦  ◺ ◦    ▾    ▾    ◦    ◦    ▾    ◦  ◺ ◦    
+          //  scene: ps   qs   ◦    ◦    ts   us   ◦    ▾    ▾    ◦    ◦    ▾    ▾    ◦    
+          //         ◦    ◦    ◦    ◦    ◦    ◦    ◦    ▾    ▾    ◦    ◦    ▾    ▾    ◦    
+          // object: ◦    ◦    ◦    ◦    ◦    ◦    ◦    po   qo   ◦    ◦    to   uo   ◦    
+          // 
+          // Key: ▾ ▸ : propagation path; ◦ : should not reach
+
+          vwf.models.splice( 1, 0,
+            scriptModel().create( vwf.models.kernel, [], {}, [] ),
+            sceneModel().create( vwf.models.kernel, [], {}, [] )
           );
 
           // URI component to be used as a prototype. The state of a URI component can be expressed
@@ -520,7 +561,181 @@
 
           } );
 
+          // Change flags for properties handled by model/object and by a driver above model/object.
+
+          asyncTest( "Property changes", function() {
+
+            vwf.createNode( testUtility.dataURIFromDescriptor( {
+
+              children: {
+
+                alpha: {
+                  properties: {
+                    po: 0,
+                    ps: 0,
+                  }
+                },
+
+                beta: {
+                  properties: {
+                    po: 0,
+                    ps: 0,
+                  }
+                },
+
+              }
+
+            } ), function( id ) {
+
+              // Change the properties.
+
+              vwf.execute( id, "this.alpha.po = 1" ); // handled by model/object; should mark alpha changed
+              vwf.execute( id, "this.beta.ps = 1" );  // handled by model/test/scene; should mark beta changed
+
+              // Verify the children and property changes are present in the replication state.
+
+              deepEqual( vwf.getNode( id ), {
+                patches: id,
+                children: {
+                  alpha: {
+                    patches: vwf.execute( id, "this.alpha.id" ),
+                    properties: {
+                      po: 1, ps: 0,
+                    }
+                  },
+                  beta: {
+                    patches: vwf.execute( id, "this.beta.id" ),
+                    properties: {
+                      po: 0, ps: 1,
+                    }
+                  },
+              } }, "property changes handled by model/object and by model/test/scene detected" );
+
+              // Clean up and continue.
+
+              vwf.deleteNode( id );
+
+              start();
+
+            } );
+
+          } );
+
           // == Helper functions ===================================================================
+
+          // A driver representing a script engine. No values are stored here, but some properties
+          // delegate to other properties.
+
+          function scriptModel() {
+
+            return require( "vwf/model" ).load( { id: "vwf/model/test/script" }, {
+
+              creatingProperty: function( nodeID, propertyName, propertyValue ) {
+
+                if ( propertyValue !== undefined ) {
+                  return this.settingProperty( nodeID, propertyName, propertyValue );
+                }
+
+              },
+
+              initializingProperty: function( nodeID, propertyName, propertyValue ) {
+
+                if ( propertyValue !== undefined ) {
+                  return this.settingProperty( nodeID, propertyName, propertyValue );
+                }
+
+              },
+
+              settingProperty: function( nodeID, propertyName, propertyValue ) {
+
+                switch ( propertyName ) {
+
+                  case "qo": this.kernel.setProperty( nodeID, "qo", propertyValue.toString() ); return propertyValue;
+                  case "qs": this.kernel.setProperty( nodeID, "qs", propertyValue.toString() ); return propertyValue;
+
+                  case "ro": this.kernel.setProperty( nodeID, "so", propertyValue - 1 ); return propertyValue;
+                  case "rs": this.kernel.setProperty( nodeID, "ss", propertyValue - 1 ); return propertyValue;
+
+                  case "so": this.kernel.setProperty( nodeID, "to", propertyValue.toString() ); return propertyValue;
+                  case "ss": this.kernel.setProperty( nodeID, "ts", propertyValue.toString() ); return propertyValue;
+
+                  case "uo": this.kernel.setProperty( nodeID, "vo", propertyValue - 1 ); return propertyValue;
+                  case "us": this.kernel.setProperty( nodeID, "vs", propertyValue - 1 ); return propertyValue;
+
+                  case "vo": this.kernel.setProperty( nodeID, "uo", propertyValue.toString() ); return propertyValue;
+                  case "vs": this.kernel.setProperty( nodeID, "us", propertyValue.toString() ); return propertyValue;
+
+                }
+
+              },
+
+              gettingProperty: function( nodeID, propertyName, propertyValue ) {
+
+                switch ( propertyName ) {
+
+                  case "qo": return parseInt( this.kernel.getProperty( nodeID, "qo" ) );
+                  case "qs": return parseInt( this.kernel.getProperty( nodeID, "qs" ) );
+
+                  case "ro": return this.kernel.getProperty( nodeID, "so" ) + 1;
+                  case "rs": return this.kernel.getProperty( nodeID, "ss" ) + 1;
+
+                  case "so": return parseInt( this.kernel.getProperty( nodeID, "to" ) );
+                  case "ss": return parseInt( this.kernel.getProperty( nodeID, "ts" ) );
+
+                  case "uo": return this.kernel.getProperty( nodeID, "vo" ) + 1;
+                  case "us": return this.kernel.getProperty( nodeID, "vs" ) + 1;
+
+                  case "vo": return parseInt( this.kernel.getProperty( nodeID, "uo" ) );
+                  case "vs": return parseInt( this.kernel.getProperty( nodeID, "us" ) );
+
+                }
+
+              },
+
+            } );
+
+          }
+
+          // A driver representing a scene manager or other engine that stores some properties.
+          // Properties handled here won't reach the model/object driver.
+
+          function sceneModel() {
+
+            return require( "vwf/model" ).load( { id: "vwf/model/test/scene" }, {
+
+              creatingProperty: function( nodeID, propertyName, propertyValue ) {
+                  return this.initializingProperty( nodeID, propertyName, propertyValue );
+              },
+
+              initializingProperty: function( nodeID, propertyName, propertyValue ) {
+                  return this.settingProperty( nodeID, propertyName, propertyValue );
+              },
+
+              settingProperty: function( nodeID, propertyName, propertyValue ) {
+
+                switch ( propertyName ) {
+
+                  case "ps": case "qs": case "ts": case "us":
+                    return this.state[ nodeID + '-' + propertyName ] = propertyValue;
+
+                }
+
+              },
+
+              gettingProperty: function( nodeID, propertyName, propertyValue ) {
+
+                switch ( propertyName ) {
+
+                  case "ps": case "qs": case "ts": case "us":
+                    return this.state[ nodeID + '-' + propertyName ];
+
+                }
+
+              },
+
+            } );
+
+          }
 
           // Generate the random state object given a parent's state and a node ID. If the node
           // doesn't have a parent, use the global random seed. This mimics the prng initialization
