@@ -68,7 +68,7 @@ properties:
       if ( ! goog.vec.Mat4.equals( this.transform || goog.vec.Mat4.createIdentity(), transform ) ) {
         this.transform = transform;
         this.transformChanged( transform );
-      }
+      }  //@ sourceURL=node3.transform.set.vwf
 
   ## Translation of 3D node
   ## node.translation <= [ x, y, z ]
