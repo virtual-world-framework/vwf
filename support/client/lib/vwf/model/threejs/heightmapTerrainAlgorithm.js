@@ -8,28 +8,30 @@ function heightmapTerrainAlgorithm()
 		console.log('data received');
 		this.dataHeight = data.dataHeight;
 		this.dataWidth = data.dataWidth;
-		this.worldLength = 13500;
-		this.worldWidth = 9500;
+		this.worldLength = data.worldLength || 13500;
+		this.worldWidth = data.worldWidth || 9500;
 		this.min = data.min;
 		console.log('from thread: min is ' + this.min);
 		this.type = 'bt';
-		this.url = 'terrain/River.bt';
+		
 		this.importScript('simplexNoise.js');
 		this.importScript('Rc4Random.js');
 		this.SimplexNoise = new SimplexNoise((new Rc4Random(1 +"")).random);
 	}
 	//This can generate data on the main thread, and it will be passed to the coppies in the thread pool
-	this.poolInit = function(cb)
+	this.poolInit = function(cb,params)
 	{	
 		
 		this.type = 'bt';
-		this.url = 'terrain/River.bt';
+		this.url = (params && params.url) || 'terrain/River.bt';
+		this.diffuseUrl = (params && params.diffuseUrl) || 'terrain/River.jpg';
 		if(this.type == 'img')
 		{
 			canvas = document.createElement('canvas');
 			
 			var img = new Image();
 			img.src = this.url;
+			
 			img.onload = function()
 			{
 				
@@ -73,6 +75,10 @@ function heightmapTerrainAlgorithm()
 				}
 			};
 			xhr.open('GET', this.url);
+			
+			this.worldLength = parseFloat(params.worldLength) || 13500;
+			this.worldWidth =  parseFloat(params.worldWidth) || 9500;
+			
 			xhr.send();
 		}
 		
@@ -112,7 +118,7 @@ function heightmapTerrainAlgorithm()
 		}
 		this.min = min;
 		this.data = data;
-		cb({dataHeight:this.dataHeight,dataWidth:this.dataWidth,min:min,data:data});
+		cb({worldLength:this.worldLength,worldWidth:this.worldWidth,dataHeight:this.dataHeight,dataWidth:this.dataWidth,min:min,data:data});
 	}
 	//This is the settings data, set both main and pool side
 	this.getEditorData = function(data)
@@ -121,8 +127,23 @@ function heightmapTerrainAlgorithm()
 		heightmapSrc:{
 								displayname : 'HeightMap URL',
 								property:'url',
-								type:'text'
-						}
+								type:'prompt'
+						},
+		diffuseSrc:{
+								displayname : 'HeightMap URL',
+								property:'diffuseUrl',
+								type:'prompt'
+						},	
+		worldLength:{
+								displayname : 'Length (m)',
+								property:'worldLength',
+								type:'prompt'
+						},
+		worldWidth:{
+								displayname : 'Width (m)',
+								property:'worldWidth',
+								type:'prompt'
+						}							
 		}
 	}
 	//This is the settings data, set both main and pool side
@@ -133,24 +154,55 @@ function heightmapTerrainAlgorithm()
 	//this sets the values on the pool side. Keep these cached here, so the engine can query them without an async call
 	//updatelist is the existing tiles. Return tiles in an array  that will need an update after the property set. This will 
 	//allow the engine to only schedule tile updates that are necessary.
-	this.setAlgorithmDataPool = function(seed,updateList)
+	this.setAlgorithmDataPool = function(data,updateList)
 	{
-		this.seed = seed;
-		return updateList;
+		
+		var needRebuild = false;
+		if(data.url && data.url != this.url)
+		{
+			this.url = data.url;
+			needRebuild = true;
+		}
+		if(data.worldLength && data.worldLength != this.worldLength)
+		{
+			this.worldLength =  parseFloat(data.worldLength);
+			needRebuild = true;
+		}
+		if(data.worldWidth && data.worldWidth != this.worldWidth)
+		{
+			this.worldWidth =  parseFloat(data.worldWidth);
+			needRebuild = true;
+		}
+		if(data.diffuseUrl)	
+		{
+			this.diffuseUrl = data.diffuseUrl;
+			if(updateList)
+			{
+				for(var i = 0; i < updateList.length; i++)
+				{
+					updateList[i].mesh.material.uniforms.diffuseSampler.value = _SceneManager.getTexture( this.diffuseUrl);
+				}
+			}
+			
+		}
+		if(needRebuild) return updateList;
+		return [];
 	}
 	//the engine will read the data values here
 	this.getAlgorithmDataPool = function(seed)
 	{
 		return {
-			url:this.url
-		
+			url:this.url,
+			diffuseUrl:this.diffuseUrl,
+			worldWidth:this.worldWidth,
+			worldLength:this.worldLength
 		};
 	}
 	//This will allow you to setup shader variables that will be merged into the the terrain shader
 	this.getMaterialUniforms = function(mesh,matrix)
 	{
 		var uniforms_default = {
-		diffuseSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/River.jpg" ) },
+		diffuseSampler:   { type: "t", value: _SceneManager.getTexture( this.diffuseUrl) },
 		dirtSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/dirt.jpg" ) },
 		brushSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/scrub.jpg" ) },
 		};

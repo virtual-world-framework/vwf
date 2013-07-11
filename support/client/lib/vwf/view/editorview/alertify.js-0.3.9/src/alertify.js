@@ -12,7 +12,7 @@
 		    isopen    = false,
 		    keys      = { ENTER: 13, ESC: 27, SPACE: 32 },
 		    queue     = [],
-		    $, btnCancel, btnOK, btnReset, btnFocus, elCallee, elCover, elDialog, elLog, form, input, getTransitionEvent;
+		    $, btnCancel, btnOK, btnReset, btnFocus, elCallee, elCover, elDialog, elLog, form, input, getTransitionEvent,choices;
 
 		/**
 		 * Markup pieces
@@ -247,21 +247,30 @@
 				    message = item.message,
 				    css     = item.cssClass || "";
 
+					
 				html += "<div class=\"alertify-dialog\">";
 
 				if (_alertify.buttonFocus === "none") html += "<a href=\"#\" id=\"alertify-noneFocus\" class=\"alertify-hidden\"></a>";
 
-				if (type === "prompt") html += "<form id=\"alertify-form\">";
+				if (type === "prompt" || type === "choice") html += "<form id=\"alertify-form\">";
 
 				html += "<article class=\"alertify-inner\">";
 				html += dialogs.message.replace("{{message}}", message);
-
-				if (type === "prompt") html += dialogs.input;
+				
+				if(type === "choice")
+				{
+					for(var i = 0; i < item.placeholder.length; i++)
+					{
+						html += '<div id="choice'+i+'">'+item.placeholder[i]+'</div>';
+					}
+				}
+				
+				if (type === "prompt" || type === "choice") html += dialogs.input;
 
 				html += dialogs.buttons.holder;
 				html += "</article>";
 
-				if (type === "prompt") html += "</form>";
+				if (type === "prompt" || type === "choice") html += "</form>";
 
 				html += "<a id=\"alertify-resetFocus\" class=\"alertify-resetFocus\" href=\"#\">Reset Focus</a>";
 				html += "</div>";
@@ -272,6 +281,7 @@
 					html = html.replace("{{ok}}", this.labels.ok).replace("{{cancel}}", this.labels.cancel);
 					break;
 				case "prompt":
+				case "choice":
 					html = html.replace("{{buttons}}", this.appendButtons(dialogs.buttons.cancel, dialogs.buttons.submit));
 					html = html.replace("{{ok}}", this.labels.ok).replace("{{cancel}}", this.labels.cancel);
 					break;
@@ -574,6 +584,37 @@
 				btnFocus  = (_alertify.buttonFocus === "cancel") ? btnCancel : ((_alertify.buttonFocus === "none") ? $("alertify-noneFocus") : btnOK),
 				input     = $("alertify-text")   || undefined;
 				form      = $("alertify-form")   || undefined;
+				choices   = undefined;
+				if(input) input.style.display = '';
+				if(item.type == 'choice')
+				{
+					if(input) input.style.display = 'none';
+					choices = [];
+					for(var i = 0; i < item.placeholder.length; i++)
+					{
+						choices.push($('choice' + i));
+						choices[i].className = 'choice';
+					}
+					
+					choices[0].className = 'choiceSelected';
+					input.value = item.placeholder[0];
+					
+					for(var i = 0; i < item.placeholder.length; i++)
+					{
+						choices[i].index = i;
+						choices[i].onclick = function()
+						{
+							
+							for(var i = 0; i < item.placeholder.length; i++)
+							{
+								choices[i].className = 'choice';
+							}
+							this.className = 'choiceSelected';
+							input.value = item.placeholder[this.index];
+						
+						};
+					}					
+				}
 				// add placeholder value to the input field
 				if (typeof item.placeholder === "string" && item.placeholder !== "") input.value = item.placeholder;
 				if (fromQueue) this.setFocus();
@@ -605,6 +646,7 @@
 			init    : _alertify.init,
 			log     : function (message, type, wait) { _alertify.log(message, type, wait); return this; },
 			prompt  : function (message, fn, placeholder, cssClass) { _alertify.dialog(message, "prompt", fn, placeholder, cssClass); return this; },
+			choice  : function (message, fn, placeholder, cssClass) { _alertify.dialog(message, "choice", fn, placeholder, cssClass); return this; },
 			success : function (message, wait) { _alertify.log(message, "success", wait); return this; },
 			error   : function (message, wait) { _alertify.log(message, "error", wait); return this; },
 			set     : function (args) { _alertify.set(args); },

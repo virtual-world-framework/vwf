@@ -34,9 +34,12 @@ function TileCache()
 						"uniform vec3 debugColor;\n"+
 						"uniform float side;\n"+
 						"attribute vec3 everyOtherNormal;\n"+
+						"attribute vec3 ONormal;\n"+
 						"attribute float everyOtherZ;\n"+
+						"attribute float everyZ;\n"+
 						"void main() {\n"+
-						" pos = (modelMatrix * vec4(position,1.0)).xyz; \n"+
+						" float z = mix(everyOtherZ,everyZ,blendPercent);\n"+
+						" pos = (modelMatrix * vec4(position.xy,z,1.0)).xyz; \n"+
 						"npos = pos;\n"+
 						"npos.z += getNoise(pos.xy*200.0)/50.0; \n"+
 						
@@ -53,8 +56,8 @@ function TileCache()
 						" if(side == 7.0 && (position.y > 49.0 || position.x < -49.0)) {edgeblend = 1.0; debug = vec3(1.0,1.0,1.0);}\n" +
 						" if(side == 8.0 && (position.y < -49.0 || position.x < -49.0)) {edgeblend = 1.0; debug = vec3(1.0,1.0,1.0);}\n" +
 						
-						" float z = mix(everyOtherZ,position.z,blendPercent);\n"+
-						"wN = mix(everyOtherNormal,normal,blendPercent);\n"+
+						
+						"wN = mix(everyOtherNormal,ONormal,blendPercent);\n"+
 						"if(edgeblend == 1.0) {z=everyOtherZ;wN = everyOtherNormal; }\n"+
 						
 						"n = normalMatrix *  wN\n;"+
@@ -184,6 +187,7 @@ function TileCache()
 				{	
 						
 						
+						
 						var algorithmShaderString = this.terrainGenerator.getDiffuseFragmentShader();
 						var algorithmUniforms = this.terrainGenerator.getMaterialUniforms();
 						
@@ -225,6 +229,8 @@ function TileCache()
 						var attributes_default = {
 							everyOtherNormal: { type: 'v3', value: [] },
 							everyOtherZ: { type: 'f', value: [] },
+							everyZ: { type: 'f', value: [] },
+							ONormal: { type: 'v3', value: [] },
 						};
 						var mat = new THREE.ShaderMaterial( {
 							uniforms:       uniforms_default,
@@ -240,6 +246,7 @@ function TileCache()
 						uniforms_default.noiseSampler.value.wrapS = uniforms_default.noiseSampler.value.wrapT = THREE.RepeatWrapping;
 						//mat.wireframe = true;
 						
+						this.mat = mat;
 						return mat;
 						
 					// this.mat = new THREE.MeshPhongMaterial();
@@ -488,23 +495,28 @@ function TileCache()
 					newtile = new THREE.Mesh(this.buildMesh0(100,res),this.getMat());
 					newtile.res = res + 3;
 					newtile.geometry.dynamic = true;
-					newtile.doublesided = true;
+					newtile.doublesided = false;
 					newtile.side = side;
 					newtile.receiveShadow = true;
-					newtile.castShadow = false;
+					newtile.castShadow = true;
 					newtile.material.uniforms.side.value = side;
-					
+					newtile.matrixAutoUpdate = false;
 					for(var i = 0; i < newtile.geometry.vertices.length; i++)
 					{
 						if(i < newtile.res * newtile.res)
 						{
 							newtile.material.attributes.everyOtherZ.value.push(0);
+							newtile.material.attributes.everyZ.value.push(0);
 							newtile.material.attributes.everyOtherNormal.value.push(new THREE.Vector3(0,0,1));
+							newtile.material.attributes.ONormal.value.push(new THREE.Vector3(0,0,1));
+							
 						}
 						else
 						{
 							newtile.material.attributes.everyOtherZ.value.push(-10);
+							newtile.material.attributes.everyZ.value.push(-10);
 							newtile.material.attributes.everyOtherNormal.value.push(new THREE.Vector3(0,0,1));
+							newtile.material.attributes.ONormal.value.push(new THREE.Vector3(0,0,1));
 						}
 					}
 					newtile.material.attributes.everyOtherZ.needsUpdate = true;

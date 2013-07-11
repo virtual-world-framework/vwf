@@ -430,21 +430,35 @@ define(function ()
 				}
 				if (editordata[i].type == 'choice')
 				{
-					var id = 'basicSettings' + nodeid + editordata[i].property + 'choices';
-					$('#basicSettings' + nodeid).append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">' + editordata[i].displayname + ': </div>');
-					$('#basicSettings' + nodeid).append('<form><div id="' + id + '"></div></form>');
-					var val = vwf.getProperty(node.id, editordata[i].property);
-					for (var k = 0; k < editordata[i].labels.length; k++)
+					
+					
+					$('#basicSettings' + nodeid).append('<div style="">' + editordata[i].displayname + '</div><input type="text" style="text-align: center;border: outset 1px;background-color: #DDDDDD;margin: 0px 0px 5px 0px;cursor: pointer;display: block;width: 100%;padding: 2px;border-radius: 5px;font-weight: bold;" id="' + nodeid + i + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/>');
+					$('#' + nodeid + i).val(vwf.getProperty(node.id, editordata[i].property));
+					$('#' + nodeid + i).attr('index',i);
+					
+					$('#' + nodeid + i).click(function ()
 					{
-						var newid = id + editordata[i].labels[k];
-						$('#' + id).append('<input type="radio" id="' + newid + '" name="Radio"/><label id="' + newid + 'label' + '" for="' + newid + '">' + editordata[i].labels[k] + '</label>');
-						$('#' + newid + 'label').attr('propname', editordata[i].property);
-						$('#' + newid + 'label').attr('nodename', nodeid);
-						$('#' + newid + 'label').attr('value', editordata[i].values[k]);
-						$('#' + newid + 'label').click(this.primPropertyValue);
-						if (val == editordata[i].values[k]) $('#' + newid).attr('checked', 'checked');
-					}
-					$('#' + id).buttonset();
+						
+						var propname = $(this).attr('propname');
+						var nodename = $(this).attr('nodename');
+						var values = editordata[$(this).attr('index')].values;
+						var labels = editordata[$(this).attr('index')].labels;
+						var div = this;
+						
+						alertify.choice('Enter a value for ' + propname,function(ok,value)
+						{
+							
+							if(ok)
+							{
+								$(div).val(value);
+								var k = labels.indexOf(value)
+								
+								_PrimitiveEditor.setProperty(nodename, propname, values[k]);
+							}
+						},labels);
+					});
+					
+					
 					//$('#'+i).
 				}
 				if (editordata[i].type == 'rangeslider')
@@ -577,6 +591,26 @@ define(function ()
 						var propname = $(this).attr('propname');
 						var nodename = $(this).attr('nodename');
 						_PrimitiveEditor.setProperty(nodename, propname, $(this).val());
+					});
+				}
+				if (editordata[i].type == 'prompt')
+				{
+					$('#basicSettings' + nodeid).append('<div style="">' + editordata[i].displayname + '</div><input type="text" style="text-align: center;border: outset 1px;background-color: #DDDDDD;margin: 0px 0px 5px 0px;cursor: pointer;display: block;width: 100%;padding: 2px;border-radius: 5px;font-weight: bold;" id="' + nodeid + i + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/>');
+					$('#' + nodeid + i).val(vwf.getProperty(node.id, editordata[i].property));
+					$('#' + nodeid + i).click(function ()
+					{
+					
+						var propname = $(this).attr('propname');
+						var nodename = $(this).attr('nodename');
+						var div = this;
+						alertify.prompt('Enter a value for ' + propname,function(ok,value)
+						{
+							if(ok)
+							{
+								$(div).val(value);
+								_PrimitiveEditor.setProperty(nodename, propname, value);
+							}
+						},$(this).val() );
 					});
 				}
 				if (editordata[i].type == 'nodeid')
