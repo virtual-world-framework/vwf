@@ -68,6 +68,8 @@ methods:
 
 scripts:
 - |
-  this.pointerClick = function()  {  // when clicked ...
-    this["spin-spinning"] = ! this["spin-spinning"];  // ... toggle the enabled flag
+  this.pointerClick = function( pointerInfo )  {
+    if ( pointerInfo.button == "left" ) {
+      this["spin-spinning"] = ! this["spin-spinning"];  // ... toggle the enabled flag
+    }
   }
