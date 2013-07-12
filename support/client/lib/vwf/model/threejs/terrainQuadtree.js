@@ -543,10 +543,10 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 											this.badsidemesh = null;
 											
 										}
-									//	this.mesh.geometry.dirtyMesh = true;
-									//	this.mesh.geometry.BoundingSphere = null;
-									//	this.mesh.geometry.BoundingBox = null;
-									//	this.mesh.geometry.RayTraceAccelerationStructure = null;
+										this.mesh.geometry.dirtyMesh = true;
+										this.mesh.geometry.BoundingSphere = null;
+										this.mesh.geometry.BoundingBox = null;
+										this.mesh.geometry.RayTraceAccelerationStructure = null;
 										//go head and callback into the rebuild look to deal with fadein/out stuff, and dispatch the next tile update
 										cb(this,force);
 									}else

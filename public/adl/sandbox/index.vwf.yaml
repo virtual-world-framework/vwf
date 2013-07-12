@@ -169,6 +169,7 @@ scripts:
        this.setCameraMode('Orbit');
        this.offset = [0,0,1];
        this.center = [0,0,0];
+       this.flyspeed = 1;
        this.activeCameraComp = false;
        this.loaded = false;
        this.zoom = 4;
@@ -786,8 +787,8 @@ scripts:
             var side = MATH.crossVec3([0,0,1],offset);
             
             if(this.y_rot < .479 ) this.y_rot = .479;
-            if(this.y_rot > .628 && this.cameramode != 'Free') this.y_rot = .628;
-            if(this.y_rot > .783 && this.cameramode == 'Free') this.y_rot = .783;
+            if(this.y_rot > .628 && (this.cameramode != 'Free' && this.cameramode != 'Fly')) this.y_rot = .628;
+            if(this.y_rot > .783 && (this.cameramode == 'Free' || this.cameramode == 'Fly')) this.y_rot = .783;
             
             var crossmatrix = MATH.angleAxis(this.y_rot*10,side);
             var stage2offset = MATH.mulMat4Vec3(crossmatrix,offset);
@@ -901,7 +902,7 @@ scripts:
         this.cameramode = mode;
         if(this.cameramode == 'Orbit')
             this.followObject(null);
-        if(this.cameramode == 'Free')
+        if(this.cameramode == 'Free' || this.cameramode == 'Fly')
         {
            this.ReprojectCameraCenter();
            this.followObject(null);
@@ -949,7 +950,7 @@ scripts:
     this.localpointerWheel = function( pickInfo ) {
        
         
-        if(this.cameramode != 'Navigate' && this.cameramode != 'Free')
+        if(this.cameramode != 'Navigate' && this.cameramode != 'Free'  && this.cameramode != 'Fly')
         { 
             if(pickInfo.deltaY < 0 )
             this.zoom *= .9;
@@ -962,13 +963,22 @@ scripts:
             this.zoom = this.zoom + (3- this.zoom )*.01;
         }
         
-        if(this.cameramode == 'Free')
+        if(this.cameramode == 'Free' )
         { 
             if(pickInfo.deltaY > 0 )
             this.center = MATH.subVec3(this.center,this.GetCameraCenterRay());
             else
             this.center = MATH.addVec3(this.GetCameraCenterRay(),this.center);
             
+        }
+        if(this.cameramode == 'Fly')
+        {
+            if(pickInfo.deltaY > 0 )
+            this.flyspeed *= 1.1;
+            else 
+            this.flyspeed *= .9;
+            
+            alertify.log('Flying at ' + Math.floor(75 / this.flyspeed) + ' mph');
         }
         if(this.cameramode == 'FirstPerson' && pickInfo.deltaY > 0)
         {
@@ -1083,9 +1093,9 @@ scripts:
         
         
         
-        if(this.cameramode == 'Free' && this.flying == true)
+        if(this.cameramode == 'Fly')
         { 
-            this.center = MATH.addVec3(this.center,MATH.scaleVec3(this.GetCameraCenterRay(),window.deltaTime/30.0));
+            this.center = MATH.addVec3(this.center,MATH.scaleVec3(this.GetCameraCenterRay(),window.deltaTime/(this.flyspeed * 30.0)));
             document.title = 1/(window.deltaTime/30.0);
         }
         

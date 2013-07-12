@@ -498,7 +498,7 @@ function TileCache()
 					newtile.doublesided = false;
 					newtile.side = side;
 					newtile.receiveShadow = true;
-					newtile.castShadow = true;
+					newtile.castShadow = false;
 					newtile.material.uniforms.side.value = side;
 					newtile.matrixAutoUpdate = false;
 					for(var i = 0; i < newtile.geometry.vertices.length; i++)

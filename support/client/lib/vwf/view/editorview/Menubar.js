@@ -451,8 +451,8 @@ define(
 		{
 			clearCameraModeIcons();
 			$('#MenuCameraNavigateicon').css('background', '#9999FF');
-			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Free');
-			vwf.models[0].model.nodes['index-vwf'].flying = true;
+			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Fly');
+			
 		});
 		
 		$('#MenuCameraNone').click(function (e)
