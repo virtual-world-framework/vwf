@@ -37,7 +37,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
 
             // turns on logger debugger console messages 
             this.debug = {
-                "creation": true,
+                "creation": false,
                 "initializing": false,
                 "parenting": false,
                 "deleting": false,
@@ -444,8 +444,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
                 
                 var sceneNode = findSceneNode.call( this, node );
                 
-                //debugger;
-
                 if ( node.cesiumObj ) {
                     if ( node.cesiumObj instanceof Cesium.Billboard ) {
                         if ( node.bbCollection ) {
@@ -480,7 +478,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
                             }
                         }
                     } else if ( node.cesiumObj instanceof Cesium.PolylineCollection ) {
-                        //debugger;
                         sceneNode.scene.getPrimitives().remove( node.cesiumObj );
                         node.cesiumObj = undefined;
                     }
