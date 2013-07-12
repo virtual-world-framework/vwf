@@ -20,8 +20,10 @@ properties:
 children:
   camera:
     extends: http://vwf.example.com/cesium/camera.vwf
-  #sun: 
-    #extends: http://vwf.example.com/cesium/sun.vwf 
+  earth:
+    extends: http://vwf.example.com/cesium/centralBody.vwf 
+  sun: 
+    extends: http://vwf.example.com/cesium/sun.vwf 
   atmosphere: 
     extends: http://vwf.example.com/cesium/atmosphere.vwf 
   skybox: 
