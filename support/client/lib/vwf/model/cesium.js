@@ -41,7 +41,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
                 "initializing": false,
                 "parenting": false,
                 "deleting": false,
-                "properties": false,
+                "properties": true,
                 "setting": false,
                 "getting": false
             };
