@@ -37,11 +37,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
 
             // turns on logger debugger console messages 
             this.debug = {
-                "creation": false,
+                "creation": true,
                 "initializing": false,
                 "parenting": false,
                 "deleting": false,
-                "properties": true,
+                "properties": false,
                 "setting": false,
                 "getting": false
             };
