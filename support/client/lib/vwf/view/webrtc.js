@@ -261,18 +261,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             $container = $( "#" + this.videoElementsDiv );
             if ( muted ) {
-                var setMuted = "muted"; // this is the specified way to mute the 
-                                        // video, which ff doesn't support currently 
-                if ( webrtcDetectedBrowser == "firefox" ) {
-                    setMuted = "muted='true'";
-                }
+                var setMuted = "";
 
                 $container.append(
                     "<div id='"+ divId + "'>" +
                         "<video class='vwf-webrtc-video' id='" + videoId +
                             "' width='320' height='240' src='" + url + 
-                            "' loop='loop' autoplay = true " + setMuted +
-                            " style='position: absolute; left: 0; top: 0; z-index: 40;'>" +
+                            "' loop='loop' autoplay = true muted='true' " +
+                            "style='position: absolute; left: 0; top: 0; z-index: 40;'>" +
                         "</video>" +
                     "</div>"
                 );                
