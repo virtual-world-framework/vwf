@@ -51,10 +51,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             if ( options === undefined ) { options = {}; }
 
-            this.cesiumObjectDef = options.cesium !== undefined ? options.cesium : 'widget';
+            this.cesiumType = options.cesium !== undefined ? options.cesium : 'widget'; // 'widget', 'viewer', manual - anything else 
             this.parentDiv = options.parentDiv !== undefined ? options.parentDiv : 'body';
             this.parentClass = options.parentClass !== undefined ? options.parentClass : 'cesium-main-div';
-            this.containerDiv = options.containerDiv !== undefined ? options.containerDiv : 'cesiumContainer';
+            this.container = options.container !== undefined ? options.container : { "create": true, "divName": "cesiumContainer" } ;
 
             this.height = 600;
             this.width = 800;
@@ -95,18 +95,20 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             if ( isCesiumDefinition.call( this, protos ) ) {
 
-                var cesiumCont = "<div class='cesuim-container' id='"+this.containerDiv+"'></div>";
+                if ( this.container.create ) {                
+                    var cesiumCont = "<div class='cesuim-container' id='" + this.container.divName + "'></div>";
 
-                if ( this.parentDiv == 'body' ) {
-                    jQuery( this.parentDiv ).append( cesiumCont );
-                } else {
-                    var outDiv;
-                    if ( this.parentClass !== undefined ) {
-                        outDiv = "<div id='"+this.parentDiv+"' class='"+this.parentClass+"'>"+cesiumCont+"</div>";
+                    if ( this.parentDiv == 'body' ) {
+                        jQuery( this.parentDiv ).append( cesiumCont );
                     } else {
-                        outDiv = "<div id='"+this.parentDiv+"'>"+cesiumCont+"</div>"
+                        var outDiv;
+                        if ( this.parentClass !== undefined ) {
+                            outDiv = "<div id='"+this.parentDiv+"' class='"+this.parentClass+"'>"+cesiumCont+"</div>";
+                        } else {
+                            outDiv = "<div id='"+this.parentDiv+"'>"+cesiumCont+"</div>"
+                        }
+                        jQuery( 'body' ).append( outDiv );
                     }
-                    jQuery( 'body' ).append( outDiv );
                 }
 
                 if ( this.state.scenes[ childID ] === undefined ) {
@@ -120,16 +122,16 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 var scene, canvas;
                 var cesiumOptions = { "contextOptions": { "alpha": true }, }; 
 
-                switch ( this.cesiumObjectDef ) {
+                switch ( this.cesiumType ) {
 
                     case 'widget':
-                        node.cesiumWidget = new Cesium.CesiumWidget( this.containerDiv, cesiumOptions );
+                        node.cesiumWidget = new Cesium.CesiumWidget( this.container.divName, cesiumOptions );
                         node.centralBody = node.cesiumWidget.centralBody;
                         node.scene = scene = node.cesiumWidget.scene;
                         break;
 
                     case 'viewer':
-                        node.cesiumViewer = new Cesium.Viewer( this.containerDiv );
+                        node.cesiumViewer = new Cesium.Viewer( this.container.divName );
                         node.cesiumWidget = node.cesiumViewer.cesiumWidget;
                         node.centralBody = node.cesiumViewer.centralBody;
                         node.scene = scene = node.cesiumViewer.scene;
@@ -140,7 +142,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         // camera syncronization
                         canvas = document.createElement( 'canvas' );
                         canvas.className = 'fullSize';
-                        document.getElementById( this.containerDiv ).appendChild( canvas );
+                        document.getElementById( this.container.divName ).appendChild( canvas );
 
                         canvas.setAttribute( 'height', this.height );
                         canvas.setAttribute( 'width', this.width );
