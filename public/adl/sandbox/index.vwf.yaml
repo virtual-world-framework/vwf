@@ -14,6 +14,8 @@
 --- 
 extends: http://vwf.example.com/navscene.vwf
 properties:
+  placemarks:
+    Origin: [0, 0, 0]
   navmode: none     
   sunColor: 
     value: [1, 1, 1]
@@ -1095,8 +1097,22 @@ scripts:
         
         if(this.cameramode == 'Fly')
         { 
-            this.center = MATH.addVec3(this.center,MATH.scaleVec3(this.GetCameraCenterRay(),window.deltaTime/(this.flyspeed * 30.0)));
-            document.title = 1/(window.deltaTime/30.0);
+            var dist = window.deltaTime/(this.flyspeed * 30.0);
+            var forward = new THREE.Vector3(0,0,-1);
+            var center = new THREE.Vector3(0,0,0);
+            var cam = findcamera();
+            forward.applyMatrix4(cam.matrixWorld);
+            center.applyMatrix4(cam.matrixWorld);
+            var offset = forward.sub(center);
+            
+            offset.setLength(.400 + dist);
+            
+            center.add(offset);
+            this.center = [center.x,center.y,center.z];
+            findcamera().position = center;
+            
+            
+            
         }
         
         

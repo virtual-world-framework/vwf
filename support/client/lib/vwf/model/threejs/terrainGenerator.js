@@ -8,7 +8,8 @@ new (function(){
 	
 	this.terrainDataReceived = function(dataBack,mesh,readers,cb)
 	{
-	
+		
+		
 		var now = performance.now();
 		this.regencount++;
 		var geo = mesh.geometry;
@@ -34,6 +35,9 @@ new (function(){
 			mesh.material.attributes.everyOtherNormal.value[i].y = everyOtherNormal[i*3+1];
 			mesh.material.attributes.everyOtherNormal.value[i].z = everyOtherNormal[i*3+2];
 		}
+		
+		
+		
 		for(var i = 0; i < mesh.res * mesh.res; i++)
 		{
 			mesh.material.attributes.everyOtherZ.value[i] = everyOtherZ[i];
@@ -220,6 +224,11 @@ new (function(){
 			
 		
 		}.bind(this.terrainAlgorithm);
+		
+		this.terrainAlgorithm.materialRebuildCB = function()
+		{
+			self.TileCache.rebuildAllMaterials();
+		}
 		
 		var poolSideData;
 		

@@ -76,8 +76,8 @@ function heightmapTerrainAlgorithm()
 			};
 			xhr.open('GET', this.url);
 			
-			this.worldLength = parseFloat(params.worldLength) || 13500;
-			this.worldWidth =  parseFloat(params.worldWidth) || 9500;
+			this.worldLength = params && parseFloat(params.worldLength) || 13500;
+			this.worldWidth =  params && parseFloat(params.worldWidth) || 9500;
 			
 			xhr.send();
 		}
@@ -156,7 +156,7 @@ function heightmapTerrainAlgorithm()
 	//allow the engine to only schedule tile updates that are necessary.
 	this.setAlgorithmDataPool = function(data,updateList)
 	{
-		
+		if(!data) return [];
 		var needRebuild = false;
 		if(data.url && data.url != this.url)
 		{
@@ -173,21 +173,15 @@ function heightmapTerrainAlgorithm()
 			this.worldWidth =  parseFloat(data.worldWidth);
 			needRebuild = true;
 		}
-		if(data.diffuseUrl)	
+		if(data.diffuseUrl != this.diffuseUrl)	
 		{
 			this.diffuseUrl = data.diffuseUrl;
-			if(updateList)
-			{
-				for(var i = 0; i < updateList.length; i++)
-				{
-					updateList[i].mesh.material.uniforms.diffuseSampler.value = _SceneManager.getTexture( this.diffuseUrl);
-				}
-			}
-			
+			this.materialRebuildCB();
 		}
 		if(needRebuild) return updateList;
 		return [];
 	}
+	
 	//the engine will read the data values here
 	this.getAlgorithmDataPool = function(seed)
 	{

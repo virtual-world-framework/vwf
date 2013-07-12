@@ -14,9 +14,10 @@
 // the License.
 
 define( [ "module", "vwf/view" ], function( module, view ) {
-
+var stats;
     return view.load( module, {
 
+		
         initialize: function( rootSelector ) {
            
             this.rootSelector = rootSelector;
@@ -26,6 +27,17 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
             if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
             this.keyStates = { keysDown: {}, mods: {}, keysUp: {} };
+			
+			
+			this.stats = new THREE.Stats();
+			this.stats.domElement.style.position = 'absolute';
+			this.stats.domElement.style.top = '0px';
+			this.stats.domElement.style.zIndex = 100000;
+			document.body.appendChild( this.stats.domElement );
+			
+			stats = this.stats;
+			window.stats = stats;
+			window.stats.domElement.style.display = 'none';
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -373,6 +385,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			renderer.render(scene,cam);
 			$(document).trigger('postrender',[vp,wh,ww]);
 			sceneNode.lastTime = now;
+			stats.update();
         };
 
         var mycanvas = this.canvasQuery.get( 0 );

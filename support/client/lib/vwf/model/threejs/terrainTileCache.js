@@ -478,6 +478,20 @@ function TileCache()
 				{
 					this.tiles = [];
 				}
+				this.rebuildAllMaterials = function()
+				{
+					for(var j in this.tiles)
+					{
+							if(this.tiles[j])
+							for(var i = 0; i < this.tiles[j].length; i++)
+							{
+								var mat = this.getMat();
+								mat.attributes = this.tiles[j][i].material.attributes;
+								this.tiles[j][i].material = mat;
+							}
+					}			
+				
+				}
 				this.getMesh = function(res,side)
 				{
 					if(this.tiles[res])

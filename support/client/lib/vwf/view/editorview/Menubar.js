@@ -312,7 +312,10 @@ define(
 		});
 		$('#MenuViewStats').click(function (e)
 		{
-			MATH.Stats.showDisplay();
+			if(window.stats.domElement.style.display == 'none')
+				window.stats.domElement.style.display = 'block';
+			else
+				window.stats.domElement.style.display = 'none';
 		});
 		$('#MenuViewShadows').click(function (e)
 		{
@@ -594,5 +597,26 @@ define(
 		{
 			_Editor.CreatePrim('pyramid', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
 		});
+		
+		$('#LocationGoToPosition').click(function (e)
+		{
+			_LocationTools.GoToPosition();
+		});
+		
+		$('#LocationGoToPlacemark').click(function (e)
+		{
+			_LocationTools.GoToPlaceMark();
+		});
+		
+		$('#LocationAddPlacemark').click(function (e)
+		{
+			_LocationTools.AddPlacemark();
+		});
+		
+		$('#LocationMoveToGround').click(function (e)
+		{
+			_LocationTools.MoveToGround();
+		});
+		
 	}
 });

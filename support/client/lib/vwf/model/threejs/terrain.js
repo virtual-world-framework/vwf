@@ -8,7 +8,7 @@
 		var minTileSize = totalmintilesize;
 		var maxTileSize = 2048;
 		var worldExtents = 2048;
-		var updateEvery = 15;
+		var updateEvery = 150;
 		
 		
 		function loadScript	(url)
@@ -295,7 +295,7 @@
 			if(this.counter >= updateEvery && this.enabled)
 			{
 				this.counter = 0;
-				
+				var now = performance.now();
 				var campos = _Editor.findcamera().position;
 				var x = campos.x;
 				var y = campos.y;
@@ -511,7 +511,8 @@
 					
 					self.rebuild();	
 					
-					
+					var time = performance.now() - now;
+					console.log(time);
 				}
 				
 			}
