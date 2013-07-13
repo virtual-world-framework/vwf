@@ -51,6 +51,7 @@
                 };
 
                 function gotLocation( pos ) {
+                  var Cesium = require( "vwf/model/cesium/Cesium" );
                   var ellipsoid = Cesium.Ellipsoid.WGS84;
                   var dest = Cesium.Cartographic.fromDegrees( pos.coords.longitude, pos.coords.latitude, 1000.0 );
                   dest = ellipsoid.cartographicToCartesian( dest );
