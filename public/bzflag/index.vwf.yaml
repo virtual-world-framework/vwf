@@ -52,7 +52,6 @@ properties:
       laserMaterial: 
       startingTranslation: []
       translation: []
-      scale: 0.5
       translationSpeed: 400
       rotationSpeed: 0.3
       playerName:
@@ -69,14 +68,13 @@ properties:
         type: model/vnd.collada+xml
         properties: 
           rotation: [0, 0, 1, 180]
+          scale: 115
         children: 
           Tank: 
             extends: http://vwf.example.com/node3.vwf
             children: 
               material: 
                 extends: http://vwf.example.com/material.vwf
-                properties: 
-                  texture: ""
 methods:
   initializeCamera:
   createPlayer:
@@ -99,7 +97,6 @@ children:
     properties:
       rotation: [ 1, 0, 0, 0 ]
       translation: [ 0, 0, -5000 ]
-      scale: 110
   lasers:
     extends: http://vwf.example.com/node3.vwf
 scripts:
@@ -185,7 +182,7 @@ scripts:
       if(playerObject.length) {
         playerObject = playerObject[0];
         var tankTexture = tankMaterials[this.colorIndex];
-        //playerObject.avatar.Tank.material.properties['texture'] = tankTexture;
+        playerObject.avatar.Tank.material.properties['texture'] = tankTexture;
         playerObject.color = tankColors[this.colorIndex];
         playerObject.translation = tankStartingPositions[this.colorIndex];
         playerObject.startingTranslation = tankStartingPositions[this.colorIndex];
