@@ -55,6 +55,8 @@ properties:
       translationSpeed: 400
       rotationSpeed: 0.3
       playerName:
+      # Disable inherited navigation so it can use custom bzflag controls
+      navmode: none
     children:     
       camera:
         extends: http://vwf.example.com/camera.vwf
