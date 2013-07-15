@@ -44,7 +44,7 @@ scripts:
       endColor: [ 1, 1, 1, 1],
       colorRange: [ .2, .1, .1, 0],
       additive: false,
-      depthTest: false,
+      depthTest: true,
       depthWrite: false,
       maxOrientation: 0,
       minOrientation: 0,
