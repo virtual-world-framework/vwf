@@ -125,7 +125,7 @@ children:
         // the array of children to be removed if they fail the test.
         this.children.forEach( function ( entry ) {
           if ( resetHeartbeats == true ) {
-            entry.lastHeartbeat = myParent.usersTime;
+            entry.lastHeartbeat = myParent.users.usersTime;
           }
           else if ( ( entry.lastHeartbeat < curTimeCutoff ) && ( actuallyRemove == true ) ) {
             toRemove.push( entry );
