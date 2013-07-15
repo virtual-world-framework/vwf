@@ -83,6 +83,8 @@
             }
             e.stopPropagation();
           });
+
+          $('#toolbar').draggable();
         });
 
         vwf_view.calledMethod = function( nodeID, methodName, methodParameters, methodValue ) {
@@ -395,16 +397,18 @@
   <body>
       <div id="wrapper" class="wrapper">
         <div class="toolstyle" id="toolbar">
-          <i id="orbit" class="icon-globe icon-white" alt="orbit" onclick="setMode('orbit')" />
-          <i id="draw" class="icon-pencil icon-white" alt="draw" onclick="setMode('draw')" />
-          <i id="pindrop" class="icon-map-marker icon-white" alt="pindrop" onclick="setMode('pindrop')" />
+          <span style="margin-right:10px;position:relative;top:-2px">
+            <i id="orbit" class="icon-globe icon-white" alt="orbit" onclick="setMode('orbit')" />
+            <i id="draw" class="icon-pencil icon-white" alt="draw" onclick="setMode('draw')" />
+            <i id="pindrop" class="icon-map-marker icon-white" alt="pindrop" onclick="setMode('pindrop')" />
+          </span>
           <img id="black" src="images/black.png" alt="black" onclick="setColor('black')" />
           <img id="red" src="images/red.png" alt="red" onclick="setColor('red')" />
           <img id="yellow" src="images/yellow.png" alt="yellow" onclick="setColor('yellow')" />
           <img id="green" src="images/green.png" alt="green" onclick="setColor('green')" />
           <img id="blue" src="images/blue.png" alt="blue" onclick="setColor('blue')" />
-          <button id="reset" class="btn btn-info" style="font-size:12px;padding-top:0px;padding-bottom:0px" onclick="clearOverlay()">Reset</button>
-          <button id="calibrate" class="btn btn-info" style="font-size:12px;padding-top:0px;padding-bottom:0px" onclick="calibrate()">Calibrate</button>
+          <button id="reset" class="btn btn-info" style="font-size:14px;padding-top:1px;padding-bottom:1px" onclick="clearOverlay()">Reset</button>
+          <button id="calibrate" class="btn btn-info" style="font-size:14px;padding-top:1px;padding-bottom:1px" onclick="calibrate()">Calibrate</button>
         </div>
       </div>
     <div class="vwf-main-content" align="center"></div>

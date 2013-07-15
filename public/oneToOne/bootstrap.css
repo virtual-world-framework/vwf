@@ -2006,10 +2006,16 @@ table th[class*="span"],
   background-position: -456px -48px;
 }
 .icon-pencil {
-  background-position: 0 -72px;
+  width: 21px;
+  height: 21px;
+  background-size: 704px 238px;
+  background-position: 0 -108px;
 }
 .icon-map-marker {
-  background-position: -24px -72px;
+  width: 21px;
+  height: 21px;
+  background-size: 704px 238px;
+  background-position: -34px -108px;
 }
 .icon-adjust {
   background-position: -48px -72px;
@@ -2230,7 +2236,10 @@ table th[class*="span"],
   background-position: -312px -144px;
 }
 .icon-globe {
-  background-position: -336px -144px;
+  width: 21px;
+  height: 21px;
+  background-size: 704px 238px;
+  background-position: -504px -216px;
 }
 .icon-wrench {
   background-position: -360px -144px;
