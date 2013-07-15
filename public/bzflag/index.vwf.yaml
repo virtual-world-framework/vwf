@@ -59,7 +59,7 @@ properties:
       camera:
         extends: http://vwf.example.com/camera.vwf
         properties:
-          translation: [0, 300, 450]
+          translation: [0, 100, 450]
           far: 1000000
           near: 1
       avatar:
