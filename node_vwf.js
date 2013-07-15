@@ -448,7 +448,7 @@ function isPointerEvent(message)
 			{
 				var childComponent = node.children[i];
 				var childName = childComponent.name || i;
-				var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
+				var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName.replace(/ /g,'-'); 
 				childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
 				childComponent.id = childID;
 				node.children[childID] = childComponent;
@@ -746,7 +746,7 @@ function startVWF(){
 		{
 			var childComponent = state[i];
 			var childName = state[i].name || state[i].properties.DisplayName + i;
-			var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
+			var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName.replace(/ /g,'-'); 
 			childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
 			state[i].id = childID;
 			global.instances[namespace].state.nodes['index-vwf'].children[childID] = state[i];
@@ -941,7 +941,7 @@ function startVWF(){
 						if(!childComponent) return;
 						var childName = message.member;
 						if(!childName) return;
-						var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
+						var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName.replace(/ /g,'-'); 
 						childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
 						childComponent.id = childID;
 						if(!node.children) node.children = {};

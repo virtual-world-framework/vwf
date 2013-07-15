@@ -119,7 +119,7 @@ define(function ()
 						}
 						else
 						{
-							if(vwf.models[0].model.nodes['character-vwf-' + username] == undefined)
+							if(vwf.models[0].model.nodes['character-vwf-' + username.replace(/ /g,'-')] == undefined)
 							this.Login(username);
 						}
 						
@@ -189,7 +189,7 @@ define(function ()
 		}
 		this.GetCurrentUserID = function ()
 		{
-			return 'character-vwf-' + this.currentUsername;
+			return 'character-vwf-' + this.currentUsername.replace(/ /g,'-');
 		}
 		this.PlayerProto = {
 			extends: 'character.vwf',
@@ -313,8 +313,7 @@ define(function ()
 		{
 			//if (!_UserManager.GetCurrentUserName()) return;
 			
-			window.location = _DataManager.getCurrentApplication();
-			return;
+			
 			
 			$('#MenuLogOuticon').css('background', "#555555");
 			$('#MenuLogInicon').css('background', "");
@@ -353,6 +352,9 @@ define(function ()
 			document[document.PlayerNumber + 'link'] = null;
 			document.PlayerNumber = null;
 			_UserManager.currentUsername = null;
+			
+			window.location = _DataManager.getCurrentApplication();
+			return;
 		}
 		this.showLogin = function ()
 		{

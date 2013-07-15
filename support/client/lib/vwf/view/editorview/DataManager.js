@@ -98,7 +98,7 @@ define(function ()
 				var data = jQuery.ajax(
 				{
 					type: 'GET',
-					url: PersistanceServer + '/vwfDataManager.svc/Profile',
+					url: PersistanceServer + '/vwfDataManager.svc/Profile?UID='+username,
 					data: null,
 					success: null,
 					async: false,

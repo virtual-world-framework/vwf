@@ -1100,8 +1100,10 @@ var stats;
     
 		}else
 		{
-			
-			intersects = _SceneManager.CPUPick([pos.x,pos.y,pos.z],[directionVector.x,directionVector.y,directionVector.z]);
+			if(vwf.models[0].model.nodes['index-vwf'].cameramode == 'FirstPerson')
+				intersects = _SceneManager.CPUPick([pos.x,pos.y,pos.z],[directionVector.x,directionVector.y,directionVector.z],{filter:function(o){return !(o.isAvatar === true)}});
+			else
+				intersects = _SceneManager.CPUPick([pos.x,pos.y,pos.z],[directionVector.x,directionVector.y,directionVector.z]);
 			return intersects;
 		}
     }

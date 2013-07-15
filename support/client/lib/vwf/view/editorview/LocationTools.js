@@ -20,7 +20,7 @@ define(function ()
 		{
 			if (!_UserManager.GetCurrentUserName())
 				{
-					_Notifier.alert('First person mode is not available when you are not logged in.');
+					_Notifier.alert('Location tools are not available when you are not logged in.');
 					return;
 				}
 			alertify.prompt('Type the location in the form of "x,y,z"',function(ok,val)
@@ -61,7 +61,7 @@ define(function ()
 		{
 			if (!_UserManager.GetCurrentUserName())
 				{
-					_Notifier.alert('First person mode is not available when you are not logged in.');
+					_Notifier.alert('Location tools are not available when you are not logged in.');
 					return;
 				}
 				
@@ -98,7 +98,7 @@ define(function ()
 		{
 			if (!_UserManager.GetCurrentUserName())
 				{
-					_Notifier.alert('First person mode is not available when you are not logged in.');
+					_Notifier.alert('Location tools are not available when you are not logged in.');
 					return;
 				}
 				
@@ -119,7 +119,7 @@ define(function ()
 		{
 			if (!_UserManager.GetCurrentUserName())
 				{
-					_Notifier.alert('First person mode is not available when you are not logged in.');
+					_Notifier.alert('Location tools are not available when you are not logged in.');
 					return;
 				}
 			

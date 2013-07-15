@@ -1069,9 +1069,11 @@ function serve (request, response)
 	
 	URL.loginData = GetSessionData(request);
 	
-	var UID = URL.query.UID;
+	var UID;
 	if(URL.loginData)
 		UID = URL.loginData.UID;
+	if(URL.query.UID)
+	UID = URL.query.UID;	
 	var SID = URL.query.SID;
 	if(SID)
 	 SID = SID.replace(/[\\,\/]/g,'_');

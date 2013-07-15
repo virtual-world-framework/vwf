@@ -326,7 +326,7 @@ define(function ()
 			var pickopts = new THREE.CPUPickOptions();
 			pickopts.OneHitPerMesh = true;
 			MoveGizmo.InvisibleToCPUPick = true;
-			var pick = this.ThreeJSPick(campos, ray, pickopts);
+			var pick = this.ThreeJSPick(campos, ray,{OneHitPerMesh:true});
 			MoveGizmo.InvisibleToCPUPick = false;
 			var vwfnode;
 			while (pick && pick.object && !pick.object.vwfID) pick.object = pick.object.parent;
@@ -1272,7 +1272,7 @@ define(function ()
 				var ray;
 				ray = this.GetWorldPickRay(e);
 				self.GetMoveGizmo().InvisibleToCPUPick = true;
-				var pick = this.ThreeJSPick(campos, ray);
+				var pick = this.ThreeJSPick(campos, ray,{filter:function(o){return !(o.isAvatar === true)}});
 				self.GetMoveGizmo().InvisibleToCPUPick = false;
 				var dxy = pick.distance;
 				newintersectxy = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy * .99));
@@ -1286,7 +1286,7 @@ define(function ()
 			{
 				
 				var ray = self.GetCameraCenterRay();
-				var pick = this.ThreeJSPick(campos, ray);
+				var pick = this.ThreeJSPick(campos, ray,{filter:function(o){return !(o.isAvatar === true)}});
 				var dxy = pick?pick.distance:Infinity;
 				var newintersectxy = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy));
 				newintersectxy[2] += .01;
@@ -1585,7 +1585,7 @@ define(function ()
 					var ray;
 					ray = this.GetWorldPickRay(this.ContextShowEvent);
 					self.GetMoveGizmo().InvisibleToCPUPick = true;
-					var pick = this.ThreeJSPick(campos, ray);
+					var pick = this.ThreeJSPick(campos, ray,{filter:function(o){return !(o.isAvatar === true)}});
 					self.GetMoveGizmo().InvisibleToCPUPick = false;
 					var dxy = pick.distance;
 					newintersectxy = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy * .99));
@@ -2074,6 +2074,7 @@ define(function ()
 				MoveGizmo.allChildren[i].material.depthTest = false;
 				MoveGizmo.allChildren[i].material.depthWrite = false;
 				MoveGizmo.allChildren[i].material.transparent = true;
+				MoveGizmo.allChildren[i].material.fog = false;
 				MoveGizmo.allChildren[i].PickPriority = 10;
 			}
 			this.SetGizmoMode(Move);
@@ -2656,6 +2657,7 @@ define(function ()
 				{
 					mapname = 'map';
 					currentmat.alphaTest = 1 - value.layers[i].alpha;
+					
 				}
 				if (value.layers[i].mapTo == 2)
 				{
@@ -2716,7 +2718,7 @@ define(function ()
 				currentmat[mapname].offset.x = value.layers[i].offsetx;
 				currentmat[mapname].offset.y = value.layers[i].offsety;
 				
-				return currentmat;
+				//return currentmat;
 			}
 			for (var i in mapnames)
 			{
