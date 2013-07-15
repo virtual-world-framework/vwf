@@ -319,15 +319,19 @@
         var me = this.kernel.moniker( );
         if ( clientThatIssuedEvent == me ) {
           if ( ( properties[ "displayName" ] != undefined ) && ( properties[ "displayColor" ] != undefined ) ) {
-            var timestamp = getTimestamp();
-            userDetails[ properties[ "displayName" ] ] = { "displayName": properties[ "displayName" ], "displayColor": properties[ "displayColor" ] };
-            var newLine = "<tr><td style='vertical-align:top;width:250px;max-width:250px;'><div class='system' style='word-wrap:break-word;color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='" + properties[ "displayName" ] + "' style='word-wrap:break-word;color:" + properties[ "displayColor" ] + ";float:left'>" + properties[ "displayName" ] + "</div><div class='system' style='word-wrap:break-word;color:#000000;margin-left:5px;float:left;'> has joined chat.</div></td></tr>";
-            var updateScroll = autoScroll( );
-            $( '#chatTable' ).append( newLine );
-            if ( updateScroll ) {
-              scrollToBottom( );
+            if ( properties[ "displayName" ] != "" ) {
+              var timestamp = getTimestamp();
+              userDetails[ properties[ "displayName" ] ] = { "displayName": properties[ "displayName" ], "displayColor": properties[ "displayColor" ] };
+              var newLine = "<tr><td style='vertical-align:top;width:250px;max-width:250px;'><div class='system' style='word-wrap:break-word;color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='" + properties[ "displayName" ] + "' style='word-wrap:break-word;color:" + properties[ "displayColor" ] + ";float:left'>" + properties[ "displayName" ] + "</div><div class='system' style='word-wrap:break-word;color:#000000;margin-left:5px;float:left;'> has joined chat.</div></td></tr>";
+              if ( properties[ "displayName" ] != localUsername ) {
+                var updateScroll = autoScroll( );
+                $( '#chatTable' ).append( newLine );
+                if ( updateScroll ) {
+                  scrollToBottom( );
+                }
+              }
+              addUser( properties[ "displayName" ], properties[ "displayColor" ] );
             }
-            addUser( properties[ "displayName" ], properties[ "displayColor" ] );
           }
         }
       };      
@@ -364,14 +368,18 @@
             //  send a message to the chat log about the user joining and add the user to the user list.
             if ( isConnected( ) ) {
               //  First, store the user information.
-              userDetails[ eventParameters[ 1 ] ] = { "displayName": eventParameters[ 1 ], "displayColor": eventParameters[ 2 ], "viewHandle": eventParameters[ 4 ] };
-              var newLine = "<tr><td style='vertical-align:top;width:250px;max-width:250px;'><div class='system' style='word-wrap:break-word;color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='" + eventParameters[ 1 ] + "' style='word-wrap:break-word;color:" + eventParameters[ 2 ] + ";float:left'>" + eventParameters[ 1 ] + "</div><div class='system' style='word-wrap:break-word;color:#000000;margin-left:5px;float:left;'> has joined chat.</div></td></tr>";
-              var updateScroll = autoScroll( );
-              $( '#chatTable' ).append( newLine );
-              if ( updateScroll ) {
-                scrollToBottom( );
+              if ( eventParameters[ 1 ] != undefined ) {
+                if ( eventParameters[ 1 ] != "" ) {
+                  userDetails[ eventParameters[ 1 ] ] = { "displayName": eventParameters[ 1 ], "displayColor": eventParameters[ 2 ], "viewHandle": eventParameters[ 4 ] };
+                  var newLine = "<tr><td style='vertical-align:top;width:250px;max-width:250px;'><div class='system' style='word-wrap:break-word;color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div></td><td style='width:100%''><div class='" + eventParameters[ 1 ] + "' style='word-wrap:break-word;color:" + eventParameters[ 2 ] + ";float:left'>" + eventParameters[ 1 ] + "</div><div class='system' style='word-wrap:break-word;color:#000000;margin-left:5px;float:left;'> has joined chat.</div></td></tr>";
+                  var updateScroll = autoScroll( );
+                  $( '#chatTable' ).append( newLine );
+                  if ( updateScroll ) {
+                    scrollToBottom( );
+                  }
+                  addUser( eventParameters[ 1 ], eventParameters[ 2 ] );
+                }
               }
-              addUser( eventParameters[ 1 ], eventParameters[ 2 ] );
             }
             else if ( clientThatIssuedEvent == me ) {
               localUsername = eventParameters[ 1 ];
