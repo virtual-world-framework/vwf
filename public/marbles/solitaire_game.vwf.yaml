@@ -300,10 +300,27 @@ scripts:
   this.activitySelected = function( nodeId, eventParameters, user ) {
     var me = this;
     var node = user.getObject( nodeId );
-    if ( ( node != undefined ) && ( me.gameOccupiedBy == "" ) ) {
+    var clickedMe = false;
+    if ( node != undefined ) {
       if ( ( node === me ) || ( node.parent === me ) ) {
+        clickedMe = true;
+      }
+      else if ( node.parent != undefined ) {
+        if ( node.parent.parent === me ) {
+          clickedMe = true;
+        }
+      }
+    }
+    if ( clickedMe == true ) {
+      if ( me.gameOccupiedBy == "" ) {
         return true;
       }
+      var occupier = user.getObject( me.gameOccupiedBy );
+      var occupierString = ".";
+      if ( occupier != undefined ) {
+        occupierString = " by " + occupier.userName + ".";
+      }
+      user.sendMessage("Solitaire", "Sorry " + user.userName + ", but that solitaire game is already occupied" + occupierString);
     }
     return false;
   };
