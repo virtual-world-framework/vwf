@@ -82,7 +82,7 @@ children:
       material:
         extends: http://vwf.example.com/material.vwf
         properties:
-          bumpScale: 0.005
+          bumpScale: 0.004
   chest:
     extends: http://vwf.example.com/node3.vwf
     source: models/marblerunChest.DAE
@@ -93,7 +93,7 @@ children:
       material:
         extends: http://vwf.example.com/material.vwf
         properties:
-          bumpScale: 0.005
+          bumpScale: 0.002
   chest_2:
     extends: http://vwf.example.com/node3.vwf
     source: models/marblerunChest.DAE
@@ -104,7 +104,7 @@ children:
       material:
         extends: http://vwf.example.com/material.vwf
         properties:
-          bumpScale: 0.005
+          bumpScale: 0.002
   unsupportedGames:
     extends: http://vwf.example.com/node3.vwf
     source: models/games.DAE
@@ -242,7 +242,7 @@ children:
           material:
             extends: http://vwf.example.com/material.vwf
             properties:
-              bumpScale: 0.005
+              bumpScale: 0.002
       solitaire_board_2:
         extends: solitaire_game.vwf
         source: models/solitaire_board.DAE
@@ -254,7 +254,7 @@ children:
           material:
             extends: http://vwf.example.com/material.vwf
             properties:
-              bumpScale: 0.005
+              bumpScale: 0.002
   light_1:
     extends: http://vwf.example.com/light.vwf
     properties:
