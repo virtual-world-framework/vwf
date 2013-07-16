@@ -330,21 +330,33 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
     }
 
     function updateProperties( nodeName ) {
-        var nodeID = nodeName;
-        var properties = getProperties.call( this, this.kernel, nodeID );
-
-        for ( var i in properties ) { 
-            try {
-                var propertyName = properties[i].prop.name;
-                var propertyValue = JSON.stringify( utility.transform( vwf.getProperty( nodeID, propertyName, [] ), utility.transforms.transit ));
-            } catch ( e ) {
-                this.logger.warnx( "satProperty", nodeID, propertyName, propertyValue, "stringify error:", e.message );
+        // Check if an editor input field is in focus to determine whether to auto update
+        var editorInputFocus = false;
+        var inputs = document.getElementsByTagName('input');
+        for ( var i = 0; i < inputs.length; i++ ) {
+            if ( $("input").is(":focus") ) {
+                editorInputFocus = true;
+                break;
             }
+        }
 
-            if ( propertyValue ) {
-                var nodeIDAttribute = $.encoder.encodeForAlphaNumeric( nodeID ); 
-                var propertyNameAttribute = $.encoder.encodeForHTMLAttribute( "id", propertyName, true );
-                $( '#input-' + nodeIDAttribute + '-' + propertyNameAttribute ).val( propertyValue );       
+        if ( !editorInputFocus ) {
+            var nodeID = nodeName;
+            var properties = getProperties.call( this, this.kernel, nodeID );
+
+            for ( var i in properties ) { 
+                try {
+                    var propertyName = properties[i].prop.name;
+                    var propertyValue = JSON.stringify( utility.transform( vwf.getProperty( nodeID, propertyName, [] ), utility.transforms.transit ));
+                } catch ( e ) {
+                    this.logger.warnx( "satProperty", nodeID, propertyName, propertyValue, "stringify error:", e.message );
+                }
+
+                if ( propertyValue ) {
+                    var nodeIDAttribute = $.encoder.encodeForAlphaNumeric( nodeID ); 
+                    var propertyNameAttribute = $.encoder.encodeForHTMLAttribute( "id", propertyName, true );
+                    $( '#input-' + nodeIDAttribute + '-' + propertyNameAttribute ).val( propertyValue );       
+                }
             }
         }
     }
