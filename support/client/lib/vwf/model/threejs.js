@@ -981,7 +981,55 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                         value = vwfColor.toString();
                     }
-
+                    if ( propertyName == "specColor" ) {
+                        if ( propertyValue instanceof String ) {
+                            propertyValue = propertyValue.replace( /\s/g, '' );
+                        }
+                        var vwfColor = new utility.color( propertyValue );
+                        if ( vwfColor ) {
+                          threeObject.specular.setRGB( vwfColor.red( ) / 255, vwfColor.green( ) / 255, vwfColor.blue( ) / 255 );
+                          threeObject.needsUpdate = true;
+                          value = vwfColor.toString();
+                        }
+                    }
+                    if ( propertyName == "reflect" ) {
+                        value = Number( propertyValue );
+                        threeObject.reflectivity = value;
+                        threeObject.needsUpdate = true;
+                    }
+                    
+                    if ( propertyName == "shininess" ) {
+                        value = Number( propertyValue );
+                        threeObject.shininess = value;
+                        threeObject.needsUpdate = true;
+                    }
+                    if (propertyName == "bumpScale" ) {
+                        value = Number( propertyValue );
+                        threeObject.bumpScale = value;
+                        threeObject.needsUpdate = true;
+                    }
+                    if ( propertyName == "ambient" ) {
+                        if ( propertyValue instanceof String ) {
+                            propertyValue = propertyValue.replace( /\s/g, '' );
+                        }
+                        var vwfColor = new utility.color( propertyValue );
+                        if ( vwfColor ) {
+                          threeObject.ambient.setRGB( vwfColor.red( ) / 255, vwfColor.green( ) / 255, vwfColor.blue( ) / 255 );
+                          threeObject.needsUpdate = true;
+                          value = vwfColor.toString();
+                        }
+                    }
+                    if ( propertyName == "emit" ) {
+                        if ( propertyValue instanceof String ) {
+                            propertyValue = propertyValue.replace( /\s/g, '' );
+                        }
+                        var vwfColor = new utility.color( propertyValue );
+                        if ( vwfColor ) {
+                          threeObject.emissive.setRGB( vwfColor.red( ) / 255, vwfColor.green( ) / 255, vwfColor.blue( ) / 255 );
+                          threeObject.needsUpdate = true;
+                          value = vwfColor.toString();
+                        }
+                    }
                     // these properties should possibly be three js specific
                     if(propertyName == "transparent") {
                         value = Boolean( propertyValue );
@@ -990,10 +1038,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if(propertyName == "opacity") {
                         value = Number( propertyValue );
                         threeObject.opacity = value;
-                    }
-                    if (propertyName == "bumpScale" ) {
-                        value = Number( propertyValue );
-                        threeObject.bumpScale = value;
                     }
 
                 }
@@ -1266,6 +1310,33 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     var vwfColor = new utility.color( [ threeObject.color.r*255, threeObject.color.g*255, threeObject.color.b*255 ] );
                     value = vwfColor.toString();
                     return value;    
+                }
+                if ( propertyName == "specColor" ) {
+                    var vwfColor = new utility.color( [ threeObject.specular.r*255, threeObject.specular.g*255, threeObject.specular.b*255 ] );
+                    value = vwfColor.toString();
+                    return value;
+                }
+                if ( propertyName == "reflect" ) {
+                    value = threeObject.reflectivity;
+                    return value;
+                }
+                if ( propertyName == "shininess" ) {
+                    value = threeObject.shininess;
+                    return value;
+                }
+                if ( propertyName == "emit" ) {
+                    var vwfColor = new utility.color( [ threeObject.emissive.r*255, threeObject.emissive.g*255, threeObject.emissive.b*255 ] );
+                    value = vwfColor.toString();
+                    return value;
+                }
+                if ( propertyName == "ambient" ) {
+                    var vwfColor = new utility.color( [ threeObject.ambient.r*255, threeObject.ambient.g*255, threeObject.ambient.b*255 ] );
+                    value = vwfColor.toString();
+                    return value;
+                }
+                if ( ( propertyName == "bumpScale" ) && ( threeObject.bumpMap ) ) {
+                    value = threeObject.bumpScale;
+                    return value;
                 }
                 if(propertyName == "diffuse") {
                     
