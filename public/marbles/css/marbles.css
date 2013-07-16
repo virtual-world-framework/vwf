@@ -1,0 +1,3 @@
+.no-close .ui-dialog-titlebar-close {
+  display: none;
+}

@@ -51,11 +51,12 @@ define( function() {
         /// @function
         /// 
         /// @param {String|Object} nodeComponent
+        /// @param {String} [nodeAnnotation]
         /// @param {module:vwf/api/kernel~nodeCallback} [callback]
         /// 
         /// @returns {}
 
-        createNode: [ /* nodeComponent, callback( nodeID ) */ ],
+        createNode: [ /* nodeComponent, nodeAnnotation, callback( nodeID ) */ ],
 
         /// Delete a node.
         /// 
@@ -106,6 +107,15 @@ define( function() {
         /// @returns {}
 
         createChild: [ /* nodeID, childName, childComponent, childURI, callback( childID ) */ ],
+
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} childName
+        /// 
+        /// @returns {}
+
+        deleteChild: [ /* nodeID, childName */ ],
 
         /// addChild calls addingChild() on each model. The child is considered added after each model has
         /// run.  Additionally, it calls addedChild() on each view. The view is being notified that a 
@@ -584,6 +594,21 @@ define( function() {
         ///   true when testID matches the pattern.
 
         test: [ /* nodeID, matchPattern, testID, initializedOnly */ ],
+
+        /// Return client object matching the given search pattern.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
+        /// @param {String} matchPattern
+        ///   The search pattern.
+        /// @param {Function} [callback]
+        ///   A callback to receive the search results. If callback is provided, find invokes
+        ///   callback( matchID ) for each match. Otherwise the result is returned as an array.
+
+        findClients: [ /* nodeID, matchPattern, callback( matchID ) */ ],
 
         /// Description.
         /// 

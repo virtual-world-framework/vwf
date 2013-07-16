@@ -366,7 +366,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 var topdownName = this.topdownName;
                 var topdownTemp = this.topdownTemp;
 
-                if( this.currentNodeID == '' )
+                if( !this.currentNodeID )
                 {
                     this.currentNodeID = vwf_view.kernel.find("", "/")[0];
                 }
@@ -541,7 +541,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
     {
         var clientList = this.clientList;
 
-        updateClients.call(this);
+        viewClients.call(this);
 
         if (!this.editorOpen)
         {
@@ -553,65 +553,132 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         }
     }
 
-    // -- updateClients ---------------------------------------------------------------------
+    // -- viewClients -----------------------------------------------------------------------
 
-    function updateClients() {
+    function viewClients() {
         var self = this;
         var app = window.location.pathname;
         var root = app.substring(1, app.length-18);
-        var inst = app.substring(app.length-17, app.length-1);
-        var match;
 
         var clients$ = $(this.clientList);
+        var node = this.nodes[ "http-vwf-example-com-clients-vwf" ];
 
-        jQuery.getJSON( "/" + root + "/admin/instances", function( data ) {
-            jQuery.each( data, function( key, value ) {
-                if ( match = /* assignment! */ key.match( RegExp( "/([^/]*)$" ) ) ) {
+        clients$.html("<div class='header'>Connected Clients</div>");
 
-                    var instanceHTML = $.encoder.encodeForHTML(String( match[1] ));
+        // Add node children
+        clients$.append("<div id='clientsChildren'></div>");
+        for ( var i = 0; i < node.children.length; i++ ) {
+            var nodeChildIDAttribute = $.encoder.encodeForHTMLAttribute("id", node.children[i].ID, true);
+            var nodeChildIDAlpha = $.encoder.encodeForAlphaNumeric(node.children[i].ID);
+            var nodeChildNameHTML = $.encoder.encodeForHTML(node.children[i].name);
+            $('#clientsChildren').append("<div id='" + nodeChildIDAlpha + "' data-nodeID='" + nodeChildIDAttribute + "' class='childContainer'><div class='childEntry'><b>" + nodeChildNameHTML + "</b></div></div>");
+            $('#' + nodeChildIDAlpha).click( function(evt) {
+                viewClient.call(self, $(this).attr("data-nodeID"));
+            });
+        }
 
-                    if(instanceHTML == inst)
-                    {
-                        clients$.html("<div class='header'>Users</div>");
-                        for (var clientID in value.clients) { 
-                            clients$.append("<div class='clientEntry'>" + clientID + "</div>"); 
-                        }
+        // Login Information
+        clients$.append("<div style='padding:6px'><input class='filename_entry' type='text' id='userName' placeholder='Username' /><!-- <input class='filename_entry' type='password' id='password' placeholder='Password'/> --><input class='update_button' type='button' id='login' value='Login' /></div>"); 
+        clients$.append("<hr/>");
+        $('#userName').keydown( function(evt) {
+            evt.stopPropagation();
+        });
+        $('#userName').keypress( function(evt) {
+            evt.stopPropagation();
+        });
+        $('#userName').keyup( function(evt) {
+            evt.stopPropagation();
+        });
+        $('#password').keydown( function(evt) {
+            evt.stopPropagation();
+        });
+        $('#password').keypress( function(evt) {
+            evt.stopPropagation();
+        });
+        $('#password').keyup( function(evt) {
+            evt.stopPropagation();
+        });
+        $('#login').click(function(evt) {
+            // Future call to validate username and password
+            //login.call(self, $('#userName').val(), $('#password').val());
 
-                        clients$.append("<div style='padding:6px'><input class='filename_entry' type='text' id='fileName' /><input class='update_button' type='button' id='save' value='Save' /></div>");
-                        $('#fileName').keydown( function(evt) {
-                            evt.stopPropagation();
-                        });
-                        $('#fileName').keypress( function(evt) {
-                            evt.stopPropagation();
-                        });
-                        $('#fileName').keyup( function(evt) {
-                            evt.stopPropagation();
-                        });
-                        $('#save').click(function(evt) {
-                            saveStateAsFile.call(self, $('#fileName').val());
-                        });
-
-                        clients$.append("<div style='padding:6px'><select class='filename_select' id='fileToLoad' /></select></div>");
-                        $('#fileToLoad').append("<option value='none'></option>");
-
-                        $.getJSON( "/" + root + "/admin/files", function( data ) {
-                            $.each( data, function( key, value ) {
-                                var fileName = encodeURIComponent(value['basename']);
-                                $('#fileToLoad').append("<option value='"+fileName+"'>"+fileName+"</option>");
-                            } );
-                        } );
-
-                        clients$.append("<div style='padding:6px'><input class='update_button' type='button' id='load' value='Load' /></div>");
-                        $('#load').click(function(evt) {
-                            loadSavedState.call(self, $('#fileToLoad').val());
-                        });
-                    }
+            var moniker = vwf_view.kernel.moniker();
+            var clients = vwf_view.kernel.findClients("", "/*");
+            var client = undefined;
+            for (var i=0; i < clients.length; i++)
+            {
+                if ( clients[i].indexOf(moniker) != -1 )
+                {
+                    client = clients[i];
+                    break;
                 }
+            }
+            // var client = vwf_view.kernel.findClients("", "/" + moniker)[0];
+            
+            if ( client ) {
+                vwf_view.kernel.setProperty( client, "displayName", $('#userName').val() );
+            }
+        });
+
+        // Save / Load
+        clients$.append("<div style='padding:6px'><input class='filename_entry' type='text' id='fileName' /><input class='update_button' type='button' id='save' value='Save' /></div>");
+        $('#fileName').keydown( function(evt) {
+            evt.stopPropagation();
+        });
+        $('#fileName').keypress( function(evt) {
+            evt.stopPropagation();
+        });
+        $('#fileName').keyup( function(evt) {
+            evt.stopPropagation();
+        });
+        $('#save').click(function(evt) {
+            saveStateAsFile.call(self, $('#fileName').val());
+        });
+
+        clients$.append("<div style='padding:6px'><select class='filename_select' id='fileToLoad' /></select></div>");
+        $('#fileToLoad').append("<option value='none'></option>");
+
+        $.getJSON( "/" + root + "/admin/files", function( data ) {
+            $.each( data, function( key, value ) {
+                var fileName = encodeURIComponent(value['basename']);
+                $('#fileToLoad').append("<option value='"+fileName+"'>"+fileName+"</option>");
             } );
         } );
 
-        //setTimeout(updateClients.call(this), 5000);
-    };
+        clients$.append("<div style='padding:6px'><input class='update_button' type='button' id='load' value='Load' /></div>");
+        $('#load').click(function(evt) {
+            loadSavedState.call(self, $('#fileToLoad').val());
+        });
+    }
+
+    // -- viewClient ------------------------------------------------------------------------
+
+    function viewClient( clientID ) {
+        var self = this;
+
+        var clients$ = $(this.clientList);
+        var node = this.nodes[ clientID ];
+
+        clients$.html("<div class='header'><img src='images/back.png' id='back' alt='back'/> " + $.encoder.encodeForHTML(node.name) + "</div>");
+        jQuery('#back').click ( function(evt) {
+            viewClients.call( self );
+        });
+
+        // Add node properties
+        clients$.append("<div id='clientProperties'></div>");
+        var displayedProperties = {};
+        for ( var i = 0; i < node.properties.length; i++ ) {
+            if ( !displayedProperties[ node.properties[i].name ] ) {
+                displayedProperties[ node.properties[i].name ] = "instance";
+                var nodeIDAlpha = $.encoder.encodeForAlphaNumeric(clientID);
+                var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", node.properties[i].name, true);
+                var propertyNameAlpha = $.encoder.encodeForAlphaNumeric(node.properties[i].name);
+                var propertyNameHTML = $.encoder.encodeForHTML(node.properties[i].name);
+                var propertyValueAttribute = $.encoder.encodeForHTMLAttribute("val", node.properties[i].value, true);
+                $('#clientProperties').append("<div id='" + nodeIDAlpha + "-" + propertyNameAlpha + "' class='propEntry'><table><tr><td><b>" + propertyNameHTML + " </b></td><td><input type='text' class='input_text' id='input-" + nodeIDAlpha + "-" + propertyNameAlpha + "' value='" + propertyValueAttribute + "' data-propertyName='" + propertyNameAttribute + "' readonly></td></tr></table></div>");
+            }
+        }
+    }
 
     // -- drillDown -------------------------------------------------------------------------
 
@@ -666,13 +733,19 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
     function drill(nodeID, drillBackID) // invoke with the view as "this"
     {
+        var node = this.nodes[ nodeID ];
+
+        if ( !node ) {
+            this.logger.errorx( "drill: Cannot find node '" + nodeID + "'" );
+            return;
+        }
+
         var self = this;
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
         var nodeIDAlpha = $.encoder.encodeForAlphaNumeric(nodeID);
 
         $(topdownName).html(''); // Clear alternate div first to ensure content is added correctly
-        var node = this.nodes[ nodeID ];
         this.currentNodeID = nodeID;
 
         if(!drillBackID) drillBackID = node.parentID;

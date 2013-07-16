@@ -39,11 +39,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             this.captureVideo = options.video !== undefined  ? options.video : true;
             this.captureAudio = options.audio !== undefined  ? options.audio : true;
-            this.debug = options.debug !== undefined  ? options.debug : false;
+            this.stereo = options.stereo !== undefined  ? options.stereo : false;
             this.videoElementsDiv = options.videoElementsDiv !== undefined  ? options.videoElementsDiv : 'videoSurfaces';
-            this.createVideoElements = options.createVideoElements !== undefined  ? options.createVideoElements : true;
+            this.videoProperties = options.videoProperties !== undefined  ? options.videoProperties : {};
+            this.debug = options.debug !== undefined  ? options.debug : false;
 
             this.videosAdded = 0;
+            this.msgQueue = [];
 
         },
   
@@ -250,7 +252,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     function displayVideo( url, name, destMoniker, muted ) {
         
-        if ( this.createVideoElements ) {
+        if ( this.videoProperties.create ) {
             //debugger;
             this.videosAdded++
             var $container;
@@ -259,12 +261,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             $container = $( "#" + this.videoElementsDiv );
             if ( muted ) {
+                var setMuted = "";
+
                 $container.append(
                     "<div id='"+ divId + "'>" +
                         "<video class='vwf-webrtc-video' id='" + videoId +
                             "' width='320' height='240' src='" + url + 
-                            "' loop='loop' autoplay = true muted" +
-                            " style='position: absolute; left: 0; top: 0; z-index: 40;'>" +
+                            "' loop='loop' autoplay = true muted='true' " +
+                            "style='position: absolute; left: 0; top: 0; z-index: 40;'>" +
                         "</video>" +
                     "</div>"
                 );                
@@ -382,12 +386,24 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     function handlePeerMessage( propertyName, msg ) {
         var peerNode = getPeer.call( this, propertyName )
         if ( peerNode ) {
-            if ( peerNode.connection === undefined ) {
-                peerNode.connection = new mediaConnection( this, peerNode );
-                peerNode.connection.connect( this.local.stream, false );
-            }
+            if ( peerNode.connection !== undefined ) {
+                peerNode.connection.processMessage( msg );
+            } else {
+                if ( msg.type === 'offer' ) {
+                    
+                    this.msgQueue.unshift( msg );
 
-            peerNode.connection.processMessage( msg );
+                    peerNode.connection = new mediaConnection( this, peerNode );
+                    peerNode.connection.connect( this.local.stream, false );
+
+                    while ( this.msgQueue.length > 0 ) {
+                      peerNode.connection.processMessage( this.msgQueue.shift() );
+                    }
+                    this.msgQueue = [];
+                } else {
+                    this.msgQueue.push( msg );
+                }
+            }
         }     
     }
 
@@ -464,9 +480,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     }
                 }; 
 
-                if ( webrtcDetectedBrowser == "firefox" ) {
-                    this.pc_config = {"iceServers":[{"url":"stun:23.21.150.121"}]};
-                }
+                // if ( webrtcDetectedBrowser == "firefox" ) {
+                //     this.pc_config = {"iceServers":[{"url":"stun:23.21.150.121"}]};
+                // }
 
                 try {
                     this.pc = new RTCPeerConnection( this.pc_config, this.pc_constraints );
@@ -552,9 +568,15 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if ( this.view.debug ) console.log('S->C: ' +  JSON.stringify(msg) );
             if ( this.pc ) {
                 if ( msg.type === 'offer') {
+                    if ( this.view.stereo ) {
+                        msg.sdp = addStereo( msg.sdp );
+                    }
                     this.pc.setRemoteDescription( new RTCSessionDescription( msg ) );
                     this.answer();
                 } else if ( msg.type === 'answer' && this.streamAdded ) {
+                    if ( this.view.stereo ) {
+                        msg.sdp = addStereo( msg.sdp );
+                    }                    
                     this.pc.setRemoteDescription( new RTCSessionDescription( msg ) );
                 } else if ( msg.type === 'candidate' && this.streamAdded ) {
                     var candidate = new RTCIceCandidate( { 
@@ -587,7 +609,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             var self = this;
             var constraints = {
                 "optional": [], 
-                "mandatory": {"MozDontOfferDataChannel": true }
+                "mandatory": {}
             };
 
             // temporary measure to remove Moz* constraints in Chrome
@@ -738,6 +760,39 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             // Remove CN in m line and sdp.
             sdpLines = this.removeCN( sdpLines, mLineIndex );
+
+            sdp = sdpLines.join('\r\n');
+            return sdp;
+        }
+
+        // Set Opus in stereo if stereo is enabled.
+        function addStereo( sdp ) {
+            var sdpLines = sdp.split('\r\n');
+
+            // Find opus payload.
+            for (var i = 0; i < sdpLines.length; i++) {
+              if (sdpLines[i].search('opus/48000') !== -1) {
+                var opusPayload = extractSdp(sdpLines[i], /:(\d+) opus\/48000/i);
+                break;
+              }
+            }
+
+            // Find the payload in fmtp line.
+            for (var i = 0; i < sdpLines.length; i++) {
+              if (sdpLines[i].search('a=fmtp') !== -1) {
+                var payload = extractSdp(sdpLines[i], /a=fmtp:(\d+)/ );
+                if (payload === opusPayload) {
+                  var fmtpLineIndex = i;
+                  break;
+                }
+              }
+            }
+            // No fmtp line found.
+            if (fmtpLineIndex === null)
+              return sdp;
+
+            // Append stereo=1 to fmtp line.
+            sdpLines[fmtpLineIndex] = sdpLines[fmtpLineIndex].concat(' stereo=1');
 
             sdp = sdpLines.join('\r\n');
             return sdp;

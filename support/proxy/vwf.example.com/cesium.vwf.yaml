@@ -25,12 +25,20 @@ properties:
   backgroundColor: [ 0, 0, 0, 0 ]
   renderStyle: "3D"
   imageryProvider: "bingAerial"
-  terrainProvider:
   enableLook: 
   enableRotate: 
   enableTilt: 
   enableTranslate: 
   enableZoom: 
+events:
+  pointerClick:
+  pointerDoubleClick:
+  pointerDown:
+  pointerMove:
+  pointerUp:
+  pointerEnter:
+  pointerOver:
+  pointerLeave:  
 scripts:
 - |
     this.initialize = function() {

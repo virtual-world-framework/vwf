@@ -14,12 +14,13 @@
 --- 
 extends: http://vwf.example.com/cesium.vwf
 properties:
-  backgroundColor:
   renderStyle: "3D"
   imageryProvider: "bingAerial"
 children:
   camera:
     extends: http://vwf.example.com/cesium/camera.vwf
+  earth:
+    extends: http://vwf.example.com/cesium/centralBody.vwf
   sun: 
     extends: http://vwf.example.com/cesium/sun.vwf 
   atmosphere: 

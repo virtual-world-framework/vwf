@@ -40,13 +40,13 @@ properties:
         }
         this.selected = false;
       }
-      else if ( ( this.parent.selectedMarble == "" ) || ( !( ( this.parent.selectedMarble != this.id ) && ( value == true ) ) ) ) {
+      else if ( ( this.parent.parent.selectedMarble == "" ) || ( !( ( this.parent.parent.selectedMarble != this.id ) && ( value == true ) ) ) ) {
         // If the game has no selected marble, or if there is a selected marble then so long as we're setting the value to false or the
         // selected marble is this marble...
 
 
         // If the game is not underway, we always move instantly.
-        if ( this.parent.gameUnderway == false ) {
+        if ( this.parent.parent.gameUnderway == false ) {
           moveInstant = true;
         }
 
@@ -61,10 +61,10 @@ properties:
         }
         // We may need to update the game's selected marble.
         if ( value == true ) {
-          this.parent.selectedMarble = this.id;
+          this.parent.parent.selectedMarble = this.id;
         }
-        else if ( this.parent.selectedMarble == this.id ) {
-          this.parent.selectedMarble = "";
+        else if ( this.parent.parent.selectedMarble == this.id ) {
+          this.parent.parent.selectedMarble = "";
         }
         
         this.selected = value;     
@@ -76,9 +76,9 @@ properties:
           this.moveMarbleInstantly();
         }
         else if ( (moveInstant == false) && ( this.moveMarble != undefined ) ) {
-          this.parent.incrementLock();
+          this.parent.parent.incrementLock();
           this.moveMarble();
-          this.parent.future(this.moveMarbleTime * 1.1).decrementLock();
+          this.parent.parent.future(this.moveMarbleTime * 1.1).decrementLock();
         }
         if ( this.moveMarbleInstantly == undefined ) {
           this.logger.warn("Set selected undefined!");
@@ -93,7 +93,7 @@ properties:
       //  First test if either position is off of the board. If so, move instantly.
       var moveInstant = this.eitherOffBoard(  value, this.solitairePosition );
       //  Double check, if no game is underway, we move instantly.
-      if ( ( this.parent == undefined ) || ( this.parent.gameUnderway == false ) ) {
+      if ( ( this.parent == undefined ) || ( this.parent.parent.gameUnderway == false ) ) {
         moveInstant = true;
       }
       // Actually update the position.
@@ -108,9 +108,9 @@ properties:
         }
       }
       else {
-        this.parent.incrementLock()
+        this.parent.parent.incrementLock()
         this.moveMarble(); 
-        this.parent.future(this.moveMarbleTime * 1.1).decrementLock();
+        this.parent.parent.future(this.moveMarbleTime * 1.1).decrementLock();
       }
     get: | # Get the grid position.
       return this.solitairePosition;
@@ -140,10 +140,10 @@ scripts:
   // Implement a lookupMarble helper function to look up a marble based on its grid position.
   this.lookupMarble = function( game, gridPosition ) {
     var foundMarble = undefined;
-    for( var childIndex = 0; childIndex < game.children.length; childIndex++ ) {
-      if ( ( gridPosition[ 0 ] == game.children[ childIndex ].solitairePosition[ 0 ] ) && ( gridPosition[ 1 ] == game.children[ childIndex ].solitairePosition[ 1 ] ) ) {
-        foundMarble = game.children[ childIndex ];
-        childIndex = game.children.length;
+    for( var childIndex = 0; childIndex < game.marbles.children.length; childIndex++ ) {
+      if ( ( gridPosition[ 0 ] == game.marbles.children[ childIndex ].solitairePosition[ 0 ] ) && ( gridPosition[ 1 ] == game.marbles.children[ childIndex ].solitairePosition[ 1 ] ) ) {
+        foundMarble = game.marbles.children[ childIndex ];
+        childIndex = game.marbles.children.length;
       }
     }
     return foundMarble;
@@ -181,7 +181,7 @@ scripts:
         // Calculate where we would wind up if we do leap...
         var potentialNewPosition = [ me.solitairePosition[ 0 ] + ( 2 * xDiff ), me.solitairePosition[ 1 ] + ( 2 * yDiff ) ];
         // If the new position is on the board, and there is no marble already at the position, then we can leap.
-        if ( ( this.positionOnBoard( potentialNewPosition ) == true ) && (  me.lookupMarble( me.parent, potentialNewPosition ) == undefined ) ) {
+        if ( ( this.positionOnBoard( potentialNewPosition ) == true ) && (  me.lookupMarble( me.parent.parent, potentialNewPosition ) == undefined ) ) {
           return true;
         }
       }
@@ -199,7 +199,7 @@ scripts:
         if ( selected == true ) {
           zIndex = 1;
         }
-        posResult = [ this.parent.xCoords[ gridPosition[ 0 ] ], this.parent.yCoords[ gridPosition[ 1 ] ], this.parent.zCoords[ zIndex ] ];
+        posResult = [ this.parent.parent.xCoords[ gridPosition[ 0 ] ], this.parent.parent.yCoords[ gridPosition[ 1 ] ], this.parent.parent.zCoords[ zIndex ] ];
       }
     }
     return posResult;
@@ -227,7 +227,7 @@ scripts:
         // Calculate where we would wind up if we do leap...
         var potentialNewPosition = [ me.solitairePosition[ 0 ] + ( 2 * xDiff ), me.solitairePosition[ 1 ] + ( 2 * yDiff ) ];
         // If the new position is on the board, and there is no marble already at the position, then we can leap.
-        if ( ( this.positionOnBoard( potentialNewPosition ) == true ) && (  me.lookupMarble( me.parent, potentialNewPosition ) == undefined ) ) {
+        if ( ( this.positionOnBoard( potentialNewPosition ) == true ) && (  me.lookupMarble( me.parent.parent, potentialNewPosition ) == undefined ) ) {
           toLeap.solitairePosition = [ 0, 0 ];
           me.solitairePosition = potentialNewPosition;
           me.future(this.moveMarbleTime * 1.1).selected = false;
@@ -240,7 +240,7 @@ scripts:
     var newPosition = this.marblePosition( this.solitairePosition, this.selected );
     if ( newPosition == undefined ) {
       if ( this.parent != undefined ) {
-        var stowedPos = [ this.parent.xCoords[ 0 ] , this.parent.yCoords[ 1 ], -this.parent.zCoords[ 1 ] ];
+        var stowedPos = [ this.parent.parent.xCoords[ 0 ] , this.parent.parent.yCoords[ 1 ], -this.parent.parent.zCoords[ 1 ] ];
         this.translation = stowedPos;
       }
       this.visible = false;
@@ -256,7 +256,7 @@ scripts:
     var newPosition = this.marblePosition( this.solitairePosition, this.selected );
     if ( newPosition == undefined ) {
       if ( this.parent != undefined ) {
-        var stowedPos = [ this.parent.xCoords[ 0 ] , this.parent.yCoords[ 1 ], -this.parent.zCoords[ 1 ] ];
+        var stowedPos = [ this.parent.parent.xCoords[ 0 ] , this.parent.parent.yCoords[ 1 ], -this.parent.parent.zCoords[ 1 ] ];
         this.translation = stowedPos;
       }
       this.visible = false;

@@ -71,13 +71,23 @@ scripts:
 
   
   this.handleInit = function( ) {
-      var me = this;
-
-
-    if( this.children.length == 0 ) {
-      for( var newMarbleIndex = 0; ( ( newMarbleIndex < this.tableSlots.length ) && ( newMarbleIndex < this.parent.parent.gameMarbleTypes.children.length ) ); newMarbleIndex++ ) {
-        var marbleType = this.parent.parent.gameMarbleTypes.children[ newMarbleIndex ];
-        var marbleSlots = this.tableSlots[ newMarbleIndex ];
+    var myNode = this;
+    if ( myNode.marbles == undefined ) {
+      var marblesTemplate = { 
+        "extends": "http://vwf.example.com/node3.vwf",
+        "properties": { 
+          "private": null
+          }
+      };
+      
+      myNode.children.create( "marbles", marblesTemplate, function( newObj ) {
+        myNode.future(1.5).handleInit();
+      } );
+    }
+    else if ( myNode.marbles.children.length == 0 ) {
+      for( var newMarbleIndex = 0; ( ( newMarbleIndex < myNode.tableSlots.length ) && ( newMarbleIndex < myNode.parent.parent.gameMarbleTypes.children.length ) ); newMarbleIndex++ ) {
+        var marbleType = myNode.parent.parent.gameMarbleTypes.children[ newMarbleIndex ];
+        var marbleSlots = myNode.tableSlots[ newMarbleIndex ];
         
         var newMarbleShooterName = marbleType.displayName + "_selection_shooter";
         var newMarbleStandardName = marbleType.displayName + "_selection_standard";
@@ -101,16 +111,17 @@ scripts:
             "private": null
           }
         };
-        me.children.create( newMarbleShooterName, newMarbleShooterDef, undefined );
-        me.children.create( newMarbleStandardName, newMarbleStandardDef, undefined );
+        myNode.marbles.children.create( newMarbleShooterName, newMarbleShooterDef, undefined );
+        myNode.marbles.children.create( newMarbleStandardName, newMarbleStandardDef, undefined );
       }
     }
   };
 
+
   //  During initialization, generate all of the selection pairs of marbles.
   this.initialize = function( ) {
     if ( this.id != "selection_table.vwf" ) {
-      this.future(3.0).handleInit();
+      this.future(1.5).handleInit();
     }
   };
   
@@ -174,18 +185,20 @@ scripts:
     var me = this;
     var node = user.getObject( nodeId );
     if ( node != undefined ) {
-      if ( ( node.parent === me ) && ( node.marbleType != undefined ) ){
-        user.selectedMarbles = node.marbleType;
-        var marbleName = "Nothing Selected";
-        var marbleImage = undefined;
-        if ( user.selectedMarbles != undefined ) {
-          var marbleType = user.getObject( user.selectedMarbles );
-          if ( marbleType != undefined ) {
-            marbleName = marbleType.displayName;
-            marbleImage = marbleType.webImage;
+      if ( node.parent != undefined ) {
+        if ( ( node.parent.parent === me ) && ( node.marbleType != undefined ) ){
+          user.selectedMarbles = node.marbleType;
+          var marbleName = "Nothing Selected";
+          var marbleImage = undefined;
+          if ( user.selectedMarbles != undefined ) {
+            var marbleType = user.getObject( user.selectedMarbles );
+            if ( marbleType != undefined ) {
+              marbleName = marbleType.displayName;
+              marbleImage = marbleType.webImage;
+            }
           }
+          this.selectionMadeChoice( user.id, marbleName, marbleImage );
         }
-        this.selectionMadeChoice( user.id, marbleName, marbleImage );
       }
     }
   };

@@ -37,7 +37,7 @@
               <color>0 0 0 1</color>
             </emission>
             <ambient>
-              <color>0 0 0 1</color>
+              <color>1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="texture1_jpg-sampler" texcoord="UVSET0"/>
@@ -79,7 +79,7 @@
               <color>0 0 0 1</color>
             </emission>
             <ambient>
-              <color>0 0 0 1</color>
+              <color>1 1 1 1</color>
             </ambient>
             <diffuse>
               <texture texture="texture0_bmp-sampler" texcoord="UVSET0"/>

@@ -10,12 +10,14 @@
 <!-- License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,   -->
 <!-- either express or implied. See the License for the specific language governing permissions  -->
 <!-- and limitations under the License.                                                          -->
+<link rel="stylesheet" type="text/css" href="css/marbles.css"/>
 
 
 <!-- The following div provides buttons for controlling the solitaire activity.                  -->
 <div id="solitaire-panel" style="position:absolute; bottom: 10%; top: 10%; right:80%; left:10%; background:#AAA; opacity:1.0; text-align:left;">
   <button id="solitaire-newgame">New Game</button>
   <button id="solitaire-endgame">End Game</button>
+  <button id="solitaire-exit">Exit Solitaire</button>
 </div>
 
 
@@ -27,11 +29,14 @@
 <div id="selection-panel" style="position:absolute; bottom: 10%; top: 80%; right:10%; left:10%; background:#AAA;opacity:1.0;text-align:left;">
   <span>Marble Type:</span><span id="selection-panel-marble-name">Nothing Selected</span><span id="selection-panel-marble-image" style="margin-left:5px;vertical-align:-50%"></span><br>
   <button id="selection-deselect">Deselect Marble</button>
+  <button id="selection-exit">Exit Selection</button>
 </div>
 
 
 
 <script type="text/javascript">
+
+  $('html').css("overflow-y","hidden");
 
   var view = this;
 	// The user login dialog
@@ -41,6 +46,8 @@
     modal: true,
     resizable: false,
     draggable: false,
+    closeOnEscape: false,
+    dialogClass: "no-close",
     buttons: {
       "Login": function( ) {
         var userName = $( "#userName" ).val( );
@@ -86,7 +93,19 @@
       vwf_view.kernel.callMethod( view.myUserObjectId, "callActivityMethod", [ "solitaireEndGame", [ ] ] );
     } 
   } );
+  
+  $( '#solitaire-exit' ).click( function ( ) {
+    if ( view.myUserObjectId != undefined ) {
+      vwf_view.kernel.callMethod( view.myUserObjectId, "callActivityMethod", [ "detachUser", [ ] ] );
+    }
+  } );
 
+  $( '#selection-exit' ).click( function ( ) {
+    if ( view.myUserObjectId != undefined ) {
+      vwf_view.kernel.callMethod( view.myUserObjectId, "callActivityMethod", [ "detachUser", [ ] ] );
+    }
+  } );
+  
   var updateSelectionPanel = function ( marbleName, marbleImage ) {
     $( '#selection-panel-marble-name' ).html( marbleName );
     if ( marbleImage != undefined ) {
@@ -170,5 +189,5 @@
 <!-- The input field for the login dialog above -->
 <link rel="stylesheet" type="text/css" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css" />
 <div id="login">
-	<input id="userName" type="text" placeholder="Your Name">
+	<input id="userName" type="text" placeholder="Your Name" maxlength="32">
 </div>

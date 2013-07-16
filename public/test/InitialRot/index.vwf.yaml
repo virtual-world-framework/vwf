@@ -50,7 +50,7 @@ scripts:
 
     this.initializeCamera = function() {
         this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-1500,0];
+        this.camera.translation = [0,-900,0];
         this.camera.navmode = "none";
     }
 
