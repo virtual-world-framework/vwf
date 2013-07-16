@@ -55,6 +55,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
             this.parentDiv = options.parentDiv !== undefined ? options.parentDiv : 'body';
             this.parentClass = options.parentClass !== undefined ? options.parentClass : 'cesium-main-div';
             this.container = options.container !== undefined ? options.container : { "create": true, "divName": "cesiumContainer" } ;
+            this.invertMouse = options.invertMouse !== undefined ? options.invertMouse : {};
 
             this.height = 600;
             this.width = 800;
@@ -409,15 +410,30 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
         var overID = undefined;
         var downID = undefined;
         var lastOverID = undefined;
+        var sceneCanvas = scene.getCanvas();
         
-        this.state.mouse.handler = new Cesium.ScreenSpaceEventHandler( scene.getCanvas() );
+        this.state.mouse.handler = new Cesium.ScreenSpaceEventHandler( sceneCanvas );
         
         if ( this.state.mouse.handler ) {
             var mouse = this.state.mouse.handler;  
             var self = this; 
 
-            var pick = function( button, clickCount, event, pos ) {
+            var getMousePosition = function( pos ) {
                 
+                var posRet = { "x": pos.x, "y": pos.y };
+                if ( self.invertMouse.x !== undefined ) {
+                    posRet.x = sceneCanvas.width - posRet.x;
+                }
+                if ( self.invertMouse.y !== undefined ) {
+                    posRet.y = sceneCanvas.height - posRet.y;
+                }
+                return posRet;
+
+            }
+
+            var pick = function( button, clickCount, event, position ) {
+                
+                var pos = getMousePosition( position ); 
                 var height = scene.getCanvas().height;
                 var width = scene.getCanvas().width;
                 var eventObj = self.state.mouse.scene.pick( pos );
