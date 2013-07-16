@@ -12,11 +12,13 @@
 # the License.
 
 --- 
-extends: http://vwf.example.com/navtouch.vwf
+extends: http://vwf.example.com/scene.vwf
 properties:
-  navmode: none
   rotationSpeed: 10
   backgroundColor: "rgba(0,0,0,0)"
+methods:
+  initializeCamera:
+  createClient:
 children:
   clients:
     extends: http://vwf.example.com/node.vwf
@@ -24,12 +26,16 @@ children:
     extends: http://vwf.example.com/node3.vwf
     properties:
       translation: [ 0, 0, 0 ]
-methods:
-  createClient:
 scripts:
 - |
     this.initialize = function(){
+      this.future( 0 ).initializeCamera();
     }
+
+    this.initializeCamera = function() {
+      this.camera.navmode = "none";
+    }
+
     this.createClient = function( moniker, loginName ) {
       var clientDef = { 
         "extends": "http://vwf.example.com/client.vwf",

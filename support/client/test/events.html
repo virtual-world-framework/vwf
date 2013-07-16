@@ -30,6 +30,7 @@
       }, [
 
         "domReady",
+        "utility.js",
 
         "vwf/configuration",
         "vwf/kernel/model",
@@ -40,7 +41,7 @@
         "vwf/utility",
         "logger",
 
-      ], function( ready ) {
+      ], function( ready, testUtility ) {
 
         // Test events.
           
@@ -336,7 +337,7 @@
 
           function createFixture( callback ) {
 
-            vwf.createChild( 0, unique_name( "node" ), {
+            vwf.createChild( 0, testUtility.uniqueName( "node" ), {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -379,7 +380,7 @@
 
               // Parent node.
 
-              vwf.createChild( 0, unique_name( "parent" ), {
+              vwf.createChild( 0, testUtility.uniqueName( "parent" ), {
 
                 extends: baseID,
 
@@ -387,7 +388,7 @@
 
                 // Child node.
 
-                vwf.createChild( parentID, unique_name( "child" ), {
+                vwf.createChild( parentID, testUtility.uniqueName( "child" ), {
 
                   extends: baseID,
 
@@ -438,14 +439,6 @@
 
             } );
 
-          }
-         
-          // Create a unique name from a base.
-
-          var sequence = 0;
-
-          function unique_name( base ) {
-            return base + "-" + ( ++sequence );
           }
 
        } );

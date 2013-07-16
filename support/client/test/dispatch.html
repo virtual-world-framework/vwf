@@ -30,6 +30,7 @@
       }, [
 
         "domReady",
+        "utility.js",
 
         "vwf/configuration",
         "vwf/kernel/model",
@@ -40,7 +41,7 @@
         "vwf/utility",
         "logger",
 
-      ], function( ready ) {
+      ], function( ready, testUtility ) {
 
         // Test dispatching events.
 
@@ -451,7 +452,7 @@
 
               // Parent node.
 
-              vwf.createChild( 0, unique_name( "top" ), {
+              vwf.createChild( 0, testUtility.uniqueName( "top" ), {
 
                 extends: baseID,
                 properties: { result: result.top },
@@ -460,7 +461,7 @@
 
                 // Child node.
 
-                vwf.createChild( topID, unique_name( "middle" ), {
+                vwf.createChild( topID, testUtility.uniqueName( "middle" ), {
 
                   extends: baseID,
                   properties: { result: result.middle },
@@ -469,7 +470,7 @@
 
                   // Grandchild node.
 
-                  vwf.createChild( middleID, unique_name( "bottom" ), {
+                  vwf.createChild( middleID, testUtility.uniqueName( "bottom" ), {
 
                     extends: baseID,
                     properties: { result: result.bottom },
@@ -490,14 +491,6 @@
 
             } );
 
-          }
-         
-          // Create a unique name from a base.
-
-          var sequence = 0;
-
-          function unique_name( base ) {
-            return base + "-" + ( ++sequence );
           }
 
        } );

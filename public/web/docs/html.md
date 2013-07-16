@@ -45,9 +45,9 @@ The following sections show examples of how to do just that. Refer to [querying]
 
 Properties of the application or of specific nodes may be set directly in the javascript of an HTML file. In order to set a property, the following syntax should be used. 
 
-	vwf_view.kernel.setProperty("application-vwf", "property1", value);
+	vwf_view.kernel.setProperty(vwf_view.kernel.application(), "property1", value);
 
-The first argument is the name of the node containing the given property. In this case, the property is on the application itself. The second parameter is the name of the property to set, and the third argument is the value to be passed to the specified property. 
+The first argument is the ID of the node containing the given property. In this case, the property is on the application itself, and uses the function call for the root node of the application. The second parameter is the name of the property to set, and the third argument is the value to be passed to the specified property. 
 
 -------------------
 
@@ -55,11 +55,11 @@ The first argument is the name of the node containing the given property. In thi
 
 Application methods can be called directly from the HTML, with or without parameters. In order to call a method, the following syntax should be used.
 
-	vwf_view.kernel.callMethod("http-vwf-example-com-node2-vwf-nodeName", "method1");
+	vwf_view.kernel.callMethod(vwf_view.kernel.find(undefined, "/nodeName")[0], "method1");
 
-The first argument is the name of the node where the method resides. The second parameter is the name of the method as defined in the main application file. In order to pass parameters directly to the method call, a third parameter may be passed as an array of values. 
+The first argument is the ID of the node where the method resides. In this case, the ID is found using the [find](query.html) function call passing in the name of the node. The second parameter is the name of the method as defined in the main application file. In order to pass parameters directly to the method call, a third parameter may be passed as an array of values. 
 
-	vwf_view.kernel.callMethod("http-vwf-example-com-node2-vwf-nodeName", "method1", [ parameter1, parameter2, etc ]);
+	vwf_view.kernel.callMethod(vwf_view.kernel.find(undefined, "/nodeName")[0], "method1", [ parameter1, parameter2, etc ]);
 
 -------------------
 
@@ -67,9 +67,10 @@ The first argument is the name of the node where the method resides. The second 
 
 New components can also be created from the HTML. In order to create a node, the following syntax should be used.
 
-	vwf_view.kernel.createChild("application-vwf", "componentName", component, undefined, callback);
+	vwf_view.kernel.createChild(vwf_view.kernel.application(), "componentName", component, undefined, callback);
 
-The first argument is the name of the node that will be the parent of the new component. The second argument is the name of the new component, and the third is the JavaScript object defining the new component. The final argument is optional, and is a function that will be called after the new component has been created.
+The first argument is the ID of the node that will be the parent of the new component. The second argument is the name of the new component, and the third is the JavaScript object defining the new component. The final argument is optional, and is a function that will be called after the new component has been created.  Note the callback is not
+currently functional.
 
 -------------------
 
@@ -78,7 +79,7 @@ The first argument is the name of the node that will be the parent of the new co
 The HTML can reflect changes to the simulation as they occur. These changes can include property updates, method calls, or event fires. The following example allows the HTML to be notified of property changes in the simulation. 
 
 	vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-	  if (nodeId == "application-vwf" ) {
+	  if (nodeId == vwf_view.kernel.application() ) {
 	    switch (propertyName) {
 	      case "mouseMode":
 	        doSomething( propertyValue );

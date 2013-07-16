@@ -55,7 +55,9 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
     if request.path_info[-1,1] != "/" && private_path.nil?
 
-      if instance.nil? && ! request.accept.include?( mime_type :html )  # TODO: pass component request through to normal delegation below?
+      if ! request.env["HTTP_USER_AGENT"].nil? && request.env["HTTP_USER_AGENT"].include?( "MSIE 8.0" ) # Redirect to unsupported browser page if using IE8.
+        redirect to "/web/docs/unsupported.html"
+      elsif instance.nil? && ! request.accept.include?( mime_type :html )  # TODO: pass component request through to normal delegation below?
         Application::Component.new( settings.public_folder ).call env # A component, possibly from a template or as JSONP  # TODO: we already know the template file name with extension, but now Component has to figure it out again
       else
         redirect to request.path_info + "/" + ( request.query_string.length > 0 ? "?" + request.query_string : "" )

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Virtual World Framework - Demo Chat</title>
+  </head>
+  <body>
+    <div id="demochat-audio">
+      <audio id='None' class="sounds">
+      </audio>
+      <audio id='Boom' class="sounds">
+        <source src="sounds/boom.wav"></source>
+      </audio>
+      <audio id='Bounce' class="sounds">
+        <source src="sounds/bounce.wav"></source>
+      </audio>
+      <audio id='Burrow' class="sounds">
+        <source src="sounds/burrow.wav"></source>
+      </audio>
+      <audio id='Explosion' class="sounds">
+        <source src="sounds/explosion.wav"></source>
+      </audio>
+      <audio id='Fire' class="sounds">
+        <source src="sounds/fire.wav"></source>
+      </audio>
+      <audio id='FlagAlert' class="sounds">
+        <source src="sounds/flag_alert.wav"></source>
+      </audio>
+      <audio id='FlagDrop' class="sounds">
+        <source src="sounds/flag_drop.wav"></source>
+      </audio>
+      <audio id='FlagGrab' class="sounds">
+        <source src="sounds/flag_grab.wav"></source>
+      </audio>
+      <audio id='FlagLost' class="sounds">
+        <source src="sounds/flag_lost.wav"></source>
+      </audio>
+      <audio id='FlagWon' class="sounds">
+        <source src="sounds/flag_won.wav"></source>
+      </audio>
+      <audio id='Flap' class="sounds">
+        <source src="sounds/flap.wav"></source>
+      </audio>
+      <audio id='Honk' class="sounds">
+        <source src="sounds/honk.wav"></source>
+      </audio>
+      <audio id='Hunt' class="sounds">
+        <source src="sounds/hunt.wav"></source>
+      </audio>
+      <audio id='HuntSelect' class="sounds">
+        <source src="sounds/hunt_select.wav"></source>
+      </audio>
+      <audio id='Ignition' class="sounds">
+        <source src="sounds/ignition.wav"></source>
+      </audio>
+      <audio id='Jump' class="sounds">
+        <source src="sounds/jump.wav"></source>
+      </audio>
+      <audio id='Killteam' class="sounds">
+        <source src="sounds/killteam.wav"></source>
+      </audio>
+      <audio id='Land' class="sounds">
+        <source src="sounds/land.wav"></source>
+      </audio>
+      <audio id='Laser' class="sounds">
+        <source src="sounds/laser.wav"></source>
+      </audio>
+      <audio id='Lock' class="sounds">
+        <source src="sounds/lock.wav"></source>
+      </audio>
+      <audio id='MessageAdmin' class="sounds">
+        <source src="sounds/message_admin.wav"></source>
+      </audio>
+      <audio id='MessagePrivate' class="sounds">
+        <source src="sounds/message_private.wav"></source>
+      </audio>
+      <audio id='MessageTeam' class="sounds">
+        <source src="sounds/message_team.wav"></source>
+      </audio>
+      <audio id='Missile' class="sounds">
+        <source src="sounds/missile.wav"></source>
+      </audio>
+      <audio id='Phantom' class="sounds">
+        <source src="sounds/phantom.wav"></source>
+      </audio>
+      <audio id='Pop' class="sounds">
+        <source src="sounds/pop.wav"></source>
+      </audio>
+      <audio id='Ricochet' class="sounds">
+        <source src="sounds/ricochet.wav"></source>
+      </audio>
+      <audio id='Shock' class="sounds">
+        <source src="sounds/shock.wav"></source>
+      </audio>
+      <audio id='Spree1' class="sounds">
+        <source src="sounds/spree1.wav"></source>
+      </audio>
+      <audio id='Spree2' class="sounds">
+        <source src="sounds/spree2.wav"></source>
+      </audio>
+      <audio id='Spree3' class="sounds">
+        <source src="sounds/spree3.wav"></source>
+      </audio>
+      <audio id='Spree4' class="sounds">
+        <source src="sounds/spree4.wav"></source>
+      </audio>
+      <audio id='Static' class="sounds">
+        <source src="sounds/static.wav"></source>
+      </audio>
+      <audio id='StaticSM' class="sounds">
+        <source src="sounds/static-sm.wav"></source>
+      </audio>
+      <audio id='Steamroller' class="sounds">
+        <source src="sounds/steamroller.wav"></source>
+      </audio>
+      <audio id='Teamgrab' class="sounds">
+        <source src="sounds/teamgrab.wav"></source>
+      </audio>
+      <audio id='Teleport' class="sounds">
+        <source src="sounds/teleport.wav"></source>
+      </audio>
+      <audio id='Thief' class="sounds">
+        <source src="sounds/thief.wav"></source>
+      </audio>
+    </div>
+    <link rel="stylesheet" type="text/css" href="css/demochat.css"/>
+    <div id="logon" class="demochat-logon">
+      </br>
+      Username: <input id="playerNameInput" type="text" maxlength="32"/></br>
+      <div> <div style="display:inline-block; height:36px;vertical-align:0%"> Display Color: </div> <div id="newUserColor" class="demochat-colorwidget"></div> </div>
+      Alert Sound: <select id="loginSoundSelect"></select><button type="button" id="loginSoundSelectTest">Test Sound</button></br>
+      <button type="button" id="chatlogin" class="demochat-logonbutton">Login</button></br>
+      <div id="nameexists" class="demochat-warning" style="display:none;">Name already exists!</div>
+      </br>
+    </div>
+    <div id="chatList" class="demochat-chatlist">
+      <h4>Current Users</h4>
+      <div id="chatListInternal">
+      </div>
+    </div>
+    <div id="chatWindow" class="demochat-chatwindow">
+      <div id="chatContent" class="demochat-chatcontent"></div>
+      <textarea id='chatInput' rows='1' class="demochat-chatinput"></textarea>
+    </div>
+    <div id="chatOptions" class="demochat-chatoptions">
+      <div class="demochat-chatInnerOptions" style="align:left">
+        <div> <div style="display:inline-block; height:36px;vertical-align:0%"> Select New Display Color: </div> <div id="changeTextColor" class="demochat-colorwidget"></div> </div>
+        Change Display Name: <input type="text" id="changeDisplayName" maxlength="32"/> <button type="button" id="changeDisplayNameButton">Change Name</button></br>
+      </div>
+      <div class="demochat-chatInnerOptions" style="align:right">
+        Select New Alert Sound: <select id="changeSoundSelect"></select><button type="button" id="changeSoundSelectTest">Test Sound</button><button type="button" id="changeSoundButton">Change Sound</button></br>
+        Disconnect: <button type="button" id="disconnect">Disconnect</button></br>
+      </div>
+    </div>
+    <script src="js/heartbeat.js"/>
+    <script src="js/appearance.js"/>
+    <link rel="stylesheet" media="screen" type="text/css" href="css/colorpicker.css" />
+    <script src="js/colorpicker.js"/>
+    <script>
+      $( '#newUserColor' ).ColorPicker( {
+			  flat: false,
+			  color: '#000000',
+			  onSubmit: function( hsb, hex, rgb ) {
+				  $( '#newUserColor' ).css( 'backgroundColor', '#' + hex );
+			  }
+		  } );
+      $( '#changeTextColor' ).ColorPicker( {
+			  flat: false,
+			  color: '#000000',
+			  onSubmit: function( hsb, hex, rgb ) {
+				  $( '#changeTextColor' ).css( 'backgroundColor', '#' + hex );
+          if ( isConnected( ) ) {
+            vwf_view.kernel.callMethod( sceneId, "userColorChange", [ $( '#changeTextColor' ).css( 'backgroundColor' ), playerId, vwf_view.kernel.moniker( ) ] );
+          }
+			  }
+		  } );
+      
+      
+      $( '#playerNameInput' ).keyup( function( ) {
+        $( '#playerNameInput' ).val( sanitizeUsername( $( '#playerNameInput' ).val( ) ) );
+      });
+      $( '#changeDisplayName' ).keyup( function( ) {
+        $( '#changeDisplayName' ).val( sanitizeUsername( $( '#changeDisplayName' ).val( ) ) );
+      });
+      
+      var autoScroll = function ( ) {
+        return $('#chatContent')[0].scrollHeight - $('#chatContent')[0].scrollTop == $('#chatContent').height();
+      };
+      
+      var scrollToBottom = function ( ) {
+        $('#chatContent')[0].scrollTop = $('#chatContent')[0].scrollHeight;
+      };
+      // Store the nodeID of the entire scene for later reference.
+      var sceneId = vwf_view.kernel.find( "", "/" )[ 0 ];
+      var userDetails = {};
+      
+      
+      var debugInformation = function( ) {
+        vwf_view.logger.warn("Debug requested locally, printing view level information with local moniker " + vwf_view.kernel.moniker( ) + ".");
+        var userIndex = 1;
+        for ( var nodeId in userDetails ) {
+          if ( userDetails[ nodeId ] != undefined ) {
+            vwf_view.logger.warn("  (" + userIndex + ")  Node Id:'" + nodeId + "'  User Name: '" + userDetails[ nodeId ][ "displayName" ] + "'  View Handle: '" + userDetails[ nodeId ][ "viewHandle" ] + "'  Last Heartbeat: '" + userDetails[ nodeId ][ "lastHeartbeat" ] + "'");
+            userIndex++;
+          }
+        }
+        vwf_view.kernel.callMethod( sceneId, "debug", [ vwf_view.kernel.moniker( ) ] );
+      }
+
+      // Display the login interface.
+      displayLogin( );
+
+      // Load the options into the audio selects.
+      loadAudioSelects( );
+
+
+      // Register a function to run when the login button is clicked.
+      $( '#chatlogin' ).click( function( ) {
+        //  Disable the input fields while the login attempt is being made.
+        disableLogonDataEntry( );
+
+        //  Make the actual call to the model to attempt to create the user.
+        vwf_view.kernel.callMethod( sceneId, "createUser", [ sanitizeUsername( $( '#playerNameInput' ).val( ) ), $( '#newUserColor' ).css( 'backgroundColor' ) , $( '#loginSoundSelect' ).val( ), vwf_view.kernel.moniker( ) ] );
+        $( '#changeTextColor' ).css( 'backgroundColor', $( '#newUserColor' ).css( 'backgroundColor' ) )
+      });
+      
+      // Register a callback so when the loginSoundSelectTest button is pressed, the sound currently
+      // selected is played.
+      $( '#loginSoundSelectTest' ).click( function ( ) {
+        $( '#' + $( '#loginSoundSelect' ).val( ) )[ 0 ].play( );
+      } );
+
+
+      // Register a callback so when the changeSoundSelectTest button is pressed, the sound currently
+      // selected is played.
+      $( '#changeSoundSelectTest' ).click( function ( ) {
+        $( '#' + $( '#changeSoundSelect' ).val( ) )[ 0 ].play( );
+      } );
+
+
+      // Register a callback so when the changeSoundButton is pressed, the alertSound property of
+      // the user is changed appropriately.
+      $( '#changeSoundButton' ).click( function ( ) {
+        if ( isConnected( ) ) {
+          vwf_view.kernel.callMethod( sceneId, "userSoundChange", [ $( '#changeSoundSelect' ).val( ), playerId, vwf_view.kernel.moniker( ) ] );
+        }
+      } );
+
+
+
+      //Register function to listen for keydown and keyup of the enter key in the chat message
+      // entry area.
+      $( '#chatInput' ).keydown( function( e ) {
+        // Stop propogation of the event, if it was enter that was pressed and we are connected,
+        // call the sendMessage function.
+        e.stopPropagation( );
+        var code = ( e.keyCode ? e.keyCode : e.which );
+        if ( ( code == 13 ) && ( isConnected( ) ) ) { //Enter
+          if ( $( this ).val( ) == "/debug" ) {
+            debugInformation( );
+          }
+          else if ( $( this ).val( ) != "" ) {
+            vwf_view.kernel.callMethod( sceneId, "sendMessage", [ $( this ).val( ), playerId, vwf_view.kernel.moniker( ) ] );
+          }
+        }
+      } ).keyup( function( e ) {
+        // Stop propogation of the event, if it was enter that was released and we are connected,
+        // clear the text entry area.
+        e.stopPropagation( );
+        var code = ( e.keyCode ? e.keyCode : e.which );
+        if ( code == 13 ) { //Enter
+          $( this ).val( '' );
+        }
+      } );
+
+
+      //Register a callback function to respond to clicking the change display name button.
+      $( '#changeDisplayNameButton' ).click( function ( ) {
+        if ( isConnected( ) ) {
+          // Call the renameUser method on the appropriate user.
+          vwf_view.kernel.callMethod( sceneId, "renameUser", [ sanitizeUsername( $('#changeDisplayName').val( ) ), playerId, vwf_view.kernel.moniker( ) ] )
+        }
+      } );
+
+      //Register a callback function for handling clicking the disconnect button.
+      $( '#disconnect' ).click( function( ) {
+        if ( isConnected( ) ) {
+          //First, remove the user.
+          vwf_view.kernel.callMethod( sceneId, "removeUser", [ playerId, vwf_view.kernel.moniker( ) ] );
+          //Reset the web page. Set playerId to undefined, and display the login screen with enabled
+          //inputs.
+          playerId = undefined;
+          enableLogonDataEntry( );
+          displayLogin( );
+          hideUserExistsMessage( );
+        }
+      } );
+
+      vwf_view.deletedNode = function ( nodeId ) {
+        if ( isConnected( ) ) {
+          var timestamp = getTimestamp();
+          if ( userDetails[ nodeId ] != undefined ) {
+            var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='" + userDetails[ nodeId ][ "displayName" ] + "' style='color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left'>" + userDetails[ nodeId ][ "displayName" ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has left chat.</div></br>";
+            var updateScroll = autoScroll( );
+            $( '#chatContent' ).append( newLine );
+            if ( updateScroll ) {
+              scrollToBottom( );
+            }
+            removeUser( userDetails[ nodeId ][ "displayName" ] );
+            userDetails[ nodeId ] = undefined;
+          }
+        }
+      };
+      
+      vwf_view.satProperty = function ( nodeId, propertyName, propertyValue ) {
+        if ( isConnected( ) ) {
+          var timestamp = getTimestamp();
+          if ( propertyName == "displayName" ) {
+            if ( userDetails[ nodeId ] != undefined ) {
+              if ( userDetails[ nodeId ][ propertyName ] != propertyValue ) {
+                //Display name has been changed.
+ 
+                removeUser( userDetails[ nodeId ][ "displayName" ] );
+ 
+                $( '.' + userDetails[ nodeId ][ "displayName" ] ).attr( "class", propertyValue );
+ 
+                addUser( propertyValue, userDetails[ nodeId ][ "displayColor" ] );
+          
+                var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='system'           style='color:#000000;float:left;'>The user </div><div class='" + propertyValue + "' style='color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left;margin-left:5px;'>" + userDetails[ nodeId ][ "displayName" ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has changed their display name to</div><div class='" + propertyValue + "' style='color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left;margin-left:5px;'>" + propertyValue + "</div><div class='system' style='color:#000000;float:left;'>.</div></br>";
+
+                var updateScroll = autoScroll( );
+                $( '#chatContent' ).append( newLine );
+                if ( updateScroll ) {
+                  scrollToBottom( );
+                }               
+
+                userDetails[ nodeId ][ propertyName ] = propertyValue;
+              }
+            }
+          }
+          else if ( propertyName == "displayColor" ) {
+            if ( userDetails[ nodeId ] != undefined ) {
+              if ( userDetails[ nodeId ][ propertyName ] != propertyValue ) {
+                //Display color has been changed.
+                userDetails[ nodeId ][ propertyName ] = propertyValue;
+                changeUserColor( userDetails[ nodeId ][ "displayName" ], userDetails[ nodeId ][ "displayColor" ]);
+              }
+            }
+          }
+          else if ( ( propertyName == "viewHandle" ) || ( propertyName == "lastHeartbeat" ) ) {
+            if ( userDetails[ nodeId ] != undefined ) {
+              userDetails[ nodeId ][ propertyName ] = propertyValue;
+            }
+          }
+        }
+      };
+      
+      vwf_view.gotProperties = function ( nodeId, properties ) {
+        var clientThatIssuedEvent = this.kernel.client( );
+        var me = this.kernel.moniker( );
+        if ( clientThatIssuedEvent == me ) {
+          if ( ( properties[ "displayName" ] != undefined ) && ( properties[ "displayColor" ] != undefined ) ) {
+            var timestamp = getTimestamp();
+            userDetails[ nodeId ] = { "displayName": properties[ "displayName" ], "displayColor": properties[ "displayColor" ] };
+            var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='" + properties[ "displayName" ] + "' style='color:" + properties[ "displayColor" ] + ";float:left'>" + properties[ "displayName" ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has joined chat.</div></br>";
+            var updateScroll = autoScroll( );
+            $( '#chatContent' ).append( newLine );
+            if ( updateScroll ) {
+              scrollToBottom( );
+            }
+            addUser( properties[ "displayName" ], properties[ "displayColor" ] );
+          }
+        }
+      };      
+      
+      //  Register the firedEvent callback handler.
+      vwf_view.firedEvent = function ( nodeId, eventName, eventParameters ) {
+        // Go ahead and generate a time stamp, since most of the scene events need one.
+        var timestamp = getTimestamp();
+
+       
+        // If the event that triggered this event handler was the creation of a new user,
+        // And the event issued from this client, grab the camera from the new object to use for this user
+        var clientThatIssuedEvent = this.kernel.client( );
+        var me = this.kernel.moniker( );
+        
+
+
+        // If the event came from the user we are logged in as and it is
+        // a playSoundEvent, then play the sound based on the parameter
+        // passed in the event.
+        if ( ( nodeId == playerId ) && ( eventName == "playSoundEvent" ) ) {
+          $( '#' + eventParameters[ 0 ] )[ 0 ].play( );
+        }
+
+        if ( nodeId == sceneId ) {
+          // Recieved an event fired by the scene.
+          
+          if ( eventName == "userCreated" ) {
+            //  Handle the user created event.
+            
+            //  First, test if we are already connected, if so, this is another user joining,
+            //  send a message to the chat log about the user joining and add the user to the user list.
+            if ( isConnected( ) ) {
+              //  First, store the user information.
+              userDetails[ eventParameters[ 0 ] ] = { "displayName": eventParameters[ 1 ], "displayColor": eventParameters[ 2 ] };
+              var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='" + eventParameters[ 1 ] + "' style='color:" + eventParameters[ 2 ] + ";float:left'>" + eventParameters[ 1 ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has joined chat.</div></br>";
+              var updateScroll = autoScroll( );
+              $( '#chatContent' ).append( newLine );
+              if ( updateScroll ) {
+                scrollToBottom( );
+              }
+              addUser( eventParameters[ 1 ], eventParameters[ 2 ] );
+            }
+            else if ( clientThatIssuedEvent == me ) {
+              //  If this event was our own login,
+              //  start the heartbeat for this particular user.
+              startHeartbeat( eventParameters[ 0 ], eventParameters[ 4 ] );
+
+              // Display the chat interface.
+              displayChatInterface( eventParameters[ 2 ] )
+
+              // The fourth(index 3) eventParameter is an array of currently connected users, loop over the list adding them to the user list.
+              for( var index = 0; index < eventParameters[ 3 ].length; index++ ) {
+                userDetails[ eventParameters[ 3 ][ index ][ 0 ] ] = { "displayName": eventParameters[ 3 ][ index ][ 1 ], "displayColor": eventParameters[ 3 ][ index ][ 2 ] };
+                addUser( eventParameters[ 3 ][ index ][ 1 ], eventParameters[ 3 ][ index ][ 2 ] );
+              }
+            }
+          }
+
+          if ( eventName == "userMissing" ) {
+            if ( ( playerId == eventParameters[ 0 ] ) && ( vwf_view.kernel.moniker( ) == eventParameters[ 1 ] ) ) {
+              vwf_view.logger.warn( "Recieved user missing that matches my node id " + playerId + " and view handle " + vwf_view.kernel.moniker( ) );
+              debugInformation( );
+              playerId = undefined;
+              displayLogin( );
+              enableLogonDataEntry( );
+              hideUserExistsMessage( );
+            }
+            else if ( isConnected ( ) ) {
+              var timestamp = getTimestamp();
+              if ( userDetails[ nodeId ] != undefined ) {
+                var newLine = "<div class='system' style='color:#000000;width:250px;float:left;'>[SYSTEM] [<span style='font-size:75%';>" + timestamp + "</span>]</div><div class='" + userDetails[ nodeId ][ "displayName" ] + "' style='color:" + userDetails[ nodeId ][ "displayColor" ] + ";float:left'>" + userDetails[ nodeId ][ "displayName" ] + "</div><div class='system' style='color:#000000;margin-left:5px;float:left;'> has left chat.</div></br>";
+                var updateScroll = autoScroll( );
+                $( '#chatContent' ).append( newLine );
+                if ( updateScroll ) {
+                  scrollToBottom( );
+                }
+                removeUser( userDetails[ nodeId ][ "displayName" ] );
+                userDetails[ nodeId ] = undefined;
+              }
+            }
+          }
+
+          //  If the event is of type userCreateFailed, and it was in response to our attempt to log in...
+          if ( ( eventName == "userCreateFailed" ) && ( clientThatIssuedEvent == me ) ) {
+            //  Re-enable the logon data inputs.
+            enableLogonDataEntry( );
+
+            //  Display the display name conflict error message.
+            displayUserExistsMessage( );
+          }
+
+          //  If the event was a message from a user and we are connected, display the message in the chat window.
+          if ( ( isConnected( ) ) && ( eventName == "userMessage" ) ) {
+		        var newLine = "<div class='" + eventParameters[ 0 ] + "' style='width:250px;color:" + eventParameters[ 1 ] + ";float:left;'>[" + eventParameters[ 0 ] + "] [<span style='font-size:75%'>" + timestamp + "</span>] </div><div class='" + eventParameters[ 0 ] + "' style='color:" + eventParameters[ 1 ] + "'>" + eventParameters[ 2 ] + "</div>";
+            var updateScroll = autoScroll( );
+            $( '#chatContent' ).append( newLine );
+            if ( updateScroll ) {
+              scrollToBottom( );
+            }
+          }
+        }
+      };
+
+    </script>
+  </body>
+</html>

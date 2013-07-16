@@ -34,27 +34,27 @@
 #   0 <= animationTime <= animationDuration
 #   -Infinity < animationRate < Infinity
 # 
-# The animation play state and time index are maintained in `animationStartTime$` and
-# `animationPauseTime$`. `animationPauseTime$` is `null` while the animation is playing. The
-# distance from `animationStartTime$` to the current time (when playing) or `animationPauseTime$`
+# The animation play state and time index are maintained in `animationStart$` and
+# `animationPause$`. `animationPause$` is `null` while the animation is playing. The
+# distance from `animationStart$` to the current time (when playing) or `animationPause$`
 # (when paused) gives the time index, after accounting for the play rate.
 # 
-#   animationTime = ( ( animationPauseTime$ || time ) - ( animationStartTime$ || time ) ) *
+#   animationTime = ( ( animationPause$ || time ) - ( animationStart$ || time ) ) *
 #     animationRate (positive rates)
-#   animationTime = ( ( animationPauseTime$ || time ) - ( animationStartTime$ || time ) ) *
+#   animationTime = ( ( animationPause$ || time ) - ( animationStart$ || time ) ) *
 #     animationRate + animationDuration (negative rates)
 # 
-#   animationPlaying = this.animationStartTime$ != null && this.animationPauseTime$ == null
+#   animationPlaying = this.animationStart$ != null && this.animationPause$ == null
 # 
-# `animationStartTime$` and `animationPauseTime$` are `null` before the animation is first played.
+# `animationStart$` and `animationPause$` are `null` before the animation is first played.
 # This state is interpreted as `animationPlaying` == `false` and `animationTime` == `0`.
 # 
-#   animationStartTime$ == null => animationPauseTime$ == null
-#   animationStartTime$ == null => animationStopTime$ == null
+#   animationStart$ == null => animationPause$ == null
+#   animationStart$ == null => animationStop$ == null
 # 
-#   animationStartTime$ != null => animationStartTime$ <= time
-#   animationPauseTime$ != null => animationStartTime$ <= animationPauseTime$ <= time
-#   animationStopTime$ != null => animationStartTime$ + animationDuration$ == animationStopTime$
+#   animationStart$ != null => animationStart$ <= time
+#   animationPause$ != null => animationStart$ <= animationPause$ <= time
+#   animationStop$ != null => animationStart$ + animationDuration$ == animationStop$
 # 
 #   animationDuration$ == animationDuration / animationRate (positive rates)
 #   animationDuration$ == -animationDuration / animationRate (negative rates)
@@ -76,42 +76,48 @@ properties:
   animationTime:
 
     set: |
+      if(this.animationStartTime == null) {
+        this.animationStartTime = 0;
+      }
+      if(this.animationStopTime == null) {
+        this.animationStopTime = this.animationDuration;
+      }
       // Save copies to avoid repeated reads.
-      var duration = this.animationDuration,
+      var duration = this.animationStopTime - this.animationStartTime,
         rate = this.animationRate;
       // Range limit the incoming value.
-      value = Math.min( Math.max( 0, value ), duration );
+      value = Math.min( Math.max( this.animationStartTime, value ), this.animationStopTime );
       // Keep paused if updating start/pause from null/null.
-      if ( this.animationStartTime$ == null || this.animationPauseTime$ == 0 ) {
-        this.animationPauseTime$ = this.time;
+      if ( this.animationStart$ == null || this.animationPause$ == 0 ) {
+        this.animationPause$ = this.time;
       }
       // Calculate the start and stop times that makes the new time work.
-      this.animationStartTime$ =
-        ( this.animationPauseTime$ != null ? this.animationPauseTime$ : this.time ) -
-        ( rate >= 0 ? value : value - duration ) / rate;
-      this.animationStopTime$ =
-        this.animationStartTime$ +
+      this.animationStart$ =
+        ( this.animationPause$ != null ? this.animationPause$ : this.time ) -
+        ( rate >= 0 ? value - this.animationStartTime : value - duration ) / rate;
+      this.animationStop$ =
+        this.animationStart$ +
         ( rate >= 0 ? duration : -duration ) / rate;
       // Update the node and fire the changed event.
       if ( value !== this.animationTimeUpdated ) {
         this.animationTimeUpdated = value;
-        this.animationUpdate( value, duration );
+        this.animationUpdate( value, this.animationDuration );
         this.animationTimeChanged( value );
       }
 
     get: |
       // Save copies to avoid repeated reads.
-      var duration = this.animationDuration,
+      var duration = this.animationStopTime - this.animationStartTime,
         rate = this.animationRate;
       // Calculate the time from the start and current/pause times.
       var value = (
-        ( this.animationPauseTime$ != null ? this.animationPauseTime$ : this.time ) -
-        ( this.animationStartTime$ != null ? this.animationStartTime$ : this.time )
-      ) * rate + ( rate >= 0 ? 0 : duration );
+        ( this.animationPause$ != null ? this.animationPause$ : this.time ) -
+        ( this.animationStart$ != null ? this.animationStart$ : this.time )
+      ) * rate + ( rate >= 0 ? this.animationStartTime : duration );
       // If changed since last seen, update and fire the changed event.
       if ( value !== this.animationTimeUpdated ) {
         this.animationTimeUpdated = value;
-        this.animationUpdate( value, duration );
+        this.animationUpdate( value, this.animationDuration );
         this.animationTimeChanged( value );
       }
       return value;
@@ -137,9 +143,11 @@ properties:
 
   animationRate:  # TODO: allow changes while playing
     set: |
-      var duration = this.animationDuration, rate = value;
+      var duration = this.animationDuration, rate = value, startFrame = this.animationStartFrame, stopFrame = this.animationStopFrame;
       this.animationRate = rate;
       this.animationDuration$ = ( rate >= 0 ? duration : -duration ) / rate;
+      this.animationStartFrame = startFrame;
+      this.animationStopFrame = stopFrame;
     value: 1
 
   ## Automatically replay the animation from the start after reaching the end.
@@ -151,35 +159,41 @@ properties:
   animationPlaying:
 
     set: |
-      if ( this.animationStartTime$ && ! this.animationPauseTime$ ) {
+      if(this.animationStartTime == null) {
+        this.animationStartTime = 0;
+      }
+      if(this.animationStopTime == null) {
+        this.animationStopTime = this.animationDuration;
+      }
+      if ( this.animationStart$ != null && this.animationPause$ == null ) {
         if ( ! value ) {
           // Mark as paused at the current time.
-          this.animationPauseTime$ = this.time;
+          this.animationPause$ = this.time;
           // Send the `animationStopped` event if stopping at the end.
-          if ( this.time == this.animationStopTime$ ) {
+          if ( this.time == this.animationStop$ ) {
             this.animationStopped();
           }
         }
       } else {
         if ( value ) {
           // Save copies to avoid repeated reads.
-          var duration = this.animationDuration,
+          var duration = this.animationStopTime - this.animationStartTime,
             rate = this.animationRate;
           // Start from the beginning if resuming from the end.
-          if ( this.animationPauseTime$ == this.animationStopTime$ ) {
-            this.animationPauseTime$ = this.animationStartTime$;
+          if ( this.animationPause$ == this.animationStop$ ) {
+            this.animationPause$ = this.animationStart$;
           }
           // Recalculate the start and stop times to keep paused time unchanged, then resume.
-          this.animationStartTime$ =
-            ( this.animationStartTime$ || this.time ) -
-            ( this.animationPauseTime$ || this.time ) +
+          this.animationStart$ =
+            ( this.animationStart$ || this.time ) -
+            ( this.animationPause$ || this.time ) +
             this.time;
-          this.animationStopTime$ =
-            this.animationStartTime$ +
+          this.animationStop$ =
+            this.animationStart$ +
             ( rate >= 0 ? duration : -duration ) / rate;
-          this.animationPauseTime$ = null;
+          this.animationPause$ = null;
           // Send the `animationStarted` event if starting from the beginning.
-          if ( this.time == this.animationStartTime$ ) {
+          if ( this.time == this.animationStart$ ) {
             this.animationStarted();
           }
           // Start the animation worker.
@@ -189,8 +203,7 @@ properties:
       }
 
     get: |
-      return !! this.animationStartTime$ &&
-        ! this.animationPauseTime$;
+      return this.animationStart$ != null && this.animationPause$ == null;
 
   ## The most recent value of `animationTime` recognized by this behavior.
   ## 
@@ -203,28 +216,28 @@ properties:
 
   ## The simulation time corresponding to the start of the animation.
   ## 
-  ## `animationStartTime$` is `null` until the animation is first played. `animationPlaying` is
-  ## `false` and `animationTime` is `0` while `animationStartTime$` is `null`.
+  ## `animationStart$` is `null` until the animation is first played. `animationPlaying` is
+  ## `false` and `animationTime` is `0` while `animationStart$` is `null`.
   ## 
-  ## `animationStartTime$` is for internal use. Do not set this property.
+  ## `animationStart$` is for internal use. Do not set this property.
 
-  animationStartTime$: null
+  animationStart$: null
 
   ## The simulation time corresponding to the animation's pause position.
   ## 
-  ## `animationPauseTime$` is `null` while the animation is playing and before the animation is
+  ## `animationPause$` is `null` while the animation is playing and before the animation is
   ## first played.
   ## 
-  ## `animationPauseTime$` is for internal use. Do not set this property.
+  ## `animationPause$` is for internal use. Do not set this property.
 
-  animationPauseTime$: null
+  animationPause$: null
 
   ## The simulation time corresponding to the end of the animation. The animation worker function
   ## loops or stops the animation when `time` reaches this value.
   ## 
-  ## `animationStopTime$` is for internal use. Do not set this property.
+  ## `animationStop$` is for internal use. Do not set this property.
 
-  animationStopTime$: null
+  animationStop$: null
 
   ## The animation's duration in simulation time, after considering `animationRate`.
   ## 
@@ -232,13 +245,70 @@ properties:
 
   animationDuration$: null
 
+  ## The time that the animation should start at. Used with animationStopTime to play
+  ## a subsection of the animation. Defaults to 0 when the animation starts to play
+  ## if it is not assigned another value. 'animationStartTime' will always be within 
+  ## the range [ `0`, `animationDuration` ]
+
+  animationStartTime: 
+    set: |
+      this.animationStartTime = value ? Math.min( Math.max( 0, value ), this.animationDuration ) : value;
+    value: null
+
+  ## The time that the animation should stop at. Used with animationStartTime to play
+  ## a subsection of the animation. Defaults to 'animationDuration' when the animation
+  ## starts to play if it is not assigned another value. 'animationStopTime' will always
+  ## be within the range [ `0`, `animationDuration` ]
+
+  animationStopTime:  
+    set: |
+      this.animationStopTime = value ? Math.min( Math.max( 0, value ), this.animationDuration ) : value;
+    value: null
+
+  ## The frame that the animation should start at. Setting this value automatically updates the "animationStartTime"
+  ## to the "animationStartFrame" / "fps"
+
+  animationStartFrame:
+    set: |
+      this.animationStartTime = value / this.fps;
+    get: |
+      return Math.floor(this.animationStartTime * this.fps);
+
+  ## The frame that the animation should stop at. Setting this value automatically updates the "animationStopTime"
+  ## to the "animationStopFrame" / "fps"
+
+  animationStopFrame:
+    set: |
+      this.animationStopTime = value / this.fps;
+    get: |
+      return Math.floor(this.animationStopTime * this.fps);
+
+  ## The animation playback rate in frames per second. Setting this value automatically updates the "animationRate"
+  ## to "fps" / 30
+
+  fps: 
+    set: |
+      this.animationRate = value / 30;
+    get: |
+      return this.animationRate * 30;
+
 methods:
 
   # Play the animation from the start.
 
-  animationPlay: |
-    this.animationTime = 0;
-    this.animationPlaying = true;
+  animationPlay:
+    parameters:
+      - startTime
+      - stopTime
+    body: |
+      if(!isNaN(stopTime)) {
+        this.animationStopTime = stopTime;
+      }
+      if(!isNaN(startTime)) {
+        this.animationStartTime = startTime;
+      }
+      this.animationTime = 0;
+      this.animationPlaying = true;
 
   # Pause the animation at the current position.
 
@@ -266,21 +336,21 @@ methods:
       // Read the time to recognize the current time and update.
       this.animationTime;
       // Loop or stop after reaching the end.
-      if ( this.time === this.animationStopTime$ ) {
+      if ( this.time === this.animationStop$ ) {
         if ( this.animationLoop ) {
           this.animationLooped();
           this.animationTime = this.animationRate >= 0 ?
-            0 : this.animationDuration;
+            this.animationStartTime : this.animationStopTime;
         } else {
           this.animationPlaying = false;
         }
       }
       // Schedule the next tick if still playing.
       if ( this.animationPlaying ) {
-        if ( this.animationStopTime$ - this.time > 1/60 ) {
+        if ( this.animationStop$ - this.time > 1/60 ) {
           this.in( 1/60 ).animationTick(); // next interval
         } else {
-          this.at( this.animationStopTime$ ).animationTick(); // exactly at end
+          this.at( this.animationStop$ ).animationTick(); // exactly at end
         }
       } else {
         this.logger.debug( "canceling animationTick" );

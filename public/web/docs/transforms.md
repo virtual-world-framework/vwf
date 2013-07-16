@@ -2,7 +2,7 @@
 
 --------------
 
-Among the most common properties to set on a node within the Virtual World Framework are various transforms. The [node3](application.html) component defines the basic transforms including the following:
+Among the most common properties to set on a node within the Virtual World Framework are various transforms. The [node3](jsdoc_cmp/symbols/node3.vwf.html) component defines the basic transforms including the following:
 
 * worldTransform
 * transform

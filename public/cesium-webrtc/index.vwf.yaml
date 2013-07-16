@@ -15,29 +15,108 @@
 extends: http://vwf.example.com/cesium.vwf
 properties:
   controlClient: "NONE"
-children:
-  clients:
-    extends: http://vwf.example.com/node.vwf
-  cesiumInstance:
-    extends: http://vwf.example.com/node3.vwf
-    properties:
-      cameraControllerData:
-      cameraViewData: 
-      backgroundColor: [ 0, 0, 0, 0 ]
+  cameraControllerData:
+  cameraViewData: 
+  imageryProvider: "bingAerial"
+  backgroundColor: [ 0, 0, 0, 0 ]
+  clientColors: [ [ 0, 0, 255 ], [ 255, 0, 0 ], [ 255, 255, 0 ], [ 0, 255, 0 ], [ 0, 255, 255 ], [ 255, 0, 255 ], [ 255, 153, 0 ], [ 153, 153, 153 ], [ 230, 230, 250 ], [ 0, 0, 0 ] ]
 methods:
   createClient:
+  locationCaptured:
+  findClient:
+  newClientVideo:
+children:
+  toolbar:
+    properties:
+      selectedColor:
+        set: |
+          this.selectedColor = value;
+          this.selectedColorChanged( value );
+        value:
+          "black"
+      inputMode:
+        set: |
+          this.inputMode = value;
+          this.inputModeChanged( value );
+        value:
+          "orbit"
+    methods:
+      clear: |
+        this.clearing();
+    events:
+      selectedColorChanged:
+      inputModeChanged:
+      clearing:
+  camera:
+    extends: http://vwf.example.com/cesium/camera.vwf
+    properties:
+      position: [ 0, -14261948, 11360974 ]
+  sun: 
+    extends: http://vwf.example.com/cesium/sun.vwf 
+    properties:
+      visible: false
+  atmosphere: 
+    extends: http://vwf.example.com/cesium/atmosphere.vwf 
+    properties:
+      visible: false
+  skybox: 
+    extends: http://vwf.example.com/cesium/skybox.vwf 
+    properties:
+      visible: false
+  clients:
+    extends: http://vwf.example.com/node.vwf
 scripts:
 - |
-    this.initialize = function(){
+    this.initialize = function() {
     }
+    
+    this.toolbar.selectedColorChanged = this.events.add( function( color ) { }, this );
+
+    this.toolbar.inputModeChanged = this.events.add( function( mode ) { }, this );
+
+    this.toolbar.events.clearing = this.events.add( function() { 
+      this.clear(); 
+    }, this );
+
     this.createClient = function( moniker, loginName ) {
+      console.info( "createClient( "+moniker+", "+loginName+" )" );
+      var self = this;
+      
+      var clr, colorList = this.clientColors;
+      clr = colorList.shift();
+      this.clientColors = colorList;
+
       var clientDef = { 
-        "extends": "http://vwf.example.com/client.vwf",
+        "extends": "http://vwf.example.com/cesium/client.vwf",
         "properties": {
           "displayName": loginName,
+          "color": clr
         },
       }
-      this.clients.children.create( "client"+moniker, clientDef, function( child ) {
-
+      this.clients.children.create( "client"+moniker, clientDef, function( child ){
+        child.createMarkers( moniker == self.moniker );
       } );
-    } //@ sourceURL = webrtc.vwf
+    }
+    this.findClient = function( moniker ) {
+      var client = undefined;
+      var clientMoniker = "";
+      var len = this.clients.children.length;
+      for ( var i = 0; i < len && client === undefined; i++ ) {
+        clientMoniker = this.clients.children[i].name;
+        clientMoniker = clientMoniker.substr( 6, clientMoniker.length-1 );
+        if ( moniker == clientMoniker ) {
+          client = this.clients.children[i];
+        }
+      }
+      return client;
+    } 
+    this.locationCaptured = function( parms ) {
+      var client = this.findClient( parms.moniker );
+      if ( client !== undefined ) {
+        client.location = parms.location;
+        client.longitude = parms.longitude;
+        client.latitude = parms.latitude;
+      } else {
+        this.future( 2.0 ).locationCaptured( parms );
+      }
+    } //@ sourceURL = index.vwf

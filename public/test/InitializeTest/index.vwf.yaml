@@ -13,8 +13,6 @@
 
 --- 
 extends: http://vwf.example.com/scene.vwf
-properties:
-  navmode: none
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -39,8 +37,8 @@ scripts:
     this.initialize = function()
     {
        
-        if(!this.camera)
-            alert('this.camera is null! (or maybe undefined)');
+        if(!this.duck)
+            alert('this.duck is null! (or maybe undefined)');
         else
             alert('This is the correct behavior');
        

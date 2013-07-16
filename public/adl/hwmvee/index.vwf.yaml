@@ -17,10 +17,10 @@ properties:
   navmode: none
 events:
   keyDown:
-methods:  
+methods:
+  initializeCamera:  
   newplayer:
   deleteplayer:
-  initialize:
 children:
   Terrain:
     extends: http://vwf.example.com/node3.vwf
@@ -40,8 +40,13 @@ children:
 scripts:
 - |
     this.initialize = function(){
-      this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,16,616,90,1 ];
-         
+      this.future( 0 ).initializeCamera();
+    }
+    this.initializeCamera = function() {
+      this.camera.transform = [ -1,   0,  0, 0,
+                                 0,  -1,  0, 0,
+                                 0,   0,  1, 0,
+                                16, 616, 90, 1 ];
     }
     this.deleteplayer = function(e)
     {

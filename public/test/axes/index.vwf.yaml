@@ -1,8 +1,9 @@
 --- 
-extends: http://vwf.example.com/navtouch.vwf
+extends: http://vwf.example.com/scene.vwf
 properties: 
-  navmode: orbit
   ambientColor: [200, 200, 200]
+methods:
+  initializeCamera:
 children:
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
@@ -86,7 +87,6 @@ children:
 scripts:
 - |
   this.initialize = function() {
-    this.camera.translation = [ 0, -50, 0 ];
     [ "x", "y", "z" ].forEach( function( axis ) {
       var angle = axis == "x" ? 0 : axis == "y" ? Math.PI / 2 : -Math.PI / 2;
       var vector = axis == "x" ? [ 0, 0, 1 ] : axis == "y" ? [ 0, 0, 1 ] : [ 0, 1, 0 ];
@@ -109,4 +109,9 @@ scripts:
         goog.vec.Mat4.create()
       );
     }, this );
+    this.future( 0 ).initializeCamera();
+  }
+
+  this.initializeCamera = function() {
+    this.camera.translation = [ 0, -50, 0 ];
   }

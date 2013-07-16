@@ -1,16 +1,21 @@
 Installation Instructions
 ==========================
 --------------------------
-
-The VWF source can be downloaded from [github](https://github.com/virtual-world-framework/vwf) for both Windows and Linux.
-
+<div class="well" markdown="1">
+Source Code
+--------------------------
 --------------------------
 
+The VWF source can be downloaded from [github](https://github.com/virtual-world-framework/vwf) for both Windows and Linux.
+</div>
+
+--------------------------
+<div class="well" markdown="1">
 Windows Installation
 --------------------------
 --------------------------
 
-**Install Cygwin**
+**1. Install Cygwin**
 
 Download and run setup.exe from [Cygwin](http://www.cygwin.com/install.html).
 
@@ -40,15 +45,17 @@ Select the following packages for installation. Use the search box or scroll dow
 
 Click through to *Finish* to close Cygwin setup. Save setup.exe for later since you may need it to add or update packages.
 
-**Install Java**
+--------------------------
 
-Please make sure your computer has the latest version of Java installed.  You may install java from http://www.java.com
+**2. Install Java**
+
+Please make sure your computer has the latest version of Java installed.  You may install java from [Java's Website](http://www.java.com)
 
 --------------------------
 
-**Option 1: Automatic Windows Installation**
+**Option A: Automatic Windows Installation**
 
-*1.1 Shell Command*
+*A.1 Shell Command*
 
 Please make sure your HTTP_PROXY and HTTPS_PROXY environment variable are set in cygwin. Please make sure your git http proxy are also set (ie. git config --global http.proxy http://yourproxy.com)
 
@@ -58,20 +65,20 @@ Perform the following shell command at a user shell prompt within Cygwin:
 
 --------------------------
 
-**Option 2: Manual Windows Installation**
+**Option B: Manual Windows Installation**
 
-*2.1 Install RubyGems*
+*B.1 Install RubyGems*
 
-Cygwin's ruby installs without the library manager, so we have to install it from source: http://rubygems.org/pages/download
+Cygwin's ruby installs without the library manager, so we have to install it from source: [http://rubygems.org/pages/download](http://rubygems.org/pages/download)
 Open a new Cygwin terminal session.
 Unpack into a directory and cd there
 Install with command: ruby setup.rb
 
-*2.2 Extract VWF from ZIP File*
+*B.2 Extract VWF from ZIP File*
 
-Download the latest baseline from our downloads page and extract to C:\Users\YOU\pathto\VirtualWorldFramework.
+Download the latest baseline from our downloads page and extract to C:\Users\YOU\pathto\VirtualWorldFramework.  Please note that you should use WinRAR, WinZip, or 7-Zip to extract your archive to prevent any path length issues you may encounter with Windows built-in zip utility.
 
-*2.3 Install the Gems*
+*B.3 Install the Gems*
 
 Use the previous Cygwin terminal window or launch a new one and cd to your VWF development directory:
 
@@ -89,18 +96,18 @@ Then enter these commands:
 	
 Ignore the warning about sudo not found for bundle install. If you get linker relocation errors, you probably need to tell Cygwin to rebaseall. See [Cygwin rebaseall](http://www.heikkitoivonen.net/blog/2008/11/26/cygwin-upgrades-and-rebaseall) for details. The required rebase and dash packages should already be installed.
 
-*2.4 Launch the Server*
+*B.4 Launch the Server*
 
 Enter the following command:
 
 	bundle exec thin start 
 
-*2.5 Connect*
+*B.5 Connect*
 
 The server runs on port 3000 in development mode by default. Use Google Chrome to connect to [http://localhost:3000/duck](http://localhost:3000/duck) and [http://localhost:3000/plane](http://localhost:3000/plane). View the excellent duck and the fascinating plane. Other applications may be available at other paths.
-
+</div>
 --------------------------
-
+<div class="well" markdown="1">
 Linux Installations
 --------------------------
 --------------------------
@@ -149,7 +156,7 @@ Or (for Red Hat/Fedora)
 
 Or (for OSX with Homebrew)
 
-	Make sure you have the Command Line Tools for XCode installed: https://developer.apple.com/downloads/index.action
+	Make sure you have the [Command Line Tools for XCode](https://developer.apple.com/downloads/index.action) installed.
 	
 	# ruby -e "$(curl -fsSkL raw.github.com/mxcl/homebrew/go)"
 	# brew install automake
@@ -218,6 +225,6 @@ Now you can install the RubyGems to the system (as root):
 *3.6 Connect*
 
 The server runs on port 3000 in development mode by default. Use Google Chrome to connect to [http://localhost:3000/duck](http://localhost:3000/duck) and [http://localhost:3000/plane](http://localhost:3000/plane). 
-
+</div>
 --------------------------
 

@@ -130,6 +130,11 @@ file "run.bat" => "Rakefile" do |task|
             REM where to connect to the server.
             REM
             IF NOT \"%*\" == \"\" GOTO NOMESSAGE
+			echo.%~dp0|findstr /C:" " >nul 2>&1 
+			if not errorlevel 1 (
+				echo Your path contains whitespace which will cause issues with the server. Please move your VWF folder into a location without space characters in the directory path, and try run.bat again.
+				GOTO :EOF
+			)
             ECHO Virtual World Framework. Navigate to http://localhost:3000 to begin.
             :NOMESSAGE
             REM

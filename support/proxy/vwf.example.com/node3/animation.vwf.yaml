@@ -52,7 +52,7 @@ methods:
             goog.vec.Vec3.create()
           );
         }
-        this.animationPlay();
+        this.animationPlay(0, duration);
       }
       else {
         this.translation = stopTranslation;
@@ -83,7 +83,7 @@ methods:
             goog.vec.Vec3.create()
           );
         }
-        this.animationPlay();
+        this.animationPlay(0, duration);
       }
       else {
         this.translation = stopTranslation;
@@ -175,7 +175,7 @@ methods:
             goog.vec.Quaternion.create()
           );
         }
-        this.animationPlay();
+        this.animationPlay(0, duration);
       }
       else {
         this.quaternion = stopQuaternion;
@@ -206,7 +206,7 @@ methods:
             goog.vec.Quaternion.create()
           );
         }
-        this.animationPlay();
+        this.animationPlay(0, duration);
       }
       else {
         this.quaternion = stopQuaternion;
@@ -242,7 +242,7 @@ methods:
             goog.vec.Vec3.create()
           );
         }
-        this.animationPlay();
+        this.animationPlay(0, duration);
       }
       else {
         this.scale = stopScale;
@@ -273,7 +273,7 @@ methods:
             goog.vec.Vec3.create()
           );
         }
-        this.animationPlay(); 
+        this.animationPlay(0, duration); 
       }
       else {
         this.scale = stopScale;
@@ -346,7 +346,7 @@ methods:
             goog.vec.Vec3.create()
           );
         }
-        this.animationPlay();
+        this.animationPlay(0, duration);
       }
       else {
         this.translation = stopTranslation;

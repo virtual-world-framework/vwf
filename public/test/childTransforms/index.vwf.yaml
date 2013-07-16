@@ -14,9 +14,9 @@
 --- 
 extends: http://vwf.example.com/scene.vwf
 properties:
-  navmode: none
   counter: 0
 methods:
+  initializeCamera:
   update:  
 children:
   duck:
@@ -38,9 +38,6 @@ children:
                 extends: http://vwf.example.com/node3.vwf
                 source: duck.dae
                 type: model/vnd.collada+xml
-  camera:
-    extends: http://vwf.example.com/camera.vwf
-    properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
     implements:
@@ -60,9 +57,6 @@ scripts:
 - | 
     this.initialize = function()
     {
-       
-           this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
         this.dir1.translation =[0,-100,0];
         this.duck.translation =[0,0,0];
         this.duck.childduck.translation =[200,0,50];
@@ -71,9 +65,16 @@ scripts:
         this.duck.childduck.childchildduck.scale =[.5,.5,.5];
         this.duck.childduck.childchildduck.childchildchildduck.translation =[200,0,50];
         this.duck.childduck.childchildduck.childchildchildduck.scale =[.5,.5,.5];
+        this.future(0).initializeCamera();
         this.future(0.2).update();
-      
     }
+
+    this.initializeCamera = function() {
+        this.camera.rotation = [0,1,0,0];
+        this.camera.translation = [0,-600,50];
+        this.camera.navmode = "none";
+    }
+
     this.update = function()
     {
        this.duck.rotation=[0,0,1,this.counter];

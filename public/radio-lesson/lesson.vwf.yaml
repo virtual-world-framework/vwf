@@ -37,69 +37,96 @@ children:
             this.logger.info( "Step 1 entering", this );
             var radio = this.find( "/radio" )[ 0 ];
             radio.Radio.ic40Volume.pointerUp = radio.events.add( function() {
-              radio.Radio.ic40Volume.pointerUp = radio.events.flush( this );
-              this.logger.info("BCBB: ", radio.Radio);
-              this.logger.info( "Step 1 completed" );
-              this.completed();
-              this.logger.info( "Step 1 after completed");
+              if (radio.Radio.ic40Volume.controlValue == 0) {
+                radio.Radio.ic40Volume.pointerUp = radio.events.flush( this );
+                this.logger.info( "Step 1 completed" );
+                this.completed();
+                this.logger.info( "Step 1 after completed");
+              }  
             }, this );
           } //@ sourceURL=step1.entering
       selectRedButton:
-          extends: http://vwf.example.com/lesson/task.vwf
-          properties:
-            text: "1.2 Click red key button"
-            cameraPoseRef: /lesson/cameraPose2
-          scripts:
-          - |
-            this.entering = function() {
-              this.logger.info( "Step 2 entering" );
-              var radio = this.find( "/radio" )[ 0 ];
-              radio.Radio.ic40Red.pointerClick = radio.events.add( function() {
+        extends: http://vwf.example.com/lesson/task.vwf
+        properties:
+          text: "1.2 Change to Backlight mode"
+          cameraPoseRef: /lesson/cameraPose2
+        children:
+          lightModeInstructions:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "Click red key button to change modes from CHAN to LIGT"
+        scripts:
+        - |
+          this.entering = function() {
+            this.logger.info( "Step 2 entering" );
+            var radio = this.find( "/radio" )[ 0 ];
+            radio.Radio.ic40Red.pointerClick = radio.events.add( function() {
+              if ( radio.powerOn && radio.menuMode == "channel" ) {
                 radio.Radio.ic40Red.pointerClick = radio.events.flush( this );
                 this.logger.info( "Step 2 completed" );
                 this.completed();
                 this.logger.info( "Step 2 after completed");
-              }, this );
-            } //@ sourceURL=step2.entering
+              }
+            }, this );
+          } //@ sourceURL=step2.entering
       selectUpButton:
           extends: http://vwf.example.com/lesson/task.vwf
           properties:
-            text: "1.3 Click on the Up Key to select LIGT ON"
+            text: "1.3 Turn backlight on"
             cameraPoseRef: /lesson/cameraPose3
+          children:
+            lightOnInstructions:
+              extends: http://vwf.example.com/lesson/task.vwf
+              properties:
+                text: "Click on the Up Key to select LIGT ON"
           scripts:
           - |
             this.entering = function() {
-              this.logger.info( "Step 2 entering" );
+              this.logger.info( "Step 3 entering" );
               var radio = this.find( "/radio" )[ 0 ];
               radio.Radio.ic40Up.pointerClick = radio.events.add( function() {
-                radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
-                this.logger.info( "Step 3 completed" );
-                this.completed();
-                this.logger.info( "Step 3 after completed");
+                if ( radio.powerOn && radio.menuMode == "backLight" ) {
+                  radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
+                  this.logger.info( "Step 3 completed" );
+                  this.completed();
+                  this.logger.info( "Step 3 after completed");
+                }
               }, this );
             } //@ sourceURL=step3.entering
       selectRedButton2:
           extends: http://vwf.example.com/lesson/task.vwf
           properties:
-            text: "1.4 Click on the Red Key button to display SQL 20"
+            text: "1.4 Change to squelch mode"
             cameraPoseRef: /lesson/cameraPose4
+          children:
+            squelchModeInstructions:
+              extends: http://vwf.example.com/lesson/task.vwf
+              properties:
+                text: "Click on the Red Key button to display SQL 20"
           scripts:
           - |
             this.entering = function() {
-              this.logger.info( "Step 2 entering" );
+              this.logger.info( "Step 4 entering" );
               var radio = this.find( "/radio" )[ 0 ];
               radio.Radio.ic40Red.pointerClick = radio.events.add( function() {
-                radio.Radio.ic40Red.pointerClick = radio.events.flush( this );
-                this.logger.info( "Step 3 completed" );
-                this.completed();
-                this.logger.info( "Step 3 after completed");
+                if ( radio.powerOn && radio.menuMode == "backLight" ) {
+                  radio.Radio.ic40Red.pointerClick = radio.events.flush( this );
+                  this.logger.info( "Step 4 completed" );
+                  this.completed();
+                  this.logger.info( "Step 4 after completed");
+                }
               }, this );
             } //@ sourceURL=step3.entering#          
       selectUpButton2:
           extends: http://vwf.example.com/lesson/task.vwf
           properties:
-            text: "1.5 Continue to click Up Key until static background noise is silenced"
+            text: "1.5 Tune radio channel"
             cameraPoseRef: /lesson/cameraPose3
+          children:
+            removeStaticInstructions:
+              extends: http://vwf.example.com/lesson/task.vwf
+              properties:
+                text: "Continue to click Up Key until static background noise is silenced"
           methods:
             stopStatic:
           scripts:
@@ -108,12 +135,13 @@ children:
               this.logger.info( "Step 5 entering" );
               var radio = this.find( "/radio" )[ 0 ];
               radio.Radio.ic40Up.pointerClick = radio.events.add( function() {
-                this.logger.info("BCB3: ", radio.squelch );
-                if (radio.squelch >= 70) 
-                {
-                  radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
-                  this.completed();
-                  this.logger.info( "Step 5 after completed");
+                if ( radio.powerOn && radio.menuMode == "squelch" ) {              
+                  if (radio.squelch >= 60) 
+                  {
+                    radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
+                    this.completed();
+                    this.logger.info( "Step 5 after completed");
+                  }
                 }
               } , this );
             } //@ sourceURL=step3.entering#   

@@ -30,6 +30,7 @@
       }, [
 
         "domReady",
+        "utility.js",
 
         "vwf/configuration",
         "vwf/kernel/model",
@@ -41,7 +42,7 @@
         "vwf/utility",
         "logger",
 
-      ], function( ready ) {
+      ], function( ready, testUtility, configuration ) {
 
         // Test node replication.
 
@@ -59,7 +60,7 @@
 
             // The descriptor, and a data URI referencing it.
 
-            uri: dataURIFromDescriptor( {
+            uri: testUtility.dataURIFromDescriptor( {
               properties: {
                 p: { // numbers externally, strings internally
                   set: "this.p = value.toString()", // number to string
@@ -164,6 +165,8 @@
                 return {
                   id: this.id,
                   extends: prototype.uri,
+                  sequence: 0,
+                  random: randomState( undefined, this.id ),
                   properties: {
                     p: state.toString(), // property "p" from prototype set in node
                   },
@@ -172,6 +175,8 @@
                 return {
                   id: this.id,
                   extends: prototype.uri,
+                  sequence: 0,
+                  random: randomState( undefined, this.id ),
                 };
               }
             },
@@ -227,7 +232,7 @@
 
             // The descriptor, and a data URI referencing it.
 
-            uri: dataURIFromDescriptor( {
+            uri: testUtility.dataURIFromDescriptor( {
               properties: {
                 p: {
                   set: "this.p = value.toString()",
@@ -259,7 +264,6 @@
               if ( state ) {
                 return { // modified state
                   patches: this.uri,
-                  sequence: 1,
                   children: {
                     c: {
                       patches: vwf.execute( this.id, "this.c.id" ),
@@ -325,7 +329,7 @@
 
             // The descriptor, and a data URI referencing it.
 
-            uri: dataURIFromDescriptor( {
+            uri: testUtility.dataURIFromDescriptor( {
               scripts: [
                 "this.initialize = function() { " +
                   "this.children.create( 'c', { " +
@@ -353,7 +357,6 @@
               if ( state ) {
                 return { // modified state
                   patches: this.uri,
-                  sequence: 1,
                   children: {
                     c: {
                       patches: vwf.execute( this.id, "this.c.id" ),
@@ -438,19 +441,29 @@
             // Function to calculate the expected getNode() state after a given change.
 
             state: function( state ) {
+
+              var childID = vwf.execute( this.id, "this.c.id" );
+
+              var nodeRandomState = randomState( undefined, this.id );
+              var childRandomState = randomState( nodeRandomState, childID );
+
               return {
                 id: this.id,
                 extends: prototypeWithInitializerChild.uri,
                 sequence: 1, // one child
+                random: nodeRandomState,
                 children: {
                   c: { // child always fully specified since createNode() outside of initialize()
-                    id: vwf.execute( this.id, "this.c.id" ),
+                    id: childID,
+                    sequence: 0,
+                    random: childRandomState,
                     properties: {
                       p: state ? state : null,
                     },
                   },
                 },
               };
+
             },
 
           };
@@ -507,13 +520,18 @@
 
           } );
 
-          // == Helper functions =====================================================================
+          // == Helper functions ===================================================================
 
-          // Convert a component descriptor to a data URI component.
+          // Generate the random state object given a parent's state and a node ID. If the node
+          // doesn't have a parent, use the global random seed. This mimics the prng initialization
+          // in model/object#creatingNode.
 
-          function dataURIFromDescriptor( descriptor ) {
+          function randomState( parentState, childID ) {
 
-            return "data:application/json;base64," + btoa( JSON.stringify( descriptor ) );
+            return new Alea(
+              parentState ? JSON.stringify( parentState ) : configuration.active["random-seed"],
+              childID
+            ).state;
 
           }
 

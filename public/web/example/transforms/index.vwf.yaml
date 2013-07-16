@@ -12,6 +12,8 @@
 # the License.
 --- 
 extends: http://vwf.example.com/scene.vwf
+methods:
+  initializeCamera:
 children: 
   hello: 
     extends: http://vwf.example.com/node3.vwf
@@ -62,5 +64,12 @@ scripts:
 - |
     var badVariable = this;
     this.initialize = function() {
-      this.camera.transform = [1,0,0,0,0,1,0,0,0,0,1,0,0,-8,0,1]
+      this.future( 0 ).initializeCamera();
+    }
+
+    this.initializeCamera = function() {
+      this.camera.transform = [ 1,  0, 0, 0,
+                                0,  1, 0, 0,
+                                0,  0, 1, 0,
+                                0, -8, 0, 1 ]; 
     }

@@ -67,8 +67,39 @@ properties:
   ## @property
 
   backgroundColor: [ 200, 200, 200 ]
+  
+  ## Boolean determines whether the use wants a shared camera (true) or independent views (false).
+  ## Defaults to true
+  ## 
+  ## @name navscene.vwf#usersShareView
+  ## @property
 
+  usersShareView: true
+
+  ## Object to be instantiated to represent a user.
+  ## If usersShareView is true, only one is created
+  ## Else, one is created per user
+  ## Defaults to a camera w/ the navigable behavior attached
+  ## 
+  ## @name navscene.vwf#userObject
+  ## @property
+
+  userObject:
+    extends: http://vwf.example.com/camera.vwf
+    implements: [ "http://vwf.example.com/navigable.vwf" ]
+    properties:
+      navmode: fly
+
+  ## Boolean determines whether the users own avatars should be visible to themselves
+  ## Defaults to false
+  ## 
+  ## @name navscene.vwf#makeOwnAvatarVisible
+  ## @property
+
+  makeOwnAvatarVisible: false
+    
 methods:
+  initializeActiveCamera:
   getActiveCameraComp:
   getChild:
   getActiveCamera:
@@ -77,10 +108,19 @@ scripts:
 - |
     this.activeCameraComp = undefined;
     var scene = this;
+
     this.initialize = function() {
-      this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
+      if ( this.usersShareView ) {
+        this.children.create( "camera", this.userObject );
+        this.future( 0 ).initializeActiveCamera();
+      }
+    }
+
+    this.initializeActiveCamera = function() {
+      this.activeCamera = this.camera.id;
       this.lastActiveCamera = this.activeCamera;
     }
+
     this.getChild = function( childName, startingNode ) {
       if(!startingNode) {
         startingNode = this;
@@ -101,19 +141,19 @@ scripts:
       //console.info( "WARNING: SCENE.getChild   CHILD NOT FOUND: " + childName );
       return undefined;
     }
+
     this.getActiveCameraComp = function() {
       return this.activeCameraComp;
     }
+
     this.lastActiveCameraID = function() {
       return this.lastActiveCamera;
     }
+
     this.getActiveCamera = function() {
       if ( !this.activeCameraComp ) {
         if ( this.getChild ) {
           this.activeCameraComp = this.getChild( this.activeCamera );
-          if ( !this.activeCameraComp ) {
-             this.activeCameraComp = this.camera;
-          }
         }
       }
       return this.activeCameraComp;

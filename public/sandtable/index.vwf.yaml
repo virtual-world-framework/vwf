@@ -16,22 +16,9 @@ extends: appscene.vwf
 type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
-  backgroundColor: [ 83, 157, 194 ]
-scripts:
-- |
-    this.initialize = function() {
-      this.camera.translation = [ 0, 20000, 10000 ];
-      this.camera.far = 500000;
-      this.camera.near = 2;
-      this.camera.lookAt = this.children.sceneCenter.id;
-    }
-    this.toolbar.selectedColorChanged = this.events.add( function( color ) {
-    }, this );
-    this.toolbar.inputModeChanged = this.events.add( function( mode ) {
-    }, this );
-    this.toolbar.events.clearing = this.events.add( function() { 
-      this.clear(); 
-    }, this );
+  backgroundColor: [ 135, 196, 250 ]
+methods:
+  initializeCamera:
 children:
   toolbar:
     properties:
@@ -356,3 +343,21 @@ children:
             properties:
               translation: [ 0, -300, -1100 ]
               scale: [ 8, 8, 16 ]
+scripts:
+- |
+    this.initialize = function() {
+      this.future( 0 ).initializeCamera();
+    }
+    this.initializeCamera = function() {
+      this.camera.translation = [ 0, 20000, 10000 ];
+      this.camera.far = 500000;
+      this.camera.near = 2;
+      this.camera.lookAt = this.children.sceneCenter.id;
+    }
+    this.toolbar.selectedColorChanged = this.events.add( function( color ) {
+    }, this );
+    this.toolbar.inputModeChanged = this.events.add( function( mode ) {
+    }, this );
+    this.toolbar.events.clearing = this.events.add( function() { 
+      this.clear(); 
+    }, this );

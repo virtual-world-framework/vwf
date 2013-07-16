@@ -24,6 +24,8 @@ properties:
   squelchImages: 
   encryptImages: 
   powerImages: 
+  animationPlaying: false
+  animationDuration: 26.6
   powerOn:
     set: |
       if ( this.powerOn != Boolean( value ) ){
@@ -123,7 +125,7 @@ properties:
   antenna:
     set: |
       if ( value ) {
-        this.Radio.playing = !value;
+        this.Radio.animationPlaying = !value;
       } else {
         this.logger.debug( "replace the antenna" );
       }
@@ -265,9 +267,9 @@ children:
   Radio: 
     extends: http://vwf.example.com/node3.vwf 
     properties: 
-      playing: false
-      looping: false
-      speed: 1
+      animationTime: 0
+      animationPlaying: false
+      animationDuration: 26.6
     children: 
       ic40_MicrophonePort: 
         extends: http://vwf.example.com/node3.vwf 
@@ -740,13 +742,12 @@ children:
       BeltClip_1: 
         extends: http://vwf.example.com/node3.vwf 
         properties: 
-          playing: false
-          looping: false
-          speed: 1
+          animationPlaying: false
+          animationDuration: 26.6
         scripts:
         - |
             this.pointerUp = function() {
-              this.playing = !this.playing 
+              this.animationPlaying = !this.animationPlaying 
             }    
         children: 
           BeltClip: 
@@ -756,13 +757,12 @@ children:
           BeltClip_Latch: 
             extends: http://vwf.example.com/node3.vwf 
             properties: 
-              playing: false
-              looping: false
-              speed: 1
+              animationPlaying: false
+              animationDuration: 26.6
             scripts:
             - |
                 this.pointerUp = function() {
-                  this.playing = !this.playing 
+                  this.animationPlaying = !this.animationPlaying 
                 }   
             children: 
               BeltClipTab: 
@@ -770,13 +770,12 @@ children:
       Battery: 
         extends: http://vwf.example.com/node3.vwf 
         properties: 
-          playing: false
-          looping: false
-          speed: 1
+          animationPlaying: false
+          animationDuration: 26.6 
         scripts:
         - |
             this.pointerUp = function() {
-              this.playing = !this.playing 
+              this.animationPlaying = !this.animationPlaying 
             }  
         children: 
           ic40Battery: 
@@ -784,13 +783,12 @@ children:
       BatteryLatch: 
         extends: http://vwf.example.com/node3.vwf 
         properties: 
-          playing: false
-          looping: false
-          speed: 1
+          animationPlaying: false
+          animationDuration: 26.6
         scripts:
         - |
             this.pointerUp = function() {
-              this.playing = !this.playing 
+              this.animationPlaying = !this.animationPlaying 
             }          
         children: 
           ic40BatteryLatch: 

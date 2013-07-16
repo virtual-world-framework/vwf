@@ -104,11 +104,11 @@ scripts:
                   players.children[i].active = false;
                   players.children[i].visible = false;
                   players.children[i].playerDeaths += 1;
-                  this.parent.parent.events.playerDestroyed(players.children[i].id, players.children[i].score);
+                  this.parent.parent.events.playerDestroyed(players.children[i].id, players.children[i].name, players.children[i].score);
                 }
                 else if(players.children[i].id == this.parentTank) {
                   players.children[i].playerKills += 1;
-                  this.parent.parent.events.playerScored(players.children[i].id, players.children[i].score);
+                  this.parent.parent.events.playerScored(players.children[i].id, players.children[i].name, players.children[i].score);
                 }
               }
             }
@@ -125,11 +125,11 @@ scripts:
               players.children[i].active = false;
               players.children[i].visible = false;
               players.children[i].playerDeaths += 1;
-              this.parent.parent.events.playerDestroyed(players.children[i].id, players.children[i].score);
+              this.parent.parent.events.playerDestroyed(players.children[i].id, players.children[i].name, players.children[i].score);
             }
             else if(players.children[i].id == this.parentTank) {
               players.children[i].playerKills += 1;
-              this.parent.parent.events.playerScored(players.children[i].id, players.children[i].score);
+              this.parent.parent.events.playerScored(players.children[i].id, players.children[i].name, players.children[i].score);
             }
           }
         }
