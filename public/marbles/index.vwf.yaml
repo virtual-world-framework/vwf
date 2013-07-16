@@ -43,29 +43,34 @@ children:
     properties:
       rotation: [ 1, 0, 0, 0 ]
     children:
-      grass:
-        extends: http://vwf.example.com/material.vwf
-        properties:
-          bumpScale: 0.01
-      brick_green:
-        extends: http://vwf.example.com/material.vwf
-        properties:
-          bumpScale: 0.01
-      flagstone_pavers:
-        extends: http://vwf.example.com/material.vwf
-        properties:
-          bumpScale: 0.01
-  walls:
-    extends: http://vwf.example.com/node3.vwf
-    source: models/stoneWalls.DAE
-    type: model/vnd.collada+xml
-    properties:
-      rotation: [ 1, 0, 0, 0 ]
-    children:
-      material:
-        extends: http://vwf.example.com/material.vwf
-        properties:
-          bumpScale: 0.015
+      node-brick_green_1:
+        extends: http://vwf.example.com/node3.vwf
+        children:
+          material:
+            extends: http://vwf.example.com/material.vwf
+            properties:
+              bumpScale: 0.005
+      node-grass:
+        extends: http://vwf.example.com/node3.vwf
+        children:
+          material:
+            extends: http://vwf.example.com/material.vwf
+            properties:
+              bumpScale: 0.005
+      node-wall_west:
+        extends: http://vwf.example.com/node3.vwf
+        children:
+          material:
+            extends: http://vwf.example.com/material.vwf
+            properties:
+              bumpScale: 0.005
+      node-flagstone:
+        extends: http://vwf.example.com/node3.vwf
+        children:
+          material:
+            extends: http://vwf.example.com/material.vwf
+            properties:
+              bumpScale: 0.005
   furniture:
     extends: http://vwf.example.com/node3.vwf
     source: models/marbleFurniture.DAE
@@ -77,7 +82,29 @@ children:
       material:
         extends: http://vwf.example.com/material.vwf
         properties:
-          bumpScale: 0.015
+          bumpScale: 0.005
+  chest:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/marblerunChest.DAE
+    type: model/vnd.collada+xml
+    properties:
+      transform: [ 0.7071067690849304, 0.7071067690849304, 0, 0, -0.7071067690849304, 0.7071067690849304, 0, 0, 0, 0, 1, 0, 8.886, -4.714, 0.417, 1 ]
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.005
+  chest_2:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/marblerunChest.DAE
+    type: model/vnd.collada+xml
+    properties:
+      transform: [ 0.7071067690849304, 0.7071067690849304, 0, 0, -0.7071067690849304, 0.7071067690849304, 0, 0, 0, 0, 1, 0, -9.147000312805176, 5.651000022888184, 0.42399999499320984, 1 ]
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.005
   unsupportedGames:
     extends: http://vwf.example.com/node3.vwf
     source: models/games.DAE
@@ -89,15 +116,15 @@ children:
       wood_fine01:
         extends: http://vwf.example.com/material.vwf
         properties:
-          bumpScale: 0.01
+          bumpScale: 0.005
       field_playing01:
         extends: http://vwf.example.com/material.vwf
         properties:
-          bumpScale: 0.01
+          bumpScale: 0.005
       target_practice:
         extends: http://vwf.example.com/material.vwf
         properties:
-          bumpScale: 0.01
+          bumpScale: 0.005
   background:
     extends: http://vwf.example.com/node3.vwf
     source: models/skydome.dae
@@ -192,7 +219,7 @@ children:
           material:
             extends: http://vwf.example.com/material.vwf
             properties:
-              bumpScale: 0.01
+              bumpScale: 0.005
       selection_table_2:
         extends: selection_table.vwf
         source: models/selection_table.DAE
@@ -203,7 +230,7 @@ children:
           material:
             extends: http://vwf.example.com/material.vwf
             properties:
-              bumpScale: 0.01
+              bumpScale: 0.005
       solitaire_board_1:
         extends: solitaire_game.vwf
         source: models/solitaire_board.DAE
@@ -215,7 +242,7 @@ children:
           material:
             extends: http://vwf.example.com/material.vwf
             properties:
-              bumpScale: 0.01
+              bumpScale: 0.005
       solitaire_board_2:
         extends: solitaire_game.vwf
         source: models/solitaire_board.DAE
@@ -227,7 +254,7 @@ children:
           material:
             extends: http://vwf.example.com/material.vwf
             properties:
-              bumpScale: 0.01
+              bumpScale: 0.005
   light_1:
     extends: http://vwf.example.com/light.vwf
     properties:
