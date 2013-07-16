@@ -201,7 +201,7 @@
       });
       
       var autoScroll = function ( ) {
-        return $('#chatContent')[0].scrollHeight - $('#chatContent')[0].scrollTop == $('#chatContent').height();
+        return Math.abs( ( $('#chatContent')[0].scrollHeight - $('#chatContent')[0].scrollTop ) - $('#chatContent').height() ) < 21;
       };
       
       var scrollToBottom = function ( ) {
