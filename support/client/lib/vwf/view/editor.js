@@ -1120,8 +1120,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         $(topdownTemp).html("<div class='header'><img src='images/back.png' id='script-" + nodeIDAlpha + "-back' alt='back'/> script</div>");
         jQuery('#script-' + nodeIDAlpha + '-back').click ( function(evt) {
             self.editingScript = false;
-            var id = $(this).attr("id").substring(7, $(this).attr("id").lastIndexOf('-'));
-            drillBack.call(self, id);
+            drillBack.call(self, nodeID);
 
             // Return editor to normal width
             $('#editor').animate({ 'left' : "-260px" }, 175);
