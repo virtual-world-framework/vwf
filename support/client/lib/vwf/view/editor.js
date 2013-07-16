@@ -209,7 +209,8 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         
         deletedNode: function (nodeID) {
             var node = this.nodes[ nodeID ];
-            node.parent.children.splice( node );
+            node.parent.children.splice( node.parent.children.indexOf(node), 1 );
+            delete this.nodes[ nodeID ];
             var nodeIDAttribute = $.encoder.encodeForAlphaNumeric(nodeID); // $.encoder.encodeForHTMLAttribute("id", nodeID, true);
             $('#' + nodeIDAttribute).remove();
             $('#children > div:last').css('border-bottom-width', '3px');
