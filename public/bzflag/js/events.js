@@ -72,6 +72,9 @@ canvas.onmousemove = undefined;
 
 canvas.onmousewheel = undefined;
 
+// TODO: Limit the number of shots that can be fired per keypress to improve performance
+var laserCount = 0;
+
 window.onkeydown = function(e) {
     if(playerNode) {
         var active = input.futureActive();
@@ -79,7 +82,10 @@ window.onkeydown = function(e) {
         var keyAlreadyDown = false;
         switch (e.keyCode) {
             case 13:
-                vwf_view.kernel.callMethod(sceneNode, "fireLaser", [playerName]);
+                if(laserCount < 3) {
+                    vwf_view.kernel.callMethod(sceneNode, "fireLaser", [playerName]);
+                    laserCount++;
+                }
                 break;
             case 17:
             case 16:
@@ -114,6 +120,9 @@ window.onkeyup = function(e) {
         var active = input.futureActive();
         var validKey = false;
         switch (e.keyCode) {
+            case 13:
+                laserCount = 0;
+                break;
             case 16:
             case 17:
             case 18:
