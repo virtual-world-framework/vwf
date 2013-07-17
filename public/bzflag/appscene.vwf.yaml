@@ -124,7 +124,7 @@ scripts:
     return false;
   }
   this.findPlayers = function() {
-    return this.find(".//element(*,'http://vwf.example.com/navigable.vwf')");
+    return this.find("./element(*,'http://vwf.example.com/navigable.vwf')");
   }
   this.findPlayerByName = function(playerName) {
     var players = this.findPlayers();
