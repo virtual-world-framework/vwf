@@ -211,5 +211,6 @@ scripts:
     this.laserFired();
   }
   this.sendChat = function(playerName, chatToSend) {
-    this.chatSent( playerName, chatToSend, this.players[playerName].color );
+    var player = this.findPlayerByName(playerName);
+    this.chatSent( playerName, chatToSend, player.color );
   } //@ sourceURL=index.vwf
