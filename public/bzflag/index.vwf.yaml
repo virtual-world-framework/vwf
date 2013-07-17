@@ -52,15 +52,16 @@ properties:
       laserMaterial: 
       startingTranslation: []
       translation: []
-      scale: 0.5
       translationSpeed: 400
       rotationSpeed: 0.3
       playerName:
+      # Disable inherited navigation so it can use custom bzflag controls
+      navmode: none
     children:     
       camera:
         extends: http://vwf.example.com/camera.vwf
         properties:
-          translation: [0, 300, 450]
+          translation: [0, 100, 450]
           far: 1000000
           near: 1
       avatar:
@@ -69,14 +70,13 @@ properties:
         type: model/vnd.collada+xml
         properties: 
           rotation: [0, 0, 1, 180]
+          scale: 115
         children: 
           Tank: 
             extends: http://vwf.example.com/node3.vwf
             children: 
               material: 
                 extends: http://vwf.example.com/material.vwf
-                properties: 
-                  texture: ""
 methods:
   initializeCamera:
   createPlayer:
@@ -99,7 +99,6 @@ children:
     properties:
       rotation: [ 1, 0, 0, 0 ]
       translation: [ 0, 0, -5000 ]
-      scale: 110
   lasers:
     extends: http://vwf.example.com/node3.vwf
 scripts:
@@ -148,7 +147,7 @@ scripts:
           endColor: [ 1, 1, 1, 1],
           colorRange: [ .2, .1, .1, 0],
           additive: false,
-          depthTest: false,
+          depthTest: true,
           depthWrite: false,
           maxOrientation: 0,
           minOrientation: 0,
@@ -185,7 +184,7 @@ scripts:
       if(playerObject.length) {
         playerObject = playerObject[0];
         var tankTexture = tankMaterials[this.colorIndex];
-        //playerObject.avatar.Tank.material.properties['texture'] = tankTexture;
+        playerObject.avatar.Tank.material.properties['texture'] = tankTexture;
         playerObject.color = tankColors[this.colorIndex];
         playerObject.translation = tankStartingPositions[this.colorIndex];
         playerObject.startingTranslation = tankStartingPositions[this.colorIndex];
@@ -196,7 +195,6 @@ scripts:
         this.colorIndex += 1;
       }
     }
-    console.info(this);
   }
   this.fireLaser = function(playerName) {
     var player = this.findPlayerByName(playerName);
