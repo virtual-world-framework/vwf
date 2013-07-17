@@ -1,0 +1,12 @@
+.DS_Store
+node_modules
+examples/imgs/*
+!examples/imgs/original.jpg
+!examples/imgs/original.png
+!examples/imgs/original.gif
+!examples/imgs/originalSideways.jpg
+!examples/imgs/morpher.jpg
+!examples/imgs/photo.JPG
+!examples/imgs/orientation/*\d.jpg
+!examples/imgs/orientation/*.correct.jpg
+*.sw*
