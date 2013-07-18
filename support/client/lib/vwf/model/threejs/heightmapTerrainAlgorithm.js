@@ -213,7 +213,7 @@ function heightmapTerrainAlgorithm()
 		"uniform sampler2D diffuseSampler;\n"+
 		"uniform sampler2D dirtSampler;\n"+
 		"uniform sampler2D brushSampler;\n"+
-		"vec4 getTexture(vec3 coords, vec3 norm)" +
+		"vec4 getTexture(vec3 coords, vec3 norm, vec2 uv)" +
 		"{"+
 			"vec4 diffuse = texture2D(diffuseSampler,((coords.yx * vec2(1.0,1.0) + vec2("+((this.worldWidth)/2).toFixed(5)+","+((this.worldLength)/2).toFixed(5)+"))/vec2("+((this.worldWidth)).toFixed(5)+","+((this.worldLength)).toFixed(5)+")));\n"+
 			//"vec4 diffuse = texture2D(diffuseSampler,((coords.yx * vec2(1.0,1.0) + vec2(6750.0,4750.0))/vec2(13500.0,9500.0)));\n"+

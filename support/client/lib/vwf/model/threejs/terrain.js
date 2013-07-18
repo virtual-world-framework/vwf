@@ -795,7 +795,7 @@
 			}
 			if(propertyName == 'EditorData')
 			{
-
+					
 					var editordata = {
 						_active:{displayname : 'Enabled',property:'enabled',type:'check',min:-10,max:10,step:.01},
 						extents:{

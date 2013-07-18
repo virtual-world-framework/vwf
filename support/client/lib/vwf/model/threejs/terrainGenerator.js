@@ -279,10 +279,11 @@ new (function(){
 			return this.terrainAlgorithm.getDiffuseFragmentShader(mesh,matrix);
 		return null;	
 	}
-	this.updateMaterial = function(m)
+	this.updateMaterial = function(m,d)
 	{
+		
 		if(this.terrainAlgorithm.updateMaterial)
-			this.terrainAlgorithm.updateMaterial(m);
+			this.terrainAlgorithm.updateMaterial(m,d);
 	}
 	this.reInit = function(type,params)
 	{

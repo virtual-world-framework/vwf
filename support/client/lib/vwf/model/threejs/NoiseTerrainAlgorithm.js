@@ -68,7 +68,7 @@ function NoiseTerrainAlgorithm()
 			"vec4 mixvec =  normalize(vec4(bottom,middle,side* 4.0,top)) ;\n"+
 			"return mixvec;\n"+
 		"}"+
-		"vec4 getTexture(vec3 coords, vec3 norm)" +
+		"vec4 getTexture(vec3 coords, vec3 norm, vec2 uv)" +
 		"{"+
 			//"coords /= 100.0;\n"+
 			"vec4 noiseMain = texture2D(noiseSampler,(npos.xy/10.0)/2.0);\n"+

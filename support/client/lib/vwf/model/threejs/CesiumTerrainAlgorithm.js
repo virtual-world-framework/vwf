@@ -33,6 +33,37 @@ function CesiumTerrainAlgorithm(seed)
 		arr[3] = this.cubicInterpolate(p[3], y);
 		return this.cubicInterpolate(arr, x);
 	}
+	//This will allow you to setup shader variables that will be merged into the the terrain shader
+	this.getMaterialUniforms = function(mesh,matrix)
+	{
+		var uniforms_default = {
+		diffuseSampler:   { type: "t", value: _SceneManager.getTexture( "http://ecn.t0.tiles.virtualearth.net/tiles/a0210.jpeg?g=1484") }
+		};
+		uniforms_default.diffuseSampler.value.wrapS = uniforms_default.diffuseSampler.value.wrapT = THREE.RepeatWrapping;
+		return uniforms_default;
+	}
+	//This funciton allows you to compute the diffuse surface color however you like. 
+	//must implement vec4 getTexture(vec3 coords, vec3 norm) or return null which will give you the default white
+	this.getDiffuseFragmentShader = function(mesh,matrix)
+	{
+		return (
+		"uniform sampler2D diffuseSampler;\n"+
+		"vec4 getTexture(vec3 coords, vec3 norm,  vec2 uv)" +
+		"{"+
+			"vec4 diffuse = texture2D(diffuseSampler,uv * vec2(1.0,-1.0));\n"+
+			"return diffuse;\n"+
+		"}")
+	}
+	this.updateMaterial = function(mesh,depth)
+	{
+		
+		var mat = mesh.material;
+		var x = mesh.position.x;
+		var y = mesh.position.y;
+		
+		mat.uniforms.diffuseSampler.value = _SceneManager.getTexture( "http://ecn.t0.tiles.virtualearth.net/tiles/a"+this.getQuadkey(Math.floor((x/depth)/100),Math.floor((y/depth)/100),depth)+".jpeg?g=1484");
+		mat.uniforms.diffuseSampler.value.wrapS = mat.uniforms.diffuseSampler.value.wrapT = THREE.RepeatWrapping;
+	}
 	this.getTile = function(i,j,res)
 	{
 		if(!this.heightCache.res[res] || !this.heightCache.res[res][i] || ! this.heightCache.res[res][i][j])
@@ -66,6 +97,29 @@ function CesiumTerrainAlgorithm(seed)
 			console.log(x + " " +y+ " "+ index);
 		return tiles[index][i];
 	}
+	this.getEditorData = function()
+	{
+	
+	}
+	this.getQuadkey = function (x, y, level) {
+        var quadkey = '';
+        for ( var i = level; i >= 0; --i) {
+            var bitmask = 1 << i;
+            var digit = 0;
+
+            if ((x & bitmask) !== 0) {
+                digit |= 1;
+            }
+
+            if ((y & bitmask) !== 0) {
+                digit |= 2;
+            }
+
+            quadkey += digit;
+        }
+        return quadkey;
+    }
+
 	this.sample = function(u,v,res)
 	{
 		

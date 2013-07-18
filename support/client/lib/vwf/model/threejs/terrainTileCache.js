@@ -23,6 +23,7 @@ function TileCache()
 						"return res;"+
 						"}"+
 						"varying vec3 pos;"+
+						"varying vec3 opos;"+
 						"varying vec3 npos;"+
 						"varying vec3 n;"+
 						"varying vec3 wN;"+
@@ -40,6 +41,7 @@ function TileCache()
 						"void main() {\n"+
 						" float z = mix(everyOtherZ,everyZ,blendPercent);\n"+
 						" pos = (modelMatrix * vec4(position.xy,z,1.0)).xyz; \n"+
+						"opos = vec3(position.xy,z);\n"+
 						"npos = pos;\n"+
 						"npos.z += getNoise(pos.xy*200.0)/50.0; \n"+
 						
@@ -121,8 +123,8 @@ function TileCache()
 						"varying vec3 pos;"+
 						"varying vec3 n;"+
 						"varying vec3 wN;"+
-						"varying vec3 npos;";
-						
+						"varying vec3 npos;"+
+						"varying vec3 opos;";
 						
 						
 						
@@ -143,7 +145,7 @@ function TileCache()
 						"	light += directionalLightColor[0] * clamp(0.0,1.0,dot(nn, vLightDir));\n"+
 						"	#endif\n"+
 						
-						"	vec4 diffuse = getTexture(npos,nn);\n"+
+						"	vec4 diffuse = getTexture(npos,nn,opos.xy/100.0 + 0.5);\n"+
 						"	diffuse.a = 1.0;\n"+
 						"   gl_FragColor = ambient * diffuse + diffuse * vec4(light.xyz,1.0) + 0.0 * vec4(0.4,0.4,0.4,1.0);\n"+
 						"#ifdef USE_FOG\n"+
@@ -180,7 +182,7 @@ function TileCache()
 				
 				this.getDefaultDiffuseString = function()
 				{
-					return "vec4 getTexture(vec3 coords, vec3 norm) {return vec4(1.0,1.0,1.0,1.0);}\n";
+					return "vec4 getTexture(vec3 coords, vec3 norm, vec2 uv) {return vec4(1.0,1.0,1.0,1.0);}\n";
 		
 				}
 				this.getMat = function()

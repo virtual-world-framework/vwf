@@ -519,7 +519,7 @@ function QuadtreeNode(min,max,root,depth,quad,minsize,maxsize)
 									this.THREENode.add(this.mesh,true);	
 									this.mesh.visible = false;
 									this.mesh.waitingForRebuild = true;
-									self.terrainGenerator.updateMaterial(this.mesh);
+									self.terrainGenerator.updateMaterial(this.mesh,this.depth);
 								}
 									
 								// displace the mesh
