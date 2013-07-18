@@ -8,7 +8,7 @@
 		var minTileSize = totalmintilesize;
 		var maxTileSize = 2048;
 		var worldExtents = 2048;
-		var updateEvery = 150;
+		var updateEvery = 30;
 		
 		
 		function loadScript	(url)
