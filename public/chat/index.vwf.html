@@ -186,7 +186,8 @@
 		  } );
       
       
-      $( '#playerNameInput' ).keyup( function( ) {
+      $( '#playerNameInput' ).keyup( function( e ) {
+        e.stopPropagation( );
         var sanitizedUsername = sanitizeUsername( $( '#playerNameInput' ).val( ) );        
         if ( sanitizedUsername != $( '#playerNameInput' ).val( ) ) {
           $( '#playerNameInput' ).val( sanitizeUsername( $( '#playerNameInput' ).val( ) ) );
@@ -197,9 +198,19 @@
         else {
           $( '#chatlogin' ).attr( "disabled", "disabled" );
         }
+        var code = ( e.keyCode ? e.keyCode : e.which );
+        if ( ( code == 13 ) && ( sanitizedUsername.length > 0 ) ) { //Enter
+          //  Disable the input fields while the login attempt is being made.
+          disableLogonDataEntry( );
+
+          //  Make the actual call to the model to attempt to create the user.
+          vwf_view.kernel.callMethod( sceneId, "createUser", [ sanitizedUsername, $( '#newUserColor' ).css( 'backgroundColor' ) , $( '#loginSoundSelect' ).val( ), vwf_view.kernel.moniker( ) ] );
+          $( '#changeTextColor' ).css( 'backgroundColor', $( '#newUserColor' ).css( 'backgroundColor' ) )
+        }
       });
       
-      $( '#changeDisplayName' ).keyup( function( ) {
+      $( '#changeDisplayName' ).keyup( function( e ) {
+        e.stopPropagation( );
         var sanitizedUsername = sanitizeUsername( $( '#changeDisplayName' ).val( ) );
         if ( sanitizedUsername != $( '#changeDisplayName' ).val( ) ) {
           $( '#changeDisplayName' ).val( sanitizeUsername( $( '#changeDisplayName' ).val( ) ) );
@@ -209,6 +220,13 @@
         }
         else {
           $( '#changeDisplayNameButton' ).attr( "disabled", "disabled" );
+        }
+        var code = ( e.keyCode ? e.keyCode : e.which );
+        if ( ( code == 13 ) && ( sanitizedUsername.length > 0 ) ) { //Enter
+          if ( isConnected( ) ) {
+            // Call the renameUser method on the appropriate user.
+            vwf_view.kernel.callMethod( sceneId, "renameUser", [ sanitizedUsername, localUsername ] )
+          }
         }
       });
       
