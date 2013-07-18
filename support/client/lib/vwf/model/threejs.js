@@ -1008,6 +1008,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         threeObject.bumpScale = value;
                         threeObject.needsUpdate = true;
                     }
+                    if (propertyName == "alphaTest" ) {
+                        value = Number( propertyValue );
+                        threeObject.alphaTest = value;
+                        threeObject.needsUpdate = true;
+                    }
                     if ( propertyName == "ambient" ) {
                         if ( propertyValue instanceof String ) {
                             propertyValue = propertyValue.replace( /\s/g, '' );
@@ -1336,6 +1341,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
                 if ( ( propertyName == "bumpScale" ) && ( threeObject.bumpMap ) ) {
                     value = threeObject.bumpScale;
+                    return value;
+                }
+                if ( propertyName == "alphaTest" ) {
+                    value = threeObject.alphaTest;
+                    return value;
+                }
+                if ( propertyName == "transparent" ) {
+                    value = threeObject.transparent;
+                    return value;
+                }
+                if ( propertyName == "opacity" ) {
+                    value = threeObject.opacity;
                     return value;
                 }
                 if(propertyName == "diffuse") {
