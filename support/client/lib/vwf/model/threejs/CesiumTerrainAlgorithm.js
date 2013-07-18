@@ -58,10 +58,10 @@ function CesiumTerrainAlgorithm(seed)
 	{
 		
 		var mat = mesh.material;
-		var x = mesh.position.x;
-		var y = mesh.position.y;
+		var x = (mesh.position.x + 8192) / (mesh.scale.x * 100) ;
+		var y = (mesh.position.y + 6553600) / (mesh.scale.y * 100) ;
 		
-		mat.uniforms.diffuseSampler.value = _SceneManager.getTexture( "http://ecn.t0.tiles.virtualearth.net/tiles/a"+this.getQuadkey(Math.floor((x/depth)/100),Math.floor((y/depth)/100),depth)+".jpeg?g=1484");
+		mat.uniforms.diffuseSampler.value = _SceneManager.getTexture( "http://ecn.t0.tiles.virtualearth.net/tiles/a"+this.getQuadkey(Math.floor(x),Math.floor(y),depth-2)+".jpeg?g=1484");
 		mat.uniforms.diffuseSampler.value.wrapS = mat.uniforms.diffuseSampler.value.wrapT = THREE.RepeatWrapping;
 	}
 	this.getTile = function(i,j,res)
