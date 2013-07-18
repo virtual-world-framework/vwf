@@ -128,7 +128,7 @@
       Username: <input id="playerNameInput" type="text" maxlength="32"/></br>
       <div> <div style="display:inline-block; height:36px;vertical-align:0%"> Display Color: </div> <div id="newUserColor" class="chat-colorwidget"></div> </div>
       Alert Sound: <select id="loginSoundSelect"></select><button type="button" id="loginSoundSelectTest">Test Sound</button></br>
-      <button type="button" id="chatlogin" class="chat-logonbutton">Login</button></br>
+      <button type="button" id="chatlogin" class="chat-logonbutton" disabled="disabled">Login</button></br>
       <div id="nameexists" class="chat-warning" style="display:none;">Name already exists!</div>
       </br>
     </div>
@@ -147,7 +147,7 @@
     <div id="chatOptions" class="chat-chatoptions">
       <div class="chat-chatInnerOptions" style="align:left">
         <div> <div style="display:inline-block; height:36px;vertical-align:0%"> Select New Display Color: </div> <div id="changeTextColor" class="chat-colorwidget"></div> </div>
-        Change Display Name: <input type="text" id="changeDisplayName" maxlength="32"/> <button type="button" id="changeDisplayNameButton">Change Name</button></br>
+        Change Display Name: <input type="text" id="changeDisplayName" maxlength="32"/> <button type="button" id="changeDisplayNameButton" disabled="disabled">Change Name</button></br>
       </div>
       <div class="chat-chatInnerOptions" style="align:right">
         Select New Alert Sound: <select id="changeSoundSelect"></select><button type="button" id="changeSoundSelectTest">Test Sound</button><button type="button" id="changeSoundButton">Change Sound</button></br>
@@ -190,6 +190,12 @@
         var sanitizedUsername = sanitizeUsername( $( '#playerNameInput' ).val( ) );        
         if ( sanitizedUsername != $( '#playerNameInput' ).val( ) ) {
           $( '#playerNameInput' ).val( sanitizeUsername( $( '#playerNameInput' ).val( ) ) );
+        }    
+        if ( sanitizedUsername.length > 0 ) {
+          $( '#chatlogin' ).removeAttr( "disabled" );
+        }
+        else {
+          $( '#chatlogin' ).attr( "disabled", "disabled" );
         }
       });
       
@@ -197,6 +203,12 @@
         var sanitizedUsername = sanitizeUsername( $( '#changeDisplayName' ).val( ) );
         if ( sanitizedUsername != $( '#changeDisplayName' ).val( ) ) {
           $( '#changeDisplayName' ).val( sanitizeUsername( $( '#changeDisplayName' ).val( ) ) );
+        }
+        if ( sanitizedUsername.length > 0 ) {
+          $( '#changeDisplayNameButton' ).removeAttr( "disabled" );
+        }
+        else {
+          $( '#changeDisplayNameButton' ).attr( "disabled", "disabled" );
         }
       });
       
