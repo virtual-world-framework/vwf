@@ -49,28 +49,28 @@ children:
           material:
             extends: http://vwf.example.com/material.vwf
             properties:
-              bumpScale: 0.005
+              bumpScale: 0.1
       node-grass:
         extends: http://vwf.example.com/node3.vwf
         children:
           material:
             extends: http://vwf.example.com/material.vwf
             properties:
-              bumpScale: 0.005
+              bumpScale: 0.05
       node-wall_west:
         extends: http://vwf.example.com/node3.vwf
         children:
           material:
             extends: http://vwf.example.com/material.vwf
             properties:
-              bumpScale: 0.005
+              bumpScale: 0.02
       node-flagstone:
         extends: http://vwf.example.com/node3.vwf
         children:
           material:
             extends: http://vwf.example.com/material.vwf
             properties:
-              bumpScale: 0.005
+              bumpScale: 0.02
   furniture:
     extends: http://vwf.example.com/node3.vwf
     source: models/marbleFurniture.DAE
@@ -82,7 +82,89 @@ children:
       material:
         extends: http://vwf.example.com/material.vwf
         properties:
-          bumpScale: 0.004
+          bumpScale: 0.005
+  grass:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/grass.DAE
+    type:  model/vnd.collada+xml
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.1
+          transparent: true
+          alphaTest: 0.7
+  hedge:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/hedge.DAE
+    type:  model/vnd.collada+xml
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.05
+  plants:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/plants.DAE
+    type:  model/vnd.collada+xml
+    children:
+      ccs_Clutter_plants:
+        extends: http://vwf.example.com/material.vwf       
+        properties:
+          bumpScale: 0.15
+          transparent: true
+          alphaTest: 0.7
+      BananaPlant:
+        extends: http://vwf.example.com/material.vwf       
+        properties:
+          bumpScale: 0.03
+          transparent: true
+          alphaTest: 0.7
+  trees:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/trees.DAE
+    type:  model/vnd.collada+xml
+    children:
+      Dogwood:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.05
+          transparent: true
+          alphaTest: 0.7
+      ccs_tree2:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.075
+          transparent: true
+          alphaTest: 0.7
+  wallboardtrellis:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/wallboardtrellis.DAE
+    type:  model/vnd.collada+xml
+    children:
+      wisteria_purple:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.2
+          transparent: true
+          alphaTest: 0.7
+      wood_fine02:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.005
+      wallboards:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.01
+  walls:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/walls.DAE
+    type:  model/vnd.collada+xml
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 1.0
   chest:
     extends: http://vwf.example.com/node3.vwf
     source: models/marblerunChest.DAE
@@ -93,7 +175,7 @@ children:
       material:
         extends: http://vwf.example.com/material.vwf
         properties:
-          bumpScale: 0.002
+          bumpScale: 0.01
   chest_2:
     extends: http://vwf.example.com/node3.vwf
     source: models/marblerunChest.DAE
@@ -104,7 +186,7 @@ children:
       material:
         extends: http://vwf.example.com/material.vwf
         properties:
-          bumpScale: 0.002
+          bumpScale: 0.01
   unsupportedGames:
     extends: http://vwf.example.com/node3.vwf
     source: models/games.DAE
@@ -120,19 +202,24 @@ children:
       field_playing01:
         extends: http://vwf.example.com/material.vwf
         properties:
-          bumpScale: 0.005
+          bumpScale: 0.04
       target_practice:
         extends: http://vwf.example.com/material.vwf
         properties:
-          bumpScale: 0.005
+          bumpScale: 0.04
   background:
     extends: http://vwf.example.com/node3.vwf
     source: models/skydome.dae
     type: model/vnd.collada+xml
     properties:
       rotation: [ 1, 0, 0, 0 ]
-      translation: [ 0, 0, -5 ]
-      scale: 0.1
+      translation: [ 0, 0, 0 ]
+      scale: 0.05
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          emit: "rgb(200,200,200)"
   gameMarbleTypes:
     extends: http://vwf.example.com/node.vwf
     children:
@@ -219,7 +306,7 @@ children:
           material:
             extends: http://vwf.example.com/material.vwf
             properties:
-              bumpScale: 0.005
+              bumpScale: 0.01
       selection_table_2:
         extends: selection_table.vwf
         source: models/selection_table.DAE
@@ -230,14 +317,14 @@ children:
           material:
             extends: http://vwf.example.com/material.vwf
             properties:
-              bumpScale: 0.005
+              bumpScale: 0.01
       solitaire_board_1:
         extends: solitaire_game.vwf
         source: models/solitaire_board.DAE
         type: model/vnd.collada+xml
         properties:
           rotation: [ 1, 0, 0, 0 ]
-          translation: [ -7.429945, -7.816388, 0.8209709 ]
+          translation: [-7.359945,-7.816388,0.8209709]
         children:
           material:
             extends: http://vwf.example.com/material.vwf
@@ -283,153 +370,6 @@ children:
       intensity: 0.8
       distance: 24
       color: "#999999"
-  light_5:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ 60, 0.0, 7.0 ]      
-      intensity: 1.0
-      distance: 50
-      color: "#ffffff"      
-  light_6:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ -60, 0.0, 7.0 ]      
-      intensity: 1.0
-      distance: 50
-      color: "#ffffff"     
-  light_7:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ 0, 60.0, 7.0 ]      
-      intensity: 1.0
-      distance: 50
-      color: "#ffffff"  
-  light_8:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ 0, -60.0, 7.0 ]      
-      intensity: 1.0
-      distance: 50
-      color: "#ffffff"  
-  light_9:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ 42, 42, 7.0 ]      
-      intensity: 1.0
-      distance: 50
-      color: "#ffffff"        
-  light_10:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ -42, 42, 7.0 ]      
-      intensity: 1.0
-      distance: 50
-      color: "#ffffff"        
-  light_11:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ 42, -42, 7.0 ]      
-      intensity: 1.0
-      distance: 50
-      color: "#ffffff"        
-  light_12:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ -42, -42, 7.0 ]      
-      intensity: 1.0
-      distance: 50
-      color: "#ffffff"        
-  light_13:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ 0, 0, 25 ]      
-      intensity: 1.0
-      distance: 20
-      color: "#ffffff"
-  light_14:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ 8.6, 8.6, 22 ]      
-      intensity: 1.0
-      distance: 20
-      color: "#ffffff"
-  light_15:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ -8.6, 8.6, 22 ]      
-      intensity: 1.0
-      distance: 20
-      color: "#ffffff"
-  light_16:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ 8.6, -8.6, 22 ]      
-      intensity: 1.0
-      distance: 20
-      color: "#ffffff"
-  light_17:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ -8.6, -8.6, 22 ]      
-      intensity: 1.0
-      distance: 20
-      color: "#ffffff"
-  light_18:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ 11, 26, 22 ]      
-      intensity: 1.0
-      distance: 25
-      color: "#ffffff"
-  light_19:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ -11, 26, 22 ]      
-      intensity: 1.0
-      distance: 25
-      color: "#ffffff"
-  light_20:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ 11, -26, 22 ]      
-      intensity: 1.0
-      distance: 25
-      color: "#ffffff"
-  light_21:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ -11, -26, 22 ]      
-      intensity: 1.0
-      distance: 25
-      color: "#ffffff"
-  light_22:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ 26, 11, 22 ]      
-      intensity: 1.0
-      distance: 25
-      color: "#ffffff"
-  light_23:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ -26, 11, 22 ]      
-      intensity: 1.0
-      distance: 25
-      color: "#ffffff"
-  light_24:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ 26, -11, 22 ]      
-      intensity: 1.0
-      distance: 25
-      color: "#ffffff"
-  light_25:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      translation: [ -26, -11, 22 ]      
-      intensity: 1.0
-      distance: 25
-      color: "#ffffff"
 scripts:
 - |
   var initialCam = [0.798465371131897, -0.6020503044128418, 0, 0, 0.6020503044128418, 0.798465371131897, 0, 0, 0, 0, 1, 0, -1.1765320301055908, -0.9326445460319519, 1.2000001668930054, 1];
