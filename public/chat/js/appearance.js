@@ -156,20 +156,28 @@ function getTimestamp( ) {
   var timestampDate = new Date( );
 	var timestampHours = timestampDate.getHours();
 	var timestampPeriod = "AM";
+  var timestampMonthBlank = "";
+  var timestampHoursBlank = "";
+  if ( timestampDate.getMonth()  < 9 ) {
+      timestampMonthBlank = " ";
+  }
 	if ( timestampHours > 11 ) {
-	  timestampHours = timestampHours - 12;
-	  timestampPeriod = "PM"
+	    timestampHours = timestampHours - 12;
+	    timestampPeriod = "PM"
 	}
   if ( timestampHours == 0 ) {
-    timestampHours = 12;
+      timestampHours = 12;
+  }
+  if ( timestampHours < 10 ) {
+      timestampHoursBlank = " ";
   }
 	var timestampMinutes = timestampDate.getMinutes();
 	if ( timestampMinutes < 10 ) {
-	  timestampMinutes = "0" + timestampMinutes;
+	    timestampMinutes = "0" + timestampMinutes;
 	}
 	var timestampSeconds = timestampDate.getSeconds();
   if ( timestampSeconds < 10 ) {
-    timestampSeconds = "0" + timestampSeconds;
+      timestampSeconds = "0" + timestampSeconds;
   }
-  return timestampDate.getMonth() + 1 + "/" + timestampDate.getDate() + " " + timestampHours + ":" + timestampMinutes + ":" +  timestampSeconds + " " + timestampPeriod;
+  return timestampMonthBlank + ( timestampDate.getMonth() + 1 ) + "/" + timestampDate.getDate() + " " + timestampHoursBlank + timestampHours + ":" + timestampMinutes + ":" +  timestampSeconds + " " + timestampPeriod;
 }
