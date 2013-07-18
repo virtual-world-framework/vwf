@@ -38,9 +38,8 @@
 						}
 						else
 						{
-							playerNode = $('#selectPlayerInput').val();
-							playerName = $("#selectPlayerInput option[value='" + playerNode + "']").text();
-							vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [playerName, vwf.moniker()]);
+							playerName = $("#selectPlayerInput option[value='" + $('#selectPlayerInput').val() + "']").text();
+							vwf_view.kernel.callMethod(vwf.find("","/")[0], "rejoinPlayer", [playerName, vwf.moniker()]);
 							$('#userName').html(playerName + ":&nbsp;");
 							preloadImages();
 							$(this).dialog("close");
@@ -48,16 +47,28 @@
 					}
 				},
 				open: function() {
-					var players = vwf_view.kernel.find("", "/players/*");
+					var players = vwf_view.kernel.find(vwf.find("","/")[0], "./element(*,'http://vwf.example.com/navigable.vwf')");
+					var clients = vwf_view.kernel.findClients("", "/*");
 
 					// Add existing player options
 					for(var i=0; i<players.length; i++)
 					{
-						var name = vwf_view.kernel.name( players[i] );
-						$('#selectPlayerInput').append($('<option>', { 
-							value: players[i],
-							text : name 
-						}));
+						var clientFound = false;
+						for (var j=0; j<clients.length; j++) {
+							if(players[i].indexOf(vwf_view.kernel.name(clients[j])) >=0) {
+								clientFound = true;
+							}
+						}
+						if(!clientFound) {
+							// TODO: Change vwf.getProperty after the sandboxing changes are merged in
+							var name = vwf.getProperty( players[i], "playerName" ); 
+							if(name) {
+								$('#selectPlayerInput').append($('<option>', { 
+									value: players[i],
+									text : name 
+								}));
+							}
+						}
 					}
 				}
 			});

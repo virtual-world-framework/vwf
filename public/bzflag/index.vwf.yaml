@@ -51,7 +51,7 @@ properties:
       color: 
       laserMaterial: 
       startingTranslation: []
-      translation: []
+      translation: [0, 0, 1800]
       translationSpeed: 400
       rotationSpeed: 0.3
       playerName:
@@ -80,6 +80,7 @@ properties:
 methods:
   initializeCamera:
   createPlayer:
+  rejoinPlayer: 
   fireLaser:
   sendChat:
 events:
@@ -164,7 +165,7 @@ scripts:
     this.future( 0 ).initializeCamera();
   }
   this.initializeCamera = function() {
-    this.camera.translation = [ 0, 0, 800 ];
+    this.camera.translation = [ 0, 0, 1800 ];
     this.camera.far = 1000000;
     this.camera.near = 1;
   }
@@ -194,6 +195,39 @@ scripts:
         this.playerJoined( playerName );
         this.colorIndex += 1;
       }
+    }
+  }
+  this.rejoinPlayer = function(playerName, playerMoniker) {
+    var oldPlayerObject = this.findPlayerByName(playerName);
+    if(oldPlayerObject) {
+      var playerObject = this.find("/navobj_" + playerMoniker);
+      if(playerObject.length) {
+        playerObject = playerObject[0];
+
+        // Copy over all important data from the old player object
+        playerObject.avatar.Tank.material.properties['texture'] = oldPlayerObject.avatar.Tank.material.properties['texture'];
+        playerObject.color = oldPlayerObject.color;
+        playerObject.startingTranslation = oldPlayerObject.startingTranslation;
+        if(!oldPlayerObject.active) {
+          playerObject.translation = playerObject.startingTranslation;
+        }
+        else {
+          playerObject.worldTransform = oldPlayerObject.worldTransform;
+        }
+        playerObject.laserMaterial = oldPlayerObject.laserMaterial;
+        playerObject.playerKills = oldPlayerObject.playerKills;
+        playerObject.playerDeaths = oldPlayerObject.playerDeaths;
+        playerObject.active = true;
+        playerObject.playerName = playerName;
+
+        // Delete the old player object
+        this.children.delete(oldPlayerObject);
+
+        this.playerJoined( playerName );
+      }
+    }
+    else {
+      this.createPlayer(playerName, playerMoniker);
     }
   }
   this.fireLaser = function(playerName) {
