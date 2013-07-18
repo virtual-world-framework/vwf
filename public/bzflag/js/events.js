@@ -214,6 +214,13 @@ vwf_view.gotProperty = function (nodeId, propertyName, propertyValue) {
                 break;
         }
     }
+    else if (nodeId == playerNode) {
+        switch (propertyName) {
+            case "score":
+                $("#userScore").text(propertyValue); 
+                break;
+        }
+    }
 }
 
 function updateModel(time) {
