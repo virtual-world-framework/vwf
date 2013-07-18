@@ -218,7 +218,7 @@ vwf_view.gotProperty = function (nodeId, propertyName, propertyValue) {
 
 function updateModel(time) {
     time = time || 0;
-    if(time - lastUpdateTime > 100) {
+    if(time - lastUpdateTime > 100 && input.keysAreDown()) {
         vwf_view.kernel.callMethod(playerNode, "update", [input]);
         input.lastInputTime = vwf_view.kernel.time();
         lastUpdateTime = time;
