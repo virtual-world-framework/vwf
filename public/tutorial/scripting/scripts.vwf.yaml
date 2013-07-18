@@ -12,7 +12,7 @@
 # the License.
 
 ---
-extends: http://vwf.example.com/navtouch.vwf
+extends: http://vwf.example.com/navscene.vwf
 properties:
   navmode: "orbit"
   speed: 4.0

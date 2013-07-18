@@ -12,7 +12,7 @@
 # the License.
 
 ---
-extends: http://vwf.example.com/navtouch.vwf
+extends: http://vwf.example.com/navscene.vwf
 properties:
   ambientColor: [ 183, 183, 183 ]
   navmode: "orbit"
