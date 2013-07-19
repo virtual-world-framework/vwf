@@ -859,7 +859,29 @@ var stats;
                         sceneView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [sceneView.keyStates]);
                     }
                 };
-
+	      window.document.getElementById('index-vwf').onblur = function()
+		  {
+				
+				  for(var i in  sceneView.keyStates.keysDown)
+				  {
+					var key = sceneView.keyStates.keysDown[i];
+					delete sceneView.keyStates.keysDown[i];
+					sceneView.keyStates.keysUp[key.key] = key;
+				  }
+				  var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
+                    if (sceneNode) {
+                        //var params = JSON.stringify( sceneView.keyStates );
+                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [sceneView.keyStates]);
+                        
+                    }
+				 for(var i in  sceneView.keyStates.keysUp)
+				  {
+					
+					delete sceneView.keyStates.keysUp[i];
+					
+				  }	
+			
+		  }
          window.document.getElementById('index-vwf').onkeyup = function (event) {
                     var key = undefined;
                     var validKey = false;

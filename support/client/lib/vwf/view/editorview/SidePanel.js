@@ -48,6 +48,7 @@ define(
 				window.sizeTimeoutHandle = null;
 			});
 			$(document).trigger('sidePanelClosed');
+			$('#index-vwf').focus();
 		}
 
 		function showSidePanel()

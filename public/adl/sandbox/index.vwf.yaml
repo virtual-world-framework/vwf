@@ -789,7 +789,7 @@ scripts:
             var side = MATH.crossVec3([0,0,1],offset);
             
             if(this.y_rot < .479 ) this.y_rot = .479;
-            if(this.y_rot > .628 && (this.cameramode != 'Free' && this.cameramode != 'Fly')) this.y_rot = .628;
+            if(this.y_rot > .783 && (this.cameramode != 'Free' && this.cameramode != 'Fly')) this.y_rot = .783;
             if(this.y_rot > .783 && (this.cameramode == 'Free' || this.cameramode == 'Fly')) this.y_rot = .783;
             
             var crossmatrix = MATH.angleAxis(this.y_rot*10,side);
@@ -954,10 +954,22 @@ scripts:
         
         if(this.cameramode != 'Navigate' && this.cameramode != 'Free'  && this.cameramode != 'Fly')
         { 
-            if(pickInfo.deltaY < 0 )
-            this.zoom *= .9;
-            else
-            this.zoom *= 1.1;
+          
+            
+            if(this.zoom < .4 && pickInfo.deltaY < 0)
+            {
+                var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
+                var worldmousepos  = this.GetCameraCenterRay();
+                worldmousepos = MATH.scaleVec3(worldmousepos,1);
+                this.center = MATH.addVec3(worldmousepos,campos);  
+                this.zoom = 1;
+            }else
+            {
+                if(pickInfo.deltaY < 0 )
+                this.zoom *= .9;
+                else
+                this.zoom *= 1.1;
+            }
         }
         if(this.cameramode == 'Navigate')
         {  

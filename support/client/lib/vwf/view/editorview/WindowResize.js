@@ -80,7 +80,7 @@ define({
 			$('#index-vwf').css('width',$(window).width() + 'px');
 			$('#index-vwf').css('top', 0 + 'px');
 			_Editor.findcamera().aspect = ($('#index-vwf').width()/$('#index-vwf').height());
-			
+			$('#index-vwf').focus()
 			_Editor.findcamera().updateProjectionMatrix();
 		}
 		window.showTools = function()
@@ -90,7 +90,7 @@ define({
 			$('#toolbar').show();
 			$('#sidepanel').show();
 			$('#statusbar').show();
-			
+			$('#index-vwf').focus()
 			$('#index-vwf').css('height',$(window).height() + 'px');
 			$('#index-vwf').css('width',$(window).width() + 'px');
 			$('#index-vwf').css('top', $('#smoothmenu1').height() + $('#toolbar').height() + 'px');
