@@ -104,6 +104,7 @@ define(function ()
 		{
 				
 				if(this.GetCurrentUserName()) return;
+				$(window).trigger('hashchange');
 				$.ajax('/vwfDataManager.svc/logindata',
 				{
 					cache:false,
@@ -208,6 +209,7 @@ define(function ()
 		this.Login = function (username)
 		{
 		
+			
 			if(this.GetCurrentUserName()) return;
 			//clear this. No reason to have it saved in the dom
 			
@@ -251,7 +253,7 @@ define(function ()
 				alert('User is already logged into this space');
 				return;
 			}
-			var newintersectxy = _Editor.GetInsertPoint();
+			var newintersectxy = _LocationTools.getCurrentPlacemarkPosition() || _Editor.GetInsertPoint();
 			
 			this.PlayerProto.properties.PlayerNumber = username;
 			this.PlayerProto.properties.owner = username;

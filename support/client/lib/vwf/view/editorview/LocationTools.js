@@ -16,13 +16,26 @@ define(function ()
 
 	function initialize()
 	{
+		var self = this;
+		$(window).on('hashchange',function()
+		{
+			
+			self.hashchange();
+		});
+		this.currentPlacemark = '';
+		this.hashchange = function()
+		{
+			
+			var hash = window.location.hash.substr(1);
+			if(self.currentPlacemark != hash)
+			{
+				self.GoToPlacemark_inner(hash);
+			}
+			
+		}
 		this.GoToPosition = function()
 		{
-			if (!_UserManager.GetCurrentUserName())
-				{
-					_Notifier.alert('Location tools are not available when you are not logged in.');
-					return;
-				}
+			
 			alertify.prompt('Type the location in the form of "x,y,z"',function(ok,val)
 			{
 			
@@ -49,6 +62,15 @@ define(function ()
 							_Notifier.alert('Invalid Format');
 							return;
 						}
+					
+					if (!_UserManager.GetCurrentUserName())
+					{
+						vwf.models[0].model.nodes['index-vwf'].orbitPoint(vals);
+						vwf.models[0].model.nodes['index-vwf'].zoom = 5;
+						vwf.models[0].model.nodes['index-vwf'].updateCamera();
+						return;
+					}					
+					
 				$('#MenuCamera3RDPersonicon').click();		
 				_Editor.setProperty(_UserManager.GetCurrentUserID(),'translation',vals);
 				
@@ -59,11 +81,7 @@ define(function ()
 		}
 		this.GoToPlaceMark = function()
 		{
-			if (!_UserManager.GetCurrentUserName())
-				{
-					_Notifier.alert('Location tools are not available when you are not logged in.');
-					return;
-				}
+			
 				
 			var placemarks = vwf.getProperty('index-vwf','placemarks');
 			if(!placemarks || Object.keys(placemarks).length == 0)
@@ -78,6 +96,30 @@ define(function ()
 			{
 				if(ok)
 				{
+					self.GoToPlacemark_inner(val);
+				}
+			
+			},labels);
+		
+		}
+		this.getCurrentPlacemarkPosition = function()
+		{
+		
+			var placemarks = vwf.getProperty('index-vwf','placemarks');
+					var pos = null;
+					for(var i in placemarks)
+					{
+						if(i == window.location.hash.substr(1))
+							pos = placemarks[i];
+					}
+					return pos;
+		
+		}
+		this.GoToPlacemark_inner = function(val)
+		{
+			var placemarks = vwf.getProperty('index-vwf','placemarks');
+			this.currentPlacemark = val;
+			window.location.hash = val;
 					var pos;
 					for(var i in placemarks)
 					{
@@ -86,13 +128,17 @@ define(function ()
 					}
 					if(pos)
 					{
+						if (!_UserManager.GetCurrentUserName())
+						{
+							vwf.models[0].model.nodes['index-vwf'].orbitPoint(pos);
+							vwf.models[0].model.nodes['index-vwf'].zoom = 5;
+							vwf.models[0].model.nodes['index-vwf'].updateCamera();
+							return;
+						}	
+					
 						$('#MenuCamera3RDPersonicon').click();		
 						_Editor.setProperty(_UserManager.GetCurrentUserID(),'translation',pos);
 					}
-				}
-			
-			},labels);
-		
 		}
 		this.AddPlacemark = function()
 		{
