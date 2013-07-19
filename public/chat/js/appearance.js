@@ -159,7 +159,7 @@ function getTimestamp( ) {
   var timestampMonthBlank = "";
   var timestampHoursBlank = "";
   if ( timestampDate.getMonth()  < 9 ) {
-      timestampMonthBlank = " ";
+      timestampMonthBlank = "&nbsp;";
   }
 	if ( timestampHours > 11 ) {
 	    timestampHours = timestampHours - 12;
@@ -169,7 +169,7 @@ function getTimestamp( ) {
       timestampHours = 12;
   }
   if ( timestampHours < 10 ) {
-      timestampHoursBlank = " ";
+      timestampHoursBlank = "&nbsp;";
   }
 	var timestampMinutes = timestampDate.getMinutes();
 	if ( timestampMinutes < 10 ) {
