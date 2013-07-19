@@ -164,7 +164,7 @@ children:
       material:
         extends: http://vwf.example.com/material.vwf
         properties:
-          bumpScale: 1.0
+          bumpScale: 0.03
   chest:
     extends: http://vwf.example.com/node3.vwf
     source: models/marblerunChest.DAE
