@@ -252,7 +252,7 @@ define(function ()
 			{
 				alert('User is already logged into this space');
 				return;
-			}
+			} 
 			var newintersectxy = _LocationTools.getCurrentPlacemarkPosition() || _Editor.GetInsertPoint();
 			
 			this.PlayerProto.properties.PlayerNumber = username;
