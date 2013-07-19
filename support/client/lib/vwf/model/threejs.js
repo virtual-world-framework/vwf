@@ -2312,7 +2312,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             };
             var uniforms_default = {
                 amplitude: { type: "f", value: 1.0 },
-                texture:   { type: "t", value: THREE.ImageUtils.loadTexture( "textures/sprites/ball.png" ) },
+                texture:   { type: "t", value: new THREE.Texture( new Image() ) },
                 useTexture: { type: "f", value: 0.0 },
                 maxSpin: { type: "f", value: 0.0 },
                 minSpin: { type: "f", value: 0.0 },
