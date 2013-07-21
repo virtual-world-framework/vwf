@@ -1763,7 +1763,9 @@
 
             // Properties.
 
-            if ( full || ! node.patchable || node.properties.changed ) {  // TODO: properties changed only
+            if ( full || ! node.patchable ) {
+
+                // Want everything, or only want patches but the node is not patchable.
 
                 nodeComponent.properties = this.getProperties( nodeID );
 
@@ -1778,6 +1780,18 @@
                 } else {
                     patched = true;
                 }
+
+            } else if ( node.properties.changed ) {
+
+                // The node is patchable and properties have changed.
+
+                nodeComponent.properties = {};
+
+                Object.keys( node.properties.changed ).forEach( function( propertyName ) {
+                    nodeComponent.properties[propertyName] = this.getProperty( nodeID, propertyName );
+                }, this );
+
+                patched = true;
 
             }
 
