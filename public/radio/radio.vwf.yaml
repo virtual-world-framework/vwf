@@ -895,6 +895,8 @@ scripts:
         case "squelch":
           if ( radio.squelch >= 30 )
             radio.squelch = radio.squelch - 10;
+          if (radio.squelch == 60)
+            radio.Radio.ic40Volume.playStatic(1);
           break;
         case "beep":
           radio.beepOn = !radio.beepOn;
