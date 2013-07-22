@@ -63,11 +63,13 @@ scripts:
   this.switchCameraView = function(view) {
     if(view == "exterior") {
       this.navmode='orbit'; 
+      this.translationSpeed = 40;
       this.camera.lookAt = this.humvee.id; 
       this.activeCamera = this.camera.id;
     }
     else {
       this.navmode='walk'; 
+      this.translationSpeed = 10; 
       this.activeCamera = this.humvee.interiorCamera.id;
     }
   }
