@@ -148,7 +148,7 @@ children:
           bumpScale: 0.2
           transparent: true
           alphaTest: 0.7
-      wood_fine02:
+      trellis:
         extends: http://vwf.example.com/material.vwf
         properties:
           bumpScale: 0.005

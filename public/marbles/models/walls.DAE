@@ -6,8 +6,8 @@
       <authoring_tool>OpenCOLLADA for 3ds Max;  Version: 1.4.1;  Revision: exported;  Platform: x64;  Configuration: Release_Max2012_static</authoring_tool>
       <source_data>file:///C:/Users/tlhuggin/Project_VWF/VWF/scenes/scene_01_C.max</source_data>
     </contributor>
-    <created>2013-07-19T16:22:50</created>
-    <modified>2013-07-19T16:22:50</modified>
+    <created>2013-07-22T10:14:00</created>
+    <modified>2013-07-22T10:14:00</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
