@@ -95,7 +95,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     
                     if ( this.videoElementsDiv ) {
                         jQuery('body').append(
-                            "<div id='"+this.videoElementsDiv+"'></div>"
+                            "<div id='"+self.videoElementsDiv+"'></div>"
                         );                   
                     }
                 } 
@@ -246,44 +246,54 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         return clientNode;
     }
 
-    function displayLocal( name ) {
-        displayVideo.call( this, this.local.url, name, this.kernel.moniker(), true );
+    function displayLocal( stream, name ) {
+        displayVideo.call( this, stream, this.local.url, name, this.kernel.moniker(), true );
     }
 
-    function displayVideo( url, name, destMoniker, muted ) {
+    function displayVideo( stream, url, name, destMoniker, muted ) {
         
         if ( this.videoProperties.create ) {
-            //debugger;
             this.videosAdded++
             var $container;
             var divId = name + this.videosAdded;
             var videoId = "video-" + divId;
 
             $container = $( "#" + this.videoElementsDiv );
+            var videoE;
             if ( muted ) {
                 var setMuted = "";
 
                 $container.append(
                     "<div id='"+ divId + "'>" +
                         "<video class='vwf-webrtc-video' id='" + videoId +
-                            "' width='320' height='240' src='" + url + 
-                            "' loop='loop' autoplay = true muted='true' " +
+//                            "' width='320' height='240' src='" + url + " "+ 
+                            "' width='320' height='240' " +
+                            "loop='loop' autoplay = true muted='true' " +
                             "style='position: absolute; left: 0; top: 0; z-index: 40;'>" +
                         "</video>" +
                     "</div>"
-                );                
+                );
+
+
             } else {
                 $container.append(
                     "<div id='"+ divId + "'>" +
                         "<video class='vwf-webrtc-video' id='" + videoId +
-                            "' width='320' height='240' src='" + url + 
-                            "' loop='loop' autoplay = true" +
-                            " style='position: absolute; left: 0; top: 0; z-index: 40;'>" +
+                            "' width='320' height='240'" +
+                            " loop='loop' autoplay = true " +
+                            "style='position: absolute; left: 0; top: 0; z-index: 40;'>" +
                         "</video>" +
                     "</div>"
                 );
             }
+            
+            videoE = $( '#'+ videoId )[0];
+            if ( videoE && stream ) {
+                attachMediaStream( videoE, stream );
+            }  
+
             $('#'+divId).draggable();
+            
         } 
 
         //console.info( "[ { 'url': "+url+", 'name': "+name+", 'muted': "+muted+" }, "+destMoniker+" ]" );
@@ -292,8 +302,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     }
 
-    function displayRemote( url, name, destMoniker ) {
-        displayVideo.call( this, url, name, destMoniker, false );
+    function displayRemote( stream, url, name, destMoniker ) {
+        displayVideo.call( this, stream, url, name, destMoniker, false );
     }
 
     function capture() {
@@ -311,7 +321,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                 self.kernel.setProperty( self.local.ID, "localUrl", self.local.url );
 
-                displayLocal.call( self, self.state.clients[ self.local.ID ].displayName );
+                displayLocal.call( self, stream, self.state.clients[ self.local.ID ].displayName );
                 sendOffers.call( self );
             };
 
@@ -508,7 +518,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     
                     if ( self.view.debug ) console.log("Remote stream added.  url: " + self.url );
 
-                    displayRemote.call( self.view, self.url, self.peerNode.displayName, view.kernel.moniker() );
+                    displayRemote.call( self.view, self.stream, self.url, self.peerNode.displayName, view.kernel.moniker() );
                 };
 
                 this.pc.onremovestream = function( event ) {
