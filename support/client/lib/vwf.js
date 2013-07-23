@@ -2505,24 +2505,38 @@ if ( ! childComponent.source ) {
 
             var node = nodes.existing[nodeID];
 
+            var entrants = this.setProperty.entrants;
+
             // Call settingProperties() on each model.
 
-            properties = this.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we can't go left to right and stop after the first that accepts the set since we are setting all of the properties as a batch; verify that this creates the same result as calling setProperty individually on each property and that there are no side effects from setting through a driver after the one that handles the set.
+            properties = this.models.reduceRight( function( intermediate_properties, model, index ) {  // TODO: note that we can't go left to right and stop after the first that accepts the set since we are setting all of the properties as a batch; verify that this creates the same result as calling setProperty individually on each property and that there are no side effects from setting through a driver after the one that handles the set.
 
                 var model_properties = {};
 
                 if ( model.settingProperties ) {
+
                     model_properties = model.settingProperties( nodeID, properties );
+
                 } else if ( model.settingProperty ) {
+
                     Object.keys( node.properties.existing ).forEach( function( propertyName ) {
+
                         if ( properties[propertyName] !== undefined ) {
+
+                            var reentry = entrants[nodeID+'-'+propertyName] = { index: index }; // the active model number from this call  // TODO: need unique nodeID+propertyName hash
+
                             model_properties[propertyName] =
                                 model.settingProperty( nodeID, propertyName, properties[propertyName] );
                             if ( vwf.models.kernel.blocked() ) {
                                 model_properties[propertyName] = undefined; // ignore result from a blocked setter
                             }
+
+                            delete entrants[nodeID+'-'+propertyName];
+
                         }
+
                     } );
+
                 }
 
                 Object.keys( node.properties.existing ).forEach( function( propertyName ) {
@@ -2578,22 +2592,34 @@ if ( ! childComponent.source ) {
 
             var node = nodes.existing[nodeID];
 
+            var entrants = this.getProperty.entrants;
+
             // Call gettingProperties() on each model.
 
-            var properties = this.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we can't go left to right and take the first result since we are getting all of the properties as a batch; verify that this creates the same result as calling getProperty individually on each property and that there are no side effects from getting through a driver after the one that handles the get.
+            var properties = this.models.reduceRight( function( intermediate_properties, model, index ) {  // TODO: note that we can't go left to right and take the first result since we are getting all of the properties as a batch; verify that this creates the same result as calling getProperty individually on each property and that there are no side effects from getting through a driver after the one that handles the get.
 
                 var model_properties = {};
 
                 if ( model.gettingProperties ) {
+
                     model_properties = model.gettingProperties( nodeID, properties );
+
                 } else if ( model.gettingProperty ) {
+
                     Object.keys( node.properties.existing ).forEach( function( propertyName ) {
+
+                        var reentry = entrants[nodeID+'-'+propertyName] = { index: index }; // the active model number from this call  // TODO: need unique nodeID+propertyName hash
+
                         model_properties[propertyName] =
                             model.gettingProperty( nodeID, propertyName, intermediate_properties[propertyName] );
                         if ( vwf.models.kernel.blocked() ) {
                             model_properties[propertyName] = undefined; // ignore result from a blocked getter
                         }
+
+                        delete entrants[nodeID+'-'+propertyName];
+
                     } );
+
                 }
 
                 Object.keys( node.properties.existing ).forEach( function( propertyName ) {
