@@ -12802,6 +12802,9 @@ THREE.Texture = function ( image, mapping, wrapS, wrapT, magFilter, minFilter, f
 	this.needsUpdate = false;
 	this.onUpdate = null;
 
+	this.texcoord = "";
+	this.input_set = 0;
+
 };
 
 THREE.Texture.prototype = {
@@ -14654,7 +14657,6 @@ THREE.CanvasRenderer = function ( parameters ) {
 				if ( material.map !== null ) {
 
 					if ( material.map.mapping instanceof THREE.UVMapping ) {
-
 						_uvs = element.uvs[ 0 ];
 						patternPath( _v1x, _v1y, _v2x, _v2y, _v3x, _v3y, _uvs[ uv1 ].x, _uvs[ uv1 ].y, _uvs[ uv2 ].x, _uvs[ uv2 ].y, _uvs[ uv3 ].x, _uvs[ uv3 ].y, material.map );
 
