@@ -6,8 +6,8 @@
       <authoring_tool>OpenCOLLADA for 3ds Max;  Version: 1.4.1;  Revision: exported;  Platform: x64;  Configuration: Release_Max2012_static</authoring_tool>
       <source_data>file:///C:/Users/tlhuggin/Project_VWF/VWF/scenes/scene_01_C.max</source_data>
     </contributor>
-    <created>2013-07-16T16:43:33</created>
-    <modified>2013-07-16T16:43:33</modified>
+    <created>2013-07-22T15:01:37</created>
+    <modified>2013-07-22T15:01:37</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -1122,7 +1122,7 @@
         </extra>
       </node>
       <node id="node-plantSmall1_2" name="plantSmall1_2">
-        <matrix>0.2202991 0.05032935 -0.1973202 -3.4058 0.1745196 0.1031323 0.2211485 0.5235412 0.1049345 -0.2771835 0.04645495 2.421317 0 0 0 1</matrix>
+        <matrix>0.2202991 0.05032935 -0.1973202 -3.241437 0.1745196 0.1031323 0.2211485 0.7133514 0.1049345 -0.2771835 0.04645495 2.51062 0 0 0 1</matrix>
         <node>
           <matrix>-0.2042447 1.039289 -0.124756 -0.013823 -0.9979461 -0.1549747 0.3427633 0.7721549 0.3158923 0.1823809 1.002173 0.2430356 0 0 0 1</matrix>
           <instance_geometry url="#geom-plantSmall1_2">
@@ -1150,7 +1150,7 @@
         </extra>
       </node>
       <node id="node-plantSmall1_1" name="plantSmall1_1">
-        <matrix>0.05032935 -0.2202992 -0.1973201 5.555054 0.1031322 -0.1745194 0.2211486 9.392633 -0.2771835 -0.1049344 0.04645498 2.421317 0 0 0 1</matrix>
+        <matrix>0.05032935 -0.2202992 -0.1973201 4.915465 0.1031322 -0.1745194 0.2211486 8.847241 -0.2771835 -0.1049344 0.04645498 2.450885 0 0 0 1</matrix>
         <node>
           <matrix>-0.2042447 1.039289 -0.124756 -0.013823 -0.9979461 -0.1549747 0.3427633 0.7721549 0.3158923 0.1823809 1.002173 0.2430356 0 0 0 1</matrix>
           <instance_geometry url="#geom-plantSmall1_1">
