@@ -1198,10 +1198,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     else if ( propertyName == 'intensity' ) {
                         value = parseFloat( propertyValue );
                         threeObject.intensity = value;
-
-                        // Is this a mistake?  Why do we update the transform matrix after setting light
-                        // intensity? - Eric (5/13/13)
-                        threeObject.updateMatrix();
                     }                    
                     else if ( propertyName == 'castShadows' ) {
                         value = Boolean( propertyValue );
@@ -1430,7 +1426,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         value = threeObject.distance;
                         break;
                     case "color":
-                        var clr = new utility.color( [ threeObject.color.r, threeObject.color.g, threeObject.color.b ] ) 
+                        var clr = new utility.color( [ threeObject.color.r * 255, threeObject.color.g * 255, 
+                                                       threeObject.color.b * 255 ] ) 
                         value = clr.toString();
                         break;
                     case "intensity":
