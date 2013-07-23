@@ -11,29 +11,39 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-// This overrides socket.io's websocket.onMessage to have it register that a connection has been made, even when 
-// the sessionid is not null
 ( function () { 
-	var oldOnMessage = io.Transport.websocket.prototype.onMessage;
-	io.Transport.websocket.prototype.onMessage = function(message){
-		oldOnMessage.call( this, message );
-		if ( !this.connected ) {
-			this.onConnect();
+	var transport = io.Transport;
+	var transports = [ transport, transport.websocket, transport.flashsocket ];
+
+	// This overrides socket.io's Transport.onDisconnect that resets the sessionid on disconnect
+	// We would like to keep it around so it can be reused on reconnect so the application understands that this 
+	// is an existing client reconnecting, instead of a new client
+	transports.map( function( trans ) {
+		if ( !trans ) {
+			return;
 		}
-	}
+		trans.prototype.onDisconnect = function( message ){
+			this.connecting = false;
+			this.connected = false;
+			this.base.onDisconnect();
+		}
+	} );
+
+	// This overrides socket.io's onMessage functions to have it register that a connection has been made, even 
+	// when the sessionid is not null
+	var xhrTransports = [ transport.XHR, transport.htmlfile, transport['xhr-multipart'], 
+	                      transport['xhr-polling'], transport['jsonp-polling'] ];
+	transports = transports.concat( xhrTransports );
+	transports.map( function( trans ) {
+		if ( !trans ) {
+			return;
+		}
+	  	var oldOnMessage = trans.prototype.onMessage;
+		trans.prototype.onMessage = function( message ){
+			oldOnMessage.call( this, message );
+			if ( !this.connected ) {
+				this.onConnect();
+			}
+		}
+	} );
 } )();
-
-// This overrides socket.io's Transport.onDisconnect that resets the sessionid on disconnect
-// We would like to keep it around so it can be reused on reconnect so the application understands that this is 
-// an existing client reconnecting, instead of a new client
-io.Transport.prototype.onDisconnect = function(){
-	this.connecting = false;
-	this.connected = false;
-	this.base.onDisconnect();
-};
-
-io.Transport.websocket.prototype.onDisconnect = function(){
-	this.connecting = false;
-	this.connected = false;
-	this.base.onDisconnect();
-};
