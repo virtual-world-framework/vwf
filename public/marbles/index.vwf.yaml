@@ -326,6 +326,8 @@ children:
           rotation: [ 1, 0, 0, 0 ]
           translation: [-7.359945,-7.816388,0.8209709]
         children:
+          marbles:
+            extends: http://vwf.example.com/node3.vwf
           material:
             extends: http://vwf.example.com/material.vwf
             properties:
@@ -338,6 +340,8 @@ children:
           rotation: [ 1, 0, 0, 0 ]
           translation: [ 7.061623, 8.292849, 0.8209709 ]
         children:
+          marbles:
+            extends: http://vwf.example.com/node3.vwf
           material:
             extends: http://vwf.example.com/material.vwf
             properties:
