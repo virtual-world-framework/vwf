@@ -182,10 +182,12 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
                 ( function tick() {
 
                     if ( view.state.cameraInfo ) {
-                        var diffs = view.state.cameraInfo.diff( camera );
-                        if ( diffs !== undefined ){
-                           broadcastCameraViewData.call( view, diffs );                        
-                        } 
+                        if ( view.clientControl == view.kernel.moniker() ) {
+                            var diffs = view.state.cameraInfo.diff( camera );
+                            if ( diffs !== undefined ){
+                               broadcastCameraViewData.call( view, diffs );                        
+                            } 
+                        }
                     } else {
                         view.state.cameraInfo = { 
                             "initialized": false,
@@ -306,11 +308,23 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
         //initializedProperty: function (nodeID, propertyName, propertyValue) {
         //},        
 
-        //satProperty: function( nodeID, propertyName, propertyValue ) {
-        //},
+        satProperty: function( nodeID, propertyName, propertyValue ) {
+            switch ( propertyName ) {
+                case "clientControl":
+                    this.clientControl = propertyValue;
+                    break;
+            }
+        },
 
-        //gotProperty: function( nodeID, propertyName, propertyValue ) {
-        //}
+        gotProperty: function( nodeID, propertyName, propertyValue ) {
+            var value = undefined;
+            switch ( propertyName ) {
+                case "clientControl":
+                    value = propertyValue = this.clientControl;
+                    break;
+            }
+            return value;
+        }
             
     } );
  
@@ -411,7 +425,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
         var downID = undefined;
         var lastOverID = undefined;
         var sceneCanvas = scene.getCanvas();
-        
+        var rootID = this.kernel.find( "", "/" )[0];
+
         this.state.mouse.handler = new Cesium.ScreenSpaceEventHandler( sceneCanvas );
         
         if ( this.state.mouse.handler ) {
@@ -440,7 +455,6 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
                 var ellipsoid = node.centralBody.getEllipsoid();
                 var globePoint = scene.getCamera().controller.pickEllipsoid( pos, ellipsoid );
                 var camPos = scene.getCamera().position;
-                var rootID = self.kernel.find( "", "/" )[0];
                 var eventID;
                 
                 if ( eventObj ) {
@@ -572,6 +586,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
             // left down
             mouse.setInputAction( function( movement ) {
                 
+                self.kernel.setProperty( rootID, "clientControl", self.kernel.moniker() );
                 self.state.mouse.leftDown = true;
                 var eData = pick( "left", 0, "down", movement.position );
                 self.kernel.dispatchEvent( downID, "pointerDown", eData.eventData, eData.eventNodeData );
@@ -631,6 +646,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
             // middle down
             mouse.setInputAction( function( movement ) {
 
+                self.kernel.setProperty( rootID, "clientControl", self.kernel.moniker() );
                 self.state.mouse.middleDown = true;
                 var eData = pick( "middle", 0, "down", movement.position );
                 self.kernel.dispatchEvent( downID, "pointerDown", eData.eventData, eData.eventNodeData );
@@ -667,6 +683,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
             // right down
             mouse.setInputAction( function( movement ) {
 
+                self.kernel.setProperty( rootID, "clientControl", self.kernel.moniker() );
                 self.state.mouse.rightDown = true;
                 var eData = pick( "right", 0, "down", movement.position );
                 self.kernel.dispatchEvent( downID, "pointerDown", eData.eventData, eData.eventNodeData );
@@ -677,6 +694,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
             // pinch start
             mouse.setInputAction( function( movement ) {
 
+                self.kernel.setProperty( rootID, "clientControl", self.kernel.moniker() );
                 self.state.mouse.pinching = true;
 
             }, Cesium.ScreenSpaceEventType.PINCH_START );
@@ -695,7 +713,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
 
             // wheel
             mouse.setInputAction( function( movement ) {
-
+                self.kernel.setProperty( rootID, "clientControl", self.kernel.moniker() );
             }, Cesium.ScreenSpaceEventType.WHEEL );
 
         }
