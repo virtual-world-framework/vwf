@@ -35,3 +35,25 @@ MACINTOSH OS X
 *   Firefox 22 Proxy Support for firewalls requires that under Firefox -> Preferences -> Network -> Settings, you must select "Manual Proxy Configuration", and place a check in the "use this proxy server for all protocols" checkbox.
 
 </div>
+
+<div class="well" markdown="1">
+Enabling WebGL
+===================
+-------------------
+
+Use the following steps to verify that WebGL is enabled in your browser.
+
+CHROME
+
+*   Open a new tab and type *chrome://flags* in the address bar.
+*   Search for WebGL.
+*   Verify *Disable WebGL* is not enabled. 
+*   If on an Android device, verify *Enable WebGL Android* is enabled.
+
+FIREFOX
+
+*   Open a new tab and type *about:config* in the address bar. 
+*   Search for *WebGL.*
+*   Verify *webgl.disabled* is set to false. Alternatively, set *webgl.force-enabled* to true.
+
+</div>
