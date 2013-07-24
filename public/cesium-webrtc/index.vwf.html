@@ -41,8 +41,9 @@
               clientName = $('#userName').val().replace(/ /g,"_");
               $( this ).dialog( "close" );
               var parms = [ vwf_view.kernel.moniker(), clientName ];
+
               vwf_view.kernel.callMethod( "index-vwf", "createClient", parms );
-                            
+                 
               var options = {
                 enableHighAccuracy: true,
                 timeout: 6000,
@@ -69,7 +70,6 @@
                 console.warn('ERROR(' + err.code + '): ' + err.message);
               };                            
 
-              console.info( "Getting location: .............." );
               navigator.geolocation.getCurrentPosition( gotLocation, errorLocation, options );
             },
           }
