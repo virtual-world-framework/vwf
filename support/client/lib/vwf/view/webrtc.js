@@ -259,37 +259,35 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             var videoId = "video-" + divId;
 
             $container = $( "#" + this.videoElementsDiv );
-            var videoE;
             if ( muted ) {
-                var setMuted = "";
-
                 $container.append(
                     "<div id='"+ divId + "'>" +
                         "<video class='vwf-webrtc-video' id='" + videoId +
-//                            "' width='320' height='240' src='" + url + " "+ 
                             "' width='320' height='240' " +
-                            "loop='loop' autoplay = true muted='true' " +
+                            "loop='loop' autoplay muted " +
                             "style='position: absolute; left: 0; top: 0; z-index: 40;'>" +
                         "</video>" +
                     "</div>"
                 );
-
 
             } else {
                 $container.append(
                     "<div id='"+ divId + "'>" +
                         "<video class='vwf-webrtc-video' id='" + videoId +
                             "' width='320' height='240'" +
-                            " loop='loop' autoplay = true " +
+                            " loop='loop' autoplay " +
                             "style='position: absolute; left: 0; top: 0; z-index: 40;'>" +
                         "</video>" +
                     "</div>"
                 );
             }
             
-            videoE = $( '#'+ videoId )[0];
+            var videoE = $( '#'+ videoId )[0];
             if ( videoE && stream ) {
                 attachMediaStream( videoE, stream );
+                if ( muted ) {
+                    videoE.muted = true;  // firefox isn't mapping the muted property correctly
+                }
             }  
 
             $('#'+divId).draggable();

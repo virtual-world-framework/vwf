@@ -167,11 +167,6 @@
             }
           }
 
-          // default: Math.sqrt( 312905820319949.9 ) = 17689144.137576297 
-          //          Math.sqrt( 6400000000 ) = 80000 
-          // closest: Math.sqrt( 40601075714271 ) =  6371897.34
-          //          Math.sqrt( 40000 ) = 200                      
-
         }
 
         // vwf_view doesn't currently get messages from the document launch. Force a property update
@@ -192,26 +187,29 @@
           var $container;
           var divId = value.name + videosAdded++;
           var videoId = "video-" + divId;
-          var muted = value.muted ? "muted" : "";
+          var videoE = undefined;
 
           $container = $( "#webrtc-videos" );
           if ( value.muted ) {
-            // this is your local video
-            // should be muted, firefox isn't accepting muted the 
-            // latest update to the html5 specification
 
             // Create a large local video for initial viewing and calibration purposes 
             // (only visible during calibration or before remote user has joined)
             $container.append(
               "<div id='calibrate-"+ divId + "'>" +
                 "<video class='vwf-webrtc-video' id='calibrate-" + videoId +
-                  "' width='640' height='480' src='" + value.url + 
-                  "' loop='loop' autoplay = true muted = true" +
+                  "' width='640' height='480'" + 
+                  " loop='loop' autoplay muted" +
                   " style='position: absolute; left: 0; top: 0; z-index: -8; width: 100%; height: 60%'>" +
                 "</video>" +
               "</div>"
             );
             localVideoDiv = 'calibrate-'+videoId;
+            videoE = $( '#' + localVideoDiv )[0];
+            if ( videoE && value.url ) {
+              //attachMediaStream( videoE, value.url );
+              videoE.src = value.url;
+              videoE.muted = true;  // firefox isn't mapping the muted property correctly
+            }            
           } else {
             if ( !fullScreenVideo ) {
               //console.info( "create fullscreen video: " + value.url );
@@ -220,14 +218,20 @@
               $container.append(
                 "<div id='"+ divId + "'>" +
                   "<video class='vwf-webrtc-video' id='" + videoId +
-                    "' width='640' height='480' src='" + value.url + 
-                    "' loop='loop' autoplay = true" +
+                    "' width='640' height='480'" + 
+                    " loop='loop' autoplay" +
                     " style='position: absolute; left: 0; top: 0; z-index: -1; width: 100%; height: 60%;'>" +
                   "</video>" +
                 "</div>"
               );
               fullScreenVideo = true;
               fullScreenVideoDiv = videoId;
+
+              videoE = $( '#' + videoId )[0];
+              if ( videoE && value.url ) {
+                //attachMediaStream( videoE, value.url );
+                videoE.src = value.url;
+              }                 
 
               // Get css top value if local video has been calibrated
               var top = parseInt( $('#'+localVideoDiv).css("top") );
@@ -241,25 +245,36 @@
               $container.append(
                 "<div id='sm-"+ divId + "'>" +
                   "<video class='vwf-webrtc-video' id='sm-" + videoId +
-                    "' width='320' height='240' src='" + value.url + 
-                    "' loop='loop' autoplay = true" +
+                    "' width='320' height='240'" + 
+                    " loop='loop' autoplay" +
                     " style='position: absolute; right: 0px; top: 0px; z-index: 16; visibility: hidden'>" +
                   "</video>" +
                 "</div>"
               );
+              videoE = $( '#' + videoId )[0];
+              if ( videoE && value.url ) {
+                //attachMediaStream( videoE, value.url );
+                videoE.src = value.url;
+              }  
             } else {
               $container.append(
                 "<div id='"+ divId + "'>" +
                   "<video class='vwf-webrtc-video' id='" + videoId +
-                    "' width='320' height='240' src='" + value.url + 
-                    "' loop='loop' autoplay = true" +
+                    "' width='320' height='240'" + 
+                    " loop='loop' autoplay" +
                     " style='position: absolute; left: 0; top: 0; z-index: 16;'>" +
                   "</video>" +
                 "</div>"
               );
               $('#'+divId).draggable();
+              videoE = $( '#' + videoId )[0];
+              if ( videoE && value.url ) {
+                //attachMediaStream( videoE, value.url );
+                videoE.src = value.url;
+              }                
             }
           }
+
         }
 
         var mainVideo = true;

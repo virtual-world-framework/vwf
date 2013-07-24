@@ -16,4 +16,4 @@ model:
   vwf/model/cesium:
 view:
   vwf/view/cesium: { cesium: 'widget', parentDiv: 'cesium-main', invertMouse: { x: true } }
-  vwf/view/webrtc: { audio: true, video: true, videoProperties: { create: false }, debug: true, videoElementsDiv: undefined }
+  vwf/view/webrtc: { audio: true, video: true, videoProperties: { create: false }, debug: false }
