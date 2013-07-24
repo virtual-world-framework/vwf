@@ -52,10 +52,12 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
             if ( options === undefined ) { options = {}; }
 
             this.cesiumType = options.cesium !== undefined ? options.cesium : 'widget'; // 'widget', 'viewer', manual - anything else 
+            this.canvasOptions = options.canvasOptions;
             this.parentDiv = options.parentDiv !== undefined ? options.parentDiv : 'body';
             this.parentClass = options.parentClass !== undefined ? options.parentClass : 'cesium-main-div';
             this.container = options.container !== undefined ? options.container : { "create": true, "divName": "cesiumContainer" } ;
             this.invertMouse = options.invertMouse !== undefined ? options.invertMouse : {};
+
 
             this.height = 600;
             this.width = 800;
@@ -121,18 +123,20 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
                 var view = this;
                 var forceResizeDelay = 60;
                 var scene, canvas;
-                var cesiumOptions = { "contextOptions": { "alpha": true }, }; 
+                
+                // options for oneToOne below
+                //var cesiumOptions = { "contextOptions": { "alpha": true }, }; 
 
                 switch ( this.cesiumType ) {
 
                     case 'widget':
-                        node.cesiumWidget = new Cesium.CesiumWidget( this.container.divName, cesiumOptions );
+                        node.cesiumWidget = new Cesium.CesiumWidget( this.container.divName, this.canvasOptions );
                         node.centralBody = node.cesiumWidget.centralBody;
                         node.scene = scene = node.cesiumWidget.scene;
                         break;
 
                     case 'viewer':
-                        node.cesiumViewer = new Cesium.Viewer( this.container.divName );
+                        node.cesiumViewer = new Cesium.Viewer( this.container.divName, this.canvasOptions );
                         node.cesiumWidget = node.cesiumViewer.cesiumWidget;
                         node.centralBody = node.cesiumViewer.centralBody;
                         node.scene = scene = node.cesiumViewer.scene;
