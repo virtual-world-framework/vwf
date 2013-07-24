@@ -15,4 +15,4 @@
 model:
   vwf/model/cesium:
 view:
-  vwf/view/cesium: { cesium: 'widget' }
+  vwf/view/cesium: { cesium: 'widget', parentDiv: 'cesium-main' }
