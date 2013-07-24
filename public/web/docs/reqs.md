@@ -1,4 +1,5 @@
-System Requirements
+<div class="well" markdown="1">
+Browser Requirements
 ===================
 -------------------
  
@@ -14,6 +15,23 @@ The following browsers are recommended for use:
 *   [Chrome 27+](https://www.google.com/intl/en/chrome/browser/)
 *   [Firefox 21+](http://www.mozilla.org/en-US/firefox/new/)
 *   [Opera 15+](http://www.opera.com/developer/next)
+</div>
+
+<div class="well" markdown="1">
+VWF Compatibility Quirks
+===================
+-------------------
+
+WINDOWS
 
 *   At this time we have limited support for Internet Explorer 10. Please see our demos of Google Earth and Tile Puzzle 2D to see what can be done with the framework without WebGL.  
+
 *   Internet Explorer 11 is rumored at this time to support WebGL, and we are constantly looking to the future of modern browsers to determine how well the Virtual World Framework is supported.
+
+MACINTOSH OS X
+
+*   Safari 5 is experiencing some issues at this time. We are working through multiple issues with Safari to get VWF and Safari compatibility completed.
+
+*   Firefox 22 Proxy Support for firewalls requires that under Firefox -> Preferences -> Network -> Settings, you must select "Manual Proxy Configuration", and place a check in the "use this proxy server for all protocols" checkbox.
+
+</div>
