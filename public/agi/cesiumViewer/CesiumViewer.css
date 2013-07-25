@@ -1,6 +1,6 @@
 @import url(vwf/model/Widgets/Viewer/Viewer.css);
-@import url(vwf/model/Source/Widgets/Viewer/lighter.css);
-@import url(vwf/model/Source/Widgets/checkForChromeFrame.css);
+@import url(vwf/model/Widgets/Viewer/lighter.css);
+@import url(vwf/model/Widgets/checkForChromeFrame.css);
 
 body {
     height: 100%;
