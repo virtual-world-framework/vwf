@@ -13,8 +13,10 @@ function trace(text) {
   console.log((performance.now() / 1000).toFixed(3) + ": " + text);
 }
 
+console.log( navigator.userAgent );
+
 if (navigator.mozGetUserMedia) {
-  console.log("This appears to be Firefox");
+  console.log( "This appears to be Firefox: " + navigator.vendor );
 
   webrtcDetectedBrowser = "firefox";
 
@@ -76,7 +78,7 @@ if (navigator.mozGetUserMedia) {
     return [];
   };
 } else if (navigator.webkitGetUserMedia) {
-  console.log("This appears to be Chrome");
+  console.log("This appears to be Chrome: " + navigator.vendor);
 
   webrtcDetectedBrowser = "chrome";
   webrtcDetectedVersion =
@@ -150,5 +152,5 @@ if (navigator.mozGetUserMedia) {
     };
   }
 } else {
-  console.log("Browser does not appear to be WebRTC-capable");
+  console.log("Browser does not appear to be WebRTC-capable: " + navigator.vendor);
 }
