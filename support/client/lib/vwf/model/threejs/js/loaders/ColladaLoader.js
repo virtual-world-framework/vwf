@@ -755,8 +755,10 @@ THREE.ColladaLoader = function () {
 
 						// Get bind vertex input data from the instance material and assign it to applicable textures
 						if(instance_material.bindVertexInputs ) {
-							for(var i = 0; i < instance_material.bindVertexInputs.length; i++) {
-								var bindVertexInput = instance_material.bindVertexInputs[i];
+							// i is being used in the outer most for loop.
+							// updating since this is causing an infinite loop
+							for( var k = 0; k < instance_material.bindVertexInputs.length; k++ ) {
+								var bindVertexInput = instance_material.bindVertexInputs[k];
 								if(bindVertexInput.input_set > 0) {
 									if(material3js.map && material3js.map.texcoord == bindVertexInput.semantic) {
 										material3js.map.input_set = bindVertexInput.input_set;
