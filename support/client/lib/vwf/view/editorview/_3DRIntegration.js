@@ -290,10 +290,13 @@ define(["vwf/view/editorview/Editor"], function (Editor)
 			pos[2] = Editor.SnapTo(pos[2], Editor.MoveSnap);
 			if (_ModelLibrary.MetadataCache[pid].AnonymousDownloadAvailable)
 			{
+			
+				
+				
 				var proto = {
-					extends: '3DRObject.vwf',
+					extends: 'asset.vwf',
 					source: _ModelLibrary.BuildModelRequest(pid),
-					type: 'model/vnd.osgjs+json+compressed',
+					type: 'subDriver/threejs/asset/vnd.osgjs+json+compressed',
 					properties: {
 						rotation: [1, 0, 0, 0],
 						translation: pos,

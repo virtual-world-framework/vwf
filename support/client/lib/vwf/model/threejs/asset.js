@@ -1,0 +1,252 @@
+(function(){
+		function asset(childID, childSource, childName, childType, assetSource, asyncCallback, assetRegistry)
+		{
+			this.inherits = ['vwf/model/threejs/transformable.js','vwf/model/threejs/materialDef.js'];
+			this.initializingNode = function()
+			{
+				this.materialDef = null;
+			}
+			this.gettingProperty = function(propertyName)
+			{
+				
+				
+			}
+			this.settingProperty = function(propertyName,propertyValue)
+			{
+				
+			}
+			this.gettingProperty = function(propertyName)
+			{
+				if(propertyName == 'materialDef')
+				{
+					if(this.materialDef == null)
+					{
+						
+						var list = [];
+						this.GetAllLeafMeshes(this.rootnode,list);
+						return this.getDefForMaterial(list[0].material);
+					
+					}else
+					{
+						return this.materialDef;
+					}
+				}
+			}
+			//must be defined by the object
+			this.getRoot = function()
+			{
+				return this.rootnode;
+			}
+			this.rootnode = new THREE.Object3D();
+			
+			//for the subNode case
+			this.setAsset = function(asset)
+			{
+			
+			
+			}
+			this.loadFailed = function()
+			{
+				$(document).trigger('EndParse');
+				if(window._Notifier)
+					_Notifier.alert('error loading asset');
+			
+			}
+			this.loaded = function(asset)
+			{
+				
+				this.getRoot().add(asset.scene);
+				$(document).trigger('EndParse',['Loading...',assetSource]);
+				
+				
+				//get the entry from the asset registry
+				reg = this.assetRegistry[this.assetSource];
+				//it's not pending, and it is loaded
+				reg.pending = false;
+				reg.loaded = true;
+				//store this asset in the registry
+				reg.node = asset.scene.clone();
+				
+				var list = [];
+					
+					this.GetAllLeafMeshes(reg.node,list);
+					for(var i =0; i < list.length; i++)
+						if(list[i].material)
+						{
+							list[i].material = list[i].material.clone();
+							list[i].materialUpdated();
+						}
+				console.log(' asset loaded');
+				this.settingProperty('materialDef',this.materialDef);
+				//if any callbacks were waiting on the asset, call those callbacks
+				for(var i = 0; i < reg.callbacks.length; i++)
+					reg.callbacks[i](asset.scene);
+				//nothing should be waiting on callbacks now.	
+				reg.callbacks = [];	
+				
+				
+				asyncCallback(true);
+				
+				
+			
+			}.bind(this);
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+		this.assetRegistry	= assetRegistry;
+		this.assetSource = assetSource;
+			
+			// if there is no entry in the registry, create one
+		if(!assetRegistry[assetSource])
+		{
+			//its new, so not waiting, and not loaded
+			assetRegistry[assetSource] = {};
+			assetRegistry[assetSource].loaded = false;
+			assetRegistry[assetSource].pending = false;
+			assetRegistry[assetSource].callbacks = [];
+		}
+		this.GetAllLeafMeshes = function(threeObject,list)
+			{
+				if(threeObject instanceof THREE.Mesh)
+				{
+					list.push(threeObject);
+				}
+				if(threeObject.children)
+				{
+					for(var i=0; i < threeObject.children.length; i++)
+					{
+						GetAllLeafMeshes(threeObject.children[i],list);
+					}               
+				}     
+			}
+			
+			//grab the registry entry for this asset
+			var reg = assetRegistry[assetSource];
+			
+			//if the asset entry is not loaded and not pending, you'll have to actaully go download and parse it
+			if(reg.loaded == false && reg.pending == false)
+			{
+				//thus, it becomes pending
+				reg.pending = true;
+				asyncCallback( false );
+			
+				$(document).trigger('BeginParse',['Loading...',assetSource]);
+				
+				if(childType == 'subDriver/threejs/asset/vnd.collada+xml')
+				{
+					this.loader = new THREE.ColladaLoader();
+					this.loader.load(assetSource,this.loaded);
+					console.log('beginning load');
+					asyncCallback(false);
+				}
+				if(childType == 'subDriver/threejs/asset/vnd.osgjs+json+compressed')
+				{
+					
+					this.loader = new UTF8JsonLoader({source:assetSource},this.loaded,this.loadFailed);
+					console.log('beginning load');
+					asyncCallback(false);
+				}
+				
+				
+				
+			}
+			//if the asset registry entry is not pending and it is loaded, then just grab a copy, no download or parse necessary
+			else if(reg.loaded == true && reg.pending == false)
+			{
+				this.getRoot().add(reg.node.clone());
+				var list = [];
+					
+					this.GetAllLeafMeshes(this.rootnode,list);
+					for(var i =0; i < list.length; i++)
+						if(list[i].material)
+						{
+							list[i].material = list[i].material.clone();
+							list[i].materialUpdated();
+						}
+					
+					
+					this.settingProperty('materialDef',this.materialDef);
+				$(document).trigger('EndParse');
+			}
+			//if it's pending but not done, register a callback so that when it is done, it can be attached.
+			else if(reg.loaded == false && reg.pending == true)
+			{	
+				
+			
+				asyncCallback( false );
+				
+				var tcal = asyncCallback;
+				reg.callbacks.push(function(node)
+				{
+					
+					//just clone the node and attach it.
+					//this should not clone the geometry, so much lower memory.
+					//seems to take near nothing to duplicated animated avatar
+					$(document).trigger('EndParse');
+					this.getRoot().add(node.clone());
+					
+					var list = [];
+					
+					this.GetAllLeafMeshes(this.rootnode,list);
+					for(var i =0; i < list.length; i++)
+						if(list[i].material)
+						{
+							list[i].material = list[i].material.clone();
+							list[i].materialUpdated();
+						}
+					
+					console.log('pending asset ready and loaded');
+					this.settingProperty('materialDef',this.materialDef);
+					this.getRoot().updateMatrixWorld(true);
+					this.getRoot().sceneManagerUpdate();
+					tcal( true );
+				}.bind(this));
+			}	
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			//this.Build();
+		}
+		//default factory code
+        return function(childID, childSource, childName, childType, assetSource, asyncCallback) {
+			//name of the node constructor
+
+			
+			
+		//create an asset registry if one does not exist for this driver
+		if(!this.assetRegistry)
+		{
+			this.assetRegistry = {};
+		}
+		
+    	    
+	    
+            return new asset(childID, childSource, childName, childType, assetSource, asyncCallback, this.assetRegistry);
+        }
+})();

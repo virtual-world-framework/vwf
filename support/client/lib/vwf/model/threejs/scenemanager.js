@@ -1,7 +1,7 @@
 var maxObjects = 1; 
 var maxDepth = 16;
 var batchAtLevel = 4;
-var drawSceneManagerRegions = false;
+var drawSceneManagerRegions = true;
 
 function SceneManager(scene)
 {
@@ -245,6 +245,7 @@ SceneManager.prototype.initialize = function(scene)
 }
 SceneManager.prototype.addChild = function(c)
 {
+	
 	this.root.addChild(c);
 }
 SceneManager.prototype.removeChild = function(c)

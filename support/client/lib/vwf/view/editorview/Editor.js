@@ -1352,6 +1352,33 @@ define(function ()
 			BoxProto.type = 'subDriver/threejs';
 			BoxProto.source = 'vwf/model/threejs/' + type + '.js';
 			var proto = BoxProto;
+			
+			var defaultmaterialDef = {
+			    shininess:15,
+			    alpha:1,
+			    ambient:{r:1,g:1,b:1},
+			    color:{r:1,g:1,b:1,a:1},
+			    emit:{r:0,g:0,b:0},
+			    reflect:0.8,
+			    shadeless:false,
+			    shadow:true,
+			    specularColor:{r:0.5773502691896258,g:0.5773502691896258,b:0.5773502691896258},
+			    specularLevel:1,
+			    layers:[
+			      {  alpha: 1,
+				blendMode: 0,
+				mapInput: 0,
+				mapTo: 1,
+				offsetx: 0,
+				offsety: 0,
+				rot: 0,
+				scalex: 1,
+				scaley: 1,
+				src: "checker.jpg"}
+			    ]
+			}
+			
+			proto.properties.materialDef = defaultmaterialDef;
 			proto.properties.size = size;
 			proto.properties.translation = translation;
 			proto.properties.scale = [1, 1, 1];
@@ -2608,20 +2635,20 @@ define(function ()
 				{
 					value.layers.push(
 					{});
-					value.layers[i].mapTo = i + 1;
-					value.layers[i].scalex = map.repeat.x;
-					value.layers[i].scaley = map.repeat.y;
-					value.layers[i].offsetx = map.offset.x;
-					value.layers[i].offsety = map.offset.y;
-					if (i == 1) value.layers[i].alpha = -currentmat.alphaTest + 1;
-					if (i == 4) value.layers[i].alpha = currentmat.normalScale.x;
-					if (i == 2) value.layers[i].alpha = currentmat.bumpScale;
+					value.layers[value.layers.length-1].mapTo = i + 1;
+					value.layers[value.layers.length-1].scalex = map.repeat.x;
+					value.layers[value.layers.length-1].scaley = map.repeat.y;
+					value.layers[value.layers.length-1].offsetx = map.offset.x;
+					value.layers[value.layers.length-1].offsety = map.offset.y;
+					if (i == 1) value.layers[value.layers.length-1].alpha = -currentmat.alphaTest + 1;
+					if (i == 4) value.layers[value.layers.length-1].alpha = currentmat.normalScale.x;
+					if (i == 2) value.layers[value.layers.length-1].alpha = currentmat.bumpScale;
 					value.layers[i].src = map.image.src;
-					if (map.mapping instanceof THREE.UVMapping) value.layers[i].mapInput = 0;
-					if (map.mapping instanceof THREE.CubeReflectionMapping) value.layers[i].mapInput = 1;
-					if (map.mapping instanceof THREE.CubeRefractionMapping) value.layers[i].mapInput = 2;
-					if (map.mapping instanceof THREE.SphericalReflectionMapping) value.layers[i].mapInput = 3;
-					if (map.mapping instanceof THREE.SphericalRefractionMapping) value.layers[i].mapInput = 4;
+					if (map.mapping instanceof THREE.UVMapping) value.layers[value.layers.length-1].mapInput = 0;
+					if (map.mapping instanceof THREE.CubeReflectionMapping) value.layers[value.layers.length-1].mapInput = 1;
+					if (map.mapping instanceof THREE.CubeRefractionMapping) value.layers[value.layers.length-1].mapInput = 2;
+					if (map.mapping instanceof THREE.SphericalReflectionMapping) value.layers[value.layers.length-1].mapInput = 3;
+					if (map.mapping instanceof THREE.SphericalRefractionMapping) value.layers[value.layers.length-1].mapInput = 4;
 				}
 			}
 			return value;
@@ -2735,17 +2762,19 @@ define(function ()
 		this.loadMesh = function(url,type)
 		{
 			
-			if( !type)
-				type = 'model/vnd.collada+xml';
 			var Proto = 
 			{
-				extends: 'http://vwf.example.com/node3.vwf',
+				extends: 'asset.vwf',
 				source: url,
-				type: type,
+				type : 'subDriver/threejs/asset/vnd.collada+xml',
 				properties: {
-					PlayerNumber: 1,
+					owner: _UserManager.GetCurrentUserName()
 				}
 			};
+			
+			
+		
+			
 			
 			var newintersectxy = self.GetInsertPoint();
 			Proto.properties.owner = _UserManager.GetCurrentUserName();

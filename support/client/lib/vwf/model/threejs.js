@@ -346,7 +346,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 				//set of gets and sets
 				else if(childType ==  "subDriver/threejs")
 				{
-					node = this.state.nodes[childID] = this.subDriverFactory.createNode(childID, childSource, childName);
+					
+					node = this.state.nodes[childID] = this.subDriverFactory.createNode(childID, childSource, childName, childType, null, callback);
 
 					node.name= childName,    
 					node.ID=childID;
@@ -358,7 +359,23 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 					node.threeObject = new THREE.Object3D();
 					node.threeObject.add(node.getRoot());
 					threeParent.add(node.threeObject);
-				} 
+				}
+				else if(childType ==  "subDriver/threejs/asset/vnd.collada+xml" || childType ==  "subDriver/threejs/asset/vnd.osgjs+json+compressed")
+				{
+					
+					node = this.state.nodes[childID] = this.subDriverFactory.createNode(childID, 'vwf/model/threejs/asset.js', childName, childType, childSource, callback);
+
+					node.name= childName,    
+					node.ID=childID;
+					node.parentID= nodeID;
+					node.sourceType= childType;
+					node.type= childExtendsID;
+					node.sceneID= this.state.sceneRootID;
+
+					node.threeObject = new THREE.Object3D();
+					node.threeObject.add(node.getRoot());
+					threeParent.add(node.threeObject);
+				}				
 				else
 				{     
                         
@@ -589,7 +606,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 															
                             }
                         
-                        }else if (propertyValue instanceof Array)
+                        }else if (propertyValue instanceof Array || propertyValue instanceof Float32Array)
                         {
 								
                                 var lookatPosition = new THREE.Vector3();
@@ -2979,17 +2996,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 			return factory;
 		
 		}
-		this.createNode = function(childID, childSource, childName)
+		this.createNode = function(childID, childSource, childName, sourceType, assetSource, asyncCallback)
 		{			
 			
 			var APINames = ['callingMethod','settingProperty','gettingProperty','initializingNode','addingChild','deletingNode','ticking'];
 			var node = null;
 			if(this.factories[childSource])
-				node = this.factories[childSource](childID, childSource, childName);
+				node = this.factories[childSource](childID, childSource, childName,sourceType,assetSource,asyncCallback);
 			else
 			{
 				this.factories[childSource] = this.loadSubDriver(childSource);
-				node = this.factories[childSource](childID, childSource, childName);
+				node = this.factories[childSource](childID, childSource, childName,sourceType,assetSource,asyncCallback);
 			}
 			
 			if(node.inherits)

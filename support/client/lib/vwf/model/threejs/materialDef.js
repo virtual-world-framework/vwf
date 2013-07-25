@@ -1,7 +1,7 @@
 (function(){
 		function materialDef(childID, childSource, childName)
 		{
-			this.materialDef = {
+		    this.defaultmaterialDef = {
                     shininess:15,
                     alpha:1,
                     ambient:{r:1,g:1,b:1},
@@ -34,6 +34,7 @@
 			}
 			this.setMaterialByDef = function(currentmat,value)
 			{
+				if(!value) return;
 				currentmat.color.r = value.color.r;
 				currentmat.color.g = value.color.g;
 				currentmat.color.b = value.color.b;
@@ -165,12 +166,12 @@
 			}
 			this.settingProperty = function(propname,propval)
 			{
-				if(propname == 'materialDef')
+				if(propname == 'materialDef' && propval && propval.layers)
 				{
 					
 					var needRebuild = false;
 					
-					if(propval.layers.length > this.materialDef.layers.length)
+					if(this.materialDef && propval.layers.length > this.materialDef.layers.length)
 						needRebuild = true;
 						
 					this.materialDef = propval;
@@ -183,6 +184,7 @@
 						this.setMaterialByDef(list[i].material || new THREE.MeshPhongMaterial,propval);
 						list[i].materialUpdated();
 					}
+					console.log("materialDef set on",list,propval);
 					if(this.dirtyStack && needRebuild)
 					{
 						
@@ -194,9 +196,65 @@
 			{
 				if(propname == 'materialDef')
 				{
-					return this.materialDef;
+					return this.materialDef || this.defaultmaterialDef;
 				}
 			}
+		this.getDefForMaterial = function (currentmat)
+		{
+		   try{
+			var value = {};
+			value.color = {}
+			value.color.r = currentmat.color.r;
+			value.color.g = currentmat.color.g;
+			value.color.b = currentmat.color.b;
+			value.ambient = {}
+			value.ambient.r = currentmat.ambient.r;
+			value.ambient.g = currentmat.ambient.g;
+			value.ambient.b = currentmat.ambient.b;
+			value.emit = {}
+			value.emit.r = currentmat.emissive.r;
+			value.emit.g = currentmat.emissive.g;
+			value.emit.b = currentmat.emissive.b;
+			value.specularColor = {}
+			value.specularColor.r = currentmat.specular.r;
+			value.specularColor.g = currentmat.specular.g;
+			value.specularColor.b = currentmat.specular.b;
+			value.specularLevel = 1;
+			value.alpha = currentmat.alpha;
+			
+			 value.reflect = currentmat.reflectivity * 10;
+			var mapnames = ['map', 'bumpMap', 'lightMap', 'normalMap', 'specularMap'];
+			value.layers = [];
+			for (var i = 0; i < mapnames.length; i++)
+			{
+				var map = currentmat[mapnames[i]];
+				if (map)
+				{
+					value.layers.push(
+					{});
+					value.layers[value.layers.length-1].mapTo = i + 1;
+					value.layers[value.layers.length-1].scalex = map.repeat.x;
+					value.layers[value.layers.length-1].scaley = map.repeat.y;
+					value.layers[value.layers.length-1].offsetx = map.offset.x;
+					value.layers[value.layers.length-1].offsety = map.offset.y;
+					if (i == 1) value.layers[value.layers.length-1].alpha = -currentmat.alphaTest + 1;
+					if (i == 4) value.layers[value.layers.length-1].alpha = currentmat.normalScale.x;
+					if (i == 2) value.layers[value.layers.length-1].alpha = currentmat.bumpScale;
+					value.layers[value.layers.length-1].src = map.image.src;
+					if (map.mapping instanceof THREE.UVMapping) value.layers[value.layers.length-1].mapInput = 0;
+					if (map.mapping instanceof THREE.CubeReflectionMapping) value.layers[value.layers.length-1].mapInput = 1;
+					if (map.mapping instanceof THREE.CubeRefractionMapping) value.layers[value.layers.length-1].mapInput = 2;
+					if (map.mapping instanceof THREE.SphericalReflectionMapping) value.layers[value.layers.length-1].mapInput = 3;
+					if (map.mapping instanceof THREE.SphericalRefractionMapping) value.layers[value.layers.length-1].mapInput = 4;
+					
+				}
+			}
+			return value;
+			}catch(e)
+			{
+				return {}
+			}
+		}
 		}
 		//default factory code
         return function(childID, childSource, childName) {
