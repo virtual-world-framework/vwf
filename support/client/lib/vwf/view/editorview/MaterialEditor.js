@@ -168,23 +168,8 @@ define(["vwf/view/editorview/mapbrowser"], function ()
 			}
 			$('#MaterialBasicSettings').append('<div id="brightdiv" />');
 			$('#MaterialBasicSettings').append('<div style="clear:both" />');
-			$('#brightdiv').append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Full Bright: </div>');
-			$('#brightdiv').append('<select id="FullBright" style="float:right"><option value="true">true</option><option value="false">false</option></select>')
-			$('#MaterialBasicSettings').append('<div id="shadowdiv" />');
-			$('#shadowdiv').append('<div  style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Enable Shadows: </div>');
-			$('#shadowdiv').append('<select id="Shadows" style="float:right;clear:right"><option value="true">true</option><option value="false">false</option></select>')
-			$('#Shadows').val(this.currentMaterial.shadows + "");
-			$('#FullBright').val(this.currentMaterial.shadeless + "");
-			$('#FullBright').change(function ()
-			{
-				_MaterialEditor.currentMaterial.shadeless = $(this).val() == 'true';
-				_MaterialEditor.updateObject();
-			});
-			$('#Shadows').change(function ()
-			{
-				_MaterialEditor.currentMaterial.shadows = $(this).val() == 'true';
-				_MaterialEditor.updateObject();
-			});
+		
+			
 			var colorswatchstyle = "margin: 5px;float:right;clear:right;background-color: #FF19E9;width: 25px;height: 25px;border: 2px solid lightgray;border-radius: 3px;display: inline-block;margin-left: 20px;vertical-align: middle;box-shadow: 2px 2px 5px,1px 1px 3px gray inset;background-image: url(vwf/view/editorview/images/select3.png);background-position: center;";
 			$('#MaterialBasicSettings').append('<div style="clear:both" />');
 			$('#MaterialBasicSettings').append('<div style="margin-bottom:10px" id="colordiv" />');

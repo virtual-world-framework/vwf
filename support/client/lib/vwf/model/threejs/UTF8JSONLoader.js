@@ -117,7 +117,7 @@
 					console.log(src);
 					src = src.replace("AnonymousUser:@","");
 					
-					var tex = THREE.ImageUtils.loadTexture(src);
+					var tex = _SceneManager.getTexture(src);
 					
 					return tex;
 				}
@@ -296,6 +296,7 @@
             var newmaterial = null;
             if (node.stateset) {
                 newmaterial = new THREE.MeshPhongMaterial();
+				newmaterial.map = _SceneManager.getTexture('white.png');
                 if (node.stateset.textures) {
                     var textures = node.stateset.textures;
                     for ( var t = 0, tl = textures.length; t < tl; t++) {
@@ -314,7 +315,7 @@
                             tex = texture_load_callback(textures[t].file);
                         else
                         {
-                            tex = THREE.ImageUtils.loadTexture(textures[t].file);
+                            tex = _SceneManager.getTexture(textures[t].file);
                         }
                         if (tex) {
                             tex.wrapS = THREE.RepeatWrapping;
@@ -330,6 +331,7 @@
                     newmaterial.alpha = 1.0;
                     newmaterial.shininess = (node.stateset.material.shininess);
                     newmaterial.specular = (toColor(node.stateset.material.specular));
+					newmaterial.reflectivity = 0;
                     newmaterial.needsUpdate = true;
                 }
                 

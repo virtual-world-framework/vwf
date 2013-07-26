@@ -1,7 +1,7 @@
 var maxObjects = 1; 
 var maxDepth = 16;
 var batchAtLevel = 4;
-var drawSceneManagerRegions = true;
+var drawSceneManagerRegions = false;
 
 function SceneManager(scene)
 {
@@ -128,11 +128,34 @@ SceneManager.prototype.getTexture = function(src)
 	p = p.substring(p.lastIndexOf('/')+1);
 	src = src.replace(p,'');
 	
+	
 	if(!this.textureList)
 		this.textureList = {};
 	if(!this.textureList[src])
-		this.textureList[src]  = THREE.ImageUtils.loadTexture(src);
-	return this.textureList[src];	
+	{
+	
+		var tex = this.textureList[src];
+		
+		var onload = function(){
+		
+			if(tex.clones)
+			{
+				for(var i =0; i < tex.clones.length; i++)
+					tex.clones[i].needsUpdate = true;
+			
+			
+			}
+		}.bind(this);
+		
+		this.textureList[src]  = THREE.ImageUtils.loadTexture(src,new THREE.UVMapping(), onload);
+		var tex = this.textureList[src];
+		tex.clones = [];
+		return this.textureList[src];
+	}
+	var ret = this.textureList[src].clone();
+    ret.needsUpdate  = true;
+	this.textureList[src].clones.push(ret);
+    return ret;	
 }
 SceneManager.prototype.initialize = function(scene)
 {

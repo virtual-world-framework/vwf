@@ -62,7 +62,7 @@ define(function ()
 		"<div id='otherprops'>" +
 		"<input class='TransformEditorInput' style='width:50%;margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='text' id='dispName'>Name</input><br/>" +
 		"<input disabled='disabled' class='TransformEditorInput' style='width:50%;margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='text' id='dispOwner'>Owners</input><br/>" +
-		"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='isTransparent'>Transparent</input><br/>" +
+		
 		"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='isStatic'>Static</input><br/>" +
 		"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='castShadows'>Cast Shadows</input><br/>" +
 		"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='receiveShadows'>Receive Shadows</input><br/>" +
@@ -97,10 +97,7 @@ define(function ()
 		{
 			_PrimitiveEditor.hide();
 		});
-		$('#isTransparent').change(function (e)
-		{
-			_PrimitiveEditor.setProperty('selection', 'transparent', this.checked);
-		});
+		
 		$('#isStatic').change(function (e)
 		{
 			_PrimitiveEditor.setProperty('selection', 'isStatic', this.checked)
@@ -231,14 +228,7 @@ define(function ()
 						$('#dispName').val(node.name);
 					}
 					$('#dispOwner').val(vwf.getProperty(node.id, 'owner'));
-					if (vwf.getProperty(node.id, 'transparent'))
-					{
-						$('#isTransparent').attr('checked', 'checked');
-					}
-					else
-					{
-						$('#isTransparent').removeAttr('checked');
-					}
+					
 					if (vwf.getProperty(node.id, 'isStatic'))
 					{
 						$('#isStatic').attr('checked', 'checked');

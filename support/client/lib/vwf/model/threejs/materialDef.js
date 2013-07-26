@@ -108,6 +108,7 @@
 						if((currentmat[mapname] && currentmat[mapname].image && !currentmat[mapname].image.src.toString().endsWith(value.layers[i].src)) || !currentmat[mapname])
 						{
 							currentmat[mapname] = _SceneManager.getTexture(value.layers[i].src);
+							currentmat[mapname].needsUpdate = true;
 							//currentmat[mapname] = THREE.ImageUtils.loadTexture(value.layers[i].src);
 							
 						}
@@ -140,6 +141,9 @@
 				}
 				for(var i in mapnames)
 				{
+					if(mapnames[i] == 'map')
+						currentmat.map =  _SceneManager.getTexture('white.png');
+					else	
 					currentmat[mapnames[i]] = null;
 				}
 				if(currentmat.reflectivity)
@@ -220,8 +224,8 @@
 			value.specularColor.g = currentmat.specular.g;
 			value.specularColor.b = currentmat.specular.b;
 			value.specularLevel = 1;
-			value.alpha = currentmat.alpha;
-			
+			value.alpha = currentmat.opacity;
+			value.shininess = (currentmat.shininess || 0) / 5 ;
 			 value.reflect = currentmat.reflectivity * 10;
 			var mapnames = ['map', 'bumpMap', 'lightMap', 'normalMap', 'specularMap'];
 			value.layers = [];
@@ -237,9 +241,9 @@
 					value.layers[value.layers.length-1].scaley = map.repeat.y;
 					value.layers[value.layers.length-1].offsetx = map.offset.x;
 					value.layers[value.layers.length-1].offsety = map.offset.y;
-					if (i == 1) value.layers[value.layers.length-1].alpha = -currentmat.alphaTest + 1;
-					if (i == 4) value.layers[value.layers.length-1].alpha = currentmat.normalScale.x;
-					if (i == 2) value.layers[value.layers.length-1].alpha = currentmat.bumpScale;
+					if (i == 0) value.layers[value.layers.length-1].alpha = -currentmat.alphaTest + 1;
+					if (i == 3) value.layers[value.layers.length-1].alpha = currentmat.normalScale.x;
+					if (i == 1) value.layers[value.layers.length-1].alpha = currentmat.bumpScale;
 					value.layers[value.layers.length-1].src = map.image.src;
 					if (map.mapping instanceof THREE.UVMapping) value.layers[value.layers.length-1].mapInput = 0;
 					if (map.mapping instanceof THREE.CubeReflectionMapping) value.layers[value.layers.length-1].mapInput = 1;

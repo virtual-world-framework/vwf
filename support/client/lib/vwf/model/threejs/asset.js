@@ -74,8 +74,37 @@
 						if(list[i].material)
 						{
 							list[i].material = list[i].material.clone();
+							list[i].material.needsUpdate = true;
+							if(list[i].material.map)
+							{
+								list[i].material.map =  _SceneManager.getTexture(list[i].material.map.image.src);
+								list[i].material.map.needsUpdate = true;
+							}else
+							{
+								list[i].material.map =  _SceneManager.getTexture('white.png');
+								list[i].material.map.needsUpdate = true;
+							}
+							if(list[i].material.bumpMap)
+							{
+								list[i].material.bumpMap = list[i].material.bumpMap.clone();
+								list[i].material.bumpMap.needsUpdate = true;
+							}
+							if(list[i].material.lightMap)
+							{
+								list[i].material.lightMap = list[i].material.lightMap.clone();
+								list[i].material.lightMap.needsUpdate = true;
+							}
+							if(list[i].material.normalMap)
+							{
+								list[i].material.normalMap = list[i].material.normalMap.clone();
+								list[i].material.normalMap.needsUpdate = true;								
+							}
+											
 							list[i].materialUpdated();
 						}
+				
+					
+					
 				console.log(' asset loaded');
 				this.settingProperty('materialDef',this.materialDef);
 				//if any callbacks were waiting on the asset, call those callbacks
@@ -168,6 +197,38 @@
 						if(list[i].material)
 						{
 							list[i].material = list[i].material.clone();
+							list[i].material.needsUpdate = true;
+							
+				
+							if(list[i].material.map)
+							{
+								list[i].material.map = _SceneManager.getTexture(list[i].material.map.image.src);
+								list[i].material.map.needsUpdate = true;
+							}
+							else
+							{
+								list[i].material.map =  _SceneManager.getTexture('white.png');
+								list[i].material.map.needsUpdate = true;
+							}
+							if(list[i].material.bumpMap)
+							{
+								list[i].material.bumpMap = list[i].material.bumpMap.clone();
+								list[i].material.bumpMap.needsUpdate = true;
+							}
+							if(list[i].material.lightMap)
+							{
+								list[i].material.lightMap = list[i].material.lightMap.clone();
+								list[i].material.lightMap.needsUpdate = true;
+							}
+							if(list[i].material.normalMap)
+							{
+								list[i].material.normalMap = list[i].material.normalMap.clone();
+								list[i].material.normalMap.needsUpdate = true;								
+							}
+							
+						
+							
+							
 							list[i].materialUpdated();
 						}
 					
@@ -199,6 +260,35 @@
 						if(list[i].material)
 						{
 							list[i].material = list[i].material.clone();
+							list[i].material.needsUpdate = true;
+							
+							if(list[i].material.map)
+							{
+								list[i].material.map =  _SceneManager.getTexture(list[i].material.map.image.src);
+								list[i].material.map.needsUpdate = true;
+							}
+							else
+							{
+								list[i].material.map =  _SceneManager.getTexture('white.png');
+								list[i].material.map.needsUpdate = true;
+							}
+							if(list[i].material.bumpMap)
+							{
+								list[i].material.bumpMap = list[i].material.bumpMap.clone();
+								list[i].material.bumpMap.needsUpdate = true;
+							}
+							if(list[i].material.lightMap)
+							{
+								list[i].material.lightMap = list[i].material.lightMap.clone();
+								list[i].material.lightMap.needsUpdate = true;
+							}
+							if(list[i].material.normalMap)
+							{
+								list[i].material.normalMap = list[i].material.normalMap.clone();
+								list[i].material.normalMap.needsUpdate = true;								
+							}
+							
+							
 							list[i].materialUpdated();
 						}
 					
