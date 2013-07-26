@@ -16758,7 +16758,10 @@ THREE.ShaderChunk = {
 		"#if defined( USE_MAP ) || defined( USE_BUMPMAP ) || defined( USE_NORMALMAP ) || defined( USE_SPECULARMAP )",
 
 			"varying vec2 vUv;",
-			"uniform vec4 offsetRepeat;",
+			"uniform vec4 mapOffsetRepeat;",
+			"uniform vec4 bumpMapOffsetRepeat;",
+			"uniform vec4 normalMapOffsetRepeat;",
+			"uniform vec4 specularMapOffsetRepeat;",
 			"uniform int mapInputSet;",
 			"uniform int bumpMapInputSet;",
 			"uniform int normalMapInputSet;",
@@ -16788,25 +16791,25 @@ THREE.ShaderChunk = {
 
 		"#if defined( USE_MAP )",
 
-			"vUv = uvMap * offsetRepeat.zw + offsetRepeat.xy;",
+			"vUv = uvMap * mapOffsetRepeat.zw + mapOffsetRepeat.xy;",
 
 		"#endif",
 
 		"#if defined( USE_BUMPMAP )",
 
-			"vUv = uvBumpMap * offsetRepeat.zw + offsetRepeat.xy;",
+			"vUv = uvBumpMap * bumpMapOffsetRepeat.zw + bumpMapOffsetRepeat.xy;",
 
 		"#endif",
 
 		"#if defined( USE_NORMALMAP )",
 
-			"vUv = uvNormalMap * offsetRepeat.zw + offsetRepeat.xy;",
+			"vUv = uvNormalMap * normalMapOffsetRepeat.zw + normalMapOffsetRepeat.xy;",
 
 		"#endif",
 
 		"#if defined( USE_SPECULARMAP )",
 
-			"vUv = uvSpecularMap * offsetRepeat.zw + offsetRepeat.xy;",
+			"vUv = uvSpecularMap * specularMapOffsetRepeat.zw + specularMapOffsetRepeat.xy;",
 
 		"#endif"
 
@@ -18394,12 +18397,14 @@ THREE.UniformsLib = {
 
 		"map" : { type: "t", value: null },
 		"mapInputSet" : { type: "i", value: 0},
-		"offsetRepeat" : { type: "v4", value: new THREE.Vector4( 0, 0, 1, 1 ) },
+		"mapOffsetRepeat" : { type: "v4", value: new THREE.Vector4( 0, 0, 1, 1 ) },
 
 		"lightMap" : { type: "t", value: null },
 		"lightMapInputSet" : { type: "i", value: 0},
+		"lightMapOffsetRepeat" : { type: "v4", value: new THREE.Vector4( 0, 0, 1, 1 ) },
 		"specularMap" : { type: "t", value: null },
 		"specularMapInputSet" : { type: "i", value: 0},
+		"specularMapOffsetRepeat" : { type: "v4", value: new THREE.Vector4( 0, 0, 1, 1 ) },
 
 		"envMap" : { type: "t", value: null },
 		"flipEnvMap" : { type: "f", value: -1 },
@@ -18420,6 +18425,7 @@ THREE.UniformsLib = {
 		"bumpMap" : { type: "t", value: null },
 		"bumpScale" : { type: "f", value: 1 },
 		"bumpMapInputSet" : { type: "i", value: 0},
+		"bumpMapOffsetRepeat" : { type: "v4", value: new THREE.Vector4( 0, 0, 1, 1 ) },
 
 	},
 
@@ -18427,7 +18433,8 @@ THREE.UniformsLib = {
 
 		"normalMap" : { type: "t", value: null },
 		"normalScale" : { type: "v2", value: new THREE.Vector2( 1, 1 ) },
-		"normalMapInputSet" : { type: "i", value: 0}
+		"normalMapInputSet" : { type: "i", value: 0},
+		"normalMapOffsetRepeat" : { type: "v4", value: new THREE.Vector4( 0, 0, 1, 1 ) },
 	},
 
 	fog : {
@@ -21562,6 +21569,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 		vk, vkl, vka,
 		nka, chf, faceVertexNormals,
 		a,
+		uvArray,
 
 		vertexIndex = 0,
 
@@ -21580,7 +21588,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 		value,
 
 		vertexArray = geometryGroup.__vertexArray,
-		uvArray = geometryGroup.__uvArray,
+		uvArrays = geometryGroup.__uvArray,
 		normalArray = geometryGroup.__normalArray,
 		tangentArray = geometryGroup.__tangentArray,
 		colorArray = geometryGroup.__colorArray,
@@ -22223,13 +22231,14 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		if ( dirtyUvs && obj_uvs && uvType ) {
 
-			for(u = 0; u < obj_uvs.length; u++) {
+			for(j = 0; j < obj_uvs.length; j++) {
 				offset_uv = 0;
+				uvArray = uvArrays[j];
 				for ( f = 0, fl = chunk_faces3.length; f < fl; f ++ ) {
 
 					fi = chunk_faces3[ f ];
 
-					uv = obj_uvs[u][ fi ];
+					uv = obj_uvs[j][ fi ];
 
 					if ( uv === undefined ) continue;
 
@@ -22237,8 +22246,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 						uvi = uv[ i ];
 
-						uvArray[u][ offset_uv ]     = uvi.x;
-						uvArray[u][ offset_uv + 1 ] = uvi.y;
+						uvArray[ offset_uv ]     = uvi.x;
+						uvArray[ offset_uv + 1 ] = uvi.y;
 
 						offset_uv += 2;
 
@@ -22250,7 +22259,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 					fi = chunk_faces4[ f ];
 
-					uv = obj_uvs[u][ fi ];
+					uv = obj_uvs[j][ fi ];
 
 					if ( uv === undefined ) continue;
 
@@ -22258,8 +22267,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 						uvi = uv[ i ];
 
-						uvArray[u][ offset_uv ]     = uvi.x;
-						uvArray[u][ offset_uv + 1 ] = uvi.y;
+						uvArray[ offset_uv ]     = uvi.x;
+						uvArray[ offset_uv + 1 ] = uvi.y;
 
 						offset_uv += 2;
 
@@ -22272,35 +22281,35 @@ THREE.WebGLRenderer = function ( parameters ) {
 			if ( material.map ) {
 
 				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglUVMapBuffer );
-				_gl.bufferData( _gl.ARRAY_BUFFER, uvArray[material.map.input_set], hint );
+				_gl.bufferData( _gl.ARRAY_BUFFER, uvArrays[material.map.input_set], hint );
 
 			}
 
 			if ( material.lightMap ) {
 
 				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglUVLightMapBuffer );
-				_gl.bufferData( _gl.ARRAY_BUFFER, uvArray[material.lightMap.input_set], hint );
+				_gl.bufferData( _gl.ARRAY_BUFFER, uvArrays[material.lightMap.input_set], hint );
 
 			}
 
 			if ( material.specularMap ) {
 
 				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglUVSpecularMapBuffer );
-				_gl.bufferData( _gl.ARRAY_BUFFER, uvArray[material.specularMap.input_set], hint );
+				_gl.bufferData( _gl.ARRAY_BUFFER, uvArrays[material.specularMap.input_set], hint );
 
 			}
 
 			if ( material.bumpMap ) {
 
 				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglUVBumpMapBuffer );
-				_gl.bufferData( _gl.ARRAY_BUFFER, uvArray[material.bumpMap.input_set], hint );
+				_gl.bufferData( _gl.ARRAY_BUFFER, uvArrays[material.bumpMap.input_set], hint );
 
 			}
 
 			if ( material.normalMap ) {
 
 				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglUVNormalMapBuffer );
-				_gl.bufferData( _gl.ARRAY_BUFFER, uvArray[material.normalMap.input_set], hint );
+				_gl.bufferData( _gl.ARRAY_BUFFER, uvArrays[material.normalMap.input_set], hint );
 
 			}
 
@@ -25036,27 +25045,25 @@ THREE.WebGLRenderer = function ( parameters ) {
 		if ( material.map ) {
 
 			uvScaleMap = material.map;
+			uniforms.mapOffsetRepeat.value.set( uvScaleMap.offset.x, uvScaleMap.offset.y, uvScaleMap.repeat.x, uvScaleMap.repeat.y );
 
-		} else if ( material.specularMap ) {
+		} 
+		if ( material.specularMap ) {
 
 			uvScaleMap = material.specularMap;
+			uniforms.specularMapOffsetRepeat.value.set( uvScaleMap.offset.x, uvScaleMap.offset.y, uvScaleMap.repeat.x, uvScaleMap.repeat.y );
 
-		} else if ( material.normalMap ) {
+		} 
+		if ( material.normalMap ) {
 
 			uvScaleMap = material.normalMap;
+			uniforms.normalMapOffsetRepeat.value.set( uvScaleMap.offset.x, uvScaleMap.offset.y, uvScaleMap.repeat.x, uvScaleMap.repeat.y );
 
-		} else if ( material.bumpMap ) {
+		} 
+		if ( material.bumpMap ) {
 
 			uvScaleMap = material.bumpMap;
-
-		}
-
-		if ( uvScaleMap !== undefined ) {
-
-			var offset = uvScaleMap.offset;
-			var repeat = uvScaleMap.repeat;
-
-			uniforms.offsetRepeat.value.set( offset.x, offset.y, repeat.x, repeat.y );
+			uniforms.bumpMapOffsetRepeat.value.set( uvScaleMap.offset.x, uvScaleMap.offset.y, uvScaleMap.repeat.x, uvScaleMap.repeat.y );
 
 		}
 
