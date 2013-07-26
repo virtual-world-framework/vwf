@@ -308,6 +308,21 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
         },
 
+        // -- firedEvent -----------------------------------------------------------------------------
+
+        firedEvent: function( nodeID, eventName ) {
+            if ( eventName == "changingTransformFromView" ) {
+                var clientThatSatProperty = self.kernel.client();
+                var me = self.kernel.moniker();
+
+                // If the transform property was initially updated by this view....
+                if ( clientThatSatProperty == me ) {
+                    var node = this.state.nodes[ nodeID ];
+                    node.ignoreNextTransformUpdate = true;
+                }
+            }
+        },
+
         // -- ticked -----------------------------------------------------------------------------------
 
         ticked: function() {
@@ -2449,23 +2464,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             return;
         }
 
-        var clientThatSatProperty = self.kernel.client();
-        var me = self.kernel.moniker();
-
         // If the transform property was initially updated by this view....
-        if ( clientThatSatProperty == me ) {
-            if ( node.outstandingTransformRequestToBeIgnored && 
-                 node.outstandingTransformRequestToBeIgnored.length ) {
-                node.outstandingTransformRequestToBeIgnored.shift();
-            } else {
-
-                // We have not created a view-side update that this model-side one corresponds to
-                // Therefore, we must adopt this update
-                adoptTransform( node, transformMatrix );
-
-                // Initialize variable
-                node.outstandingTransformRequestToBeIgnored = [];
-            }
+        if ( node.ignoreNextTransformUpdate ) {
+            node.outstandingTransformRequestToBeIgnored.shift();
+            node.ignoreNextTransformUpdate = false;
         } else { // this transform change request is not from me
             adoptTransform( node, transformMatrix );
             if ( node.outstandingTransformRequestToBeIgnored ) {
@@ -2485,10 +2487,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var transformMatrix = matCpy( transform );
         var threeObject = node.threeObject;
 
-        if ( node == navObject ) {
-            extractRotationAndTranslation( threeObject );
-        }
-
         if ( threeObject instanceof THREE.Camera ) {  
             transformMatrix = convertCameraTransformFromVWFtoThreejs( transformMatrix );
         } else if( threeObject instanceof THREE.ParticleSystem ) {
@@ -2500,6 +2498,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         threeObject.matrix.elements = transformMatrix;
         updateRenderObjectTransform( threeObject );
+
+        if ( node == navObject ) {
+            extractRotationAndTranslation( threeObject );
+        }
+        
         nodeLookAt( node );
     }
 
@@ -2535,6 +2538,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 } else {
                     deltaModelTransform = deltaViewTransform;
                 }
+                vwf_view.kernel.fireEvent( nodeID, "changingTransformFromView");
                 vwf_view.kernel.callMethod( nodeID, "transformBy", [ deltaModelTransform ] );
                 node.outstandingTransformRequestToBeIgnored = node.outstandingTransformRequestToBeIgnored || [];
                 node.outstandingTransformRequestToBeIgnored.push( deltaViewTransform );
