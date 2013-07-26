@@ -150,7 +150,7 @@ define(function ()
 				var parent = this.selectedID;
 				var childname = HierarchyManager.selectedName;
 				var proto = {
-					extends: '3DRObject.vwf',
+					extends: 'asset.vwf',
 					type: "link_existing/threejs",
 					source: childname,
 					properties: {

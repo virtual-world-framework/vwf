@@ -12,7 +12,8 @@
                 {
 					
 					var threeObject = this.getRoot().parent;
-					
+					if(this.getRoot().initializedFromAsset)
+						threeObject = this.getRoot();
 					var transform = goog.vec.Mat4.createFromArray( propertyValue || [] );
 
 					// Rotate 90 degress around X to convert from VWF Z-up to MATH Y-up.
@@ -48,6 +49,8 @@
 				if(propertyName == 'transform')
                 {
 					var threeObject = this.getRoot().parent;
+					if(this.getRoot().initializedFromAsset)
+						threeObject = this.getRoot();
 					var value = matCpy(threeObject.matrix.elements); 
 					
 					if ( threeObject instanceof THREE.Camera ) {

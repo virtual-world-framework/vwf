@@ -314,16 +314,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
                     } 
                 } else if(childType ==  "link_existing/threejs")
 				{
+					//debugger;
+					node = this.state.nodes[childID] = this.subDriverFactory.createNode(childID, 'vwf/model/threejs/asset.js', childName, childType, null, callback);
 					
-					node = this.state.nodes[childID] = {
-						name: childName,  
-						threeObject: null,
-						ID: childID,
-						parentID: nodeID,
-						type: childExtendsID,
-						sourceType: childType, 
-					};
-					node.threeObject = FindChildByName(parentNode.threeObject,childSource);
+					node.name= childName;
+					node.threeObject= null;
+					node.ID= childID;
+					node.parentID= nodeID;
+					node.type= childExtendsID;
+					node.sourceType= childType;
+					
+					var scenenode = FindChildByName(parentNode.threeObject,childSource);
+					
+					node.setAsset(scenenode);
+					node.threeObject = scenenode;
 					//we need to mark this node - because the VWF node is layered onto a GLGE node loaded from the art asset, deleteing the VWF node should not
 					//delete the GLGE node. This should probably undo any changes made to the GLGE node by the VWF. This is tricky. I'm going to backup the matrix, and reset it
 					//when deleting the VWF node.
@@ -341,6 +345,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 						node.threeObject = new THREE.Object3D();
 						node.threeObject.vwfID = node.ID;
 					}
+					callback(true);
 				} 
 				//use a pluggable model for createing nodes. This should make it easier to develop a driver that is not one long
 				//set of gets and sets
@@ -443,14 +448,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 							
 						}
 					}
-					//This node is a sub node of an asset that was loaded by the VWF. Deleteing the VWF node should reset the asset sub node.
-					//we need to undo some of the changes made by the framework to this asset. 
-					//coded here for now, probably need a delete callback in the framworkd
-					else
-					{
-						
-							restoreObject(childNode.threeObject);
-					}
+					
 					
 					var parentNode = childNode.parentNode;
 					parentNode.children.splice(parentNode.children.indexOf(childNode));

@@ -1,6 +1,10 @@
 (function(){
 		function asset(childID, childSource, childName, childType, assetSource, asyncCallback, assetRegistry)
 		{
+		
+			
+		
+		
 			this.inherits = ['vwf/model/threejs/transformable.js','vwf/model/threejs/materialDef.js'];
 			this.initializingNode = function()
 			{
@@ -42,8 +46,40 @@
 			//for the subNode case
 			this.setAsset = function(asset)
 			{
+				this.initializedFromAsset = true;
+				this.backupmats = [];
+				this.backupMatrix = asset.matrix.clone();
+				this.rootnode = asset;
+				asset.initializedFromAsset = true;
+				var list = [];
+				this.GetAllLeafMeshes(this.rootnode,list);
+				for(var i =0; i < list.length; i++)
+				{
+					if(list[i].material)
+					{
+						this.backupmats.push([list[i],list[i].material.clone()]);
+					}					
+				}
+				
+				
 			
-			
+			}
+			this.deletingNode = function()
+			{
+				
+				if(this.initializedFromAsset)
+				{
+					
+					delete this.rootnode.vwfID;
+					//delete this.rootnode.initializedFromAsset;
+					
+					for(var i =0; i < this.backupmats.length; i++)
+					{
+						this.backupmats[i][0].material = this.backupmats[i][1];
+					}
+					this.rootnode.matrix = this.backupMatrix
+					this.rootnode.updateMatrixWorld(true);
+				}
 			}
 			this.loadFailed = function()
 			{
@@ -121,7 +157,12 @@
 			}.bind(this);
 			
 			
-			
+			//if there is no asset source, perhaps because this linked to an existing node from a parent asset, just continue with loading
+			if(!assetSource)
+			{
+				
+				return;
+			}
 			
 			
 			
