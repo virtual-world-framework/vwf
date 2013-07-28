@@ -546,8 +546,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                     // Begin handling properties
 
-                    if ( propertyName == 'transform' )
-                    {
+                    if ( propertyName == 'transform' ) {
+                        if ( !node.transform ) {
+                            self.logger.warnx( "Attempting to set the transform on an object that doesn’t have a transform");
+                        }
+
                         //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
                         var transformMatrix = goog.vec.Mat4.createFromArray( propertyValue || [] );
 						if(threeObject instanceof THREE.ParticleSystem)
@@ -2012,27 +2015,35 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if(asset.animations && asset.animations.length > 0) {
                 animations = asset.animations;
             }
+
+            if(asset.scene)
+                asset = asset.scene;
+            
+            asset.updateMatrixWorld();
+            
+            asset.matrix = new THREE.Matrix4();
+            asset.matrixAutoUpdate = false;
+            
+            nodeCopy.threeObject = asset.clone();
+
             if(asset.skins && asset.skins.length > 0) {
                 animatedMesh = asset.skins;
             }
 
-            //possibly deal with setting intial scale and rotation here, if threejs does something strange by default
-            //collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
-            if(asset.scene)
-                asset = asset.scene;
+            nodeCopy.threeObject.animatedMesh = animatedMesh;
+            parentObject3.add( nodeCopy.threeObject );
+            nodeCopy.threeObject.name = childName;
+            nodeCopy.threeObject.vwfID = nodeID;
 
-            nodeCopy.threeObject = asset;
-
-            asset.name = childName;
-            asset.vwfID = nodeID;
-            asset.matrixAutoUpdate = false;
             if(animations) {
                 var animHandler = THREE.AnimationHandler;
                 asset.kfAnimations = [];
                 asset.animations = animations;
+
                 // Initialize the key frame animations
                 for(var i = 0; i < animations.length; i++) {
                     var animation = animations[i];
+
                     // Save references to the animations on the node that is animated, so that it can play separately
                     if(animation.node.animations == undefined) {
                         animation.node.animations = [];
@@ -2081,7 +2092,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 meshes[i].geometry.uvsNeedUpdate = true;
             }
             
-            parentObject3.add( asset );
             if ( asset.updateMatrixWorld ) asset.updateMatrixWorld(true);
             
             nodeCopy.threeObject.matrixAutoUpdate = false;
@@ -2095,6 +2105,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             if ( node.threeObject )
             {
+
                 // Add a local model-side transform that can stay pure even if the view changes the
                 // transform on the threeObject - this already happened in creatingNode for those nodes that
                 // didn't need to load a model
@@ -2128,39 +2139,151 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             // let vwf know the asset is loaded 
             if ( nodeCopy.loadingCallback ) {
+
                 //console.info( "========= LOADED ========== "+node.name+" ========= LOADED ==========" );
                 nodeCopy.loadingCallback( true );                    
             }
+
+            //get the entry from the asset registry
+            reg = threeModel.assetRegistry[nodeCopy.source];
+            
+            //it's not pending, and it is loaded
+            reg.pending = false;
+            reg.loaded = true;
+            
+            //store this asset in the registry
+            reg.node = asset;
+            
+            //if any callbacks were waiting on the asset, call those callbacks
+            for( var i = 0; i < reg.callbacks.length; i++ ) {
+                reg.callbacks[i]( asset );
+            }
+            
+            //nothing should be waiting on callbacks now.  
+            reg.callbacks = [];  
+            
         }
         node.name = childName;
-        sceneNode.srcAssetObjects.push( node );
-        sceneNode.pendingLoads++;
+      
+        //create an asset registry if one does not exist for this driver
+        if( !this.assetRegistry ) {
+            this.assetRegistry = {};
+        }
         
-        if ( parentNode && parentNode.threeObject ) {
-            parentNode.threeObject.add(node.threeObject);
-         } else if ( sceneNode ) {
-            if ( sceneNode.threeScene ) {
-                sceneNode.threeScene.add( node.threeObject );
+        // if there is no entry in the registry, create one
+        if( !this.assetRegistry[node.source] ) {
+            
+            //it's new, so not waiting, and not loaded
+            this.assetRegistry[node.source] = {};
+            this.assetRegistry[node.source].loaded = false;
+            this.assetRegistry[node.source].pending = false;
+            this.assetRegistry[node.source].callbacks = [];
+        }
+        
+        //grab the registry entry for this asset
+        var reg = this.assetRegistry[node.source];
+        
+        //if the asset entry is not loaded and not pending, you'll have to actually go download and parse it
+        if( reg.loaded == false && reg.pending == false ) {
+            
+            //thus, it becomes pending
+            reg.pending = true;
+            
+            sceneNode.srcAssetObjects.push( node.threeObject );
+            
+            //node.threeObject.vwfID = nodeID;
+            sceneNode.pendingLoads++;
+          
+            //call up the correct loader/parser
+            if( childType == "model/vnd.collada+xml" ) {
+                node.parse = true;
+                node.loader = new THREE.ColladaLoader();
+                node.loader.options.convertUpAxis = true;
+                node.loader.options.upAxis = "Z";
+                node.loader.load(node.source,node.assetLoaded.bind( this ));
             }
-             
+          
+            if( childType == "model/vnd.osgjs+json+compressed" ) {
+                node.loader = new UTF8JsonLoader( node,node.assetLoaded.bind( this ) );
+            }
         }
-        ////////////////////////////////////
-        //manually call callback, since there is no async load currently
-        //assetLoaded(node.threeObject);
-        if(childType == "model/vnd.collada+xml")
-        {
-            node.loader = new THREE.ColladaLoader();
-            node.loader.options.convertUpAxis = true;
-            node.loader.options.upAxis = "Z";
-            node.loader.load(node.source, node.assetLoaded.bind( this ) );
+
+        //if the asset registry entry is not pending and it is loaded, then just grab a copy, 
+        //no download or parse necessary
+        else if( reg.loaded == true && reg.pending == false ) {
+            var asset = (reg.node.clone());
+            var n = asset;
+            var skins = [];
+            walkGraph( n, function( node ) {
+                if( node instanceof THREE.SkinnedMesh ) {
+                    skins.push( node );
+                }
+            });
+
+            n.animatedMesh = skins;
+            nodeCopy.threeObject = asset;
+            
+            nodeCopy.threeObject.matrix = new THREE.Matrix4();
+            nodeCopy.threeObject.matrixAutoUpdate = false;
+            parentObject3.add( nodeCopy.threeObject );
+            nodeCopy.threeObject.name = childName;
+            nodeCopy.threeObject.vwfID = nodeID;
+            nodeCopy.threeObject.matrixAutoUpdate = false;
+            nodeCopy.threeObject.updateMatrixWorld( true );
+            propertyNotifyCallback();
+            window.setTimeout( function() {
+                nodeCopy.loadingCallback( true ); 
+            }, 10);
+          
         }
-        if(childType == "model/vnd.osgjs+json+compressed")
-        {
-            node.loader = new UTF8JsonLoader(node, node.assetLoaded.bind( this ) );
+        
+        //if it's pending but not done, register a callback so that when it is done, it can be attached.
+        else if( reg.loaded == false && reg.pending == true ) {  
+            sceneNode.srcAssetObjects.push( node.threeObject );
+          
+            //so, not necessary to do all the other VWF node goo stuff, as that will be handled by the node that requested
+            //the asset in teh first place
+            
+            reg.callbacks.push( function( node ) {
+            
+            //just clone the node and attach it.
+            //this should not clone the geometry, so much lower memory.
+            //seems to take near nothing to duplicated animated avatar            
+            var n = node.clone();
+            var skins = [];
+            walkGraph( n, function( node ) {
+                if( node instanceof THREE.SkinnedMesh ) {
+                    skins.push( node );
+                }            
+            });
+            n.animatedMesh = skins;
+            nodeCopy.threeObject = n;            
+
+            nodeCopy.threeObject.matrix = new THREE.Matrix4();
+            nodeCopy.threeObject.matrixAutoUpdate = false;
+            parentObject3.add( nodeCopy.threeObject );
+            nodeCopy.threeObject.name = childName;
+            nodeCopy.threeObject.vwfID = nodeID;
+            nodeCopy.threeObject.updateMatrixWorld( true );
+            propertyNotifyCallback();
+            nodeCopy.loadingCallback( true ); 
+            
+            });
         }
             
-        
     }
+
+
+    function walkGraph( root, func ) {
+        if( root ) {
+            func( root );
+        }
+        for( var i =0; i < root.children.length; i++ ) {
+            walkGraph( root.children[i], func );
+        }
+    }
+
+
     function getObjectID( objectToLookFor, bubbleUp, debug ) {
 
         var objectIDFound = -1;
