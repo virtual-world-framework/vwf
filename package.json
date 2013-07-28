@@ -1,0 +1,42 @@
+{
+  "name": "vwf",
+  "version": "0.0.0",
+  "description": "Virtual World Framework\r =====================",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "crypto": "~0.0.3",
+    "forever": "~0.10.0",
+    "fs-extra": "~0.6.0",
+    "nstore": "~0.5.2",
+    "socket.io": "~0.9.13",
+    "async": "~0.2.7",
+    "mime": "~1.2.9",
+    "ws": "~0.4.25",
+    "js-yaml": "~2.0.2",
+    "express": "~3.2.3",
+    "hogan-express": "~0.3.3",
+    "node-gyp": "~0.8.4",
+    "gm": "~1.8.1",
+    "yamljs": "~0.1.4",
+    "npm": "~1.2.10",
+    "mongodb": "~1.2.14",
+    "node-inspector": "~0.2.0beta3",
+    "nodebug": "~0.1.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adlnet/Sandbox.git"
+  },
+  "author": "",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/adlnet/Sandbox/issues"
+  }
+}
