@@ -2,6 +2,425 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.6.13
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+Server: 
+- No updates to server for 0.6.13.
+
+Client:
+
+- NEW: Implements cxml import for cesium/node3.
+- NEW: Add support for assigning textures to multiple sets of texture coordinates. Copied from https://github.com/virtual-world-framework/three.js.git Refs #2464
+- NEW: Add support in three.js for assigning textures to multiple sets of texture coordinates. Refs #2464
+- NEW: Add support for both transparent modes in the collada loader. Refs #1860, #2464
+- NEW: Add animationRate property to control component. Fixes #2490. Fixes #2491.
+- NEW: Add debug to node3.vwf.yaml. refs #2462
+- NEW: Add necessary properties to support alpha channel transparency from textures in threejs. References #2311.
+- NEW: New cesium view option: invertMouse: { x and or y }  to invert the mouse due to the canvas being rotated
+- CHG: Remove stale touch view driver from core. To be replaced with updated hammer.js library and touch support in threejs. Refs #2456. Fixes #1643.
+- CHG: Updates the client user control to be the first user has control and does not release control to a up event.
+- CHG: Fixes an error in a for loop variable that had a wide variety of undesired side effects. Fixes: #2521
+- CHG: Fix getting/setting of light color. refs #1901
+- CHG: Update to three.js r59. Brought files over from vwf fork of three.js. refs #1860
+- CHG: Driver support for exposing the canvas Options. Plus allows the Cesium.Viewer to use those same options.
+- CHG: Fix setting webrtc video's muted property.  webrtc and cesium should work both in Chrome and Firefox. Fixes: 2478
+- CHG: Delays the setting of the url/stream until after the video element is created
+- CHG: Experimental support in the collada loader for assigning textures to multiple sets of texture coordinates. Refs #2464
+- CHG: Update the cross browser support to the latest version of the file from: https://code.google.com/p/webrtc/source/browse/trunk/samples/js/base/adapter.js version: https://code.google.com/p/webrtc/source/detail?spec=svn4384&r=4259 Fixes: 2478
+- CHG: Limits client control of broad casting the current camera location to the user who has created the latest mouse event.
+- CHG: Expand socket.io-sessionid-patch.js to account for other transports. fixes #2461
+- CHG: Have clients reuse websocket session id when reconnecting. Since the sessionid is used as the user's unique moniker, this will solve the problems we were having when a user would reconnect and the session would treat him as a new user. refs #2461
+- CHG: Remove default particle texture so that it doesn't cause 404 errors. Fixes #2268
+- CHG: Remove texture case so that settingProperty will be called for textures during synchronization. Refs #2438
+- CHG: Allow two users to control same object smoothly. fixes #2462
+- CHG: Simplify transformTo calculation when duration is 0. refs #2462
+- CHG: Add setting and initialization of property support for more material properties in three.js.Fixes #2241
+- CHG: Update camera input field style to italic if in focus, to indicate it is not updating. Fixes #2193.
+- CHG: Fix issue with passing encoded nodeID as nodeID. Fixes #1638.
+- CHG: Add a focus check for editor input fields. Only auto-update fields if a cursor is not active in a field. Fixes #2193.
+- CHG: Update editor delete node to properly delete the node. Add a call to delete the node from the editor's this.object, as well as to properly call splice passing in the index of the node to remove from node.parent.children. Fixes #2427.
+
+Demonstration Applications: 
+
+- CHG: AGI/Cesium: Updates the cesium canvas correctly so cesium will take up the entire browser view in Firefox. Fixes: 2228
+- CHG: BZFlag: Fix bzflag chat messaging. Refs #2291
+- CHG: BZFlag: Limit the number of shots that can be fired per keypress to improve performance. Refs #2124
+- CHG: BZFlag: Change find function to only look one level down. Refs #2124
+- CHG: Chat: Modify spacing in timestamp to use &nbsp; to avoid double spaces being treated as single space by browsers. Fixes #2501.
+- CHG: Chat: Add handlers to login name and change display name entry fields to recognize and handle pressing enter. Fixes #2472.
+- CHG: Chat: Add in tests and forbid blank username. Disable login and name change button when appropriate fields are blank. Fixes #2489.
+- CHG: Chat: Change timestamp to monospace font, update its format to consistent length, and place the timestamp before the username in the chat log in order to improve UI readability. Fixes #2501.
+- CHG: Chat: Update the 'at bottom of chat scroll' test for autoscrolling to have a small buffer so 'not quite 100% to the bottom' still counts as at bottom. Fixes #2473.
+- CHG: Cesium-webrtc: Adds more info out to the console about the current browser for webrtc apps.
+- CHG: Cesium-webrtc: Fix the name of the outer most div for the video elements.  It turns out that is you define the something as undefined in the driver options then the value is 'undefined' as a string.
+- CHG: Humvee: Change the humvee translationSpeed on interior camera view to match the humvee-lesson and make it easier to explore inside. Fixes #2492.
+- CHG: Humvee: Add function to sanitize username to avoid potential inject attacks. Add reaction to enter key presses for the login entry form. Add check to prevent weapons firing for users that have not yet logged in. Fixes #2481.  Fixes #2484.
+- CHG: Humvee: Update user score so that it is set correctly when a player reconnects. Refs #2438
+- CHG: Humvee: Fix start menu so that rejoin options work correctly. Limit rejoin options so they are only available for tanks of disconnected players. Refs #2438
+- CHG: Humvee: Only send updates if a key is being pressed. Refs #2438
+- CHG: Humvee Lesson: Verify control value is coming from STOP position on RUN step of humvee-lesson. Fixes #2499.
+- CHG: Marbles: Remove solitaire game marbles delayed creation workaround since creating children during initialization is now functional and workaround was acting inconsistent. Fixes #2319.
+- CHG: Marbles: Update graphic models in marbles application. References #2311.
+- CHG: Marbles: Update artwork in marbles application. References #2311.
+- CHG: Marbles: Add new model artwork. Update background to be emissive in order to remove lights added to light background. Remove outdated texture files. References #2311.
+- CHG: Marbles: Update the walls model. References #2311.
+- CHG: Marbles: Adding further model updates and small bumpScale tweaks. References #2311.
+- CHG: Marbles: Integrate updated models. References #2311.
+- CHG: Marbles: Add user messaging protocol, and send users messages to inform them that a solitaire game is already occupied if they attempt to join an already occupied solitaire game. Fixes #2319.
+- CHG: Minesweeper: Default minesweeper to threejs. Fixes #2529
+- CHG: Radio: Play static when squelch drops below 70. Fixes #2503.
+- CHG: Radio: Remove preventDefault call and add user-select css properties none to prevent highlighting. Fixes #2245.
+- CHG: Radio-Lesson: Remove preventDefault call and add user-select css properties none to prevent highlighting. Fixes #2245.
+- CHG: Radio-Lesson: Move prevent highlighting css from radio apps, to index.css for use on all apps. Refs #2245. Fixes #2475.
+- CHG: Sandtable: Add new followPath component to factor out common predator code, and update sandtable to use the followPath component for the predators. Remove unused old predator related files. Fixes #2410.
+- CHG: Sandtable: Update toolbar size since navigation button was removed. Fixes #2468.
+
+Documentation:
+- CHG: Add reference to the transforms example in the appropriate recipes. References #2091.
+- CHG: Add instructions to verify WebGL is enabled in the browser. Fixes #2520.
+- CHG: Updated page layout and content for Firefox Proxy information. Fixes #2422
+- CHG: Update multiuser recipe to reflect changes to multiuser app. fixes #1971
+
+Test Applications:
+- NEW: test/czml: Adds a simple application that loads czml into a cesium viewer based vwf application.
+- NEW: test/clientNotification: Add sample client notification test. Displays console output when a client joins or leaves. Refs #1274. Refs #2025.
+- CHG: test/dirlightPosY: Fix test/dirlightPosY to light actually changes in y axis instead of x. refs #1901
+
+----------------------------------
+0.6.12
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+Server: 
+
+- NEW: Create a global `clients.vwf` node and maintain one child per client. The server creates the global node `http://vwf.example.com/clients.vwf` on launch (independent of the application) then adds one child to it for each client connected to the application instance. The child's name is the client's moniker. In the default implementation, neither the `clients.vwf` node nor its children contain any additional data. It is expected that server installations that have user data to share will make that available to the application by creating the nodes with additional behaviors and properties. References #1272.
+
+Client:
+
+- NEW: Client: Implement mouse orbit refs #2258 fixes #2339
+- NEW*: API: Add `kernel.deleteChild` to delete a node by name. References #1272.
+- NEW*: API: Support annotations on top-level nodes and mark the application. Add a `nodeAnnotation` parameter to `createNode` to allow top-level nodes to be tagged. Interpret the "application" annotation as identifying the root of the application tree. Update the replication data to include the tags. This replaces the previous heuristic of treating the first node created as the application root. References #1272.
+- CHG: Client: Set the default value for active to false for the scenejs renderer
+- CHG: Client: Add in proper support for threejs nodes with multiple materials.
+- CHG: Client: Add in basic bumpScale option to control degree of bump mapping. References #2311.
+- CHG: Client: Fix for when findClients returns undefined. Refs #2424.
+- CHG: Client: Make spin-on-click only respond to left-clicks. fixes #2339
+- CHG: Client: Limit scroll speed to 9 times the translation speed. The idea is that if you scroll backward so far that things get clipped by the far plane or become so small that you can't scroll back in on them, it should only take you three scrolls forward on empty space (3 clicks per scroll) to get back where you were.  This solves the problem where a person can scroll out and get totally lost. fixes #2257
+- CHG: Client: Maintain a current list of clients in an application. As each client joins an application instance, a node is created as a child of the "clients" node, which is parallel to the application root node. Add a findClients kernel function, similar to the find function. Whereas the find function finds nodes descending from the application root node, the findClients function finds nodes descending from the clients node.The Users tab of the editor shows a list of all clients in the application instance. A user can choose to login, which will add a displayName property to its client node. This can be seen by drilling down into that client in the editor. Fixes #1951. Fixes #1998. Fixes #1275.
+- CHG: Client: Add sourceUrl to node3.transform.set for debugging refs #2259
+- CHG: Client: Fix FindChildByName so recursive calls recurse all the way down The next level down was not calling itself recursively so it only ever went down one level refs #2259
+- CHG: Client: Change key navigation while orbiting (and disable look and scroll). WS now move the user toward and away from the orbit point. ADQE now orbit the camera laterally around the orbit point. Right-click to rotate camera and scroll are disabled while middle mouse wheel are down. fixes #2258
+- CHG: Client: Make ThreeJSPick only return visible objects (ignoring invisible ones) refs #2258
+- CHG: Client: Added check when setting navmode to none to release cursor. Fixes #2374.
+- CHG: Client: Remove extra assignment of self variable refs #2257
+- CHG: Client: Make scroll-to-zoom work in Firefox, too refs #2257
+- CHG: Client: Move a "translationSpeed" distance when scrolling over a non-object refs #2257
+- CHG: Client: Add error checking to editor.js refs #2257
+- CHG: Client: Add scroll-to-zoom navigation in "fly" mode fixes #2257
+- CHG: Client: Disable pointer lock when navigation mode is "none". refs #2038
+- CHG: Client: Use pointer lock so mouse stays inside window during navigation. fixes #2038
+
+Demonstration Applications: 
+
+- CHG: BZFlag Demo: Clean up bzflag event handlers Refs #2291
+- CHG: BZFlag Demo: Fix collision detection between tanks. Clean up references to player objects. Refs #2291
+- CHG: BZFlag Demo: Fixes for using particles in threejs Refs #2291
+- CHG: BZFlag Demo: Remove navigable behavior Refs #2291
+- CHG: BZFlag Demo: Fix threejs bounding box calculations. Standardize bounding box return value to use objects. Refs #2040
+- CHG: BZFlag Demo: Change bzflag to use new navigation system Refs #2291
+- CHG: BZFlag Demo: Fix ambient color settings for bzflag models Refs #2291
+- CHG: Chat Demo: Fix error where heartbeats were being reset to undefined. Fixes #2426.
+- CHG: Chat Demo: Added tests for empty usernames to user joined chat message. Fixes #2443.
+- CHG: Chat Demo: Add call to fire userDeleted event for manual disconnects. Fixes #2407.
+- CHG: Chat Demo: Rename demochat to chat. Fixes #2334.
+- CHG: Chat Demo: Rewrite heartbeat mechanism to identify users solely by username to avoid NodeId/View moniker synch issues. Add time tracking to the users collector to try to smooth over and avoid time synch issues. Fixes #2344.
+- CHG: Chat Demo: Add vertical align to table cells to keep everything aliged to the top. Fixes #2225.
+- CHG: Chat Demo: Set word-wrap style to break-word to deal with super long words/URLs in chat. Fixes #2225.
+- CHG: Chat Demo: Fix issue with table rows not being placed in table with conversion to table layout for chat content. Fixes 2210. Fixes 2225.
+- CHG: Chat Demo: Fix bugs in javascript date to timestamp string method. Fixes #2332.
+- CHG: Chat Demo: Rework chat display to use tables to address multiple display issues. Fixes #2225 Fixes #2210
+- CHG: Chat Demo: Add max field length to username entry field. Fixes #2285.
+- CHG: Chat Demo: Add max length to user login name input field. Fixes #2317.
+- CHG: Chat Demo: Update html so text entry renders properly for firefox. Fixes #2215.
+- CHG: Cesium WebRTC Demo: Cesium global needed to be added to the view after the change to the way we load the lib
+- CHG: Cesium WebRTC Demo: Set muted='true' for the video elements, chrome stopped supporting just adding muted
+- CHG: Cesium WebRTC Demo: Latest version from cesium, switched from the built version to the source version
+- CHG: Cesium WebRTC Demo: Update to the driver options: combined a couple of properties into an object
+- CHG: Cesium WebRTC Demo: Add the earth to the application definition.
+- CHG: Cesium WebRTC Demo: Fix for the uniforms property of a Cesium.Material
+- CHG: Cesium WebRTC Demo: Update cesium-webrtc css and html files to adhere to VWF coding standards. Refs #2305.
+- CHG: Cesium WebRTC Demo: Use the webrtc drivers default video elements
+- CHG: Cesium WebRTC Demo: Calculate the distance to earth and set a reasonable minimum line distance for drawing
+- CHG: Cesium WebRTC Demo: Updated the default driver options for webrtc, if videoProperties.create replaces createVideoElements
+- CHG: Cesium WebRTC Demo: Use the default camera position
+- CHG: Cesium WebRTC Demo: Node variable changed in the view, but was never changed in the model
+- CHG: Cesium WebRTC Demo: Delete all polylines and billboards created from the toolbar on Reset
+- CHG: Cesium WebRTC Demo: Move the distance calculations to the view( html )
+- CHG: Cesium WebRTC Demo: Queue messages until an offer is received, and then process all messages after the offer. Added 'stereo' which can be set in the driver options. Attempted to fix the Firefox feedback issue.
+- CHG: Cesium WebRTC Demo: Reset initial camera position when reset button is clicked (cesium-webrtc) Refs #2305.
+- CHG: Cesium WebRTC Demo: Add 'yellow' to the named colors in the the color utility. Fixes #2381. Fixes #2378.
+- CHG: Cesium WebRTC Demo: Remove circular clear/clearing reference is cesium-webrtc. Refs #2305.
+- CHG: Cesium WebRTC Demo: Switch cesium-webrtc toolbar to use bootstrap. Refs #2305.
+- CHG: Cesium WebRTC Demo: Add reset/clear capability to cesium-webrtc demo.
+- CHG: Cesium WebRTC Demo: Polyline clearing still needs to be added to cesium driver. Refs #2305.
+- CHG: Cesium WebRTC Demo: Add delete billboard support to cesium driver. Refs #2305.
+- CHG: Cesium WebRTC Demo: Add reset capability for line markup. Still needs deletingNode implemented in cesium driver to remove polyLineCollection objects. Refs #2305.
+- CHG: Cesium WebRTC Demo: Add clear functionality for pushpins. Cesium driver still needs to be updated to include deletingNode. Refs #2305.
+- CHG: Cesium WebRTC Demo: Replace eraser image with "Reset". Remove circular clear/clearing reference. Refs #2305.
+- CHG: Cesium WebRTC Demo: Fix for the mouse event data being passed to the model
+- CHG: Cesium WebRTC Demo: Implemented mouse events in the Cesium driver
+- CHG: Command Center Demo: command-center optimization, removed computer towers from scene.  ref #2325
+- CHG: Command Center Demo: command-center, break out individual chair models.  Fixes #2325
+- CHG: Duck Demo: Removed the glgeLight from duck. Fixes #2350.
+- CHG: Google Earth Demo: Update so that mouse control of google earth is disabled when the view does not have control of the google-earth (as denoted in the controlView property of the google-earth node). Control is granted to a view when the google-earth is clicked. Fixes #2264.
+- CHG: Humvee Demo: Modify humvee emergency brake to respond to only clicks, not drags. Fixes #2276.
+- CHG: Humvee-Lesson Demo: Add animation time to emergency brake release control value. Fixes #2345. 
+- CHG: Humvee-Lesson Demo: Update camera pose for transmission to make parking break easier to see. Fixes #2276.
+- CHG: Marbles Demo: Update to use bump map employed models.
+- CHG: Marbles Demo: Update solitaire and selection table prototypes to store marbles under marbles child in order to allow material child to not break logic. References #2333.
+- CHG: Marbles Demo: Add selection exit button to selection table panel. Fixes #2403.
+- CHG: Marbles Demo: Add skybox and lighting for skybox to marbles. Add bounding box option to navigation system, and add bounding box to marbles. Fixes #2402.
+- CHG: Marbles Demo: Update light layout in marbles garden. Fixes #2320.
+- CHG: Marbles Demo: Update CSS to hide close button on jQuery dialog. Fixes #2382.
+- CHG: Marbles Demo: Manually set html element's overflow-y to hidden to prevent forced vertical scrollbar which was in turn causing the horizontal scrollbar to be required. Fixes #2351.
+- CHG: Marbles Demo: Add exit solitaire button to solitaire panel. Fixes #2318.
+- CHG: Sandtable Demo: Refactor sandtable methods and scripts. fixes #2259
+- CHG: Sandtable Demo: Fix typo in definition of sandtable clear method and remove comment refs #2259
+- CHG: Sandtable Demo: Remove toolbar child from sandtable/index.vwf.yaml refs #2259
+- CHG: Sandtable Demo: Remove unused properties from sandtable/index.vwf.yaml refs #2259
+- CHG: Sandtable Demo: Remove unnecessary type from sandtable/index.vwf.yaml refs #2259
+- CHG: Sandtable Demo: Updated sandtable catalog description refs #2259
+- CHG: Sandtable Demo: Remove some unnecessary files from sandtable app refs #2259
+- CHG: Sandtable Demo: Move sandtable app to new navigation system. In the process, remove the orbit mode from sandtable toolbar since the user will now be able to navigate in all the input modes refs #2259
+- CHG: Sandtable Demo: Change sandtable to only draw and drop pins on left mouse click Also, moved logic of when to start and stop drawing to view side so two users can draw at the same time w/o having to share a line refs #2259
+- CHG: Sandtable Demo: Simplify sandtable app to use on inputMode property. Previously, the app had a mouseMode property and the toolbar had an inputMode property that had to stay in sync refs #2259
+- CHG: Sandtable Demo: Merge sandtable/appscene.vwf.yaml into sandtable/index.vwf.yaml refs #2259
+
+Test Applications:
+- CHG: Test IntialRot: Move camera closer to duck in InitialRot/index.vwf.yaml As it was, the camera was so far away that the duck was past its far clip plane. refs #2258
+- CHG: Test materialColor: Define counter as property so it synchs between views. Fixes #2327.
+
+----------------------------------
+0.6.11
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+Server Changes
+
+- CHG: Server: Don't rewrite times when forwarding the pending client messages. They were stamped with the correct times when they were added to the queue. Connected clients received them with those times, so clients that are connecting should receive them the same way.
+- CHG: Server: Use reflector client ids instead of Ruby object ids in log messages.
+- CHG: Server: Do not remove pending clients from list when we log them refs #2182
+- CHG: Server: Watch for new async actions started during an async action and resolve. Async operations need to complete in a consistent manner in order for the replication computation to work correctly across multiple clients.If a queue action starts one more more async operations, the operations need to complete before the next queue item is started. And they need to complete in the same order they were started. If an async action starts other async actions, the outer action shouldn't complete until the inner actions have completed. For example, if a node's `initiailze` calls `node.children.create`, wait for the child node to finish initializing before allowing the parent node to complete. Fixes #2137.
+- CHG: Server: Switch `/* ( p1, p2 ) */` callback comment notation to `/* p1, p2 */`.
+- CHG: Server: Move the test utility functions to a shared utility module.
+- CHG: Server: Fix test/replication.html, broken in commit:aa0849b.
+- CHG: Server: Send setState only to new joiners, not to everyone refs #2182
+- CHG: Server: Use the minified client in production mode when available.
+- CHG: Server: Add nil check for request.env["HTTP USER AGENT"] in ruby browser check. Refs #2076.
+- CHG: Server: Add unsupported browser documentation page, and a redirect to it in the ruby code if a user launches a demo in IE8. Fixes #2076.
+- CHG: Server: Use `setState`+`createNode` to launch since `setState` resets the queue. Fixes #2207. References #2122, #2106, #2167.
+- CHG: Server: Update build_redhat.sh. Removed the call to turn off IPTables, and updated the note to the system administrator to allow port 80 traffic. Fixes #1617
+- CHG: Server: Added information to use WinZip, WinRAR, or 7-Zip to unzip a package from the downloads page. Also fixed up numbering issues, cleaned up layout, and general other housekeeping items to cleanup the page.  fixes #2050
+- CHG: Server: Repaired issue of catalog page auto deleting after first build. Fixes #2065
+- CHG: Server: Updated the Rakefile to remove HTML files autogenerated from a previous build.  Fixes #2065
+- CHG: Server: Update component Rakefile to build docs for child directories of vwf.example.com and update doc syntax to properly display. Fixes #1779 and fixes #1629.
+- CHG: Server: Schedule future actions in front of reflector actions at the same time. Previously, if future and reflector actions were placed in the message queue with the same execution time, they would be arranged in order of arrival. But this would leave the queue in an indeterminate state. Since reflector messages arrive at different clients at different times, clients wouldn't order these sequences consistently. Additionally, it's probably expected that when an action generates a future action at delta time 0, the new action will run before a new external action executes--even if an external action for the current time has already arrived. Now, the message queue is sorted first by time, as before, then by origin to place future actions in front of reflector actions, then by arrival order, as before. This ensures that a sequence of future
+actions, including one that generates new actions for the same time, will always run to completion before a reflector action executes, regardless of whether the external action arrives before, during or after the sequence starts executing. Fixes #2123.
+- CHG: Server: Don't remove reflector messages in `setState` sent after the action. When updating the message queue to match the incoming specification, `setState` previously cleared the queue except for messages with a `respond` field. But that would delete messages sent after the `setState` that arrived before it finished executing. Those messages apply to the new state and should be retained. The correct process is to delete all future messages, including any generated during the `setState` since the incoming queue contains the correct messages for the new state, delete any reflector messages that arrived before the `setState` but were scheduled to execute at a later
+time, but retain any reflector messages that arrived after the `setState`. Fixes #2122.
+
+Client Changes
+
+- CHG: Client: Fix bug w/ malformed pointerUp messages
+- CHG: Client: Check for when pointerDownID is null and do not send the pointerUp event fixes #2243
+- CHG: Client: Stop key-based movement when window goes out of focus. Key presses are going somewhere else when that happens. This fixes the bug where if a user pressed a key and then clicked on another window, the app would not register the key-up event and the user would continue to move w/o the key being down. fixes #366
+- CHG: Client: Remove code to detect button states onmouseover that is obsolete. It didn't work anyway, but is made unnecessary by the fix that uses document.onmouseup to catch mouse-up events outside the window. refs #366
+- CHG: Client: Listen for onmouseup on document instead of canvas. document will catch mouseup events that occur outside the window and fixes the bug where the app would think the mouse button was still down if the user moused-up outside the window and then re-entered refs #366
+- CHG: Client: Add support for setting setting fps, start and stop frames to the animation behavior. Fixes #2250
+- CHG: Client: Add support for making a user's own avatar invisible to himself. refs #2180
+- CHG: Client: Add property to scene to make avatars invisible to their user. fixes #2180
+- CHG: Client: Add comment about assumption in navscene.vwf.yaml refs #2265
+- CHG: Client: Remove camera creation from GLGE model driver. It is now created in scene.vwf. refs #2265
+- CHG: Client: Add debug code to find issue w/ navigation hopping and skipping. refs #2182
+- CHG: Client: Replace vwf references in lesson view driver. Fixes #2097.
+- CHG: Client: Add error checking for cameraNode to be null in view/threejs.js refs #2252
+- CHG: Client: Separate disabling of view side nav from setting navscene nav. Disabling the view-side nav only needs to happen once, but setting the navscene nav might happen many times. refs #2252
+- CHG: Client: Do not assign backup camera is activeCamera does not yet exist. This was leading to second clients having a prototype camera set as the one they were looking through (which made it unresponsive) - this was first seen in the tutorial apps. refs #2252
+- CHG: Client: Update tutorials to initialize camera properties in a future call. refs #2252
+- CHG: Client: Have navscene.vwf.yaml automatically disable view-side navigation. refs #2252
+- CHG: Client: Move initialization of navscene navigation mode to future call. For now, we cannot assume that the camera has already been created in initialize - so we must wait until the queue resumes to know that it is there.  This will change once initialize waits for all nodes created inside it to complete before being done refs #2252
+- CHG: Client: Update nodeHasOwnChild to manually loop over children to check the names, if the child name is numeric. Refs #2085
+- CHG: Client: Update sourceURLs refs #2252
+- CHG: Client: Update threeObject matrixWorld before using it in nodeLookAt. Was causing the sandtable camera position not to update. refs #2252
+- CHG: Client: Explicitly set animation start and stop time in the node3 animation functions, so that the stop time is correct if the functions are called more than once. Refs #1953
+- CHG: Client: Fix null reference exception in nodeLookAt. refs #2019
+- CHG: Client: Fix bug where view was ignoring transform updates on own navObject. refs #2019
+- CHG: Client: Expose translationSpeed and rotationSpeed in navigable.vwf.yaml. fixes #2197
+- CHG: Client: Fix bug where "self" was being used locally and resetting global. refs #1972
+- CHG: Client: Remove hard-coded node id from scene.vwf.yaml. refs #2186
+- CHG: Client: Fix lookat. refs #2019
+- CHG: Client: Remove extra newline from navigable.vwf.yaml. refs #2019
+- CHG: Client: Remove code that sets view camera from the model. This is now exclusively done in controlNavObject(). Also, put some checks in for when node is null. fixes #2088
+- CHG: Client: Add check for node being null in receiveModelTransformChanges. Also add some comments and rearrange some logic to make it more clear and efficient. refs #2019
+- CHG: Client: Fix bug where user could not navigate w/ mouse keys. We were not always updating the three.js world matrix of the navigation object (and therefore, its children were not getting updated). refs #2027
+- CHG: Client: Fix could not move navObject w/ mouse or keys. The three.js objects were auto-updating their matrices from their position and orientation values, overwriting the matrix that we had set. refs #2027
+- CHG: Client: Fix camera coming in w/ unexpected 90 degree rotation on it. If a camera was a child of the navObject, but not the main navObject, its model and view transforms were not properly separated.  This checkin separates those transforms for all node3s, and fixes a bug where initial transforms were not properly being adopted on initializeProperty. refs #2027
+- CHG: Client: Have second user create his own navigable object. fixes #1969. 
+- CHG: Client: Change error messages to use errorx for extra context information. refs #2019
+- CHG: Client: Add error checking to object driver. refs #2027
+- CHG: Client: Resolve merge conflicts from rebase of navigation onto development. refs #2027
+- CHG: Client: Add userObject property to scene.vwf.yaml for independent navigation. This object describes what will be created for each user as their "user object".  It usually includes a camera and an avatar in some configuration refs #1969
+- CHG: Client: Do not look for children before they're attached (in controlNavObject). refs #1969
+- CHG: Client: Remove trace code from navigation code in threejs.js view driver. refs #2019
+- CHG: Client: Fix bug where second user would not always sync to scene.vwf.yaml. I was updating the view transform in satProperty, but not in initializedProperty, so the view was staying out of sync until the next set came through Also includes changes to allow the application to specify a navigation object that the user will be given control of. Also fixed a bug where the pointerOut event was being thrown on an undefined node fixes #1963 refs #1969
+- CHG: Client: Remove properties from camera component that refer to navigation refs #1963
+- CHG: Client: Make key presses control navObject position, not camera position directly refs #1963
+- CHG: Client: Remove 90 degree unrotation from camera getProperty that is no longer needed refs #1963
+- CHG: Client: Add check for non-existant node to core "nodeHasProperty" method refs #1963
+- CHG: Client: Handle incoming transform requests from reflector (in threejs view driver)
+- CHG: Client: Check mouse state onmouseover so we stay synched w/ mouse state refs #1960
+- CHG: Client: Create camera dynamically in scene.vwf.yaml when appropriate. It was added as a child in the .yaml, but since children are not inherited from prototypes, the application did not get the child camera.  Now it is created dynamically in initialize if the usersShareView property is set to true (otherwise users will create their own "navigable" object) fixes #1970
+- CHG: Client: Make viewTransform copy values, not reference to model transform. The viewTransform was copying the reference, so every time the model changed, it would clobber the view transform. refs #1960
+- CHG: Client: Constrain camera pitch to +/- 90 degrees refs #1960
+- CHG: Client: Navigation refactoring continued. Put camera in scene.vwf and removed default camera creation from Threejs model driver.  Required a callback workaround in the Threejs view driver that can be removed once the kernel implements the creatChild callback.
+- CHG: Client: Allow user to change camera orientation w/ right-click and drag refs #1960
+- CHG: Client: Hide right-click context menu when navigating refs #1960
+- CHG: Client: Fix bug where pressing two mouse buttons would cause bad things. refs #1960
+- CHG: Client: Remove unnecessary consoleOut refs #2019
+- CHG: Client: Remove reference to kernel.kernel in view/threejs.js refs #2019
+- CHG: Client: Add camera to scene.vwf.yaml, ref #1914
+- CHG: Client: Sync navigation updates to render refs #1973. Move camera translation from navscene.vwf.yaml into view/threejs.js refs #1973.
+- CHG: Client: Fix timeout call for navigation move and rotate (make it every 16 ms) refs #1973
+- CHG: Client: Improve temporary navigation fixes #1973
+- CHG: Client: Hide camera z-to-y-up transform from the user in model/threejs.js fixes #1955,#1956,#1957
+- CHG: Client: Correctly set the view camera and render from it. fixes #1880, 1955, 1956, 1957
+- CHG: Client: Remove frameCount property from sceneNode in threejs.js view driver. This was used to make sure we were render safe in GLGE, but is unnecessary in three.js - refs #1879
+- CHG: Client: Added navigable.vwf.yaml behavior component
+- CHG: Client: Add optional start and stopTime parameters to animationPlay method Refs #1953
+- CHG: Client: Added animationStartTime and animationStopTime to allow playing subsections of an animation time line Fixes #1953
+- CHG: Client: For animations loaded from the collada file, automatically calculate the animationDuration Refs #2172
+- CHG: Client: Update collada loader to use the collada ID as the threejs ID to fix a bug in loading the animations Refs #2172
+- CHG: Client: Add references to animations on the node that is animated, so that the animation can be played separately. Refs #2172
+- CHG: Client: Add support for bump maps to the ColladaLoader Fixes #2116
+- CHG: Client: Fix error in navigation distance calculation when elapsed time is 0
+- CHG: Client: Add preventDefault calls in mouse event handlers to prevent the drag image behavior in the canvas Fixes #2108
+- CHG: Client: Fixes the transformTo test but broken by #2122 fix.  Redmine #2106
+- CHG: Client: Rakefile update to modify run.bat to check for file path whitespace and stop the script if it detects it.  This is a workaround until Bundler/Thin determine the error in their systems causing the whitespace issue. Submitted Ticket on GitHub for their issue: https://github.com/macournoyer/thin/issues/180   fixes #1535
+- CHG: Client: Sequence counter reset to 0 when patched with no sequence field. Fixes #2138.
+- CHG: Client: Stopped the Editor from listing prototype children until the children inherit from the prototype. Redmine #2032
+- CHG: Client: Editor updates navigation properties correctly.  Specific to camera/navigation at 200ms update rate.  Redmine Task: 1626
+
+Demonstration Application Changes
+
+- CHG: All: Update GLGE apps to initialize camera properties in future call. Temporarily necessary because the camera is not yet created in initialize() - a fix is coming along that will make it so that the camera is created and ready in initialize at which point this madness will no longer be necessary  ;o) fixes #2265,#2281
+- CHG: All: Rename "sharedCamera" to "camera". This is more appropriate since the camera itself might be shared at some points and not at others. refs #2186
+- CHG: All: Update three.js apps in public to use new navigation system 
+- CHG: BZFlag Demo: Performance improvements for bzflag. Refs #2124
+- CHG: BZFlag Demo: Standardize names used in bzflag chat messages. Fixes #2256
+- CHG: BZFlag Demo: Fix children with numeric names so that they get shortcut properties on the parent node  Fixes #2085
+- NEW: cesiumTerrain Demo: Added cesiumTerrain demo
+- CHG: Command Center Demo: Resolved a 'DAE' case issue in command-center.  Fixes #2253.
+- CHG: Command Center Demo: Command-center: changed front left screen from video to png.  Redmine #2111
+- CHG: DemoChat Demo: Update link addition to make links open in new window. References #2224.
+- CHG: DemoChat Demo: Added check to turn www and http: in messages to links. Fixes #2224.
+- CHG: DemoChat Demo: Add automatic scrolling. Fixes #2296.
+- CHG: DemoChat Demo: Add in max field length and restrict to alphanumerics. Fixes #2213. Fixes #2212. Fixes #2211.
+- CHG: DemoChat Demo: Move demochat to main public and add catalog image and description. Fixes #2206.
+- CHG: DemoChat Demo: Added colorpicker widget. Fixes #2195.
+- CHG: DemoChat Demo: Addresses user connection issues.  Addresses #2168.
+- CHG: DemoChat Demo: Updated heartbeat and events. Tests for user node presence before issuing a heartbeat. Post heartbeat now results in verification that user is correctly correlated with view. Shift from custom events with additional data to using default events and view storing username/user color lookup. Added debug function that can be manually invoked, and automatically is invoked when oddities occur. Displays view side user information as well as causes all attached users models to provide similar information. Fixes #2168
+- CHG: DemoChat Demo: Initial update. Heartbeat still unchanged, but login now uses vwf_view.kernel.moniker comparison to client that issued event in order to simplify identifying user/view pairs. Fixes #2168
+- CHG: DemoChat Demo: Update the name search regexp so that all lowercase versions of usernames (for that matter, case insensitive matches) prompt alert sounds. fixes #2194
+- CHG: DemoChat Demo: Update for minor appearance tweaks. Date format was already handled when the datestamp/username 'column' was added. Turned off text area resizing for the chat input box. Added HTML escaping functionality to the user messaging system, so posting HTML to the chat should display properly and not be interpreted as HTML. fixes #2196
+- CHG: DemoChat Demo: Adjust the width of the timestamp column. Make certain all system messages also use the new column type layout. fixes #2140
+- CHG: DemoChat Demo: Adjust chat display so that timestamp and username are in a defined 'column' separate from the actual chat messages to improve readability. May need to tweak exact width later. fixes #2140
+- CHG: DemoChat Demo: Update the CSS definition of the chat content so that the text scrolling is available, and text doesn't overflow the div. #2145
+- CHG: Marbles Demo: Implement basic selection mechanism. Fixes #2052.
+- CHG: Marbles Demo: Implements workaround for bug. Fixes #2288.
+- CHG: Marbles Demo: Update user model to use new functionality. Fixes #2270. Fixes #2271.
+- CHG: Marbles Demo: Update models and new environment. Fixes #2054.
+- CHG: Marbles Demo: Implement Solitaire Viewpoint Control. Fixes #2192.
+- NEW: Marbles Demo: Check in initial marbles application with solitaire game functionality.
+- CHG: Physics Demo: Increase translation speed in physics/index.vwf.yaml fixes #2266
+- CHG: Physics Demo: Tidy code in physics/index.vwf.yaml Moved scripts section of physics/index.vwf.yaml to end of document refs #1960
+- CHG: Plane Demo: Clean up vestigial properties in plane app. refs #2252
+- CHG: Radio Demo: Update radio to use the animation behavior. Refs #2172
+- CHG: Radio Lesson Demo: Update radio lesson squelch check and removed extra conditional comments. Fixes #2230.
+- CHG: Radio Lesson Demo: In radio-lesson, do not proceed to the next lesson step until the user has correctly satisfied the previous task.  Fixes #2128
+- CHG: Radio Lesson Demo: Adds checks to radio-lesson for out of sequence user selection.  Resolves lesson out of sync issue.  Fixes #2128.
+- CHG: Sandtable Demo: Do not set view side navigation mode in sandtable (done in navscene). refs #2252
+- CHG: Sandtable Demo: Move initialization of mouse mode to future call. For now, we cannot assume that the camera has already been created in initialize - so we must wait until the queue resumes to know that it is there.  This will change once initialize waits for all nodes created inside it to complete before being done. refs #2252
+- CHG: Sandtable Demo: Disable view-side navigation in sandtable so navscene can do it. Leaving this app using navscene until the view-side navigation has an middle-mouse button orbit. refs #2252
+- CHG: Sandtable Demo: Switched sandtable background color to a more pleasing blue. refs #2252
+- CHG: Sandtable Demo: Fix bug where sandtable was not showing up. Known issues: View does not sync between users, and left-click to drag the sandtable does not work. refs #2252
+- CHG: Sandtable Demo: Fix error in navigation distance calculation when scrolling the mouse wheel Refs #2108
+- CHG: Test All: Update test apps to use new navigation system. refs #1972
+- NEW: Test Polygon: Implemented a polygon component and wrote a test application
+- CHG: Test Polyline: Fixed the agi/test/polyline application.  PolyLines and Materials now working
+- CHG: Test TransformTo: Update the UI to expected approach. Fixes #2053.
+- CHG: Test TransformTo: Cleaned up transformTo test, pulled toleranceTest method out of initialize based on Eric's recommendation.
+- CHG: Test JQuery: Remove `jquery-encoder` tests. We don't need to run third-party library tests.
+- CHG: Test Replication: Fix test/replication.html to expect replicated random internal state.
+- CHG: Test WorldTrasnform: test/worldTransform determined to no longer be applicable.  Removed.  Redmine #1932
+- CHG: Tutorials: Consolidated two "methods" objects in scripting tutorial app. refs #2281
+- CHG: Tutorials: Comply w/ coding standard for spacing in tutorial app. refs #2252
+- CHG: Tutorials: Increase translationSpeed in multiuser/index.vwf.yaml. refs #2197
+- CHG: Webrtc-Cesium Demo: Load czml from the widget, needs the latest version of Cesium
+- CHG: Webrtc-Cesium Demo: Removed resize hack, cesium is now fixed
+- CHG: Webrtc-Cesium Demo: Added the camera navigation control flags into the cesium component, and fixed an issue dealing with setting a property to false
+- CHG: Webrtc-Cesium Demo: Fixed issue with the Sun, and made sure to reference the existing sun, atmosphere, and sky box
+- CHG: Webrtc-Cesium Demo: Fixed camera synchronization that the previous push broke. Updated driver options for selecting the type of Cesium root object ( manual Scene creation use( any string ), CesiumWidget use( 'widget' ),  Cesium.Viewer use( 'viewer' ) )
+- CHG: Webrtc-Cesium Demo: Latest minified version of Cesium
+- CHG: Webrtc-Cesium Demo: Removed debugger command
+- NEW: Webrtc-Cesium Demo: Toolbar support for modes and color of the drawing
+- NEW: Webrtc-Cesium Demo: New files for the toolbar
+- CHG: Webrtc-Cesium Demo: Updated the variable name for the cesium object for each node
+- CHG: Webrtc-Cesium Demo: Fixed the polylines so that they show up now, added a material component
+- CHG: Webrtc-Cesium Demo: Added support for polyline, polygon, and dynamicObjects
+- CHG: Webrtc-Cesium Demo: Fixed an issue resetting the terrainProvider property
+- CHG: Webrtc-Cesium Demo: Move the main video to the top of the view
+- CHG: Webrtc-Cesium Demo: Fixed an issue with the client colors being incorrect
+- CHG: Webrtc-Cesium Demo: Increase the size of the video in the background( large video )
+- CHG: Webrtc-Cesium Demo: Fixed the path to the cesium logo
+- CHG: Webrtc-Cesium Demo: Updated the path to match case of the path on the server
+- CHG: Webrtc-Cesium Demo: Implemented the transform property and fixed issues setting the camera'a frustum member properties
+- CHG: Webrtc-Cesium Demo: Implemented translateTo and translateBy
+- CHG: Webrtc-Cesium Demo: Remember the original location for the camera so that can be reset
+- CHG: Webrtc-Cesium Demo: Added a initial position to move the earth down in the view
+- CHG: Webrtc-Cesium Demo: Added camera synchronization, fixes #2217
+- CHG: Webrtc-Cesium Demo: Added the camera component for each cesium application
+- CHG: Webrtc-Cesium Demo: Double the resize delay frame count, fixes #2118
+- CHG: Webrtc-Cesium Demo: Bug fix: Added the check for webgl to the cesium model driver fixes #2142 and #2143
+- CHG: Webrtc-Cesium Demo: Bug fix for the wrong aspect ratio on start up fixes #2118
+- CHG: Webrtc-Cesium Demo: Fixed more vwf side properties due to API changes in the latest cesium
+- CHG: Webrtc-Cesium Demo: Fixed the renderStyle setting due to the latest cesium API changes
+- CHG: Webrtc-Cesium Demo: Updated with the latest version of cesium, context options are now available to the CesiumWidget, which was the modification I had made to cesium
+- CHG: Webrtc-Cesium Demo: Fixed an issue where all clients where checking the location of a new client locally, so new clients would end up at the host client location
+- CHG: Webrtc-Cesium Demo: A minified build from the latest of cesium from github, which include the ability to pass in the canvas options into the CesiumWidget
+
+Documentation Changes 
+
+- CHG: Documentation: Update sandtable tutorial to reflect some navigation changes. This will need further updating when we move the sandtable app away from using navscene altogether. refs #2252
+- CHG: Documentation: Update rgb color format of hello world material to properly toggle colors. Fixes #2244.
+- CHG: Documentation: Update example apps to use new navigation system. fixes #1972
+- CHG: Documentation: Update multiuser app to use new navigation system. fixes #2027
+- CHG: Documentation: Update the FAQ page to remove TBDs and outdated information. Fixes #1982.
+- CHG: Documentation: Update kernel api links. Fixes #2067.
+- CHG: Documentation: Update the cookbook index page to give a description of the cookbook. Fixes #2113.
+- CHG: Documentation: Updated grey text to be much lighter and changed links to be blue to differentiate from regular text. Refs #1922
+- CHG: Documentation: Updated documentation to reflect kernel.createChild() callback is not currently supported.  Redmine #2023
+- CHG: Documentation: Adjusted Blue for links to match alert-info blue. refs #1922
+- CHG: Documentation: Updating WebGL to the WebGL logo. Fixes #2064
+- CHG: Documentation: Remove static ID references from HTML overlay documentation. Fixes #1780.
+- CHG: Documentation: Updated Browser Requirements from Tested and Support Browser versions.  Added notes about IE10 limited support, and potential IE11 WebGL support.  Fixes #2069
+
+
+
+
+
+----------------------------------
 0.6.10
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change.
