@@ -69,7 +69,7 @@ scripts:
     }
     else {
       this.navmode='walk'; 
-      this.translationSpeed = 10; 
+      this.translationSpeed = 5; 
       this.activeCamera = this.humvee.interiorCamera.id;
     }
   }
