@@ -36,7 +36,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var pitchMatrix;
     var rollMatrix;
     var yawMatrix;
-    var translation;
+    var translationMatrix;
     var positionUnderMouseClick;
     var boundingBox = undefined;
     // End Navigation
@@ -78,7 +78,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             pitchMatrix = new THREE.Matrix4();
             rollMatrix = new THREE.Matrix4();
             yawMatrix = new THREE.Matrix4();
-            translation = new THREE.Matrix4();
+            translationMatrix = new THREE.Matrix4();
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -1359,7 +1359,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
                 
                 // Insert the new navObject position into the translation array
-                var translationArray = translation.elements;
+                var translationArray = translationMatrix.elements;
                 translationArray[ 12 ] = navObjectWorldPos [ 0 ];
                 translationArray[ 13 ] = navObjectWorldPos [ 1 ];
                 translationArray[ 14 ] = navObjectWorldPos [ 2 ];
@@ -1425,7 +1425,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 // Construct the new transform from pitch, yaw, and translation
                 var navObjectWorldTransform = navThreeObject.matrixWorld;
                 navObjectWorldTransform.multiplyMatrices( yawMatrix, pitchMatrix );
-                navObjectWorldTransform.multiplyMatrices( translation, navObjectWorldTransform );
+                navObjectWorldTransform.multiplyMatrices( translationMatrix, navObjectWorldTransform );
                 if ( navThreeObject instanceof THREE.Camera ) {
                     var navObjectWorldTransformArray = navObjectWorldTransform.elements;
                     navObjectWorldTransform.elements = convertCameraTransformFromVWFtoThreejs( navObjectWorldTransformArray );
@@ -1622,7 +1622,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                             
                         var navObjectWorldMatrix = navThreeObject.matrixWorld;
                         navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
-                        navObjectWorldMatrix.multiplyMatrices( translation, navObjectWorldMatrix );
+                        navObjectWorldMatrix.multiplyMatrices( translationMatrix, navObjectWorldMatrix );
                         if ( navThreeObject instanceof THREE.Camera ) {
                             var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
                             navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
@@ -1668,7 +1668,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 amountToMove = dist * ( 1 - Math.pow( 1 / percentDistRemainingEachStep, numClicks ) );
             }
 
-            var translationArray = translation.elements;
+            var translationArray = translationMatrix.elements;
             translationArray[ 12 ] += amountToMove * pickDirectionVector.x;
             translationArray[ 13 ] += amountToMove * pickDirectionVector.y;
             translationArray[ 14 ] += amountToMove * pickDirectionVector.z;
@@ -2466,14 +2466,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         // If the transform property was initially updated by this view....
         if ( node.ignoreNextTransformUpdate ) {
-            node.outstandingTransformRequestToBeIgnored.shift();
+            node.outstandingTransformRequests.shift();
             node.ignoreNextTransformUpdate = false;
         } else { // this transform change request is not from me
             adoptTransform( node, transformMatrix );
-            if ( node.outstandingTransformRequestToBeIgnored ) {
+            if ( node.outstandingTransformRequests ) {
                 var threeObject = node.threeObject;
-                for ( var i = 0; i < node.outstandingTransformRequestToBeIgnored.length; i++ ) {
-                    goog.vec.Mat4.multMat( node.outstandingTransformRequestToBeIgnored[ i ], 
+                for ( var i = 0; i < node.outstandingTransformRequests.length; i++ ) {
+                    goog.vec.Mat4.multMat( node.outstandingTransformRequests[ i ], 
                                            threeObject.matrix.elements, 
                                            threeObject.matrix.elements );
                 }
@@ -2540,8 +2540,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
                 vwf_view.kernel.fireEvent( nodeID, "changingTransformFromView");
                 vwf_view.kernel.callMethod( nodeID, "transformBy", [ deltaModelTransform ] );
-                node.outstandingTransformRequestToBeIgnored = node.outstandingTransformRequestToBeIgnored || [];
-                node.outstandingTransformRequestToBeIgnored.push( deltaViewTransform );
+                node.outstandingTransformRequests = node.outstandingTransformRequests || [];
+                node.outstandingTransformRequests.push( deltaViewTransform );
 
             } else {
                 self.logger.errorx( "callModelTransformBy: Original view transform is not invertible" );
@@ -2737,8 +2737,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         yawArray[ 4 ] = -sinphi;
         yawArray[ 5 ] = cosphi;
 
-        translation = new THREE.Matrix4();
-        var translationArray = translation.elements;
+        translationMatrix = new THREE.Matrix4();
+        var translationArray = translationMatrix.elements;
         translationArray[ 12 ] = vwfWorldTransformArray[ 12 ];
         translationArray[ 13 ] = vwfWorldTransformArray[ 13 ];
         translationArray[ 14 ] = vwfWorldTransformArray[ 14 ];
@@ -2832,7 +2832,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 worldToRotatedOrbit.getInverse( rotatedOrbitFrameInWorld );
 
                 var translationInRotatedOrbitFrame = new THREE.Matrix4();
-                translationInRotatedOrbitFrame.multiplyMatrices( worldToRotatedOrbit, translation );
+                translationInRotatedOrbitFrame.multiplyMatrices( worldToRotatedOrbit, translationMatrix );
 
                 // Apply pitch and then yaw
                 translationInRotatedOrbitFrame.multiplyMatrices( pitchDeltaMatrix, translationInRotatedOrbitFrame );
@@ -2842,7 +2842,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 var newTranslationInWorld = new THREE.Matrix4();
                 newTranslationInWorld.multiplyMatrices( rotatedOrbitFrameInWorld, translationInRotatedOrbitFrame );
 
-                var translationArray = translation.elements;
+                var translationArray = translationMatrix.elements;
                 var newTranslationInWorldArray = newTranslationInWorld.elements;
                 translationArray[ 12 ] = newTranslationInWorldArray[ 12 ];
                 translationArray[ 13 ] = newTranslationInWorldArray[ 13 ];
@@ -2874,7 +2874,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if ( boundByBoundingBox == false ) {
                     var navObjectWorldMatrix = navThreeObject.matrixWorld;
                     navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
-                    navObjectWorldMatrix.multiplyMatrices( translation, navObjectWorldMatrix );
+                    navObjectWorldMatrix.multiplyMatrices( translationMatrix, navObjectWorldMatrix );
                 
                     if ( navThreeObject instanceof THREE.Camera ) {
                         var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
