@@ -56,6 +56,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             this.currentModelID = '';
             this.currentModelURL = '';
             this.highlightedChild = '';
+            this.intervalTimer = 0;
             
             jQuery('body').append(
                 "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Application.png' alt='application' /><img id='userlist' src='images/tab_Users.png' alt='users' /><img id='timeline' src='images/tab_Time.png' alt='time' /><img id='models' src='images/tab_Models.png' alt='models' /><img id='about' src='images/tab_About.png' alt='about' /></div></div></div>" + 
@@ -310,22 +311,21 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         }
         return childNode;
     };
-    
-    var intervalTimer;
+
     function updateCameraProperties () {
 
         var cameraNodeName = "http-vwf-example-com-camera-vwf-camera";
         
         if ( this.currentNodeID == cameraNodeName ) {
-            if ( !intervalTimer ) {
+            if ( !this.intervalTimer ) {
                 var self = this;
-                intervalTimer = setInterval( function() {updateProperties.call( self, cameraNodeName )}, 200 );
+                this.intervalTimer = setInterval( function() {updateProperties.call( self, cameraNodeName )}, 200 );
             }
         }
         else {
-            if ( intervalTimer ) {
-                clearInterval( intervalTimer );
-                intervalTimer = 0;
+            if ( this.intervalTimer ) {
+                clearInterval( this.intervalTimer );
+                this.intervalTimer = 0;
             } 
         }
     }
