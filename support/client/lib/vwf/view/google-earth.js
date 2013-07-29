@@ -17,7 +17,7 @@
 /// @requires vwf/view
 
 define( [ "module", "vwf/view" ], function( module, view ) {
-
+    var myOptions = undefined;
     return view.load( module, {
 
         // == Module Definition ====================================================================
@@ -104,6 +104,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                     node.earthInst.getLayerRoot().enableLayerById(node.earthInst.LAYER_TERRAIN, true);
                                     node.earthInst.getLayerRoot().enableLayerById(node.earthInst.LAYER_TREES, true);
                                     node.earthInst.getOptions().setFlyToSpeed( node.earthInst.SPEED_TELEPORT );
+                                    myOptions = node.earthInst.getOptions();
+                                    myOptions.setMouseNavigationEnabled(false);
 
 
                                     var la = node.earthInst.getView().copyAsLookAt(node.earthInst.ALTITUDE_RELATIVE_TO_GROUND);
@@ -176,14 +178,25 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         //deletedNode: function (nodeID) {
         //},
   
-        //createdProperty: function (nodeID, propertyName, propertyValue) {
-        //},        
+        createdProperty: function (nodeID, propertyName, propertyValue) {
+            return this.initializedProperty(nodeID, propertyName, propertyValue);   
+        },       
 
-        //initializedProperty: function (nodeID, propertyName, propertyValue) {
-        //},        
+        initializedProperty: function (nodeID, propertyName, propertyValue) {
+            switch (propertyName) {
+                case "controlClient": 
+                    if ( propertyValue == vwf_view.kernel.moniker() ) {
+                        enableMouseControl.call( vwf_view );
+                    }
+                    else {
+                        disableMouseControl.call( vwf_view );
+                    }
+                    break;
+            }
+        },        
 
         satProperty: function( nodeID, propertyName, propertyValue ) {
-            
+
             var value = undefined;
             var obj, earth, ge;
             for(var node in this.state.nodes) {
@@ -194,6 +207,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if ( propertyValue && earth ) {
                 //this.logger.infox( "satProperty", nodeID, propertyName, propertyValue );
                 if ( propertyName == "controlClient" ) {
+                    if ( propertyValue != vwf_view.kernel.moniker() ) {
+                      disableMouseControl.call( vwf_view );
+                    }
+                    else {
+                      enableMouseControl.call( vwf_view );
+                    }
                     this.controlClient = propertyValue;
                     value = propertyValue;
                 } else if ( this.kernel.client() != this.kernel.moniker() ) { 
@@ -326,6 +345,16 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         },
     } );
 
+    function disableMouseControl() {
+        if ( myOptions != undefined ) {
+          myOptions.setMouseNavigationEnabled(false);
+        }
+    }
+    function enableMouseControl() {
+        if ( myOptions != undefined ) {
+          myOptions.setMouseNavigationEnabled(true);
+        }  
+    }
     function broadcastCameraData() {
         var node, ge;   
         if ( this.kernel.find("", "//earth").length > 0 ) {

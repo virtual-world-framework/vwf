@@ -6,8 +6,8 @@
       <authoring_tool>OpenCOLLADA for 3ds Max;  Version: 1.4.1;  Revision: exported;  Platform: x64;  Configuration: Release_Max2012_static</authoring_tool>
       <source_data>file:///C:/Users/tlhuggin/Project_VWF/VWF/scenes/scene_01_C.max</source_data>
     </contributor>
-    <created>2013-06-25T11:00:46</created>
-    <modified>2013-06-25T11:00:46</modified>
+    <created>2013-07-02T12:29:51</created>
+    <modified>2013-07-02T12:29:51</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -32,6 +32,16 @@
         <newparam sid="stone_wall_w_plants_spec_jpg-sampler">
           <sampler2D>
             <source>stone_wall_w_plants_spec_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="stone_wall_w_plants_bump_jpg-surface">
+          <surface type="2D">
+            <init_from>stone_wall_w_plants_bump_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="stone_wall_w_plants_bump_jpg-sampler">
+          <sampler2D>
+            <source>stone_wall_w_plants_bump_jpg-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -61,6 +71,13 @@
               <float>1</float>
             </transparency>
           </blinn>
+          <extra>
+            <technique profile="OpenCOLLADA3dsMax">
+              <bump bumptype="HEIGHTFIELD">
+                <texture texture="stone_wall_w_plants_bump_jpg-sampler" texcoord="CHANNEL1"/>
+              </bump>
+            </technique>
+          </extra>
         </technique>
       </profile_COMMON>
       <extra>
@@ -104,16 +121,6 @@
             </accessor>
           </technique_common>
         </source>
-        <source id="geom-wall_north-normals">
-          <float_array id="geom-wall_north-normals-array" count="120">0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 0 -0.7071059 0.7071077 0 -0.7071059 0.7071076 0 -0.7071059 0.7071077 0 -0.7071059 0.7071077 0 -0.7071059 0.7071076 0 -0.7071059 0.7071077 0 0 1 0 0 1 0 -1 0 0 -1 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 1 0 0 1 0 0 -0.7071059 0.7071077 0 -0.7071059 0.7071076 0 -0.7071059 0.7071077 0 -0.7071059 0.7071077 0 -0.7071059 0.7071076 0 -0.7071059 0.7071077</float_array>
-          <technique_common>
-            <accessor source="#geom-wall_north-normals-array" count="40" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
         <source id="geom-wall_north-map1">
           <float_array id="geom-wall_north-map1-array" count="114">-5.25191 0.1938824 0 6.25191 0.1938824 0 6.25191 0.8181176 0 -5.25191 0.8181176 0 -2.397391 0.001253983 0 3.373008 0.001253983 0 3.373008 0.9890189 0 -2.397391 0.9890189 0 3.373008 0.001253912 0 -2.397391 0.001253912 0 -2.397391 0.9950382 0 3.373008 0.9950382 0 0.3408306 0.004356548 0 0.6591691 0.004356548 0 0.6591691 0.9896404 0 0.3408306 0.9956445 0 0.653165 0.9956445 0 -2.397391 0.995981 0 3.373008 0.995981 0 -5.25191 0.1938824 0 6.25191 0.1938824 0 6.25191 0.8181176 0 -5.25191 0.8181176 0 -2.397391 0.001253983 0 3.373008 0.001253983 0 3.373008 0.9890189 0 -2.397391 0.9890189 0 0.6591694 0.004355595 0 0.3408308 0.004355595 0 0.3408308 0.9956436 0 0.6591694 0.9896394 0 3.373008 0.001253912 0 -2.397391 0.001253912 0 -2.397391 0.9950382 0 3.373008 0.9950382 0 0.6531652 0.9956436 0 -2.397391 0.995981 0 3.373008 0.995981 0</float_array>
           <technique_common>
@@ -127,12 +134,12 @@
         <vertices id="geom-wall_north-vertices">
           <input semantic="POSITION" source="#geom-wall_north-positions"/>
         </vertices>
-        <triangles material="Stone_Wall" count="22">
+        <polylist material="Stone_Wall" count="10">
           <input semantic="VERTEX" source="#geom-wall_north-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#geom-wall_north-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#geom-wall_north-map1" offset="2" set="0"/>
-          <p>4 0 0 13 1 1 11 2 2 11 2 2 3 3 3 4 0 0 0 4 4 5 5 5 9 6 6 9 6 6 2 7 7 0 4 4 7 8 8 1 9 9 3 10 10 3 10 10 11 11 11 7 8 8 0 12 13 2 13 14 4 14 16 1 15 12 0 12 13 4 14 16 1 15 12 4 14 16 3 16 15 4 17 17 2 18 7 9 19 6 9 20 6 13 21 18 4 22 17 13 1 19 14 23 20 12 24 21 12 24 21 11 2 22 13 1 19 5 5 23 6 25 24 10 26 25 10 26 25 9 6 26 5 5 23 6 27 27 8 28 28 12 29 29 12 29 29 14 30 35 10 31 30 6 27 27 12 29 29 10 31 30 8 32 31 7 8 32 11 11 33 11 11 33 12 33 34 8 32 31 13 34 36 9 35 26 10 36 25 10 37 25 14 38 37 13 39 36</p>
-        </triangles>
+          <input semantic="TEXCOORD" source="#geom-wall_north-map1" offset="1" set="0"/>
+          <vcount>4 4 4 5 4 4 4 5 4 4 </vcount>
+          <p>4 0 13 1 11 2 3 3 0 4 5 5 9 6 2 7 7 8 1 9 3 10 11 11 1 12 0 13 2 14 4 16 3 15 4 17 2 7 9 6 13 18 13 19 14 20 12 21 11 22 5 23 6 24 10 25 9 26 6 27 8 28 12 29 14 35 10 30 8 31 7 32 11 33 12 34 13 36 9 26 10 25 14 37</p>
+        </polylist>
       </mesh>
     </geometry>
     <geometry id="geom-wall_south" name="wall_south">
@@ -141,16 +148,6 @@
           <float_array id="geom-wall_south-positions-array" count="45">11.50319 0.3181158 -0.9906 11.50319 -0.3181194 -0.9906 11.50319 0.3181158 0.9786 11.50319 -0.3181194 0.9906 11.50319 0.3061158 0.9906 -4.76837e-7 0.3181175 -0.9906 -11.50319 0.3181193 -0.9906 -4.76837e-7 -0.3181177 -0.9906 -11.50319 -0.318116 -0.9906 -4.76837e-7 0.3181175 0.9786 -11.50319 0.3181193 0.9786 -4.76837e-7 -0.3181177 0.9906 -11.50319 -0.318116 0.9906 -4.76837e-7 0.3061175 0.9906 -11.50319 0.3061193 0.9906</float_array>
           <technique_common>
             <accessor source="#geom-wall_south-positions-array" count="15" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="geom-wall_south-normals">
-          <float_array id="geom-wall_south-normals-array" count="120">0 0 1 0 0 1 0 0 1 0 0 1 1.50266e-7 1 0 1.50266e-7 1 0 1.50266e-7 1 0 1.50266e-7 1 0 -1.50266e-7 -1 0 -1.50266e-7 -1 0 -1.50266e-7 -1 0 -1.50266e-7 -1 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1.06254e-7 0.7071059 0.7071077 1.06254e-7 0.7071059 0.7071076 1.06254e-7 0.7071059 0.7071077 1.06254e-7 0.7071059 0.7071077 1.06254e-7 0.7071059 0.7071076 1.06254e-7 0.7071059 0.7071077 0 0 1 0 0 1 1.50266e-7 1 0 1.50266e-7 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1.50266e-7 -1 0 -1.50266e-7 -1 0 1.06254e-7 0.7071059 0.7071077 1.06254e-7 0.7071059 0.7071076 1.06254e-7 0.7071059 0.7071077 1.06254e-7 0.7071059 0.7071077 1.06254e-7 0.7071059 0.7071076 1.06254e-7 0.7071059 0.7071077</float_array>
-          <technique_common>
-            <accessor source="#geom-wall_south-normals-array" count="40" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
@@ -170,12 +167,12 @@
         <vertices id="geom-wall_south-vertices">
           <input semantic="POSITION" source="#geom-wall_south-positions"/>
         </vertices>
-        <triangles material="Stone_Wall" count="22">
+        <polylist material="Stone_Wall" count="10">
           <input semantic="VERTEX" source="#geom-wall_south-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#geom-wall_south-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#geom-wall_south-map1" offset="2" set="0"/>
-          <p>4 0 0 13 1 1 11 2 2 11 2 2 3 3 3 4 0 0 0 4 4 5 5 5 9 6 6 9 6 6 2 7 7 0 4 4 7 8 8 1 9 9 3 10 10 3 10 10 11 11 11 7 8 8 0 12 13 2 13 14 4 14 16 1 15 12 0 12 13 4 14 16 1 15 12 4 14 16 3 16 15 4 17 17 2 18 7 9 19 6 9 20 6 13 21 18 4 22 17 13 1 19 14 23 20 12 24 21 12 24 21 11 2 22 13 1 19 5 5 23 6 25 24 10 26 25 10 26 25 9 6 26 5 5 23 6 27 27 8 28 28 12 29 29 12 29 29 14 30 35 10 31 30 6 27 27 12 29 29 10 31 30 8 32 31 7 8 32 11 11 33 11 11 33 12 33 34 8 32 31 13 34 36 9 35 26 10 36 25 10 37 25 14 38 37 13 39 36</p>
-        </triangles>
+          <input semantic="TEXCOORD" source="#geom-wall_south-map1" offset="1" set="0"/>
+          <vcount>4 4 4 5 4 4 4 5 4 4 </vcount>
+          <p>4 0 13 1 11 2 3 3 0 4 5 5 9 6 2 7 7 8 1 9 3 10 11 11 1 12 0 13 2 14 4 16 3 15 4 17 2 7 9 6 13 18 13 19 14 20 12 21 11 22 5 23 6 24 10 25 9 26 6 27 8 28 12 29 14 35 10 30 8 31 7 32 11 33 12 34 13 36 9 26 10 25 14 37</p>
+        </polylist>
       </mesh>
     </geometry>
     <geometry id="geom-wall_east" name="wall_east">
@@ -184,16 +181,6 @@
           <float_array id="geom-wall_east-positions-array" count="45">-0.3181168 11.50319 -0.9906 0.3181185 11.50319 -0.9906 -0.3181168 11.50319 0.9786 0.3181185 11.50319 0.9906 -0.3061168 11.50319 0.9906 -0.3181186 -4.76837e-7 -0.9906 -0.3181205 -11.50319 -0.9906 0.3181166 -4.76837e-7 -0.9906 0.3181148 -11.50319 -0.9906 -0.3181186 -4.76837e-7 0.9786 -0.3181205 -11.50319 0.9786 0.3181166 -4.76837e-7 0.9906 0.3181148 -11.50319 0.9906 -0.3061186 -4.76837e-7 0.9906 -0.3061205 -11.50319 0.9906</float_array>
           <technique_common>
             <accessor source="#geom-wall_east-positions-array" count="15" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="geom-wall_east-normals">
-          <float_array id="geom-wall_east-normals-array" count="120">0 0 1 0 0 1 0 0 1 0 0 1 -1 1.60629e-7 0 -1 1.61924e-7 0 -1 1.61924e-7 0 -1 1.60629e-7 0 1 -1.61924e-7 0 1 -1.60629e-7 0 1 -1.60629e-7 0 1 -1.61924e-7 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 -0.7071059 1.13582e-7 0.7071077 -0.7071059 1.13582e-7 0.7071076 -0.7071059 1.13582e-7 0.7071077 -0.7071059 1.13582e-7 0.7071077 -0.7071059 1.13582e-7 0.7071076 -0.7071059 1.13582e-7 0.7071077 0 0 1 0 0 1 -1 1.6322e-7 0 -1 1.6322e-7 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 -1.6322e-7 0 1 -1.6322e-7 0 -0.7071059 1.15414e-7 0.7071077 -0.7071059 1.15414e-7 0.7071076 -0.7071059 1.15414e-7 0.7071077 -0.7071059 1.15414e-7 0.7071077 -0.7071059 1.15414e-7 0.7071076 -0.7071059 1.15414e-7 0.7071077</float_array>
-          <technique_common>
-            <accessor source="#geom-wall_east-normals-array" count="40" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
@@ -213,12 +200,12 @@
         <vertices id="geom-wall_east-vertices">
           <input semantic="POSITION" source="#geom-wall_east-positions"/>
         </vertices>
-        <triangles material="Stone_Wall" count="22">
+        <polylist material="Stone_Wall" count="10">
           <input semantic="VERTEX" source="#geom-wall_east-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#geom-wall_east-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#geom-wall_east-map1" offset="2" set="0"/>
-          <p>4 0 0 13 1 1 11 2 2 11 2 2 3 3 3 4 0 0 0 4 4 5 5 5 9 6 6 9 6 6 2 7 7 0 4 4 7 8 8 1 9 9 3 10 10 3 10 10 11 11 11 7 8 8 0 12 13 2 13 14 4 14 16 1 15 12 0 12 13 4 14 16 1 15 12 4 14 16 3 16 15 4 17 17 2 18 7 9 19 6 9 20 6 13 21 18 4 22 17 13 1 19 14 23 20 12 24 21 12 24 21 11 2 22 13 1 19 5 5 23 6 25 24 10 26 25 10 26 25 9 6 26 5 5 23 6 27 27 8 28 28 12 29 29 12 29 29 14 30 35 10 31 30 6 27 27 12 29 29 10 31 30 8 32 31 7 8 32 11 11 33 11 11 33 12 33 34 8 32 31 13 34 36 9 35 26 10 36 25 10 37 25 14 38 37 13 39 36</p>
-        </triangles>
+          <input semantic="TEXCOORD" source="#geom-wall_east-map1" offset="1" set="0"/>
+          <vcount>4 4 4 5 4 4 4 5 4 4 </vcount>
+          <p>4 0 13 1 11 2 3 3 0 4 5 5 9 6 2 7 7 8 1 9 3 10 11 11 1 12 0 13 2 14 4 16 3 15 4 17 2 7 9 6 13 18 13 19 14 20 12 21 11 22 5 23 6 24 10 25 9 26 6 27 8 28 12 29 14 35 10 30 8 31 7 32 11 33 12 34 13 36 9 26 10 25 14 37</p>
+        </polylist>
       </mesh>
     </geometry>
     <geometry id="geom-wall_west" name="wall_west">
@@ -227,16 +214,6 @@
           <float_array id="geom-wall_west-positions-array" count="45">0.3181157 -11.50319 -0.9906 -0.3181196 -11.50319 -0.9906 0.3181157 -11.50319 0.9786 -0.3181196 -11.50319 0.9906 0.3061157 -11.50319 0.9906 0.3181179 4.76837e-7 -0.9906 0.3181202 11.50319 -0.9906 -0.3181173 4.76837e-7 -0.9906 -0.3181151 11.50319 -0.9906 0.3181179 4.76837e-7 0.9786 0.3181202 11.50319 0.9786 -0.3181173 4.76837e-7 0.9906 -0.3181151 11.50319 0.9906 0.306118 4.76837e-7 0.9906 0.3061202 11.50319 0.9906</float_array>
           <technique_common>
             <accessor source="#geom-wall_west-positions-array" count="15" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="geom-wall_west-normals">
-          <float_array id="geom-wall_west-normals-array" count="120">0 0 1 0 0 1 0 0 1 0 0 1 1 -1.969e-7 0 1 -1.95604e-7 0 1 -1.95604e-7 0 1 -1.969e-7 0 -1 1.95604e-7 0 -1 1.969e-7 0 -1 1.969e-7 0 -1 1.95604e-7 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0.7071059 -1.39229e-7 0.7071077 0.7071059 -1.39229e-7 0.7071076 0.7071059 -1.39229e-7 0.7071077 0.7071059 -1.39229e-7 0.7071077 0.7071059 -1.39229e-7 0.7071076 0.7071059 -1.39229e-7 0.7071077 0 0 1 0 0 1 1 -1.94309e-7 0 1 -1.94309e-7 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 1.94309e-7 0 -1 1.94309e-7 0 0.7071059 -1.37397e-7 0.7071077 0.7071059 -1.37397e-7 0.7071076 0.7071059 -1.37397e-7 0.7071077 0.7071059 -1.37397e-7 0.7071077 0.7071059 -1.37397e-7 0.7071076 0.7071059 -1.37397e-7 0.7071077</float_array>
-          <technique_common>
-            <accessor source="#geom-wall_west-normals-array" count="40" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
@@ -256,12 +233,12 @@
         <vertices id="geom-wall_west-vertices">
           <input semantic="POSITION" source="#geom-wall_west-positions"/>
         </vertices>
-        <triangles material="Stone_Wall" count="22">
+        <polylist material="Stone_Wall" count="10">
           <input semantic="VERTEX" source="#geom-wall_west-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#geom-wall_west-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#geom-wall_west-map1" offset="2" set="0"/>
-          <p>4 0 0 13 1 1 11 2 2 11 2 2 3 3 3 4 0 0 0 4 4 5 5 5 9 6 6 9 6 6 2 7 7 0 4 4 7 8 8 1 9 9 3 10 10 3 10 10 11 11 11 7 8 8 0 12 13 2 13 14 4 14 16 1 15 12 0 12 13 4 14 16 1 15 12 4 14 16 3 16 15 4 17 17 2 18 7 9 19 6 9 20 6 13 21 18 4 22 17 13 1 19 14 23 20 12 24 21 12 24 21 11 2 22 13 1 19 5 5 23 6 25 24 10 26 25 10 26 25 9 6 26 5 5 23 6 27 27 8 28 28 12 29 29 12 29 29 14 30 35 10 31 30 6 27 27 12 29 29 10 31 30 8 32 31 7 8 32 11 11 33 11 11 33 12 33 34 8 32 31 13 34 36 9 35 26 10 36 25 10 37 25 14 38 37 13 39 36</p>
-        </triangles>
+          <input semantic="TEXCOORD" source="#geom-wall_west-map1" offset="1" set="0"/>
+          <vcount>4 4 4 5 4 4 4 5 4 4 </vcount>
+          <p>4 0 13 1 11 2 3 3 0 4 5 5 9 6 2 7 7 8 1 9 3 10 11 11 1 12 0 13 2 14 4 16 3 15 4 17 2 7 9 6 13 18 13 19 14 20 12 21 11 22 5 23 6 24 10 25 9 26 6 27 8 28 12 29 14 35 10 30 8 31 7 32 11 33 12 34 13 36 9 26 10 25 14 37</p>
+        </polylist>
       </mesh>
     </geometry>
   </library_geometries>
@@ -278,6 +255,9 @@
     <image id="stone_wall_w_plants_jpg">
       <init_from>./images/0_stone_wall_w_plants.jpg</init_from>
     </image>
+    <image id="stone_wall_w_plants_bump_jpg">
+      <init_from>./images/2_stone_wall_w_plants_bump.jpg</init_from>
+    </image>
     <image id="stone_wall_w_plants_spec_jpg">
       <init_from>./images/1_stone_wall_w_plants_spec.jpg</init_from>
     </image>
@@ -293,6 +273,7 @@
           <bind_material>
             <technique_common>
               <instance_material symbol="Stone_Wall" target="#Stone_Wall-material">
+                <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                 <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                 <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
@@ -314,6 +295,7 @@
           <bind_material>
             <technique_common>
               <instance_material symbol="Stone_Wall" target="#Stone_Wall-material">
+                <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                 <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                 <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
@@ -341,6 +323,7 @@
                 <instance_material symbol="Stone_Wall" target="#Stone_Wall-material">
                   <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                   <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
+                  <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                 </instance_material>
               </technique_common>
             </bind_material>
@@ -363,6 +346,7 @@
           <bind_material>
             <technique_common>
               <instance_material symbol="Stone_Wall" target="#Stone_Wall-material">
+                <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                 <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                 <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>

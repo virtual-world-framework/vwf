@@ -109,3 +109,12 @@ properties:
   binaryAlpha:
     set: |
       this.binaryAlpha = value;
+
+  ## Bump scale
+  ## 
+  ## @name material.vwf#bumpScale
+  ## @property
+
+  bumpScale:
+    set: |
+      this.bumpScale = value;

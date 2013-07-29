@@ -18,7 +18,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
     var self;
 
-    // Private global variables for navigation
+    // Navigation: Private global variables for navigation
     var appInitialized;
     var navObjectRequested;
     var navObjectName;
@@ -28,11 +28,25 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var translationSpeed = 100; // Units per second
     var rotationSpeed = 90; // Degrees per second
     var makeOwnAvatarVisible = false;
+    var pointerLockImplemented = "pointerLockElement" in document ||
+                                 "mozPointerLockElement" in document ||
+                                 "webkitPointerLockElement" in document;
+    var pointerLocked = false;
+    var pickDirectionVector;
+    var pitchMatrix;
+    var rollMatrix;
+    var yawMatrix;
+    var translation;
+    var positionUnderMouseClick;
+    var boundingBox = undefined;
+    // End Navigation
 
     return view.load( module, {
 
         initialize: function( options ) {
             
+            self = this;
+
             checkCompatibility.call(this);
 
             this.pickInterval = 10;
@@ -60,6 +74,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
             if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
             this.keyStates = { keysDown: {}, mods: {}, keysUp: {} };
+
+            pitchMatrix = new THREE.Matrix4();
+            rollMatrix = new THREE.Matrix4();
+            yawMatrix = new THREE.Matrix4();
+            translation = new THREE.Matrix4();
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -136,6 +155,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if ( navObject ) {
                     setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
                 }
+            } else if ( ( nodeID == this.kernel.application() ) &&
+                        ( propertyName == "boundingBox" ) ) {
+                boundingBox = propertyValue;
             }
         },
 
@@ -149,6 +171,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // rotationSpeed
             if ( navObject && ( nodeID == navObject.ID ) ) {
                 if ( propertyName == "navmode" ) { 
+                    if ( ( propertyValue == "none" ) && ( navmode != "none" ) && pointerLockImplemented ) {
+                        document.exitPointerLock();
+                    }
                     navmode = propertyValue;
                 } else if ( propertyName == "translationSpeed" ) {
                     translationSpeed = propertyValue;
@@ -161,6 +186,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if ( navObject ) {
                     setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
                 }
+            } else if ( ( nodeID == this.kernel.application() ) &&
+                        ( propertyName == "boundingBox" ) ) {
+                boundingBox = propertyValue;
             }
 
             // Pay attention to these properties for all nodes
@@ -263,6 +291,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     if ( navObject ) {
                         setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
                     }
+                } else if ( propertyName == "boundingBox" ) {
+                    boundingBox = propertyValue;
                 } else if ( navObject && ( nodeID == navObject.ID ) ) {
                     
                     // These were requested in controlNavObject
@@ -317,7 +347,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
     function initScene( sceneNode ) {
     
-        self = this;
         var lastPickTime = 0;
         
         function GetParticleSystems(node,list)
@@ -530,7 +559,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         if ( appID ) {
             appInitialized = true;
         }
-    }
+    } // initScene
+
     function rebuildAllMaterials(start)
     {
         
@@ -577,6 +607,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var sceneCanvas = canvas;
         //var mouse = new GLGE.MouseInput( sceneCanvas );
 
+        canvas.requestPointerLock = canvas.requestPointerLock ||
+                                    canvas.mozRequestPointerLock ||
+                                    canvas.webkitRequestPointerLock ||
+                                    function() {};
+        document.exitPointerLock = document.exitPointerLock ||
+                                   document.mozExitPointerLock ||
+                                   document.webkitExitPointerLock ||
+                                   function() {};
+
         var getEventData = function( e, debug ) {
             var returnData = { eventData: undefined, eventNodeData: undefined };
             var pickInfo = self.lastPick;
@@ -618,11 +657,16 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 screenPosition: [ mousePos.x, mousePos.y ]
             } ];
 
+            if ( pointerLocked ) {
+                returnData.eventData.movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+                returnData.eventData.movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
+            }
+
             var camera = sceneView.state.cameraInUse;
             var worldCamPos, worldCamTrans, camInverse;
             if ( camera ) { 
                 var worldCamTrans = new THREE.Vector3();
-                worldCamTrans.getPositionFromMatrix( camera.matrix );
+                worldCamTrans.getPositionFromMatrix( camera.matrixWorld );
 
                 // Convert THREE.Vector3 to array
                 worldCamPos = [ worldCamTrans.x, worldCamTrans.y, worldCamTrans.z];
@@ -710,18 +754,25 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         }          
 
         canvas.onmousedown = function( e ) {
-           switch( e.button ) {
-                case 2: 
+            var event = getEventData( e, false );
+            switch( e.button ) {
+                case 2:
+                    if ( pointerLockImplemented && ( navmode != "none" ) ) {
+                        canvas.requestPointerLock();
+                    }
                     mouseRightDown = true;
                     break;
-                case 1: 
+                case 1:
+                    if ( pointerLockImplemented && ( navmode == "fly" ) ) {
+                        canvas.requestPointerLock();
+                        positionUnderMouseClick = event.eventNodeData[ "" ][ 0 ].globalPosition;
+                    }
                     mouseMiddleDown = true;
                     break;
                 case 0:
                     mouseLeftDown = true;
                     break;
             };
-            var event = getEventData( e, false );
             if ( event ) {
                 pointerDownID = pointerPickID ? pointerPickID : sceneID;
                 sceneView.kernel.dispatchEvent( pointerDownID, "pointerDown", event.eventData, event.eventNodeData );
@@ -742,10 +793,22 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var ctrlAndAltDown = ctrlDown && atlDown;
 
             switch( e.button ) {
-                case 2: 
+                case 2:
+                    if ( pointerLockImplemented && ( navmode != "none" ) ) {
+
+                        // If we're in fly mode and the middle mouse button is down, then we are orbiting, and
+                        // we do not want to release pointer lock.
+                        // But otherwise, release it
+                        if ( !( ( navmode == "fly" ) && ( mouseMiddleDown ) ) ) {
+                            document.exitPointerLock();
+                        }
+                    }
                     mouseRightDown = false;
                     break;
                 case 1: 
+                    if ( pointerLockImplemented && ( navmode == "fly" ) && !mouseRightDown ) {
+                        document.exitPointerLock();
+                    }
                     mouseMiddleDown = false;
                     break;
                 case 0:
@@ -967,12 +1030,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             rotatingRight = false;
         }
 
-        if(typeof canvas.onmousewheel == "function") {
+        // As of this writing, Chrome and Opera Next use canvas.onmousewheel
+        // Firefox uses canvas.onwheel
+        if ( canvas.onmousewheel !== undefined ) {
             canvas.removeAttribute("onmousewheel");
             canvas.onmousewheel = function( e ) {
                 var eData = getEventData( e, false );
                 if ( eData ) {
-                    eData.eventNodeData[""][0].wheel = {
+                    var eventNodeData = eData.eventNodeData[ "" ][ 0 ];
+                    eventNodeData.wheel = {
                         delta: e.wheelDelta / -40,
                         deltaX: e.wheelDeltaX / -40,
                         deltaY: e.wheelDeltaY / -40,
@@ -984,18 +1050,28 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         id = pointerOverID; 
                         
                     sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
+
+                    if ( navmode == "fly" ) {
+                        handleScroll( eventNodeData.wheel.delta, eventNodeData.distance );
+                    }
                 }
             };
-        }
-        else {
+        } else if ( canvas.onwheel !== undefined ) {
             canvas.removeAttribute("onmousewheel");
-            canvas.addEventListener('DOMMouseScroll', function( e ) {
+            canvas.onwheel = function( e ) {
                 var eData = getEventData( e, false );
                 if ( eData ) {
-                    eData.eventNodeData[""][0].wheel = {
-                        delta: e.detail,
-                        deltaX: e.detail,
-                        deltaY: e.detail,
+                    
+                    if ( e.deltaMode != 1 ) {
+                        self.logger.warnx( "canvas.onwheel: This browser uses an unsupported deltaMode: " + 
+                                           e.deltaMode );
+                    }
+
+                    var eventNodeData = eData.eventNodeData[ "" ][ 0 ];
+                    eventNodeData.wheel = {
+                        delta: e.deltaY,
+                        deltaX: e.deltaX,
+                        deltaY: e.deltaY,
                     };
                     var id = sceneID;
                     if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
@@ -1004,8 +1080,16 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         id = pointerOverID; 
                         
                     sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
+
+                    if ( navmode == "fly" ) {
+                        handleScroll( eventNodeData.wheel.delta, eventNodeData.distance );
+                    }
                 }
-            });
+            };
+        } else {
+            this.logger.warnx( "initInputEvents: Neither onmousewheel nor onwheel are supported in this " +
+                               "browser so mouse scrolling is not supported - request that the VWF team " +
+                               "support the DOMMouseScroll event to support your browser" );
         }
 
         // TODO: Navigation - This section should become a view component as soon as that system is available
@@ -1019,6 +1103,20 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var rotatingLeft = false;
         var rotatingRight = false;
         var startMousePosition;
+
+        var onPointerLockChange = function() {
+            if ( document.pointerLockElement === canvas ||
+                 document.mozPointerLockElement === canvas ||
+                 document.webkitPointerLockElement === canvas ) {
+                pointerLocked = true;
+            } else {
+                pointerLocked = false;
+            }
+        }
+
+        document.addEventListener( "pointerlockchange", onPointerLockChange, false);
+        document.addEventListener( "mozpointerlockchange", onPointerLockChange, false);
+        document.addEventListener( "webkitpointerlockchange", onPointerLockChange, false);
 
         this.moveNavObject = function( msSinceLastFrame ) {
 
@@ -1043,47 +1141,113 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
             // one key press doesn't send them off in space
             var dist = translationSpeed * Math.min( msSinceLastFrame * 0.001, 0.5 );
-
-            // Get the camera's rotation matrix in the world's frame of reference
-            // (remove its translation component so it is just a rotation matrix)
+            var dir = [ 0, 0, 0 ];
             var camera = this.state.cameraInUse;
             var cameraWorldTransformArray = camera.matrixWorld.elements;
-            var camWorldRotMat = goog.vec.Mat4.createFromArray( cameraWorldTransformArray );
-            camWorldRotMat[ 12 ] = 0;
-            camWorldRotMat[ 13 ] = 0;
-            camWorldRotMat[ 14 ] = 0;
 
-            // Calculate a unit direction vector in the camera's parent's frame of reference
-            var moveVectorInCameraFrame = goog.vec.Vec4.createFromValues( x, 0, -y, 1 ); // Accounts for z-up (VWF) to y-up (three.js) change
-            moveVectorInCameraFrame = goog.vec.Vec4.createFromValues( x, 0, -y, 1 ); // Accounts for z-up (VWF) to y-up (three.js) change
-            var dir = goog.vec.Mat4.multVec4( camWorldRotMat, moveVectorInCameraFrame,
-                                              goog.vec.Vec3.create() );
+            var orbiting = ( navmode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
+
+            if ( orbiting ) {
+                if ( y ) {
+
+                    dir = [ positionUnderMouseClick[ 0 ] - cameraWorldTransformArray[ 12 ],
+                            positionUnderMouseClick[ 1 ] - cameraWorldTransformArray[ 13 ],
+                            positionUnderMouseClick[ 2 ] - cameraWorldTransformArray[ 14 ] ];
+
+                    if ( y > 0 ) {
+                        var distToOrbitTarget = Math.sqrt( dir[ 0 ] * dir[ 0 ] + dir[ 1 ] * dir[ 1 ] + dir[ 2 ] * dir[ 2 ] );
+                        var epsilon = 0.01;
+                        var almostDistToOrbit = distToOrbitTarget - epsilon;
+                        if ( dist > almostDistToOrbit ) {
+                            dist = almostDistToOrbit;
+                        }
+                        if ( dist < epsilon ) {
+                            dir = [ 0, 0, 0 ];
+                        }
+                    } else {
+                        dir = [ -dir[ 0 ], -dir[ 1 ], -dir[ 2 ] ];
+                    }
+                }
+                if ( x ) {
+                    var pitchRadians = 0;
+                    var yawRadians = x * ( rotationSpeed * degreesToRadians ) * 
+                                     Math.min( msSinceLastFrame * 0.001, 0.5 );
+                    orbit( pitchRadians, yawRadians );
+                }
+            } else {
+
+                // Get the camera's rotation matrix in the world's frame of reference
+                // (remove its translation component so it is just a rotation matrix)
+                
+                var camWorldRotMat = goog.vec.Mat4.createFromArray( cameraWorldTransformArray );
+                camWorldRotMat[ 12 ] = 0;
+                camWorldRotMat[ 13 ] = 0;
+                camWorldRotMat[ 14 ] = 0;
+
+                // Calculate a unit direction vector in the camera's parent's frame of reference
+                var moveVectorInCameraFrame = goog.vec.Vec4.createFromValues( x, 0, -y, 1 ); // Accounts for z-up (VWF) to y-up (three.js) change
+                moveVectorInCameraFrame = goog.vec.Vec4.createFromValues( x, 0, -y, 1 ); // Accounts for z-up (VWF) to y-up (three.js) change
+                dir = goog.vec.Mat4.multVec4( camWorldRotMat, moveVectorInCameraFrame, goog.vec.Vec3.create() );
+            }
             
             // If user is walking, constrain movement to the horizontal plane
             if ( navmode == "walk") {
                 dir[ 2 ] = 0;
             }
 
-            goog.vec.Vec3.normalize( dir, dir );
-            
-            // Extract the navObject world position so we can add to it
             var navThreeObject = navObject.threeObject;
-            var navObjectWorldTransformMatrixArray = navThreeObject.matrixWorld.elements;
-            var navObjectWorldPos = [ navObjectWorldTransformMatrixArray[ 12 ], 
-                                      navObjectWorldTransformMatrixArray[ 13 ], 
-                                      navObjectWorldTransformMatrixArray[ 14 ] ];
-            
-            // Take the direction and apply a calculated magnitude 
-            // to that direction to compute the displacement vector
-            var translation = goog.vec.Vec3.scale( dir, dist, goog.vec.Vec3.create() );
+            var length = Math.sqrt( dir[ 0 ] * dir[ 0 ] + dir[ 1 ] * dir[ 1 ] + dir[ 2 ] * dir[ 2 ] );
 
-            // Add the displacement to the current camera position
-            goog.vec.Vec3.add( navObjectWorldPos, translation, navObjectWorldPos );
+            if ( length ) {
 
-            // Insert the new camera position in the camera transform
-            navObjectWorldTransformMatrixArray[ 12 ] = navObjectWorldPos [ 0 ];
-            navObjectWorldTransformMatrixArray[ 13 ] = navObjectWorldPos [ 1 ];
-            navObjectWorldTransformMatrixArray[ 14 ] = navObjectWorldPos [ 2 ];
+                goog.vec.Vec3.normalize( dir, dir );
+                
+                // Extract the navObject world position so we can add to it
+                var navObjectWorldTransformMatrixArray = navThreeObject.matrixWorld.elements;
+                var navObjectWorldPos = [ navObjectWorldTransformMatrixArray[ 12 ], 
+                                          navObjectWorldTransformMatrixArray[ 13 ], 
+                                          navObjectWorldTransformMatrixArray[ 14 ] ];
+                
+                // Take the direction and apply a calculated magnitude 
+                // to that direction to compute the displacement vector
+                var deltaTranslation = goog.vec.Vec3.scale( dir, dist, goog.vec.Vec3.create() );
+
+                // Add the displacement to the current navObject position
+                goog.vec.Vec3.add( navObjectWorldPos, deltaTranslation, navObjectWorldPos );
+
+                if ( boundingBox != undefined ) {
+                    if ( navObjectWorldPos[ 0 ] < boundingBox[ 0 ][ 0 ] ) {
+                        navObjectWorldPos[ 0 ] = boundingBox[ 0 ][ 0 ];
+                    }
+                    else if ( navObjectWorldPos[ 0 ] > boundingBox[ 0 ][ 1 ] ) {
+                        navObjectWorldPos[ 0 ] = boundingBox[ 0 ][ 1 ];
+                    }
+                    if ( navObjectWorldPos[ 1 ] < boundingBox[ 1 ][ 0 ] ) {
+                        navObjectWorldPos[ 1 ] = boundingBox[ 1 ][ 0 ];
+                    }
+                    else if ( navObjectWorldPos[ 1 ] > boundingBox[ 1 ][ 1 ] ) {
+                        navObjectWorldPos[ 1 ] = boundingBox[ 1 ][ 1 ];
+                    }
+                    if ( navObjectWorldPos[ 2 ] < boundingBox[ 2 ][ 0 ] ) {
+                        navObjectWorldPos[ 2 ] = boundingBox[ 2 ][ 0 ];
+                    }
+                    else if ( navObjectWorldPos[ 2 ] > boundingBox[ 2 ][ 1 ] ) {
+                        navObjectWorldPos[ 2 ] = boundingBox[ 2 ][ 1 ];
+                    }
+                }
+                
+                // Insert the new navObject position into the translation array
+                var translationArray = translation.elements;
+                translationArray[ 12 ] = navObjectWorldPos [ 0 ];
+                translationArray[ 13 ] = navObjectWorldPos [ 1 ];
+                translationArray[ 14 ] = navObjectWorldPos [ 2 ];
+
+                // Since this translation already accounts for pitch and yaw, insert it directly into the navObject 
+                // transform
+                navObjectWorldTransformMatrixArray[ 12 ] = navObjectWorldPos [ 0 ];
+                navObjectWorldTransformMatrixArray[ 13 ] = navObjectWorldPos [ 1 ];
+                navObjectWorldTransformMatrixArray[ 14 ] = navObjectWorldPos [ 2 ];
+            }
 
             // Update the navigation object's local transform from its new world transform
             setTransformFromWorldTransform( navThreeObject );
@@ -1111,35 +1275,42 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var theta = direction * ( rotationSpeed * degreesToRadians ) * 
                         Math.min( msSinceLastFrame * 0.001, 0.5 );
 
-            var cos = Math.cos( theta );
-            var sin = Math.sin( theta );
-            var rotation = [  cos, sin, 0, 0,
-                             -sin, cos, 0, 0,
-                                0,   0, 1, 0,
-                                0,   0, 0, 1 ];
-            
-            // Left multiply the current transform matrix by the rotation transform
-            // and assign the result back to the navObject's transform
             var navThreeObject = navObject.threeObject;
-            var navObjectTransform = navThreeObject.matrix.elements;
+            var orbiting = ( navmode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
 
-            // Save the camera position so we can reinstitute it after the rotation
-            // (effectively rotating the camera in place rather than around its origin)
-            var navObjectPos = [ navObjectTransform[ 12 ], 
-                                 navObjectTransform[ 13 ], 
-                                 navObjectTransform[ 14 ] ];
+            if ( orbiting ) {
+                var pitchRadians = 0;
+                var yawRadians = -theta;
+                orbit( pitchRadians, yawRadians );
+            } else {
 
-            // Perform the rotation
-            goog.vec.Mat4.multMat( rotation, navObjectTransform, navObjectTransform );
+                var cos = Math.cos( theta );
+                var sin = Math.sin( theta );
+                var rotation = [  cos, sin, 0, 0,
+                                 -sin, cos, 0, 0,
+                                    0,   0, 1, 0,
+                                    0,   0, 0, 1 ];
+                
+                // Left multiply the current transform matrix by the rotation transform
+                // and assign the result back to the navObject's transform
+                var yawArray = yawMatrix.elements;
 
-            // Put the original camera position back
-            navObjectTransform[ 12 ] = navObjectPos[ 0 ];
-            navObjectTransform[ 13 ] = navObjectPos[ 1 ];
-            navObjectTransform[ 14 ] = navObjectPos[ 2 ];
+                // Perform the rotation
+                goog.vec.Mat4.multMat( rotation, yawArray, yawArray );
 
-            // Force the camera's world transform to update from its local transform
-            updateRenderObjectTransform( navThreeObject );
-            setModelTransformProperty( navObject, navObjectTransform );
+                // Construct the new transform from pitch, yaw, and translation
+                var navObjectWorldTransform = navThreeObject.matrixWorld;
+                navObjectWorldTransform.multiplyMatrices( yawMatrix, pitchMatrix );
+                navObjectWorldTransform.multiplyMatrices( translation, navObjectWorldTransform );
+                if ( navThreeObject instanceof THREE.Camera ) {
+                    var navObjectWorldTransformArray = navObjectWorldTransform.elements;
+                    navObjectWorldTransform.elements = convertCameraTransformFromVWFtoThreejs( navObjectWorldTransformArray );
+                }
+            }
+
+            // Force the navObject's world transform to update from its local transform
+            setTransformFromWorldTransform( navThreeObject );
+            setModelTransformProperty( navObject, navThreeObject.matrix.elements );
         }
 
         var handleKeyNavigation = function( keyCode, keyIsDown ) {
@@ -1175,103 +1346,229 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         var handleMouseNavigation = function( mouseEventData ) {
 
-            if ( mouseEventData[ 0 ].buttons.right ) {
+            var deltaX = 0;
+            var deltaY = 0;
+
+            if ( pointerLocked ) {
+                deltaX = mouseEventData.movementX / sceneView.width;
+                deltaY = mouseEventData.movementY / sceneView.height;
+            } else if ( startMousePosition ) {
                 var currentMousePosition = mouseEventData[ 0 ].position;
-                var deltaX = currentMousePosition[ 0 ] - startMousePosition [ 0 ];
-                var deltaY = currentMousePosition[ 1 ] - startMousePosition [ 1 ];
+                deltaX = currentMousePosition[ 0 ] - startMousePosition [ 0 ];
+                deltaY = currentMousePosition[ 1 ] - startMousePosition [ 1 ];
+            }
+
+            if ( deltaX || deltaY ) {
                 var yawQuat = new THREE.Quaternion();
                 var pitchQuat = new THREE.Quaternion();
                 var rotationSpeedRadians = degreesToRadians * rotationSpeed;
 
-                // deltaX is negated because a positive change (to the right) generates a negative rotation 
-                // around the vertical z axis (clockwise as viewed from above)
-                yawQuat.setFromAxisAngle( new THREE.Vector3( 0, 0, 1 ), -deltaX * rotationSpeedRadians );
+                var orbiting = mouseMiddleDown && ( navmode == "fly" );
 
-                // deltaY is negated because a positive change (downward) generates a negative rotation 
-                // around the horizontal x axis (clockwise as viewed from the right)
-                pitchQuat.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), -deltaY * rotationSpeedRadians );
-                var yawMatrix = new THREE.Matrix4();
-                yawMatrix.makeRotationFromQuaternion( yawQuat );
-                var pitchMatrix = new THREE.Matrix4();
-                pitchMatrix.makeRotationFromQuaternion( pitchQuat );
+                if ( orbiting ) {
+                    var pitchRadians = deltaY * rotationSpeedRadians;
+                    var yawRadians = deltaX * rotationSpeedRadians;
+                    orbit( pitchRadians, yawRadians );
+                } else if ( mouseRightDown ) {
+                    if ( navObject ) {
 
-                // Perform pitch on camera - right-multiply to keep pitch separate from yaw
-                var camera = sceneView.state.cameraInUse;
-                if ( camera ) {
-                    var cameraMatrix = camera.matrix;
-                    var cameraPos = new THREE.Vector3();
-                    cameraPos.getPositionFromMatrix( cameraMatrix );
-                    cameraMatrix.multiply( pitchMatrix );
+                        // --------------------
+                        // Calculate new pitch
+                        // --------------------
 
-                    // Constrain the camera's pitch to +/- 90 degrees
-                    var camWorldMatrix = camera.matrixWorld;
-                    var camWorldMatrixElements = camWorldMatrix.elements;
+                        // deltaY is negated because a positive change (downward) generates a negative rotation 
+                        // around the horizontal x axis (clockwise as viewed from the right)
+                        pitchQuat.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), -deltaY * rotationSpeedRadians );
+                        var pitchDeltaMatrix = new THREE.Matrix4();
+                        pitchDeltaMatrix.makeRotationFromQuaternion( pitchQuat );
 
-                    // We need to do something if zAxis.z is < 0
-                    // This can get a little weird because this matrix is in three.js coordinates, but we care
-                    // about VWF coordinates:
-                    // -the VWF y-axis is the three.js -z axis 
-                    // -the VWF z-axis is the three.js y axis
-                    if ( camWorldMatrixElements[ 6 ] < 0 ) {
+                        if ( ( navmode == "fly" )  ||
+                             ( ( navmode == "walk" ) && ( cameraNode == navObject ) ) ) {
+                            pitchMatrix.multiplyMatrices( pitchDeltaMatrix, pitchMatrix );
 
-                        var xAxis = goog.vec.Vec3.create();
-                        xAxis = goog.vec.Vec3.setFromArray( xAxis, [ camWorldMatrixElements[ 0 ], 
-                                                                     camWorldMatrixElements[ 1 ], 
-                                                                     camWorldMatrixElements[ 2 ] ] );
+                            // Constrain the camera's pitch to +/- 90 degrees
+                            // We need to do something if zAxis.z is < 0
+                            var pitchMatrixElements = pitchMatrix.elements;
+                            if ( pitchMatrixElements[ 10 ] < 0 ) {
 
-                        var yAxis = goog.vec.Vec3.create();
+                                var xAxis = goog.vec.Vec3.create();
+                                xAxis = goog.vec.Vec3.setFromArray( xAxis, [ pitchMatrixElements[ 0 ], 
+                                                                             pitchMatrixElements[ 1 ], 
+                                                                             pitchMatrixElements[ 2 ] ] );
 
-                        // If forward vector is tipped up
-                        if ( camWorldMatrixElements[ 10 ] > 0 ) {
-                            yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
-                        } else {
-                            yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
+                                var yAxis = goog.vec.Vec3.create();
+
+                                // If forward vector is tipped up
+                                if ( pitchMatrixElements[ 6 ] > 0 ) {
+                                    yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
+                                } else {
+                                    yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
+                                }
+
+                                // Calculate the zAxis as a crossProduct of x and y
+                                var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
+
+                                // Put these values back in the camera matrix
+                                pitchMatrixElements[ 4 ] = yAxis[ 0 ];
+                                pitchMatrixElements[ 5 ] = yAxis[ 1 ];
+                                pitchMatrixElements[ 6 ] = yAxis[ 2 ];
+                                pitchMatrixElements[ 8 ] = zAxis[ 0 ];
+                                pitchMatrixElements[ 9 ] = zAxis[ 1 ];
+                                pitchMatrixElements[ 10 ] = zAxis[ 2 ];
+                            }
+                        } else if ( navmode == "walk" ) {
+
+                            // Perform pitch on camera - right-multiply to keep pitch separate from yaw
+                            var camera = sceneView.state.cameraInUse;
+                            if ( camera ) {
+                                var cameraMatrix = camera.matrix;
+                                var cameraPos = new THREE.Vector3();
+                                cameraPos.getPositionFromMatrix( cameraMatrix );
+                                cameraMatrix.multiply( pitchDeltaMatrix );
+
+                                // Constrain the camera's pitch to +/- 90 degrees
+                                var camWorldMatrix = camera.matrixWorld;
+                                var camWorldMatrixElements = camWorldMatrix.elements;
+
+                                // We need to do something if zAxis.z is < 0
+                                // This can get a little weird because this matrix is in three.js coordinates, 
+                                // but we care about VWF coordinates:
+                                // -the VWF y-axis is the three.js -z axis 
+                                // -the VWF z-axis is the three.js y axis
+                                if ( camWorldMatrixElements[ 6 ] < 0 ) {
+
+                                    var xAxis = goog.vec.Vec3.create();
+                                    xAxis = goog.vec.Vec3.setFromArray( xAxis, [ camWorldMatrixElements[ 0 ], 
+                                                                                 camWorldMatrixElements[ 1 ], 
+                                                                                 camWorldMatrixElements[ 2 ] ] );
+
+                                    var yAxis = goog.vec.Vec3.create();
+
+                                    // If forward vector is tipped up
+                                    if ( camWorldMatrixElements[ 10 ] > 0 ) {
+                                        yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
+                                    } else {
+                                        yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
+                                    }
+
+                                    // Calculate the zAxis as a crossProduct of x and y
+                                    var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
+
+                                    // Put these values back in the camera matrix
+                                    camWorldMatrixElements[ 4 ] = zAxis[ 0 ];
+                                    camWorldMatrixElements[ 5 ] = zAxis[ 1 ];
+                                    camWorldMatrixElements[ 6 ] = zAxis[ 2 ];
+                                    camWorldMatrixElements[ 8 ] = -yAxis[ 0 ];
+                                    camWorldMatrixElements[ 9 ] = -yAxis[ 1 ];
+                                    camWorldMatrixElements[ 10 ] = -yAxis[ 2 ];
+
+                                    setTransformFromWorldTransform( camera );
+                                }
+
+                                // Restore camera position so rotation is done around camera center
+                                cameraMatrix.setPosition( cameraPos );
+                                updateRenderObjectTransform( camera );
+
+                                setModelTransformProperty( cameraNode, cameraMatrix.elements );
+                            } else {
+                                self.logger.warnx( "There is no camera to move" );
+                            }
                         }
 
-                        // Calculate the zAxis as a crossProduct of x and y
-                        var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
+                        // ------------------
+                        // Calculate new yaw
+                        // ------------------
 
-                        // Put these values back in the camera matrix
-                        camWorldMatrixElements[ 4 ] = zAxis[ 0 ];
-                        camWorldMatrixElements[ 5 ] = zAxis[ 1 ];
-                        camWorldMatrixElements[ 6 ] = zAxis[ 2 ];
-                        camWorldMatrixElements[ 8 ] = -yAxis[ 0 ];
-                        camWorldMatrixElements[ 9 ] = -yAxis[ 1 ];
-                        camWorldMatrixElements[ 10 ] = -yAxis[ 2 ];
+                        // deltaX is negated because a positive change (to the right) generates a negative rotation 
+                        // around the vertical z axis (clockwise as viewed from above)
+                        yawQuat.setFromAxisAngle( new THREE.Vector3( 0, 0, 1 ), -deltaX * rotationSpeedRadians );
+                        var yawDeltaMatrix = new THREE.Matrix4();
+                        yawDeltaMatrix.makeRotationFromQuaternion( yawQuat );
+                        yawMatrix.multiplyMatrices( yawDeltaMatrix, yawMatrix );
 
-                        setTransformFromWorldTransform( camera );
+                        // -------------------------------------------------
+                        // Put all components together and set the new pose
+                        // -------------------------------------------------
+                                            
+                        var navThreeObject = navObject.threeObject;
+                        var navObjectWorldMatrix = navThreeObject.matrixWorld;
+                        navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
+                        navObjectWorldMatrix.multiplyMatrices( translation, navObjectWorldMatrix );
+                        if ( navThreeObject instanceof THREE.Camera ) {
+                            var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
+                            navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
+                        }
+                        setTransformFromWorldTransform( navObject.threeObject );
+                        setModelTransformProperty( navObject, navThreeObject.matrix.elements );
+                    } else {
+                        self.logger.warnx( "handleMouseNavigation: There is no navigation object to move" );
                     }
 
-                    // Restore camera position so rotation is done around camera center
-                    cameraMatrix.setPosition( cameraPos );
-                    updateRenderObjectTransform( camera );
-
-                    // If the navObject is the camera, its new transform will be sent to the reflector 
-                    // all at once at the end
-                    // If not (here below), we need to send a separate message to the reflector to set 
-                    // the pitch on the camera
-                    if ( navObject !== cameraNode ) {
-                        setModelTransformProperty( cameraNode, cameraMatrix.elements );
-                    }
-                } else {
-                    self.logger.warnx( "There is no camera to move" );
-                }
-
-                // Perform yaw on nav object - left-multiply to keep yaw separate from pitch
-                if ( navObject ) {
-                    var navObjectMatrix = navObject.threeObject.matrix;
-                    var navObjectPos = new THREE.Vector3();
-                    navObjectPos.getPositionFromMatrix( navObjectMatrix );
-                    navObjectMatrix.multiplyMatrices( yawMatrix, navObjectMatrix );
-                    navObjectMatrix.setPosition( navObjectPos );
-                    updateRenderObjectTransform( navObject.threeObject );
-                    setModelTransformProperty( navObject, navObjectMatrix.elements );
-                } else {
-                    self.logger.warnx( "There is no navigation object to move" );
                 }
 
                 startMousePosition = currentMousePosition;
+            } 
+        }
+
+        function handleScroll( wheelDelta, distanceToTarget ) {
+            
+            var orbiting = ( navmode == "fly" ) && ( mouseMiddleDown )
+
+            if ( orbiting || !pickDirectionVector ) {
+                return;
             }
+
+            // wheelDelta has a value of 3 for every click
+            var numClicks = Math.abs( wheelDelta / 3 );
+
+            // Prepare variables for calculation
+            var dist = Math.min( Math.max( distanceToTarget || translationSpeed, 
+                                           2 * self.state.cameraInUse.near ),
+                                 9 * translationSpeed );
+            var percentDistRemainingEachStep = 0.8;
+            var amountToMove = 0;
+
+            // If wheelDelta is negative, user pushed wheel forward - move toward the object
+            // Else, user pulled wheel back - move away from object
+            if ( wheelDelta < 0 ) { 
+                amountToMove = dist * ( 1 - Math.pow( percentDistRemainingEachStep, numClicks ) );
+            } else {
+                amountToMove = dist * ( 1 - Math.pow( 1 / percentDistRemainingEachStep, numClicks ) );
+            }
+
+            var translationArray = translation.elements;
+            translationArray[ 12 ] += amountToMove * pickDirectionVector.x;
+            translationArray[ 13 ] += amountToMove * pickDirectionVector.y;
+            translationArray[ 14 ] += amountToMove * pickDirectionVector.z;
+            if ( boundingBox != undefined ) {
+                if ( translationArray[ 12 ] < boundingBox[ 0 ][ 0 ] ) {
+                    translationArray[ 12 ] = boundingBox[ 0 ][ 0 ];
+                }
+                else if ( translationArray[ 12 ] > boundingBox[ 0 ][ 1 ] ) {
+                    translationArray[ 12 ] = boundingBox[ 0 ][ 1 ];
+                }
+                if ( translationArray[ 13 ] < boundingBox[ 1 ][ 0 ] ) {
+                    translationArray[ 13 ] = boundingBox[ 1 ][ 0 ];
+                }
+                else if ( translationArray[ 13 ] > boundingBox[ 1 ][ 1 ] ) {
+                    translationArray[ 13 ] = boundingBox[ 1 ][ 1 ];
+                }
+                if ( translationArray[ 14 ] < boundingBox[ 2 ][ 0 ] ) {
+                    translationArray[ 14 ] = boundingBox[ 2 ][ 0 ];
+                }
+                else if ( translationArray[ 14 ] > boundingBox[ 2 ][ 1 ] ) {
+                    translationArray[ 14 ] = boundingBox[ 2 ][ 1 ];
+                }
+            }
+            var navThreeObject = navObject.threeObject;
+            var worldTransformArray = navThreeObject.matrixWorld.elements;
+            worldTransformArray[ 12 ] = translationArray[ 12 ];
+            worldTransformArray[ 13 ] = translationArray[ 13 ];
+            worldTransformArray[ 14 ] = translationArray[ 14 ];
+
+            setTransformFromWorldTransform( navThreeObject );
+
+            setModelTransformProperty( navObject, navThreeObject.matrix.elements );
         }
 
         // END TODO
@@ -1393,36 +1690,32 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var x = ( mousepos.x ) * 2 - 1;
         var y = -( mousepos.y ) * 2 + 1;
 
-        var directionVector = new THREE.Vector3();
+        pickDirectionVector = new THREE.Vector3();
         
         //console.info( "mousepos = " + x + ", " + y );
-        directionVector.set( x, y, 0.5 );
+        pickDirectionVector.set( x, y, 0.5 );
         
-        this.projector.unprojectVector(directionVector, threeCam);
+        this.projector.unprojectVector(pickDirectionVector, threeCam);
         var pos = new THREE.Vector3();
-        pos.getPositionFromMatrix( threeCam.matrix );
-        directionVector.sub(pos);
-        directionVector.normalize();
+        pos.getPositionFromMatrix( threeCam.matrixWorld );
+        pickDirectionVector.sub(pos);
+        pickDirectionVector.normalize();
         
         
-        this.raycaster.set(pos, directionVector);
+        this.raycaster.set(pos, pickDirectionVector);
         var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
-        if (intersects.length) {
-            var target = intersects[0].object;
-            if ( debug ) {
-                for ( var i = 0; i < intersects.length; i++ ) { 
-                    console.info( i + ". " + intersects[i].object.name ) 
-                }
-            }            
-            // intersections are, by default, ordered by distance,
-            // so we only care for the first one. The intersection
-            // object holds the intersection point, the face that's
-            // been "hit" by the ray, and the object to which that
-            // face belongs. We only care for the object itself.
+        
+        // intersections are, by default, ordered by distance,
+        // so we only care for the first (visible) one. The intersection
+        // object holds the intersection point, the face that's
+        // been "hit" by the ray, and the object to which that
+        // face belongs. We only care for the object itself.
 
-            
-            var ID = getPickObjectID.call(this,target);
-            return intersects[0];
+        // Cycle through the list of intersected objects and return the first visible one
+        for ( var i = 0; i < intersects.length; i++ ) {
+            if ( intersects[ i ].object.visible ) {
+                return intersects[ i ];
+            }
         }
         return null;
     }
@@ -1993,6 +2286,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             rendererState.cameraInUse = cameraNode.threeObject;
         }
 
+        // Pull the initial pitch, yaw, and translation out of the navObject's transform
+        extractRotationAndTranslation( navObject.threeObject );
+
         // Request properties from the navigation object
         vwf_view.kernel.getProperty( navObject.ID, "navmode" );
         vwf_view.kernel.getProperty( navObject.ID, "translationSpeed" );
@@ -2016,6 +2312,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
         } else {
             vwf_view.kernel.getProperty( sceneRootID, "makeOwnAvatarVisible" );
+            vwf_view.kernel.getProperty( sceneRootID, "boundingBox" );
             vwf_view.kernel.getProperty( sceneRootID, "userObject" );
         }
     }
@@ -2092,8 +2389,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var transformMatrix = matCpy( transform );
         var threeObject = node.threeObject;
 
+        if ( node == navObject ) {
+            extractRotationAndTranslation( threeObject );
+        }
+
         if ( threeObject instanceof THREE.Camera ) {  
-            convertCameraTransformFromVWFtoThreejs( transformMatrix );
+            transformMatrix = convertCameraTransformFromVWFtoThreejs( transformMatrix );
         } else if( threeObject instanceof THREE.ParticleSystem ) {
 
             // I don't see where this function is defined. Maybe a copy-paste bug from
@@ -2120,22 +2421,16 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         if ( nodeID ) {
 
-            var transform = matCpy( transformArray );
-
+            var transform;
+            
             // If this threeObject is a camera, it has a 90-degree rotation on it to account for the different 
             // coordinate systems of VWF and three.js.  We need to undo that rotation before setting the VWF 
             // property.
+            // Else, just copy the matrix for use in setting the model property
             if ( node.threeObject instanceof THREE.Camera ) {
-                                    
-                // Get column y and z out of the matrix
-                var columny = goog.vec.Vec4.create();
-                goog.vec.Mat4.getColumn( transform, 1, columny );
-                var columnz = goog.vec.Vec4.create();
-                goog.vec.Mat4.getColumn( transform, 2, columnz );
-
-                // Swap the two columns, negating columny
-                goog.vec.Mat4.setColumn( transform, 1, goog.vec.Vec4.negate( columnz, columnz ) );
-                goog.vec.Mat4.setColumn( transform, 2, columny );
+                transform = convertCameraTransformFromThreejsToVWF( transformArray );
+            } else {
+                transform = matCpy( transformArray );
             }
 
             vwf_view.kernel.setProperty( nodeID, "transform", transform );
@@ -2147,6 +2442,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     }
 
     function setTransformFromWorldTransform( threeObject ) {
+        
+        if ( !threeObject ) {
+            self.logger.warnx( "setTransformFromWorldTransform: There is no threeObject to update" );
+            return;
+        }
+
         var parent = threeObject.parent;
         if ( parent ) {
             var inverseParentWorldMatrix = new THREE.Matrix4();
@@ -2172,7 +2473,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     // An almost identical function is copied in model/threejs.js, so if any modifications are made here, they 
     // should be made there, also
     function nodeLookAt( node ) {
-
         if ( !node ) {
             self.logger.warnx( "nodeLookAt: Node does not exist" );
             return;
@@ -2181,10 +2481,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // Function to make the object look at a particular position
         // (For use in the following conditional)
         var lookAtWorldPosition = function( targetWorldPos ) {
-            
             // Get the eye position
             var eye = new THREE.Vector3();
-            eye.getPositionFromMatrix( node.threeObject.matrixWorld );
+            var threeObject = node.threeObject;
+            eye.getPositionFromMatrix( threeObject.matrixWorld );
 
             var look = new THREE.Vector3();
             look.subVectors( targetWorldPos, eye );
@@ -2207,16 +2507,17 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 var up = new THREE.Vector3();
                 up.crossVectors( right, look );
 
-                var worldTransform = node.threeObject.matrixWorld.elements;
+                var worldTransform = threeObject.matrixWorld.elements;
                 worldTransform[ 0 ] = right.x; worldTransform[ 4 ] = look.x; worldTransform[ 8 ] = up.x;
                 worldTransform[ 1 ] = right.y; worldTransform[ 5 ] = look.y; worldTransform[ 9 ] = up.y;
                 worldTransform[ 2 ] = right.z; worldTransform[ 6 ] = look.z; worldTransform[ 10 ] = up.z;
                 
-                setTransformFromWorldTransform( node.threeObject );
+                setTransformFromWorldTransform( threeObject );
 
-                if ( node.threeObject instanceof THREE.Camera ) {
-                    convertCameraTransformFromVWFtoThreejs( node.threeObject.matrix.elements );
-                    updateRenderObjectTransform( node.threeObject );
+                if ( threeObject instanceof THREE.Camera ) {
+                    var nodeTransformArray = threeObject.matrix.elements;
+                    threeObject.matrix.elements = convertCameraTransformFromVWFtoThreejs( nodeTransformArray );
+                    updateRenderObjectTransform( threeObject );
                 }
             }
         }
@@ -2246,15 +2547,38 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         // Rotate 90 degrees around X to convert from VWF Z-up to three.js Y-up.
 
+        var newTransform = matCpy( transform );
+
         // Get column y and z out of the matrix
         var columny = goog.vec.Vec4.create();
-        goog.vec.Mat4.getColumn( transform, 1, columny );
+        goog.vec.Mat4.getColumn( newTransform, 1, columny );
         var columnz = goog.vec.Vec4.create();
-        goog.vec.Mat4.getColumn( transform, 2, columnz );
+        goog.vec.Mat4.getColumn( newTransform, 2, columnz );
 
         // Swap the two columns, negating columny
-        goog.vec.Mat4.setColumn( transform, 1, columnz );
-        goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
+        goog.vec.Mat4.setColumn( newTransform, 1, columnz );
+        goog.vec.Mat4.setColumn( newTransform, 2, goog.vec.Vec4.negate( columny, columny ) );
+
+        return newTransform;
+    }
+
+    function convertCameraTransformFromThreejsToVWF( transform ) {
+
+        // Rotate -90 degrees around X to convert from three.js Y-up to VWF Z-up.
+
+        var newTransform = matCpy( transform );
+                                    
+        // Get column y and z out of the matrix
+        var columny = goog.vec.Vec4.create();
+        goog.vec.Mat4.getColumn( newTransform, 1, columny );
+        var columnz = goog.vec.Vec4.create();
+        goog.vec.Mat4.getColumn( newTransform, 2, columnz );
+
+        // Swap the two columns, negating columnz
+        goog.vec.Mat4.setColumn( newTransform, 1, goog.vec.Vec4.negate( columnz, columnz ) );
+        goog.vec.Mat4.setColumn( newTransform, 2, columny );
+
+        return newTransform;
     }
 
     function setVisibleRecursively( threeObject, visible ) {
@@ -2264,6 +2588,191 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         threeObject.visible = visible;
         for ( var i = 0; i < threeObject.children.length; i++ ) {
             setVisibleRecursively( threeObject.children[ i ], visible );
+        }
+    }
+
+    function extractRotationAndTranslation( threeObject ) {
+
+        // Pull the pitch, yaw, and translation out of the transform
+
+        var worldTransformArray = threeObject.matrixWorld.elements;
+        var vwfWorldTransformArray;
+
+        // If this threeObject is a camera, it has a 90-degree rotation on it to account for the different 
+        // coordinate systems of VWF and three.js.  We need to undo that rotation before using it as a VWF 
+        // property.
+        // Else, just use the transform as-is
+        if ( threeObject instanceof THREE.Camera ) {
+            vwfWorldTransformArray = convertCameraTransformFromThreejsToVWF( worldTransformArray );
+        } else {
+            vwfWorldTransformArray = matCpy( worldTransformArray );
+        }
+
+        pitchMatrix = new THREE.Matrix4();
+        var pitchArray = pitchMatrix.elements;
+        var costheta = vwfWorldTransformArray[ 10 ];
+        var sintheta = vwfWorldTransformArray[ 6 ];
+        pitchArray[ 5 ] = costheta;
+        pitchArray[ 6 ] = sintheta;
+        pitchArray[ 9 ] = -sintheta;
+        pitchArray[ 10 ] = costheta;
+
+        yawMatrix = new THREE.Matrix4();
+        var yawArray = yawMatrix.elements;
+        var cosphi = vwfWorldTransformArray[ 0 ];
+        var sinphi = vwfWorldTransformArray[ 1 ];
+        yawArray[ 0 ] = cosphi;
+        yawArray[ 1 ] = sinphi;
+        yawArray[ 4 ] = -sinphi;
+        yawArray[ 5 ] = cosphi;
+
+        translation = new THREE.Matrix4();
+        var translationArray = translation.elements;
+        translationArray[ 12 ] = vwfWorldTransformArray[ 12 ];
+        translationArray[ 13 ] = vwfWorldTransformArray[ 13 ];
+        translationArray[ 14 ] = vwfWorldTransformArray[ 14 ];
+    }
+
+    function orbit( pitchRadians, yawRadians ) {
+        if ( navObject ) {
+
+            // We can only orbit around a point if there is a point to orbit around
+            if ( positionUnderMouseClick ) {
+
+                var originalPitchMatrix = pitchMatrix.clone();
+
+                // --------------------
+                // Calculate new pitch
+                // --------------------
+
+                var pitchQuat = new THREE.Quaternion();
+                pitchQuat.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), pitchRadians );
+                var pitchDeltaMatrix = new THREE.Matrix4();
+                pitchDeltaMatrix.makeRotationFromQuaternion( pitchQuat );
+                pitchMatrix.multiplyMatrices( pitchDeltaMatrix, pitchMatrix );
+
+                // Constrain the camera's pitch to +/- 90 degrees
+                // We need to do something if zAxis.z is < 0
+                var pitchMatrixElements = pitchMatrix.elements;
+                var pitchIsConstrained = false;
+                var zenithOrNadirMult = 0;
+                if ( pitchMatrixElements[ 10 ] < 0 ) {
+
+                    var xAxis = goog.vec.Vec3.create();
+                    xAxis = goog.vec.Vec3.setFromArray( xAxis, [ pitchMatrixElements[ 0 ], 
+                                                                 pitchMatrixElements[ 1 ], 
+                                                                 pitchMatrixElements[ 2 ] ] );
+
+                    var yAxis = goog.vec.Vec3.create();
+
+                    // If forward vector is tipped up
+                    if ( pitchMatrixElements[ 6 ] > 0 ) {
+                        yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
+                    } else {
+                        yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
+                    }
+
+                    // Calculate the zAxis as a crossProduct of x and y
+                    var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
+
+                    // Put these values back in the camera matrix
+                    pitchMatrixElements[ 4 ] = yAxis[ 0 ];
+                    pitchMatrixElements[ 5 ] = yAxis[ 1 ];
+                    pitchMatrixElements[ 6 ] = yAxis[ 2 ];
+                    pitchMatrixElements[ 8 ] = zAxis[ 0 ];
+                    pitchMatrixElements[ 9 ] = zAxis[ 1 ];
+                    pitchMatrixElements[ 10 ] = zAxis[ 2 ];
+
+                    pitchIsConstrained = true;
+                    zenithOrNadirMult = -yAxis[ 2 ];
+                }
+
+                // ------------------
+                // Calculate new yaw
+                // ------------------
+
+                var yawQuat = new THREE.Quaternion();
+                yawQuat.setFromAxisAngle( new THREE.Vector3( 0, 0, 1 ), yawRadians );
+                var yawDeltaMatrix = new THREE.Matrix4();
+                yawDeltaMatrix.makeRotationFromQuaternion( yawQuat );
+                yawMatrix.multiplyMatrices( yawDeltaMatrix, yawMatrix );
+
+                // --------------------------
+                // Calculate new translation
+                // --------------------------
+
+                if ( pitchIsConstrained ) {
+                    var inverseOriginalPitchMatrix = new THREE.Matrix4();
+                    inverseOriginalPitchMatrix.getInverse( originalPitchMatrix );
+                    pitchDeltaMatrix.multiplyMatrices( pitchMatrix, inverseOriginalPitchMatrix );
+                }
+
+                var rotatedOrbitFrameInWorld = new THREE.Matrix4();
+                //rotatedOrbitFrameInWorld.multiplyMatrices( yawMatrix, pitchMatrix );
+                rotatedOrbitFrameInWorld = yawMatrix.clone();
+                rotatedOrbitFrameInWorld.setPosition( new THREE.Vector3( positionUnderMouseClick[ 0 ],
+                                                                         positionUnderMouseClick[ 1 ], 
+                                                                         positionUnderMouseClick[ 2 ] ) ); 
+
+                var worldToRotatedOrbit = new THREE.Matrix4();
+                worldToRotatedOrbit.getInverse( rotatedOrbitFrameInWorld );
+
+                var translationInRotatedOrbitFrame = new THREE.Matrix4();
+                translationInRotatedOrbitFrame.multiplyMatrices( worldToRotatedOrbit, translation );
+
+                // Apply pitch and then yaw
+                translationInRotatedOrbitFrame.multiplyMatrices( pitchDeltaMatrix, translationInRotatedOrbitFrame );
+                translationInRotatedOrbitFrame.multiplyMatrices( yawDeltaMatrix, translationInRotatedOrbitFrame );
+
+                // Transform back to world
+                var newTranslationInWorld = new THREE.Matrix4();
+                newTranslationInWorld.multiplyMatrices( rotatedOrbitFrameInWorld, translationInRotatedOrbitFrame );
+
+                var translationArray = translation.elements;
+                var newTranslationInWorldArray = newTranslationInWorld.elements;
+                translationArray[ 12 ] = newTranslationInWorldArray[ 12 ];
+                translationArray[ 13 ] = newTranslationInWorldArray[ 13 ];
+                translationArray[ 14 ] = newTranslationInWorldArray[ 14 ];
+                var boundByBoundingBox = false;
+                if ( boundingBox != undefined ) {
+                    if ( translationArray[ 12 ] < boundingBox[ 0 ][ 0 ] ) {
+                        boundByBoundingBox = true;
+                    }
+                    else if ( translationArray[ 12 ] > boundingBox[ 0 ][ 1 ] ) {
+                        boundByBoundingBox = true;
+                    }
+                    if ( translationArray[ 13 ] < boundingBox[ 1 ][ 0 ] ) {
+                        boundByBoundingBox = true;
+                   }
+                    else if ( translationArray[ 13 ] > boundingBox[ 1 ][ 1 ] ) {
+                        boundByBoundingBox = true;
+                    }
+                    if ( translationArray[ 14 ] < boundingBox[ 2 ][ 0 ] ) {
+                        boundByBoundingBox = true;
+                    }
+                    else if ( translationArray[ 14 ] > boundingBox[ 2 ][ 1 ] ) {
+                        boundByBoundingBox = true;
+                    }
+                }
+                // -------------------------------------------------
+                // Put all components together and set the new pose
+                // -------------------------------------------------
+                var navThreeObject = navObject.threeObject;
+                if ( boundByBoundingBox == false ) {
+                    var navObjectWorldMatrix = navThreeObject.matrixWorld;
+                    navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
+                    navObjectWorldMatrix.multiplyMatrices( translation, navObjectWorldMatrix );
+                
+                    if ( navThreeObject instanceof THREE.Camera ) {
+                        var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
+                        navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
+                    }
+                }
+                setTransformFromWorldTransform( navThreeObject );
+                setModelTransformProperty( navObject, navThreeObject.matrix.elements );
+            }
+        } else {
+            self.logger.warnx( "orbit: There is no navigation object to move" );
         }
     }
 });

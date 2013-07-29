@@ -2,6 +2,120 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.6.12
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+Server: 
+
+- NEW: Create a global `clients.vwf` node and maintain one child per client. The server creates the global node `http://vwf.example.com/clients.vwf` on launch (independent of the application) then adds one child to it for each client connected to the application instance. The child's name is the client's moniker. In the default implementation, neither the `clients.vwf` node nor its children contain any additional data. It is expected that server installations that have user data to share will make that available to the application by creating the nodes with additional behaviors and properties. References #1272.
+
+Client:
+
+- NEW: Client: Implement mouse orbit refs #2258 fixes #2339
+- NEW*: API: Add `kernel.deleteChild` to delete a node by name. References #1272.
+- NEW*: API: Support annotations on top-level nodes and mark the application. Add a `nodeAnnotation` parameter to `createNode` to allow top-level nodes to be tagged. Interpret the "application" annotation as identifying the root of the application tree. Update the replication data to include the tags. This replaces the previous heuristic of treating the first node created as the application root. References #1272.
+- CHG: Client: Set the default value for active to false for the scenejs renderer
+- CHG: Client: Add in proper support for threejs nodes with multiple materials.
+- CHG: Client: Add in basic bumpScale option to control degree of bump mapping. References #2311.
+- CHG: Client: Fix for when findClients returns undefined. Refs #2424.
+- CHG: Client: Make spin-on-click only respond to left-clicks. fixes #2339
+- CHG: Client: Limit scroll speed to 9 times the translation speed. The idea is that if you scroll backward so far that things get clipped by the far plane or become so small that you can't scroll back in on them, it should only take you three scrolls forward on empty space (3 clicks per scroll) to get back where you were.  This solves the problem where a person can scroll out and get totally lost. fixes #2257
+- CHG: Client: Maintain a current list of clients in an application. As each client joins an application instance, a node is created as a child of the "clients" node, which is parallel to the application root node. Add a findClients kernel function, similar to the find function. Whereas the find function finds nodes descending from the application root node, the findClients function finds nodes descending from the clients node.The Users tab of the editor shows a list of all clients in the application instance. A user can choose to login, which will add a displayName property to its client node. This can be seen by drilling down into that client in the editor. Fixes #1951. Fixes #1998. Fixes #1275.
+- CHG: Client: Add sourceUrl to node3.transform.set for debugging refs #2259
+- CHG: Client: Fix FindChildByName so recursive calls recurse all the way down The next level down was not calling itself recursively so it only ever went down one level refs #2259
+- CHG: Client: Change key navigation while orbiting (and disable look and scroll). WS now move the user toward and away from the orbit point. ADQE now orbit the camera laterally around the orbit point. Right-click to rotate camera and scroll are disabled while middle mouse wheel are down. fixes #2258
+- CHG: Client: Make ThreeJSPick only return visible objects (ignoring invisible ones) refs #2258
+- CHG: Client: Added check when setting navmode to none to release cursor. Fixes #2374.
+- CHG: Client: Remove extra assignment of self variable refs #2257
+- CHG: Client: Make scroll-to-zoom work in Firefox, too refs #2257
+- CHG: Client: Move a "translationSpeed" distance when scrolling over a non-object refs #2257
+- CHG: Client: Add error checking to editor.js refs #2257
+- CHG: Client: Add scroll-to-zoom navigation in "fly" mode fixes #2257
+- CHG: Client: Disable pointer lock when navigation mode is "none". refs #2038
+- CHG: Client: Use pointer lock so mouse stays inside window during navigation. fixes #2038
+
+Demonstration Applications: 
+
+- CHG: BZFlag Demo: Clean up bzflag event handlers Refs #2291
+- CHG: BZFlag Demo: Fix collision detection between tanks. Clean up references to player objects. Refs #2291
+- CHG: BZFlag Demo: Fixes for using particles in threejs Refs #2291
+- CHG: BZFlag Demo: Remove navigable behavior Refs #2291
+- CHG: BZFlag Demo: Fix threejs bounding box calculations. Standardize bounding box return value to use objects. Refs #2040
+- CHG: BZFlag Demo: Change bzflag to use new navigation system Refs #2291
+- CHG: BZFlag Demo: Fix ambient color settings for bzflag models Refs #2291
+- CHG: Chat Demo: Fix error where heartbeats were being reset to undefined. Fixes #2426.
+- CHG: Chat Demo: Added tests for empty usernames to user joined chat message. Fixes #2443.
+- CHG: Chat Demo: Add call to fire userDeleted event for manual disconnects. Fixes #2407.
+- CHG: Chat Demo: Rename demochat to chat. Fixes #2334.
+- CHG: Chat Demo: Rewrite heartbeat mechanism to identify users solely by username to avoid NodeId/View moniker synch issues. Add time tracking to the users collector to try to smooth over and avoid time synch issues. Fixes #2344.
+- CHG: Chat Demo: Add vertical align to table cells to keep everything aliged to the top. Fixes #2225.
+- CHG: Chat Demo: Set word-wrap style to break-word to deal with super long words/URLs in chat. Fixes #2225.
+- CHG: Chat Demo: Fix issue with table rows not being placed in table with conversion to table layout for chat content. Fixes 2210. Fixes 2225.
+- CHG: Chat Demo: Fix bugs in javascript date to timestamp string method. Fixes #2332.
+- CHG: Chat Demo: Rework chat display to use tables to address multiple display issues. Fixes #2225 Fixes #2210
+- CHG: Chat Demo: Add max field length to username entry field. Fixes #2285.
+- CHG: Chat Demo: Add max length to user login name input field. Fixes #2317.
+- CHG: Chat Demo: Update html so text entry renders properly for firefox. Fixes #2215.
+- CHG: Cesium WebRTC Demo: Cesium global needed to be added to the view after the change to the way we load the lib
+- CHG: Cesium WebRTC Demo: Set muted='true' for the video elements, chrome stopped supporting just adding muted
+- CHG: Cesium WebRTC Demo: Latest version from cesium, switched from the built version to the source version
+- CHG: Cesium WebRTC Demo: Update to the driver options: combined a couple of properties into an object
+- CHG: Cesium WebRTC Demo: Add the earth to the application definition.
+- CHG: Cesium WebRTC Demo: Fix for the uniforms property of a Cesium.Material
+- CHG: Cesium WebRTC Demo: Update cesium-webrtc css and html files to adhere to VWF coding standards. Refs #2305.
+- CHG: Cesium WebRTC Demo: Use the webrtc drivers default video elements
+- CHG: Cesium WebRTC Demo: Calculate the distance to earth and set a reasonable minimum line distance for drawing
+- CHG: Cesium WebRTC Demo: Updated the default driver options for webrtc, if videoProperties.create replaces createVideoElements
+- CHG: Cesium WebRTC Demo: Use the default camera position
+- CHG: Cesium WebRTC Demo: Node variable changed in the view, but was never changed in the model
+- CHG: Cesium WebRTC Demo: Delete all polylines and billboards created from the toolbar on Reset
+- CHG: Cesium WebRTC Demo: Move the distance calculations to the view( html )
+- CHG: Cesium WebRTC Demo: Queue messages until an offer is received, and then process all messages after the offer. Added 'stereo' which can be set in the driver options. Attempted to fix the Firefox feedback issue.
+- CHG: Cesium WebRTC Demo: Reset initial camera position when reset button is clicked (cesium-webrtc) Refs #2305.
+- CHG: Cesium WebRTC Demo: Add 'yellow' to the named colors in the the color utility. Fixes #2381. Fixes #2378.
+- CHG: Cesium WebRTC Demo: Remove circular clear/clearing reference is cesium-webrtc. Refs #2305.
+- CHG: Cesium WebRTC Demo: Switch cesium-webrtc toolbar to use bootstrap. Refs #2305.
+- CHG: Cesium WebRTC Demo: Add reset/clear capability to cesium-webrtc demo.
+- CHG: Cesium WebRTC Demo: Polyline clearing still needs to be added to cesium driver. Refs #2305.
+- CHG: Cesium WebRTC Demo: Add delete billboard support to cesium driver. Refs #2305.
+- CHG: Cesium WebRTC Demo: Add reset capability for line markup. Still needs deletingNode implemented in cesium driver to remove polyLineCollection objects. Refs #2305.
+- CHG: Cesium WebRTC Demo: Add clear functionality for pushpins. Cesium driver still needs to be updated to include deletingNode. Refs #2305.
+- CHG: Cesium WebRTC Demo: Replace eraser image with "Reset". Remove circular clear/clearing reference. Refs #2305.
+- CHG: Cesium WebRTC Demo: Fix for the mouse event data being passed to the model
+- CHG: Cesium WebRTC Demo: Implemented mouse events in the Cesium driver
+- CHG: Command Center Demo: command-center optimization, removed computer towers from scene.  ref #2325
+- CHG: Command Center Demo: command-center, break out individual chair models.  Fixes #2325
+- CHG: Duck Demo: Removed the glgeLight from duck. Fixes #2350.
+- CHG: Google Earth Demo: Update so that mouse control of google earth is disabled when the view does not have control of the google-earth (as denoted in the controlView property of the google-earth node). Control is granted to a view when the google-earth is clicked. Fixes #2264.
+- CHG: Humvee Demo: Modify humvee emergency brake to respond to only clicks, not drags. Fixes #2276.
+- CHG: Humvee-Lesson Demo: Add animation time to emergency brake release control value. Fixes #2345. 
+- CHG: Humvee-Lesson Demo: Update camera pose for transmission to make parking break easier to see. Fixes #2276.
+- CHG: Marbles Demo: Update to use bump map employed models.
+- CHG: Marbles Demo: Update solitaire and selection table prototypes to store marbles under marbles child in order to allow material child to not break logic. References #2333.
+- CHG: Marbles Demo: Add selection exit button to selection table panel. Fixes #2403.
+- CHG: Marbles Demo: Add skybox and lighting for skybox to marbles. Add bounding box option to navigation system, and add bounding box to marbles. Fixes #2402.
+- CHG: Marbles Demo: Update light layout in marbles garden. Fixes #2320.
+- CHG: Marbles Demo: Update CSS to hide close button on jQuery dialog. Fixes #2382.
+- CHG: Marbles Demo: Manually set html element's overflow-y to hidden to prevent forced vertical scrollbar which was in turn causing the horizontal scrollbar to be required. Fixes #2351.
+- CHG: Marbles Demo: Add exit solitaire button to solitaire panel. Fixes #2318.
+- CHG: Sandtable Demo: Refactor sandtable methods and scripts. fixes #2259
+- CHG: Sandtable Demo: Fix typo in definition of sandtable clear method and remove comment refs #2259
+- CHG: Sandtable Demo: Remove toolbar child from sandtable/index.vwf.yaml refs #2259
+- CHG: Sandtable Demo: Remove unused properties from sandtable/index.vwf.yaml refs #2259
+- CHG: Sandtable Demo: Remove unnecessary type from sandtable/index.vwf.yaml refs #2259
+- CHG: Sandtable Demo: Updated sandtable catalog description refs #2259
+- CHG: Sandtable Demo: Remove some unnecessary files from sandtable app refs #2259
+- CHG: Sandtable Demo: Move sandtable app to new navigation system. In the process, remove the orbit mode from sandtable toolbar since the user will now be able to navigate in all the input modes refs #2259
+- CHG: Sandtable Demo: Change sandtable to only draw and drop pins on left mouse click Also, moved logic of when to start and stop drawing to view side so two users can draw at the same time w/o having to share a line refs #2259
+- CHG: Sandtable Demo: Simplify sandtable app to use on inputMode property. Previously, the app had a mouseMode property and the toolbar had an inputMode property that had to stay in sync refs #2259
+- CHG: Sandtable Demo: Merge sandtable/appscene.vwf.yaml into sandtable/index.vwf.yaml refs #2259
+
+Test Applications:
+- CHG: Test IntialRot: Move camera closer to duck in InitialRot/index.vwf.yaml As it was, the camera was so far away that the duck was past its far clip plane. refs #2258
+- CHG: Test materialColor: Define counter as property so it synchs between views. Fixes #2327.
+
+----------------------------------
 0.6.11
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change.

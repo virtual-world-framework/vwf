@@ -184,7 +184,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
             
             } else if ( protos && isMaterialDefinition.call( this, protos ) ) {
-                
+
                 node = this.state.nodes[childID] = {
                     name: childName,
                     threeObject: parentNode.threeObject,
@@ -193,7 +193,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     type: childExtendsID,
                     sourceType: childType,
                 };
-                node.threeMaterial = GetMaterial(node.threeObject);
+                node.threeMaterial = GetMaterial(node.threeObject, childName);
                 if(!node.threeMaterial)
                 {   
                     node.threeMaterial = new THREE.MeshPhongMaterial();
@@ -554,7 +554,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
                         var transformMatrix = goog.vec.Mat4.createFromArray( propertyValue || [] );
-						
+						if(threeObject instanceof THREE.ParticleSystem)
+                        {   
+                            threeObject.updateTransform(propertyValue);
+                        }
                         // Store the value locally
                         // It must be stored separately from the threeObject so the view can change the
                         // threeObject's transform to get ahead of the model state without polluting it
@@ -781,11 +784,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         else
                         {
                             ps.shaderMaterial_default.blending = THREE.NormalBlending;  
-                            ps.shaderMaterial_default.transparent = false;
+                            ps.shaderMaterial_default.transparent = true;
                             ps.shaderMaterial_analytic.blending = THREE.NormalBlending; 
-                            ps.shaderMaterial_analytic.transparent = false;
+                            ps.shaderMaterial_analytic.transparent = true;
 						    ps.shaderMaterial_interpolate.blending = THREE.NormalBlending; 
-                            ps.shaderMaterial_interpolate.transparent = false;
+                            ps.shaderMaterial_interpolate.transparent = true;
                         }
 
                         ps.shaderMaterial_default.needsUpdate = true;   
@@ -987,6 +990,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if(propertyName == "opacity") {
                         value = Number( propertyValue );
                         threeObject.opacity = value;
+                    }
+                    if (propertyName == "bumpScale" ) {
+                        value = Number( propertyValue );
+                        threeObject.bumpScale = value;
                     }
 
                 }
@@ -1552,17 +1559,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
     }
 
-    //changing this function significantly from the GLGE code. Will search heirarchy down until encountering a matching chile
-    //will look into nodes that don't match.... this might not be desirable
-     function FindChildByName( obj, childName, childType, recursive ) {
+    // Changing this function significantly from the GLGE code
+    // Will search hierarchy down until encountering a matching child
+    // Will look into nodes that don't match.... this might not be desirable
+    function FindChildByName( obj, childName, childType, recursive ) {
         
         var child = undefined;
         if ( recursive ) {
+
+            // TODO: If the obj itself has the child name, the object will be returned by this function
+            //       I don't think this this desirable.
+
             if( nameTest.call( this, obj, childName ) ) {
                 child = obj;
             } else if ( obj.children && obj.children.length > 0) {
                 for( var i = 0; i < obj.children.length && child === undefined; i++ ) {
-                    child = FindChildByName( obj.children[i], childName, childType );
+                    child = FindChildByName( obj.children[i], childName, childType, true );
                 }
             }
         } else {
@@ -1697,23 +1709,57 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         return ret;
     }
     //do a depth first search of the children, return the first material
-    function GetMaterial(threeObject)
+    function GetMaterial(threeObject, optionalName)
     {
+        var potentialResult = undefined;
         //something must be pretty seriously wrong if no threeobject
         if(!threeObject)
+        {
             return null;
-        
-        if(threeObject && threeObject.material)
-            return threeObject.material;
+        }        
+        if(threeObject && threeObject.material) {
+            if ( threeObject.material instanceof THREE.Material ) {
+                if ( ( optionalName == undefined ) || ( threeObject.material.name == optionalName ) ) {
+                    return threeObject.material;
+                }
+                else if ( potentialResult == undefined ) {
+                    potentialResult = threeObject.material;
+                }
+            }
+            else if ( threeObject.material instanceof THREE.MeshFaceMaterial ) {
+                if ( threeObject.material.materials ) {
+                    for ( var i = 0; i < threeObject.material.materials.length; i++ ) {
+                        if ( threeObject.material.materials[ i ] instanceof THREE.Material ) {
+                            if ( ( optionalName == undefined ) || ( threeObject.material.materials[ i ].name == optionalName ) ) {
+                                return threeObject.material.materials[ i ];
+                            }
+                            else if ( potentialResult == undefined ) {
+                                potentialResult = threeObject.material.materials[ i ];
+                            }
+                        }
+                    }
+                }
+            }
+        }
         if(threeObject.children)
         {
             var ret = null;
             for(var i=0; i < threeObject.children.length; i++)
             {
-                ret = GetMaterial(threeObject.children[i])
-                if(ret) return ret;
+                ret = GetMaterial(threeObject.children[i], optionalName);
+                if ( ret ) {
+                    if ( ( optionalName == undefined ) || ( ret.name == optionalName ) ) {
+                        return ret;
+                    }
+                    else if ( potentialResult == undefined ) {
+                        potentialResult = ret;
+                    }
+                }
             }               
         }       
+        if ( potentialResult != undefined ) {
+            return potentialResult;
+        }
         return null;
     }
     
@@ -2990,8 +3036,26 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             max: { x: -Number.MAX_VALUE, y: -Number.MAX_VALUE, z: -Number.MAX_VALUE }
         };
 
-        if ( object3 && object3.geometry && object3.geometry.computeBoundingBox ) {
-           
+        if (object3 instanceof THREE.Object3D)
+        {
+            object3.traverse (function (mesh)
+            {
+                if (mesh instanceof THREE.Mesh)
+                {
+                    mesh.geometry.computeBoundingBox ();
+                    var meshBoundingBox = mesh.geometry.boundingBox;
+
+                    // compute overall bbox
+                    bBox.min.x = Math.min (bBox.min.x, meshBoundingBox.min.x);
+                    bBox.min.y = Math.min (bBox.min.y, meshBoundingBox.min.y);
+                    bBox.min.z = Math.min (bBox.min.z, meshBoundingBox.min.z);
+                    bBox.max.x = Math.max (bBox.max.x, meshBoundingBox.max.x);
+                    bBox.max.y = Math.max (bBox.max.y, meshBoundingBox.max.y);
+                    bBox.max.z = Math.max (bBox.max.z, meshBoundingBox.max.z);
+                }
+            });
+        }
+        else if ( object3 && object3.geometry && object3.geometry.computeBoundingBox ) {
             object3.geometry.computeBoundingBox();
             var bx = object3.geometry.boundingBox;
             bBox = { 
@@ -3000,8 +3064,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             };
         }
 
-        return bBox; 
-           
+        return bBox;
     }
 
     function getCenterOffset( object3 ) {

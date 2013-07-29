@@ -13,6 +13,6 @@
 
 ---
 model:
-  vwf/model/glge:
+  vwf/model/threejs:
 view:
-  vwf/view/glge: { application-root: "#vwf-root", experimental-disable-inputs: true }
+  vwf/view/threejs: { application-root: "#vwf-root", experimental-disable-inputs: true }

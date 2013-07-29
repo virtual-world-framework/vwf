@@ -15,6 +15,9 @@
 extends: http://vwf.example.com/scene.vwf
 properties:
   usersShareView: false
+  ambientColor: [ 100, 100, 100 ]
+  backgroundColor: [ 0, 0, 0 ]
+  boundingBox: [ [ -10.2, 10.2 ], [ -11, 11 ], [ 0.2, 2.8 ] ]
   userObject:
     extends: user.vwf
     implements: [ "http://vwf.example.com/navigable.vwf" ]
@@ -22,7 +25,7 @@ properties:
       translationSpeed: 7
       navmode: "none"
       translation: [ 0, 0, 0.7 ]
-    children:     
+    children:   
       camera:
         extends: http://vwf.example.com/camera.vwf
         properties:
@@ -39,12 +42,30 @@ children:
     type: model/vnd.collada+xml
     properties:
       rotation: [ 1, 0, 0, 0 ]
+    children:
+      grass:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.01
+      brick_green:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.01
+      flagstone_pavers:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.01
   walls:
     extends: http://vwf.example.com/node3.vwf
     source: models/stoneWalls.DAE
     type: model/vnd.collada+xml
     properties:
       rotation: [ 1, 0, 0, 0 ]
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.015
   furniture:
     extends: http://vwf.example.com/node3.vwf
     source: models/marbleFurniture.DAE
@@ -52,6 +73,11 @@ children:
     properties:
       rotation: [ 1, 0, 0, 0 ]
       scale: 1
+    children:
+      material:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.015
   unsupportedGames:
     extends: http://vwf.example.com/node3.vwf
     source: models/games.DAE
@@ -59,6 +85,27 @@ children:
     properties:
       rotation: [ 1, 0, 0, 0 ]
       scale: 1
+    children:
+      wood_fine01:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.01
+      field_playing01:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.01
+      target_practice:
+        extends: http://vwf.example.com/material.vwf
+        properties:
+          bumpScale: 0.01
+  background:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/skydome.dae
+    type: model/vnd.collada+xml
+    properties:
+      rotation: [ 1, 0, 0, 0 ]
+      translation: [ 0, 0, -5 ]
+      scale: 0.1
   gameMarbleTypes:
     extends: http://vwf.example.com/node.vwf
     children:
@@ -140,13 +187,23 @@ children:
         source: models/selection_table.DAE
         type: model/vnd.collada+xml
         properties:
-          transform: [ -0.707107, -0.7071065, 0, 0, 0.7071065, -0.707107, 0, 0, 0, 0, 1, 0, -4.214666, -9.89909, 0.3974555, 1 ]
+          transform: [-0.7009091973304749,0.7132503390312195,0,0,-0.7132503390312195,-0.7009091973304749,0,0,0,0,1,0,-4.21466588973999,-9.899089813232422,0.39745551347732544,1]
+        children:
+          material:
+            extends: http://vwf.example.com/material.vwf
+            properties:
+              bumpScale: 0.01
       selection_table_2:
         extends: selection_table.vwf
         source: models/selection_table.DAE
         type: model/vnd.collada+xml
         properties:
-          transform: [ 0.7071068, 0.7071068, 0, 0, -0.7071068, 0.7071068, 0, 0, 0, 0, 1, 0, 3.941558, 9.861572, 0.3974555, 1 ]
+          transform: [0.7071067094802856,-0.7071067094802856,0,0,0.7071067094802856,0.7071067094802856,0,0,0,0,1,0,3.9415578842163086,9.861572265625,0.39745551347732544,1]
+        children:
+          material:
+            extends: http://vwf.example.com/material.vwf
+            properties:
+              bumpScale: 0.01
       solitaire_board_1:
         extends: solitaire_game.vwf
         source: models/solitaire_board.DAE
@@ -154,6 +211,11 @@ children:
         properties:
           rotation: [ 1, 0, 0, 0 ]
           translation: [ -7.429945, -7.816388, 0.8209709 ]
+        children:
+          material:
+            extends: http://vwf.example.com/material.vwf
+            properties:
+              bumpScale: 0.01
       solitaire_board_2:
         extends: solitaire_game.vwf
         source: models/solitaire_board.DAE
@@ -161,14 +223,186 @@ children:
         properties:
           rotation: [ 1, 0, 0, 0 ]
           translation: [ 7.061623, 8.292849, 0.8209709 ]
-  light:
+        children:
+          material:
+            extends: http://vwf.example.com/material.vwf
+            properties:
+              bumpScale: 0.01
+  light_1:
     extends: http://vwf.example.com/light.vwf
     properties:
-      translation: [ 0, 0, 1.5 ]
+      translation: [ 0, -10.0, 4.0 ]      
+      intensity: 0.8
+      distance: 24
+      color: "#999999"
   light_2:
     extends: http://vwf.example.com/light.vwf
     properties:
-      translation: [7.397893905639648,7.316537857055664,2.1273322105407715]
+      translation: [ 0, 10.0, 4.0 ]      
+      intensity: 0.8
+      distance: 24
+      color: "#999999"
+  light_3:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ -10, 0.0, 4.0 ]      
+      intensity: 0.8
+      distance: 24
+      color: "#999999"
+  light_4:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 10, 0.0, 4.0 ]      
+      intensity: 0.8
+      distance: 24
+      color: "#999999"
+  light_5:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 60, 0.0, 7.0 ]      
+      intensity: 1.0
+      distance: 50
+      color: "#ffffff"      
+  light_6:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ -60, 0.0, 7.0 ]      
+      intensity: 1.0
+      distance: 50
+      color: "#ffffff"     
+  light_7:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 0, 60.0, 7.0 ]      
+      intensity: 1.0
+      distance: 50
+      color: "#ffffff"  
+  light_8:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 0, -60.0, 7.0 ]      
+      intensity: 1.0
+      distance: 50
+      color: "#ffffff"  
+  light_9:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 42, 42, 7.0 ]      
+      intensity: 1.0
+      distance: 50
+      color: "#ffffff"        
+  light_10:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ -42, 42, 7.0 ]      
+      intensity: 1.0
+      distance: 50
+      color: "#ffffff"        
+  light_11:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 42, -42, 7.0 ]      
+      intensity: 1.0
+      distance: 50
+      color: "#ffffff"        
+  light_12:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ -42, -42, 7.0 ]      
+      intensity: 1.0
+      distance: 50
+      color: "#ffffff"        
+  light_13:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 0, 0, 25 ]      
+      intensity: 1.0
+      distance: 20
+      color: "#ffffff"
+  light_14:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 8.6, 8.6, 22 ]      
+      intensity: 1.0
+      distance: 20
+      color: "#ffffff"
+  light_15:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ -8.6, 8.6, 22 ]      
+      intensity: 1.0
+      distance: 20
+      color: "#ffffff"
+  light_16:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 8.6, -8.6, 22 ]      
+      intensity: 1.0
+      distance: 20
+      color: "#ffffff"
+  light_17:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ -8.6, -8.6, 22 ]      
+      intensity: 1.0
+      distance: 20
+      color: "#ffffff"
+  light_18:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 11, 26, 22 ]      
+      intensity: 1.0
+      distance: 25
+      color: "#ffffff"
+  light_19:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ -11, 26, 22 ]      
+      intensity: 1.0
+      distance: 25
+      color: "#ffffff"
+  light_20:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 11, -26, 22 ]      
+      intensity: 1.0
+      distance: 25
+      color: "#ffffff"
+  light_21:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ -11, -26, 22 ]      
+      intensity: 1.0
+      distance: 25
+      color: "#ffffff"
+  light_22:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 26, 11, 22 ]      
+      intensity: 1.0
+      distance: 25
+      color: "#ffffff"
+  light_23:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ -26, 11, 22 ]      
+      intensity: 1.0
+      distance: 25
+      color: "#ffffff"
+  light_24:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ 26, -11, 22 ]      
+      intensity: 1.0
+      distance: 25
+      color: "#ffffff"
+  light_25:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      translation: [ -26, -11, 22 ]      
+      intensity: 1.0
+      distance: 25
+      color: "#ffffff"
 scripts:
 - |
   var initialCam = [0.798465371131897, -0.6020503044128418, 0, 0, 0.6020503044128418, 0.798465371131897, 0, 0, 0, 0, 1, 0, -1.1765320301055908, -0.9326445460319519, 1.2000001668930054, 1];

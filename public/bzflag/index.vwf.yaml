@@ -24,14 +24,15 @@ properties:
   scoreBoard: 
     get: |
       var scoreBoard = [];
-      if ( this.players ) {
-        for ( var i = 0; i < this.players.children.length; i++) {
+      var players = this.findPlayers();
+      if ( players ) {
+        for ( var i = 0; i < players.length; i++) {
           scoreBoard.push( {
-            id: this.players.children[ i ].id, 
-            name: this.players.children[ i ].name, 
-            score: this.players.children[ i ].score,
-            playerKills: this.players.children[ i ].playerKills,
-            playerDeaths: this.players.children[ i ].playerDeaths
+            id: players[ i ].id, 
+            name: players[ i ].playerName, 
+            score: players[ i ].score,
+            playerKills: players[ i ].playerKills,
+            playerDeaths: players[ i ].playerDeaths
           } );
         }
       }
@@ -39,6 +40,43 @@ properties:
         return b.score - a.score;
       } );
       return scoreBoard;
+  usersShareView: false
+  makeOwnAvatarVisible: true
+  userObject:
+    extends: tank.vwf
+    implements: [ "http://vwf.example.com/navigable.vwf" ]
+    properties:
+      active: false
+      laserCount: 0
+      color: 
+      laserMaterial: 
+      startingTranslation: []
+      translation: []
+      translationSpeed: 400
+      rotationSpeed: 0.3
+      playerName:
+      # Disable inherited navigation so it can use custom bzflag controls
+      navmode: none
+    children:     
+      camera:
+        extends: http://vwf.example.com/camera.vwf
+        properties:
+          translation: [0, 100, 450]
+          far: 1000000
+          near: 1
+      avatar:
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tank.dae
+        type: model/vnd.collada+xml
+        properties: 
+          rotation: [0, 0, 1, 180]
+          scale: 115
+        children: 
+          Tank: 
+            extends: http://vwf.example.com/node3.vwf
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
 methods:
   initializeCamera:
   createPlayer:
@@ -54,25 +92,13 @@ events:
 children:
   bz_world:
     extends: bzworld.vwf
-  # mountains:
-  #   extends: http://vwf.example.com/node3.vwf
-  #   source: models/mountains.dae
-  #   type: model/vnd.collada+xml
-  #   properties: 
-  #     rotation: [ 1, 0, 0, 0 ]
-  #     translation: [ 0, 0, -5000 ]
-  #     scale: 1500
   background:
     extends: http://vwf.example.com/node3.vwf
-    # source: models/desert_skydome.dae
     source: models/skydome.dae
     type: model/vnd.collada+xml
     properties:
       rotation: [ 1, 0, 0, 0 ]
       translation: [ 0, 0, -5000 ]
-      scale: 110
-  players:
-    extends: http://vwf.example.com/node3.vwf
   lasers:
     extends: http://vwf.example.com/node3.vwf
 scripts:
@@ -85,68 +111,7 @@ scripts:
     [-15000,-40000,100],[10000,-25000,100],[30000,12000,100],[-60000,-17000,100]];
   var laserMaterials = ["images/blue_bolt.png", "images/green_bolt.png", "images/hunter_bolt.png", "images/purple_bolt.png", 
     "images/rabbit_bolt.png", "images/red_bolt.png", "images/rogue_bolt.png"];
-  var playerTank = {
-    extends: "tank.vwf",
-    properties: {
-      active: true,
-      laserCount: 0,
-      color: '',
-      laserMaterial: '',
-      startingTranslation: [],
-      translation: [],
-      scale: 0.5
-    },
-    children: {
-      playerModel: {
-        extends: "http://vwf.example.com/node3.vwf",
-        source: "models/tank.dae",
-        type: "model/vnd.collada+xml",
-        properties: {
-          rotation: [0, 0, 1, 180],
-        },
-        children: {
-          bone1: {
-            extends: "http://vwf.example.com/node3.vwf",
-            children: {
-              bone3: {
-                extends: "http://vwf.example.com/node3.vwf",
-                children: {
-                  Scene: {
-                    extends: "http://vwf.example.com/node3.vwf",
-                    children: {
-                      Tank: {
-                        extends: "http://vwf.example.com/node3.vwf",
-                        children: {
-                          glgeObj1: {
-                            extends: "http://vwf.example.com/node3.vwf",
-                            children: { }
-                          },
-                        }
-                      },
-                    }
-                  },
-                }
-              },
-            }
-          },
-          material: {
-            extends: "http://vwf.example.com/material.vwf",
-            properties: {
-              texture: ""
-            }
-          }
-        }
-      }
-    }
-  };
-  var playerCamera = {
-    extends: "http://vwf.example.com/camera.vwf",
-    properties: {
-      translation: [0, 300, 450],
-      far: 1000000,
-      near: 1,
-    }
-  };
+  
   var bolt = {
     extends: "laser.vwf",
     properties: {
@@ -171,11 +136,25 @@ scripts:
           minLifeTime: 170000,
           startSize: 400,
           endSize: 400,
-          startColor: "#ffffff",
-          endColor: "#ffffff",
           loop: true,
+          translation: [],
+          minVelocity: [ 0, 0, 0.0],
+          maxVelocity: [ 0, 0, 0],
+          maxAcceleration: [ 0, 0, 0.0],
+          minAcceleration: [ 0, 0, 0.0],
+          sizeRange: 0,
+          startColor: [ 1, 1, 1, 1],
+          endColor: [ 1, 1, 1, 1],
+          colorRange: [ .2, .1, .1, 0],
+          additive: false,
+          depthTest: true,
+          depthWrite: false,
+          maxOrientation: 0,
+          minOrientation: 0,
+          emitterSize: [ 500 , 0 , 500.0 ],
+          emitterType: "point",
+          textureTiles: 1,
           image: "",
-          translation: []
         }
       }
     }
@@ -189,32 +168,36 @@ scripts:
     this.camera.far = 1000000;
     this.camera.near = 1;
   }
-  this.createPlayer = function(playerName) {
-    if(this.players[playerName]) {
-      if(!this.players[playerName].active) {
-        this.players[playerName].translation = this.players[playerName].startingTranslation;
-        this.players[playerName].cachedBoundingBox = this.players[playerName].worldBoundingBox;
-        this.players[playerName].active = true;
-        this.players[playerName].visible = true;
+  this.createPlayer = function(playerName, playerMoniker) {
+    var playerObject = this.findPlayerByName(playerName);
+    if(playerObject) {
+      if(!playerObject.active) {
+        playerObject.translation = playerObject.startingTranslation;
+        playerObject.cachedBoundingBox = playerObject.worldBoundingBox;
+        playerObject.active = true;
+        playerObject.visible = true;
         this.playerRespawned( playerName );
       }
     }
     else if(this.colorIndex < tankMaterials.length) {
-      var newPlayer = $.extend(true, {}, playerTank);
-      var tankTexture = tankMaterials[this.colorIndex];
-      newPlayer.children[playerName + "Camera"] = playerCamera;
-      newPlayer.children['playerModel'].children['material'].properties['texture'] = tankTexture;
-      newPlayer.properties.color = tankColors[this.colorIndex];
-      newPlayer.properties.translation = tankStartingPositions[this.colorIndex];
-      newPlayer.properties.startingTranslation = tankStartingPositions[this.colorIndex];
-      newPlayer.properties.laserMaterial = laserMaterials[this.colorIndex];
-      this.players.children.create(playerName, newPlayer);
-      this.playerJoined( playerName );
-      this.colorIndex += 1;
+      playerObject = this.find("/navobj_" + playerMoniker);
+      if(playerObject.length) {
+        playerObject = playerObject[0];
+        var tankTexture = tankMaterials[this.colorIndex];
+        playerObject.avatar.Tank.material.properties['texture'] = tankTexture;
+        playerObject.color = tankColors[this.colorIndex];
+        playerObject.translation = tankStartingPositions[this.colorIndex];
+        playerObject.startingTranslation = tankStartingPositions[this.colorIndex];
+        playerObject.laserMaterial = laserMaterials[this.colorIndex];
+        playerObject.active = true;
+        playerObject.playerName = playerName;
+        this.playerJoined( playerName );
+        this.colorIndex += 1;
+      }
     }
   }
   this.fireLaser = function(playerName) {
-    var player = this.players[playerName];
+    var player = this.findPlayerByName(playerName);
     if(player && player.active) {
       var newBolt = $.extend(true, {}, bolt);
       newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];

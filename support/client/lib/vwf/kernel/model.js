@@ -160,7 +160,19 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             case "createNode":
 
-                return function( nodeComponent, when, callback /* nodeID */ ) {
+                return function( nodeComponent, nodeAnnotation, when, callback /* nodeID */ ) {
+
+                    // Interpret `createNode( nodeComponent, when, callback )` as
+                    // `createNode( nodeComponent, undefined, when, callback )`. (`nodeAnnotation`
+                    // was added in 0.6.12.)
+
+                    if ( typeof when == "function" || when instanceof Function ) {
+                        callback = when;
+                        when = nodeAnnotation;
+                        nodeAnnotation = undefined;
+                    }
+
+                    // Make the call.
 
                     if ( this.state.enabled ) {
 
@@ -170,13 +182,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 callback = this.state.asyncs.defer( callback /* nodeID */ );
                             }
 
-                            return this.kernel[kernelFunctionName]( nodeComponent, function( nodeID ) {
+                            return this.kernel[kernelFunctionName]( nodeComponent, nodeAnnotation, function( nodeID ) {
                                 callback && callback( nodeID );
                             } );
 
                         } else {
                             this.kernel.plan( undefined, kernelFunctionName, undefined,
-                                [ nodeComponent ], when, callback /* result */ );
+                                [ nodeComponent, nodeAnnotation ], when, callback /* result */ );
                         }
 
                     } else {
@@ -226,6 +238,25 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, childName,
                                 [ childComponent, childURI ], when, callback /* result */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
+            case "deleteChild":
+
+                return function( nodeID, childName, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, childName );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, childName,
+                                undefined, when, callback /* result */ );
                         }
 
                     } else {
@@ -548,6 +579,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             case "find":
             case "test":
+            case "findClients":
 
                 return function() {
                     return this.kernel[kernelFunctionName].apply( this.kernel, arguments );

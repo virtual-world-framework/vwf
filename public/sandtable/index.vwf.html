@@ -19,12 +19,13 @@
     <link href="toolbar.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript">
 
-      mousePressed = false;
+      var inputMode;
+      var mouseLeftDown = false;
+      var minDistanceSquared;
+      var appID = vwf_view.kernel.application();
 
-      function setColor(color) {
-        vwf_view.kernel.find("", "/toolbar", function(toolbarID) {
-          vwf_view.kernel.setProperty( toolbarID, "selectedColor", color );
-        });
+      function setColor( color ) {
+        vwf_view.kernel.setProperty( appID, "selectedColor", color );
         highlightColor(color);
       }
 
@@ -54,85 +55,122 @@
             vColor = [0, 0, 0];
             break;
         }
-        vwf_view.kernel.setProperty(vwf_view.kernel.find("", "/")[0], "lineColor", vColor);
+        vwf_view.kernel.setProperty( appID, "lineColor", vColor );
       }
 
       function setMode(mode) {
-        vwf_view.kernel.find(vwf_view.kernel.find("", "/")[0], "toolbar", function(toolbarID) {
-          vwf_view.kernel.setProperty( toolbarID, "inputMode", mode );
-        });
+        vwf_view.kernel.setProperty( appID, "inputMode", mode );
         highlightMode(mode);
       }
 
       function highlightMode(mode) {
-        document.getElementById('orbit').style.border = "2px solid black";
         document.getElementById('draw').style.border = "2px solid black";
         document.getElementById('pindrop').style.border = "2px solid black";
 
         document.getElementById(mode).style.border = "3px solid red";
-        vwf_view.kernel.setProperty(vwf_view.kernel.find("", "/")[0], "mouseMode", mode);
       }
 
       function clearOverlay() {
-        vwf_view.kernel.find(vwf_view.kernel.find("", "/")[0], "toolbar", function(toolbarID) {
-          vwf_view.kernel.callMethod( toolbarID, "clear" );
-        });
+        vwf_view.kernel.callMethod( appID, "clear" );
         setColor('black');
-        setMode('orbit');
+        setMode('draw');
       }
 
-      document.body.onmousedown = function (e) { 
-        mousePressed = true;
-      } 
-
-      document.body.onmouseup = function (e) { 
-        mousePressed = false;
-      } 
-
-      jQuery('#toolbar').mouseleave( function(evt) { 
-        evt.stopPropagation(); 
-        // $('#toolbar').stop().delay(200).animate({ opacity:0.0 }, 1500);
-        return false; 
-      }); 
-
-      jQuery('#toolbar').mouseenter( function(evt) { 
-        evt.stopPropagation(); 
-        if(!mousePressed) 
-        {
-          // $('#toolbar').stop().delay(200).animate({ opacity:0.8 }, 1500);
-        }
-        return false; 
-      });
-
-      // $('#toolbar').animate({ opacity:0.0 }, 1);
+      vwf_view.gotProperty = function (nodeId, propertyName, propertyValue) {
+        processPropertyChange( propertyName, propertyValue );
+      }
 
       vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-        if (vwf_view.kernel.test(vwf_view.kernel.find("", "/")[0], "toolbar", nodeId)) {
-          switch (propertyName) {
-            case "selectedColor":
-              highlightColor(propertyValue);
+        processPropertyChange( propertyName, propertyValue );
+      }
+
+      function processPropertyChange( propertyName, propertyValue ) {
+        switch (propertyName) {
+          case "selectedColor":
+            highlightColor( propertyValue );
+            break;
+          case "inputMode":
+            inputMode = propertyValue;
+            highlightMode( inputMode );
+            break;
+          case "minDrawDistance":
+            minDistanceSquared = propertyValue * propertyValue;
+        }
+      }
+
+      var lastDrawPoint;
+
+      vwf_view.firedEvent = function (nodeId, eventName, parameters) {
+        var userThatFiredEvent = vwf_view.kernel.client();
+        var me = vwf_view.kernel.moniker();
+        if ( userThatFiredEvent == me ) {
+          var pickInfo;
+          switch ( eventName ) {
+            case "pointerDown":
+              if ( parameters[ 0 ].button == "left" ) {
+                pickInfo = parameters[ 1 ];
+                if ( pickInfo ) {
+                  lastDrawPoint = { pickInfo: pickInfo };
+                } else {
+                  lastDrawPoint = undefined;
+                }
+                mouseLeftDown = true;
+              }
               break;
-            case "inputMode":
-              highlightMode( propertyValue );
+            case "pointerUp":
+              if ( parameters[ 0 ].button == "left" ) {
+                switch ( inputMode ) {
+                  case "pindrop":
+                    pickInfo = parameters[ 1 ];
+                    vwf_view.kernel.callMethod( appID, "pindrop", [ pickInfo ] );
+                    break;  
+                }
+                lastDrawPoint = undefined;
+                mouseLeftDown = false;
+              }
+              break;
+            case "pointerMove":
+              if ( mouseLeftDown ) {
+                switch( inputMode ) {
+                  case "draw":
+                    pickInfo = parameters[ 1 ];
+                    if ( distanceFromLast( pickInfo ) > minDistanceSquared ) {
+                      vwf_view.kernel.callMethod( appID, "draw", [ lastDrawPoint, pickInfo ] );
+                      lastDrawPoint.pickInfo = pickInfo;
+                    }
+                    break;
+                }
+              }
+              break;
+            default:
               break;
           }
         }
       }
 
-      // vwf_view doesn't currently get messages from the document launch. Force a property update
-      // so that vwf_view.satProperty() can update the toolbar with the current values.
+      function distanceFromLast( pickInfo ) {
+        var distSquared = 0;
+        if ( pickInfo && pickInfo.globalPosition ) {
+          if ( lastDrawPoint ) {
+            var p1 = pickInfo.globalPosition;
+            var p2 = lastDrawPoint.pickInfo.globalPosition;
+            distSquared = Math.pow( p1[0] - p2[0], 2 ) + Math.pow( p1[1] - p2[1], 2 );
+          }
+        }
+        return distSquared;
+      }
 
-      vwf_view.kernel.find(vwf_view.kernel.find("", "/")[0], "toolbar", function(toolbarID) {
-        vwf_view.kernel.execute( toolbarID, "this.selectedColor = this.selectedColor" );
-        vwf_view.kernel.execute( toolbarID, "this.inputMode = this.inputMode" );
-      });
+      // Get the initial values for inputMode and selectedColor (the logic for changing the view is in gotProperty)
+
+      vwf_view.kernel.getProperty( appID, "inputMode" );
+      vwf_view.kernel.getProperty( appID, "minDrawDistance" );
+      vwf_view.kernel.getProperty( appID, "selectedColor" ); //@ sourceURL=index.vwf.html
 
     </script>
   </head>
   <body>
     <div id="wrapper" class="wrapper">
       <div class="toolstyle" id="toolbar">
-        <img id="orbit" src="images/spin.png" style="border:3px solid red" alt="orbit" onclick="setMode('orbit')"/>
         <img id="draw" src="images/draw.png" style="border:2px solid black" alt="draw" onclick="setMode('draw')"/>
         <img id="pindrop" src="images/pindrop.png" style="border:2px solid black" alt="pindrop" onclick="setMode('pindrop')"/>
         <img id="black" src="images/black.png" style="border:3px solid orange" alt="black" onclick="setColor('black')"/>

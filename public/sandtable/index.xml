@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<glge>
-
-	<camera id="maincamera" rot_order="ROT_XZY" />
-	
-	<scene id="mainscene" camera="#maincamera" ambient_color="#fff" fog_type="FOG_NONE">
-		<light name="light1" id="mainlight" loc_z="57" loc_y="0" loc_x="0" attenuation_constant="1" type="L_POINT" />
-	</scene>
-</glge>

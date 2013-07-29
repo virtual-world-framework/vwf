@@ -31,7 +31,7 @@
 /// @module vwf/view/cesium
 /// @requires vwf/view
 
-define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
+define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], function( module, view, utility, Cesium ) {
 
     return view.load( module, {
 
@@ -51,10 +51,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             if ( options === undefined ) { options = {}; }
 
-            this.cesiumObjectDef = options.cesium !== undefined ? options.cesium : 'widget';
+            this.cesiumType = options.cesium !== undefined ? options.cesium : 'widget'; // 'widget', 'viewer', manual - anything else 
             this.parentDiv = options.parentDiv !== undefined ? options.parentDiv : 'body';
             this.parentClass = options.parentClass !== undefined ? options.parentClass : 'cesium-main-div';
-            this.containerDiv = options.containerDiv !== undefined ? options.containerDiv : 'cesiumContainer';
+            this.container = options.container !== undefined ? options.container : { "create": true, "divName": "cesiumContainer" } ;
 
             this.height = 600;
             this.width = 800;
@@ -95,18 +95,20 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             if ( isCesiumDefinition.call( this, protos ) ) {
 
-                var cesiumCont = "<div class='cesuim-container' id='"+this.containerDiv+"'></div>";
-                //debugger;
-                if ( this.parentDiv == 'body' ) {
-                    jQuery( this.parentDiv ).append( cesiumCont );
-                } else {
-                    var outDiv;
-                    if ( this.parentClass !== undefined ) {
-                        outDiv = "<div id='"+this.parentDiv+"' class='"+this.parentClass+"'>"+cesiumCont+"</div>";
+                if ( this.container.create ) {                
+                    var cesiumCont = "<div class='cesuim-container' id='" + this.container.divName + "'></div>";
+
+                    if ( this.parentDiv == 'body' ) {
+                        jQuery( this.parentDiv ).append( cesiumCont );
                     } else {
-                        outDiv = "<div id='"+this.parentDiv+"'>"+cesiumCont+"</div>"
+                        var outDiv;
+                        if ( this.parentClass !== undefined ) {
+                            outDiv = "<div id='"+this.parentDiv+"' class='"+this.parentClass+"'>"+cesiumCont+"</div>";
+                        } else {
+                            outDiv = "<div id='"+this.parentDiv+"'>"+cesiumCont+"</div>"
+                        }
+                        jQuery( 'body' ).append( outDiv );
                     }
-                    jQuery( 'body' ).append( outDiv );
                 }
 
                 if ( this.state.scenes[ childID ] === undefined ) {
@@ -120,18 +122,16 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 var scene, canvas;
                 var cesiumOptions = { "contextOptions": { "alpha": true }, }; 
 
-
-
-                switch ( this.cesiumObjectDef ) {
+                switch ( this.cesiumType ) {
 
                     case 'widget':
-                        node.cesiumWidget = new Cesium.CesiumWidget( this.containerDiv, cesiumOptions );
+                        node.cesiumWidget = new Cesium.CesiumWidget( this.container.divName, cesiumOptions );
                         node.centralBody = node.cesiumWidget.centralBody;
                         node.scene = scene = node.cesiumWidget.scene;
                         break;
 
                     case 'viewer':
-                        node.cesiumViewer = new Cesium.Viewer( this.containerDiv );
+                        node.cesiumViewer = new Cesium.Viewer( this.container.divName );
                         node.cesiumWidget = node.cesiumViewer.cesiumWidget;
                         node.centralBody = node.cesiumViewer.centralBody;
                         node.scene = scene = node.cesiumViewer.scene;
@@ -142,7 +142,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         // camera syncronization
                         canvas = document.createElement( 'canvas' );
                         canvas.className = 'fullSize';
-                        document.getElementById( this.containerDiv ).appendChild( canvas );
+                        document.getElementById( this.container.divName ).appendChild( canvas );
 
                         canvas.setAttribute( 'height', this.height );
                         canvas.setAttribute( 'width', this.width );
@@ -172,7 +172,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                 node.imageryProvider = 'bingAerial';
                 node.canvas = scene.getCanvas();
+                scene.vwfID = childID;
                 
+                initializeMouseEvents.call( this, scene, node );
+
                 var camera = scene.getCamera();
 
                 ( function tick() {
@@ -189,10 +192,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                             "position": undefined,
                             "up": undefined,
                             "right": undefined,
-                            //"direction": camera.direction.clone(),
-                            //"position": camera.position.clone(),
-                            //"up": camera.up.clone(),
-                            //"right": camera.right.clone(),
+                            //"earthDistance": 0,
+                            "equals": function( v1, v2 ) {
+                                return ( ( Math.round( v1.x ) == Math.round( v2.x ) ) && ( Math.round( v1.y ) == Math.round( v2.y ) ) && ( Math.round( v1.z ) == Math.round( v2.z ) ) );
+                            },
                             "diff": function( cam ) {
                                 var retObj = undefined;
 
@@ -200,12 +203,19 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                     if ( !Cesium.Cartesian3.equals( this.direction, cam.direction ) ){
                                         retObj = { "direction": [ cam.direction.x, cam.direction.y, cam.direction.z ] };    
                                     } 
-                                    if ( !Cesium.Cartesian3.equals( this.position, cam.position ) ) {
+                                    if ( !this.equals( this.position, cam.position ) ) {
                                         if ( retObj === undefined ) {
                                             retObj = { "position": [ cam.position.x, cam.position.y, cam.position.z ] };
                                         } else {
                                             retObj.position = [ cam.position.x, cam.position.y, cam.position.z ];
                                         }
+                                        //var dist = Math.round( this.calcDistanceToOrigin( cam ) );
+                                        //var tolerance = 2;
+                                        //if ( dist <= this.earthDistance - tolerance || dist >= this.earthDistance + tolerance ) {
+                                            // is there a way to fire an event from here?
+                                            // console.info( "change in the distance to earth:" + this.earthDistance );  
+                                        //}
+                                        //this.earthDistance = dist; 
                                     }
                                     if ( !Cesium.Cartesian3.equals( this.up, cam.up ) ) {
                                         if ( retObj === undefined ) {
@@ -222,15 +232,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                         }
                                     }                                                                        
                                 }
-                                //return ( this.initialized &&
-                                //    ( ( !Cesium.Cartesian3.equals( this.direction, cam.direction ) ) ||  
-                                //    ( !Cesium.Cartesian3.equals( this.position, cam.position ) ) ||
-                                //    ( !Cesium.Cartesian3.equals( this.up, cam.up ) ) ||
-                                //    ( !Cesium.Cartesian3.equals( this.right, cam.right ) ) )
-                                //);
-
                                 return retObj;
                             },
+                            // "calcDistanceToOrigin": function( obj ) {
+                            //     if ( obj.position ){
+                            //         var p = obj.position;
+                            //         return Math.sqrt( ( p.x * p.x ) + ( p.y * p.y ) + ( p.z * p.z ) );
+                            //     }
+                            //     return undefined;
+                            // },
                             "getCurrent": function( cam ) {
                                 this.direction = camera.direction.clone();
                                 this.position = camera.position.clone();
@@ -250,7 +260,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     if ( forceResizeDelay ) {
                         forceResizeDelay--;
                         if ( forceResizeDelay == 0 ) {
-                            //console.info( " ||||| == resize ==  ||||| " );
                             node.cesiumWidget.resize();
                             forceResizeDelay = undefined;
                             view.state.cameraInfo.initialized = true;
@@ -370,6 +379,311 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             nodeID = this.kernel.find( "", "//" )[ 0 ];
             this.kernel.setProperty( nodeID, "cameraViewData", cameraData );
         }
+    }
+
+    function initializeMouseEvents( scene, node ) {
+        
+        this.state.mouse = { 
+            "handler": undefined,
+            "leftDown": false, 
+            "leftDownID": undefined, 
+            "middleDown": false ,
+            "middleDownID": undefined, 
+            "rightDown": false,
+            "rightDownID": undefined,
+            "pinching": false,
+            "scene": scene,
+            "lastPosition": [ -1, -1 ],
+            "buttonDown": function() {
+                if ( this.leftDown ) {
+                    return "left";
+                } else if ( this.rightDown ) {
+                    return "right";
+                } else if ( this.middleDown ) {
+                    return "middle";
+                }
+
+                return undefined;
+            } 
+        };
+        var overID = undefined;
+        var downID = undefined;
+        var lastOverID = undefined;
+        
+        this.state.mouse.handler = new Cesium.ScreenSpaceEventHandler( scene.getCanvas() );
+        
+        if ( this.state.mouse.handler ) {
+            var mouse = this.state.mouse.handler;  
+            var self = this; 
+
+            var pick = function( button, clickCount, event, pos ) {
+                
+                var height = scene.getCanvas().height;
+                var width = scene.getCanvas().width;
+                var eventObj = self.state.mouse.scene.pick( pos );
+                var ellipsoid = node.centralBody.getEllipsoid();
+                var globePoint = scene.getCamera().controller.pickEllipsoid( pos, ellipsoid );
+                var camPos = scene.getCamera().position;
+                var rootID = self.kernel.find( "", "/" )[0];
+                var eventID;
+                
+                if ( eventObj ) {
+                    eventID = eventObj.vwfID;
+                } else if ( globePoint !== undefined ) {
+                    eventID = self.kernel.find( rootID, "earth" )[0];
+                } else {
+                    eventID = rootID;
+                }
+
+                var eData = { 
+                    "eventData": [ {  
+                        "button": button,
+                        "clicks": clickCount,
+                        "buttons": {
+                                "left": self.state.mouse.leftDown,
+                                "middle": self.state.mouse.middleDown,
+                                "right": self.state.mouse.rightDown
+                            },
+                        "modifiers": {
+                                "alt": false,
+                                "ctrl": false,
+                                "shift": false,
+                                "meta": false
+                            },
+                        "position": [ pos.x / width, pos.y / height ],
+                        "screenPosition": [ pos.x, pos.y ]
+                    } ],
+                    "eventNodeData": { "": [ {
+                        "distance": undefined,
+                        "origin": [ camPos.x, camPos.y, camPos.z ],
+                        "id": eventID,
+                        "globalPosition": globePoint ? [ globePoint.x, globePoint.y, globePoint.z ] : undefined,
+                        "globalNormal": undefined,
+                        "globalSource": [ camPos.x, camPos.y, camPos.z ],            
+                    } ] },
+                };
+
+
+
+                if ( event == "down" ) {
+                    switch( button ) {
+                        case "left":
+                            self.state.mouse.leftDownID = eventID;
+                            break;
+                        case "middle":
+                            self.state.mouse.middleDownID = eventID;
+                            break;
+                        case "right":
+                            self.state.mouse.rightDownID = eventID;
+                            break;
+                    }
+                    downID = eventID;
+
+                } else if ( ( event == "up" ) || ( event == "drag" ) ) {
+                    switch( button ) {
+                        case "left":
+                            if ( self.state.mouse.leftDownID !== undefined ) {
+                                eventID = self.state.mouse.leftDownID;
+                            }
+                            break;
+                        case "middle":
+                            if ( self.state.mouse.middleDownID !== undefined ) {
+                                eventID = self.state.mouse.middleDownID;
+                            }
+                            break;
+                        case "right":
+                            if ( self.state.mouse.rightDownID !== undefined ) {
+                                eventID = self.state.mouse.rightDownID;
+                            }
+                            break;
+                    }
+                } else if ( event == "move" ) {
+                    overID = eventID;
+                }
+
+                if ( eventID && eventID != rootID ) {
+
+                    var id = eventID;
+                    while ( id && id != rootID ) {
+                        eData.eventNodeData[ id ] = [ {
+                            "distance": undefined,
+                            "origin": scene.getCamera().position,
+                            "globalPosition": globePoint ? [ globePoint.x, globePoint.y, globePoint.z ] : undefined,
+                            "globalNormal": undefined,
+                            "globalSource": scene.getCamera().position,            
+                        } ];
+
+                        //id = undefined;
+                        if ( self.state.nodes[ id ] ) {
+                            id = self.state.nodes[ id ].parentID;
+                        } else {
+                            id = undefined;
+                        }
+                    }
+                }
+                return eData;
+            }
+
+
+            // left click
+            mouse.setInputAction( function( movement ) {
+                
+                var eData = pick( "left", 1, "click", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerClick", eData.eventData, eData.eventNodeData );
+
+            }, Cesium.ScreenSpaceEventType.LEFT_CLICK );
+            
+            // left double click
+            mouse.setInputAction( function( movement ) {
+
+                var eData = pick( "left", 2, "click", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerDoubleClick", eData.eventData, eData.eventNodeData );
+
+            }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK );
+            
+            // left up
+            mouse.setInputAction( function( movement ) {
+                
+                self.state.mouse.leftDown = false;
+                var eData = pick( "left", 0, "up", movement.position );
+                if ( downID !== undefined ) {
+                    self.kernel.dispatchEvent( downID, "pointerUp", eData.eventData, eData.eventNodeData );
+                }
+                self.state.mouse.leftDownID = undefined;
+
+            }, Cesium.ScreenSpaceEventType.LEFT_UP );
+
+            // left down
+            mouse.setInputAction( function( movement ) {
+                
+                self.state.mouse.leftDown = true;
+                var eData = pick( "left", 0, "down", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerDown", eData.eventData, eData.eventNodeData );
+            
+            }, Cesium.ScreenSpaceEventType.LEFT_DOWN );
+
+            // mouse move
+            mouse.setInputAction( function( movement ) {
+                var bd = self.state.mouse.buttonDown();
+                if ( bd ) {
+                    var eData = pick( bd, 0, "drag", movement.endPosition );
+                    self.kernel.dispatchEvent( downID, "pointerMove", eData.eventData, eData.eventNodeData );
+                } else {
+                    var eData = pick( "", 0, "move", movement.endPosition );
+                    if ( lastOverID === undefined && overID !== undefined ) {
+                        self.kernel.dispatchEvent( overID, "pointerEnter", eData.eventData, eData.eventNodeData );
+                        lastOverID = overID;
+                    } else if ( overID ) {
+                        if ( overID !== lastOverID ) {
+                            self.kernel.dispatchEvent( lastOverID, "pointerLeave", eData.eventData, eData.eventNodeData );
+                            self.kernel.dispatchEvent( overID, "pointerEnter", eData.eventData, eData.eventNodeData );
+                            lastOverID = overID;
+                        } else {
+                            self.kernel.dispatchEvent( overID, "pointerOver", eData.eventData, eData.eventNodeData );
+                        }
+                    }
+                }   
+            }, Cesium.ScreenSpaceEventType.MOUSE_MOVE );
+
+
+            // middle click
+            mouse.setInputAction( function( movement ) {
+
+                var eData = pick( "middle", 1, "click", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerClick", eData.eventData, eData.eventNodeData );
+                
+            }, Cesium.ScreenSpaceEventType.MIDDLE_CLICK );
+            
+            // middle double click
+            mouse.setInputAction( function( movement ) {
+
+                var eData = pick( "middle", 2, "click", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerDoubleClick", eData.eventData, eData.eventNodeData );
+                
+            }, Cesium.ScreenSpaceEventType.MIDDLE_DOUBLE_CLICK );
+            
+            // middle up
+            mouse.setInputAction( function( movement ) {
+
+                self.state.mouse.middleDown = false;
+                var eData = pick( "middle", 1, "up", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerUp", eData.eventData, eData.eventNodeData );
+                self.state.mouse.middleDownID = undefined;
+
+            }, Cesium.ScreenSpaceEventType.MIDDLE_UP );
+
+            // middle down
+            mouse.setInputAction( function( movement ) {
+
+                self.state.mouse.middleDown = true;
+                var eData = pick( "middle", 0, "down", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerDown", eData.eventData, eData.eventNodeData );
+
+            }, Cesium.ScreenSpaceEventType.MIDDLE_DOWN );
+
+
+            // right click
+            mouse.setInputAction( function( movement ) {
+
+                var eData = pick( "right", 1, "click", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerClick", eData.eventData, eData.eventNodeData );
+                
+            }, Cesium.ScreenSpaceEventType.RIGHT_CLICK );
+            
+            // right double click
+            mouse.setInputAction( function( movement ) {
+
+                var eData = pick( "right", 2, "click", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerDoubleClick", eData.eventData, eData.eventNodeData );
+
+            }, Cesium.ScreenSpaceEventType.RIGHT_DOUBLE_CLICK );
+            
+            // right up
+            mouse.setInputAction( function( movement ) {
+
+                self.state.mouse.rightDown = false;
+                var eData = pick( "right", 0, "up", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerUp", eData.eventData, eData.eventNodeData );
+                self.state.mouse.rightDownID = undefined;
+
+            }, Cesium.ScreenSpaceEventType.RIGHT_UP );
+
+            // right down
+            mouse.setInputAction( function( movement ) {
+
+                self.state.mouse.rightDown = true;
+                var eData = pick( "right", 0, "down", movement.position );
+                self.kernel.dispatchEvent( downID, "pointerDown", eData.eventData, eData.eventNodeData );
+
+            }, Cesium.ScreenSpaceEventType.RIGHT_DOWN );
+
+
+            // pinch start
+            mouse.setInputAction( function( movement ) {
+
+                self.state.mouse.pinching = true;
+
+            }, Cesium.ScreenSpaceEventType.PINCH_START );
+            
+            // pinch move
+            mouse.setInputAction( function( movement ) {
+
+            }, Cesium.ScreenSpaceEventType.PINCH_MOVE );
+
+            // pinch end
+            mouse.setInputAction( function( movement ) {
+
+                self.state.mouse.pinching = false;
+
+            }, Cesium.ScreenSpaceEventType.PINCH_END );
+
+            // wheel
+            mouse.setInputAction( function( movement ) {
+
+            }, Cesium.ScreenSpaceEventType.WHEEL );
+
+        }
+
     }
     
 } );

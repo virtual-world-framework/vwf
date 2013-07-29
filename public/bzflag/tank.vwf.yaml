@@ -132,7 +132,7 @@ scripts:
       if ( x != 0 ) { 
         this.rotateBy( [ 0, 0, 1, -x * this.angularDistance(input) ], 0 );
         this.cachedBoundingBox = this.worldBoundingBox;
-        if(this.parent.parent.collisionDetection([0,0,0], this)) {
+        if(this.parent.collisionDetection([0,0,0], this)) {
           this.rotateBy( [ 0, 0, 1, x * this.angularDistance(input) ], 0 );
         }
       }
@@ -173,7 +173,7 @@ scripts:
           trans
         );
       this.cachedBoundingBox = this.worldBoundingBox;
-      if(!this.parent.parent.collisionDetection(trans, this)) {
+      if(!this.parent.collisionDetection(trans, this)) {
         this.translation = goog.vec.Vec3.add(
           this.translation,
           trans,
