@@ -2,6 +2,93 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.6.13
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+Server: 
+- No updates to server for 0.6.13.
+
+Client:
+
+- NEW: Implements cxml import for cesium/node3.
+- NEW: Add support for assigning textures to multiple sets of texture coordinates. Copied from https://github.com/virtual-world-framework/three.js.git Refs #2464
+- NEW: Add support in three.js for assigning textures to multiple sets of texture coordinates. Refs #2464
+- NEW: Add support for both transparent modes in the collada loader. Refs #1860, #2464
+- NEW: Add animationRate property to control component. Fixes #2490. Fixes #2491.
+- NEW: Add debug to node3.vwf.yaml. refs #2462
+- NEW: Add necessary properties to support alpha channel transparency from textures in threejs. References #2311.
+- NEW: New cesium view option: invertMouse: { x and or y }  to invert the mouse due to the canvas being rotated
+- CHG: Remove stale touch view driver from core. To be replaced with updated hammer.js library and touch support in threejs. Refs #2456. Fixes #1643.
+- CHG: Updates the client user control to be the first user has control and does not release control to a up event.
+- CHG: Fixes an error in a for loop variable that had a wide variety of undesired side effects. Fixes: #2521
+- CHG: Fix getting/setting of light color. refs #1901
+- CHG: Update to three.js r59. Brought files over from vwf fork of three.js. refs #1860
+- CHG: Driver support for exposing the canvas Options. Plus allows the Cesium.Viewer to use those same options.
+- CHG: Fix setting webrtc video's muted property.  webrtc and cesium should work both in Chrome and Firefox. Fixes: 2478
+- CHG: Delays the setting of the url/stream until after the video element is created
+- CHG: Experimental support in the collada loader for assigning textures to multiple sets of texture coordinates. Refs #2464
+- CHG: Update the cross browser support to the latest version of the file from: https://code.google.com/p/webrtc/source/browse/trunk/samples/js/base/adapter.js version: https://code.google.com/p/webrtc/source/detail?spec=svn4384&r=4259 Fixes: 2478
+- CHG: Limits client control of broad casting the current camera location to the user who has created the latest mouse event.
+- CHG: Expand socket.io-sessionid-patch.js to account for other transports. fixes #2461
+- CHG: Have clients reuse websocket session id when reconnecting. Since the sessionid is used as the user's unique moniker, this will solve the problems we were having when a user would reconnect and the session would treat him as a new user. refs #2461
+- CHG: Remove default particle texture so that it doesn't cause 404 errors. Fixes #2268
+- CHG: Remove texture case so that settingProperty will be called for textures during synchronization. Refs #2438
+- CHG: Allow two users to control same object smoothly. fixes #2462
+- CHG: Simplify transformTo calculation when duration is 0. refs #2462
+- CHG: Add setting and initialization of property support for more material properties in three.js.Fixes #2241
+- CHG: Update camera input field style to italic if in focus, to indicate it is not updating. Fixes #2193.
+- CHG: Fix issue with passing encoded nodeID as nodeID. Fixes #1638.
+- CHG: Add a focus check for editor input fields. Only auto-update fields if a cursor is not active in a field. Fixes #2193.
+- CHG: Update editor delete node to properly delete the node. Add a call to delete the node from the editor's this.object, as well as to properly call splice passing in the index of the node to remove from node.parent.children. Fixes #2427.
+
+Demonstration Applications: 
+
+- CHG: AGI/Cesium: Updates the cesium canvas correctly so cesium will take up the entire browser view in Firefox. Fixes: 2228
+- CHG: BZFlag: Fix bzflag chat messaging. Refs #2291
+- CHG: BZFlag: Limit the number of shots that can be fired per keypress to improve performance. Refs #2124
+- CHG: BZFlag: Change find function to only look one level down. Refs #2124
+- CHG: Chat: Modify spacing in timestamp to use &nbsp; to avoid double spaces being treated as single space by browsers. Fixes #2501.
+- CHG: Chat: Add handlers to login name and change display name entry fields to recognize and handle pressing enter. Fixes #2472.
+- CHG: Chat: Add in tests and forbid blank username. Disable login and name change button when appropriate fields are blank. Fixes #2489.
+- CHG: Chat: Change timestamp to monospace font, update its format to consistent length, and place the timestamp before the username in the chat log in order to improve UI readability. Fixes #2501.
+- CHG: Chat: Update the 'at bottom of chat scroll' test for autoscrolling to have a small buffer so 'not quite 100% to the bottom' still counts as at bottom. Fixes #2473.
+- CHG: Cesium-webrtc: Adds more info out to the console about the current browser for webrtc apps.
+- CHG: Cesium-webrtc: Fix the name of the outer most div for the video elements.  It turns out that is you define the something as undefined in the driver options then the value is 'undefined' as a string.
+- CHG: Humvee: Change the humvee translationSpeed on interior camera view to match the humvee-lesson and make it easier to explore inside. Fixes #2492.
+- CHG: Humvee: Add function to sanitize username to avoid potential inject attacks. Add reaction to enter key presses for the login entry form. Add check to prevent weapons firing for users that have not yet logged in. Fixes #2481.  Fixes #2484.
+- CHG: Humvee: Update user score so that it is set correctly when a player reconnects. Refs #2438
+- CHG: Humvee: Fix start menu so that rejoin options work correctly. Limit rejoin options so they are only available for tanks of disconnected players. Refs #2438
+- CHG: Humvee: Only send updates if a key is being pressed. Refs #2438
+- CHG: Humvee Lesson: Verify control value is coming from STOP position on RUN step of humvee-lesson. Fixes #2499.
+- CHG: Marbles: Remove solitaire game marbles delayed creation workaround since creating children during initialization is now functional and workaround was acting inconsistent. Fixes #2319.
+- CHG: Marbles: Update graphic models in marbles application. References #2311.
+- CHG: Marbles: Update artwork in marbles application. References #2311.
+- CHG: Marbles: Add new model artwork. Update background to be emissive in order to remove lights added to light background. Remove outdated texture files. References #2311.
+- CHG: Marbles: Update the walls model. References #2311.
+- CHG: Marbles: Adding further model updates and small bumpScale tweaks. References #2311.
+- CHG: Marbles: Integrate updated models. References #2311.
+- CHG: Marbles: Add user messaging protocol, and send users messages to inform them that a solitaire game is already occupied if they attempt to join an already occupied solitaire game. Fixes #2319.
+- CHG: Minesweeper: Default minesweeper to threejs. Fixes #2529
+- CHG: Radio: Play static when squelch drops below 70. Fixes #2503.
+- CHG: Radio: Remove preventDefault call and add user-select css properties none to prevent highlighting. Fixes #2245.
+- CHG: Radio-Lesson: Remove preventDefault call and add user-select css properties none to prevent highlighting. Fixes #2245.
+- CHG: Radio-Lesson: Move prevent highlighting css from radio apps, to index.css for use on all apps. Refs #2245. Fixes #2475.
+- CHG: Sandtable: Add new followPath component to factor out common predator code, and update sandtable to use the followPath component for the predators. Remove unused old predator related files. Fixes #2410.
+- CHG: Sandtable: Update toolbar size since navigation button was removed. Fixes #2468.
+
+Documentation:
+- CHG: Add reference to the transforms example in the appropriate recipes. References #2091.
+- CHG: Add instructions to verify WebGL is enabled in the browser. Fixes #2520.
+- CHG: Updated page layout and content for Firefox Proxy information. Fixes #2422
+- CHG: Update multiuser recipe to reflect changes to multiuser app. fixes #1971
+
+Test Applications:
+- NEW: test/czml: Adds a simple application that loads czml into a cesium viewer based vwf application.
+- NEW: test/clientNotification: Add sample client notification test. Displays console output when a client joins or leaves. Refs #1274. Refs #2025.
+- CHG: test/dirlightPosY: Fix test/dirlightPosY to light actually changes in y axis instead of x. refs #1901
+
+----------------------------------
 0.6.12
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change.
