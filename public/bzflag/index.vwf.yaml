@@ -71,9 +71,12 @@ properties:
         properties: 
           rotation: [0, 0, 1, 180]
           scale: 115
+          visible: false
         children: 
           Tank: 
             extends: http://vwf.example.com/node3.vwf
+            properties:
+              visible: false
             children: 
               material: 
                 extends: http://vwf.example.com/material.vwf
@@ -177,6 +180,8 @@ scripts:
         playerObject.cachedBoundingBox = playerObject.worldBoundingBox;
         playerObject.active = true;
         playerObject.visible = true;
+        playerObject.avatar.visible = true;
+        playerObject.avatar.Tank.visible = true;
         this.playerRespawned( playerName );
       }
     }
@@ -192,6 +197,9 @@ scripts:
         playerObject.laserMaterial = laserMaterials[this.colorIndex];
         playerObject.active = true;
         playerObject.playerName = playerName;
+        playerObject.visible = true;
+        playerObject.avatar.visible = true;
+        playerObject.avatar.Tank.visible = true;
         this.playerJoined( playerName );
         this.colorIndex += 1;
       }
@@ -218,6 +226,10 @@ scripts:
         playerObject.playerKills = oldPlayerObject.playerKills;
         playerObject.playerDeaths = oldPlayerObject.playerDeaths;
         playerObject.active = true;
+        playerObject.visible = true;
+        playerObject.avatar.visible = true;
+        playerObject.avatar.Tank.visible = true;
+
         playerObject.playerName = playerName;
 
         // Delete the old player object
