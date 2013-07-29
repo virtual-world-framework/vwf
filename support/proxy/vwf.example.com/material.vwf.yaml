@@ -118,3 +118,30 @@ properties:
   bumpScale:
     set: |
       this.bumpScale = value;
+
+  ## Transparent
+  ## 
+  ## @name material.vwf#transparent
+  ## @property
+
+  transparent:
+    set: |
+      this.transparent = value;
+
+  ## opacity
+  ## 
+  ## @name material.vwf#opacity
+  ## @property
+
+  opacity:
+    set: |
+      this.opacity = value;
+
+  ## alphaTest
+  ## 
+  ## @name material.vwf#alphaTest
+  ## @property
+
+  alphaTest:
+    set: |
+      this.alphaTest = value;

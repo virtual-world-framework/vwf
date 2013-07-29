@@ -58,6 +58,6 @@ scripts:
     this.update = function()
     {
         this.counter++;
-        this.dir1.translation = [Math.sin(this.counter/10)*1,.1,.1];
+        this.dir1.translation = [.1,Math.sin(this.counter/10)*1,.1];
         this.future(0.06).update();
     }

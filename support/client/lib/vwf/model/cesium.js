@@ -355,7 +355,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
 
                     case "model/vnd.cesium.czml+xml":
                         if ( sceneNode && sceneNode.cesiumViewer ) {
-                            sceneNode.cesiumViewer.loadCzml( childSource );
+                            
+                            var viewer = sceneNode.cesiumViewer;
+                            var cds = new Cesium.CzmlDataSource();
+                            cds.loadUrl( childSource ).then( function() {
+                                viewer.homeButton.viewModel.command();
+                                var dataClock = cds.getClock();
+                                if( typeof dataClock !== 'undefined' ) {
+                                    dataClock.clone( viewer.clock );
+                                    viewer.timeline.zoomTo( dataClock.startTime, dataClock.stopTime );
+                                }                                
+                            } );
+                            viewer.dataSources.add( cds );
+
+
                         } else {
                             node.dynObjs = new Cesium.DynamicObjectCollection();
 

@@ -1137,6 +1137,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( ! ( x || y ) )
                 return;
 
+            var navThreeObject = navObject.threeObject;
+            var originalTransform = matCpy( navThreeObject.matrix.elements );
+
             // Compute the distance traveled in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
             // one key press doesn't send them off in space
@@ -1195,7 +1198,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 dir[ 2 ] = 0;
             }
 
-            var navThreeObject = navObject.threeObject;
             var length = Math.sqrt( dir[ 0 ] * dir[ 0 ] + dir[ 1 ] * dir[ 1 ] + dir[ 2 ] * dir[ 2 ] );
 
             if ( length ) {
@@ -1252,7 +1254,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Update the navigation object's local transform from its new world transform
             setTransformFromWorldTransform( navThreeObject );
 
-            setModelTransformProperty( navObject, navThreeObject.matrix.elements );
+            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
         }
 
         this.rotateNavObjectByKey = function( msSinceLastFrame ) {
@@ -1269,13 +1271,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( !direction )
                 return;
 
+            var navThreeObject = navObject.threeObject;
+            var originalTransform = matCpy( navThreeObject.matrix.elements );
+
             // Compute the distance rotated in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
             // one key press doesn't send them off in space
             var theta = direction * ( rotationSpeed * degreesToRadians ) * 
                         Math.min( msSinceLastFrame * 0.001, 0.5 );
 
-            var navThreeObject = navObject.threeObject;
             var orbiting = ( navmode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
 
             if ( orbiting ) {
@@ -1310,7 +1314,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             // Force the navObject's world transform to update from its local transform
             setTransformFromWorldTransform( navThreeObject );
-            setModelTransformProperty( navObject, navThreeObject.matrix.elements );
+
+            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
         }
 
         var handleKeyNavigation = function( keyCode, keyIsDown ) {
@@ -1372,6 +1377,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 } else if ( mouseRightDown ) {
                     if ( navObject ) {
 
+                        var navThreeObject = navObject.threeObject;
+                        var originalTransform = matCpy( navThreeObject.matrix.elements );
+
                         // --------------------
                         // Calculate new pitch
                         // --------------------
@@ -1422,6 +1430,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                             var camera = sceneView.state.cameraInUse;
                             if ( camera ) {
                                 var cameraMatrix = camera.matrix;
+                                var originalCameraTransform = matCpy( cameraMatrix.elements );
                                 var cameraPos = new THREE.Vector3();
                                 cameraPos.getPositionFromMatrix( cameraMatrix );
                                 cameraMatrix.multiply( pitchDeltaMatrix );
@@ -1467,9 +1476,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                                 // Restore camera position so rotation is done around camera center
                                 cameraMatrix.setPosition( cameraPos );
+                                
                                 updateRenderObjectTransform( camera );
-
-                                setModelTransformProperty( cameraNode, cameraMatrix.elements );
+                                callModelTransformBy( cameraNode, originalCameraTransform, 
+                                                      cameraMatrix.elements );
                             } else {
                                 self.logger.warnx( "There is no camera to move" );
                             }
@@ -1490,7 +1500,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         // Put all components together and set the new pose
                         // -------------------------------------------------
                                             
-                        var navThreeObject = navObject.threeObject;
                         var navObjectWorldMatrix = navThreeObject.matrixWorld;
                         navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
                         navObjectWorldMatrix.multiplyMatrices( translation, navObjectWorldMatrix );
@@ -1499,7 +1508,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                             navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
                         }
                         setTransformFromWorldTransform( navObject.threeObject );
-                        setModelTransformProperty( navObject, navThreeObject.matrix.elements );
+                        callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
                     } else {
                         self.logger.warnx( "handleMouseNavigation: There is no navigation object to move" );
                     }
@@ -1517,6 +1526,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( orbiting || !pickDirectionVector ) {
                 return;
             }
+
+            var navThreeObject = navObject.threeObject;
+            var originalTransform = matCpy( navThreeObject.matrix.elements );
 
             // wheelDelta has a value of 3 for every click
             var numClicks = Math.abs( wheelDelta / 3 );
@@ -1560,15 +1572,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     translationArray[ 14 ] = boundingBox[ 2 ][ 1 ];
                 }
             }
-            var navThreeObject = navObject.threeObject;
             var worldTransformArray = navThreeObject.matrixWorld.elements;
             worldTransformArray[ 12 ] = translationArray[ 12 ];
             worldTransformArray[ 13 ] = translationArray[ 13 ];
             worldTransformArray[ 14 ] = translationArray[ 14 ];
 
             setTransformFromWorldTransform( navThreeObject );
-
-            setModelTransformProperty( navObject, navThreeObject.matrix.elements );
+            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
         }
 
         // END TODO
@@ -2339,47 +2349,28 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         // If the transform property was initially updated by this view....
         if ( clientThatSatProperty == me ) {
-            
-            // If updates have come in from other clients between the time that the view updated and now, it is
-            // considered stale and has been overwritten.  Thus, it needs to be applied again.
-            // Else, it has already been applied by the view and can be ignored (just decrement the number of 
-            // outstanding requests)
-            if ( node.staleTransformRequestsToBeApplied ) {
-                node.staleTransformRequestsToBeApplied--;
-                adoptTransform( node, transformMatrix );   
-            } else {  // no stale transform requests
-                if ( node.outstandingTransformRequestToBeIgnored ) {
-                    node.outstandingTransformRequestToBeIgnored--;
-                } else {
+            if ( node.outstandingTransformRequestToBeIgnored && 
+                 node.outstandingTransformRequestToBeIgnored.length ) {
+                node.outstandingTransformRequestToBeIgnored.shift();
+            } else {
 
-                    // We have not created a view-side update that this model-side one corresponds to
-                    // Therefore, we must adopt this update
-                    // (It appears to come from us because it is part of the initialization process)
-                    adoptTransform( node, transformMatrix );
+                // We have not created a view-side update that this model-side one corresponds to
+                // Therefore, we must adopt this update
+                adoptTransform( node, transformMatrix );
 
-                    // Initialize variable
-                    node.outstandingTransformRequestToBeIgnored = 0;
-                }
+                // Initialize variable
+                node.outstandingTransformRequestToBeIgnored = [];
             }
         } else { // this transform change request is not from me
-
-            // If the view has already made updates that should have been applied after this incoming one, move
-            // them to count of "stale" ones (meaning that they have been undone and will need to be reapplied)
-            // Then overwrite them w/ this incoming transform
-            // Else, just adopt this incoming transform
+            adoptTransform( node, transformMatrix );
             if ( node.outstandingTransformRequestToBeIgnored ) {
-                node.staleTransformRequestsToBeApplied = node.staleTransformRequestsToBeApplied || 0;
-                node.staleTransformRequestsToBeApplied += node.outstandingTransformRequestToBeIgnored;
-                node.outstandingTransformRequestToBeIgnored = 0;
-                adoptTransform( node, transformMatrix );  
-            } else { 
-
-                // TODO: Smooth the transform toward the matrix specified by the other client
-                //       Be careful: right now this is where a setState will enter when the user
-                //       first joins - perhaps treat that case differently afte detecting that 
-                //       client() is undefined?
-
-                adoptTransform( node, transformMatrix );
+                var threeObject = node.threeObject;
+                for ( var i = 0; i < node.outstandingTransformRequestToBeIgnored.length; i++ ) {
+                    goog.vec.Mat4.multMat( node.outstandingTransformRequestToBeIgnored[ i ], 
+                                           threeObject.matrix.elements, 
+                                           threeObject.matrix.elements );
+                }
+                updateRenderObjectTransform( threeObject );
             }
         }
     }
@@ -2416,28 +2407,39 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         return ret;
     }
 
-    function setModelTransformProperty( node, transformArray ) {
+    function callModelTransformBy( node, originalViewTransform, goalViewTransform ) {
         var nodeID = node.ID;
 
         if ( nodeID ) {
+            var inverseOriginalViewTransform = goog.vec.Mat4.createFloat32();
+            if ( goog.vec.Mat4.invert( originalViewTransform, inverseOriginalViewTransform ) ) {
+                var deltaViewTransform = goog.vec.Mat4.multMat( goalViewTransform, inverseOriginalViewTransform, 
+                                                                goog.vec.Mat4.createFloat32() );
+                var deltaModelTransform;
+                if ( node.threeObject instanceof THREE.Camera ) {
+                    var originalModelTransform = convertCameraTransformFromThreejsToVWF( originalViewTransform );
+                    var goalModelTransform = convertCameraTransformFromThreejsToVWF( goalViewTransform );
+                    var inverseOriginalModelTransform = goog.vec.Mat4.createFloat32();
+                    if ( goog.vec.Mat4.invert( originalModelTransform, inverseOriginalModelTransform ) ) {
+                        deltaModelTransform = goog.vec.Mat4.multMat( goalModelTransform, 
+                                                                     inverseOriginalModelTransform, 
+                                                                     goog.vec.Mat4.createFloat32() );
+                    } else {
+                        self.logger.errorx( "callModelTransformBy: Original model transform is not invertible" );
+                    }
+                } else {
+                    deltaModelTransform = deltaViewTransform;
+                }
+                vwf_view.kernel.callMethod( nodeID, "transformBy", [ deltaModelTransform ] );
+                node.outstandingTransformRequestToBeIgnored = node.outstandingTransformRequestToBeIgnored || [];
+                node.outstandingTransformRequestToBeIgnored.push( deltaViewTransform );
 
-            var transform;
-            
-            // If this threeObject is a camera, it has a 90-degree rotation on it to account for the different 
-            // coordinate systems of VWF and three.js.  We need to undo that rotation before setting the VWF 
-            // property.
-            // Else, just copy the matrix for use in setting the model property
-            if ( node.threeObject instanceof THREE.Camera ) {
-                transform = convertCameraTransformFromThreejsToVWF( transformArray );
             } else {
-                transform = matCpy( transformArray );
+                self.logger.errorx( "callModelTransformBy: Original view transform is not invertible" );
             }
-
-            vwf_view.kernel.setProperty( nodeID, "transform", transform );
-            node.outstandingTransformRequestToBeIgnored = node.outstandingTransformRequestToBeIgnored || 0;
-            node.outstandingTransformRequestToBeIgnored++;
         } else {
-            view.logger.error( "Cannot set property on node that does not have a valid ID" );
+            self.logger.errorx( "callModelTransformBy: Cannot set property on node that does not have a " +
+                                "valid ID" );
         }
     }
 
@@ -2639,6 +2641,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // We can only orbit around a point if there is a point to orbit around
             if ( positionUnderMouseClick ) {
 
+                var navThreeObject = navObject.threeObject;
+                var originalTransform = matCpy( navThreeObject.matrix.elements );
+
                 var originalPitchMatrix = pitchMatrix.clone();
 
                 // --------------------
@@ -2757,7 +2762,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 // -------------------------------------------------
                 // Put all components together and set the new pose
                 // -------------------------------------------------
-                var navThreeObject = navObject.threeObject;
                 if ( boundByBoundingBox == false ) {
                     var navObjectWorldMatrix = navThreeObject.matrixWorld;
                     navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
@@ -2769,7 +2773,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     }
                 }
                 setTransformFromWorldTransform( navThreeObject );
-                setModelTransformProperty( navObject, navThreeObject.matrix.elements );
+                callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
             }
         } else {
             self.logger.warnx( "orbit: There is no navigation object to move" );

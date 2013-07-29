@@ -1,0 +1,175 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+## The component representation of a path following behavior
+## 
+## @name followPath.vwf
+## @namespace
+
+--- 
+extends:
+  http://vwf.example.com/node3.vwf
+properties:
+
+  ## Whether the component is following a path
+  ## 
+  ## @name followPath.vwf#followPath-following
+  ## @property
+
+  followPath-following:
+    set: |
+      if ( value && ! this["followPath-following"] ) {  // starting
+        if ( this["followPath-path"] ) {
+          if ( this["followPath-path"] instanceof Array ) {
+            if ( this["followPath-path"].length > 1 ) {
+              this["followPath-following"] = true;  // set the internal value
+              this.future(this["followPath-tickRate"]).followPath();  // run the first step and schedule the next one
+              this.translation = [ this["followPath-path"][0].translation[0], this["followPath-path"][0].translation[1], this["followPath-height"] ];
+              this["followPath-lastTime"] = this.time;
+            }
+          }
+        }
+      } else if ( ! value && this["followPath-following"] ) { // stopping
+        this["followPath-following"] = false;  // set the internal value
+      }
+    value: false
+
+  ## Path to follow
+  ## 
+  ## @name followPath.vwf#followPath-path
+  ## @property
+
+  followPath-path:
+
+  ## Index of the last path point achieved.
+  ## 
+  ## @name followPath.vwf#followPath-lastPathIndex
+  ## @property
+
+  followPath-lastPathIndex:
+    set: |
+      if ( value >= 0 ) {
+        if ( this["followPath-path"] && value < this["followPath-path"].length ) {
+          this["followPath-lastPathIndex"] = value;
+          this["followPath-nextPathIndex"] = value+1;
+          if ( this["followPath-nextPathIndex"] == this["followPath-path"].length ) {
+            this["followPath-nextPathIndex"] = 0;
+          }
+        } else {
+          this["followPath-lastPathIndex"] = 0;
+          this["followPath-nextPathIndex"] = 1;              
+        }
+      }
+    value: 0
+
+  ## Index of the next path point to achieve.
+  ## 
+  ## @name followPath.vwf#followPath-nextPathIndex
+  ## @property
+
+  followPath-nextPathIndex: 1
+
+  ## Should the path loop.
+  ## 
+  ## @name followPath.vwf#followPath-looping
+  ## @property
+
+  followPath-looping: true
+
+  ## Height to follow path at
+  ## 
+  ## @name followPath.vwf#followPath-height
+  ## @property
+
+  followPath-height: 1200
+
+  ## Last time that followPath 'ticked.'
+  ## 
+  ## @name followPath.vwf#followPath-lastTime
+  ## @property
+
+  followPath-lastTime: 0
+  
+  ## How often follow path will tick.
+  ## 
+  ## @name followPath.vwf#followPath-tickRate
+  ## @property
+
+  followPath-tickRate: 1
+
+methods:
+
+  ## Follow Path function. Updates component position and calls vwf future followPath call
+  ## 
+  ## @name followPath.vwf#followPath
+  ## @function
+  ##
+  ## @returns undefined
+
+  followPath:
+scripts:
+- |
+  this.followPath = function()  {  // when following path ...
+    var time = this.time;
+    var len = this["followPath-path"].length;
+    var timeElasped = time - this["followPath-lastTime"];
+    var lastPathPoint = this["followPath-path"][ this["followPath-lastPathIndex"] ];
+    var nextPathPoint = this["followPath-path"][ this["followPath-nextPathIndex"] ];
+    var goalPointIndex = this["followPath-nextPathIndex"] + 1;
+    if ( goalPointIndex >= this["followPath-path"].length ) {
+      goalPointIndex = 0;
+    }
+    var goalPathPoint = this["followPath-path"][ goalPointIndex ];
+      
+    var percentDone = timeElasped / nextPathPoint.time;
+    if ( percentDone > 0.975 ) {
+      percentDone = 1;
+    }
+
+
+    if ( ( goalPointIndex == 0 ) && ( this["followPath-looping"] == false ) ) {
+      goalPathPoint = nextPathPoint + ( nextPathPoint - lastPathPoint );
+      if ( percentDone == 1 ) {
+        this[ "followPath-following" ] = false;
+      }
+    }
+
+    
+    function interpolate( beforeCoord, afterCoord, percent ) {
+      return beforeCoord + percent * (afterCoord - beforeCoord);
+    }
+        
+    var newX = interpolate( nextPathPoint.translation[0], goalPathPoint.translation[0], percentDone );
+    var newY = interpolate( nextPathPoint.translation[1], goalPathPoint.translation[1], percentDone );
+    var goal = [ newX, newY, this["followPath-height"] ];
+        
+    newX = interpolate( lastPathPoint.translation[0], nextPathPoint.translation[0], percentDone );
+    newY = interpolate( lastPathPoint.translation[1], nextPathPoint.translation[1], percentDone );
+        
+    var zRot = [ goalPathPoint.translation[0] - newX, goalPathPoint.translation[1] - newY, 0 ];
+
+    var rotation = Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5);
+    var sinRot = Math.sin(rotation);
+    var cosRot = Math.cos(rotation);
+
+    this.transformTo([ cosRot, sinRot, 0, 0, -sinRot, cosRot, 0, 0, 0, 0, 1, 0, newX, newY, this["followPath-height"], 1], this["followPath-tickRate"]);
+        
+    if ( percentDone == 1 ) {
+      this["followPath-lastPathIndex"] = this["followPath-lastPathIndex"] + 1;
+      this["followPath-lastTime"] =  time;
+    }
+    
+    if ( this[ "followPath-following" ] ) {
+      this.future( this["followPath-tickRate"] ).followPath( );
+    }
+  }  //@ sourceURL=fly.vwf

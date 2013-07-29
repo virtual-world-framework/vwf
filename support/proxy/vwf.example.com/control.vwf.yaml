@@ -51,6 +51,7 @@ properties:
   linkedControls: []
   initialTransform: 
   controlDisabled: false
+  animationRate: 1
 methods:
   mouseInit: 
   animateControlToPosition:

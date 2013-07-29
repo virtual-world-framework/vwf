@@ -138,12 +138,16 @@ children:
               this.entering = function() {
                 this.logger.info( "Step: Set Ignition to Run" );
                 var ignition = this.find( "/humvee/Ignition" )[ 0 ];
+                // Verify control value is coming from "STOP" position
+                var currentControlValue = ignition.controlValue;
                 ignition.controlValueUpdated = ignition.events.add( function() {
-                  if(ignition.controlValue == ignition.run.controlValue)
-                  {
+                  if(currentControlValue == ignition.stop.controlValue && ignition.controlValue == ignition.run.controlValue) {
                     ignition.controlValueUpdated = ignition.events.flush( this );
                     this.logger.info( "Step: Set Ignition to Run - Completed" );
                     this.completed();
+                  }
+                  else {
+                    currentControlValue = ignition.controlValue;
                   }
                 }, this );
               }

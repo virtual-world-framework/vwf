@@ -146,7 +146,7 @@ properties:
       );
       this.scaledTransform( transform, scale, transform );
       goog.vec.Mat4.setColumn( transform, 3, translation );
-      this.transform = transform;
+      this.transform = transform; //@ sourceURL=node3.quaternion.set
     # node.quaternion => [ x, y, z, w ]
     get: |
       return goog.vec.Quaternion.fromRotationMatrix4(

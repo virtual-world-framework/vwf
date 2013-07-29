@@ -65,6 +65,9 @@ methods:
 # The callActivityMethod method is an interface that allows the view to call activity methods by way of the
 # correlated user.
   callActivityMethod:
+  sendMessage:
+events:
+  messageToPost:
 scripts:
 - |
   var objectLookup = {};   // objectLookup is created for storing nodeId to object lookup map.
@@ -87,6 +90,10 @@ scripts:
     return objectLookup[ nodeId ];
   };
 
+  this.sendMessage = function( title, message ) {
+    this.messageToPost( title, message );
+  };
+  
   // Helper function for loading the objectLookup map. Recursively go through children, adding them
   // to the map.
   this.objectLookupHelper = function( objectLookupMap, currentObject ) {

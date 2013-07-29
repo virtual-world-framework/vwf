@@ -32,6 +32,9 @@
   <button id="selection-exit">Exit Selection</button>
 </div>
 
+<!-- The following div is used to display messages to the user.      -->
+<div id="user-message">
+</div>
 
 
 <script type="text/javascript">
@@ -129,7 +132,11 @@
     var clientThatIssuedEvent = this.kernel.client( );
     var me = this.kernel.moniker( );
 
-    if ( ( eventName == "solitaireUserJoined" ) && ( eventParameters[ 0 ] == view.myUserObjectId ) ) {
+    if ( ( eventName == "messageToPost" ) && ( nodeId == view.myUserObjectId ) ) {
+      $( '#user-message' ).html( eventParameters[ 1 ] );
+      $( '#user-message' ).dialog( { 'title':eventParameters[ 0 ], 'height':'auto', 'modal':true, 'resizable':false, 'draggable':false } );
+    }
+    else if ( ( eventName == "solitaireUserJoined" ) && ( eventParameters[ 0 ] == view.myUserObjectId ) ) {
       //If the event that triggered the event handler was this user joining an instance of the
       //solitaire activity, then show the solitaire panel.
       $( '#solitaire-panel' ).show( );

@@ -12,7 +12,7 @@
 # the License.
 
 ---
-extends: http://vwf.example.com/navtouch.vwf
+extends: http://vwf.example.com/navscene.vwf
 properties:
   ambientColor: [ 183, 183, 183 ]
   navmode: "orbit"
@@ -63,11 +63,13 @@ scripts:
   this.switchCameraView = function(view) {
     if(view == "exterior") {
       this.navmode='orbit'; 
+      this.translationSpeed = 40;
       this.camera.lookAt = this.humvee.id; 
       this.activeCamera = this.camera.id;
     }
     else {
       this.navmode='walk'; 
+      this.translationSpeed = 10; 
       this.activeCamera = this.humvee.interiorCamera.id;
     }
   }
