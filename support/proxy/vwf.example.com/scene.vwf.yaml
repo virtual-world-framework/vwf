@@ -106,8 +106,8 @@ methods:
   lastActiveCameraID:
 scripts:
 - |
-    this.activeCameraComp = undefined;
     var scene = this;
+    this.activeCameraComp = undefined;
 
     this.initialize = function() {
       if ( this.usersShareView ) {
@@ -119,6 +119,10 @@ scripts:
     this.initializeActiveCamera = function() {
       this.activeCamera = this.camera.id;
       this.lastActiveCamera = this.activeCamera;
+    }
+
+    this.getActiveCameraComp = function() {
+      return this.activeCameraComp;
     }
 
     this.getChild = function( childName, startingNode ) {
@@ -142,14 +146,6 @@ scripts:
       return undefined;
     }
 
-    this.getActiveCameraComp = function() {
-      return this.activeCameraComp;
-    }
-
-    this.lastActiveCameraID = function() {
-      return this.lastActiveCamera;
-    }
-
     this.getActiveCamera = function() {
       if ( !this.activeCameraComp ) {
         if ( this.getChild ) {
@@ -158,6 +154,11 @@ scripts:
       }
       return this.activeCameraComp;
     }
+
+    this.lastActiveCameraID = function() {
+      return this.lastActiveCamera;
+    }
+
     this.load = function( obj, objName ){
       this.children.create( objName, obj );
     } //@ sourceURL=scene.vwf
