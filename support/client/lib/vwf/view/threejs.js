@@ -591,6 +591,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var sceneID = this.state.sceneRootID;
         var sceneView = this;
 
+        var touchID = undefined;
+
         var pointerDownID = undefined;
         var pointerOverID = undefined;
         var pointerPickID = undefined;
@@ -601,6 +603,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var mouseRightDown = false;
         var mouseLeftDown = false;
         var mouseMiddleDown = false;
+        var touchGesture = false;
         var win = window;
 
         var container = document.getElementById("container");
@@ -647,6 +650,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         middle: mouseMiddleDown,
                         right: mouseRightDown,
                     },
+                gestures: touchGesture,
                 modifiers: {
                         alt: e.altKey,
                         ctrl: e.ctrlKey,
@@ -752,6 +756,107 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             self.lastEventData = returnData;
             return returnData;
         }          
+
+        function handleHammer(ev) {
+            // disable browser scrolling
+            ev.gesture.preventDefault();
+
+            var touchPick = null;
+
+            touchID = pointerPickID ? pointerPickID : sceneID;
+
+            var eData = { eventData: undefined, eventNodeData: undefined };
+
+            switch(ev.type) {
+                case 'hold':
+                    sceneView.kernel.dispatchEvent( touchID, "touchHold", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'tap':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTap", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'doubletap':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDoubleTap", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'drag': 
+                    sceneView.kernel.dispatchEvent( touchID, "touchDrag", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragstart':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragStart", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragend':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragEnd", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragup':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragUp", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragdown':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragDown", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragleft':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragLeft", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragright':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragRight", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipe':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipe", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipeup':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeUp", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipedown':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeDown", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipeleft':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeLeft", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swiperight':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeRight", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'transform':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTransform", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'transformstart':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTransformStart", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'transformend':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTransformEnd", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'rotate':
+                    sceneView.kernel.dispatchEvent( touchID, "touchRotate", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'pinch':
+                    sceneView.kernel.dispatchEvent( touchID, "touchPinch", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'pinchin':
+                    // Zoom Out
+                    handleScroll( 0.2 * ev.gesture.scale, ev.gesture.distance );
+                    sceneView.kernel.dispatchEvent( touchID, "touchPinchIn", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'pinchout':
+                    // Zoom In
+                    handleScroll( -0.2 * ev.gesture.scale, ev.gesture.distance );
+                    sceneView.kernel.dispatchEvent( touchID, "touchPinchOut", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'touch':
+                    touchGesture = true;
+                    sceneView.kernel.dispatchEvent( touchID, "touchStart", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'release':
+                    touchGesture = false;
+                    sceneView.kernel.dispatchEvent( touchID, "touchRelease", eData.eventData, eData.eventNodeData );
+                    break;
+            }
+        }
+
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("touch release", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("hold tap doubletap", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("drag dragstart dragend dragup dragdown dragleft dragright", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("swipe swipeup swipedown swipeleft,swiperight", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("transform transformstart transformend", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("rotate", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("pinch pinchin pinchout", handleHammer);
+        
 
         canvas.onmousedown = function( e ) {
             var event = getEventData( e, false );

@@ -60,3 +60,27 @@ events:
   pointerUp:
   pointerOver:
   pointerOut:
+  touchHold:
+  touchTap:
+  touchDoubleTap:
+  touchDrag:
+  touchDragStart:
+  touchDragEnd:
+  touchDragUp:
+  touchDragDown:
+  touchDragLeft:
+  touchDragRight:
+  touchSwipe:
+  touchSwipeUp:
+  touchSwipeDown:
+  touchSwipeLeft:
+  touchSwipeRight:
+  touchTransform:
+  touchTransformStart:
+  touchTransformEnd:
+  touchRotate:
+  touchPinch:
+  touchPinchIn:
+  touchPinchOut:
+  touchStart:
+  touchRelease:
