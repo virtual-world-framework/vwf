@@ -59,6 +59,7 @@
 			
 			self.worldObjects = ko.observableArray([]);
 			self.displayWorldObjects = ko.observableArray([]);
+			self.featuredWorldObjects = ko.observableArray([]);
 			self.getNextPage = function(){
 				if(self.nextDisabled() === false)
 					self.getPage(1);
@@ -96,8 +97,7 @@
 			};
 		};
 		
-		function checkFilter(textArr)
-		{
+		function checkFilter(textArr){
 			if(filter != ""){
 				for(var i = 0; i < textArr.length; i++){
 					if(textArr[i] && textArr[i].toLowerCase().indexOf(filter.toLowerCase()) != -1)
@@ -162,6 +162,7 @@
 
 				var tempArr = getFlatIdArr();
 				var saveIndex = 0;
+				var featuredIndex = 0;
 
 				for(var i = 0; i < keys.length; i++){
 					
@@ -179,21 +180,19 @@
 					e[keys[i]].updates = e[keys[i]].updates > 0 ? e[keys[i]].updates : 0;
 					e[keys[i]].editVisible = ko.observable(false);
 					
+					if(e[keys[i]].featured === true && featuredIndex < 3){
+						vwfPortalModel.featuredWorldObjects()[featuredIndex] = e[keys[i]];
+						featuredIndex++;
+					}
+					
 					vwfPortalModel.worldObjects()[saveIndex] = e[keys[i]];	
 				}
-				
-				vwfPortalModel.worldObjects().sort(sortArrByUpdates);
-				
-				/////////////////////////////////////////////////////////////
-					
-					vwfPortalModel.worldObjects()[2].screen = '{{root}}/img/dfac_small.png';
-					vwfPortalModel.worldObjects()[1].screen = '{{root}}/img/desertworld_small.png';
-					vwfPortalModel.worldObjects()[0].screen = '{{root}}/img/terrain_small.png';
-				/////////////////////////////////////////////////////////////
-				
+								
+				vwfPortalModel.worldObjects().sort(sortArrByUpdates);				
 				
 				vwfPortalModel.getPage(0);
-				vwfPortalModel.worldObjects.valueHasMutated();				
+				vwfPortalModel.worldObjects.valueHasMutated();
+				vwfPortalModel.featuredWorldObjects.valueHasMutated();
 				
 				$.getJSON("./admin/instances",function(e){
 				
