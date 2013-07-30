@@ -16,13 +16,14 @@ extends: http://vwf.example.com/node.vwf
 properties:
   worldTransform:
     set: |
-      var parentInverse = goog.vec.Mat4.invert( this.transformFromValue( parent.transform ), goog.vec.Vec3.create() );
+      var parentInverse = goog.vec.Mat4.invert( this.transformFromValue( parent.transform.internal_val ), goog.vec.Vec3.create() );
       var transform = goog.vec.Mat4.multMat( parentInverse, this.transformFromValue( value ), goog.vec.Vec3.create() );
       this.transform = transform;
   transform:
     set: |
+      
       var transform = this.transformFromValue( value ); // parse incoming value
-      if ( ! goog.vec.Mat4.equals( this.transform || goog.vec.Mat4.createIdentity(), transform ) ) {
+      if ( ! goog.vec.Mat4.equals( (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity(), transform ) ) {
         this.transform = transform;
         this.transformChanged( transform );
         this.translation = this.translation;
@@ -32,14 +33,15 @@ properties:
   translation:
     # node.translation <= [ x, y, z ]
     set: |
+      
       var translation = this.translationFromValue( value ); // parse incoming value
-      var transform = this.transform || goog.vec.Mat4.createIdentity();
+      var transform = (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity();
       goog.vec.Mat4.setColumnValues( transform, 3, translation[0], translation[1], translation[2], 1 );
       this.transform = transform; //@ sourceURL=node3.translation.set.vwf
     # node.translation => [ x, y, z ]
     get: |
       var translation = goog.vec.Vec3.create();
-      goog.vec.Mat4.getColumn( this.transform || goog.vec.Mat4.createIdentity(), 3, translation );
+      goog.vec.Mat4.getColumn( (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity(), 3, translation );
       return translation;
   rotation:
     # node.rotation <= [ x, y, z, angle ]
@@ -55,21 +57,21 @@ properties:
     get: |
       var rotation = goog.vec.Vec4.create();
       rotation[3] = goog.vec.Quaternion.toAngleAxis(
-        this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 ),
+        this.quaternion.internal_val || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 ),
         rotation
       ) * 180 / Math.PI;
       return rotation;
   rotationMatrix:
     get: |
       return this.unscaledTransform(
-        this.transform || goog.vec.Mat4.createIdentity(),
+       (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity(),
         goog.vec.Vec3.create(),
         goog.vec.Mat4.create()
       );
   quaternion:
     # node.quaternion <= [ x, y, z, w ]
     set: |
-      var transform = this.transform || goog.vec.Mat4.createIdentity();
+      var transform = (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity();
       var translation = goog.vec.Vec4.create(); goog.vec.Mat4.getColumn( transform, 3, translation );
       var scale = this.transformScale( transform, goog.vec.Vec3.create() );
       var quaternion = this.quaternionFromValue( value ); // parse incoming value
@@ -84,7 +86,7 @@ properties:
     get: |
       return goog.vec.Quaternion.fromRotationMatrix4(
         this.unscaledTransform(
-          this.transform || goog.vec.Mat4.createIdentity(),
+          (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity(),
           goog.vec.Vec3.create(),
           goog.vec.Mat4.create()
         ),
@@ -94,7 +96,7 @@ properties:
     # node.scale <= [ x, y, z ], node.scale <= s
     set: |
       var scale = this.scaleFromValue( value ); // parse incoming value
-      var transform = this.transform || goog.vec.Mat4.createIdentity();
+      var transform = (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity();
       this.scaledTransform(
         this.unscaledTransform(
           transform,
@@ -108,7 +110,7 @@ properties:
     # node.scale => [ x, y, z ]
     get: |
       return this.transformScale(
-        this.transform || goog.vec.Mat4.createIdentity(),
+        (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity(),
         goog.vec.Vec3.create()
       );
   enabled: true
@@ -138,7 +140,7 @@ methods:
       - translation
       - duration
     body: |
-      var startTranslation = this.translation || goog.vec.Vec3.create();
+      var startTranslation = this.translation.internal_val || goog.vec.Vec3.create();
       var deltaTranslation = this.translationFromValue( translation );
       var stopTranslation = goog.vec.Vec3.add(
         startTranslation,
@@ -157,7 +159,7 @@ methods:
       - translation
       - duration
     body: |
-      var startTranslation = this.translation || goog.vec.Vec3.create();
+      var startTranslation = this.translation.internal_val || goog.vec.Vec3.create();
       var stopTranslation = this.translationFromValue( translation );
       this.translationWorker(
         startTranslation,
@@ -218,7 +220,7 @@ methods:
       - quaternion
       - duration
     body: |
-      var startQuaternion = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
+      var startQuaternion = this.quaternion.internal_val || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
       var deltaQuaternion = this.quaternionFromValue( quaternion );
       var stopQuaternion = goog.vec.Quaternion.concat(
         deltaQuaternion,
@@ -237,7 +239,7 @@ methods:
       - quaternion
       - duration
     body: |
-      var startQuaternion = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
+      var startQuaternion = this.quaternion.internal_val || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
       var stopQuaternion = this.quaternionFromValue( quaternion );
       this.quaternionWorker(
         startQuaternion,
@@ -272,7 +274,7 @@ methods:
       - scale
       - duration
     body: |
-      var startScale = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
+      var startScale = this.scale.internal_val || goog.vec.Vec3.createFromValues( 1, 1, 1 );
       var deltaScale = this.scaleFromValue( scale );
       var stopScale = goog.vec.Vec3.createFromValues(
         startScale[0] * deltaScale[0],
@@ -291,7 +293,7 @@ methods:
       - scale
       - duration
     body: |
-      var startScale = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
+      var startScale = this.scale.internal_val || goog.vec.Vec3.createFromValues( 1, 1, 1 );
       var stopScale = this.scaleFromValue( scale );
       this.scaleWorker(
         startScale,
@@ -403,11 +405,11 @@ scripts:
     return scale;
   };
   this.state = function( test ) {
-    vwf.logger.info( test, "x", Array.prototype.slice.apply( this.transform || goog.vec.Mat4.createIdentity() ) );
-    vwf.logger.info( test, "t", Array.prototype.slice.apply( this.translation || goog.vec.Vec3.create() ) );
-    vwf.logger.info( test, "o", Array.prototype.slice.apply( this.rotation || goog.vec.Vec4.createFromValues( 1, 0, 0, 0 ) ) );
-    vwf.logger.info( test, "s", Array.prototype.slice.apply( this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 ) ) );
-    vwf.logger.info( test, "q", Array.prototype.slice.apply( this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 ) ) );
+    vwf.logger.info( test, "x", Array.prototype.slice.apply( this.transform.internal_val || goog.vec.Mat4.createIdentity() ) );
+    vwf.logger.info( test, "t", Array.prototype.slice.apply( this.translation.internal_val || goog.vec.Vec3.create() ) );
+    vwf.logger.info( test, "o", Array.prototype.slice.apply( this.rotation.internal_val || goog.vec.Vec4.createFromValues( 1, 0, 0, 0 ) ) );
+    vwf.logger.info( test, "s", Array.prototype.slice.apply( this.scale.internal_val || goog.vec.Vec3.createFromValues( 1, 1, 1 ) ) );
+    vwf.logger.info( test, "q", Array.prototype.slice.apply( this.quaternion.internal_val || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 ) ) );
   };
   this.test1 = function() {
     this.transform = [];
