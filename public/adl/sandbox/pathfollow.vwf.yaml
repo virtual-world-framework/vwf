@@ -1,4 +1,4 @@
-extends: 'http://vwf.example.com/node.vwf'
+extends: 'http://vwf.example.com/behavior.vwf'
 properties:
   Active: true
   type: behavior
@@ -25,5 +25,5 @@ properties:
   Path: line ID
   counter: 0
 methods:
-  initialize: "              this.findviewnode = function(id)\n    {\n        for (var i = 0; i < vwf.views.length; i++)\n        {\n            if (vwf.views[i] && vwf.views[i].state && vwf.views[i].state.nodes && vwf.views[i].state.nodes[id] && vwf.views[i].state.nodes[id].glgeObject) return vwf.views[i].state.nodes[id].glgeObject;\n            if (vwf.views[i] && vwf.views[i].state && vwf.views[i].state.scenes && vwf.views[i].state.scenes[id] && vwf.views[i].state.scenes[id].glgeScene) return vwf.views[i].state.scenes[id].glgeScene;\n\n\n        }\n        return null;\n    };\n\n    this.EditorData.Active = {\n        property: \"Active\",\n        displayname: \"Active\",\n        type: \"check\"\n    };\n    this.EditorData.Speed = {\n        property: \"Speed\",\n        displayname: \"Speed\",\n        type: \"slider\",\n        min: -20,\n        max: 20,\n        step: 1\n    };\n    this.EditorData.Path = {\n        property: \"Path\",\n        displayname: \"Path\",\n        type: \"nodeid\",\n    };"
+  initialize: "              this.findviewnode = function(id)\n    {\n        for (var i = 0; i < vwf.views.length; i++)\n        {\n            if (vwf.views[i] && vwf.views[i].state && vwf.views[i].state.nodes && vwf.views[i].state.nodes[id] && vwf.views[i].state.nodes[id].glgeObject) return vwf.views[i].state.nodes[id].glgeObject;\n            if (vwf.views[i] && vwf.views[i].state && vwf.views[i].state.scenes && vwf.views[i].state.scenes[id] && vwf.views[i].state.scenes[id].glgeScene) return vwf.views[i].state.scenes[id].glgeScene;\n\n\n        }\n        return null;\n    };\n\n    "
   tick: "  if(!this.owner) return;       if (this.Active)\n    {\n        if (!this.counter)\n            this.counter = 0;\n        this.counter++;\n\n        var length = vwf.callMethod(this.Path, 'getLength');\n        var seconds = this.counter * 3 / 10;\n        var dist = (seconds * this.Speed);\n        var percent = dist / length;\n        if (percent > 1)\n            percent = percent - Math.floor(percent);\n        var point = vwf.callMethod(this.Path, 'pathPercent', [percent]);\n        this.parent.translation = point;\n    }"

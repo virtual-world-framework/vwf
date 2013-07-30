@@ -1,4 +1,4 @@
-extends: 'http://vwf.example.com/node.vwf'
+extends: 'http://vwf.example.com/behavior.vwf'
 properties:
   type: behavior
   NotProto: null
@@ -15,13 +15,13 @@ properties:
   url: 'http://www.google.com'
   popup: true
 methods:
-  initialize: "   if(this.url === undefined)\n   this.properties.create('url','http://www.google.com');\n   \n   if(this.popup === undefined)\n   this.properties.create('popup',true);\n   \n if(this.EditorData === undefined)\n   this.properties.create('EditorData',{});\n this.EditorData = {};\n this.EditorData.URL={displayname:'URL',property:'url',type:'text'};\n this.EditorData.Pop={displayname:'Popup',property:'popup',type:'check'};"
+  initialize: "   "
 events:
   pointerOver:
     parameters:
       - '    eventData'
       - '    nodeData    '
-    body: "    if(this.client == this.moniker)\n {\n     $('#index-vwf').css('cursor','pointer');\n }"
+    body: "   if(this.client == this.moniker)\n {\n     $('#index-vwf').css('cursor','pointer');\n }"
   pointerOut:
     parameters:
       - '    eventData'

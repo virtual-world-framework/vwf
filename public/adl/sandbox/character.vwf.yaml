@@ -232,7 +232,7 @@ scripts:
         if(this.id == 'character-vwf') return;
        
         
-      
+        
         
           var backupr = this.rotation;
           backupr = [0,0,1,this.rotZ/0.0174532925];
@@ -454,7 +454,7 @@ scripts:
         if(this.updatecounter > 180 && document["PlayerNumber"] == this.PlayerNumber)
           {
             
-            vwf_view.kernel.setProperty(this.id,'transform',this.transform,0,null);
+            vwf_view.kernel.setProperty(this.id,'transform',this.transform.internal_val,0,null);
              this.updatecounter = 0;
           }
           

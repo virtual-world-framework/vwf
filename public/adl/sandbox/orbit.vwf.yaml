@@ -1,4 +1,4 @@
-extends: 'http://vwf.example.com/node.vwf'
+extends: 'http://vwf.example.com/behavior.vwf'
 properties:
   type: behavior
   axis:
@@ -6,7 +6,7 @@ properties:
     - 0
     - 1
   counter: 0
-  speed: 0.017
+  radialspeed: 0.0017
   DisplayName: Orbit
   EditorData:
     Aradius:
@@ -18,7 +18,7 @@ properties:
       step: 0.1
     Bspeed:
       displayname: Speed
-      property: speed
+      property: radialspeed
       type: slider
       min: 0
       max: 10
@@ -39,5 +39,5 @@ properties:
     - 0
     - 0
 methods:
-  initialize: "   if(this.radius === undefined)\n    this.properties.create('radius',1);\n if(this.center === undefined)\n    this.properties.create('center',[0,0,0]);\n if(this.axis === undefined)\n    this.properties.create('axis',[0,0,1]);\n if(this.speed === undefined)\n    this.properties.create('speed',.01);\n if(this.EditorData === undefined)\n    this.properties.create('EditorData',{});\n if(this.counter === undefined)\n    this.properties.create('counter',0);\n \n this.EditorData = {};\n this.EditorData.Aradius = {displayname:'Radius',property:'radius',type:'slider',min:0,max:100,step:.1};\n this.EditorData.Bspeed = {displayname:'Speed',property:'speed',type:'slider',min:0,max:10,step:.01};\n this.EditorData.Ccenter = {displayname:'Center',property:'center',type:'vector',step:.1};\n this.EditorData.Daxis = {displayname:'Axis',property:'axis',type:'vector',step:.1};"
-  tick: " if(!this.owner) return; var axis = MATH.toUnitVec3(this.axis);\n\n    \n         \n    this.counter += this.speed;\n     var q = MATH.quatFromAxisAngle(axis,this.counter);\n     var mat = MATH.mat4FromQuat(q);\n     var offset = MATH.mulMat4Vec3(mat,[this.radius ,0,0]);\n     this.parent.translation = MATH.addVec3(this.center ,offset);"
+  initialize: ""
+  tick: " if(!this.owner) return; var axis = MATH.toUnitVec3(this.axis);\n\n    \n         \n    this.counter += this.radialspeed;\n     var q = MATH.quatFromAxisAngle(axis,this.counter);\n     var mat = MATH.mat4FromQuat(q);\n     var offset = MATH.mulMat4Vec3(mat,[this.radius ,0,0]);\n     this.parent.translation = MATH.addVec3(this.center ,offset);"

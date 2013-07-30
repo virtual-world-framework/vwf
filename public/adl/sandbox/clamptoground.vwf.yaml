@@ -1,4 +1,4 @@
-extends: 'http://vwf.example.com/node.vwf'
+extends: 'http://vwf.example.com/behavior.vwf'
 properties:
   NotProto: 
   type: behavior
@@ -21,6 +21,6 @@ properties:
       min: 0
       step: 0.1
 methods:
-  initialize: " if(this.FromHeight === undefined)\n    this.properties.create('FromHeight',500);\n if(this.Offset === undefined)\n    this.properties.create('Offset',0);\n if(this.EditorData === undefined)\n    this.properties.create('EditorData',{});\n\n this.EditorData = {};\n this.EditorData.offset = {displayname:'Offset',property:'Offset',type:'slider',max:100,min:0,step:0.1};\n this.EditorData.from = {displayname:'Trace from Height',property:'FromHeight',type:'slider',max:50,min:0,step:0.1};"
-  tick: "if(!this.owner) return; var trans = this.parent.translation;\n //console.log(trans);\ntrans[2] += this.FromHeight;\n\n var hit = _Editor.findscene().CPUPick(trans,[0,0,-1],{ignore:[_Editor.findviewnode(this.parent.id),_Editor.GetMoveGizmo(),_dSky]});\n if(hit)\n {\n    var bounds = _Editor.findviewnode(this.parent.id).getBoundingBox(true);\n    trans[2] -= hit.distance;\n    trans[2] -= bounds.min.z;\n    trans[2] += this.Offset;\n    \n    this.parent.translation = trans;\n \n }"
+  initialize: " "
+  tick: "if(!this.owner) return; var trans = this.parent.translation;\n //console.log(trans);\ntrans[2] += this.FromHeight;\n\n var hit = _SceneManager.CPUPick(trans,[0,0,-1],{ignore:[_Editor.findviewnode(this.parent.id),_Editor.GetMoveGizmo(),_dSky]});\n if(hit)\n {\n    var bounds = _Editor.findviewnode(this.parent.id).getBoundingBox(true);\n    trans[2] -= hit.distance;\n    trans[2] -= bounds.min.z;\n    trans[2] += this.Offset;\n    \n    this.parent.translation = trans;\n \n }"
 Author: Rob

@@ -188,7 +188,7 @@
 						this.setMaterialByDef(list[i].material || new THREE.MeshPhongMaterial,propval);
 						list[i].materialUpdated();
 					}
-					console.log("materialDef set on",list,propval);
+					
 					if(this.dirtyStack && needRebuild)
 					{
 						

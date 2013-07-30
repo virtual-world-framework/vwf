@@ -255,21 +255,28 @@ node.id = childID; // TODO: move to vwf/model/object
             node.private.change = 1; // incremented whenever "future"-related changes occur
 	
 			
-			if(childExtendsID =='http-vwf-example-com-behavior-vwf')
+			if(this.isBehavior(node))
 			{
 				self.hookupBehavior(node,nodeID);
 			
+
 			}
         },
+		//allow a behavior node to directly acess the properties of it's parent
 		hookupBehaviorProperty: function(behaviorNode,parentid,propname)
 		{
+			self = this;
 			var node = this.nodes[parentid];
 				Object.defineProperty(behaviorNode, propname, {
-				get : function(){ return vwf.getProperty(parentid,propname); },
-                set : function(newValue){ vwf.setProperty(parentid,propname,newValue); },
+				get: function() { 
+				
+				       return self.createWatchable(self.kernel.getProperty( parentid, propname ),propname,parentid) 
+				       },
+					set: function( value ) { self.kernel.setProperty( parentid, propname, self.watchableToObject(value) ) },
                                enumerable : true,
                                configurable : true});
 		},
+		//Allow the behavior to call the parent's methods
 		hookupBehaviorMethod: function(behaviorNode,parentid,propname)
 		{
 			var node = this.nodes[parentid];
@@ -279,6 +286,7 @@ node.id = childID; // TODO: move to vwf/model/object
 								   enumerable : true,
 								   configurable : true});
 		},
+		//hook the behavior as a sort of proxy to the parent property and methods
 		hookupBehavior : function(behaviorNode,parentid)
 		{
 			
@@ -474,10 +482,11 @@ node.id = childID; // TODO: move to vwf/model/object
                 node.private.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
             }
 
+			//add the new property to the API for the children nodes
 			for( var i =0; i < node.children.length; i++)
 			{
 				
-				if(node.children[i].childExtendsID =='http-vwf-example-com-behavior-vwf')
+				if(this.isBehavior(node.children[i]))
 				{
 					this.hookupBehaviorProperty(node.children[i],nodeID,propertyName);
 				}
@@ -487,14 +496,121 @@ node.id = childID; // TODO: move to vwf/model/object
 			
             return this.initializingProperty( nodeID, propertyName, propertyValue );
         },
+		//A watchable property will call the VWF set property kernel code when it's values are changed
 		_Watchable : function()
 		{
 		
 		
 		},
-        // -- initializingProperty -----------------------------------------------------------------
-		createWatchable : function(val,propertyname,id)
+		//Set up a watchable to mirror an object (including named properties)
+		// note - we currently can't detect assignment of new properties to an object
+		//should probably create a function to accomplish that
+		setupWatchableObject: function (watchable,val,propertyname,id,masterval)
 		{
+				if(masterval === undefined)
+					masterval = val;
+				var self = this;
+				watchable.internal_val = val;
+				watchable.propertyname = propertyname;
+				watchable.id = id;
+				var keys = Object.keys(val);
+				for(var i = 0; i < keys.length; i++)
+				{
+					(function(){
+					var _val = val;
+					var _id = id;
+					var _propertyname = propertyname;
+					var _i = keys[i];
+					var _masterval = masterval;
+					Object.defineProperty(watchable,_i,{set:function(value){
+						_val[_i] = value; 
+						
+						self.kernel.setProperty(_id,_propertyname,_masterval);
+					},
+					get:function(){
+						var ret = _val[_i];
+						//This recursively builds new watchables, such that you can do things like
+						//this.materialDef.layers[0].alpha -= .1;
+						ret =  self.createWatchable(ret,propertyname,id,masterval);
+						return ret;
+					},configurable:true});
+					})();
+				}
+		
+		
+		
+		},
+		//Setup a watchable to behave like an array. This creates accessor functions for the numbered integer properties.
+		
+		setupWatchableArray: function (watchable,val,propertyname,id,masterval)
+		{
+				if(masterval === undefined)
+					masterval = val;
+					
+				var self = this;
+				watchable.internal_val = val;
+				watchable.propertyname = propertyname;
+				watchable.id = id;
+				for(var i = 0; i < val.length; i++)
+				{
+					(function(){
+					var _val = val;
+					var _id = id;
+					var _propertyname = propertyname;
+					var _i = i;
+					var _masterval = masterval;
+					Object.defineProperty(watchable,_i,{set:function(value){
+						_val[_i] = value; 
+						
+						self.kernel.setProperty(_id,_propertyname,_masterval);
+					},
+					get:function(){
+						var ret = _val[_i];
+						//This recursively builds new watchables, such that you can do things like
+						//this.materialDef.layers[0].alpha -= .1;
+						ret =  self.createWatchable(ret,propertyname,id,masterval);
+						return ret;
+					},configurable:true});
+					})();
+				}
+				
+				//Hookup some typical Array functions.
+				watchable.push = function(newval)
+				{
+					var internal = this.internal_val;
+					internal.push(newval);
+					self.kernel.setProperty(this.id,this.propertyname,internal);
+					self.setupWatchableArray(this,internal,this.propertyname,this.id);
+				}
+				watchable.indexOf = function(val)
+				{
+					return this.internal_val.indexOf(val);
+				}
+				for(var i = 0; i < 7; i++) 
+				{
+					var func = ['pop','shift','slice','sort','splice','unshift','shift'][i];
+					watchable[func] = function()
+					{
+						var internal = this.internal_val;
+						
+						Array.prototype[func].apply(internal,arguments)
+						self.kernel.setProperty(this.id,this.propertyname,internal);
+						self.setupWatchableArray(this,internal,this.propertyname,this.id);
+					}
+				}
+				
+				Object.defineProperty(watchable,'length',{
+					get:function(){
+						return watchable.internal_val.length;
+					},configurable:true});
+			
+		
+		},
+        // -- initializingProperty -----------------------------------------------------------------
+		//create a new watchable for a given value. Val is the object itself, and masterval is the root property of the node
+		createWatchable : function(val,propertyname,id,masterval)
+		{
+			
 			if(!val) return val;
 			var self = this;
 			if(val instanceof self._Watchable)
@@ -503,39 +619,33 @@ node.id = childID; // TODO: move to vwf/model/object
 			
 			}
 			
+			if(masterval === undefined)
+					masterval = val;
 			
-			if(val.prototype == Array 
+			if(val.constructor == Array 
 			|| val instanceof Float32Array)
 			{
 				var watchable = new self._Watchable();
-				watchable.internal_val = val;
-				for(var i = 0; i < val.length; i++)
-				{
-					(function(){
-					var _val = val;
-					var _id = id;
-					var _propertyname = propertyname;
-					var _i = i;
-					Object.defineProperty(watchable,_i,{set:function(value){
-						_val[_i] = value; 
-						
-						self.kernel.setProperty(_id,_propertyname,_val);
-					},
-					get:function(){
-						return _val[i]
-					},configurable:true});
-					})();
-				}
-
+				self.setupWatchableArray(watchable,val,propertyname,id,masterval);
 				return watchable;
+			}else if(val.constructor == Object)
+			{
+				var watchable = new self._Watchable();
+				self.setupWatchableObject(watchable,val,propertyname,id,masterval);
+				return watchable;
+			
 			}else
 			{
+				//if the object is a primitive type, then we catch modifications to it
+				//when it is set. 
+				
+				//We may have to handle strings here.....
 				return val;
-			
 			}
 		
 		
 		},
+		//If you execute this.transform = this.transform, then the setter will get a watchable. Need to strip that before sending it back into the kernel.
 		watchableToObject : function(watchable)
 		{	
 			
@@ -548,8 +658,7 @@ node.id = childID; // TODO: move to vwf/model/object
 			}
 			else
 			{
-				if(isNaN(watchable[0]) && watchable instanceof Float32Array)
-							debugger;
+				
 				return watchable;
 			}
 		
@@ -560,14 +669,22 @@ node.id = childID; // TODO: move to vwf/model/object
             var self = this;
 
             Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
-                get: function() { return self.createWatchable(self.kernel.getProperty( this.node.id, propertyName ),propertyName,this.node.id) },
+                get: function() { 
+		
+		
+		return self.createWatchable(self.kernel.getProperty( this.node.id, propertyName ),propertyName,this.node.id) 
+		
+		},
                 set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, self.watchableToObject(value) ) },
                 enumerable: true
             } );
 
-node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+	    node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             Object.defineProperty( node, propertyName, { // "this" is node in get/set
-               get: function() { return self.createWatchable(self.kernel.getProperty( this.id, propertyName ),propertyName,this.id) },
+               get: function() { 
+	       
+	       return self.createWatchable(self.kernel.getProperty( this.id, propertyName ),propertyName,this.id) 
+	       },
                 set: function( value ) { self.kernel.setProperty( this.id, propertyName, self.watchableToObject(value) ) },
                 enumerable: true
             } );
@@ -732,7 +849,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 			for( var i =0; i < node.children.length; i++)
 			{
 				
-				if(node.children[i].childExtendsID =='http-vwf-example-com-behavior-vwf')
+				if(this.isBehavior(node.children[i]))
 				{
 					this.hookupBehaviorMethod(node.children[i],nodeID,methodName);
 				}
@@ -768,7 +885,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 			for( var i =0; i < node.children.length; i++)
 			{
 				
-				if(node.children[i].childExtendsID =='http-vwf-example-com-behavior-vwf')
+				if(this.isBehavior(node.children[i]))
 				{
 					this.dehookupBehaviorMethod(node.children[i],nodeID,methodName);
 				}
@@ -909,7 +1026,16 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 		
 		},
 
-		
+	isBehavior : function(node)
+	{
+		if(!node)
+			return false;
+		if(node.childExtendsID == 'http-vwf-example-com-behavior-vwf')
+		{
+			return true;	
+		}
+		return this.isBehavior(node.__proto__);
+	},	
         // -- firingEvent --------------------------------------------------------------------------
         firingEvent: function( nodeID, eventName, eventParameters ) {
 
@@ -943,11 +1069,11 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                 return handled;
 
             }, false );
-
+			
 			for( var i =0; i < node.children.length; i++)
 			{
 				
-				if(node.children[i].childExtendsID =='http-vwf-example-com-behavior-vwf')
+				if(this.isBehavior(node.children[i]))
 				{
 					this.firingEvent(node.children[i].id,eventName, eventParameters);
 				}
