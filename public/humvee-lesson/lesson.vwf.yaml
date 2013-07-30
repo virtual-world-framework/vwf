@@ -193,7 +193,7 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Set Ignition to Start" );
-                this.in(5).completed();
+                this.in(3).completed();
               }
   driveVehicle:
     # With parking brake applied, move the transmission range selector from the N to the D position.
