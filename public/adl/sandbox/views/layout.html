@@ -21,37 +21,92 @@
     <script type="text/javascript" src="{{root}}/js/knockout-2.2.1.js"></script>
 	<script type="text/javascript" src="{{root}}/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="{{root}}/vwf/view/editorview/sha256.js"></script>
-	<script type="text/javascript" src="{{root}}/js/jquery.nicescroll.min.js"></script>
+	<script type="text/javascript" src="{{root}}/js/moment.min.js"></script>
 
     <script type="text/javascript">
-		var filter = '';
+		"use strict";
+		var filter = ''
 		var root = '{{root}}';
-		var vwfPortalModel = {
-		
-			user: ko.observable({
+		var pageIndex = 0;
+		var pageLength = 12;
+		var vwfPortalModel = new function(){
+			var self = this;
+			self.getShorterStr = function(a, length){
+				if(a == undefined)
+					return '';
+				
+				var obj = {};
+				obj.title = a.title ? a.title : a;
+				length = length ? length : 55;
+				return (obj.title.length>length)? obj.title.substr(0, length - 3) + '...' : obj.title;
+			};
+			self.user = ko.observable({
 				isLoggedIn: false,
 				isAdmin: false,
 				username: 'Guest'
-			}),
+			});
 			
-			filterVal: ko.computed({
+			self.filterVal = ko.computed({
 				read:  function(){ return ''; }, 
 				write: function(str){ 
-					filter = str;
-					showStates(); 
+					if(filter != str){
+						filter = str;
+						pageIndex = 0;
+						showStates(); 
+					}
 				}	
-			}).extend({throttle:750}),
+			}).extend({throttle:500});
 			
-			worldObjects: ko.observableArray()
+			self.worldObjects = ko.observableArray([]);
+			self.displayWorldObjects = ko.observableArray([]);
+			self.getNextPage = function(){
+				if(self.nextDisabled() === false)
+					self.getPage(1);
+			};
+			self.getPreviousPage = function(){
+				if(self.previousDisabled() === false)
+					self.getPage(-1);
+			};
+			
+			self.previousDisabled = ko.observable(true);
+			self.nextDisabled = ko.observable(true);
+			
+			self.getPage = function(i){
+				var worldObjectsLength = getArrVisibleLength(self.worldObjects());
+				pageIndex += i;
+				self.displayWorldObjects(getArrVisible(self.worldObjects(), pageIndex*pageLength));
+			
+				if((pageIndex+1)*pageLength < worldObjectsLength){
+					self.nextDisabled(false);
+				}
+				
+				else self.nextDisabled(true);
+				
+				if(pageIndex > 0){
+					self.previousDisabled(false);
+				}
+				else self.previousDisabled(true);
+				
+			};
+			
+			self.handleEditDisplay = function(obj, e){
+				if(($(e.relatedTarget).hasClass("editstatedata") ||  $(e.relatedTarget).hasClass("editstatedelete")) && e.type == "mouseout")
+					return;
+				obj.editVisible(e.type === "mouseover");
+			};
 		};
 		
 		function checkFilter(textArr)
 		{
-			for(var i = 0; i < textArr.length; i++){
-				if(textArr[i] && textArr[i].toLowerCase().indexOf(filter.toLowerCase()) != -1)
-					return true;
-			}
-			return false;	
+			if(filter != ""){
+				for(var i = 0; i < textArr.length; i++){
+					if(textArr[i] && textArr[i].toLowerCase().indexOf(filter.toLowerCase()) != -1)
+						return true;
+				}
+				return false;
+			}			
+			
+			else return true;
 		}
 		
 		function getFlatIdArr(resetHotstate){
@@ -66,49 +121,95 @@
 			return tempArr;
 		}
 		
-		function showStates()
-		{
-			$.getJSON("./vwfDataManager.svc/states",function(e)
-			{
-				var keys = Object.keys(e);
+		function getArrVisibleLength(arr){
+			var count = 0;
+			for(var i = 0; i < arr.length; i++){
+				if(arr[i].isVisible == true)
+					count++;
+			}
+			
+			return count;
+		};		
+		function getArrVisible(arr, start){
+			var tempArr = [];
+			var count = 0;
+			for(var i = start; i < arr.length && count < pageLength; i++){
+			
+				if(arr[i].isVisible == true){
+					tempArr.push(arr[i]);
+					count++;
+				}
+			}
+			
+			return tempArr;
+		};
+		
+		function removeAgoFromMoment(date){
+			var temp = moment(date).fromNow();
+			return temp.substr(0, temp.length - 4);
+		};
+		
+		function showStates(){
+		
+			$.getJSON("./vwfDataManager.svc/states",function(e){
+				
+				var keys = [];
+				for(var tmpKey in e){
+				
+					if(e.hasOwnProperty(tmpKey))
+						keys.push(tmpKey);
+				}
+
 				var tempArr = getFlatIdArr();
 				var saveIndex = 0;
 
-				for(var i = 0; i < keys.length; i++)
-				{
+				for(var i = 0; i < keys.length; i++){
+					
 					var id = keys[i].substr(13,16);
 					e[keys[i]].id = id;
-					e[keys[i]].isHidden = checkFilter([e[keys[i]].title, e[keys[i]].description, e[keys[i]].owner]);
+					e[keys[i]].isVisible = checkFilter([e[keys[i]].title, e[keys[i]].description, e[keys[i]].owner]);
 					
 					//The incoming data elements may not be in the same order as existing elements, get proper index
-					saveIndex = tempArr.indexOf(id);
+					saveIndex = $.inArray(id, tempArr);
 					saveIndex = saveIndex > -1 ? saveIndex : i;
 					
-					//If the incoming and currently displayed objects are not the same, then something must have chaged. Update
-					if(JSON.stringify(vwfPortalModel.worldObjects()[saveIndex]) != JSON.stringify(e[keys[i]])){
-						
-						e[keys[i]].hotState = ko.observable(false);
-						e[keys[i]].lastUpdate = e[keys[i]].lastUpdate?e[keys[i]].lastUpdate:(new Date()).toString();
-						vwfPortalModel.worldObjects()[saveIndex] = e[keys[i]];	
-					}
+					e[keys[i]].hotState = ko.observable(false);
+					e[keys[i]].lastUpdate = e[keys[i]].lastUpdate?removeAgoFromMoment(e[keys[i]].lastUpdate):removeAgoFromMoment(new Date());
+					e[keys[i]].description = e[keys[i]].description ? e[keys[i]].description : "No description";
+					e[keys[i]].updates = e[keys[i]].updates > 0 ? e[keys[i]].updates : 0;
+					e[keys[i]].editVisible = ko.observable(false);
+					
+					vwfPortalModel.worldObjects()[saveIndex] = e[keys[i]];	
 				}
 				
-				vwfPortalModel.worldObjects.valueHasMutated();
-				console.log("New collapse");
-				$(".collapse").collapse();
-				setTimeout(function(){$(".accordion").css("visibility","visible")}, 300);
+				vwfPortalModel.worldObjects().sort(sortArrByUpdates);
+				
+				/////////////////////////////////////////////////////////////
+					
+					vwfPortalModel.worldObjects()[2].screen = '{{root}}/img/dfac_small.png';
+					vwfPortalModel.worldObjects()[1].screen = '{{root}}/img/desertworld_small.png';
+					vwfPortalModel.worldObjects()[0].screen = '{{root}}/img/terrain_small.png';
+				/////////////////////////////////////////////////////////////
 				
 				
-				$.getJSON("./admin/instances",function(e)
-				{
+				vwfPortalModel.getPage(0);
+				vwfPortalModel.worldObjects.valueHasMutated();				
+				
+				$.getJSON("./admin/instances",function(e){
+				
 					//Get all world IDs in flat array form
 					var tempArr = getFlatIdArr(true);
-					var keys = Object.keys(e);
+					var keys = [];
+					for(var tmpKey in e){
+				
+						if(e.hasOwnProperty(tmpKey))
+							keys.push(tmpKey);
+					}
 					var saveIndex = 0;
 					
 					//Iterate through keys, get index of world id which matches key, set its hotState to true
-					for(var i = 0; i < keys.length; i++)
-					{
+					for(var i = 0; i < keys.length; i++){
+					
 						var id = keys[i].substr(13,16);
 						saveIndex = tempArr.indexOf(id);
 						
@@ -120,13 +221,17 @@
 			});
 		}
 		
+		function sortArrByUpdates(a, b){
+			return b.updates - a.updates;
+		}
+		
 		function getLoginInfo(defaultCb, failCb){
 			
 			$.ajax('/vwfDataManager.svc/logindata',
 			{
 				cache:false,
-				success:function(data,status,xhr)
-				{
+				success:function(data,status,xhr){
+					
 					data = JSON.parse(xhr.responseText);
 					vwfPortalModel.user().username = data.username;
 					vwfPortalModel.user().isAdmin = data.admin;

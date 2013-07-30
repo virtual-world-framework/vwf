@@ -11,11 +11,38 @@ a{
 	text-decoration: none;
 }
 
-#activeInstances{
+.btn{
 
-	max-height: 500px;
-	overflow-y: scroll;
-	width:90%;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: moz-none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.worldBox{
+
+	min-height: 88px;
+}
+.worldBox{
+
+	border: 1px solid #eee;
+	margin-bottom: 21px;
+	border-radius: 8px;
+	padding: 5px 5px 3px 5px;
+	max-height: 128px;
+	min-height: 128px;
+	width: 90%;
+}
+
+.activeWorld{
+
+	background-color: #EAFFEA;
+	border: 1px solid #A0CFA0;
+	border-radius: 5px;
+	padding: 2px 10px;
+
 }
 
 #wrapper{
@@ -129,6 +156,7 @@ a{
 }
 .description
 {
+	color: gray;
 	margin-top: 1em;
 }
 .owner
@@ -150,6 +178,8 @@ a{
 {
 	color: lightgray;
 	margin-top: .2em;
+	font-size: 12px;
+	text-align:right;
 }
 .button
 {
@@ -163,19 +193,43 @@ a{
 	box-shadow: 5px 5px 5px;
 }
 
-.editstate
+.featuredWorlds{
+	height:100%;
+	padding: 0;
+	background-color:#eee;
+	border:  1px #e6e6e6 solid;
+	border-radius: 5px;
+	
+}
+
+.featuredInstance{
+
+	padding: 10px;
+	height: 28%;
+	border-bottom: 1px #dfdfdf solid;
+	border-top: 1px #f7f7f7 solid;
+}
+
+.featuredInstanceLast{
+
+	border-bottom: none;
+}
+.editstate, .editstateGuest
 {
 	display: block;
 	border-top: 1px solid #eee;
-	margin-top: 10px;
-	
+	margin-top: 20px;
 	width:100%;
 	color: gray;
-	padding-top: 11px;
-	padding-bottom: 20px;
+	padding-top: 10px;
 }
 
-.editstate a
+.editstateGuest{
+	
+	border-top: none;
+}
+
+.editstate a, .editstateGuest a
 {
 	text-align:right;
 	float:right;
@@ -187,7 +241,7 @@ a{
 	color:gray;
 	text-decoration: none !important;
 	cursor: pointer;
-	margin-top:-3px;
+	margin-top:-5px;
 }
 .accordion-inner{
 

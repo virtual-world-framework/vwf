@@ -1,71 +1,100 @@
-	<div class="row" style="margin-top:30px;">
-		<div class="span4">
-			<div class="row">
-				<div class="span1" data-bind="visible:user().isLoggedIn">
-					<a href="{{root}}/create" class="coldstate" id="newinstancebutton"><img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"/></a>
-				</div>
-				<div class="span3">
-					<input id="filter" class="span3" style="width:89%; float:left;" type="text" placeholder="Filter Results" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
+	<div class="row" style="margin-top:30px;height:426px;clear:both;">
+		<div class="span7">
+			<div style="height: 114px;">
+				<p>
+					Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in
+					"cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a
+					new world" 
+				</p>
+			</div>
+			<iframe width="560" height="315" style="display:block;margin:0px auto;width:80%" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
+		</div>
+		<div class="span5" style="height:100%;">
+			<div class="featuredWorlds" data-bind="foreach:worldObjects.slice(0,3)">
+				<div class="featuredInstance" data-bind="css : $index() == 2 ? 'featuredInstanceLast' : 'featuredInstance'">
+					<div class="span2" style="margin-left:10px;">
+						<a data-bind="attr:{href:'{{root}}/'+id}">
+							<img data-bind="attr:{src:screen}" style="width:140px;height:110px;margin-top:4px;" />
+						</a>
+					</div>
+					<div class="span2" style="overflow:hidden; width:50%;">
+						<div>
+							<h4 style="margin-top:0;"><a style="color:inherit;" data-bind="text:title, attr:{href:'{{root}}/'+id}"></a></h4>
+							<p data-bind="text:$root.getShorterStr(description, 30)"></p>
+						</div>
+					</div>
+					<!--<div style="text-align:right;width:100%;float:left;">
+						<a href="/" data-bind="attr:{href:'{{root}}/'+id}">Load World</a>
+					</div>-->
 				</div>
 			</div>
-			<div class="row" id="activeRow">
-				<div id="activeInstances" class="accordion span4" data-bind="foreach:worldObjects">
-				
-					<div class="accordion-group" data-bind="visible:isHidden" style="width:97.5%;">
-						
-						<div class="accordion-heading">
-							<a class="accordion-toggle" data-toggle="collapse" data-parent="#activeInstances" data-bind="text:title,attr:{href:'#collapse'+$index()}, css:hotState()?'alert-success':'coldstate'" onclick='scrollbarFix()'>Title</a>
+		</div>
+	</div>
+	<div class="row" style="margin-top:30px;">
+		<div class="span12">
+			<div class="row">
+				<div class="span1 offset8" style="text-align:right;">
+					<a href="{{root}}/create" class="coldstate" id="newinstancebutton" data-bind="visible:user().isLoggedIn">
+						<img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"/>
+					</a>
+				</div>
+				<div class="span3">
+					<input id="filter" class="span3" style="width:90%;" type="text" placeholder="Filter Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
+				</div>
+			</div>
+			<div class="row" id="activeRow" data-bind="foreach:displayWorldObjects">				
+				<div data-bind="visible:isVisible" class="span3">
+					<div class="worldBox" data-bind="event: {mouseover:$root.handleEditDisplay, mouseout:$root.handleEditDisplay}">
+						<div style="margin-bottom: 10px;">
+							<a data-bind="attr:{href:'{{root}}/'+id}, text:$root.getShorterStr(title, 20)" href="">Title</a>
+							<span class="owner" data-bind="text:' - ' + owner"></span>
 						</div>
-						<div data-bind="attr:{id:'collapse'+$index()}" class="accordion-body collapse in">
-						
-							<div class="accordion-inner">								
+						<div>								
+							<div class="worldInfo">
 								<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
-									<div class="description" data-bind="text:description"></div>
-									<div class="owner" data-bind="text:'Created by: ' + owner"></div>
-									<div class="objects" data-bind="text:objects +' objects currently in world'"></div>
-									<div class="lastModified" data-bind="text:lastUpdate"></div>
-									<div class="stateid" data-bind="text:id"></div>
+									<span class="description" data-bind="text:$root.getShorterStr(description, 25)"></span>
+									&nbsp;<span class="lastModified stateid" data-bind="text:' (' + lastUpdate + ')' "></span>
+									<div class="objects" data-bind="text: objects + (objects == 1 ? ' object ' : ' objects ')"></div>
 								</a>
+							</div>
+							<div class="editstateGuest">
+								<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState()">Active</a>
 								
-								<div class="editstate">
-									<a class="loadWorld" data-bind="attr:{href:'{{root}}/'+id}">Load World</a>
+								<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible -->
 									<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
 									<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
-								</div>
+								<!-- /ko -->
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div class="span8">
-			<p>
-				Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in
-				"cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a
-				new world" 
-			</p>
-			<iframe width="560" height="315" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
+			<div class="row" style="margin-top:45px;margin-bottom:70px;" data-bind="visible:displayWorldObjects().length==0">	
+				<div class="span4 offset4" style="text-align:center;">
+					<span style="font-weight:bold;">No worlds found</span>
+				</div>
+			</div>
+			<div class="row" style="margin-bottom:45px;">
+				<div class="span1 offset4" style="text-align:right;">
+					<a class="btn" data-bind="click:getPreviousPage, css:previousDisabled()?'disabled btn':'btn'"><i class="icon-chevron-left"></i></a>
+				</div>				
+				<div class="span1 offset2">
+					<a class="btn" data-bind="click:getNextPage, css:nextDisabled()?'disabled btn':'btn'"><i class="icon-chevron-right"></i></a>
+				</div>
+			</div>
 		</div>
 	</div>
 	<script>
-		function scrollbarFix(){
-
-			obj = $("#activeInstances");
-
-			obj.getNiceScroll().remove();
-			obj.niceScroll({"cursoropacitymax": 0.4, "cursorborderradius": 0} );
-		};
 		$(document).ready(function(){	
 			
 			ko.applyBindings(vwfPortalModel);
-			$("#activeInstances").niceScroll({"cursoropacitymax": 0.4, "cursorborderradius": 0} );
 			getLoginInfo(function(){
 					
 				showStates();
 
-				window.setInterval(function(){
-					showStates();
-				},60000);
+			//	window.setInterval(function(){
+			//		showStates();
+			//	},10000);
 
 			});
 		});
