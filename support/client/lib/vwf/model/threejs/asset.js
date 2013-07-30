@@ -122,17 +122,17 @@
 							}
 							if(list[i].material.bumpMap)
 							{
-								list[i].material.bumpMap = list[i].material.bumpMap.clone();
+								list[i].material.bumpMap = _SceneManager.getTexture(list[i].material.bumpMap.image.src);
 								list[i].material.bumpMap.needsUpdate = true;
 							}
 							if(list[i].material.lightMap)
 							{
-								list[i].material.lightMap = list[i].material.lightMap.clone();
+								list[i].material.lightMap = _SceneManager.getTexture(list[i].material.lightMap.image.src);
 								list[i].material.lightMap.needsUpdate = true;
 							}
 							if(list[i].material.normalMap)
 							{
-								list[i].material.normalMap = list[i].material.normalMap.clone();
+								list[i].material.normalMap = _SceneManager.getTexture(list[i].material.normalMap.image.src);
 								list[i].material.normalMap.needsUpdate = true;								
 							}
 											
@@ -243,27 +243,26 @@
 				
 							if(list[i].material.map)
 							{
-								list[i].material.map = _SceneManager.getTexture(list[i].material.map.image.src);
+								list[i].material.map =  _SceneManager.getTexture(list[i].material.map.image.src);
 								list[i].material.map.needsUpdate = true;
-							}
-							else
+							}else
 							{
 								list[i].material.map =  _SceneManager.getTexture('white.png');
 								list[i].material.map.needsUpdate = true;
 							}
 							if(list[i].material.bumpMap)
 							{
-								list[i].material.bumpMap = list[i].material.bumpMap.clone();
+								list[i].material.bumpMap = _SceneManager.getTexture(list[i].material.bumpMap.image.src);
 								list[i].material.bumpMap.needsUpdate = true;
 							}
 							if(list[i].material.lightMap)
 							{
-								list[i].material.lightMap = list[i].material.lightMap.clone();
+								list[i].material.lightMap = _SceneManager.getTexture(list[i].material.lightMap.image.src);
 								list[i].material.lightMap.needsUpdate = true;
 							}
 							if(list[i].material.normalMap)
 							{
-								list[i].material.normalMap = list[i].material.normalMap.clone();
+								list[i].material.normalMap = _SceneManager.getTexture(list[i].material.normalMap.image.src);
 								list[i].material.normalMap.needsUpdate = true;								
 							}
 							
@@ -307,25 +306,24 @@
 							{
 								list[i].material.map =  _SceneManager.getTexture(list[i].material.map.image.src);
 								list[i].material.map.needsUpdate = true;
-							}
-							else
+							}else
 							{
 								list[i].material.map =  _SceneManager.getTexture('white.png');
 								list[i].material.map.needsUpdate = true;
 							}
 							if(list[i].material.bumpMap)
 							{
-								list[i].material.bumpMap = list[i].material.bumpMap.clone();
+								list[i].material.bumpMap = _SceneManager.getTexture(list[i].material.bumpMap.image.src);
 								list[i].material.bumpMap.needsUpdate = true;
 							}
 							if(list[i].material.lightMap)
 							{
-								list[i].material.lightMap = list[i].material.lightMap.clone();
+								list[i].material.lightMap = _SceneManager.getTexture(list[i].material.lightMap.image.src);
 								list[i].material.lightMap.needsUpdate = true;
 							}
 							if(list[i].material.normalMap)
 							{
-								list[i].material.normalMap = list[i].material.normalMap.clone();
+								list[i].material.normalMap = _SceneManager.getTexture(list[i].material.normalMap.image.src);
 								list[i].material.normalMap.needsUpdate = true;								
 							}
 							

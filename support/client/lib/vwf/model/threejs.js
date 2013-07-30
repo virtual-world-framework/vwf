@@ -433,6 +433,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
             if(nodeID)
             {
                 var childNode = this.state.nodes[nodeID];
+				
+				
+				if(childNode.children)
+				{
+					
+					for(var i = 0; i < childNode.children.length; i++)
+					{
+						this.deletingNode(childNode.children[i].ID);
+					}
+				}
+				
                 if(childNode)
                 {
 					if(childNode.deletingNode)

@@ -173,6 +173,26 @@ SceneManager.prototype.initialize = function(scene)
 	{
 		
 		this.add_internal(child);
+		
+		
+		
+		//here, we need to walk up the graph and make sure that at some point, the object is a child of the scene.
+		// if it's not, it should not go in the scenemanager.
+		var parent = this;
+		var found = false;
+		while(parent)
+		{
+			if(parent instanceof THREE.Scene)
+			{
+				found = true;
+				break;
+			}else
+			{
+				parent = parent.parent;
+			}
+		}
+		if(!found) return;
+		
 		if(SceneManagerIgnore)
 			return;
 		

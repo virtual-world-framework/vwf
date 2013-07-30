@@ -299,7 +299,7 @@ define(function ()
 				{
 					var name = $('#newPropertyName').val();
 					_ScriptEditor.setSelectedProperty(name, '"null"');
-					_ScriptEditor.SavePropertyClicked();
+					_ScriptEditor.SavePropertyClicked(true);
 					$('#ScriptEditorCreateProperty').dialog('close');
 				},
 				'Cancel': function ()
@@ -810,7 +810,7 @@ define(function ()
 			$('#propertytext').css('border-color', 'black');
 			_ScriptEditor.BuildGUI(true);
 		}
-		this.SavePropertyClicked = function ()
+		this.SavePropertyClicked = function (create)
 		{
 			
 			if (!_ScriptEditor.checkPermission()) return;
@@ -833,6 +833,9 @@ define(function ()
 				}
 			
 			}
+			if(create === true)
+			vwf_view.kernel.createProperty(_ScriptEditor.currentNode.id, propertyname, val);
+			else
 			vwf_view.kernel.setProperty(_ScriptEditor.currentNode.id, propertyname, val);
 			window.setTimeout(_ScriptEditor.PostSaveProperty, 500);
 			return true;

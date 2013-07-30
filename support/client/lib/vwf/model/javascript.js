@@ -78,6 +78,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             var node = this.nodes[childID] = Object.create( prototype );
 
+			node.childExtendsID = childExtendsID;
             Object.defineProperty( node, "private", {
                 value: {} // for bookkeeping, not visible to scripts on the node  // TODO: well, ideally not visible; hide this better ("_private", "vwf_private", ?)
             } );
@@ -252,8 +253,51 @@ node.id = childID; // TODO: move to vwf/model/object
             } );
 
             node.private.change = 1; // incremented whenever "future"-related changes occur
-
+	
+			
+			if(childExtendsID =='http-vwf-example-com-behavior-vwf')
+			{
+				self.hookupBehavior(node,nodeID);
+			
+			}
         },
+		hookupBehaviorProperty: function(behaviorNode,parentid,propname)
+		{
+			var node = this.nodes[parentid];
+				Object.defineProperty(behaviorNode, propname, {
+				get : function(){ return vwf.getProperty(parentid,propname); },
+                set : function(newValue){ vwf.setProperty(parentid,propname,newValue); },
+                               enumerable : true,
+                               configurable : true});
+		},
+		hookupBehaviorMethod: function(behaviorNode,parentid,propname)
+		{
+			var node = this.nodes[parentid];
+			
+				Object.defineProperty(behaviorNode, propname, {
+					value: node.methods[propname].bind(node),
+								   enumerable : true,
+								   configurable : true});
+		},
+		hookupBehavior : function(behaviorNode,parentid)
+		{
+			
+			
+			var node = this.nodes[parentid];
+			for(var i in node.properties)
+			{
+				this.hookupBehaviorProperty(behaviorNode,parentid,i);
+			}
+			
+			for(var i in node.methods)
+			{
+				this.hookupBehaviorMethod(behaviorNode,parentid,i);
+			}
+			
+			
+			
+		
+		},
 
         // -- initializingNode ---------------------------------------------------------------------
 
@@ -430,26 +474,101 @@ node.id = childID; // TODO: move to vwf/model/object
                 node.private.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
             }
 
+			for( var i =0; i < node.children.length; i++)
+			{
+				
+				if(node.children[i].childExtendsID =='http-vwf-example-com-behavior-vwf')
+				{
+					this.hookupBehaviorProperty(node.children[i],nodeID,propertyName);
+				}
+			
+			}
+			
+			
             return this.initializingProperty( nodeID, propertyName, propertyValue );
         },
-
+		_Watchable : function()
+		{
+		
+		
+		},
         // -- initializingProperty -----------------------------------------------------------------
+		createWatchable : function(val,propertyname,id)
+		{
+			if(!val) return val;
+			var self = this;
+			if(val instanceof self._Watchable)
+			{
+				return self.createWatchable(val.internal_val,propertyname,id)
+			
+			}
+			
+			
+			if(val.prototype == Array 
+			|| val instanceof Float32Array)
+			{
+				var watchable = new self._Watchable();
+				watchable.internal_val = val;
+				for(var i = 0; i < val.length; i++)
+				{
+					(function(){
+					var _val = val;
+					var _id = id;
+					var _propertyname = propertyname;
+					var _i = i;
+					Object.defineProperty(watchable,_i,{set:function(value){
+						_val[_i] = value; 
+						
+						self.kernel.setProperty(_id,_propertyname,_val);
+					},
+					get:function(){
+						return _val[i]
+					},configurable:true});
+					})();
+				}
 
+				return watchable;
+			}else
+			{
+				return val;
+			
+			}
+		
+		
+		},
+		watchableToObject : function(watchable)
+		{	
+			
+			if(!watchable) return watchable;
+			var self = this;
+			if(watchable instanceof self._Watchable)
+			{
+				
+				return watchable.internal_val;
+			}
+			else
+			{
+				if(isNaN(watchable[0]) && watchable instanceof Float32Array)
+							debugger;
+				return watchable;
+			}
+		
+		},
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var node = this.nodes[nodeID];
             var self = this;
 
             Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
-                get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
-                set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
+                get: function() { return self.createWatchable(self.kernel.getProperty( this.node.id, propertyName ),propertyName,this.node.id) },
+                set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, self.watchableToObject(value) ) },
                 enumerable: true
             } );
 
 node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             Object.defineProperty( node, propertyName, { // "this" is node in get/set
-                get: function() { return self.kernel.getProperty( this.id, propertyName ) },
-                set: function( value ) { self.kernel.setProperty( this.id, propertyName, value ) },
+               get: function() { return self.createWatchable(self.kernel.getProperty( this.id, propertyName ),propertyName,this.id) },
+                set: function( value ) { self.kernel.setProperty( this.id, propertyName, self.watchableToObject(value) ) },
                 enumerable: true
             } );
 
@@ -609,6 +728,16 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                     "exception evaluating body:", utility.exceptionMessage( e ) );
             }
         
+		
+			for( var i =0; i < node.children.length; i++)
+			{
+				
+				if(node.children[i].childExtendsID =='http-vwf-example-com-behavior-vwf')
+				{
+					this.hookupBehaviorMethod(node.children[i],nodeID,methodName);
+				}
+			
+			}
             node.private.change++; // invalidate the "future" cache
 
         },
@@ -636,6 +765,16 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                 }
             }
 
+			for( var i =0; i < node.children.length; i++)
+			{
+				
+				if(node.children[i].childExtendsID =='http-vwf-example-com-behavior-vwf')
+				{
+					this.dehookupBehaviorMethod(node.children[i],nodeID,methodName);
+				}
+			
+			}
+			
             return undefined;
         },
         // -- callingMethod ------------------------------------------------------------------------
@@ -805,6 +944,16 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             }, false );
 
+			for( var i =0; i < node.children.length; i++)
+			{
+				
+				if(node.children[i].childExtendsID =='http-vwf-example-com-behavior-vwf')
+				{
+					this.firingEvent(node.children[i].id,eventName, eventParameters);
+				}
+			
+			}
+			
             return handled;
         },
 

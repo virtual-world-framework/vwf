@@ -1392,13 +1392,13 @@ define(function ()
 		}.bind(this);
 		this.AddBlankBehavior = function ()
 		{
-			if (GetSelectedVWFNode() == null)
+			if (this.GetSelectedVWFNode() == null)
 			{
 				_Notifier.notify('no object selected');
 				return;
 			}
 			var ModProto = {
-				extends: 'http://vwf.example.com/node.vwf',
+				extends: 'http://vwf.example.com/behavior.vwf',
 				properties: {
 					NotProto: ""
 				}
@@ -1407,7 +1407,7 @@ define(function ()
 			proto.properties.type = 'behavior';
 			proto.properties.DisplayName = self.GetUniqueName('behavior');
 			proto.properties.owner = document.PlayerNumber;
-			var id = GetSelectedVWFNode().id;
+			var id = this.GetSelectedVWFNode().id;
 			var owner = vwf.getProperty(id, 'owner');
 			if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
 			{
