@@ -1778,6 +1778,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         }         
     }
+    //walk the graph of an object, and set all materials to new material clones
+    function cloneMaterials(nodein)
+    {
+	walkGraph(nodein,function(node){
+		if(node.material)
+		{
+			node.material = node.material.clone();
+		}
+	});
+    }
     function loadAsset( parentNode, node, childType, propertyNotifyCallback ) {
 
         var nodeCopy = node; 
@@ -1788,279 +1798,286 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var parentObject3 = parentNode.threeObject ? parentNode.threeObject : parentNode.threeScene;
         //console.info( "---- loadAsset( "+parentNode.name+", "+node.name+", "+childType+" )" );
 
-        node.assetLoaded = function( asset ) { 
-            //console.info( "++++ assetLoaded( "+parentNode.name+", "+node.name+", "+childType+" )" );
-            sceneNode.pendingLoads--;
-            var removed = false;
-            
-            var animations, animatedMesh;
-			
-            if(asset.animations && asset.animations.length > 0) {
-                animations = asset.animations;
-            }
-           
-            
-            if(asset.scene)
-                asset = asset.scene;
-			;	
-			asset.updateMatrixWorld();
-			//this is weird - should we be throwing away the asset root matrix completely? seems like we are
-			//nodeCopy.threeObject.matrix = asset.matrix.clone();	
-			asset.matrix = new THREE.Matrix4();
-			asset.matrixAutoUpdate = false;
-			
-            nodeCopy.threeObject = asset.clone();
-			
-			animatedMesh = []
-			walkGraph(nodeCopy.threeObject,function(node){
-					if(node instanceof THREE.SkinnedMesh)
-					{
-						animatedMesh.push(node);
-					}
-				
-				});
-			nodeCopy.threeObject.animatedMesh = animatedMesh;
-			nodeCopy.threeObject.updateMatrixWorld();
-			parentObject3.add(nodeCopy.threeObject);
-            nodeCopy.threeObject.name = childName;
-            nodeCopy.threeObject.vwfID = nodeID;
-            nodeCopy.threeObject.matrixAutoUpdate = false;
-            if(animations) {
-                var animHandler = THREE.AnimationHandler;
-                asset.kfAnimations = [];
-                asset.animations = animations;
-                // Initialize the key frame animations
-                for(var i = 0; i < animations.length; i++) {
-                    var animation = animations[i];
-                    animHandler.add(animation);
-                    var kfAnimation = new THREE.KeyFrameAnimation(animation.node, animation.name);
-                    kfAnimation.timeScale = 1;
-                    asset.kfAnimations.push(kfAnimation);
-                    for(var h = 0; h < kfAnimation.hierarchy.length; h++) {
-                        var keys = kfAnimation.data.hierarchy[h].keys;
-                        var sids = kfAnimation.data.hierarchy[h].sids;
-                        var obj = kfAnimation.hierarchy[h];
+        node.assetLoaded = function( asset ) 
+	{ 
+		//console.info( "++++ assetLoaded( "+parentNode.name+", "+node.name+", "+childType+" )" );
+		sceneNode.pendingLoads--;
+		var removed = false;
 
-                        if(keys.length && sids) {
-                            for(var s = 0; s < sids.length; s++) {
-                                var sid = sids[s];
-                                var next = kfAnimation.getNextKeyWith(sid, h, 0);
-                                if(next) next.apply(sid);
-                            }
-                            obj.matrixAutoUpdate = false;
-                            kfAnimation.data.hierarchy[h].node.updateMatrix();
-                            obj.matrixWorldNeedsUpdate = true;
-                        }
-                    } 
-                    kfAnimation.play(false, 0);
-                }
-            }
+		var animations, animatedMesh;
 			
-            if(animatedMesh) {
-                asset.animatedMesh = animatedMesh;
-            }
-            
-            // remember that this was a loaded collada file
-            asset.loadedColladaNode = true;
-            
-            var meshes =[];
-            GetAllLeafMeshes(asset,meshes);
-        
-            for(var i =0; i < meshes.length; i++)
-            {
-                fixMissingUVs(meshes[i]);   
-                meshes[i].geometry.uvsNeedUpdate = true;
-            }
-            
-			
-            if ( asset.updateMatrixWorld ) asset.updateMatrixWorld(true);
-            
-            nodeCopy.threeObject.matrixAutoUpdate = false;
-			
-            for ( var j = 0; j < sceneNode.srcAssetObjects.length; j++ ) {
-                if ( sceneNode.srcAssetObjects[j] == nodeCopy ){
-                    sceneNode.srcAssetObjects.splice( j, 1 );
-                    removed = true;
-                }
-            } 
+		if(asset.animations && asset.animations.length > 0) {
+			animations = asset.animations;
+		}
 
-            // Since prototypes are created before the object, it does not get "setProperty" updates for
-            // its prototype (and behavior) properties.  Therefore, we cycle through those properties to
-            // notify the drivers of the property values so they can react accordingly
-            // TODO: Have the kernel send the "setProperty" updates itself so the driver need not
-            propertyNotifyCallback();
 
-            // let vwf know the asset is loaded 
-            if ( nodeCopy.loadingCallback ) {
-                //console.info( "========= LOADED ========== "+node.name+" ========= LOADED ==========" );
-                nodeCopy.loadingCallback( true );                    
-            }
+		if(asset.scene)
+		asset = asset.scene;
+
+		var meshes =[];
+		GetAllLeafMeshes(asset,meshes);
+
+		for(var i =0; i < meshes.length; i++)
+		{
+			fixMissingUVs(meshes[i]);   
+			meshes[i].geometry.uvsNeedUpdate = true;
+		}
+            		
+
+		
+		asset.updateMatrixWorld();
+		//this is weird - should we be throwing away the asset root matrix completely? seems like we are
+		//nodeCopy.threeObject.matrix = asset.matrix.clone();	
+		asset.matrix = new THREE.Matrix4();
+		asset.matrixAutoUpdate = false;
+			
+
+		nodeCopy.threeObject = asset.clone();
+		//make sure that the new object has a unique material
+		cloneMaterials(nodeCopy.threeObject);
+
+		//find and bind the animations
+		//NOTE: this would probably be better handled by walking and finding the animations and skins only on the 
+		//property setter when needed.
+		
+		animatedMesh = []
+		walkGraph(nodeCopy.threeObject,function(node){
+			if(node instanceof THREE.SkinnedMesh)
+			{
+				animatedMesh.push(node);
+			}
+		});
+		nodeCopy.threeObject.animatedMesh = animatedMesh;
+		nodeCopy.threeObject.updateMatrixWorld();
+		parentObject3.add(nodeCopy.threeObject);
+		nodeCopy.threeObject.name = childName;
+		nodeCopy.threeObject.vwfID = nodeID;
+		nodeCopy.threeObject.matrixAutoUpdate = false;
+		if(animations) 
+		{
+			var animHandler = THREE.AnimationHandler;
+			asset.kfAnimations = [];
+			asset.animations = animations;
+			
+			// Initialize the key frame animations
+			for(var i = 0; i < animations.length; i++) {
+			    var animation = animations[i];
+			    animHandler.add(animation);
+			    var kfAnimation = new THREE.KeyFrameAnimation(animation.node, animation.name);
+			    kfAnimation.timeScale = 1;
+			    asset.kfAnimations.push(kfAnimation);
+			    for(var h = 0; h < kfAnimation.hierarchy.length; h++) {
+				var keys = kfAnimation.data.hierarchy[h].keys;
+				var sids = kfAnimation.data.hierarchy[h].sids;
+				var obj = kfAnimation.hierarchy[h];
+
+				if(keys.length && sids) {
+				    for(var s = 0; s < sids.length; s++) {
+					var sid = sids[s];
+					var next = kfAnimation.getNextKeyWith(sid, h, 0);
+					if(next) next.apply(sid);
+				    }
+				    obj.matrixAutoUpdate = false;
+				    kfAnimation.data.hierarchy[h].node.updateMatrix();
+				    obj.matrixWorldNeedsUpdate = true;
+				}
+			    } 
+			    kfAnimation.play(false, 0);
+			}
+		}
+			
+		if(animatedMesh) {
+			asset.animatedMesh = animatedMesh;
+		}
+
+		// remember that this was a loaded collada file
+		asset.loadedColladaNode = true;
+
+		if ( asset.updateMatrixWorld ) 
+			asset.updateMatrixWorld(true);
+
+		nodeCopy.threeObject.matrixAutoUpdate = false;
+			
+		for ( var j = 0; j < sceneNode.srcAssetObjects.length; j++ ) {
+			if ( sceneNode.srcAssetObjects[j] == nodeCopy ){
+			    sceneNode.srcAssetObjects.splice( j, 1 );
+			    removed = true;
+			}
+		} 
+
+		// Since prototypes are created before the object, it does not get "setProperty" updates for
+		// its prototype (and behavior) properties.  Therefore, we cycle through those properties to
+		// notify the drivers of the property values so they can react accordingly
+		// TODO: Have the kernel send the "setProperty" updates itself so the driver need not
+		propertyNotifyCallback();
+
+		// let vwf know the asset is loaded 
+		if ( nodeCopy.loadingCallback ) {
+			nodeCopy.loadingCallback( true );                    
+		}
 			
 			
-			//get the entry from the asset registry
-			reg = threeModel.assetRegistry[nodeCopy.source];
-			//it's not pending, and it is loaded
-			reg.pending = false;
-			reg.loaded = true;
-			//store this asset in the registry
-			reg.node = asset;
-			
-			//if any callbacks were waiting on the asset, call those callbacks
-			for(var i = 0; i < reg.callbacks.length; i++)
-				reg.callbacks[i](asset);
-			//nothing should be waiting on callbacks now.	
-			reg.callbacks = [];	
-			
-			
+		//get the entry from the asset registry
+		reg = threeModel.assetRegistry[nodeCopy.source];
+		//it's not pending, and it is loaded
+		reg.pending = false;
+		reg.loaded = true;
+		//store this asset in the registry
+		reg.node = asset;
+
+		//if any callbacks were waiting on the asset, call those callbacks
+		for(var i = 0; i < reg.callbacks.length; i++)
+			reg.callbacks[i](asset);
+		//nothing should be waiting on callbacks now.	
+		reg.callbacks = [];		
         }
         node.name = childName;
       
-		//create an asset registry if one does not exist for this driver
-		if(!this.assetRegistry)
-		{
-			this.assetRegistry = {};
-		}
-		// if there is no entry in the registry, create one
-		if(!this.assetRegistry[node.source])
-		{
-			//its new, so not waiting, and not loaded
-			this.assetRegistry[node.source] = {};
-			this.assetRegistry[node.source].loaded = false;
-			this.assetRegistry[node.source].pending = false;
-			this.assetRegistry[node.source].callbacks = [];
-		}
-		//grab the registry entry for this asset
-		var reg = this.assetRegistry[node.source];
-		
-		//if the asset entry is not loaded and not pending, you'll have to actaully go download and parse it
-		if(reg.loaded == false && reg.pending == false)
-		{
-			//thus, it becomes pending
-			reg.pending = true;
-			
-			sceneNode.srcAssetObjects.push( node.threeObject );
-			//node.threeObject.vwfID = nodeID;
-			sceneNode.pendingLoads++;
-		
-		     //Do we need this when we have an async load? currently seems to break things
-			 //NOTE: yes, need to prevent the queue from advancing - I think
-             //this pauses the queue. Resume by calling with true
-			 //callback( false );
-		
-			//call up the correct loader/parser
-			if(childType == "model/vnd.collada+xml")
-			{
-				
-				node.parse = true;
-				node.loader = new THREE.ColladaLoader();
-				node.loader.options.convertUpAxis = true;
-				node.loader.options.upAxis = "Z";
-				
-				node.loader.load(node.source,node.assetLoaded.bind(this));
-			}
-			if(childType == "model/vnd.osgjs+json+compressed")
-			{
-				
-				node.loader = new UTF8JsonLoader(node,node.assetLoaded.bind(this));
-			}
-			
-			
-		}
-		//if the asset registry entry is not pending and it is loaded, then just grab a copy, no download or parse necessary
-		else if(reg.loaded == true && reg.pending == false)
-		{
-			
-			var asset = (reg.node.clone());
-			var n = asset;
-				var skins = []
-				walkGraph(n,function(node){
-					if(node instanceof THREE.SkinnedMesh)
-					{
-						skins.push(node);
-					}
-				
-				});
-				n.animatedMesh = skins;
-				
-				nodeCopy.threeObject = asset;
-				
-				
-				//this is weird - should we be throwing away the asset root matrix completely? seems like we are
-				//nodeCopy.threeObject.matrix = asset.matrix.clone();	
-				nodeCopy.threeObject.matrix = new THREE.Matrix4();
-				nodeCopy.threeObject.matrixAutoUpdate = false;
-				parentObject3.add(nodeCopy.threeObject);
-				nodeCopy.threeObject.name = childName;
-				nodeCopy.threeObject.vwfID = nodeID;
-				nodeCopy.threeObject.matrixAutoUpdate = false;
-				nodeCopy.threeObject.updateMatrixWorld(true);
-				propertyNotifyCallback();
-				window.setTimeout(function(){
-					nodeCopy.loadingCallback( true ); 
-				},10);
-			
-		}
-		//if it's pending but not done, register a callback so that when it is done, it can be attached.
-		else if(reg.loaded == false && reg.pending == true)
-		{	
-			sceneNode.srcAssetObjects.push( node.threeObject );
-			
-			//sceneNode.pendingLoads++;
-		
-		     //Do we need this when we have an async load? currently seems to break things
-             //this pauses the queue. Resume by calling with true
-			 //callback( false );
-			
-			//so, not necessary to do all the other VWF node goo stuff, as that will be handled by the node that requseted
-			//the asset in teh first place
-			//
-			//var tcal = callback;
-			reg.callbacks.push(function(node)
-			{
-				
-				//just clone the node and attach it.
-				//this should not clone the geometry, so much lower memory.
-				//seems to take near nothing to duplicated animated avatar
-				
-				var n = node.clone();
-				var skins = []
-				walkGraph(n,function(node){
-					if(node instanceof THREE.SkinnedMesh)
-					{
-						skins.push(node);
-					}
-				
-				});
-				n.animatedMesh = skins;
-				
-				nodeCopy.threeObject = n;
-				
-				//this is weird - should we be throwing away the asset root matrix completely? seems like we are
-				//nodeCopy.threeObject.matrix = asset.matrix.clone();	
-				nodeCopy.threeObject.matrix = new THREE.Matrix4();
-				nodeCopy.threeObject.matrixAutoUpdate = false;
-
-				parentObject3.add(nodeCopy.threeObject);
-				nodeCopy.threeObject.name = childName;
-				nodeCopy.threeObject.vwfID = nodeID;
-				nodeCopy.threeObject.matrixAutoUpdate = false;
-				
-				nodeCopy.threeObject.updateMatrixWorld(true);
-				propertyNotifyCallback();
-				nodeCopy.loadingCallback( true ); 
-				
-			});
-		}
-            
-        
-    }
-	function walkGraph(root,cb)
+	//create an asset registry if one does not exist for this driver
+	if(!this.assetRegistry)
 	{
-		if(root)
-			cb(root);
-		for(var i =0; i < root.children.length; i ++)
-			walkGraph(root.children[i],cb);
+		this.assetRegistry = {};
 	}
+	// if there is no entry in the registry, create one
+	if(!this.assetRegistry[node.source])
+	{
+		//its new, so not waiting, and not loaded
+		this.assetRegistry[node.source] = {};
+		this.assetRegistry[node.source].loaded = false;
+		this.assetRegistry[node.source].pending = false;
+		this.assetRegistry[node.source].callbacks = [];
+	}
+	//grab the registry entry for this asset
+	var reg = this.assetRegistry[node.source];
+	
+	//if the asset entry is not loaded and not pending, you'll have to actaully go download and parse it
+	if(reg.loaded == false && reg.pending == false)
+	{
+		//thus, it becomes pending
+		reg.pending = true;
+		
+		sceneNode.srcAssetObjects.push( node.threeObject );
+		//node.threeObject.vwfID = nodeID;
+		sceneNode.pendingLoads++;
+	
+	         //Do we need this when we have an async load? currently seems to break things
+		 //NOTE: yes, need to prevent the queue from advancing - I think
+                 //this pauses the queue. Resume by calling with true
+		 //callback( false );
+	
+		//call up the correct loader/parser
+		if(childType == "model/vnd.collada+xml")
+		{
+			
+			node.parse = true;
+			node.loader = new THREE.ColladaLoader();
+			node.loader.options.convertUpAxis = true;
+			node.loader.options.upAxis = "Z";
+			
+			node.loader.load(node.source,node.assetLoaded.bind(this));
+		}
+		if(childType == "model/vnd.osgjs+json+compressed")
+		{
+			
+			node.loader = new UTF8JsonLoader(node,node.assetLoaded.bind(this));
+		}
+	}
+	//if the asset registry entry is not pending and it is loaded, then just grab a copy, no download or parse necessary
+	else if(reg.loaded == true && reg.pending == false)
+	{
+		
+		var asset = (reg.node.clone());
+		// make sure the materails are unique
+		cloneMaterials(asset);
+		var n = asset;
+		var skins = []
+		walkGraph(n,function(node){
+			if(node instanceof THREE.SkinnedMesh)
+			{
+				skins.push(node);
+			}
+		});
+		n.animatedMesh = skins;
+		
+		nodeCopy.threeObject = asset;
+				
+		//this is weird - should we be throwing away the asset root matrix completely? seems like we are
+		//nodeCopy.threeObject.matrix = asset.matrix.clone();	
+		nodeCopy.threeObject.matrix = new THREE.Matrix4();
+		nodeCopy.threeObject.matrixAutoUpdate = false;
+		parentObject3.add(nodeCopy.threeObject);
+		nodeCopy.threeObject.name = childName;
+		nodeCopy.threeObject.vwfID = nodeID;
+		nodeCopy.threeObject.matrixAutoUpdate = false;
+		nodeCopy.threeObject.updateMatrixWorld(true);
+		propertyNotifyCallback();
+		window.setTimeout(function(){
+			nodeCopy.loadingCallback( true ); 
+		},10);
+		
+	}
+	//if it's pending but not done, register a callback so that when it is done, it can be attached.
+	else if(reg.loaded == false && reg.pending == true)
+	{	
+		sceneNode.srcAssetObjects.push( node.threeObject );
+		
+		//sceneNode.pendingLoads++;
+	
+	        //Do we need this when we have an async load? currently seems to break things
+		//this pauses the queue. Resume by calling with true
+		//callback( false );
+		
+		//so, not necessary to do all the other VWF node goo stuff, as that will be handled by the node that requseted
+		//the asset in teh first place
+		//
+		//var tcal = callback;
+		reg.callbacks.push(function(node)
+		{
+			
+			//just clone the node and attach it.
+			//this should not clone the geometry, so much lower memory.
+			//seems to take near nothing to duplicated animated avatar
+			
+			var n = node.clone();
+			cloneMaterials(n);
+			var skins = []
+			walkGraph(n,function(node){
+				if(node instanceof THREE.SkinnedMesh)
+				{
+					skins.push(node);
+				}
+			
+			});
+			n.animatedMesh = skins;
+			
+			nodeCopy.threeObject = n;
+			
+			//this is weird - should we be throwing away the asset root matrix completely? seems like we are
+			//nodeCopy.threeObject.matrix = asset.matrix.clone();	
+			nodeCopy.threeObject.matrix = new THREE.Matrix4();
+			nodeCopy.threeObject.matrixAutoUpdate = false;
+
+			parentObject3.add(nodeCopy.threeObject);
+			nodeCopy.threeObject.name = childName;
+			nodeCopy.threeObject.vwfID = nodeID;
+			nodeCopy.threeObject.matrixAutoUpdate = false;
+			
+			nodeCopy.threeObject.updateMatrixWorld(true);
+			propertyNotifyCallback();
+			nodeCopy.loadingCallback( true ); 
+			
+		});
+	}
+           
+    }
+    //walk the scenegraph from the given root, calling the given function on each node
+    function walkGraph(root,cb)
+    {
+	if(root)
+		cb(root);
+	for(var i =0; i < root.children.length; i ++)
+		walkGraph(root.children[i],cb);
+    }
     function getObjectID( objectToLookFor, bubbleUp, debug ) {
 
         var objectIDFound = -1;
