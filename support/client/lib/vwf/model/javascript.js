@@ -752,11 +752,14 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 			}
             return method;
         },
-		gettingMethods: function( nodeID ) {
+	gettingMethods: function( nodeID ) {
 
 			
 			var node = this.nodes[nodeID];
 			var methods = {};
+			
+			while(node)
+			{
 			for(var i in node.methods)
 			{
 				if(node.methods.hasOwnProperty(i))
@@ -771,12 +774,19 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 					}
 				}	
 			}
+			node = Object.getPrototypeOf(node);
+			}
             return methods;
         },
 		gettingEvents: function( nodeID ) {
 			
 			var node = this.nodes[nodeID];
 			var events = {};
+			
+			while(node)
+			{
+			
+			if(node.events)
 			for(var i in node.events)
 			{
 				var eventName = i;
@@ -796,6 +806,9 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 						}
 					}
 				}	
+			}
+			
+			node = Object.getPrototypeOf(node);
 			}
             return events;
         },
