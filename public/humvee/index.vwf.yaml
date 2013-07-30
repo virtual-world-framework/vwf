@@ -14,7 +14,6 @@
 ---
 extends: http://vwf.example.com/navscene.vwf
 properties:
-  ambientColor: [ 183, 183, 183 ]
   navmode: "orbit"
   translationSpeed: 40
 methods:
@@ -23,28 +22,6 @@ methods:
 children:
   humvee:
     includes: humvee.vwf
-  dir1:
-    extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
-    properties:
-      lightType: "directional"
-      distance: 2000
-      intensity: 0.4
-      color: [ 255, 255, 255 ]
-      specular: false # the highlights are way too hot (materials or light?)
-      rotation: [ 1, 0, 0, -10 ]
-  dir2:
-    extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
-    properties:
-      lightType: "directional"
-      distance: 2000
-      intensity: 0.6
-      color: [ 255, 255, 255 ]
-      specular: false # the highlights are way too hot (materials or light?)
-      rotation: [ -1, 0, 0, 200 ]
 scripts:
 - |
   this.initialize = function() {

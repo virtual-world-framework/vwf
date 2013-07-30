@@ -1011,9 +1011,7 @@ children:
         }
         this.transform = this.initialTransform;
         this.rotateBy([0, 0, 1, time * 360], 0, "rotated");
-      }
-  Omni002: 
-    extends: http://vwf.example.com/node3.vwf 
+      } 
   WiperPass: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 
