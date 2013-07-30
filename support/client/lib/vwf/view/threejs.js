@@ -518,11 +518,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if ((origWidth != self.width) || (origHeight != self.height)) {
                     mycanvas.height = self.height;
                     mycanvas.width = self.width;
-                    sceneNode.renderer.setViewport(0,0,window.innerWidth,window.innerHeight)
+                    if ( sceneNode.renderer ) {
+                        sceneNode.renderer.setViewport(0,0,window.innerWidth,window.innerHeight);
+                    }
                     
                     var viewCam = view.state.cameraInUse;
-                    viewCam.aspect =  mycanvas.width / mycanvas.height;
-                    viewCam.updateProjectionMatrix();
+                    if ( viewCam ) {
+                        viewCam.aspect =  mycanvas.width / mycanvas.height;
+                        viewCam.updateProjectionMatrix();
+                    }
                 }
             }
 
