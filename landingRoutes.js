@@ -62,11 +62,11 @@ exports.user = function(req, res){
 exports.admin = function(req, res){
 	//Show index page instead of admin page
 	
-	//res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: 'Admin', fileList: fileList};
-	res.locals = {root: root, title: ''};
+	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: 'Admin', fileList: fileList};
+	//res.locals = {root: root, title: ''};
 	
-	//res.render('admin/admin');
-	res.render('index');
+	res.render('admin/admin');
+	//res.render('index');
 }
 exports.help = function(req, res){
 	

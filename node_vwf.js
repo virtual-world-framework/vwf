@@ -1072,8 +1072,8 @@ function startVWF(){
 		app.get('/adl/sandbox/help', landing.help);
 		
 		app.get('/adl/sandbox/help/:page([a-zA-Z]+)', landing.help);
-		//app.get('/adl/sandbox/admin', landing.admin);
-		//app.post('/adl/sandbox/admin/:page([a-zA-Z]+)', landing.handlePostRequest);
+		app.get('/adl/sandbox/admin', landing.admin);
+		app.post('/adl/sandbox/admin/:page([a-zA-Z]+)', landing.handlePostRequest);
 		
 		app.use(OnRequest);
 		var listen = app.listen(port);
