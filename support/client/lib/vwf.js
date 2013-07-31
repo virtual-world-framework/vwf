@@ -709,6 +709,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 							
 							
 							this.tick();
+						//	window.setTimeout(function(){
+							
+						//	this.tick();
+							
+						//	}.bind(this),25);
 							time -= .05;
 							//console.log('tick',this.now);
 						}
@@ -2296,7 +2301,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             // Call gettingProperty() on each model. The first model to return a non-undefined value
             // dictates the return value.
-
+	   
             var propertyValue = undefined;
 
             // Record calls into this function by nodeID and propertyName so that models may call

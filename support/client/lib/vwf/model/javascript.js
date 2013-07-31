@@ -505,7 +505,7 @@ node.id = childID; // TODO: move to vwf/model/object
 		//Set up a watchable to mirror an object (including named properties)
 		// note - we currently can't detect assignment of new properties to an object
 		//should probably create a function to accomplish that
-		setupWatchableObject: function (watchable,val,propertyname,id,masterval)
+		setupWatchableObject: function (watchable,val,propertyname,id,masterval,dotNotation)
 		{
 				if(masterval === undefined)
 					masterval = val;
@@ -513,25 +513,24 @@ node.id = childID; // TODO: move to vwf/model/object
 				watchable.internal_val = val;
 				watchable.propertyname = propertyname;
 				watchable.id = id;
+				watchable.masterval = masterval;
 				var keys = Object.keys(val);
 				for(var i = 0; i < keys.length; i++)
 				{
 					(function(){
-					var _val = val;
-					var _id = id;
-					var _propertyname = propertyname;
+					
 					var _i = keys[i];
-					var _masterval = masterval;
+					
 					Object.defineProperty(watchable,_i,{set:function(value){
-						_val[_i] = value; 
+						this.internal_val[_i] = value; 
 						
-						self.kernel.setProperty(_id,_propertyname,_masterval);
+						self.setWatchableValue(this.id,this.propertyname,this.internal_val,this.dotNotation);
 					},
 					get:function(){
-						var ret = _val[_i];
+						var ret = this.internal_val[_i];
 						//This recursively builds new watchables, such that you can do things like
 						//this.materialDef.layers[0].alpha -= .1;
-						ret =  self.createWatchable(ret,propertyname,id,masterval);
+						ret =  self.createWatchable(ret,this.propertyname,this.id,this.masterval,this.dotNotation+'.'+_i);
 						return ret;
 					},configurable:true});
 					})();
@@ -542,7 +541,7 @@ node.id = childID; // TODO: move to vwf/model/object
 		},
 		//Setup a watchable to behave like an array. This creates accessor functions for the numbered integer properties.
 		
-		setupWatchableArray: function (watchable,val,propertyname,id,masterval)
+		setupWatchableArray: function (watchable,val,propertyname,id,masterval,dotNotation)
 		{
 				if(masterval === undefined)
 					masterval = val;
@@ -551,24 +550,24 @@ node.id = childID; // TODO: move to vwf/model/object
 				watchable.internal_val = val;
 				watchable.propertyname = propertyname;
 				watchable.id = id;
+				watchable.masterval = masterval;
 				for(var i = 0; i < val.length; i++)
 				{
 					(function(){
-					var _val = val;
-					var _id = id;
-					var _propertyname = propertyname;
+					
 					var _i = i;
-					var _masterval = masterval;
+					
+					
 					Object.defineProperty(watchable,_i,{set:function(value){
-						_val[_i] = value; 
+						this.internal_val[_i] = value; 
 						
-						self.kernel.setProperty(_id,_propertyname,_masterval);
+						self.setWatchableValue(this.id,this.propertyname,this.internal_val,this.dotNotation);
 					},
 					get:function(){
-						var ret = _val[_i];
+						var ret = this.internal_val[_i];
 						//This recursively builds new watchables, such that you can do things like
 						//this.materialDef.layers[0].alpha -= .1;
-						ret =  self.createWatchable(ret,propertyname,id,masterval);
+						ret =  self.createWatchable(ret,this.propertyname,this.id,this.masterval,this.dotNotation+'['+_i+']');
 						return ret;
 					},configurable:true});
 					})();
@@ -579,8 +578,8 @@ node.id = childID; // TODO: move to vwf/model/object
 				{
 					var internal = this.internal_val;
 					internal.push(newval);
-					self.kernel.setProperty(this.id,this.propertyname,internal);
-					self.setupWatchableArray(this,internal,this.propertyname,this.id);
+					self.setWatchableValue(this.id,this.propertyname,this.internal_val,this.dotNotation);
+					self.setupWatchableArray(this,internal,this.propertyname,this.id,this.masterval,this.dotNotation);
 				}
 				watchable.indexOf = function(val)
 				{
@@ -594,8 +593,8 @@ node.id = childID; // TODO: move to vwf/model/object
 						var internal = this.internal_val;
 						
 						Array.prototype[func].apply(internal,arguments)
-						self.kernel.setProperty(this.id,this.propertyname,internal);
-						self.setupWatchableArray(this,internal,this.propertyname,this.id);
+						self.setWatchableValue(this.id,this.propertyname,this.internal_val,this.dotNotation);
+						self.setupWatchableArray(this,internal,this.propertyname,this.id,this.masterval,this.dotNotation);
 					}
 				}
 				
@@ -606,32 +605,89 @@ node.id = childID; // TODO: move to vwf/model/object
 			
 		
 		},
+		__WatchableCache : {},
+		setWatchableValue: function(id, propertyName, value, dotNotation)
+		{
+			var self = this;
+			var masterid = dotNotation.substring(0,(dotNotation.indexOf('.') +1 || dotNotation.indexOf('[') +1) -1)
+			masterid = masterid || dotNotation;
+			if(this.__WatchableCache[masterid])
+			{
+				
+				var command = "this.__WatchableCache[masterid].masterval" + dotNotation.substr(masterid.length) + " = value;"
+				eval(command);
+				var command = "this.__WatchableCache[masterid].internal_val" + dotNotation.substr(masterid.length) + " = value;"
+				eval(command)
+				this.__WatchableSetting ++;
+				try{
+				self.kernel.setProperty(id,propertyName,this.__WatchableCache[masterid].masterval);
+				}catch(e)
+				{
+				
+				}
+				this.__WatchableSetting --;
+				
+			}else
+			{	this.__WatchableSetting ++;
+				try{
+				self.kernel.setProperty(id,propertyName,value);
+				}catch(e)
+				{
+				
+				}
+				this.__WatchableSetting --;
+				
+			}
+			
+			
+		},
+		__WatchableSetting : 0,
         // -- initializingProperty -----------------------------------------------------------------
 		//create a new watchable for a given value. Val is the object itself, and masterval is the root property of the node
-		createWatchable : function(val,propertyname,id,masterval)
+		createWatchable : function(val,propertyname,id,masterval,dotNotation)
 		{
+			
+			
+			
+			
 			
 			if(!val) return val;
 			var self = this;
 			if(val instanceof self._Watchable)
 			{
-				return self.createWatchable(val.internal_val,propertyname,id)
+				return self.createWatchable(val.internal_val,propertyname,id,undefined,dotNotation)
 			
 			}
 			
 			if(masterval === undefined)
 					masterval = val;
 			
-			if(val.constructor == Array 
-			|| val instanceof Float32Array)
+			if(val.constructor == Array || val instanceof Float32Array)
 			{
+				if(this.__WatchableCache[dotNotation])
+				{
+					this.__WatchableCache[dotNotation].internal_val = val;
+					return this.__WatchableCache[dotNotation];
+				}
+				console.log('new watchable');
 				var watchable = new self._Watchable();
-				self.setupWatchableArray(watchable,val,propertyname,id,masterval);
+				watchable.dotNotation = dotNotation;
+				self.setupWatchableArray(watchable,val,propertyname,id,masterval,dotNotation);
+				this.__WatchableCache[dotNotation] = watchable;
 				return watchable;
-			}else if(val.constructor == Object)
+			}
+			else if(val.constructor == Object)
 			{
+				if(this.__WatchableCache[dotNotation])
+				{
+					this.__WatchableCache[dotNotation].internal_val = val;
+					return this.__WatchableCache[dotNotation];
+				}
+			
 				var watchable = new self._Watchable();
-				self.setupWatchableObject(watchable,val,propertyname,id,masterval);
+				watchable.dotNotation = dotNotation;
+				self.setupWatchableObject(watchable,val,propertyname,id,masterval,dotNotation);
+				this.__WatchableCache[dotNotation] = watchable;
 				return watchable;
 			
 			}else
@@ -672,23 +728,24 @@ node.id = childID; // TODO: move to vwf/model/object
                 get: function() { 
 		
 		
-		return self.createWatchable(self.kernel.getProperty( this.node.id, propertyName ),propertyName,this.node.id) 
+		return self.createWatchable(self.kernel.getProperty( this.node.id, propertyName ),propertyName,this.node.id,undefined,this.node.id+"-"+propertyName) 
 		
 		},
-                set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, self.watchableToObject(value) ) },
+                set: function( value ) { self.setWatchableValue( this.node.id, propertyName, self.watchableToObject(value), this.node.id+"-"+propertyName ) },
                 enumerable: true
             } );
 
-	    node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-            Object.defineProperty( node, propertyName, { // "this" is node in get/set
-               get: function() { 
-	       
-	       return self.createWatchable(self.kernel.getProperty( this.id, propertyName ),propertyName,this.id) 
-	       },
-                set: function( value ) { self.kernel.setProperty( this.id, propertyName, self.watchableToObject(value) ) },
-                enumerable: true
-            } );
-
+	    if(!node.hasOwnProperty( propertyName ) ) // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+	    {
+		    Object.defineProperty( node, propertyName, { // "this" is node in get/set
+		       get: function() { 
+		       
+		       return self.createWatchable(self.kernel.getProperty( this.id, propertyName ),propertyName,this.id,undefined,this.id+"-"+propertyName) 
+		       },
+			set: function( value ) { self.setWatchableValue( this.id, propertyName, self.watchableToObject(value) , this.id+"-"+propertyName) },
+			enumerable: true
+		    } );
+	    }
             node.private.change++; // invalidate the "future" cache
 
             return propertyValue !== undefined ?
@@ -715,7 +772,26 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                         "exception in setter:", utility.exceptionMessage( e ) );
                 }
             }
-
+		
+	    if(this.__WatchableSetting === 0)
+	    {
+		
+		var keys = Object.keys(this.__WatchableCache);
+		var dels = [];
+		for(var i = 0; i < keys.length; i++)
+		{
+			if(keys[i].indexOf(nodeID+'-'+propertyName) == 0)
+			{
+				
+				dels.push(keys[i]);
+			}
+		}
+		for(var i = 0; i < dels.length; i++)
+		{
+			delete this.__WatchableCache[dels[i]];
+		}
+		delete this.__WatchableCache[nodeID+'-'+propertyName];
+	    }
             return undefined;
         },
 
@@ -758,8 +834,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 			var node = this.nodes[nodeID];
 			var methods = {};
 			
-			while(node)
-			{
+			
 			for(var i in node.methods)
 			{
 				if(node.methods.hasOwnProperty(i))
@@ -775,7 +850,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 				}	
 			}
 			node = Object.getPrototypeOf(node);
-			}
+			
             return methods;
         },
 		gettingEvents: function( nodeID ) {
@@ -783,8 +858,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 			var node = this.nodes[nodeID];
 			var events = {};
 			
-			while(node)
-			{
+			
 			
 			if(node.events)
 			for(var i in node.events)
@@ -809,7 +883,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 			}
 			
 			node = Object.getPrototypeOf(node);
-			}
+			
             return events;
         },
 

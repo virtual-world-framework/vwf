@@ -23,25 +23,28 @@ properties:
     set: |
       
       var transform = this.transformFromValue( value ); // parse incoming value
-      if ( ! goog.vec.Mat4.equals( (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity(), transform ) ) {
+      //var thisTransform = this.transform;
+      //if ( ! goog.vec.Mat4.equals( ( thisTransform && thisTransform.internal_val) || thisTransform || goog.vec.Mat4.createIdentity(), transform ) ) {
         this.transform = transform;
-        this.transformChanged( transform );
-        this.translation = this.translation;
-        this.quaternion = this.quaternion;
-        this.rotation = this.rotation;
-      }
+       // this.transformChanged( transform );
+       // this.translation = this.translation;
+       // this.quaternion = this.quaternion;
+       // this.rotation = this.rotation;
+      //}
   translation:
     # node.translation <= [ x, y, z ]
     set: |
       
       var translation = this.translationFromValue( value ); // parse incoming value
-      var transform = (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity();
+      var thisTransform = this.transform;
+      var transform = (thisTransform && thisTransform.internal_val) || thisTransform || goog.vec.Mat4.createIdentity();
       goog.vec.Mat4.setColumnValues( transform, 3, translation[0], translation[1], translation[2], 1 );
       this.transform = transform; //@ sourceURL=node3.translation.set.vwf
     # node.translation => [ x, y, z ]
     get: |
       var translation = goog.vec.Vec3.create();
-      goog.vec.Mat4.getColumn( (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity(), 3, translation );
+      var thisTransform = this.transform;
+      goog.vec.Mat4.getColumn( (thisTransform && thisTransform.internal_val) || thisTransform || goog.vec.Mat4.createIdentity(), 3, translation );
       return translation;
   rotation:
     # node.rotation <= [ x, y, z, angle ]
@@ -63,15 +66,17 @@ properties:
       return rotation;
   rotationMatrix:
     get: |
+      var thisTransform = this.transform;
       return this.unscaledTransform(
-       (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity(),
+       (thisTransform && thisTransform.internal_val) || thisTransform || goog.vec.Mat4.createIdentity(),
         goog.vec.Vec3.create(),
         goog.vec.Mat4.create()
       );
   quaternion:
     # node.quaternion <= [ x, y, z, w ]
     set: |
-      var transform = (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity();
+      var thisTransform = this.transform;
+      var transform = (thisTransform && thisTransform.internal_val) || thisTransform || goog.vec.Mat4.createIdentity();
       var translation = goog.vec.Vec4.create(); goog.vec.Mat4.getColumn( transform, 3, translation );
       var scale = this.transformScale( transform, goog.vec.Vec3.create() );
       var quaternion = this.quaternionFromValue( value ); // parse incoming value
@@ -84,9 +89,10 @@ properties:
       this.transform = transform;
     # node.quaternion => [ x, y, z, w ]
     get: |
+      var thisTransform = this.transform;
       return goog.vec.Quaternion.fromRotationMatrix4(
         this.unscaledTransform(
-          (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity(),
+          (thisTransform && this.transform.internal_val) || thisTransform || goog.vec.Mat4.createIdentity(),
           goog.vec.Vec3.create(),
           goog.vec.Mat4.create()
         ),
@@ -95,8 +101,9 @@ properties:
   scale:
     # node.scale <= [ x, y, z ], node.scale <= s
     set: |
+      var thisTransform = this.transform;
       var scale = this.scaleFromValue( value ); // parse incoming value
-      var transform = (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity();
+      var transform = (thisTransform && thisTransform.internal_val) || thisTransform || goog.vec.Mat4.createIdentity();
       this.scaledTransform(
         this.unscaledTransform(
           transform,
@@ -109,8 +116,9 @@ properties:
       this.transform = transform;
     # node.scale => [ x, y, z ]
     get: |
+      var thisTransform = this.transform;
       return this.transformScale(
-        (this.transform && this.transform.internal_val) || this.transform || goog.vec.Mat4.createIdentity(),
+        (thisTransform && thisTransform.internal_val) || thisTransform || goog.vec.Mat4.createIdentity(),
         goog.vec.Vec3.create()
       );
   enabled: true
