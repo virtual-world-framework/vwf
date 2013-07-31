@@ -3846,6 +3846,8 @@ if ( ! childComponent.source ) {
                 "get",
                 "set",
                 "value",
+                "create",
+                "undefined",
             ];
 
             var hasAccessors = false;
