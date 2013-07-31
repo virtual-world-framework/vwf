@@ -546,14 +546,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                     // Begin handling properties
 
-                    if ( propertyName == 'transform' ) {
-                        if ( !node.transform ) {
-                            self.logger.warnx( "Attempting to set the transform on an object that doesn’t have a transform");
-                        }
+                    if ( propertyName == 'transform' && node.transform ) {
 
                         //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
                         var transformMatrix = goog.vec.Mat4.createFromArray( propertyValue || [] );
-						if(threeObject instanceof THREE.ParticleSystem)
+                        if(threeObject instanceof THREE.ParticleSystem)
                         {   
                             threeObject.updateTransform(propertyValue);
                         }
@@ -564,12 +561,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         value = propertyValue;
 
-						//because threejs does not do auto tracking of lookat, we must do it manually.
-						//after updating the matrix for an ojbect, if it's looking at something, update to lookat from
-						//the new position
-						if ( node.lookatval ) {
-							lookAt( node.lookatval );
-						}
+                        //because threejs does not do auto tracking of lookat, we must do it manually.
+                        //after updating the matrix for an ojbect, if it's looking at something, update to lookat from
+                        //the new position
+                        if ( node.lookatval ) {
+                            lookAt( node.lookatval );
+                        }
                     }
                     else if ( propertyName == 'lookAt' ) {
                         value = lookAt( propertyValue );
@@ -1239,7 +1236,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
           
             if(threeObject instanceof THREE.Object3D)
             {
-                if(propertyName == 'transform')
+                if(propertyName == 'transform' && node.transform)
                 {
                     value = matCpy( node.transform.elements );
                     return value;
@@ -1996,6 +1993,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         }         
     }
+
+    //walk the graph of an object, and set all materials to new material clones
+    function cloneMaterials( nodein ) {
+        walkGraph( nodein, function( node ) {
+            if(node.material) {
+              node.material = node.material.clone();
+            }
+        });
+    }
+
     function loadAsset( parentNode, node, childType, propertyNotifyCallback ) {
 
         var nodeCopy = node; 
@@ -2018,6 +2025,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             if(asset.scene)
                 asset = asset.scene;
+
+            var meshes =[];
+            GetAllLeafMeshes( asset, meshes );
+
+            for( var i =0; i < meshes.length; i++ ) {
+                fixMissingUVs( meshes[i] );   
+                meshes[i].geometry.uvsNeedUpdate = true;
+            }
             
             asset.updateMatrixWorld();
             
@@ -2025,17 +2040,28 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             asset.matrixAutoUpdate = false;
             
             nodeCopy.threeObject = asset.clone();
+		    
+            //make sure that the new object has a unique material
+            cloneMaterials( nodeCopy.threeObject );
 
-            if(asset.skins && asset.skins.length > 0) {
-                animatedMesh = asset.skins;
-            }
-
+            //find and bind the animations
+            //NOTE: this would probably be better handled by walking and finding the animations and skins only on the 
+            //property setter when needed.
+		
+            animatedMesh = [];
+            walkGraph(nodeCopy.threeObject,function( node ){
+                if( node instanceof THREE.SkinnedMesh ) {
+                    animatedMesh.push( node );
+                }
+            });
             nodeCopy.threeObject.animatedMesh = animatedMesh;
+            nodeCopy.threeObject.updateMatrixWorld();
             parentObject3.add( nodeCopy.threeObject );
             nodeCopy.threeObject.name = childName;
             nodeCopy.threeObject.vwfID = nodeID;
+            nodeCopy.threeObject.matrixAutoUpdate = false;
 
-            if(animations) {
+            if( animations ) {
                 var animHandler = THREE.AnimationHandler;
                 asset.kfAnimations = [];
                 asset.animations = animations;
@@ -2045,17 +2071,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     var animation = animations[i];
 
                     // Save references to the animations on the node that is animated, so that it can play separately
-                    if(animation.node.animations == undefined) {
+                    if( animation.node.animations == undefined ) {
                         animation.node.animations = [];
                     }
-                    if(animation.node.kfAnimations == undefined) {
+                    if( animation.node.kfAnimations == undefined ) {
                         animation.node.kfAnimations = [];
                     }
-                    animation.node.animations.push(animation);
-                    animHandler.add(animation);
-                    var kfAnimation = new THREE.KeyFrameAnimation(animation.node, animation.name);
+                    animation.node.animations.push( animation );
+                    animHandler.add( animation );
+                    var kfAnimation = new THREE.KeyFrameAnimation( animation.node, animation.name );
                     kfAnimation.timeScale = 1;
-                    asset.kfAnimations.push(kfAnimation);
+                    asset.kfAnimations.push( kfAnimation );
                     animation.node.kfAnimations.push(kfAnimation);
                     for(var h = 0; h < kfAnimation.hierarchy.length; h++) {
                         var keys = kfAnimation.data.hierarchy[h].keys;
@@ -2212,6 +2238,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         //no download or parse necessary
         else if( reg.loaded == true && reg.pending == false ) {
             var asset = (reg.node.clone());
+		
+            // make sure the materails are unique
+            cloneMaterials( asset );
+            
             var n = asset;
             var skins = [];
             walkGraph( n, function( node ) {
@@ -2250,6 +2280,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //this should not clone the geometry, so much lower memory.
             //seems to take near nothing to duplicated animated avatar            
             var n = node.clone();
+			cloneMaterials( n );
             var skins = [];
             walkGraph( n, function( node ) {
                 if( node instanceof THREE.SkinnedMesh ) {
@@ -2264,6 +2295,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             parentObject3.add( nodeCopy.threeObject );
             nodeCopy.threeObject.name = childName;
             nodeCopy.threeObject.vwfID = nodeID;
+            nodeCopy.threeObject.matrixAutoUpdate = false;
             nodeCopy.threeObject.updateMatrixWorld( true );
             propertyNotifyCallback();
             nodeCopy.loadingCallback( true ); 
@@ -2273,7 +2305,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
     }
 
-
+    //walk the scenegraph from the given root, calling the given function on each node
     function walkGraph( root, func ) {
         if( root ) {
             func( root );
