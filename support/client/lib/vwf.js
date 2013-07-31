@@ -2714,23 +2714,6 @@ if ( ! childComponent.source ) {
 
             var node = nodes.existing[nodeID];
 
-            // Select the actual driver calls. Create the property if it doesn't exist on this node
-            // or its prototypes. Initialize it if it exists on a prototype but not on this node.
-            // Set it if it already exists on this node.
-
-            if ( ! node.properties.has( propertyName ) ) {
-                var settingPropertyEtc = "creatingProperty";
-                var satPropertyEtc = "createdProperty";
-                node.properties.create( propertyName );
-            } else if ( ! node.properties.hasOwn( propertyName ) ) {
-                var settingPropertyEtc = "initializingProperty";
-                var satPropertyEtc = "initializedProperty";
-                node.properties.create( propertyName );
-            } else {
-                var settingPropertyEtc = "settingProperty";
-                var satPropertyEtc = "satProperty";
-            }
-
             // Record calls into this function by nodeID and propertyName so that models may call
             // back here (directly or indirectly) to delegate responses further down the chain
             // without causing infinite recursion.
@@ -2740,30 +2723,67 @@ if ( ! childComponent.source ) {
             var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
             var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
 
+            // Select the actual driver calls. Create the property if it doesn't exist on this node
+            // or its prototypes. Initialize it if it exists on a prototype but not on this node.
+            // Set it if it already exists on this node.
+
+            if ( ! node.properties.has( propertyName ) || entry.creating ) {
+                reentry.creating = true;
+                var settingPropertyEtc = "creatingProperty";
+                var satPropertyEtc = "createdProperty";
+                node.properties.create( propertyName );
+            } else if ( ! node.properties.hasOwn( propertyName ) || entry.initializing ) {
+                reentry.initializing = true;
+                var settingPropertyEtc = "initializingProperty";
+                var satPropertyEtc = "initializedProperty";
+                node.properties.create( propertyName );
+            } else {
+                var settingPropertyEtc = "settingProperty";
+                var satPropertyEtc = "satProperty";
+            }
+
+            // Keep track of the number of assignments made by this `setProperty` call and others
+            // invoked indirectly by it, starting with the outermost call.
+
+            var outermost = entrants.assignments === undefined;
+
+            if ( outermost ) {
+                entrants.assignments = 0;
+            }
+
+            // We'll need to know if the set was delegated to other properties, actually assigned
+            // here, or if blocked during replication while attempting to delegate.
+
+            var delegated = false, assigned = false, blocked = false;
+
             // Call settingProperty() on each model. The first model to return a non-undefined value
             // has performed the set and dictates the return value. The property is considered set
             // after all models have run.
 
             this.models.some( function( model, index ) {
 
-                // Skip models up through the one making the most recent call here (if any).
+                // Skip initial models that an outer call has already invoked for this node and
+                // property (if any). If an inner call completed for this node and property, skip
+                // the remaining models.
 
-                if ( entry.index === undefined || index > entry.index ) {
+                if ( ( entry.index === undefined || index > entry.index ) && ! reentry.completed ) {
 
                     // Record the active model number.
  
                     reentry.index = index;
 
+                    // Record the number of assignments made since the outermost call. When
+                    // `entrants.assignments` increases, a driver has called `setProperty` to make
+                    // an assignment elsewhere.
+
+                    var assignments = entrants.assignments;
+
                     // Make the call.
 
-                    var value = model[settingPropertyEtc] && model[settingPropertyEtc]( nodeID, propertyName, propertyValue );
-
-                    // Look for a return value potentially stored here by a reentrant call if the
-                    // model didn't return one explicitly (such as with a JavaScript accessor
-                    // method).
-
-                    if ( value === undefined ) {
-                        value = reentry.value;
+                    if ( ! delegated && ! assigned ) {
+                        var value = model[settingPropertyEtc] && model[settingPropertyEtc]( nodeID, propertyName, propertyValue );
+                    } else {
+                        model[settingPropertyEtc] && model[settingPropertyEtc]( nodeID, propertyName, undefined );
                     }
 
                     // Ignore the result if reentry is disabled and the driver attempted to call
@@ -2772,6 +2792,20 @@ if ( ! childComponent.source ) {
 
                     if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
                         value = undefined;
+                        blocked = true;
+                    }
+
+                    // The property was delegated if the call made any assignments.
+
+                    if ( entrants.assignments !== assignments ) {
+                        delegated = true;
+                    }
+
+                    // Otherwise if the called returned a value, the property was assigned here.
+
+                    else if ( value !== undefined ) {
+                        entrants.assignments++;
+                        assigned = true;
                     }
 
                     // Record the value actually assigned. This may differ from the incoming value
@@ -2786,39 +2820,47 @@ if ( ! childComponent.source ) {
                     // has been set. Don't exit early if we are creating or initializing since every
                     // model needs the opportunity to register the property.
 
-                    return settingPropertyEtc == "settingProperty" && value !== undefined;  // TODO: this stops after p: { set: "this.p = value" } or p: { set: "return value" }, but should it also stop on p: { set: "this.q = value" }?
+                    return settingPropertyEtc == "settingProperty" && ( delegated || assigned );
                 }
 
             }, this );
 
-            if ( entry.index !== undefined ) {
+            // Record the change if the property was assigned here.
 
-                // For a reentrant call, restore the previous state, move the index forward to cover
-                // the models we called, and record the current result.
+            if ( assigned && node.initialized && node.patchable ) {
+                node.properties.change( propertyName );
+            }
 
-                entrants[nodeID+'-'+propertyName] = entry;
-                entry.value = propertyValue;
+            // Call satProperty() on each view. The view is being notified that a property has
+            // been set. Don't notify for inner, reentrant calls since the outer call will notify.
+            // Also don't notify if attempted delegation was blocked during replication since it
+            // makes this like an inner call.
 
-            } else {
-
-                // Delete the call record if this is the first, non-reentrant call here (the normal
-                // case).
-
-                delete entrants[nodeID+'-'+propertyName];
-
-                // Record the change.
-
-                if ( node.initialized && node.patchable ) {
-                    node.properties.change( propertyName );
-                }
-
-                // Call satProperty() on each view. The view is being notified that a property has
-                // been set.  TODO: only want to call when actually set and with final value
-
+            if ( ( delegated || assigned ) && ! ( entry.index !== undefined || blocked ) ) {
                 this.views.forEach( function( view ) {
-                    view[satPropertyEtc] && view[satPropertyEtc]( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
+                    view[satPropertyEtc] && view[satPropertyEtc]( nodeID, propertyName, propertyValue );
                 } );
+            }
 
+            // For a reentrant call, restore the previous state, move the index forward to cover
+            // the models we called.
+
+            if ( entry.index !== undefined ) {
+                entrants[nodeID+'-'+propertyName] = entry;
+                entry.completed = true;
+            }
+
+            // Delete the call record if this is the first, non-reentrant call here (the normal
+            // case).
+
+            else {
+                delete entrants[nodeID+'-'+propertyName];
+            }
+
+            // Clear the assignment counter when the outermost `setProperty` completes.
+
+            if ( outermost ) {
+                delete entrants.assignments;
             }
 
             this.logger.debugu();
