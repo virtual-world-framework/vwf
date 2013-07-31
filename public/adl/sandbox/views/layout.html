@@ -114,7 +114,6 @@
 			
 			//Get all world IDs in flat array form
 			for(var i = 0; i < vwfPortalModel.worldObjects().length; i++){
-				if(resetHotstate){vwfPortalModel.worldObjects()[i].hotState(false);}
 				tempArr.push(vwfPortalModel.worldObjects()[i].id);
 			}
 			
@@ -152,75 +151,77 @@
 		function showStates(){
 		
 			$.getJSON("./vwfDataManager.svc/states",function(e){
+				console.log(e)
 				
-				var keys = [];
-				for(var tmpKey in e){
-				
-					if(e.hasOwnProperty(tmpKey))
-						keys.push(tmpKey);
-				}
-
 				var tempArr = getFlatIdArr();
 				var saveIndex = 0;
 				var featuredIndex = 0;
+				var i = 0;
+				
+				for(var tmpKey in e){
+				
+					if(e.hasOwnProperty(tmpKey)){
 
-				for(var i = 0; i < keys.length; i++){
-					
-					var id = keys[i].substr(13,16);
-					e[keys[i]].id = id;
-					e[keys[i]].isVisible = checkFilter([e[keys[i]].title, e[keys[i]].description, e[keys[i]].owner]);
-					
-					//The incoming data elements may not be in the same order as existing elements, get proper index
-					saveIndex = $.inArray(id, tempArr);
-					saveIndex = saveIndex > -1 ? saveIndex : i;
-					
-					e[keys[i]].hotState = ko.observable(false);
-					e[keys[i]].lastUpdate = e[keys[i]].lastUpdate?removeAgoFromMoment(e[keys[i]].lastUpdate):removeAgoFromMoment(new Date());
-					e[keys[i]].description = e[keys[i]].description ? e[keys[i]].description : "No description";
-					e[keys[i]].updates = e[keys[i]].updates > 0 ? e[keys[i]].updates : 0;
-					e[keys[i]].editVisible = ko.observable(false);
-					
-					if(e[keys[i]].featured === true && featuredIndex < 3){
-						vwfPortalModel.featuredWorldObjects()[featuredIndex] = e[keys[i]];
-						featuredIndex++;
+						var id = tmpKey.substr(13,16);
+						e[tmpKey].id = id;
+
+						//The incoming data elements may not be in the same order as existing elements, get proper index
+						saveIndex = tempArr.indexOf(id) > -1 ? tempArr.indexOf(id) : i++;
+						
+						e[tmpKey].lastUpdate = e[tmpKey].lastUpdate?removeAgoFromMoment(e[tmpKey].lastUpdate):removeAgoFromMoment(new Date());
+						e[tmpKey].description = e[tmpKey].description ? e[tmpKey].description : "No description";
+						e[tmpKey].updates = e[tmpKey].updates > 0 ? e[tmpKey].updates : 0;
+						e[tmpKey].editVisible = ko.observable(false);
+						
+						if(e[tmpKey].featured === true && featuredIndex < 3){
+							vwfPortalModel.featuredWorldObjects()[featuredIndex] = e[tmpKey];
+							featuredIndex++;
+						}
+						
+						e[tmpKey].isVisible = checkFilter([e[tmpKey].title, e[tmpKey].description, e[tmpKey].owner]);
+						vwfPortalModel.worldObjects()[saveIndex] = e[tmpKey];	
+						vwfPortalModel.worldObjects()[saveIndex].hotState = vwfPortalModel.worldObjects()[saveIndex].hotState ? vwfPortalModel.worldObjects()[saveIndex].hotState : ko.observable(false);
 					}
-					
-					vwfPortalModel.worldObjects()[saveIndex] = e[keys[i]];	
 				}
-								
-				vwfPortalModel.worldObjects().sort(sortArrByUpdates);				
 				
 				vwfPortalModel.getPage(0);
-				vwfPortalModel.worldObjects.valueHasMutated();
-				vwfPortalModel.featuredWorldObjects.valueHasMutated();
 				
 				$.getJSON("./admin/instances",function(e){
 				
 					//Get all world IDs in flat array form
-					var tempArr = getFlatIdArr(true);
-					var keys = [];
-					for(var tmpKey in e){
-				
-						if(e.hasOwnProperty(tmpKey))
-							keys.push(tmpKey);
-					}
+					var tempArr = getFlatIdArr();
 					var saveIndex = 0;
 					
 					//Iterate through keys, get index of world id which matches key, set its hotState to true
-					for(var i = 0; i < keys.length; i++){
-					
-						var id = keys[i].substr(13,16);
-						saveIndex = tempArr.indexOf(id);
-						
-						if(saveIndex > -1){
-							vwfPortalModel.worldObjects()[saveIndex].hotState(true);
-						}	
+					for(var tmpKey in e){
+				
+						if(e.hasOwnProperty(tmpKey)){
+							saveIndex = tempArr.indexOf(tmpKey.substr(13,16));
+													
+							if(saveIndex > -1){
+								vwfPortalModel.worldObjects()[saveIndex].hotState(true);
+							}	
+							
+							else{
+								vwfPortalModel.worldObjects()[saveIndex].hotState(false);
+							}
+						}
 					}
+					
+					vwfPortalModel.worldObjects().sort(sortArrByUpdates);
+					vwfPortalModel.getPage(0);
 				});
 			});
 		}
 		
 		function sortArrByUpdates(a, b){
+			console.log(a.hotState(), b.hotState());
+			if(a.hotState() == true && b.hotState() == false)
+				return -1;			
+			
+			else if(b.hotState() == true && a.hotState() == false)
+				return 1;
+				
 			return b.updates - a.updates;
 		}
 		
