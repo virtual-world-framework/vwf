@@ -14,12 +14,13 @@ fs.readdir('./public' + root + '/views/help', function(err, files){
 	}
 });
 
-exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user'];
+exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'admin'];
 routesMap = {
 	sandbox: {template:'index'},
 	edit: {sid: true},
 	remove: {sid:true, title: 'Warning!'},
-	user: {sid:true, title: 'Account'}
+	user: {sid:true, title: 'Account'},
+	admin: {sid:true, title:'Admin', fileList: fileList, template: 'admin/admin'}
 };
 
 exports.generalHandler = function(req, res){
@@ -29,14 +30,15 @@ exports.generalHandler = function(req, res){
 	
 	if(routeIndex >= 0){
 		
-		var currentAcceptedRoute = exports.acceptedRoutes[routeIndex], title = '', sid = '', template = currentAcceptedRoute;
+		var currentAcceptedRoute = exports.acceptedRoutes[routeIndex], title = '', sid = '', template = currentAcceptedRoute, fileList = [];
 		if(routesMap[currentAcceptedRoute]){
 			title = routesMap[currentAcceptedRoute].title ? routesMap[currentAcceptedRoute].title : '';
 			sid = routesMap[currentAcceptedRoute].sid ?  root + '/' + (req.query.id?req.query.id:'') + '/' : '';
 			template = routesMap[currentAcceptedRoute].template ? routesMap[currentAcceptedRoute].template : currentAcceptedRoute;
+			fileList = routesMap[currentAcceptedRoute].fileList ? routesMap[currentAcceptedRoute].fileList : [];	
 		}
 		
-		res.locals = {sid: sid, root: root, title: title};
+		res.locals = {sid: sid, root: root, title: title, fileList:fileList};
 		res.render(template);
 	}
 	
@@ -45,15 +47,6 @@ exports.generalHandler = function(req, res){
 	}
 }
 
-exports.admin = function(req, res){
-	//Show index page instead of admin page
-	
-	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: 'Admin', fileList: fileList};
-	//res.locals = {root: root, title: ''};
-	
-	res.render('admin/admin');
-	//res.render('index');
-}
 exports.help = function(req, res){
 	
 	var currentIndex = fileList.indexOf(req.params.page);
