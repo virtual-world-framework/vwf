@@ -16,9 +16,11 @@ extends: http://vwf.example.com/scene.vwf
 properties:
   rotationSpeed: 10
   backgroundColor: "rgba(0,0,0,0)"
+  clientColors: [ [ 0, 0, 255 ], [ 255, 0, 0 ], [ 255, 255, 0 ], [ 0, 255, 0 ], [ 0, 255, 255 ], [ 255, 0, 255 ], [ 255, 153, 0 ], [ 153, 153, 153 ], [ 230, 230, 250 ], [ 0, 0, 0 ] ]
 methods:
   initializeCamera:
   createClient:
+  removeClient:
 children:
   clients:
     extends: http://vwf.example.com/node.vwf
@@ -36,14 +38,48 @@ scripts:
       this.camera.navmode = "none";
     }
 
-    this.createClient = function( moniker, loginName ) {
+    this.createClient = function( moniker, loginName, captureMedia ) {
+      
+      var clr, colorList = this.clientColors;
+      clr = colorList.shift();
+      this.clientColors = colorList;
+
+      console.info( "createClient( "+moniker+", "+loginName+", "+captureMedia+" )   clr = " + clr );
+
       var clientDef = { 
         "extends": "http://vwf.example.com/client.vwf",
         "properties": {
           "displayName": loginName,
+          "capture": captureMedia,
+          "color": clr
         },
       }
       this.clients.children.create( "client"+moniker, clientDef, function( child ) {
-
+        
       } );
+    } 
+    this.clientMoniker = function( name ) {
+        return name.substr( 6, name.length-1 );
+    }    
+    this.findClient = function( moniker ) {
+      var client = undefined;
+      var len = this.clients.children.length;
+      for ( var i = 0; i < len && client === undefined; i++ ) {
+        if ( moniker == this.clientMoniker( this.clients.children[i].name ) ) {
+          client = this.clients.children[i];
+        }
+      }
+      return client;
+    } 
+    this.removeClient = function( moniker ) {
+      var client = this.findClient( moniker );
+      if ( client ) { 
+        var colorList = this.clientColors;
+        colorList.push( client.color );
+        this.clientColors = colorList;
+
+        if ( client.parent ) {
+          client.parent.children.delete( client );
+        }
+      }
     } //@ sourceURL = webrtc.vwf
