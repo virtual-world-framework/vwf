@@ -474,6 +474,14 @@ define(function(){
 		};
 		return this.getHex();
 	};
+
+	Color.prototype.toArray = function(){
+		if ( this._alpha != 1 ) {
+			return [ this._red, this._green, this._blue, this._alpha ];
+		} else {
+			return [ this._red, this._green, this._blue ];
+		}
+	};	
 	
 	Color.prototype._listeners = null;
 	Color.prototype._isSubscribed = function(type){
