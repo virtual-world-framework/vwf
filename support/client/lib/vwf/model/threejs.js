@@ -623,7 +623,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
 
                     else if ( propertyName == "animationTimeUpdated" ) {
-                        if(node.threeObject.animatedMesh && propertyValue !== undefined) {
+                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined) {
                             var fps = this.state.kernel.getProperty( nodeID, "fps");
                             for(var i = 0; i < node.threeObject.animatedMesh.length; i++) {
                                 for(var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++) {
@@ -2039,10 +2039,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             asset.matrix = new THREE.Matrix4();
             asset.matrixAutoUpdate = false;
             
-            nodeCopy.threeObject = asset.clone();
-		    
-            //make sure that the new object has a unique material
-            cloneMaterials( nodeCopy.threeObject );
+            // Don't make a copy of the three object if there are keyframe animations associated with it
+            // until we figure out a way to copy them successfully.
+            if(animations) {
+                nodeCopy.threeObject = asset;
+            }
+            else {
+                nodeCopy.threeObject = asset.clone();
+    		    
+                //make sure that the new object has a unique material
+                cloneMaterials( nodeCopy.threeObject );
+            }
 
             //find and bind the animations
             //NOTE: this would probably be better handled by walking and finding the animations and skins only on the 
@@ -2063,8 +2070,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             if( animations ) {
                 var animHandler = THREE.AnimationHandler;
-                asset.kfAnimations = [];
-                asset.animations = animations;
+                nodeCopy.threeObject.kfAnimations = [];
+                nodeCopy.threeObject.animations = animations;
 
                 // Initialize the key frame animations
                 for(var i = 0; i < animations.length; i++) {
@@ -2081,7 +2088,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     animHandler.add( animation );
                     var kfAnimation = new THREE.KeyFrameAnimation( animation.node, animation.name );
                     kfAnimation.timeScale = 1;
-                    asset.kfAnimations.push( kfAnimation );
+                    nodeCopy.threeObject.kfAnimations.push( kfAnimation );
                     animation.node.kfAnimations.push(kfAnimation);
                     for(var h = 0; h < kfAnimation.hierarchy.length; h++) {
                         var keys = kfAnimation.data.hierarchy[h].keys;
@@ -2103,24 +2110,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
             }
             if(animatedMesh) {
-                asset.animatedMesh = animatedMesh;
+                nodeCopy.threeObject.animatedMesh = animatedMesh;
             }
             
             // remember that this was a loaded collada file
-            asset.loadedColladaNode = true;
-            
-            var meshes =[];
-            GetAllLeafMeshes(asset,meshes);
-        
-            for(var i =0; i < meshes.length; i++)
-            {
-                fixMissingUVs(meshes[i]);   
-                meshes[i].geometry.uvsNeedUpdate = true;
-            }
-            
-            if ( asset.updateMatrixWorld ) asset.updateMatrixWorld(true);
-            
-            nodeCopy.threeObject.matrixAutoUpdate = false;
+            nodeCopy.threeObject.loadedColladaNode = true;
 
             for ( var j = 0; j < sceneNode.srcAssetObjects.length; j++ ) {
                 if ( sceneNode.srcAssetObjects[j] == nodeCopy ){
@@ -2173,12 +2167,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //get the entry from the asset registry
             reg = threeModel.assetRegistry[nodeCopy.source];
             
-            //it's not pending, and it is loaded
-            reg.pending = false;
-            reg.loaded = true;
-            
-            //store this asset in the registry
-            reg.node = asset;
+            // If there are animations, set loaded to false and don't store the asset
+            // in the registry, since the animations don't work with the copy process
+            if(animations) {
+                reg.pending = false;
+                reg.loaded = false;
+            }
+            else {
+                //it's not pending, and it is loaded
+                reg.pending = false;
+                reg.loaded = true;
+                
+                //store this asset in the registry
+                reg.node = asset;
+            }
             
             //if any callbacks were waiting on the asset, call those callbacks
             for( var i = 0; i < reg.callbacks.length; i++ ) {
