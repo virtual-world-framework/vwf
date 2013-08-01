@@ -1,5 +1,6 @@
 var root = '/adl/sandbox',
 fileList = [],
+routesMap = {},
 fs = require('fs');
 
 fs.readdir('./public' + root + '/views/help', function(err, files){
@@ -13,52 +14,37 @@ fs.readdir('./public' + root + '/views/help', function(err, files){
 	}
 });
 
-exports.index = function(req, res){
+exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user'];
+routesMap = {
+	sandbox: {template:'index'},
+	edit: {sid: true},
+	remove: {sid:true, title: 'Warning!'},
+	user: {sid:true, title: 'Account'}
+};
 
-	res.locals = {root: root, title: ''};
-	res.render('index');
+exports.generalHandler = function(req, res){
+	
+	var pathArr = req.route.path.split('/');
+	var routeIndex = exports.acceptedRoutes.indexOf(pathArr[pathArr.length-1]);
+	
+	if(routeIndex >= 0){
+		
+		var currentAcceptedRoute = exports.acceptedRoutes[routeIndex], title = '', sid = '', template = currentAcceptedRoute;
+		if(routesMap[currentAcceptedRoute]){
+			title = routesMap[currentAcceptedRoute].title ? routesMap[currentAcceptedRoute].title : '';
+			sid = routesMap[currentAcceptedRoute].sid ?  root + '/' + (req.query.id?req.query.id:'') + '/' : '';
+			template = routesMap[currentAcceptedRoute].template ? routesMap[currentAcceptedRoute].template : currentAcceptedRoute;
+		}
+		
+		res.locals = {sid: sid, root: root, title: title};
+		res.render(template);
+	}
+	
+	else{
+		res.status(404).end('Error');
+	}
 }
-exports.create = function(req, res){
 
-
-	res.locals = {root: root, title:''};
-	res.render('create');
-}
-exports.signup = function(req, res){
-
-
-	res.locals = {root: root, title:''};
-	res.render('signup');
-}
-exports.login = function(req, res){
-
-
-	res.locals = {root: root, title:''};
-	res.render('login');
-}
-exports.logout = function(req, res){
-
-
-	res.locals = {root: root, title:''};
-	res.render('logout');
-}
-exports.edit = function(req, res){
-
-	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title:''};
-	res.render('edit');
-}
-exports.remove = function(req, res){
-
-
-	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: 'Warning!'};
-	res.render('remove');
-}
-exports.user = function(req, res){
-
-
-	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: 'Account'};
-	res.render('user');
-}
 exports.admin = function(req, res){
 	//Show index page instead of admin page
 	

@@ -1060,17 +1060,13 @@ function startVWF(){
 		});
 
 		app.use(app.router);
-		app.get('/adl/sandbox', landing.index);
-		app.get('/adl/sandbox/index', landing.index);
-		app.get('/adl/sandbox/create', landing.create);
-		app.get('/adl/sandbox/signup', landing.signup);
-		app.get('/adl/sandbox/login', landing.login);
-		app.get('/adl/sandbox/logout', landing.logout);
-		app.get('/adl/sandbox/edit', landing.edit);
-		app.get('/adl/sandbox/remove', landing.remove);
-		app.get('/adl/sandbox/user', landing.user);
-		app.get('/adl/sandbox/help', landing.help);
+		app.get('/adl/sandbox', landing.generalHandler);
 		
+		for(var i = 0; i < landing.acceptedRoutes.length; i++){
+			app.get('/adl/sandbox/' + landing.acceptedRoutes[i], landing.generalHandler);
+		}
+		
+		app.get('/adl/sandbox/help', landing.help);
 		app.get('/adl/sandbox/help/:page([a-zA-Z]+)', landing.help);
 		app.get('/adl/sandbox/admin', landing.admin);
 		app.post('/adl/sandbox/admin/:page([a-zA-Z]+)', landing.handlePostRequest);
