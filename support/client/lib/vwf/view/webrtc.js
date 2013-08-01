@@ -16,7 +16,7 @@
 /// @module vwf/view/webrtc
 /// @requires vwf/view
 
-define( [ "module", "vwf/view" ], function( module, view ) {
+define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( module, view, utility, Color ) {
 
     return view.load( module, {
 
@@ -35,10 +35,19 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 "stream": undefined, 
             };
 
+            // turns on logger debugger console messages 
+            this.debug = {
+                "creation": false,
+                "initializing": false,
+                "parenting": false,
+                "deleting": false,
+                "properties": true,
+                "setting": false,
+                "getting": false
+            };
+
             if ( options === undefined ) { options = {}; }
 
-            this.captureVideo = options.video !== undefined  ? options.video : true;
-            this.captureAudio = options.audio !== undefined  ? options.audio : true;
             this.stereo = options.stereo !== undefined  ? options.stereo : false;
             this.videoElementsDiv = options.videoElementsDiv !== undefined  ? options.videoElementsDiv : 'videoSurfaces';
             this.videoProperties = options.videoProperties !== undefined  ? options.videoProperties : {};
@@ -51,6 +60,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
   
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
+
+            if ( this.debug.creation ) {
+                this.logger.infox( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            }
 
             if ( childExtendsID === undefined )
                 return;
@@ -79,6 +92,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     "connection": undefined,
                     "localUrl": undefined, 
                     "remoteUrl": undefined,
+                    "color": "rgb(0,0,0)",
                     "createProperty": true                    
                 };
 
@@ -106,10 +120,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs, 
             childSource, childType, childIndex, childName ) {
 
+            if ( this.debug.initializing ) {
+                this.logger.infox( "initializedNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            } 
+
             if ( childExtendsID === undefined )
                 return;
 
-            //console.info( "  initializedNode(  "+nodeID+", "+childID+", "+childExtendsID+", "+childName+" )" );
             var client = this.state.clients[ childID ];
 
             if ( client ) {
@@ -117,7 +134,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     
                     // local client object
                     // grab access to the webcam 
-                    capture.call( this, childID );
+                    // capture.call( this, childID );
+                    // moving over to 'capture' property
                     
                     var remoteClient = undefined;
                     // existing clients
@@ -148,29 +166,53 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }            
         },
 
-        //deletedNode: function( nodeID ) {
-        //},
+        deletedNode: function( nodeID ) {
+            
+            if ( this.debug.deleting ) {
+                this.logger.infox( "deletedNode", nodeID );
+            }
+
+        },
   
         createdProperty: function( nodeID, propertyName, propertyValue ) {
-            //console.info( "webrtc.createdProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
+
+            if ( this.debug.properties ) {
+                this.logger.infox( "C === createdProperty ", nodeID, propertyName, propertyValue );
+            }
+
             this.satProperty( nodeID, propertyName, propertyValue );
         },        
 
         initializedProperty: function( nodeID, propertyName, propertyValue ) {
-            //console.info( "webrtc.initializedProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
+
+            if ( this.debug.properties ) {
+                this.logger.infox( "  I === initializedProperty ", nodeID, propertyName, propertyValue );
+            }
+
             this.satProperty( nodeID, propertyName, propertyValue );
         },        
 
         satProperty: function( nodeID, propertyName, propertyValue ) {
             
-            //if ( !propertyValue ) return;
+            if ( this.debug.properties || this.debug.setting ) {
+                this.logger.infox( "    S === satProperty ", nodeID, propertyName, propertyValue );
+            } 
+
             var client = this.state.clients[ nodeID ];
 
-            //console.info( "webrtc.satProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
-
             if ( client ) {
-                //console.info( "webrtc.satProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
                 switch( propertyName ) {
+                    
+                    case "capture":
+                        if ( propertyValue ) {
+                            if ( this.local.ID == nodeID ) {
+                                if ( this.local.stream === undefined ) {
+                                    capture.call( this, propertyValue );
+                                }    
+                            }
+                        }
+                        break;
+
                     case "localUrl":
                         if ( propertyValue ) {
                             if ( nodeID != this.local.ID ) {
@@ -191,7 +233,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         }
                         break; 
 
-
+                    case "color":
+                        var clr = new utility.color( propertyValue );
+                        if ( clr ) {
+                            client.color = clr.toString();
+                        }
+                        break;    
 
                     default:  
                         // propertyName is the moniker of the client that 
@@ -208,12 +255,15 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }
         },
 
-        //gotProperty: function( nodeID, propertyName, propertyValue ) {
-            // console.info( "GP webrtc.gotProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
-            // var value = undefined;
+        gotProperty: function( nodeID, propertyName, propertyValue ) {
 
-            // return value;
-        //},
+            if ( this.debug.properties || this.debug.getting ) {
+                this.logger.infox( "   G === gotProperty ", nodeID, propertyName, propertyValue );
+            }
+            var value = undefined;
+
+            return value;
+        },
 
         //calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
         //},       
@@ -246,11 +296,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         return clientNode;
     }
 
-    function displayLocal( stream, name ) {
-        displayVideo.call( this, stream, this.local.url, name, this.kernel.moniker(), true );
+    function displayLocal( stream, name, color ) {
+        displayVideo.call( this, stream, this.local.url, name, this.kernel.moniker(), true, color );
     }
 
-    function displayVideo( stream, url, name, destMoniker, muted ) {
+    function displayVideo( stream, url, name, destMoniker, muted, color ) {
         
         if ( this.videoProperties.create ) {
             this.videosAdded++
@@ -294,23 +344,31 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             
         } 
 
-        //console.info( "[ { 'url': "+url+", 'name': "+name+", 'muted': "+muted+" }, "+destMoniker+" ]" );
+        var clr = new utility.color( color );
+        if ( clr ) { 
+            clr = clr.toArray(); 
+        }
 
-        this.kernel.callMethod( "index-vwf", "newClientVideo", [ { "url": url, "name": name, "muted": muted }, destMoniker ] );          
+       this.kernel.callMethod( "index-vwf", "newClientVideo", [ { 
+            "url": url, 
+            "name": name, 
+            "muted": muted, 
+            "color": clr ? clr : color
+        }, destMoniker ] );          
 
     }
 
-    function displayRemote( stream, url, name, destMoniker ) {
-        displayVideo.call( this, stream, url, name, destMoniker, false );
+    function displayRemote( stream, url, name, destMoniker, color ) {
+        displayVideo.call( this, stream, url, name, destMoniker, false, color );
     }
 
-    function capture() {
+    function capture( media ) {
 
-        if ( this.local.stream === undefined && ( this.captureVideo || this.captureAudio ) ) {
+        if ( this.local.stream === undefined && ( media.video || media.audio ) ) {
             var self = this;
             var constraints = { 
-                "audio": this.captureAudio, 
-                "video": this.captureVideo ? { "mandatory": {}, "optional": [] } : false, 
+                "audio": media.audio, 
+                "video": media.video ? { "mandatory": {}, "optional": [] } : false, 
             };
             
             var successCallback = function( stream ) {
@@ -319,7 +377,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                 self.kernel.setProperty( self.local.ID, "localUrl", self.local.url );
 
-                displayLocal.call( self, stream, self.state.clients[ self.local.ID ].displayName );
+                var localNode = self.state.clients[ self.local.ID ];
+                displayLocal.call( self, stream, localNode.displayName, localNode.color );
                 sendOffers.call( self );
             };
 
@@ -516,7 +575,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     
                     if ( self.view.debug ) console.log("Remote stream added.  url: " + self.url );
 
-                    displayRemote.call( self.view, self.stream, self.url, self.peerNode.displayName, view.kernel.moniker() );
+                    displayRemote.call( self.view, self.stream, self.url, self.peerNode.displayName, view.kernel.moniker(), self.peerNode.color );
                 };
 
                 this.pc.onremovestream = function( event ) {
