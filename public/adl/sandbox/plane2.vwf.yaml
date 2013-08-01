@@ -14,7 +14,7 @@
 
 extends: prim2.vwf
 properties:
-  _length:1
-  width:1
-  lsegs:1
-  wsegs:1
+  _length: 1
+  width: 1
+  lsegs: 1
+  wsegs: 1

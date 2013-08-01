@@ -317,12 +317,12 @@ node.id = childID; // TODO: move to vwf/model/object
 			
             var scriptText = "this.initialize && this.initialize()";
 
-            try {
+            //try {
                 return ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
-            } catch ( e ) {
-                this.logger.warnc( "initializingNode", childID,
-                    "exception in initialize:", utility.exceptionMessage( e ) );
-            }
+            //} catch ( e ) {
+             //   this.logger.warnc( "initializingNode", childID,
+             //       "exception in initialize:", utility.exceptionMessage( e ) );
+            //}
 
             return undefined;
         },
@@ -363,12 +363,12 @@ node.id = childID; // TODO: move to vwf/model/object
 
 			var scriptText = "this.deinitialize && this.deinitialize()";
 
-            try {
+            //try {
                 ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
-            } catch ( e ) {
-                this.logger.warnc( "deinitializingNode", childID,
-                    "exception in deinitialize:", utility.exceptionMessage( e ) );
-            }
+            //} catch ( e ) {
+            //    this.logger.warnc( "deinitializingNode", childID,
+            //        "exception in deinitialize:", utility.exceptionMessage( e ) );
+            //}
 			
             delete this.nodes[nodeID];
 
@@ -395,21 +395,21 @@ node.id = childID; // TODO: move to vwf/model/object
 			
 			var scriptText = "this.attached && this.attached()";
 
-            try {
+            //try {
                 ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
-            } catch ( e ) {
-                this.logger.warnc( "addingChild", childID,
-                    "exception in addingChild:", utility.exceptionMessage( e ) );
-            }
+            //} catch ( e ) {
+            //    this.logger.warnc( "addingChild", childID,
+            //        "exception in addingChild:", utility.exceptionMessage( e ) );
+            //}
 			
 			scriptText = "this.childAdded && this.childAdded('"+child+"')";
 
-            try {
+           // try {
                 ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
-            } catch ( e ) {
-                this.logger.warnc( "addingChild", childID,
-                    "exception in addingChild:", utility.exceptionMessage( e ) );
-            }
+            //} catch ( e ) {
+            //    this.logger.warnc( "addingChild", childID,
+            //        "exception in addingChild:", utility.exceptionMessage( e ) );
+            //}
 
         },
 
@@ -461,23 +461,23 @@ node.id = childID; // TODO: move to vwf/model/object
             var node = this.nodes[nodeID];
 
             if ( propertyGet ) {  // TODO: assuming javascript here; how to specify script type?
-                try {
+              //  try {
                     node.private.getters[propertyName] = eval( getterScript( propertyGet ) );
-                } catch ( e ) {
-                    this.logger.warnc( "creatingProperty", nodeID, propertyName, propertyValue,
-                        "exception evaluating getter:", utility.exceptionMessage( e ) );
-                }
+              //  } catch ( e ) {
+              //      this.logger.warnc( "creatingProperty", nodeID, propertyName, propertyValue,
+              //          "exception evaluating getter:", utility.exceptionMessage( e ) );
+              //  }
             } else {
                 node.private.getters[propertyName] = true; // set a guard value so that we don't call prototype getters on value properties
             }
         
             if ( propertySet ) {  // TODO: assuming javascript here; how to specify script type?
-                try {
+               // try {
                     node.private.setters[propertyName] = eval( setterScript( propertySet ) );
-                } catch ( e ) {
-                    this.logger.warnc( "creatingProperty", nodeID, propertyName, propertyValue,
-                        "exception evaluating setter:", utility.exceptionMessage( e ) );
-                }
+               // } catch ( e ) {
+               //     this.logger.warnc( "creatingProperty", nodeID, propertyName, propertyValue,
+               //         "exception evaluating setter:", utility.exceptionMessage( e ) );
+               // }
             } else {
                 node.private.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
             }
@@ -499,7 +499,11 @@ node.id = childID; // TODO: move to vwf/model/object
 		//A watchable property will call the VWF set property kernel code when it's values are changed
 		_Watchable : function()
 		{
-		
+			Object.defineProperty(this,'internal_val',{configurable:true,enumerable:false,writable:true});
+			Object.defineProperty(this,'propertyname',{configurable:true,enumerable:false,writable:true});
+			Object.defineProperty(this,'id',{configurable:true,enumerable:false,writable:true});
+			Object.defineProperty(this,'masterval',{configurable:true,enumerable:false,writable:true});
+			Object.defineProperty(this,'dotNotation',{configurable:true,enumerable:false,writable:true});
 		
 		},
 		//Set up a watchable to mirror an object (including named properties)
@@ -532,7 +536,7 @@ node.id = childID; // TODO: move to vwf/model/object
 						//this.materialDef.layers[0].alpha -= .1;
 						ret =  self.createWatchable(ret,this.propertyname,this.id,this.masterval,this.dotNotation+'.'+_i);
 						return ret;
-					},configurable:true});
+					},configurable:true,enumerable:true});
 					})();
 				}
 		
@@ -569,7 +573,7 @@ node.id = childID; // TODO: move to vwf/model/object
 						//this.materialDef.layers[0].alpha -= .1;
 						ret =  self.createWatchable(ret,this.propertyname,this.id,this.masterval,this.dotNotation+'['+_i+']');
 						return ret;
-					},configurable:true});
+					},configurable:true,enumerable:true});
 					})();
 				}
 				
@@ -601,11 +605,27 @@ node.id = childID; // TODO: move to vwf/model/object
 				Object.defineProperty(watchable,'length',{
 					get:function(){
 						return watchable.internal_val.length;
-					},configurable:true});
+					},configurable:true,enumerable:true});
 			
 		
 		},
 		__WatchableCache : {},
+		setValueByDotNotation : function(root,dot,val)
+		{
+			dot.replace(/\[/g,".");
+			dot.replace(/\]/g,".");
+			var names = dot.split('.');
+			while(names.indexOf('') != -1)
+			   names.splice(names.indexOf(''),1);
+			   
+			for(var i =0; i < names.length-1; i++)
+			{
+				root = root[names[i]];
+			
+			}
+			root[names[names.length -1]] = val;
+		
+		},
 		setWatchableValue: function(id, propertyName, value, dotNotation)
 		{
 			var self = this;
@@ -614,27 +634,25 @@ node.id = childID; // TODO: move to vwf/model/object
 			if(this.__WatchableCache[masterid])
 			{
 				
-				var command = "this.__WatchableCache[masterid].masterval" + dotNotation.substr(masterid.length) + " = value;"
-				eval(command);
-				var command = "this.__WatchableCache[masterid].internal_val" + dotNotation.substr(masterid.length) + " = value;"
-				eval(command)
+				this.setValueByDotNotation(this.__WatchableCache[masterid], "masterval." + dotNotation.substr(masterid.length), value);
+				this.setValueByDotNotation(this.__WatchableCache[masterid], "internal_val." + dotNotation.substr(masterid.length), value);
 				this.__WatchableSetting ++;
-				try{
+				//try{
 				self.kernel.setProperty(id,propertyName,this.__WatchableCache[masterid].masterval);
-				}catch(e)
-				{
+				//}catch(e)
+				//{
 				
-				}
+				//}
 				this.__WatchableSetting --;
 				
 			}else
 			{	this.__WatchableSetting ++;
-				try{
+				//try{
 				self.kernel.setProperty(id,propertyName,value);
-				}catch(e)
-				{
+				//}catch(e)
+				//{
 				
-				}
+				//}
 				this.__WatchableSetting --;
 				
 			}
@@ -765,12 +783,12 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             var setter = node.private.setters && node.private.setters[propertyName];
 
             if ( setter && setter !== true ) { // is there is a setter (and not just a guard value)
-                try {
+                //try {
                     return setter.call( node, propertyValue );
-                } catch ( e ) {
-                    this.logger.warnc( "settingProperty", nodeID, propertyName, propertyValue,
-                        "exception in setter:", utility.exceptionMessage( e ) );
-                }
+                //} catch ( e ) {
+                //    this.logger.warnc( "settingProperty", nodeID, propertyName, propertyValue,
+                //        "exception in setter:", utility.exceptionMessage( e ) );
+                //}
             }
 		
 	    if(this.__WatchableSetting === 0)
@@ -803,12 +821,12 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             var getter = node.private.getters && node.private.getters[propertyName];
 
             if ( getter && getter !== true ) { // is there is a getter (and not just a guard value)
-                try {
+                //try {
                     return getter.call( node );
-                } catch ( e ) {
-                    this.logger.warnc( "gettingProperty", nodeID, propertyName, propertyValue,
-                        "exception in getter:", utility.exceptionMessage( e ) );
-                }
+                //} catch ( e ) {
+                //    this.logger.warnc( "gettingProperty", nodeID, propertyName, propertyValue,
+                //        "exception in getter:", utility.exceptionMessage( e ) );
+                //}
             }
 
             return undefined;
@@ -925,12 +943,12 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 				configurable: true
             } );
 
-            try {
+           // try {
                 node.private.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
-            } catch ( e ) {
-                this.logger.warnc( "creatingMethod", nodeID, methodName, methodParameters,
-                    "exception evaluating body:", utility.exceptionMessage( e ) );
-            }
+           // } catch ( e ) {
+           //     this.logger.warnc( "creatingMethod", nodeID, methodName, methodParameters,
+           //         "exception evaluating body:", utility.exceptionMessage( e ) );
+           // }
         
 		
 			for( var i =0; i < node.children.length; i++)
@@ -954,7 +972,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             var body = node.private.bodies && node.private.bodies[methodName];
 
             if ( body ) {
-                try {
+               // try {
 						
 						delete node.private.bodies[methodName];
 						if(node.hasOwnProperty( methodName ))
@@ -963,10 +981,10 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 						
 
 						
-					} catch ( e ) {
-                    this.logger.warnc( "deletingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
-                        "exception:", utility.exceptionMessage( e ) );
-                }
+				//	} catch ( e ) {
+                //    this.logger.warnc( "deletingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
+                //        "exception:", utility.exceptionMessage( e ) );
+                //}
             }
 
 			for( var i =0; i < node.children.length; i++)
@@ -987,15 +1005,40 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
             var node = this.nodes[nodeID];
 			if(!node) return undefined;
+			
+			
+			if(methodName == 'JavascriptEvalKeys')
+			{
+				var ret = (function()
+				{
+				
+					try{
+					return eval(
+					'(function(){'+
+					'var keys = Object.keys('+methodParameters[0]+');'+
+					'var ret = [];'+
+					'for( var i = 0; i < keys.length; i++) {'+
+					'ret.push([keys[i],'+methodParameters[0]+'[keys[i]] ?'+methodParameters[0]+'[keys[i]].constructor:null])'+
+					'};'+
+					'return ret;'+
+					'}.bind(this))()');
+					}catch(e)
+					{
+						return null;
+					}
+				
+				}).apply(node);
+				return ret;
+			}
             var body = node.private.bodies && node.private.bodies[methodName];
 
             if ( body ) {
-                try {
+              //  try {
                     return body.apply( node, methodParameters );
-                } catch ( e ) {
-                    this.logger.warnc( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
-                        "exception:", utility.exceptionMessage( e ) );
-                }
+              //  } catch ( e ) {
+              //      this.logger.warnc( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
+              //          "exception:", utility.exceptionMessage( e ) );
+              //  }
             }
 
             return undefined;
@@ -1076,14 +1119,14 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 			if(eventBody)
 			{
 				
-				try{
+				//try{
 					var handler = { handler: null, context: node }
 					handler.handler = eval( bodyScript( eventParameters || [], eventBody || "" ) );
 					node.private.listeners[eventName].push(handler);
-				} catch ( e ) {
-                    this.logger.warnc( "creatingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
-                        "exception:", utility.exceptionMessage( e ) );
-                }
+				//} catch ( e ) {
+                //    this.logger.warnc( "creatingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
+                //        "exception:", utility.exceptionMessage( e ) );
+                //}
 			}
 
             node.private.change++; // invalidate the "future" cache
@@ -1097,18 +1140,18 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 			if(!node) return undefined;
 			if(node)
 			{
-				try{
+				//try{
 					if(node.private.listeners && node.private.listeners[eventName])
 						delete node.private.listeners[eventName];
 					if(node.hasOwnProperty( eventName ))
 						delete node[eventName];
 					if(node.events.hasOwnProperty( eventName ))
 						delete node.events[eventName];
-				}
-				catch ( e ) {
-						this.logger.warnc( "deletingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
-							"exception:", utility.exceptionMessage( e ) );
-				}
+			//	}
+			//	catch ( e ) {
+			//			this.logger.warnc( "deletingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
+			//				"exception:", utility.exceptionMessage( e ) );
+			//	}
 			}	
 		
 		},
@@ -1143,15 +1186,15 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                 // Call the handler. If a phase is provided, only call handlers tagged for that
                 // phase.
 
-                try {
+          //      try {
                     if ( ! phase || listener.phases && listener.phases.indexOf( phase ) >= 0 ) {
                         var result = listener.handler.apply( listener.context || self.nodes[0], eventParameters ); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
                         return handled || result || result === undefined; // interpret no return as "return true"
                     }
-                } catch ( e ) {
-                    self.logger.warnc( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
-                        "exception:", utility.exceptionMessage( e ) );
-                }
+           //     } catch ( e ) {
+            //        self.logger.warnc( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
+            //            "exception:", utility.exceptionMessage( e ) );
+            //    }
 
                 return handled;
 
@@ -1177,12 +1220,12 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             var node = this.nodes[nodeID];
 
             if ( scriptType == "application/javascript" ) {
-                try {
+               // try {
                     return ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
-                } catch ( e ) {
-                    this.logger.warnc( "executing", nodeID,
-                        ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", utility.exceptionMessage( e ) );
-                }
+               // } catch ( e ) {
+               //     this.logger.warnc( "executing", nodeID,
+               //         ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", utility.exceptionMessage( e ) );
+               // }
             }
 
             return undefined;

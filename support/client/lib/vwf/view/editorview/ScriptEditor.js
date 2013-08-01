@@ -974,10 +974,14 @@ define(function ()
 			$('#methodlist').empty();
 			$('#eventlist').empty();
 			$('#propertylist').empty();
+			
+			this.methodlist = this.getMethods();
+			this.eventlist = this.getEvents();
+			this.properties = this.getProperties();
 			var style = "cursor:pointer;font-size: 1.5em;border: 1px solid gray;border-radius: 5px;box-shadow: 0px 0px 20px lightgray inset;margin: 2px;padding: 3px;"
 			var newstyle = "cursor:pointer;font-size: 1.5em;border: 2px solid gray;border-radius: 5px;box-shadow: 0px 0px 20px gray inset;margin: 2px;padding: 3px;"
 			var lightstyle = "color:lightgray;cursor:pointer;font-size: 1.5em;border: 0px solid lightgray;border-radius: 5px;box-shadow: 0px 0px 20px #EEEEEE inset;margin: 2px;padding: 3px;"
-			for (var i in this.currentNode.methods)
+			for (var i in this.methodlist)
 			{
 				$('#methodlist').append('<div class="scriptchoice" style="' + style + '" id="method' + i + '"></div>');
 				$('#method' + i).text(i);
@@ -994,7 +998,7 @@ define(function ()
 					$("#methodlist").children().css('border-color', 'gray');
 					$(this).css('border-color', 'blue');
 					var method = $(this).attr('method');
-					_ScriptEditor.setSelectedMethod(method, "function " + method + "()\n{\n" + _ScriptEditor.currentNode.methods[method] + "\n}");
+					_ScriptEditor.setSelectedMethod(method, "function " + method + "()\n{\n" + _ScriptEditor.methodlist[method] + "\n}");
 				});
 				if (refresh)
 				{
@@ -1004,7 +1008,7 @@ define(function ()
 					}
 				}
 			}
-			for (var i in this.currentNode.properties)
+			for (var i in this.properties)
 			{
 				$('#propertylist').append('<div class="scriptchoice" style="' + style + '" id="property' + i + '"></div>');
 				$('#property' + i).text(i);
@@ -1021,7 +1025,7 @@ define(function ()
 					$("#propertylist").children().css('border-color', 'gray');
 					$(this).css('border-color', 'blue');
 					var property = $(this).attr('property');
-					var val = _ScriptEditor.currentNode.properties[property];
+					var val = _ScriptEditor.properties[property];
 					if(typeof(val) == 'object')
 						val = JSON.stringify(val);
 					_ScriptEditor.setSelectedProperty(property, val );
@@ -1034,7 +1038,7 @@ define(function ()
 					}
 				}
 			}
-			for (var i in this.currentNode.events)
+			for (var i in this.eventlist)
 			{
 				$('#eventlist').append('<div  style="' + style + '"  id="event' + i + '"></div>');
 				$('#event' + i).text(i);
@@ -1052,14 +1056,14 @@ define(function ()
 					$(this).css('border-color', 'blue');
 					var event = $(this).attr('event');
 					var params = "";
-					for (var j in _ScriptEditor.currentNode.events[event].parameters)
+					for (var j in _ScriptEditor.eventlist[event].parameters)
 					{
-						params += _ScriptEditor.currentNode.events[event].parameters[j] + ','
+						params += _ScriptEditor.eventlist[event].parameters[j] + ','
 					}
 					var eventstring = 'function ' + event + '(';
 					for (var i in _ScriptEditor.currentNode.events[event].parameters)
 					{
-						eventstring += _ScriptEditor.currentNode.events[event].parameters[i] + ',';
+						eventstring += _ScriptEditor.eventlist[event].parameters[i] + ',';
 					}
 					eventstring = eventstring.substring(0, eventstring.length - 1);
 					eventstring += ')\n{\n' + _ScriptEditor.currentNode.events[event].body + '\n}';
@@ -1073,7 +1077,7 @@ define(function ()
 					}
 				}
 			}
-			if (!this.currentNode.methods || (this.currentNode.methods && !this.currentNode.methods['tick']))
+			if (!this.methodlist || (this.methodlist && !this.methodlist['tick']))
 			{
 				$('#methodlist').append('<div class="scriptchoice" style="' + lightstyle + '" id="methodtick"></div>');
 				$('#methodtick').text('tick');
@@ -1093,7 +1097,7 @@ define(function ()
 					_ScriptEditor.setSelectedMethod(method, 'function tick(){\n\n console.log("this is called every 20th of a second"); \n\n}');
 				});
 			}
-			if (!this.currentNode.methods || (this.currentNode.methods && !this.currentNode.methods['initialize']))
+			if (!this.methodlist || (this.methodlist && !this.methodlist['initialize']))
 			{
 				$('#methodlist').append('<div class="scriptchoice" style="' + lightstyle + '" id="methodinitialize"></div>');
 				$('#methodinitialize').text('initialize');
@@ -1113,7 +1117,7 @@ define(function ()
 					_ScriptEditor.setSelectedMethod(method, 'function initialize(){\n\n console.log("this is called when the objects is created"); \n\n}');
 				});
 			}
-			if (!this.currentNode.methods || (this.currentNode.methods && !this.currentNode.methods['deinitialize']))
+			if (!this.methodlist || (this.methodlist && !this.methodlist['deinitialize']))
 			{
 				$('#methodlist').append('<div class="scriptchoice" style="' + lightstyle + '" id="methoddeinitialize"></div>');
 				$('#methoddeinitialize').text('deinitialize');
@@ -1133,7 +1137,7 @@ define(function ()
 					_ScriptEditor.setSelectedMethod(method, 'function deinitialize(){\n\n console.log("this is called when the object is destroyed"); \n\n}');
 				});
 			}
-			if (!this.currentNode.methods || (this.currentNode.methods && !this.currentNode.methods['prerender']))
+			if (!this.methodlist || (this.methodlist && !this.methodlist['prerender']))
 			{
 				$('#methodlist').append('<div class="scriptchoice" style="' + lightstyle + '" id="methodprerender"></div>');
 				$('#methodprerender').text('prerender');
@@ -1156,7 +1160,7 @@ define(function ()
 			var pointersugs = ['pointerDown', 'pointerUp', 'pointerOver', 'pointerOut', 'pointerClick', 'pointerMove', 'keyDown', 'keyUp', 'keyPress'];
 			for (var i in pointersugs)
 			{
-				if (!this.currentNode.events || (this.currentNode.events && !this.currentNode.events[pointersugs[i]]))
+				if (!this.eventlist || (this.eventlist && !this.eventlist[pointersugs[i]]))
 				{
 					var name = pointersugs[i];
 					$('#eventlist').append('<div class="scriptchoice" style="' + lightstyle + '" id="event' + name + '"></div>');
@@ -1179,6 +1183,60 @@ define(function ()
 				}
 			}
 		}
+		this.getMethods = function()
+		{
+			
+			var methods = {};
+			var node = this.currentNode;
+			while(node)
+			{
+			for ( var i in node.methods)
+			{
+				if(methods[i] === undefined)
+				methods[i] = node.methods[i];
+			
+			}
+			node = vwf.getNode(vwf.prototype(node.id),true);
+			}
+
+			return methods;
+
+		}
+		this.getProperties = function()
+		{
+			
+			var properties = {};
+			var node = this.currentNode;
+			while(node)
+			{
+			for ( var i in node.properties)
+			{
+				if(properties[i] === undefined)
+				properties[i] = node.properties[i];
+			
+			}
+			node = vwf.getNode(vwf.prototype(node.id),true);
+			}
+			return properties;
+		}
+		this.getEvents = function()
+		{
+			var events = {};
+			var node = this.currentNode;
+			while(node)
+			{
+			for ( var i in node.events)
+			{
+				if(events[i] === undefined)
+				events[i] = node.events[i];
+			
+			}
+			node = vwf.getNode(vwf.prototype(node.id),true);
+			}
+			return events;
+		
+		
+		}
 		this.changeSelection = function (node)
 		{
 			if (node && this.isOpen())
@@ -1186,6 +1244,7 @@ define(function ()
 				if (!this.currentNode || (this.currentNode.id != node.id))
 				{
 					this.currentNode = node;
+					this.getPrototypeEventsAndMethods();
 					this.BuildGUI();
 				}
 				else
@@ -1229,6 +1288,174 @@ define(function ()
 		this.methodEditor = ace.edit("methodtext");
 		this.methodEditor.setTheme("ace/theme/chrome");
 		this.methodEditor.getSession().setMode("ace/mode/javascript");
+		var self = this;
+		this.setupAutocomplete = function(keys,editor,offset,width)
+		{
+			this.activeEditor = editor;
+			if($('#AutoComplete').length == 0)
+			{
+				$(document.body).append("<form id='AutoComplete' tabindex=890483 />");
+				$('#AutoComplete').on('blur',function(e,key)
+				{
+					$('#AutoComplete').hide();
+				});
+				
+				$('#AutoComplete').on('keydown',function(e,key)
+				{
+					//enter
+					if(e.which == 13)
+					{
+						
+						var index = $(this).attr('autocompleteindex');
+						$('#AutoComplete').hide();
+						
+						var text = $($(this).children()[index]).text();
+						_ScriptEditor.activeEditor.insert(text);
+						window.setTimeout(function(){
+						
+							_ScriptEditor.activeEditor.focus();
+						
+						},15);
+						return true;
+					}
+					else if(e.which == 190)
+					{
+						
+						var index = $(this).attr('autocompleteindex');
+						$('#AutoComplete').hide();
+						
+						var text = $($(this).children()[index]).text();
+						_ScriptEditor.activeEditor.insert(text);
+						_ScriptEditor.activeEditor.focus();
+						return true;
+					}else if(e.which == 40) //down
+					{
+						var children = $(this).children();
+						var index = $(this).attr('autocompleteindex');
+						index++;
+						if(index >= children.length)
+							index = 0;
+						$(this).attr('autocompleteindex',index);
+						
+						
+						for(var i = 0; i < children.length; i++)
+						{
+							if(i == index)
+							{
+								$(children[i]).css('background','lightblue');
+							}else
+								$(children[i]).css('background','white');
+						}
+					}
+					else if(e.which == 38) //up
+					{
+						var children = $(this).children();
+						var index = $(this).attr('autocompleteindex');
+						index--;
+						if(index < 0 )
+							index = children.length-1;
+						$(this).attr('autocompleteindex',index);
+						
+						
+						for(var i = 0; i < children.length; i++)
+						{
+							if(i == index)
+							{
+								$(children[i]).css('background','lightblue');
+							}else
+								$(children[i]).css('background','white');
+						}
+					}
+					else if(e.which == 27) //esc
+					{
+						$('#AutoComplete').hide();
+						_ScriptEditor.activeEditor.focus();
+						
+					}else
+					{
+						$('#AutoComplete').hide();
+						_ScriptEditor.activeEditor.focus();
+						$(_ScriptEditor.activeEditor.renderer.$textLayer).trigger(e);	
+					}
+					
+				});
+			}
+			$('#AutoComplete').empty();
+			for(var i in keys)
+			{
+				$('#AutoComplete').append("<div id='AutoComplete_"+i+"' class='AutoCompleteOption'/>");
+				$('#AutoComplete_'+i).text(keys[i][0]);
+				if(keys[i][1] == Function)
+				{
+					$('#AutoComplete_'+i).addClass('AutoCompleteOptionFunction');
+				}
+				$('#AutoComplete_'+i).attr('autocompleteindex',i);
+				if(i == 0)
+					$('#AutoComplete_'+i).css('background','lightblue');
+				$('#AutoComplete_'+i).click(function()
+				{
+					
+					
+						$('#AutoComplete').hide();
+						
+						var text = $(this).text();
+						_ScriptEditor.activeEditor.insert(text);
+						window.setTimeout(function(){
+						
+							_ScriptEditor.activeEditor.focus();
+						
+						},15);
+						return true;
+					
+				});
+			}
+			$('#AutoComplete').focus();
+			
+			$('#AutoComplete').css('top',offset.top + 'px');
+			$('#AutoComplete').css('left',(offset.left + width) + 'px');
+			
+			$('#AutoComplete').css('max-height',($(window).height() - offset.top) + 'px');
+			$('#AutoComplete').show();
+			$('#AutoComplete').attr('autocompleteindex',0);
+			window.setTimeout(function()
+			{
+				$('#AutoComplete').focus();
+				
+			},15);
+		}
+		this.methodEditor.getSession().on('change',function(e)
+		{
+			
+			var cur = self.methodEditor.getCursorPosition();
+			var session = self.methodEditor.getSession();
+			var line = session.getLine(cur.row);
+			if(line[cur.column] == '.')
+			{
+				
+				line = line.substr(0,cur.column);
+				var splits = line.split(' ');
+				line = splits[splits.length-1];
+				splits = line.split(';');
+				line = splits[splits.length-1];
+				if(line.indexOf('(') == -1 && line.indexOf('=') == -1)
+				{
+					var keys = vwf.callMethod(self.currentNode.id,'JavascriptEvalKeys',[line]);
+					if(keys)
+					{
+						window.setTimeout(function()
+						{
+							self.setupAutocomplete(keys,self.methodEditor,$(self.methodEditor.renderer.$cursorLayer.cursor).offset(),$(self.methodEditor.renderer.$cursorLayer.cursor).width());
+							
+						},15);
+						
+					}
+				
+				}
+			
+			}
+		
+		
+		});
 		this.eventEditor = ace.edit("eventtext");
 		this.eventEditor.setTheme("ace/theme/chrome");
 		this.eventEditor.getSession().setMode("ace/mode/javascript");

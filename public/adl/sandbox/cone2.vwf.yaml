@@ -14,7 +14,7 @@
 
 extends: prim2.vwf
 properties:
-  radius:1
-  rsegs:10
-  height:1
-  hsegs:1
+  radius: 1
+  rsegs: 10
+  height: 1
+  hsegs: 1
