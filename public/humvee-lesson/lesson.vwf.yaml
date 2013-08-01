@@ -45,6 +45,15 @@ children:
                     this.completed();
                   }
                 }, this );
+                app.pointerWheel = this.events.add( function() {
+                  var trans = app.camera.translation;
+                  if( trans[0] > -55 && trans[0] < 45 && trans[1] > -200 && trans[1] < -100 && trans[2] > 35 && trans[2] < 95 )
+                  {
+                    app.keyUp = app.events.flush( this );
+                    this.logger.info( "Step: Walk to Vehicle - Completed" );
+                    this.completed();
+                  }
+                }, this );
               }
       openDoor:
         extends: http://vwf.example.com/lesson/task.vwf
