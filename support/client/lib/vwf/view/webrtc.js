@@ -32,7 +32,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             this.local = {
                 "ID": undefined,
                 "url": undefined,
-                "stream": undefined, 
+                "stream": undefined,
+                "sharing": { audio: true, video: true } 
             };
 
             // turns on logger debugger console messages 
@@ -93,7 +94,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                     "localUrl": undefined, 
                     "remoteUrl": undefined,
                     "color": "rgb(0,0,0)",
-                    "createProperty": true                    
+                    "createProperty": true, 
+                    "sharing": { audio: true, video: true }                   
                 };
 
                 this.state.clients[ childID ] = node;
@@ -134,9 +136,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                     
                     // local client object
                     // grab access to the webcam 
-                    // capture.call( this, childID );
-                    // moving over to 'capture' property
-                    
+                    capture.call( this, this.local.sharing );
+                   
                     var remoteClient = undefined;
                     // existing clients
                     for ( var clientID in this.state.clients ) {
@@ -194,6 +195,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
         satProperty: function( nodeID, propertyName, propertyValue ) {
             
+            //console.info( "view.webrtc.satProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" )
             if ( this.debug.properties || this.debug.setting ) {
                 this.logger.infox( "    S === satProperty ", nodeID, propertyName, propertyValue );
             } 
@@ -203,12 +205,11 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             if ( client ) {
                 switch( propertyName ) {
                     
-                    case "capture":
+                    case "sharing":
                         if ( propertyValue ) {
-                            if ( this.local.ID == nodeID ) {
-                                if ( this.local.stream === undefined ) {
-                                    capture.call( this, propertyValue );
-                                }    
+                            client.sharing = propertyValue;
+                            if ( nodeID == this.local.ID ) {
+                                updateSharing.call( this, nodeID, propertyValue );
                             }
                         }
                         break;
@@ -265,11 +266,18 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             return value;
         },
 
-        //calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
-        //},       
+        calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+            switch ( methodName ) {
+                case "setLocalMute":
+                    if ( this.kernel.moniker() == this.kernel.client() ) {
+                        methodValue = setMute.call( this, methodParameters );
+                    }
+                    break;
+            }
+        },       
 
-        //firedEvent: function( nodeID, eventName, eventParameters ) {
-        //},
+        firedEvent: function( nodeID, eventName, eventParameters ) {
+        },
 
     } );
  
@@ -413,6 +421,12 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
         
 
     }
+
+    function updateSharing( nodeID, sharing ) {
+        setMute.call( this, !sharing.audio );
+        setPause.call( this, !sharing.video );
+    }
+
 
     function setMute( mute ) {
         if ( this.local.stream && this.local.stream.audioTracks && this.local.stream.audioTracks.length > 0 ) {

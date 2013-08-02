@@ -21,7 +21,7 @@ properties:
   localUrl:
   remoteUrl: 
   displayName:
-  capture: { audio: true, video: true }
+  sharing: { audio: true, video: true }
   color: "rgb(0,0,0)"
 scripts:
 - |

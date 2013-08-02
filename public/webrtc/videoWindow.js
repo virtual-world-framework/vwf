@@ -12,13 +12,15 @@ function setMute() {
 		$('#muteButton').removeClass('btn-info').addClass('btn-danger');
 		$('#mute').removeClass('icon-volume-up').addClass('icon-volume-off');
 		//vwfMedia.setMute( true );
-
+      
+    vwf_view.kernel.callMethod( "index-vwf", "setLocalMute", true );
   }
   else {
 		$('#muteButton').removeClass('btn-danger').addClass('btn-info');
 		$('#mute').removeClass('icon-volume-off').addClass('icon-volume-up');
 		//vwfMedia.setMute( false );
-    
+
+    vwf_view.kernel.callMethod( "index-vwf", "setLocalMute", false );
   }
 }
 
