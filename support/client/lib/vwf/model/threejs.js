@@ -2046,10 +2046,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
             else {
                 nodeCopy.threeObject = asset.clone();
-    		    
-                //make sure that the new object has a unique material
-                cloneMaterials( nodeCopy.threeObject );
             }
+            
+            //make sure that the new object has a unique material
+            cloneMaterials( nodeCopy.threeObject );
 
             //find and bind the animations
             //NOTE: this would probably be better handled by walking and finding the animations and skins only on the 
