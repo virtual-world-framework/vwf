@@ -30,26 +30,19 @@ children:
           walkInstructions:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
-              text: "Use WASD to navigate to the vehicle door."
+              text: "Use WASD, the mouse wheel, or pinch-to-zoom gestures to navigate to the vehicle door."
             scripts:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Walk to Vehicle" );
                 var app = this.parent.parent.parent.parent;
-                app.keyUp = this.events.add( function() {
+                app.keyUp = app.pointerWheel = app.touchPinchOut = this.events.add( function() {
                   var trans = app.camera.translation;
                   if( trans[0] > -55 && trans[0] < 45 && trans[1] > -200 && trans[1] < -100 && trans[2] > 35 && trans[2] < 95 )
                   {
                     app.keyUp = app.events.flush( this );
-                    this.logger.info( "Step: Walk to Vehicle - Completed" );
-                    this.completed();
-                  }
-                }, this );
-                app.pointerWheel = this.events.add( function() {
-                  var trans = app.camera.translation;
-                  if( trans[0] > -55 && trans[0] < 45 && trans[1] > -200 && trans[1] < -100 && trans[2] > 35 && trans[2] < 95 )
-                  {
-                    app.keyUp = app.events.flush( this );
+                    app.pointerWheel = app.events.flush( this );
+                    app.touchPinchOut = app.events.flush( this );
                     this.logger.info( "Step: Walk to Vehicle - Completed" );
                     this.completed();
                   }

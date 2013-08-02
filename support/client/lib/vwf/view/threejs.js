@@ -611,6 +611,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var sceneView = this;
 
         var touchID = undefined;
+        var touchPick = undefined;
 
         var pointerDownID = undefined;
         var pointerOverID = undefined;
@@ -774,17 +775,36 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
             self.lastEventData = returnData;
             return returnData;
-        }          
+        }
+
+        var getTouchEventData = function( e, debug ) {
+            var returnData = { eventData: undefined, eventNodeData: undefined };
+            var pickInfo = touchPick;
+
+            var mousePos = utility.coordinates.contentFromWindow( e.target, { x: e.gesture.center.pageX, y: e.gesture.center.pageY } ); // canvas coordinates from window coordinates
+            touchPick = ThreeJSTouchPick.call( self, canvas, sceneNode, false, mousePos );
+
+            returnData.eventData = [ {
+                gestures: touchGesture,
+                position: [ mousePos.x / sceneView.width, mousePos.y / sceneView.height ],
+                screenPosition: [ mousePos.x, mousePos.y ]
+            } ];
+
+            returnData.eventNodeData = { "": [ {
+                distance: pickInfo ? pickInfo.distance : undefined,
+                globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined
+            } ] };
+
+            self.lastEventData = returnData;
+            return returnData;
+        }       
 
         function handleHammer(ev) {
             // disable browser scrolling
             ev.gesture.preventDefault();
 
-            var touchPick = null;
-
-            touchID = pointerPickID ? pointerPickID : sceneID;
-
-            var eData = { eventData: undefined, eventNodeData: undefined };
+            var eData = getTouchEventData( ev, false );
+            touchID = touchPick ? getPickObjectID.call( sceneView, touchPick.object, false ) : sceneID;
 
             switch(ev.type) {
                 case 'hold':
@@ -792,11 +812,19 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     break;
                 case 'tap':
                     sceneView.kernel.dispatchEvent( touchID, "touchTap", eData.eventData, eData.eventNodeData );
+                    // TODO - Update control behavior and apps to listen for touchTap events
+                    // Emulate pointer events
+                    sceneView.kernel.dispatchEvent( touchID, "pointerClick", eData.eventData, eData.eventNodeData );
+                    sceneView.kernel.dispatchEvent( touchID, "pointerDown", eData.eventData, eData.eventNodeData );
+                    sceneView.kernel.dispatchEvent( touchID, "pointerUp", eData.eventData, eData.eventNodeData );
                     break;
                 case 'doubletap':
+                    // Switch Mode (from right mouse button to left mouse button)?
                     sceneView.kernel.dispatchEvent( touchID, "touchDoubleTap", eData.eventData, eData.eventNodeData );
                     break;
                 case 'drag': 
+                    // Fly Navigation Behavior
+                    //handleTouchNavigation( eData.eventData );
                     sceneView.kernel.dispatchEvent( touchID, "touchDrag", eData.eventData, eData.eventNodeData );
                     break;
                 case 'dragstart':
@@ -842,6 +870,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     sceneView.kernel.dispatchEvent( touchID, "touchTransformEnd", eData.eventData, eData.eventNodeData );
                     break;
                 case 'rotate':
+                    // Orbit Selected Object?
                     sceneView.kernel.dispatchEvent( touchID, "touchRotate", eData.eventData, eData.eventNodeData );
                     break;
                 case 'pinch':
@@ -849,12 +878,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     break;
                 case 'pinchin':
                     // Zoom Out
-                    handleScroll( 0.2 * ev.gesture.scale, ev.gesture.distance );
+                    handleScroll( ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
                     sceneView.kernel.dispatchEvent( touchID, "touchPinchIn", eData.eventData, eData.eventNodeData );
                     break;
                 case 'pinchout':
                     // Zoom In
-                    handleScroll( -0.2 * ev.gesture.scale, ev.gesture.distance );
+                    handleScroll( -1 * ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
                     sceneView.kernel.dispatchEvent( touchID, "touchPinchOut", eData.eventData, eData.eventNodeData );
                     break;
                 case 'touch':
@@ -1705,6 +1734,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
         }
 
+        function handleTouchNavigation( touchEventData ) {
+
+        }
+
         // END TODO
 
         // == Draggable Content ========================================================================
@@ -1801,6 +1834,54 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         };
          
     };
+
+    function ThreeJSTouchPick ( canvas, sceneNode, debug, mousepos )
+    {
+        if(!this.lastEventData) return;
+
+        var threeCam = this.state.cameraInUse;
+        if ( !threeCam ) {
+            this.logger.errorx( "Cannot perform pick because there is no camera to pick from" );
+            return;
+        }
+
+        if(!this.raycaster) this.raycaster = new THREE.Raycaster();
+        if(!this.projector) this.projector = new THREE.Projector();
+        
+        var SCREEN_HEIGHT = window.innerHeight;
+        var SCREEN_WIDTH = window.innerWidth;
+
+        var mousepos = { x: this.lastEventData.eventData[0].position[0], y: this.lastEventData.eventData[0].position[1] }; // window coordinates
+
+        var x = ( mousepos.x ) * 2 - 1;
+        var y = -( mousepos.y ) * 2 + 1;
+
+        pickDirectionVector = new THREE.Vector3();
+        pickDirectionVector.set( x, y, 0.5 );
+        
+        this.projector.unprojectVector(pickDirectionVector, threeCam);
+        var pos = new THREE.Vector3();
+        pos.getPositionFromMatrix( threeCam.matrixWorld );
+        pickDirectionVector.sub(pos);
+        pickDirectionVector.normalize();
+                
+        this.raycaster.set(pos, pickDirectionVector);
+        var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
+        
+        // intersections are, by default, ordered by distance,
+        // so we only care for the first (visible) one. The intersection
+        // object holds the intersection point, the face that's
+        // been "hit" by the ray, and the object to which that
+        // face belongs. We only care for the object itself.
+
+        // Cycle through the list of intersected objects and return the first visible one
+        for ( var i = 0; i < intersects.length; i++ ) {
+            if ( intersects[ i ].object.visible ) {
+                return intersects[ i ];
+            }
+        }
+        return null;
+    }
 
     function ThreeJSPick( canvas, sceneNode, debug )
     {
