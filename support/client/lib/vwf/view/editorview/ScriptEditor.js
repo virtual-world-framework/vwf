@@ -440,11 +440,7 @@ define(function ()
 		$('#deleteEvent').css('margin-top', '3px');
 		$('#deleteProperty').css('margin-top', '3px');
 		$('#newEvent').css('margin-top', '3px');
-		$('#methodtext,#eventtext,#propertytext').keydown(function (e)
-		{
-			var code = (e.keyCode ? e.keyCode : e.which);
-			e.stopPropagation();
-		});
+		
 		$('#saveMethodCopy').click(function (e)
 		{
 			if (!_ScriptEditor.checkMethodSyntax())
@@ -647,9 +643,7 @@ define(function ()
 		$('#newMethod').click(this.NewMethod);
 		$('#newEvent').click(this.NewEvent);
 		$('#newProperty').click(this.NewProperty);
-		$('#methodtext').keyup(this.MethodChange);
-		$('#eventtext').keyup(this.EventChange);
-		$('#propertytext').keyup(this.PropertyChange);
+
 		this.show = function ()
 		{
 			//window.clearInterval(window.scripthideinterval);
@@ -765,6 +759,7 @@ define(function ()
 		$('#saveMethod').click(this.SaveMethodClicked);
 		this.PostSaveEvent = function ()
 		{
+			
 			_ScriptEditor.currentNode = vwf.getNode(_ScriptEditor.currentNode.id);
 			_ScriptEditor.EventChanged = false;
 			$('#eventtext').css('border-color', 'black');
@@ -848,13 +843,22 @@ define(function ()
 		
 		this.PromptAbandon = function (callback)
 		{
-			$('#ScriptEditorAbandonChanges').dialog('open');
-			_ScriptEditor.AbandonChangesCallback = callback;
+			//$('#ScriptEditorAbandonChanges').dialog('open');
+			//_ScriptEditor.AbandonChangesCallback = callback;
+			alertify.confirm($('#ScriptEditorAbandonChanges').text(),function(val){
+			
+				if(val === true)
+					callback()
+			
+			});
 		}
 		this.setSelectedMethod_internal = function (name, text)
 		{
-		
-			if (this.currentNode.methods && this.currentNode.methods[name])
+			
+			_ScriptEditor.selectedMethod = name;
+			_ScriptEditor.methodEditor.setValue(js_beautify(text,{braces_on_own_line:true,opt_keep_array_indentation:true}));
+			_ScriptEditor.methodEditor.selection.clearSelection();
+			if (this.methodlist && this.methodlist[name])
 			{
 				_ScriptEditor.MethodChanged = false;
 				$('#methodtext').css('border-color', 'black');
@@ -864,9 +868,7 @@ define(function ()
 				_ScriptEditor.MethodChanged = true;
 				$('#methodtext').css('border-color', 'red');
 			}
-			_ScriptEditor.selectedMethod = name;
-			_ScriptEditor.methodEditor.setValue(js_beautify(text,{braces_on_own_line:true,opt_keep_array_indentation:true}));
-			_ScriptEditor.methodEditor.selection.clearSelection();
+			
 			//$('#methodtextback').text(_ScriptEditor.formatScript(indentedtext));
 			$('#methodtext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/stripe.png) 100% 100% repeat');
 			$('#methodtext').removeAttr('disabled');
@@ -882,7 +884,9 @@ define(function ()
 		
 		this.setSelectedProperty_internal = function (name, text)
 		{
-		
+			_ScriptEditor.selectedProperty = name;
+			_ScriptEditor.propertyEditor.setValue(js_beautify(text.toString(),{braces_on_own_line:true,opt_keep_array_indentation:true}));
+			_ScriptEditor.propertyEditor.selection.clearSelection();
 			if (this.currentNode.properties && this.currentNode.properties[name])
 			{
 				_ScriptEditor.PropertyChanged = false;
@@ -893,9 +897,7 @@ define(function ()
 				_ScriptEditor.PropertyChanged = true;
 				$('#propertytext').css('border-color', 'red');
 			}
-			_ScriptEditor.selectedProperty = name;
-			_ScriptEditor.propertyEditor.setValue(js_beautify(text.toString(),{braces_on_own_line:true,opt_keep_array_indentation:true}));
-			_ScriptEditor.propertyEditor.selection.clearSelection();
+			
 			//$('#methodtextback').text(_ScriptEditor.formatScript(indentedtext));
 			$('#propertytext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/stripe.png) 100% 100% repeat');
 			$('#propertytext').removeAttr('disabled');
@@ -910,7 +912,10 @@ define(function ()
 		}
 		this.setSelectedEvent_internal = function (name, text)
 		{
-			if (this.currentNode.events && this.currentNode.events[name])
+			_ScriptEditor.selectedEvent = name;
+			_ScriptEditor.eventEditor.setValue(js_beautify(text,{braces_on_own_line:true,opt_keep_array_indentation:true}));
+			_ScriptEditor.eventEditor.selection.clearSelection();
+			if (this.eventlist && this.eventlist[name])
 			{
 				_ScriptEditor.EventChanged = false;
 				$('#eventtext').css('border-color', 'black');
@@ -920,9 +925,7 @@ define(function ()
 				_ScriptEditor.EventChanged = true;
 				$('#eventtext').css('border-color', 'red');
 			}
-			_ScriptEditor.selectedEvent = name;
-			_ScriptEditor.eventEditor.setValue(js_beautify(text,{braces_on_own_line:true,opt_keep_array_indentation:true}));
-			_ScriptEditor.eventEditor.selection.clearSelection();
+			
 			//$('#eventtextback').text(_ScriptEditor.formatScript(text));
 			$('#eventtext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/stripe.png) 100% 100% repeat');
 			$('#eventtext').removeAttr('disabled');
@@ -1244,7 +1247,7 @@ define(function ()
 				if (!this.currentNode || (this.currentNode.id != node.id))
 				{
 					this.currentNode = node;
-					this.getPrototypeEventsAndMethods();
+					
 					this.BuildGUI();
 				}
 				else
@@ -1259,24 +1262,24 @@ define(function ()
 		}
 		this.SelectionChanged = function (e, node)
 		{
-			if (!this.isOpen())
+			if (!self.isOpen())
 			{
-				_ScriptEditor.currentNode = node
+				self.currentNode = node
 				return;
 			}
 			try
 			{
-				if ((this.MethodChanged || this.EventChanged) && ((node && this.currentNode && node.id != this.currentNode.id) || (!node && this.currentNode)))
+				if ((self.MethodChanged || self.EventChanged) && ((node && self.currentNode && node.id != self.currentNode.id) || (!node && self.currentNode)))
 				{
 					$('#ScriptEditorAbandonChanges').text('You have selected a new object, but you have unsaved changes on this script. Do you want to abandon these changes? If you choose not to, your changes will remain in the editor, but the script editor will show properties for the previoiusly selected node, not the newly selected one.');
-					this.PromptAbandon(function ()
+					self.PromptAbandon(function ()
 					{
-						this.changeSelection(node)
+						self.changeSelection(node)
 					});
 				}
 				else
 				{
-					this.changeSelection(node);
+					self.changeSelection(node);
 				}
 			}
 			catch (e)
@@ -1289,6 +1292,19 @@ define(function ()
 		this.methodEditor.setTheme("ace/theme/chrome");
 		this.methodEditor.getSession().setMode("ace/mode/javascript");
 		var self = this;
+		this.setupFunctionTip = function(text,editor,offset,width)
+		{
+		
+			
+			if($('#FunctionTip').length == 0)
+			{
+				$(document.body).append("<form id='FunctionTip' />");
+			}
+			$('#FunctionTip').text(text);
+			$('#FunctionTip').css('top',(offset.top - $('#FunctionTip').height()) + 'px');
+			$('#FunctionTip').css('left',(offset.left) + 'px');
+			$('#FunctionTip').show();
+		}
 		this.setupAutocomplete = function(keys,editor,offset,width)
 		{
 			this.activeEditor = editor;
@@ -1333,10 +1349,11 @@ define(function ()
 						var children = $(this).children();
 						var index = $(this).attr('autocompleteindex');
 						index++;
-						if(index >= children.length)
-							index = 0;
+						if(index > children.length-1)
+							index = children.length-1;
 						$(this).attr('autocompleteindex',index);
-						
+						if((index+1) * $(children[0]).height() > 150 + $('#AutoComplete').scrollTop() )
+							$('#AutoComplete').scrollTop((index+1) * $(children[0]).height() - 150);
 						
 						for(var i = 0; i < children.length; i++)
 						{
@@ -1353,10 +1370,11 @@ define(function ()
 						var index = $(this).attr('autocompleteindex');
 						index--;
 						if(index < 0 )
-							index = children.length-1;
+							index = 0;
 						$(this).attr('autocompleteindex',index);
 						
-						
+						if((index) * $(children[0]).height() < $('#AutoComplete').scrollTop() )
+							$('#AutoComplete').scrollTop(index * $(children[0]).height());
 						for(var i = 0; i < children.length; i++)
 						{
 							if(i == index)
@@ -1379,6 +1397,7 @@ define(function ()
 					}
 					
 				});
+				
 			}
 			$('#AutoComplete').empty();
 			for(var i in keys)
@@ -1414,22 +1433,24 @@ define(function ()
 			$('#AutoComplete').css('top',offset.top + 'px');
 			$('#AutoComplete').css('left',(offset.left + width) + 'px');
 			
-			$('#AutoComplete').css('max-height',($(window).height() - offset.top) + 'px');
+			$('#AutoComplete').css('max-height',Math.min(150,($(window).height() - offset.top) )+ 'px');
 			$('#AutoComplete').show();
 			$('#AutoComplete').attr('autocompleteindex',0);
+			$('#AutoComplete').css('overflow','hidden');
+			$('#AutoComplete').scrollTop(0);
 			window.setTimeout(function()
 			{
 				$('#AutoComplete').focus();
 				
 			},15);
 		}
-		this.methodEditor.getSession().on('change',function(e)
+		this.triggerAutoComplete = function(editor)
 		{
-			
-			var cur = self.methodEditor.getCursorPosition();
-			var session = self.methodEditor.getSession();
+			var cur = editor.getCursorPosition();
+			var session = editor.getSession();
 			var line = session.getLine(cur.row);
-			if(line[cur.column] == '.')
+			var chr = line[cur.column] ;
+			if(chr== '.' || chr == '[')
 			{
 				
 				line = line.substr(0,cur.column);
@@ -1440,11 +1461,48 @@ define(function ()
 				if(line.indexOf('(') == -1 && line.indexOf('=') == -1)
 				{
 					var keys = vwf.callMethod(self.currentNode.id,'JavascriptEvalKeys',[line]);
+					
+					
+					
+					
 					if(keys)
 					{
+					
+						if(chr == '.')
+						{
+							var remove = [];
+							var i = 0;
+							
+							while(i < keys.length)
+							{
+								if(keys[i][0].search(/[^0-9a-zA-Z]/) != -1 || keys[i][0].search(/[0-9]/) == 0)
+								{
+									keys.splice(i,1);
+								}else
+								{
+								i++;
+								}
+							}
+						
+						
+						}else
+						{
+							for(var i = 0;i < keys.length; i++)
+							{
+								if(keys[i][0].search(/[^0-9a-zA-Z]/) != -1 || keys[i][0].search(/[0-9]/) == 0)
+								{
+									keys[i][0] = '"'+keys[i][0]+'"';
+								}
+							}
+						}
+					
+						keys.sort(function(a,b)
+						{
+							return a[0] > b[0]?1:-1;
+						})
 						window.setTimeout(function()
 						{
-							self.setupAutocomplete(keys,self.methodEditor,$(self.methodEditor.renderer.$cursorLayer.cursor).offset(),$(self.methodEditor.renderer.$cursorLayer.cursor).width());
+							self.setupAutocomplete(keys,editor,$(editor.renderer.$cursorLayer.cursor).offset(),$(editor.renderer.$cursorLayer.cursor).width());
 							
 						},15);
 						
@@ -1454,11 +1512,57 @@ define(function ()
 			
 			}
 		
+		}
+		this.triggerFunctionTip = function(editor)
+		{
+			var cur = editor.getCursorPosition();
+			var session = editor.getSession();
+			var line = session.getLine(cur.row);
+			if(line[cur.column] == '(')
+			{
+				
+				line = line.substr(0,cur.column);
+				var splits = line.split(' ');
+				line = splits[splits.length-1];
+				splits = line.split(';');
+				line = splits[splits.length-1];
+				if(line.indexOf('(') == -1 && line.indexOf('=') == -1)
+				{
+					var text = vwf.callMethod(self.currentNode.id,'JavascriptEvalFunction',[line]);
 		
+					if(text)
+					{
+						window.setTimeout(function()
+						{
+							self.setupFunctionTip(text,editor,$(editor.renderer.$cursorLayer.cursor).offset(),$(editor.renderer.$cursorLayer.cursor).width());
+							
+						},15);
+						
+					}
+				
+				}
+			
+			}
+		
+		}
+		this.methodEditor.getSession().on('change',function(e)
+		{
+			self.MethodChange();
+			self.triggerAutoComplete(self.methodEditor);
+			self.triggerFunctionTip(self.methodEditor);
 		});
+		
+		
 		this.eventEditor = ace.edit("eventtext");
 		this.eventEditor.setTheme("ace/theme/chrome");
 		this.eventEditor.getSession().setMode("ace/mode/javascript");
+		
+		this.eventEditor.getSession().on('change',function(e)
+		{
+			self.EventChange();
+			self.triggerAutoComplete(self.eventEditor);
+		});
+		
 		this.methodEditor.setPrintMarginColumn(false);
 		this.methodEditor.setFontSize('15px');
 		this.eventEditor.setPrintMarginColumn(false);
@@ -1469,7 +1573,124 @@ define(function ()
 		this.propertyEditor.getSession().setMode("ace/mode/javascript");
 		this.propertyEditor.setPrintMarginColumn(false);
 		this.propertyEditor.setFontSize('15px');
+		
+		this.propertyEditor.getSession().on('change',function(e)
+		{
+			self.triggerAutoComplete(self.propertyEditor);
+		});
+		
+		this.methodEditor.keyBinding.origOnCommandKey = this.methodEditor.keyBinding.onCommandKey;
+		this.eventEditor.keyBinding.origOnCommandKey = this.methodEditor.keyBinding.onCommandKey;
+		this.methodEditor.on('change',function(e){
+		   
+		   if(e.data.action == "removeText")
+		   {
+			if(e.data.text.indexOf('(') != -1)
+				$('#FunctionTip').hide();
+		   
+		   }
+		   if(e.data.action == "insertText")
+		   {
+			if(e.data.text.indexOf(')') != -1)
+				$('#FunctionTip').hide();
+		   
+		   }
+		   
+		   var cur = self.methodEditor.getCursorPosition();
+		   var session = self.methodEditor.getSession();
+		   var line = session.getLine(cur.row);
+	           var chr1 = line[cur.column-1];
+		   var chr2 = line[cur.column];
+		
+		    if(chr2 == ')')
+			$('#FunctionTip').hide();
+		
+		});
+		
+		this.eventEditor.on('change',function(e){
+		   
+		   if(e.data.action == "removeText")
+		   {
+			if(e.data.text.indexOf('(') != -1)
+				$('#FunctionTip').hide();
+		   
+		   }
+		   if(e.data.action == "insertText")
+		   {
+			if(e.data.text.indexOf(')') != -1)
+				$('#FunctionTip').hide();
+		   
+		   }
+		   
+		   var cur = self.eventEditor.getCursorPosition();
+		   var session = self.eventEditor.getSession();
+		   var line = session.getLine(cur.row);
+	           var chr1 = line[cur.column-1];
+		   var chr2 = line[cur.column];
+		
+		    if(chr2 == ')')
+			$('#FunctionTip').hide();
+		
+		});
+		
+		this.methodEditor.keyBinding.onCommandKey = function(e, hashId, keyCode) {
+		   
+		   var cur = self.methodEditor.getCursorPosition();
+		   var session = self.methodEditor.getSession();
+		   var line = session.getLine(cur.row);
+	           var chr1 = line[cur.column-1];
+		   var chr2 = line[cur.column];
+			
+		   if(keyCode == 38 || keyCode == 40)
+			$('#FunctionTip').hide();
+		   if( keyCode == 37)
+		   {
+			if(chr1 == '(')
+				$('#FunctionTip').hide();
+		   }
+		   if( keyCode == 39)
+		   {
+			if(chr2 == ')')
+				$('#FunctionTip').hide();
+		   }
+		   this.origOnCommandKey(e, hashId, keyCode);
+			
+		}
+		
+		this.eventEditor.keyBinding.onCommandKey = function(e, hashId, keyCode) {
+		   
+		   var cur = self.eventEditor.getCursorPosition();
+		   var session = self.eventEditor.getSession();
+		   var line = session.getLine(cur.row);
+	           var chr1 = line[cur.column-1];
+		   var chr2 = line[cur.column];
+			
+		   if(keyCode == 38 || keyCode == 40)
+			$('#FunctionTip').hide();
+		   if( keyCode == 37)
+		   {
+			if(chr1 == '(')
+				$('#FunctionTip').hide();
+		   }
+		   if( keyCode == 39)
+		   {
+			if(chr2 == ')')
+				$('#FunctionTip').hide();
+		   }
+		   this.origOnCommandKey(e, hashId, keyCode);
+			
+		}
+		
+		$('#methodtext').on('click',function(){$('#FunctionTip').hide();})
+		$('#eventtext').on('click',function(){$('#FunctionTip').hide();})
+		this.eventEditor.on('blur',function(e){$('#FunctionTip').hide();});
+		this.methodEditor.on('blur',function(e){$('#FunctionTip').hide();});
+		
+		
 		$('#ScriptEditor').hide();
 		$('#ScriptEditor').css('height', '405px');
+		self.methodEditor.setBehavioursEnabled(false);
+		self.eventEditor.setBehavioursEnabled(false);
+		self.propertyEditor.setBehavioursEnabled(false);
 	}
 });

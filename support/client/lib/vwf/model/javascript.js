@@ -267,14 +267,12 @@ node.id = childID; // TODO: move to vwf/model/object
 		{
 			self = this;
 			var node = this.nodes[parentid];
-				Object.defineProperty(behaviorNode, propname, {
-				get: function() { 
-				
-				       return self.createWatchable(self.kernel.getProperty( parentid, propname ),propname,parentid) 
-				       },
-					set: function( value ) { self.kernel.setProperty( parentid, propname, self.watchableToObject(value) ) },
-                               enumerable : true,
-                               configurable : true});
+			Object.defineProperty( behaviorNode, propname, 
+			{ // "this" is node in get/set
+			get: function() {return node[propname];},
+			set: function( value ) {node[propname] = value},
+			enumerable: true
+			} );
 		},
 		//Allow the behavior to call the parent's methods
 		hookupBehaviorMethod: function(behaviorNode,parentid,propname)
@@ -943,12 +941,12 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 				configurable: true
             } );
 
-           // try {
+            try {
                 node.private.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
-           // } catch ( e ) {
-           //     this.logger.warnc( "creatingMethod", nodeID, methodName, methodParameters,
-           //         "exception evaluating body:", utility.exceptionMessage( e ) );
-           // }
+            } catch ( e ) {
+                this.logger.warnc( "creatingMethod", nodeID, methodName, methodParameters,
+                    "exception evaluating body:", utility.exceptionMessage( e ) );
+            }
         
 		
 			for( var i =0; i < node.children.length; i++)
@@ -972,7 +970,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             var body = node.private.bodies && node.private.bodies[methodName];
 
             if ( body ) {
-               // try {
+                try {
 						
 						delete node.private.bodies[methodName];
 						if(node.hasOwnProperty( methodName ))
@@ -981,10 +979,10 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 						
 
 						
-				//	} catch ( e ) {
-                //    this.logger.warnc( "deletingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
-                //        "exception:", utility.exceptionMessage( e ) );
-                //}
+					} catch ( e ) {
+                    this.logger.warnc( "deletingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
+                        "exception:", utility.exceptionMessage( e ) );
+                }
             }
 
 			for( var i =0; i < node.children.length; i++)
@@ -1015,7 +1013,8 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 					try{
 					return eval(
 					'(function(){'+
-					'var keys = Object.keys('+methodParameters[0]+');'+
+					'var keys = [];'+
+					'for (var i in '+methodParameters[0]+'){keys.push(i)}'+
 					'var ret = [];'+
 					'for( var i = 0; i < keys.length; i++) {'+
 					'ret.push([keys[i],'+methodParameters[0]+'[keys[i]] ?'+methodParameters[0]+'[keys[i]].constructor:null])'+
@@ -1029,6 +1028,60 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 				
 				}).apply(node);
 				return ret;
+			}
+			if(methodName == 'JavascriptEvalFunction')
+			{
+				
+				var ret = (function()
+				{
+				
+					try{
+					return eval(
+					'(function(){'+
+					//'debugger;'+
+					'return '+methodParameters[0]+'.toString();'+
+					
+					'}.bind(this))()');
+					}catch(e)
+					{
+						return null;
+					}
+				
+				}).apply(node);
+				
+				if(ret && ret.indexOf("function ( /* parameter1, parameter2, ... */ )") == 0)
+				{
+					
+					var nodereference = methodParameters[0].substr(0,methodParameters[0].lastIndexOf('.'));
+					var funcid = methodParameters[0].substr(methodParameters[0].lastIndexOf('.')+1);
+					
+					var refid = (function()
+					{
+					
+						try{
+						return eval(
+						'(function(){'+
+						//'debugger;'+
+						'return '+nodereference+'.id'+
+						
+						'}.bind(this))()');
+						}catch(e)
+						{
+						     return null;
+						}
+					
+					}).apply(node);
+					ret = this.nodes[refid].private.bodies[funcid].toString()
+				}				
+				
+				if(ret)
+				{
+					ret = ret.match(/\(.*\)/);
+					if(ret && ret[0])
+						return ret[0];
+					return null;	
+				}else
+				return null;
 			}
             var body = node.private.bodies && node.private.bodies[methodName];
 
@@ -1119,14 +1172,14 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 			if(eventBody)
 			{
 				
-				//try{
+				try{
 					var handler = { handler: null, context: node }
 					handler.handler = eval( bodyScript( eventParameters || [], eventBody || "" ) );
 					node.private.listeners[eventName].push(handler);
-				//} catch ( e ) {
-                //    this.logger.warnc( "creatingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
-                //        "exception:", utility.exceptionMessage( e ) );
-                //}
+				} catch ( e ) {
+                    this.logger.warnc( "creatingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
+                        "exception:", utility.exceptionMessage( e ) );
+                }
 			}
 
             node.private.change++; // invalidate the "future" cache
@@ -1140,18 +1193,18 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 			if(!node) return undefined;
 			if(node)
 			{
-				//try{
+				try{
 					if(node.private.listeners && node.private.listeners[eventName])
 						delete node.private.listeners[eventName];
 					if(node.hasOwnProperty( eventName ))
 						delete node[eventName];
 					if(node.events.hasOwnProperty( eventName ))
 						delete node.events[eventName];
-			//	}
-			//	catch ( e ) {
-			//			this.logger.warnc( "deletingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
-			//				"exception:", utility.exceptionMessage( e ) );
-			//	}
+				}
+				catch ( e ) {
+						this.logger.warnc( "deletingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
+							"exception:", utility.exceptionMessage( e ) );
+				}
 			}	
 		
 		},

@@ -20,6 +20,21 @@
 		border-color: lightgray;
 		border-width: 1px;
 	}
+	#FunctionTip
+	{
+	
+		top: 804.1875px;
+		left: 295px;
+		position: absolute;
+		z-index: 10000;
+		font-size: 1.5em;
+		font-family: sans-serif;
+		background: white;
+		border: 1px solid gray;
+		box-shadow: 2px 2px 2px gray;
+		font-style: italic;
+	
+	}
 	.AutoCompleteOption
 	{
 		font-size: 1.5em;
