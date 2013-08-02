@@ -97,11 +97,11 @@
           // Patch the model and view drivers to log property-related calls.
 
           vwf.models.forEach( function( model ) {
-            patchHandlers( model, "model", [ "creatingProperty", "initializingProperty", "settingProperty" ] );
+            patchHandlers( model, "model", [ "creatingProperty", "initializingProperty", "settingProperty", "gettingProperty" ] );
           } );
 
           vwf.views.forEach( function( view ) {
-            patchHandlers( view, "view", [ "createdProperty", "initializedProperty", "satProperty" ] );
+            patchHandlers( view, "view", [ "createdProperty", "initializedProperty", "satProperty", "gotProperty" ] );
           } );
 
           // URI component to be used as a prototype. The state of a URI component can be expressed
@@ -802,6 +802,8 @@
 
             } ), function( id ) {
 
+              // SETTING
+
               // Setting a non-delegating property handled by vwf/model/object.
 
               driverCalls = []; vwf.setProperty( id, "po", 1 );
@@ -889,15 +891,124 @@
 
               driverCalls = undefined;
 
-              // TODO: Getting a non-delegating property handled by vwf/model/object.
+              // GETTING
 
-              vwf.getProperty( id, "po" );
+              // Getting a non-delegating property handled by vwf/model/object.
 
-              // TODO: Getting ...
+              driverCalls = []; vwf.getProperty( id, "po" );
 
-              // Setting a self-delegating property during replication.
+              deepEqual( driverCalls, [
+                { driver: "vwf/model/javascript",  node: id, action: "gettingProperty", member: "po", value: undefined }, // pass
+                { driver: "vwf/model/test/script", node: id, action: "gettingProperty", member: "po", value: undefined }, // pass
+                { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "po", value: undefined }, // pass
+                { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "po", value: undefined }, // retrieve
+                { driver: "vwf/view/document",     node: id, action: "gotProperty",     member: "po", value: 1 }, // result
+              ], "non-delegating property terminating in vwf/model/object" );
+
+              // Getting a non-delegating property handled before vwf/model/object.
+
+              driverCalls = []; vwf.getProperty( id, "ps" );
+
+              deepEqual( driverCalls, [
+                { driver: "vwf/model/javascript",  node: id, action: "gettingProperty", member: "ps", value: undefined }, // pass
+                { driver: "vwf/model/test/script", node: id, action: "gettingProperty", member: "ps", value: undefined }, // pass
+                { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "ps", value: undefined }, // retrieve
+                // { driver: "vwf/model/object",   node: id, action: "gettingProperty", member: "ps", value: 1 }, // omit
+                { driver: "vwf/view/document",     node: id, action: "gotProperty",     member: "ps", value: 1 }, // result
+              ], "non-delegating property terminating before vwf/model/object" );
+
+              // Getting a self-delegating property.
+
+              driverCalls = []; vwf.getProperty( id, "qs" );
+
+              deepEqual( driverCalls, [
+                /* outer */  { driver: "vwf/model/javascript",     node: id, action: "gettingProperty", member: "qs", value: undefined }, // pass
+                /* outer */  { driver: "vwf/model/test/script",    node: id, action: "gettingProperty", member: "qs", value: undefined }, // delegate to `qs` as "1"
+                /* inner */  // { driver: "vwf/model/javascript",  node: id, action: "gettingProperty", member: "qs", value: undefined }, // skip for reentrant call
+                /* inner */  // { driver: "vwf/model/test/script", node: id, action: "gettingProperty", member: "qs", value: undefined }, // skip for reentrant call
+                /* inner */  { driver: "vwf/model/test/scene",     node: id, action: "gettingProperty", member: "qs", value: undefined }, // retrieve
+                /* inner */  // { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "qs", value: "1" }, // omit since assigned
+                /* inner */  // { driver: "vwf/view/document",     node: id, action: "gotProperty",     member: "qs", value: "1" }, // no result from reentrant call
+                /* outer */  // { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "qs", value: 1 },   // omit since delegated
+                /* outer */  // { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "qs", value: 1 },   // omit since delegated
+                /* outer */  { driver: "vwf/view/document",        node: id, action: "gotProperty",     member: "qs", value: 1 },   // result
+              ], "property delegating to self" );
+
+              // Getting a property delegating to a property delegating to a non-delegating property.
+
+              driverCalls = []; vwf.getProperty( id, "rs" );
+
+              deepEqual( driverCalls, [
+                /* rs */  { driver: "vwf/model/javascript",     node: id, action: "gettingProperty", member: "rs", value: undefined }, // pass
+                /* rs */  { driver: "vwf/model/test/script",    node: id, action: "gettingProperty", member: "rs", value: undefined }, // delegate to `ss` as 0
+                /* ss */  { driver: "vwf/model/javascript",     node: id, action: "gettingProperty", member: "ss", value: undefined }, // pass
+                /* ss */  { driver: "vwf/model/test/script",    node: id, action: "gettingProperty", member: "ss", value: undefined }, // delegate to `ts` as "0"
+                /* ts */  { driver: "vwf/model/javascript",     node: id, action: "gettingProperty", member: "ts", value: undefined }, // pass
+                /* ts */  { driver: "vwf/model/test/script",    node: id, action: "gettingProperty", member: "ts", value: undefined }, // pass
+                /* ts */  { driver: "vwf/model/test/scene",     node: id, action: "gettingProperty", member: "ts", value: undefined }, // retrieve
+                /* ts */  // { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "ts", value: "0" }, // omit since `ts` assigned
+                /* ts */  { driver: "vwf/view/document",        node: id, action: "gotProperty",     member: "ts", value: "0" }, // `ts` result
+                /* ss */  // { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "ss", value: 0 },   // omit since `ss` delegated
+                /* ss */  // { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "ss", value: 0 },   // omit since `ss` delegated
+                /* ss */  { driver: "vwf/view/document",        node: id, action: "gotProperty",     member: "ss", value: 0 },   // `ss` result
+                /* rs */  // { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "rs", value: 1 },   // omit since `rs` delegated
+                /* rs */  // { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "rs", value: 1 },   // omit since `rs` delegated
+                /* rs */  { driver: "vwf/view/document",        node: id, action: "gotProperty",     member: "rs", value: 1 },   // `rs` result
+              ], "property delegating to a property delegating to a non-delegating property" );
+
+              // Setting a property delegating to a property delegating to the initial property.
+
+              driverCalls = []; vwf.getProperty( id, "us" );
+
+              deepEqual( driverCalls, [
+                /* us */  { driver: "vwf/model/javascript",     node: id, action: "gettingProperty", member: "us", value: undefined },   // pass
+                /* us */  { driver: "vwf/model/test/script",    node: id, action: "gettingProperty", member: "us", value: undefined },   // delegate to `vs` as 0
+                /* vs */  { driver: "vwf/model/javascript",     node: id, action: "gettingProperty", member: "vs", value: undefined },   // pass
+                /* vs */  { driver: "vwf/model/test/script",    node: id, action: "gettingProperty", member: "vs", value: undefined },   // delegate back to `us` as "0"
+                /* us */  // { driver: "vwf/model/javascript",  node: id, action: "gettingProperty", member: "us", value: undefined }, // skip for reentrant call
+                /* us */  // { driver: "vwf/model/test/script", node: id, action: "gettingProperty", member: "us", value: undefined }, // skip for reentrant call
+                /* us */  { driver: "vwf/model/test/scene",     node: id, action: "gettingProperty", member: "us", value: undefined }, // retrieve
+                /* us */  // { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "us", value: "0" }, // omit since `us` assigned
+                /* us */  // { driver: "vwf/view/document",     node: id, action: "gotProperty",     member: "us", value: "0" }, // no result from reentrant call
+                /* vs */  // { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "vs", value: 0 },   // omit since `vs` delegated
+                /* vs */  // { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "vs", value: 0 },   // omit since `vs` delegated
+                /* vs */  { driver: "vwf/view/document",        node: id, action: "gotProperty",     member: "vs", value: 0 },   // `vs` result
+                /* us */  // { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "us", value: 1 },   // omit since `us` delegated
+                /* us */  // { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "us", value: 1 },   // omit since `us` delegated
+                /* us */  { driver: "vwf/view/document",        node: id, action: "gotProperty",     member: "us", value: 1 },   // `us` result
+              ], "property delegating to a property delegating to initial property" );
+
+              driverCalls = undefined;
+
+              // SETTING DURING REPLICATION
 
               vwf.models.kernel.disable();
+
+              // Setting a non-delegating property handled by vwf/model/object during replication
+
+              driverCalls = []; vwf.setProperty( id, "po", 1 );
+
+              deepEqual( driverCalls, [
+                { driver: "vwf/model/javascript",  node: id, action: "settingProperty", member: "po", value: 1 }, // pass
+                { driver: "vwf/model/test/script", node: id, action: "settingProperty", member: "po", value: 1 }, // pass
+                { driver: "vwf/model/test/scene",  node: id, action: "settingProperty", member: "po", value: 1 }, // pass
+                { driver: "vwf/model/object",      node: id, action: "settingProperty", member: "po", value: 1 }, // assign
+                { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "po", value: 1 }, // result
+              ], "non-delegating property terminating in vwf/model/object during replication" );
+
+              // Setting a non-delegating property handled before vwf/model/object during replication
+
+              driverCalls = []; vwf.setProperty( id, "ps", 1 );
+
+              deepEqual( driverCalls, [
+                { driver: "vwf/model/javascript",  node: id, action: "settingProperty", member: "ps", value: 1 }, // pass
+                { driver: "vwf/model/test/script", node: id, action: "settingProperty", member: "ps", value: 1 }, // pass
+                { driver: "vwf/model/test/scene",  node: id, action: "settingProperty", member: "ps", value: 1 }, // assign
+                // { driver: "vwf/model/object",   node: id, action: "settingProperty", member: "ps", value: 1 }, // omit
+                { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "ps", value: 1 }, // result
+              ], "non-delegating property terminating before vwf/model/object during replication" );
+
+              // Setting a self-delegating property during replication
 
               driverCalls = []; vwf.setProperty( id, "qs", "1" );
 
@@ -909,7 +1020,19 @@
                 /* outer */  // { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "qs", value: "1" }, // no result since delegated during replication
               ], "property delegating to self during replication" );
 
-              // Setting a property delegating to a property delegating to the initial property during replication.
+              // Setting a property delegating to a property delegating to a non-delegating property during replication
+
+              driverCalls = []; vwf.setProperty( id, "rs", 1 );
+
+              deepEqual( driverCalls, [
+                /* rs */  { driver: "vwf/model/javascript",     node: id, action: "settingProperty", member: "rs", value: 1 },   // pass
+                /* rs */  { driver: "vwf/model/test/script",    node: id, action: "settingProperty", member: "rs", value: 1 },   // ignore since delegated during replication
+                /* rs */  { driver: "vwf/model/test/scene",     node: id, action: "settingProperty", member: "rs", value: 1 },   // pass
+                /* rs */  { driver: "vwf/model/object",         node: id, action: "settingProperty", member: "rs", value: 1 },   // pass
+                /* rs */  // { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "rs", value: 1 },   // no result since delegated during replication
+              ], "property delegating to a property delegating to a non-delegating property during replication" );
+
+              // Setting a property delegating to a property delegating to the initial property during replication
 
               driverCalls = []; vwf.setProperty( id, "us", "0" );
 
@@ -919,6 +1042,70 @@
                 /* us */  { driver: "vwf/model/test/scene",     node: id, action: "settingProperty", member: "us", value: "0" }, // assign
                 /* us */  // { driver: "vwf/model/object",      node: id, action: "settingProperty", member: "us", value: "0" }, // omit since assigned
                 /* us */  // { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "us", value: 1 },   // no result since delegated during replication
+              ], "property delegating to a property delegating to initial property during replication" );
+
+              driverCalls = undefined;
+
+              // GETTING DURING REPLICATION
+
+              // Getting a non-delegating property handled by vwf/model/object during replication
+
+              driverCalls = []; vwf.getProperty( id, "po" );
+
+              deepEqual( driverCalls, [
+                { driver: "vwf/model/javascript",  node: id, action: "gettingProperty", member: "po", value: undefined }, // pass
+                { driver: "vwf/model/test/script", node: id, action: "gettingProperty", member: "po", value: undefined }, // pass
+                { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "po", value: undefined }, // pass
+                { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "po", value: undefined }, // assign
+                { driver: "vwf/view/document",     node: id, action: "gotProperty",     member: "po", value: 1 }, // result
+              ], "non-delegating property terminating in vwf/model/object during replication" );
+
+              // Getting a non-delegating property handled before vwf/model/object during replication
+
+              driverCalls = []; vwf.getProperty( id, "ps" );
+
+              deepEqual( driverCalls, [
+                { driver: "vwf/model/javascript",  node: id, action: "gettingProperty", member: "ps", value: undefined }, // pass
+                { driver: "vwf/model/test/script", node: id, action: "gettingProperty", member: "ps", value: undefined }, // pass
+                { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "ps", value: undefined }, // assign
+                // { driver: "vwf/model/object",   node: id, action: "gettingProperty", member: "ps", value: 1 }, // omit
+                { driver: "vwf/view/document",     node: id, action: "gotProperty",     member: "ps", value: 1 }, // result
+              ], "non-delegating property terminating before vwf/model/object during replication" );
+
+              // Getting a self-delegating property during replication during replication
+
+              driverCalls = []; vwf.getProperty( id, "qs" );
+
+              deepEqual( driverCalls, [
+                /* outer */  { driver: "vwf/model/javascript",     node: id, action: "gettingProperty", member: "qs", value: undefined }, // pass
+                /* outer */  { driver: "vwf/model/test/script",    node: id, action: "gettingProperty", member: "qs", value: undefined }, // ignore since delegated during replication
+                /* outer */  { driver: "vwf/model/test/scene",     node: id, action: "gettingProperty", member: "qs", value: undefined }, // retrieve
+                /* outer */  // { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "qs", value: "1" }, // omit since retrieved
+                /* outer */  // { driver: "vwf/view/document",     node: id, action: "gotProperty",     member: "qs", value: "1" }, // no result since delegated during replication
+              ], "property delegating to self during replication" );
+
+              // Getting a property delegating to a property delegating to a non-delegating property during replication
+
+              driverCalls = []; vwf.getProperty( id, "rs" );
+
+              deepEqual( driverCalls, [
+                /* rs */  { driver: "vwf/model/javascript",     node: id, action: "gettingProperty", member: "rs", value: undefined },   // pass
+                /* rs */  { driver: "vwf/model/test/script",    node: id, action: "gettingProperty", member: "rs", value: undefined },   // ignore since delegated during replication
+                /* rs */  { driver: "vwf/model/test/scene",     node: id, action: "gettingProperty", member: "rs", value: undefined },   // pass
+                /* rs */  { driver: "vwf/model/object",         node: id, action: "gettingProperty", member: "rs", value: undefined },   // pass
+                /* rs */  // { driver: "vwf/view/document",     node: id, action: "gotProperty",     member: "rs", value: undefined },   // no result since delegated during replication
+              ], "property delegating to a property delegating to a non-delegating property during replication" );
+
+              // Getting a property delegating to a property delegating to the initial property during replication
+
+              driverCalls = []; vwf.getProperty( id, "us" );
+
+              deepEqual( driverCalls, [
+                /* us */  { driver: "vwf/model/javascript",     node: id, action: "gettingProperty", member: "us", value: undefined }, // pass
+                /* us */  { driver: "vwf/model/test/script",    node: id, action: "gettingProperty", member: "us", value: undefined }, // ignore since delegated during replication
+                /* us */  { driver: "vwf/model/test/scene",     node: id, action: "gettingProperty", member: "us", value: undefined }, // retrieve
+                /* us */  // { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "us", value: "-1" }, // omit since retrieved
+                /* us */  // { driver: "vwf/view/document",     node: id, action: "gotProperty",     member: "us", value: "-1" },   // no result since delegated during replication
               ], "property delegating to a property delegating to initial property during replication" );
 
               driverCalls = undefined;
