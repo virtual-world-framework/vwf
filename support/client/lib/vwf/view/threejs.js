@@ -321,6 +321,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     node.ignoreNextTransformUpdate = true;
                 }
             }
+            else if (eventName == "resetViewport") {
+                if(this.state.scenes[nodeID]) {
+                    this.state.scenes[nodeID].renderer.setViewport(0,0,window.innerWidth,window.innerHeight);
+                }
+            }
         },
 
         // -- ticked -----------------------------------------------------------------------------------

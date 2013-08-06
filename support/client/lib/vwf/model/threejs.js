@@ -579,14 +579,21 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     else if ( propertyName == 'castShadows' )
                     {
-                        //debugger;
                         value = Boolean( propertyValue );
                         threeObject.castShadow = value;
+                        var meshes = findAllMeshes.call( this, threeObject );
+                        for(var i = 0, il = meshes.length; i < il; i++) {
+                            meshes[i].castShadow = value;
+                        }
                     }
                     else if ( propertyName == 'receiveShadows' )
                     {
                         value = Boolean( propertyValue );
                         threeObject.receiveShadow = value;
+                        var meshes = findAllMeshes.call( this, threeObject );
+                        for(var i = 0, il = meshes.length; i < il; i++) {
+                            meshes[i].receiveShadow = value;
+                        }
                     }
 
                     //This can be a bit confusing, as the node has a material property, and a material child node. 
@@ -1118,6 +1125,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         else if(node) {
                             node.rendererProperties["enableShadows"] = propertyValue;
                         }
+
+                        // Need to reset the viewport or you just get a blank screen
+                        this.state.kernel.dispatchEvent( nodeID, "resetViewport" );
                     }
                 }   
                 if(threeObject instanceof THREE.PointLight || threeObject instanceof THREE.DirectionalLight || threeObject instanceof THREE.SpotLight )
@@ -1131,14 +1141,26 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             "distance": threeObject.distance,
                             "color":  threeObject.color,
                             "intensity": threeObject.intensity,
-                            "castShadows": threeObject.castShadow,
+                            "castShadow": threeObject.castShadow,
+                            "shadowCameraLeft": threeObject.shadowCameraLeft,
+                            "shadowCameraRight": threeObject.shadowCameraRight,
+                            "shadowCameraTop": threeObject.shadowCameraTop,
+                            "shadowCameraBottom": threeObject.shadowCameraBottom,
+                            "shadowCameraNear": threeObject.shadowCameraNear,
+                            "shadowCameraFar": threeObject.shadowCameraFar,
                             "clone": function( newObj ) {
                                 newObj.name = this.name;
                                 newObj.distance = this.distance;
                                 //console.info( "light.clone.color = " + JSON.stringify( this.color ) )
                                 newObj.color.setRGB( this.color.r, this.color.g, this.color.b );
                                 newObj.intensity = this.intensity;
-                                newObj.castShadows = this.castShadows;
+                                newObj.castShadow = this.castShadow;
+                                newObj.shadowCameraLeft = this.shadowCameraLeft;
+                                newObj.shadowCameraRight = this.shadowCameraRight;
+                                newObj.shadowCameraTop = this.shadowCameraTop;
+                                newObj.shadowCameraBottom = this.shadowCameraBottom;
+                                newObj.shadowCameraNear = this.shadowCameraNear;
+                                newObj.shadowCameraFar = this.shadowCameraFar;
                             }
                         };
 
@@ -1434,7 +1456,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         value = threeObject.intensity;
                         break;
                     case "castShadows":
-                        value = threeObject.castShadows;
+                        value = threeObject.castShadow;
                         break;
                 }
             }
@@ -1984,7 +2006,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }   
             }
             if ( geo !== undefined ) {
-                var mesh = new THREE.Mesh( geo, mat );          
+                var mesh = new THREE.Mesh( geo, mat );
+
+                // The child mesh is created after the properties have been initialized, so copy
+                // the values of cast and receive shadow so they match
+                mesh.castShadow = node.threeObject.castShadow;
+                mesh.receiveShadow = node.threeObject.receiveShadow;
+
                 node.threeObject.add( mesh ); 
                 
                 geo.computeCentroids();
