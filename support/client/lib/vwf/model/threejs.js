@@ -1194,6 +1194,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             "shadowCameraBottom": threeObject.shadowCameraBottom,
                             "shadowCameraNear": threeObject.shadowCameraNear,
                             "shadowCameraFar": threeObject.shadowCameraFar,
+                            "shadowDarkness": threeObject.shadowDarkness,
                             "clone": function( newObj ) {
                                 newObj.name = this.name;
                                 newObj.distance = this.distance;
@@ -1207,6 +1208,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 newObj.shadowCameraBottom = this.shadowCameraBottom;
                                 newObj.shadowCameraNear = this.shadowCameraNear;
                                 newObj.shadowCameraFar = this.shadowCameraFar;
+                                newObj.shadowDarkness = this.shadowDarkness;
                             }
                         };
 
@@ -1270,6 +1272,34 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     else if ( propertyName == 'castShadows' ) {
                         value = Boolean( propertyValue );
                         threeObject.castShadow = value;
+                    }
+                    else if ( propertyName == 'shadowCameraBottom' ) {
+                        value = Number( propertyValue );
+                        threeObject.shadowCameraBottom = value;
+                    }
+                    else if ( propertyName == 'shadowCameraLeft' ) {
+                        value = Number( propertyValue );
+                        threeObject.shadowCameraLeft = value;
+                    }
+                    else if ( propertyName == 'shadowCameraRight' ) {
+                        value = Number( propertyValue );
+                        threeObject.shadowCameraRight = value;
+                    }
+                    else if ( propertyName == 'shadowCameraTop' ) {
+                        value = Number( propertyValue );
+                        threeObject.shadowCameraTop = value;
+                    }
+                    else if ( propertyName == 'shadowCameraNear' ) {
+                        value = Number( propertyValue );
+                        threeObject.shadowCameraNear = value;
+                    }
+                    else if ( propertyName == 'shadowCameraFar' ) {
+                        value = Number( propertyValue );
+                        threeObject.shadowCameraFar = value;
+                    }
+                    else if ( propertyName == 'shadowDarkness' ) {
+                        value = Number( propertyValue );
+                        threeObject.shadowDarkness = value;
                     }
 
                 }
@@ -1507,6 +1537,26 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     case "castShadows":
                         value = threeObject.castShadow;
                         break;
+                    case "shadowCameraBottom":
+                        value = threeObject.shadowCameraBottom;
+                        break;
+                    case "shadowCameraLeft": 
+                        value = threeObject.shadowCameraLeft;
+                        break;
+                    case "shadowCameraRight": 
+                        value = threeObject.shadowCameraRight;
+                        break;
+                    case "shadowCameraTop": 
+                        value = threeObject.shadowCameraTop;
+                        break;
+                    case "shadowCameraNear":
+                        value = threeObject.shadowCameraNear;
+                        break;
+                    case "shadowCameraFar":
+                        value = threeObject.shadowCameraFar;
+                        break;
+                    case "shadowDarkness":
+                        value = threeObject.shadowDarkness;
                 }
             }
             return value;
