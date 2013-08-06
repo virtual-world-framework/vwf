@@ -67,6 +67,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
             this.state.prototypes = {}; 
             this.state.kernel = this.kernel.kernel.kernel;            
+ 
+            // turns on logger debugger console messages 
+            this.debug = {
+                "creation": false,
+                "initializing": false,
+                "parenting": false,
+                "deleting": false,
+                "properties": false,
+                "setting": false,
+                "getting": false,
+                "prototypes": false
+            };
+
         },
 
 
@@ -82,10 +95,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             // the scene or a prototype.  In either of those cases, save the uri of the new node
             var childURI = ( nodeID === 0 ? childIndex : undefined );
 
+            if ( this.debug.creation ) {
+                this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            }
+
             // If the node being created is a prototype, construct it and add it to the array of prototypes,
             // and then return
             var prototypeID = ifPrototypeGetId.call( this, nodeID, childID );
             if ( prototypeID !== undefined ) {
+                
+                if ( this.debug.prototypes ) {
+                    this.logger.infox( "prototype: ", prototypeID );
+                }
+
                 this.state.prototypes[ prototypeID ] = {
                     parentID: nodeID,
                     ID: childID,
@@ -357,10 +379,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             };
 
         },
+
+        initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childIndex, childName ) {
+
+            if ( this.debug.initializing ) {
+                this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            } 
+        },
          
         // -- deletingNode -------------------------------------------------------------------------
 
         deletingNode: function( nodeID ) {
+
+            if ( this.debug.deleting ) {
+                this.logger.infox( "deletingNode", nodeID );
+            }
 
             if(nodeID)
             {
@@ -396,6 +430,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
+
+            if ( this.debug.properties ) {
+                this.logger.infox( "C === creatingProperty ", nodeID, propertyName, propertyValue );
+            }
+
             return this.initializingProperty( nodeID, propertyName, propertyValue );
         },
 
@@ -405,6 +444,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             var value = undefined;
             //console.info( "initializingProperty( " + nodeID+", "+propertyName+", "+propertyValue + " )" );
+
+            if ( this.debug.properties ) {
+                this.logger.infox( "  I === initializingProperty ", nodeID, propertyName, propertyValue );
+            }
 
             if ( propertyValue !== undefined ) {
                 var node = this.state.nodes[ nodeID ];
@@ -430,7 +473,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
-            //console.info( "settingProperty( " + nodeID+", "+propertyName+", "+propertyValue + " )" );
+            if ( this.debug.properties || this.debug.setting ) {
+                this.logger.infox( "    S === settingProperty ", nodeID, propertyName, propertyValue );
+            }
+
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             if( node === undefined ) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
@@ -1235,7 +1281,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         gettingProperty: function( nodeID, propertyName ) {
 
-            //console.log([nodeID,propertyName,propertyValue]);
+            if ( this.debug.properties || this.debug.getting ) {
+                this.logger.infox( "   G === gettingProperty ", nodeID, propertyName, propertyValue );
+            }
+
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
