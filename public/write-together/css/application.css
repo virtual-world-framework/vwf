@@ -1,0 +1,12 @@
+body {
+  color: #333;
+  background-color: #fff;
+}
+
+textarea.write-together-editor {
+  background-color: transparent;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #222;
+}
