@@ -16,4 +16,4 @@ model:
   vwf/model/threejs:
 view:
   vwf/view/threejs: "#vwf-root"
-  vwf/view/webrtc: { debug: true, videoProperties: { create: false } }
+  vwf/view/webrtc: { debug: false, videoProperties: { create: false } }
