@@ -6,13 +6,12 @@
     $('html').css('backgroundColor', '#fff');
     $('div').css('backgroundColor', '#fff');
 
-    // Grab the content property from the kernel and shove it in the textarea    
-    var editorNodeId = vwf_view.kernel.find(undefined, '/editor');
-
-    console.log(editorNodeId);
-    
     vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-      if ( nodeId == editorNodeId ) {
+      // If I'm the one who set the property, then ignore the change
+      console.log("Other changed content to: " + propertyValue);
+      var editorNodeId = vwf_view.kernel.find('', '/editor');
+
+      if ( nodeId == editorNodeId[0] ) {
         switch ( propertyName ) {
           case "content":
             $(".write-together-editor").val(propertyValue);
@@ -21,9 +20,10 @@
       }
     }
 
-    $('.write-together-editor').change(function() {
-      vwf_view.kernel.setProperty( editorNodeId, "content", $(this).val() );
-      console.log('content changed');
+    $('.write-together-editor').on('input propertychange', function() {
+      console.log("I changed content to: " + $(this).val());
+      var editorNodeId = vwf_view.kernel.find('', '/editor');
+      vwf_view.kernel.setProperty( editorNodeId[0], "content", $(this).val());
     });
   });
 </script>
