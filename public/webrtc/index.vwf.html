@@ -30,6 +30,8 @@
 
 	<script type="text/javascript">
 
+		
+		var appRoot = vwf_view.kernel.find( "", "/" )[0];
 		var local = { 
 			"client": {
 				"name": "",
@@ -67,7 +69,7 @@
 						$( this ).dialog( "close" );
 
 						var parms = [ vwf_view.kernel.moniker(), local.client.name, capture ];
-						vwf_view.kernel.callMethod( "index-vwf", "createClient", parms );
+						vwf_view.kernel.callMethod( appRoot, "createClient", parms );
 					},
 				}
 			} );
@@ -119,11 +121,9 @@
 		});
 
 
-		$( window ).unload( function() {
-
-			vwf_view.kernel.callMethod( "index-vwf", "removeClient", [ vwf_view.kernel.moniker() ] )
-		
-		} );
+		//$( window ).unload( function() {
+		//	vwf_view.kernel.callMethod( appRoot, "removeClient", [ vwf_view.kernel.moniker() ] )
+		//} );
 
         // VWF view - call Method
         vwf_view.calledMethod = function( nodeID, methodName, methodParameters, methodValue ) {
@@ -131,17 +131,21 @@
             return;
           }
 
-          //console.info( "calledMethod( "+nodeID+", "+methodName+", "+methodParameters[0]+" )" );
           switch ( methodName ) {
             case "newClientVideo":
+            case "createVideo":
                 var moniker = methodParameters[1];
-                //console.info( "++++   " + moniker + " == " + this.kernel.moniker() );
                 if ( moniker && moniker == this.kernel.moniker() ) {
 	                var parms = methodParameters[0];
 
 					// defined in videoWindow.js
-					newWindow( parms.name, "video", parms.url, parms.color, parms.muted );
+					newWindow( parms.ID, parms.name, "video", parms.url, parms.color, parms.muted );
 				}
+              	break;
+            case "removeClientVideo":
+            case "removeVideo":
+				// defined in videoWindow.js
+				removeWindow( methodParameters[0] );
               	break;
           }
         }

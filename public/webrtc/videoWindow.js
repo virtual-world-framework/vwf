@@ -4,6 +4,7 @@
 
 // Global Variable Instantiation for Taskbar
 var windowIndex = 0;
+var windowsCreated = {};
  
 // Mute Button - updates mute button and controls local mic mute
  
@@ -13,14 +14,14 @@ function setMute() {
 		$('#mute').removeClass('icon-volume-up').addClass('icon-volume-off');
 		//vwfMedia.setMute( true );
       
-    vwf_view.kernel.callMethod( "index-vwf", "setLocalMute", true );
+    vwf_view.kernel.callMethod( "index-vwf", "setLocalMute", { "moniker": vwf_view.kernel.moniker() , "value": true } );
   }
   else {
 		$('#muteButton').removeClass('btn-danger').addClass('btn-info');
 		$('#mute').removeClass('icon-volume-off').addClass('icon-volume-up');
 		//vwfMedia.setMute( false );
 
-    vwf_view.kernel.callMethod( "index-vwf", "setLocalMute", false );
+    vwf_view.kernel.callMethod( "index-vwf", "setLocalMute", { "moniker": vwf_view.kernel.moniker() , "value": false } );
   }
 }
 
@@ -43,8 +44,8 @@ function setMainVideo( url, name, color ) {
   var b = "0" + parseInt( color[2] ).toString( 16 ).substr( -2 );
   var borderColor = "#" +
     r.substr( r.length - 2 ) + 
-    g.substr( g.length - 2) +
-    b.substr( b.length - 2);
+    g.substr( g.length - 2 ) +
+    b.substr( b.length - 2 );
 
   $( "#main" ).css( "border-color", borderColor );
   
@@ -82,11 +83,18 @@ function swapPanes( divId ) {
 
 }
 
-function newWindow( title, type, url, color, muted ) {
+function newWindow( id, title, type, url, color, muted ) {
 
   //--------------------------
   // Set up window parameters
   //--------------------------
+
+  var newWin = windowsCreated[ id ] = {
+    "title": title,
+    "type": type,
+    "url": url,
+    "color": color
+  };  // the id should be unique
 
   // Ensure that color is valid
   if ( color === undefined ) {
@@ -101,8 +109,8 @@ function newWindow( title, type, url, color, muted ) {
   // END TODO
 
   // Declare the variables that every window type needs
-  var divId = title + windowIndex;
-  var divSelector = "#" + divId;
+  var divId = newWin.divId = title + windowIndex;
+  var divSelector = newWin.divSelector = "#" + divId;
   var $container, classString, stylString, resizeFunction;
 
   //---------------------------------
@@ -201,16 +209,18 @@ function newWindow( title, type, url, color, muted ) {
   var $appBar = $("#appBar");
   if ($appBar.children().length < 12)
   {
-    var buttonName = "button-" + divId;
+    var buttonName = newWin.buttonName = "button-" + divId;
     var buttonHtml = "<div class='btn-group dropup' id='"+buttonName+"'><button class='btn btn-success' id='"+buttonName+"-button'>"+title+"</button>" + 
       "<button class='btn btn-success dropdown-toggle' data-toggle='dropdown'><span class='caret'></span></button>" +
       "<ul class='dropdown-menu pull-right'><li><a id='"+buttonName+"-reset' href='#'>Reset</a></li></ul></div>";
-    $appBar.append(buttonHtml);
+    
+    $appBar.append( buttonHtml );
+    
     $("#" + buttonName + "-button").click(function() {
-      minMax(divId);
+      minMax( divId );
     });
     $("#" + buttonName + "-reset").click(function() {
-      resetPosition(divId);
+      resetPosition( divId );
     });
   } 
 
@@ -230,8 +240,8 @@ function newWindow( title, type, url, color, muted ) {
         "<div class='btn-group' id='vnccontrol-" + divId + "'><button class='btn btn-info switchVNCControl' onclick='controlVnc(this.parentNode.id.substr(11));'></button></div>"
       );
 
-      var $canvasContainer = $('#container-'+divId);
-      var $canvas = $('#canvas-'+divId);
+      var $canvasContainer = newWin.canvasContainer = $('#container-'+divId);
+      var $canvas = newWin.canvas = $('#canvas-'+divId);
       // $canvas.resize( function () {
         // $div.width( $canvas.width()+20 );
         // $canvasContainer.height( $canvas.height()+5 );
@@ -245,7 +255,7 @@ function newWindow( title, type, url, color, muted ) {
       // });
       break;
     case "html":
-      var iframeId = "iframe-" + divId;
+      var iframeId = newWin.iframeId  = "iframe-" + divId;
       var iframeWidth = $div.width() - 20;
       var iframeHeight = $div.height() - 45;
       $div.append(
@@ -254,7 +264,7 @@ function newWindow( title, type, url, color, muted ) {
       );
       break;
 		case "video":
-			var videoId = "video-" + divId;
+			var videoId = newWin.videoId = "video-" + divId;
 			var mutedAttr = muted ? "muted " : "";
 
       $div.append(
@@ -283,6 +293,17 @@ function newWindow( title, type, url, color, muted ) {
   windowIndex++;  
   return $div; 
 }
+
+function removeWindow( id ) {
+  if ( windowsCreated[ id ] != null ) {
+    var win = windowsCreated[ id ];
+
+    win.divId && deleteWindow( win.divId );
+
+    delete windowsCreated[ id ];
+  }
+}
+
 
 function resizeCanvas( jQueryWindow ) {
   var $container = jQueryWindow.children(".canvasContainer");
@@ -359,7 +380,7 @@ function restore( name )
   });
 }
 
-function removeWindow( name ) {
+function deleteWindow( name ) {
   var jQueryWindow = $('#' + name);
 
   if ( jQueryWindow )

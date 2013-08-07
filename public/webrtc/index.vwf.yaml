@@ -21,6 +21,8 @@ methods:
   initializeCamera:
   createClient:
   removeClient:
+  createVideo:
+  removeVideo:
 children:
   clients:
     extends: http://vwf.example.com/node.vwf
@@ -44,7 +46,7 @@ scripts:
       clr = colorList.shift();
       this.clientColors = colorList;
 
-      console.info( "createClient( "+moniker+", "+loginName+", "+mediaSharing+" )   clr = " + clr );
+      //console.info( "createClient( "+moniker+", "+loginName+", "+mediaSharing+" )   clr = " + clr );
 
       var clientDef = { 
         "extends": "http://vwf.example.com/client.vwf",
