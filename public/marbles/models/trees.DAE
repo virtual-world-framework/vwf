@@ -75,7 +75,7 @@
               <color>0 0 0 1</color>
             </reflective>
             <transparent opaque="RGB_ZERO">
-              <texture texture="ccs_tree2_alpha_png-sampler" texcoord="CHANNEL1"/>
+              <color>1 1 1 1</color>
             </transparent>
             <transparency>
               <float>1</float>
@@ -175,7 +175,7 @@
               <color>0 0 0 1</color>
             </reflective>
             <transparent opaque="RGB_ZERO">
-              <texture texture="tree_decid_10_alpha_png-sampler" texcoord="CHANNEL1"/>
+              <color>1 1 1 1</color>
             </transparent>
             <transparency>
               <float>1</float>
