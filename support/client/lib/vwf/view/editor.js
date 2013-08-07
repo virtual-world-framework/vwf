@@ -1689,9 +1689,6 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             var timestamp = state["queue"].time;
             timestamp = Math.round(timestamp * 1000);
 
-            // Remove queue component of state
-            delete state["queue"];
-
             var objectIsTypedArray = function( candidate ) {
                 var typedArrayTypes = [
                     Int8Array,
