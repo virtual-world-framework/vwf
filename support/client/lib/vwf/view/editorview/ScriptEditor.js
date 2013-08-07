@@ -1292,6 +1292,7 @@ define(function ()
 		this.methodEditor.setTheme("ace/theme/chrome");
 		this.methodEditor.getSession().setMode("ace/mode/javascript");
 		var self = this;
+		//show the little popup that displays the parameters to a function call
 		this.setupFunctionTip = function(text,editor,offset,width)
 		{
 		
@@ -1305,56 +1306,65 @@ define(function ()
 			$('#FunctionTip').css('left',(offset.left) + 'px');
 			$('#FunctionTip').show();
 		}
-		this.setupAutocomplete = function(keys,editor,offset,width)
+		//Setup the div for the autocomplete interface
+		this.setupAutocomplete = function(keys,editor)
 		{
 			this.activeEditor = editor;
+			if(!self.filter)
+				self.filter = '';
+			
+			//Get the position of hte cursor on the editor			
+			var offset = $(editor.renderer.$cursorLayer.cursor).offset();
+			var width = $(editor.renderer.$cursorLayer.cursor).width();
 			if($('#AutoComplete').length == 0)
 			{
+				//append the div and create it
 				$(document.body).append("<form id='AutoComplete' tabindex=890483 />");
 				$('#AutoComplete').on('blur',function(e,key)
 				{
 					$('#AutoComplete').hide();
 				});
-				
+				//bind up events
 				$('#AutoComplete').on('keydown',function(e,key)
 				{
-					//enter
-					if(e.which == 13)
+					//enter or dot will accept the suggestion
+					if(e.which == 13 || e.which == 190)
 					{
-						
+						//find the selected text
 						var index = $(this).attr('autocompleteindex');
 						$('#AutoComplete').hide();
 						
+						//backspace letters up to the dot or bracket
 						var text = $($(this).children()[index]).text();
+						for(var i = 0; i < self.filter.length; i++)
+							_ScriptEditor.activeEditor.remove('left');
+						//insert	
 						_ScriptEditor.activeEditor.insert(text);
+						
+						//focus on the editor
 						window.setTimeout(function(){
 						
 							_ScriptEditor.activeEditor.focus();
 						
 						},15);
 						return true;
-					}
-					else if(e.which == 190)
-					{
-						
-						var index = $(this).attr('autocompleteindex');
-						$('#AutoComplete').hide();
-						
-						var text = $($(this).children()[index]).text();
-						_ScriptEditor.activeEditor.insert(text);
-						_ScriptEditor.activeEditor.focus();
-						return true;
+					
+					
 					}else if(e.which == 40) //down
 					{
+						//move up or down the list
 						var children = $(this).children();
 						var index = $(this).attr('autocompleteindex');
 						index++;
 						if(index > children.length-1)
 							index = children.length-1;
 						$(this).attr('autocompleteindex',index);
+						
+						//deal with the scrolling
 						if((index+1) * $(children[0]).height() > 150 + $('#AutoComplete').scrollTop() )
 							$('#AutoComplete').scrollTop((index+1) * $(children[0]).height() - 150);
 						
+						//show the selection
 						for(var i = 0; i < children.length; i++)
 						{
 							if(i == index)
@@ -1366,6 +1376,7 @@ define(function ()
 					}
 					else if(e.which == 38) //up
 					{
+						//move up or down the list
 						var children = $(this).children();
 						var index = $(this).attr('autocompleteindex');
 						index--;
@@ -1373,8 +1384,11 @@ define(function ()
 							index = 0;
 						$(this).attr('autocompleteindex',index);
 						
+						//deal with scrolling drama
 						if((index) * $(children[0]).height() < $('#AutoComplete').scrollTop() )
 							$('#AutoComplete').scrollTop(index * $(children[0]).height());
+						
+						//show the selected text
 						for(var i = 0; i < children.length; i++)
 						{
 							if(i == index)
@@ -1386,31 +1400,91 @@ define(function ()
 					}
 					else if(e.which == 27) //esc
 					{
+						//just hide the editor
 						$('#AutoComplete').hide();
 						_ScriptEditor.activeEditor.focus();
 						
 					}else
 					{
-						$('#AutoComplete').hide();
+						//this is all other keys, 
+						var key = e.which;
+						key = String.fromCharCode(key);
+						
+						//if the key is a character or backspace, edit the filter
+						if(e.which == 8 || (e.which < 91 && e.which > 64))
+						{
+							//if it's not a backspace, add it to the filter
+							if(e.which != 8)
+								self.filter += key;
+							else	
+							{	//if the backspace occurs with no filter, then close and remove
+								if(self.filter.length ==0)
+								{
+									window.setTimeout(function()
+									{
+										_ScriptEditor.activeEditor.remove('left');
+										$('#AutoComplete').hide();
+										_ScriptEditor.activeEditor.focus();
+										
+									},15);
+									e.preventDefault();
+									return;
+								}
+								//else, backspace from both the editor and the filter string
+								self.filter = self.filter.substr(0,self.filter.length-1);
+								_ScriptEditor.activeEditor.remove('left');
+								
+							}
+							//wait 15ms, then show this whole dialog again
+							window.setTimeout(function()
+							{
+								console.log(self.filter);
+								$('#AutoComplete').focus();
+								
+								self.setupAutocomplete(self.keys,editor,self.filter);
+								
+							},15);
+						}else
+						{	
+							//any key that is not a character or backspace cancels the autocomplete
+							window.setTimeout(function()
+							{
+								$('#AutoComplete').hide();
+									_ScriptEditor.activeEditor.focus();
+								
+							},15);
+						
+						}
+						//this is important for keypresses, so that they will filter down into ACE
 						_ScriptEditor.activeEditor.focus();
-						$(_ScriptEditor.activeEditor.renderer.$textLayer).trigger(e);	
+						
 					}
 					
 				});
 				
 			}
+			
+			
+			//now that the gui is setup, populate it with the keys
 			$('#AutoComplete').empty();
-			for(var i in keys)
-			{
+			for(var i in self.keys)
+			{	
+				//use the filter string to filter out suggestions
+				if(self.keys[i][0].toLowerCase().indexOf(self.filter.toLowerCase()) != 0)
+					continue;
+				
+				//Append a div	
 				$('#AutoComplete').append("<div id='AutoComplete_"+i+"' class='AutoCompleteOption'/>");
-				$('#AutoComplete_'+i).text(keys[i][0]);
-				if(keys[i][1] == Function)
+				$('#AutoComplete_'+i).text(self.keys[i][0]);
+				if(self.keys[i][1] == Function)
 				{
 					$('#AutoComplete_'+i).addClass('AutoCompleteOptionFunction');
 				}
 				$('#AutoComplete_'+i).attr('autocompleteindex',i);
 				if(i == 0)
 					$('#AutoComplete_'+i).css('background','lightblue');
+				
+				//Clicking on the div just inserts the text, and hides the GUI
 				$('#AutoComplete_'+i).click(function()
 				{
 					
@@ -1418,7 +1492,11 @@ define(function ()
 						$('#AutoComplete').hide();
 						
 						var text = $(this).text();
+						//Remove up the the last dot or bracket
+						for(var i = 0; i < self.filter.length; i++)
+							_ScriptEditor.activeEditor.remove('left');
 						_ScriptEditor.activeEditor.insert(text);
+						
 						window.setTimeout(function(){
 						
 							_ScriptEditor.activeEditor.focus();
@@ -1444,40 +1522,47 @@ define(function ()
 				
 			},15);
 		}
+		//The dot or the bracket was hit, so open the suggestion box
 		this.triggerAutoComplete = function(editor)
 		{
 			var cur = editor.getCursorPosition();
 			var session = editor.getSession();
 			var line = session.getLine(cur.row);
 			var chr = line[cur.column] ;
+			//Open on . or [
 			if(chr== '.' || chr == '[')
 			{
 				
+				//get the line up to the dot
 				line = line.substr(0,cur.column);
 				var splits = line.split(' ');
 				line = splits[splits.length-1];
 				splits = line.split(';');
 				line = splits[splits.length-1];
+				//don't show autocomplete for lines that contain a (, because we'll be calling a functio ntaht might have side effects
 				if(line.indexOf('(') == -1 && line.indexOf('=') == -1)
 				{
-					var keys = vwf.callMethod(self.currentNode.id,'JavascriptEvalKeys',[line]);
+					//get the keys
+					self.keys = vwf.callMethod(self.currentNode.id,'JavascriptEvalKeys',[line]);
 					
 					
 					
 					
-					if(keys)
+					if(self.keys)
 					{
 					
+						//if the character that started the autocomplete is a dot, then remove the keys that have
+						//spaces or special characters, as they are not valid identifiers
 						if(chr == '.')
 						{
 							var remove = [];
 							var i = 0;
 							
-							while(i < keys.length)
+							while(i < self.keys.length)
 							{
-								if(keys[i][0].search(/[^0-9a-zA-Z]/) != -1 || keys[i][0].search(/[0-9]/) == 0)
+								if(self.keys[i][0].search(/[^0-9a-zA-Z]/) != -1 || self.keys[i][0].search(/[0-9]/) == 0)
 								{
-									keys.splice(i,1);
+									self.keys.splice(i,1);
 								}else
 								{
 								i++;
@@ -1487,22 +1572,25 @@ define(function ()
 						
 						}else
 						{
-							for(var i = 0;i < keys.length; i++)
+							//if the character was a bracket, suround the key with quotes
+							for(var i = 0;i < self.keys.length; i++)
 							{
-								if(keys[i][0].search(/[^0-9a-zA-Z]/) != -1 || keys[i][0].search(/[0-9]/) == 0)
+								if(self.keys[i][0].search(/[^0-9a-zA-Z]/) != -1 || self.keys[i][0].search(/[0-9]/) == 0)
 								{
-									keys[i][0] = '"'+keys[i][0]+'"';
+									self.keys[i][0] = '"'+self.keys[i][0]+'"';
 								}
 							}
 						}
 					
-						keys.sort(function(a,b)
+						//sort the keys by name
+						self.keys.sort(function(a,b)
 						{
 							return a[0] > b[0]?1:-1;
 						})
 						window.setTimeout(function()
 						{
-							self.setupAutocomplete(keys,editor,$(editor.renderer.$cursorLayer.cursor).offset(),$(editor.renderer.$cursorLayer.cursor).width());
+							self.filter = '';
+							self.setupAutocomplete(self.keys,editor);
 							
 						},15);
 						
@@ -1513,23 +1601,29 @@ define(function ()
 			}
 		
 		}
+		//Test for an open paren, then show the parameter help
 		this.triggerFunctionTip = function(editor)
 		{
 			var cur = editor.getCursorPosition();
 			var session = editor.getSession();
 			var line = session.getLine(cur.row);
+			//Only show for open paren
 			if(line[cur.column] == '(')
 			{
-				
+				//Get the line
 				line = line.substr(0,cur.column);
 				var splits = line.split(' ');
 				line = splits[splits.length-1];
 				splits = line.split(';');
 				line = splits[splits.length-1];
+				//Don't show for lines that have ( or ) (other than the one that triggered the autocomplete) because function calls
+				//might have side effects
 				if(line.indexOf('(') == -1 && line.indexOf('=') == -1)
 				{
+					//Get the text for the tooltip
 					var text = vwf.callMethod(self.currentNode.id,'JavascriptEvalFunction',[line]);
 		
+			
 					if(text)
 					{
 						window.setTimeout(function()
@@ -1545,6 +1639,8 @@ define(function ()
 			}
 		
 		}
+		
+		//route change events to check for autocomplete
 		this.methodEditor.getSession().on('change',function(e)
 		{
 			self.MethodChange();
@@ -1557,6 +1653,7 @@ define(function ()
 		this.eventEditor.setTheme("ace/theme/chrome");
 		this.eventEditor.getSession().setMode("ace/mode/javascript");
 		
+		//route change events to check for autocomplete
 		this.eventEditor.getSession().on('change',function(e)
 		{
 			self.EventChange();
@@ -1574,6 +1671,7 @@ define(function ()
 		this.propertyEditor.setPrintMarginColumn(false);
 		this.propertyEditor.setFontSize('15px');
 		
+		//route change events to check for autocomplete
 		this.propertyEditor.getSession().on('change',function(e)
 		{
 			self.triggerAutoComplete(self.propertyEditor);
@@ -1581,14 +1679,19 @@ define(function ()
 		
 		this.methodEditor.keyBinding.origOnCommandKey = this.methodEditor.keyBinding.onCommandKey;
 		this.eventEditor.keyBinding.origOnCommandKey = this.methodEditor.keyBinding.onCommandKey;
+		
+		
+		//hide or show the function top based on the inputs
 		this.methodEditor.on('change',function(e){
 		   
+		    //hide if removing an open paren
 		   if(e.data.action == "removeText")
 		   {
 			if(e.data.text.indexOf('(') != -1)
 				$('#FunctionTip').hide();
 		   
 		   }
+		   //hide if inserting a close paren
 		   if(e.data.action == "insertText")
 		   {
 			if(e.data.text.indexOf(')') != -1)
@@ -1607,14 +1710,17 @@ define(function ()
 		
 		});
 		
+		//hide or show the function top based on the inputs
 		this.eventEditor.on('change',function(e){
 		   
+		   //hide if removing an open paren
 		   if(e.data.action == "removeText")
 		   {
 			if(e.data.text.indexOf('(') != -1)
 				$('#FunctionTip').hide();
 		   
 		   }
+		   //hide if inserting a close paren
 		   if(e.data.action == "insertText")
 		   {
 			if(e.data.text.indexOf(')') != -1)
@@ -1633,6 +1739,7 @@ define(function ()
 		
 		});
 		
+		//hide or show the function top based on the inputs
 		this.methodEditor.keyBinding.onCommandKey = function(e, hashId, keyCode) {
 		   
 		   var cur = self.methodEditor.getCursorPosition();
@@ -1641,13 +1748,16 @@ define(function ()
 	           var chr1 = line[cur.column-1];
 		   var chr2 = line[cur.column];
 			
+		   //hide on up or down arrow	
 		   if(keyCode == 38 || keyCode == 40)
 			$('#FunctionTip').hide();
+		   //hide when moving cursor beyond start of (
 		   if( keyCode == 37)
 		   {
 			if(chr1 == '(')
 				$('#FunctionTip').hide();
 		   }
+		   //hide when moving cursor beyond end of )
 		   if( keyCode == 39)
 		   {
 			if(chr2 == ')')
@@ -1656,7 +1766,7 @@ define(function ()
 		   this.origOnCommandKey(e, hashId, keyCode);
 			
 		}
-		
+		//hide or show the function top based on the inputs
 		this.eventEditor.keyBinding.onCommandKey = function(e, hashId, keyCode) {
 		   
 		   var cur = self.eventEditor.getCursorPosition();
@@ -1664,14 +1774,17 @@ define(function ()
 		   var line = session.getLine(cur.row);
 	           var chr1 = line[cur.column-1];
 		   var chr2 = line[cur.column];
-			
+		   
+		   //hide on up or down arrow	
 		   if(keyCode == 38 || keyCode == 40)
 			$('#FunctionTip').hide();
+		   //hide when moving cursor beyond start of (
 		   if( keyCode == 37)
 		   {
 			if(chr1 == '(')
 				$('#FunctionTip').hide();
 		   }
+		   //hide when moving cursor beyond end of )
 		   if( keyCode == 39)
 		   {
 			if(chr2 == ')')
