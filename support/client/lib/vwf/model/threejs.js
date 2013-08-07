@@ -846,13 +846,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     if(propertyName == 'depthTest')
                     {
-                        ps.shaderMaterial_default.depthTest = propertyValue;    
-                        ps.shaderMaterial_default.depthWrite = propertyValue;
+                        ps.shaderMaterial_default.depthTest = propertyValue;
                         ps.shaderMaterial_analytic.depthTest = propertyValue;   
-                        ps.shaderMaterial_analytic.depthWrite = propertyValue;
-						ps.shaderMaterial_interpolate.depthTest = propertyValue;   
-                        ps.shaderMaterial_interpolate.depthWrite = propertyValue;
+						ps.shaderMaterial_interpolate.depthTest = propertyValue;
                         //value = propertyValue;  // no gettingProperty support so let the object model record
+                    }
+                    if(propertyName == "depthWrite")
+                    {
+                        ps.shaderMaterial_default.depthWrite = propertyValue;
+                        ps.shaderMaterial_analytic.depthWrite = propertyValue;
+                        ps.shaderMaterial_interpolate.depthWrite = propertyValue;
                     }
                     if(propertyName == "minAcceleration" || propertyName == "maxAcceleration")
                     {
@@ -2746,7 +2749,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 vertexShader:   vertShader_analytic,
                 fragmentShader: fragShader_analytic
             });
-            
 
             // create the particle system
             var particleSystem = new THREE.ParticleSystem(particles,shaderMaterial_default);
