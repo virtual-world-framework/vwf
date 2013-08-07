@@ -46,9 +46,27 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
       logger.debug "VWF::Application::Reflector#connect #{id} " +
           "launching from #{ env["vwf.application"] }"
+      
+      if env["vwf.load"]
+        filename = VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState.vwf.json"
+        if env["vwf.loadrevision"]
+          if File.exists?(VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState_"+env["vwf.loadrevision"]+".vwf.json")
+            filename = VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState_"+env["vwf.loadrevision"]+".vwf.json"
+          end
+        end
+      end
 
       # TODO: check for file format not that json exists
-      if( File.exists?("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json"))
+      if  env["vwf.load"] and File.exists?(filename)
+        contents = File.read(filename)
+        json = JSON.parse("#{ contents }", :max_nesting => 100)
+
+        send "time" => session[:transport].time,
+          "action" => "setState",
+          "parameters" => [
+              json
+            ]
+      elsif( File.exists?("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json"))
 
         contents = File.read("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json")
         json = JSON.parse("#{ contents }", :max_nesting => 100)
