@@ -5,7 +5,7 @@
 			
 		
 		
-			this.inherits = ['vwf/model/threejs/transformable.js','vwf/model/threejs/materialDef.js'];
+			this.inherits = ['vwf/model/threejs/transformable.js','vwf/model/threejs/materialDef.js','vwf/model/threejs/animatable.js'];
 			this.initializingNode = function()
 			{
 				this.materialDef = null;

@@ -887,7 +887,7 @@ define(function ()
 			_ScriptEditor.selectedProperty = name;
 			_ScriptEditor.propertyEditor.setValue(js_beautify(text.toString(),{braces_on_own_line:true,opt_keep_array_indentation:true}));
 			_ScriptEditor.propertyEditor.selection.clearSelection();
-			if (this.currentNode.properties && this.currentNode.properties[name])
+			if (this.properties && this.properties[name] !== undefined)
 			{
 				_ScriptEditor.PropertyChanged = false;
 				$('#propertytext').css('border-color', 'black');
@@ -1028,7 +1028,7 @@ define(function ()
 					$("#propertylist").children().css('border-color', 'gray');
 					$(this).css('border-color', 'blue');
 					var property = $(this).attr('property');
-					var val = _ScriptEditor.properties[property];
+					var val = vwf.getProperty(_ScriptEditor.currentNode.id,property);
 					if(typeof(val) == 'object')
 						val = JSON.stringify(val);
 					_ScriptEditor.setSelectedProperty(property, val );
@@ -1328,7 +1328,7 @@ define(function ()
 				$('#AutoComplete').on('keydown',function(e,key)
 				{
 					//enter or dot will accept the suggestion
-					if(e.which == 13 || e.which == 190)
+					if(e.which == 13 || e.which == 190 || e.which == 39)
 					{
 						//find the selected text
 						var index = $(this).attr('autocompleteindex');
@@ -1403,6 +1403,11 @@ define(function ()
 						//just hide the editor
 						$('#AutoComplete').hide();
 						_ScriptEditor.activeEditor.focus();
+						
+					}
+					else if(e.which == 16) //esc
+					{
+						//do nothing for shift
 						
 					}else
 					{
@@ -1674,6 +1679,7 @@ define(function ()
 		//route change events to check for autocomplete
 		this.propertyEditor.getSession().on('change',function(e)
 		{
+			self.PropertyChange();
 			self.triggerAutoComplete(self.propertyEditor);
 		});
 		

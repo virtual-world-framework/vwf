@@ -567,6 +567,14 @@ define(
 			_Editor.CreatePrim('terrain', [0,0,0], [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
 		});
 		
+		$('#MenuCreateLoadMeshURL').click(function (e)
+		{
+			alertify.prompt('Input a URL to a COLLADA mesh. Please note: this must serve from a CORS capable host!',function(ok,val){
+			if(ok)
+				_Editor.loadMesh(val);
+			},'http://');
+		});
+		
 		
 		$('#MenuCreateSphere').click(function (e)
 		{

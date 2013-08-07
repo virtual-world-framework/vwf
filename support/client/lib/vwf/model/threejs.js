@@ -13,6 +13,60 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
+
+
+        THREE.Matrix4.prototype.lookAt = function ( eye, target, up , axis) {
+
+			var te = this.elements;
+			if(axis === undefined)
+				axis = 2;
+			var x = new THREE.Vector3();
+			var y = new THREE.Vector3();
+			var z = new THREE.Vector3();
+			z.subVectors( eye, target ).normalize();
+
+			if ( z.length() === 0 ) {
+
+				z.z = 1;
+
+			}
+
+			x.crossVectors( up, z ).normalize();
+
+			if ( x.length() === 0 ) {
+
+				z.x += 0.0001;
+				x.crossVectors( up, z ).normalize();
+
+			}
+
+			y.crossVectors( z, x );
+
+			
+			if(axis == 2)
+			{
+				
+			te[0] = x.x; te[4] = y.x; te[8] = z.x;
+			te[1] = x.y; te[5] = y.y; te[9] = z.y;
+			te[2] = x.z; te[6] = y.z; te[10] = z.z;
+			}
+			if(axis == 1)
+			{
+			te[0] = x.x; te[4] = z.x; te[8] = y.x;
+			te[1] = x.y; te[5] = z.y; te[9] = y.y;
+			te[2] = x.z; te[6] = z.z; te[10] = y.z;
+			}
+			if(axis == 0)
+			{
+			te[0] = z.x; te[4] = x.x; te[8] = y.x;
+			te[1] = z.y; te[5] = x.y; te[9] = y.y;
+			te[2] = z.z; te[6] = x.z; te[10] = y.z;
+			}
+
+			return this;
+
+		}
+
     function rebuildAllMaterials(start)
     {
         
@@ -609,7 +663,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 									thisPosition.getPositionFromMatrix(thisMatrix);
 									
 									
-									threeObject.matrix.lookAt(thisPosition,lookatPosition,new THREE.Vector3(0,0,1));
+									var up = this.kernel.getProperty(nodeID,'upAxis') || 2;
+									var upaxis = [0,0,0];
+									upaxis[up] = 1;
+									upaxis = new THREE.Vector3(upaxis[0],upaxis[1],upaxis[2]);
+									var axis = this.kernel.getProperty(nodeID,'lookAxis') || 2;
+									
+									threeObject.matrix.lookAt(thisPosition,lookatPosition,upaxis,axis);
 									
 									threeObject.updateMatrixWorld(true); 
 															
@@ -623,12 +683,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 									var thisMatrix = new THREE.Matrix4();
 									thisMatrix.elements = matCpy(threeObject.matrix.elements);
 									
-									
+									debugger;
 									lookatPosition.set(propertyValue[0],propertyValue[1],propertyValue[2]);
 									thisPosition.getPositionFromMatrix(thisMatrix);
 									
+									var up = this.kernel.getProperty(nodeID,'upAxis') || 2;
+									var upaxis = [0,0,0];
+									upaxis[up] = 1;
+									upaxis = new THREE.Vector3(upaxis[0],upaxis[1],upaxis[2]);
+									var axis = this.kernel.getProperty(nodeID,'lookAxis') || 2;
 									
-									threeObject.matrix.lookAt(thisPosition,lookatPosition,new THREE.Vector3(0,0,1));
+									threeObject.matrix.lookAt(thisPosition,lookatPosition,upaxis,axis);
 									
 									threeObject.updateMatrixWorld(true); 
                         }

@@ -13,6 +13,21 @@
 ---
 extends: http://vwf.example.com/node3.vwf
 methods:
+  play:
+    parameters:
+    body: |
+      this.animationState = 1;
+  pause:
+    parameters:
+    body: |
+      this.animationState = 0;
 events:
 properties:
   source:
+  animationFrame:
+  animationLength:
+  animationStart:
+  animationEnd: 
+  animationState: 0
+
+    

@@ -14,6 +14,8 @@
 ---
 extends: http://vwf.example.com/node.vwf
 properties:
+  lookAxis: 2
+  upAxis: [ 0, 0, 1]
   worldTransform:
     set: |
       var parentInverse = goog.vec.Mat4.invert( this.transformFromValue( parent.transform.internal_val ), goog.vec.Vec3.create() );
