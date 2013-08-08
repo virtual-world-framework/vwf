@@ -14,15 +14,15 @@ fs.readdir('./public' + root + '/views/help', function(err, files){
 	}
 });
 
-exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'admin', 'admin/users', 'admin/worlds'];
+exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user']; //'admin', 'admin/users', 'admin/worlds'];
 routesMap = {
 	'sandbox': {template:'index'},
 	'edit': {sid: true},
 	'remove': {sid:true, title: 'Warning!'},
-	'user': {sid:true, title: 'Account'},
-	'admin': {sid:true, title:'Admin', fileList: fileList, template: 'admin/admin'},
-	'admin/users': {parent:'admin'},
-	'admin/worlds': {parent:'admin'}
+	'user': {sid:true, title: 'Account'}
+	//'admin': {sid:true, title:'Admin', fileList: fileList, template: 'admin/admin'},
+	//'admin/users': {parent:'admin'},
+	//'admin/worlds': {parent:'admin'}
 };
 
 exports.generalHandler = function(req, res){
