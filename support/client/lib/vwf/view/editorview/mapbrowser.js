@@ -35,6 +35,7 @@ define(function ()
 
 	function initialize()
 	{
+		var self = this;
 		$(document.body).append("<div id='MapBrowser' />");
 		//$(document.body).append("<div id='AddMap'> <input type='text' id='newmapurl' /> </div>");
 		$('#MapBrowser').dialog(
@@ -133,8 +134,9 @@ define(function ()
 					$('#MapChoice' + i).click(this.dirpicked);
 				}
 			}
-			//$('#MapBrowser').append('<img id="MapChoiceadd" class="textureChoice" src="images/plus.png" />');
-			//$('#MapChoiceadd').click(this.addTextureURLClick);
+			$('#MapBrowser').append('<img id="MapChoiceadd" class="textureChoice" src="images/plus.png" />');
+			$('#MapChoiceadd').css('background','white');
+			$('#MapChoiceadd').click(self.manualEntry);
 		}
 		//this.addTextureURLClick = function()
 		//{
@@ -156,6 +158,23 @@ define(function ()
 		this.isOpen = function ()
 		{
 			$("#MapBrowser").dialog("isOpen")
+		}
+		this.manualEntry = function()
+		{
+			alertify.prompt('Enter the URL to a texture. The texture must be WebGL compatable and served from a domain that supports CORS',function(ok,val)
+			{
+				if(ok)
+				{
+					if (_MapBrowser.texturePickedCallback)
+					{
+						_MapBrowser.texturePickedCallback(val);
+					}
+					else
+					{
+						_MaterialEditor.setActiveTextureSrc(val);
+					}
+				}
+			},"http://");
 		}
 	}
 });

@@ -16,6 +16,38 @@ extends: http://vwf.example.com/node.vwf
 properties:
   lookAxis: 2
   upAxis: [ 0, 0, 1]
+  transformAPI:
+    get: |
+        return {
+        
+            move:function(x,y,z, coordinateSystem /* x,y,z in meters, coordinateSystem either 'global' or 'local' */){
+            
+                var t = this.translation;
+                t[0] += x;
+                t[1] += y;
+                t[2] += z;
+                this.translation = t;
+            
+            
+            
+            }.bind(this),
+            rotate:function(x,y,z)
+            {
+            
+            
+            
+            }.bind(this),
+            scale:function(x,y,z)
+            {
+            
+            
+            }.bind(this)
+        
+        
+        
+        
+        
+        }
   worldTransform:
     set: |
       var parentInverse = goog.vec.Mat4.invert( this.transformFromValue( parent.transform.internal_val ), goog.vec.Vec3.create() );

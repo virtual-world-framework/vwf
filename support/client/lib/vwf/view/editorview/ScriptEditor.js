@@ -500,8 +500,8 @@ define(function ()
 		{
 			if (_ScriptEditor.checkMethodSyntax())
 			{
-				$('#ScriptEditorMessage').text('This script contains no syntax errors.');
-				$('#ScriptEditorMessage').dialog('open');
+				alertify.alert('This script contains no syntax errors.');
+				
 			}
 		}
 		this.checkMethodSyntax = function ()
@@ -514,8 +514,8 @@ define(function ()
 			}
 			if (errors != "")
 			{
-				$('#ScriptEditorMessage').text('This script contains syntax errors, and cannot be saved. The errors are: \n' + errors.toString());
-				$('#ScriptEditorMessage').dialog('open');
+				alertify.alert('This script contains syntax errors, and cannot be saved. The errors are: \n' + errors.toString());
+				
 				return false;
 			}
 			return true;
@@ -858,7 +858,7 @@ define(function ()
 			_ScriptEditor.selectedMethod = name;
 			_ScriptEditor.methodEditor.setValue(js_beautify(text,{braces_on_own_line:true,opt_keep_array_indentation:true}));
 			_ScriptEditor.methodEditor.selection.clearSelection();
-			if (this.methodlist && this.methodlist[name])
+			if (this.methodlist && this.methodlist[name] !== undefined)
 			{
 				_ScriptEditor.MethodChanged = false;
 				$('#methodtext').css('border-color', 'black');
@@ -915,7 +915,7 @@ define(function ()
 			_ScriptEditor.selectedEvent = name;
 			_ScriptEditor.eventEditor.setValue(js_beautify(text,{braces_on_own_line:true,opt_keep_array_indentation:true}));
 			_ScriptEditor.eventEditor.selection.clearSelection();
-			if (this.eventlist && this.eventlist[name])
+			if (this.eventlist && this.eventlist[name] !== undefined)
 			{
 				_ScriptEditor.EventChanged = false;
 				$('#eventtext').css('border-color', 'black');
@@ -998,6 +998,7 @@ define(function ()
 				$('#method' + i).attr('method', i);
 				$('#method' + i).click(function ()
 				{
+					
 					$("#methodlist").children().css('border-color', 'gray');
 					$(this).css('border-color', 'blue');
 					var method = $(this).attr('method');
@@ -1080,90 +1081,43 @@ define(function ()
 					}
 				}
 			}
-			if (!this.methodlist || (this.methodlist && !this.methodlist['tick']))
+			var methodsuggestions = ['tick','initialize','deinitialize','prerender','added'];
+			var methoddescription = {'tick':"The tick function is called 20 times every second. \n// Write code here to animate over time",'initialize':"Initialize is called when the node is constructed.\n//Write code here to setup the object, or hook up event handlers.\n//Note that the object is not yet hooked into the scene - that will happen during the 'Added' event.\n// You cannot access this.parent in this function.",'deinitialize':"Deinitialize is called when the object is being destroyed.\n// Clean up here if your object allocated any resources manually during initialize.",'prerender':"This function is called at every frame. Don't animate object properties here - that can break syncronization.\n//This can happen because each user might have a different framerate.\n//Most of the time, you should probably be using Tick instaed.",'added':"Added is called when the object is hooked up to the scene.\n// Note that this happens after initialize. At this point, you can access the objects parent."};
+			for(var i = 0; i < methodsuggestions.length; i++)
 			{
-				$('#methodlist').append('<div class="scriptchoice" style="' + lightstyle + '" id="methodtick"></div>');
-				$('#methodtick').text('tick');
-				$('#methodtick').attr('method', 'tick');
-				$('#methodtick').qtip(
+				var thissug = methodsuggestions[i];
+				if (!this.methodlist || (this.methodlist && this.methodlist[thissug] === undefined))
 				{
-					content: "Create the tick method.",
-					show: {
-						delay: 1000
-					}
-				});
-				$('#methodtick').click(function ()
-				{
-					$("#methodlist").children().css('border-color', 'gray');
-					$(this).css('border-color', 'blue');
-					var method = $(this).attr('method');
-					_ScriptEditor.setSelectedMethod(method, 'function tick(){\n\n console.log("this is called every 20th of a second"); \n\n}');
-				});
-			}
-			if (!this.methodlist || (this.methodlist && !this.methodlist['initialize']))
-			{
-				$('#methodlist').append('<div class="scriptchoice" style="' + lightstyle + '" id="methodinitialize"></div>');
-				$('#methodinitialize').text('initialize');
-				$('#methodinitialize').attr('method', 'initialize');
-				$('#methodinitialize').qtip(
-				{
-					content: "Create the initialize method.",
-					show: {
-						delay: 1000
-					}
-				});
-				$('#methodinitialize').click(function ()
-				{
-					$("#methodinitialize").children().css('border-color', 'gray');
-					$(this).css('border-color', 'blue');
-					var method = $(this).attr('method');
-					_ScriptEditor.setSelectedMethod(method, 'function initialize(){\n\n console.log("this is called when the objects is created"); \n\n}');
-				});
-			}
-			if (!this.methodlist || (this.methodlist && !this.methodlist['deinitialize']))
-			{
-				$('#methodlist').append('<div class="scriptchoice" style="' + lightstyle + '" id="methoddeinitialize"></div>');
-				$('#methoddeinitialize').text('deinitialize');
-				$('#methoddeinitialize').attr('method', 'deinitialize');
-				$('#methoddeinitialize').qtip(
-				{
-					content: "Create the deinitialize method.",
-					show: {
-						delay: 1000
-					}
-				});
-				$('#methoddeinitialize').click(function ()
-				{
-					$("#methoddeinitialize").children().css('border-color', 'gray');
-					$(this).css('border-color', 'blue');
-					var method = $(this).attr('method');
-					_ScriptEditor.setSelectedMethod(method, 'function deinitialize(){\n\n console.log("this is called when the object is destroyed"); \n\n}');
-				});
-			}
-			if (!this.methodlist || (this.methodlist && !this.methodlist['prerender']))
-			{
-				$('#methodlist').append('<div class="scriptchoice" style="' + lightstyle + '" id="methodprerender"></div>');
-				$('#methodprerender').text('prerender');
-				$('#methodprerender').attr('method', 'prerender');
-				$('#methodprerender').qtip(
-				{
-					content: "Create the prerender method.",
-					show: {
-						delay: 1000
-					}
-				});
-				$('#methodprerender').click(function ()
-				{
-					$("#methodprerender").children().css('border-color', 'gray');
-					$(this).css('border-color', 'blue');
-					var method = $(this).attr('method');
-					_ScriptEditor.setSelectedMethod(method, 'function prerender(){\n\n console.log("this is called when a frame is rendered. Careful, you can break sync here!"); \n\n}');
-				});
+					$('#methodlist').append('<div class="scriptchoice" style="' + lightstyle + '" id="method'+thissug+'"></div>');
+					$('#method'+thissug).text(thissug);
+					$('#method'+thissug).attr('method', thissug);
+					$('#method'+thissug).qtip(
+					{
+						content: "Create the "+thissug+" method.",
+						show: {
+							delay: 1000
+						}
+					});
+					$('#method'+thissug).click(function ()
+					{
+						var method = $(this).attr('method');
+						alertify.confirm('Would you like to create a new function called ' +method+'?' ,function(ok)
+						{
+							if(ok)
+							{
+								$("#methodlist").children().css('border-color', 'gray');
+								$(this).css('border-color', 'blue');
+								
+								_ScriptEditor.setSelectedMethod(method, 'function '+method+'(){\n\n //This function was created for you by the system. \n//'+methoddescription[method]+'\n}');
+							}
+						}.bind(this));	
+					});
+				}
 			}
 			var pointersugs = ['pointerDown', 'pointerUp', 'pointerOver', 'pointerOut', 'pointerClick', 'pointerMove', 'keyDown', 'keyUp', 'keyPress'];
 			for (var i in pointersugs)
 			{
-				if (!this.eventlist || (this.eventlist && !this.eventlist[pointersugs[i]]))
+				if (!this.eventlist || (this.eventlist && this.eventlist[pointersugs[i]] === undefined))
 				{
 					var name = pointersugs[i];
 					$('#eventlist').append('<div class="scriptchoice" style="' + lightstyle + '" id="event' + name + '"></div>');
@@ -1178,10 +1132,17 @@ define(function ()
 					$('#event' + name).attr('event', name);
 					$('#event' + name).click(function ()
 					{
-						$("#eventlist").children().css('border-color', 'gray');
-						$(this).css('border-color', 'blue');
 						var event = $(this).attr('event');
-						_ScriptEditor.setSelectedEvent(event, 'function ' + event + '(eventData,nodeData){\n\n console.log("got here"); \n\n}');
+						alertify.confirm('Would you like to create a new function called ' +event+'?' ,function(ok)
+						{
+							if(ok)
+							{
+								$("#eventlist").children().css('border-color', 'gray');
+								$(this).css('border-color', 'blue');
+								
+								_ScriptEditor.setSelectedEvent(event, 'function ' + event + '(eventData,nodeData){\n\n console.log("got here"); \n\n}');
+							}
+						}.bind(this));	
 					});
 				}
 			}
@@ -1416,11 +1377,13 @@ define(function ()
 						key = String.fromCharCode(key);
 						
 						//if the key is a character or backspace, edit the filter
-						if(e.which == 8 || (e.which < 91 && e.which > 64))
+						if(e.which == 8 || (e.which < 91 && e.which > 64) || e.which == 189 )
 						{
 							//if it's not a backspace, add it to the filter
-							if(e.which != 8)
+							if(e.which != 8 && e.which != 189)
 								self.filter += key;
+							else if (e.which == 189)
+								self.filter += '_';
 							else	
 							{	//if the backspace occurs with no filter, then close and remove
 								if(self.filter.length ==0)
@@ -1472,6 +1435,7 @@ define(function ()
 			
 			//now that the gui is setup, populate it with the keys
 			$('#AutoComplete').empty();
+			var first = false;
 			for(var i in self.keys)
 			{	
 				//use the filter string to filter out suggestions
@@ -1486,8 +1450,9 @@ define(function ()
 					$('#AutoComplete_'+i).addClass('AutoCompleteOptionFunction');
 				}
 				$('#AutoComplete_'+i).attr('autocompleteindex',i);
-				if(i == 0)
+				if(!first)
 					$('#AutoComplete_'+i).css('background','lightblue');
+				first = true;	
 				
 				//Clicking on the div just inserts the text, and hides the GUI
 				$('#AutoComplete_'+i).click(function()
@@ -1527,6 +1492,66 @@ define(function ()
 				
 			},15);
 		}
+		this.beginAutoComplete =function(editor,chr,line,filter)
+		{
+		
+		
+					//get the keys
+					self.keys = vwf.callMethod(self.currentNode.id,'JavascriptEvalKeys',[line]);
+					
+					
+					
+					
+					if(self.keys)
+					{
+					
+						//if the character that started the autocomplete is a dot, then remove the keys that have
+						//spaces or special characters, as they are not valid identifiers
+						if(chr == '.')
+						{
+							var remove = [];
+							var i = 0;
+							
+							while(i < self.keys.length)
+							{
+								if(self.keys[i][0].search(/[^0-9a-zA-Z_]/) != -1 || self.keys[i][0].search(/[0-9]/) == 0)
+								{
+									self.keys.splice(i,1);
+								}else
+								{
+								i++;
+								}
+							}
+						
+						
+						}else
+						{
+							//if the character was a bracket, suround the key with quotes
+							for(var i = 0;i < self.keys.length; i++)
+							{
+								if(self.keys[i][0].search(/[^0-9]/) != -1)
+								{
+									self.keys[i][0] = '"'+self.keys[i][0]+'"';
+								}
+							}
+						}
+					
+						//sort the keys by name
+						self.keys.sort(function(a,b)
+						{
+							return a[0] > b[0]?1:-1;
+						})
+						window.setTimeout(function()
+						{
+							self.filter = filter;
+							self.setupAutocomplete(self.keys,editor,filter);
+							
+						},15);
+						
+					}
+				
+		
+		}
 		//The dot or the bracket was hit, so open the suggestion box
 		this.triggerAutoComplete = function(editor)
 		{
@@ -1547,60 +1572,7 @@ define(function ()
 				//don't show autocomplete for lines that contain a (, because we'll be calling a functio ntaht might have side effects
 				if(line.indexOf('(') == -1 && line.indexOf('=') == -1)
 				{
-					//get the keys
-					self.keys = vwf.callMethod(self.currentNode.id,'JavascriptEvalKeys',[line]);
-					
-					
-					
-					
-					if(self.keys)
-					{
-					
-						//if the character that started the autocomplete is a dot, then remove the keys that have
-						//spaces or special characters, as they are not valid identifiers
-						if(chr == '.')
-						{
-							var remove = [];
-							var i = 0;
-							
-							while(i < self.keys.length)
-							{
-								if(self.keys[i][0].search(/[^0-9a-zA-Z]/) != -1 || self.keys[i][0].search(/[0-9]/) == 0)
-								{
-									self.keys.splice(i,1);
-								}else
-								{
-								i++;
-								}
-							}
-						
-						
-						}else
-						{
-							//if the character was a bracket, suround the key with quotes
-							for(var i = 0;i < self.keys.length; i++)
-							{
-								if(self.keys[i][0].search(/[^0-9a-zA-Z]/) != -1 || self.keys[i][0].search(/[0-9]/) == 0)
-								{
-									self.keys[i][0] = '"'+self.keys[i][0]+'"';
-								}
-							}
-						}
-					
-						//sort the keys by name
-						self.keys.sort(function(a,b)
-						{
-							return a[0] > b[0]?1:-1;
-						})
-						window.setTimeout(function()
-						{
-							self.filter = '';
-							self.setupAutocomplete(self.keys,editor);
-							
-						},15);
-						
-					}
-				
+					this.beginAutoComplete(editor,chr,line,'');
 				}
 			
 			}
@@ -1775,30 +1747,104 @@ define(function ()
 		//hide or show the function top based on the inputs
 		this.eventEditor.keyBinding.onCommandKey = function(e, hashId, keyCode) {
 		   
-		   var cur = self.eventEditor.getCursorPosition();
-		   var session = self.eventEditor.getSession();
-		   var line = session.getLine(cur.row);
-	           var chr1 = line[cur.column-1];
-		   var chr2 = line[cur.column];
-		   
-		   //hide on up or down arrow	
-		   if(keyCode == 38 || keyCode == 40)
+			
+			var cur = self.eventEditor.getCursorPosition();
+			var session = self.eventEditor.getSession();
+			var line = session.getLine(cur.row);
+			   var chr1 = line[cur.column-1];
+			var chr2 = line[cur.column];
+
+			//hide on up or down arrow	
+			if(keyCode == 38 || keyCode == 40)
 			$('#FunctionTip').hide();
-		   //hide when moving cursor beyond start of (
-		   if( keyCode == 37)
-		   {
+			//hide when moving cursor beyond start of (
+			if( keyCode == 37)
+			{
 			if(chr1 == '(')
 				$('#FunctionTip').hide();
-		   }
-		   //hide when moving cursor beyond end of )
-		   if( keyCode == 39)
-		   {
+			}
+			//hide when moving cursor beyond end of )
+			if( keyCode == 39)
+			{
 			if(chr2 == ')')
 				$('#FunctionTip').hide();
-		   }
+			}
+			
+		   
 		   this.origOnCommandKey(e, hashId, keyCode);
 			
 		}
+		
+		$('#eventtext textarea.ace_text-input').keydown(function(e){
+			 if(e.which == 83 && e.ctrlKey == true)
+			 {
+				e.preventDefault();
+				self.SaveEventClicked();
+			 }
+			  if(e.which == 32 && e.ctrlKey == true)
+			 {
+				e.preventDefault();
+				
+				var cur = self.eventEditor.getCursorPosition();
+				var session = self.eventEditor.getSession();
+				var line = session.getLine(cur.row);
+			   
+				
+				
+				var splits = line.split(' ');
+				line = splits[splits.length-1];
+				splits = line.split(';');
+				line = splits[splits.length-1];
+				var triggerkeyloc = Math.max(line.lastIndexOf('.'),line.lastIndexOf('['));
+				var triggerkey = line[triggerkeyloc];
+				var filter = line.substr(triggerkeyloc+1);
+				line = line.substring(0,triggerkeyloc);
+				line = line || 'window';
+				triggerkey = triggerkey || '.';
+				//Don't show for lines that have ( or ) (other than the one that triggered the autocomplete) because function calls
+				//might have side effects
+				if(line.indexOf('(') == -1 && line.indexOf('=') == -1)
+				{
+					self.beginAutoComplete(self.eventEditor,triggerkey,line,filter);
+				}
+			 }
+		})
+		$('#methodtext textarea.ace_text-input').keydown(function(e){
+			 if(e.which == 83 && e.ctrlKey == true)
+			 {
+				e.preventDefault();
+				self.SaveMethodClicked();
+			 }
+			 if(e.which == 32 && e.ctrlKey == true)
+			 {
+				e.preventDefault();
+				
+				var cur = self.methodEditor.getCursorPosition();
+				var session = self.methodEditor.getSession();
+				var line = session.getLine(cur.row);
+			   
+				
+				
+				var splits = line.split(' ');
+				line = splits[splits.length-1];
+				splits = line.split(';');
+				line = splits[splits.length-1];
+				var triggerkeyloc = Math.max(line.lastIndexOf('.'),line.lastIndexOf('['));
+				var triggerkey = line[triggerkeyloc];
+				var filter = line.substr(triggerkeyloc+1);
+				line = line.substring(0,triggerkeyloc);
+				line = line || 'window';
+				triggerkey = triggerkey || '.';
+				//Don't show for lines that have ( or ) (other than the one that triggered the autocomplete) because function calls
+				//might have side effects
+				if(line.indexOf('(') == -1 && line.indexOf('=') == -1)
+				{
+					self.beginAutoComplete(self.methodEditor,triggerkey,line,filter);
+				}
+			 }
+			 
+		})
+		
 		
 		$('#methodtext').on('click',function(){$('#FunctionTip').hide();})
 		$('#eventtext').on('click',function(){$('#FunctionTip').hide();})

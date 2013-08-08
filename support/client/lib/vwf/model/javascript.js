@@ -191,6 +191,19 @@ node.id = childID; // TODO: move to vwf/model/object
                     return self.kernel.deleteNode( child.id );
                 }
             } );
+			
+			Object.defineProperty( node, "children_by_name", { // same as "in"  // TODO: only define on shared "node" prototype?
+                get: function() {
+                    var children = {};
+					for(var i=0; i < this.children.length; i++)
+					{
+						children[this.children[i].DisplayName] = this.children[i];
+					}
+					return children;
+                },
+                enumerable: true,
+				
+            } );
 
             // Define the "time", "client", and "moniker" properties.
 
@@ -240,6 +253,10 @@ node.id = childID; // TODO: move to vwf/model/object
                 enumerable: true,
             } );
 
+			
+			
+			
+			
             node.private.future = Object.create( prototype.private ?
                 prototype.private.future : Object.prototype
             );
@@ -839,7 +856,8 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 			if(func)
 			{
 				var str = func.toString();
-				str = str.substring(str.indexOf('{')+1,str.lastIndexOf('}')-1);
+				
+				str = str.substring(str.indexOf('{')+1,str.lastIndexOf('}'));
 				method = str;
 			}
             return method;
@@ -860,7 +878,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 					if(func)
 					{
 						var str = func.toString();
-						str = str.substring(str.indexOf('{')+1,str.lastIndexOf('}')-1);
+						str = str.substring(str.indexOf('{')+1,str.lastIndexOf('}'));
 						methods[methodName] = str;
 					}
 				}	
@@ -940,7 +958,6 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                 enumerable: true,
 				configurable: true
             } );
-
             try {
                 node.private.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
             } catch ( e ) {
@@ -1004,7 +1021,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             var node = this.nodes[nodeID];
 			if(!node) return undefined;
 			
-			
+			//used for the autocomplete - eval in the context of the node, and get the keys
 			if(methodName == 'JavascriptEvalKeys')
 			{
 				var ret = (function()
@@ -1029,6 +1046,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 				}).apply(node);
 				return ret;
 			}
+			//used by the autocomplete - eval in the context of the node and get the function params
 			if(methodName == 'JavascriptEvalFunction')
 			{
 				
