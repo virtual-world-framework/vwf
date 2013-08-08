@@ -10,10 +10,10 @@ In order to create an animation on a node, the <code>animationUpdate</code> meth
 
 	scripts:
 	- |
-		this.animationUpdate = function(time, duration) {
-			// Animate the node. For example, update the translation based on the time
-			this.translateBy([0, 0, 1 * time], 0);
-		}
+	  this.animationUpdate = function(time, duration) {
+	    // Animate the node. For example, update the translation based on the time
+	    this.translateBy([0, 0, 1 * time], 0);
+	  }
 
 The animation can then be started by calling the <code>animationPlay</code> method and stopped by calling <code>animationStop</code>.
 
