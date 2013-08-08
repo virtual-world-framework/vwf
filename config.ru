@@ -13,7 +13,30 @@
 
 require File.expand_path File.join File.dirname( __FILE__ ), "init"
 
-map "/" do
+class VWF < Sinatra::Base  
   # use Rack::GoogleAnalytics, :tracker => "UA-xxxxxx-x" # uncomment and add your Google Analytics ID
-  run VWF
+  configure do
+    enable :static_cache_control
+  end
+ 
+  get(/.+/) do
+    send_sinatra_file(request.path)
+  end
+ 
+  not_found do
+    send_file(File.join(File.dirname(__FILE__), 'public', '404.html'), {:status => 404})
+  end
+ 
+	def send_sinatra_file(path)
+		if path =~ /\.vwf+.[a-z]+$/i
+			send_file(File.join(File.dirname(__FILE__), path), {:status => 404})
+		elsif path =~ /favicon\.ico$/i
+			send_file(File.join(File.dirname(__FILE__), path), {:status => 404})
+		else
+			file_path = File.join(File.dirname(__FILE__), path)
+			file_path = File.join(file_path, 'index.html') unless file_path =~ /\.[a-z]+$/i and !File.directory?(file_path) 
+			File.exist?(file_path) ? send_file(file_path) : not_found
+		end
+	end
 end
+run VWF
