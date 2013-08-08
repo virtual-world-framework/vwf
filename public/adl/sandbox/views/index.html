@@ -52,7 +52,7 @@
 						<div>								
 							<div class="worldInfo">
 								<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
-									<span class="description" data-bind="text:$root.getShorterStr(description, 25)"></span>
+									<span class="description" data-bind="text:description?$root.getShorterStr(description, 25):'No description'"></span>
 									&nbsp;<span class="lastModified stateid" data-bind="text:' (' + lastUpdate + ')' "></span>
 									<div class="objects" data-bind="text: objects + (objects == 1 ? ' object ' : ' objects ')"></div>
 								</a>
