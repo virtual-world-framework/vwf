@@ -648,13 +648,20 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         clients$.append("<div style='padding:6px'><select class='filename_select' id='fileToLoad' /></select></div>");
         $('#fileToLoad').append("<option value='none'></option>");
 
-        $.getJSON( "/" + root + "/listsaves", function( data ) {
+        $.getJSON( "/" + root + "/listallsaves", function( data ) {
             $.each( data, function( key, value ) {
+                var applicationName = value[ 'applicationpath' ].split( "/" );
+                if ( applicationName.length > 0 ) {
+                    applicationName = applicationName[ applicationName.length - 1 ];
+                }
+                if ( applicationName.length > 0 ) {
+                    applicationName = applicationName.charAt(0).toUpperCase() + applicationName.slice(1);
+                }
                 if ( value['latestsave'] ) {
-                    $('#fileToLoad').append("<option value='"+value['savename']+"' applicationpath='"+value['applicationpath']+"'>"+value['savename']+"</option>");
+                    $('#fileToLoad').append("<option value='"+value['savename']+"' applicationpath='"+value['applicationpath']+"'>"+applicationName+": "+value['savename']+"</option>");
                 }
                 else {
-                    $('#fileToLoad').append("<option value='"+value['savename']+"' applicationpath='"+value['applicationpath']+"' revision='"+value['revision']+"'>"+value['savename']+" Rev(" + value['revision'] + ")</option>");
+                    $('#fileToLoad').append("<option value='"+value['savename']+"' applicationpath='"+value['applicationpath']+"' revision='"+value['revision']+"'>"+applicationName+": "+value['savename']+" Rev(" + value['revision'] + ")</option>");
                 }
             } );
         } );
