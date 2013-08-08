@@ -38,10 +38,10 @@ function NoiseTerrainAlgorithm()
 	this.getMaterialUniforms = function(mesh,matrix)
 	{
 		var uniforms_default = {
-		grassSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/grass.jpg" ) },
-		cliffSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/cliff.jpg" ) },
-		dirtSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/dirt.jpg" ) },
-		snowSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/snow.jpg" ) }
+		grassSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/grass.jpg",true ) },
+		cliffSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/cliff.jpg",true ) },
+		dirtSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/dirt.jpg",true ) },
+		snowSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/snow.jpg",true ) }
 		};
 		
 		uniforms_default.grassSampler.value.wrapS = uniforms_default.grassSampler.value.wrapT = THREE.RepeatWrapping;

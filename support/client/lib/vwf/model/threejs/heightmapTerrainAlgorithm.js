@@ -195,10 +195,11 @@ function heightmapTerrainAlgorithm()
 	//This will allow you to setup shader variables that will be merged into the the terrain shader
 	this.getMaterialUniforms = function(mesh,matrix)
 	{
+		
 		var uniforms_default = {
-		diffuseSampler:   { type: "t", value: _SceneManager.getTexture( this.diffuseUrl) },
-		dirtSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/dirt.jpg" ) },
-		brushSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/scrub.jpg" ) },
+		diffuseSampler:   { type: "t", value: _SceneManager.getTexture( this.diffuseUrl,true) },
+		dirtSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/dirt.jpg",true ) },
+		brushSampler:   { type: "t", value: _SceneManager.getTexture( "terrain/scrub.jpg",true ) },
 		};
 		uniforms_default.diffuseSampler.value.wrapS = uniforms_default.diffuseSampler.value.wrapT = THREE.RepeatWrapping;
 		uniforms_default.dirtSampler.value.wrapS = uniforms_default.dirtSampler.value.wrapT = THREE.RepeatWrapping;
@@ -209,6 +210,7 @@ function heightmapTerrainAlgorithm()
 	//must implement vec4 getTexture(vec3 coords, vec3 norm) or return null which will give you the default white
 	this.getDiffuseFragmentShader = function(mesh,matrix)
 	{
+		
 		return (
 		"uniform sampler2D diffuseSampler;\n"+
 		"uniform sampler2D dirtSampler;\n"+

@@ -120,7 +120,7 @@ SceneManager.prototype.update = function(dt)
 		this.particleSystemList[i].update(dt);
 	}
 }
-SceneManager.prototype.getTexture = function(src)
+SceneManager.prototype.getTexture = function(src,noclone)
 {
 	
 	var p = window.location.pathname;
@@ -152,7 +152,9 @@ SceneManager.prototype.getTexture = function(src)
 		tex.clones = [];
 		return this.textureList[src];
 	}
-	var ret = this.textureList[src].clone();
+	var ret = this.textureList[src];
+	if(noclone) return ret;
+	ret = ret.clone();
     ret.needsUpdate  = true;
 	this.textureList[src].clones.push(ret);
     return ret;	
