@@ -332,12 +332,12 @@ node.id = childID; // TODO: move to vwf/model/object
 			
             var scriptText = "this.initialize && this.initialize()";
 
-            //try {
+            try {
                 return ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
-            //} catch ( e ) {
-             //   this.logger.warnc( "initializingNode", childID,
-             //       "exception in initialize:", utility.exceptionMessage( e ) );
-            //}
+            } catch ( e ) {
+                this.logger.warnc( "initializingNode", childID,
+                    "exception in initialize:", utility.exceptionMessage( e ) );
+            }
 
             return undefined;
         },
@@ -378,12 +378,12 @@ node.id = childID; // TODO: move to vwf/model/object
 
 			var scriptText = "this.deinitialize && this.deinitialize()";
 
-            //try {
+            try {
                 ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
-            //} catch ( e ) {
-            //    this.logger.warnc( "deinitializingNode", childID,
-            //        "exception in deinitialize:", utility.exceptionMessage( e ) );
-            //}
+            } catch ( e ) {
+                this.logger.warnc( "deinitializingNode", childID,
+                    "exception in deinitialize:", utility.exceptionMessage( e ) );
+            }
 			
             delete this.nodes[nodeID];
 
@@ -410,21 +410,21 @@ node.id = childID; // TODO: move to vwf/model/object
 			
 			var scriptText = "this.attached && this.attached()";
 
-            //try {
+            try {
                 ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
-            //} catch ( e ) {
-            //    this.logger.warnc( "addingChild", childID,
-            //        "exception in addingChild:", utility.exceptionMessage( e ) );
-            //}
+            } catch ( e ) {
+                this.logger.warnc( "addingChild", childID,
+                    "exception in addingChild:", utility.exceptionMessage( e ) );
+            }
 			
 			scriptText = "this.childAdded && this.childAdded('"+child+"')";
 
-           // try {
+            try {
                 ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
-            //} catch ( e ) {
-            //    this.logger.warnc( "addingChild", childID,
-            //        "exception in addingChild:", utility.exceptionMessage( e ) );
-            //}
+            } catch ( e ) {
+                this.logger.warnc( "addingChild", childID,
+                    "exception in addingChild:", utility.exceptionMessage( e ) );
+            }
 
         },
 
@@ -652,22 +652,22 @@ node.id = childID; // TODO: move to vwf/model/object
 				this.setValueByDotNotation(this.__WatchableCache[masterid], "masterval." + dotNotation.substr(masterid.length), value);
 				this.setValueByDotNotation(this.__WatchableCache[masterid], "internal_val." + dotNotation.substr(masterid.length), value);
 				this.__WatchableSetting ++;
-				//try{
+				try{
 				self.kernel.setProperty(id,propertyName,this.__WatchableCache[masterid].masterval);
-				//}catch(e)
-				//{
+				}catch(e)
+				{
 				
-				//}
+				}
 				this.__WatchableSetting --;
 				
 			}else
 			{	this.__WatchableSetting ++;
-				//try{
+				try{
 				self.kernel.setProperty(id,propertyName,value);
-				//}catch(e)
-				//{
+				}catch(e)
+				{
 				
-				//}
+				}
 				this.__WatchableSetting --;
 				
 			}
@@ -798,12 +798,12 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             var setter = node.private.setters && node.private.setters[propertyName];
 
             if ( setter && setter !== true ) { // is there is a setter (and not just a guard value)
-                //try {
+                try {
                     return setter.call( node, propertyValue );
-                //} catch ( e ) {
-                //    this.logger.warnc( "settingProperty", nodeID, propertyName, propertyValue,
-                //        "exception in setter:", utility.exceptionMessage( e ) );
-                //}
+                } catch ( e ) {
+                    this.logger.warnc( "settingProperty", nodeID, propertyName, propertyValue,
+                        "exception in setter:", utility.exceptionMessage( e ) );
+                }
             }
 		
 	    if(this.__WatchableSetting === 0)
@@ -836,12 +836,12 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             var getter = node.private.getters && node.private.getters[propertyName];
 
             if ( getter && getter !== true ) { // is there is a getter (and not just a guard value)
-                //try {
+                try {
                     return getter.call( node );
-                //} catch ( e ) {
-                //    this.logger.warnc( "gettingProperty", nodeID, propertyName, propertyValue,
-                //        "exception in getter:", utility.exceptionMessage( e ) );
-                //}
+                } catch ( e ) {
+                    this.logger.warnc( "gettingProperty", nodeID, propertyName, propertyValue,
+                        "exception in getter:", utility.exceptionMessage( e ) );
+                }
             }
 
             return undefined;
