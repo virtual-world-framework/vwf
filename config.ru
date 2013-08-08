@@ -28,9 +28,11 @@ class VWF < Sinatra::Base
   end
  
   def send_sinatra_file(path)
-    file_path = File.join(File.dirname(__FILE__), 'public',  path)
-    file_path = File.join(file_path, 'index.html') unless file_path =~ /\.[a-z]+$/i and !File.directory?(file_path) 
-    File.exist?(file_path) ? send_file(file_path) : not_found
+	if path =~ /\.[a-z]+.[a-z]+$/i
+		file_path = File.join(File.dirname(__FILE__), 'public',  path)
+		file_path = File.join(file_path, 'index.html') unless file_path =~ /\.[a-z]+$/i and !File.directory?(file_path) 
+		File.exist?(file_path) ? send_file(file_path) : not_found
+	end
   end
  
 end
