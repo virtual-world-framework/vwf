@@ -233,6 +233,26 @@ function StartShellInterface()
 				});
 			}
 		}
+		if(commands[0] == 'feature')
+		{
+			if(commands[1] == 'state')
+			{
+				DAL.updateInstance(commands[2],{featured:true},function()
+				{
+				
+				});
+			}
+		}
+		if(commands[0] == 'unfeature')
+		{
+			if(commands[1] == 'state')
+			{
+				DAL.updateInstance(commands[2],{featured:false},function()
+				{
+				
+				});
+			}
+		}
 		if(commands[0] == 'search')
 		{
 			if(commands[1] == 'inventory')

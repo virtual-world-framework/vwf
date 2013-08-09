@@ -358,7 +358,7 @@ function createUser (id,data,cb)
 		}
 		else
 		{
-			console.log('got here');
+			
 			async.waterfall([
 			function(cb2){
 				
@@ -371,7 +371,7 @@ function createUser (id,data,cb)
 			},
 			function(inventoryKey,cb2){
 				
-				console.log('got here2');
+				
 				data.inventoryKey = inventoryKey;
 				DB.save(id,data,function(err,doc,key)
 				{
@@ -381,7 +381,7 @@ function createUser (id,data,cb)
 			},
 			function(cb2){
 				
-				console.log('got here3');
+				
 				DB.get('UserIndex',function(err,UserIndex,key)
 				{
 					cb2(null,UserIndex);
@@ -390,7 +390,7 @@ function createUser (id,data,cb)
 			},
 			function(UserIndex, cb2)
 			{
-				console.log('got here4');
+				
 					if(!UserIndex)
 						UserIndex = [];
 					UserIndex.push(id);
@@ -402,7 +402,7 @@ function createUser (id,data,cb)
 			function(cb2)
 			{
 			
-				console.log('got here5');
+				
 				var file = (datapath + '/Profiles/' + id).replace(safePathRE);
 				global.log(file,0);
 				MakeDirIfNotExist(file+'_Data',function(){
@@ -412,7 +412,7 @@ function createUser (id,data,cb)
 			}],
 			function(err,results)
 			{
-				console.log('got here6');
+				
 				console.log(err,0);
 				cb(true);
 			}
@@ -609,11 +609,11 @@ function CheckHash(filename,data,callback)
 }
 function saveInstanceState(id,data,cb)
 {
-	console.log('saveinstancestate');
+	
 	var parsedData = typeof data == 'string' ? JSON.parse(data) : data;
 	getInstance(id,function(instance){
 	
-		console.log('get instance callback inside saveinstancestate');
+		
 		if(instance)
 		{
 			global.log('instance '+ id + ' exists');
@@ -678,7 +678,7 @@ function saveInstanceState(id,data,cb)
 		
 		}else
 		{
-			console.log("instance not found");
+			
 			cb(false);
 		}
 	});
@@ -722,14 +722,14 @@ function deleteInstance (id,cb)
 	{
 		DB.remove(id,function(err,doc,key)
 		{
-			console.log('delete demo folder');
+			
 			deleteFolderRecursive((datapath + '/States/' + id).replace(safePathRE));
 			cb2();
 		});
 	},
 	function(cb2)
 	{
-		console.log('update state index');
+		
 		DB.get('StateIndex',function(err,stateIndex,key)
 		{
 			if(!stateIndex)
@@ -737,11 +737,11 @@ function deleteInstance (id,cb)
 				cb();
 				return;
 			}
-			console.log('Got state index');
+			
 			stateIndex.splice(stateIndex.indexOf(id),1);
 			DB.save('StateIndex',stateIndex,function()
 			{
-				console.log('Saved StateIndex');
+				
 				cb();
 			});
 		});
@@ -763,7 +763,7 @@ function clearUsers()
 	{
 		async.eachSeries(UserIndex,function(item,cb2)
 		{
-			console.log('delete ' + item);
+			
 			deleteUser(item,function()
 			{
 				cb2();
@@ -789,7 +789,7 @@ function importUsers()
 					{
 						if(user)
 						{
-							console.log("user "+ i + " already in database");
+							
 							cb();	
 						}else
 						{
@@ -807,7 +807,7 @@ function importUsers()
 										{
 											async.eachSeries(Object.keys(inventory.objects),function(item,cb2)
 											{
-												console.log("create inventoryitem " + item);
+												
 												var itemdata = inventory.objects[item];
 												if(itemdata)
 												{
@@ -840,7 +840,7 @@ function importUsers()
 										{
 											async.eachSeries(Object.keys(inventory.scripts),function(item,cb2)
 											{
-												console.log("create inventoryitem " + item);
+												
 												var itemdata = inventory.scripts[item];
 												if(itemdata)
 												{
@@ -879,7 +879,7 @@ function importUsers()
 			},
 			function(err)
 			{
-				console.log('done');
+				
 			});
 	});
 }

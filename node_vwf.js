@@ -557,7 +557,7 @@ function startVWF(){
 					//no app name but is directory. Not listing directories, so 404
 					if(!appname)
 					{
-						console.log(filename + "is a directory")
+						
 						_404(response);
 						
 						return;
@@ -574,7 +574,7 @@ function startVWF(){
 						if(data)
 							ServeFile(request,filename,response,URL);
 						else {
-							console.log('redirect since no data for', instanceName);
+							
 							redirect(filterinstance(URL.pathname,instance)+"/index.html",response);
 						}
 					});

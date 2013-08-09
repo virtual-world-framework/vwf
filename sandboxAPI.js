@@ -1078,7 +1078,7 @@ function serve (request, response)
 	if(SID)
 	 SID = SID.replace(/[\\,\/]/g,'_');
 	 
-	console.log(UID);
+	
 	 
 	var basedir = datapath + libpath.sep;
 	global.log(command,UID,3);
