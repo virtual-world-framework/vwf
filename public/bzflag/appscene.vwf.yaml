@@ -132,7 +132,9 @@ scripts:
     for(var i = 0, il = players.length; i < il; i++) {
       if(players[i].playerName == playerName) {
         playerObject = players[i];
-        break;
+        if ( players[i].playerConnected ) {
+          break;
+        }
       }
     }
     return playerObject;

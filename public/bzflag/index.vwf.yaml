@@ -55,6 +55,7 @@ properties:
       translationSpeed: 400
       rotationSpeed: 0.3
       playerName:
+      playerConnected: true
       # Disable inherited navigation so it can use custom bzflag controls
       navmode: none
     children:     
@@ -87,6 +88,7 @@ methods:
   fireLaser:
   sendChat:
 events:
+  playerCreatedOrRejoined:
   playerJoined:
   playerDestroyed: 
   playerRespawned:
@@ -172,10 +174,24 @@ scripts:
     this.camera.far = 1000000;
     this.camera.near = 1;
   }
+  //Create player has two options.
+  //  The player exists. In which case, fail and return false.
+  //  The player doesn't exist. In which case, suceed and return true.
   this.createPlayer = function(playerName, playerMoniker) {
     var playerObject = this.findPlayerByName(playerName);
-    if(playerObject) {
-      if(!playerObject.active) {
+    if( playerObject ) {
+      var allowRejoin = false;
+      if ( playerObject.isConnected ) {
+        if ( playerObject.id.length > 16 ) {
+          if ( playerObject.id.slice( playerObject.id.length - 16 ) == playerMoniker ) {
+            allowRejoin = true;
+          }
+        }
+      }
+      else {
+        allowRejoin = true;
+      }
+      if ( ( allowRejoin ) && ( !playerObject.active ) ) {
         playerObject.translation = playerObject.startingTranslation;
         playerObject.cachedBoundingBox = playerObject.worldBoundingBox;
         playerObject.active = true;
@@ -183,9 +199,11 @@ scripts:
         playerObject.avatar.visible = true;
         playerObject.avatar.Tank.visible = true;
         this.playerRespawned( playerName );
+        this.playerCreatedOrRejoined( true, playerName, playerMoniker );
+        return;
       }
     }
-    else if(this.colorIndex < tankMaterials.length) {
+    else {
       playerObject = this.find("/navobj_" + playerMoniker);
       if(playerObject.length) {
         playerObject = playerObject[0];
@@ -201,46 +219,73 @@ scripts:
         playerObject.avatar.visible = true;
         playerObject.avatar.Tank.visible = true;
         this.playerJoined( playerName );
+        this.playerCreatedOrRejoined( true, playerName, playerMoniker );
         this.colorIndex += 1;
+        if ( this.colorIndex >= tankMaterials.length ) {
+          this.colorIndex = 0;
+        }
+        return;
       }
     }
+    this.playerCreatedOrRejoined( false, playerName, playerMoniker );
   }
+  
   this.rejoinPlayer = function(playerName, playerMoniker) {
     var oldPlayerObject = this.findPlayerByName(playerName);
     if(oldPlayerObject) {
-      var playerObject = this.find("/navobj_" + playerMoniker);
-      if(playerObject.length) {
-        playerObject = playerObject[0];
-
-        // Copy over all important data from the old player object
-        playerObject.avatar.Tank.material.properties['texture'] = oldPlayerObject.avatar.Tank.material.properties['texture'];
-        playerObject.color = oldPlayerObject.color;
-        playerObject.startingTranslation = oldPlayerObject.startingTranslation;
-        if(!oldPlayerObject.active) {
-          playerObject.translation = playerObject.startingTranslation;
+      var allowRejoin = false;
+      var needToDelete = false;
+      if ( oldPlayerObject.playerConnected ) {
+        if ( oldPlayerObject.id.length > 16 ) {
+          if ( oldPlayerObject.id.slice( oldPlayerObject.id.length - 16 ) == playerMoniker ) {
+            allowRejoin = true;
+          }
         }
-        else {
-          playerObject.worldTransform = oldPlayerObject.worldTransform;
+      }
+      else {
+        allowRejoin = true;
+        needToDelete = true;
+      }
+      if ( allowRejoin ) {
+        var playerObject = this.find("/navobj_" + playerMoniker);
+        if(playerObject.length) {
+          playerObject = playerObject[0];
+
+          // Copy over all important data from the old player object
+          playerObject.avatar.Tank.material.properties['texture'] = oldPlayerObject.avatar.Tank.material.properties['texture'];
+          playerObject.color = oldPlayerObject.color;
+          playerObject.startingTranslation = oldPlayerObject.startingTranslation;
+          if(!oldPlayerObject.active) {
+            playerObject.translation = playerObject.startingTranslation;
+          }
+          else {
+            playerObject.worldTransform = oldPlayerObject.worldTransform;
+          }
+          playerObject.laserMaterial = oldPlayerObject.laserMaterial;
+          playerObject.playerKills = oldPlayerObject.playerKills;
+          playerObject.playerDeaths = oldPlayerObject.playerDeaths;
+          playerObject.active = true;
+          playerObject.visible = true;
+          playerObject.avatar.visible = true;
+          playerObject.avatar.Tank.visible = true;
+
+          playerObject.playerName = playerName;
+
+     
+          this.playerJoined( playerName );
+          this.playerCreatedOrRejoined( true, playerName, playerMoniker);
+          if ( needToDelete ) {
+            this.children.delete( oldPlayerObject );
+          }
+          return;
         }
-        playerObject.laserMaterial = oldPlayerObject.laserMaterial;
-        playerObject.playerKills = oldPlayerObject.playerKills;
-        playerObject.playerDeaths = oldPlayerObject.playerDeaths;
-        playerObject.active = true;
-        playerObject.visible = true;
-        playerObject.avatar.visible = true;
-        playerObject.avatar.Tank.visible = true;
-
-        playerObject.playerName = playerName;
-
-        // Delete the old player object
-        this.children.delete(oldPlayerObject);
-
-        this.playerJoined( playerName );
       }
     }
     else {
       this.createPlayer(playerName, playerMoniker);
+      return;
     }
+    this.playerCreatedOrRejoined( false, playerName, playerMoniker);
   }
   this.fireLaser = function(playerName) {
     if ( playerName )

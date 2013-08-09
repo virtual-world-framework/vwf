@@ -54,13 +54,30 @@ vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplements
     if(childName == "navobj_" + vwf.moniker()) {
         playerNode = childID;
     }
-}
+    if ( nodeID == vwf_view.kernel.findClients( "", "/" ) ) {
+        var player_nodes = vwf_view.kernel.find( "/", "/navobj_" + childName );
+        if ( player_nodes.length > 0 ) {
+            vwf_view.kernal.setProperty( player_nodes[ 0 ], "playerConnected", true );
+        }
+    }
+};
+
+vwf_view.deletedNode = function ( nodeID ) { 
+    if (nodeID.length > 50 ) {
+        if ( nodeID.slice(0, 33) == "http-vwf-example-com-clients-vwf:" ) {
+            var player_nodes = vwf_view.kernel.find( "/", "/navobj_" + nodeID.slice( nodeID.length - 16 ) );
+            if ( player_nodes.length > 0 ) {
+                vwf_view.kernel.setProperty( player_nodes[ 0 ], "playerConnected", false );
+            }
+        }
+    }
+};
 
 canvas.onmousedown = function(e) {
     if(playerNode) {
         vwf_view.kernel.callMethod(sceneNode, "fireLaser", [playerName]);
     }
-}
+};
 
 canvas.onmouseup = undefined;
 
@@ -198,6 +215,32 @@ vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
             break;
           case "laserFired":
             $('#laser')[0].play();
+            break;
+          case "playerCreatedOrRejoined":
+            if ( eventParameters[ 2 ] == vwf_view.kernel.moniker() ) {
+              $( '#userNameInput' ).removeAttr( 'disabled' );
+              $( ".ui-dialog-buttonpane button:contains('Create')" ).removeAttr( 'disabled' );
+              $( ".ui-dialog-buttonpane button:contains('Yes')" ).removeAttr( 'disabled' );
+              $( ".ui-dialog-buttonpane button:contains('No')" ).removeAttr( 'disabled' );
+              if ( $( '#createUser' ).dialog( "isOpen" ) == true ) {
+                if ( eventParameters[ 0 ] ) {
+                  $( '#userName' ).html( playerName + ":&nbsp;" );
+	  			  	    preloadImages();
+		  		    	  $( '#createUser' ).dialog( "close" );
+                }
+                else {
+                  alert( "This username is already in use!" );
+                }
+              }
+              else if ( $( '#gameOver' ).dialog( "isOpen" ) == true ) {
+                if ( eventParameters[ 0 ] ) {
+                  $('#gameOver').dialog( "close" );
+                }
+                else {
+                  alert( "This username is already in use!" );
+                }
+              }
+            }
             break;
         }
         $("#serverContent").scrollTop($("#allContent")[0].scrollHeight);
