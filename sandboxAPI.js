@@ -1064,7 +1064,11 @@ function Salt(URL,response)
 function serve (request, response)
 {
 	var URL = url.parse(request.url,true);
-	var command = URL.pathname.substr(URL.pathname.lastIndexOf('/')+1);
+	var serviceRoute = "vwfDataManager.svc/";
+	var pathAfterRoute = URL.pathname.substr(URL.pathname.lastIndexOf(serviceRoute)+serviceRoute.length);
+	var command = pathAfterRoute.substr(0,pathAfterRoute.indexOf('/')) || pathAfterRoute;
+	var pathAfterCommand = pathAfterRoute.substr(command.length);
+	
 	command = command.toLowerCase();
 	
 	URL.loginData = GetSessionData(request);
@@ -1079,8 +1083,9 @@ function serve (request, response)
 	 SID = SID.replace(/[\\,\/]/g,'_');
 	 
 	
-	 
+	pathAfterCommand = pathAfterCommand.replace(/\//g,libpath.sep);
 	var basedir = datapath + libpath.sep;
+	console.log(basedir+"DataFiles"+ pathAfterCommand);
 	global.log(command,UID,3);
 	if(request.method == "GET")
 	{
@@ -1088,6 +1093,9 @@ function serve (request, response)
 		{	
 			case "texture":{
 				global.FileCache.ServeFile(request,basedir+"Textures"+libpath.sep+ URL.query.UID,response,URL);		
+			} break;
+			case "datafile":{
+				global.FileCache.ServeFile(request,basedir+"DataFiles"+ pathAfterCommand,response,URL);		
 			} break;
 			case "thumbnail":{
 				global.FileCache.ServeFile(request,basedir+"Thumbnails"+libpath.sep + URL.query.UID,response,URL);		
