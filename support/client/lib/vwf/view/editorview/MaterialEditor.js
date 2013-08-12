@@ -133,6 +133,12 @@ define(["vwf/view/editorview/mapbrowser"], function ()
 					min: 0,
 					max: 10,
 					step: .05
+				},
+				{
+					prop: 'side',
+					min: 0,
+					max: 2,
+					step: 1
 				}
 			];
 			$("#materialeditor").empty();

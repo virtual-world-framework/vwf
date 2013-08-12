@@ -12,6 +12,7 @@
                     shadow:true,
                     specularColor:{r:0.5773502691896258,g:0.5773502691896258,b:0.5773502691896258},
                     specularLevel:1,
+					side:0,
                     layers:[
                       {  alpha: 1,
                         blendMode: 0,
@@ -51,6 +52,7 @@
 				currentmat.specular.g = value.specularColor.g * value.specularLevel;
 				currentmat.specular.b = value.specularColor.b * value.specularLevel;
 				
+				currentmat.side = value.side || 0;
 				currentmat.opacity = value.alpha;
 				if(value.alpha < 1)
 					currentmat.transparent = true;
@@ -226,6 +228,7 @@
 			value.specularLevel = 1;
 			value.alpha = currentmat.opacity;
 			value.shininess = (currentmat.shininess || 0) / 5 ;
+			value.side = currentmat.side;
 			 value.reflect = currentmat.reflectivity * 10;
 			var mapnames = ['map', 'bumpMap', 'lightMap', 'normalMap', 'specularMap'];
 			value.layers = [];
