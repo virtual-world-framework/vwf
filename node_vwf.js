@@ -1086,13 +1086,11 @@ function startVWF(){
 		});
 
 		app.use(app.router);
-		app.get('/adl/sandbox', landing.generalHandler);
-		for(var i = 0; i < landing.acceptedRoutes.length; i++){
-			app.get('/adl/sandbox/' + landing.acceptedRoutes[i], landing.generalHandler);
-		}
-		
 		app.get('/adl/sandbox/help', landing.help);
 		app.get('/adl/sandbox/help/:page([a-zA-Z]+)', landing.help);
+		app.get('/adl/sandbox', landing.generalHandler);
+		app.get('/adl/sandbox/:page([a-zA-Z/]+)', landing.generalHandler);		
+
 		app.post('/adl/sandbox/admin/:page([a-zA-Z]+)', landing.handlePostRequest);
 		
 		app.use(OnRequest);
