@@ -1067,7 +1067,7 @@ function startVWF(){
 
 		app.post('/adl/sandbox/admin/:page([a-zA-Z]+)', landing.handlePostRequest);
 		
-		app.use(OnRequest);
+		app.use(OnRequest); 
 		var listen = app.listen(port);
 		
 		global.log(brown+'Admin is "' + global.adminUID+"\""+reset,0);

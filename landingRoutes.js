@@ -25,9 +25,12 @@ routesMap = {
 };
 
 exports.generalHandler = function(req, res){
-
-	var routeIndex = exports.acceptedRoutes.indexOf(req.params.page);
 	
+	if(!req.params.page)
+		req.params.page = 'sandbox';
+		
+	var routeIndex = exports.acceptedRoutes.indexOf(req.params.page);
+
 	if(routeIndex >= 0){
 		
 		var currentAcceptedRoute = exports.acceptedRoutes[routeIndex], title = '', sid = '', template = currentAcceptedRoute, fileList = [];

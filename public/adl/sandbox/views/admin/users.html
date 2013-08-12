@@ -1,9 +1,29 @@
 <div class="row">
 	<div class="span3">
-		Subtitle
+		<h3>Users</h3>
 	</div>
 </div>
 <div class="row">
+	<div class="span4">
+		<a href="">Delete Selected</a>
+	</div>
+	<div class="usersList span4">
+		<table class="table table-striped" style="border: 1px solid #ddd;">
+			<tr>
+				<th style="border:none; background:#FFF"></th>
+				<th style="border:none; background:#FFF">Name</th>
+			</tr>
+			<tbody data-bind="foreach:usersList, style:{border:'none'}">
+				<td><input type="checkbox"/></td>
+				<td><a data-bind="text:user" href="">Mick</a></td>
+			</tbody>
+		</table>
+	</div>
 </div>
 <script>
+	vwfPortalModel.usersList = [{user:"Mick"}, {user:"Joe"}, {user:"Mike"}];
+	$(document).ready(function(){	
+		ko.applyBindings(vwfPortalModel);
+		getLoginInfo();
+	});
 </script>
