@@ -1064,11 +1064,13 @@ function Salt(URL,response)
 function serve (request, response)
 {
 	var URL = url.parse(request.url,true);
-	var serviceRoute = "vwfDataManager.svc/";
-	var pathAfterRoute = URL.pathname.substr(URL.pathname.lastIndexOf(serviceRoute)+serviceRoute.length);
+	var serviceRoute = "vwfdatamanager.svc/";
+	var pathAfterRoute = URL.pathname.toLowerCase().substr(URL.pathname.toLowerCase().lastIndexOf(serviceRoute)+serviceRoute.length);
 	var command = pathAfterRoute.substr(0,pathAfterRoute.indexOf('/')) || pathAfterRoute;
 	var pathAfterCommand = pathAfterRoute.substr(command.length);
-	
+	console.log(pathAfterRoute);
+	console.log(command);
+	console.log(pathAfterCommand);
 	command = command.toLowerCase();
 	
 	URL.loginData = GetSessionData(request);
@@ -1085,7 +1087,8 @@ function serve (request, response)
 	
 	pathAfterCommand = pathAfterCommand.replace(/\//g,libpath.sep);
 	var basedir = datapath + libpath.sep;
-	console.log(basedir+"DataFiles"+ pathAfterCommand);
+	//console.log(basedir+"DataFiles"+ pathAfterCommand);
+	
 	global.log(command,UID,3);
 	if(request.method == "GET")
 	{
