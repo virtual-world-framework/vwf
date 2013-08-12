@@ -294,8 +294,30 @@ define(function ()
 		{
 			$("#" + e + "label").remove();
 		}
+		this.getPlayerIDs = function()
+		{
+			return this.playerIDs || [];
+		}
+		this.getPlayers = function()
+		{
+			var playerNodes = [];
+			for(var i =0; i < this.getPlayerIDs().length; i++)
+			{
+				playerNodes.push(vwf.models.javascript.nodes[this.getPlayerIDs()[i]]);
+				
+			}
+			return playerNodes;
+		}
 		this.PlayerCreated = function (e, id)
 		{
+			if(!this.playerNames)
+				this.playerNames = [];
+			if(!this.playerIDs)
+				this.playerIDs = [];
+				
+			this.playerNames.push(e);
+			this.playerIDs.push (id);	
+			
 			$("#PlayerList").append("<div id='" + (e + "label") + "'  class='playerlabel'>" + e + "</div>");
 			$("#" + e + "label").attr("playerid", id);
 			$("#" + e + "label").click(function ()

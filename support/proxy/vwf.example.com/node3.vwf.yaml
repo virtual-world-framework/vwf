@@ -31,6 +31,10 @@ properties:
             
             
             }.bind(this),
+            getPosition: function()
+            {
+                return [this.translation[0],this.translation[1],this.translation[2]];
+            }.bind(this),
             rotate:function(x,y,z)
             {
             
@@ -41,7 +45,40 @@ properties:
             {
             
             
+            }.bind(this),
+            lookat: function(t,clamp, axis, up,fromOffset)
+            {
+                var target;
+                target = t.internal_val||t;
+                if(!fromOffset) fromOffset = [0,0,0];
+                if(!axis) axis = 'Y';
+                if(!up) up = [0,0,1];
+                
+                var pos = MATH.addVec3(this.transformAPI.getPosition(),fromOffset);
+                var tovec = MATH.subVec3(pos,target);
+                if(clamp =='X')
+                    tovec[0] = 0;
+                if(clamp =='Y')
+                    tovec[1] = 0;
+                if(clamp =='Z')
+                    tovec[2] = 0;    
+                tovec = MATH.toUnitVec3(tovec);
+                var side = MATH.crossVec3(tovec,up);
+                side = MATH.toUnitVec3(side);
+                up = MATH.crossVec3(side,tovec);
+                var t = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+                if(axis == 'Y')
+                {
+                t[0] = side[0]; t[1] = side[1]; t[2] = side[2]; t[3] = 0;
+                t[4] = tovec[0]; t[5] = tovec[1]; t[6] = tovec[2]; t[7] = 0;
+                t[8] = up[0]; t[9] = up[1]; t[10] = up[2]; t[11] = 0;
+                t[12] = pos[0]; t[13] = pos[1]; t[14] = pos[2]; t[15] =1;
+                this.transform = t;
+                }
+                
+            
             }.bind(this)
+            
         
         
         

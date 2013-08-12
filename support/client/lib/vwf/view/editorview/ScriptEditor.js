@@ -1635,6 +1635,7 @@ define(function ()
 		{
 			self.EventChange();
 			self.triggerAutoComplete(self.eventEditor);
+			self.triggerFunctionTip(self.eventEditor);
 		});
 		
 		this.methodEditor.setPrintMarginColumn(false);
@@ -1656,7 +1657,7 @@ define(function ()
 		});
 		
 		this.methodEditor.keyBinding.origOnCommandKey = this.methodEditor.keyBinding.onCommandKey;
-		this.eventEditor.keyBinding.origOnCommandKey = this.methodEditor.keyBinding.onCommandKey;
+		this.eventEditor.keyBinding.origOnCommandKey = this.eventEditor.keyBinding.onCommandKey;
 		
 		
 		//hide or show the function top based on the inputs
