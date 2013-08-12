@@ -50,17 +50,22 @@ children:
       scale: [ 0.008, 0.008, 0.020 ]
   light1:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
       enable: true
-      distance: 2000
-      intensity: 3
-      color: [ 255, 255, 255 ]
-      glge-constantAttenuation: 0.3
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001  
+      distance: 25000
+      intensity: 1
+      color: [ 128, 128, 128 ]
+      translation: [ 10000, 0, 10000 ]
+  light2:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "point"
+      enable: true
+      distance: 25000
+      intensity: 1
+      color: [ 128, 128, 128 ]
+      translation: [ -10000, 0, 10000 ]
   predator1:
     extends: http://vwf.example.com/node3.vwf 
     implements:
