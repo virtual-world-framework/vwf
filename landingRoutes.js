@@ -14,19 +14,18 @@ fs.readdir('./public' + root + '/views/help', function(err, files){
 	}
 });
 
-exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user']; //'admin', 'admin/users', 'admin/worlds'];
+exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'admin', 'admin/users', 'admin/worlds', 'admin/edit'];
 routesMap = {
 	'sandbox': {template:'index'},
 	'edit': {sid: true},
 	'remove': {sid:true, title: 'Warning!'},
-	'user': {sid:true, title: 'Account'}
-	//'admin': {sid:true, title:'Admin', fileList: fileList, template: 'admin/admin'},
-	//'admin/users': {parent:'admin'},
-	//'admin/worlds': {parent:'admin'}
+	'user': {sid:true, title: 'Account'},
+	'admin': {sid:true, title:'Admin', fileList: fileList, template: 'admin/admin'},
+	'admin/edit': {fileList: fileList}
 };
 
 exports.generalHandler = function(req, res){
-	
+
 	if(!req.params.page)
 		req.params.page = 'sandbox';
 		
@@ -36,15 +35,6 @@ exports.generalHandler = function(req, res){
 		
 		var currentAcceptedRoute = exports.acceptedRoutes[routeIndex], title = '', sid = '', template = currentAcceptedRoute, fileList = [];
 		if(routesMap[currentAcceptedRoute]){
-			
-			if(routesMap[currentAcceptedRoute].parent){
-				if(routesMap[currentAcceptedRoute].parent != parent){
-					res.status(404).end('Error');
-					return;
-				}
-				
-				console.log(pathArr);
-			}
 			
 			title = routesMap[currentAcceptedRoute].title ? routesMap[currentAcceptedRoute].title : '';
 			sid = routesMap[currentAcceptedRoute].sid ?  root + '/' + (req.query.id?req.query.id:'') + '/' : '';
@@ -57,6 +47,7 @@ exports.generalHandler = function(req, res){
 	}
 	
 	else{
+		console.log("Not found");
 		res.status(404).end('Error');
 	}
 }
@@ -92,10 +83,3 @@ exports.handlePostRequest = function(req, res){
 	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: ''};
 	res.render('help/template');
 }
-
-
-
-
-
-
-
