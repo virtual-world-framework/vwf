@@ -87,6 +87,9 @@ children:
         //names. Return true if there is no match(the name is good),
         //return false if there is a match(the name is invalid).
         var nameGood = true;
+        if ( userName.length == 0 ) {
+          nameGood = false;
+        }
         this.children.forEach( function ( entry ) {
           if ( entry.displayName == userName ) {
             nameGood = false;
@@ -300,6 +303,8 @@ scripts:
   };
   
   this.createUser = function( userName, userColor, userSound, viewHandle ) {
+    userName = userName.replace( / /g, "_" );
+    userName = userName.replace( /([^0-9A-Za-z\-\_])/g, "" );
     //First, test if the userName is valid.
     if ( this.users.testUsername( userName ) == false ) {
       // Raise event that the username wasn't usable.

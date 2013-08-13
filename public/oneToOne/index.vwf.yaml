@@ -209,7 +209,6 @@ scripts:
             case "draw":
               if ( pickInfo.globalPosition ) {
                 var dist = this.distanceFromLast( pickInfo );
-                console.info( "dist = " + dist + "       this.minDistanceSquared = " + this.minDistanceSquared );
                 if ( dist > this.minDistanceSquared ) {
                   this.draw( pickInfo )
                 }

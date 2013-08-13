@@ -314,19 +314,22 @@ methods:
       - duration
     body: |
       var stopTransform = this.transformFromValue( transform ) || goog.vec.Mat4.createIdentity();
-      // Calculate the start and stop translations
-      var startTranslation = this.translation || goog.vec.Vec3.create();
-      var stopTranslation = goog.vec.Vec3.create();
-      goog.vec.Mat4.getColumn( stopTransform, 3, stopTranslation );
-      // Calculate the start and stop quaternion and scale
-      var startScale = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
-      var stopScale = goog.vec.Vec3.create();
-      var startQuaternion = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
-      var stopQuaternion = goog.vec.Quaternion.fromRotationMatrix4(
-        this.unscaledTransform( stopTransform || goog.vec.Mat4.createIdentity(), stopScale, goog.vec.Mat4.create() ),
-        goog.vec.Quaternion.create()
-      );
-      if(duration > 0) {
+
+      if ( duration > 0 ) {
+
+        // Calculate the start and stop translations
+        var startTranslation = this.translation || goog.vec.Vec3.create();
+        var stopTranslation = goog.vec.Vec3.create();
+        goog.vec.Mat4.getColumn( stopTransform, 3, stopTranslation );
+        // Calculate the start and stop quaternion and scale
+        var startScale = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
+        var stopScale = goog.vec.Vec3.create();
+        var startQuaternion = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
+        var stopQuaternion = goog.vec.Quaternion.fromRotationMatrix4(
+          this.unscaledTransform( stopTransform || goog.vec.Mat4.createIdentity(), stopScale, goog.vec.Mat4.create() ),
+          goog.vec.Quaternion.create()
+        );
+
         this.animationDuration = duration;
         // Call the appropriate functions to do the translation and quaterniation (that is totally a word)
         this.animationUpdate = function(time, duration) {
@@ -349,10 +352,8 @@ methods:
         this.animationPlay(0, duration);
       }
       else {
-        this.translation = stopTranslation;
-        this.quaternion = stopQuaternion;
-        this.scale = stopScale;
-      }//@ sourceURL=node3.animation.transformTo.vwf
+        this.transform = stopTransform;
+      } //@ sourceURL=node3.animation.transformTo.vwf
 
   ## Transform the world transform by the given amount over duration.
   ## 

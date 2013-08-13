@@ -25,6 +25,8 @@ Additionally, property values can be set within script, as shown below.
 	this.translation = [ 0, 100, 0 ];
 	this.scale = [ 10, 0, 0];
 
+*Note* - There is an example application by the name of [transforms](../example/transforms). This application allows the user to set and view the various properties discussed in this recipe, and see the outcome on an actual model. The source for this app can be found in the [github repository](https://github.com/virtual-world-framework/vwf) in public/web/example/transforms.) 
+
 -------------
 
 ### Transform By Methods

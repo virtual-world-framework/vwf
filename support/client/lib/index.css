@@ -1,5 +1,10 @@
 body {
   background-color: #000;
+  /* Prevent selection of HTML divs */
+  user-select: none;
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
 }
 
 h1, h2, h3, h4, h5, h6 {

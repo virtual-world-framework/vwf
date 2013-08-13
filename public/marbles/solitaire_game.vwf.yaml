@@ -100,28 +100,8 @@ events:
 scripts:
  - |
   //When initialized, create marbles.
-  this.handleInit = function( ) {
-    var myNode = this;
-    if ( myNode.marbles == undefined ) {
-      var marblesTemplate = { 
-        "extends": "http://vwf.example.com/node3.vwf",
-        "properties": { 
-          "private": null
-          }
-      };
-      
-      myNode.children.create( "marbles", marblesTemplate, function( newObj ) {
-        this.future(1.5).handleInit();
-      } );
-    }
-    else if ( this.marbles.children.length == 0 ) {
-      this.createMarbles( );
-    }
-  }
   this.initialize = function( ) {
-    if ( this.id != "solitaire_game.vwf" ) {
-      this.future(1.5).handleInit();
-    }
+    this.createMarbles( );
   };
 
   this.incrementLock = function() {
@@ -229,29 +209,31 @@ scripts:
   //Method to create marbles.
   // If the marbles have not yet been created, loop and create them.
   this.createMarbles = function( ) {
-    var myNode = this.marbles;
-    var patternIndex = 0;
-    for ( var patternIndex = 0; patternIndex < 32; patternIndex++ ) {
-      var newMarbleName = "solitaireMarble" + patternIndex;
-      var solitaireMarbleTemplate = { 
-        "source": "models/" + this.marbleTypes[ patternIndex % this.marbleTypes.length ], 
-        "extends": "solitaire_marble.vwf",
-        "type": "model/vnd.collada+xml",
-        "properties": { 
-          "selected": false,
-          "private": null
-          }
-      };
+    if ( this.marbles ) {
+      var myNode = this.marbles;
+      var patternIndex = 0;
+      for ( var patternIndex = 0; patternIndex < 32; patternIndex++ ) {
+        var newMarbleName = "solitaireMarble" + patternIndex;
+        var solitaireMarbleTemplate = { 
+          "source": "models/" + this.marbleTypes[ patternIndex % this.marbleTypes.length ], 
+          "extends": "solitaire_marble.vwf",
+          "type": "model/vnd.collada+xml",
+          "properties": { 
+            "selected": false,
+            "private": null
+            }
+        };
       
-      myNode.children.create( newMarbleName, solitaireMarbleTemplate, function( newObj ) {
-        if ( newObj.moveMarbleInstantly != undefined ) {
-          newObj.moveMarbleInstantly( );
-        }
-        else {
-          this.logger.warn("Create marbles in game undefined.");
-        }
-      } );
-    };
+        myNode.children.create( newMarbleName, solitaireMarbleTemplate, function( newObj ) {
+          if ( newObj.moveMarbleInstantly != undefined ) {
+            newObj.moveMarbleInstantly( );
+          }
+          else {
+            this.logger.warn("Create marbles in game undefined.");
+          }
+        } );
+      };
+    }
   };
 
   //When detaching a user, change the viewpoint of the user. Then set the users attachedTo to an
@@ -300,10 +282,27 @@ scripts:
   this.activitySelected = function( nodeId, eventParameters, user ) {
     var me = this;
     var node = user.getObject( nodeId );
-    if ( ( node != undefined ) && ( me.gameOccupiedBy == "" ) ) {
+    var clickedMe = false;
+    if ( node != undefined ) {
       if ( ( node === me ) || ( node.parent === me ) ) {
+        clickedMe = true;
+      }
+      else if ( node.parent != undefined ) {
+        if ( node.parent.parent === me ) {
+          clickedMe = true;
+        }
+      }
+    }
+    if ( clickedMe == true ) {
+      if ( me.gameOccupiedBy == "" ) {
         return true;
       }
+      var occupier = user.getObject( me.gameOccupiedBy );
+      var occupierString = ".";
+      if ( occupier != undefined ) {
+        occupierString = " by " + occupier.userName + ".";
+      }
+      user.sendMessage("Solitaire", "Sorry " + user.userName + ", but that solitaire game is already occupied" + occupierString);
     }
     return false;
   };

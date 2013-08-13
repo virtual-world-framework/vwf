@@ -191,7 +191,16 @@ module Rack
         # logger.debug "Rack::SocketIO::Application#on_open #{id}"
 
         @heartbeats = 0
-        send_serialization id
+
+        # if the incoming url has a session id, set the local id to it
+        # else, generate a new one and send it
+        
+        if matchdata = env["PATH_INFO"].match( %r{^/(socket|websocket)/(?<id>.+)(/|$)} )  # TODO: configuration parameter for paths accepted; "websocket/session" is for socket.io
+          self.id = matchdata[:id]
+        else
+          send_serialization id
+        end
+
         schedule_heartbeat
         onconnect
 
@@ -259,6 +268,8 @@ module Rack
       def id
         @id ||= "%08x" % rand( 1 << 32 ) + "%08x" % rand( 1 << 32 ) # rand has 52 bits of randomness; call twice to get 64 bits
       end
+
+      attr_writer :id
 
     private
 

@@ -209,7 +209,8 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         
         deletedNode: function (nodeID) {
             var node = this.nodes[ nodeID ];
-            node.parent.children.splice( node );
+            node.parent.children.splice( node.parent.children.indexOf(node), 1 );
+            delete this.nodes[ nodeID ];
             var nodeIDAttribute = $.encoder.encodeForAlphaNumeric(nodeID); // $.encoder.encodeForHTMLAttribute("id", nodeID, true);
             $('#' + nodeIDAttribute).remove();
             $('#children > div:last').css('border-bottom-width', '3px');
@@ -330,6 +331,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
     }
 
     function updateProperties( nodeName ) {
+
         var nodeID = nodeName;
         var properties = getProperties.call( this, this.kernel, nodeID );
 
@@ -344,7 +346,15 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             if ( propertyValue ) {
                 var nodeIDAttribute = $.encoder.encodeForAlphaNumeric( nodeID ); 
                 var propertyNameAttribute = $.encoder.encodeForHTMLAttribute( "id", propertyName, true );
-                $( '#input-' + nodeIDAttribute + '-' + propertyNameAttribute ).val( propertyValue );       
+                var inputElement$ = $( '#input-' + nodeIDAttribute + '-' + propertyNameAttribute );
+                // Only update if property value input is not in focus
+                // If in focus, change font style to italic
+                if ( ! inputElement$.is(":focus") ) {
+                    inputElement$.val( propertyValue );
+                    inputElement$.css( "font-style", "normal");
+                } else {
+                    inputElement$.css( "font-style", "italic");
+                }  
             }
         }
     }
@@ -1120,8 +1130,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         $(topdownTemp).html("<div class='header'><img src='images/back.png' id='script-" + nodeIDAlpha + "-back' alt='back'/> script</div>");
         jQuery('#script-' + nodeIDAlpha + '-back').click ( function(evt) {
             self.editingScript = false;
-            var id = $(this).attr("id").substring(7, $(this).attr("id").lastIndexOf('-'));
-            drillBack.call(self, id);
+            drillBack.call(self, nodeID);
 
             // Return editor to normal width
             $('#editor').animate({ 'left' : "-260px" }, 175);

@@ -4,173 +4,45 @@
 
 All that is needed for a VWF app to become a multi-user app is for a second person to navigate to the same url.  By default, both users share the same view of the virtual world.
 
-Often, you will want your users to be different "characters" in the scene.  For this to happen, we need to create three things when a new user joins.
+Often, you will want your users to be different "characters" in the scene.  For this to happen, we need to set the scene's *usersShareView* property to false:
 
-## What needs to be created
+	extends: http://vwf.example.com/scene.vwf
+	properties:
+	  usersShareView: false
 
-- A user object that consists of:
-	- A camera from which the user's point of view will be rendered -<br/>&nbsp;&nbsp;This will go in the model (.yaml) so other users can assume this user's viewpoint, if desirable
-	- A 3D model for the user's avatar (optional if you don't want other users to be able to see them) -<br/>&nbsp;&nbsp;This will also go in the model (.yaml) so everyone will see it
-- A reference that tells the user that this camera and 3D model is "his" -<br/>&nbsp;&nbsp;This will go in the view (.html) so every user's can be different
+By default, the system will create a camera for each user who joins the application so users can move independently through the scene.  Often you will want some represention of each user (an avatar) in your application so users can see each other.  To specify the object that we want the system to create for each user, we need to set the scene's *userObject* property to a description of the desired object.  This userObject must play by two rules:
 
-## Create the user object
+- It must implement the *navigable* behavior to be recognized as something the user can control.
+- It must contain a camera so the user can see.
 
-We need a method in the model (index.vwf.yaml) that we can call each time a user joins.  This one will do nicely:
+Here is an example of a user object that is a duck with a camera attached:
 
-	this.createUser = function( userName ) {
+	  userObject:
+	    extends: http://vwf.example.com/node3.vwf
+	    implements: [ "http://vwf.example.com/navigable.vwf" ]
+	    properties:
+	      translationSpeed: 10000
+	    children:     
+	      camera:
+	        extends: http://vwf.example.com/camera.vwf
+	        properties:
+	          translation: [ 0, 0, 800 ]
+	          far: 1000000
+	          near: 1
+	      avatar:
+	        extends: http://vwf.example.com/node3.vwf
+	        source: models/duck.dae
+	        type: model/vnd.collada+xml
+	        properties:
+	          rotation: [ 0, 0, 1, 90 ]
+	          scale: 4.5
 
-	  // Ready the parameters to the call to create the child (2 steps)
-	  // Step 1: Make the user name unique
-	  userName += this.count++;
+That's all!
 
-	  // Step 2: Create the definition of an object that will group a camera w/ an avatar 3D model
-	  var userDef = { 
-	    "extends": "http://vwf.example.com/node3.vwf",
-	    "children": {}     
-	  };
-	  var cameraDef = {
-	    "extends": "http://vwf.example.com/camera.vwf",
-	    "properties": {
-	      "translation": [ 0, 0, 800 ],
-	      "far": 1000000,
-	      "near": 1
-	    }
-	  };
-	  var avatarDef = {
-	    "extends": "http://vwf.example.com/node3.vwf",
-	    "source": "models/duck.dae",
-	    "type": "model/vnd.collada+xml",
-	    "properties": {
-	      "rotation": [ 0, 0, 1, 90 ],
-	      "scale": 4.5
-	    }
-	  };
-	  userDef.children[ "camera" ] = cameraDef;
-	  userDef.children[ "avatar" ] = avatarDef;
+## Notes
 
-	  // Create the user object, passing a callback that fires an event upon completion
-	  this.children.create( userName, userDef, function( node ) {
-	    this.userCreated( node.id );
-	  } );
-	}
-
-The method is declared under the *methods* header to make it visible outside this component (for example, to call it from the view, which we will do in a bit) -- for a complete context of where this method fits in the application, look at the example app that this recipe is based off (see note at top of page).
-
-## When to create the user object
-
-The new user's view needs to tell the model when to create the new user object (once the user has joined).  This means that the view must *know* when the user has joined.  In future versions of VWF, when the new user has joined, the kernel will call a callback function in the view.  For now, we can learn when the user has joined by presenting a login screen.  By the time the user can click the *Login* button, he has already joined the session.  Therefore, we can call the necessary functions in the model when the user clicks the *Login* button.  (This method has the added benefit of being able to grab a name, etc, by which we can identify the new user - note, though, that this is not a secure login ... the app has already loaded by the time you ask the user to log in ... info on secure logins is in progress).
-
-So, the next step is to add the Login screen to your app.
-
-### A sample login screen
-
-In your index.vwf.html file you could create an input field like so:
-
-	<link rel="stylesheet" type="text/css" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css" />
-	<div id="login">
-	  <input id="userName" type="text" placeholder="Your Name">
-	</div>
-
-And then connect a script to the login that will call your createUser function when a button is clicked (also in index.vwf.html):
-
-	// The user login dialog
-	$('#login').dialog( {
-	  title: 'Login',
-	  height: 'auto',
-	  modal: true,
-	  resizable: false,
-	  draggable: false,
-	  buttons: {
-	    "Login": function() {
-	        
-	      var userName = $( "#userName" ).val();
-	      
-	      // If the user entered something valid, proceed
-	      if ( !( ( userName == "Your Name" ) || ( userName == "" ) ) ) {
-
-	        // Remove ugly characters from the username
-	        userName = userName.replace(/ /g,"_");
-	        userName = userName.replace(/([^0-9A-Za-z])/g,"");
-
-	        // Close the dialog box
-	        $( this ).dialog("close");
-
-	        // Call the function in the model to create the new user object
-	        var kernel = vwf_view.kernel;
-	        kernel.callMethod( kernel.application(), "createUser", [ userName ] );
-	      }
-	    }
-	  }
-	});
-
-Note: The jquery API is loaded by default by all VWF applications.
-
-## Save the user reference and set the user's camera
-
-When the *userCreated* event fires, we will save the reference to the user object so the user can control it.  We will also tell the renderer to render from the point of view of this user's camera.  These two steps are done from the view (.html), since this behavior is specific to this user.  Below is an event handler for *userCreated* that should get the job done:
-
-	// The event handler that is called whenever an event is fired from the model
-	vwf_view.firedEvent = function( nodeId, eventName, eventParameters ) {
-
-	  // If the event that triggered this event handler was the creation of a new user,
-	  // And the event issued from this client, grab the camera from the new object to use for this user
-	  var clientThatIssuedEvent = this.kernel.client();
-	  var me = this.kernel.moniker();
-	  if ( ( eventName == "userCreated" ) && ( clientThatIssuedEvent == me ) ) {
-
-	    // Save the reference to the user object - this belongs to this user
-	    view.myUserObjectId = eventParameters[ 0 ];
-
-	    // Set the aspect ration on the camera to match that of the html canvas
-	    var cameraId = vwf_view.kernel.find( view.myUserObjectId, "camera" );
-	    var applicationId = vwf_view.kernel.application();
-	    var canvas = $( "#" + applicationId );
-	    vwf_view.kernel.setProperty( cameraId, "aspect", canvas.width() / canvas.height() );
-
-	    // Tell the renderer to render from this camera for this user
-	    var rendererState = vwf_view.kernel.kernel.views[ "vwf/view/threejs" ].state;
-	    rendererState.cameraInUse = rendererState.nodes[ cameraId ].threeObject;
-
-	    // Save the camera id for future use
-	    var sceneNode = rendererState.scenes[ applicationId ];
-	    sceneNode.camera.ID = cameraId;
-	  }
-	}
-
-Note: This code makes reference to renderer-specific objects ("vwf/view/threejs" and threeObject are specific to the three.js renderer).  Soon, such renderer references will be able to be made through view-side components so that the programmer need not worry him or herself with renderer details unless there is a desire to do so for advanced functionality.
-
-We can now make the user's interactions affect his specific character by updating the properties of myUserObject:
-
-	// The event handler that is called whenever the user presses a key
-	window.onkeydown = function( eventArg ) {
-
-	  // If this user has a user object, react accordingly to the key press as follows:
-	  // W,A,S,D - move forward, left, back, right
-	  // Q,E - rotate left, right
-	  // Note: In this example, translations are in world coordinates, so W,A,S,D always move the user in the
-	  //       same direction, regardless of which way they are facing
-	  if ( view.myUserObjectId )
-	    switch ( eventArg.keyCode ) {
-	      case 87: // 'W' key
-	        vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ 0, 100, 0 ] ] );
-	        break;
-	      case 65: // 'A' key
-	        vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ -100, 0, 0 ] ] );
-	        break;
-	      case 83: // 'S' key
-	        vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ 0, -100, 0 ] ] );
-	        break;
-	      case 68: // 'D' key
-	        vwf_view.kernel.callMethod( view.myUserObjectId, "translateBy", [ [ 100, 0, 0 ] ] );
-	        break;
-	      case 81: // 'Q' key
-	        vwf_view.kernel.callMethod( view.myUserObjectId, "rotateBy", [ [ 0, 0, 1, 1 ] ] );
-	        break;
-	      case 69: // 'E' key
-	        vwf_view.kernel.callMethod( view.myUserObjectId, "rotateBy", [ [ 0, 0, 1, -1 ] ] );
-	        break;  
-	    }
-	}
+- Currently these instructions work with only the three.js renderer (since the functionality is implemented in the VWF drivers for three.js).
+- Though the userObject property looks like a node description, it is only a property (later, the system will create a node for the user from this property). Therefore, one cannot manipulate userObject by calling methods for node operations (for example, we cannot call *userObject.createChild(..)*).  Once the system creates the actual node, we may call such functions on that node.
 
 ## Pitfalls
 
@@ -181,3 +53,5 @@ We can now make the user's interactions affect his specific character by updatin
 - Do not access the *vwf* variable anywhere
 
 *vwf* gives a coder direct access to manipulate the model.  This may seem convenient, but it side-steps VWF's mechanisms to ensure that state stays synchronized between users.  In the future this variable will be hidden from us coders for our safety, but in the mean time, steer clear of it!
+
+- For a full list of pitfalls, see the document located [here](pitfalls.html).

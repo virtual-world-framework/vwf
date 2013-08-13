@@ -63,38 +63,11 @@ children:
       glge-quadraticAttenuation: 0.0000001  
   predator1:
     extends: http://vwf.example.com/node3.vwf 
+    implements:
+    - http://vwf.example.com/followPath.vwf
     properties:
       translation: [ 0, 0, 1200 ]
-      lastPathIndex:
-        set: |
-          if ( value >= 0 ) {
-            if ( this.path && value < this.path.length ) {
-              this.lastPathIndex = value;
-              this.nextPathIndex = value+1;
-              if ( this.nextPathIndex == this.path.length )
-                this.nextPathIndex = 0;
-            } else {
-              this.lastPathIndex = 0;
-              this.nextPathIndex = 1;              
-            }
-          }
-        value: 0
-      nextPathIndex: 0
-      timeSinceLast: 0
-      animating:
-        set: |
-          if ( value && !this.animating ) {
-             this.future( 0.1 ).animate();
-          }
-          this.animating = value;
-        value: false
-    methods:
-      animate: 
     children:
-      goal1:
-        extends: http://vwf.example.com/node3.vwf 
-        properties:
-          translation: [ 0, 0, 1200 ]
       planeGroup1:
         extends: http://vwf.example.com/node3.vwf 
         properties:
@@ -117,99 +90,30 @@ children:
     scripts:
     - |
       this.initialize = function() {
-
-        this.path = [];
+        this["followPath-path"] = [];
         var len = 0, pos, x, y, z = 1200;
 
         for ( var theta = 0; theta < 2 * Math.PI && len < (( 2*180 )-1); theta += Math.PI / 180 ) {
           x = 10000 * Math.cos( theta );
           y = 10000 * Math.sin( theta );
-          len = this.path.length;
+          len = this["followPath-path"].length;
           pos = [ x, y, z ];
-          this.path.push( { translation: pos, time: 1 } );
+          this["followPath-path"].push( { translation: pos, time: 1 } );
         }
-        this.nextPathIndex = ( this.lastPathIndex || 0 ) + 1;
-        this.timeSinceLast = this.time;
-        this.planeGroup1.translation = this.path[ this.lastPathIndex || 0 ].translation;
-        this.goal1.translation = this.path[ this.nextPathIndex || 0 ].translation;
+        this["followPath-nextPathIndex"] = ( this["followPath-lastPathIndex"] || 0 ) + 1;
+        this["followPath-lastTime"] = this.time;
+        this.translation = this["followPath-path"][ this["followPath-lastPathIndex"] || 0 ].translation;
 
-        this.animating = true;
-      }
-
-      this.animate = function() {
-        var time = this.time;
-        var len = this.path.length;
-        var timeElasped = time - this.timeSinceLast;
-        var lastPathPoint = this.path[ this.lastPathIndex ];
-        var nextPathPoint = this.path[ this.nextPathIndex ];
-        var goalPointIndex = this.nextPathIndex + 1;
-        if ( goalPointIndex >= this.path.length ) {
-          goalPointIndex = 0;
-        }
-        var goalPathPoint = this.path[ goalPointIndex ];
-        var percentDone = timeElasped / nextPathPoint.time;
-        if ( percentDone > 0.975 ) {
-          percentDone = 1;
-        }
-         
-        function interpolate( beforeCoord, afterCoord, percent ) {
-          return beforeCoord + percent * (afterCoord - beforeCoord);
-        }
-        
-        var newX = interpolate( nextPathPoint.translation[0], goalPathPoint.translation[0], percentDone );
-        var newY = interpolate( nextPathPoint.translation[1], goalPathPoint.translation[1], percentDone );
-        this.goal1.translation = [ newX, newY, 1200 ]; 
-        
-        newX = interpolate( lastPathPoint.translation[0], nextPathPoint.translation[0], percentDone );
-        newY = interpolate( lastPathPoint.translation[1], nextPathPoint.translation[1], percentDone );
-        this.planeGroup1.translation = [ newX, newY, 1200 ];
-        
-        var zRot = [ goalPathPoint.translation[0] - newX, goalPathPoint.translation[1] - newY, 0 ];
-        this.planeGroup1.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5)) * 180 / Math.PI ]; 
-        
-        if ( percentDone == 1 ) {
-          this.lastPathIndex += 1;
-          this.timeSinceLast = time;
-        }
-        if ( this.animating ) {
-          this.future( 0.1 ).animate();
-        }       
+        this["followPath-following"] = true;          
       } //@ sourceURL=predator1.vwf
   predator2:
     extends: http://vwf.example.com/node3.vwf 
+    implements:
+    - http://vwf.example.com/followPath.vwf
     properties:
       translation: [ 0, 0, 1500 ]
-      lastPathIndex:
-        set: |
-
-          if ( value >= 0 ) {
-            if ( this.path && value < this.path.length ) {
-              this.lastPathIndex = value;
-              this.nextPathIndex = value+1;
-              if ( this.nextPathIndex == this.path.length )
-                this.nextPathIndex = 0;
-            } else {
-              this.lastPathIndex = 0;
-              this.nextPathIndex = 1;
-            }
-          }
-        value: 0
-      nextPathIndex: 0
-      timeSinceLast: 0
-      animating:
-        set: |
-          if ( value && !this.animating ) {
-             this.future( 0.1 ).animate();
-          }
-          this.animating = value;
-        value: false
-    methods:
-      animate:
+      followPath-height: 1500
     children:
-      goal2:
-        extends: http://vwf.example.com/node3.vwf 
-        properties:
-          translation: [ 0, 0, 1500 ]
       planeGroup2:
         extends: http://vwf.example.com/node3.vwf 
         properties:
@@ -232,9 +136,7 @@ children:
     scripts:
     - |
       this.initialize = function() {
-        console.info( "================ predator2 ================" );
-
-        this.path = [];
+        this["followPath-path"] = [];
         var len, pos, x = 0, y = 0, z = 12000;
         var radius = 5000;
         var step = 200;
@@ -242,107 +144,68 @@ children:
         y = 0;
         for ( var x = radius - 200; x > -radius; x -= step ) {
           pos = [ x, 0, 1200 ];
-          len = this.path.length;
-          this.path.push( { translation: pos, time: 1 } );
+          len = this["followPath-path"].length;
+          this["followPath-path"].push( { translation: pos, time: 1 } );
         }
 
         for ( var theta = 1.5 * Math.PI; theta > 0; theta -= Math.PI / 90 ) {
           x = -radius + ( radius * Math.cos( theta ) );
           y = radius + ( radius * Math.sin( theta ) );
-          len = this.path.length;
+          len = this["followPath-path"].length;
           pos = [ x, y, z ];
-          this.path.push( { translation: pos, time: 2 } );
+          this["followPath-path"].push( { translation: pos, time: 2 } );
         } 
 
         x = 0;
         for ( var y = radius - step; y > -radius ; y -= step ) {
           pos = [ 0, y, 1200 ];
-          len = this.path.length;
-          this.path.push( { translation: pos, time: 1 } );
+          len = this["followPath-path"].length;
+          this["followPath-path"].push( { translation: pos, time: 1 } );
         }
 
         for ( var theta = 2 * Math.PI; theta > 0.5 * Math.PI; theta -= Math.PI / 90 ) {
           x = -radius + (radius * Math.cos( theta ) );
           y = -radius + (radius * Math.sin( theta ) );
-          len = this.path.length;
+          len = this["followPath-path"].length;
           pos = [ x, y, z ];
-          this.path.push( { translation: pos, time: 2 } );
+          this["followPath-path"].push( { translation: pos, time: 2 } );
         } 
 
         y = 0;
         for ( var x = -radius + step; x < radius; x += step ) {
           pos = [ x, 0, 1200 ];
-          len = this.path.length;
-          this.path.push( { translation: pos, time: 1 } );
+          len = this["followPath-path"].length;
+          this["followPath-path"].push( { translation: pos, time: 1 } );
         }            
 
         for ( var theta = 1.5 * Math.PI; theta < 3.0 * Math.PI; theta += Math.PI / 90 ) {
           x = radius + (radius * Math.cos( theta ) );
           y = radius + (radius * Math.sin( theta ) );
-          len = this.path.length;
+          len = this["followPath-path"].length;
           pos = [ x, y, z ];
-          this.path.push( { translation: pos, time: 2 } );
+          this["followPath-path"].push( { translation: pos, time: 2 } );
         }
         
         x = 0;
         for ( var y = radius - step; y > -radius; y -= step ) {
           pos = [ 0, y, 1200 ];
-          len = this.path.length;
-          this.path.push( { translation: pos, time: 1 } );
+          len = this["followPath-path"].length;
+          this["followPath-path"].push( { translation: pos, time: 1 } );
         }
 
         for ( var theta = 1.0 * Math.PI; theta < 2.5 * Math.PI; theta += Math.PI / 90 ) {
           x = radius + ( radius * Math.cos( theta ) );
           y = -radius + ( radius * Math.sin( theta ) );
-          len = this.path.length;
+          len = this["followPath-path"].length;
           pos = [ x, y, z ];
-          this.path.push( { translation: pos, time: 2 } );
+          this["followPath-path"].push( { translation: pos, time: 2 } );
         }            
        
-        this.nextPathIndex = ( this.lastPathIndex || 0 ) + 1;
-        this.timeSinceLast = this.time;
-        this.planeGroup2.translation = this.path[ this.lastPathIndex || 0 ].translation;
-        this.goal2.translation = this.path[ this.nextPathIndex || 0 ].translation;
+        this["followPath-nextPathIndex"] = ( this["followPath-lastPathIndex"] || 0 ) + 1;
+        this["followPath-lastTime"] = this.time;
+        this.translation = this["followPath-path"][ this["followPath-lastPathIndex"] || 0 ].translation;
         
-        this.animating = true;
-      }
-      this.animate = function() {
-        var time = this.time;
-        var len = this.path.length;
-        var timeElasped = time - this.timeSinceLast;
-        var lastPathPoint = this.path[ this.lastPathIndex ];
-        var nextPathPoint = this.path[ this.nextPathIndex ];
-        var goalPointIndex = this.nextPathIndex + 1;
-        if ( goalPointIndex >= this.path.length )
-          goalPointIndex = 0;
-        var goalPathPoint = this.path[ goalPointIndex ];
-        var percentDone = timeElasped / nextPathPoint.time;
-        if ( percentDone > 0.975 )
-          percentDone = 1;
-      
-        function interpolate( beforeCoord, afterCoord, percent ) {
-          return beforeCoord + percent * (afterCoord - beforeCoord);
-        }
-        var newX = interpolate( nextPathPoint.translation[0], goalPathPoint.translation[0], percentDone );
-        var newY = interpolate( nextPathPoint.translation[1], goalPathPoint.translation[1], percentDone );
-        this.goal2.translation = [ newX, newY, 1200 ]; 
-        
-        newX = interpolate( lastPathPoint.translation[0], nextPathPoint.translation[0], percentDone );
-        newY = interpolate( lastPathPoint.translation[1], nextPathPoint.translation[1], percentDone );
-        this.planeGroup2.translation = [ newX, newY, 1200 ];
-
-        var zRot = [ goalPathPoint.translation[0] - newX, goalPathPoint.translation[1] - newY, 0 ];
-        this.planeGroup2.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5)) * 180 / Math.PI ];
-
-        if ( percentDone == 1 ) {
-          this.lastPathIndex += 1;
-          var newPt = this.path[ this.lastPathIndex ].translation;
-          var goalPt = this.path[ this.nextPathIndex ].translation;
-          this.timeSinceLast = time;
-        }
-        if ( this.animating ) {
-          this.future( 0.1 ).animate();
-        }          
+        this["followPath-following"] = true;
       } //@ sourceURL=predator2.vwf
 scripts:
 - |

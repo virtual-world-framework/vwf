@@ -16,5 +16,5 @@
 /// @module version
 
 define( function() {
-	return [ 0, 6, 12, 0 ]; // major, minor, patch, build
+	return [ 0, 6, 13, 0 ]; // major, minor, patch, build
 } );
