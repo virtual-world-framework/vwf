@@ -67,6 +67,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
             this.state.prototypes = {}; 
             this.state.kernel = this.kernel.kernel.kernel;            
+ 
+            // turns on logger debugger console messages 
+            this.debug = {
+                "creation": false,
+                "initializing": false,
+                "parenting": false,
+                "deleting": false,
+                "properties": false,
+                "setting": false,
+                "getting": false,
+                "prototypes": false
+            };
+
         },
 
 
@@ -82,10 +95,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             // the scene or a prototype.  In either of those cases, save the uri of the new node
             var childURI = ( nodeID === 0 ? childIndex : undefined );
 
+            if ( this.debug.creation ) {
+                this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            }
+
             // If the node being created is a prototype, construct it and add it to the array of prototypes,
             // and then return
             var prototypeID = ifPrototypeGetId.call( this, nodeID, childID );
             if ( prototypeID !== undefined ) {
+                
+                if ( this.debug.prototypes ) {
+                    this.logger.infox( "prototype: ", prototypeID );
+                }
+
                 this.state.prototypes[ prototypeID ] = {
                     parentID: nodeID,
                     ID: childID,
@@ -357,10 +379,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             };
 
         },
+
+        initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childIndex, childName ) {
+
+            if ( this.debug.initializing ) {
+                this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            } 
+        },
          
         // -- deletingNode -------------------------------------------------------------------------
 
         deletingNode: function( nodeID ) {
+
+            if ( this.debug.deleting ) {
+                this.logger.infox( "deletingNode", nodeID );
+            }
 
             if(nodeID)
             {
@@ -396,6 +430,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
+
+            if ( this.debug.properties ) {
+                this.logger.infox( "C === creatingProperty ", nodeID, propertyName, propertyValue );
+            }
+
             return this.initializingProperty( nodeID, propertyName, propertyValue );
         },
 
@@ -405,6 +444,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             var value = undefined;
             //console.info( "initializingProperty( " + nodeID+", "+propertyName+", "+propertyValue + " )" );
+
+            if ( this.debug.properties ) {
+                this.logger.infox( "  I === initializingProperty ", nodeID, propertyName, propertyValue );
+            }
 
             if ( propertyValue !== undefined ) {
                 var node = this.state.nodes[ nodeID ];
@@ -430,7 +473,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
-            //console.info( "settingProperty( " + nodeID+", "+propertyName+", "+propertyValue + " )" );
+            if ( this.debug.properties || this.debug.setting ) {
+                this.logger.infox( "    S === settingProperty ", nodeID, propertyName, propertyValue );
+            }
+
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             if( node === undefined ) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
@@ -546,11 +592,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                     // Begin handling properties
 
-                    if ( propertyName == 'transform' )
-                    {
+                    if ( propertyName == 'transform' && node.transform ) {
+
                         //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
                         var transformMatrix = goog.vec.Mat4.createFromArray( propertyValue || [] );
-						if(threeObject instanceof THREE.ParticleSystem)
+                        if(threeObject instanceof THREE.ParticleSystem)
                         {   
                             threeObject.updateTransform(propertyValue);
                         }
@@ -561,12 +607,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         value = propertyValue;
 
-						//because threejs does not do auto tracking of lookat, we must do it manually.
-						//after updating the matrix for an ojbect, if it's looking at something, update to lookat from
-						//the new position
-						if ( node.lookatval ) {
-							lookAt( node.lookatval );
-						}
+                        //because threejs does not do auto tracking of lookat, we must do it manually.
+                        //after updating the matrix for an ojbect, if it's looking at something, update to lookat from
+                        //the new position
+                        if ( node.lookatval ) {
+                            lookAt( node.lookatval );
+                        }
                     }
                     else if ( propertyName == 'lookAt' ) {
                         value = lookAt( propertyValue );
@@ -579,14 +625,21 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     else if ( propertyName == 'castShadows' )
                     {
-                        //debugger;
                         value = Boolean( propertyValue );
                         threeObject.castShadow = value;
+                        var meshes = findAllMeshes.call( this, threeObject );
+                        for(var i = 0, il = meshes.length; i < il; i++) {
+                            meshes[i].castShadow = value;
+                        }
                     }
                     else if ( propertyName == 'receiveShadows' )
                     {
                         value = Boolean( propertyValue );
                         threeObject.receiveShadow = value;
+                        var meshes = findAllMeshes.call( this, threeObject );
+                        for(var i = 0, il = meshes.length; i < il; i++) {
+                            meshes[i].receiveShadow = value;
+                        }
                     }
 
                     //This can be a bit confusing, as the node has a material property, and a material child node. 
@@ -623,7 +676,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
 
                     else if ( propertyName == "animationTimeUpdated" ) {
-                        if(node.threeObject.animatedMesh && propertyValue !== undefined) {
+                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined) {
                             var fps = this.state.kernel.getProperty( nodeID, "fps");
                             for(var i = 0; i < node.threeObject.animatedMesh.length; i++) {
                                 for(var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++) {
@@ -793,13 +846,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     if(propertyName == 'depthTest')
                     {
-                        ps.shaderMaterial_default.depthTest = propertyValue;    
-                        ps.shaderMaterial_default.depthWrite = propertyValue;
+                        ps.shaderMaterial_default.depthTest = propertyValue;
                         ps.shaderMaterial_analytic.depthTest = propertyValue;   
-                        ps.shaderMaterial_analytic.depthWrite = propertyValue;
-						ps.shaderMaterial_interpolate.depthTest = propertyValue;   
-                        ps.shaderMaterial_interpolate.depthWrite = propertyValue;
+						ps.shaderMaterial_interpolate.depthTest = propertyValue;
                         //value = propertyValue;  // no gettingProperty support so let the object model record
+                    }
+                    if(propertyName == "depthWrite")
+                    {
+                        ps.shaderMaterial_default.depthWrite = propertyValue;
+                        ps.shaderMaterial_analytic.depthWrite = propertyValue;
+                        ps.shaderMaterial_interpolate.depthWrite = propertyValue;
                     }
                     if(propertyName == "minAcceleration" || propertyName == "maxAcceleration")
                     {
@@ -1118,6 +1174,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         else if(node) {
                             node.rendererProperties["enableShadows"] = propertyValue;
                         }
+
+                        // Need to reset the viewport or you just get a blank screen
+                        this.state.kernel.dispatchEvent( nodeID, "resetViewport" );
                     }
                 }   
                 if(threeObject instanceof THREE.PointLight || threeObject instanceof THREE.DirectionalLight || threeObject instanceof THREE.SpotLight )
@@ -1131,14 +1190,28 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             "distance": threeObject.distance,
                             "color":  threeObject.color,
                             "intensity": threeObject.intensity,
-                            "castShadows": threeObject.castShadow,
+                            "castShadow": threeObject.castShadow,
+                            "shadowCameraLeft": threeObject.shadowCameraLeft,
+                            "shadowCameraRight": threeObject.shadowCameraRight,
+                            "shadowCameraTop": threeObject.shadowCameraTop,
+                            "shadowCameraBottom": threeObject.shadowCameraBottom,
+                            "shadowCameraNear": threeObject.shadowCameraNear,
+                            "shadowCameraFar": threeObject.shadowCameraFar,
+                            "shadowDarkness": threeObject.shadowDarkness,
                             "clone": function( newObj ) {
                                 newObj.name = this.name;
                                 newObj.distance = this.distance;
                                 //console.info( "light.clone.color = " + JSON.stringify( this.color ) )
                                 newObj.color.setRGB( this.color.r, this.color.g, this.color.b );
                                 newObj.intensity = this.intensity;
-                                newObj.castShadows = this.castShadows;
+                                newObj.castShadow = this.castShadow;
+                                newObj.shadowCameraLeft = this.shadowCameraLeft;
+                                newObj.shadowCameraRight = this.shadowCameraRight;
+                                newObj.shadowCameraTop = this.shadowCameraTop;
+                                newObj.shadowCameraBottom = this.shadowCameraBottom;
+                                newObj.shadowCameraNear = this.shadowCameraNear;
+                                newObj.shadowCameraFar = this.shadowCameraFar;
+                                newObj.shadowDarkness = this.shadowDarkness;
                             }
                         };
 
@@ -1203,6 +1276,34 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         value = Boolean( propertyValue );
                         threeObject.castShadow = value;
                     }
+                    else if ( propertyName == 'shadowCameraBottom' ) {
+                        value = Number( propertyValue );
+                        threeObject.shadowCameraBottom = value;
+                    }
+                    else if ( propertyName == 'shadowCameraLeft' ) {
+                        value = Number( propertyValue );
+                        threeObject.shadowCameraLeft = value;
+                    }
+                    else if ( propertyName == 'shadowCameraRight' ) {
+                        value = Number( propertyValue );
+                        threeObject.shadowCameraRight = value;
+                    }
+                    else if ( propertyName == 'shadowCameraTop' ) {
+                        value = Number( propertyValue );
+                        threeObject.shadowCameraTop = value;
+                    }
+                    else if ( propertyName == 'shadowCameraNear' ) {
+                        value = Number( propertyValue );
+                        threeObject.shadowCameraNear = value;
+                    }
+                    else if ( propertyName == 'shadowCameraFar' ) {
+                        value = Number( propertyValue );
+                        threeObject.shadowCameraFar = value;
+                    }
+                    else if ( propertyName == 'shadowDarkness' ) {
+                        value = Number( propertyValue );
+                        threeObject.shadowDarkness = value;
+                    }
 
                 }
             }
@@ -1213,7 +1314,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         gettingProperty: function( nodeID, propertyName ) {
 
-            //console.log([nodeID,propertyName,propertyValue]);
+            if ( this.debug.properties || this.debug.getting ) {
+                this.logger.infox( "   G === gettingProperty ", nodeID, propertyName, propertyValue );
+            }
+
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
@@ -1236,7 +1340,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
           
             if(threeObject instanceof THREE.Object3D)
             {
-                if(propertyName == 'transform')
+                if(propertyName == 'transform' && node.transform)
                 {
                     value = matCpy( node.transform.elements );
                     return value;
@@ -1434,8 +1538,28 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         value = threeObject.intensity;
                         break;
                     case "castShadows":
-                        value = threeObject.castShadows;
+                        value = threeObject.castShadow;
                         break;
+                    case "shadowCameraBottom":
+                        value = threeObject.shadowCameraBottom;
+                        break;
+                    case "shadowCameraLeft": 
+                        value = threeObject.shadowCameraLeft;
+                        break;
+                    case "shadowCameraRight": 
+                        value = threeObject.shadowCameraRight;
+                        break;
+                    case "shadowCameraTop": 
+                        value = threeObject.shadowCameraTop;
+                        break;
+                    case "shadowCameraNear":
+                        value = threeObject.shadowCameraNear;
+                        break;
+                    case "shadowCameraFar":
+                        value = threeObject.shadowCameraFar;
+                        break;
+                    case "shadowDarkness":
+                        value = threeObject.shadowDarkness;
                 }
             }
             return value;
@@ -1984,7 +2108,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }   
             }
             if ( geo !== undefined ) {
-                var mesh = new THREE.Mesh( geo, mat );          
+                var mesh = new THREE.Mesh( geo, mat );
+
+                // The child mesh is created after the properties have been initialized, so copy
+                // the values of cast and receive shadow so they match
+                mesh.castShadow = node.threeObject.castShadow;
+                mesh.receiveShadow = node.threeObject.receiveShadow;
+
                 node.threeObject.add( mesh ); 
                 
                 geo.computeCentroids();
@@ -1993,6 +2123,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         }         
     }
+
+    //walk the graph of an object, and set all materials to new material clones
+    function cloneMaterials( nodein ) {
+        walkGraph( nodein, function( node ) {
+            if(node.material) {
+              node.material = node.material.clone();
+            }
+        });
+    }
+
     function loadAsset( parentNode, node, childType, propertyNotifyCallback ) {
 
         var nodeCopy = node; 
@@ -2012,39 +2152,73 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if(asset.animations && asset.animations.length > 0) {
                 animations = asset.animations;
             }
-            if(asset.skins && asset.skins.length > 0) {
-                animatedMesh = asset.skins;
-            }
 
-            //possibly deal with setting intial scale and rotation here, if threejs does something strange by default
-            //collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
             if(asset.scene)
                 asset = asset.scene;
 
-            nodeCopy.threeObject = asset;
+            var meshes =[];
+            GetAllLeafMeshes( asset, meshes );
 
-            asset.name = childName;
-            asset.vwfID = nodeID;
+            for( var i =0; i < meshes.length; i++ ) {
+                fixMissingUVs( meshes[i] );   
+                meshes[i].geometry.uvsNeedUpdate = true;
+            }
+            
+            asset.updateMatrixWorld();
+            
+            asset.matrix = new THREE.Matrix4();
             asset.matrixAutoUpdate = false;
+            
+            // Don't make a copy of the three object if there are keyframe animations associated with it
+            // until we figure out a way to copy them successfully.
             if(animations) {
+                nodeCopy.threeObject = asset;
+            }
+            else {
+                nodeCopy.threeObject = asset.clone();
+            }
+            
+            //make sure that the new object has a unique material
+            cloneMaterials( nodeCopy.threeObject );
+
+            //find and bind the animations
+            //NOTE: this would probably be better handled by walking and finding the animations and skins only on the 
+            //property setter when needed.
+		
+            animatedMesh = [];
+            walkGraph(nodeCopy.threeObject,function( node ){
+                if( node instanceof THREE.SkinnedMesh ) {
+                    animatedMesh.push( node );
+                }
+            });
+            nodeCopy.threeObject.animatedMesh = animatedMesh;
+            nodeCopy.threeObject.updateMatrixWorld();
+            parentObject3.add( nodeCopy.threeObject );
+            nodeCopy.threeObject.name = childName;
+            nodeCopy.threeObject.vwfID = nodeID;
+            nodeCopy.threeObject.matrixAutoUpdate = false;
+
+            if( animations ) {
                 var animHandler = THREE.AnimationHandler;
-                asset.kfAnimations = [];
-                asset.animations = animations;
+                nodeCopy.threeObject.kfAnimations = [];
+                nodeCopy.threeObject.animations = animations;
+
                 // Initialize the key frame animations
                 for(var i = 0; i < animations.length; i++) {
                     var animation = animations[i];
+
                     // Save references to the animations on the node that is animated, so that it can play separately
-                    if(animation.node.animations == undefined) {
+                    if( animation.node.animations == undefined ) {
                         animation.node.animations = [];
                     }
-                    if(animation.node.kfAnimations == undefined) {
+                    if( animation.node.kfAnimations == undefined ) {
                         animation.node.kfAnimations = [];
                     }
-                    animation.node.animations.push(animation);
-                    animHandler.add(animation);
-                    var kfAnimation = new THREE.KeyFrameAnimation(animation.node, animation.name);
+                    animation.node.animations.push( animation );
+                    animHandler.add( animation );
+                    var kfAnimation = new THREE.KeyFrameAnimation( animation.node, animation.name );
                     kfAnimation.timeScale = 1;
-                    asset.kfAnimations.push(kfAnimation);
+                    nodeCopy.threeObject.kfAnimations.push( kfAnimation );
                     animation.node.kfAnimations.push(kfAnimation);
                     for(var h = 0; h < kfAnimation.hierarchy.length; h++) {
                         var keys = kfAnimation.data.hierarchy[h].keys;
@@ -2066,25 +2240,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
             }
             if(animatedMesh) {
-                asset.animatedMesh = animatedMesh;
+                nodeCopy.threeObject.animatedMesh = animatedMesh;
             }
             
             // remember that this was a loaded collada file
-            asset.loadedColladaNode = true;
-            
-            var meshes =[];
-            GetAllLeafMeshes(asset,meshes);
-        
-            for(var i =0; i < meshes.length; i++)
-            {
-                fixMissingUVs(meshes[i]);   
-                meshes[i].geometry.uvsNeedUpdate = true;
-            }
-            
-            parentObject3.add( asset );
-            if ( asset.updateMatrixWorld ) asset.updateMatrixWorld(true);
-            
-            nodeCopy.threeObject.matrixAutoUpdate = false;
+            nodeCopy.threeObject.loadedColladaNode = true;
 
             for ( var j = 0; j < sceneNode.srcAssetObjects.length; j++ ) {
                 if ( sceneNode.srcAssetObjects[j] == nodeCopy ){
@@ -2095,6 +2255,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             if ( node.threeObject )
             {
+
                 // Add a local model-side transform that can stay pure even if the view changes the
                 // transform on the threeObject - this already happened in creatingNode for those nodes that
                 // didn't need to load a model
@@ -2128,39 +2289,165 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             // let vwf know the asset is loaded 
             if ( nodeCopy.loadingCallback ) {
+
                 //console.info( "========= LOADED ========== "+node.name+" ========= LOADED ==========" );
                 nodeCopy.loadingCallback( true );                    
             }
+
+            //get the entry from the asset registry
+            reg = threeModel.assetRegistry[nodeCopy.source];
+            
+            // If there are animations, set loaded to false and don't store the asset
+            // in the registry, since the animations don't work with the copy process
+            if(animations) {
+                reg.pending = false;
+                reg.loaded = false;
+            }
+            else {
+                //it's not pending, and it is loaded
+                reg.pending = false;
+                reg.loaded = true;
+                
+                //store this asset in the registry
+                reg.node = asset;
+            }
+            
+            //if any callbacks were waiting on the asset, call those callbacks
+            for( var i = 0; i < reg.callbacks.length; i++ ) {
+                reg.callbacks[i]( asset );
+            }
+            
+            //nothing should be waiting on callbacks now.  
+            reg.callbacks = [];  
+            
         }
         node.name = childName;
-        sceneNode.srcAssetObjects.push( node );
-        sceneNode.pendingLoads++;
+      
+        //create an asset registry if one does not exist for this driver
+        if( !this.assetRegistry ) {
+            this.assetRegistry = {};
+        }
         
-        if ( parentNode && parentNode.threeObject ) {
-            parentNode.threeObject.add(node.threeObject);
-         } else if ( sceneNode ) {
-            if ( sceneNode.threeScene ) {
-                sceneNode.threeScene.add( node.threeObject );
+        // if there is no entry in the registry, create one
+        if( !this.assetRegistry[node.source] ) {
+            
+            //it's new, so not waiting, and not loaded
+            this.assetRegistry[node.source] = {};
+            this.assetRegistry[node.source].loaded = false;
+            this.assetRegistry[node.source].pending = false;
+            this.assetRegistry[node.source].callbacks = [];
+        }
+        
+        //grab the registry entry for this asset
+        var reg = this.assetRegistry[node.source];
+        
+        //if the asset entry is not loaded and not pending, you'll have to actually go download and parse it
+        if( reg.loaded == false && reg.pending == false ) {
+            
+            //thus, it becomes pending
+            reg.pending = true;
+            
+            sceneNode.srcAssetObjects.push( node.threeObject );
+            
+            //node.threeObject.vwfID = nodeID;
+            sceneNode.pendingLoads++;
+          
+            //call up the correct loader/parser
+            if( childType == "model/vnd.collada+xml" ) {
+                node.parse = true;
+                node.loader = new THREE.ColladaLoader();
+                node.loader.options.convertUpAxis = true;
+                node.loader.options.upAxis = "Z";
+                node.loader.load(node.source,node.assetLoaded.bind( this ));
             }
-             
+          
+            if( childType == "model/vnd.osgjs+json+compressed" ) {
+                node.loader = new UTF8JsonLoader( node,node.assetLoaded.bind( this ) );
+            }
         }
-        ////////////////////////////////////
-        //manually call callback, since there is no async load currently
-        //assetLoaded(node.threeObject);
-        if(childType == "model/vnd.collada+xml")
-        {
-            node.loader = new THREE.ColladaLoader();
-            node.loader.options.convertUpAxis = true;
-            node.loader.options.upAxis = "Z";
-            node.loader.load(node.source, node.assetLoaded.bind( this ) );
+
+        //if the asset registry entry is not pending and it is loaded, then just grab a copy, 
+        //no download or parse necessary
+        else if( reg.loaded == true && reg.pending == false ) {
+            var asset = (reg.node.clone());
+		
+            // make sure the materails are unique
+            cloneMaterials( asset );
+            
+            var n = asset;
+            var skins = [];
+            walkGraph( n, function( node ) {
+                if( node instanceof THREE.SkinnedMesh ) {
+                    skins.push( node );
+                }
+            });
+
+            n.animatedMesh = skins;
+            nodeCopy.threeObject = asset;
+            
+            nodeCopy.threeObject.matrix = new THREE.Matrix4();
+            nodeCopy.threeObject.matrixAutoUpdate = false;
+            parentObject3.add( nodeCopy.threeObject );
+            nodeCopy.threeObject.name = childName;
+            nodeCopy.threeObject.vwfID = nodeID;
+            nodeCopy.threeObject.matrixAutoUpdate = false;
+            nodeCopy.threeObject.updateMatrixWorld( true );
+            propertyNotifyCallback();
+            window.setTimeout( function() {
+                nodeCopy.loadingCallback( true ); 
+            }, 10);
+          
         }
-        if(childType == "model/vnd.osgjs+json+compressed")
-        {
-            node.loader = new UTF8JsonLoader(node, node.assetLoaded.bind( this ) );
+        
+        //if it's pending but not done, register a callback so that when it is done, it can be attached.
+        else if( reg.loaded == false && reg.pending == true ) {  
+            sceneNode.srcAssetObjects.push( node.threeObject );
+          
+            //so, not necessary to do all the other VWF node goo stuff, as that will be handled by the node that requested
+            //the asset in teh first place
+            
+            reg.callbacks.push( function( node ) {
+            
+            //just clone the node and attach it.
+            //this should not clone the geometry, so much lower memory.
+            //seems to take near nothing to duplicated animated avatar            
+            var n = node.clone();
+			cloneMaterials( n );
+            var skins = [];
+            walkGraph( n, function( node ) {
+                if( node instanceof THREE.SkinnedMesh ) {
+                    skins.push( node );
+                }            
+            });
+            n.animatedMesh = skins;
+            nodeCopy.threeObject = n;            
+
+            nodeCopy.threeObject.matrix = new THREE.Matrix4();
+            nodeCopy.threeObject.matrixAutoUpdate = false;
+            parentObject3.add( nodeCopy.threeObject );
+            nodeCopy.threeObject.name = childName;
+            nodeCopy.threeObject.vwfID = nodeID;
+            nodeCopy.threeObject.matrixAutoUpdate = false;
+            nodeCopy.threeObject.updateMatrixWorld( true );
+            propertyNotifyCallback();
+            nodeCopy.loadingCallback( true ); 
+            
+            });
         }
             
-        
     }
+
+    //walk the scenegraph from the given root, calling the given function on each node
+    function walkGraph( root, func ) {
+        if( root ) {
+            func( root );
+        }
+        for( var i =0; i < root.children.length; i++ ) {
+            walkGraph( root.children[i], func );
+        }
+    }
+
+
     function getObjectID( objectToLookFor, bubbleUp, debug ) {
 
         var objectIDFound = -1;
@@ -2462,7 +2749,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 vertexShader:   vertShader_analytic,
                 fragmentShader: fragShader_analytic
             });
-            
 
             // create the particle system
             var particleSystem = new THREE.ParticleSystem(particles,shaderMaterial_default);

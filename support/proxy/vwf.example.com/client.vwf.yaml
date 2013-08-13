@@ -21,6 +21,8 @@ properties:
   localUrl:
   remoteUrl: 
   displayName:
+  sharing: { audio: true, video: true }
+  color: "rgb(0,0,0)"
 scripts:
 - |
     this.initialize = function() {

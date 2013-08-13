@@ -13,8 +13,8 @@
 
 ---
 model:
-  vwf/model/glge:
+  vwf/model/threejs:
 view:
-  vwf/view/glge: 
+  vwf/view/threejs: 
     application-root: "#vwf-root"
   vwf/view/lesson: 

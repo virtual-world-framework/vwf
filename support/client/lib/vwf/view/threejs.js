@@ -36,7 +36,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var pitchMatrix;
     var rollMatrix;
     var yawMatrix;
-    var translation;
+    var translationMatrix;
     var positionUnderMouseClick;
     var boundingBox = undefined;
     // End Navigation
@@ -78,7 +78,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             pitchMatrix = new THREE.Matrix4();
             rollMatrix = new THREE.Matrix4();
             yawMatrix = new THREE.Matrix4();
-            translation = new THREE.Matrix4();
+            translationMatrix = new THREE.Matrix4();
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -308,6 +308,26 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
         },
 
+        // -- firedEvent -----------------------------------------------------------------------------
+
+        firedEvent: function( nodeID, eventName ) {
+            if ( eventName == "changingTransformFromView" ) {
+                var clientThatSatProperty = self.kernel.client();
+                var me = self.kernel.moniker();
+
+                // If the transform property was initially updated by this view....
+                if ( clientThatSatProperty == me ) {
+                    var node = this.state.nodes[ nodeID ];
+                    node.ignoreNextTransformUpdate = true;
+                }
+            }
+            else if (eventName == "resetViewport") {
+                if(this.state.scenes[nodeID]) {
+                    this.state.scenes[nodeID].renderer.setViewport(0,0,window.innerWidth,window.innerHeight);
+                }
+            }
+        },
+
         // -- ticked -----------------------------------------------------------------------------------
 
         ticked: function() {
@@ -503,11 +523,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if ((origWidth != self.width) || (origHeight != self.height)) {
                     mycanvas.height = self.height;
                     mycanvas.width = self.width;
-                    sceneNode.renderer.setViewport(0,0,window.innerWidth,window.innerHeight)
+                    if ( sceneNode.renderer ) {
+                        sceneNode.renderer.setViewport(0,0,window.innerWidth,window.innerHeight);
+                    }
                     
                     var viewCam = view.state.cameraInUse;
-                    viewCam.aspect =  mycanvas.width / mycanvas.height;
-                    viewCam.updateProjectionMatrix();
+                    if ( viewCam ) {
+                        viewCam.aspect =  mycanvas.width / mycanvas.height;
+                        viewCam.updateProjectionMatrix();
+                    }
                 }
             }
 
@@ -591,6 +615,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var sceneID = this.state.sceneRootID;
         var sceneView = this;
 
+        var touchID = undefined;
+        var touchPick = undefined;
+
         var pointerDownID = undefined;
         var pointerOverID = undefined;
         var pointerPickID = undefined;
@@ -601,6 +628,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var mouseRightDown = false;
         var mouseLeftDown = false;
         var mouseMiddleDown = false;
+        var touchGesture = false;
         var win = window;
 
         var container = document.getElementById("container");
@@ -647,6 +675,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         middle: mouseMiddleDown,
                         right: mouseRightDown,
                     },
+                gestures: touchGesture,
                 modifiers: {
                         alt: e.altKey,
                         ctrl: e.ctrlKey,
@@ -751,7 +780,136 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
             self.lastEventData = returnData;
             return returnData;
-        }          
+        }
+
+        var getTouchEventData = function( e, debug ) {
+            var returnData = { eventData: undefined, eventNodeData: undefined };
+            var pickInfo = touchPick;
+
+            var mousePos = utility.coordinates.contentFromWindow( e.target, { x: e.gesture.center.pageX, y: e.gesture.center.pageY } ); // canvas coordinates from window coordinates
+            touchPick = ThreeJSTouchPick.call( self, canvas, sceneNode, false, mousePos );
+
+            returnData.eventData = [ {
+                gestures: touchGesture,
+                position: [ mousePos.x / sceneView.width, mousePos.y / sceneView.height ],
+                screenPosition: [ mousePos.x, mousePos.y ]
+            } ];
+
+            returnData.eventNodeData = { "": [ {
+                distance: pickInfo ? pickInfo.distance : undefined,
+                globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined
+            } ] };
+
+            self.lastEventData = returnData;
+            return returnData;
+        }       
+
+        function handleHammer(ev) {
+            // disable browser scrolling
+            ev.gesture.preventDefault();
+
+            var eData = getTouchEventData( ev, false );
+            touchID = touchPick ? getPickObjectID.call( sceneView, touchPick.object, false ) : sceneID;
+
+            switch(ev.type) {
+                case 'hold':
+                    sceneView.kernel.dispatchEvent( touchID, "touchHold", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'tap':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTap", eData.eventData, eData.eventNodeData );
+                    // TODO - Update control behavior and apps to listen for touchTap events
+                    // Emulate pointer events
+                    sceneView.kernel.dispatchEvent( touchID, "pointerClick", eData.eventData, eData.eventNodeData );
+                    sceneView.kernel.dispatchEvent( touchID, "pointerDown", eData.eventData, eData.eventNodeData );
+                    sceneView.kernel.dispatchEvent( touchID, "pointerUp", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'doubletap':
+                    // Switch Mode (from right mouse button to left mouse button)?
+                    sceneView.kernel.dispatchEvent( touchID, "touchDoubleTap", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'drag': 
+                    // Fly Navigation Behavior
+                    //handleTouchNavigation( eData.eventData );
+                    sceneView.kernel.dispatchEvent( touchID, "touchDrag", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragstart':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragStart", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragend':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragEnd", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragup':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragUp", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragdown':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragDown", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragleft':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragLeft", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragright':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragRight", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipe':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipe", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipeup':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeUp", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipedown':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeDown", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipeleft':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeLeft", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swiperight':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeRight", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'transform':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTransform", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'transformstart':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTransformStart", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'transformend':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTransformEnd", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'rotate':
+                    // Orbit Selected Object?
+                    sceneView.kernel.dispatchEvent( touchID, "touchRotate", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'pinch':
+                    sceneView.kernel.dispatchEvent( touchID, "touchPinch", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'pinchin':
+                    // Zoom Out
+                    handleScroll( ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
+                    sceneView.kernel.dispatchEvent( touchID, "touchPinchIn", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'pinchout':
+                    // Zoom In
+                    handleScroll( -1 * ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
+                    sceneView.kernel.dispatchEvent( touchID, "touchPinchOut", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'touch':
+                    touchGesture = true;
+                    sceneView.kernel.dispatchEvent( touchID, "touchStart", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'release':
+                    touchGesture = false;
+                    sceneView.kernel.dispatchEvent( touchID, "touchRelease", eData.eventData, eData.eventNodeData );
+                    break;
+            }
+        }
+
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("touch release", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("hold tap doubletap", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("drag dragstart dragend dragup dragdown dragleft dragright", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("swipe swipeup swipedown swipeleft,swiperight", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("transform transformstart transformend", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("rotate", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("pinch pinchin pinchout", handleHammer);
+        
 
         canvas.onmousedown = function( e ) {
             var event = getEventData( e, false );
@@ -1239,7 +1397,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
                 
                 // Insert the new navObject position into the translation array
-                var translationArray = translation.elements;
+                var translationArray = translationMatrix.elements;
                 translationArray[ 12 ] = navObjectWorldPos [ 0 ];
                 translationArray[ 13 ] = navObjectWorldPos [ 1 ];
                 translationArray[ 14 ] = navObjectWorldPos [ 2 ];
@@ -1305,7 +1463,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 // Construct the new transform from pitch, yaw, and translation
                 var navObjectWorldTransform = navThreeObject.matrixWorld;
                 navObjectWorldTransform.multiplyMatrices( yawMatrix, pitchMatrix );
-                navObjectWorldTransform.multiplyMatrices( translation, navObjectWorldTransform );
+                navObjectWorldTransform.multiplyMatrices( translationMatrix, navObjectWorldTransform );
                 if ( navThreeObject instanceof THREE.Camera ) {
                     var navObjectWorldTransformArray = navObjectWorldTransform.elements;
                     navObjectWorldTransform.elements = convertCameraTransformFromVWFtoThreejs( navObjectWorldTransformArray );
@@ -1502,7 +1660,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                             
                         var navObjectWorldMatrix = navThreeObject.matrixWorld;
                         navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
-                        navObjectWorldMatrix.multiplyMatrices( translation, navObjectWorldMatrix );
+                        navObjectWorldMatrix.multiplyMatrices( translationMatrix, navObjectWorldMatrix );
                         if ( navThreeObject instanceof THREE.Camera ) {
                             var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
                             navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
@@ -1548,7 +1706,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 amountToMove = dist * ( 1 - Math.pow( 1 / percentDistRemainingEachStep, numClicks ) );
             }
 
-            var translationArray = translation.elements;
+            var translationArray = translationMatrix.elements;
             translationArray[ 12 ] += amountToMove * pickDirectionVector.x;
             translationArray[ 13 ] += amountToMove * pickDirectionVector.y;
             translationArray[ 14 ] += amountToMove * pickDirectionVector.z;
@@ -1579,6 +1737,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             setTransformFromWorldTransform( navThreeObject );
             callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+        }
+
+        function handleTouchNavigation( touchEventData ) {
+
         }
 
         // END TODO
@@ -1677,6 +1839,54 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         };
          
     };
+
+    function ThreeJSTouchPick ( canvas, sceneNode, debug, mousepos )
+    {
+        if(!this.lastEventData) return;
+
+        var threeCam = this.state.cameraInUse;
+        if ( !threeCam ) {
+            this.logger.errorx( "Cannot perform pick because there is no camera to pick from" );
+            return;
+        }
+
+        if(!this.raycaster) this.raycaster = new THREE.Raycaster();
+        if(!this.projector) this.projector = new THREE.Projector();
+        
+        var SCREEN_HEIGHT = window.innerHeight;
+        var SCREEN_WIDTH = window.innerWidth;
+
+        var mousepos = { x: this.lastEventData.eventData[0].position[0], y: this.lastEventData.eventData[0].position[1] }; // window coordinates
+
+        var x = ( mousepos.x ) * 2 - 1;
+        var y = -( mousepos.y ) * 2 + 1;
+
+        pickDirectionVector = new THREE.Vector3();
+        pickDirectionVector.set( x, y, 0.5 );
+        
+        this.projector.unprojectVector(pickDirectionVector, threeCam);
+        var pos = new THREE.Vector3();
+        pos.getPositionFromMatrix( threeCam.matrixWorld );
+        pickDirectionVector.sub(pos);
+        pickDirectionVector.normalize();
+                
+        this.raycaster.set(pos, pickDirectionVector);
+        var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
+        
+        // intersections are, by default, ordered by distance,
+        // so we only care for the first (visible) one. The intersection
+        // object holds the intersection point, the face that's
+        // been "hit" by the ray, and the object to which that
+        // face belongs. We only care for the object itself.
+
+        // Cycle through the list of intersected objects and return the first visible one
+        for ( var i = 0; i < intersects.length; i++ ) {
+            if ( intersects[ i ].object.visible ) {
+                return intersects[ i ];
+            }
+        }
+        return null;
+    }
 
     function ThreeJSPick( canvas, sceneNode, debug )
     {
@@ -2344,29 +2554,16 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             return;
         }
 
-        var clientThatSatProperty = self.kernel.client();
-        var me = self.kernel.moniker();
-
         // If the transform property was initially updated by this view....
-        if ( clientThatSatProperty == me ) {
-            if ( node.outstandingTransformRequestToBeIgnored && 
-                 node.outstandingTransformRequestToBeIgnored.length ) {
-                node.outstandingTransformRequestToBeIgnored.shift();
-            } else {
-
-                // We have not created a view-side update that this model-side one corresponds to
-                // Therefore, we must adopt this update
-                adoptTransform( node, transformMatrix );
-
-                // Initialize variable
-                node.outstandingTransformRequestToBeIgnored = [];
-            }
+        if ( node.ignoreNextTransformUpdate ) {
+            node.outstandingTransformRequests.shift();
+            node.ignoreNextTransformUpdate = false;
         } else { // this transform change request is not from me
             adoptTransform( node, transformMatrix );
-            if ( node.outstandingTransformRequestToBeIgnored ) {
+            if ( node.outstandingTransformRequests ) {
                 var threeObject = node.threeObject;
-                for ( var i = 0; i < node.outstandingTransformRequestToBeIgnored.length; i++ ) {
-                    goog.vec.Mat4.multMat( node.outstandingTransformRequestToBeIgnored[ i ], 
+                for ( var i = 0; i < node.outstandingTransformRequests.length; i++ ) {
+                    goog.vec.Mat4.multMat( node.outstandingTransformRequests[ i ], 
                                            threeObject.matrix.elements, 
                                            threeObject.matrix.elements );
                 }
@@ -2380,10 +2577,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var transformMatrix = matCpy( transform );
         var threeObject = node.threeObject;
 
-        if ( node == navObject ) {
-            extractRotationAndTranslation( threeObject );
-        }
-
         if ( threeObject instanceof THREE.Camera ) {  
             transformMatrix = convertCameraTransformFromVWFtoThreejs( transformMatrix );
         } else if( threeObject instanceof THREE.ParticleSystem ) {
@@ -2395,6 +2588,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         threeObject.matrix.elements = transformMatrix;
         updateRenderObjectTransform( threeObject );
+
+        if ( node == navObject ) {
+            extractRotationAndTranslation( threeObject );
+        }
+        
         nodeLookAt( node );
     }
 
@@ -2430,9 +2628,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 } else {
                     deltaModelTransform = deltaViewTransform;
                 }
+                vwf_view.kernel.fireEvent( nodeID, "changingTransformFromView");
                 vwf_view.kernel.callMethod( nodeID, "transformBy", [ deltaModelTransform ] );
-                node.outstandingTransformRequestToBeIgnored = node.outstandingTransformRequestToBeIgnored || [];
-                node.outstandingTransformRequestToBeIgnored.push( deltaViewTransform );
+                node.outstandingTransformRequests = node.outstandingTransformRequests || [];
+                node.outstandingTransformRequests.push( deltaViewTransform );
 
             } else {
                 self.logger.errorx( "callModelTransformBy: Original view transform is not invertible" );
@@ -2628,8 +2827,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         yawArray[ 4 ] = -sinphi;
         yawArray[ 5 ] = cosphi;
 
-        translation = new THREE.Matrix4();
-        var translationArray = translation.elements;
+        translationMatrix = new THREE.Matrix4();
+        var translationArray = translationMatrix.elements;
         translationArray[ 12 ] = vwfWorldTransformArray[ 12 ];
         translationArray[ 13 ] = vwfWorldTransformArray[ 13 ];
         translationArray[ 14 ] = vwfWorldTransformArray[ 14 ];
@@ -2723,7 +2922,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 worldToRotatedOrbit.getInverse( rotatedOrbitFrameInWorld );
 
                 var translationInRotatedOrbitFrame = new THREE.Matrix4();
-                translationInRotatedOrbitFrame.multiplyMatrices( worldToRotatedOrbit, translation );
+                translationInRotatedOrbitFrame.multiplyMatrices( worldToRotatedOrbit, translationMatrix );
 
                 // Apply pitch and then yaw
                 translationInRotatedOrbitFrame.multiplyMatrices( pitchDeltaMatrix, translationInRotatedOrbitFrame );
@@ -2733,7 +2932,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 var newTranslationInWorld = new THREE.Matrix4();
                 newTranslationInWorld.multiplyMatrices( rotatedOrbitFrameInWorld, translationInRotatedOrbitFrame );
 
-                var translationArray = translation.elements;
+                var translationArray = translationMatrix.elements;
                 var newTranslationInWorldArray = newTranslationInWorld.elements;
                 translationArray[ 12 ] = newTranslationInWorldArray[ 12 ];
                 translationArray[ 13 ] = newTranslationInWorldArray[ 13 ];
@@ -2765,7 +2964,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if ( boundByBoundingBox == false ) {
                     var navObjectWorldMatrix = navThreeObject.matrixWorld;
                     navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
-                    navObjectWorldMatrix.multiplyMatrices( translation, navObjectWorldMatrix );
+                    navObjectWorldMatrix.multiplyMatrices( translationMatrix, navObjectWorldMatrix );
                 
                     if ( navThreeObject instanceof THREE.Camera ) {
                         var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;

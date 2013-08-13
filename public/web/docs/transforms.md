@@ -70,7 +70,7 @@ Example from the view:
 
 	vwf_view.kernel.callMethod( camera, "translateTo", [ [ 0, 0, 5 ], 10 ] );
 
-The above method calls will translate the camera to [ 0, 0, 5 ], over a duration of 10 milliseconds. 
+The above method calls will translate the camera to \[ 0, 0, 5 \], over a duration of 10 milliseconds. 
 
 --------------
 

@@ -39,12 +39,19 @@
         }
         var code = ( e.keyCode ? e.keyCode : e.which );
         if ( ( code == 13 ) && ( sanitizedUsername.length > 0 ) ) {
-          $('.ui-button').focus();
-          playerName = $('#userNameInput').val( );
-          vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [$('#userNameInput').val(), vwf.moniker()]);
-          $('#userName').html(playerName + ":&nbsp;");
-          preloadImages();
-					$('#createUser').dialog("close");
+          var buttonEnabled = true;
+          if ( $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled') ) {
+            if ( $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled') == true ) {
+              buttonEnabled = false;
+            }
+          }
+          if ( buttonEnabled ) {
+            $('.ui-button').focus();
+            playerName = $('#userNameInput').val( );
+            vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [$('#userNameInput').val(), vwf.moniker()]);
+            $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
+            $('#userNameInput').attr('disabled', true);
+          }
         }
       });
 
@@ -55,17 +62,21 @@
         e.stopPropogation();
         var code = ( e.keyCode ? e.keyCode : e.which );
         if ( ( code == 13 ) && ( sanitizedUsername.length > 0 ) ) {
-          if ( $( '#selectPlayerInput' ).val( ) != 'createNew' ) {
+          var buttonEnabled = true;
+          if ( $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled') ) {
+            if ( $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled') == true ) {
+              buttonEnabled = false;
+            }
+          }
+          if ( buttonEnabled && ( $( '#selectPlayerInput' ).val( ) != 'createNew' ) ){
             $('.ui-button').focus();
             playerName = $("#selectPlayerInput option[value='" + $('#selectPlayerInput').val() + "']").text();
 			  		vwf_view.kernel.callMethod(vwf.find("","/")[0], "rejoinPlayer", [playerName, vwf.moniker()]);
-				  	$('#userName').html(playerName + ":&nbsp;");
-					  preloadImages();
-				  	$('#createUser').dialog("close");
+            $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
+            $('#userNameInput').attr('disabled', true);
           }
         }
       });
-      
 			$('#createUser').dialog( {
 				height: 'auto',
 				width: 820,
@@ -79,9 +90,8 @@
 							if($('#userNameInput').val().length > 0) {
 								playerName = $('#userNameInput').val();
 								vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [$('#userNameInput').val(), vwf.moniker()]);
-								$('#userName').html(playerName + ":&nbsp;");
-								preloadImages();
-								$(this).dialog("close");
+                $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
+                $('#userNameInput').attr('disabled', true);
 							}
 						}
 						else
@@ -134,7 +144,6 @@
 				buttons: {
 					"Yes": function () {
 						vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [playerName, vwf.moniker()]);
-						$(this).dialog("close");
 					},
 					"No": function () {
 						$(this).dialog("close");

@@ -350,6 +350,11 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
             var object = this.objects[nodeID];
 
+            if ( !object ) {
+                this.logger.errorx( "internals: object does not exist with id = '" + nodeID + "'" );
+                return;
+            }
+
             if ( internals ) { // set
                 object.sequence = internals.sequence !== undefined ? internals.sequence : object.sequence;
                 jQuery.extend( object.prng.state, internals.random || {} );

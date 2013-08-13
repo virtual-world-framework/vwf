@@ -30,7 +30,8 @@ methods:
   createClient:
   locationCaptured:
   findClient:
-  newClientVideo:
+  createVideo:
+  removeVideo:
   dropPin:
   draw:
 children:

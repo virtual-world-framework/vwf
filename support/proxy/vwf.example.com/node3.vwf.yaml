@@ -49,6 +49,8 @@ properties:
       if ( this.parent && goog.vec.Mat4.invert( this.transformFromValue( this.parent.worldTransform ), parentInverse ) ) {
         var transform = goog.vec.Mat4.multMat( parentInverse, this.transformFromValue( value ), goog.vec.Mat4.create() );
         this.transform = transform;
+      } else {
+        this.transform = value;
       }
     get: |
       if( this.parent && this.parent.worldTransform && this.transform )
@@ -331,6 +333,30 @@ events:
   pointerOut:
   pointerWheel:
   transformChanged:
+  touchHold:
+  touchTap:
+  touchDoubleTap:
+  touchDrag:
+  touchDragStart:
+  touchDragEnd:
+  touchDragUp:
+  touchDragDown:
+  touchDragLeft:
+  touchDragRight:
+  touchSwipe:
+  touchSwipeUp:
+  touchSwipeDown:
+  touchSwipeLeft:
+  touchSwipeRight:
+  touchTransform:
+  touchTransformStart:
+  touchTransformEnd:
+  touchRotate:
+  touchPinch:
+  touchPinchIn:
+  touchPinchOut:
+  touchStart:
+  touchRelease:
 
 scripts:
 

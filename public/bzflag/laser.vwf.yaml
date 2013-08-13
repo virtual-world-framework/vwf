@@ -152,7 +152,6 @@ scripts:
   this.explode = function() {
     this.children.delete(this.laserParticle);
     var newExplosion = $.extend(true, {}, explosion);
-    newExplosion.properties.worldTransform = this.worldTransform;
     this.children.create(this.name + "Explosion", newExplosion);
     this.future(5.0).clean();
   }

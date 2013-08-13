@@ -258,10 +258,10 @@
                 <technique sid="COMMON">
                     <lambert>
                         <ambient>
-                            <color>0 0 0 1</color>
+                            <color>0.15 0.15 0.15 1</color>
                         </ambient>
                         <diffuse>
-                            <color>0 0 0 1</color>
+                            <color>0.15 0.15 0.15 1</color>
                         </diffuse>
                     </lambert>
                 </technique>
