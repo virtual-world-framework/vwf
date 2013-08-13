@@ -27,14 +27,11 @@ routesMap = {
 
 exports.generalHandler = function(req, res){
 	
-	var pathArr = req.route.path.split('/');
-	
-	var parent = pathArr[pathArr.length-2];
-	var routeIndex = exports.acceptedRoutes.indexOf(pathArr[pathArr.length-1]);
-	
-	if(exports.acceptedRoutes.indexOf(parent + '/' + pathArr[pathArr.length-1]) >= 0)
-		routeIndex = exports.acceptedRoutes.indexOf(parent + '/' + pathArr[pathArr.length-1]);
-	
+	if(!req.params.page)
+		req.params.page = 'sandbox';
+		
+	var routeIndex = exports.acceptedRoutes.indexOf(req.params.page);
+
 	if(routeIndex >= 0){
 		
 		var currentAcceptedRoute = exports.acceptedRoutes[routeIndex], title = '', sid = '', template = currentAcceptedRoute, fileList = [];
