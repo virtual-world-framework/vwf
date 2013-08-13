@@ -43,6 +43,12 @@ Alternative driver options also include:
 * Lesson (vwf/view/lesson)
 * WebRTC (vwf/view/webrtc)
 
+For 2D applications, or any application where the default drivers are not necessary, the keyword *nodriver* may be used. For example, in tile-puzzle-2D, a WebGL renderer is not required, and thus uses the following configuration:
+
+	---
+	model:
+	  nodriver: 
+
 -------------------
 
 ### Additional Information
@@ -66,6 +72,10 @@ For instance, the Google Earth view driver may be loaded in an application witho
 Both a model and a view driver may be loaded in an application with the following URL:
 
 	http://virtualworldframework.com/humvee/?glge#!glge
+
+Parameters may also be passed in via the URL. The following example passes in parameters for the application root and setting the pick interval:
+
+	http://virtualworldframework.com/sandtable/?threejs#!threejs={"application-root":"#vwf-root","experimental-pick-interval":50}
 
 *Note*: The URL takes precedence and will override anything defined via the configuration file.
 
