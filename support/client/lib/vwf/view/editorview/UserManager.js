@@ -138,6 +138,11 @@ define(function ()
 						alertify.confirm("You are viewing this world as a guest. You will be able to view the world, but not interact with it. Would you like to go back and log in?",
 						function(e)
 						{
+							alertify.set({ labels: {
+							    ok     : "Ok",
+							    cancel : "Cancel"
+							} });
+						
 							if(e)
 								window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13);
 							else
@@ -156,7 +161,7 @@ define(function ()
 			
 			
 			
-		}.bind(this)
+		}.bind(this) 
 		);
 		this.SelectedProfile = null;
 		this.showProfile = function (profile)

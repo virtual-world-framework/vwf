@@ -170,6 +170,7 @@ define(function ()
 			_ScriptEditor.resize();
 		});
 		//$('#ScriptEditor').dialog({title:'Script Editor',autoOpen:false,resize:this.resize,height:520,width:760,position:'center'});
+		
 		$('#ScriptEditorDeleteMethod').dialog(
 		{
 			title: 'Delete Method?',
@@ -1569,6 +1570,10 @@ define(function ()
 				line = splits[splits.length-1];
 				splits = line.split(';');
 				line = splits[splits.length-1];
+				splits = line.split('(');
+				line = splits[splits.length-1];
+				splits = line.split(')');
+				line = splits[splits.length-1];
 				//don't show autocomplete for lines that contain a (, because we'll be calling a functio ntaht might have side effects
 				if(line.indexOf('(') == -1 && line.indexOf('=') == -1)
 				{
@@ -1796,6 +1801,10 @@ define(function ()
 				line = splits[splits.length-1];
 				splits = line.split(';');
 				line = splits[splits.length-1];
+				splits = line.split('(');
+				line = splits[splits.length-1];
+				splits = line.split(')');
+				line = splits[splits.length-1];
 				var triggerkeyloc = Math.max(line.lastIndexOf('.'),line.lastIndexOf('['));
 				var triggerkey = line[triggerkeyloc];
 				var filter = line.substr(triggerkeyloc+1);
@@ -1829,6 +1838,10 @@ define(function ()
 				var splits = line.split(' ');
 				line = splits[splits.length-1];
 				splits = line.split(';');
+				line = splits[splits.length-1];
+				splits = line.split('(');
+				line = splits[splits.length-1];
+				splits = line.split(')');
 				line = splits[splits.length-1];
 				var triggerkeyloc = Math.max(line.lastIndexOf('.'),line.lastIndexOf('['));
 				var triggerkey = line[triggerkeyloc];
