@@ -17,6 +17,7 @@ properties:
   backgroundColor: [ 83, 157, 194 ]
   ambientColor: [ 250, 250, 250 ]
   colorIndex: 0
+  laserCount: 0
   ## The sorted list of scores for all players
   ##
   ## @name appscene.vwf#scoreBoard
@@ -123,6 +124,7 @@ scripts:
     properties: {
       laserDirection: [],
       parentTank: "",
+      enabled: false,
       translation: [],
     },
     children: {
@@ -144,6 +146,7 @@ scripts:
           endSize: 400,
           loop: true,
           translation: [],
+          visible: false,
           minVelocity: [ 0, 0, 0.0],
           maxVelocity: [ 0, 0, 0],
           maxAcceleration: [ 0, 0, 0.0],
@@ -162,11 +165,48 @@ scripts:
           textureTiles: 1,
           image: "",
         }
+      },
+      explosion: {
+        extends: "http://vwf.example.com/particlesystem.vwf",
+        properties: {
+          numberParticles: 100,
+          maxLifeTime: 1000,
+          minLifeTime: 1000,
+          startSize: 400,
+          endSize: 400,
+          loop: false,
+          image: "images/explode.png",
+          maxEndAcceleration: [ 0.006, 0.006, 0.006 ],
+          minEndAcceleration: [ -0.006, -0.006, -0.006 ],
+          minVelocity: [ -0.2, -0.2, -0.2 ],
+          maxVelocity: [ 0.2, 0.2, 0.2 ],
+          translation: [],
+          sizeRange: 0,
+          startColor: [ 1, 1, 1, 1],
+          endColor: [ 1, 1, 1, 1],
+          colorRange: [ .2, .1, .1, 0],
+          additive: false,
+          depthTest: true,
+          depthWrite: false,
+          maxOrientation: 0,
+          minOrientation: 0,
+          emitterSize: [ 500 , 0 , 500.0 ],
+          emitterType: "point",
+          visible: false,
+          textureTiles: 1,
+        }
       }
     }
   };
 
   this.initialize = function() {
+    for ( var i = 0; i < 50; i++ ) {
+      var newBolt = $.extend(true, {}, bolt);
+      newBolt.properties.enabled = false;
+      newBolt.children.laserParticle.properties.image = laserMaterials[0];
+      this.lasers.children.create("Laser"+this.laserCount, newBolt);
+      this.laserCount += 1;
+    }
     this.future( 0 ).initializeCamera();
   }
   this.initializeCamera = function() {
@@ -291,17 +331,38 @@ scripts:
     if ( playerName )
     {
       var player = this.findPlayerByName(playerName);
-      if(player && player.active) {
-        var newBolt = $.extend(true, {}, bolt);
-        newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
-        newBolt.children.laserParticle.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
-        newBolt.children.laserParticle.properties.image = player.laserMaterial;
-        newBolt.properties.laserDirection = goog.vec.Mat4.multVec3(player.rotationMatrix, [0,1,0], goog.vec.Vec3.create());
-        newBolt.properties.parentTank = player.id;
-        this.lasers.children.create(playerName+"Laser"+player.laserCount, newBolt);
-        player.laserCount += 1;
+      if ( ( player ) && ( player.active ) ) {
+        if ( player.lastFired > 0 ) {
+          if ( ( this.time - player.lastFired ) < 0.25 ) {
+            return;
+          }
+        }
+        player.lastFired = this.time;
+        var oldBolt = this.findUnusedLaser( );
+        if ( oldBolt ) {
+          oldBolt.enabled = true;
+          oldBolt.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
+          oldBolt.laserParticle.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
+          oldBolt.laserParticle.image = player.laserMaterial;
+          oldBolt.laserDirection = goog.vec.Mat4.multVec3(player.rotationMatrix, [0,1,0], goog.vec.Vec3.create());
+          oldBolt.parentTank = player.id;
+          oldBolt.lastUpdateTime = this.time;
+          oldBolt.collisionInfo = undefined;
+          oldBolt.future(0.05).fire();
+        }
+        else {
+          var newBolt = $.extend(true, {}, bolt);
+          newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
+          newBolt.children.laserParticle.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
+          newBolt.children.laserParticle.properties.image = player.laserMaterial;
+          newBolt.properties.laserDirection = goog.vec.Mat4.multVec3(player.rotationMatrix, [0,1,0], goog.vec.Vec3.create());
+          newBolt.properties.parentTank = player.id;
+          newBolt.properties.enabled = true;
+          this.lasers.children.create("Laser"+this.laserCount, newBolt);
+          this.laserCount += 1;
+        }
+        this.laserFired();
       }
-      this.laserFired();
     }
   }
   this.sendChat = function(playerName, chatToSend) {
