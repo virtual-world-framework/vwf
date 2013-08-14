@@ -11,7 +11,7 @@
 			this.PassableGetAllLeafMeshes = function(threeObject,list)
 			{
 				if(!list) list = [];
-				if(threeObject instanceof THREE.Mesh)
+				if(threeObject instanceof THREE.Mesh || threeObject instanceof THREE.Line)
 				{
 					list.push(threeObject);
 				}

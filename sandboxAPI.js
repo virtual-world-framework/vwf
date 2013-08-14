@@ -1068,9 +1068,7 @@ function serve (request, response)
 	var pathAfterRoute = URL.pathname.toLowerCase().substr(URL.pathname.toLowerCase().lastIndexOf(serviceRoute)+serviceRoute.length);
 	var command = pathAfterRoute.substr(0,pathAfterRoute.indexOf('/')) || pathAfterRoute;
 	var pathAfterCommand = pathAfterRoute.substr(command.length);
-	console.log(pathAfterRoute);
-	console.log(command);
-	console.log(pathAfterCommand);
+	
 	command = command.toLowerCase();
 	
 	URL.loginData = GetSessionData(request);

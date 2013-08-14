@@ -498,7 +498,7 @@ function startVWF(){
 				
 				if(uri.indexOf('/admin/instances'.replace(safePathRE)) != -1)
 				{	
-					console.log ('here');
+					
 					var data = {};
 					for(var i in global.instances)
 					{
