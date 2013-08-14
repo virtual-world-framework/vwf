@@ -59,6 +59,7 @@ properties:
       playerConnected: true
       # Disable inherited navigation so it can use custom bzflag controls
       navmode: none
+      visible: false
     children:     
       camera:
         extends: http://vwf.example.com/camera.vwf
@@ -73,12 +74,9 @@ properties:
         properties: 
           rotation: [0, 0, 1, 180]
           scale: 115
-          visible: false
         children: 
           Tank: 
             extends: http://vwf.example.com/node3.vwf
-            properties:
-              visible: false
             children: 
               material: 
                 extends: http://vwf.example.com/material.vwf
@@ -96,6 +94,7 @@ events:
   playerScored: 
   chatSent:
   laserFired:
+  fixPlayerVisibility:
 children:
   bz_world:
     extends: bzworld.vwf
@@ -236,10 +235,10 @@ scripts:
         playerObject.cachedBoundingBox = playerObject.worldBoundingBox;
         playerObject.active = true;
         playerObject.visible = true;
-        playerObject.avatar.visible = true;
-        playerObject.avatar.Tank.visible = true;
+        playerObject.junk = 1;
         this.playerRespawned( playerName );
         this.playerCreatedOrRejoined( true, playerName, playerMoniker );
+        this.future(0.1).fixPlayerVisibility();
         return;
       }
     }
@@ -256,10 +255,10 @@ scripts:
         playerObject.active = true;
         playerObject.playerName = playerName;
         playerObject.visible = true;
-        playerObject.avatar.visible = true;
-        playerObject.avatar.Tank.visible = true;
+        playerObject.junk = 1;
         this.playerJoined( playerName );
         this.playerCreatedOrRejoined( true, playerName, playerMoniker );
+        this.future(0.1).fixPlayerVisibility();
         this.colorIndex += 1;
         if ( this.colorIndex >= tankMaterials.length ) {
           this.colorIndex = 0;
@@ -306,8 +305,7 @@ scripts:
           playerObject.playerDeaths = oldPlayerObject.playerDeaths;
           playerObject.active = true;
           playerObject.visible = true;
-          playerObject.avatar.visible = true;
-          playerObject.avatar.Tank.visible = true;
+          playerObject.junk = 1;
 
           playerObject.playerName = playerName;
 
@@ -317,6 +315,7 @@ scripts:
           if ( needToDelete ) {
             this.children.delete( oldPlayerObject );
           }
+          this.future(0.1).fixPlayerVisibility();
           return;
         }
       }
@@ -327,6 +326,24 @@ scripts:
     }
     this.playerCreatedOrRejoined( false, playerName, playerMoniker);
   }
+
+  this.fixPlayerVisibility = function() {
+    var allPlayers = this.find("./element(*,'http://vwf.example.com/navigable.vwf')");
+    while ( allPlayers.length > 0 ) {
+      var current = allPlayers.pop();
+      if ( current ) {
+        if ( current.visible != current.active ) {
+          this.logger.warn("  For ID " + current.id + " the visible is now " + current.visible + " and the active is " + current.active );
+          this.logger.warn("FIXING ISSUE!");
+          current.visible = current.active;
+        }
+      }
+    }
+
+  };
+
+
+  
   this.fireLaser = function(playerName) {
     if ( playerName )
     {

@@ -16,6 +16,7 @@ extends: http://vwf.example.com/node3.vwf
 properties: 
   active: 
   laserCount: 
+  junk: 0
   translationSpeed: 400
   rotationSpeed: 0.3
   initialBoundingBox: [[-347.0129699707031,-974.0763549804688],[-347.0129699707031,860.0464477539062],[341.7322692871094,860.0464477539062],[341.7322692871094,-974.0763549804688]]
@@ -25,11 +26,15 @@ properties:
       return this.playerKills - this.playerDeaths;
   playerKills: 0
   playerDeaths: 0
+  visible: false
 methods:
   update:
   calculateCollisionInfo:
 scripts:
 - |
+  this.initialize = function() {   
+    this.visible = this.active;
+  }
   this.calculateCollisionInfo = function(rotationDelta, translateDelta) {
     var newCollisionInfo = {};
     var myRotation = Math.PI / 180 * ( this.rotation[3] + rotationDelta );
