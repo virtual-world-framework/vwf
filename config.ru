@@ -16,9 +16,8 @@ require 'bundler/setup'
 require 'sinatra/base'
 
 class VWF < Sinatra::Base
-  use Rack::GoogleAnalytics, :tracker => "UA-30971226-1" # uncomment and add your Google Analytics ID
+  # use Rack::GoogleAnalytics, :tracker => "UA-xxxxxx-x" # uncomment and add your Google Analytics ID
   not_found do
-        print request.path
         if request.path.end_with?('vwf.html') or request.path.end_with?('favicon.ico')
                 print "404 Bypass" # TODO: MUST FIX AUTOGEN FILES
         else
