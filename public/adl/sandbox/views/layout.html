@@ -29,6 +29,7 @@
 		var root = '{{root}}';
 		var pageIndex = 0;
 		var pageLength = 12;
+		var userNameFilter = '';
 		var vwfPortalModel = new function(){
 			var self = this;
 			self.getShorterStr = function(a, length){
@@ -45,6 +46,25 @@
 				isAdmin: false,
 				username: 'Guest'
 			});
+			
+			self.filterOnUsername = function(){
+				userNameFilter  = self.user().username;
+				console.log("filter");
+				
+				$("#yourWorlds").addClass("active");
+				$("#allWorlds").removeClass("active");
+			
+				showStates();
+			};			
+			self.eraseFilterOnUsername = function(){
+				userNameFilter  = '';
+				console.log("erase");
+				
+				$("#allWorlds").addClass("active");
+				$("#yourWorlds").removeClass("active");
+				
+				showStates();
+			};
 			
 			self.filterVal = ko.computed({
 				read:  function(){ return ''; }, 
@@ -98,6 +118,13 @@
 		};
 		
 		function checkFilter(textArr){
+			
+			//textArr[2] is the owner of the world
+			
+			if(userNameFilter && userNameFilter != textArr[2]){
+				return false;
+			}
+			
 			if(filter != ""){
 				for(var i = 0; i < textArr.length; i++){
 					if(textArr[i] && textArr[i].toLowerCase().indexOf(filter.toLowerCase()) != -1)
