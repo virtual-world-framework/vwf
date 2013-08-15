@@ -5,7 +5,7 @@
 </div>
 <div class="row" data-bind="visible:currentUser() == false">
 	<div class="span4">
-		<a href="">Delete Selected</a>
+		<a data-bind="click:deleteSelected" href="">Delete Selected</a>
 	</div>
 	<div class="usersList span4">
 		<table class="table table-striped" style="border: 1px solid #ddd;">
@@ -14,7 +14,7 @@
 				<th style="border:none; background:#FFF">Name</th>
 			</tr>
 			<tbody data-bind="foreach:usersList, style:{border:'none'}">
-				<td><input type="checkbox"/></td>
+				<td><input type="checkbox" /></td>
 				<td><a data-bind="text:user, click:$root.userClick, attr:{href:'#'+user}" href=""></a></td>
 			</tbody>
 		</table>
@@ -22,18 +22,20 @@
 </div>
 <div class="row" data-bind="visible:currentUser() != false">
 	<div class="span4">
-		<a data-bind="click:function(){currentUser(false)}">Full List</a>
+		<a data-bind="click:function(){currentUser(false)}" href="">View full list of users</a>
 	</div>
 	<div class="usersList span4">
 		<form> 
 			
-			Edit user name:
-			<input type="text" />			
-			
-			Change password:
-			<input type="text" />
-			
-		
+			<div style="height:50px;">
+				<span>Edit user name:</span>
+				<input type="text" style="float:right;" />			
+			</div>
+			<div>
+				<span>Change password:</span>
+				<input type="text"style="float:right;" /><br/>
+			</div>
+	
 		</form>
 		
 		Under construction..
@@ -42,6 +44,17 @@
 <script>
 	vwfPortalModel.usersList = [{user:"Mick"}, {user:"Joe"}, {user:"Mike"}];
 	vwfPortalModel.currentUser = ko.observable(false); 
+	vwfPortalModel.deleteSelected = function(data){
+		
+		var tempUserArr = [];
+		for(var i = 0; i < $('input:checked').length; i++){
+			tempUserArr.push(ko.dataFor($('input:checked')[i]).user);
+		}
+		
+		//Make the request to the server to delete these users
+		console.log("Delete users ", tempUserArr);
+		$('input:checked').click();
+	}; 
 	vwfPortalModel.userClick = function(data){
 	
 		console.log(data.user);
