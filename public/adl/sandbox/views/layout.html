@@ -47,24 +47,21 @@
 				username: 'Guest'
 			});
 			
-			self.filterOnUsername = function(){
-				userNameFilter  = self.user().username;
-				console.log("filter");
-				
-				$("#yourWorlds").addClass("active");
-				$("#allWorlds").removeClass("active");
+			self.toggleNameFilter = function(){
 			
+				if(userNameFilter){
+					userNameFilter  = '';
+					$("#allWorlds").addClass("active");
+					$("#yourWorlds").removeClass("active");
+				}			
+				else{
+					userNameFilter  = self.user().username;
+					$("#yourWorlds").addClass("active");
+					$("#allWorlds").removeClass("active");
+				}
+
 				showStates();
 			};			
-			self.eraseFilterOnUsername = function(){
-				userNameFilter  = '';
-				console.log("erase");
-				
-				$("#allWorlds").addClass("active");
-				$("#yourWorlds").removeClass("active");
-				
-				showStates();
-			};
 			
 			self.filterVal = ko.computed({
 				read:  function(){ return ''; }, 

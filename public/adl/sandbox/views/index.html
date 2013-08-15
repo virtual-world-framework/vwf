@@ -35,8 +35,8 @@
 			<div class="row">
 			
 				<div class="span4" style="text-align:left;">
-					<button id="allWorlds" class="btn btn-small active" data-bind="click:eraseFilterOnUsername">All Worlds</button>
-					<button id="yourWorlds" class="btn btn-small" data-bind="click:filterOnUsername">Your Worlds</button>
+					<button id="allWorlds" class="btn btn-small active" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">All Worlds</button>
+					<button id="yourWorlds" class="btn btn-small" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">Your Worlds</button>
 				</div>
 				
 				<div class="span1 offset4" style="text-align:right;">
