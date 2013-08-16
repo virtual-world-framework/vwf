@@ -2,8 +2,7 @@
 		<div class="span3">
 			<h3>Worlds</h3>
 			<a href="{{root}}/create">Create World</a><br/>
-			<a href="Delete Multiple">Delete Selected</a><br/>
-			<a href="Edit Multiple">Edit Selected</a><br/>
+			<a data-bind="click:deleteSelected" href="">Delete Selected</a><br/><br/>
 			<a href="{{root}}/admin">Admin Page</a>
 		</div>
 		<div class="span9">
@@ -14,12 +13,14 @@
 							<th style="border:none; background:#FFF"></th>
 							<th style="border:none; background:#FFF">Name</th>
 							<th style="border:none; background:#FFF">Owner</th>
+							<th style="border:none; background:#FFF">Objects</th>
 						</tr>
 						<tbody data-bind="foreach:worldObjects, style:{border:'none'}">
 						
 							<td><input type="checkbox" /></td>
 							<td><a data-bind="text:title, attr:{href:'#'+id}" href=""></a></td>
 							<td><a data-bind="text:owner, attr:{href:'{{root}}/admin/users#'+owner}" href=""></a></td>
+							<td><span data-bind="text:objects"></span></td>
 						</tbody>
 					</table>
 				</div>
@@ -27,16 +28,21 @@
 		</div>
 	</div>
 	<script>
+		vwfPortalModel.deleteSelected = function(data){
+			
+			var tempWorldArr = [];
+			for(var i = 0; i < $('input:checked').length; i++){
+				tempWorldArr.push(ko.dataFor($('input:checked')[i]).title);
+			}
+			
+			//Make the request to the server to delete these users
+			console.log("Delete worlds ", tempWorldArr);
+			$('input:checked').click();
+		}; 
+		
 		$(document).ready(function(){	
 			
 			ko.applyBindings(vwfPortalModel);
-			getLoginInfo(function(){
-					
-				showStates();
-
-				window.setInterval(function(){
-					showStates();
-				},100000);
-			});
+			getLoginInfo(showStates);
 		});
 	</script>
