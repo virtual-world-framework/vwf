@@ -24,30 +24,104 @@ properties:
             {
                 move:function(x,y,z, coordinateSystem /* x,y,z in meters, coordinateSystem either 'global' or 'local' */){
                 
-                    var t = this.translation;
-                    t[0] += x;
-                    t[1] += y;
-                    t[2] += z;
-                    this.translation = t;
+                    if(x.length)
+                    {
+                        coordinateSystem = y;
+                        y = x[1];
+                        z = x[2];
+                        x = x[0];
+                    }
+                    
+                    if(!coordinateSystem)
+                     coordinateSystem = 'parent';
+                     
+                    if( coordinateSystem== 'parent')
+                    {                       
+                       var position = this.transformAPI.getPosition();
+                       position = Vec3.add(position,[x,y,z],[]);                      
+                       this.transformAPI.setPosition(position);
+                    }
+                    
+                    if( coordinateSystem== 'local')
+                    {                       
+                       var position = this.transformAPI.getPosition();
+                       var offset = Mat4.multVec3NoTranslate(this.transform,[x,y,z],[]);
+                       position = Vec3.add(position,offset,[]);                      
+                       this.transformAPI.setPosition(position);
+                    }
+                    
+                    
                 
                 
                 
                 }.bind(this),
                 getPosition: function()
                 {
-                    return [this.translation[0],this.translation[1],this.translation[2]];
+                    var transform = this.transform;
+                    return [transform[12],transform[13],transform[14]];
                 }.bind(this),
-                rotate:function(x,y,z)
+                setPosition: function(x,y,z)
                 {
-                
-                
-                
+                    if(x.length)
+                    {
+                        y = x[1];
+                        z = x[2];
+                        x = x[0];
+                    }
+                    var transform = this.transform;
+                    transform[12] = x;
+                    transform[13] = y;
+                    transform[14] = z;
+                }.bind(this),
+                rotate:function(x,y,z,coordinateSystem)
+                {
+                    this.transformAPI.rotateX(x,coordinateSystem);
+                    this.transformAPI.rotateY(y,coordinateSystem);
+                    this.transformAPI.rotateZ(z,coordinateSystem);
+                }.bind(this),
+                rotateX : function(angle,coordinateSystem)
+                {
+                    this.transformAPI.rotateAroundAxis(angle,[1,0,0],coordinateSystem);
+                }.bind(this),
+                rotateY : function(angle,coordinateSystem)
+                {
+                    this.transformAPI.rotateAroundAxis(angle,[0,1,0],coordinateSystem);
+                }.bind(this),
+                rotateZ : function(angle,coordinateSystem)
+                {
+                    this.transformAPI.rotateAroundAxis(angle,[0,0,1],coordinateSystem);
+                }.bind(this),
+                COORDINATES:{LOCAL:'local','GLOBAL':'global',PARENT:'parent'},
+                rotateAroundAxis: function(angle,axis,coordinateSystem)
+                {
+                    
+                    axis = Vec3.normalize(axis,[]);
+                    if(!coordinateSystem)
+                     coordinateSystem = 'parent';
+                     
+                    if( coordinateSystem== 'local')
+                    {                       
+                       var axis = Mat4.multVec3NoTranslate(this.transform,axis,[]);
+                    } 
+                    
+                    var rotmat = Mat4.makeRotate([],angle,axis[0],axis[1],axis[2]);
+                    var position = this.transformAPI.getPosition();
+                    var transform = this.transform.internal_val;
+                    transform[12] = 0;
+                    transform[13] = 0;
+                    transform[14] = 0;
+                    transform = Mat4.multMat(rotmat,transform,[]);
+                    transform[12] = position[0];
+                    transform[13] = position[1];
+                    transform[14] = position[2];
+                    this.transform = transform;
                 }.bind(this),
                 scale:function(x,y,z)
                 {
                 
                 
                 }.bind(this),
+                
                 lookat: function(t,clamp, axis, up,fromOffset)
                 {
                     var target;
@@ -59,18 +133,18 @@ properties:
                     if(up == 'Z') up = [0,0,1];
                     if(!up) up = [0,0,1];
                     
-                    var pos = MATH.addVec3(this.transformAPI.getPosition(),fromOffset);
-                    var tovec = MATH.subVec3(pos,target);
+                    var pos = Vec3.add(this.transformAPI.getPosition(),fromOffset,[]);
+                    var tovec = Vec3.subtract(pos,target,[]);
                     if(clamp =='X')
                         tovec[0] = 0;
                     if(clamp =='Y')
                         tovec[1] = 0;
                     if(clamp =='Z')
                         tovec[2] = 0;    
-                    tovec = MATH.toUnitVec3(tovec);
-                    var side = MATH.crossVec3(tovec,up);
-                    side = MATH.toUnitVec3(side);
-                    up = MATH.crossVec3(side,tovec);
+                    tovec = Vec3.normalize(tovec,[]);
+                    var side = Vec3.cross(tovec,up,[]);
+                    side = Vec3.normalize(side,[]);
+                    up = Vec3.cross(side,tovec,[]);
                     var t = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
                     if(axis == 'Y')
                     {
@@ -101,7 +175,7 @@ properties:
                 }.bind(this)
             }
             this._tapi.lookat.toString = function(){return "(target [3],clamp 'X|Y|Z', look axis 'X|Y|Z', upaxis 'X|Y|Z',fromOffset [3])"};
-            this._tapi.move.toString = function(){return "(x,y,z, coordinateSystem 'local|global')"};
+            this._tapi.move.toString = function(){return "(x,y,z, coordinateSystem 'local|global|parent')"};
         }
         
         return this._tapi
