@@ -15,7 +15,7 @@
 			</tr>
 			<tbody data-bind="foreach:usersList, style:{border:'none'}">
 				<td><input type="checkbox" /></td>
-				<td><a data-bind="text:user, click:$root.userClick, attr:{href:'#'+user}" href=""></a></td>
+				<td><a data-bind="text:$data, attr:{href:'#'+$data}" href=""></a></td>
 			</tbody>
 		</table>
 	</div>
@@ -42,8 +42,9 @@
 	</div>
 </div>
 <script>
-	vwfPortalModel.usersList = [{user:"Mick"}, {user:"Joe"}, {user:"Mike"}];
+	vwfPortalModel.usersList = ["Mick", "Joe", "Mike"];
 	vwfPortalModel.currentUser = ko.observable(false); 
+	
 	vwfPortalModel.deleteSelected = function(data){
 		
 		var tempUserArr = [];
@@ -55,14 +56,29 @@
 		console.log("Delete users ", tempUserArr);
 		$('input:checked').click();
 	}; 
-	vwfPortalModel.userClick = function(data){
 	
-		console.log(data.user);
-		vwfPortalModel.currentUser(data.user); 
-		return true;
-	}; 
+	var handleHash = function(){
+
+		if(window.location.hash){
+			var tmpHash = '';
+			if(window.location.hash.charAt(0) == '#'){
+				tmpHash = window.location.hash.substr(1);
+			}
+			else if(window.location.hash){
+				tmpHash = window.location.hash;
+			}
+			
+			if(vwfPortalModel.usersList.indexOf(tmpHash) > -1){
+				vwfPortalModel.currentUser(tmpHash);
+			}
+		}
+	};
+	
+	window.onhashchange = handleHash;
 	
 	$(document).ready(function(){	
+	
+		handleHash();
 		ko.applyBindings(vwfPortalModel);
 		getLoginInfo();
 

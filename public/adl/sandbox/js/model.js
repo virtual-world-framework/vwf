@@ -30,12 +30,12 @@ var vwfPortalModel = new function(){
 		if(userNameFilter){
 			userNameFilter  = '';
 			$("#allWorlds").addClass("active");
-			$("#yourWorlds").removeClass("active");
+			$("#yourWorlds").removeClass("active").blur();
 		}			
 		else{
 			userNameFilter  = self.user().username;
 			$("#yourWorlds").addClass("active");
-			$("#allWorlds").removeClass("active");
+			$("#allWorlds").removeClass("active").blur();
 		}
 
 		showStates();
@@ -188,6 +188,7 @@ function showStates(){
 		
 		vwfPortalModel.getPage(0);
 		vwfPortalModel.featuredWorldObjects.valueHasMutated();
+		vwfPortalModel.worldObjects.valueHasMutated();
 		
 		$.getJSON("./admin/instances",function(e){
 		
