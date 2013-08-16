@@ -22,7 +22,7 @@
 </div>
 <div class="row" data-bind="visible:currentUser() != false">
 	<div class="span4">
-		<a data-bind="click:function(){currentUser(false)}" href="">View full list of users</a>
+		<a href="#">View full list of users</a>
 	</div>
 	<div class="usersList span4">
 		<form> 
@@ -71,7 +71,11 @@
 			if(vwfPortalModel.usersList.indexOf(tmpHash) > -1){
 				vwfPortalModel.currentUser(tmpHash);
 			}
+			
+			else vwfPortalModel.currentUser(false);
 		}
+		
+		else vwfPortalModel.currentUser(false);
 	};
 	
 	window.onhashchange = handleHash;
