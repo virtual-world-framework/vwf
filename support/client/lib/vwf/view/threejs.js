@@ -466,6 +466,7 @@ var stats;
 				sceneNode.renderer.autoUpdateScene = false;
 				sceneNode.renderer.setSize($('#index-vwf').width(),$('#index-vwf').height());
 				sceneNode.renderer.shadowMapEnabled = true;
+				sceneNode.renderer.shadowMapType = THREE.PCFSoftShadowMap;
 				sceneNode.renderer.autoClear = false;
 				sceneNode.renderer.setClearColor({r:0,g:0,b:0},1.0);
             }else
