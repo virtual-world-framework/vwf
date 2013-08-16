@@ -58,21 +58,10 @@
 	}; 
 	
 	var handleHash = function(){
-
-		if(window.location.hash){
-			var tmpHash = '';
-			if(window.location.hash.charAt(0) == '#'){
-				tmpHash = window.location.hash.substr(1);
-			}
-			else if(window.location.hash){
-				tmpHash = window.location.hash;
-			}
-			
-			if(vwfPortalModel.usersList.indexOf(tmpHash) > -1){
-				vwfPortalModel.currentUser(tmpHash);
-			}
-			
-			else vwfPortalModel.currentUser(false);
+		
+		var tmpHash = window.location.hash.replace("#", "")
+		if(tmpHash && vwfPortalModel.usersList.indexOf(tmpHash) > -1){
+			vwfPortalModel.currentUser(tmpHash);
 		}
 		
 		else vwfPortalModel.currentUser(false);
@@ -85,12 +74,5 @@
 		handleHash();
 		ko.applyBindings(vwfPortalModel);
 		getLoginInfo();
-
-		var hash = window.location.hash.replace("#", "");
-		
-		console.log("Hash is", hash);
-		
-
-		
 	});
 </script>
