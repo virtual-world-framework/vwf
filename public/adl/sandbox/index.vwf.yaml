@@ -164,6 +164,9 @@ methods:
   PM:
   latencyTest:
   getSkyMat:
+  cameraBroadcastStart:
+  broadcastCameraPosition:
+  tick:
 scripts:
 - |
     this.initialize = function(){
@@ -288,6 +291,56 @@ scripts:
           $(document).bind('postprerender',this.postrendercallback);
           this.createNameTag();
           this.updateCamera();
+    }
+    this.tick = function()
+    {
+       
+        if(this.broadcastingCamera)
+        {
+            vwf_view.kernel.callMethod('index-vwf','broadcastCameraPosition',[this.camera.transform]);
+        }
+        if(this.receivingCameraBroadcast && this.cameramode != 'None')
+            this.receivingCameraBroadcast = false;
+        
+    }
+    this.broadcastCameraPosition = function(transform)
+    {
+        if(this.receivingCameraBroadcast)
+        {
+          
+            this.camera.transform = transform;
+        }
+    }
+    this.cameraBroadcastStart = function()
+    {
+        if(this.client == this.moniker)
+        {
+            
+            this.broadcastingCamera = true;
+            this.receivingCameraBroadcast = false;
+        }else
+        {
+            alertify.confirm(_UserManager.GetPlayernameForClientID(this.client) + " would like to share their camera view with you. Accept?",function(ok)
+            {
+                if(ok)
+                {
+                
+                    this.broadcastingCamera = false;
+                    this.receivingCameraBroadcast = true;
+                    this.cameramode = 'None';
+                
+                }
+            
+            }.bind(this));
+            
+        
+        }
+    
+    }
+    this.cameraBroadcastPrompt = function()
+    {
+        
+    
     }
     this.getSkyMat = function()
     {

@@ -450,6 +450,19 @@ define(
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Navigate');
 		});
 		
+		
+		$('#MenuCameraShare').click(function (e)
+		{
+            alertify.confirm("Are you sure you want to share your camera position? Other users will be able to see from your camera!",function(ok)
+            {
+                if(ok)
+                {
+					vwf_view.kernel.callMethod('index-vwf','cameraBroadcastStart',[]);
+                 
+                }
+            }.bind(this));
+        });
+		
 		$('#MenuCameraFly').click(function (e)
 		{
 			clearCameraModeIcons();
