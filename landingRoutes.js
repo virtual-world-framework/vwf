@@ -24,7 +24,7 @@ routesMap = {
 	'admin/edit': {fileList: fileList}
 };
 
-exports.generalHandler = function(req, res){
+exports.generalHandler = function(req, res, next){
 
 	if(!req.params.page)
 		req.params.page = 'sandbox';
@@ -48,7 +48,9 @@ exports.generalHandler = function(req, res){
 	
 	else{
 		console.log("Not found");
-		res.status(404).end('Error');
+		//res.status(404).end('Error');
+		
+		next();
 	}
 }
 
