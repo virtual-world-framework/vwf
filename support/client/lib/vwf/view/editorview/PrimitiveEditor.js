@@ -800,7 +800,7 @@ define(function ()
 					var mat = MATH.transposeMat4(_Editor.findviewnode(node.id).matrix.elements);
 					var angles = this.rotationMatrix_2_XYZ(mat);
 					var pos = vwf.getProperty(node.id, 'translation');
-					var rot = vwf.getProperty(node.id, 'rotation');
+					
 					var scl = vwf.getProperty(node.id, 'scale');
 					$('#PositionX').val(Math.floor(pos[0]));
 					$('#PositionY').val(Math.floor(pos[1]));

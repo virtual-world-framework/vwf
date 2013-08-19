@@ -228,6 +228,13 @@ node.id = childID; // TODO: move to vwf/model/object
                 enumerable: true,
             } );
 
+	    Object.defineProperty( node, "Scene", {  // TODO: only define on shared "node" prototype?
+                get: function() {
+                    return self.nodes['index-vwf'];
+                },
+                enumerable: true,
+            } );
+	    
             // Define a "future" proxy so that for any this.property, this.method, or this.event, we
             // can reference this.future( when, callback ).property/method/event and have the
             // expression evaluated at the future time.

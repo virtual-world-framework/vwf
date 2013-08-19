@@ -1298,11 +1298,13 @@ define(function ()
 						
 						//backspace letters up to the dot or bracket
 						var text = $($(this).children()[index]).text();
-						for(var i = 0; i < self.filter.length; i++)
-							_ScriptEditor.activeEditor.remove('left');
-						//insert	
-						_ScriptEditor.activeEditor.insert(text);
-						
+						if(text != "")
+						{
+							for(var i = 0; i < self.filter.length; i++)
+								_ScriptEditor.activeEditor.remove('left');
+							//insert	
+							_ScriptEditor.activeEditor.insert(text);
+						}
 						//focus on the editor
 						window.setTimeout(function(){
 						
@@ -1566,14 +1568,7 @@ define(function ()
 				
 				//get the line up to the dot
 				line = line.substr(0,cur.column);
-				var splits = line.split(' ');
-				line = splits[splits.length-1];
-				splits = line.split(';');
-				line = splits[splits.length-1];
-				splits = line.split('(');
-				line = splits[splits.length-1];
-				splits = line.split(')');
-				line = splits[splits.length-1];
+				line = self.filterLine(line);
 				//don't show autocomplete for lines that contain a (, because we'll be calling a functio ntaht might have side effects
 				if(line.indexOf('(') == -1 && line.indexOf('=') == -1)
 				{
@@ -1797,14 +1792,8 @@ define(function ()
 			   
 				
 				
-				var splits = line.split(' ');
-				line = splits[splits.length-1];
-				splits = line.split(';');
-				line = splits[splits.length-1];
-				splits = line.split('(');
-				line = splits[splits.length-1];
-				splits = line.split(')');
-				line = splits[splits.length-1];
+				line = self.filterLine(line);
+				
 				var triggerkeyloc = Math.max(line.lastIndexOf('.'),line.lastIndexOf('['));
 				var triggerkey = line[triggerkeyloc];
 				var filter = line.substr(triggerkeyloc+1);
@@ -1835,14 +1824,8 @@ define(function ()
 			   
 				
 				
-				var splits = line.split(' ');
-				line = splits[splits.length-1];
-				splits = line.split(';');
-				line = splits[splits.length-1];
-				splits = line.split('(');
-				line = splits[splits.length-1];
-				splits = line.split(')');
-				line = splits[splits.length-1];
+				line = self.filterLine(line);
+				
 				var triggerkeyloc = Math.max(line.lastIndexOf('.'),line.lastIndexOf('['));
 				var triggerkey = line[triggerkeyloc];
 				var filter = line.substr(triggerkeyloc+1);
@@ -1858,6 +1841,23 @@ define(function ()
 			 }
 			 
 		})
+		
+		this.filterLine = function(line)
+		{
+		
+			var splits = line.split(' ');
+			line = splits[splits.length-1];
+			splits = line.split(';');
+			line = splits[splits.length-1];
+			splits = line.split('(');
+			line = splits[splits.length-1];
+			splits = line.split(')');
+			line = splits[splits.length-1];
+			splits = line.split(',');
+			line = splits[splits.length-1];
+			return line;
+		
+		}
 		
 		
 		$('#methodtext').on('click',function(){$('#FunctionTip').hide();})

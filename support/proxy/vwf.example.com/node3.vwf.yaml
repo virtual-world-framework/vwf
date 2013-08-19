@@ -20,6 +20,7 @@ properties:
     get: |
         if(!this._tapi)
         {
+            Object.defineProperty(this,"_tapi",{enumerable:false,writable:true});
             this._tapi = 
             {
                 move:function(x,y,z, coordinateSystem /* x,y,z in meters, coordinateSystem either 'global' or 'local' */){
@@ -103,9 +104,10 @@ properties:
                     {                       
                        var axis = Mat4.multVec3NoTranslate(this.transform,axis,[]);
                     } 
-                    
+                    angle /=  57.2957795;
                     var rotmat = Mat4.makeRotate([],angle,axis[0],axis[1],axis[2]);
                     var position = this.transformAPI.getPosition();
+                    var scale = this.transformAPI.getScale();
                     var transform = this.transform.internal_val;
                     transform[12] = 0;
                     transform[13] = 0;
@@ -115,13 +117,80 @@ properties:
                     transform[13] = position[1];
                     transform[14] = position[2];
                     this.transform = transform;
+                    this.transformAPI.setScale(scale);
                 }.bind(this),
-                scale:function(x,y,z)
+                getRotation: function()
+                {
+                    var euler = []
+                    Mat4.toEulerZXZ(this.transform.internal_val,euler);
+                    
+                    euler[0] *= 57.2957795;
+                    euler[1] *= 57.2957795;
+                    euler[2] *= 57.2957795;
+                    
+                    return euler;
+                
+                }.bind(this),
+                setRotation: function(x,y,z)
                 {
                 
+                    if(x.length)
+                    {
+                        y = x[1];
+                        z = x[2];
+                        x = x[0];
+                    }
+                   
+                    x /= 57.2957795;
+                    y /= 57.2957795;
+                    z /= 57.2957795;
+                    
+                    var mat = Mat4.makeEulerZXZ([],x,y,z);
+                    var pos = this.transformAPI.getPosition();
+                    
+                    var scale = this.transformAPI.getScale();
+                    
+                    mat[12] = pos[0];
+                    mat[13] = pos[1];
+                    mat[14] = pos[2];
+                    
+                    this.transform = mat;
+                    this.transformAPI.setScale(scale);
                 
                 }.bind(this),
+                getScale:function()
+                {
+                    var mat = this.transform.internal_val;
+                    var x = Vec3.magnitude([mat[0],mat[1],mat[2]]);
+                    var y = Vec3.magnitude([mat[4],mat[5],mat[6]]);
+                    var z = Vec3.magnitude([mat[8],mat[9],mat[10]]);
+                    return [x,y,z];
                 
+                }.bind(this),
+                setScale:function(x,y,z)
+                {
+                    if(x.length)
+                    {
+                        y = x[1];
+                        z = x[2];
+                        x = x[0];
+                    }
+                    
+                    var mat = this.transform.internal_val;
+                    var xVec = Vec3.normalize([mat[0],mat[1],mat[2]],[]);
+                    var yVec = Vec3.normalize([mat[4],mat[5],mat[6]],[]);
+                    var zVec = Vec3.normalize([mat[8],mat[9],mat[10]],[]);
+                    xVec = Vec3.scale(xVec,x,[]);
+                    yVec = Vec3.scale(yVec,y,[]);
+                    zVec = Vec3.scale(zVec,z,[]);
+                    
+                    mat[0] = xVec[0]; mat[1] = xVec[1]; mat[2] = xVec[2];
+                    mat[4] = yVec[0]; mat[5] = yVec[1]; mat[6] = yVec[2];
+                    mat[8] = zVec[0]; mat[9] = zVec[1]; mat[10] = zVec[2];
+                    
+                    this.transform = mat;
+                
+                }.bind(this),
                 lookat: function(t,clamp, axis, up,fromOffset)
                 {
                     var target;
@@ -132,6 +201,8 @@ properties:
                     if(up == 'Y') up = [0,1,0];
                     if(up == 'Z') up = [0,0,1];
                     if(!up) up = [0,0,1];
+                    
+                    var scale = this.transformAPI.getScale();
                     
                     var pos = Vec3.add(this.transformAPI.getPosition(),fromOffset,[]);
                     var tovec = Vec3.subtract(pos,target,[]);
@@ -170,7 +241,7 @@ properties:
                         t[12] = pos[0]; t[13] = pos[1]; t[14] = pos[2]; t[15] =1;
                         this.transform = t;
                     }
-                    
+                    this.transformAPI.setScale(scale);
                 
                 }.bind(this)
             }
