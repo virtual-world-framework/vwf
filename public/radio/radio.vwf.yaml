@@ -882,6 +882,11 @@ scripts:
         case "beep":
           radio.beepOn = !radio.beepOn;
           break;
+        case "channel":
+          if (radio.channel < 15) {
+            radio.channel += 1; 
+          }
+          break;
       }
     }
     this.down = function() {
@@ -900,6 +905,11 @@ scripts:
           break;
         case "beep":
           radio.beepOn = !radio.beepOn;
+          break;
+        case "channel":
+          if (radio.channel > 0) {
+            radio.channel -= 1; 
+          }
           break;
       }
     }

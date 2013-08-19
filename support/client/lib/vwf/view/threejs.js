@@ -784,10 +784,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         var getTouchEventData = function( e, debug ) {
             var returnData = { eventData: undefined, eventNodeData: undefined };
-            var pickInfo = touchPick;
 
             var mousePos = utility.coordinates.contentFromWindow( e.target, { x: e.gesture.center.pageX, y: e.gesture.center.pageY } ); // canvas coordinates from window coordinates
             touchPick = ThreeJSTouchPick.call( self, canvas, sceneNode, false, mousePos );
+
+            var pickInfo = touchPick;
 
             returnData.eventData = [ {
                 gestures: touchGesture,
@@ -817,14 +818,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     break;
                 case 'tap':
                     sceneView.kernel.dispatchEvent( touchID, "touchTap", eData.eventData, eData.eventNodeData );
-                    // TODO - Update control behavior and apps to listen for touchTap events
                     // Emulate pointer events
+                    eData.eventData[0].button = "left"; 
                     sceneView.kernel.dispatchEvent( touchID, "pointerClick", eData.eventData, eData.eventNodeData );
                     sceneView.kernel.dispatchEvent( touchID, "pointerDown", eData.eventData, eData.eventNodeData );
                     sceneView.kernel.dispatchEvent( touchID, "pointerUp", eData.eventData, eData.eventNodeData );
                     break;
                 case 'doubletap':
-                    // Switch Mode (from right mouse button to left mouse button)?
                     sceneView.kernel.dispatchEvent( touchID, "touchDoubleTap", eData.eventData, eData.eventNodeData );
                     break;
                 case 'drag': 
@@ -875,7 +875,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     sceneView.kernel.dispatchEvent( touchID, "touchTransformEnd", eData.eventData, eData.eventNodeData );
                     break;
                 case 'rotate':
-                    // Orbit Selected Object?
                     sceneView.kernel.dispatchEvent( touchID, "touchRotate", eData.eventData, eData.eventNodeData );
                     break;
                 case 'pinch':
@@ -902,6 +901,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
         }
 
+        // Do not emulate mouse events on touch
+        Hammer.NO_MOUSEEVENTS = true;
+
         $(canvas).hammer({ drag_lock_to_axis: false }).on("touch release", handleHammer);
         $(canvas).hammer({ drag_lock_to_axis: false }).on("hold tap doubletap", handleHammer);
         $(canvas).hammer({ drag_lock_to_axis: false }).on("drag dragstart dragend dragup dragdown dragleft dragright", handleHammer);
@@ -909,7 +911,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         $(canvas).hammer({ drag_lock_to_axis: false }).on("transform transformstart transformend", handleHammer);
         $(canvas).hammer({ drag_lock_to_axis: false }).on("rotate", handleHammer);
         $(canvas).hammer({ drag_lock_to_axis: false }).on("pinch pinchin pinchout", handleHammer);
-        
 
         canvas.onmousedown = function( e ) {
             var event = getEventData( e, false );
