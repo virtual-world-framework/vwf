@@ -10,17 +10,26 @@ var OCTMaxDepth = 4;
 
 THREE.Object3D.prototype.getModelMatrix = function()
 {
-	var mat = [];
-	for(var i=0; i < 16; i++)
-		mat.push(this.matrixWorld.elements[i]);
-	return MATH.transposeMat4(mat);
+	var mat = new Array(16);
+	var ele = this.matrixWorld.elements;
+	mat[0] = ele[0]; mat[4] = ele[1]; mat[8] = ele[2]; mat[12] = ele[3];
+	mat[1] = ele[4]; mat[5] = ele[5]; mat[9] = ele[6]; mat[13] = ele[7];
+	mat[2] = ele[8]; mat[6] = ele[9]; mat[10] = ele[10]; mat[14] = ele[11];
+	mat[3] = ele[12]; mat[7] = ele[13]; mat[11] = ele[14]; mat[15] = ele[15];
+	
+	return mat;
 }
 
 THREE.Object3D.prototype.getLocalMatrix = function()
 {
-		var mat = [];
-	for(var i=0; i < 16; i++)
-		mat.push(this.matrix.elements[i]);
+	var mat = new Array(16);
+	var ele = this.matrix.elements;
+	mat[0] = ele[0]; mat[4] = ele[1]; mat[8] = ele[2]; mat[12] = ele[3];
+	mat[1] = ele[4]; mat[5] = ele[5]; mat[9] = ele[6]; mat[13] = ele[7];
+	mat[2] = ele[8]; mat[6] = ele[9]; mat[10] = ele[10]; mat[14] = ele[11];
+	mat[3] = ele[12]; mat[7] = ele[13]; mat[11] = ele[14]; mat[15] = ele[15];
+	
+	return mat;
 	return MATH.transposeMat4(mat);
 }
 

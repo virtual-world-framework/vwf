@@ -236,7 +236,7 @@ scripts:
        this.groundplane = ground;
        
        
-       findscene().add(ground);
+       findscene().add(ground,true);
        
        if(this.materialDef)
        this.setTexture(this.materialDef);
@@ -500,7 +500,7 @@ scripts:
            this.skycube.InvisibleToCPUPick = false;
            this.skycube.depthWrite = false;
            this.skycube.depthCheck = false;
-           _dbackgroundScene.add(this.skycube);
+           _dbackgroundScene.add(this.skycube,true);
            window._dSky = this.skycube;
        }
         

@@ -449,10 +449,12 @@ SceneManagerRegion.prototype.desplit = function()
 SceneManagerRegion.prototype.completelyContains = function(object)
 {
 	
-	if(!object.tempbounds) 
+	//changing transforms make this cache not work
+	//if(!object.tempbounds) 
 	{
 		object.updateMatrixWorld();
-		object.tempbounds = object.GetBoundingBox().transformBy(object.getModelMatrix());
+		
+		object.tempbounds = object.GetBoundingBox(true).transformBy(object.getModelMatrix());
 	}
 	var box = object.tempbounds;
 	if(box.min[0] > this.min[0] && box.max[0] < this.max[0])
@@ -698,6 +700,7 @@ SceneManagerRegion.prototype.CPUPick = function(o,d,opts)
 	}
 	for(var i = 0; i < this.childObjects.length; i++)
 	{
+		
 		var childhits = this.childObjects[i].CPUPick(o,d,opts);
 		if(childhits)
 			hits = hits.concat(childhits);
