@@ -173,7 +173,7 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
   end
   
 	not_found do
-		if request.url.include?('/web') or not request.url.match(/\w*\.\w*\z/)
+		if request.url.include?('/web') or not request.url.match(/[v][w][f].\w*\z)
 			[ 404, {'Content-Type' => 'text/html'}, File.read(File.join(File.dirname(__FILE__), '../public', '404.html')) ]
 		end
 	end
