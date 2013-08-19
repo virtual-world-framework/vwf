@@ -453,15 +453,31 @@ define(
 		
 		$('#MenuCameraShare').click(function (e)
 		{
-            alertify.confirm("Are you sure you want to share your camera position? Other users will be able to see from your camera!",function(ok)
-            {
-                if(ok)
-                {
-					vwf_view.kernel.callMethod('index-vwf','cameraBroadcastStart',[]);
-                 
-                }
-            }.bind(this));
-        });
+		    
+		    var broadcasting = vwf.callMethod('index-vwf','getBroadcasting',[]);
+		    if(!broadcasting)
+		    {
+			    alertify.confirm("Are you sure you want to share your camera position? Other users will be able to see from your camera!",function(ok)
+			    {
+				if(ok)
+				{
+							vwf_view.kernel.callMethod('index-vwf','cameraBroadcastStart',[]);
+				 
+				}
+			    }.bind(this));
+		    }else
+		    {
+			alertify.confirm("You are currently sharing your camera view. Would you like to stop sharing?",function(ok)
+			    {
+				if(ok)
+				{
+							vwf_view.kernel.callMethod('index-vwf','cameraBroadcastEnd',[]);
+				 
+				}
+			    }.bind(this));
+		    
+		    }
+		});
 		
 		$('#MenuCameraFly').click(function (e)
 		{

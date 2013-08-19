@@ -167,6 +167,8 @@ methods:
   cameraBroadcastStart:
   broadcastCameraPosition:
   tick:
+  getBroadcasting:
+  cameraBroadcastEnd:
 scripts:
 - |
     this.initialize = function(){
@@ -311,6 +313,10 @@ scripts:
             this.camera.transform = transform;
         }
     }
+    this.getBroadcasting = function()
+    {
+        return this.broadcastingCamera;
+    }
     this.cameraBroadcastStart = function()
     {
         if(this.client == this.moniker)
@@ -320,7 +326,7 @@ scripts:
             this.receivingCameraBroadcast = false;
         }else
         {
-            alertify.confirm(_UserManager.GetPlayernameForClientID(this.client) + " would like to share their camera view with you. Accept?",function(ok)
+            alertify.confirm(_UserManager.GetPlayernameForClientID(this.client) + " would like to share the camera view with you. Accept?",function(ok)
             {
                 if(ok)
                 {
@@ -336,6 +342,19 @@ scripts:
         
         }
     
+    }
+    this.cameraBroadcastEnd = function()
+    {
+        if(this.client == this.moniker)
+        {
+            this.broadcastingCamera = false;
+            this.receivingCameraBroadcast = false;
+        }else
+        {
+            alertify.alert(_UserManager.GetPlayernameForClientID(this.client) + " has stopped sharing the camera view.");
+            this.broadcastingCamera = false;
+            this.receivingCameraBroadcast = false;
+        }
     }
     this.cameraBroadcastPrompt = function()
     {

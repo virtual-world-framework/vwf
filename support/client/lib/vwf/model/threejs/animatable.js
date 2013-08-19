@@ -20,20 +20,31 @@
 				{
 					
 					this.animationFrame = propertyValue;
+					
 					var skins = getSkin(this.getRoot());
 					for(var i = 0; i < skins.length; i++)
 					{
+						
 						var frame = parseInt(propertyValue);
+						var mod = propertyValue - frame;
 						if(frame < 0) return;
 						
 						if(frame === null) return;
 						for(var j = 0; j < skins[i].morphTargetInfluences.length; j++)
 						{
-							if(j != frame)
+							
 								skins[i].morphTargetInfluences[j] = 0;
-							else
-								skins[i].morphTargetInfluences[j] = 1;
+							
+							
 						}
+						
+						
+						skins[i].morphTargetInfluences[frame] = 1.0-mod;
+						if(skins[i].morphTargetInfluences[frame-1])
+							skins[i].morphTargetInfluences[frame-1] = mod;
+						
+						
+						
 					
 					}
 				}	
