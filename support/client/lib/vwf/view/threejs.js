@@ -2630,7 +2630,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     deltaModelTransform = deltaViewTransform;
                 }
                 vwf_view.kernel.fireEvent( nodeID, "changingTransformFromView");
-                vwf_view.kernel.callMethod( nodeID, "transformBy", [ deltaModelTransform ] );
+                vwf_view.kernel.callMethod( nodeID, "transformBy", [ Array.prototype.slice.call( deltaModelTransform ) ] );
                 node.outstandingTransformRequests = node.outstandingTransformRequests || [];
                 node.outstandingTransformRequests.push( deltaViewTransform );
 
