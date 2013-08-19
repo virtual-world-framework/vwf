@@ -100,8 +100,9 @@
 							vwf_view.kernel.callMethod(vwf.find("","/")[0], "rejoinPlayer", [playerName, vwf.moniker()]);
 							$('#userName').html(playerName + ":&nbsp;");
 							preloadImages();
-							$(this).dialog("close");
-						}
+              $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
+              $('#userNameInput').attr('disabled', true);
+            }
 					}
 				},
 				open: function() {
@@ -113,7 +114,8 @@
 					{
 						var clientFound = false;
 						for (var j=0; j<clients.length; j++) {
-							if(players[i].indexOf(vwf_view.kernel.name(clients[j])) >=0) {
+              
+						  if(vwf_view.kernel.name(players[i]).indexOf(vwf_view.kernel.name(clients[j])) >=0) {
 								clientFound = true;
 							}
 						}

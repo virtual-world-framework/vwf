@@ -1220,10 +1220,10 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 {
                     var prmtr = $('#input-param'+ i).val();
                     try {
-                        prmtr = JSON.parse($.encoder.canonicalize(prmtr));
+                        prmtr = JSON.parse(JSON.stringify($.encoder.canonicalize(prmtr)));
                         parameters.push( prmtr );
                     } catch (e) {
-                        this.logger.error('Invalid Value');
+                        self.logger.error('Invalid Value');
                     }
                 }
             }
@@ -1281,7 +1281,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                         arg = JSON.parse($.encoder.canonicalize(arg));
                         args.push( arg );
                     } catch (e) {
-                        this.logger.error('Invalid Value');
+                        self.logger.error('Invalid Value');
                     }
                 }
             }
