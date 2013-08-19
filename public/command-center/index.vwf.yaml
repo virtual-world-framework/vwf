@@ -423,10 +423,6 @@ children:
     extends: http://vwf.example.com/node3.vwf
     source: joc/TeaTable.DAE
     type: model/vnd.collada+xml
-  televisions:
-    extends: http://vwf.example.com/node3.vwf
-    source: joc/televisions.DAE
-    type: model/vnd.collada+xml
 scripts:
 - |
   this.initialize = function() {
