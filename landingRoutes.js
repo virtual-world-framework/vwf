@@ -1,6 +1,7 @@
 var root = '/adl/sandbox',
 fileList = [],
 routesMap = {},
+DAL = {},
 fs = require('fs');
 
 fs.readdir('./public' + root + '/views/help', function(err, files){
@@ -13,6 +14,10 @@ fs.readdir('./public' + root + '/views/help', function(err, files){
 		}
 	}
 });
+
+exports.setDAL = function(d){
+	DAL = d;
+};
 
 exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'admin', 'admin/users', 'admin/worlds', 'admin/edit'];
 routesMap = {
