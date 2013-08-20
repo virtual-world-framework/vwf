@@ -1,6 +1,7 @@
 var root = '/adl/sandbox',
 fileList = [],
 routesMap = {},
+DAL = {},
 fs = require('fs');
 
 fs.readdir('./public' + root + '/views/help', function(err, files){
@@ -14,6 +15,10 @@ fs.readdir('./public' + root + '/views/help', function(err, files){
 	}
 });
 
+exports.setDAL = function(d){
+	DAL = d;
+};
+
 exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'admin', 'admin/users', 'admin/worlds', 'admin/edit'];
 routesMap = {
 	'sandbox': {template:'index'},
@@ -24,7 +29,7 @@ routesMap = {
 	'admin/edit': {fileList: fileList}
 };
 
-exports.generalHandler = function(req, res){
+exports.generalHandler = function(req, res, next){
 
 	if(!req.params.page)
 		req.params.page = 'sandbox';
@@ -48,7 +53,9 @@ exports.generalHandler = function(req, res){
 	
 	else{
 		console.log("Not found");
-		res.status(404).end('Error');
+		//res.status(404).end('Error');
+		
+		next();
 	}
 }
 

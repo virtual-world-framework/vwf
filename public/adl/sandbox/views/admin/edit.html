@@ -4,8 +4,11 @@
 	</div>
 </div>
 <div class="row">
-	<div data-bind="foreach:fileList" class="span3">
-		<a href="" data-bind="text:$data, click:$root.loadScript"></a><br/>
+	<div class="span3" style="margin-bottom:40px;">
+		<div data-bind="foreach:fileList">
+			<a href="" data-bind="text:$data, click:$root.loadScript"></a><br/>
+		</div>
+		<br/><a href="{{root}}/admin">Admin Page</a>
 	</div>
 	<form action="" class="span9" method="post" data-bind="with: entries, submit: $root.handleSubmission">
 		

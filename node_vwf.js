@@ -10,7 +10,7 @@ var libpath = require('path'),
 	DAL = require('./DAL'),
 	express = require('express'),
 	app = express(),
-	landing = require('./landingRoutes');
+	Landing = require('./landingRoutes');
 var zlib = require('zlib');
 	
 // pick the application name out of the URL by finding the index.vwf.yaml
@@ -1062,6 +1062,7 @@ function startVWF(){
 	SandboxAPI.setDAL(DAL);
 	SandboxAPI.setDataPath(datapath);
 	Shell.setDAL(DAL);
+	Landing.setDAL(DAL);
 	DAL.startup(function(){
 		
 		global.sessions = [];
@@ -1091,12 +1092,12 @@ function startVWF(){
 		});
 
 		app.use(app.router);
-		app.get('/adl/sandbox/help', landing.help);
-		app.get('/adl/sandbox/help/:page([a-zA-Z]+)', landing.help);
-		app.get('/adl/sandbox', landing.generalHandler);
-		app.get('/adl/sandbox/:page([a-zA-Z/]+)', landing.generalHandler);		
+		app.get('/adl/sandbox/help', Landing.help);
+		app.get('/adl/sandbox/help/:page([a-zA-Z]+)', Landing.help);
+		app.get('/adl/sandbox', Landing.generalHandler);
+		app.get('/adl/sandbox/:page([a-zA-Z/]+)', Landing.generalHandler);		
 
-		app.post('/adl/sandbox/admin/:page([a-zA-Z]+)', landing.handlePostRequest);
+		app.post('/adl/sandbox/admin/:page([a-zA-Z]+)', Landing.handlePostRequest);
 		
 		app.use(OnRequest); 
 		var listen = app.listen(port);

@@ -33,7 +33,13 @@
 	<div class="row" style="margin-top:30px;">
 		<div class="span12">
 			<div class="row">
-				<div class="span1 offset8" style="text-align:right;">
+			
+				<div class="span4" style="text-align:left;">
+					<button id="allWorlds" class="btn btn-small active" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">All Worlds</button>
+					<button id="yourWorlds" class="btn btn-small" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">Your Worlds</button>
+				</div>
+				
+				<div class="span1 offset4" style="text-align:right;">
 					<a href="{{root}}/create" class="coldstate" id="newinstancebutton" data-bind="visible:user().isLoggedIn">
 						<img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"/>
 					</a>

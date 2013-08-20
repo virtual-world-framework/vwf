@@ -1,73 +1,48 @@
 	<div class="row" style="margin-top:30px;">
 		<div class="span3">
-			<a href="{{root}}/adl/sandbox/create">Create World</a><br/>
-			<a href="Delete Multiple">Delete Multiple</a><br/>
-			<a href="Edit Multiple">Edit Multiple</a><br/>
+			<h3>Worlds</h3>
+			<a href="{{root}}/create">Create World</a><br/>
+			<a data-bind="click:deleteSelected" href="">Delete Selected</a><br/><br/>
+			<a href="{{root}}/admin">Admin Page</a>
 		</div>
 		<div class="span9">
 			<div class="row">
-				<div class="span1 offset8" style="text-align:right;">
-					<a href="{{root}}/create" class="coldstate" id="newinstancebutton" data-bind="visible:user().isLoggedIn">
-						<img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"/>
-					</a>
-				</div>
-				<div class="span3 offset3">
-					<input id="filter" class="span3" style="width:90%;" type="text" placeholder="Filter Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
-				</div>
-			</div>
-			<div class="row" id="activeRow" data-bind="foreach:displayWorldObjects">				
-				<div data-bind="visible:isVisible" class="span3">
-					<div class="worldBox" data-bind="event: {mouseover:$root.handleEditDisplay, mouseout:$root.handleEditDisplay}">
-						<div style="margin-bottom: 10px;">
-							<a data-bind="attr:{href:'{{root}}/'+id}, text:$root.getShorterStr(title, 20)" href="">Title</a>
-							<span class="owner" data-bind="text:' - ' + owner"></span>
-						</div>
-						<div>								
-							<div class="worldInfo">
-								<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
-									<span class="description" data-bind="text:$root.getShorterStr(description, 25)"></span>
-									&nbsp;<span class="lastModified stateid" data-bind="text:' (' + lastUpdate + ')' "></span>
-									<div class="objects" data-bind="text: objects + (objects == 1 ? ' object ' : ' objects ')"></div>
-								</a>
-							</div>
-							<div class="editstateGuest">
-								<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState()">Active</a>
-								
-								<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible -->
-									<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
-									<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
-								<!-- /ko -->
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row" style="margin-top:45px;margin-bottom:70px;" data-bind="visible:displayWorldObjects().length==0">	
-				<div class="span4 offset4" style="text-align:center;">
-					<span style="font-weight:bold;">No worlds found</span>
-				</div>
-			</div>
-			<div class="row" style="margin-bottom:45px;">
-				<div class="span1 offset3" style="text-align:right;">
-					<a class="btn" data-bind="click:getPreviousPage, css:previousDisabled()?'disabled btn':'btn'"><i class="icon-chevron-left"></i></a>
-				</div>				
-				<div class="span1 offset1">
-					<a class="btn" data-bind="click:getNextPage, css:nextDisabled()?'disabled btn':'btn'"><i class="icon-chevron-right"></i></a>
+				<div class="usersList span4">
+					<table class="table table-striped" style="border: 1px solid #ddd;">
+						<tr>
+							<th style="border:none; background:#FFF"></th>
+							<th style="border:none; background:#FFF">Name</th>
+							<th style="border:none; background:#FFF">Owner</th>
+							<th style="border:none; background:#FFF">Objects</th>
+						</tr>
+						<tbody data-bind="foreach:worldObjects, style:{border:'none'}">
+						
+							<td><input type="checkbox" /></td>
+							<td><a data-bind="text:title, attr:{href:'#'+id}" href=""></a></td>
+							<td><a data-bind="text:owner, attr:{href:'{{root}}/admin/users#'+owner}" href=""></a></td>
+							<td><span data-bind="text:objects"></span></td>
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
 	</div>
 	<script>
+		vwfPortalModel.deleteSelected = function(data){
+			
+			var tempWorldArr = [];
+			for(var i = 0; i < $('input:checked').length; i++){
+				tempWorldArr.push(ko.dataFor($('input:checked')[i]).title);
+			}
+			
+			//Make the request to the server to delete these users
+			console.log("Delete worlds ", tempWorldArr);
+			$('input:checked').click();
+		}; 
+		
 		$(document).ready(function(){	
 			
 			ko.applyBindings(vwfPortalModel);
-			getLoginInfo(function(){
-					
-				showStates();
-
-				window.setInterval(function(){
-					showStates();
-				},10000);
-			});
+			getLoginInfo(showStates);
 		});
 	</script>

@@ -20,7 +20,8 @@
 				data: JSON.stringify(statedata),
 				success:function(data,status,xhr)
 				{
-					redirect();
+					var newLocation = data.replace("Created state _adl_sandbox_", "").replace("_", "");
+					window.location = "{{root}}/" + newLocation;
 				},
 				error:function(xhr,status,err)
 				{
