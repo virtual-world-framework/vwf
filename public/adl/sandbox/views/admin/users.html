@@ -16,7 +16,7 @@
 			</tr>
 			<tbody data-bind="foreach:usersList, style:{border:'none'}">
 				<td><input type="checkbox" /></td>
-				<td><a data-bind="text:$data, attr:{href:'#'+$data}" href=""></a></td>
+				<td><a data-bind="text:$data.Username, attr:{href:'#'+$data}" href=""></a></td>
 			</tbody>
 		</table>
 	</div>
@@ -47,24 +47,30 @@
 	vwfPortalModel.currentUser = ko.observable(false); 
 	
 	$.post('{{root}}/data/get_users', function(o){
-		
-		vwfPortalModel.usersList(JSON.parse(o));
+		o = JSON.parse(o);
 		console.log(o);
+		for(var i in o){
+			if(!o[i]){
+				o.splice(i);
+			}
+		}
+		
+		console.log(o);
+		vwfPortalModel.usersList(o);
 	});
 	
 	vwfPortalModel.deleteSelected = function(data){
 		
-		var tempUserArr = [];
+		var tempUserArr = [], tempArr = [];
 		for(var i = 0; i < $('input:checked').length; i++){
 			tempUserArr.push(ko.dataFor($('input:checked')[i]));
-		}		
+			tempArr[i] = tempUserArr[i].Username ? tempUserArr[i].Username : tempUserArr[i];
+		}
 		
 		//Make the request to the server to delete these users
-		$.post('{{root}}/data/delete_users', JSON.stringify(tempUserArr), function(o){
-		
-			console.log("Request result: ", o);
+		$.post('{{root}}/data/delete_users', JSON.stringify(tempArr), function(o){
 			
-			for(var i = 0; i < tempUserArr.length; i++){
+			for(var i in tempUserArr){
 				vwfPortalModel.usersList.remove(tempUserArr[i]);
 			}
 			

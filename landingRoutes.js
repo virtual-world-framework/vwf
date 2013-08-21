@@ -2,8 +2,9 @@ var root = '/adl/sandbox',
 fileList = [],
 routesMap = {},
 DAL = {},
-fs = require('fs');
-var async = require('async');
+fs = require('fs'),
+async = require('async');
+
 fs.readdir('./public' + root + '/views/help', function(err, files){
 	var tempArr = [];
 	
@@ -73,40 +74,15 @@ exports.handlePostRequest = function(req, res, next){
 	var data = req.body ? JSON.parse(req.body) : '';
 	
 	switch(req.params.action){
-		case "delete_users":
-			var cbNum = 0;
-			console.log(data);
-			
-			async.eachSeries(data,function(val,cb)
-			{
-				DAL.deleteUser(val,function(){		
-					cb();
-				});	
-			},
-			function()
-			{
-				res.end("" + cbNum);
+		case "delete_users":			
+			DAL.deleteUsers(data, function(){
+				res.end("done");
 			});
-			
-			for(var i = 0; i < data.length; i++){
-				console.log(data[i]);
-				
-			}
-		break;	
+			break;	
 		
 		case "get_users":
-			DAL.getUsers(function(users){
-
-				var cbNum = 0;
-				for(var i = 0; i < users.length; i++){
-					DAL.getUser(users[i],function(doc){
-						cbNum++;
-						
-						if(cbNum == users.length){
-							res.end(JSON.stringify(users));
-						}
-					});
-				}
+			DAL.getAllUsersInfo(function(docs){
+				res.end(JSON.stringify(docs));
 			});
 			break;
 		
