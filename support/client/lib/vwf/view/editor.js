@@ -568,8 +568,34 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
     function viewClients() {
         var self = this;
         var app = window.location.pathname;
-        var root = app.substring(1, app.length-18);
+        var pathSplit = app.split('/');
+        if ( pathSplit[0] == "" ) {          
+            pathSplit.shift();
+        }
+        if ( pathSplit[ pathSplit.length - 1 ] == "" ) {
+            pathSplit.pop();
+        }            
+        var instIndex = pathSplit.length - 1;
+        if ( pathSplit.length > 2 ) {
+            if ( pathSplit[ pathSplit.length - 2 ] == "load" ) {
+                instIndex = pathSplit.length - 3;
+            }
+        }
+        if ( pathSplit.length > 3 ) {
+            if ( pathSplit[ pathSplit.length - 3 ] == "load" ) {
+                instIndex = pathSplit.length - 4;
+            }
+        }
+        var root = pathSplit[ 0 ];
+        for ( var createRootIndex = 1; createRootIndex < instIndex - 1; createRootIndex++ ) {
+          root = root + "/" + pathSplit[ createRootIndex ];
+        }
 
+        if(root.indexOf('.vwf') != -1) root = root.substring(0, root.lastIndexOf('/'));
+
+        
+        
+        
         var clients$ = $(this.clientList);
         var node = this.nodes[ "http-vwf-example-com-clients-vwf" ];
 
@@ -1734,21 +1760,30 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             json = $.encoder.encodeForURL(json);
 
             var path = window.location.pathname;
-            var root = path.substring(1, path.length - 18);
-            var rootSplit = root.split('/');
-            if ( rootSplit.length > 1 ) {
-              if ( rootSplit[ rootSplit.length - 2 ] == "load" ) {
-                root = "";
-                for ( var rootPart = 0; rootPart < rootSplit.length - 2; rootPart++ ) {
-                  if ( rootPart > 0 ) {
-                    root = root + "/";
-                  }
-                  root = root + rootSplit[rootPart];
-                }
-              }
+            var pathSplit = path.split('/');
+            if ( pathSplit[0] == "" ) {          
+                pathSplit.shift();
             }
-            
-            var inst = path.substring(path.length-17, path.length-1);
+            if ( pathSplit[ pathSplit.length - 1 ] == "" ) {
+                pathSplit.pop();
+            }            
+            var inst = undefined;
+            var instIndex = pathSplit.length - 1;
+            if ( pathSplit.length > 2 ) {
+                if ( pathSplit[ pathSplit.length - 2 ] == "load" ) {
+                    instIndex = pathSplit.length - 3;
+                }
+            }
+            if ( pathSplit.length > 3 ) {
+                if ( pathSplit[ pathSplit.length - 3 ] == "load" ) {
+                    instIndex = pathSplit.length - 4;
+                }
+            }
+            inst = pathSplit[ instIndex ];
+            var root = pathSplit[ 0 ];
+            for ( var createRootIndex = 1; createRootIndex < instIndex - 1; createRootIndex++ ) {
+              root = root + "/" + pathSplit[ createRootIndex ];
+            }
 
             if(filename == '') filename = inst;
 
@@ -1808,12 +1843,32 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         // Redirect until setState ID conflict is resolved
         var path = window.location.pathname;
         var inst = path.substring(path.length-17, path.length-1);
-
+        
+        var pathSplit = path.split('/');
+        if ( pathSplit[0] == "" ) {          
+            pathSplit.shift();
+        }
+        if ( pathSplit[ pathSplit.length - 1 ] == "" ) {
+            pathSplit.pop();
+        }            
+        var inst = undefined;
+        var instIndex = pathSplit.length - 1;
+        if ( pathSplit.length > 2 ) {
+            if ( pathSplit[ pathSplit.length - 2 ] == "load" ) {
+                instIndex = pathSplit.length - 3;
+            }
+        }
+        if ( pathSplit.length > 3 ) {
+            if ( pathSplit[ pathSplit.length - 3 ] == "load" ) {
+                instIndex = pathSplit.length - 4;
+            }
+        }
+        inst = pathSplit[ instIndex ];
         if ( revision ) {
-            window.location.pathname = applicationpath + '/load/' + filename + '/' + revision + '/' + inst;
+            window.location.pathname = applicationpath + "/" + inst + '/load/' + filename + '/' + revision + '/';
         }
         else {
-            window.location.pathname = applicationpath + '/load/' + filename + '/' + inst;
+            window.location.pathname = applicationpath + "/" + inst + '/load/' + filename + '/';
         }
 
         // $.get(filename,function(data,status){

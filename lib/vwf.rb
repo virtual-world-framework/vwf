@@ -45,9 +45,9 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
   end
 
-  get Pattern.new do |public_path, application, instance, private_path, loaded_component, load_revision|
+  get Pattern.new do |public_path, application, instance, private_path|
   
-    logger.debug "VWF#get #{public_path} - #{application} - #{instance} - #{private_path} - #{loaded_component} - #{load_revision}"
+    logger.debug "VWF#get #{public_path} - #{application} - #{instance} - #{private_path}"
     # Redirect "/path/to/application" to "/path/to/application/", and
     # "/path/to/application/instance" to "/path/to/application/instance/". But XHR calls to
     # "/path/to/application" get the component data.
@@ -73,7 +73,7 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
     else
 
-      delegate_to_application public_path, application, instance, private_path, loaded_component, load_revision
+      delegate_to_application public_path, application, instance, private_path
 
     end
 
@@ -81,11 +81,11 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
   # Delegate all posts to the application.
 
-  post Pattern.new do |public_path, application, instance, private_path, loaded_component, load_revision|
+  post Pattern.new do |public_path, application, instance, private_path|
 
-    logger.debug "VWF#post #{public_path} - #{application} - #{instance} - #{private_path} - #{loaded_component} - #{load_revision}"
+    logger.debug "VWF#post #{public_path} - #{application} - #{instance} - #{private_path}"
 
-    delegate_to_application public_path, application, instance, private_path, loaded_component, load_revision
+    delegate_to_application public_path, application, instance, private_path
 
   end
 
@@ -144,7 +144,7 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
   helpers do
 
-    def delegate_to_application public_path, application, instance, private_path, loaded_component, load_revision
+    def delegate_to_application public_path, application, instance, private_path
 
       application_instance = instance ?
         File.join( public_path, application, instance ) :
@@ -155,12 +155,10 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
         "PATH_INFO" => "/" + ( private_path || "" ),  # TODO: escaped properly for PATH_INFO?
         "vwf.root" => public_path,
         "vwf.application" => application,
-        "vwf.instance" => instance,
-        "vwf.load" => loaded_component,
-        "vwf.loadrevision" => load_revision
+        "vwf.instance" => instance
       )
 
-      Application.new( delegated_env["vwf.root"] ).call delegated_env
+      Application.new( delegated_env ).call delegated_env
 
     end
 
