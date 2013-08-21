@@ -374,14 +374,16 @@ var stats;
 			
 			renderer.render(backgroundScene,cam);
 			renderer.clear(false,true,false);
-			cam.near = cam.far - (cam.far - cam.near)/100.0;
-			cam.far = far * 10;
-			cam.updateProjectionMatrix();
-			renderer.render(scene,cam);
-			renderer.clear(false,true,false);
-			cam.near = near;
-			cam.far = far;
-			cam.updateProjectionMatrix();
+			
+			//use this for drawing really really far. Not usually necessary
+			//cam.near = cam.far - (cam.far - cam.near)/100.0;
+			//cam.far = far * 10;
+			//cam.updateProjectionMatrix();
+			//renderer.render(scene,cam);
+			//renderer.clear(false,true,false);
+			//cam.near = near;
+			//cam.far = far;
+			//cam.updateProjectionMatrix();
 			renderer.render(scene,cam);
 			$(document).trigger('postrender',[vp,wh,ww]);
 			sceneNode.lastTime = now;

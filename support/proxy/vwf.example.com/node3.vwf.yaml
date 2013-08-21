@@ -116,8 +116,9 @@ properties:
                     transform[12] = position[0];
                     transform[13] = position[1];
                     transform[14] = position[2];
+                    transform = this.transformAPI.scaleMatrix(scale,transform);
                     this.transform = transform;
-                    this.transformAPI.setScale(scale);
+                    
                 }.bind(this),
                 getRotation: function()
                 {
@@ -154,8 +155,9 @@ properties:
                     mat[13] = pos[1];
                     mat[14] = pos[2];
                     
+                    mat = this.transformAPI.scaleMatrix(scale,mat);
                     this.transform = mat;
-                    this.transformAPI.setScale(scale);
+                    
                 
                 }.bind(this),
                 getScale:function()
@@ -191,6 +193,31 @@ properties:
                     this.transform = mat;
                 
                 }.bind(this),
+                scaleMatrix:function(x,y,z,mat)
+                {
+                    if(x.length)
+                    {
+                        mat = y;
+                        y = x[1];
+                        z = x[2];
+                        x = x[0];
+                    }
+                    
+                   
+                    var xVec = Vec3.normalize([mat[0],mat[1],mat[2]],[]);
+                    var yVec = Vec3.normalize([mat[4],mat[5],mat[6]],[]);
+                    var zVec = Vec3.normalize([mat[8],mat[9],mat[10]],[]);
+                    xVec = Vec3.scale(xVec,x,[]);
+                    yVec = Vec3.scale(yVec,y,[]);
+                    zVec = Vec3.scale(zVec,z,[]);
+                    
+                    mat[0] = xVec[0]; mat[1] = xVec[1]; mat[2] = xVec[2];
+                    mat[4] = yVec[0]; mat[5] = yVec[1]; mat[6] = yVec[2];
+                    mat[8] = zVec[0]; mat[9] = zVec[1]; mat[10] = zVec[2];
+                    
+                    return mat;
+                
+                }.bind(this),
                 lookat: function(t,clamp, axis, up,fromOffset)
                 {
                     
@@ -224,6 +251,7 @@ properties:
                         t[4] = tovec[0]; t[5] = tovec[1]; t[6] = tovec[2]; t[7] = 0;
                         t[8] = up[0]; t[9] = up[1]; t[10] = up[2]; t[11] = 0;
                         t[12] = pos[0]; t[13] = pos[1]; t[14] = pos[2]; t[15] =1;
+                        t = this.transformAPI.scaleMatrix(scale,t);
                         this.transform = t;
                     }
                     if(axis == 'X')
@@ -232,6 +260,7 @@ properties:
                         t[4] = side[0]; t[5] = side[1]; t[6] = side[2]; t[7] = 0;
                         t[8] = up[0]; t[9] = up[1]; t[10] = up[2]; t[11] = 0;
                         t[12] = pos[0]; t[13] = pos[1]; t[14] = pos[2]; t[15] =1;
+                        t = this.transformAPI.scaleMatrix(scale,t);
                         this.transform = t;
                     }
                     if(axis == 'Z')
@@ -240,10 +269,11 @@ properties:
                         t[4] = side[0]; t[5] = side[1]; t[6] = side[2]; t[7] = 0;
                         t[8] = tovec[0]; t[9] = tovec[1]; t[10] = tovec[2]; t[11] = 0;
                         t[12] = pos[0]; t[13] = pos[1]; t[14] = pos[2]; t[15] =1;
+                        t = this.transformAPI.scaleMatrix(scale,t);
                         this.transform = t;
                     }
                    
-                    this.transformAPI.setScale(scale);
+                    
                 
                 }.bind(this)
             }

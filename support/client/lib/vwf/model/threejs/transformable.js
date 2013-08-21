@@ -7,7 +7,7 @@
 			this.TransformEnabled = function(){return !this.overrideTransform;}
 			this.settingProperty = function(propertyName,propertyValue)
 			{
-				if(!this.TransformEnabled()) {console.log('skipping'); return propertyValue};
+				if(!this.TransformEnabled()) { return propertyValue};
 				if(propertyName == 'transform')
                 {
 					

@@ -1,6 +1,6 @@
 var maxObjects = 1; 
 var maxDepth = 16;
-var batchAtLevel = 4;
+var batchAtLevel = 8;
 var drawSceneManagerRegions = false;
 
 function SceneManager(scene)
@@ -21,6 +21,26 @@ function GetAllLeafMeshes(threeObject,list)
 			GetAllLeafMeshes(threeObject.children[i],list);
 		}               
 	}     
+}
+SceneManager.prototype.forceBatchAll = function()
+{
+	var list = [];
+	GetAllLeafMeshes(this.scene,list);
+	for(var i = 0; i < list.length; i++)
+	{
+		if(list[i].setStatic)
+			list[i].setStatic(true);
+	}
+}
+SceneManager.prototype.forceUnbatchAll = function()
+{
+	var list = [];
+	GetAllLeafMeshes(this.scene,list);
+	for(var i = 0; i < list.length; i++)
+	{
+		if(list[i].setStatic)
+			list[i].setStatic(false);
+	}
 }
 SceneManager.prototype.rebuild = function(mo,md)
 {
@@ -103,9 +123,11 @@ SceneManager.prototype.update = function(dt)
 	if(!this.initialized) return;
 	for(var i = 0; i < this.dirtyObjects.length; i++)
 	{
+		
 		this.dirtyObjects[i].sceneManagerUpdate();
 		
 	}
+	this.dirtyObjects = [];
 	for(var i =0; i < this.BatchManagers.length; i++)
 	{
 		this.BatchManagers[i].update();
@@ -545,7 +567,7 @@ SceneManagerRegion.prototype.distributeObject = function(object)
 				}	
 				
 				this.updateMatrixWorld();
-				this.tempbounds = object.GetBoundingBox().transformBy(this.getModelMatrix());
+				this.tempbounds = object.GetBoundingBox(true).transformBy(this.getModelMatrix());
 				this.sceneManagerNode.updateObject(this);
 			}.bind(object)
 			object.sceneManagerDelete = function()
@@ -946,7 +968,7 @@ function compareMaterials(m1,m2)
 	delta += Math.abs(m1.bumpScale - m2.bumpScale);	
 	delta += Math.abs(m1.normalScale.x - m2.normalScale.x);
 	delta += Math.abs(m1.normalScale.y - m2.normalScale.y);
-	
+	delta += m1.side != m2.side ? 1000 : 0;
 		var mapnames = ['map','bumpMap','lightMap','normalMap','specularMap'];
         for(var i =0; i < mapnames.length; i++)
         {
