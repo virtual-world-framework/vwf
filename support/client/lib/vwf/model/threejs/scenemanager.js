@@ -817,12 +817,17 @@ THREE.RenderBatch = function(material,scene)
 	this.material = material;
 	this.dirty = false;
 	this.scene = scene;
+	this.totalVerts = 0;
+	this.totalFaces = 0;
 }
 THREE.RenderBatch.prototype.addObject = function(object)
 {
 	if(this.objects.indexOf(object) == -1)
 	{
+		this.totalVerts += object.geometry.vertices.length;
+		this.totalFaces += object.geometry.faces.length;
 		this.objects.push(object);
+		
 		this.dirty = true;
 	}
 	
@@ -831,6 +836,8 @@ THREE.RenderBatch.prototype.removeObject = function(object)
 {
 	if(this.objects.indexOf(object) != -1)
 	{
+		this.totalVerts -= object.geometry.vertices.length;
+		this.totalFaces -= object.geometry.faces.length;
 		this.objects.splice(this.objects.indexOf(object),1);
 		this.dirty = true;
 	}
@@ -838,13 +845,14 @@ THREE.RenderBatch.prototype.removeObject = function(object)
 }
 THREE.RenderBatch.prototype.update = function()
 {
+	
 	if(this.dirty)
 		this.build();
 	this.dirty = false;	
 }
 THREE.RenderBatch.prototype.checkSuitability = function(object)
 {
-	
+	if(this.totalFaces + object.geometry.faces.length > 32767 || this.totalVerts + object.geometry.vertices.length > 32767) return false;
 	return compareMaterials(this.material,object.material);
 }
 THREE.RenderBatch.prototype.deinitialize = function()
@@ -854,7 +862,7 @@ THREE.RenderBatch.prototype.deinitialize = function()
 }
 THREE.RenderBatch.prototype.build = function()
 {
-	console.log('Building batch' + this.name + ' : objects = ' + this.objects.length); 
+	console.log('Building batch ' + this.name + ' : objects = ' + this.objects.length); 
 	
 	//do the merge:
 	if(this.mesh)
@@ -869,8 +877,21 @@ THREE.RenderBatch.prototype.build = function()
 	this.mesh.receiveShadow=true;
 	this.scene.add_internal(this.mesh);
 	
+	var totalUVSets = 1;
+	
+	
 	for(var i =0; i < this.objects.length; i++)
 	{
+		totalUVSets = Math.max(totalUVSets,this.objects[i].geometry.faceVertexUvs.length);
+	}
+	console.log(totalUVSets);
+	for(var i = 0; i < totalUVSets; i++)
+	{
+		geo.faceVertexUvs[i] = [];
+	}
+	for(var i =0; i < this.objects.length; i++)
+	{
+		
 		var tg = this.objects[i].geometry;
 		var matrix = this.objects[i].matrixWorld.clone();
 		var normalMatrix = new THREE.Matrix3();
@@ -895,7 +916,7 @@ THREE.RenderBatch.prototype.build = function()
 				if(face.d !== undefined)
 					newface.d = face.d + geo.vertices.length;
 
-				newface.materialIndex = face.materialIndex;
+				//newface.materialIndex = face.materialIndex;
 				newface.centroid.copy( face.centroid );
 				newface.normal.copy(face.normal);		
 				newface.normal.applyMatrix3( normalMatrix ).normalize();
@@ -916,20 +937,48 @@ THREE.RenderBatch.prototype.build = function()
 			}
 			
 			
-			var uvs2 = tg.faceVertexUvs[ 0 ];
-			
-			for ( u = 0, il = uvs2.length; u < il; u ++ ) {
+			for(var l = 0; l < totalUVSets; l++)
+			{
+				var uvs2 = tg.faceVertexUvs[ l ];
+				
+				if(uvs2 && uvs2.length === tg.faces.length)
+				{
+					for ( u = 0, il = uvs2.length; u < il; u ++ ) 
+					{
 
-				var uv = uvs2[ u ], uvCopy = [];
+						var uv = uvs2[ u ], uvCopy = [];
 
-				for ( var j = 0, jl = uv.length; j < jl; j ++ ) {
+						for ( var j = 0, jl = uv.length; j < jl; j ++ ) {
 
-					uvCopy.push( new THREE.Vector2( uv[ j ] ? uv[ j ].x : 0, uv[ j ] ? uv[ j ].y : 0 ) );
+							uvCopy.push( new THREE.Vector2( uv[ j ] ? uv[ j ].x : 0, uv[ j ] ? uv[ j ].y : 0 ) );
 
+						}
+
+						geo.faceVertexUvs[l].push( uvCopy );
+
+					}
 				}
+				else
+				{
+					for ( u = 0, il = tg.faces.length; u < il; u ++ )
+					{
 
-				geo.faceVertexUvs[0].push( uvCopy );
+						var count = 3;
+						if(tg.faces[u].d !== undefined)
+							count = 4;
 
+						var uvCopy = [];
+						for ( var j = 0, jl = count; j < jl; j ++ ) {
+
+							uvCopy.push( new THREE.Vector2( 0,0) );
+
+						}
+
+						geo.faceVertexUvs[l].push( uvCopy );
+
+					}
+				
+				}
 			}
 		}
 	}
