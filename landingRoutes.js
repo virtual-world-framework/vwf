@@ -3,7 +3,7 @@ fileList = [],
 routesMap = {},
 DAL = {},
 fs = require('fs');
-
+var async = require('async');
 fs.readdir('./public' + root + '/views/help', function(err, files){
 	var tempArr = [];
 	
@@ -76,16 +76,21 @@ exports.handlePostRequest = function(req, res, next){
 		case "delete_users":
 			var cbNum = 0;
 			console.log(data);
+			
+			async.eachSeries(data,function(val,cb)
+			{
+				DAL.deleteUser(val,function(){		
+					cb();
+				});	
+			},
+			function()
+			{
+				res.end("" + cbNum);
+			});
+			
 			for(var i = 0; i < data.length; i++){
 				console.log(data[i]);
-				DAL.deleteUser(data[i],function(){		
-					
-					cbNum++;
-					if(cbNum == data.length){
-						console.log("END");
-						res.end("" + cbNum);
-					}
-				});
+				
 			}
 		break;	
 		
