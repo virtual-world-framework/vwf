@@ -2126,11 +2126,27 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
     //walk the graph of an object, and set all materials to new material clones
     function cloneMaterials( nodein ) {
+	
+		//sort the materials in the model, and when cloneing, make the new model share the same material setup as the old.
+		var materialMap = {};
+	
         walkGraph( nodein, function( node ) {
             if(node.material) {
-              node.material = node.material.clone();
+			
+			  if(!materialMap[node.material])
+				materialMap[node.material] = [];
+			
+			  materialMap[node.material].push(node);
+              
             }
         });
+		
+		for(var i in materialMap)
+		{
+			var newmat = materialMap[i][0].material.clone();
+			for(var j =0; j < materialMap[i].length; j++)
+				materialMap[i][j].material = newmat;
+		}
     }
 
     function loadAsset( parentNode, node, childType, propertyNotifyCallback ) {
