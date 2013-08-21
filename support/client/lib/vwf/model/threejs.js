@@ -100,7 +100,7 @@
 	
 	function matComp(m1,m2)
 	{
-		
+	
 		for(var i =0; i < 16; i++)
 		{
 			if(m1[i] != m2[i])
@@ -109,6 +109,16 @@
 		return true;	
 	}
 	
+	function matComploose(m1,m2)
+	{
+	
+		for(var i =0; i < 16; i++)
+		{
+			if(Math.abs(m1[i] - m2[i]) > .000001)
+				return false;
+		}
+		return true;	
+	}
 	
 define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/threejs/backgroundLoader" ], function( module, model, utility, Color, backgroundLoader ) {
 
@@ -623,16 +633,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
                             goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
                         }
 						
-						if(!matComp(transform,threeObject.matrix.elements))
+						if(!matComploose(transform,threeObject.matrix.elements))
 						{
 							if(threeObject instanceof THREE.ParticleSystem)
 							{	
 								threeObject.updateTransform(transform);
 							}
-						
+							console.log(transform,threeObject.matrix.elements);
                             threeObject.matrixAutoUpdate = false;
                             threeObject.matrix.elements = matCpy(transform);
-                            threeObject.updateMatrixWorld(true);      
+                            threeObject.updateMatrixWorld(true);   
+													
 							threeObject.sceneManagerUpdate();							
                         }                            
                     

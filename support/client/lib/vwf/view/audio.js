@@ -11,7 +11,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 		initialize : function()
 		{
 			this.buzz = require("buzz");
-			debugger;
+			
 		},
 
 		calledMethod : function(id,name,params)

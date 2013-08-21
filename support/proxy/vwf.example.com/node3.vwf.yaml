@@ -193,6 +193,7 @@ properties:
                 }.bind(this),
                 lookat: function(t,clamp, axis, up,fromOffset)
                 {
+                    
                     var target;
                     target = t.internal_val||t;
                     if(!fromOffset) fromOffset = [0,0,0];
@@ -241,6 +242,7 @@ properties:
                         t[12] = pos[0]; t[13] = pos[1]; t[14] = pos[2]; t[15] =1;
                         this.transform = t;
                     }
+                   
                     this.transformAPI.setScale(scale);
                 
                 }.bind(this)

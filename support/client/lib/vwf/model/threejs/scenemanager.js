@@ -90,9 +90,22 @@ SceneManager.prototype.FrustrumCast = function(f,opts)
 	
 	return hitlist;
 }	
+SceneManager.prototype.dirtyObjects = [];
+SceneManager.prototype.setDirty = function(object)
+{
+	if(this.dirtyObjects.indexOf(object) == -1)
+	{
+		this.dirtyObjects.push(object);
+	}	
+}
 SceneManager.prototype.update = function(dt)
 {
 	if(!this.initialized) return;
+	for(var i = 0; i < this.dirtyObjects.length; i++)
+	{
+		this.dirtyObjects[i].sceneManagerUpdate();
+		
+	}
 	for(var i =0; i < this.BatchManagers.length; i++)
 	{
 		this.BatchManagers[i].update();
@@ -153,8 +166,9 @@ SceneManager.prototype.getTexture = function(src,noclone)
 		return this.textureList[src];
 	}
 	var ret = this.textureList[src];
-	if(noclone) return ret;
-	ret = ret.clone();
+	if(noclone) 
+		return ret;
+	ret = new THREE.Texture(ret.image);
     ret.needsUpdate  = true;
 	this.textureList[src].clones.push(ret);
     return ret;	
@@ -258,6 +272,7 @@ SceneManager.prototype.initialize = function(scene)
 	}
 	THREE.Object3D.prototype.sceneManagerUpdate = function()
 	{
+		
 		for(var i =0; i <  this.children.length; i++)
 		{
 			this.children[i].sceneManagerUpdate();
@@ -450,7 +465,7 @@ SceneManagerRegion.prototype.completelyContains = function(object)
 {
 	
 	//changing transforms make this cache not work
-	//if(!object.tempbounds) 
+	if(!object.tempbounds) 
 	{
 		object.updateMatrixWorld();
 		

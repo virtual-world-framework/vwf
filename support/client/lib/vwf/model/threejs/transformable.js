@@ -26,17 +26,17 @@
 						goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
 					}
 					
-					if(!matComp(transform,threeObject.matrix.elements))
+					if(!matComploose(transform,threeObject.matrix.elements))
 					{
 						if(threeObject instanceof THREE.ParticleSystem)
 						{	
 							threeObject.updateTransform(transform);
 						}
-					
+						
 						threeObject.matrixAutoUpdate = false;
 						threeObject.matrix.elements = matCpy(transform);
 						threeObject.updateMatrixWorld(true);      
-						threeObject.sceneManagerUpdate();							
+						_SceneManager.setDirty(threeObject);							
 					}
 
 					//signals the driver that we don't have to process further, this prop was handled
