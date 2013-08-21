@@ -169,6 +169,8 @@ methods:
   tick:
   getBroadcasting:
   cameraBroadcastEnd:
+  playSound:
+  setMusic:
 scripts:
 - |
     this.initialize = function(){
