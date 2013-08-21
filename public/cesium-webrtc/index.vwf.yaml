@@ -29,6 +29,7 @@ properties:
 methods:
   createClient:
   locationCaptured:
+  hideInvalidBillboard:
   findClient:
   createVideo:
   removeVideo:
@@ -170,6 +171,11 @@ scripts:
       } else {
         this.future( 2.0 ).locationCaptured( parms );
       }
+    }
+    // Hide client markers for clients with invalid locations
+    this.hideInvalidBillboard = function( bbName ) {
+      this.find( "/"+bbName+"-bb" )[0].visible = false;
+      this.find( "/"+bbName+"-label" )[0].visible = false;
     }
     this.pointerClick = function( pointerInfo, pickInfo ) {
 

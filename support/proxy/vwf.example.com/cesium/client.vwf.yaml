@@ -41,44 +41,41 @@ scripts:
       
       var self = this;
 
-      // If location exists, create a billboard and label for user
-      if ( self.location ) {
+      var bbDef = {
+        "extends": "http://vwf.example.com/cesium/billboard.vwf",
+      };
+      var lblDef = {
+        "extends": "http://vwf.example.com/cesium/label.vwf",
+      };
 
-        var bbDef = {
-          "extends": "http://vwf.example.com/cesium/billboard.vwf",
-        };
-        var lblDef = {
-          "extends": "http://vwf.example.com/cesium/label.vwf",
-        };
-
-        var scene = self.parent;
-        while( scene.parent.parent ) {
-          scene = scene.parent;
-        }
-
-        // this node, nor it's parent are represented in the cesium driver,
-        // so the scene must be used to add this child 
-        scene.children.create( self.displayName + "-bb", bbDef, function( child ) {
-          
-          self.billboard = child;
-          
-          child.position = self.location;
-          child.color = self.color;
-        } );
-
-        scene.children.create( self.displayName + "-label", lblDef, function( child ) {
-          
-          self.label = child;
-          
-          child.position = self.location;
-          child.fillColor = self.color;
-          child.verticalOrigin = 'top';
-          child.horizontalOrigin = 'center';
-          child.pixelOffset = [ 0, 10, 0 ];
-          child.font = '18px Helvetica';
-          child.text = self.displayName;
-        } );      
+      var scene = self.parent;
+      while( scene.parent.parent ) {
+        scene = scene.parent;
       }
+
+      // this node, nor it's parent are represented in the cesium driver,
+      // so the scene must be used to add this child 
+      scene.children.create( self.displayName + "-bb", bbDef, function( child ) {
+        
+        self.billboard = child;
+        
+        child.position = self.location;
+        console.info(child.position);
+        child.color = self.color;
+      } );
+
+      scene.children.create( self.displayName + "-label", lblDef, function( child ) {
+        
+        self.label = child;
+        
+        child.position = self.location;
+        child.fillColor = self.color;
+        child.verticalOrigin = 'top';
+        child.horizontalOrigin = 'center';
+        child.pixelOffset = [ 0, 10, 0 ];
+        child.font = '18px Helvetica';
+        child.text = self.displayName;
+      } );      
     }
     this.updateMarkers = function( pos ) {
       if ( this.billboard ) {
