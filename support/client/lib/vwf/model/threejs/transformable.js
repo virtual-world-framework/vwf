@@ -45,7 +45,7 @@
 			}
 			this.gettingProperty = function(propertyName,propertyValue)
 			{
-				if(!this.TransformEnabled()) {console.log('skipping'); return propertyValue};
+				if(!this.TransformEnabled()) { return propertyValue};
 				if(propertyName == 'transform')
                 {
 					var threeObject = this.getRoot().parent;

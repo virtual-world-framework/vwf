@@ -639,7 +639,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 							{	
 								threeObject.updateTransform(transform);
 							}
-							console.log(transform,threeObject.matrix.elements);
+							
                             threeObject.matrixAutoUpdate = false;
                             threeObject.matrix.elements = matCpy(transform);
                             threeObject.updateMatrixWorld(true);   
@@ -729,6 +729,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
                     {
                         //debugger;
                         threeObject.setStatic(propertyValue);
+                    }
+					if(propertyName == 'isDynamic')
+                    {
+                        //debugger;
+						vwf.setProperty(nodeID,'isStatic',false);
+                        threeObject.setDynamic(propertyValue);
                     }
                     //This can be a bit confusing, as the node has a material property, and a material child node. 
                     //setting the property does this, but the code in the component is ambigious

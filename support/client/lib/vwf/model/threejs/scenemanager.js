@@ -69,6 +69,11 @@ SceneManager.prototype.addToRoot = function(child)
 {
 	this.specialCaseObjects.push(child);
 }
+SceneManager.prototype.removeFromRoot = function(child)
+{
+	if(this.specialCaseObjects.indexOf(child) != -1)
+		this.specialCaseObjects.splice(this.specialCaseObjects.indexOf(child),1);
+}
 SceneManager.prototype.CPUPick = function(o,d,opts)
 {
 	if(d[0] == 0 && d[1] ==0 && d[2] == 0)
@@ -283,8 +288,30 @@ SceneManager.prototype.initialize = function(scene)
 	THREE.Line.prototype.materialUpdated = THREE.Mesh.prototype.materialUpdated;
 	THREE.Object3D.prototype.setStatic = function(_static)
 	{
+		if(this.isDynamic && this.isDynamic()) return;
 		this._static = _static;
 		this.sceneManagerUpdate();
+	}
+	THREE.Object3D.prototype.setDynamic = function(_dynamic)
+	{
+		if(this.dynamic == _dynamic) return;
+		this._dynamic = _dynamic;
+		this._static = false;
+		if(this._dynamic)
+		{
+			this.sceneManagerDelete();
+			_SceneManager.addToRoot(this);
+		}else
+		{
+			_SceneManager.removeFromRoot(this);
+			var list = [];
+			GetAllLeafMeshes(this,list);
+			for(var i =0; i < list.length; i++)
+			{
+				_SceneManager.addChild(list[i]);
+			}
+			this.sceneManagerUpdate();
+		}
 	}
 	THREE.Object3D.prototype.isStatic = function()
 	{
@@ -292,9 +319,15 @@ SceneManager.prototype.initialize = function(scene)
 			return this._static;
 		return (this.parent && this.parent.isStatic());
 	}
+	THREE.Object3D.prototype.isDynamic = function()
+	{
+		if(this._dynamic != undefined)
+			return this._dynamic;
+		return (this.parent && this.parent.isDynamic());
+	}
 	THREE.Object3D.prototype.sceneManagerUpdate = function()
 	{
-		
+		if(this.isDynamic && this.isDynamic()) return;
 		for(var i =0; i <  this.children.length; i++)
 		{
 			this.children[i].sceneManagerUpdate();
