@@ -625,6 +625,7 @@ function startVWF(){
 		//Get the state and load it.
 		//Now the server has a rough idea of what the simulation is
 
+        socket.emit('message',{action:"createNode",parameters:["http://vwf.example.com/clients.vwf"],time:global.instances[namespace].time});
 		
 		socket.emit('message',{action:"createNode",parameters:["index.vwf", "application"],time:global.instances[namespace].time});
 		socket.pending = false;
