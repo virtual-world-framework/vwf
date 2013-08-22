@@ -57,6 +57,7 @@
 		}
 
 		vwfPortalModel.usersList(newObject);
+		handleHash();
 	});
 	
 	vwfPortalModel.deleteSelected = function(data){
@@ -79,12 +80,13 @@
 	}; 
 	
 	var handleHash = function(){
-		
+	
 		var tmpHash = window.location.hash.replace("#", "");
 		if(tmpHash){
 			for(var i in vwfPortalModel.usersList()){
 				if(tmpHash == vwfPortalModel.usersList()[i].Username){
-					vwfPortalModel.currentUser(tmpHash);
+					vwfPortalModel.currentUser(tmpHash, vwfPortalModel.usersList()[i].Username);
+					console.log(vwfPortalModel.usersList());
 					break;
 				}
 			}
