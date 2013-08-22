@@ -30,14 +30,29 @@
 	<script>
 		vwfPortalModel.deleteSelected = function(data){
 			
-			var tempWorldArr = [];
+			var tempWorldArr = [], dataSendArr = [], tempStr = '';
 			for(var i = 0; i < $('input:checked').length; i++){
-				tempWorldArr.push(ko.dataFor($('input:checked')[i]).title);
+				tempStr = ko.dataFor($('input:checked')[i]).id;
+				
+				tempWorldArr.push(tempStr);
+				dataSendArr.push('_adl_sandbox_' + tempStr + '_');
 			}
 			
 			//Make the request to the server to delete these users
-			console.log("Delete worlds ", tempWorldArr);
-			$('input:checked').click();
+			console.log("Delete worlds ", tempWorldArr, dataSendArr);
+			
+			//Make the request to the server to delete these users
+			$.post('{{root}}/data/delete_worlds', JSON.stringify(dataSendArr), function(o){
+				
+				for(var i in tempWorldArr){
+					for(var g in vwfPortalModel.worldObjects()){
+						if(vwfPortalModel.worldObjects()[g].id == tempWorldArr[i]){
+							vwfPortalModel.worldObjects.splice(g, 1);
+						}
+					}
+				}
+				
+			});
 		}; 
 		
 		$(document).ready(function(){	

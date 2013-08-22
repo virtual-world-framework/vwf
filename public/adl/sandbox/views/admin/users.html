@@ -16,7 +16,7 @@
 			</tr>
 			<tbody data-bind="foreach:usersList, style:{border:'none'}">
 				<td><input type="checkbox" /></td>
-				<td><a data-bind="text:$data.Username, attr:{href:'#'+$data}" href=""></a></td>
+				<td><a data-bind="text:$data.Username, attr:{href:'#'+$data.Username}" href=""></a></td>
 			</tbody>
 		</table>
 	</div>
@@ -73,7 +73,6 @@
 			for(var i in tempUserArr){
 				vwfPortalModel.usersList.remove(tempUserArr[i]);
 			}
-			
 		});
 		console.log("Delete users ", tempUserArr);
 		$('input:checked').click();
@@ -81,9 +80,14 @@
 	
 	var handleHash = function(){
 		
-		var tmpHash = window.location.hash.replace("#", "")
-		if(tmpHash && vwfPortalModel.usersList.indexOf(tmpHash) > -1){
-			vwfPortalModel.currentUser(tmpHash);
+		var tmpHash = window.location.hash.replace("#", "");
+		if(tmpHash){
+			for(var i in vwfPortalModel.usersList()){
+				if(tmpHash == vwfPortalModel.usersList()[i].Username){
+					vwfPortalModel.currentUser(tmpHash);
+					break;
+				}
+			}
 		}
 		
 		else vwfPortalModel.currentUser(false);

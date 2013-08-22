@@ -921,6 +921,18 @@ function importStates()
 			});
 	});
 }
+function deleteInstances(list, cb){
+	async.eachSeries(list, function(val,cb2)
+	{
+		getInstance(val,function(state){
+			//Do some type of privilege checking
+			//if(state.owner != URL.loginData.UID && URL.loginData.UID != global.adminUID)
+			deleteInstance(val,function(){
+				cb2();
+			});
+		});
+	}, cb);
+};
 function deleteUsers(list, cb){
 	async.eachSeries(list, function(val,cb2)
 	{
@@ -1065,6 +1077,7 @@ function startup(callback)
 			exports.updateInstance = updateInstance;
 			exports.createInstance = createInstance;
 			exports.deleteInstance = deleteInstance;
+			exports.deleteInstances = deleteInstances;
 			
 			exports.getUsers = getUsers;
 			exports.getInstances = getInstances;
