@@ -327,7 +327,7 @@ function _404(response)
 function ServeYAML(filename,response, URL)
 {
 		var tf = filename;
-		fs.readFile(filename, "utf8", function (err, file) {
+		fs.readFile(filename, "utf8", function (err, data) {
 			if (err) {
 				response.writeHead(500, {
 					"Content-Type": "text/plain"
@@ -336,6 +336,10 @@ function ServeYAML(filename,response, URL)
 				response.end();
 				return;
 			}
+
+			// Remove the Byte Order Mark (BOM) if one exists
+            var file = data.replace(/^\uFEFF/, '');
+
 			//global.log(tf);
 			try{
 			    var deYAML = JSON.stringify(YAML.load(file));
