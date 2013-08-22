@@ -4,27 +4,38 @@
 <script src="js/bootstrap.js" type="text/javascript"></script>
 
 <script type="text/javascript">
+  function setContentOrTitle(nodeId, propertyName, propertyValue) {
+    var editorNodeId = vwf_view.kernel.find('', '/editor');
+
+    if ( nodeId == editorNodeId[0] ) {
+      switch ( propertyName ) {
+        case "content":
+          $("#doc-content").val(propertyValue);
+          break;
+        case "title":
+          $("#doc-title").val(propertyValue);
+          break;
+      }
+    }
+  }
+
   $(function(){
     // Horrible hack to set the page to be white
     $('html').css('backgroundColor', '#f1f1f1');
     $('.full-screen').parent().css('backgroundColor', '#f1f1f1');
 
     vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-      // If I'm the one who set the property, then ignore the change?
-      console.log("Other changed content to: " + propertyValue);
-      var editorNodeId = vwf_view.kernel.find('', '/editor');
-
-      if ( nodeId == editorNodeId[0] ) {
-        switch ( propertyName ) {
-          case "content":
-            $("#doc-content").val(propertyValue);
-            break;
-          case "title":
-            $("#doc-title").val(propertyValue);
-            break;
-        }
-      }
+      console.log("Another changed content to: " + propertyValue);
+      setContentOrTitle(nodeId, propertyName, propertyValue);
     }
+
+    vwf_view.gotProperty = function (nodeId, propertyName, propertyValue) {
+      console.log("Got property " + propertyName + "  with value: " + propertyValue);
+      setContentOrTitle(nodeId, propertyName, propertyValue);
+    }
+
+    vwf_view.kernel.getProperty(vwf_view.kernel.find('', '/editor'), 'content');
+    vwf_view.kernel.getProperty(vwf_view.kernel.find('', '/editor'), 'title');
 
     $('#doc-content').on('input propertychange', function() {
       console.log("I changed content to: " + $(this).val());
@@ -43,7 +54,7 @@
 <div id="wrap" class="full-screen">
   <div id="title-row" class="row-fluid">
     <div class="span8">
-      <button class="close">&times;</button>
+      <a href="/write-together/list.html" class="close" data-toggle="tooltip" title="Return to Document List">&times;</a>
       <input id="doc-title" type="text" placeholder="Document title">
     </div>
   </div>
