@@ -858,7 +858,7 @@
                 node: nodeID,
                 action: actionName,
                 member: memberName,
-                parameters: parameters,
+                parameters: require( "vwf/utility" ).transform( parameters, require( "vwf/utility" ).transforms.transit ),
                 // callback: callback_async,  // TODO: provisionally add fields to queue (or a holding queue) then execute callback when received back from reflector
             };
 
@@ -902,8 +902,8 @@
                 node: nodeID,
                 action: actionName,
                 member: memberName,
-                parameters: parameters,
-                result: result,
+                parameters: require( "vwf/utility" ).transform( parameters, require( "vwf/utility" ).transforms.transit ),
+                result: require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ),
             };
 
             if ( socket ) {
@@ -955,8 +955,7 @@
 
             // Return the result.
 
-            respond && this.respond( nodeID, actionName, memberName, parameters,
-                require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ) );
+            respond && this.respond( nodeID, actionName, memberName, parameters, result );
 
             // origin == "reflector" ?
             //     this.logger.infou() : this.logger.debugu();
@@ -1018,8 +1017,7 @@
 
         this.log = function() {
 
-            this.respond( undefined, "log", undefined, undefined,
-                require( "vwf/utility" ).transform( arguments, require( "vwf/utility" ).transforms.transit ) );
+            this.respond( undefined, "log", undefined, undefined, arguments );
 
         }
 
@@ -1162,8 +1160,8 @@
                 // Global node and descendant deltas.
 
                 nodes: [  // TODO: all global objects
-                    require( "vwf/utility" ).transform( this.getNode( "http-vwf-example-com-clients-vwf", full ), require( "vwf/utility" ).transforms.transit ),
-                    require( "vwf/utility" ).transform( this.getNode( applicationID, full ), require( "vwf/utility" ).transforms.transit ),
+                    this.getNode( "http-vwf-example-com-clients-vwf", full ),
+                    this.getNode( applicationID, full ),
                 ],
 
                 // `createNode` annotations, keyed by `nodes` indexes.
@@ -3911,7 +3909,6 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
             }
 
             return uri;
-
         };
 
         // -- queueTransitTransformation -----------------------------------------------------------
@@ -3953,12 +3950,9 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                 return filtered;
 
-            } else {
-
-                return require( "vwf/utility" ).transform( object, require( "vwf/utility" ).transforms.transit );
-
             }
 
+            return object;
         };
 
         // -- loggableComponentTransformation ------------------------------------------------------
