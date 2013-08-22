@@ -669,6 +669,9 @@
 
                     secure: window.location.protocol === "https:",
 
+                    port: window.location.port ||
+                        ( window.location.protocol === "https:" ? 443 : 80 ),
+
                     // The ruby socket.io server only supports WebSockets. Don't try the others.
 
                     transports: [
