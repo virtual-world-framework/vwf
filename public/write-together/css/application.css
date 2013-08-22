@@ -11,7 +11,7 @@ div#wrap.full-screen {
   padding-bottom: 20px;
 }
 
-button.close {
+a.close {
   float: left;
   padding: 5px 10px;
 }
