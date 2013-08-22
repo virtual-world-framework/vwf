@@ -1553,43 +1553,67 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             vwf.models.kernel.enable();
 
-            // Create and attach the children. For each child, call createChild() with the
-            // child's component specification. createChild() delegates to the models and
-            // views as before.
 
-            async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
+            async.series( [
 
-                var creating = ! nodeHasOwnChild.call( vwf, nodeID, childName );
+                function( series_callback_async /* ( err, results ) */ ) {
 
-                if ( creating ) {
-                    vwf.createChild( nodeID, childName, nodeComponent.children[childName], undefined, function( childID ) /* async */ {  // TODO: add in original order from nodeComponent.children  // TODO: ensure id matches nodeComponent.children[childName].id  // TODO: propagate childURI + fragment identifier to children of a URI component?
-                        each_callback_async( undefined );
+                    // Create and attach the children. For each child, call createChild() with the
+                    // child's component specification. createChild() delegates to the models and
+                    // views as before.
+
+                    async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
+
+                        var creating = ! nodeHasOwnChild.call( vwf, nodeID, childName );
+
+                        if ( creating ) {
+                            vwf.createChild( nodeID, childName, nodeComponent.children[childName], undefined, function( childID ) /* async */ {  // TODO: add in original order from nodeComponent.children  // TODO: ensure id matches nodeComponent.children[childName].id  // TODO: propagate childURI + fragment identifier to children of a URI component?
+                                each_callback_async( undefined );
+                            } );
+                        } else {
+                            vwf.setNode( nodeComponent.children[childName].id || nodeComponent.children[childName].patches,
+                                    nodeComponent.children[childName], function( childID ) /* async */ {
+                                each_callback_async( undefined );
+                            } );
+                        }  // TODO: delete when nodeComponent.children[childName] === null in patch
+
+                    }, function( err ) /* async */ {
+                        series_callback_async( err, undefined );
                     } );
-                } else {
-                    vwf.setNode( nodeComponent.children[childName].id || nodeComponent.children[childName].patches,
-                            nodeComponent.children[childName], function( childID ) /* async */ {
-                        each_callback_async( undefined );
+
+                },
+
+                function( series_callback_async /* ( err, results ) */ ) {
+
+                    // Attach the scripts. For each script, load the network resource if the script
+                    // is specified as a URI, then once loaded, call execute() to direct any model
+                    // that manages scripts of this script's type to evaluate the script where it
+                    // will perform any immediate actions and retain any callbacks as appropriate
+                    // for the script type.
+
+                    var scripts = nodeComponent.scripts ?
+                        [].concat( nodeComponent.scripts ) : []; // accept either an array or a single item
+
+                    async.map( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
+
+                        if ( valueHasType( script ) ) {
+                            map_callback_async( undefined, { text: script.text, type: script.type } );
+                        } else {
+                            map_callback_async( undefined, { text: script, type: undefined } );
+                        }
+
+                    }, function( err, scripts ) /* async */ {
+
+                        scripts.forEach( function( script ) {
+                            script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                        } );
+
+                        series_callback_async( err, undefined );
                     } );
-                }  // TODO: delete when nodeComponent.children[childName] === null in patch
 
-            }, function( err ) /* async */ {
+                },
 
-                // Attach the scripts. For each script, load the network resource if the script is
-                // specified as a URI, then once loaded, call execute() to direct any model that
-                // manages scripts of this script's type to evaluate the script where it will
-                // perform any immediate actions and retain any callbacks as appropriate for the
-                // script type.
-
-                var scripts = nodeComponent.scripts ?
-                    [].concat( nodeComponent.scripts ) : []; // accept either an array or a single item
-
-                scripts.forEach( function( script ) {
-                    if ( valueHasType( script ) ) {
-                        script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
-                    } else {
-                        script && vwf.execute( nodeID, script, undefined ); // TODO: external scripts too // TODO: callback
-                    }
-                } );
+            ], function( err, results ) /* async */ {
 
                 callback_async && callback_async( nodeID );
 
@@ -2197,43 +2221,51 @@ if ( ! childComponent.source ) {
 
                 function( series_callback_async /* ( err, results ) */ ) {
 
-                    // Watch for any async kernel calls generated as we run the scripts and wait for
-                    // them complete before completing the node.
+                    // Attach the scripts. For each script, load the network resource if the script is
+                    // specified as a URI, then once loaded, call execute() to direct any model that
+                    // manages scripts of this script's type to evaluate the script where it will
+                    // perform any immediate actions and retain any callbacks as appropriate for the
+                    // script type.
 
-                    vwf.models.kernel.capturingAsyncs( function() {
+                    var scripts = childComponent.scripts ?
+                        [].concat( childComponent.scripts ) : []; // accept either an array or a single item
 
-                        // Suppress kernel reentry so that initialization functions don't make any
-                        // changes during replication.
+                    async.map( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
 
-                        replicating && vwf.models.kernel.disable();
+                        if ( valueHasType( script ) ) {
+                            map_callback_async( undefined, { text: script.text, type: script.type } );
+                        } else {
+                            map_callback_async( undefined, { text: script, type: undefined } );
+                        }
 
-                        // Attach the scripts. For each script, load the network resource if the script is
-                        // specified as a URI, then once loaded, call execute() to direct any model that
-                        // manages scripts of this script's type to evaluate the script where it will
-                        // perform any immediate actions and retain any callbacks as appropriate for the
-                        // script type.
+                    }, function( err, scripts ) /* async */ {
 
-                        var scripts = childComponent.scripts ?
-                            [].concat( childComponent.scripts ) : []; // accept either an array or a single item
+                        // Watch for any async kernel calls generated as we run the scripts and wait for
+                        // them complete before completing the node.
 
-                        scripts.forEach( function( script ) {
-                            if ( valueHasType( script ) ) {
+                        vwf.models.kernel.capturingAsyncs( function() {
+
+                            // Suppress kernel reentry so that initialization functions don't make any
+                            // changes during replication.
+
+                            replicating && vwf.models.kernel.disable();
+
+                            // Create each script.
+
+                            scripts.forEach( function( script ) {
                                 script.text && vwf.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
-                            } else {
-                                script && vwf.execute( childID, script, undefined ); // TODO: external scripts too // TODO: callback
-                            }
-                        } );
+                            } );
 
-                        // Restore kernel reentry.
+                            // Restore kernel reentry.
 
-                        replicating && vwf.models.kernel.enable();
+                            replicating && vwf.models.kernel.enable();
 
-                        // Perform initializations for properties with setter functions. These are
-                        // assigned here so that the setters run on a fully-constructed node.
+                            // Perform initializations for properties with setter functions. These are
+                            // assigned here so that the setters run on a fully-constructed node.
 
-                        Object.keys( deferredInitializations ).forEach( function( propertyName ) {
-                            vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
-                        } );
+                            Object.keys( deferredInitializations ).forEach( function( propertyName ) {
+                                vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
+                            } );
 
 // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
@@ -2241,31 +2273,31 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
     vwf.tickable.nodeIDs.push( childID );
 }
 
-                        // Suppress kernel reentry so that initialization functions don't make any
-                        // changes during replication.
+                            // Suppress kernel reentry so that initialization functions don't make any
+                            // changes during replication.
 
-                        replicating && vwf.models.kernel.disable();
+                            replicating && vwf.models.kernel.disable();
 
-                        // Call initializingNode() on each model and initializedNode() on each view to
-                        // indicate that the node is fully constructed.
+                            // Call initializingNode() on each model and initializedNode() on each view to
+                            // indicate that the node is fully constructed.
 
-                        vwf.models.forEach( function( model ) {
-                            model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childIndex, childName );
+                            vwf.models.forEach( function( model ) {
+                                model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                    childComponent.source, childComponent.type, childIndex, childName );
+                            } );
+
+                            vwf.views.forEach( function( view ) {
+                                view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                    childComponent.source, childComponent.type, childIndex, childName );
+                            } );
+
+                            // Restore kernel reentry.
+
+                            replicating && vwf.models.kernel.enable();
+
+                        }, function() {
+                            series_callback_async( err, undefined );
                         } );
-
-                        vwf.views.forEach( function( view ) {
-                            view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childIndex, childName );
-                        } );
-
-                        // Restore kernel reentry.
-
-                        replicating && vwf.models.kernel.enable();
-
-                    }, function() {
-
-                        series_callback_async( undefined, undefined );
 
                     } );
 
