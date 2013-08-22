@@ -45,42 +45,22 @@ children:
       rotation: [ 1, 0, 0, 0 ]
       receiveShadows: true
     children:
-      node-brick_green_1:
-        extends: http://vwf.example.com/node3.vwf
+      brick_green:
+        extends: http://vwf.example.com/material.vwf
         properties:
-          receiveShadows: true
-        children:
-          material:
-            extends: http://vwf.example.com/material.vwf
-            properties:
-              bumpScale: 0.1
-      node-grass:
-        extends: http://vwf.example.com/node3.vwf
+          bumpScale: 0.1
+      grass:
+        extends: http://vwf.example.com/material.vwf
         properties:
-          receiveShadows: true
-        children:
-          material:
-            extends: http://vwf.example.com/material.vwf
-            properties:
-              bumpScale: 0.05
-      node-wall_west:
-        extends: http://vwf.example.com/node3.vwf
+          bumpScale: 0.05
+      Stone_Wall:
+        extends: http://vwf.example.com/material.vwf
         properties:
-          receiveShadows: true
-        children:
-          material:
-            extends: http://vwf.example.com/material.vwf
-            properties:
-              bumpScale: 0.02
-      node-flagstone:
-        extends: http://vwf.example.com/node3.vwf
+          bumpScale: 0.02
+      flagstone_pavers:
+        extends: http://vwf.example.com/material.vwf
         properties:
-          receiveShadows: true
-        children:
-          material:
-            extends: http://vwf.example.com/material.vwf
-            properties:
-              bumpScale: 0.02
+          bumpScale: 0.02
   furniture:
     extends: http://vwf.example.com/node3.vwf
     source: models/marbleFurniture.DAE
@@ -229,10 +209,6 @@ children:
       castShadows: true
       receiveShadows: true
     children:
-      wood_fine01:
-        extends: http://vwf.example.com/material.vwf
-        properties:
-          bumpScale: 0.005
       field_playing01:
         extends: http://vwf.example.com/material.vwf
         properties:
