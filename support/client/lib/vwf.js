@@ -2279,10 +2279,6 @@ if ( ! childComponent.source ) {
                                 vwf.execute( childID, script.text, script.type ); // TODO: callback
                             } );
 
-                            // Restore kernel reentry.
-
-                            replicating && vwf.models.kernel.enable();
-
                             // Perform initializations for properties with setter functions. These are
                             // assigned here so that the setters run on a fully-constructed node.
 
@@ -2295,11 +2291,6 @@ if ( ! childComponent.source ) {
 if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
     vwf.tickable.nodeIDs.push( childID );
 }
-
-                            // Suppress kernel reentry so that initialization functions don't make any
-                            // changes during replication.
-
-                            replicating && vwf.models.kernel.disable();
 
                             // Call initializingNode() on each model and initializedNode() on each view to
                             // indicate that the node is fully constructed.
