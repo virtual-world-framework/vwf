@@ -30,7 +30,7 @@
 /// @module vwf/view/document
 /// @requires vwf/view
 
-define( [ "module", "vwf/view" ], function( module, view ) {
+define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
 
     return view.load( module, {
 
@@ -39,7 +39,53 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         initialize: function() {
             window.vwf_view = this;
         },
-        
+
+        // == Model API ============================================================================
+
+        createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+                childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+
+            var self = this;
+
+            // At the root node of the application, load the UI chrome if available.
+
+            if ( childID == this.kernel.application() && childURI &&
+                    utility.resolveURI( childURI ).match( /^https?:/ ) ) {
+
+                // Suspend the queue.
+
+                callback( false );
+
+                // Load the file and insert it into the main page.
+
+                var container = jQuery( "body" ).append( "<div />" ).children( ":last" );
+
+                container.load( childURI + ".html", function( responseText, textStatus ) {
+
+                    // Did the overlay attach a `createdNode` handler? If so, forward this first
+                    // call since it missed it.
+
+                    if ( self.createdNode !== Object.getPrototypeOf( self ).createdNode ) {
+                        self.createdNode( nodeID, childID, childExtendsID, childImplementsIDs,
+                            childSource, childType, childURI, childName );
+                    }
+
+                    // Remove the container div on error.
+
+                    if ( textStatus != "success" && textStatus != "notmodified" ) {
+                        container.remove();
+                    }
+
+                    // Resume the queue.
+
+                    callback( true );
+
+                } );
+
+            }
+
+        },
+
     }, function( viewFunctionName ) {
 
         // == View API =============================================================================

@@ -1438,16 +1438,6 @@
                     } );
                 }
 
-                // Load the UI chrome if available.
-
-                if ( nodeURI && ! nodeURI.match( /^data:/ ) ) {  // TODO: normalizedComponent() on component.extends and use component.extends || component.source?
-if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  // TODO: any better way to only attempt to load chrome for the main application and not the prototypes?
-                    jQuery("body").append( "<div />" ).children( ":last" ).load( remappedURI( nodeURI ) + ".html", function() {  // TODO: move to vwf/view/document#initializedNode; don't reach out to the window from the kernel; connect through a future vwf.initialize callback.
-                        $('#loadstatus').remove(); // remove 'loading' overlay
-                    } );
-}
-                }
-
             } );
 
             this.logger.debugu();
