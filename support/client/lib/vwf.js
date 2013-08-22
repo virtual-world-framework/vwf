@@ -665,6 +665,10 @@
                     resource: window.location.pathname.slice( 1,
                         window.location.pathname.lastIndexOf("/") ),
 
+                    // Use a secure connection when the application comes from https.
+
+                    secure: window.location.protocol === "https:",
+
                     // The ruby socket.io server only supports WebSockets. Don't try the others.
 
                     transports: [
