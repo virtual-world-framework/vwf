@@ -2133,10 +2133,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         walkGraph( nodein, function( node ) {
             if(node.material) {
 			
-			  if(!materialMap[node.material])
-				materialMap[node.material] = [];
+			  if(!materialMap[node.material.uuid])
+				materialMap[node.material.uuid] = [];
 			
-			  materialMap[node.material].push(node);
+			  materialMap[node.material.uuid].push(node);
               
             }
         });
