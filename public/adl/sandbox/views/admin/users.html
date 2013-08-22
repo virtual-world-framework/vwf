@@ -48,15 +48,15 @@
 	
 	$.post('{{root}}/data/get_users', function(o){
 		o = JSON.parse(o);
-		console.log(o);
-		for(var i in o){
-			if(!o[i]){
-				o.splice(i);
+		var newObject = [];
+		
+		for(var i = 0; i < o.length; i++){
+			if(o[i]){
+				newObject.push(o[i]);
 			}
 		}
-		
-		console.log(o);
-		vwfPortalModel.usersList(o);
+
+		vwfPortalModel.usersList(newObject);
 	});
 	
 	vwfPortalModel.deleteSelected = function(data){

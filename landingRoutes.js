@@ -79,6 +79,7 @@ exports.handlePostRequest = function(req, res, next){
 				res.end("done");
 			});
 			break;	
+			
 		case "delete_worlds":			
 			DAL.deleteInstances(data, function(){
 				res.end("done");
