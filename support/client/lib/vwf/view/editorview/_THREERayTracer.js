@@ -207,7 +207,7 @@ function distanceLineSegment(o,d,v1,v2,hitData)
 	var t = MATH.distanceVec3(v1,v2);
 	var v = MATH.toUnitVec3(MATH.subVec3(v2,v1));
 	var u = d;
-    var a = MATH.dotVec3(u,u);
+	var a = MATH.dotVec3(u,u);
 	var b = MATH.dotVec3(u,v);
 	var c = MATH.dotVec3(v,v);
 	
@@ -343,6 +343,50 @@ face.prototype.intersect1 = function(p,d)
 		 return null;
 
 }
+
+//p = [x,y,z] of center
+face.prototype.intersectSphere = function(P,r)
+{
+	var A = MATH.subVec3(this.v0 , P);
+	var B = MATH.subVec3(this.v1 , P);
+	var C = MATH.subVec3(this.v2 , P);
+	var rr = r * r;
+	var V = MATH.crossVec3(MATH.subVec3(B , A), MATH.subVec3(C , A));
+	var d = MATH.dotVec3(A, V);
+	var e = MATH.dotVec3(V, V);
+	var sep1 = d * d > rr * e;
+	var aa = MATH.dotVec3(A, A);
+	var ab = MATH.dotVec3(A, B);
+	var ac = MATH.dotVec3(A, C);
+	var bb = MATH.dotVec3(B, B);
+	var bc = MATH.dotVec3(B, C);
+	var cc = MATH.dotVec3(C, C);
+	var sep2 = (aa > rr) && (ab > aa) && (ac > aa);
+	var sep3 = (bb > rr) && (ab > bb) && (bc > bb);
+	var sep4 = (cc > rr) && (ac > cc) && (bc > cc);
+	var AB = MATH.subVec3(B , A);
+	var BC = MATH.subVec3(C , B);
+	var CA = MATH.subVec3(A , C);
+	var d1 = ab - aa;
+	var d2 = bc - bb;
+	var d3 = ac - cc;
+	var e1 = MATH.dotVec3(AB, AB);
+	var e2 = MATH.dotVec3(BC, BC);
+	var e3 = MATH.dotVec3(CA, CA);
+	var Q1 = MATH.subVec3(MATH.scaleVec3(A , e1) , MATH.scaleVec3(AB,d1));
+	var Q2 = MATH.subVec3(MATH.scaleVec3(B , e2) , MATH.scaleVec3(BC,d2));
+	var Q3 = MATH.subVec3(MATH.scaleVec3(C , e3) , MATH.scaleVec3(CA,d3));
+	var QC = MATH.subVec3(MATH.scaleVec3(C , e1) , Q1);
+	var QA = MATH.subVec3(MATH.scaleVec3(A , e2) , Q2);
+	var QB = MATH.subVec3(MATH.scaleVec3(B , e3) , Q3);
+	var sep5 = (MATH.dotVec3(Q1, Q1) > rr * e1 * e1) && (MATH.dotVec3(Q1, QC) > 0);
+	var sep6 = (MATH.dotVec3(Q2, Q2) > rr * e2 * e2) && (MATH.dotVec3(Q2, QA) > 0);
+	var sep7 = (MATH.dotVec3(Q3, Q3) > rr * e3 * e3) && (MATH.dotVec3(Q3, QB) > 0);
+	var separated = sep1 | sep2 | sep3 | sep4 | sep5 | sep6 | sep7;
+	return !separated;
+}
+
+
 // for meshes that are few polys, just create a list of faces
 function SimpleFaceListRTAS(faces,verts)
 {

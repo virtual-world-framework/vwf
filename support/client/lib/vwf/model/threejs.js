@@ -1262,10 +1262,29 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
           //There is not three object for this node, so there is nothing this driver can do. return
           if(!threeObject) return value;    
           
+	      if(node && node.threeScene)
+              {
+		if(propertyName == 'cameraPosition')
+		{	
+			
+			var mat = node.camera.threeJScameras[node.camera.defaultCamID].matrixWorld;
+			var x = mat.elements[12];
+			var y = mat.elements[13];
+			var z = mat.elements[14];
+			return [x,y,z];
+		}
+	      }	      
               if ( node && threeObject ) 
               {
                 if(threeObject instanceof THREE.Object3D)
                 {
+		    if(propertyName == 'worldPosition')
+                    {
+			var x = threeObject.matrixWorld.elements[12];
+			var y = threeObject.matrixWorld.elements[13];
+			var z = threeObject.matrixWorld.elements[14];
+			return [x,y,z];
+		    }
                     if(propertyName == 'transform')
                     {
                         

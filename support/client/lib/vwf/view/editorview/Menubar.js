@@ -12,13 +12,14 @@ define(
 	initialize: function ()
 	{
 		//$(document.body).append('');
-		ddsmoothmenu.init(
+		window.menus = ddsmoothmenu.init(
 		{
 			mainmenuid: "smoothmenu1", //menu DIV id
 			orientation: 'h', //Horizontal or vertical menu: Set to "h" or "v"
 			classname: 'ddsmoothmenu', //class added to menu's outer DIV
 			//customtheme: ["#1c5a80", "#18374a"],
-			contentsource: "markup" //"markup" or ["container_id", "path_to_menu_file"]
+			contentsource: "markup", //"markup" or ["container_id", "path_to_menu_file"]
+			method: 'hover'
 		});
 		//make the menu items disappear when you click one
 		//$(".ddsmoothmenu").find('li').click(function(){$(".ddsmoothmenu").find('li').trigger('mouseleave');});
@@ -654,6 +655,10 @@ define(
 		{
 			_LocationTools.MoveToGround();
 		});
+		list = $('#smoothmenu1').find('[id]');
+		
+		//make every clicked menu item close all menus
+		 $('#smoothmenu1').find('[id]').filter(':only-child').click(function(){ddsmoothmenu.closeall({type:'click',target:'asd'})});
 		
 	}
 });

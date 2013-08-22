@@ -410,6 +410,10 @@ properties:
   lookAt: ""
   visible: true
 methods:
+  playSound:
+  pauseSound:
+  stopSound:
+  deleteSound:
   # Translate by translation over duration.
   translateBy:
     parameters:
