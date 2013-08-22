@@ -12,6 +12,14 @@
 // the License.
 
 ( function () { 
+
+    // Only patch if running Socket.io version 0.6.3, i.e. Ruby server
+
+	if (io.version !=="0.6.3") {
+	    return;
+    }
+
+
 	var transport = io.Transport;
 	var transports = [ transport, transport.websocket, transport.flashsocket ];
 
