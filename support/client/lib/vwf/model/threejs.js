@@ -3647,7 +3647,26 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             for(var i =0; i < newnode.children.length;i++)
                 ApplyMaterial(newnode.children[0],newmaterial);
         }   
-    }   
+    }
+    function isIdentityMatrix( elements ) {
+        if ( ( elements.length == 16 ) || ( elements.length == 9 ) ) {
+          var modNumber = Math.sqrt( elements.length ) + 1;
+          for ( var index = 0; index < elements.length; index++ ) {
+              if ( ( index % modNumber ) == 0 ) {
+                  if ( elements[ index ] != 1 ) {
+                      return false;
+                  }
+              }
+              else {
+                  if ( elements[ index ] != 0 ) {
+                      return false;
+                  }
+              }
+          }
+          return true;
+        }
+        return false;
+    }
     function ParseSceneGraph(node, texture_load_callback) {
         
         var newnode;
