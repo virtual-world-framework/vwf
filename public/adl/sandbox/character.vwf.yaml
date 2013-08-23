@@ -469,8 +469,10 @@ scripts:
              this.updatecounter = 0;
           }
           
-       
-      
+        
+        var spc = _dScene.SphereCast([finalt[0],finalt[1],finalt[2]+1.0],.25,{ignore:[this.skin]});
+        if(spc.length)
+            finalt = backupt;
         this.skin.PickPriority = 1;
         this.tbak = finalt;
         this.translation = finalt;
