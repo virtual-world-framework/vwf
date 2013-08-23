@@ -2165,21 +2165,45 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 	
         walkGraph( nodein, function( node ) {
             if(node.material) {
-			
-			  if(!materialMap[node.material.uuid])
-				materialMap[node.material.uuid] = [];
-			
-			  materialMap[node.material.uuid].push(node);
-              
+                if ( node.material instanceof THREE.Material ) {
+                    if(!materialMap[node.material.uuid]) {
+                				materialMap[node.material.uuid] = [];
+                    }
+			       			  materialMap[node.material.uuid].push( [ node, -1 ] );
+                }
+                else if ( node.material instanceof THREE.MeshFaceMaterial ) {
+                    if ( node.material.materials ) {
+                        for ( var index = 0; index < node.material.materials.length; index++ ) {
+                            if ( node.material.materials[ index ] instanceof THREE.Material ) {
+                                if(!materialMap[node.material.uuid]) {
+                				            materialMap[node.material.uuid] = [];
+                                }
+			       	            		  materialMap[node.material.uuid].push( [ node, index ] );
+                            }
+                        }
+                    }
+                }              
             }
         });
 		
-		for(var i in materialMap)
-		{
-			var newmat = materialMap[i][0].material.clone();
-			for(var j =0; j < materialMap[i].length; j++)
-				materialMap[i][j].material = newmat;
-		}
+		    for(var i in materialMap)
+    		{
+		    	  var newmat;
+            if ( materialMap[ i ][ 0 ][ 1 ] < 0 ) {
+                newmat = materialMap[ i ][ 0 ][ 0 ].material.clone( );
+            }
+            else {
+                newmat = materialMap[ i ][ 0 ][ 0 ].material.materials[ materialMap[ i ][ 0 ][ 1 ] ].clone( );
+            }
+			      for ( var j =0; j < materialMap[i].length; j++ ) {
+                if ( materialMap[ i ][ j ][ 1 ] < 0 ) {
+    			     	    materialMap[ i ][ j ][ 0 ].material = newmat;
+                }
+                else {
+                    materialMap[ i ][ j ][ 0 ].material.materials[ materialMap[ i ][ j ][ 1 ] ] = newmat;
+                }
+            }
+		    }
     }
 
     function loadAsset( parentNode, node, childType, propertyNotifyCallback ) {
