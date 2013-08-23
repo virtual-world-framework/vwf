@@ -15,6 +15,9 @@
         case "title":
           $("#doc-title").val(propertyValue);
           break;
+        case "savename":
+          $("#doc-savename").text(propertyValue);
+          break;
       }
     }
   }
@@ -36,6 +39,7 @@
 
     vwf_view.kernel.getProperty(vwf_view.kernel.find('', '/editor'), 'content');
     vwf_view.kernel.getProperty(vwf_view.kernel.find('', '/editor'), 'title');
+    vwf_view.kernel.getProperty(vwf_view.kernel.find('', '/editor'), 'savename');
 
     $('#doc-content').on('input propertychange', function() {
       console.log("I changed content to: " + $(this).val());
@@ -72,6 +76,7 @@
           Eric Burns
         </li>
       </ul>
+      <small id="save-id">SAVENAME: <span id="doc-savename">5678</span></small>
     </div>
   </div>
 </div>
