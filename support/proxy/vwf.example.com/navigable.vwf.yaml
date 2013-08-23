@@ -27,6 +27,14 @@ properties:
 
   navmode: "fly"
 
+  ## Touch mode. Default value is 'look'.  Other options include 'orbit' and 'none.' 
+  ## This value determines what default behavior a drag gesture will have.
+  ## 
+  ## @name navigable.vwf#navmode
+  ## @property
+
+  touchmode: "look"
+
   ## Speed at which the object translates in units per second
   ## 
   ## @name navigable.vwf#translationSpeed

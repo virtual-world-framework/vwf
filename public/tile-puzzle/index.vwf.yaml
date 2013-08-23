@@ -594,6 +594,7 @@ scripts:
                                  0.089, 32.294, 69.995, 1 ];
       this.camera.near = 1;
       this.camera.navmode = "none";
+      this.camera.touchmode = "none";
     }
 
     this.shuffle = function() {
