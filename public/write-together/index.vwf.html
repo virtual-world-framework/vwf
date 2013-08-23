@@ -52,6 +52,21 @@
       var editorNodeId = vwf_view.kernel.find('', '/editor');
       vwf_view.kernel.setProperty( editorNodeId[0], "title", $(this).val());
     });
+
+    $('#doc-save').click(function() {
+      console.log("I saved the doc");
+      var saveName = $("#doc-savename").text();
+
+      // Show and hide the list user list in order to kick off the dynamic build of the save / load controls
+      $.fx.off = true; // Turn off FX so we don't get any animations
+      $('#userlist').click();
+      $('#x').click();
+      $.fx.on = false; // Turn back on FX
+
+      // Stuff the filename in the box and force a click to submit the save
+      $('#fileName').val(saveName);
+      $('#save').click();
+    });
   });
 </script>
 
@@ -60,6 +75,7 @@
     <div class="span8">
       <a href="/write-together/list.html" class="close" data-toggle="tooltip" title="Return to Document List">&times;</a>
       <input id="doc-title" type="text" placeholder="Document title">
+      <button id="doc-save" class="btn btn-primary">Save</button>
     </div>
   </div>
   <div class="row-fluid">
