@@ -382,7 +382,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName ) {
-
+            var myNode = this.state.nodes[childID];
+            if ( myNode ) {
+              if ( myNode.threeObject ) {
+                if ( ! ( myNode.threeMaterial ) ) {
+                  generateNodeMaterial.call( this, childID, myNode );//Potential node, need to do node things!
+                }
+              }
+            }
             if ( this.debug.initializing ) {
                 this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             } 
@@ -1913,57 +1920,83 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
         return ret;
     }
-    //do a depth first search of the children, return the first material
-    function GetMaterial(threeObject, optionalName)
-    {
-        var potentialResult = undefined;
-        //something must be pretty seriously wrong if no threeobject
-        if(!threeObject)
-        {
-            return null;
-        }        
-        if(threeObject && threeObject.material) {
-            if ( threeObject.material instanceof THREE.Material ) {
-                if ( ( optionalName == undefined ) || ( threeObject.material.name == optionalName ) ) {
-                    return threeObject.material;
-                }
-                else if ( potentialResult == undefined ) {
-                    potentialResult = threeObject.material;
-                }
+    
+    function GetAllMaterials( threeObject ) {
+        var result = [];
+        var resultUUID = [];
+        if ( !threeObject ) {
+          return result;
+        }
+        if ( threeObject && threeObject.material ) {
+            if ( ( threeObject.material instanceof THREE.Material ) && ( resultUUID.indexOf( threeObject.material.uuid ) < 0 ) ) {
+                result.push( threeObject.material );
+                resultUUID.push( threeObject.material.uuid );
             }
-            else if ( threeObject.material instanceof THREE.MeshFaceMaterial ) {
-                if ( threeObject.material.materials ) {
-                    for ( var i = 0; i < threeObject.material.materials.length; i++ ) {
-                        if ( threeObject.material.materials[ i ] instanceof THREE.Material ) {
-                            if ( ( optionalName == undefined ) || ( threeObject.material.materials[ i ].name == optionalName ) ) {
-                                return threeObject.material.materials[ i ];
-                            }
-                            else if ( potentialResult == undefined ) {
-                                potentialResult = threeObject.material.materials[ i ];
-                            }
-                        }
+        }
+        else if ( threeObject.material instanceof THREE.MeshFaceMaterial ) {
+            if ( threeObject.material.materials ) {
+                for ( var index = 0; index < threeObject.material.materials.length; index++ ) {
+                    if ( ( threeObject.material.materials[ index ] instanceof THREE.Material ) && ( resultUUID.indexOf( threeObject.material.materials[ index ].uuid ) < 0 ) ) {
+                        result.push( threeObject.material.materials[ index ] );
+                        resultUUID.push( threeObject.material.materials[ index ].uuid );
                     }
                 }
             }
         }
-        if(threeObject.children)
-        {
-            var ret = null;
-            for(var i=0; i < threeObject.children.length; i++)
-            {
-                ret = GetMaterial(threeObject.children[i], optionalName);
-                if ( ret ) {
-                    if ( ( optionalName == undefined ) || ( ret.name == optionalName ) ) {
-                        return ret;
-                    }
-                    else if ( potentialResult == undefined ) {
-                        potentialResult = ret;
+        
+        if ( threeObject && threeObject.children ) {
+            for ( var index = 0; index < threeObject.children.length; index++ ) {
+                var childrenMaterials = GetAllMaterials( threeObject.children[ index ] );
+                for ( var subindex = 0; subindex < childrenMaterials.length; subindex++ ) {
+                    if ( resultUUID.indexOf( childrenMaterials[ subindex ].uuid ) < 0 ) {
+                        result.push( childrenMaterials[ subindex ] );
+                        resultUUID.push( childrenMaterials[ subindex ].uuid );
                     }
                 }
-            }               
-        }       
-        if ( potentialResult != undefined ) {
-            return potentialResult;
+            }
+        }
+        return result;
+    }
+    //do a depth first search of the children, return the first material
+    function GetMaterial(threeObject, optionalName)
+    {        
+        //something must be pretty seriously wrong if no threeobject
+        if(!threeObject)
+        {
+            return null;
+        }
+        var allMaterialChildren = GetAllMaterials( threeObject );
+                
+        if ( optionalName ) {
+            var regExResult = optionalName.match(/^material_\d+_/);
+            if ( regExResult ) {
+                var updatedName = optionalName.slice( regExResult[ 0 ].length );
+                var firstMatch = undefined;
+                var nameIndex = parseInt( optionalName.slice( 9, regExResult[ 0 ].length - 1 ) );
+                var foundIndex = 0;
+                for ( var index = 0; index < allMaterialChildren.length; index++ ) {
+                    if ( allMaterialChildren[ index ].name == updatedName ) {
+                        if ( ! firstMatch ) {
+                            firstMatch = allMaterialChildren[ index ];
+                        }
+                        foundIndex++;
+                        if ( foundIndex == nameIndex ) {
+                            return allMaterialChildren[ index ];
+                        }
+                    }
+                }
+                if ( firstMatch ) {
+                    return firstMatch;
+                }
+            }
+            for ( var index = 0; index < allMaterialChildren.length; index++ ) {
+                if ( allMaterialChildren[ index ].name == optionalName ) {
+                    return allMaterialChildren[ index ];
+                }
+            }
+        }
+        if ( allMaterialChildren.length > 0 ) {
+            return allMaterialChildren[ 0 ];
         }
         return null;
     }
@@ -3841,7 +3874,74 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
     return data;
     }
+    
+    function isUUIDinArray( value, arrayToCheck ) {
+        for ( var index = 0; index < arrayToCheck.length; index++ ) {
+            if ( value.uuid == arrayToCheck[ index ].uuid ) {
+                return true;
+            }
+        }
+        return false;
+    }
+    function threeMaterialsFromIDs( nodeIDs ) {
+        var result = [];
+        for ( var index = 0; index < nodeIDs.length; index++ ) {
+            var node = this.state.nodes[ nodeIDs[ index ] ];
+            if ( node ) {
+                if ( node.threeMaterial ) {
+                    result.push( node.threeMaterial );
+                }
+            }
+        }
+        return result;
+    }
+    function createInheritedMaterial( parentID, threeObject, name ) {
+        var nodeName = "material";
+        if ( name ) {
+            nodeName = name;
+        }
+        else if ( threeObject.name.length > 0 ) {
+            nodeName = threeObject.name;
+        }
+        var newNode = { 
+            "id": nodeName,
+            "uri": nodeName,
+            "extends": "http://vwf.example.com/material.vwf",
+            "properties": { 
+                "private": null,
+            },
+            "methods": {
+            },
+            "scripts": []
+        };
+        vwf.createChild( parentID, nodeName, newNode);
+        
+    }
+    function generateNodeMaterial( nodeID, node ) {
+        if ( false ) {
+            if ( node.threeObject instanceof THREE.Object3D ) {
+                var representedMaterialsVWF = vwf.find( nodeID, "./element(*,'http://vwf.example.com/material.vwf')" );
+                var representedMaterialsThreeJS = threeMaterialsFromIDs.call( this, representedMaterialsVWF );
+                var allChildrenMaterials = GetAllMaterials( node.threeObject );
 
+                var nameTallys = {};
+
+                for ( var index = 0; index < allChildrenMaterials.length; index ++ ) {
+                    if ( nameTallys[ allChildrenMaterials[ index ].name ] ) {
+                        nameTallys[ allChildrenMaterials[ index ].name ] = nameTallys[ allChildrenMaterials[ index ].name ] + 1;
+                    }
+                    else {
+                        nameTallys[ allChildrenMaterials[ index ].name ] = 1;
+                    }
+                    if ( ! isUUIDinArray( allChildrenMaterials[ index ], representedMaterialsThreeJS ) ) {
+                        var newName = "material_" + nameTallys[ allChildrenMaterials[ index ].name ] + "_" + allChildrenMaterials[ index ].name;
+                        createInheritedMaterial.call( this, nodeID, allChildrenMaterials[ index ], newName );
+                    }
+                }                
+            }
+        }
+
+    }
     function decompress(dataencoded)
     {
         blobsfound = 0;
