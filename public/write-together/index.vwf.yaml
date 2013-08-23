@@ -5,3 +5,9 @@ children:
     properties:
       content: ""
       title: ""
+      savename: 0
+scripts:
+- |
+  this.initialize = function() {
+    this.editor.savename = Math.random().toString().split(".")[1];
+  }
