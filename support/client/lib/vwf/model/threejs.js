@@ -1932,13 +1932,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 result.push( threeObject.material );
                 resultUUID.push( threeObject.material.uuid );
             }
-        }
-        else if ( threeObject.material instanceof THREE.MeshFaceMaterial ) {
-            if ( threeObject.material.materials ) {
-                for ( var index = 0; index < threeObject.material.materials.length; index++ ) {
-                    if ( ( threeObject.material.materials[ index ] instanceof THREE.Material ) && ( resultUUID.indexOf( threeObject.material.materials[ index ].uuid ) < 0 ) ) {
-                        result.push( threeObject.material.materials[ index ] );
-                        resultUUID.push( threeObject.material.materials[ index ].uuid );
+            else if ( threeObject.material instanceof THREE.MeshFaceMaterial ) {
+                if ( threeObject.material.materials ) {
+                    for ( var index = 0; index < threeObject.material.materials.length; index++ ) {
+                        if ( ( threeObject.material.materials[ index ] instanceof THREE.Material ) && ( resultUUID.indexOf( threeObject.material.materials[ index ].uuid ) < 0 ) ) {
+                            result.push( threeObject.material.materials[ index ] );
+                            resultUUID.push( threeObject.material.materials[ index ].uuid );
+                        }
                     }
                 }
             }
@@ -2160,8 +2160,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     //walk the graph of an object, and set all materials to new material clones
     function cloneMaterials( nodein ) {
 	
-		//sort the materials in the model, and when cloneing, make the new model share the same material setup as the old.
-		var materialMap = {};
+		    //sort the materials in the model, and when cloneing, make the new model share the same material setup as the old.
+	    	var materialMap = {};
 	
         walkGraph( nodein, function( node ) {
             if(node.material) {
@@ -2175,10 +2175,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if ( node.material.materials ) {
                         for ( var index = 0; index < node.material.materials.length; index++ ) {
                             if ( node.material.materials[ index ] instanceof THREE.Material ) {
-                                if(!materialMap[node.material.uuid]) {
-                				            materialMap[node.material.uuid] = [];
+                                if(!materialMap[node.material.materials[ index ].uuid]) {
+                				            materialMap[node.material.materials[ index ].uuid] = [];
                                 }
-			       	            		  materialMap[node.material.uuid].push( [ node, index ] );
+			       	            		  materialMap[node.material.materials[ index ].uuid].push( [ node, index ] );
                             }
                         }
                     }
