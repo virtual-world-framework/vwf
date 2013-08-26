@@ -1,5 +1,5 @@
 body {
-  color: #333;
+  color: #444;
   background-color: #f1f1f1;
 }
 
@@ -67,3 +67,23 @@ ul#collaborator-list li {
 #save-id {
   color: #ccc;
 }
+
+h2.app-name {
+  text-transform: uppercase;
+  color: #ccc;
+}
+
+.table thead th {
+  text-transform: uppercase;
+  color: #ccc;
+}
+
+.table td.title {
+  font-weight: 700;
+}
+
+.table td.last-saved {
+  font-size: 85%;
+  color: #666;
+}
+
