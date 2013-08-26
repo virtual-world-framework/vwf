@@ -92,6 +92,10 @@ var vwfPortalModel = new function(){
 		selectAll = !selectAll;
 		return true;
 	};
+	
+	self.setSelectAll = function(val){
+		selectAll = val;
+	};
 };
 
 function checkFilter(textArr){

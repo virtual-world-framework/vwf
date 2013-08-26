@@ -76,7 +76,8 @@
 			}
 		});
 		console.log("Delete users ", tempUserArr);
-		$('input:checked').click();
+		$('input').prop("checked", false);
+		vwfPortalModel.setSelectAll(false);
 	}; 
 	
 	var handleHash = function(){
