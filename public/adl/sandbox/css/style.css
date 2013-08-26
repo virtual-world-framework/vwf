@@ -235,10 +235,15 @@ height:315px;
 {
 	display: block;
 	border-top: 1px solid #eee;
-	margin-top: 20px;
+	margin-top: 9px;
 	width:100%;
 	color: gray;
-	padding-top: 10px;
+}
+
+.boxContentWrapper{
+	height: 96px;
+	overflow:hidden;
+	max-height:96px;
 }
 
 .editstateGuest{
