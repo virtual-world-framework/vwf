@@ -370,7 +370,7 @@ scripts:
                 motionvec = motionvec ? MATH.toUnitVec3(motionvec) : [0,0,0];
                 var testpos = MATH.subVec3(finalt,MATH.scaleVec3(motionvec,-.15));
                 
-                var intersectfront = _SceneManager.CPUPick(MATH.addVec3(testpos,[0,0,1]),motionvec,{filter:function(o){return !(o.isAvatar === true || o.passable===true)},maxDist: 100,ignore:[this.skin,_Editor.GetMoveGizmo()]});
+                /*var intersectfront = _SceneManager.CPUPick(MATH.addVec3(testpos,[0,0,1]),motionvec,{filter:function(o){return !(o.isAvatar === true || o.passable===true)},maxDist: 100,ignore:[this.skin,_Editor.GetMoveGizmo()]});
                 if(intersectfront)
                 {
                     if(intersectfront.distance < .3)
@@ -389,7 +389,7 @@ scripts:
                         
                         finalt = MATH.addVec3(finalt,R);
                     }
-                }
+                }*/
                 var falldist = 1000;
                
                 var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,1.7]),[0,0,-1],{filter:function(o){ return !(o.isAvatar === true || o.passable === true)},maxDist: 100,ignore:[this.skin,_Editor.GetMoveGizmo()]});
@@ -470,9 +470,51 @@ scripts:
           }
           
         
-        var spc = _dScene.SphereCast([finalt[0],finalt[1],finalt[2]+1.0],.25,{ignore:[this.skin]});
+        var spc = _SceneManager.SphereCast([finalt[0],finalt[1],finalt[2]+1.0],.5,{ignore:[this.skin]});
+        //if the character intersected something (as defined by the sphere)
         if(spc.length)
-            finalt = backupt;
+        {
+           
+            //find the motion vector
+            var offset = MATH.subVec3(finalt , backupt);
+            var len = MATH.lengthVec3(offset);
+            var normal = [0,0,0];
+            
+            //average the normals of all contacts
+            for(var i = 0; i < spc.length; i++)
+                normal = MATH.addVec3(normal,spc[i].norm);
+            normal = MATH.scaleVec3(normal,1.0/spc.length);
+            normal[2] = 0;
+            normal = MATH.toUnitVec3(normal);
+            
+            //if moving into the contact
+            if(MATH.dotVec3(MATH.toUnitVec3(offset),normal) > 0)
+            {
+            // normal = MATH.scaleVec3(normal,-len);
+            var up = [0,0,1];
+            var side = MATH.crossVec3(normal,up);
+            
+            //build a coord system with the normal as the x
+            var collisioncoord = [
+            normal[0],normal[1],normal[2], 0,
+            side[0],side[1],side[2], 0,
+            up[0],up[1],up[2], 0,
+            0,0,0,1
+            ];
+            
+            //put motion vector into this system
+            var cc_offset = MATH.mulMat4Vec3(collisioncoord,offset);
+            
+            //remove motion relative to normal of contact
+            cc_offset[0] = 0;
+            
+            //move back to world space
+            cc_offset = MATH.mulMat4Vec3(MATH.transposeMat4(collisioncoord),cc_offset);
+            
+            //add offset to original position
+            finalt = MATH.addVec3(backupt,cc_offset);
+            }
+        }
         this.skin.PickPriority = 1;
         this.tbak = finalt;
         this.translation = finalt;

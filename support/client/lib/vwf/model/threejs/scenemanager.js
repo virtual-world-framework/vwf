@@ -114,7 +114,21 @@ SceneManager.prototype.FrustrumCast = function(f,opts)
 	}
 	
 	return hitlist;
-}	
+}
+SceneManager.prototype.SphereCast = function(center,r,opts)
+{
+	//console.profile("PickProfile");
+
+	var hitlist = this.root.SphereCast(center,r,opts || new THREE.CPUPickOptions());
+	for(var i = 0; i < this.specialCaseObjects.length; i++)
+	{
+		var childhits = this.specialCaseObjects[i].SphereCast(center,r,opts || new THREE.CPUPickOptions());
+		if(childhits)
+			hitlist = hitlist.concat(childhits);
+	}
+	
+	return hitlist;
+}		
 SceneManager.prototype.dirtyObjects = [];
 SceneManager.prototype.setDirty = function(object)
 {
@@ -818,7 +832,47 @@ SceneManagerRegion.prototype.FrustrumCast = function(frustrum,opts)
 	return hits;
 }
 
+//Test a ray against an octree region
+SceneManagerRegion.prototype.SphereCast = function(center,r,opts)
+{
+	
+	var hits = [];
+	//if no faces, can be no hits. 
+	//remember, faces is all faces in this node AND its children
+	if(this.getChildCount().length == 0)
+		return hits;
+		
+	//reject this node if the ray does not intersect it's bounding box
+	if(this.testBoundsSphere(center,r).length == 0)
+		return hits;
+	
+	//the the opts specify a max dist
+	//if the start is not in me, and im to far, don't bother with my children or my objcts
+	if(opts.maxDist > 0 && this.r + MATH.distanceVec3(o,this.c) > opts.maxDist)
+	{
+		if(!this.contains(o))
+			return hits;
+	}	
+	
+	//check either this nodes faces, or the not distributed faces. for a leaf, this will just loop all faces,
+	//for a non leaf, this will iterate over the faces that for some reason are not in children, which SHOULD be none
+	for(var i = 0; i < this.childRegions.length; i++)
+	{
+		var childhits = this.childRegions[i].SphereCast(center,r,opts);
+		if(childhits)
+			hits = hits.concat(childhits);
+	}
+	for(var i = 0; i < this.childObjects.length; i++)
+	{
+		var childhits = this.childObjects[i].SphereCast(center,r,opts);
+		if(childhits)
+			hits = hits.concat(childhits);
+	}
+	return hits;
+}
+
 SceneManagerRegion.prototype.testBoundsRay = BoundingBoxRTAS.prototype.intersect;
+SceneManagerRegion.prototype.testBoundsSphere = BoundingBoxRTAS.prototype.intersectSphere;
 SceneManagerRegion.prototype.intersect = BoundingBoxRTAS.prototype.intersect;
 SceneManagerRegion.prototype.testBoundsFrustrum = BoundingBoxRTAS.prototype.intersectFrustrum;
 

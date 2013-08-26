@@ -383,7 +383,13 @@ face.prototype.intersectSphere = function(P,r)
 	var sep6 = (MATH.dotVec3(Q2, Q2) > rr * e2 * e2) && (MATH.dotVec3(Q2, QA) > 0);
 	var sep7 = (MATH.dotVec3(Q3, Q3) > rr * e3 * e3) && (MATH.dotVec3(Q3, QB) > 0);
 	var separated = sep1 | sep2 | sep3 | sep4 | sep5 | sep6 | sep7;
-	return !separated;
+	if(!separated)
+	{
+		return {norm:this.norm,face:this};
+	
+	}
+	return null;
+
 }
 
 function testSphereTriPerf()
@@ -1542,10 +1548,14 @@ THREE.Object3D.prototype.SphereCast = function(center,r,options)
 				{	
 					//move the normal and hit point into worldspace
 					
-					ret[i] = {};
+					
 					mat2[3] = 0;
 					mat2[7] = 0;
 					mat2[11] = 0;
+					//ret[i].point = MATH.mulMat4Vec3(mat2,ret[i].point);
+					ret[i].norm = MATH.mulMat4Vec3(mat2,ret[i].norm);
+					ret[i].norm = MATH.scaleVec3(ret[i].norm,1.0/MATH.lengthVec3(ret[i].norm));
+				//	ret[i].distance = MATH.distanceVec3([0,0,0],ret[i].point);
 					ret[i].object = this;
 					ret[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
 				}
