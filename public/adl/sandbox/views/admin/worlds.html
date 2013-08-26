@@ -10,14 +10,14 @@
 				<div class="usersList span4">
 					<table class="table table-striped" style="border: 1px solid #ddd;">
 						<tr>
-							<th style="border:none; background:#FFF"></th>
+							<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllBox" data-bind="click:handleSelectAll" /></th>
 							<th style="border:none; background:#FFF">Name</th>
 							<th style="border:none; background:#FFF">Owner</th>
 							<th style="border:none; background:#FFF">Objects</th>
 						</tr>
 						<tbody data-bind="foreach:worldObjects, style:{border:'none'}">
 						
-							<td><input type="checkbox" /></td>
+							<td><input type="checkbox" class="checkboxes" /></td>
 							<td><a data-bind="text:title, attr:{href:'#'+id}" href=""></a></td>
 							<td><a data-bind="text:owner, attr:{href:'{{root}}/admin/users#'+owner}" href=""></a></td>
 							<td><span data-bind="text:objects"></span></td>
@@ -30,12 +30,14 @@
 	<script>
 		vwfPortalModel.deleteSelected = function(data){
 			
-			var tempWorldArr = [], dataSendArr = [], tempStr = '';
-			for(var i = 0; i < $('input:checked').length; i++){
-				tempStr = ko.dataFor($('input:checked')[i]).id;
+			var tempWorldArr = [], dataSendArr = [], tempStr = '', cacheQuery = $('input:checked').not('#selectAllBox');
+			for(var i = 0; i < cacheQuery.length; i++){
+				tempStr = ko.dataFor(cacheQuery[i]).id;
 				
-				tempWorldArr.push(tempStr);
-				dataSendArr.push('_adl_sandbox_' + tempStr + '_');
+				if(tempStr){
+					tempWorldArr.push(tempStr);
+					dataSendArr.push('_adl_sandbox_' + tempStr + '_');
+				}
 			}
 			
 			//Make the request to the server to delete these users

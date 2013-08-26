@@ -11,11 +11,11 @@
 	<div class="usersList span4">
 		<table class="table table-striped" style="border: 1px solid #ddd;">
 			<tr>
-				<th style="border:none; background:#FFF"></th>
+				<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllBox" data-bind="click:handleSelectAll" /></th>
 				<th style="border:none; background:#FFF">Name</th>
 			</tr>
 			<tbody data-bind="foreach:usersList, style:{border:'none'}">
-				<td><input type="checkbox" /></td>
+				<td><input type="checkbox" class="checkboxes" /></td>
 				<td><a data-bind="text:$data.Username, attr:{href:'#'+$data.Username}" href=""></a></td>
 			</tbody>
 		</table>

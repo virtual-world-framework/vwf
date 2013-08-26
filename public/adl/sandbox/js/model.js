@@ -3,11 +3,7 @@
 //IE undefined console fix
 if (!window.console) console = {log: function() {}};
 		
-var filter = ''
-var root = '{{root}}';
-var pageIndex = 0;
-var pageLength = 12;
-var userNameFilter = '';
+var filter = '', root = '{{root}}', pageIndex = 0, pageLength = 12, userNameFilter = '', selectAll = false;
 var vwfPortalModel = new function(){
 	var self = this;
 	self.getShorterStr = function(a, length){
@@ -89,6 +85,12 @@ var vwfPortalModel = new function(){
 		if(($(e.relatedTarget).hasClass("editstatedata") ||  $(e.relatedTarget).hasClass("editstatedelete")) && e.type == "mouseout")
 			return;
 		obj.editVisible(e.type === "mouseover");
+	};
+
+	self.handleSelectAll = function(){
+		$('.checkboxes').prop('checked', !selectAll);
+		selectAll = !selectAll;
+		return true;
 	};
 };
 
