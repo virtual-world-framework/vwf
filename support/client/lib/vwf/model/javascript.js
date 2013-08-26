@@ -614,14 +614,17 @@ node.id = childID; // TODO: move to vwf/model/object
 				for(var i = 0; i < 7; i++) 
 				{
 					var func = ['pop','shift','slice','sort','splice','unshift','shift'][i];
-					watchable[func] = function()
+					
+					(function setupWatchableArrayVal(funcname){
+					watchable[funcname] = function()
 					{
 						var internal = this.internal_val;
 						
-						Array.prototype[func].apply(internal,arguments)
+						Array.prototype[funcname].apply(internal,arguments)
 						self.setWatchableValue(this.id,this.propertyname,this.internal_val,this.dotNotation);
 						self.setupWatchableArray(this,internal,this.propertyname,this.id,this.masterval,this.dotNotation);
 					}
+					})(func);
 				}
 				
 				Object.defineProperty(watchable,'length',{

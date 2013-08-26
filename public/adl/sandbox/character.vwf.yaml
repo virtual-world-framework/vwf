@@ -484,7 +484,7 @@ scripts:
             for(var i = 0; i < spc.length; i++)
                 normal = MATH.addVec3(normal,spc[i].norm);
             normal = MATH.scaleVec3(normal,1.0/spc.length);
-            normal[2] = 0;
+           // normal[2] = 0;
             normal = MATH.toUnitVec3(normal);
             
             //if moving into the contact
@@ -493,7 +493,7 @@ scripts:
             // normal = MATH.scaleVec3(normal,-len);
             var up = [0,0,1];
             var side = MATH.crossVec3(normal,up);
-            
+            up = MATH.crossVec3(normal,side);
             //build a coord system with the normal as the x
             var collisioncoord = [
             normal[0],normal[1],normal[2], 0,
@@ -513,6 +513,8 @@ scripts:
             
             //add offset to original position
             finalt = MATH.addVec3(backupt,cc_offset);
+            //move away on the normal, just for good measure
+            finalt = MATH.addVec3(finalt,MATH.scaleVec3(normal,-.001));
             }
         }
         this.skin.PickPriority = 1;
@@ -591,6 +593,7 @@ scripts:
     }
     this.removeMotion=function(m)
     {
+       
         if(this.motionStack.indexOf(m) == -1) return;
                this.motionStack.splice(this.motionStack.indexOf(m),1);
     }

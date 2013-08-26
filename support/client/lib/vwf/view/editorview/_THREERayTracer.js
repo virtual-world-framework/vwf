@@ -1392,7 +1392,7 @@ function Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr)
 	}
 }
 
-THREE.Object3D.prototype.FrustrumCast = function(frustrum,opts)
+THREE.Object3D.prototype.FrustrumCast = function(frustrum,options)
 {
 	  
 
@@ -1417,7 +1417,7 @@ THREE.Object3D.prototype.FrustrumCast = function(frustrum,opts)
 	  {
 		 if(this.children[i].FrustrumCast)
 		 {
-			 var hit = this.children[i].FrustrumCast(frustrum);
+			 var hit = this.children[i].FrustrumCast(frustrum,options);
 			 if(hit)
 			 {
 				for(var j =0; j<hit.length; j++)
@@ -1445,7 +1445,7 @@ THREE.Object3D.prototype.FrustrumCast = function(frustrum,opts)
 			if(this instanceof THREE.Mesh)
 			{
 				//collide with the mesh
-				ret = this.geometry.FrustrumCast(tfrustrum,opts);
+				ret = this.geometry.FrustrumCast(tfrustrum,options);
 				if(ret.length)
 					mat2 = this.getModelMatrix().slice(0);
 				for(var i = 0; i < ret.length; i++)

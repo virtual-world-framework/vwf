@@ -1147,7 +1147,7 @@ function compareMaterials(m1,m2)
 
 }
 
-
+_SceneManager.compareMaterials = compareMaterials;
 THREE.RenderBatchManager = function(scene,name)
 {
 	this.scene = scene;
