@@ -49,8 +49,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             // At the root node of the application, load the UI chrome if available.
 
-            if ( childID == this.kernel.application() && childURI &&
-                    utility.resolveURI( childURI ).match( /^https?:/ ) ) {
+            if ( childID == this.kernel.application() &&
+                    ( window.location.protocol == "http:" || window.location.protocol == "https:" ) ) {
 
                 // Suspend the queue.
 
@@ -60,19 +60,21 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                 var container = jQuery( "body" ).append( "<div />" ).children( ":last" );
 
-                container.load( childURI + ".html", function( responseText, textStatus ) {
+                container.load( "admin/chrome", function( responseText, textStatus ) {
 
-                    // Did the overlay attach a `createdNode` handler? If so, forward this first
-                    // call since it missed it.
+                    // If the overlay attached a `createdNode` handler, forward this first call
+                    // since the overlay will have missed it.
 
                     if ( self.createdNode !== Object.getPrototypeOf( self ).createdNode ) {
                         self.createdNode( nodeID, childID, childExtendsID, childImplementsIDs,
                             childSource, childType, childURI, childName );
                     }
 
-                    // Remove the container div on error.
+                    // Remove the container div if an error occurred or if we received an empty
+                    // result. The server sends an empty document when the application doesn't
+                    // provide a chrome file.
 
-                    if ( textStatus != "success" && textStatus != "notmodified" ) {
+                    if ( ! ( textStatus == "success" || textStatus == "notmodified" ) || responseText == "" ) {
                         container.remove();
                     }
 
