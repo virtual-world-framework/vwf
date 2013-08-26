@@ -1,6 +1,10 @@
-	<div class="row" style="margin-top:30px;">
+	<div class="row">
 		<div class="span3">
-			<h3>Worlds</h3>
+			<h3 data-bind="text:currentAdminItem() == false?'Worlds':currentAdminItem().title"></h3>
+		</div>
+	</div>
+	<div class="row" data-bind="visible:currentAdminItem() == false">
+		<div class="span3">
 			<a href="{{root}}/create">Create World</a><br/>
 			<a data-bind="click:deleteSelected" href="">Delete Selected</a><br/><br/>
 			<a href="{{root}}/admin">Admin Page</a>
@@ -15,7 +19,7 @@
 							<th style="border:none; background:#FFF">Owner</th>
 							<th style="border:none; background:#FFF">Objects</th>
 						</tr>
-						<tbody data-bind="foreach:worldObjects, style:{border:'none'}">
+						<tbody data-bind="foreach:adminDisplayList, style:{border:'none'}">
 						
 							<td><input type="checkbox" class="checkboxes" /></td>
 							<td><a data-bind="text:title, attr:{href:'#'+id}" href=""></a></td>
@@ -27,6 +31,27 @@
 			</div>
 		</div>
 	</div>
+<div class="row" data-bind="visible:currentAdminItem() != false">
+	<div class="span4">
+		<a href="#">View full list of worlds</a>
+	</div>
+	<div class="adminDisplayList span4">
+		<form> 
+			
+			<div style="height:50px;">
+				<span>Edit user name:</span>
+				<input type="text" style="float:right;" />			
+			</div>
+			<div>
+				<span>Change password:</span>
+				<input type="text"style="float:right;" /><br/>
+			</div>
+	
+		</form>
+		
+		Under construction..
+	</div>
+</div>
 	<script>
 		vwfPortalModel.deleteSelected = function(data){
 			
@@ -47,9 +72,9 @@
 			$.post('{{root}}/data/delete_worlds', JSON.stringify(dataSendArr), function(o){
 				
 				for(var i in tempWorldArr){
-					for(var g in vwfPortalModel.worldObjects()){
-						if(vwfPortalModel.worldObjects()[g].id == tempWorldArr[i]){
-							vwfPortalModel.worldObjects.splice(g, 1);
+					for(var g in vwfPortalModel.adminDisplayList()){
+						if(vwfPortalModel.adminDisplayList()[g].id == tempWorldArr[i]){
+							vwfPortalModel.adminDisplayList.splice(g, 1);
 						}
 					}
 				}
@@ -60,9 +85,18 @@
 			vwfPortalModel.setSelectAll(false);
 		}; 
 		
+		window.onhashchange = function(){handleHash("id");};
+		
 		$(document).ready(function(){	
 			
+			vwfPortalModel.adminDisplayList = vwfPortalModel.worldObjects;
 			ko.applyBindings(vwfPortalModel);
-			getLoginInfo(showStates);
+			getLoginInfo(showStates(
+				function(){
+					handleHash("id");
+				}
+			));
+			
+			
 		});
 	</script>

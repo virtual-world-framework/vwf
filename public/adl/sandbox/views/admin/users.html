@@ -1,31 +1,31 @@
 <div class="row">
 	<div class="span3">
-		<h3 data-bind="text:currentUser() == false?'Users':currentUser()"></h3>
+		<h3 data-bind="text:currentAdminItem() == false?'Users':currentAdminItem().Username"></h3>
 	</div>
 </div>
-<div class="row" data-bind="visible:currentUser() == false">
+<div class="row" data-bind="visible:currentAdminItem() == false">
 	<div class="span4">
 		<a data-bind="click:deleteSelected" href="">Delete Selected</a><br/><br/>
 		<a href="{{root}}/admin">Admin Page</a>
 	</div>
-	<div class="usersList span4">
+	<div class="adminDisplayList span4">
 		<table class="table table-striped" style="border: 1px solid #ddd;">
 			<tr>
 				<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllBox" data-bind="click:handleSelectAll" /></th>
 				<th style="border:none; background:#FFF">Name</th>
 			</tr>
-			<tbody data-bind="foreach:usersList, style:{border:'none'}">
+			<tbody data-bind="foreach:adminDisplayList, style:{border:'none'}">
 				<td><input type="checkbox" class="checkboxes" /></td>
 				<td><a data-bind="text:$data.Username, attr:{href:'#'+$data.Username}" href=""></a></td>
 			</tbody>
 		</table>
 	</div>
 </div>
-<div class="row" data-bind="visible:currentUser() != false">
+<div class="row" data-bind="visible:currentAdminItem() != false">
 	<div class="span4">
 		<a href="#">View full list of users</a>
 	</div>
-	<div class="usersList span4">
+	<div class="adminDisplayList span4">
 		<form> 
 			
 			<div style="height:50px;">
@@ -43,8 +43,7 @@
 	</div>
 </div>
 <script>
-	vwfPortalModel.usersList = ko.observableArray();
-	vwfPortalModel.currentUser = ko.observable(false); 
+
 	
 	$.post('{{root}}/data/get_users', function(o){
 		o = JSON.parse(o);
@@ -56,8 +55,8 @@
 			}
 		}
 
-		vwfPortalModel.usersList(newObject);
-		handleHash();
+		vwfPortalModel.adminDisplayList(newObject);
+		handleHash("Username");
 	});
 	
 	vwfPortalModel.deleteSelected = function(data){
@@ -72,7 +71,7 @@
 		$.post('{{root}}/data/delete_users', JSON.stringify(tempArr), function(o){
 			
 			for(var i in tempUserArr){
-				vwfPortalModel.usersList.remove(tempUserArr[i]);
+				vwfPortalModel.adminDisplayList.remove(tempUserArr[i]);
 			}
 		});
 		console.log("Delete users ", tempUserArr);
@@ -80,27 +79,9 @@
 		vwfPortalModel.setSelectAll(false);
 	}; 
 	
-	var handleHash = function(){
-	
-		var tmpHash = window.location.hash.replace("#", "");
-		if(tmpHash){
-			for(var i in vwfPortalModel.usersList()){
-				if(tmpHash == vwfPortalModel.usersList()[i].Username){
-					vwfPortalModel.currentUser(tmpHash, vwfPortalModel.usersList()[i].Username);
-					console.log(vwfPortalModel.usersList());
-					break;
-				}
-			}
-		}
-		
-		else vwfPortalModel.currentUser(false);
-	};
-	
-	window.onhashchange = handleHash;
+	window.onhashchange = function(){handleHash("Username");};
 	
 	$(document).ready(function(){	
-	
-		handleHash();
 		ko.applyBindings(vwfPortalModel);
 		getLoginInfo();
 	});

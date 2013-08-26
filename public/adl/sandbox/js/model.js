@@ -51,6 +51,8 @@ var vwfPortalModel = new function(){
 	self.worldObjects = ko.observableArray([]);
 	self.displayWorldObjects = ko.observableArray([]);
 	self.featuredWorldObjects = ko.observableArray([]);
+	self.adminDisplayList = ko.observableArray();
+	self.currentAdminItem = ko.observable(false); 
 	self.getNextPage = function(){
 		if(self.nextDisabled() === false)
 			self.getPage(1);
@@ -97,6 +99,21 @@ var vwfPortalModel = new function(){
 		selectAll = val;
 	};
 };
+
+function handleHash(propStr){
+
+	var tmpHash = window.location.hash.replace("#", "");
+	if(tmpHash){
+		for(var i in vwfPortalModel.adminDisplayList()){
+			if(tmpHash == vwfPortalModel.adminDisplayList()[i][propStr]){
+				vwfPortalModel.currentAdminItem(vwfPortalModel.adminDisplayList()[i]);
+				break;
+			}
+		}
+	}
+	
+	else vwfPortalModel.currentAdminItem(false);
+}
 
 function checkFilter(textArr){
 	
@@ -156,10 +173,9 @@ function removeAgoFromMoment(date){
 	return temp.substr(0, temp.length - 4);
 };
 
-function showStates(){
+function showStates(cb){
 
 	$.getJSON("./vwfDataManager.svc/states",function(e){
-		console.log(e)
 		
 		var tempArr = getFlatIdArr();
 		var saveIndex = 0;
@@ -220,12 +236,13 @@ function showStates(){
 			
 			vwfPortalModel.worldObjects().sort(sortArrByUpdates);
 			vwfPortalModel.getPage(0);
+			
+			if(cb) cb();
 		});
 	});
 }
 
 function sortArrByUpdates(a, b){
-	console.log(a.hotState(), b.hotState());
 	if(a.hotState() == true && b.hotState() == false)
 		return -1;			
 	
