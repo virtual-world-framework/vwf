@@ -3,7 +3,7 @@
 //IE undefined console fix
 if (!window.console) console = {log: function() {}};
 		
-var filter = '', root = '{{root}}', pageIndex = 0, pageLength = 12, userNameFilter = '', selectAll = false;
+var filter = '', pageIndex = 0, pageLength = 12, userNameFilter = '', selectAll = false;
 var vwfPortalModel = new function(){
 	var self = this;
 	self.getShorterStr = function(a, length){
@@ -48,6 +48,7 @@ var vwfPortalModel = new function(){
 		}	
 	}).extend({throttle:500});
 	
+	self.returnVal = (root + '/' + window.location.search.substr(window.location.search.indexOf('=')+1)).replace('//', '/') + window.location.hash;
 	self.worldObjects = ko.observableArray([]);
 	self.displayWorldObjects = ko.observableArray([]);
 	self.featuredWorldObjects = ko.observableArray([]);
@@ -64,6 +65,7 @@ var vwfPortalModel = new function(){
 	
 	self.previousDisabled = ko.observable(true);
 	self.nextDisabled = ko.observable(true);
+	
 	
 	self.getPage = function(i){
 		var worldObjectsLength = getArrVisibleLength(self.worldObjects());
