@@ -628,7 +628,7 @@ define(function ()
 							});
 						}
 					
-					},'value');
+					},'0');
 			
 				}
 			},'name');
@@ -693,7 +693,7 @@ define(function ()
 							});
 						}
 					
-					},'value');
+					},'0');
 			
 				}
 			},'name');
@@ -793,7 +793,7 @@ define(function ()
 				//$('#ScriptEditor').show('slide',{direction:'down'},function(){window.clearInterval(window.scripthideinterval);window.scripthideinterval=null;});
 				$('#ScriptEditor').show();
 				var newtop = $(window).height() - $('#ScriptEditor').height() - $('#statusbar').height() + 'px';
-				console.log(newtop);
+				//console.log(newtop);
 				$('#ScriptEditor').animate(
 				{
 					'top': newtop
@@ -803,7 +803,7 @@ define(function ()
 					{
 						$('#ScriptEditorTabs').css('height', $('#ScriptEditor').height() + 'px');
 						var newheight = window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - $('#toolbar').height() - ($(window).height() - $('#ScriptEditor').offset().top - 25) + 'px';
-						console.log(newheight);
+						//console.log(newheight);
 						$('#index-vwf').css('height', newheight);
 						_Editor.findcamera().aspect = ($('#index-vwf').width() / $('#index-vwf').height());
 						_Editor.findcamera().updateProjectionMatrix();
@@ -1137,7 +1137,11 @@ define(function ()
 					$("#methodlist").children().css('border-color', 'gray');
 					$(this).css('border-color', 'blue');
 					var method = $(this).attr('method');
-					_ScriptEditor.setSelectedMethod(method, "function " + method + "()\n{\n" + _ScriptEditor.methodlist[method] + "\n}");
+					var body = _ScriptEditor.methodlist[method].body;
+					var params = _ScriptEditor.methodlist[method].parameters;
+					if(params)
+						params = params.join(',');
+					_ScriptEditor.setSelectedMethod(method, "function " + method + "("+params+")\n{\n" + body + "\n}");
 				});
 				if (refresh)
 				{
@@ -1543,7 +1547,7 @@ define(function ()
 							//wait 15ms, then show this whole dialog again
 							window.setTimeout(function()
 							{
-								console.log(self.filter);
+								//console.log(self.filter);
 								$('#AutoComplete').focus();
 								
 								self.setupAutocomplete(self.keys,_ScriptEditor.activeEditor,self.filter);

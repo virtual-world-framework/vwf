@@ -2328,7 +2328,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 			particleSystem.gravityCenter = [0,0,0];
 			particleSystem.textureTiles = 1;
 			particleSystem.solver = 'AnalyticShader';
-			particleSystem.depthTest = false;
+			particleSystem.depthTest = true;
 			particleSystem.opacity = 1;
 			particleSystem.additive = false;
 			particleSystem.image = null;

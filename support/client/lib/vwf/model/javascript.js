@@ -712,7 +712,7 @@ node.id = childID; // TODO: move to vwf/model/object
 					this.__WatchableCache[dotNotation].internal_val = val;
 					return this.__WatchableCache[dotNotation];
 				}
-				console.log('new watchable');
+				
 				var watchable = new self._Watchable();
 				watchable.dotNotation = dotNotation;
 				self.setupWatchableArray(watchable,val,propertyname,id,masterval,dotNotation);
@@ -888,8 +888,15 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 					if(func)
 					{
 						var str = func.toString();
+						
+						var params = str.substring(str.indexOf('(')+1,str.indexOf(')'));
+						params = params.split(',');
+						var cleanparms = [];
+						for(var i = 0; i < params.length; i++)
+							if(params[i] && $.trim(params[i]) != '')
+								cleanparms.push($.trim(params[i]));
 						str = str.substring(str.indexOf('{')+1,str.lastIndexOf('}'));
-						methods[methodName] = str;
+						methods[methodName] = {body:str,parameters:cleanparms};
 					}
 				}	
 			}

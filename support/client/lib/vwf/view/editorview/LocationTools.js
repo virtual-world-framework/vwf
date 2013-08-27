@@ -117,6 +117,7 @@ define(function ()
 		}
 		this.GoToPlacemark_inner = function(val)
 		{
+			
 			var placemarks = vwf.getProperty('index-vwf','placemarks');
 			this.currentPlacemark = val;
 			window.location.hash = val;
@@ -137,7 +138,7 @@ define(function ()
 						}	
 					
 						$('#MenuCamera3RDPersonicon').click();		
-						_Editor.setProperty(_UserManager.GetCurrentUserID(),'translation',pos);
+						_Editor.setProperty(_UserManager.GetCurrentUserID(),'translation',[pos[0],pos[1],pos[2]]);
 					}
 		}
 		this.AddPlacemark = function()
@@ -152,6 +153,7 @@ define(function ()
 			
 				if(ok)
 				{
+					debugger;
 					var title = val;
 					var location = vwf.getProperty(_UserManager.GetCurrentUserID(),'translation');
 					var placemarks = vwf.getProperty('index-vwf','placemarks');
