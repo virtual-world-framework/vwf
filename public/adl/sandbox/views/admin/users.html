@@ -43,17 +43,32 @@
 	</div>
 </div>
 <script>
-	vwfPortalModel.usersList = ["Mick", "joey", "Mike"];
+	vwfPortalModel.usersList = ko.observableArray();
 	vwfPortalModel.currentUser = ko.observable(false); 
+	
+	$.post('{{root}}/data/get_users', function(o){
+		
+		vwfPortalModel.usersList(JSON.parse(o));
+		console.log(o);
+	});
 	
 	vwfPortalModel.deleteSelected = function(data){
 		
 		var tempUserArr = [];
 		for(var i = 0; i < $('input:checked').length; i++){
 			tempUserArr.push(ko.dataFor($('input:checked')[i]));
-		}
+		}		
 		
 		//Make the request to the server to delete these users
+		$.post('{{root}}/data/delete_users', JSON.stringify(tempUserArr), function(o){
+		
+			console.log("Request result: ", o);
+			
+			for(var i = 0; i < tempUserArr.length; i++){
+				vwfPortalModel.usersList.remove(tempUserArr[i]);
+			}
+			
+		});
 		console.log("Delete users ", tempUserArr);
 		$('input:checked').click();
 	}; 
