@@ -1,7 +1,48 @@
 VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 ----------------------------------
-0.6.13
+0.6.14
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+Server: 
+- NEW: Load the application chrome as a service instead of a file. Instead of having the client parse the URL and guess at the application name, load the `application.vwf.html` overlay using a fixed path relative to the application root. Since applications aren't required to provide an overlay, return an empty result with status code 200 when the overlay doesn't exist. Otherwise, the log will show an error for a condition that isn't really an error. Closes #741.
+- NEW: Load the application chrome from view/document instead of the kernel. Test for the application explicitly rather than using the kernel's heuristic. Prevents attempting to load *component*.vwf.html for components referenced by the application. Suspend loading the application while the chrome document loads. Synthesize a `createdNode` call for the application node when the chrome provides a `createdNode` handler. Allows the chrome's `vwf_view` handlers to observe all of the actions for the document--not just the ones that occur after the chrome happens to load. Closes #188.
+- NEW: Kernel reentry should be off for deferred properties too.
+- NEW: Remove need for ./Log directory for Nodejs server default LogLevel.
+
+Client:
+- NEW: Add drag touch gesture to emulate fly behavior. Add ability to switch camera.touchmode to "orbit" or "none" as well. Orbit is minimally supported, but needs work. Remove hmmwv-touch application. Fixes #2604.
+- NEW: Fixes bug in GetAllMaterials helper function which broke materials in some models for GetMaterials. Fixes #2681.
+- NEW: Adds a isIdentityMatrix function, which was previously called despite not existing. Fixes #1927.
+- NEW: Modifies CloneMaterial to take into account the difference between THREE.Material and THREE.MeshFaceMaterial. Fixes #2677.
+- NEW: Add automatic generation of not yet represented materials to the threejs node creation process. Updates the material name to material matching system to support potential 'multiple identical yet distinct' materials. Fixes #2159.
+- NEW: Load scripts from external URIs. 
+- NEW: Process scripts in a separate async block. This is in preparation for loading scripts from external resources, which will be an async operation.
+- NEW: Accept a single item in addition to an array for behaviors and scripts. Closes #173.
+- NEW: Select the correct socket.io port when the application uses the default. References #2674.
+- NEW: Use SSL WebSockets for SSL applications. Fixes #2674.
+- NEW: Add additional mod to Rob's Asset Cache Material Clone fix (315ca5ff079043e4f658946952d7bf136b34b217).  Fixes #2617
+- NEW: Move the `transforms.transit` normalization just before the socket send. Parameter and result values need to be normalized before they are converted to JSON and sent to the reflector. Specifically, Array-like objects must be converted to Arrays so that they pass through JSON serialization and deserialization properly. Actions initiated by views and sent using `kernel.send` weren't being normalized this way. This commit moves normalization into `kernel.send` and `kernel.respond` to ensure that it is applied consistently for each outgoing message. Other `transforms.transit` normalizations done in anticipation of the result being sent to the reflector are redundant and have been removed. The patch to explicitly convert array-likes to arrays in view/threejs is now also redundant and has been removed. Fixes #2666.
+- NEW: Move processing of load portions of URL out of VWF::Pattern and into VWF::Application::Persistence.  Update editor panel and pattern test to work with the slightly changed URL syntax for loading saves that this produced. Fixes #2654.
+- NEW: Updated regex to capture only .vwf.html files for 404 custom page. Fixes #2637
+
+Demonstration Applications: 
+- Marbles: Alters marbles material definitions in the YAML so that they properly identify materials in the collada model files. Fixes #2672.
+- Cesium WebRTC: Fix Google Chrome location error in cesium-webrtc. If the location query returns and invalid response and presents an error, the billboard and associated label will be hidden. Fixes #2648. Fixes #2600.
+- Command Center: add blank tv screens to the side wall televisions.  Fixes #2557
+- Command Center: Migrate command-center to threejs.  Fixes #2663
+- AGI/Cesium: Add check to only create the billboard and label in cesium is the geographic location is valid. This reimplements 2541c151879be9e3f029fdee0190099d14ddde8f. Fixes #2600.
+
+Documentation:
+
+
+Test Applications:
+
+
+
+----------------------------------
+0.6.14
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change.
 
