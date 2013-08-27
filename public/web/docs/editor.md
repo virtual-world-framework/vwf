@@ -35,7 +35,7 @@ All properties of a given node can be edited while the application is running. U
 
 <div style='width:100%;text-align:center'><img src='images/editor_properties.png' alt='properties' /></div>
 
-Properties may be booleans, numbers, or strings, and their values are represented in form they would be as a javascript format. Strings must be quoted, and arrays must be intered in the form of *[ 0, 0, 0 ]*. Values can also be null or undefined.
+Properties may be booleans, numbers, or strings, and their values are represented in form they would be as a javascript format. Strings must be quoted, and arrays must be intered in the form of *\[ 0, 0, 0 \]*. Values can also be null or undefined.
 
 **Methods**
 

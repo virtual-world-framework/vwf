@@ -41,12 +41,12 @@ children:
                 case true:
                   this.braked = value;
                   this.Circle.material.color = "#ff0000";
-                  this.Text.material.emit = 1;
+                  this.Text.material.emit = "#ffffff";
                   break;
                 case false:
                   this.braked = value;
-                  this.Circle.material.color = "#bb0000";
-                  this.Text.material.emit = 0.1;
+                  this.Circle.material.color = "#550000";
+                  this.Text.material.emit = "#555555";
                   break;
               }
             value: true
@@ -85,12 +85,12 @@ children:
                 case true:
                   this.waiting = value;
                   this.Circle.material.color = "#ff0000";
-                  this.Text.material.emit = 1;
+                  this.Text.material.emit = "#ffffff";
                   break;
                 case false:
                   this.waiting = value;
-                  this.Circle.material.color = "#bb0000";
-                  this.Text.material.emit = 0.1;
+                  this.Circle.material.color = "#550000";
+                  this.Text.material.emit = "#555555";
                   break;
               }
             value: false
@@ -1011,9 +1011,7 @@ children:
         }
         this.transform = this.initialTransform;
         this.rotateBy([0, 0, 1, time * 360], 0, "rotated");
-      }
-  Omni002: 
-    extends: http://vwf.example.com/node3.vwf 
+      } 
   WiperPass: 
     extends: http://vwf.example.com/node3.vwf 
     implements: 

@@ -56,6 +56,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             this.currentModelID = '';
             this.currentModelURL = '';
             this.highlightedChild = '';
+            this.intervalTimer = 0;
             
             jQuery('body').append(
                 "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Application.png' alt='application' /><img id='userlist' src='images/tab_Users.png' alt='users' /><img id='timeline' src='images/tab_Time.png' alt='time' /><img id='models' src='images/tab_Models.png' alt='models' /><img id='about' src='images/tab_About.png' alt='about' /></div></div></div>" + 
@@ -310,22 +311,21 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         }
         return childNode;
     };
-    
-    var intervalTimer;
+
     function updateCameraProperties () {
 
         var cameraNodeName = "http-vwf-example-com-camera-vwf-camera";
         
         if ( this.currentNodeID == cameraNodeName ) {
-            if ( !intervalTimer ) {
+            if ( !this.intervalTimer ) {
                 var self = this;
-                intervalTimer = setInterval( function() {updateProperties.call( self, cameraNodeName )}, 200 );
+                this.intervalTimer = setInterval( function() {updateProperties.call( self, cameraNodeName )}, 200 );
             }
         }
         else {
-            if ( intervalTimer ) {
-                clearInterval( intervalTimer );
-                intervalTimer = 0;
+            if ( this.intervalTimer ) {
+                clearInterval( this.intervalTimer );
+                this.intervalTimer = 0;
             } 
         }
     }
@@ -648,16 +648,27 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         clients$.append("<div style='padding:6px'><select class='filename_select' id='fileToLoad' /></select></div>");
         $('#fileToLoad').append("<option value='none'></option>");
 
-        $.getJSON( "/" + root + "/admin/files", function( data ) {
+        $.getJSON( "/" + root + "/listallsaves", function( data ) {
             $.each( data, function( key, value ) {
-                var fileName = encodeURIComponent(value['basename']);
-                $('#fileToLoad').append("<option value='"+fileName+"'>"+fileName+"</option>");
+                var applicationName = value[ 'applicationpath' ].split( "/" );
+                if ( applicationName.length > 0 ) {
+                    applicationName = applicationName[ applicationName.length - 1 ];
+                }
+                if ( applicationName.length > 0 ) {
+                    applicationName = applicationName.charAt(0).toUpperCase() + applicationName.slice(1);
+                }
+                if ( value['latestsave'] ) {
+                    $('#fileToLoad').append("<option value='"+value['savename']+"' applicationpath='"+value['applicationpath']+"'>"+applicationName+": "+value['savename']+"</option>");
+                }
+                else {
+                    $('#fileToLoad').append("<option value='"+value['savename']+"' applicationpath='"+value['applicationpath']+"' revision='"+value['revision']+"'>"+applicationName+": "+value['savename']+" Rev(" + value['revision'] + ")</option>");
+                }
             } );
         } );
 
         clients$.append("<div style='padding:6px'><input class='update_button' type='button' id='load' value='Load' /></div>");
         $('#load').click(function(evt) {
-            loadSavedState.call(self, $('#fileToLoad').val());
+            loadSavedState.call(self, $('#fileToLoad').val(), $('#fileToLoad').find(':selected').attr('applicationpath'), $('#fileToLoad').find(':selected').attr('revision'));
         });
     }
 
@@ -1209,10 +1220,10 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 {
                     var prmtr = $('#input-param'+ i).val();
                     try {
-                        prmtr = JSON.parse($.encoder.canonicalize(prmtr));
+                        prmtr = JSON.parse(JSON.stringify($.encoder.canonicalize(prmtr)));
                         parameters.push( prmtr );
                     } catch (e) {
-                        this.logger.error('Invalid Value');
+                        self.logger.error('Invalid Value');
                     }
                 }
             }
@@ -1270,7 +1281,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                         arg = JSON.parse($.encoder.canonicalize(arg));
                         args.push( arg );
                     } catch (e) {
-                        this.logger.error('Invalid Value');
+                        self.logger.error('Invalid Value');
                     }
                 }
             }
@@ -1685,9 +1696,6 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             var timestamp = state["queue"].time;
             timestamp = Math.round(timestamp * 1000);
 
-            // Remove queue component of state
-            delete state["queue"];
-
             var objectIsTypedArray = function( candidate ) {
                 var typedArrayTypes = [
                     Int8Array,
@@ -1727,15 +1735,28 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
             var path = window.location.pathname;
             var root = path.substring(1, path.length - 18);
+            var rootSplit = root.split('/');
+            if ( rootSplit.length > 1 ) {
+              if ( rootSplit[ rootSplit.length - 2 ] == "load" ) {
+                root = "";
+                for ( var rootPart = 0; rootPart < rootSplit.length - 2; rootPart++ ) {
+                  if ( rootPart > 0 ) {
+                    root = root + "/";
+                  }
+                  root = root + rootSplit[rootPart];
+                }
+              }
+            }
+            
             var inst = path.substring(path.length-17, path.length-1);
 
             if(filename == '') filename = inst;
 
             if(root.indexOf('.vwf') != -1) root = root.substring(0, root.lastIndexOf('/'));
 
-            xhr.open("POST", "/"+root, true);
+            xhr.open("POST", "/"+root+"/save/"+filename, true);
             xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            xhr.send("root="+root+"&filename="+filename+"&inst="+inst+"&timestamp="+timestamp+"&extension=.vwf.json"+"&jsonState="+json);
+            xhr.send("root="+root+"/"+filename+"&filename=saveState&inst="+inst+"&timestamp="+timestamp+"&extension=.vwf.json"+"&jsonState="+json);
 
             // Save Config Information
             var config = {"info":{}, "model":{}, "view":{} };
@@ -1767,9 +1788,9 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
             // Save config file to server
             var xhrConfig = new XMLHttpRequest();
-            xhrConfig.open("POST", "/"+root, true);
+            xhrConfig.open("POST", "/"+root+"/save/"+filename, true);
             xhrConfig.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            xhrConfig.send("root="+root+"&filename="+filename+"&inst="+inst+"&timestamp="+timestamp+"&extension=.vwf.config.json"+"&jsonState="+jsonConfig);
+            xhrConfig.send("root="+root+"/"+filename+"&filename=saveState&inst="+inst+"&timestamp="+timestamp+"&extension=.vwf.config.json"+"&jsonState="+jsonConfig);
         }
 
         else
@@ -1780,17 +1801,20 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
     // -- LoadSavedState --------------------------------------------------------------------------
 
-    function loadSavedState(filename) 
+    function loadSavedState(filename, applicationpath, revision) 
     {
         this.logger.info("Loading: " + filename);
 
         // Redirect until setState ID conflict is resolved
         var path = window.location.pathname;
-        var root = path.substring(1, path.length - 18);
         var inst = path.substring(path.length-17, path.length-1);
 
-        if(root.indexOf('.vwf') != -1) root = root.substring(0, root.lastIndexOf('/'));
-        window.location.pathname = root + '/' + filename.substring(0, filename.lastIndexOf('.')) + '/' + inst;
+        if ( revision ) {
+            window.location.pathname = applicationpath + '/load/' + filename + '/' + revision + '/' + inst;
+        }
+        else {
+            window.location.pathname = applicationpath + '/load/' + filename + '/' + inst;
+        }
 
         // $.get(filename,function(data,status){
         //     vwf.setState(data);

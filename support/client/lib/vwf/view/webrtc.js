@@ -16,7 +16,7 @@
 /// @module vwf/view/webrtc
 /// @requires vwf/view
 
-define( [ "module", "vwf/view" ], function( module, view ) {
+define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( module, view, utility, Color ) {
 
     return view.load( module, {
 
@@ -29,20 +29,32 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }
             
             this.state.clients = {};
+            this.state.instances = {};
             this.local = {
                 "ID": undefined,
                 "url": undefined,
-                "stream": undefined, 
+                "stream": undefined,
+                "sharing": { audio: true, video: true } 
+            };
+
+            // turns on logger debugger console messages 
+            this.debugVwf = {
+                "creation": false,
+                "initializing": false,
+                "parenting": false,
+                "deleting": false,
+                "properties": false,
+                "setting": false,
+                "getting": false,
+                "calling": false
             };
 
             if ( options === undefined ) { options = {}; }
 
-            this.captureVideo = options.video !== undefined  ? options.video : true;
-            this.captureAudio = options.audio !== undefined  ? options.audio : true;
             this.stereo = options.stereo !== undefined  ? options.stereo : false;
             this.videoElementsDiv = options.videoElementsDiv !== undefined  ? options.videoElementsDiv : 'videoSurfaces';
             this.videoProperties = options.videoProperties !== undefined  ? options.videoProperties : {};
-            this.debug = options.debug !== undefined  ? options.debug : false;
+            this.debug = options.debug !== undefined ? options.debug : false;
 
             this.videosAdded = 0;
             this.msgQueue = [];
@@ -52,20 +64,37 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
 
+            if ( this.debugVwf.creation ) {
+                this.kernel.logger.infox( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            }
+
             if ( childExtendsID === undefined )
                 return;
 
-            //console.info( "webrtc.createdNode(  "+nodeID+", "+childID+", "+childExtendsID+", "+childImplementsIDs+", "+childSource+", "+childType+", "+childIndex+", "+childName+" )" );
             var self = this, node;
             
             var protos = getPrototypes.call( self, childExtendsID )
    
-            if ( isClientDefinition.call( this, protos ) && childName ) {
+            if ( isClientInstanceDef.call( this, protos ) && childName ) {
+                
+                node = {
+                    "parentID": nodeID,
+                    "ID": childID,
+                    "extendsID": childExtendsID,
+                    "implementsIDs": childImplementsIDs,
+                    "source": childSource,
+                    "type": childType,
+                    "name": childName,
+                    "prototypes": protos,
+                };
 
-                //console.info( "local moniker: " + this.kernel.moniker() );
+                this.state.instances[ childID ] = node;
+
+            } else if ( isClientDefinition.call( this, protos ) && childName ) {
+
                 // check if this instance of client and if this client is for this instance
                 // create a login for this 
-                var node = {
+                node = {
                     "parentID": nodeID,
                     "ID": childID,
                     "moniker": undefined,
@@ -79,7 +108,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     "connection": undefined,
                     "localUrl": undefined, 
                     "remoteUrl": undefined,
-                    "createProperty": true                    
+                    "color": "rgb(0,0,0)",
+                    "createProperty": true, 
+                    "sharing": { audio: true, video: true }                   
                 };
 
                 this.state.clients[ childID ] = node;
@@ -106,10 +137,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs, 
             childSource, childType, childIndex, childName ) {
 
+            if ( this.debugVwf.initializing ) {
+                this.kernel.logger.infox( "initializedNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            } 
+
             if ( childExtendsID === undefined )
                 return;
 
-            //console.info( "  initializedNode(  "+nodeID+", "+childID+", "+childExtendsID+", "+childName+" )" );
             var client = this.state.clients[ childID ];
 
             if ( client ) {
@@ -117,8 +151,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     
                     // local client object
                     // grab access to the webcam 
-                    capture.call( this, childID );
-                    
+                    capture.call( this, this.local.sharing );
+                   
                     var remoteClient = undefined;
                     // existing clients
                     for ( var clientID in this.state.clients ) {
@@ -148,29 +182,88 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }            
         },
 
-        //deletedNode: function( nodeID ) {
-        //},
+        deletedNode: function( nodeID ) {
+            
+            if ( this.debugVwf.deleting ) {
+                this.kernel.logger.infox( "deletedNode", nodeID );
+            }
+            debugger;
+
+            if ( nodeID.indexOf( "-clients-vwf" ) != -1 ) {
+                var moniker = nodeID.substr( nodeID.lastIndexOf('-')+1, 16 );
+                var client = undefined;
+
+                if ( moniker == this.kernel.moniker() ) {
+                    
+                    // this is the client that has left the converstaion
+                    // go through the peerConnections and close the 
+                    // all current connections
+                    var peer, peerMoniker;
+                    for ( var peerID in this.state.clients ) {
+                        peer = this.state.clients[ peerID ];
+                        peerMoniker = appMoniker.call( this, peer.name )
+                        if ( peerMoniker != this.kernel.moniker ) {
+                            peer.connection && peer.connection.disconnect();
+                        }
+                    }
+
+                } else {
+
+                    // this is a client who has has a peer leave the converstaion
+                    // remove that client, and the 
+                    client = findClientByMoniker.call( this, moniker );
+                    if ( client ) {
+                        client.connection && client.connection.disconnect();
+
+                        removeClient.call( this, client );
+                        delete this.state.clients[ client ]
+                    }
+
+                     
+                }
+            }         
+
+        },
   
         createdProperty: function( nodeID, propertyName, propertyValue ) {
-            //console.info( "webrtc.createdProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
+
+            if ( this.debugVwf.properties ) {
+                this.kernel.logger.infox( "C === createdProperty ", nodeID, propertyName, propertyValue );
+            }
+
             this.satProperty( nodeID, propertyName, propertyValue );
         },        
 
         initializedProperty: function( nodeID, propertyName, propertyValue ) {
-            //console.info( "webrtc.initializedProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
+
+            if ( this.debugVwf.properties ) {
+                this.kernel.logger.infox( "  I === initializedProperty ", nodeID, propertyName, propertyValue );
+            }
+
             this.satProperty( nodeID, propertyName, propertyValue );
         },        
 
         satProperty: function( nodeID, propertyName, propertyValue ) {
             
-            //if ( !propertyValue ) return;
+            
+            if ( this.debugVwf.properties || this.debugVwf.setting ) {
+                this.kernel.logger.infox( "    S === satProperty ", nodeID, propertyName, propertyValue );
+            } 
+
             var client = this.state.clients[ nodeID ];
 
-            //console.info( "webrtc.satProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
-
             if ( client ) {
-                //console.info( "webrtc.satProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
                 switch( propertyName ) {
+                    
+                    case "sharing":
+                        if ( propertyValue ) {
+                            client.sharing = propertyValue;
+                            if ( nodeID == this.local.ID ) {
+                                updateSharing.call( this, nodeID, propertyValue );
+                            }
+                        }
+                        break;
+
                     case "localUrl":
                         if ( propertyValue ) {
                             if ( nodeID != this.local.ID ) {
@@ -191,7 +284,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         }
                         break; 
 
-
+                    case "color":
+                        var clr = new utility.color( propertyValue );
+                        if ( clr ) {
+                            client.color = clr.toString();
+                        }
+                        break;    
 
                     default:  
                         // propertyName is the moniker of the client that 
@@ -208,18 +306,33 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }
         },
 
-        //gotProperty: function( nodeID, propertyName, propertyValue ) {
-            // console.info( "GP webrtc.gotProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
-            // var value = undefined;
+        gotProperty: function( nodeID, propertyName, propertyValue ) {
 
-            // return value;
-        //},
+            if ( this.debugVwf.properties || this.debugVwf.getting ) {
+                this.kernel.logger.infox( "   G === gotProperty ", nodeID, propertyName, propertyValue );
+            }
+            var value = undefined;
 
-        //calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
-        //},       
+            return value;
+        },
 
-        //firedEvent: function( nodeID, eventName, eventParameters ) {
-        //},
+        calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+            
+            if ( this.debugVwf.calling ) {
+                this.kernel.logger.infox( "  CM === calledMethod ", nodeID, methodName, methodParameters );
+            }
+
+            switch ( methodName ) {
+                case "setLocalMute":
+                    if ( this.kernel.moniker() == this.kernel.client() ) {
+                        methodValue = setMute.call( this, methodParameters );
+                    }
+                    break;
+            }
+        },       
+
+        firedEvent: function( nodeID, eventName, eventParameters ) {
+        },
 
     } );
  
@@ -246,16 +359,19 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         return clientNode;
     }
 
-    function displayLocal( stream, name ) {
-        displayVideo.call( this, stream, this.local.url, name, this.kernel.moniker(), true );
+    function displayLocal( stream, name, color ) {
+        var id = this.kernel.moniker();
+        return displayVideo.call( this, id, stream, this.local.url, name, id, true, color );
     }
 
-    function displayVideo( stream, url, name, destMoniker, muted ) {
+    function displayVideo( id, stream, url, name, destMoniker, muted, color ) {
         
+        var divId = undefined;
+
         if ( this.videoProperties.create ) {
             this.videosAdded++
             var $container;
-            var divId = name + this.videosAdded;
+            divId = name + this.videosAdded;
             var videoId = "video-" + divId;
 
             $container = $( "#" + this.videoElementsDiv );
@@ -294,23 +410,47 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             
         } 
 
-        //console.info( "[ { 'url': "+url+", 'name': "+name+", 'muted': "+muted+" }, "+destMoniker+" ]" );
+        var clr = new utility.color( color );
+        if ( clr ) { 
+            clr = clr.toArray(); 
+        }
 
-        this.kernel.callMethod( "index-vwf", "newClientVideo", [ { "url": url, "name": name, "muted": muted }, destMoniker ] );          
+        this.kernel.callMethod( "index-vwf", "createVideo", [ { 
+            "ID": id,
+            "url": url, 
+            "name": name, 
+            "muted": muted, 
+            "color": clr ? clr : color
+        }, destMoniker ] );          
+
+        return divId;
+    }
+
+    function removeVideo( client ) {
+        
+        if ( client.videoDivID ) {
+            var $videoWin = $( "#" + client.videoDivID );
+            if ( $videoWin ) {
+                $videoWin.remove();
+            }
+            client.videoDivID = undefined;
+        }
+
+        this.kernel.callMethod( "index-vwf", "removeVideo", [ client.moniker ] ); 
 
     }
 
-    function displayRemote( stream, url, name, destMoniker ) {
-        displayVideo.call( this, stream, url, name, destMoniker, false );
+    function displayRemote( id, stream, url, name, destMoniker, color ) {
+        return displayVideo.call( this, id, stream, url, name, destMoniker, false, color );
     }
 
-    function capture() {
+    function capture( media ) {
 
-        if ( this.local.stream === undefined && ( this.captureVideo || this.captureAudio ) ) {
+        if ( this.local.stream === undefined && ( media.video || media.audio ) ) {
             var self = this;
             var constraints = { 
-                "audio": this.captureAudio, 
-                "video": this.captureVideo ? { "mandatory": {}, "optional": [] } : false, 
+                "audio": media.audio, 
+                "video": media.video ? { "mandatory": {}, "optional": [] } : false, 
             };
             
             var successCallback = function( stream ) {
@@ -319,7 +459,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                 self.kernel.setProperty( self.local.ID, "localUrl", self.local.url );
 
-                displayLocal.call( self, stream, self.state.clients[ self.local.ID ].displayName );
+                var localNode = self.state.clients[ self.local.ID ];
+                displayLocal.call( self, stream, localNode.displayName, localNode.color );
                 sendOffers.call( self );
             };
 
@@ -338,6 +479,22 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     function appMoniker( name ) {
         return name.substr( 6, name.length-1 );
     }
+    
+    function findClientByMoniker( moniker ) {
+        var client = undefined;
+        for ( var id in this.state.clients ) {
+            if ( client === undefined && moniker == this.state.clients[ id ].moniker ) {
+                client = this.state.clients[ id ];
+            }
+        }
+        return client;
+    }
+
+    function removeClient( client ) {
+        if ( client ) {
+            removeVideo.call( this, client );
+        }
+    }
 
     function sendOffers() {
         var peerNode;
@@ -354,6 +511,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         
 
     }
+
+    function updateSharing( nodeID, sharing ) {
+        setMute.call( this, !sharing.audio );
+        setPause.call( this, !sharing.video );
+    }
+
 
     function setMute( mute ) {
         if ( this.local.stream && this.local.stream.audioTracks && this.local.stream.audioTracks.length > 0 ) {
@@ -445,6 +608,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         return foundClient;
     }
 
+    function isClientInstanceDef( nodeID ) {
+        return ( nodeID == "http-vwf-example-com-clients-vwf" );
+    }
+
     function mediaConnection( view, peerNode ) {
         this.view = view;
         this.peerNode = peerNode;        
@@ -516,7 +683,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     
                     if ( self.view.debug ) console.log("Remote stream added.  url: " + self.url );
 
-                    displayRemote.call( self.view, self.stream, self.url, self.peerNode.displayName, view.kernel.moniker() );
+                    var divID = displayRemote.call( self.view, self.peerNode.moniker, self.stream, self.url, self.peerNode.displayName, view.kernel.moniker(), self.peerNode.color );
+                    if ( divID !== undefined ) {
+                        self.peerNode.videoDivID = divID;
+                    }
                 };
 
                 this.pc.onremovestream = function( event ) {
@@ -528,8 +698,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 }
 
                 this.pc.oniceconnectionstatechange = function( ) {
-                    var state = self.pc.signalingState || self.pc.readyState;
-                    //console.info( "peerConnection state change: " + state ); 
+                    if ( self && self.pc ) {
+                        var state = self.pc.signalingState || self.pc.readyState;
+                        //console.info( "peerConnection state change: " + state );
+                    } 
                 }
 
                 if ( stream ) {

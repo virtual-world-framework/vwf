@@ -14,7 +14,6 @@
 ---
 extends: http://vwf.example.com/navscene.vwf
 properties:
-  ambientColor: [ 183, 183, 183 ]
   backgroundColor: [ 83, 157, 194 ]
   navmode: "walk"
   translationSpeed: 10.0
@@ -32,20 +31,6 @@ children:
     includes: /humvee/humvee.vwf
   lesson:
     includes: lesson.vwf
-  dir1:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      lightType: "directional"
-      quadraticAttenuation: 10
-      specular: false 
-      rotation: [ 1, 0, 0, -10 ]
-  dir2:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      lightType: "directional"
-      quadraticAttenuation: 10
-      specular: false 
-      rotation: [ -1, 0, 0, 200 ]
 scripts:
 - |
   this.initialize = function() {

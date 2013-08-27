@@ -70,3 +70,52 @@ properties:
   ## @property
 
   intensity: 1
+
+  ## Shadow camera bottom value
+  ## Used to define the frustum of the camera used to create shadows
+  ##
+  ## @name light.vwf#shadowCameraBottom
+  ## @property
+  shadowCameraBottom: -100
+
+  ## Shadow camera left value
+  ## Used to define the frustum of the camera used to create shadows
+  ##
+  ## @name light.vwf#shadowCameraLeft
+  ## @property
+  shadowCameraLeft: -100
+
+  ## Shadow camera right value
+  ## Used to define the frustum of the camera used to create shadows
+  ##
+  ## @name light.vwf#shadowCameraRight
+  ## @property
+  shadowCameraRight: 100
+
+  ## Shadow camera top value
+  ## Used to define the frustum of the camera used to create shadows
+  ##
+  ## @name light.vwf#shadowCameraTop
+  ## @property
+  shadowCameraTop: 100
+
+  ## Shadow camera near value
+  ## Used to define the frustum of the camera used to create shadows
+  ##
+  ## @name light.vwf#shadowCameraNear
+  ## @property
+  shadowCameraNear: 0.1
+
+  ## Shadow camera far value
+  ## Used to define the frustum of the camera used to create shadows
+  ##
+  ## @name light.vwf#shadowCameraFar
+  ## @property
+  shadowCameraFar: 1000
+
+  ## Shadow darkness value
+  ## How dark the shadow is on a scale of 0 (no shadow) to 1 (pure black)
+  ##
+  ## @name light.vwf#shadowCameraFar
+  ## @property
+  shadowDarkness: 0.5

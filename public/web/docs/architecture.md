@@ -29,7 +29,7 @@ A client's browser may have multiple views. For example, a user may see and rend
 
 <div style='width:100%;text-align:center'><img src='images/arch3.png' alt='arch' width='512' /></div>
 
-External inputs from one user get thrown "across the moat" into the shared simulation (model) [1]. The model deflects incoming input from a view, and sends it directly to the reflector [2]. The reflector can then send out the information to all of the replicated models [3]. Thus all inputs to a model happen identically on the timeline to all clients within the application. 
+External inputs from one user get thrown "across the moat" into the shared simulation (model) \[1\]. The model deflects incoming input from a view, and sends it directly to the reflector \[2\]. The reflector can then send out the information to all of the replicated models \[3\]. Thus all inputs to a model happen identically on the timeline to all clients within the application. 
 
 <div style='width:100%;text-align:center'><img src='images/arch4.png' alt='arch' width='512' /></div>
 

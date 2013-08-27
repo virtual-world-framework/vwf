@@ -15,15 +15,58 @@
 extends: http://vwf.example.com/node3.vwf
 properties:
   translationSpeed: 1200
+  initialBoundingBoxBefore: [[-75,-75],[-75,75],[600,75],[600,-75]]
+  initialBoundingBoxAfter: [[-600,-75],[-600,75],[75,75],[75,-75]]
+  collisionInfo:
   laserDirection: 
-  cachedBoundingBox: 
   parentTank: 
+  enabled: false
 methods:
   fire:
+  processFire:
   explode: 
   clean: 
+  calculateCollisionInfo:
 scripts:
 - |
+  this.fire = function() {
+    this.laserModel.visible = true;
+    this.laserParticle.visible = true;
+    this.explosion.visible = false;
+    this.processFire(0.05);
+  };
+  this.calculateCollisionInfo = function(translateDelta, checkBefore) {
+    var newCollisionInfo = {};
+    var myRotation = 0;
+    if ( this.laserDirection ) {
+      var laserDirectionFlat = [this.laserDirection[0], this.laserDirection[1], 0];
+      var laserDirectionMag = goog.vec.Vec3.magnitude(laserDirectionFlat);
+      var laserDirectionUpdate = [this.laserDirection[0] / laserDirectionMag, this.laserDirection[1] / laserDirectionMag];    
+      myRotation = Math.atan2(laserDirectionUpdate[1], laserDirectionUpdate[0]);
+    }
+    
+    var mySin = Math.sin( myRotation );
+    var myCos = Math.cos( myRotation );
+    var myTranslation = this.translation;
+    myTranslation[0] = myTranslation[0] + translateDelta[0];
+    myTranslation[1] = myTranslation[1] + translateDelta[1];
+    var newBox = [];
+    var myBoundingBox;
+    if ( checkBefore ) {
+      myBoundingBox = this.initialBoundingBoxBefore;
+    }
+    else {
+      myBoundingBox = this.initialBoundingBoxAfter;
+    }
+    for ( var index = 0; index < 4; index++ ) {
+      var newPoint = [ myBoundingBox[ index ][ 0 ] *  myCos - myBoundingBox[ index ][ 1 ] * mySin + myTranslation[ 0 ], myBoundingBox[ index ][ 1 ] * myCos + myBoundingBox[ index ][ 0 ] * mySin + myTranslation[ 1 ] ];
+      newBox.push( newPoint );
+    }
+    newCollisionInfo[ 'corners' ] = newBox;
+    newCollisionInfo[ 'bounds' ] = this.parent.parent.generateBoundsForCorners( newBox );
+    newCollisionInfo[ 'axes' ] = this.parent.parent.generateAxesForCorners( newBox );
+    return newCollisionInfo;
+  };
   var explosion = {
     extends: "http://vwf.example.com/particlesystem.vwf",
     properties: {
@@ -54,8 +97,10 @@ scripts:
     }
   }
   this.initialize = function() {
-    this.lastUpdateTime = this.time;
-    this.future(0.1).fire();
+    //this.lastUpdateTime = this.time;
+    if ( this.enabled ) {
+      this.future(0.05).fire();
+    }
   }
   this.getCameraVec = function( x, y, z ) {
       var camRotMat = this.rotationMatrix;
@@ -81,23 +126,24 @@ scripts:
     this.lastUpdateTime = this.time;
     return dist;
   }
-  this.fire = function() {
+  this.processFire = function() {
     if(this.laserDirection) {
       var collision, inBounds;
       if(this.laserDirection[2] != 0) {
         this.laserDirection[2] = 0;
       }
-      this.cachedBoundingBox = this.worldBoundingBox;
-      collision = this.parent.parent.collisionDetection([0,0,0], this);
+
+      this.collisionInfo = this.calculateCollisionInfo( [ 0, 0 ], true );
+      collision = this.parent.parent.collisionDetection( this.collisionInfo, this.parentTank );
       if(!collision) {
         if ( goog.vec.Vec3.magnitudeSquared( this.laserDirection ) > goog.vec.EPSILON ) {
           var trans = goog.vec.Vec3.scale(
               this.laserDirection,
               this.distance(),
               goog.vec.Vec3.create()
-            );
-          this.cachedBoundingBox = this.worldBoundingBox;
-          collision = this.parent.parent.collisionDetection(trans, this);
+          );
+          this.collisionInfo = this.calculateCollisionInfo( [ trans[ 0 ], trans[ 1 ] ], false );
+          collision = this.parent.parent.collisionDetection( this.collisionInfo, this.parentTank );
           if(!collision) {
             this.translation = goog.vec.Vec3.add(
               this.translation,
@@ -107,55 +153,63 @@ scripts:
             this.laserParticle.worldTransform = this.worldTransform;
           }
           else {
-            if(this.parent.parent.bz_world.id != collision.id) {
-              var players = this.parent.parent.findPlayers();
-              for(var i=0;i<players.length;i++) {
-                if(players[i].id == collision.id) {
-                  players[i].active = false;
-                  players[i].visible = false;
-                  players[i].playerDeaths += 1;
-                  this.parent.parent.events.playerDestroyed(players[i].id, players[i].playerName, players[i].score);
+            if ( this.parent.parent.bz_world.id != collision.id ) {
+              var players = this.parent.parent.findPlayers( );
+              for( var i = 0; i < players.length; i++ ) {
+                if ( players[ i ].id == collision.id ) {
+                  players[ i ].active = false;
+                  players[ i ].visible = false;
+                  players[ i ].playerDeaths += 1;
+                  this.parent.parent.events.playerDestroyed( players[ i ].id, players[ i ].playerName, players[ i ].score);
                 }
-                else if(players[i].id == this.parentTank) {
-                  players[i].playerKills += 1;
-                  this.parent.parent.events.playerScored(players[i].id, players[i].playerName, players[i].score);
+                else if ( players[ i ].id == this.parentTank ) {
+                  players[ i ].playerKills += 1;
+                  this.parent.parent.events.playerScored( players[ i ].id, players[ i ].playerName, players[ i ].score );
                 }
               }
             }
-            this.explode();
+            this.explode( );
           }
         }
       }
       else {
-        if(this.parent.parent.bz_world.id != collision.id) {
-          var players = this.parent.parent.findPlayers();
-          for(var i=0;i<players.length;i++) {
-            if(players[i].id == collision.id) {
-              players[i].active = false;
-              players[i].visible = false;
-              players[i].playerDeaths += 1;
-              this.parent.parent.events.playerDestroyed(players[i].id, players[i].playerName, players[i].score);
+        if( this.parent.parent.bz_world.id != collision.id ) {
+          var players = this.parent.parent.findPlayers( );
+          for( var i = 0; i < players.length; i++ ) {
+            if ( players[ i ].id == collision.id ) {
+              players[ i ].active = false;
+              players[ i ].visible = false;
+              players[ i ].playerDeaths += 1;
+              this.parent.parent.events.playerDestroyed( players[ i ].id, players[ i ].playerName, players[ i ].score );
             }
-            else if(players[i].id == this.parentTank) {
-              players[i].playerKills += 1;
-              this.parent.parent.events.playerScored(players[i].id, players[i].playerName, players[i].score);
+            else if ( players[ i ].id == this.parentTank ) {
+              players[ i ].playerKills += 1;
+              this.parent.parent.events.playerScored( players[ i ].id, players[ i ].playerName, players[ i ].score );
             }
           }
         }
         this.explode();
       }
       if(!collision) {
-        this.future(0.1).fire();
+        this.future(0.1).processFire();
       }
     }
   }
   this.explode = function() {
-    this.children.delete(this.laserParticle);
-    var newExplosion = $.extend(true, {}, explosion);
-    newExplosion.properties.worldTransform = this.worldTransform;
-    this.children.create(this.name + "Explosion", newExplosion);
+    this.laserParticle.visible = false;
+    this.laserModel.visible = false;
+    if ( this.explosion ) {
+      this.explosion.worldTransform = this.worldTransform;
+      this.explosion.visible = true;
+    }
+    else {
+      var newExplosion = $.extend(true, {}, explosion);
+      newExplosion.properties.worldTransform = this.worldTransform;
+      this.children.create("explosion", newExplosion);
+    }
     this.future(5.0).clean();
   }
   this.clean = function() {
-    this.parent.children.delete(this);
+    this.explosion.visible = false;
+    this.enabled = false;
   }

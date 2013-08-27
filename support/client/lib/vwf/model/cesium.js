@@ -43,7 +43,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
                 "deleting": false,
                 "properties": false,
                 "setting": false,
-                "getting": false
+                "getting": false,
+                "prototypes": false
             };
        
         },
@@ -67,6 +68,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
 
             var prototypeID = ifPrototypeGetId.call( this, nodeID, childID );
             if ( prototypeID !== undefined ) {
+                
+                if ( this.debug.prototypes ) {
+                    this.logger.infox( "prototype: ", prototypeID );
+                }
+
                 this.state.prototypes[ prototypeID ] = {
                     parentID: nodeID,
                     ID: childID,
@@ -577,7 +583,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
             if ( this.debug.properties || this.debug.setting ) {
                 this.logger.infox( "    S === settingProperty ", nodeID, propertyName, propertyValue );
             }
-
 
             if ( node ) {
 

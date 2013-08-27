@@ -17,6 +17,7 @@ properties:
   backgroundColor: [ 83, 157, 194 ]
   ambientColor: [ 250, 250, 250 ]
   colorIndex: 0
+  laserCount: 0
   ## The sorted list of scores for all players
   ##
   ## @name appscene.vwf#scoreBoard
@@ -55,8 +56,10 @@ properties:
       translationSpeed: 400
       rotationSpeed: 0.3
       playerName:
+      playerConnected: true
       # Disable inherited navigation so it can use custom bzflag controls
       navmode: none
+      visible: false
     children:     
       camera:
         extends: http://vwf.example.com/camera.vwf
@@ -84,12 +87,14 @@ methods:
   fireLaser:
   sendChat:
 events:
+  playerCreatedOrRejoined:
   playerJoined:
   playerDestroyed: 
   playerRespawned:
   playerScored: 
   chatSent:
   laserFired:
+  fixPlayerVisibility:
 children:
   bz_world:
     extends: bzworld.vwf
@@ -118,6 +123,7 @@ scripts:
     properties: {
       laserDirection: [],
       parentTank: "",
+      enabled: false,
       translation: [],
     },
     children: {
@@ -139,6 +145,7 @@ scripts:
           endSize: 400,
           loop: true,
           translation: [],
+          visible: false,
           minVelocity: [ 0, 0, 0.0],
           maxVelocity: [ 0, 0, 0],
           maxAcceleration: [ 0, 0, 0.0],
@@ -157,11 +164,48 @@ scripts:
           textureTiles: 1,
           image: "",
         }
+      },
+      explosion: {
+        extends: "http://vwf.example.com/particlesystem.vwf",
+        properties: {
+          numberParticles: 100,
+          maxLifeTime: 1000,
+          minLifeTime: 1000,
+          startSize: 400,
+          endSize: 400,
+          loop: false,
+          image: "images/explode.png",
+          maxEndAcceleration: [ 0.006, 0.006, 0.006 ],
+          minEndAcceleration: [ -0.006, -0.006, -0.006 ],
+          minVelocity: [ -0.2, -0.2, -0.2 ],
+          maxVelocity: [ 0.2, 0.2, 0.2 ],
+          translation: [],
+          sizeRange: 0,
+          startColor: [ 1, 1, 1, 1],
+          endColor: [ 1, 1, 1, 1],
+          colorRange: [ .2, .1, .1, 0],
+          additive: false,
+          depthTest: true,
+          depthWrite: false,
+          maxOrientation: 0,
+          minOrientation: 0,
+          emitterSize: [ 500 , 0 , 500.0 ],
+          emitterType: "point",
+          visible: false,
+          textureTiles: 1,
+        }
       }
     }
   };
 
   this.initialize = function() {
+    for ( var i = 0; i < 50; i++ ) {
+      var newBolt = $.extend(true, {}, bolt);
+      newBolt.properties.enabled = false;
+      newBolt.children.laserParticle.properties.image = laserMaterials[0];
+      this.lasers.children.create("Laser"+this.laserCount, newBolt);
+      this.laserCount += 1;
+    }
     this.future( 0 ).initializeCamera();
   }
   this.initializeCamera = function() {
@@ -169,18 +213,36 @@ scripts:
     this.camera.far = 1000000;
     this.camera.near = 1;
   }
+  //Create player has two options.
+  //  The player exists. In which case, fail and return false.
+  //  The player doesn't exist. In which case, suceed and return true.
   this.createPlayer = function(playerName, playerMoniker) {
     var playerObject = this.findPlayerByName(playerName);
-    if(playerObject) {
-      if(!playerObject.active) {
+    if( playerObject ) {
+      var allowRejoin = false;
+      if ( playerObject.isConnected ) {
+        if ( playerObject.id.length > 16 ) {
+          if ( playerObject.id.slice( playerObject.id.length - 16 ) == playerMoniker ) {
+            allowRejoin = true;
+          }
+        }
+      }
+      else {
+        allowRejoin = true;
+      }
+      if ( ( allowRejoin ) && ( !playerObject.active ) ) {
         playerObject.translation = playerObject.startingTranslation;
         playerObject.cachedBoundingBox = playerObject.worldBoundingBox;
         playerObject.active = true;
         playerObject.visible = true;
+        playerObject.junk = 1;
         this.playerRespawned( playerName );
+        this.playerCreatedOrRejoined( true, playerName, playerMoniker );
+        this.future(0.1).fixPlayerVisibility();
+        return;
       }
     }
-    else if(this.colorIndex < tankMaterials.length) {
+    else {
       playerObject = this.find("/navobj_" + playerMoniker);
       if(playerObject.length) {
         playerObject = playerObject[0];
@@ -192,59 +254,132 @@ scripts:
         playerObject.laserMaterial = laserMaterials[this.colorIndex];
         playerObject.active = true;
         playerObject.playerName = playerName;
+        playerObject.visible = true;
+        playerObject.junk = 1;
         this.playerJoined( playerName );
+        this.playerCreatedOrRejoined( true, playerName, playerMoniker );
+        this.future(0.1).fixPlayerVisibility();
         this.colorIndex += 1;
+        if ( this.colorIndex >= tankMaterials.length ) {
+          this.colorIndex = 0;
+        }
+        return;
       }
     }
+    this.playerCreatedOrRejoined( false, playerName, playerMoniker );
   }
+  
   this.rejoinPlayer = function(playerName, playerMoniker) {
     var oldPlayerObject = this.findPlayerByName(playerName);
     if(oldPlayerObject) {
-      var playerObject = this.find("/navobj_" + playerMoniker);
-      if(playerObject.length) {
-        playerObject = playerObject[0];
-
-        // Copy over all important data from the old player object
-        playerObject.avatar.Tank.material.properties['texture'] = oldPlayerObject.avatar.Tank.material.properties['texture'];
-        playerObject.color = oldPlayerObject.color;
-        playerObject.startingTranslation = oldPlayerObject.startingTranslation;
-        if(!oldPlayerObject.active) {
-          playerObject.translation = playerObject.startingTranslation;
+      var allowRejoin = false;
+      var needToDelete = false;
+      if ( oldPlayerObject.playerConnected ) {
+        if ( oldPlayerObject.id.length > 16 ) {
+          if ( oldPlayerObject.id.slice( oldPlayerObject.id.length - 16 ) == playerMoniker ) {
+            allowRejoin = true;
+          }
         }
-        else {
-          playerObject.worldTransform = oldPlayerObject.worldTransform;
+      }
+      else {
+        allowRejoin = true;
+        needToDelete = true;
+      }
+      if ( allowRejoin ) {
+        var playerObject = this.find("/navobj_" + playerMoniker);
+        if(playerObject.length) {
+          playerObject = playerObject[0];
+
+          // Copy over all important data from the old player object
+          playerObject.avatar.Tank.material.properties['texture'] = oldPlayerObject.avatar.Tank.material.properties['texture'];
+          playerObject.color = oldPlayerObject.color;
+          playerObject.startingTranslation = oldPlayerObject.startingTranslation;
+          if(!oldPlayerObject.active) {
+            playerObject.translation = playerObject.startingTranslation;
+          }
+          else {
+            playerObject.worldTransform = oldPlayerObject.worldTransform;
+          }
+          playerObject.laserMaterial = oldPlayerObject.laserMaterial;
+          playerObject.playerKills = oldPlayerObject.playerKills;
+          playerObject.playerDeaths = oldPlayerObject.playerDeaths;
+          playerObject.active = true;
+          playerObject.visible = true;
+          playerObject.junk = 1;
+
+          playerObject.playerName = playerName;
+
+     
+          this.playerJoined( playerName );
+          this.playerCreatedOrRejoined( true, playerName, playerMoniker);
+          if ( needToDelete ) {
+            this.children.delete( oldPlayerObject );
+          }
+          this.future(0.1).fixPlayerVisibility();
+          return;
         }
-        playerObject.laserMaterial = oldPlayerObject.laserMaterial;
-        playerObject.playerKills = oldPlayerObject.playerKills;
-        playerObject.playerDeaths = oldPlayerObject.playerDeaths;
-        playerObject.active = true;
-        playerObject.playerName = playerName;
-
-        // Delete the old player object
-        this.children.delete(oldPlayerObject);
-
-        this.playerJoined( playerName );
       }
     }
     else {
       this.createPlayer(playerName, playerMoniker);
+      return;
     }
+    this.playerCreatedOrRejoined( false, playerName, playerMoniker);
   }
+
+  this.fixPlayerVisibility = function() {
+    var allPlayers = this.find("./element(*,'http://vwf.example.com/navigable.vwf')");
+    while ( allPlayers.length > 0 ) {
+      var current = allPlayers.pop();
+      if ( current ) {
+        if ( current.visible != current.active ) {
+          this.logger.warn("  For ID " + current.id + " the visible is now " + current.visible + " and the active is " + current.active );
+          this.logger.warn("FIXING ISSUE!");
+          current.visible = current.active;
+        }
+      }
+    }
+
+  };
+
+
+  
   this.fireLaser = function(playerName) {
     if ( playerName )
     {
       var player = this.findPlayerByName(playerName);
-      if(player && player.active) {
-        var newBolt = $.extend(true, {}, bolt);
-        newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
-        newBolt.children.laserParticle.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
-        newBolt.children.laserParticle.properties.image = player.laserMaterial;
-        newBolt.properties.laserDirection = goog.vec.Mat4.multVec3(player.rotationMatrix, [0,1,0], goog.vec.Vec3.create());
-        newBolt.properties.parentTank = player.id;
-        this.lasers.children.create(playerName+"Laser"+player.laserCount, newBolt);
-        player.laserCount += 1;
+      if ( ( player ) && ( player.active ) ) {
+        if ( player.lastFired > 0 ) {
+          if ( ( this.time - player.lastFired ) < 0.25 ) {
+            return;
+          }
+        }
+        player.lastFired = this.time;
+        var oldBolt = this.findUnusedLaser( );
+        if ( oldBolt ) {
+          oldBolt.enabled = true;
+          oldBolt.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
+          oldBolt.laserParticle.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
+          oldBolt.laserParticle.image = player.laserMaterial;
+          oldBolt.laserDirection = goog.vec.Mat4.multVec3(player.rotationMatrix, [0,1,0], goog.vec.Vec3.create());
+          oldBolt.parentTank = player.id;
+          oldBolt.lastUpdateTime = this.time;
+          oldBolt.collisionInfo = undefined;
+          oldBolt.future(0.05).fire();
+        }
+        else {
+          var newBolt = $.extend(true, {}, bolt);
+          newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
+          newBolt.children.laserParticle.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
+          newBolt.children.laserParticle.properties.image = player.laserMaterial;
+          newBolt.properties.laserDirection = goog.vec.Mat4.multVec3(player.rotationMatrix, [0,1,0], goog.vec.Vec3.create());
+          newBolt.properties.parentTank = player.id;
+          newBolt.properties.enabled = true;
+          this.lasers.children.create("Laser"+this.laserCount, newBolt);
+          this.laserCount += 1;
+        }
+        this.laserFired();
       }
-      this.laserFired();
     }
   }
   this.sendChat = function(playerName, chatToSend) {

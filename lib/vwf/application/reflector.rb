@@ -38,21 +38,47 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     if clients.length == 1 # coming from 0
 
-      # Start the timer on the first connection to this instance.
-
-      schedule_tick
 
       # Initialize the client configuration from the runtime environment.
 
       logger.debug "VWF::Application::Reflector#connect #{id} " +
           "launching from #{ env["vwf.application"] }"
+      
+      if env["vwf.load"]
+        filename = VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState.vwf.json"
+        if env["vwf.loadrevision"]
+          if File.exists?(VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState_"+env["vwf.loadrevision"]+".vwf.json")
+            filename = VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState_"+env["vwf.loadrevision"]+".vwf.json"
+          end
+        end
+      end
 
       # TODO: check for file format not that json exists
-      if( File.exists?("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json"))
+      if  env["vwf.load"] and File.exists?(filename)
+        contents = File.read(filename)
+        json = JSON.parse("#{ contents }", :max_nesting => 100)
+        startTime = 0
+        startTime = json["queue"]["time"] unless json["queue"].nil?
+
+        # Start the timer on the first connection to this instance.
+
+        schedule_tick( startTime )
+        send "time" => session[:transport].time,
+          "action" => "setState",
+          "parameters" => [
+              json
+            ]
+      elsif( File.exists?("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json"))
 
         contents = File.read("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json")
         json = JSON.parse("#{ contents }", :max_nesting => 100)
-
+        startTime = 0
+        startTime = json["queue"]["time"] unless json["queue"].nil?
+        
+        # Start the timer on the first connection to this instance.
+        
+        
+        schedule_tick( startTime )
         send "time" => session[:transport].time,
           "action" => "setState",
           "parameters" => [
@@ -60,6 +86,9 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
             ]
 
       else
+      
+        # Start the timer on the first connection to this instance.
+        schedule_tick(0)
 
         send "time" => session[:transport].time,
           "action" => "setState",
@@ -429,7 +458,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
 private
 
-  def schedule_tick
+  def schedule_tick( initial_time )
 
     logger.debug "VWF::Application::Reflector#schedule_tick #{id}"
 
@@ -439,8 +468,8 @@ private
       transport.playing and broadcast( { "time" => transport.time }, false )
     end
 
-    transport.play  # TODO: wait until all clients are ready for an instructor session
-
+    transport.time = initial_time
+ 
   end
   
   def cancel_tick
@@ -482,7 +511,9 @@ public
     end
 
     def time= time
-      # TODO: ?
+      @start_time = Time.now - time
+      @pause_time = nil
+      @rate = 1
     end
 
     def rate= rate

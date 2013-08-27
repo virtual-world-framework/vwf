@@ -16,28 +16,51 @@ extends: http://vwf.example.com/node3.vwf
 properties: 
   active: 
   laserCount: 
+  junk: 0
   translationSpeed: 400
   rotationSpeed: 0.3
-  cachedBoundingBox: 
+  initialBoundingBox: [[-347.0129699707031,-974.0763549804688],[-347.0129699707031,860.0464477539062],[341.7322692871094,860.0464477539062],[341.7322692871094,-974.0763549804688]]
+  collisionInfo:
   score: 
     get: |
       return this.playerKills - this.playerDeaths;
   playerKills: 0
   playerDeaths: 0
+  visible: false
 methods:
   update:
+  calculateCollisionInfo:
 scripts:
 - |
+  this.initialize = function() {   
+    this.visible = this.active;
+  }
+  this.calculateCollisionInfo = function(rotationDelta, translateDelta) {
+    var newCollisionInfo = {};
+    var myRotation = Math.PI / 180 * ( this.rotation[3] + rotationDelta );
+    var mySin = Math.sin( myRotation );
+    var myCos = Math.cos( myRotation );
+    var myTranslation = this.translation;
+    myTranslation[0] = myTranslation[0] + translateDelta[0];
+    myTranslation[1] = myTranslation[1] + translateDelta[1];
+    var newBox = [];
+    for ( var index = 0; index < 4; index++ ) {
+      var newPoint = [ this.initialBoundingBox[ index ][ 0 ] *  myCos - this.initialBoundingBox[ index ][ 1 ] * mySin + myTranslation[ 0 ], this.initialBoundingBox[ index ][ 1 ] * myCos + this.initialBoundingBox[ index ][ 0 ] * mySin + myTranslation[ 1 ] ];
+      newBox.push( newPoint );
+    }
+    newCollisionInfo[ 'corners' ] = newBox;
+    newCollisionInfo[ 'bounds' ] = this.parent.generateBoundsForCorners( newBox );
+    newCollisionInfo[ 'axes' ] = this.parent.generateAxesForCorners( newBox );
+    return newCollisionInfo;
+  };
+  
   this.update = function(input) {
     if ( input ) {
       if(this.active) {
         if ( input.pointerInfo ) {
           var pi = input.pointerInfo;
-          if(pi.position[0] > 0.6 || pi.position[0] < 0.4) {
-            this.look( input, (pi.position[0]*2.0)-1, 0 );
-          }
-          if(pi.position[1] > 0.6 || pi.position[1] < 0.4) {
-            this.translate( input, 0,(((1-pi.position[1])*2.0)-1)*1.5 );
+          if ( ( (pi.position[0] > 0.6 || pi.position[0] < 0.4) ) || ( ( pi.position[1] > 0.6 || pi.position[1] < 0.4 ) ) ) {
+            this.lookAndTranslate( input, (pi.position[0]*2.0)-1, 0, 0,(((1-pi.position[1])*2.0)-1)*1.5 );
           }
         }
         if ( input.keyInfo && Object.keys( input.keyInfo.keysDown ).length > 0) {
@@ -46,6 +69,7 @@ scripts:
       }
     } 
   }
+  
   this.timeElapsed = function(input) {
     var timeElapsed = this.time - input.lastInputTime;
     if ( !input.lastInputTime || timeElapsed > 1 ) {
@@ -53,6 +77,7 @@ scripts:
     }
     return timeElapsed;
   }
+
   this.pointerIsDown = function(input) {
     if ( input && input.pointerInfo ) {
       var bInfo = input.pointerInfo.buttons;
@@ -61,7 +86,8 @@ scripts:
       }
     }
     return false;
-  } 
+  }
+  
   this.handleKeyDown = function(input) {
     var deltaZ = 0;
     var kd = $.extend(true, {}, input.keyInfo.keysDown, input.keyInfo.keysUp);
@@ -118,26 +144,57 @@ scripts:
 
     input.keyInfo.keysUp = {};
     
-    if ( input.look[0] != 0 || input.look[1] != 0 ) {
-      this.look( input, input.look[0], input.look[1] );
+    if (( input.look[0] != 0 || input.look[1] != 0 ) || ( input.move[0] != 0 || input.move[1] != 0 ) ) {
+      this.lookAndTranslate( input, input.look[0], input.look[1], input.move[0], input.move[1] );
     }
-    if ( input.move[0] != 0 || input.move[1] != 0 ) {
-      this.translate( input, input.move[0], input.move[1] );
-    }       
   }
-  this.look = function( input, x, y ) {
-    if ( input.pointerInfo && input.pointerInfo.modifiers.ctrl ) {
-      if ( y != 0 ) { this.rotateBy( [ 1, 0, 0, -y * this.angularDistance(input) ], 0 ) }
-    } else {
-      if ( x != 0 ) { 
-        this.rotateBy( [ 0, 0, 1, -x * this.angularDistance(input) ], 0 );
-        this.cachedBoundingBox = this.worldBoundingBox;
-        if(this.parent.collisionDetection([0,0,0], this)) {
-          this.rotateBy( [ 0, 0, 1, x * this.angularDistance(input) ], 0 );
-        }
+  
+  this.lookAndTranslate = function( input, lookX, lookY, translateX, translateY ) {
+
+    var trans = this.getCameraVec( translateX, translateY, 0 );
+    trans[2] = 0;
+
+    if ( goog.vec.Vec3.magnitudeSquared( trans ) > goog.vec.EPSILON ) {
+      trans = goog.vec.Vec3.scale(
+          trans,
+          this.distance(input),
+          trans
+        );
+    }
+    else {
+      trans[ 0 ] = 0;
+      trans[ 1 ] = 0;
+      trans[ 2 ] = 0;
+    }
+
+    var potentialNewCollisionInfo = this.calculateCollisionInfo( -lookX * this.angularDistance( input ), [ trans[ 0 ], trans[ 1 ] ] );
+    if ( ! ( this.parent.collisionDetection( potentialNewCollisionInfo, this.id ) ) ) {
+      this.rotateBy( [ 0, 0, 1, -lookX * this.angularDistance(input) ], 0 );
+      this.translation = goog.vec.Vec3.add(
+        this.translation,
+        trans,
+        trans
+      );
+      this.collisionInfo = potentialNewCollisionInfo;
+    }
+    else {
+      var myRot = Math.PI / 180 * ( lookX * this.angularDistance( input ) );          
+      var mySin = Math.sin( myRot );
+      var myCos = Math.cos( myRot );
+      var updatedTrans = [ trans[ 0 ] * myCos - trans[ 1 ] * mySin, trans[ 1 ] * myCos + trans[ 0 ] * mySin ];
+      potentialNewCollisionInfo = this.calculateCollisionInfo( -lookX * this.angularDistance( input ), [ updatedTrans[ 0 ], updatedTrans[ 1 ] ] );
+      if ( ! ( this.parent.collisionDetection( potentialNewCollisionInfo, this.id ) ) ) {
+        this.rotateBy( [ 0, 0, 1, -lookX * this.angularDistance(input) ], 0 );
+        this.translation = goog.vec.Vec3.add(
+          this.translation,
+          updatedTrans,
+          updatedTrans
+        );
+        this.collisionInfo = potentialNewCollisionInfo;
       }
-    } 
-  }    
+    }
+  }
+  
   this.distance = function(input){
     var dist = this.translationSpeed * 10;
     if(this.timeElapsed(input) > 0) {
@@ -161,24 +218,4 @@ scripts:
         goog.vec.Vec3.create()
       );
       return camAt;      
-  }
-  this.translate = function( input, x, y ) {
-    var trans = this.getCameraVec( x, y, 0 );
-    trans[2] = 0;
-
-    if ( goog.vec.Vec3.magnitudeSquared( trans ) > goog.vec.EPSILON ) {
-      trans = goog.vec.Vec3.scale(
-          trans,
-          this.distance(input),
-          trans
-        );
-      this.cachedBoundingBox = this.worldBoundingBox;
-      if(!this.parent.collisionDetection(trans, this)) {
-        this.translation = goog.vec.Vec3.add(
-          this.translation,
-          trans,
-          trans
-        );
-      }
-    }
   }
