@@ -68,6 +68,8 @@
 
               var errorLocation = function( err ) {
                 console.warn('ERROR(' + err.code + '): ' + err.message);
+                // If location error occurs, hide billboard and label from view
+                vwf_view.kernel.callMethod( "index-vwf", "hideInvalidBillboard", [ clientName ]);
               };                            
 
               navigator.geolocation.getCurrentPosition( gotLocation, errorLocation, options );

@@ -701,7 +701,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             if ( scriptType == "application/javascript" ) {
                 try {
-                    return ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
+                    return ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText || "" );
                 } catch ( e ) {
                     this.logger.warnx( "executing", nodeID,
                         ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", utility.exceptionMessage( e ) );

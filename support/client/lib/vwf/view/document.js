@@ -30,7 +30,7 @@
 /// @module vwf/view/document
 /// @requires vwf/view
 
-define( [ "module", "vwf/view" ], function( module, view ) {
+define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
 
     return view.load( module, {
 
@@ -39,7 +39,55 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         initialize: function() {
             window.vwf_view = this;
         },
-        
+
+        // == Model API ============================================================================
+
+        createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+                childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+
+            var self = this;
+
+            // At the root node of the application, load the UI chrome if available.
+
+            if ( childID == this.kernel.application() &&
+                    ( window.location.protocol == "http:" || window.location.protocol == "https:" ) ) {
+
+                // Suspend the queue.
+
+                callback( false );
+
+                // Load the file and insert it into the main page.
+
+                var container = jQuery( "body" ).append( "<div />" ).children( ":last" );
+
+                container.load( "admin/chrome", function( responseText, textStatus ) {
+
+                    // If the overlay attached a `createdNode` handler, forward this first call
+                    // since the overlay will have missed it.
+
+                    if ( self.createdNode !== Object.getPrototypeOf( self ).createdNode ) {
+                        self.createdNode( nodeID, childID, childExtendsID, childImplementsIDs,
+                            childSource, childType, childURI, childName );
+                    }
+
+                    // Remove the container div if an error occurred or if we received an empty
+                    // result. The server sends an empty document when the application doesn't
+                    // provide a chrome file.
+
+                    if ( ! ( textStatus == "success" || textStatus == "notmodified" ) || responseText == "" ) {
+                        container.remove();
+                    }
+
+                    // Resume the queue.
+
+                    callback( true );
+
+                } );
+
+            }
+
+        },
+
     }, function( viewFunctionName ) {
 
         // == View API =============================================================================

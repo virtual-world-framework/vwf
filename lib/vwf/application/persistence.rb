@@ -17,9 +17,10 @@
 
 class VWF::Application::Persistence < Sinatra::Base
 
-  def initialize root
+  def initialize( root, env )
     super nil
     @root = root
+    @env = env
   end
 
   
@@ -39,6 +40,42 @@ class VWF::Application::Persistence < Sinatra::Base
     result = savesInDirectory( request.scheme, request.host_with_port, request.env["vwf.root"] )
     result.compact
     result.to_json
+  end
+
+  get "/load/:loadname/:loadrevision" do
+    pass unless saveExists?(request.env["vwf.root"], params['loadname'], params['loadrevision'])
+    if request.env["vwf.instance"].nil?
+      redirect to random_instance_id + "/load/" + params['loadname'] + "/" + params['loadrevision'] + "/" + ( request.query_string.length > 0 ? "?" + request.query_string : "" )
+    else
+      @env['PATH_INFO'] = "/"
+      @env['vwf.loadrevision'] = params['loadrevision']
+      VWF::Application.new(@env).call @env      
+    end
+  end  
+  get "/load/:loadname/:loadrevision/*" do
+    pass unless saveExists?(request.env["vwf.root"], params['loadname'], params['loadrevision'])
+    puts params['splat']
+    @env['PATH_INFO'] = "/" + params['splat'].join()
+    @env['vwf.load'] = params['loadname']
+    @env['vwf.loadrevision'] = params['loadrevision']
+    VWF::Application.new(@env).call @env
+  end  
+  get "/load/:loadname" do
+    pass unless saveExists?(request.env["vwf.root"], params['loadname'], nil)
+    if request.env["vwf.instance"].nil?
+      redirect to random_instance_id + "/load/" + params['loadname'] + "/" + ( request.query_string.length > 0 ? "?" + request.query_string : "" )
+    else
+      @env['PATH_INFO'] = "/"
+      @env['vwf.load'] = params['loadname']
+      VWF::Application.new(@env).call @env
+    end
+  end
+  get "/load/:loadname/*" do
+    pass unless saveExists?(request.env["vwf.root"], params['loadname'], nil)
+    puts params['splat']
+    @env['PATH_INFO'] = "/" + params['splat'].join()
+    @env['vwf.load'] = params['loadname']
+    VWF::Application.new(@env).call @env
   end
 
   post "*/save/:savename" do
@@ -63,67 +100,82 @@ class VWF::Application::Persistence < Sinatra::Base
     f.close
 
   end
-private
 
-  def recursiveSavesInDirectory( scheme, host_with_port, directory_path )
-    directory = Rack::Directory.new('documents')
-    directory._call({'SCRIPT_NAME'=>scheme+'://'+host_with_port, 'PATH_INFO'=>directory_path})
-    dirContents = directory.list_directory[2].files 
-    result = []
-    result = result.concat( savesInDirectory( scheme, host_with_port, directory_path ) )
-    result.compact
-    dirContents.each do |dirContent|
-      if dirContent[3] == "directory"
-        newDirName = directory_path + "/" + dirContent[1]
-        if newDirName[newDirName.length - 1] == '/'
-          newDirName = newDirName.slice(0, newDirName.length - 1)
-        end
-        result.concat( recursiveSavesInDirectory( scheme, host_with_port, newDirName))
-        result.compact
+  
+  helpers do
+  
+    def random_instance_id  # TODO: don't count on this for security; migrate to a proper instance id, in a cookie, at least twice as long, and with verified randomness
+      "%08x" % rand( 1 << 32 ) + "%08x" % rand( 1 << 32 ) # rand has 52 bits of randomness; call twice to get 64 bits
+    end
+
+    def saveExists?( directoryRoot, saveName, saveRevision )
+      if saveRevision.nil?
+        File.exists?(VWF.settings.public_folder+"/../documents#{ directoryRoot }/#{ saveName }/saveState.vwf.json")
+      else
+        File.exists?(VWF.settings.public_folder+"/../documents#{ directoryRoot }/#{ saveName }/saveState_"+saveRevision+".vwf.json")
       end
     end
-    result
-  end
 
-  def savesInDirectory( scheme, host_with_port, directory_path )
-    directory = Rack::Directory.new('documents')
-    directory._call({'SCRIPT_NAME'=>scheme+'://'+host_with_port, 'PATH_INFO'=>directory_path})
-    dirContents = directory.list_directory[2].files 
-    result = []
-    dirContents.each do |dirContent|
-      if dirContent[3] == "directory"
-        sub_directory = Rack::Directory.new('documents')
-        sub_directory._call({'SCRIPT_NAME'=>scheme+'://'+host_with_port, 'PATH_INFO'=>directory_path+"/"+dirContent[1]})
-        subDirContents = sub_directory.list_directory[2].files
-        revision_list = []
-        subDirContents.each do |subDirContent|
-          if subDirContent[3] == "application/json"
-            if subDirContent[1].length > 18
-              if subDirContent[1].slice(0,10) == "saveState_" and subDirContent[1].slice(subDirContent[1].length() - 9, 9) == ".vwf.json"
-                potentialTimestamp = subDirContent[1].slice(10, subDirContent[1].length() - 19)
-                timestamp = Integer(potentialTimestamp) rescue nil
-                if timestamp
-                  revision_list.push( timestamp )
+    def recursiveSavesInDirectory( scheme, host_with_port, directory_path )
+      directory = Rack::Directory.new('documents')
+      directory._call({'SCRIPT_NAME'=>scheme+'://'+host_with_port, 'PATH_INFO'=>directory_path})
+      dirContents = directory.list_directory[2].files 
+      result = []
+      result = result.concat( savesInDirectory( scheme, host_with_port, directory_path ) )
+      result.compact
+      dirContents.each do |dirContent|
+        if dirContent[3] == "directory"
+          newDirName = directory_path + "/" + dirContent[1]
+          if newDirName[newDirName.length - 1] == '/'
+            newDirName = newDirName.slice(0, newDirName.length - 1)
+          end
+          result.concat( recursiveSavesInDirectory( scheme, host_with_port, newDirName))
+          result.compact
+        end
+      end
+      result
+    end
+
+    def savesInDirectory( scheme, host_with_port, directory_path )
+      directory = Rack::Directory.new('documents')
+      directory._call({'SCRIPT_NAME'=>scheme+'://'+host_with_port, 'PATH_INFO'=>directory_path})
+      dirContents = directory.list_directory[2].files 
+      result = []
+      dirContents.each do |dirContent|
+        if dirContent[3] == "directory"
+          sub_directory = Rack::Directory.new('documents')
+          sub_directory._call({'SCRIPT_NAME'=>scheme+'://'+host_with_port, 'PATH_INFO'=>directory_path+"/"+dirContent[1]})
+          subDirContents = sub_directory.list_directory[2].files
+          revision_list = []
+          subDirContents.each do |subDirContent|
+            if subDirContent[3] == "application/json"
+              if subDirContent[1].length > 18
+                if subDirContent[1].slice(0,10) == "saveState_" and subDirContent[1].slice(subDirContent[1].length() - 9, 9) == ".vwf.json"
+                  potentialTimestamp = subDirContent[1].slice(10, subDirContent[1].length() - 19)
+                  timestamp = Integer(potentialTimestamp) rescue nil
+                  if timestamp
+                    revision_list.push( timestamp )
+                  end
                 end
               end
             end
           end
-        end
-        if revision_list.length > 0
-          baseName = dirContent[1]
-          if baseName.slice(baseName.length - 1) == "/"
-            baseName = baseName.slice(0, baseName.length - 1)
+          if revision_list.length > 0
+            baseName = dirContent[1]
+            if baseName.slice(baseName.length - 1) == "/"
+              baseName = baseName.slice(0, baseName.length - 1)
+            end
+            revision_list.sort!
+            firstEntry = true
+            while revision_list.length > 0
+              entry = revision_list.pop
+              result.push({ "applicationpath" => directory_path, "savename" => baseName, "revision"=> entry, "latestsave"=>firstEntry })
+              firstEntry = false
+            end
           end
-          revision_list.sort!
-          firstEntry = true
-          while revision_list.length > 0
-            entry = revision_list.pop
-            result.push({ "applicationpath" => directory_path, "savename" => baseName, "revision"=> entry, "latestsave"=>firstEntry })
-            firstEntry = false
-          end
         end
-      end
-    end 
-    result.compact
+      end 
+      result.compact
+    end
   end
 end

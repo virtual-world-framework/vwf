@@ -338,7 +338,7 @@ function ServeYAML(filename,response, URL)
 			}
 			//global.log(tf);
 			try{
-			var deYAML = JSON.stringify(YAML.load(file));
+			    var deYAML = JSON.stringify(YAML.load(file));
 			}catch(e)
 			{
 				global.log("error parsing YAML " + filename );
@@ -561,7 +561,10 @@ function startVWF(){
 		global.instances[namespace].state = {};
 		
 		//create or open the log for this instance
-		var log = fs.createWriteStream('.//Logs/'+namespace.replace(/[\\\/]/g,'_'), {'flags': 'a'});
+		if(global.logLevel >= 2) {
+			var log = fs.createWriteStream('.//Logs/'+namespace.replace(/[\\\/]/g,'_'), {'flags': 'a'});
+		}
+
 		global.instances[namespace].Log = function(message,level)
 		{
 			if(global.logLevel >= level)
@@ -594,7 +597,7 @@ function startVWF(){
 			for(var i in global.instances[namespace].clients)
 			{
 				var client = global.instances[namespace].clients[i];
-				client.emit('message',{"action":"tick","parameters":[],"time":global.instances[namespace].time});
+				client.emit('message',{action:"tick",parameters:[],time:global.instances[namespace].time});
 			}
 		
 		},50);
@@ -619,7 +622,7 @@ function startVWF(){
 		//Now the server has a rough idea of what the simulation is
 
 		
-		socket.emit('message',{"action":"createNode","parameters":["index.vwf"],"time":global.instances[namespace].time});
+		socket.emit('message',{action:"createNode",parameters:["index.vwf", "application"],time:global.instances[namespace].time});
 		socket.pending = false;
 	  }
 	  //this client is not the first, we need to get the state and mark it pending
@@ -627,7 +630,7 @@ function startVWF(){
 	  {
 		var firstclient = Object.keys(global.instances[namespace].clients)[0];
 		firstclient = global.instances[namespace].clients[firstclient];
-		firstclient.emit('message',{"action":"getState","respond":true,"time":global.instances[namespace].time});
+		firstclient.emit('message',{action:"getState",respond:true,time:global.instances[namespace].time});
 		global.instances[namespace].Log('GetState from Client',2);
 		socket.pending = true;
 	  }
@@ -652,10 +655,10 @@ function startVWF(){
 				//if the message was get state, then fire all the pending messages after firing the setState
 				if(message.action == "getState")
 				{
-					global.instances[namespace].Log('Got State',1);
+					global.instances[namespace].Log('Got State',2);
 					var state = message.result;
 					global.instances[namespace].Log(state,2);
-					client.emit('message',{"action":"setState","parameters":[state],"time":global.instances[namespace].time});
+					client.emit('message',{action:"setState",parameters:[state],time:global.instances[namespace].time});
 					client.pending = false;
 					for(var j = 0; j < client.pendingList.length; j++)
 						client.emit('message',client.pendingList[j]);

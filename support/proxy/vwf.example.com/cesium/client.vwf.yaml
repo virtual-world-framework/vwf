@@ -60,6 +60,7 @@ scripts:
         self.billboard = child;
         
         child.position = self.location;
+        console.info(child.position);
         child.color = self.color;
       } );
 

@@ -135,4 +135,23 @@ class VWF::Application::Admin < Sinatra::Base
     end
   end
 
+  # The application's "chrome" HTML overlay.
+  # 
+  # For an application `application.vwf`, the chrome is in the file `application.vwf.html`. An empty
+  # document is sent if the overlay file doesn't exist.
+
+  get "/chrome" do
+
+    chrome_file = File.join VWF.settings.public_folder, env["vwf.root"],
+      "#{ env["vwf.application"] }.html"
+
+    if File.exists? chrome_file
+      send_file chrome_file
+    else
+      content_type :html
+      ""
+    end
+
+  end
+
 end
