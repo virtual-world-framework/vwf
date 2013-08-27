@@ -32,11 +32,11 @@
 			{
 				return this.GetMesh().getBoundingBox(true);
 			}
-			this.updateSelf = function(rebuild)
+			this.updateSelf = function(rebuild,cache)
 			{
 				if(rebuild)
 				{
-				   this.Build();
+				   this.Build(cache);
 				   this.backupMesh();
 				}
 				else
@@ -47,9 +47,9 @@
 				
 			}
 			
-			this.dirtyStack = function(rebuild)
+			this.dirtyStack = function(rebuild,cache)
 			{
-				this.updateStack(rebuild);
+				this.updateStack(rebuild,cache);
 			}
 			this.gettingProperty = function(propertyName)
 			{
@@ -59,10 +59,22 @@
 				}
 				
 			}
-			this.updateStack = function(rebuild)
+			this.hasModifiers = function()
+			{
+				var has = false;
+				if(this.children)
+				for(var i =0; i< this.children.length; i++)
+				{
+					if(vwf.getProperty(this.children[i].ID,'type') == 'modifier')
+						has = true;
+					
+				}
+				return has;
+			}
+			this.updateStack = function(rebuild,cache)
 			{
 
-				this.updateSelf(rebuild);
+				this.updateSelf(rebuild,cache && !this.hasModifiers());
 				
 				var children = vwf.children(this.ID);
 				
@@ -142,7 +154,7 @@
 				this.GetMesh().position.z = 0;
 				this.GetMesh().updateMatrixWorld(true);
 			}
-			this.Build = function()
+			this.Build = function(cache)
 			{
 				var mat;
 				if( this.rootnode.children[0])
@@ -153,7 +165,7 @@
 				if(this.mesh)
 					this.rootnode.remove(this.mesh);
 				
-				var mesh = this.BuildMesh(mat);
+				var mesh = this.BuildMesh(mat,cache);
 				this.mesh = mesh;
 				
 				

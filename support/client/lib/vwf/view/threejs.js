@@ -322,7 +322,7 @@ var stats;
 			
 			$(document).trigger('postprerender',[vp,wh,ww]);
 			
-			if($('#glyphOverlay').is(':visible'))
+			if($('#glyphOverlay').css('display') != 'none')
 			{
 				$(document).trigger('glyphRender',[vp,wh,ww]);
 			}

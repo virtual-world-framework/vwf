@@ -91,6 +91,7 @@
 				
 				if(this.animationState == 1)
 				{
+					
 					var nextframe = this.animationFrame+1;
 					if(nextframe > this.animationEnd)
 						nextframe = this.animationStart;

@@ -583,15 +583,125 @@ define(function ()
 			}
 			return true;
 		}
+		this.NewMethod_internal = function()
+		{
+			
+			
+			var name;
+			var params = [];
+			var paramcount;
+			
+			var body;
+			alertify.prompt("Enter the method name",function(ok,val)
+			{
+				if(ok)
+				{
+					name = val;
+					alertify.prompt("Enter the number of parameters",function(ok,val)
+					{
+						if(ok)
+						{
+							paramcount = parseInt(val);
+							for(var i = 0; i  < paramcount; i++)
+								params.push(i);
+							async.forEachSeries(params,function(i,cb){
+							
+								
+								alertify.prompt("Enter the name of parameter " + i,function(ok,val)
+								{
+										if(ok)
+											params[i] = val;
+										cb();	
+								},'parameter name');
+							
+							
+							},function()
+							{
+								
+								var paramstr = '(';
+								for(var i = 0; i  < paramcount; i++)
+								{
+									paramstr += params[i] + ',';
+								}
+								paramstr = paramstr.substr(0,paramstr.length-1) +')';
+								_ScriptEditor.setSelectedMethod(name, 'function ' + name+paramstr + '{\n\n console.log("got here"); \n\n}');
+							});
+						}
+					
+					},'value');
+			
+				}
+			},'name');
+			
+			
+			
+			
+		
+		}
 		this.NewMethod = function ()
 		{
 			if (!_ScriptEditor.checkPermission()) return;
 			if (_ScriptEditor.MethodChanged) _ScriptEditor.PromptAbandon(function ()
 				{
 					_ScriptEditor.MethodChanged = false;
-					$('#ScriptEditorCreateMethod').dialog('open');
+					_ScriptEditor.NewMethod_internal();
 				});
-			else $('#ScriptEditorCreateMethod').dialog('open');
+			else _ScriptEditor.NewMethod_internal();
+		}
+		this.NewEvent_internal = function()
+		{
+			
+			
+			var name;
+			var params = [];
+			var paramcount;
+			
+			var body;
+			alertify.prompt("Enter the event name",function(ok,val)
+			{
+				if(ok)
+				{
+					name = val;
+					alertify.prompt("Enter the number of parameters",function(ok,val)
+					{
+						if(ok)
+						{
+							paramcount = parseInt(val);
+							for(var i = 0; i  < paramcount; i++)
+								params.push(i);
+							async.forEachSeries(params,function(i,cb){
+							
+								
+								alertify.prompt("Enter the name of parameter " + i,function(ok,val)
+								{
+										if(ok)
+											params[i] = val;
+										cb();	
+								},'parameter name');
+							
+							
+							},function()
+							{
+								
+								var paramstr = '(';
+								for(var i = 0; i  < paramcount; i++)
+								{
+									paramstr += params[i] + ',';
+								}
+								paramstr = paramstr.substr(0,paramstr.length-1) +')';
+								_ScriptEditor.setSelectedEvent(name, 'function ' + name+paramstr + '{\n\n console.log("got here"); \n\n}');
+							});
+						}
+					
+					},'value');
+			
+				}
+			},'name');
+			
+			
+			
+			
+		
 		}
 		this.NewEvent = function ()
 		{
@@ -599,9 +709,33 @@ define(function ()
 			if (_ScriptEditor.EventChanged) _ScriptEditor.PromptAbandon(function ()
 				{
 					_ScriptEditor.EventChanged = false;
-					$('#ScriptEditorCreateEvent').dialog('open');
+					_ScriptEditor.NewEvent_internal();
 				});
-			else $('#ScriptEditorCreateEvent').dialog('open');
+			else _ScriptEditor.NewEvent_internal();
+		}
+		this.NewProperty_internal = function()
+		{
+			var name;
+			var value;
+			alertify.prompt("Enter the properties name",function(ok,val)
+			{
+				if(ok)
+				{
+					name = val;
+					alertify.prompt("Enter the properties value",function(ok,val)
+					{
+						if(ok)
+						{
+							value = val;
+							_ScriptEditor.setSelectedProperty(name, value);
+							_ScriptEditor.SavePropertyClicked(true);
+						}
+					
+					},'value');
+			
+				}
+			},'name');
+			
 		}
 		this.NewProperty = function ()
 		{
@@ -609,9 +743,9 @@ define(function ()
 			if (_ScriptEditor.PropertyChanged) _ScriptEditor.PromptAbandon(function ()
 				{
 					_ScriptEditor.PropertyChanged = false;
-					$('#ScriptEditorCreateProperty').dialog('open');
+					_ScriptEditor.NewProperty_internal();
 				});
-			else $('#ScriptEditorCreateProperty').dialog('open');
+			else _ScriptEditor.NewProperty_internal();
 		}
 		this.MethodChange = function ()
 		{
@@ -1412,7 +1546,7 @@ define(function ()
 								console.log(self.filter);
 								$('#AutoComplete').focus();
 								
-								self.setupAutocomplete(self.keys,editor,self.filter);
+								self.setupAutocomplete(self.keys,_ScriptEditor.activeEditor,self.filter);
 								
 							},15);
 						}else

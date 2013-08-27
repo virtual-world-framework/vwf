@@ -12,7 +12,8 @@
 					return this.materials[id];
 				else
 				{
-					this.materials[id] = new THREE.MeshPhongMaterial()
+					this.materials[id] = new THREE.MeshPhongMaterial();
+					//this.materials[id].morphTargets  = true;
 					this.setMaterialByDef(this.materials[id],def);
 					return this.materials[id];				
 					
@@ -33,6 +34,7 @@
 				currentmat.emissive.g = value.emit.g;
 				currentmat.emissive.b = value.emit.b;
 				
+				currentmat.morphTargets = value.morphTargets || false;
 				currentmat.specular.r = value.specularColor.r * value.specularLevel;
 				currentmat.specular.g = value.specularColor.g * value.specularLevel;
 				currentmat.specular.b = value.specularColor.b * value.specularLevel;
@@ -217,6 +219,10 @@
 					for(var i =0; i < list.length; i++)
 					{
 						//if(!(list[i].material instanceof THREE.MeshPhongMaterial))
+						if(list[i].morphTargetInfluences)
+							propval.morphTargets = true;
+						else
+							propval.morphTargets = false;
 							list[i].material =  _materialCache.getMaterialbyDef(propval);
 						//this.setMaterialByDef(list[i].material || new THREE.MeshPhongMaterial,propval);
 						list[i].materialUpdated();

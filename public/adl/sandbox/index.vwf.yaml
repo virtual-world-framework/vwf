@@ -28,9 +28,14 @@ properties:
     value: [0 , 0 , 1 ]
     set: |
             if(!this.sun) return;
-            this.sun.position.x = value[0];
-            this.sun.position.y = value[1];
-            this.sun.position.z = value[2];      
+            
+            var x = value[2] * Math.sin(value[0])* Math.cos(value[1]);
+            var y = value[2] * Math.sin(value[0])* Math.sin(value[1]);
+            var z = value[2] * Math.cos(value[0]);
+            
+            this.sun.position.x = x;
+            this.sun.position.y = y;
+            this.sun.position.z = z;      
             this.sun.position.normalize();
             this.sun.position.multiplyScalar(100);
             this.sun.updateMatrixWorld(true);
@@ -123,6 +128,7 @@ properties:
       displayname: Sun Direction
       property: sunDirection
       type: vector
+      step: .05
     skyTexture:
       displayname: skyTexture
       property: skyTexture

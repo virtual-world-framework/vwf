@@ -408,18 +408,22 @@ define(
 
 		function focusSelected()
 		{
+			var focusID = null;
 			if (_Editor.GetSelectedVWFNode())
+				focusID = _Editor.GetSelectedVWFNode().id;
+			if(!focusID)
+				focusID =  _UserManager.GetAvatarForClientID(vwf.moniker()) &&  _UserManager.GetAvatarForClientID(vwf.moniker()).id;
+			if (focusID)
 			{
-				if (_Editor.GetSelectedVWFNode())
-				{
+				
 					var t = _Editor.GetMoveGizmo().parent.matrixWorld.getPosition();
 					var gizpos = [t.x, t.y, t.z];
-					var box = _Editor.findviewnode(_Editor.GetSelectedVWFNode().id).getBoundingBox();
+					var box = _Editor.findviewnode(focusID).getBoundingBox();
 					var dist = MATH.distanceVec3([box.max.x, box.max.y, box.max.z], [box.min.x, box.min.y, box.min.z]);
 					vwf.models[0].model.nodes['index-vwf'].orbitPoint(gizpos);
 					vwf.models[0].model.nodes['index-vwf'].zoom = dist * 2;
 					vwf.models[0].model.nodes['index-vwf'].updateCamera();
-				}
+				
 			}
 		}
 		$('#MenuFocusSelected').click(function (e)
@@ -536,6 +540,7 @@ define(
 		});
 		$('#MenuCamera3RDPerson').click(function (e)
 		{
+			
 			if (_UserManager.GetCurrentUserName())
 			{
 				clearCameraModeIcons();

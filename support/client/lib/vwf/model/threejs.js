@@ -1807,7 +1807,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 		{
 			$(document).trigger('EndParse');
 			if(window._Notifier)
-				_Notifier.alert('error loading asset');
+				_Notifier.alert('error loading asset ' + err);
 		}
 		
 		//callback for sucess of asset parse

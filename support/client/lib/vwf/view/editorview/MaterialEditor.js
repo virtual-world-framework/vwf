@@ -25,6 +25,11 @@ define(["vwf/view/editorview/mapbrowser"], function ()
 		$(document.head).append('<script type="text/javascript" src="js/colorpicker.js"></script>');
 		this.show = function ()
 		{
+			if(!this.currentMaterial)
+			{
+				alertify.alert('This object does not expose a material interface');
+				return;
+			}
 			//$('#materialeditor').dialog('open');
 			$('#materialeditor').prependTo($('#materialeditor').parent());
 			$('#materialeditor').show('blind', function ()
@@ -493,8 +498,12 @@ define(["vwf/view/editorview/mapbrowser"], function ()
 			{
 				if (node)
 				{
+					
 					this.currentMaterial = vwf.getProperty(node.id, 'materialDef');
-					if (!this.currentMaterial) return;
+					if (!this.currentMaterial){
+					if(this.isOpen()) this.hide();
+					return;
+					}
 					if (this.isOpen()) this.BuildGUI();
 				}
 				else
