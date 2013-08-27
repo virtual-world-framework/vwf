@@ -139,7 +139,7 @@ define(function ()
 						function(e)
 						{
 							if(e)
-								window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13);
+								window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13) + window.location.hash;
 							else
 							{
 								
