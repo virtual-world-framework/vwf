@@ -131,7 +131,7 @@ define(function ()
 					{
 						if (!_UserManager.GetCurrentUserName())
 						{
-							vwf.models[0].model.nodes['index-vwf'].orbitPoint(pos);
+							vwf.models[0].model.nodes['index-vwf'].orbitPoint([pos[0],pos[1],pos[2]]);
 							vwf.models[0].model.nodes['index-vwf'].zoom = 5;
 							vwf.models[0].model.nodes['index-vwf'].updateCamera();
 							return;
