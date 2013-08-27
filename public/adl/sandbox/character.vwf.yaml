@@ -470,7 +470,7 @@ scripts:
           }
           
         
-        var spc = _SceneManager.SphereCast([finalt[0],finalt[1],finalt[2]+1.0],.5,{ignore:[this.skin]});
+        var spc = _SceneManager.SphereCast([finalt[0],finalt[1],finalt[2]+1.0],.5,{ignore:[this.skin],filter:function(n){if(n.passable) return false; return true;}});
         //if the character intersected something (as defined by the sphere)
         if(spc.length)
         {
