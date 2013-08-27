@@ -70,7 +70,9 @@ exports.help = function(req, res){
 };
 
 exports.handlePostRequest = function(req, res, next){
-	
+	next();
+	//Disabled until admin can be verified
+	/*
 	var data = req.body ? JSON.parse(req.body) : '';
 	
 	switch(req.params.action){
@@ -95,24 +97,6 @@ exports.handlePostRequest = function(req, res, next){
 		default: 
 			next();
 			break;
-	}
+	}*/
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
