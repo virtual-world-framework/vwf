@@ -180,6 +180,7 @@ define(function ()
 		}
 		this.MoveToGround = function()
 		{
+			
 			if (!_UserManager.GetCurrentUserName())
 				{
 					_Notifier.alert('Location tools are not available when you are not logged in.');
@@ -192,7 +193,7 @@ define(function ()
 			if(hit)
 			{
 				location[2] = hit.point[2];
-				_Editor.setProperty(_UserManager.GetCurrentUserID(),'translation',location);
+				_Editor.setProperty(_UserManager.GetCurrentUserID(),'translation',[location[0],location[1],location[2]]);
 				$('#MenuCamera3RDPersonicon').click();		
 			}
 		

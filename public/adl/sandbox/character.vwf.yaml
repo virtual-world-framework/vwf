@@ -435,7 +435,7 @@ scripts:
                 var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,2]),[0,0,-1],{filter:function(o){return !(o.isAvatar === true || o.passable === true)},maxDist: 100,ignore:[this.skin,_Editor.GetMoveGizmo()]});
                 if(intersect)
                 {
-                    
+                   
                     var zdiff = standing - intersect.distance;
                    
                     //in this case, they've jumpped onto something
@@ -474,7 +474,7 @@ scripts:
         //if the character intersected something (as defined by the sphere)
         if(spc.length)
         {
-           
+            
             //find the motion vector
             var offset = MATH.subVec3(finalt , backupt);
             var len = MATH.lengthVec3(offset);
@@ -484,7 +484,7 @@ scripts:
             for(var i = 0; i < spc.length; i++)
                 normal = MATH.addVec3(normal,spc[i].norm);
             normal = MATH.scaleVec3(normal,1.0/spc.length);
-           // normal[2] = 0;
+            normal[2] = 0;
             normal = MATH.toUnitVec3(normal);
             
             //if moving into the contact

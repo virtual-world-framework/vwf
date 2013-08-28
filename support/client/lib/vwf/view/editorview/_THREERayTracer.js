@@ -901,6 +901,9 @@ OctreeRegion.prototype.intersectSphere = function(center,r,opts)
 				
 				return hits;
 			}
+			if(hits.length > 5)
+				break;
+			
 		}
 	}
 	
@@ -1260,7 +1263,22 @@ THREE.Object3D.prototype.GetBoundingBox = function(local)
 		box = box.transformBy(this.getLocalMatrix());
 	return box;
 }
-
+//Should I ignore this? true for yes
+THREE.Object3D.prototype.ignoreTest =function(ignore)
+{
+	if(!ignore)
+		return false;
+	if(ignore.length == 0)
+		return false;
+	var parent = this;
+	while(parent)
+	{
+		if(ignore.indexOf(parent) != -1) return true;
+	
+		parent = parent.parent;
+	}
+	return false;
+}
 //no need to test bounding box here. Can only contain one mesh, and the mesh will check its own
 //boudning box.
 THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
@@ -1273,7 +1291,7 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 				return null;
 	  }
 	  
-	  if(options && options.ignore && options.ignore.indexOf(this) != -1)
+	  if(this.ignoreTest(options && options.ignore))
 		return null;
 	  if(options.UserRenderBatches && this.isBatched)
 		return null;
@@ -1434,7 +1452,7 @@ THREE.Object3D.prototype.FrustrumCast = function(frustrum,options)
 				return null;
 	  }
 	  
-	  if(options && options.ignore && options.ignore.indexOf(this) != -1)
+	  if(this.ignoreTest(options && options.ignore))
 		return null;
 	  if(options.UserRenderBatches && this.isBatched)
 		return null;
@@ -1529,7 +1547,7 @@ THREE.Object3D.prototype.SphereCast = function(center,r,options)
 				return null;
 	  }
 	  
-	  if(options && options.ignore && options.ignore.indexOf(this) != -1)
+	 if(this.ignoreTest(options && options.ignore))
 		return null;
 	  if(options.UserRenderBatches && this.isBatched)
 		return null;

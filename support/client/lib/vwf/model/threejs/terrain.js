@@ -103,6 +103,9 @@
 				}
 				
 			}
+			this.getRoot().SphereCast = function(o,d,opts){
+				return null;
+			}
 			
 			_SceneManager.specialCaseObjects.push(this.getRoot());
 			this.init = true;
