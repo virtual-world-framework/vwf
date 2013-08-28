@@ -608,6 +608,24 @@ BoundingBoxRTAS.prototype.intersect = function(o,d)
     return [true]; // if we made it here, there was an intersection - YAY
 
 }
+BoundingBoxRTAS.prototype.buildFacelist = function()
+{
+	this.faces = [];
+	
+	this.faces.push(new face([this.min[0],this.min[1],this.min[2]],[this.min[0],this.min[0],this.min[0]],[this.min[0],this.min[0],this.min[0]]));
+	this.faces.push(new face([this.min[0],this.min[1],this.min[2]],[this.min[0],this.min[0],this.min[0]],[this.min[0],this.min[0],this.min[0]]));
+	this.faces.push(new face([this.min[0],this.min[1],this.min[2]],[this.min[0],this.min[0],this.min[0]],[this.min[0],this.min[0],this.min[0]]));
+	this.faces.push(new face([this.min[0],this.min[1],this.min[2]],[this.min[0],this.min[0],this.min[0]],[this.min[0],this.min[0],this.min[0]]));
+	this.faces.push(new face([this.min[0],this.min[1],this.min[2]],[this.min[0],this.min[0],this.min[0]],[this.min[0],this.min[0],this.min[0]]));
+	this.faces.push(new face([this.min[0],this.min[1],this.min[2]],[this.min[0],this.min[0],this.min[0]],[this.min[0],this.min[0],this.min[0]]));
+	this.faces.push(new face([this.min[0],this.min[1],this.min[2]],[this.min[0],this.min[0],this.min[0]],[this.min[0],this.min[0],this.min[0]]));
+	this.faces.push(new face([this.min[0],this.min[1],this.min[2]],[this.min[0],this.min[0],this.min[0]],[this.min[0],this.min[0],this.min[0]]));
+	this.faces.push(new face([this.min[0],this.min[1],this.min[2]],[this.min[0],this.min[0],this.min[0]],[this.min[0],this.min[0],this.min[0]]));
+	this.faces.push(new face([this.min[0],this.min[1],this.min[2]],[this.min[0],this.min[0],this.min[0]],[this.min[0],this.min[0],this.min[0]]));
+	this.faces.push(new face([this.min[0],this.min[1],this.min[2]],[this.min[0],this.min[0],this.min[0]],[this.min[0],this.min[0],this.min[0]]));
+	this.faces.push(new face([this.min[0],this.min[1],this.min[2]],[this.min[0],this.min[0],this.min[0]],[this.min[0],this.min[0],this.min[0]]));
+
+}
 BoundingBoxRTAS.prototype.intersectSphere = function(center,r)
 {
 	closest = [];
@@ -1083,10 +1101,13 @@ THREE.Geometry.prototype.setPickGeometry = function(PickGeometry)
 	  this.PickGeometry = PickGeometry;
 }
 //Do the actuall intersection with the mesh;
-THREE.Geometry.prototype.CPUPick = function(origin,direction,options)
+THREE.Geometry.prototype.CPUPick = function(origin,direction,options,collisionType)
 {
 
-	 
+	  
+	  if(!collisionType)
+		collisionType = 'mesh';
+		
 	  if(this.InvisibleToCPUPick)
 		return null;
 	  
@@ -1094,7 +1115,7 @@ THREE.Geometry.prototype.CPUPick = function(origin,direction,options)
 	  if(this.PickGeometry)
 	  {
 		
-		return this.PickGeometry.CPUPick(origin,direction,options);
+		return this.PickGeometry.CPUPick(origin,direction,options,collisionType);
 	  }
 		
       //if for some reason dont have good bounds, generate	 
@@ -1115,18 +1136,28 @@ THREE.Geometry.prototype.CPUPick = function(origin,direction,options)
 		 
 		 //try to reject based on bounding box.
 		 var bbhit = this.BoundingBox.intersect(origin,direction); 
-		 
-		 if(bbhit.length > 0)
+		 if(collisionType == 'mesh')
+		 {
+			 if(bbhit.length > 0)
+			 {
+				
+				 //build the octree or the facelist
+				 if(!this.RayTraceAccelerationStructure || this.dirtyMesh)
+				 {
+					 this.BuildRayTraceAccelerationStructure();
+					
+				 }
+				 //do actual mesh intersection
+				 intersections = this.RayTraceAccelerationStructure.intersect(origin,direction,options); 		 
+			 }
+		 }
+		 if(collisionType == 'box')
 		 {
 			
-			 //build the octree or the facelist
-			 if(!this.RayTraceAccelerationStructure || this.dirtyMesh)
-			 {
-				 this.BuildRayTraceAccelerationStructure();
-				
-			 }
-			 //do actual mesh intersection
-			 intersections = this.RayTraceAccelerationStructure.intersect(origin,direction,options); 		 
+		 }
+		 if(collisionType == 'sphere')
+		 {
+		 
 		 }
 	  }
 	  this.dirtyMesh = false;
