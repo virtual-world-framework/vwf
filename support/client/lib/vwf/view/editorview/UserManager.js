@@ -151,7 +151,7 @@ define(function ()
 								$(document.body).append('<a href="#" id="GuestLogin" style="font-family: sans-serif;z-index:99;position:fixed;font-size: 2em;" class="alertify-button alertify-button-ok" id="alertify-ok">Login</a>');
 								$('#GuestLogin').click(function()
 								{
-									window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13);
+									window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13) + window.location.hash;
 								});
 							}
 						}
@@ -413,7 +413,7 @@ define(function ()
 						
 						window.onbeforeunload = '';
 						$(window).unbind();
-						window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13);
+						window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13) + window.location.hash;
 					}.bind(this)
 				});
 			
