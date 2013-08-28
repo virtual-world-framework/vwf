@@ -920,7 +920,41 @@ function importStates()
 				console.log('done');
 			});
 	});
-}			
+}
+function deleteInstances(list, cb){
+	async.eachSeries(list, function(val,cb2)
+	{
+		getInstance(val,function(state){
+			//Do some type of privilege checking
+			//if(state.owner != URL.loginData.UID && URL.loginData.UID != global.adminUID)
+			deleteInstance(val,function(){
+				cb2();
+			});
+		});
+	}, cb);
+};
+function deleteUsers(list, cb){
+	async.eachSeries(list, function(val,cb2)
+	{
+		deleteUser(val, function(){		
+			cb2();
+		});	
+	}, cb);
+};
+
+function getAllUsersInfo(cb){
+	var userInfoList = [];
+	getUsers(function(users){	
+		async.eachSeries(users, function(val,cb2)
+		{
+			getUser(val, function(doc){
+				userInfoList.push(doc);
+				cb2();
+			});
+		}, function(){cb(userInfoList)});
+	});
+};
+			
 function getUsers (cb)
 {
 	DB.get('UserIndex',function(err,UserIndex,key)
@@ -1036,11 +1070,14 @@ function startup(callback)
 			exports.updateUser = updateUser;
 			exports.createUser = createUser;
 			exports.deleteUser = deleteUser;
+			exports.deleteUsers = deleteUsers;
+			exports.getAllUsersInfo = getAllUsersInfo;
 			
 			exports.getInstance = getInstance;
 			exports.updateInstance = updateInstance;
 			exports.createInstance = createInstance;
 			exports.deleteInstance = deleteInstance;
+			exports.deleteInstances = deleteInstances;
 			
 			exports.getUsers = getUsers;
 			exports.getInstances = getInstances;

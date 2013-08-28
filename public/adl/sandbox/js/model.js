@@ -3,11 +3,7 @@
 //IE undefined console fix
 if (!window.console) console = {log: function() {}};
 		
-var filter = ''
-var root = '{{root}}';
-var pageIndex = 0;
-var pageLength = 12;
-var userNameFilter = '';
+var filter = '', pageIndex = 0, pageLength = 12, userNameFilter = '', selectAll = false;
 var vwfPortalModel = new function(){
 	var self = this;
 	self.getShorterStr = function(a, length){
@@ -52,9 +48,12 @@ var vwfPortalModel = new function(){
 		}	
 	}).extend({throttle:500});
 	
+	self.returnVal = (root + '/' + window.location.search.substr(window.location.search.indexOf('=')+1)).replace('//', '/') + window.location.hash;
 	self.worldObjects = ko.observableArray([]);
 	self.displayWorldObjects = ko.observableArray([]);
 	self.featuredWorldObjects = ko.observableArray([]);
+	self.adminDisplayList = ko.observableArray();
+	self.currentAdminItem = ko.observable(false); 
 	self.getNextPage = function(){
 		if(self.nextDisabled() === false)
 			self.getPage(1);
@@ -66,6 +65,7 @@ var vwfPortalModel = new function(){
 	
 	self.previousDisabled = ko.observable(true);
 	self.nextDisabled = ko.observable(true);
+	
 	
 	self.getPage = function(i){
 		var worldObjectsLength = getArrVisibleLength(self.worldObjects());
@@ -90,7 +90,32 @@ var vwfPortalModel = new function(){
 			return;
 		obj.editVisible(e.type === "mouseover");
 	};
+
+	self.handleSelectAll = function(){
+		$('.checkboxes').prop('checked', !selectAll);
+		selectAll = !selectAll;
+		return true;
+	};
+	
+	self.setSelectAll = function(val){
+		selectAll = val;
+	};
 };
+
+function handleHash(propStr){
+
+	var tmpHash = window.location.hash.replace("#", "");
+	if(tmpHash){
+		for(var i in vwfPortalModel.adminDisplayList()){
+			if(tmpHash == vwfPortalModel.adminDisplayList()[i][propStr]){
+				vwfPortalModel.currentAdminItem(vwfPortalModel.adminDisplayList()[i]);
+				break;
+			}
+		}
+	}
+	
+	else vwfPortalModel.currentAdminItem(false);
+}
 
 function checkFilter(textArr){
 	
@@ -150,10 +175,9 @@ function removeAgoFromMoment(date){
 	return temp.substr(0, temp.length - 4);
 };
 
-function showStates(){
+function showStates(cb){
 
 	$.getJSON("./vwfDataManager.svc/states",function(e){
-		console.log(e)
 		
 		var tempArr = getFlatIdArr();
 		var saveIndex = 0;
@@ -214,12 +238,13 @@ function showStates(){
 			
 			vwfPortalModel.worldObjects().sort(sortArrByUpdates);
 			vwfPortalModel.getPage(0);
+			
+			if(cb) cb();
 		});
 	});
 }
 
 function sortArrByUpdates(a, b){
-	console.log(a.hotState(), b.hotState());
 	if(a.hotState() == true && b.hotState() == false)
 		return -1;			
 	

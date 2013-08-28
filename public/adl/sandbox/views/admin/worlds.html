@@ -1,6 +1,10 @@
-	<div class="row" style="margin-top:30px;">
+	<div class="row">
 		<div class="span3">
-			<h3>Worlds</h3>
+			<h3 data-bind="text:currentAdminItem() == false?'Worlds':currentAdminItem().title"></h3>
+		</div>
+	</div>
+	<div class="row" data-bind="visible:currentAdminItem() == false">
+		<div class="span3">
 			<a href="{{root}}/create">Create World</a><br/>
 			<a data-bind="click:deleteSelected" href="">Delete Selected</a><br/><br/>
 			<a href="{{root}}/admin">Admin Page</a>
@@ -10,14 +14,14 @@
 				<div class="usersList span4">
 					<table class="table table-striped" style="border: 1px solid #ddd;">
 						<tr>
-							<th style="border:none; background:#FFF"></th>
+							<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllBox" data-bind="click:handleSelectAll" /></th>
 							<th style="border:none; background:#FFF">Name</th>
 							<th style="border:none; background:#FFF">Owner</th>
 							<th style="border:none; background:#FFF">Objects</th>
 						</tr>
-						<tbody data-bind="foreach:worldObjects, style:{border:'none'}">
+						<tbody data-bind="foreach:adminDisplayList, style:{border:'none'}">
 						
-							<td><input type="checkbox" /></td>
+							<td><input type="checkbox" class="checkboxes" /></td>
 							<td><a data-bind="text:title, attr:{href:'#'+id}" href=""></a></td>
 							<td><a data-bind="text:owner, attr:{href:'{{root}}/admin/users#'+owner}" href=""></a></td>
 							<td><span data-bind="text:objects"></span></td>
@@ -27,22 +31,72 @@
 			</div>
 		</div>
 	</div>
+<div class="row" data-bind="visible:currentAdminItem() != false">
+	<div class="span4">
+		<a href="#">View full list of worlds</a>
+	</div>
+	<div class="adminDisplayList span4">
+		<form> 
+			
+			<div style="height:50px;">
+				<span>Edit user name:</span>
+				<input type="text" style="float:right;" />			
+			</div>
+			<div>
+				<span>Change password:</span>
+				<input type="text"style="float:right;" /><br/>
+			</div>
+	
+		</form>
+		
+		Under construction..
+	</div>
+</div>
 	<script>
 		vwfPortalModel.deleteSelected = function(data){
 			
-			var tempWorldArr = [];
-			for(var i = 0; i < $('input:checked').length; i++){
-				tempWorldArr.push(ko.dataFor($('input:checked')[i]).title);
+			var tempWorldArr = [], dataSendArr = [], tempStr = '', cacheQuery = $('input:checked').not('#selectAllBox');
+			for(var i = 0; i < cacheQuery.length; i++){
+				tempStr = ko.dataFor(cacheQuery[i]).id;
+				
+				if(tempStr){
+					tempWorldArr.push(tempStr);
+					dataSendArr.push('_adl_sandbox_' + tempStr + '_');
+				}
 			}
 			
 			//Make the request to the server to delete these users
-			console.log("Delete worlds ", tempWorldArr);
-			$('input:checked').click();
+			console.log("Delete worlds ", tempWorldArr, dataSendArr);
+			
+			//Make the request to the server to delete these users
+			$.post('{{root}}/data/delete_worlds', JSON.stringify(dataSendArr), function(o){
+				
+				for(var i in tempWorldArr){
+					for(var g in vwfPortalModel.adminDisplayList()){
+						if(vwfPortalModel.adminDisplayList()[g].id == tempWorldArr[i]){
+							vwfPortalModel.adminDisplayList.splice(g, 1);
+						}
+					}
+				}
+				
+			});
+			
+			$('input').prop("checked", false);
+			vwfPortalModel.setSelectAll(false);
 		}; 
+		
+		window.onhashchange = function(){handleHash("id");};
 		
 		$(document).ready(function(){	
 			
+			vwfPortalModel.adminDisplayList = vwfPortalModel.worldObjects;
 			ko.applyBindings(vwfPortalModel);
-			getLoginInfo(showStates);
+			getLoginInfo(showStates(
+				function(){
+					handleHash("id");
+				}
+			));
+			
+			
 		});
 	</script>
