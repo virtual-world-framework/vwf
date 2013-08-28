@@ -168,13 +168,15 @@ function face(v0,v1,v2)
 	//precomp some values used in intersection
 	var s1 = MATH.subVec3(v1,v0);
 	var s2 = MATH.subVec3(v2,v0);
+	this.area = (MATH.lengthVec3(s1) * MATH.lengthVec3(s2))/2.0
 	s1 = MATH.scaleVec3(s1,1.0/MATH.lengthVec3(s1));
-	s2 = MATH.scaleVec3(s2,1.0/MATH.lengthVec3(s1));
+	s2 = MATH.scaleVec3(s2,1.0/MATH.lengthVec3(s2));
 	
 	//generate the face normal
 	var norm = MATH.crossVec3(s2,s1);
 	norm = MATH.scaleVec3(norm,1.0/MATH.lengthVec3(norm));
 	this.norm = norm;
+	
 }
 function crossProduct(a,b,c)
 {
