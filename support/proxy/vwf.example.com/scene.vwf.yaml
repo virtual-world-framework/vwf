@@ -43,6 +43,8 @@ properties:
     set: |
       this.ambientColor = value;
     value: [ .5, .5, .5 ]
+methods:
+  findNode:
 scripts:
 - |
     this.activeCameraComp = undefined;
@@ -61,6 +63,24 @@ scripts:
       }
       //console.info( "WARNING: SCENE.getChild   CHILD NOT FOUND: " + childName );
       return undefined;
+    }
+    this.findNode = function(displayName,node)
+    {
+      
+      if(!node)
+      node = this;
+      
+      if(node && node.properties && node.properties.DisplayName == displayName)
+        return node;
+      var ret = null;  
+      for(var i =0; i <  node.children.length; i++)
+      {
+          ret = this.findNode(displayName,node.children[i]);
+          if(ret) return ret;
+      }
+      return ret;
+    
+    
     }
     this.getActiveCamera = function() {
       if ( !this.activeCameraComp ) {

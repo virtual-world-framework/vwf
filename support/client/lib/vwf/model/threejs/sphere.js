@@ -55,7 +55,7 @@
 			}
 			this.BuildMesh = function(mat)
 			{
-				var mesh=  new THREE.Mesh(new THREE.SphereGeometry(this.radius, this.rsegs, this.ssegs), mat);
+				var mesh=  new THREE.Mesh(new THREE.SphereGeometry(this.radius, this.rsegs*2, this.ssegs), mat);
 				mesh.rotation.x = Math.PI/2;
 				return mesh;
 			}

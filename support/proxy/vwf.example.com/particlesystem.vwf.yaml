@@ -128,7 +128,7 @@ properties:
   ## @name particlesystem.vwf#alphaTest
   ## @property
   
-  alphaTest:
+  alphaTest: .5
   
   ## alpha value for particles
   ##
@@ -142,7 +142,7 @@ properties:
   ## @name particlesystem.vwf#depthTest
   ## @property
   
-  depthTest:
+  depthTest: true
 
   ## emitterType value for particles
   ## 'point','sphere','box'

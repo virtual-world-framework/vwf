@@ -170,6 +170,7 @@ define(function ()
 			_ScriptEditor.resize();
 		});
 		//$('#ScriptEditor').dialog({title:'Script Editor',autoOpen:false,resize:this.resize,height:520,width:760,position:'center'});
+		
 		$('#ScriptEditorDeleteMethod').dialog(
 		{
 			title: 'Delete Method?',
@@ -582,15 +583,125 @@ define(function ()
 			}
 			return true;
 		}
+		this.NewMethod_internal = function()
+		{
+			
+			
+			var name;
+			var params = [];
+			var paramcount;
+			
+			var body;
+			alertify.prompt("Enter the method name",function(ok,val)
+			{
+				if(ok)
+				{
+					name = val;
+					alertify.prompt("Enter the number of parameters",function(ok,val)
+					{
+						if(ok)
+						{
+							paramcount = parseInt(val);
+							for(var i = 0; i  < paramcount; i++)
+								params.push(i);
+							async.forEachSeries(params,function(i,cb){
+							
+								
+								alertify.prompt("Enter the name of parameter " + i,function(ok,val)
+								{
+										if(ok)
+											params[i] = val;
+										cb();	
+								},'parameter name');
+							
+							
+							},function()
+							{
+								
+								var paramstr = '(';
+								for(var i = 0; i  < paramcount; i++)
+								{
+									paramstr += params[i] + ',';
+								}
+								paramstr = paramstr.substr(0,paramstr.length-1) +')';
+								_ScriptEditor.setSelectedMethod(name, 'function ' + name+paramstr + '{\n\n console.log("got here"); \n\n}');
+							});
+						}
+					
+					},'0');
+			
+				}
+			},'name');
+			
+			
+			
+			
+		
+		}
 		this.NewMethod = function ()
 		{
 			if (!_ScriptEditor.checkPermission()) return;
 			if (_ScriptEditor.MethodChanged) _ScriptEditor.PromptAbandon(function ()
 				{
 					_ScriptEditor.MethodChanged = false;
-					$('#ScriptEditorCreateMethod').dialog('open');
+					_ScriptEditor.NewMethod_internal();
 				});
-			else $('#ScriptEditorCreateMethod').dialog('open');
+			else _ScriptEditor.NewMethod_internal();
+		}
+		this.NewEvent_internal = function()
+		{
+			
+			
+			var name;
+			var params = [];
+			var paramcount;
+			
+			var body;
+			alertify.prompt("Enter the event name",function(ok,val)
+			{
+				if(ok)
+				{
+					name = val;
+					alertify.prompt("Enter the number of parameters",function(ok,val)
+					{
+						if(ok)
+						{
+							paramcount = parseInt(val);
+							for(var i = 0; i  < paramcount; i++)
+								params.push(i);
+							async.forEachSeries(params,function(i,cb){
+							
+								
+								alertify.prompt("Enter the name of parameter " + i,function(ok,val)
+								{
+										if(ok)
+											params[i] = val;
+										cb();	
+								},'parameter name');
+							
+							
+							},function()
+							{
+								
+								var paramstr = '(';
+								for(var i = 0; i  < paramcount; i++)
+								{
+									paramstr += params[i] + ',';
+								}
+								paramstr = paramstr.substr(0,paramstr.length-1) +')';
+								_ScriptEditor.setSelectedEvent(name, 'function ' + name+paramstr + '{\n\n console.log("got here"); \n\n}');
+							});
+						}
+					
+					},'0');
+			
+				}
+			},'name');
+			
+			
+			
+			
+		
 		}
 		this.NewEvent = function ()
 		{
@@ -598,9 +709,33 @@ define(function ()
 			if (_ScriptEditor.EventChanged) _ScriptEditor.PromptAbandon(function ()
 				{
 					_ScriptEditor.EventChanged = false;
-					$('#ScriptEditorCreateEvent').dialog('open');
+					_ScriptEditor.NewEvent_internal();
 				});
-			else $('#ScriptEditorCreateEvent').dialog('open');
+			else _ScriptEditor.NewEvent_internal();
+		}
+		this.NewProperty_internal = function()
+		{
+			var name;
+			var value;
+			alertify.prompt("Enter the properties name",function(ok,val)
+			{
+				if(ok)
+				{
+					name = val;
+					alertify.prompt("Enter the properties value",function(ok,val)
+					{
+						if(ok)
+						{
+							value = val;
+							_ScriptEditor.setSelectedProperty(name, value);
+							_ScriptEditor.SavePropertyClicked(true);
+						}
+					
+					},'value');
+			
+				}
+			},'name');
+			
 		}
 		this.NewProperty = function ()
 		{
@@ -608,9 +743,9 @@ define(function ()
 			if (_ScriptEditor.PropertyChanged) _ScriptEditor.PromptAbandon(function ()
 				{
 					_ScriptEditor.PropertyChanged = false;
-					$('#ScriptEditorCreateProperty').dialog('open');
+					_ScriptEditor.NewProperty_internal();
 				});
-			else $('#ScriptEditorCreateProperty').dialog('open');
+			else _ScriptEditor.NewProperty_internal();
 		}
 		this.MethodChange = function ()
 		{
@@ -658,7 +793,7 @@ define(function ()
 				//$('#ScriptEditor').show('slide',{direction:'down'},function(){window.clearInterval(window.scripthideinterval);window.scripthideinterval=null;});
 				$('#ScriptEditor').show();
 				var newtop = $(window).height() - $('#ScriptEditor').height() - $('#statusbar').height() + 'px';
-				console.log(newtop);
+				//console.log(newtop);
 				$('#ScriptEditor').animate(
 				{
 					'top': newtop
@@ -668,7 +803,7 @@ define(function ()
 					{
 						$('#ScriptEditorTabs').css('height', $('#ScriptEditor').height() + 'px');
 						var newheight = window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - $('#toolbar').height() - ($(window).height() - $('#ScriptEditor').offset().top - 25) + 'px';
-						console.log(newheight);
+						//console.log(newheight);
 						$('#index-vwf').css('height', newheight);
 						_Editor.findcamera().aspect = ($('#index-vwf').width() / $('#index-vwf').height());
 						_Editor.findcamera().updateProjectionMatrix();
@@ -1002,7 +1137,11 @@ define(function ()
 					$("#methodlist").children().css('border-color', 'gray');
 					$(this).css('border-color', 'blue');
 					var method = $(this).attr('method');
-					_ScriptEditor.setSelectedMethod(method, "function " + method + "()\n{\n" + _ScriptEditor.methodlist[method] + "\n}");
+					var body = _ScriptEditor.methodlist[method].body;
+					var params = _ScriptEditor.methodlist[method].parameters;
+					if(params)
+						params = params.join(',');
+					_ScriptEditor.setSelectedMethod(method, "function " + method + "("+params+")\n{\n" + body + "\n}");
 				});
 				if (refresh)
 				{
@@ -1297,11 +1436,13 @@ define(function ()
 						
 						//backspace letters up to the dot or bracket
 						var text = $($(this).children()[index]).text();
-						for(var i = 0; i < self.filter.length; i++)
-							_ScriptEditor.activeEditor.remove('left');
-						//insert	
-						_ScriptEditor.activeEditor.insert(text);
-						
+						if(text != "")
+						{
+							for(var i = 0; i < self.filter.length; i++)
+								_ScriptEditor.activeEditor.remove('left');
+							//insert	
+							_ScriptEditor.activeEditor.insert(text);
+						}
 						//focus on the editor
 						window.setTimeout(function(){
 						
@@ -1406,10 +1547,10 @@ define(function ()
 							//wait 15ms, then show this whole dialog again
 							window.setTimeout(function()
 							{
-								console.log(self.filter);
+								//console.log(self.filter);
 								$('#AutoComplete').focus();
 								
-								self.setupAutocomplete(self.keys,editor,self.filter);
+								self.setupAutocomplete(self.keys,_ScriptEditor.activeEditor,self.filter);
 								
 							},15);
 						}else
@@ -1565,10 +1706,7 @@ define(function ()
 				
 				//get the line up to the dot
 				line = line.substr(0,cur.column);
-				var splits = line.split(' ');
-				line = splits[splits.length-1];
-				splits = line.split(';');
-				line = splits[splits.length-1];
+				line = self.filterLine(line);
 				//don't show autocomplete for lines that contain a (, because we'll be calling a functio ntaht might have side effects
 				if(line.indexOf('(') == -1 && line.indexOf('=') == -1)
 				{
@@ -1792,10 +1930,8 @@ define(function ()
 			   
 				
 				
-				var splits = line.split(' ');
-				line = splits[splits.length-1];
-				splits = line.split(';');
-				line = splits[splits.length-1];
+				line = self.filterLine(line);
+				
 				var triggerkeyloc = Math.max(line.lastIndexOf('.'),line.lastIndexOf('['));
 				var triggerkey = line[triggerkeyloc];
 				var filter = line.substr(triggerkeyloc+1);
@@ -1826,10 +1962,8 @@ define(function ()
 			   
 				
 				
-				var splits = line.split(' ');
-				line = splits[splits.length-1];
-				splits = line.split(';');
-				line = splits[splits.length-1];
+				line = self.filterLine(line);
+				
 				var triggerkeyloc = Math.max(line.lastIndexOf('.'),line.lastIndexOf('['));
 				var triggerkey = line[triggerkeyloc];
 				var filter = line.substr(triggerkeyloc+1);
@@ -1845,6 +1979,23 @@ define(function ()
 			 }
 			 
 		})
+		
+		this.filterLine = function(line)
+		{
+		
+			var splits = line.split(' ');
+			line = splits[splits.length-1];
+			splits = line.split(';');
+			line = splits[splits.length-1];
+			splits = line.split('(');
+			line = splits[splits.length-1];
+			splits = line.split(')');
+			line = splits[splits.length-1];
+			splits = line.split(',');
+			line = splits[splits.length-1];
+			return line;
+		
+		}
 		
 		
 		$('#methodtext').on('click',function(){$('#FunctionTip').hide();})

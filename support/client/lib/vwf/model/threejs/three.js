@@ -16184,7 +16184,7 @@ THREE.ShaderChunk = {
 			"#endif",
 
 			"float fDepth;",
-			"vec3 shadowColor = vec3( 1.0 );",
+			"vec3 shadowColor = vec3( 0.0 );",
 
 			"for( int i = 0; i < MAX_SHADOWS; i ++ ) {",
 
@@ -16214,7 +16214,7 @@ THREE.ShaderChunk = {
 				"bool frustumTest = all( frustumTestVec );",
 
 				"if ( frustumTest ) {",
-
+					"shadowColor = vec3( 1.0 );",
 					"shadowCoord.z += shadowBias[ i ];",
 
 					"#if defined( SHADOWMAP_TYPE_PCF )",
@@ -16364,8 +16364,24 @@ THREE.ShaderChunk = {
 
 						"shadow = dot( shadowValues, vec4( 1.0 ) );",
 
-						"shadowColor = shadowColor * vec3( ( 1.0 - shadowDarkness[ i ] * shadow ) );",
-
+						
+						
+						"vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ i ], 0.0 );",
+						"vec3 dirVector = normalize( lDirection.xyz );",
+						"float dotProduct = clamp(dot( normal, dirVector ),0.0,1.0);",
+						//"dotProduct = pow(dotProduct,4.0);",
+						"if(dotProduct > 0.05)",
+						"shadowColor = shadowColor * vec3( ( shadowDarkness[ i ] * shadow *dotProduct  ) );",
+						"else",
+						"shadowColor = vec3(0.0);",
+						//"shadowColor = shadowColor * vec3( ( 1.0 - shadowDarkness[ i ] * 1.0 * smoothstep(-0.05,0.05,-dotProduct)  ) ) * ambient;",
+						
+						
+						
+						//"shadowColor *= vec3(dotProduct);",
+						//"shadowColor = shadowColor * vec3( ( 1.0 - shadowDarkness[ i ] * shadow * dotProduct ) );",
+						"shadowColor = mix(shadowColor,vec3(0.0,0.0,0.0),clamp(0.0,1.0,pow(length(shadowCoord.xy - .5)*2.0,4.0)));",
+						
 					"#else",
 
 						"vec4 rgbaDepth = texture2D( shadowMap[ i ], shadowCoord.xy );",
@@ -16408,7 +16424,7 @@ THREE.ShaderChunk = {
 
 			"#endif",
 
-			"gl_FragColor.xyz = gl_FragColor.xyz * shadowColor;",
+			"gl_FragColor.xyz = gl_FragColor.xyz * (1.0-shadowColor);",
 
 		"#endif"
 
@@ -22691,10 +22707,12 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		objlist.push(
 			{
+				id:null,
 				buffer: buffer,
 				object: object,
 				opaque: null,
-				transparent: null
+				transparent: null,
+				z:0
 			}
 		);
 
@@ -22704,9 +22722,11 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		objlist.push(
 			{
+				id:null,
 				object: object,
 				opaque: null,
-				transparent: null
+				transparent: null,
+				z:0
 			}
 		);
 

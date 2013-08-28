@@ -1,6 +1,6 @@
 var maxObjects = 1; 
 var maxDepth = 16;
-var batchAtLevel = 4;
+var batchAtLevel = 8;
 var drawSceneManagerRegions = false;
 
 function SceneManager(scene)
@@ -21,6 +21,26 @@ function GetAllLeafMeshes(threeObject,list)
 			GetAllLeafMeshes(threeObject.children[i],list);
 		}               
 	}     
+}
+SceneManager.prototype.forceBatchAll = function()
+{
+	var list = [];
+	GetAllLeafMeshes(this.scene,list);
+	for(var i = 0; i < list.length; i++)
+	{
+		if(list[i].setStatic)
+			list[i].setStatic(true);
+	}
+}
+SceneManager.prototype.forceUnbatchAll = function()
+{
+	var list = [];
+	GetAllLeafMeshes(this.scene,list);
+	for(var i = 0; i < list.length; i++)
+	{
+		if(list[i].setStatic)
+			list[i].setStatic(false);
+	}
 }
 SceneManager.prototype.rebuild = function(mo,md)
 {
@@ -48,6 +68,11 @@ SceneManager.prototype.hide = function()
 SceneManager.prototype.addToRoot = function(child)
 {
 	this.specialCaseObjects.push(child);
+}
+SceneManager.prototype.removeFromRoot = function(child)
+{
+	if(this.specialCaseObjects.indexOf(child) != -1)
+		this.specialCaseObjects.splice(this.specialCaseObjects.indexOf(child),1);
 }
 SceneManager.prototype.CPUPick = function(o,d,opts)
 {
@@ -89,10 +114,39 @@ SceneManager.prototype.FrustrumCast = function(f,opts)
 	}
 	
 	return hitlist;
-}	
+}
+SceneManager.prototype.SphereCast = function(center,r,opts)
+{
+	//console.profile("PickProfile");
+
+	var hitlist = this.root.SphereCast(center,r,opts || new THREE.CPUPickOptions());
+	for(var i = 0; i < this.specialCaseObjects.length; i++)
+	{
+		var childhits = this.specialCaseObjects[i].SphereCast(center,r,opts || new THREE.CPUPickOptions());
+		if(childhits)
+			hitlist = hitlist.concat(childhits);
+	}
+	
+	return hitlist;
+}		
+SceneManager.prototype.dirtyObjects = [];
+SceneManager.prototype.setDirty = function(object)
+{
+	if(this.dirtyObjects.indexOf(object) == -1)
+	{
+		this.dirtyObjects.push(object);
+	}	
+}
 SceneManager.prototype.update = function(dt)
 {
 	if(!this.initialized) return;
+	for(var i = 0; i < this.dirtyObjects.length; i++)
+	{
+		
+		this.dirtyObjects[i].sceneManagerUpdate();
+		
+	}
+	this.dirtyObjects = [];
 	for(var i =0; i < this.BatchManagers.length; i++)
 	{
 		this.BatchManagers[i].update();
@@ -153,8 +207,9 @@ SceneManager.prototype.getTexture = function(src,noclone)
 		return this.textureList[src];
 	}
 	var ret = this.textureList[src];
-	if(noclone) return ret;
-	ret = ret.clone();
+	if(noclone) 
+		return ret;
+	ret = new THREE.Texture(ret.image);
     ret.needsUpdate  = true;
 	this.textureList[src].clones.push(ret);
     return ret;	
@@ -247,8 +302,30 @@ SceneManager.prototype.initialize = function(scene)
 	THREE.Line.prototype.materialUpdated = THREE.Mesh.prototype.materialUpdated;
 	THREE.Object3D.prototype.setStatic = function(_static)
 	{
+		if(this.isDynamic && this.isDynamic()) return;
 		this._static = _static;
 		this.sceneManagerUpdate();
+	}
+	THREE.Object3D.prototype.setDynamic = function(_dynamic)
+	{
+		if(this.dynamic == _dynamic) return;
+		this._dynamic = _dynamic;
+		this._static = false;
+		if(this._dynamic)
+		{
+			this.sceneManagerDelete();
+			_SceneManager.addToRoot(this);
+		}else
+		{
+			_SceneManager.removeFromRoot(this);
+			var list = [];
+			GetAllLeafMeshes(this,list);
+			for(var i =0; i < list.length; i++)
+			{
+				_SceneManager.addChild(list[i]);
+			}
+			this.sceneManagerUpdate();
+		}
 	}
 	THREE.Object3D.prototype.isStatic = function()
 	{
@@ -256,8 +333,15 @@ SceneManager.prototype.initialize = function(scene)
 			return this._static;
 		return (this.parent && this.parent.isStatic());
 	}
+	THREE.Object3D.prototype.isDynamic = function()
+	{
+		if(this._dynamic != undefined)
+			return this._dynamic;
+		return (this.parent && this.parent.isDynamic());
+	}
 	THREE.Object3D.prototype.sceneManagerUpdate = function()
 	{
+		if(this.isDynamic && this.isDynamic()) return;
 		for(var i =0; i <  this.children.length; i++)
 		{
 			this.children[i].sceneManagerUpdate();
@@ -449,10 +533,12 @@ SceneManagerRegion.prototype.desplit = function()
 SceneManagerRegion.prototype.completelyContains = function(object)
 {
 	
+	//changing transforms make this cache not work
 	if(!object.tempbounds) 
 	{
 		object.updateMatrixWorld();
-		object.tempbounds = object.GetBoundingBox().transformBy(object.getModelMatrix());
+		
+		object.tempbounds = object.GetBoundingBox(true).transformBy(object.getModelMatrix());
 	}
 	var box = object.tempbounds;
 	if(box.min[0] > this.min[0] && box.max[0] < this.max[0])
@@ -528,7 +614,7 @@ SceneManagerRegion.prototype.distributeObject = function(object)
 				}	
 				
 				this.updateMatrixWorld();
-				this.tempbounds = object.GetBoundingBox().transformBy(this.getModelMatrix());
+				this.tempbounds = object.GetBoundingBox(true).transformBy(this.getModelMatrix());
 				this.sceneManagerNode.updateObject(this);
 			}.bind(object)
 			object.sceneManagerDelete = function()
@@ -698,6 +784,7 @@ SceneManagerRegion.prototype.CPUPick = function(o,d,opts)
 	}
 	for(var i = 0; i < this.childObjects.length; i++)
 	{
+		
 		var childhits = this.childObjects[i].CPUPick(o,d,opts);
 		if(childhits)
 			hits = hits.concat(childhits);
@@ -745,7 +832,47 @@ SceneManagerRegion.prototype.FrustrumCast = function(frustrum,opts)
 	return hits;
 }
 
+//Test a ray against an octree region
+SceneManagerRegion.prototype.SphereCast = function(center,r,opts)
+{
+	
+	var hits = [];
+	//if no faces, can be no hits. 
+	//remember, faces is all faces in this node AND its children
+	if(this.getChildCount().length == 0)
+		return hits;
+		
+	//reject this node if the ray does not intersect it's bounding box
+	if(this.testBoundsSphere(center,r).length == 0)
+		return hits;
+	
+	//the the opts specify a max dist
+	//if the start is not in me, and im to far, don't bother with my children or my objcts
+	if(opts.maxDist > 0 && this.r + MATH.distanceVec3(o,this.c) > opts.maxDist)
+	{
+		if(!this.contains(o))
+			return hits;
+	}	
+	
+	//check either this nodes faces, or the not distributed faces. for a leaf, this will just loop all faces,
+	//for a non leaf, this will iterate over the faces that for some reason are not in children, which SHOULD be none
+	for(var i = 0; i < this.childRegions.length; i++)
+	{
+		var childhits = this.childRegions[i].SphereCast(center,r,opts);
+		if(childhits)
+			hits = hits.concat(childhits);
+	}
+	for(var i = 0; i < this.childObjects.length; i++)
+	{
+		var childhits = this.childObjects[i].SphereCast(center,r,opts);
+		if(childhits)
+			hits = hits.concat(childhits);
+	}
+	return hits;
+}
+
 SceneManagerRegion.prototype.testBoundsRay = BoundingBoxRTAS.prototype.intersect;
+SceneManagerRegion.prototype.testBoundsSphere = BoundingBoxRTAS.prototype.intersectSphere;
 SceneManagerRegion.prototype.intersect = BoundingBoxRTAS.prototype.intersect;
 SceneManagerRegion.prototype.testBoundsFrustrum = BoundingBoxRTAS.prototype.intersectFrustrum;
 
@@ -777,12 +904,17 @@ THREE.RenderBatch = function(material,scene)
 	this.material = material;
 	this.dirty = false;
 	this.scene = scene;
+	this.totalVerts = 0;
+	this.totalFaces = 0;
 }
 THREE.RenderBatch.prototype.addObject = function(object)
 {
 	if(this.objects.indexOf(object) == -1)
 	{
+		this.totalVerts += object.geometry.vertices.length;
+		this.totalFaces += object.geometry.faces.length;
 		this.objects.push(object);
+		
 		this.dirty = true;
 	}
 	
@@ -791,6 +923,8 @@ THREE.RenderBatch.prototype.removeObject = function(object)
 {
 	if(this.objects.indexOf(object) != -1)
 	{
+		this.totalVerts -= object.geometry.vertices.length;
+		this.totalFaces -= object.geometry.faces.length;
 		this.objects.splice(this.objects.indexOf(object),1);
 		this.dirty = true;
 	}
@@ -798,13 +932,14 @@ THREE.RenderBatch.prototype.removeObject = function(object)
 }
 THREE.RenderBatch.prototype.update = function()
 {
+	
 	if(this.dirty)
 		this.build();
 	this.dirty = false;	
 }
 THREE.RenderBatch.prototype.checkSuitability = function(object)
 {
-	
+	if(this.totalFaces + object.geometry.faces.length > 32767 || this.totalVerts + object.geometry.vertices.length > 32767) return false;
 	return compareMaterials(this.material,object.material);
 }
 THREE.RenderBatch.prototype.deinitialize = function()
@@ -814,7 +949,7 @@ THREE.RenderBatch.prototype.deinitialize = function()
 }
 THREE.RenderBatch.prototype.build = function()
 {
-	console.log('Building batch' + this.name + ' : objects = ' + this.objects.length); 
+	console.log('Building batch ' + this.name + ' : objects = ' + this.objects.length); 
 	
 	//do the merge:
 	if(this.mesh)
@@ -829,8 +964,21 @@ THREE.RenderBatch.prototype.build = function()
 	this.mesh.receiveShadow=true;
 	this.scene.add_internal(this.mesh);
 	
+	var totalUVSets = 1;
+	
+	
 	for(var i =0; i < this.objects.length; i++)
 	{
+		totalUVSets = Math.max(totalUVSets,this.objects[i].geometry.faceVertexUvs.length);
+	}
+	console.log(totalUVSets);
+	for(var i = 0; i < totalUVSets; i++)
+	{
+		geo.faceVertexUvs[i] = [];
+	}
+	for(var i =0; i < this.objects.length; i++)
+	{
+		
 		var tg = this.objects[i].geometry;
 		var matrix = this.objects[i].matrixWorld.clone();
 		var normalMatrix = new THREE.Matrix3();
@@ -855,7 +1003,7 @@ THREE.RenderBatch.prototype.build = function()
 				if(face.d !== undefined)
 					newface.d = face.d + geo.vertices.length;
 
-				newface.materialIndex = face.materialIndex;
+				//newface.materialIndex = face.materialIndex;
 				newface.centroid.copy( face.centroid );
 				newface.normal.copy(face.normal);		
 				newface.normal.applyMatrix3( normalMatrix ).normalize();
@@ -876,20 +1024,48 @@ THREE.RenderBatch.prototype.build = function()
 			}
 			
 			
-			var uvs2 = tg.faceVertexUvs[ 0 ];
-			
-			for ( u = 0, il = uvs2.length; u < il; u ++ ) {
+			for(var l = 0; l < totalUVSets; l++)
+			{
+				var uvs2 = tg.faceVertexUvs[ l ];
+				
+				if(uvs2 && uvs2.length === tg.faces.length)
+				{
+					for ( u = 0, il = uvs2.length; u < il; u ++ ) 
+					{
 
-				var uv = uvs2[ u ], uvCopy = [];
+						var uv = uvs2[ u ], uvCopy = [];
 
-				for ( var j = 0, jl = uv.length; j < jl; j ++ ) {
+						for ( var j = 0, jl = uv.length; j < jl; j ++ ) {
 
-					uvCopy.push( new THREE.Vector2( uv[ j ] ? uv[ j ].x : 0, uv[ j ] ? uv[ j ].y : 0 ) );
+							uvCopy.push( new THREE.Vector2( uv[ j ] ? uv[ j ].x : 0, uv[ j ] ? uv[ j ].y : 0 ) );
 
+						}
+
+						geo.faceVertexUvs[l].push( uvCopy );
+
+					}
 				}
+				else
+				{
+					for ( u = 0, il = tg.faces.length; u < il; u ++ )
+					{
 
-				geo.faceVertexUvs[0].push( uvCopy );
+						var count = 3;
+						if(tg.faces[u].d !== undefined)
+							count = 4;
 
+						var uvCopy = [];
+						for ( var j = 0, jl = count; j < jl; j ++ ) {
+
+							uvCopy.push( new THREE.Vector2( 0,0) );
+
+						}
+
+						geo.faceVertexUvs[l].push( uvCopy );
+
+					}
+				
+				}
 			}
 		}
 	}
@@ -928,7 +1104,7 @@ function compareMaterials(m1,m2)
 	delta += Math.abs(m1.bumpScale - m2.bumpScale);	
 	delta += Math.abs(m1.normalScale.x - m2.normalScale.x);
 	delta += Math.abs(m1.normalScale.y - m2.normalScale.y);
-	
+	delta += m1.side != m2.side ? 1000 : 0;
 		var mapnames = ['map','bumpMap','lightMap','normalMap','specularMap'];
         for(var i =0; i < mapnames.length; i++)
         {
@@ -971,7 +1147,7 @@ function compareMaterials(m1,m2)
 
 }
 
-
+_SceneManager.compareMaterials = compareMaterials;
 THREE.RenderBatchManager = function(scene,name)
 {
 	this.scene = scene;

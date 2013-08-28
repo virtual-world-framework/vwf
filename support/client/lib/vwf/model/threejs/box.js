@@ -1,4 +1,25 @@
 (function(){
+
+
+		function BoxCache()
+		{
+			this.boxes = {}
+			this.toID = function(length,width,height,lengthsegs,widthsegs,heightsegs)
+			{
+				return length+","+width+","+height+","+lengthsegs+","+widthsegs+","+heightsegs;
+			}
+			this.getBox = function(length,width,height,lengthsegs,widthsegs,heightsegs)
+			{
+				var id = this.toID(length,width,height,lengthsegs,widthsegs,heightsegs);
+				if(!this.boxes[id])
+					this.boxes[id] = new THREE.CubeGeometry(length,width,height,lengthsegs,widthsegs,heightsegs);
+				return this.boxes[id];
+			}
+		
+		
+		}
+		var _boxCache = new BoxCache();
+
 		function box(childID, childSource, childName)
 		{
 			this._length = 1;
@@ -29,12 +50,12 @@
 				propertyName == 'lsegs'||propertyName == 'wsegs'||propertyName == 'hsegs')
 				{
 					this[propertyName] = propertyValue;
-					this.dirtyStack(true);
+					this.dirtyStack(true,true);
 				}
 			}
 			this.initializingNode = function()
 			{
-				this.dirtyStack(true);
+				this.dirtyStack(true,true);
 			}
 			this.gettingProperty = function(propertyName)
 			{
@@ -42,23 +63,20 @@
 				propertyName == 'lsegs'||propertyName == 'wsegs'||propertyName == 'hsegs' || propertyName =='EditorData')
 				return this[propertyName];
 			}
-			this.BuildMesh = function(mat)
+			this.BuildMesh = function(mat,cache)
 			{
 				//special case for 1 meter cubes. Used in minecraft mode, so need to be fast
-				if(
-					this._length == 1&&
-					this.width == 1&&
-					this.height == 1&&
 				
-					this.lsegs == 1&&
-					this.wsegs == 1&&
-					this.hsegs == 1
-				)
+				if(cache)
 				{
-					return new THREE.Mesh(window.OneXOneBox, mat);
+					var mesh=  new THREE.Mesh(_boxCache.getBox(this._length, this.width, this.height,this.lsegs,this.wsegs,this.hsegs), mat);
+					console.log('from cache');
 				}
-				
-				var mesh=  new THREE.Mesh(new THREE.CubeGeometry(this._length, this.width, this.height,this.lsegs,this.wsegs,this.hsegs), mat);
+				else
+				{
+					var mesh=  new THREE.Mesh(new THREE.CubeGeometry(this._length, this.width, this.height,this.lsegs,this.wsegs,this.hsegs), mat);
+					console.log('new box');
+				}
 				return mesh;
 			}
 			

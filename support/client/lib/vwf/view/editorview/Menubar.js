@@ -12,13 +12,14 @@ define(
 	initialize: function ()
 	{
 		//$(document.body).append('');
-		ddsmoothmenu.init(
+		window.menus = ddsmoothmenu.init(
 		{
 			mainmenuid: "smoothmenu1", //menu DIV id
 			orientation: 'h', //Horizontal or vertical menu: Set to "h" or "v"
 			classname: 'ddsmoothmenu', //class added to menu's outer DIV
 			//customtheme: ["#1c5a80", "#18374a"],
-			contentsource: "markup" //"markup" or ["container_id", "path_to_menu_file"]
+			contentsource: "markup", //"markup" or ["container_id", "path_to_menu_file"]
+			method: 'hover'
 		});
 		//make the menu items disappear when you click one
 		//$(".ddsmoothmenu").find('li').click(function(){$(".ddsmoothmenu").find('li').trigger('mouseleave');});
@@ -407,18 +408,22 @@ define(
 
 		function focusSelected()
 		{
+			var focusID = null;
 			if (_Editor.GetSelectedVWFNode())
+				focusID = _Editor.GetSelectedVWFNode().id;
+			if(!focusID)
+				focusID =  _UserManager.GetAvatarForClientID(vwf.moniker()) &&  _UserManager.GetAvatarForClientID(vwf.moniker()).id;
+			if (focusID)
 			{
-				if (_Editor.GetSelectedVWFNode())
-				{
+				
 					var t = _Editor.GetMoveGizmo().parent.matrixWorld.getPosition();
 					var gizpos = [t.x, t.y, t.z];
-					var box = _Editor.findviewnode(_Editor.GetSelectedVWFNode().id).getBoundingBox();
+					var box = _Editor.findviewnode(focusID).getBoundingBox();
 					var dist = MATH.distanceVec3([box.max.x, box.max.y, box.max.z], [box.min.x, box.min.y, box.min.z]);
 					vwf.models[0].model.nodes['index-vwf'].orbitPoint(gizpos);
 					vwf.models[0].model.nodes['index-vwf'].zoom = dist * 2;
 					vwf.models[0].model.nodes['index-vwf'].updateCamera();
-				}
+				
 			}
 		}
 		$('#MenuFocusSelected').click(function (e)
@@ -448,6 +453,35 @@ define(
 			$('#MenuCameraNavigateicon').css('background', '#9999FF');
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Orbit');
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Navigate');
+		});
+		
+		
+		$('#MenuCameraShare').click(function (e)
+		{
+		    
+		    var broadcasting = vwf.callMethod('index-vwf','getBroadcasting',[]);
+		    if(!broadcasting)
+		    {
+			    alertify.confirm("Are you sure you want to share your camera position? Other users will be able to see from your camera!",function(ok)
+			    {
+				if(ok)
+				{
+							vwf_view.kernel.callMethod('index-vwf','cameraBroadcastStart',[]);
+				 
+				}
+			    }.bind(this));
+		    }else
+		    {
+			alertify.confirm("You are currently sharing your camera view. Would you like to stop sharing?",function(ok)
+			    {
+				if(ok)
+				{
+							vwf_view.kernel.callMethod('index-vwf','cameraBroadcastEnd',[]);
+				 
+				}
+			    }.bind(this));
+		    
+		    }
 		});
 		
 		$('#MenuCameraFly').click(function (e)
@@ -506,6 +540,7 @@ define(
 		});
 		$('#MenuCamera3RDPerson').click(function (e)
 		{
+			
 			if (_UserManager.GetCurrentUserName())
 			{
 				clearCameraModeIcons();
@@ -625,6 +660,10 @@ define(
 		{
 			_LocationTools.MoveToGround();
 		});
+		list = $('#smoothmenu1').find('[id]');
+		
+		//make every clicked menu item close all menus
+		 $('#smoothmenu1').find('[id]').filter(':only-child').click(function(){ddsmoothmenu.closeall({type:'click',target:'asd'})});
 		
 	}
 });

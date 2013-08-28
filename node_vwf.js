@@ -491,6 +491,28 @@ function startVWF(){
 			//remove the instance identifier from the request
 			filename = filterinstance(filename,instance);
 			
+			
+			
+			if(uri.indexOf('/admin/'.replace(safePathRE)) != -1)
+			{
+				
+				if(uri.indexOf('/admin/instances'.replace(safePathRE)) != -1)
+				{	
+					
+					var data = {};
+					for(var i in global.instances)
+					{
+						data[i] = {clients:{}};
+						for(var j in global.instances[i].clients)
+						{
+							data[i].clients[j] = null;
+						}
+					}
+					ServeJSON(data,response,URL);
+					return;
+				}
+				
+			}
 			//file is not found - serve index or map to support files
 			//file is also not a yaml document
 			var c1;
@@ -591,23 +613,6 @@ function startVWF(){
 
 			}
 			// is an admin call, currently only serving instances
-			else if(uri.indexOf('/admin/'.replace(safePathRE)) != -1)
-			{
-				if(uri.indexOf('/admin/instances'.replace(safePathRE)))
-				{
-					var data = {};
-					for(var i in global.instances)
-					{
-						data[i] = {clients:{}};
-						for(var j in global.instances[i].clients)
-						{
-							data[i].clients[j] = null;
-						}
-					}
-					ServeJSON(data,response,URL);
-					return;
-				}
-			}
 			else
 			{
 				global.log("404 : " + filename)

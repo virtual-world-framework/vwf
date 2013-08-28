@@ -553,28 +553,35 @@ define(function ()
 		}
 		this.DeleteSelection = function ()
 		{
-			for (var s = 0; s < SelectedVWFNodes.length; s++)
+			if(document.PlayerNumber == null)
 			{
-				if(document.PlayerNumber == null)
-				{
 				_Notifier.notify('You must log in to participate');
 				return;
-				}
+			}
+			for (var s = 0; s < SelectedVWFNodes.length; s++)
+			{
+				
 				var owner = vwf.getProperty(SelectedVWFNodes[s].id,'owner');
 				if(_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),SelectedVWFNodes[s].id) == 0)
 				{
-				_Notifier.notify('You do not have permission to delete this object');
-				return;
+					_Notifier.notify('You do not have permission to delete this object');
+					 continue;
+				}
+				if(vwf.prototype(SelectedVWFNodes[s].id) == 'character-vwf')
+				{
+					_Notifier.alert('Avatars cannot be deleted');
+					continue;
 				}
 				if (SelectedVWFNodes[s])
 				{
 					vwf_view.kernel.deleteNode(SelectedVWFNodes[s].id);
 					$('#StatusSelectedID').text('No Selection');
 					$('#StatusPickMode').text('Pick: None');
-					if (_PrimitiveEditor.isOpen()) _PrimitiveEditor.hide();
-					if (_MaterialEditor.isOpen()) _MaterialEditor.hide();
-					if (_ScriptEditor.isOpen()) _ScriptEditor.hide();
+					
 				}
+				if (_PrimitiveEditor.isOpen()) _PrimitiveEditor.hide();
+				if (_MaterialEditor.isOpen()) _MaterialEditor.hide();
+				if (_ScriptEditor.isOpen()) _ScriptEditor.hide();
 			}
 			this.SelectObject(null);
 		}.bind(this);
@@ -1541,6 +1548,13 @@ define(function ()
 		}
 		this.Duplicate = function ()
 		{
+			for(var i =0; i < SelectedVWFNodes.length; i++)
+			if(vwf.prototype(SelectedVWFNodes[i].id) == 'character-vwf')
+			{
+					_Notifier.alert('Avatars cannot be copied');
+					return
+			}
+			
 			for (var i = 0; i < SelectedVWFNodes.length; i++)
 			{
 				var proto = _DataManager.getCleanNodePrototype(SelectedVWFNodes[i].id);
@@ -1575,6 +1589,14 @@ define(function ()
 		this.Copy = function (nodes)
 		{
 			_CopiedNodes = [];
+			
+			for(var i =0; i < SelectedVWFNodes.length; i++)
+			if(vwf.prototype(SelectedVWFNodes[i].id) == 'character-vwf')
+			{
+					_Notifier.alert('Avatars cannot be copied');
+					return
+			}
+			
 			var tocopy = SelectedVWFNodes;
 			if (nodes) tocopy = nodes;
 			for (var i = 0; i < tocopy.length; i++)

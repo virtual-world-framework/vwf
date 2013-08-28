@@ -1,38 +1,24 @@
 (function(){
-		function materialDef(childID, childSource, childName)
+
+
+
+		function MaterialCache()
 		{
-		    this.defaultmaterialDef = {
-                    shininess:15,
-                    alpha:1,
-                    ambient:{r:1,g:1,b:1},
-                    color:{r:1,g:1,b:1,a:1},
-                    emit:{r:0,g:0,b:0},
-                    reflect:0.8,
-                    shadeless:false,
-                    shadow:true,
-                    specularColor:{r:0.5773502691896258,g:0.5773502691896258,b:0.5773502691896258},
-                    specularLevel:1,
-					side:0,
-                    layers:[
-                      {  alpha: 1,
-                        blendMode: 0,
-                        mapInput: 0,
-                        mapTo: 1,
-                        offsetx: 0,
-                        offsety: 0,
-                        rot: 0,
-                        scalex: 1,
-                        scaley: 1,
-                        src: "checker.jpg"}
-                    ]
-			}
-			this.initializingNode = function()
+			this.materials = {};
+			this.getMaterialbyDef = function(def)
 			{
-				
-				this.settingProperty( 'materialDef',this.materialDef);
-				if(this.dirtyStack)
-					this.dirtyStack(true);
-			}
+				var id = JSON.stringify(def);
+				if(this.materials[id])
+					return this.materials[id];
+				else
+				{
+					this.materials[id] = new THREE.MeshPhongMaterial();
+					//this.materials[id].morphTargets  = true;
+					this.setMaterialByDef(this.materials[id],def);
+					return this.materials[id];				
+					
+				}
+			}	
 			this.setMaterialByDef = function(currentmat,value)
 			{
 				if(!value) return;
@@ -48,6 +34,7 @@
 				currentmat.emissive.g = value.emit.g;
 				currentmat.emissive.b = value.emit.b;
 				
+				currentmat.morphTargets = value.morphTargets || false;
 				currentmat.specular.r = value.specularColor.r * value.specularLevel;
 				currentmat.specular.g = value.specularColor.g * value.specularLevel;
 				currentmat.specular.b = value.specularColor.b * value.specularLevel;
@@ -156,6 +143,52 @@
 				}
 				currentmat.needsUpdate = true;
 			}
+			
+			
+			
+		
+		
+		
+		
+		
+		}
+		var _materialCache = new MaterialCache();
+		window._materialCache = _materialCache;
+		function materialDef(childID, childSource, childName)
+		{
+		    this.defaultmaterialDef = {
+                    shininess:15,
+                    alpha:1,
+                    ambient:{r:1,g:1,b:1},
+                    color:{r:1,g:1,b:1,a:1},
+                    emit:{r:0,g:0,b:0},
+                    reflect:0.8,
+                    shadeless:false,
+                    shadow:true,
+                    specularColor:{r:0.5773502691896258,g:0.5773502691896258,b:0.5773502691896258},
+                    specularLevel:1,
+					side:0,
+                    layers:[
+                      {  alpha: 1,
+                        blendMode: 0,
+                        mapInput: 0,
+                        mapTo: 1,
+                        offsetx: 0,
+                        offsety: 0,
+                        rot: 0,
+                        scalex: 1,
+                        scaley: 1,
+                        src: "checker.jpg"}
+                    ]
+			}
+			this.initializingNode = function()
+			{
+				
+				this.settingProperty( 'materialDef',this.materialDef);
+				if(this.dirtyStack)
+					this.dirtyStack(true);
+			}
+			
 			this.GetAllLeafMeshes = function(threeObject,list)
 			{
 				if(threeObject instanceof THREE.Mesh)
@@ -185,9 +218,13 @@
 					GetAllLeafMeshes(this.getRoot(),list);
 					for(var i =0; i < list.length; i++)
 					{
-						if(!(list[i].material instanceof THREE.MeshPhongMaterial))
-							list[i].material =  new THREE.MeshPhongMaterial();
-						this.setMaterialByDef(list[i].material || new THREE.MeshPhongMaterial,propval);
+						//if(!(list[i].material instanceof THREE.MeshPhongMaterial))
+						if(list[i].morphTargetInfluences)
+							propval.morphTargets = true;
+						else
+							propval.morphTargets = false;
+							list[i].material =  _materialCache.getMaterialbyDef(propval);
+						//this.setMaterialByDef(list[i].material || new THREE.MeshPhongMaterial,propval);
 						list[i].materialUpdated();
 					}
 					

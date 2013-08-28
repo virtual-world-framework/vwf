@@ -264,7 +264,7 @@ define(function ()
 			var instances = jQuery.ajax(
 			{
 				type: 'GET',
-				url: this.getCurrentApplication() + "/" + this.getCurrentSession() + "/admin/instances",
+				url: "/admin/instances",
 				data: null,
 				success: null,
 				async: false,

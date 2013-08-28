@@ -81,11 +81,11 @@
 					this.rootnode.updateMatrixWorld(true);
 				}
 			}
-			this.loadFailed = function()
+			this.loadFailed = function(id)
 			{
 				$(document).trigger('EndParse');
 				if(window._Notifier)
-					_Notifier.alert('error loading asset');
+					_Notifier.alert('error loading asset ' + id);
 			
 			}
 			this.loaded = function(asset)

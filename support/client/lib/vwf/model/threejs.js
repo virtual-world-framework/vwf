@@ -100,7 +100,7 @@
 	
 	function matComp(m1,m2)
 	{
-		
+	
 		for(var i =0; i < 16; i++)
 		{
 			if(m1[i] != m2[i])
@@ -109,6 +109,16 @@
 		return true;	
 	}
 	
+	function matComploose(m1,m2)
+	{
+	
+		for(var i =0; i < 16; i++)
+		{
+			if(Math.abs(m1[i] - m2[i]) > .000001)
+				return false;
+		}
+		return true;	
+	}
 	
 define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/threejs/backgroundLoader" ], function( module, model, utility, Color, backgroundLoader ) {
 
@@ -623,16 +633,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
                             goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
                         }
 						
-						if(!matComp(transform,threeObject.matrix.elements))
+						if(!matComploose(transform,threeObject.matrix.elements))
 						{
 							if(threeObject instanceof THREE.ParticleSystem)
 							{	
 								threeObject.updateTransform(transform);
 							}
-						
+							
                             threeObject.matrixAutoUpdate = false;
                             threeObject.matrix.elements = matCpy(transform);
-                            threeObject.updateMatrixWorld(true);      
+                            threeObject.updateMatrixWorld(true);   
+													
 							threeObject.sceneManagerUpdate();							
                         }                            
                     
@@ -718,6 +729,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
                     {
                         //debugger;
                         threeObject.setStatic(propertyValue);
+                    }
+					if(propertyName == 'isDynamic')
+                    {
+                        //debugger;
+						vwf.setProperty(nodeID,'isStatic',false);
+                        threeObject.setDynamic(propertyValue);
                     }
                     //This can be a bit confusing, as the node has a material property, and a material child node. 
                     //setting the property does this, but the code in the component is ambigious
@@ -1245,10 +1262,29 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
           //There is not three object for this node, so there is nothing this driver can do. return
           if(!threeObject) return value;    
           
+	      if(node && node.threeScene)
+              {
+		if(propertyName == 'cameraPosition')
+		{	
+			
+			var mat = node.camera.threeJScameras[node.camera.defaultCamID].matrixWorld;
+			var x = mat.elements[12];
+			var y = mat.elements[13];
+			var z = mat.elements[14];
+			return [x,y,z];
+		}
+	      }	      
               if ( node && threeObject ) 
               {
                 if(threeObject instanceof THREE.Object3D)
                 {
+		    if(propertyName == 'worldPosition')
+                    {
+			var x = threeObject.matrixWorld.elements[12];
+			var y = threeObject.matrixWorld.elements[13];
+			var z = threeObject.matrixWorld.elements[14];
+			return [x,y,z];
+		    }
                     if(propertyName == 'transform')
                     {
                         
@@ -1771,7 +1807,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 		{
 			$(document).trigger('EndParse');
 			if(window._Notifier)
-				_Notifier.alert('error loading asset');
+				_Notifier.alert('error loading asset ' + err);
 		}
 		
 		//callback for sucess of asset parse
@@ -2292,7 +2328,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 			particleSystem.gravityCenter = [0,0,0];
 			particleSystem.textureTiles = 1;
 			particleSystem.solver = 'AnalyticShader';
-			particleSystem.depthTest = false;
+			particleSystem.depthTest = true;
 			particleSystem.opacity = 1;
 			particleSystem.additive = false;
 			particleSystem.image = null;

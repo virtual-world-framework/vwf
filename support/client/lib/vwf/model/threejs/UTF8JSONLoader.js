@@ -133,14 +133,14 @@
         this.error = function(e)
         {
            if(errorCallback)
-				errorCallback(e);
+				errorCallback(this.url);
         }.bind(this);
         
         $.ajax({
             url: this.url,
             data: {},
             success: this.jsonLoaded,
-            error: this.error,
+            error: this.error.bind(this),
             dataType:'text'
         });
         ;

@@ -322,7 +322,7 @@ var stats;
 			
 			$(document).trigger('postprerender',[vp,wh,ww]);
 			
-			if($('#glyphOverlay').is(':visible'))
+			if($('#glyphOverlay').css('display') != 'none')
 			{
 				$(document).trigger('glyphRender',[vp,wh,ww]);
 			}
@@ -374,14 +374,16 @@ var stats;
 			
 			renderer.render(backgroundScene,cam);
 			renderer.clear(false,true,false);
-			cam.near = cam.far - (cam.far - cam.near)/100.0;
-			cam.far = far * 10;
-			cam.updateProjectionMatrix();
-			renderer.render(scene,cam);
-			renderer.clear(false,true,false);
-			cam.near = near;
-			cam.far = far;
-			cam.updateProjectionMatrix();
+			
+			//use this for drawing really really far. Not usually necessary
+			//cam.near = cam.far - (cam.far - cam.near)/100.0;
+			//cam.far = far * 10;
+			//cam.updateProjectionMatrix();
+			//renderer.render(scene,cam);
+			//renderer.clear(false,true,false);
+			//cam.near = near;
+			//cam.far = far;
+			//cam.updateProjectionMatrix();
 			renderer.render(scene,cam);
 			$(document).trigger('postrender',[vp,wh,ww]);
 			sceneNode.lastTime = now;
@@ -466,6 +468,7 @@ var stats;
 				sceneNode.renderer.autoUpdateScene = false;
 				sceneNode.renderer.setSize($('#index-vwf').width(),$('#index-vwf').height());
 				sceneNode.renderer.shadowMapEnabled = true;
+				sceneNode.renderer.shadowMapType = THREE.PCFSoftShadowMap;
 				sceneNode.renderer.autoClear = false;
 				sceneNode.renderer.setClearColor({r:0,g:0,b:0},1.0);
             }else

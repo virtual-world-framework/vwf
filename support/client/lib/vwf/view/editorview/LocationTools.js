@@ -112,11 +112,27 @@ define(function ()
 						if(i == window.location.hash.substr(1))
 							pos = placemarks[i];
 					}
-					return pos;
+					if(pos)
+					return [pos[0],pos[1],pos[2]];
+					return null;
+		}
+		this.getPlacemarkPosition = function(name)
+		{
 		
+			var placemarks = vwf.getProperty('index-vwf','placemarks');
+					var pos = null;
+					for(var i in placemarks)
+					{
+						if(i == name)
+							pos = placemarks[i];
+					}
+					if(pos)
+					return [pos[0],pos[1],pos[2]];
+					return null;
 		}
 		this.GoToPlacemark_inner = function(val)
 		{
+			
 			var placemarks = vwf.getProperty('index-vwf','placemarks');
 			this.currentPlacemark = val;
 			window.location.hash = val;
@@ -130,14 +146,14 @@ define(function ()
 					{
 						if (!_UserManager.GetCurrentUserName())
 						{
-							vwf.models[0].model.nodes['index-vwf'].orbitPoint(pos);
+							vwf.models[0].model.nodes['index-vwf'].orbitPoint([pos[0],pos[1],pos[2]]);
 							vwf.models[0].model.nodes['index-vwf'].zoom = 5;
 							vwf.models[0].model.nodes['index-vwf'].updateCamera();
 							return;
 						}	
 					
 						$('#MenuCamera3RDPersonicon').click();		
-						_Editor.setProperty(_UserManager.GetCurrentUserID(),'translation',pos);
+						_Editor.setProperty(_UserManager.GetCurrentUserID(),'translation',[pos[0],pos[1],pos[2]]);
 					}
 		}
 		this.AddPlacemark = function()
@@ -152,6 +168,7 @@ define(function ()
 			
 				if(ok)
 				{
+					
 					var title = val;
 					var location = vwf.getProperty(_UserManager.GetCurrentUserID(),'translation');
 					var placemarks = vwf.getProperty('index-vwf','placemarks');

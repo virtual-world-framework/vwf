@@ -28,9 +28,14 @@ properties:
     value: [0 , 0 , 1 ]
     set: |
             if(!this.sun) return;
-            this.sun.position.x = value[0];
-            this.sun.position.y = value[1];
-            this.sun.position.z = value[2];      
+            
+            var x = value[2] * Math.sin(value[0])* Math.cos(value[1]);
+            var y = value[2] * Math.sin(value[0])* Math.sin(value[1]);
+            var z = value[2] * Math.cos(value[0]);
+            
+            this.sun.position.x = x;
+            this.sun.position.y = y;
+            this.sun.position.z = z;      
             this.sun.position.normalize();
             this.sun.position.multiplyScalar(100);
             this.sun.updateMatrixWorld(true);
@@ -38,10 +43,11 @@ properties:
     value: .5
     set: |
             if(!this.sun) return;
-            this.sun.intensity = value;                   
+            this.sun.intensity = value;   
+            this.sun.shadowDarkness = value;           
   ambientColor: 
     set: |
-            this.sun.shadowDarkness = 1.0-MATH.lengthVec3(value);
+            //this.sun.shadowDarkness = MATH.lengthVec3(value);
   fogColor: [155, 155, 155]
   fogNear: 100
   fogFar: 1000
@@ -122,6 +128,7 @@ properties:
       displayname: Sun Direction
       property: sunDirection
       type: vector
+      step: .05
     skyTexture:
       displayname: skyTexture
       property: skyTexture
@@ -163,6 +170,13 @@ methods:
   PM:
   latencyTest:
   getSkyMat:
+  cameraBroadcastStart:
+  broadcastCameraPosition:
+  tick:
+  getBroadcasting:
+  cameraBroadcastEnd:
+  playSound:
+  setMusic:
 scripts:
 - |
     this.initialize = function(){
@@ -245,6 +259,8 @@ scripts:
        //this.sun.shadowCameraVisible = true;
        this.sun.shadowCameraBottom = -10;
        this.sun.shadowCameraLeft = -10;
+       this.sun.shadowMapWidth = 1024;
+       this.sun.shadowMapHeight = 1024;
        
        this.sun.shadowCameraTop = 10;
        this.sun.shadowCameraRight = 10;
@@ -285,6 +301,73 @@ scripts:
           $(document).bind('postprerender',this.postrendercallback);
           this.createNameTag();
           this.updateCamera();
+    }
+    this.tick = function()
+    {
+       
+        if(this.broadcastingCamera)
+        {
+            vwf_view.kernel.callMethod('index-vwf','broadcastCameraPosition',[this.camera.transform]);
+        }
+        if(this.receivingCameraBroadcast && this.cameramode != 'None')
+            this.receivingCameraBroadcast = false;
+        
+    }
+    this.broadcastCameraPosition = function(transform)
+    {
+        if(this.receivingCameraBroadcast)
+        {
+          
+            this.camera.transform = transform;
+        }
+    }
+    this.getBroadcasting = function()
+    {
+        return this.broadcastingCamera;
+    }
+    this.cameraBroadcastStart = function()
+    {
+        if(this.client == this.moniker)
+        {
+            
+            this.broadcastingCamera = true;
+            this.receivingCameraBroadcast = false;
+        }else
+        {
+            alertify.confirm(_UserManager.GetPlayernameForClientID(this.client) + " would like to share the camera view with you. Accept?",function(ok)
+            {
+                if(ok)
+                {
+                
+                    this.broadcastingCamera = false;
+                    this.receivingCameraBroadcast = true;
+                    this.cameramode = 'None';
+                
+                }
+            
+            }.bind(this));
+            
+        
+        }
+    
+    }
+    this.cameraBroadcastEnd = function()
+    {
+        if(this.client == this.moniker)
+        {
+            this.broadcastingCamera = false;
+            this.receivingCameraBroadcast = false;
+        }else
+        {
+            alertify.alert(_UserManager.GetPlayernameForClientID(this.client) + " has stopped sharing the camera view.");
+            this.broadcastingCamera = false;
+            this.receivingCameraBroadcast = false;
+        }
+    }
+    this.cameraBroadcastPrompt = function()
+    {
+        
+    
     }
     this.getSkyMat = function()
     {
@@ -848,7 +931,7 @@ scripts:
             
             var oldpickstate = findviewnode(this.objectFollowed.id).PickPriority;
             
-            var hit = _Editor.ThreeJSPick(start,MATH.scaleVec3(offset,1),this.PickOptions);
+            var hit = _Editor.ThreeJSPick(start,MATH.scaleVec3(offset,1),{filter:function(o){return !(o.isAvatar === true || o.passable===true)}});
             if(hit)
             {
                 finaldist = Math.min(finaldist,hit.distance-.2);
@@ -1192,7 +1275,7 @@ scripts:
         
        
         
-        this.sun.shadowCamera.projectionMatrix.makeOrthographic(camposLS.x - 5,camposLS.x + 5,camposLS.y - 5,camposLS.y+5,-camposLS.z - 5 ,-camposLS.z + 5 );
+        this.sun.shadowCamera.projectionMatrix.makeOrthographic(camposLS.x - 15,camposLS.x + 15,camposLS.y - 15,camposLS.y+15,-camposLS.z - 15 ,-camposLS.z + 15 );
         }
     }    
     this.setMaterialByDef = function(currentmat,value)

@@ -29,5 +29,6 @@ properties:
   animationStart:
   animationEnd: 
   animationState: 0
+  materialDef:
 
     

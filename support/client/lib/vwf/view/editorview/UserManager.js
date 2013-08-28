@@ -138,6 +138,11 @@ define(function ()
 						alertify.confirm("You are viewing this world as a guest. You will be able to view the world, but not interact with it. Would you like to go back and log in?",
 						function(e)
 						{
+							alertify.set({ labels: {
+							    ok     : "Ok",
+							    cancel : "Cancel"
+							} });
+						
 							if(e)
 								window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13) + window.location.hash;
 							else
@@ -146,7 +151,7 @@ define(function ()
 								$(document.body).append('<a href="#" id="GuestLogin" style="font-family: sans-serif;z-index:99;position:fixed;font-size: 2em;" class="alertify-button alertify-button-ok" id="alertify-ok">Login</a>');
 								$('#GuestLogin').click(function()
 								{
-									window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13);
+									window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13) + window.location.hash;
 								});
 							}
 						}
@@ -156,7 +161,7 @@ define(function ()
 			
 			
 			
-		}.bind(this)
+		}.bind(this) 
 		);
 		this.SelectedProfile = null;
 		this.showProfile = function (profile)
@@ -253,8 +258,8 @@ define(function ()
 				alert('User is already logged into this space');
 				return;
 			} 
-			var newintersectxy = _LocationTools.getCurrentPlacemarkPosition() || _Editor.GetInsertPoint();
-			
+			var newintersectxy = _LocationTools.getCurrentPlacemarkPosition()||_LocationTools.getPlacemarkPosition('Origin') || _Editor.GetInsertPoint();
+			vwf.models[0].model.nodes['index-vwf'].orbitPoint(newintersectxy);
 			this.PlayerProto.properties.PlayerNumber = username;
 			this.PlayerProto.properties.owner = username;
 			this.PlayerProto.properties.ownerClientID = vwf.moniker();
@@ -408,7 +413,7 @@ define(function ()
 						
 						window.onbeforeunload = '';
 						$(window).unbind();
-						window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13);
+						window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13) + window.location.hash;
 					}.bind(this)
 				});
 			
