@@ -88,6 +88,13 @@ exports.handlePostRequest = function(req, res, next){
 		
 		case "get_users":
 			DAL.getAllUsersInfo(function(docs){
+
+				for(var i in docs){
+					if(docs[i] && docs[i].Username == '__Global__'){
+						docs.splice(i);
+					}
+				}
+				
 				res.end(JSON.stringify(docs));
 			});
 			break;
