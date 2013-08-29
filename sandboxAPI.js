@@ -1286,6 +1286,7 @@ function serve (request, response)
 
 exports.serve = serve;
 exports.getState = getState;
+exports.getSessionData = GetSessionData;
 exports.setDataPath = function(p)
 {
 	global.log("datapath is " + p,0);

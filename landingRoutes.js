@@ -31,9 +31,16 @@ routesMap = {
 };
 
 exports.generalHandler = function(req, res, next){
-
+	
+	var sessionData = global.SandboxAPI.getSessionData(req);
 	if(!req.params.page)
 		req.params.page = 'sandbox';
+		
+	
+	if(req.params.page.indexOf('admin') > -1 && (!sessionData || sessionData.UID != global.adminUID)){
+		next();
+		return;
+	}
 		
 	var routeIndex = exports.acceptedRoutes.indexOf(req.params.page);
 
@@ -72,6 +79,12 @@ exports.help = function(req, res){
 exports.handlePostRequest = function(req, res, next){
 
 	var data = req.body ? JSON.parse(req.body) : '';
+	var sessionData = global.SandboxAPI.getSessionData(req);
+	
+	if(!sessionData || sessionData.UID != global.adminUID){
+		next();
+		return;
+	}
 	
 	switch(req.params.action){
 		case "delete_users":			
