@@ -346,45 +346,84 @@ face.prototype.intersect1 = function(p,d)
 
 }
 
+var A ;
+	var B ;
+	var C ;
+	var rr ;
+	var V  ;
+	var d  ;
+	var e  ;
+	var sep1;
+	var aa ;
+	var ab ;
+	var ac;
+	var bb ;
+	var bc;
+	var cc;
+	var sep2 ;
+	var sep3 ;
+	var sep4;
+	var AB ;
+	var BC ;
+	var CA ;
+	var d1 ;
+	var d2 ;
+	var d3 ;
+	var e1 ;
+	var e2 ;
+	var e3 ;
+	var Q1 ;
+	var Q2 ;
+	var Q3 ;
+	var QC;
+	var QA ;
+	var QB;
+	var sep5 ;
+	var sep6 ;
+	var sep7 ;
+	var separated;
+
+
 //p = [x,y,z] of center
 face.prototype.intersectSphere = function(P,r)
 {
-	var A = MATH.subVec3(this.v0 , P);
-	var B = MATH.subVec3(this.v1 , P);
-	var C = MATH.subVec3(this.v2 , P);
-	var rr = r * r;
-	var V = MATH.crossVec3(MATH.subVec3(B , A), MATH.subVec3(C , A));
-	var d = MATH.dotVec3(A, V);
-	var e = MATH.dotVec3(V, V);
-	var sep1 = d * d > rr * e;
-	var aa = MATH.dotVec3(A, A);
-	var ab = MATH.dotVec3(A, B);
-	var ac = MATH.dotVec3(A, C);
-	var bb = MATH.dotVec3(B, B);
-	var bc = MATH.dotVec3(B, C);
-	var cc = MATH.dotVec3(C, C);
-	var sep2 = (aa > rr) && (ab > aa) && (ac > aa);
-	var sep3 = (bb > rr) && (ab > bb) && (bc > bb);
-	var sep4 = (cc > rr) && (ac > cc) && (bc > cc);
-	var AB = MATH.subVec3(B , A);
-	var BC = MATH.subVec3(C , B);
-	var CA = MATH.subVec3(A , C);
-	var d1 = ab - aa;
-	var d2 = bc - bb;
-	var d3 = ac - cc;
-	var e1 = MATH.dotVec3(AB, AB);
-	var e2 = MATH.dotVec3(BC, BC);
-	var e3 = MATH.dotVec3(CA, CA);
-	var Q1 = MATH.subVec3(MATH.scaleVec3(A , e1) , MATH.scaleVec3(AB,d1));
-	var Q2 = MATH.subVec3(MATH.scaleVec3(B , e2) , MATH.scaleVec3(BC,d2));
-	var Q3 = MATH.subVec3(MATH.scaleVec3(C , e3) , MATH.scaleVec3(CA,d3));
-	var QC = MATH.subVec3(MATH.scaleVec3(C , e1) , Q1);
-	var QA = MATH.subVec3(MATH.scaleVec3(A , e2) , Q2);
-	var QB = MATH.subVec3(MATH.scaleVec3(B , e3) , Q3);
-	var sep5 = (MATH.dotVec3(Q1, Q1) > rr * e1 * e1) && (MATH.dotVec3(Q1, QC) > 0);
-	var sep6 = (MATH.dotVec3(Q2, Q2) > rr * e2 * e2) && (MATH.dotVec3(Q2, QA) > 0);
-	var sep7 = (MATH.dotVec3(Q3, Q3) > rr * e3 * e3) && (MATH.dotVec3(Q3, QB) > 0);
-	var separated = sep1 | sep2 | sep3 | sep4 | sep5 | sep6 | sep7;
+	 
+	 A = MATH.subVec3(this.v0 , P);
+	 B = MATH.subVec3(this.v1 , P);
+	 C = MATH.subVec3(this.v2 , P);
+	 rr = r * r;
+	 V = MATH.crossVec3(MATH.subVec3(B , A), MATH.subVec3(C , A));
+	 d = MATH.dotVec3(A, V);
+	 e = MATH.dotVec3(V, V);
+	 sep1 = d * d > rr * e;
+	 aa = MATH.dotVec3(A, A);
+	 ab = MATH.dotVec3(A, B);
+	 ac = MATH.dotVec3(A, C);
+	 bb = MATH.dotVec3(B, B);
+	 bc = MATH.dotVec3(B, C);
+	 cc = MATH.dotVec3(C, C);
+	 sep2 = (aa > rr) && (ab > aa) && (ac > aa);
+	 sep3 = (bb > rr) && (ab > bb) && (bc > bb);
+	 sep4 = (cc > rr) && (ac > cc) && (bc > cc);
+	 AB = MATH.subVec3(B , A);
+	 BC = MATH.subVec3(C , B);
+	 CA = MATH.subVec3(A , C);
+	 d1 = ab - aa;
+	 d2 = bc - bb;
+	 d3 = ac - cc;
+	 e1 = MATH.dotVec3(AB, AB);
+	 e2 = MATH.dotVec3(BC, BC);
+	 e3 = MATH.dotVec3(CA, CA);
+	 Q1 = MATH.subVec3(MATH.scaleVec3(A , e1) , MATH.scaleVec3(AB,d1));
+	 Q2 = MATH.subVec3(MATH.scaleVec3(B , e2) , MATH.scaleVec3(BC,d2));
+	 Q3 = MATH.subVec3(MATH.scaleVec3(C , e3) , MATH.scaleVec3(CA,d3));
+	 QC = MATH.subVec3(MATH.scaleVec3(C , e1) , Q1);
+	 QA = MATH.subVec3(MATH.scaleVec3(A , e2) , Q2);
+	 QB = MATH.subVec3(MATH.scaleVec3(B , e3) , Q3);
+	 sep5 = (MATH.dotVec3(Q1, Q1) > rr * e1 * e1) && (MATH.dotVec3(Q1, QC) > 0);
+	 sep6 = (MATH.dotVec3(Q2, Q2) > rr * e2 * e2) && (MATH.dotVec3(Q2, QA) > 0);
+	 sep7 = (MATH.dotVec3(Q3, Q3) > rr * e3 * e3) && (MATH.dotVec3(Q3, QB) > 0);
+	 separated = sep1 || sep2 || sep3 || sep4 || sep5 || sep6 || sep7;
 	if(!separated)
 	{
 		return {norm:this.norm,face:this};
@@ -633,7 +672,7 @@ BoundingBoxRTAS.prototype.intersectSphere = function(center,r)
 	closest = [];
 	closest[0] = (center[0] < this.min[0])? this.min[0] : (center[0] > this.max[0])? this.max[0] :center[0];
     closest[1] = (center[1] < this.min[1])? this.min[1]: (center[1] > this.max[1])?this.max[1] : center[1];
-    closest[2] = (center[2] < this.min[3])? this.min[2]: (center[2] > this.max[2])? this.max[2] : center[2];
+    closest[2] = (center[2] < this.min[2])? this.min[2]: (center[2] > this.max[2])? this.max[2] : center[2];
 	var xDiff = MATH.subVec3(center,closest);
 	var diff = Vec3.magnitudeSquared(xDiff);
 	if(diff > r*r)
@@ -1225,11 +1264,13 @@ THREE.Geometry.prototype.SphereCast = function(center,r,opts)
 	   	
 	 var intersections = [];
 	 //try to reject based on bounding box.
+	 
 	 var bbhit = this.BoundingBox.intersectSphere(center,r,opts); 
 	
 	 if(bbhit.length > 0)
 	 {
 				
+				bbhit = this.BoundingBox.intersectSphere(center,r,opts); 
 		 //build the octree or the facelist
 		 if(!this.RayTraceAccelerationStructure || this.dirtyMesh)
 		 {
@@ -1352,7 +1393,7 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 					ret2[i].point = MATH.mulMat4Vec3(mat2,ret2[i].point);
 					
 					ret2[i].norm = MATH.mulMat4Vec3(mat3,ret2[i].norm);
-					ret2[i].norm = MATH.scaleVec3(ret2[i].norm,1.0/MATH.lengthVec3(ret2[i].norm));
+					ret2[i].norm = MATH.toUnitVec3(ret2[i].norm);
 					ret2[i].distance = MATH.distanceVec3(origin,ret2[i].point);
 					ret2[i].object = this;
 					ret2[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
@@ -1488,6 +1529,7 @@ THREE.Object3D.prototype.FrustrumCast = function(frustrum,options)
 			  var mat;
 			  var mat2;
 			  
+			  
 			 
 			  mat = this.getModelMatrix().slice(0);
 			  mat = MATH.inverseMat4(mat);
@@ -1584,11 +1626,25 @@ THREE.Object3D.prototype.SphereCast = function(center,r,options)
 			  var mat;
 			  var mat2;
 			  
+	  var mat = this.getModelMatrix().slice(0);
+	  mat = MATH.inverseMat4(mat);
+	  var tCenter = MATH.mulMat4Vec3(mat,center);
+	  
+	  
+	  mat[3] = 0;
+	  mat[7] = 0;
+	  mat[11] = 0; 
+	  var tR = r * MATH.lengthVec3([mat[0],mat[4],mat[8]]);
+	 
+	  var mat2 = this.getModelMatrix().slice(0);
+	  var mat3 = this.getModelMatrix().slice(0);
+	  mat3[3] = 0;
+	  mat3[7] = 0;
+	  mat3[11] = 0;
+	  
 			 
-			  mat = this.getModelMatrix().slice(0);
-			  mat = MATH.inverseMat4(mat);
-			  var tCenter = MATH.mulMat4Vec3(mat,center);
-			  var tR = r * MATH.lengthVec3([mat[0],mat[4],mat[8]]);
+			  
+			     
 			if(this instanceof THREE.Mesh)
 			{
 				//collide with the mesh
@@ -1600,13 +1656,11 @@ THREE.Object3D.prototype.SphereCast = function(center,r,options)
 					//move the normal and hit point into worldspace
 					
 					
-					mat2[3] = 0;
-					mat2[7] = 0;
-					mat2[11] = 0;
-					//ret[i].point = MATH.mulMat4Vec3(mat2,ret[i].point);
-					ret[i].norm = MATH.mulMat4Vec3(mat2,ret[i].norm);
+					
+					ret[i].point = MATH.mulMat4Vec3(mat2,ret[i].face.c);
+					ret[i].norm = MATH.mulMat4Vec3(mat3,ret[i].norm);
 					ret[i].norm = MATH.scaleVec3(ret[i].norm,1.0/MATH.lengthVec3(ret[i].norm));
-				//	ret[i].distance = MATH.distanceVec3([0,0,0],ret[i].point);
+					ret[i].distance = MATH.distanceVec3([0,0,0],ret[i].point);
 					ret[i].object = this;
 					ret[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
 				}

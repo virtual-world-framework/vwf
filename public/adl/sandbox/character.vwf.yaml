@@ -387,7 +387,7 @@ scripts:
                 
                 motionvec = motionvec ? MATH.toUnitVec3(motionvec) : [0,0,0];
                 var testpos = MATH.subVec3(finalt,MATH.scaleVec3(motionvec,-.15));
-                
+                /*
                 var intersectfront = _SceneManager.CPUPick(MATH.addVec3(testpos,[0,0,1]),motionvec,{filter:function(o){return !(o.isAvatar === true || o.passable===true)},maxDist: 100,ignore:[this.skin,_Editor.GetMoveGizmo()]});
                 if(intersectfront)
                 {
@@ -407,7 +407,7 @@ scripts:
                         
                         finalt = MATH.addVec3(finalt,R);
                     }
-                }
+                }*/
                 var falldist = 1000;
                
                 var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,1.7]),[0,0,-1],{filter:function(o){ return !(o.isAvatar === true || o.passable === true)},maxDist: 100,ignore:[this.skin,_Editor.GetMoveGizmo()]});
@@ -487,22 +487,25 @@ scripts:
              this.updatecounter = 0;
           }
           
-       /* var offset = MATH.subVec3(finalt , backupt);
+        var offset = MATH.subVec3(finalt , backupt);
         if(MATH.lengthVec3(offset) > 0)
         {
-            var spc = _SceneManager.SphereCast([finalt[0],finalt[1],finalt[2]+1.0],.5,{ignore:[this.skin,_Editor.GetMoveGizmo()],filter:function(n){if(n.passable) return false; return true;}});
-            
-            spc = this.filterContactsByNormal(spc);
+            var sphpt = [finalt[0],finalt[1],finalt[2]+1.0];
+            var spc = _SceneManager.SphereCast(sphpt,.5,{ignore:[this.skin,_Editor.GetMoveGizmo(),_dGround,_dSky],filter:function(n){if(n.passable) return false;if(n.isAvatar) return false; return true;}});
+            var origunitoffset = MATH.toUnitVec3(offset);
+            //spc = this.filterContactsByNormal(spc);
             
             //if the character intersected something (as defined by the sphere)
             var len = MATH.lengthVec3(offset);
-            if(spc.length )
+            if(spc.length > 0 && spc.length < 100)
             {
-
+               
+                
+                //offset = [0,0,0];
                 for(var i = 0; i < spc.length; i++)
                 {
-                    var normal = spc[i].norm;
-                    
+                    var normal = [spc[i].norm[0],spc[i].norm[1],spc[i].norm[2]];
+                    normal[2] = 0;
                    
                     normal = MATH.toUnitVec3(normal);
                     
@@ -535,13 +538,16 @@ scripts:
                 } 
                 
             }
-
+            if(spc.length > 100)
+            {
+                offset = [0,0,0];
+            }
             //add offset to original position
             finalt = MATH.addVec3(backupt,offset);
             //move away on the normal, just for good measure
            
             
-        }*/
+        }
         this.skin.PickPriority = 1;
         this.tbak = finalt;
         this.translation = finalt;
