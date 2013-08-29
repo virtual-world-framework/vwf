@@ -876,9 +876,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         };
 
         // -- getState -----------------------------------------------------------------------------
-
+		this.creatingNodeCount = 0;
         this.getState = function( full, normalize ) {
 			
+			if(this.creatingNodeCount != 0)
+				debugger;
 			if(full === undefined)
 				full = true;
             this.logger.group( "vwf.getState", full, normalize );
@@ -975,6 +977,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.createNode = function( nodeComponent, create_callback /* ( nodeID ) */ ) {
 			
+			this.creatingNodeCount++;
             this.logger.group( "vwf.createNode " + (
                 typeof nodeComponent == "string" || nodeComponent instanceof String ?
                     nodeComponent : JSON.stringify( loggableComponent( nodeComponent ) )
@@ -1118,6 +1121,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             } );
 
+			this.creatingNodeCount --;
             this.logger.groupEnd();
         };
 

@@ -265,7 +265,7 @@ scripts:
        this.sun.shadowCameraTop = 10;
        this.sun.shadowCameraRight = 10;
        findscene().add(l);
-      
+       rebuildAllMaterials();
        
        this.sun.position.x = this.sunDirection[0];
        this.sun.position.y = this.sunDirection[1];

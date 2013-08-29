@@ -285,59 +285,9 @@ define(function ()
 		}
 		
 		
-		
-		this.loadScene = function (scene)
-		{
-			
-			for (var i = 0; i < scene.length - 1; i++)
-			{
-				var node = scene[i];
-				var name = node.name?node.name:GUID();
-				var callback = null;
-				if(i == scene.length - 2)
-					callback = function(){$(document).trigger('setstatecomplete')};
-				vwf_view.kernel.kernel.createChild('index-vwf', name, node, callback, null);
-				
-			}
-			// if there is no data to load
-			if(scene.length - 1 == 0)
-				$(document).trigger('setstatecomplete');
-			
-			var props = scene[scene.length - 1]
-			for (var i in props)
-			{
-				if (props[i] !== undefined && i != 'EditorData') vwf.setProperty('index-vwf', i, props[i])
-			};
-			
-			//push the scene up to the server. Should at this point be no other client, but the server needs to know about the state
-			vwf.respond("", "stateLoaded", "", [],
-			{});
-		}
-		
 		this.loadFromServer = function ()
 		{
-			var SID = this.getCurrentSession();
-			var data = jQuery.ajax(
-			{
-				type: 'GET',
-				url: PersistanceServer + '/vwfDataManager.svc/State?SID=' + SID,
-				data: null,
-				success: null,
-				async: false,
-				dataType: "json"
-			});
-			try
-			{
-				data = JSON.parse(JSON.parse(data.responseText).GetStateResult);
-			}
-			catch (e)
-			{
-				data = [];
-				//startHelp();
-				$(document).trigger('setstatecomplete');
-			}
-			
-			this.loadScene(data);
+			$(document).trigger('setstatecomplete');
 		}
 		this.saveTimer = function ()
 		{

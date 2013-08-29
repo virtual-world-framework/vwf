@@ -290,7 +290,7 @@ scripts:
         if(this.motionStack.length == 0)
             this.stand();
         
-        var motionvec = null;
+        var motionvec = [0,0,0];
         
         if(this.motionStack.length)
             this.playSound('./vwfDataManager.svc/datafile/sounds/footsteps.mp3',true,.1);
@@ -315,28 +315,31 @@ scripts:
              if(this.cycleName == 'straferight')
             {
                  motionvec = MATH.mulMat4Vec3(MATH.angleAxis(backupr[3]*0.0174532925,[backupr[0],backupr[1],backupr[2]]),[-.03*updateFreqDivisor,0,0]);
-                 finalt = MATH.addVec3(motionvec,finalt);
+                
             }
             if(this.cycleName == 'strafeleft')
             {
                  motionvec = MATH.mulMat4Vec3(MATH.angleAxis(backupr[3]*0.0174532925,[backupr[0],backupr[1],backupr[2]]),[.03*updateFreqDivisor,0,0]);
-                 finalt = MATH.addVec3(motionvec,finalt);
+                 
             }
             if(this.cycleName == 'walk')
             {
                     motionvec = MATH.mulMat4Vec3(MATH.angleAxis(backupr[3]*0.0174532925,[backupr[0],backupr[1],backupr[2]]),[0,-.06*updateFreqDivisor,0]);
-                    finalt = MATH.addVec3(motionvec,finalt);
+                    
             }
             if(this.cycleName == 'walkback')
             {
                     motionvec = MATH.mulMat4Vec3(MATH.angleAxis(backupr[3]*0.0174532925,[backupr[0],backupr[1],backupr[2]]),[0,+.06*updateFreqDivisor,0]);
-                    finalt = MATH.addVec3(motionvec,finalt);
+                   
             }
             if(this.cycleName == 'run')
             {
                     motionvec = MATH.mulMat4Vec3(MATH.angleAxis(backupr[3]*0.0174532925,[backupr[0],backupr[1],backupr[2]]),[0,-.140*updateFreqDivisor,0]);
-                    finalt = MATH.addVec3(motionvec,finalt);
+                    
             }
+            
+            
+            
             if(this.cycleName == 'jump')
             {  
                 var preptime = 5.5;
@@ -377,6 +380,14 @@ scripts:
             
         }
         
+        if(MATH.lengthVec3(motionvec) > 0)
+        {
+            var sphpt = [finalt[0],finalt[1],finalt[2]+1.0];
+            var spc = _SceneManager.SphereCast(sphpt,.5,{ignore:[this.skin,_Editor.GetMoveGizmo(),_dGround,_dSky],filter:function(n){if(n.passable) return false;if(n.isAvatar) return false; return true;}});
+            
+            motionvec = this.collisionOffset(motionvec,spc);
+        }
+        finalt = MATH.addVec3(motionvec,finalt);
         
             //if the character is not completely still, and they're not jumpping, then check their motion vector 
             //for intersetions, and prevent penetration through objects
@@ -487,20 +498,29 @@ scripts:
              this.updatecounter = 0;
           }
           
-        var offset = MATH.subVec3(finalt , backupt);
-        if(MATH.lengthVec3(offset) > 0)
+        
+        this.skin.PickPriority = 1;
+        this.tbak = finalt;
+        this.translation = finalt;
+      
+        this.rotation = backupr;
+        
+         for(var i = 0; i < this.updateCallbacks.length; i++)
         {
-            var sphpt = [finalt[0],finalt[1],finalt[2]+1.0];
-            var spc = _SceneManager.SphereCast(sphpt,.5,{ignore:[this.skin,_Editor.GetMoveGizmo(),_dGround,_dSky],filter:function(n){if(n.passable) return false;if(n.isAvatar) return false; return true;}});
-            var origunitoffset = MATH.toUnitVec3(offset);
-            //spc = this.filterContactsByNormal(spc);
-            
-            //if the character intersected something (as defined by the sphere)
-            var len = MATH.lengthVec3(offset);
-            if(spc.length > 0 && spc.length < 100)
+        
+            this.updateCallbacks[i](this);
+        }
+    }
+    this.collisionOffset = function(offset,spc)
+    {
+    
+    //if the character intersected something (as defined by the sphere)
+           
+            if(spc.length > 0 && spc.length < 30)
             {
-               
-                
+                spc = this.filterContactsByNormal(spc); 
+                for(var k =0; k < 5; k++)
+                {
                 //offset = [0,0,0];
                 for(var i = 0; i < spc.length; i++)
                 {
@@ -508,11 +528,10 @@ scripts:
                     normal[2] = 0;
                    
                     normal = MATH.toUnitVec3(normal);
-                    
+                   
                     //if moving into the contact
                     if(MATH.dotVec3(MATH.toUnitVec3(offset),normal) > 0)
                     {
-                        // normal = MATH.scaleVec3(normal,-len);
                         
                         var up = [0,0,1];
                         var side = MATH.crossVec3(normal,up);
@@ -536,30 +555,17 @@ scripts:
                         //finalt = MATH.addVec3(offset,MATH.scaleVec3(normal,-.001));
                     }
                 } 
+                }
                 
             }
-            if(spc.length > 100)
+            if(spc.length > 30)
             {
                 offset = [0,0,0];
             }
-            //add offset to original position
-            finalt = MATH.addVec3(backupt,offset);
-            //move away on the normal, just for good measure
-           
-            
-        }
-        this.skin.PickPriority = 1;
-        this.tbak = finalt;
-        this.translation = finalt;
-      
-        this.rotation = backupr;
-        
-         for(var i = 0; i < this.updateCallbacks.length; i++)
-        {
-        
-            this.updateCallbacks[i](this);
-        }
+    
+        return offset;
     }
+    window.collide = this.collisionOffset;
     this.tick = function()
     {
         

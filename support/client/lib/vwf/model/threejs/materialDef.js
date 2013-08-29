@@ -138,8 +138,11 @@
 				if(currentmat.reflectivity)
 				{
 					var sky = vwf_view.kernel.kernel.callMethod('index-vwf','getSkyMat')
+					if(sky)
+					{
 					currentmat.envMap = sky.uniforms.texture.value;
 					currentmat.envMap.mapping = new THREE.CubeReflectionMapping();
+					}
 				}
 				currentmat.needsUpdate = true;
 			}

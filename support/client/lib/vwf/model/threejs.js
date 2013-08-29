@@ -67,28 +67,7 @@
 
 		}
 
-    function rebuildAllMaterials(start)
-    {
-        
-        if(!start)
-        {
-            for(var i in this.state.scenes)
-            {
-                rebuildAllMaterials(this.state.scenes[i].threeScene);
-            }
-        }else
-        {
-            if(start && start.material)
-            {
-                start.material.needsUpdate = true;
-            }
-            if(start && start.children)
-            {
-               for(var i in start.children)
-                rebuildAllMaterials(start.children[i]);
-            }
-        }
-    }
+    
 
 	function matCpy(mat)
 	{
@@ -142,6 +121,29 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 			this.subDriverFactory = new SubDriverFactory();
 			$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/_THREERayTracer.js"></script>');
 			$(document.head).append('<script type="text/javascript" src="vwf/model/threejs/scenemanager.js"></script>');
+			
+			window.rebuildAllMaterials=function (start)
+			{
+				
+				if(!start)
+				{
+					for(var i in this.state.scenes)
+					{
+						rebuildAllMaterials(this.state.scenes[i].threeScene);
+					}
+				}else
+				{
+					if(start && start.material)
+					{
+						start.material.needsUpdate = true;
+					}
+					if(start && start.children)
+					{
+					   for(var i in start.children)
+						rebuildAllMaterials(start.children[i]);
+					}
+				}
+			}.bind(this);
             
         },
 

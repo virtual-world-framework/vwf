@@ -709,6 +709,8 @@ function startVWF(){
 		//Get the state and load it.
 		//Now the server has a rough idea of what the simulation is
 		var state = SandboxAPI.getState(instance) || [{owner:undefined}];
+		
+		var state2 = SandboxAPI.getState(instance) || [{owner:undefined}];
 		global.instances[namespace].state = {nodes:{}};
 		global.instances[namespace].state.nodes['index-vwf'] = {id:"index-vwf",properties:state[state.length-1],children:{}};
 		
@@ -744,24 +746,47 @@ function startVWF(){
 			}
 		}
 		
-		
-		
+		var blankscene = fs.readFileSync("./public/adl/sandbox/index.vwf.yaml", 'utf8');
+		blankscene= YAML.load(blankscene);
+		//blankscene.extends = 'index-vwf';
+		blankscene.id = 'index-vwf';
+		blankscene.patches= "index.vwf";
+		if(!blankscene.children)
+			blankscene.children = {};
 		//only really doing this to keep track of the ownership
 		for(var i =0; i < state.length-1; i++)
 		{
+			
 			var childComponent = state[i];
 			var childName = state[i].name || state[i].properties.DisplayName + i;
 			var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName.replace(/ /g,'-'); 
 			childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
+			//state[i].id = childID;
+			//state2[i].id = childID;
+			blankscene.children[childName] = state2[i];
 			state[i].id = childID;
 			global.instances[namespace].state.nodes['index-vwf'].children[childID] = state[i];
 			global.instances[namespace].state.nodes['index-vwf'].children[childID].parent = global.instances[namespace].state.nodes['index-vwf'];
 			fixIDs(state[i]);
 		}
+		var props = state[state.length-1];
+		if(props)
+		{
+			if(!blankscene.properties)
+				blankscene.properties = {};
+			for(var i in props)
+			{
+				blankscene.properties[i] = props[i];
+			}
+		}
 		//global.log(Object.keys(global.instances[namespace].state.nodes['index-vwf'].children));
 		
 		//this is a blank world, go ahead and load the default
-		socket.emit('message',{"action":"createNode","parameters":["index.vwf"],"time":global.instances[namespace].time});
+		
+		
+		
+		
+		socket.emit('message',{"action":"createNode","parameters":[blankscene],"time":global.instances[namespace].time});
 		socket.pending = false;
 	  }
 	  //this client is not the first, we need to get the state and mark it pending
@@ -974,10 +999,41 @@ function startVWF(){
 					global.instances[namespace].Log('Got State',1);
 					var state = message.result;
 					global.instances[namespace].Log(state,2);
-					client.emit('message',{"action":"setState","parameters":[state],"time":global.instances[namespace].time});
+					
+					var incommingscene = state.nodes[0].children;
+					var myscene = global.instances[namespace].state.nodes['index-vwf'].children;
+					var toadd = [];
+					for(var i in myscene)
+					{	
+						node = myscene[i];
+						var found = false;
+						for(var j in incommingscene)
+						{
+							if(incommingscene[j].id == node.id)
+							{
+									found = true;
+									break;
+							}
+						}
+						if(!found)
+						{
+							console.log(node.id + " not found in state! WTF");
+							var parentbackup = node.parent;
+							delete node.parent;
+							var nodecpy = JSON.parse(JSON.stringify(node));
+							node.parent = parentbackup;
+							incommingscene[node.name] = nodecpy;
+						}
+					}
+					
+					if(message.client != i)
+						client.emit('message',{"action":"setState","parameters":[state],"time":global.instances[namespace].time});
 					client.pending = false;
 					for(var j = 0; j < client.pendingList.length; j++)
+					{
 						client.emit('message',client.pendingList[j]);
+						
+					}
 					client.pendingList = [];	
 				}
 				else
@@ -986,6 +1042,7 @@ function startVWF(){
 					if(client.pending === true)
 					{
 						client.pendingList.push(message);
+						
 					}else
 					{
 						

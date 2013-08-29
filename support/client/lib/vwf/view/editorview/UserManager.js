@@ -108,7 +108,7 @@ define(function ()
 				$.ajax('/vwfDataManager.svc/logindata',
 				{
 					cache:false,
-					async:true,
+					async:false,
 					success:function(data,status,xhr)
 					{
 						var logindata = JSON.parse(xhr.responseText);
