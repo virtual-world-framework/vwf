@@ -6,6 +6,8 @@ var libpath = require('path'),
     sio = require('socket.io'),
     YAML = require('js-yaml'),
     zlib = require('zlib');
+
+var template_extensions = [ "", ".yaml", ".json" ];
 	
 // pick the application name out of the URL by finding the index.vwf.yaml
 function findAppName(uri)
@@ -119,32 +121,11 @@ function RedirectToInstance(request,response,appname,newid)
 	
 	redirect(newid,response);			
 }
-
-function redirect(url,response)
-{
-				url = url.replace(/\\\\/g,'/');
-				url = url.replace(/\\/g,'/');
-				url = url.replace(/\/\//g,'/');
-				
-				url = url.replace(/\/\/\//g,'/');
-				//url = url.replace('http://','');
-				url = url.replace(/\/\/\//g,"/");
-				url = url.replace(/\/\/\/\//g,"/");
-				//url = 'http://' + url;
-				response.writeHead(200, {
-					"Content-Type": "text/html" 
-				});
-				response.write( "<html>" +
-								"<head>" +
-								"	<title>Virtual World Framework</title>" +
-								"	<meta http-equiv=\"REFRESH\" content=\"0;url="+url+"\">" +
-								"</head>" +
-								"<body>" +
-								"</body>" +
-								"</html>");
-				response.end();
-				return;
+function redirect(url, response) {
+    response.writeHead(302, {'Location': url} );
+    response.end();
 }
+
 //Find the instance(instance) ID in a URL
 function Findinstance(uri)
 {
@@ -379,20 +360,271 @@ function ServeJSON(jsonobject,response,URL)
 			
 }
 //Get the instance ID from the handshake headers for a socket
-function getNamespace(socket)
-{
-
-		var referer = (socket.handshake.headers.referer);
-	  var host = (socket.handshake.headers.host);
-	  var namespace = referer.substr(7+host.length);
-	  if(namespace[namespace.length-1] != "/")
-		namespace += "/";
-	  return namespace;
-
+function getNamespace( socket ) {
+    var referer = (socket.handshake.headers.referer);
+    var host = (socket.handshake.headers.host);
+    if ( referer.indexOf( host ) > -1 ) {
+        var updatedURL = referer.substr( referer.indexOf( host ) + host.length );
+        var processedURL = processURL( updatedURL );
+        if ( ( processedURL[ 'instance' ] ) && ( processedURL[ 'public_path' ] ) ) {
+            return joinPath( joinPath( processedURL[ 'public_path' ], processedURL[ 'application' ] ), processedURL[ 'instance' ] );
+        }
+    }
+    return undefined;
 }
 
 function strEndsWith(str, suffix) {
     return str.match(suffix+"$")==suffix;
+}
+
+function joinPath( segmentOne, segmentTwo ) {
+    if ( segmentOne == undefined ) {
+        segmentOne = "";
+    }
+    if ( segmentTwo == undefined ) {
+        segmentTwo = "";
+    }
+    if ( ( segmentTwo[ 0 ] == "/" ) && ( segmentOne[ segmentOne.length - 1 ] == "/" ) ) {
+        return segmentOne + segmentTwo.slice( 1 );
+    }
+    else if ( ( segmentTwo[ 0 ] == "/" ) || ( segmentOne[ segmentOne.length - 1 ] == "/" ) ) {
+        return segmentOne + segmentTwo;
+    }
+    else
+    {
+        return segmentOne + "/" + segmentTwo;
+    }
+}
+
+function isDirectory( path ) {
+    var seperatorFixedPath = path.replace(/\//g,libpath.sep);
+    if ( ! fs.existsSync( seperatorFixedPath ) ) {
+        return false;
+    }
+    return fs.statSync( seperatorFixedPath ).isDirectory( );
+}
+
+function isFile( path ) {
+    var seperatorFixedPath = path.replace(/\//g,libpath.sep);
+    if ( ! fs.existsSync( seperatorFixedPath ) ) {
+        return false;
+    }
+    return fs.statSync( seperatorFixedPath ).isFile( );
+}
+
+function getExtension( path ) {
+    if ( path.match(/\.vwf$/) ) {
+        for ( var index = 0; index < template_extensions.length; index++ ) {
+            if ( isFile( joinPath( "./public/", path + template_extensions[ index ] ) ) ) {
+                return template_extensions[ index ];
+            }
+        }
+    }
+    else if ( path.match(/\.(dae|unity3d)$/) ) {
+        if ( isFile( joinPath( "./public/", path ) ) ) {
+            return "";
+        }
+    }
+    return undefined;
+}
+
+function isInstance( segment ) {
+    if ( segment.match(/^[0-9A-Za-z]{16}$/) ) {
+        return true;
+    }
+    return false;
+}
+
+function generateSegments( argument ) {
+    var result = argument.split("/");
+    if ( result.length > 0 ) {
+        if ( result[ 0 ] == "" ) {
+            result.shift();
+        }
+    }
+    if ( result.length > 0 ) {
+        if ( result[ result.length - 1 ] == "" ) {
+            result.pop();
+        }
+    }
+    return result;
+}
+
+function processURL( updatedURL ) {
+    var result = { 'public_path': "/", 'application': undefined, 'instance': undefined, 'private_path': undefined};
+    var segments = generateSegments( updatedURL );
+    var extension = undefined;
+
+    while ( ( segments.length > 0 ) && ( isDirectory( joinPath( "./public" + result[ 'public_path' ], segments[ 0 ] ) ) ) ) {
+        result[ 'public_path' ] = joinPath( result[ 'public_path' ], segments.shift() );
+    }
+
+    if ( ( segments.length > 0 ) && ( extension = getExtension( joinPath( result[ 'public_path' ], segments[ 0 ] ) ) ) ) {
+        result[ 'application' ] = segments.shift();
+    }
+    else if ( extension = getExtension( joinPath( result[ 'public_path' ], "index.vwf" ) ) ) {
+        result[ 'application' ] = "index.vwf";
+    }
+    else if ( extension = getExtension( joinPath( result[ 'public_path' ], "index.dae" ) ) ) {
+        result[ 'application' ] = "index.dae";
+    }
+    else if ( extension = getExtension( joinPath( result[ 'public_path' ], "index.unity3d" ) ) ) {
+        result[ 'application' ] = "index.unity3d";
+    }
+
+    if ( extension ) {
+        if ( ( segments.length > 0 ) && ( isInstance( segments[ 0 ] ) ) ) {
+            result[ 'instance' ] = segments.shift();
+        }
+        if ( segments.length > 0 ) {
+            result[ 'private_path' ] = segments.join("/");
+        }
+    }
+    
+    return result;
+}
+
+function invokeFile( request, response, filename ) {
+    if ( isFile( filename ) ) {
+        ServeFile( request, filename.replace(/\//g,libpath.sep), response, url.parse( request.url, true ) );
+        return true;
+    }
+    return false;
+}
+
+function invokeComponent( request, response, filename ) {
+    if ( isFile( filename + ".yaml" ) ) {
+        ServeYAML( filename.replace(/\//g,libpath.sep) + ".yaml", response, url.parse( request.url, true ) );
+        return true;
+    }
+    return false;
+}
+
+function invokeAdmin( request, response, parsedRequest ) {
+    if ( parsedRequest[ 'private_path' ] ) {
+        var segments = generateSegments( parsedRequest[ 'private_path' ] );
+        if ( ( segments.length > 0 ) && ( segments[ 0 ] == "admin" ) ) {
+            if ( segments.length == 1 ) {
+                invokeFile( request, response, "./support/client/admin.html" );
+                return true;
+            }
+            if ( segments.length == 2 ) {
+                switch ( segments[ 1 ] ) {
+                    case "state":
+                        break;
+                    case "rate":
+                        break;
+                    case "play":
+                        break;
+                    case "pause":
+                        break;
+                    case "stop":
+                        break;
+                    case "instances":
+                        var data = {};
+                        var applicationInstanceRegexp = new RegExp("^" + joinPath( parsedRequest[ 'public_path' ], parsedRequest[ 'application' ] ) + "/[0-9A-Za-z]{16}$");
+					              for( var i in global.instances )
+			              		{
+                            if ( i.match( applicationInstanceRegexp ) ) {
+		              				  	  data[ i ] = { "clients": { } };
+		              					    for( var j in global.instances[ i ].clients )
+		              			  		  {
+		              			  			    data[ i ].clients[ j ] = null;
+		              			  		  }
+                            }
+		              			}
+			              		ServeJSON(data,response,url.parse(request.url,true));
+			              		return true;
+                    case "models":
+                        break;
+                    case "files":
+                        break;
+                    case "config":
+                        break;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function invokePersistence( request, response, parsedRequest ) {
+    return false;
+}
+
+function invokeApplication( request, response, parsedRequest ) {
+    var fileName = parsedRequest[ 'private_path' ];
+    if ( fileName == undefined ) {
+        fileName = "index.html";
+    }
+    if ( invokeFile( request, response, joinPath( "./support/client/lib/", fileName ) ) ) {
+        return true;
+    }
+    if ( invokeFile( request, response, joinPath( joinPath( "./public/", parsedRequest[ 'public_path' ] ), parsedRequest[ 'private_path' ] ) ) ) {
+        return true;
+    }
+    if ( invokeComponent( request, response, joinPath( joinPath( "./public/", parsedRequest[ 'public_path' ] ), parsedRequest[ 'private_path' ] ) ) ) {
+        return true;
+    }
+    if ( invokePersistence( request, response, parsedRequest ) ) {
+        return true;
+    }
+    if ( invokeAdmin( request, response, parsedRequest ) ) {
+        return true;
+    }
+    
+    return false;
+}
+
+function basicGet( request, response ) {
+    var parsedRequest = processURL( url.parse(request.url).pathname );
+    if ( ( request.url[ request.url.length - 1 ] != "/" ) && ( parsedRequest[ 'private_path' ] == undefined ) ) {
+        if ( ( request.headers['user-agent'] ) && ( request.headers['user-agent'].indexOf("MSIE 8.0" ) > -1 ) ) {
+            redirect( "/web/docs/unsupported.html", response ); // Redirect unsupported browsers to web/docs/unsupported.html
+            return true;
+        }
+        else if ( ( parsedRequest[ 'instance' ] == undefined ) && ( request.headers['accept'].indexOf( "text/html" ) == -1 ) ) {
+            return invokeComponent( request, response, joinPath( joinPath( "./public/", parsedRequest[ 'public_path' ] ), parsedRequest[ 'application' ] ) );
+        }
+        else {
+            redirect( request.url + "/", response );
+            return true;
+        }
+    }
+    else if ( ( parsedRequest[ 'instance' ] == undefined ) && ( parsedRequest[ 'private_path' ] == undefined ) ) {
+
+        redirect( request.url + makeid( ) + "/", response );
+        return true;
+          
+    }
+    else {
+        return invokeApplication( request, response, parsedRequest );
+          //Pass on to 'delegate to application'
+    }
+}
+
+function basicProxy( request, response ) {
+    var updatedURL = url.parse(request.url).pathname;
+    var segments = generateSegments( updatedURL );
+    if ( ( segments.length > 0 ) && ( segments[ 0 ] == "proxy" ) ) {
+        if ( invokeFile( request, response, joinPath( "./support/", updatedURL ) ) ) {
+            return true;
+        }
+        if ( invokeComponent( request, response, joinPath( "./support/", updatedURL ) ) ) {
+            return true;
+        }
+    }
+    return false;
+
+}
+
+function basicSplat( request, response ) {
+    var updatedURL = url.parse(request.url).pathname;
+    var segments = generateSegments( updatedURL );
+    if ( segments.length == 0 ) {
+        updatedURL = "/index.html";
+    }
+    return invokeFile( request, response, joinPath( "./public/", updatedURL ) );
 }
 
 //Start the VWF server
@@ -401,138 +633,18 @@ function startVWF(){
 	global.activeinstances = [];
 	function OnRequest(request, response) 
 	{
-	
 		try{
-			var safePathRE = RegExp('/\//'+(libpath.sep=='/' ? '\/' : '\\')+'/g');
-			var path = "./public".replace(safePathRE);
-			
-			var URL = url.parse(request.url,true);
-			var uri = URL.pathname.replace(safePathRE);
-			//global.log( URL.pathname );
-			
-			
-			if(URL.pathname == '/' || URL.pathname == '')
-			{
-				redirect('/adl/sandbox/',response);
-				return;
-			}
-			
-			var filename = libpath.join(path, uri);
-			var instance = Findinstance(filename);
-			
-			//remove the instance identifier from the request
-			filename = filterinstance(filename,instance);
-			
-			//file is not found - serve index or map to support files
-			//file is also not a yaml document
-			var c1 = libpath.existsSync(filename);
-			var c2 = libpath.existsSync(filename+".yaml");
-			if(!c1 && !c2)
-			{
-					
-				 //try to find the correct support file	
-				 var appname = findAppName(filename);
-				 if(!appname)
-				 {
-					
-						filename = filename.substr(13);
-						filename = "./support/".replace(safePathRE) + filename;
-						filename = filename.replace('vwf.example.com','proxy/vwf.example.com');
-						
-				 }
-				 else
-				 {
-						
-					 filename = filename.substr(appname.length-2);
-					 if(appname == "")
-						filename = './support/client/lib/index.html'.replace(safePathRE);
-					 else	
-						filename = './support/client/lib/'.replace(safePathRE) + filename;
-					
-				 }
-
-			}
-			//file does exist, serve normally 
-			if(libpath.existsSync(filename))
-			{
-				//if requesting directory, setup instance
-				//also, redirect to current instnace name of does not end in slash
-				if (fs.statSync(filename).isDirectory()) 
-				{
-					var appname = findAppName(filename);
-					if(!appname)
-						appname = findAppName(filename+libpath.sep);
-					
-					//no instance id is given, new instance
-					if(appname && instance == null)
-					{			
-						
-						RedirectToInstance(request,response,appname,makeid());
-						
-						
-						return;
-					}
-					//instance needs to end in a slash, so redirect but keep instance id
-					if(appname && strEndsWith(URL.pathname,instance))
-					{
-						RedirectToInstance(request,response,appname,"");
-						return;
-					}
-					//no app name but is directory. Not listing directories, so 404
-					if(!appname)
-					{
-						console.log(filename + "is a directory")
-						_404(response);
-						
-						return;
-					}
-					
-					//this is the bootstrap html. Must have instnace and appname
-					filename = './support/client/lib/index.html'.replace(safePathRE);
-					
-					//when loading the bootstrap, you must have an instance that exists in the database
-					global.log('Appname:', appname);
-					var instanceName = appname.substr(8).replace(/\//g,'_').replace(/\\/g,'_') + instance + "_";
-					
-					ServeFile(request,filename,response,URL);
-					
-					return;
-				}
-				//just serve the file
-				ServeFile(request,filename,response,URL);
-				
-			}
-			else if(libpath.existsSync(filename +".yaml"))
-			{
-				//was not found, but found if appending .yaml. Serve as yaml
-				ServeYAML(filename +".yaml",response,URL);
-
-			}
-			// is an admin call, currently only serving instances
-			else if(uri.indexOf('/admin/'.replace(safePathRE)) != -1)
-			{
-				if(uri.indexOf('/admin/instances'.replace(safePathRE)))
-				{
-					var data = {};
-					for(var i in global.instances)
-					{
-						data[i] = {clients:{}};
-						for(var j in global.instances[i].clients)
-						{
-							data[i].clients[j] = null;
-						}
-					}
-					ServeJSON(data,response,URL);
-					return;
-				}
-			}
-			else
-			{
-				global.log("404 : " + filename)
-				_404(response);
-				
-				return;
-			}
+        var handledRequest = basicSplat( request, response );
+        if ( ! ( handledRequest ) ) {
+            handledRequest = basicProxy( request, response );
+        }        
+        if ( ! ( handledRequest ) ) {
+            handledRequest = basicGet( request, response );
+        }
+        if ( ! ( handledRequest ) ) {
+				    global.log("404 : " + url.parse(request.url).pathname )
+				    _404(response);
+        }
 		}
 		catch(e)
 		{
@@ -551,7 +663,10 @@ function startVWF(){
 	
 	  //get instance for new connection
 	  var namespace = getNamespace(socket);
-	  
+	  if ( namespace == undefined ) {
+        return;
+    }
+
 	  //create or setup instance data
 	  if(!global.instances)
 	    global.instances = {};
@@ -559,11 +674,15 @@ function startVWF(){
 	  //if it's a new instance, setup record 
 	  if(!global.instances[namespace])
 	  {
-		global.instances[namespace] = {};
-		global.instances[namespace].clients = {};
-		global.instances[namespace].time = 0.0;
-		global.instances[namespace].state = {};
-		
+		global.instances[ namespace ] = { };
+		global.instances[ namespace ].clients = { };
+		global.instances[ namespace ].time = 0.0;
+    global.instances[ namespace ].rate = 1.0;
+    global.instances[ namespace ].playing = true;
+    global.instances[ namespace ].paused = false;
+    global.instances[ namespace ].stopped = false;
+		global.instances[ namespace ].state = { };
+    
 		//create or open the log for this instance
 		if(global.logLevel >= 2) {
 			var log = fs.createWriteStream('.//Logs/'+namespace.replace(/[\\\/]/g,'_'), {'flags': 'a'});
@@ -595,16 +714,17 @@ function startVWF(){
 		
 		
 		//keep track of the timer for this instance
-		global.instances[namespace].timerID = setInterval(function(){
+		global.instances[ namespace ].timerID = setInterval( function( ) {
+		    if ( global.instances[ namespace ].playing ) {
+  			    global.instances[ namespace ].time += 0.05 * global.instances[ namespace ].rate;
+        }
+			  for ( var i in global.instances[ namespace ].clients )
+			  {
+				    var client = global.instances[ namespace ].clients[ i ];
+				    client.emit( 'message', { action: "tick", parameters: [], time: global.instances[ namespace ].time } );
+  			}
 		
-			global.instances[namespace].time += .05;
-			for(var i in global.instances[namespace].clients)
-			{
-				var client = global.instances[namespace].clients[i];
-				client.emit('message',{action:"tick",parameters:[],time:global.instances[namespace].time});
-			}
-		
-		},50);
+		}, 50 );
 		
 	  }
 	 
