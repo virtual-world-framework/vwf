@@ -69,8 +69,30 @@ var vwfPortalModel = new function(){
 	
 	self.getPage = function(i){
 		var worldObjectsLength = getArrVisibleLength(self.worldObjects());
+		var tmpArray = getArrVisible(self.worldObjects(), pageIndex*pageLength);
+		
+		debugger;
+		var resultsArr = arrCompare(tmpArray, self.displayWorldObjects());
+		
+		/*
+		
+			CONTINUE HERE
+			
+		*/
+		
+		for(var i in resultsArr){
+		
+			
+			
+		}
+		
+		
 		pageIndex += i;
-		self.displayWorldObjects(getArrVisible(self.worldObjects(), pageIndex*pageLength));
+		
+		if(resultsArr.length > 0 || self.displayWorldObjects().length == 0){
+			self.displayWorldObjects(tmpArray);
+		}
+		
 	
 		if((pageIndex+1)*pageLength < worldObjectsLength){
 			self.nextDisabled(false);
@@ -101,6 +123,50 @@ var vwfPortalModel = new function(){
 		selectAll = val;
 	};
 };
+
+function arrCompare(arr1, arr2){
+	var tmpArr = [];
+	var tmpArr2 = [];
+	for(var i in arr1){
+		if(arr2.indexOf(arr1[i]) > -1){
+			tmpArr.push[i];
+			tmpArr2.push(arr2.indexOf(arr1[i]));
+		}
+	}
+	
+	return [tmpArr, tmpArr2];
+}
+
+function objCompare(obj1, obj2){
+
+	var keys1 = Object.keys(obj1);
+	var keys2 = Object.keys(obj2);
+	var saveKey2 = 0;
+	
+	if(keys1.length == keys2.length){
+	
+		for(var k in keys1){
+			debugger;
+			saveKey2 = keys2.indexOf(keys1[k]);
+			
+			if(saveKey2 == -1)
+				return false;
+			
+			else if(ko.isObservable(obj1[keys1[k]]) && ko.isObservable(obj2[keys2[saveKey2]])){
+				if(obj1[keys1[k]]() != obj2[keys2[saveKey2]]()){
+					return false;
+				}
+			}
+			
+			else if(obj1[keys1[k]] != obj2[keys2[saveKey2]]){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	return false;
+}
 
 function handleHash(propStr){
 
@@ -185,9 +251,9 @@ function showStates(cb){
 		var i = 0;
 		
 		for(var tmpKey in e){
-		
+			
 			if(e.hasOwnProperty(tmpKey)){
-
+				
 				var id = tmpKey.substr(13,16);
 				e[tmpKey].id = id;
 
@@ -212,7 +278,7 @@ function showStates(cb){
 		
 		vwfPortalModel.getPage(0);
 		vwfPortalModel.featuredWorldObjects.valueHasMutated();
-		vwfPortalModel.worldObjects.valueHasMutated();
+		//vwfPortalModel.worldObjects.valueHasMutated();
 		
 		$.getJSON("./admin/instances",function(e){
 		
