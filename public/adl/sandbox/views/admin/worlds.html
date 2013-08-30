@@ -11,13 +11,14 @@
 		</div>
 		<div class="span9">
 			<div class="row">
-				<div class="usersList span5">
+				<div class="usersList span6">
 					<table class="table table-striped" style="border: 1px solid #ddd;">
 						<tr>
 							<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllBox" data-bind="click:handleSelectAll" /></th>
 							<th style="border:none; background:#FFF">Name</th>
 							<th style="border:none; background:#FFF">Owner</th>
 							<th style="border:none; background:#FFF">Objects</th>
+							<th style="border:none; background:#FFF">Featured</th>
 							<th style="border:none; background:#FFF"></th>
 						</tr>
 						<tbody data-bind="foreach:adminDisplayList, style:{border:'none'}">
@@ -25,7 +26,9 @@
 							<td><input type="checkbox" class="checkboxes" /></td>
 							<td><a data-bind="text:title, attr:{href:'#'+id}" href=""></a></td>
 							<td><a data-bind="text:owner, attr:{href:'{{root}}/admin/users#'+owner}" href=""></a></td>
+							
 							<td><span data-bind="text:objects"></span></td>
+							<td><span data-bind="text:$data.featured?'Yes':'No'" href=""></span></td>
 							<td>
 								<div class="editstateGuest">
 									<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState">Active</a>

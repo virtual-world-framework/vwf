@@ -69,19 +69,35 @@ var vwfPortalModel = new function(){
 	
 	self.getPage = function(i){
 		var worldObjectsLength = getArrVisibleLength(self.worldObjects());
+		pageIndex += i;
+		
 		var tmpArray = getArrVisible(self.worldObjects(), pageIndex*pageLength);
-		var resultsArr = getWorldArrMap(tmpArray, self.displayWorldObjects());
-	
+		var idArr = [], idArr2 = [];
+		
+		for(var g = 0; g < self.displayWorldObjects().length || g < tmpArray.length; g++){
+			if(g < self.displayWorldObjects().length)
+				idArr.push(self.displayWorldObjects()[g]().id);
+			if(g < tmpArray.length)
+				idArr2.push(tmpArray[g]().id);
+		}		
+
+		var resultsArr = getWorldArrMap(tmpArray, idArr);
+		var resultsArr2 = getWorldArrMap(self.displayWorldObjects(), idArr2);
+		
+		for(var j = resultsArr2.length; j >= 0; j--){
+			if(resultsArr2[j] == -1){
+				self.displayWorldObjects.splice(j);
+			}
+		}
+		
 		for(var g = 0; g < resultsArr.length; g++){
 			if(resultsArr[g] == -1){
 				self.displayWorldObjects.push(tmpArray[g]);
 			}
-		}
+		}				
 		
-		pageIndex += i;
 		self.displayWorldObjects.sort(sortArrByUpdates);
-		
-	
+
 		if((pageIndex+1)*pageLength < worldObjectsLength){
 			self.nextDisabled(false);
 		}
@@ -114,14 +130,9 @@ var vwfPortalModel = new function(){
 
 function getWorldArrMap(arr1, arr2){
 	var tmpArr = [];
-	var idArr = [];
-	
-	for(var i = 0; i < arr2.length; i++){
-		idArr.push(arr2[i]().id);
-	}
 	
 	for(var i = 0; i < arr1.length; i++){
-		tmpArr.push(idArr.indexOf(arr1[i]().id));
+		tmpArr.push(arr2.indexOf(arr1[i]().id));
 	}
 	
 	return tmpArr;
