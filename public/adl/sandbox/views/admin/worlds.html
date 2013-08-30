@@ -11,20 +11,31 @@
 		</div>
 		<div class="span9">
 			<div class="row">
-				<div class="usersList span4">
+				<div class="usersList span5">
 					<table class="table table-striped" style="border: 1px solid #ddd;">
 						<tr>
 							<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllBox" data-bind="click:handleSelectAll" /></th>
 							<th style="border:none; background:#FFF">Name</th>
 							<th style="border:none; background:#FFF">Owner</th>
 							<th style="border:none; background:#FFF">Objects</th>
+							<th style="border:none; background:#FFF"></th>
 						</tr>
 						<tbody data-bind="foreach:adminDisplayList, style:{border:'none'}">
-						
+							
 							<td><input type="checkbox" class="checkboxes" /></td>
 							<td><a data-bind="text:title, attr:{href:'#'+id}" href=""></a></td>
 							<td><a data-bind="text:owner, attr:{href:'{{root}}/admin/users#'+owner}" href=""></a></td>
 							<td><span data-bind="text:objects"></span></td>
+							<td>
+								<div class="editstateGuest">
+									<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState">Active</a>
+									
+									<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible -->
+										<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
+										<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
+									<!-- /ko -->
+								</div>
+							</td>
 						</tbody>
 					</table>
 				</div>
@@ -73,7 +84,7 @@
 				
 				for(var i in tempWorldArr){
 					for(var g in vwfPortalModel.adminDisplayList()){
-						if(vwfPortalModel.adminDisplayList()[g].id == tempWorldArr[i]){
+						if(vwfPortalModel.adminDisplayList()[g]().id == tempWorldArr[i]){
 							vwfPortalModel.adminDisplayList.splice(g, 1);
 						}
 					}
@@ -94,8 +105,14 @@
 			getLoginInfo(showStates(
 				function(){
 					handleHash("id");
+					vwfPortalModel.adminDisplayList.valueHasMutated();
 				}
 			));
+			
+			window.setInterval(function(){
+				showStates();
+			},5000);
+			
 			
 			
 		});

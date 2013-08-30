@@ -162,7 +162,13 @@ function handleHash(propStr){
 	var tmpHash = window.location.hash.replace("#", "");
 	if(tmpHash){
 		for(var i in vwfPortalModel.adminDisplayList()){
-			if(tmpHash == vwfPortalModel.adminDisplayList()[i][propStr]){
+		
+			if(ko.isObservable(vwfPortalModel.adminDisplayList()[i]) && tmpHash == vwfPortalModel.adminDisplayList()[i]()[propStr]){
+				vwfPortalModel.currentAdminItem(vwfPortalModel.adminDisplayList()[i]());
+				break;
+			}
+			
+			else if(tmpHash == vwfPortalModel.adminDisplayList()[i][propStr]){
 				vwfPortalModel.currentAdminItem(vwfPortalModel.adminDisplayList()[i]);
 				break;
 			}
