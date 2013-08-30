@@ -69,7 +69,7 @@
 							</div>
 						</div>
 						<div class="editstateGuest">
-							<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState()">Active</a>
+							<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState">Active</a>
 							
 							<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible -->
 								<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
@@ -105,7 +105,7 @@
 
 				window.setInterval(function(){
 					showStates();
-				},3000);
+				},10000);
 			});
 		});
 	</script>

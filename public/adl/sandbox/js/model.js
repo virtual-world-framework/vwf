@@ -70,28 +70,16 @@ var vwfPortalModel = new function(){
 	self.getPage = function(i){
 		var worldObjectsLength = getArrVisibleLength(self.worldObjects());
 		var tmpArray = getArrVisible(self.worldObjects(), pageIndex*pageLength);
-		
-		debugger;
-		var resultsArr = arrCompare(tmpArray, self.displayWorldObjects());
-		
-		/*
-		
-			CONTINUE HERE
-			
-		*/
-		
-		for(var i in resultsArr){
-		
-			
-			
+		var resultsArr = getWorldArrMap(tmpArray, self.displayWorldObjects());
+	
+		for(var g = 0; g < resultsArr.length; g++){
+			if(resultsArr[g] == -1){
+				self.displayWorldObjects.push(tmpArray[g]);
+			}
 		}
-		
 		
 		pageIndex += i;
-		
-		if(resultsArr.length > 0 || self.displayWorldObjects().length == 0){
-			self.displayWorldObjects(tmpArray);
-		}
+		self.displayWorldObjects.sort(sortArrByUpdates);
 		
 	
 		if((pageIndex+1)*pageLength < worldObjectsLength){
@@ -124,17 +112,19 @@ var vwfPortalModel = new function(){
 	};
 };
 
-function arrCompare(arr1, arr2){
+function getWorldArrMap(arr1, arr2){
 	var tmpArr = [];
-	var tmpArr2 = [];
-	for(var i in arr1){
-		if(arr2.indexOf(arr1[i]) > -1){
-			tmpArr.push[i];
-			tmpArr2.push(arr2.indexOf(arr1[i]));
-		}
+	var idArr = [];
+	
+	for(var i = 0; i < arr2.length; i++){
+		idArr.push(arr2[i]().id);
 	}
 	
-	return [tmpArr, tmpArr2];
+	for(var i = 0; i < arr1.length; i++){
+		tmpArr.push(idArr.indexOf(arr1[i]().id));
+	}
+	
+	return tmpArr;
 }
 
 function objCompare(obj1, obj2){
@@ -146,7 +136,6 @@ function objCompare(obj1, obj2){
 	if(keys1.length == keys2.length){
 	
 		for(var k in keys1){
-			debugger;
 			saveKey2 = keys2.indexOf(keys1[k]);
 			
 			if(saveKey2 == -1)
@@ -207,7 +196,7 @@ function getFlatIdArr(resetHotstate){
 	
 	//Get all world IDs in flat array form
 	for(var i = 0; i < vwfPortalModel.worldObjects().length; i++){
-		tempArr.push(vwfPortalModel.worldObjects()[i].id);
+		tempArr.push(vwfPortalModel.worldObjects()[i]().id);
 	}
 	
 	return tempArr;
@@ -216,7 +205,7 @@ function getFlatIdArr(resetHotstate){
 function getArrVisibleLength(arr){
 	var count = 0;
 	for(var i = 0; i < arr.length; i++){
-		if(arr[i].isVisible == true)
+		if(arr[i]().isVisible == true)
 			count++;
 	}
 	
@@ -227,7 +216,7 @@ function getArrVisible(arr, start){
 	var count = 0;
 	for(var i = start; i < arr.length && count < pageLength; i++){
 	
-		if(arr[i].isVisible == true){
+		if(arr[i]().isVisible == true){
 			tempArr.push(arr[i]);
 			count++;
 		}
@@ -271,38 +260,50 @@ function showStates(cb){
 				}
 				
 				e[tmpKey].isVisible = checkFilter([e[tmpKey].title, e[tmpKey].description, e[tmpKey].owner]);
-				vwfPortalModel.worldObjects()[saveIndex] = e[tmpKey];	
-				vwfPortalModel.worldObjects()[saveIndex].hotState = vwfPortalModel.worldObjects()[saveIndex].hotState ? vwfPortalModel.worldObjects()[saveIndex].hotState : ko.observable(false);
+				
+				if(ko.isObservable(vwfPortalModel.worldObjects()[saveIndex])){
+					e[tmpKey].hotState = vwfPortalModel.worldObjects()[saveIndex]().hotState ? vwfPortalModel.worldObjects()[saveIndex]().hotState : false;
+					vwfPortalModel.worldObjects()[saveIndex](e[tmpKey]);
+				}
+				else{
+					e[tmpKey].hotState = false;
+					vwfPortalModel.worldObjects()[saveIndex] = ko.observable(e[tmpKey]);
+				}
 			}
 		}
 		
 		vwfPortalModel.getPage(0);
 		vwfPortalModel.featuredWorldObjects.valueHasMutated();
-		//vwfPortalModel.worldObjects.valueHasMutated();
 		
 		$.getJSON("./admin/instances",function(e){
 		
 			//Get all world IDs in flat array form
 			var tempArr = getFlatIdArr();
-			var saveIndex = 0;
-			
+
 			//Iterate through keys, get index of world id which matches key, set its hotState to true
-			for(var tmpKey in e){
-		
-				if(e.hasOwnProperty(tmpKey)){
-					saveIndex = tempArr.indexOf(tmpKey.substr(13,16));
-											
-					if(saveIndex > -1){
-						vwfPortalModel.worldObjects()[saveIndex].hotState(true);
-					}	
-					
-					else{
-						vwfPortalModel.worldObjects()[saveIndex].hotState(false);
+			for(var i = 0; i < tempArr.length; i++){
+
+				if(e.hasOwnProperty("/adl/sandbox/"+tempArr[i]+"/")){
+					if(vwfPortalModel.worldObjects()[i]().hotState == false){
+						vwfPortalModel.worldObjects()[i]().hotState = true;
+						vwfPortalModel.worldObjects()[i].valueHasMutated();
+						continue;
 					}
+					
+					vwfPortalModel.worldObjects()[i]().hotState = true;
+				}
+				
+				else{
+					if(vwfPortalModel.worldObjects()[i]().hotState == true){
+						vwfPortalModel.worldObjects()[i]().hotState = false;
+						vwfPortalModel.worldObjects()[i].valueHasMutated();
+						continue;
+					}
+					
+					vwfPortalModel.worldObjects()[i]().hotState = false;
 				}
 			}
 			
-			vwfPortalModel.worldObjects().sort(sortArrByUpdates);
 			vwfPortalModel.getPage(0);
 			
 			if(cb) cb();
@@ -311,13 +312,17 @@ function showStates(cb){
 }
 
 function sortArrByUpdates(a, b){
-	if(a.hotState() == true && b.hotState() == false)
+	if(a().hotState == true && b().hotState == false)
 		return -1;			
 	
-	else if(b.hotState() == true && a.hotState() == false)
+	else if(b().hotState == true && a().hotState == false)
 		return 1;
 		
-	return b.updates - a.updates;
+	else if (b().updates - a().updates == 0){
+		return b().id.localeCompare(a().id);
+	}
+	
+	else return b().updates - a().updates;
 }
 
 function getLoginInfo(defaultCb, failCb){
