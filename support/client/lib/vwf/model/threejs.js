@@ -1153,7 +1153,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
                     {
                         var newlight;
                         var parent = threeObject.parent;
-                        console.info( "LOL = " + JSON.stringify( threeObject.color ) );
+                        
                         var currProps = {
                             "distance": threeObject.distance,
                             "color":  threeObject.color,
@@ -1163,7 +1163,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 							"targetpos": threeObject.target ? threeObject.target.position.clone() : new THREE.Vector3(),
                             "clone": function( newObj ) {
                                 newObj.distance = this.distance;
-                                console.info( "light.clone.color = " + JSON.stringify( this.color ) )
+                                
                                 newObj.color.setRGB( this.color.r, this.color.g, this.color.b );
                                 newObj.intensity = this.intensity;
                                 newObj.castShadows = this.castShadows;
@@ -1211,12 +1211,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
                     //{
                     //    threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
                     //}
-			        if ( propertyName != "transform" && propertyName != "translation" ) console.info( "Set Light property: " + propertyName + " = " + propertyValue );
+			       
                     if ( propertyName == 'distance' ) {
                         threeObject.distance = propertyValue;
                     }
                     if ( propertyName == 'color' ) {
-                        console.info( "======        Set Light.color property: " + propertyName + " = " + JSON.stringify( propertyValue ) );
+                      
                         threeObject.color.setRGB( propertyValue[0], propertyValue[1], propertyValue[2]);
                     }
                     if ( propertyName == 'intensity' ) {

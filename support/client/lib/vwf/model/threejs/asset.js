@@ -141,7 +141,7 @@
 				
 					
 					
-				console.log(' asset loaded');
+				
 				this.settingProperty('materialDef',this.materialDef);
 				//if any callbacks were waiting on the asset, call those callbacks
 				for(var i = 0; i < reg.callbacks.length; i++)
@@ -213,14 +213,14 @@
 				{
 					this.loader = new THREE.ColladaLoader();
 					this.loader.load(assetSource,this.loaded);
-					console.log('beginning load');
+					
 					asyncCallback(false);
 				}
 				if(childType == 'subDriver/threejs/asset/vnd.osgjs+json+compressed')
 				{
 					
 					this.loader = new UTF8JsonLoader({source:assetSource},this.loaded,this.loadFailed);
-					console.log('beginning load');
+					
 					asyncCallback(false);
 				}
 				
@@ -331,7 +331,7 @@
 							list[i].materialUpdated();
 						}
 					
-					console.log('pending asset ready and loaded');
+					
 					this.settingProperty('materialDef',this.materialDef);
 					this.getRoot().updateMatrixWorld(true);
 					this.getRoot().sceneManagerUpdate();

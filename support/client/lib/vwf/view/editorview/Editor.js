@@ -259,10 +259,12 @@ define(function ()
 				relgizyz = MATH.scaleVec3(relgizyz, 1.0 / MATH.lengthVec3(relgizyz));
 				oldxrot = -Math.acos(MATH.dotVec3(CurrentZ, relgizyz));
 				if (MATH.dotVec3(CurrentY, relgizyz) > -.01) oldxrot *= -1;
+				this.mouseDownScreenPoint = [e.clientX, e.clientY];
+				this.lastScalePoint = e.clientY;
 				if (document.AxisSelected == -1 && SelectMode == 'Pick')
 				{
 					this.MouseLeftDown = true;
-					this.mouseDownScreenPoint = [e.clientX, e.clientY];
+					
 					this.selectionMarquee.css('left', this.mouseDownScreenPoint[0]);
 					this.selectionMarquee.css('top', this.mouseDownScreenPoint[1]);
 					this.selectionMarquee.css('width', '0');
@@ -282,6 +284,7 @@ define(function ()
 				}
 				if (axis >= 0)
 				{
+					this.saveTransforms();
 					if (MoveGizmo.allChildren[axis].material)
 					{
 						MoveGizmo.allChildren[axis].material.color.setRGB(1, 1, 1);
@@ -393,11 +396,41 @@ define(function ()
 				$('#ContextMenu').css('z-index', '-1');
 			}
 		}
+		this.restoreTransforms = function()
+		{
+		
+			for (var s = 0; s < SelectedVWFNodes.length; s++)
+			{
+					 vwf_view.kernel.setProperty(SelectedVWFNodes[s].id,'transform',this.backupTransfroms[s]);
+			}
+					
+		}
+		this.saveTransforms = function()
+		{
+		
+			for (var s = 0; s < SelectedVWFNodes.length; s++)
+			{
+					 this.backupTransfroms[s] = vwf.getProperty(SelectedVWFNodes[s].id,'transform');
+			}
+					
+		}
 		this.mouseup_Gizmo = function (e)
 		{
-			if (e.button == 2 && !MouseMoved)
+			if (e.button == 2 && !MouseMoved && document.AxisSelected == -1)
 			{
+				
 				self.ShowContextMenu(e);
+				return false;
+			}
+			if (e.button == 2 && document.AxisSelected != -1)
+			{
+				this.restoreTransforms();
+				var ids = [];
+					for (var s = 0; s < SelectedVWFNodes.length; s++)
+						ids.push(SelectedVWFNodes[s].id);
+				this.SelectObject(null);
+				window.setTimeout(function(){
+				_Editor.SelectObject(ids);},1000);
 				return false;
 			}
 			if (e.mouseleave)
@@ -939,6 +972,19 @@ define(function ()
 			}
 			if (document.AxisSelected != -1)
 			{
+			
+				var relscreeny = this.lastScalePoint - e.clientY;
+							if(relscreeny > 30 * this.ScaleSnap )
+							{
+								this.lastScalePoint = e.clientY;
+							
+							}
+							if(relscreeny < -30 * this.ScaleSnap)
+							{
+								this.lastScalePoint = e.clientY;
+								
+							}
+							
 				var t = new THREE.Vector3();
 				t.getPositionFromMatrix(MoveGizmo.parent.matrixWorld);
 				var gizpos = [t.x, t.y, t.z];
@@ -1112,10 +1158,24 @@ define(function ()
 						}
 						if (document.AxisSelected == 19) // || document.AxisSelected == 10 || document.AxisSelected == 11)
 						{
-							wasScaled = true;
-							tempscale[2] += scalemult * ScaleXY[0];
-							tempscale[1] += scalemult * ScaleXY[0];
-							tempscale[0] += scalemult * ScaleXY[0];
+							
+							
+							if(relscreeny > 30 * this.ScaleSnap )
+							{
+								
+								wasScaled = true;
+								tempscale[2] +=  this.ScaleSnap;
+								tempscale[1] += this.ScaleSnap;
+								tempscale[0] += this.ScaleSnap;
+							}
+							if(relscreeny < -30 * this.ScaleSnap)
+							{
+								
+								wasScaled = true;
+								tempscale[2] -=  this.ScaleSnap;
+								tempscale[1] -= this.ScaleSnap;
+								tempscale[0] -= this.ScaleSnap;
+							}
 						}
 						if (document.AxisSelected == 9) // || document.AxisSelected == 10 || document.AxisSelected == 11)
 						{
@@ -1172,6 +1232,7 @@ define(function ()
 							var success = this.setScaleCallback(SelectedVWFNodes[s].id, [tempscale[0], tempscale[1], tempscale[2]]);
 							if (SelectedVWFNodes.length > 1)
 							{
+								
 								var gizoffset = MATH.subVec3(lastpos[s], originalGizmoPos);
 								gizoffset[0] /= lastscale[s][0];
 								gizoffset[1] /= lastscale[s][1];
@@ -1752,13 +1813,14 @@ define(function ()
 			
 			for (var s = 1; s < SelectedVWFNodes.length; s++)
 			{
+				
 				//this.findviewnode(SelectedVWFNodes[s].id).updatethis.Matrix();
 				var nextchildmat = toGMat(this.findviewnode(SelectedVWFNodes[s].id).matrixWorld);
 				gizpos[0] += nextchildmat[3];
 				gizpos[1] += nextchildmat[7];
 				gizpos[2] += nextchildmat[11];
 				var trans = this.getTranslationCallback(SelectedVWFNodes[s].id);
-				lastpos[s] = [trans[12], trans[13], trans[14]];
+				lastpos[s] = trans;
 				lastscale[s] = this.getScaleCallback(SelectedVWFNodes[s].id);
 			}
 			gizpos[0] /= SelectedVWFNodes.length;
@@ -1924,11 +1986,13 @@ define(function ()
 				BuildMoveGizmo();
 			}
 			MoveGizmo.InvisibleToCPUPick = false;
+			this.backupTransfroms = [];
 			if (SelectedVWFNodes[0])
 			{
 				for (var s = 0; s < SelectedVWFNodes.length; s++)
 				{
 					lastscale[s] = this.getScaleCallback(SelectedVWFNodes[s].id);
+					
 					this.showMoveGizmo();
 					if (this.findviewnode(SelectedVWFNodes[s].id))
 					{
@@ -2069,7 +2133,9 @@ define(function ()
 			MoveGizmo.allChildren.push(this.BuildRing(7, 0.5, [1, 0, 0], 37, red, 0, 370)); //rotate x
 			MoveGizmo.allChildren.push(this.BuildRing(7, 0.5, [0, 1, 0], 37, green, 0, 370)); //rotate y
 			MoveGizmo.allChildren.push(this.BuildRing(7, 0.5, [0, 0, 1], 37, blue, 0, 370)); //rotate z
-			MoveGizmo.allChildren.push(this.BuildBox([5, 5, 5], [0, 0, 0], [1, 1, 1, 1])); //scale uniform
+			//MoveGizmo.allChildren.push(this.BuildBox([5, 5, 5], [0, 0, 0], [1, 1, 1, 1])); //scale uniform
+			MoveGizmo.allChildren.push(this.BuildScaleUniform()); //scale uniform
+			
 			MoveGizmo.allChildren.push(this.BuildBox([0.30, 5, 5], [5, 0, 0], red)); //scale uniform
 			MoveGizmo.allChildren.push(this.BuildBox([5, .30, 5], [0, 5, 0], green)); //scale uniform
 			MoveGizmo.allChildren.push(this.BuildBox([5, 5, .30], [0, 0, 5], blue)); //scale uniform
@@ -2170,7 +2236,7 @@ define(function ()
 				//SetCoordSystem(LocalCoords);			
 				for (var i = 0; i < MoveGizmo.allChildren.length; i++)
 				{
-					if (i >= 19 && i <= 25)
+					if (i == 19)
 					{
 						MoveGizmo.add(MoveGizmo.allChildren[i], true);
 					}
@@ -2234,6 +2300,26 @@ define(function ()
 			mesh.updateMatrixWorld(true);
 			return mesh;
 		}.bind(this);
+		
+		this.BuildScaleUniform = function ()
+		{
+			var mesh = new THREE.Mesh(new THREE.SphereGeometry(3,4,2), new THREE.MeshPhongMaterial());
+			mesh.material.color.r = .5;
+			mesh.material.color.g = .5;
+			mesh.material.color.b = 1;
+			mesh.material.emissive.r = .051;
+			mesh.material.emissive.g = .051;
+			mesh.material.emissive.b =  .051;
+			mesh.material.ambient.r = 0;
+			mesh.material.ambient.g = 0;
+			mesh.material.shading = true;
+			//mesh.matrix.setPosition(new THREE.Vector3(offset[0],offset[1],offset[2]));
+			
+			mesh.matrixAutoUpdate = false;
+			mesh.updateMatrixWorld(true);
+			return mesh;
+		}.bind(this);
+		
 		this.PickParentCallback = function (parentnode)
 		{
 			this.TempPickCallback = null;

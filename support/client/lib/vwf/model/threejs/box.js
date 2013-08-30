@@ -70,12 +70,12 @@
 				if(cache)
 				{
 					var mesh=  new THREE.Mesh(_boxCache.getBox(this._length, this.width, this.height,this.lsegs,this.wsegs,this.hsegs), mat);
-					console.log('from cache');
+					
 				}
 				else
 				{
 					var mesh=  new THREE.Mesh(new THREE.CubeGeometry(this._length, this.width, this.height,this.lsegs,this.wsegs,this.hsegs), mat);
-					console.log('new box');
+					
 				}
 				return mesh;
 			}

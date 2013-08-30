@@ -186,7 +186,7 @@ define(function ()
 			if(!sync) sync = false;
 			if (!_UserManager.GetCurrentUserName())
 			{
-				console.log('no user logged in, so not saving');
+				//console.log('no user logged in, so not saving');
 				return;
 			}
 			var scene = vwf.getNode('index-vwf');

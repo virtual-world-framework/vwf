@@ -143,7 +143,7 @@ define(
 		});
 		$('#MenuSnapOff').click(function (e)
 		{
-			_Editor.SetSnaps(.025, .01 * 0.0174532925, .001);
+			_Editor.SetSnaps(.001, .01 * 0.0174532925, .001);
 		});
 		$('#MenuMaterialEditor').click(function (e)
 		{

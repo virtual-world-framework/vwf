@@ -74,9 +74,9 @@ define(function ()
 		'<div>' +
 		"<div class='EditorLabel'>Translation</div>" +
 		"<div id='Translation'>" +
-		"<input type='number' class='TransformEditorInput' id='PositionX'/>" +
-		"<input type='number' class='TransformEditorInput' id='PositionY'/>" +
-		"<input type='number' class='TransformEditorInput' id='PositionZ'/>" +
+		"<input type='number' step='.001' class='TransformEditorInput' id='PositionX'/>" +
+		"<input type='number' step='.001' class='TransformEditorInput' id='PositionY'/>" +
+		"<input type='number' step='.001' class='TransformEditorInput' id='PositionZ'/>" +
 		"</div>" + "<div class='EditorLabel'>Rotation</div>" +
 		"<div id='Rotation'>" +
 		"<input type='number' class='TransformEditorInput' id='RotationX'/>" +
@@ -815,9 +815,9 @@ define(function ()
 					var pos = vwf.getProperty(node.id, 'translation');
 					
 					var scl = vwf.getProperty(node.id, 'scale');
-					$('#PositionX').val(Math.floor(pos[0]));
-					$('#PositionY').val(Math.floor(pos[1]));
-					$('#PositionZ').val(Math.floor(pos[2]));
+					$('#PositionX').val(Math.floor(pos[0]*1000)/1000);
+					$('#PositionY').val(Math.floor(pos[1]*1000)/1000);
+					$('#PositionZ').val(Math.floor(pos[2]*1000)/1000);
 					$('#RotationX').val(Math.floor(.05 + angles[0] * -57.2957795));
 					$('#RotationY').val(Math.floor(.05 + angles[1] * -57.2957795));
 					$('#RotationZ').val(Math.floor(.05 + angles[2] * -57.2957795));

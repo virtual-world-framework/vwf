@@ -114,7 +114,7 @@
 						src = this.url.substr(0,this.url.indexOf("Model/")) + "textures/NoRedirect/" + encodeURIComponent(texturename) +"?ID=00-00-00";
 					else
 						src = this.url.substr(0,this.url.indexOf("Model/")) + "textures/" + encodeURIComponent(texturename) +"?ID=00-00-00";
-					console.log(src);
+					
 					src = src.replace("AnonymousUser:@","");
 					
 					var tex = _SceneManager.getTexture(src);

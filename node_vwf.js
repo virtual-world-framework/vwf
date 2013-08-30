@@ -208,6 +208,22 @@ function _FileCache()
 	}
 	this.getFile = function(path,callback)
 	{
+		path = libpath.normalize(path);
+		path = libpath.resolve(__dirname, path);
+		
+		if(path.toLowerCase().indexOf(__dirname.toLowerCase()) != 0 && path.toLowerCase().indexOf(global.datapath.toLowerCase()) != 0)
+		{
+			global.error(path + " is illegal");
+			callback(null);
+			return;
+		}
+		if(path.toLowerCase().indexOf('users.db') != -1)
+		{
+			global.error(path + " is illegal");
+			callback(null);
+			return;
+		}
+		
 		for(var i =0; i < this.files.length; i++)
 		{
 			if(this.files[i].path == path)
@@ -304,6 +320,8 @@ function _FileCache()
 				});
 				response.write(file.data, file.datatype);
 			}
+			
+			
 			response.end();
 			
 		
@@ -1100,7 +1118,7 @@ function startVWF(){
 		
 	p = process.argv.indexOf('-d');
 	var datapath = p >= 0 ? process.argv[p+1] : "C:\\VWFData";
-		
+	global.datapath = datapath;	
 	p = process.argv.indexOf('-l');
 	global.logLevel = p >= 0 ? process.argv[p+1] : 1;
 	global.log(brown+'LogLevel = ' +  global.logLevel+reset,0);	
@@ -1147,7 +1165,38 @@ function startVWF(){
 			next();
 		   });
 		});
-
+//CORS support
+		app.use(function(req, res, next) {
+			
+			if(req.headers['access-control-request-headers']) {
+				res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers']);
+			}else
+			{
+				res.header('Access-Control-Allow-Headers', 'Content-Type');
+			}
+			
+			if(req.headers['Access-Control-Allow-Origin']) {
+				res.header('Access-Control-Allow-Origin', req.headers.origin);
+			}else
+			{
+				res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+			}
+			
+			if(req.headers['access-control-request-method']) {
+				res.header('Access-Control-Allow-Methods', req.headers['access-control-request-method']);
+			}else
+			{
+				res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+			}
+			
+			res.header('Access-Control-Max-Age', 60 * 60 * 24 * 365);
+			
+			if (req.method == 'OPTIONS') {
+				res.send(200);
+			}
+			else
+				next();
+		});
 		app.use(app.router);
 		app.get('/adl/sandbox/help', Landing.help);
 		app.get('/adl/sandbox/help/:page([a-zA-Z]+)', Landing.help);
