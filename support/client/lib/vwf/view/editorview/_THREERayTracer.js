@@ -138,7 +138,18 @@ THREE.Geometry.prototype.GenerateBounds = function()
 	this.BoundingSphere = new BoundingSphereRTAS(min,max);
 	this.BoundingBox = new BoundingBoxRTAS(min,max);
 }
-
+var n4 ;
+var d4 ;
+function intersectLinePlane(ray, raypoint, planepoint, planenormal)
+		{
+			n4 = MATH.dotVec3(MATH.subVec3(planepoint, raypoint), planenormal);
+			d4 = MATH.dotVec3(ray, planenormal);
+			if (d4 == 0) return null;
+			
+			var alongray = MATH.scaleVec3(ray,n4 / d4);
+			return MATH.addVec3(alongray,	raypoint);
+		}
+		
 //return the intersection of a ray and a sphere
 var intersectRaySphere = function(origin,direction,center,radius)
 {
@@ -426,7 +437,34 @@ face.prototype.intersectSphere = function(P,r)
 	 separated = sep1 || sep2 || sep3 || sep4 || sep5 || sep6 || sep7;
 	if(!separated)
 	{
-		return {norm:this.norm,face:this};
+		 
+		 var point;
+		 if(d < 0)
+		 {
+			point = this.intersect1(P,this.norm)
+			if(point) point =  point.point;
+			else
+			point = intersectLinePlane(this.norm,P,this.v0,this.norm);
+		 }
+		 if(d > 0)
+		 {
+			point = this.intersect1(P,MATH.scaleVec3(this.norm,-1));
+				if(point) point =  point.point;
+			else
+			point = intersectLinePlane(MATH.scaleVec3(this.norm,-1),P,this.v0,this.norm);
+		 }
+		 
+		  var dp0 = Vec3.magnitudeSquared(MATH.subVec3(point,this.v0));
+		  var dp1 = Vec3.magnitudeSquared(MATH.subVec3(point,this.v1));
+		  var dp2 = Vec3.magnitudeSquared(MATH.subVec3(point,this.v2));
+			
+		  if(Math.min(dp0,dp1,dp2) == dp0)
+			point = this.v0;
+		  if(Math.min(dp0,dp1,dp2) == dp1)
+			point = this.v1;
+		  if(Math.min(dp0,dp1,dp2) == dp1)
+			point = this.v1;
+		return {norm:this.norm,face:this,point:point};
 	
 	}
 	return null;
@@ -1657,7 +1695,7 @@ THREE.Object3D.prototype.SphereCast = function(center,r,options)
 					
 					
 					
-					ret[i].point = MATH.mulMat4Vec3(mat2,ret[i].face.c);
+					ret[i].point = MATH.mulMat4Vec3(mat2,ret[i].point);
 					ret[i].norm = MATH.mulMat4Vec3(mat3,ret[i].norm);
 					ret[i].norm = MATH.scaleVec3(ret[i].norm,1.0/MATH.lengthVec3(ret[i].norm));
 					ret[i].distance = MATH.distanceVec3([0,0,0],ret[i].point);

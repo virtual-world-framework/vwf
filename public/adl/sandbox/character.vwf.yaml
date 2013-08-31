@@ -382,13 +382,15 @@ scripts:
         
         if(MATH.lengthVec3(motionvec) > 0)
         {
-            var sphpt = MATH.addVec3(motionvec,finalt);
+            var sphpt = finalt.slice(0);
             sphpt[2] += 1;
-            var spc = _SceneManager.SphereCast(sphpt,.3,{ignore:[this.skin,_Editor.GetMoveGizmo(),_dGround,_dSky],filter:function(n){if(n.passable) return false;if(n.isAvatar) return false; return true;}});
+           
             
-            motionvec = this.collisionOffset(motionvec,spc);
+            var newpos = this.collisionOffset(motionvec,sphpt,0);
+            newpos[2] -= 1;
+            finalt = newpos;//MATH.addVec3(motionvec,finalt);
         }
-        finalt = MATH.addVec3(motionvec,finalt);
+        
         
             //if the character is not completely still, and they're not jumpping, then check their motion vector 
             //for intersetions, and prevent penetration through objects
@@ -512,44 +514,40 @@ scripts:
             this.updateCallbacks[i](this);
         }
     }
-    this.collisionOffset = function(offset,spc)
+    this.collisionOffset = function(offset,opos,depth)
     {
-    
+            
             //if the character intersected something (as defined by the sphere)
+            var newpos = MATH.addVec3(opos,offset);
+            depth++;
+            if(depth > 10)
+                return opos;
+            if(MATH.lengthVec3(offset) < .01)
+                return opos;
+            
+            var spc = _SceneManager.SphereCast(newpos,.3,{ignore:[this.skin,_Editor.GetMoveGizmo(),_dGround,_dSky],filter:function(n){if(n.passable) return false;if(n.isAvatar) return false; return true;}});
            
-             if(spc.length > 100)
-             {
-                offset = [0,0,0];
-                return;
-             }
+             
             if(spc.length > 0)
             {
                 var uoffset = MATH.toUnitVec3(offset);
-                spc = this.filterContactsByNormal(spc); 
-                var oldspc = spc;
-                spc = [];
+                debugger;
                 
-                for(var i = 0; i < oldspc.length; i++)
-                {
-                    var normal = [oldspc[i].norm[0],oldspc[i].norm[1],0];
-                    if(MATH.dotVec3(uoffset,MATH.toUnitVec3(normal)) > 0)
-                    {
-                        spc.push(oldspc[i]);
-                    }
-                }
+                spc.sort(function(a,b){
                 
+                    return a.distance - b.distance});
+                    
+                    var hit = spc[0];
                 
-               
-                //offset = [0,0,0];
-                for(var i = 0; i < spc.length; i++)
-                {
-                    var normal = [spc[i].norm[0],spc[i].norm[1],spc[i].norm[2]];
+                    
+                    var normal = [hit.norm[0],hit.norm[1],hit.norm[2]];
                     normal[2] = 0;
                    
                     normal = MATH.toUnitVec3(normal);
-                   
+                    
                     //if moving into the contact
-                   
+                    if(MATH.dotVec3(normal,offset) > 0)
+                    {
                         
                         var up = [0,0,1];
                         var side = MATH.crossVec3(normal,up);
@@ -572,14 +570,16 @@ scripts:
                         offset = MATH.mulMat4Vec3(MATH.transposeMat4(collisioncoord),cc_offset);
                         //finalt = MATH.addVec3(offset,MATH.scaleVec3(normal,-.001));
                     
-                } 
-                
+               
+                        // offset = MATH.subVec3(opos,newpos);
+                        return this.collisionOffset(offset,opos,depth);  
+                    }                    
             }
                 
-    
+            
            
     
-        return offset;
+        return newpos;
     }
     window.collide = this.collisionOffset;
     this.tick = function()
