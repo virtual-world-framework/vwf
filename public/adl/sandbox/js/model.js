@@ -72,9 +72,9 @@ var vwfPortalModel = new function(){
 		pageIndex += i;
 		
 		var tmpArray = getArrVisible(self.worldObjects(), pageIndex*pageLength);
-		var idArr = [], idArr2 = [];
+		var idArr = [], idArr2 = [], maxVal = Math.max(self.displayWorldObjects().length, tmpArray.length);
 		
-		for(var g = 0; g < self.displayWorldObjects().length || g < tmpArray.length; g++){
+		for(var g = 0; g < maxVal; g++){
 			if(g < self.displayWorldObjects().length)
 				idArr.push(self.displayWorldObjects()[g]().id);
 			if(g < tmpArray.length)
