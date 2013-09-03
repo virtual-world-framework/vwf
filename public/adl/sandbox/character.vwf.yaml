@@ -531,7 +531,7 @@ scripts:
             if(spc.length > 0)
             {
                 var uoffset = MATH.toUnitVec3(offset);
-                debugger;
+                
                 
                 spc.sort(function(a,b){
                 
