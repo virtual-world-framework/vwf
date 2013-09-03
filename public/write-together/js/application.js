@@ -34,12 +34,12 @@ $(function(){
   $('.full-screen').parent().css('backgroundColor', '#f1f1f1');
 
   vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-    console.log("Another changed content to: " + propertyValue);
+    vwf_view.logger.info("Another changed content to: " + propertyValue);
     setContentOrTitle(nodeId, propertyName, propertyValue);
   }
 
   vwf_view.gotProperty = function (nodeId, propertyName, propertyValue) {
-    console.log("Got property " + propertyName + "  with value: " + propertyValue);
+    vwf_view.logger.info("Got property " + propertyName + "  with value: " + propertyValue);
     setContentOrTitle(nodeId, propertyName, propertyValue);
 
     setSaveButtonToNotNeedSaving();
@@ -50,21 +50,21 @@ $(function(){
   vwf_view.kernel.getProperty(vwf_view.kernel.find('', '/editor'), 'savename');
 
   $('#doc-content').on('input propertychange', function() {
-    console.log("I changed content to: " + $(this).val());
+    vwf_view.logger.info("I changed content to: " + $(this).val());
     setSaveButtonToNeedsSaving();
     var editorNodeId = vwf_view.kernel.find('', '/editor');
     vwf_view.kernel.setProperty( editorNodeId[0], "content", $(this).val());
   });
 
   $('#doc-title').on('input propertychange', function() {
-    console.log("I changed title to: " + $(this).val());
+    vwf_view.logger.info("I changed title to: " + $(this).val());
     setSaveButtonToNeedsSaving();
     var editorNodeId = vwf_view.kernel.find('', '/editor');
     vwf_view.kernel.setProperty( editorNodeId[0], "title", $(this).val());
   });
 
   $('#doc-save').click(function() {
-    console.log("I saved the doc");
+    vwf_view.logger.info("I saved the doc");
     var saveName = $("#doc-savename").text();
 
     // Show and hide the list user list in order to kick off the dynamic build of the save / load controls
