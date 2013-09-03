@@ -3,7 +3,8 @@
 		{
 		
 			
-		
+			asyncCallback(false);
+			
 		
 			this.inherits = ['vwf/model/threejs/transformable.js','vwf/model/threejs/materialDef.js','vwf/model/threejs/animatable.js','vwf/model/threejs/shadowcaster.js','vwf/model/threejs/passable.js'];
 			this.initializingNode = function()

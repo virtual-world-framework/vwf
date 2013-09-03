@@ -496,6 +496,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 fields.sequence = ++queue.sequence; // to stabilize the sort
                 queue.push( fields );
+		
 
             } else {
 
@@ -832,12 +833,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     while ( queue.length > 0 ) {
 
                         fields = queue.shift();
-
+			
                         vwf.logger.info( "setState:", "removing", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
                             return depth == 2 && object ? Array.prototype.slice.call( object ) : object
                         } ), "from queue" );
 
-                        fields.respond && private_queue.push( fields );
+			//this is where we loose the avatar!
+			//used to be fields.respond && private_queue.push( fields );
+                        private_queue.push( fields );
 
                     }
 
@@ -880,7 +883,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         this.getState = function( full, normalize ) {
 			
 			if(this.creatingNodeCount != 0)
-				debugger;
+				
 			if(full === undefined)
 				full = true;
             this.logger.group( "vwf.getState", full, normalize );
@@ -977,7 +980,10 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.createNode = function( nodeComponent, create_callback /* ( nodeID ) */ ) {
 			
-			this.creatingNodeCount++;
+	    this.creatingNodeCount++;
+	    
+	    
+	    
             this.logger.group( "vwf.createNode " + (
                 typeof nodeComponent == "string" || nodeComponent instanceof String ?
                     nodeComponent : JSON.stringify( loggableComponent( nodeComponent ) )
@@ -1537,6 +1543,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.createChild = function( nodeID, childName, childComponent, create_callback /* ( childID ) */ ) {
 
+	console.log(	 "vwf.createChild " + nodeID + " " + childName + " ",childComponent);
             this.logger.group( "vwf.createChild " + nodeID + " " + childName + " " + (
                 typeof childComponent == "string" || childComponent instanceof String ?
                     childComponent : JSON.stringify( loggableComponent( childComponent ) )
@@ -1548,7 +1555,17 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] || nodeTypeURI ) + "." + childName; childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters  // TODO: hash uri => childID to shorten for faster lookups?  // TODO: canonicalize uri
 			
-			
+	
+	    var nodeExists = null;
+	    try{
+	    nodeExist = this.getNode(childID);
+	    
+	    }catch(e){}
+	    
+	    if(nodeExists)
+	    {
+		return;
+	    }
 				
             var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
 

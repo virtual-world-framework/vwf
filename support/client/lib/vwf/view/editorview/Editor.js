@@ -1789,7 +1789,7 @@ define(function ()
 		}.bind(this);
 		this.triggerSelectionChanged = function (VWFNode)
 		{
-			console.log('selectionChanged');
+			
 			$(document).trigger('selectionChanged', [VWFNode]);
 		}.bind(this);
 		this.triggerSelectionTransformed = function (VWFNode)

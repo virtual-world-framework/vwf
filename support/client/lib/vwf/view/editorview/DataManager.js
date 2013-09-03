@@ -285,10 +285,7 @@ define(function ()
 		}
 		
 		
-		this.loadFromServer = function ()
-		{
-			$(document).trigger('setstatecomplete');
-		}
+		
 		this.saveTimer = function ()
 		{
 			var num = this.getClientCount();

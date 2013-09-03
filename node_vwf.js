@@ -710,15 +710,28 @@ function startVWF(){
 		
 	  }
 	 
+	  
+	  
+	  
+	  var loadClient = null;
+	  
+	  if(Object.keys(global.instances[namespace].clients).length != 0)
+	  {
+		for(var i in global.instances[namespace].clients)
+		{
+		   var testClient = global.instances[namespace].clients[i];
+		   if(!testClient.pending && testClient.loginData)
+			loadClient = testClient;
+		}
+	  }
+	  
 	  //add the new client to the instance data
-      global.instances[namespace].clients[socket.id] = socket;	 
+	  global.instances[namespace].clients[socket.id] = socket;	 
 	  
 	  socket.pending = true;
 	  socket.pendingList = [];
-	  
-	  
 	  //The client is the first, is can just load the index.vwf, and mark it not pending
-	  if(Object.keys(global.instances[namespace].clients).length == 1)
+	  if(!loadClient)
 	  {
 		
 		//socket.emit('message',{"action":"getState","respond":true,"time":global.instances[namespace].time});
@@ -810,15 +823,18 @@ function startVWF(){
 	  //this client is not the first, we need to get the state and mark it pending
 	  else
 	  {
-		var firstclient = Object.keys(global.instances[namespace].clients)[0];
-		firstclient = global.instances[namespace].clients[firstclient];
+		
+		var firstclient = loadClient;//Object.keys(global.instances[namespace].clients)[0];
+		//firstclient = global.instances[namespace].clients[firstclient];
+		socket.pending = true;
 		firstclient.emit('message',{"action":"getState","respond":true,"time":global.instances[namespace].time});
 		global.instances[namespace].Log('GetState from Client',2);
-		socket.pending = true;
+		
 	  }
 	  
 	  socket.on('message', function (msg) {
 		
+		   
 			//need to add the client identifier to all outgoing messages
 			try{
 				var message = JSON.parse(msg);
@@ -1016,40 +1032,20 @@ function startVWF(){
 				{
 					global.instances[namespace].Log('Got State',1);
 					var state = message.result;
-					global.instances[namespace].Log(state,2);
+					
 					
 					var incommingscene = state.nodes[0].children;
 					var myscene = global.instances[namespace].state.nodes['index-vwf'].children;
 					var toadd = [];
-					for(var i in myscene)
-					{	
-						node = myscene[i];
-						var found = false;
-						for(var j in incommingscene)
-						{
-							if(incommingscene[j].id == node.id)
-							{
-									found = true;
-									break;
-							}
-						}
-						if(!found)
-						{
-							console.log(node.id + " not found in state! WTF");
-							var parentbackup = node.parent;
-							delete node.parent;
-							var nodecpy = JSON.parse(JSON.stringify(node));
-							node.parent = parentbackup;
-							incommingscene[node.name] = nodecpy;
-						}
-					}
 					
-					if(message.client != i)
+					
+					if(message.client != i && client.pending===true)
 						client.emit('message',{"action":"setState","parameters":[state],"time":global.instances[namespace].time});
 					client.pending = false;
 					for(var j = 0; j < client.pendingList.length; j++)
 					{
-						client.emit('message',client.pendingList[j]);
+						client.emit('sent queued message',client.pendingList[j]);
+						
 						
 					}
 					client.pendingList = [];	
@@ -1057,14 +1053,16 @@ function startVWF(){
 				else
 				{
 					//just a regular message, so push if the client is pending a load, otherwise just send it.
-					if(client.pending === true)
+					if(client.pending == true)
 					{
 						client.pendingList.push(message);
+						console.log('PENDING');
 						
 					}else
 					{
 						
 						client.emit('message',message);
+						
 					}
 				}
 			}

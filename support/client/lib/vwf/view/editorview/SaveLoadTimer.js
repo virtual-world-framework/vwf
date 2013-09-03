@@ -1,10 +1,9 @@
 define({
 	initialize:function()
 	{
-		if(_DataManager.getClientCount() == 1)
-		{
-			_DataManager.loadFromServer();
-		}
+		
+		$(document).trigger('setstatecomplete');
+		
 	
 		window.setTimeout(function(){_DataManager.saveTimer();},60000);		
 		window.onbeforeunload = function(){

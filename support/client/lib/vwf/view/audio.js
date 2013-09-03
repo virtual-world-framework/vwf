@@ -162,6 +162,15 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 			}
 
 		
+		},
+		deletedNode: function(id)
+		{
+			for(var i in this.soundSources)
+			{
+				if(this.soundSources[i].id == id)
+					delete this.soundSources[i];
+			
+			}
 		}
 	})
 });
