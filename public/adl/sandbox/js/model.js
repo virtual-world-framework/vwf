@@ -33,7 +33,8 @@ var vwfPortalModel = new function(){
 			$("#yourWorlds").addClass("active");
 			$("#allWorlds").removeClass("active").blur();
 		}
-
+		
+		pageIndex = 0;
 		showStates();
 	};			
 	
@@ -68,21 +69,22 @@ var vwfPortalModel = new function(){
 	
 	
 	self.getPage = function(i){
+	
 		var worldObjectsLength = getArrVisibleLength(self.worldObjects());
 		pageIndex += i;
 		
 		var tmpArray = getArrVisible(self.worldObjects(), pageIndex*pageLength);
-		var idArr = [], idArr2 = [], maxVal = Math.max(self.displayWorldObjects().length, tmpArray.length);
+		var displayIdArr = [], tmpIdArr = [], resultsArr = [], resultsArr2 = [], maxVal = Math.max(self.displayWorldObjects().length, tmpArray.length);
 		
 		for(var g = 0; g < maxVal; g++){
 			if(g < self.displayWorldObjects().length)
-				idArr.push(self.displayWorldObjects()[g]().id);
+				displayIdArr.push(self.displayWorldObjects()[g]().id);
 			if(g < tmpArray.length)
-				idArr2.push(tmpArray[g]().id);
+				tmpIdArr.push(tmpArray[g]().id);
 		}		
-
-		var resultsArr = getWorldArrMap(tmpArray, idArr);
-		var resultsArr2 = getWorldArrMap(self.displayWorldObjects(), idArr2);
+		
+		resultsArr = getWorldArrMap(tmpArray, displayIdArr);
+		resultsArr2 = getWorldArrMap(self.displayWorldObjects(), tmpIdArr);
 		
 		for(var j = resultsArr2.length; j >= 0; j--){
 			if(resultsArr2[j] == -1){
@@ -229,13 +231,17 @@ function getArrVisibleLength(arr){
 	return count;
 };		
 function getArrVisible(arr, start){
-	var tempArr = [];
-	var count = 0;
-	for(var i = start; i < arr.length && count < pageLength; i++){
+	var tempArr = [], count = 0, g = 0;
+	for(var i = 0; i < arr.length && count < pageLength; i++){
 	
 		if(arr[i]().isVisible == true){
-			tempArr.push(arr[i]);
-			count++;
+			
+			if(g >= start){
+				tempArr.push(arr[i]);
+				count++;
+			}
+			
+			else g++;
 		}
 	}
 	
@@ -251,10 +257,7 @@ function showStates(cb){
 
 	$.getJSON("./vwfDataManager.svc/states",function(e){
 		
-		var tempArr = getFlatIdArr();
-		var saveIndex = 0;
-		var featuredIndex = 0;
-		var i = 0;
+		var tempArr = getFlatIdArr(), saveIndex = 0, featuredIndex = 0, i = 0, flatWorldArray = ko.toJS(vwfPortalModel.worldObjects);
 		
 		for(var tmpKey in e){
 			
@@ -279,9 +282,19 @@ function showStates(cb){
 				e[tmpKey].isVisible = checkFilter([e[tmpKey].title, e[tmpKey].description, e[tmpKey].owner]);
 				
 				if(ko.isObservable(vwfPortalModel.worldObjects()[saveIndex])){
-					e[tmpKey].hotState = vwfPortalModel.worldObjects()[saveIndex]().hotState ? vwfPortalModel.worldObjects()[saveIndex]().hotState : false;
-					vwfPortalModel.worldObjects()[saveIndex](e[tmpKey]);
+				
+					e[tmpKey].hotState = flatWorldArray[saveIndex].hotState ? flatWorldArray[saveIndex].hotState : false;
+					
+					for(var saveProp in e[tmpKey]){
+						
+						if(saveProp != "editVisible" &&  e[tmpKey][saveProp] != flatWorldArray[saveIndex][saveProp]){
+							vwfPortalModel.worldObjects()[saveIndex](e[tmpKey]);
+							console.log(e[tmpKey].title, saveProp, flatWorldArray[saveIndex][saveProp], e[tmpKey][saveProp]);
+							break;
+						}
+					}
 				}
+				
 				else{
 					e[tmpKey].hotState = false;
 					vwfPortalModel.worldObjects()[saveIndex] = ko.observable(e[tmpKey]);
