@@ -9,5 +9,5 @@ children:
 scripts:
 - |
   this.initialize = function() {
-    this.editor.savename = Math.random().toString().split(".")[1];
+    this.editor.savename = this.random().toString().split(".")[1];
   }
