@@ -898,37 +898,37 @@
   </library_lights>
   <library_images>
     <image id="Paper_Back_PNG">
-      <init_from>./images/Paper_Back.PNG</init_from>
+      <init_from>./Textures/Paper_Back.PNG</init_from>
     </image>
     <image id="RightBoard_02_NXSockets_png">
-      <init_from>./images/RightBoard_02_NXSockets.png</init_from>
+      <init_from>./Textures/RightBoard_02_NXSockets.png</init_from>
     </image>
     <image id="RightBoard_03_a_Bc2t_map_png">
-      <init_from>./images/RightBoard_03_a_Bc2t_map.png</init_from>
+      <init_from>./Textures/RightBoard_03_a_Bc2t_map.png</init_from>
     </image>
     <image id="RightBoard_04_Apt_Building_png">
-      <init_from>./images/RightBoard_04_Apt_Building.png</init_from>
+      <init_from>./Textures/RightBoard_04_Apt_Building.png</init_from>
     </image>
     <image id="RightBoard_05_Buildings_png">
-      <init_from>./images/RightBoard_05_Buildings.png</init_from>
+      <init_from>./Textures/RightBoard_05_Buildings.png</init_from>
     </image>
     <image id="RightBoard_06_Car_Bomb_png">
-      <init_from>./images/RightBoard_06_Car_Bomb.png</init_from>
+      <init_from>./Textures/RightBoard_06_Car_Bomb.png</init_from>
     </image>
     <image id="RightBoard_07_Freedom_Tower_png">
-      <init_from>./images/RightBoard_07_Freedom_Tower.png</init_from>
+      <init_from>./Textures/RightBoard_07_Freedom_Tower.png</init_from>
     </image>
     <image id="RightBoard_08_Kuwait_Towers_1_png">
-      <init_from>./images/RightBoard_08_Kuwait_Towers_1.png</init_from>
+      <init_from>./Textures/RightBoard_08_Kuwait_Towers_1.png</init_from>
     </image>
     <image id="RightBoard_09_Kuwait_Embassy_png">
-      <init_from>./images/RightBoard_09_Kuwait_Embassy.png</init_from>
+      <init_from>./Textures/RightBoard_09_Kuwait_Embassy.png</init_from>
     </image>
     <image id="RightBoard_10_JW_Marriott_png">
-      <init_from>./images/RightBoard_10_JW_Marriott.png</init_from>
+      <init_from>./Textures/RightBoard_10_JW_Marriott.png</init_from>
     </image>
     <image id="RightBoard_11_ISLAM_terrorist_kidnappers_png">
-      <init_from>./images/RightBoard_11_ISLAM_terrorist_kidnappers.png</init_from>
+      <init_from>./Textures/RightBoard_11_ISLAM_terrorist_kidnappers.png</init_from>
     </image>
   </library_images>
   <library_visual_scenes>
