@@ -111,6 +111,28 @@ exports.handlePostRequest = function(req, res, next){
 				res.end(JSON.stringify(docs));
 			});
 			break;
+			
+		case "update_user":
+			var userId = data.id;
+			console.log(data);	
+			//DAL.updateUser(userId, data, function(e){
+			
+						
+			//});
+			res.end();
+			break;			
+			
+		case "update_world":
+			var worldId = "_adl_sandbox_" + data.id + "_";
+			delete data.id;	
+			delete data.hotState;	
+			delete data.editVisible;	
+			delete data.isVisible;	
+			
+			DAL.updateInstance(worldId, data, function(e){
+				res.end("done");
+			});
+			break;
 		
 		default: 
 			next();

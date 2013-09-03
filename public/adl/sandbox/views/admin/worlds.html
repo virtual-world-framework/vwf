@@ -50,20 +50,21 @@
 		<a href="#">View full list of worlds</a>
 	</div>
 	<div class="adminDisplayList span4">
-		<form> 
+		<form data-bind="with:currentAdminItem"> 
 			
 			<div style="height:50px;">
-				<span>Edit user name:</span>
-				<input type="text" style="float:right;" />			
+				<span>Edit title:</span>
+				<input type="text" style="float:right;" data-bind="value:title" />			
 			</div>
 			<div>
-				<span>Change password:</span>
-				<input type="text"style="float:right;" /><br/>
+				<span>Change description:</span>
+				<textarea style="float:right;" data-bind="value:description"></textarea><br/>
 			</div>
 	
 		</form>
 		
-		Under construction..
+		<button class="btn" style="margin: 0 auto;float:left;" data-bind="click:updateWorld">Submit</button>
+		<div>Under construction..</div>
 	</div>
 </div>
 	<script>
@@ -97,6 +98,16 @@
 			
 			$('input').prop("checked", false);
 			vwfPortalModel.setSelectAll(false);
+		}; 
+		
+		vwfPortalModel.updateWorld = function(e){
+		
+			//var sendObj = {id: };
+			
+			//Make the request to the server to delete these users
+			$.post('{{root}}/data/update_world', JSON.stringify(vwfPortalModel.currentAdminItem()), function(o){
+				console.log("done");
+			});
 		}; 
 		
 		window.onhashchange = function(){handleHash("id");};

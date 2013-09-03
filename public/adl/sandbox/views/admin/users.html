@@ -36,10 +36,9 @@
 				<span>Change password:</span>
 				<input type="text"style="float:right;" /><br/>
 			</div>
-	
 		</form>
-		
-		Under construction..
+		<button class="btn" style="margin: 0 auto;float:left;" data-bind="click:updateUser">Submit</button>
+		<div>Under construction..</div>
 	</div>
 </div>
 <script>
@@ -57,7 +56,7 @@
 
 		vwfPortalModel.adminDisplayList(newObject);
 		handleHash("Username");
-	});
+	}); 
 	
 	vwfPortalModel.deleteSelected = function(data){
 		
@@ -77,6 +76,16 @@
 		console.log("Delete users ", tempUserArr);
 		$('input').prop("checked", false);
 		vwfPortalModel.setSelectAll(false);
+	}; 	
+	
+	vwfPortalModel.updateUser = function(e){
+		
+		//var sendObj = {id: };
+		
+		//Make the request to the server to delete these users
+		$.post('{{root}}/data/update_user', JSON.stringify([213,213,213]), function(o){
+			console.log("done");
+		});
 	}; 
 	
 	window.onhashchange = function(){handleHash("Username");};
