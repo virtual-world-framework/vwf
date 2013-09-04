@@ -1087,7 +1087,8 @@ function startVWF(){
 					client.pending = false;
 					for(var j = 0; j < client.pendingList.length; j++)
 					{
-						client.emit('sent queued message',client.pendingList[j]);
+						client.pendingList[j].time = global.instances[namespace].time;
+						client.emit('message',client.pendingList[j]);
 						
 						
 					}

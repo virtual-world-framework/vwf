@@ -692,10 +692,15 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // Actions may use receive's ready function to suspend the queue for asynchronous
             // operations, and to resume it when the operation is complete.
 
-            while ( queue.ready && queue.length > 0 && queue[0].time <= queue.time ) {
+            while ( queue.ready && queue.length > 0 && queue[0].time <= queue.time  ) {
 
                 var fields = queue.shift();
-				
+				if(fields.action == 'getState' && this.creatingNodeCount!=0)
+				{
+					fields.time += .05;
+					queue.push(fields);
+					continue;
+				}
                 // Advance the time.
 
                 if ( this.now != fields.time ) {
@@ -882,7 +887,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 		this.creatingNodeCount = 0;
         this.getState = function( full, normalize ) {
 			
-			if(this.creatingNodeCount != 0)
+			if(this.creatingNodeCount) debugger;
 				
 			if(full === undefined)
 				full = true;
@@ -926,6 +931,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             this.logger.groupEnd();
 
+			console.log(applicationState);
             return applicationState;
         };
 
@@ -980,7 +986,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.createNode = function( nodeComponent, create_callback /* ( nodeID ) */ ) {
 			
-	    this.creatingNodeCount++;
+	    
 	    
 	    
 	    
@@ -1127,7 +1133,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             } );
 
-			this.creatingNodeCount --;
+			
             this.logger.groupEnd();
         };
 
@@ -1543,6 +1549,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.createChild = function( nodeID, childName, childComponent, create_callback /* ( childID ) */ ) {
 
+		this.creatingNodeCount++;
+		
 	console.log(	 "vwf.createChild " + nodeID + " " + childName + " ",childComponent);
             this.logger.group( "vwf.createChild " + nodeID + " " + childName + " " + (
                 typeof childComponent == "string" || childComponent instanceof String ?
@@ -1643,6 +1651,7 @@ if ( ! childComponent.source ) {
                         model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
                                 childComponent.source, childComponent.type, childComponent.uri, childName, function( ready ) {
 
+									
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
                                 vwf.logger.debug( "vwf.construct: creatingNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
                                 driver_ready = ready;
@@ -1843,6 +1852,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 // ID of its prototype. If this was the root node for the application, the
                 // application is now fully initialized.
 
+				vwf.creatingNodeCount--;
                 create_callback && create_callback( childID );
 				
 				if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
