@@ -130,7 +130,7 @@ exports.handlePostRequest = function(req, res, next){
 			delete data.isVisible;	
 			
 			DAL.updateInstance(worldId, data, function(e){
-				res.end("done");
+				res.end(e ? "done" : "error");
 			});
 			break;
 		

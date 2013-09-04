@@ -107,6 +107,7 @@ function updateUser (id,data,cb)
 			{
 				global.log(err,0);
 				cb(false);
+				return;
 			}
 				
 			cb(true);	
@@ -507,6 +508,7 @@ function updateInstance (id,data,cb)
 			{
 				global.log(err,0);
 				cb(false);
+				return;
 			}
 				
 			cb(true);	

@@ -289,7 +289,6 @@ function showStates(cb){
 						
 						if(saveProp != "editVisible" &&  e[tmpKey][saveProp] != flatWorldArray[saveIndex][saveProp]){
 							vwfPortalModel.worldObjects()[saveIndex](e[tmpKey]);
-							console.log(e[tmpKey].title, saveProp, flatWorldArray[saveIndex][saveProp], e[tmpKey][saveProp]);
 							break;
 						}
 					}

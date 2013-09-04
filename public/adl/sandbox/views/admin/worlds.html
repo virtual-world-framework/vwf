@@ -56,10 +56,20 @@
 				<span>Edit title:</span>
 				<input type="text" style="float:right;" data-bind="value:title" />			
 			</div>
-			<div>
+			<div style="height:70px;">
 				<span>Change description:</span>
 				<textarea style="float:right;" data-bind="value:description"></textarea><br/>
 			</div>
+			<div>
+				<span>Featured:</span>
+				<input style="float:right;" type="checkbox" data-bind="checked:$data.featured" /><br/>
+
+				<div data-bind="visible:$data.featured">
+					<span>Hi there</span>
+				</div>
+			</div>
+			
+			
 	
 		</form>
 		
@@ -93,7 +103,6 @@
 						}
 					}
 				}
-				
 			});
 			
 			$('input').prop("checked", false);
@@ -101,21 +110,22 @@
 		}; 
 		
 		vwfPortalModel.updateWorld = function(e){
-		
-			//var sendObj = {id: };
-			
+
 			//Make the request to the server to delete these users
-			$.post('{{root}}/data/update_world', JSON.stringify(vwfPortalModel.currentAdminItem()), function(o){
+			$.post('{{root}}/data/update_world', ko.toJSON(vwfPortalModel.currentAdminItem), function(o){
 				console.log("done");
 			});
 		}; 
 		
-		window.onhashchange = function(){handleHash("id");};
+		window.onhashchange = function(){
+			handleHash("id");
+		};
 		
 		$(document).ready(function(){	
 			
 			vwfPortalModel.adminDisplayList = vwfPortalModel.worldObjects;
 			ko.applyBindings(vwfPortalModel);
+			
 			getLoginInfo(showStates(
 				function(){
 					handleHash("id");
@@ -126,8 +136,5 @@
 			window.setInterval(function(){
 				showStates();
 			},5000);
-			
-			
-			
 		});
 	</script>
