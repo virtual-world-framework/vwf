@@ -733,7 +733,7 @@ function startVWF(){
 	  //The client is the first, is can just load the index.vwf, and mark it not pending
 	  if(!loadClient)
 	  {
-		
+		console.log('load from db');
 		//socket.emit('message',{"action":"getState","respond":true,"time":global.instances[namespace].time});
 		
 		var instance = namespace;
@@ -823,12 +823,53 @@ function startVWF(){
 	  //this client is not the first, we need to get the state and mark it pending
 	  else
 	  {
-		
+		console.log('load from client');
 		var firstclient = loadClient;//Object.keys(global.instances[namespace].clients)[0];
 		//firstclient = global.instances[namespace].clients[firstclient];
 		socket.pending = true;
 		firstclient.emit('message',{"action":"getState","respond":true,"time":global.instances[namespace].time});
+		
+		var timeout = function(namespace){
+			
+			this.namespace = namespace;
+			this.time = function()
+			{
+				try{
+				
+					var loadClient = null;
+		  
+					  if(Object.keys(this.namespace.clients).length != 0)
+					  {
+						for(var i in this.namespace.clients)
+						{
+						   var testClient = this.namespace.clients[i];
+						   if(!testClient.pending && testClient.loginData)
+							loadClient = testClient;
+						}
+					  }
+					
+					if(loadClient)
+					{
+						console.log('did not get state, resending request');	
+						loadClient.emit('message',{"action":"getState","respond":true,"time":this.namespace.time});
+						this.handle = global.setTimeout(this.time.bind(this),1000);			
+					}else
+					{
+						console.log('need to load from db');	
+					}
+				}catch(e){}
+			}
+			this.deleteMe = function()
+			{
+				global.clearTimeout(this.handle);
+				this.namespace.requestTimer = null;
+			}
+			this.namespace.requestTimer = this;
+			this.handle = global.setTimeout(this.time.bind(this),1000);
+		}
 		global.instances[namespace].Log('GetState from Client',2);
+		if(!global.instances[namespace].requestTimer)
+			(new timeout(global.instances[namespace]));
 		
 	  }
 	  
@@ -1031,6 +1072,8 @@ function startVWF(){
 				if(message.action == "getState")
 				{
 					global.instances[namespace].Log('Got State',1);
+					if(global.instances[namespace].requestTimer)
+						global.instances[namespace].requestTimer.deleteMe();
 					var state = message.result;
 					
 					
