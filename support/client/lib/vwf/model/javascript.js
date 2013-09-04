@@ -54,7 +54,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
 
-            var self = this;
+            var jsDriverSelf = this;
 
             // Get the prototype node.
 
@@ -63,14 +63,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             // Get the behavior nodes.
 
             var behaviors = ( childImplementsIDs || [] ).map( function( childImplementsID ) {
-                return self.nodes[childImplementsID];
+                return jsDriverSelf.nodes[childImplementsID];
             } );
 
             // For each behavior, create a proxy for this node to the behavior and attach it above
             // the prototype, or above the most recently-attached behavior.
 
             behaviors.forEach( function( behavior ) {
-                prototype = proxiedBehavior.call( self, prototype, behavior );
+                prototype = proxiedBehavior.call( jsDriverSelf, prototype, behavior );
             } );
 
             // Create the node. It's prototype is the most recently-attached behavior, or the
@@ -103,7 +103,7 @@ node.id = childID; // TODO: move to vwf/model/object
 
             Object.defineProperty( node.properties, "create", {
                 value: function( name, value, get, set ) { // "this" is node.properties
-                    return self.kernel.createProperty( this.node.id, name, value, get, set );
+                    return jsDriverSelf.kernel.createProperty( this.node.id, name, value, get, set );
                 }
             } );
 
@@ -121,7 +121,7 @@ node.id = childID; // TODO: move to vwf/model/object
 
             Object.defineProperty( node.methods, "create", {
                 value: function( name, parameters, body ) { // "this" is node.methods  // TODO: also accept create( name, body )
-                    return self.kernel.createMethod( this.node.id, name, parameters, body );
+                    return jsDriverSelf.kernel.createMethod( this.node.id, name, parameters, body );
                 }
             } );
 
@@ -137,7 +137,7 @@ node.id = childID; // TODO: move to vwf/model/object
 
             Object.defineProperty( node.events, "create", {
                 value: function( name, parameters ) { // "this" is node.events
-                    return self.kernel.createEvent( this.node.id, name, parameters );
+                    return jsDriverSelf.kernel.createEvent( this.node.id, name, parameters );
                 }
             } );
 
@@ -182,13 +182,13 @@ node.id = childID; // TODO: move to vwf/model/object
 
             Object.defineProperty( node.children, "create", {
                 value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
-                    return self.kernel.createChild( this.node.id, name, component /* , callback */ );  // TODO: support callback and map callback's childID parameter to the child node
+                    return jsDriverSelf.kernel.createChild( this.node.id, name, component /* , callback */ );  // TODO: support callback and map callback's childID parameter to the child node
                 }
             } );
 
             Object.defineProperty( node.children, "delete", {
                 value: function( child ) {
-                    return self.kernel.deleteNode( child.id );
+                    return jsDriverSelf.kernel.deleteNode( child.id );
                 }
             } );
 			
@@ -209,28 +209,28 @@ node.id = childID; // TODO: move to vwf/model/object
 
             Object.defineProperty( node, "time", {  // TODO: only define on shared "node" prototype?
                 get: function() {
-                    return self.kernel.time();
+                    return jsDriverSelf.kernel.time();
                 },
                 enumerable: true,
             } );
 
             Object.defineProperty( node, "client", {  // TODO: only define on shared "node" prototype?
                 get: function() {
-                    return self.kernel.client();
+                    return jsDriverSelf.kernel.client();
                 },
                 enumerable: true,
             } );
 
             Object.defineProperty( node, "moniker", {  // TODO: only define on shared "node" prototype?
                 get: function() {
-                    return self.kernel.moniker();
+                    return jsDriverSelf.kernel.moniker();
                 },
                 enumerable: true,
             } );
 
 	    Object.defineProperty( node, "Scene", {  // TODO: only define on shared "node" prototype?
                 get: function() {
-                    return self.nodes['index-vwf'];
+                    return jsDriverSelf.nodes['index-vwf'];
                 },
                 enumerable: true,
             } );
@@ -241,14 +241,14 @@ node.id = childID; // TODO: move to vwf/model/object
 
             Object.defineProperty( node, "in", {  // TODO: only define on shared "node" prototype?
                 value: function( when, callback ) { // "this" is node
-                    return refreshedFuture.call( self, this, -when, callback ); // relative time
+                    return refreshedFuture.call( jsDriverSelf, this, -when, callback ); // relative time
                 },
                 enumerable: true,
             } );
 
             Object.defineProperty( node, "at", {  // TODO: only define on shared "node" prototype?
                 value: function( when, callback ) { // "this" is node
-                    return refreshedFuture.call( self, this, when, callback ); // absolute time
+                    return refreshedFuture.call( jsDriverSelf, this, when, callback ); // absolute time
                 },
                 enumerable: true,
             } );
@@ -281,7 +281,7 @@ node.id = childID; // TODO: move to vwf/model/object
 			
 			if(this.isBehavior(node))
 			{
-				self.hookupBehavior(node,nodeID);
+				jsDriverSelf.hookupBehavior(node,nodeID);
 			
 
 			}
@@ -289,7 +289,7 @@ node.id = childID; // TODO: move to vwf/model/object
 		//allow a behavior node to directly acess the properties of it's parent
 		hookupBehaviorProperty: function(behaviorNode,parentid,propname)
 		{
-			self = this;
+			jsDriverSelf = this;
 			var node = this.nodes[parentid];
 			Object.defineProperty( behaviorNode, propname, 
 			{ // "this" is node in get/set
@@ -535,7 +535,7 @@ node.id = childID; // TODO: move to vwf/model/object
 		{
 				if(masterval === undefined)
 					masterval = val;
-				var self = this;
+				var jsDriverSelf = this;
 				watchable.internal_val = val;
 				watchable.propertyname = propertyname;
 				watchable.id = id;
@@ -550,13 +550,13 @@ node.id = childID; // TODO: move to vwf/model/object
 					Object.defineProperty(watchable,_i,{set:function(value){
 						this.internal_val[_i] = value; 
 						
-						self.setWatchableValue(this.id,this.propertyname,this.internal_val,this.dotNotation);
+						jsDriverSelf.setWatchableValue(this.id,this.propertyname,this.internal_val,this.dotNotation);
 					},
 					get:function(){
 						var ret = this.internal_val[_i];
 						//This recursively builds new watchables, such that you can do things like
 						//this.materialDef.layers[0].alpha -= .1;
-						ret =  self.createWatchable(ret,this.propertyname,this.id,this.masterval,this.dotNotation+'.'+_i);
+						ret =  jsDriverSelf.createWatchable(ret,this.propertyname,this.id,this.masterval,this.dotNotation+'.'+_i);
 						return ret;
 					},configurable:true,enumerable:true});
 					})();
@@ -572,7 +572,7 @@ node.id = childID; // TODO: move to vwf/model/object
 				if(masterval === undefined)
 					masterval = val;
 					
-				var self = this;
+				var jsDriverSelf = this;
 				watchable.internal_val = val;
 				watchable.propertyname = propertyname;
 				watchable.id = id;
@@ -587,13 +587,13 @@ node.id = childID; // TODO: move to vwf/model/object
 					Object.defineProperty(watchable,_i,{set:function(value){
 						this.internal_val[_i] = value; 
 						
-						self.setWatchableValue(this.id,this.propertyname,this.internal_val,this.dotNotation);
+						jsDriverSelf.setWatchableValue(this.id,this.propertyname,this.internal_val,this.dotNotation);
 					},
 					get:function(){
 						var ret = this.internal_val[_i];
 						//This recursively builds new watchables, such that you can do things like
 						//this.materialDef.layers[0].alpha -= .1;
-						ret =  self.createWatchable(ret,this.propertyname,this.id,this.masterval,this.dotNotation+'['+_i+']');
+						ret =  jsDriverSelf.createWatchable(ret,this.propertyname,this.id,this.masterval,this.dotNotation+'['+_i+']');
 						return ret;
 					},configurable:true,enumerable:true});
 					})();
@@ -604,8 +604,8 @@ node.id = childID; // TODO: move to vwf/model/object
 				{
 					var internal = this.internal_val;
 					internal.push(newval);
-					self.setWatchableValue(this.id,this.propertyname,this.internal_val,this.dotNotation);
-					self.setupWatchableArray(this,internal,this.propertyname,this.id,this.masterval,this.dotNotation);
+					jsDriverSelf.setWatchableValue(this.id,this.propertyname,this.internal_val,this.dotNotation);
+					jsDriverSelf.setupWatchableArray(this,internal,this.propertyname,this.id,this.masterval,this.dotNotation);
 				}
 				watchable.indexOf = function(val)
 				{
@@ -621,8 +621,8 @@ node.id = childID; // TODO: move to vwf/model/object
 						var internal = this.internal_val;
 						
 						Array.prototype[funcname].apply(internal,arguments)
-						self.setWatchableValue(this.id,this.propertyname,this.internal_val,this.dotNotation);
-						self.setupWatchableArray(this,internal,this.propertyname,this.id,this.masterval,this.dotNotation);
+						jsDriverSelf.setWatchableValue(this.id,this.propertyname,this.internal_val,this.dotNotation);
+						jsDriverSelf.setupWatchableArray(this,internal,this.propertyname,this.id,this.masterval,this.dotNotation);
 					}
 					})(func);
 				}
@@ -653,7 +653,7 @@ node.id = childID; // TODO: move to vwf/model/object
 		},
 		setWatchableValue: function(id, propertyName, value, dotNotation)
 		{
-			var self = this;
+			var jsDriverSelf = this;
 			var masterid = dotNotation.substring(0,(dotNotation.indexOf('.') +1 || dotNotation.indexOf('[') +1) -1)
 			masterid = masterid || dotNotation;
 			if(this.__WatchableCache[masterid])
@@ -663,7 +663,7 @@ node.id = childID; // TODO: move to vwf/model/object
 				this.setValueByDotNotation(this.__WatchableCache[masterid], "internal_val." + dotNotation.substr(masterid.length), value);
 				this.__WatchableSetting ++;
 				try{
-				self.kernel.setProperty(id,propertyName,this.__WatchableCache[masterid].masterval);
+				jsDriverSelf.kernel.setProperty(id,propertyName,this.__WatchableCache[masterid].masterval);
 				}catch(e)
 				{
 				
@@ -673,7 +673,7 @@ node.id = childID; // TODO: move to vwf/model/object
 			}else
 			{	this.__WatchableSetting ++;
 				try{
-				self.kernel.setProperty(id,propertyName,value);
+				jsDriverSelf.kernel.setProperty(id,propertyName,value);
 				}catch(e)
 				{
 				
@@ -686,7 +686,7 @@ node.id = childID; // TODO: move to vwf/model/object
 		},
 		__WatchableSetting : 0,
         // -- initializingProperty -----------------------------------------------------------------
-		//create a new watchable for a given value. Val is the object itself, and masterval is the root property of the node
+		//create a new watchable for a given value. Val is the object itjsDriverSelf, and masterval is the root property of the node
 		createWatchable : function(val,propertyname,id,masterval,dotNotation)
 		{
 			
@@ -695,10 +695,10 @@ node.id = childID; // TODO: move to vwf/model/object
 			
 			
 			if(!val) return val;
-			var self = this;
-			if(val instanceof self._Watchable)
+			var jsDriverSelf = this;
+			if(val instanceof jsDriverSelf._Watchable)
 			{
-				return self.createWatchable(val.internal_val,propertyname,id,undefined,dotNotation)
+				return jsDriverSelf.createWatchable(val.internal_val,propertyname,id,undefined,dotNotation)
 			
 			}
 			
@@ -713,9 +713,9 @@ node.id = childID; // TODO: move to vwf/model/object
 					return this.__WatchableCache[dotNotation];
 				}
 				
-				var watchable = new self._Watchable();
+				var watchable = new jsDriverSelf._Watchable();
 				watchable.dotNotation = dotNotation;
-				self.setupWatchableArray(watchable,val,propertyname,id,masterval,dotNotation);
+				jsDriverSelf.setupWatchableArray(watchable,val,propertyname,id,masterval,dotNotation);
 				this.__WatchableCache[dotNotation] = watchable;
 				return watchable;
 			}
@@ -727,9 +727,9 @@ node.id = childID; // TODO: move to vwf/model/object
 					return this.__WatchableCache[dotNotation];
 				}
 			
-				var watchable = new self._Watchable();
+				var watchable = new jsDriverSelf._Watchable();
 				watchable.dotNotation = dotNotation;
-				self.setupWatchableObject(watchable,val,propertyname,id,masterval,dotNotation);
+				jsDriverSelf.setupWatchableObject(watchable,val,propertyname,id,masterval,dotNotation);
 				this.__WatchableCache[dotNotation] = watchable;
 				return watchable;
 			
@@ -749,8 +749,8 @@ node.id = childID; // TODO: move to vwf/model/object
 		{	
 			
 			if(!watchable) return watchable;
-			var self = this;
-			if(watchable instanceof self._Watchable)
+			var jsDriverSelf = this;
+			if(watchable instanceof jsDriverSelf._Watchable)
 			{
 				
 				return watchable.internal_val;
@@ -765,16 +765,16 @@ node.id = childID; // TODO: move to vwf/model/object
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var node = this.nodes[nodeID];
-            var self = this;
+            var jsDriverSelf = this;
 
             Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
                 get: function() { 
 		
 		
-		return self.createWatchable(self.kernel.getProperty( this.node.id, propertyName ),propertyName,this.node.id,undefined,this.node.id+"-"+propertyName) 
+		return jsDriverSelf.createWatchable(jsDriverSelf.kernel.getProperty( this.node.id, propertyName ),propertyName,this.node.id,undefined,this.node.id+"-"+propertyName) 
 		
 		},
-                set: function( value ) { self.setWatchableValue( this.node.id, propertyName, self.watchableToObject(value), this.node.id+"-"+propertyName ) },
+                set: function( value ) { jsDriverSelf.setWatchableValue( this.node.id, propertyName, jsDriverSelf.watchableToObject(value), this.node.id+"-"+propertyName ) },
                 enumerable: true
             } );
 
@@ -783,9 +783,9 @@ node.id = childID; // TODO: move to vwf/model/object
 		    Object.defineProperty( node, propertyName, { // "this" is node in get/set
 		       get: function() { 
 		       
-		       return self.createWatchable(self.kernel.getProperty( this.id, propertyName ),propertyName,this.id,undefined,this.id+"-"+propertyName) 
+		       return jsDriverSelf.createWatchable(jsDriverSelf.kernel.getProperty( this.id, propertyName ),propertyName,this.id,undefined,this.id+"-"+propertyName) 
 		       },
-			set: function( value ) { self.setWatchableValue( this.id, propertyName, self.watchableToObject(value) , this.id+"-"+propertyName) },
+			set: function( value ) { jsDriverSelf.setWatchableValue( this.id, propertyName, jsDriverSelf.watchableToObject(value) , this.id+"-"+propertyName) },
 			enumerable: true
 		    } );
 	    }
@@ -943,17 +943,17 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
 
             var node = this.nodes[nodeID];
-            var self = this;
+            var jsDriverSelf = this;
 
             Object.defineProperty( node.methods, methodName, { // "this" is node.methods in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node.methods
-                        return self.kernel.callMethod( this.node.id, methodName, arguments );
+                        return jsDriverSelf.kernel.callMethod( this.node.id, methodName, arguments );
                     };
                 },
                 set: function( value ) {
                     this.node.methods.hasOwnProperty( methodName ) ||
-                        self.kernel.createMethod( this.node.id, methodName );
+                        jsDriverSelf.kernel.createMethod( this.node.id, methodName );
                     this.node.private.bodies[methodName] = value;
                 },
                 enumerable: true,
@@ -964,12 +964,12 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             Object.defineProperty( node, methodName, { // "this" is node in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node
-                        return self.kernel.callMethod( this.id, methodName, arguments );
+                        return jsDriverSelf.kernel.callMethod( this.id, methodName, arguments );
                     };
                 },
                 set: function( value ) {
                     this.methods.hasOwnProperty( methodName ) ||
-                        self.kernel.createMethod( this.id, methodName );
+                        jsDriverSelf.kernel.createMethod( this.id, methodName );
                     this.private.bodies[methodName] = value;
                 },
                 enumerable: true,
@@ -1121,12 +1121,13 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             var body = node.private.bodies && node.private.bodies[methodName];
 
             if ( body ) {
-              //  try {
+                try {
                     return body.apply( node, methodParameters );
-              //  } catch ( e ) {
-              //      this.logger.warnc( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
-              //          "exception:", utility.exceptionMessage( e ) );
-              //  }
+                } catch ( e ) {
+			console.warn( e.toString() + " Node:'" + (node.properties.DisplayName || nodeID)+ "' during: '"+ methodName +"' with '" + JSON.stringify(methodParameters) + "'");
+        //            this.logger.warnc( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
+          //              "exception:", utility.exceptionMessage( e ) );
+                }
             }
 
             return undefined;
@@ -1138,12 +1139,12 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
            
             var node = this.nodes[nodeID];
-            var self = this;
+            var jsDriverSelf = this;
 
             Object.defineProperty( node.events, eventName, { // "this" is node.events in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node.events
-                        return self.kernel.fireEvent( this.node.id, eventName, arguments );
+                        return jsDriverSelf.kernel.fireEvent( this.node.id, eventName, arguments );
                     };
                 },
                 set: function( value ) {
@@ -1175,7 +1176,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             Object.defineProperty( node, eventName, { // "this" is node in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node
-                        return self.kernel.fireEvent( this.id, eventName, arguments );
+                        return jsDriverSelf.kernel.fireEvent( this.id, eventName, arguments );
                     };
                 },
                 set: function( value ) {
@@ -1262,7 +1263,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             var node = this.nodes[nodeID];
             var listeners = findListeners( node, eventName );
 
-            var self = this;
+            var jsDriverSelf = this;
 
             // Call the handlers registered for the event, and calculate the logical OR of each
             // result. Normally, callers to fireEvent() ignore the handler result, but dispatched
@@ -1276,11 +1277,11 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
           //      try {
                     if ( ! phase || listener.phases && listener.phases.indexOf( phase ) >= 0 ) {
-                        var result = listener.handler.apply( listener.context || self.nodes[0], eventParameters ); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
+                        var result = listener.handler.apply( listener.context || jsDriverSelf.nodes[0], eventParameters ); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
                         return handled || result || result === undefined; // interpret no return as "return true"
                     }
            //     } catch ( e ) {
-            //        self.logger.warnc( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
+            //        jsDriverSelf.logger.warnc( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
             //            "exception:", utility.exceptionMessage( e ) );
             //    }
 
@@ -1327,7 +1328,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
     function proxiedBehavior( prototype, behavior ) { // invoke with the model as "this"  // TODO: this is a lot like createProperty()/createMethod()/createEvent(), and refreshedFuture(). Find a way to merge.
 
-        var self = this;
+        var jsDriverSelf = this;
 
         var proxy = Object.create( prototype );
 
@@ -1357,15 +1358,15 @@ proxy.id = behavior.id; // TODO: move to vwf/model/object
                 ( function( propertyName ) {
 
                     Object.defineProperty( proxy.properties, propertyName, { // "this" is proxy.properties in get/set
-                        get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
-                        set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
+                        get: function() { return jsDriverSelf.kernel.getProperty( this.node.id, propertyName ) },
+                        set: function( value ) { jsDriverSelf.kernel.setProperty( this.node.id, propertyName, value ) },
                         enumerable: true
                     } );
 
 proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
                     Object.defineProperty( proxy, propertyName, { // "this" is proxy in get/set
-                        get: function() { return self.kernel.getProperty( this.id, propertyName ) },
-                        set: function( value ) { self.kernel.setProperty( this.id, propertyName, value ) },
+                        get: function() { return jsDriverSelf.kernel.getProperty( this.id, propertyName ) },
+                        set: function( value ) { jsDriverSelf.kernel.setProperty( this.id, propertyName, value ) },
                         enumerable: true
                     } );
 
@@ -1388,12 +1389,12 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
                     Object.defineProperty( proxy.methods, methodName, { // "this" is proxy.methods in get/set
                         get: function() {
                             return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.methods
-                                return self.kernel.callMethod( this.node.id, methodName, arguments );
+                                return jsDriverSelf.kernel.callMethod( this.node.id, methodName, arguments );
                             };
                         },
                         set: function( value ) {
                             this.node.methods.hasOwnProperty( methodName ) ||
-                                self.kernel.createMethod( this.node.id, methodName );
+                                jsDriverSelf.kernel.createMethod( this.node.id, methodName );
                             this.node.private.bodies[methodName] = value;
                         },
                         enumerable: true,
@@ -1403,12 +1404,12 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
                     Object.defineProperty( proxy, methodName, { // "this" is proxy in get/set
                         get: function() {
                             return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy
-                                return self.kernel.callMethod( this.id, methodName, arguments );
+                                return jsDriverSelf.kernel.callMethod( this.id, methodName, arguments );
                             };
                         },
                         set: function( value ) {
                             this.methods.hasOwnProperty( methodName ) ||
-                                self.kernel.createMethod( this.id, methodName );
+                                jsDriverSelf.kernel.createMethod( this.id, methodName );
                             this.private.bodies[methodName] = value;
                         },
                         enumerable: true,
@@ -1433,7 +1434,7 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
                     Object.defineProperty( proxy.events, eventName, { // "this" is proxy.events in get/set
                         get: function() {
                             return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.events
-                                return self.kernel.fireEvent( this.node.id, eventName, arguments );
+                                return jsDriverSelf.kernel.fireEvent( this.node.id, eventName, arguments );
                             };
                         },
                         set: function( value ) {
@@ -1464,7 +1465,7 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
                     Object.defineProperty( proxy, eventName, { // "this" is proxy in get/set
                         get: function() {
                             return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy
-                                return self.kernel.fireEvent( this.id, eventName, arguments );
+                                return jsDriverSelf.kernel.fireEvent( this.id, eventName, arguments );
                             };
                         },
                         set: function( value ) {
@@ -1504,7 +1505,7 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
 
     function refreshedFuture( node, when, callback ) { // invoke with the model as "this"
 
-        var self = this;
+        var jsDriverSelf = this;
 
         if ( Object.getPrototypeOf( node ).private ) {
             refreshedFuture.call( this, Object.getPrototypeOf( node ) );
@@ -1530,10 +1531,10 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
                     ( function( propertyName ) {
 
                         Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
-                            get: function() { return self.kernel.getProperty( this.future.id,
+                            get: function() { return jsDriverSelf.kernel.getProperty( this.future.id,
                                 propertyName, this.future.private.when, this.future.private.callback
                             ) },
-                            set: function( value ) { self.kernel.setProperty( this.future.id,
+                            set: function( value ) { jsDriverSelf.kernel.setProperty( this.future.id,
                                 propertyName, value, this.future.private.when, this.future.private.callback
                             ) },
                             enumerable: true
@@ -1541,10 +1542,10 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
 
 future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
                         Object.defineProperty( future, propertyName, { // "this" is future in get/set
-                            get: function() { return self.kernel.getProperty( this.id,
+                            get: function() { return jsDriverSelf.kernel.getProperty( this.id,
                                 propertyName, this.private.when, this.private.callback
                             ) },
-                            set: function( value ) { self.kernel.setProperty( this.id,
+                            set: function( value ) { jsDriverSelf.kernel.setProperty( this.id,
                                 propertyName, value, this.private.when, this.private.callback
                             ) },
                             enumerable: true
@@ -1569,7 +1570,7 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
                         Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
                             get: function() {
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future.methods
-                                    return self.kernel.callMethod( this.future.id,
+                                    return jsDriverSelf.kernel.callMethod( this.future.id,
                                         methodName, arguments, this.future.private.when, this.future.private.callback
                                     );
                                 }
@@ -1581,7 +1582,7 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
                         Object.defineProperty( future, methodName, { // "this" is future in get/set
                             get: function() {
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future
-                                    return self.kernel.callMethod( this.id,
+                                    return jsDriverSelf.kernel.callMethod( this.id,
                                         methodName, arguments, this.private.when, this.private.callback
                                     );
                                 }
@@ -1608,7 +1609,7 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
                         Object.defineProperty( future.events, eventName, { // "this" is future.events in get/set
                             get: function() {
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
-                                    return self.kernel.fireEvent( this.future.id,
+                                    return jsDriverSelf.kernel.fireEvent( this.future.id,
                                         eventName, arguments, this.future.private.when, this.future.private.callback
                                     );
                                 };
@@ -1620,7 +1621,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
                         Object.defineProperty( future, eventName, { // "this" is future in get/set
                             get: function() {
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future
-                                    return self.kernel.fireEvent( this.id,
+                                    return jsDriverSelf.kernel.fireEvent( this.id,
                                         eventName, arguments, this.private.when, this.private.callback
                                     );
                                 };
@@ -1679,14 +1680,14 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     function findListeners( node, eventName, targetOnly ) {
 
-        var prototypeListeners = Object.getPrototypeOf( node ).private ? // get any self-targeted listeners from the prototypes
+        var prototypeListeners = Object.getPrototypeOf( node ).private ? // get any jsDriverSelf-targeted listeners from the prototypes
             findListeners( Object.getPrototypeOf( node ), eventName, true ) : [];
 
         var nodeListeners = node.private.listeners && node.private.listeners[eventName] || [];
 
         if ( targetOnly ) {
             return prototypeListeners.concat( nodeListeners.filter( function( listener ) {
-                return listener.context == node || listener.context == node.private.origin; // in the prototypes, select self-targeted listeners only
+                return listener.context == node || listener.context == node.private.origin; // in the prototypes, select jsDriverSelf-targeted listeners only
             } ) );
         } else {
             return prototypeListeners.map( function( listener ) { // remap the prototype listeners to target the node

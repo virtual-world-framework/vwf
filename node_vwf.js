@@ -852,7 +852,7 @@ function startVWF(){
 					{
 						console.log('did not get state, resending request');	
 						loadClient.emit('message',{"action":"getState","respond":true,"time":this.namespace.time});
-						this.handle = global.setTimeout(this.time.bind(this),1000);			
+						this.handle = global.setTimeout(this.time.bind(this),2000);			
 					}else
 					{
 						console.log('need to load from db');	

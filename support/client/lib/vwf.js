@@ -695,12 +695,12 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             while ( queue.ready && queue.length > 0 && queue[0].time <= queue.time  ) {
 
                 var fields = queue.shift();
-				if(fields.action == 'getState' && this.creatingNodeCount!=0)
-				{
-					fields.time += .05;
-					queue.push(fields);
-					continue;
-				}
+				// if(fields.action == 'getState' && this.creatingNodeCount!=0)
+				// {
+					// fields.time += .05;
+					// queue.push(fields);
+					// continue;
+				// }
                 // Advance the time.
 
                 if ( this.now != fields.time ) {
@@ -884,10 +884,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         };
 
         // -- getState -----------------------------------------------------------------------------
-		this.creatingNodeCount = 0;
+	this.creatingNodeCount = 0;
+	this.creatingNodeDefs = {};
         this.getState = function( full, normalize ) {
 			
-			if(this.creatingNodeCount) debugger;
+			
 				
 			if(full === undefined)
 				full = true;
@@ -931,10 +932,33 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             this.logger.groupEnd();
 
-			console.log(applicationState);
+	    if(this.creatingNodeCount)
+	    {
+		debugger;
+		for(var i in this.creatingNodeDefs)
+		{
+			var index = applicationState.nodes[0];
+			var parent = this.findNodeInState(index,this.creatingNodeDefs[i].parent);
+			var found = this.findNodeInState(parent,this.creatingNodeDefs[i].id);
+			if(!found)
+				parent.children[this.creatingNodeDefs[i].name] = this.creatingNodeDefs[i];
+		}
+		
+	    }
             return applicationState;
         };
-
+	this.findNodeInState=function(parent,target)
+	{
+		if(parent.id == target) return parent;
+		if(parent.children)
+		for(var i in parent.children)
+		{
+			var found = null;
+			found = this.findNodeInState(parent.children[i],target);
+			if(found) return found;
+		}
+		return null;
+	}
         // -- hashState ----------------------------------------------------------------------------
 
         this.hashState = function() {
@@ -1563,7 +1587,11 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] || nodeTypeURI ) + "." + childName; childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters  // TODO: hash uri => childID to shorten for faster lookups?  // TODO: canonicalize uri
 			
-	
+	    
+	    this.creatingNodeDefs[childID] = JSON.parse(JSON.stringify(childComponent));
+	    this.creatingNodeDefs[childID].parent = nodeID;
+	    this.creatingNodeDefs[childID].name = childName;
+	    
 	    var nodeExists = null;
 	    try{
 	    nodeExist = this.getNode(childID);
@@ -1572,6 +1600,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 	    
 	    if(nodeExists)
 	    {
+		create_callback();
 		return;
 	    }
 				
@@ -1648,7 +1677,7 @@ if ( ! childComponent.source ) {
 
                         var driver_ready = true;
 
-                        model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                        model && model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
                                 childComponent.source, childComponent.type, childComponent.uri, childName, function( ready ) {
 
 									
@@ -1852,7 +1881,9 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 // ID of its prototype. If this was the root node for the application, the
                 // application is now fully initialized.
 
-				vwf.creatingNodeCount--;
+		vwf.creatingNodeCount--;
+		delete vwf.creatingNodeDefs[childID];
+		
                 create_callback && create_callback( childID );
 				
 				if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {

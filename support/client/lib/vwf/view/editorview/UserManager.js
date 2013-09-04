@@ -297,7 +297,12 @@ define(function ()
 		}
 		this.PlayerDeleted = function (e)
 		{
+			
 			$("#" + e + "label").remove();
+			var index = this.playerNames.indexOf(e);
+			this.playerNames.splice(index,1);
+			index = this.playerIDs.indexOf('character-vwf-'+e);
+			this.playerIDs.splice(index,1);
 		}
 		this.getPlayerIDs = function()
 		{

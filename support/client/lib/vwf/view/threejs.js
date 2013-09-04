@@ -281,8 +281,9 @@ var stats;
 		}
         function renderScene(time) {
             requestAnimFrame( renderScene );
+	    
             sceneNode.frameCount++;
-				var now = ( window.performance !== undefined && window.performance.now !== undefined ) ? window.performance.now() : time;
+			var now = ( window.performance !== undefined && window.performance.now !== undefined ) ? window.performance.now() : time;
 			var timepassed = now - sceneNode.lastTime;
 			window.deltaTime = timepassed;
 			if(_SceneManager)
@@ -331,10 +332,10 @@ var stats;
 			sceneNode.axes.position = pos;
 			sceneNode.axes.scale = new THREE.Vector3(.005,.005,.005);
 			sceneNode.axes.updateMatrix();
-            if(sceneNode.frameCount > 10)
+            if(sceneNode.frameCount > 5)
             {
                 
-                sceneNode.frameCount == 0
+                sceneNode.frameCount = 0;
             
                
                 var newPick = ThreeJSPick.call(self,sceneNode);
