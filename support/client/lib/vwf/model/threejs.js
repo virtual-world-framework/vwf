@@ -1136,12 +1136,23 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                         var vwfColor = new utility.color( propertyValue );
                         if ( vwfColor ) {
-                            for( var i = 0; i < threeObject.__lights.length; i++ )
+                            for( var i = threeObject.__lights.length -1; i >= 0; i-- )
                             {
-                                if(threeObject.__lights[i] instanceof THREE.AmbientLight)
+                                if( threeObject.__lights[i] instanceof THREE.AmbientLight )
                                 {
-                                    threeObject.__lights[i].color.setRGB(vwfColor.red()/255,vwfColor.green()/255,vwfColor.blue()/255);
-                                    lightsFound++;
+ 
+                                    // The colladaloader instantiates a new THREE.AmbientLight for each SceneGraph object with an ambientLight.
+                                    // This leads to multiple ambient lights per scene.  In this case we remove all but one THREE.AmbientLight.
+                                    
+                                    if ( lightsFound = 0 )
+                                    {
+                                        threeObject.__lights[i].color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
+                                        lightsFound++;    
+                                    } else {
+                                        threeObject.__lights.splice( i, 1 );
+                                        this.logger.warn("More than one THREE.AmbientLight objects in the scene.  Removing additional ambient lights.");
+                                    }
+                                    
                                 }
                             
                             }
