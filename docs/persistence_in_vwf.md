@@ -2,7 +2,8 @@
 
 ## Terms
 
-- **Application** - Any index.vwf.yaml file, whether it is the only VWF component, or whether it loads many other VWF components.
+- **Application** - Any component file, described in YAML or JSON, intended to 
+  be run as a complete application.
 - **Instance** - An occurrence of an *application* with a distinct *state* for clients to interact with.
     - **Running Instance** - An *instance* with active clients connected to it.
     - **Instance ID** - The unique identifier for an *instance* of an *application*. Currently represented by a random 16-digit sequence of letters and numbers.
@@ -61,10 +62,12 @@ Application developer wants to save the state of the application instance at a s
 From within a running application:
 
 ```
-vwf_view.admin.saveState({"name": "state-name"});
+vwf_admin.saveState({"name": "state-name"}, function (stateName) {
+  // body of callback function to execute on completion
+});
 ```
 
-*Returns:* true if save is successful, false otherwise.
+*Returns:* the name of the saved state if save is successful, false otherwise.
 
 *Notes:*
 
