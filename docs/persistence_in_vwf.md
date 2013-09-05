@@ -4,12 +4,18 @@
 
 - **Application** - Any component file, described in YAML or JSON, intended to 
   be run as a complete application.
-- **Instance** - An occurrence of an *application* with a distinct *state* for clients to interact with.
+- **Instance** - An occurrence of an *application* with a distinct *state* for
+  clients to interact with.
     - **Running Instance** - An *instance* with active clients connected to it.
-    - **Instance ID** - The unique identifier for an *instance* of an *application*. Currently represented by a random 16-digit sequence of letters and numbers.
-- **State** - The values for all internal properties of an *instance* of an *application*.
-- **Save state** - The persisted *state* of an *instance* of an *application* at some given point in time.
-- **Client** - Any actor that interacts with the *state* of an *instance* of an *application*, whether to read or write it.
+    - **Instance ID** - The unique identifier for an *instance* of an 
+      *application*. Currently represented by a random 16-digit sequence of 
+      letters and numbers.
+- **State** - The values for all internal properties of an *instance* of an 
+  *application*.
+- **Save state** - The persisted *state* of an *instance* of an *application* 
+  at some given point in time.
+- **Client** - Any actor that interacts with the *state* of an *instance* of 
+  an *application*, whether to read or write it.
 
 ## Objective
 
