@@ -50,34 +50,42 @@
 		<a href="#">View full list of worlds</a>
 	</div>
 	<div class="adminDisplayList span4">
-		<form data-bind="with:currentAdminItem"> 
-			
-			<div style="height:50px;">
-				<span>Edit title:</span>
-				<input type="text" style="float:right;" data-bind="value:title" />			
-			</div>
-			<div style="height:70px;">
-				<span>Change description:</span>
-				<textarea style="float:right;" data-bind="value:description"></textarea><br/>
-			</div>
-			<div>
-				<span>Featured:</span>
-				<input style="float:right;" type="checkbox" data-bind="checked:$data.featured" /><br/>
-
-				<div data-bind="visible:$data.featured">
-					<span>Hi there</span>
+		<div class="row">
+			<form data-bind="with:currentAdminItem"> 
+				
+				<div style="height:50px;">
+					<span>Edit title:</span>
+					<input type="text" style="float:right;" data-bind="value:title" />			
 				</div>
-			</div>
-			
-			
-	
-		</form>
-		
-		<button class="btn" style="margin: 0 auto;float:left;" data-bind="click:updateWorld">Submit</button>
-		<div>Under construction..</div>
+				<div style="height:70px;">
+					<span>Change description:</span>
+					<textarea style="float:right;" data-bind="value:description"></textarea><br/>
+				</div>
+				<div>
+					<span>Featured this?</span>
+					<input style="float:right;" type="checkbox" id="featuredCheckBox" data-bind="click:$root.handleFeatureClick, checked:$root.isCurrentChecked" /><br/>
+					<div style="float:left;font-size:12px;" data-bind="visible:$root.isCurrentChecked">
+						<p><span style="background:#eee;padding:2px;" data-bind='text:"adl/sandbox/img/" + id + "_small.png"'></span>
+						<br/>Preview image should be 140x110 pixels.</p>
+						
+						<img style="width:140px;height:110px;" data-bind="attr:{src:'{{root}}/img/'+id+'_small.png'}" />
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="row" style="margin:15px auto;">
+			<p class="span2 offset1" style="padding-top:5px;font-weight:bold;" data-bind="text:updateSuccess"></p>
+			<button class="btn" style="margin: 0 auto;float:left;" data-bind="click:updateWorld">Submit</button>
+		</div>
 	</div>
 </div>
 	<script>
+		vwfPortalModel.updateSuccess = ko.observable('');
+		vwfPortalModel.handleFeatureClick = function(d){
+			d.featured = $('#featuredCheckBox').prop('checked');			
+			return true;
+		};
+		vwfPortalModel.isCurrentChecked = ko.observable(false);
 		vwfPortalModel.deleteSelected = function(data){
 			
 			var tempWorldArr = [], dataSendArr = [], tempStr = '', cacheQuery = $('input:checked').not('#selectAllBox');
@@ -113,12 +121,18 @@
 
 			//Make the request to the server to delete these users
 			$.post('{{root}}/data/update_world', ko.toJSON(vwfPortalModel.currentAdminItem), function(o){
+				
+				vwfPortalModel.updateSuccess(o == "done" ? "Success" : "Error");
+				window.setTimeout(function(){
+					vwfPortalModel.updateSuccess('');
+				}, 3000);
 				console.log("done");
 			});
 		}; 
 		
 		window.onhashchange = function(){
 			handleHash("id");
+			vwfPortalModel.isCurrentChecked(vwfPortalModel.currentAdminItem().featured);
 		};
 		
 		$(document).ready(function(){	
@@ -129,6 +143,7 @@
 			getLoginInfo(showStates(
 				function(){
 					handleHash("id");
+					vwfPortalModel.isCurrentChecked(vwfPortalModel.currentAdminItem().featured);
 					vwfPortalModel.adminDisplayList.valueHasMutated();
 				}
 			));
