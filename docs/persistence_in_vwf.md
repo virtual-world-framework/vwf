@@ -119,6 +119,41 @@ vwf_view.admin.getInstances();
 - Are ID and name different?
 - What does the instance object looks like exactly? Add an example JSON into the documentation.
 
+### List saved states for an application
+
+**Motivation**
+
+Application developer wants to retrieve a list of all saved states for all 
+instances of an application.
+
+**API**
+
+From within a running application:
+
+```
+vwf_admin.getSaveStates(function (savedStates) {
+  // savedStates has 
+});
+```
+
+*Returns:* 
+
+- Array of saved state objects, with all metadata, including ID, name, and a 
+  URL to connect load the saved state.
+- Empty array if there are no saved states.
+
+**Web Service**
+
+`GET /path/to/app/{INSTANCE_NAME}/saves/`
+
+*Returns:* An array of saved state objects.
+
+**Open Design Questions**
+
+- Are ID and name different?
+- What does the saved state object looks like exactly? Add an example JSON into
+  the documentation.
+
 ### List save states for an instance
 
 **Motivation**
