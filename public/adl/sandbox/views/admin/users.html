@@ -6,12 +6,13 @@
 <div class="row" data-bind="visible:currentAdminItem() == false">
 	<div class="span4">
 		<a data-bind="click:deleteSelected" href="">Delete Selected</a><br/><br/>
+		<a href="{{root}}/admin/worlds">Worlds List</a><br/>
 		<a href="{{root}}/admin">Admin Page</a>
 	</div>
 	<div class="adminDisplayList span4">
 		<table class="table table-striped" style="border: 1px solid #ddd;">
 			<tr>
-				<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllBox" data-bind="click:handleSelectAll" /></th>
+				<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllBox" class="checkAllBox" data-bind="click:handleSelectAll" /></th>
 				<th style="border:none; background:#FFF">Name</th>
 			</tr>
 			<tbody data-bind="foreach:adminDisplayList" style="border:none">
@@ -22,11 +23,11 @@
 	</div>
 </div>
 <div class="row" data-bind="visible:currentAdminItem() != false">
-	<div class="span4" style="height:150px">
+	<div class="span4" style="">
 		<a href="#">View full list of users</a><br/><br/>
 		<a href="#" data-bind="click:deleteSelectedWorlds">Delete Selected</a>
 	</div>
-	<div class="adminDisplayList span4" style="margin-bottom:20px">
+	<div class="adminDisplayList span4" style="border-bottom:1px #eee solid; height:150px;">
 		<form> 
 			<div style="height:50px;">
 				<span>Edit user name:</span>
@@ -37,13 +38,15 @@
 				<input type="text"style="float:right;" /><br/>
 			</div>
 		</form>
-		<button class="btn" style="margin: 0 auto;float:left;" data-bind="click:updateUser">Submit</button>
-		<div>Under construction..</div>
+		<div class="row">
+			<div class="span2 offset1"></div>
+			<button class="btn" style="margin: 0 auto;float:left;padding-top:15px;" data-bind="click:updateUser">Submit</button>
+		</div>
 	</div>
 	<div>
 		<table class="table table-striped span5" style="border: 1px solid #ddd;padding-top:20px;">
 			<tr>
-				<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllWorldBox" data-bind="click:handleSelectAll" /></th>
+				<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllWorldBox" class="checkAllBox" data-bind="click:handleSelectAll" /></th>
 				<th style="border:none; background:#FFF">Title</th>
 			</tr>
 			<tbody data-bind="foreach:userWorlds" style="border:none">
@@ -54,7 +57,6 @@
 	</div>
 </div>
 <script>
-
 	vwfPortalModel.userWorlds = ko.observableArray([]);
 	
 	var getCurrentUserInfo = function(){

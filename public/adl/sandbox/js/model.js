@@ -120,7 +120,7 @@ var vwfPortalModel = new function(){
 	};
 
 	self.handleSelectAll = function(){
-		$('.checkboxes').prop('checked', !selectAll);
+		$('.checkboxes, .worldCheckboxes').prop('checked', !selectAll);
 		selectAll = !selectAll;
 		return true;
 	};
@@ -171,7 +171,9 @@ function objCompare(obj1, obj2){
 }
 
 function handleHash(propStr){
-
+	vwfPortalModel.setSelectAll(false);
+	$('.checkboxes, worldCheckboxes, .checkAllBox').prop('checked', false);
+	
 	var tmpHash = window.location.hash.replace("#", "");
 	if(tmpHash){
 		for(var i in vwfPortalModel.adminDisplayList()){
