@@ -129,19 +129,25 @@ exports.handlePostRequest = function(req, res, next){
 						cb(null, state);
 
 					});
+				},
+				
+				function(cb){
+					DAL.getInventoryDisplayData(data.Username, function(inventoryInfo){
+						cb(null, inventoryInfo);
+					});
 				}
 			], 
 			
 			function(err, results){
 			
-					var serveObj = {};
+					var serveObj = [{},{}];
 					console.log(results);
 					for(var key in results[0]){
 						if(results[1][key]){
-							serveObj[key] = results[1][key];
+							serveObj[0][key] = results[1][key];
 						}
 					}
-						
+					serveObj[1] = results[2];
 					res.end(JSON.stringify(serveObj));
 			});
 			
@@ -154,7 +160,7 @@ exports.handlePostRequest = function(req, res, next){
 			console.log(data);	
 			delete data.Salt;	
 			delete data.Username;				
-			delete data.inventoryKey;				
+			//delete data.inventoryKey;				
 			
 			//delete data.inventoryKey;	
 			//DAL.updateUser(userId, data, function(e){
@@ -162,13 +168,7 @@ exports.handlePostRequest = function(req, res, next){
 						
 			//});
 			
-			/*DAL.getInventoryForUser(userId, function(e){
-			
-				getInventoryItemMetaData(userId, data.inventoryKey, function(cool){
-				
-					res.end(JSON.stringify(e));
-				});
-			});*/
+
 			//res.end();
 			break;			
 			
