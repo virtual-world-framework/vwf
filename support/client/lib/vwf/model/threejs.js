@@ -1810,6 +1810,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 			$(document).trigger('EndParse');
 			if(window._Notifier)
 				_Notifier.alert('error loading asset ' + err);
+			
+			var id = nodeCopy.vwfID;
+                if ( !id ) id = getObjectID.call( threeModel, asset, true, false );
+                if ( id && id != "" ){
+                   
+                    if ( threeModel.state.nodes[id] ) {
+                        var assetNode = threeModel.state.nodes[id];
+                        //finally, here is the async callback
+                        if ( assetNode.loadingCallback ) {
+                            
+                            assetNode.loadingCallback( true );                    
+                        }
+                    }
+                }			
 		}
 		
 		//callback for sucess of asset parse

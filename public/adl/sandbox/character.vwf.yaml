@@ -381,6 +381,8 @@ scripts:
         }
         
         if(motionvec)
+            finalt = MATH.addVec3(motionvec,finalt);
+        if(motionvec && false)
         {
             var sphpt = finalt.slice(0);
             sphpt[2] += 1;
@@ -401,7 +403,7 @@ scripts:
                 
                 motionvec = motionvec ? MATH.toUnitVec3(motionvec) : [0,0,0];
                 var testpos = MATH.subVec3(finalt,MATH.scaleVec3(motionvec,-.15));
-                /*
+                
                 var intersectfront = _SceneManager.CPUPick(MATH.addVec3(testpos,[0,0,1]),motionvec,{filter:function(o){return !(o.isAvatar === true || o.passable===true)},maxDist: 100,ignore:[this.skin,_Editor.GetMoveGizmo()]});
                 if(intersectfront)
                 {
@@ -421,7 +423,7 @@ scripts:
                         
                         finalt = MATH.addVec3(finalt,R);
                     }
-                }*/
+                }
                 var falldist = 1000;
                
                 var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,1.7]),[0,0,-1],{filter:function(o){ return !(o.isAvatar === true || o.passable === true)},maxDist: 100,ignore:[this.skin,_Editor.GetMoveGizmo()]});
