@@ -1284,7 +1284,12 @@ function startVWF(){
 		Shell.StartShellInterface();  
 		//create socket server
 		sio = sio.listen(listen,{log:false});
+		sio.configure(function()
+		{
 		sio.set('transports', ['websocket']);
+		sio.set('heartbeat interval', 5);
+		
+		});
 		sio.sockets.on('connection', WebSocketConnection);
 	});
 
