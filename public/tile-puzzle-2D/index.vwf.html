@@ -3,7 +3,15 @@
   <head>
     <title>Virtual World Framework</title>
     <script type="text/javascript">
-      var gameID = vwf.find("", "/game")[0];
+      var gameID;
+
+      vwf_view.initializedNode = function( nodeID, childID, childExtendsID, childImplementsIDs,
+          childSource, childType, childIndex, childName ) {
+        if ( childID == vwf_view.kernel.application() ) {
+          gameID = vwf_view.kernel.find("", "/game")[0];
+          initializeBoard();
+        }
+      }
 
       vwf_view.satProperty = function (nodeID, propertyName, propertyValue) {
         switch(propertyName) {
@@ -54,8 +62,6 @@
             break;
         }
       }
-
-      initializeBoard();
         
       function initializeBoard() {
         placeTile('01');
