@@ -42,6 +42,10 @@ function GUID()
             );
     }
 	
+function findInDB(obj, cb){
+	DB.find(obj, cb);
+}
+	
 function getUser (id,cb)
 {
 	getUsers(function(UserIndex){
@@ -107,6 +111,7 @@ function updateUser (id,data,cb)
 			{
 				global.log(err,0);
 				cb(false);
+				return;
 			}
 				
 			cb(true);	
@@ -507,6 +512,7 @@ function updateInstance (id,data,cb)
 			{
 				global.log(err,0);
 				cb(false);
+				return;
 			}
 				
 			cb(true);	
@@ -1072,6 +1078,8 @@ function startup(callback)
 			exports.deleteUser = deleteUser;
 			exports.deleteUsers = deleteUsers;
 			exports.getAllUsersInfo = getAllUsersInfo;
+			
+			exports.find = findInDB;
 			
 			exports.getInstance = getInstance;
 			exports.updateInstance = updateInstance;

@@ -6,15 +6,16 @@
 <div class="row" data-bind="visible:currentAdminItem() == false">
 	<div class="span4">
 		<a data-bind="click:deleteSelected" href="">Delete Selected</a><br/><br/>
+		<a href="{{root}}/admin/worlds">Worlds List</a><br/>
 		<a href="{{root}}/admin">Admin Page</a>
 	</div>
 	<div class="adminDisplayList span4">
 		<table class="table table-striped" style="border: 1px solid #ddd;">
 			<tr>
-				<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllBox" data-bind="click:handleSelectAll" /></th>
+				<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllBox" class="checkAllBox" data-bind="click:handleSelectAll" /></th>
 				<th style="border:none; background:#FFF">Name</th>
 			</tr>
-			<tbody data-bind="foreach:adminDisplayList, style:{border:'none'}">
+			<tbody data-bind="foreach:adminDisplayList" style="border:none">
 				<td><input type="checkbox" class="checkboxes" /></td>
 				<td><a data-bind="text:$data.Username, attr:{href:'#'+$data.Username}" href=""></a></td>
 			</tbody>
@@ -22,12 +23,12 @@
 	</div>
 </div>
 <div class="row" data-bind="visible:currentAdminItem() != false">
-	<div class="span4">
-		<a href="#">View full list of users</a>
+	<div class="span4" style="">
+		<a href="#">View full list of users</a><br/><br/>
+		<a href="#" data-bind="click:deleteSelectedWorlds">Delete Selected</a>
 	</div>
 	<div class="adminDisplayList span4">
 		<form> 
-			
 			<div style="height:50px;">
 				<span>Edit user name:</span>
 				<input type="text" style="float:right;" />			
@@ -36,14 +37,48 @@
 				<span>Change password:</span>
 				<input type="text"style="float:right;" /><br/>
 			</div>
-	
 		</form>
-		
-		Under construction..
+		<div class="row">
+			<div class="span2 offset1"></div>
+			<button class="btn" style="margin: 0 auto;float:left;" data-bind="click:updateUser">Submit</button>
+		</div>
+	</div>
+</div>
+<div class="row" style="margin-top:20px;" data-bind="visible:currentAdminItem() != false">
+	<div class="offset4 span4" style="border-top:1px #eee solid;padding-top:20px;">
+		<table class="table table-striped" style="border: 1px solid #ddd;padding-top:20px;">
+			<tr>
+				<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllWorldBox" class="checkAllBox" data-bind="click:handleSelectAll" /></th>
+				<th style="border:none; background:#FFF">World Title</th>
+			</tr>
+			<tbody data-bind="foreach:userWorlds" style="border:none">
+				<td><input type="checkbox" class="worldCheckboxes" /></td>
+				<td><a data-bind="text:$data.title, attr:{href:'{{root}}/admin/worlds#'+$data.id}" href=""></a></td>
+			</tbody>
+		</table>
 	</div>
 </div>
 <script>
-
+	vwfPortalModel.userWorlds = ko.observableArray([]);
+	
+	var getCurrentUserInfo = function(){
+	
+		if(vwfPortalModel.currentAdminItem().Username){
+			$.post('{{root}}/data/get_user_info', JSON.stringify(vwfPortalModel.currentAdminItem()), function(o){
+				
+				var tempArr = [];
+				o = JSON.parse(o);
+				for(var key in o){
+					
+					o[key].id = key.substr(13,16);
+					tempArr.push(o[key]);				
+				}
+				
+				vwfPortalModel.userWorlds(tempArr);
+				console.log(tempArr);
+			});
+		}
+	};
 	
 	$.post('{{root}}/data/get_users', function(o){
 		o = JSON.parse(o);
@@ -57,13 +92,16 @@
 
 		vwfPortalModel.adminDisplayList(newObject);
 		handleHash("Username");
-	});
+		getCurrentUserInfo();
+	}); 
+	
+
 	
 	vwfPortalModel.deleteSelected = function(data){
 		
-		var tempUserArr = [], tempArr = [];
-		for(var i = 0; i < $('input:checked').length; i++){
-			tempUserArr.push(ko.dataFor($('input:checked')[i]));
+		var tempUserArr = [], tempArr = [], cacheQuery = $('input:checked').filter('.checkboxes');
+		for(var i = 0; i < cacheQuery.length; i++){
+			tempUserArr.push(ko.dataFor(cacheQuery[i]));
 			tempArr[i] = tempUserArr[i].Username ? tempUserArr[i].Username : tempUserArr[i];
 		}
 		
@@ -77,9 +115,49 @@
 		console.log("Delete users ", tempUserArr);
 		$('input').prop("checked", false);
 		vwfPortalModel.setSelectAll(false);
+	}; 	
+	
+	vwfPortalModel.updateUser = function(e){
+		//Make the request to the server to update these users
+		$.post('{{root}}/data/update_user', JSON.stringify(vwfPortalModel.currentAdminItem()), function(o){
+			console.log("done");
+		});
 	}; 
 	
-	window.onhashchange = function(){handleHash("Username");};
+	vwfPortalModel.deleteSelectedWorlds = function(data){
+			
+		var tempWorldArr = [], dataSendArr = [], tempStr = '', cacheQuery = $('input:checked').filter('.worldCheckboxes');
+		for(var i = 0; i < cacheQuery.length; i++){
+			tempStr = ko.dataFor(cacheQuery[i]).id;
+			
+			if(tempStr){
+				tempWorldArr.push(tempStr);
+				dataSendArr.push('_adl_sandbox_' + tempStr + '_');
+			}
+		}
+		
+		console.log("Delete worlds ", tempWorldArr, dataSendArr);
+
+		//Make the request to the server to delete these worlds
+		$.post('{{root}}/data/delete_worlds', JSON.stringify(dataSendArr), function(o){
+			
+			for(var i in tempWorldArr){
+				for(var g in vwfPortalModel.userWorlds()){
+					if(vwfPortalModel.userWorlds()[g].id == tempWorldArr[i]){
+						vwfPortalModel.userWorlds.splice(g, 1);
+					}
+				}
+			}
+		});
+		
+		$('input').prop("checked", false);
+		vwfPortalModel.setSelectAll(false);
+	}; 
+	
+	window.onhashchange = function(){
+		handleHash("Username");
+		getCurrentUserInfo();
+	};
 	
 	$(document).ready(function(){	
 		ko.applyBindings(vwfPortalModel);

@@ -33,7 +33,8 @@ var vwfPortalModel = new function(){
 			$("#yourWorlds").addClass("active");
 			$("#allWorlds").removeClass("active").blur();
 		}
-
+		
+		pageIndex = 0;
 		showStates();
 	};			
 	
@@ -68,10 +69,37 @@ var vwfPortalModel = new function(){
 	
 	
 	self.getPage = function(i){
+	
 		var worldObjectsLength = getArrVisibleLength(self.worldObjects());
 		pageIndex += i;
-		self.displayWorldObjects(getArrVisible(self.worldObjects(), pageIndex*pageLength));
-	
+		
+		var tmpArray = getArrVisible(self.worldObjects(), pageIndex*pageLength);
+		var displayIdArr = [], tmpIdArr = [], resultsArr = [], resultsArr2 = [], maxVal = Math.max(self.displayWorldObjects().length, tmpArray.length);
+		
+		for(var g = 0; g < maxVal; g++){
+			if(g < self.displayWorldObjects().length)
+				displayIdArr.push(self.displayWorldObjects()[g]().id);
+			if(g < tmpArray.length)
+				tmpIdArr.push(tmpArray[g]().id);
+		}		
+		
+		resultsArr = getWorldArrMap(tmpArray, displayIdArr);
+		resultsArr2 = getWorldArrMap(self.displayWorldObjects(), tmpIdArr);
+		
+		for(var j = resultsArr2.length; j >= 0; j--){
+			if(resultsArr2[j] == -1){
+				self.displayWorldObjects.splice(j);
+			}
+		}
+		
+		for(var g = 0; g < resultsArr.length; g++){
+			if(resultsArr[g] == -1){
+				self.displayWorldObjects.push(tmpArray[g]);
+			}
+		}				
+		
+		self.displayWorldObjects.sort(sortArrByUpdates);
+
 		if((pageIndex+1)*pageLength < worldObjectsLength){
 			self.nextDisabled(false);
 		}
@@ -92,7 +120,7 @@ var vwfPortalModel = new function(){
 	};
 
 	self.handleSelectAll = function(){
-		$('.checkboxes').prop('checked', !selectAll);
+		$('.checkboxes, .worldCheckboxes').prop('checked', !selectAll);
 		selectAll = !selectAll;
 		return true;
 	};
@@ -102,12 +130,60 @@ var vwfPortalModel = new function(){
 	};
 };
 
-function handleHash(propStr){
+function getWorldArrMap(arr1, arr2){
+	var tmpArr = [];
+	
+	for(var i = 0; i < arr1.length; i++){
+		tmpArr.push(arr2.indexOf(arr1[i]().id));
+	}
+	
+	return tmpArr;
+}
 
+function objCompare(obj1, obj2){
+
+	var keys1 = Object.keys(obj1);
+	var keys2 = Object.keys(obj2);
+	var saveKey2 = 0;
+	
+	if(keys1.length == keys2.length){
+	
+		for(var k in keys1){
+			saveKey2 = keys2.indexOf(keys1[k]);
+			
+			if(saveKey2 == -1)
+				return false;
+			
+			else if(ko.isObservable(obj1[keys1[k]]) && ko.isObservable(obj2[keys2[saveKey2]])){
+				if(obj1[keys1[k]]() != obj2[keys2[saveKey2]]()){
+					return false;
+				}
+			}
+			
+			else if(obj1[keys1[k]] != obj2[keys2[saveKey2]]){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	return false;
+}
+
+function handleHash(propStr){
+	vwfPortalModel.setSelectAll(false);
+	$('.checkboxes, worldCheckboxes, .checkAllBox').prop('checked', false);
+	
 	var tmpHash = window.location.hash.replace("#", "");
 	if(tmpHash){
 		for(var i in vwfPortalModel.adminDisplayList()){
-			if(tmpHash == vwfPortalModel.adminDisplayList()[i][propStr]){
+		
+			if(ko.isObservable(vwfPortalModel.adminDisplayList()[i]) && tmpHash == vwfPortalModel.adminDisplayList()[i]()[propStr]){
+				vwfPortalModel.currentAdminItem(vwfPortalModel.adminDisplayList()[i]());
+				break;
+			}
+			
+			else if(tmpHash == vwfPortalModel.adminDisplayList()[i][propStr]){
 				vwfPortalModel.currentAdminItem(vwfPortalModel.adminDisplayList()[i]);
 				break;
 			}
@@ -141,7 +217,7 @@ function getFlatIdArr(resetHotstate){
 	
 	//Get all world IDs in flat array form
 	for(var i = 0; i < vwfPortalModel.worldObjects().length; i++){
-		tempArr.push(vwfPortalModel.worldObjects()[i].id);
+		tempArr.push(vwfPortalModel.worldObjects()[i]().id);
 	}
 	
 	return tempArr;
@@ -150,20 +226,24 @@ function getFlatIdArr(resetHotstate){
 function getArrVisibleLength(arr){
 	var count = 0;
 	for(var i = 0; i < arr.length; i++){
-		if(arr[i].isVisible == true)
+		if(arr[i]().isVisible == true)
 			count++;
 	}
 	
 	return count;
 };		
 function getArrVisible(arr, start){
-	var tempArr = [];
-	var count = 0;
-	for(var i = start; i < arr.length && count < pageLength; i++){
+	var tempArr = [], count = 0, g = 0;
+	for(var i = 0; i < arr.length && count < pageLength; i++){
 	
-		if(arr[i].isVisible == true){
-			tempArr.push(arr[i]);
-			count++;
+		if(arr[i]().isVisible == true){
+			
+			if(g >= start){
+				tempArr.push(arr[i]);
+				count++;
+			}
+			
+			else g++;
 		}
 	}
 	
@@ -179,15 +259,12 @@ function showStates(cb){
 
 	$.getJSON("./vwfDataManager.svc/states",function(e){
 		
-		var tempArr = getFlatIdArr();
-		var saveIndex = 0;
-		var featuredIndex = 0;
-		var i = 0;
+		var tempArr = getFlatIdArr(), saveIndex = 0, featuredIndex = 0, i = 0, flatWorldArray = ko.toJS(vwfPortalModel.worldObjects);
 		
 		for(var tmpKey in e){
-		
+			
 			if(e.hasOwnProperty(tmpKey)){
-
+				
 				var id = tmpKey.substr(13,16);
 				e[tmpKey].id = id;
 
@@ -205,38 +282,59 @@ function showStates(cb){
 				}
 				
 				e[tmpKey].isVisible = checkFilter([e[tmpKey].title, e[tmpKey].description, e[tmpKey].owner]);
-				vwfPortalModel.worldObjects()[saveIndex] = e[tmpKey];	
-				vwfPortalModel.worldObjects()[saveIndex].hotState = vwfPortalModel.worldObjects()[saveIndex].hotState ? vwfPortalModel.worldObjects()[saveIndex].hotState : ko.observable(false);
+				
+				if(ko.isObservable(vwfPortalModel.worldObjects()[saveIndex])){
+				
+					e[tmpKey].hotState = flatWorldArray[saveIndex].hotState ? flatWorldArray[saveIndex].hotState : false;
+					
+					for(var saveProp in e[tmpKey]){
+						
+						if(saveProp != "editVisible" &&  e[tmpKey][saveProp] != flatWorldArray[saveIndex][saveProp]){
+							vwfPortalModel.worldObjects()[saveIndex](e[tmpKey]);
+							break;
+						}
+					}
+				}
+				
+				else{
+					e[tmpKey].hotState = false;
+					vwfPortalModel.worldObjects()[saveIndex] = ko.observable(e[tmpKey]);
+				}
 			}
 		}
 		
 		vwfPortalModel.getPage(0);
 		vwfPortalModel.featuredWorldObjects.valueHasMutated();
-		vwfPortalModel.worldObjects.valueHasMutated();
 		
 		$.getJSON("./admin/instances",function(e){
 		
 			//Get all world IDs in flat array form
 			var tempArr = getFlatIdArr();
-			var saveIndex = 0;
-			
+
 			//Iterate through keys, get index of world id which matches key, set its hotState to true
-			for(var tmpKey in e){
-		
-				if(e.hasOwnProperty(tmpKey)){
-					saveIndex = tempArr.indexOf(tmpKey.substr(13,16));
-											
-					if(saveIndex > -1){
-						vwfPortalModel.worldObjects()[saveIndex].hotState(true);
-					}	
-					
-					else{
-						vwfPortalModel.worldObjects()[saveIndex].hotState(false);
+			for(var i = 0; i < tempArr.length; i++){
+
+				if(e.hasOwnProperty("/adl/sandbox/"+tempArr[i]+"/")){
+					if(vwfPortalModel.worldObjects()[i]().hotState == false){
+						vwfPortalModel.worldObjects()[i]().hotState = true;
+						vwfPortalModel.worldObjects()[i].valueHasMutated();
+						continue;
 					}
+					
+					vwfPortalModel.worldObjects()[i]().hotState = true;
+				}
+				
+				else{
+					if(vwfPortalModel.worldObjects()[i]().hotState == true){
+						vwfPortalModel.worldObjects()[i]().hotState = false;
+						vwfPortalModel.worldObjects()[i].valueHasMutated();
+						continue;
+					}
+					
+					vwfPortalModel.worldObjects()[i]().hotState = false;
 				}
 			}
 			
-			vwfPortalModel.worldObjects().sort(sortArrByUpdates);
 			vwfPortalModel.getPage(0);
 			
 			if(cb) cb();
@@ -245,13 +343,17 @@ function showStates(cb){
 }
 
 function sortArrByUpdates(a, b){
-	if(a.hotState() == true && b.hotState() == false)
+	if(a().hotState == true && b().hotState == false)
 		return -1;			
 	
-	else if(b.hotState() == true && a.hotState() == false)
+	else if(b().hotState == true && a().hotState == false)
 		return 1;
 		
-	return b.updates - a.updates;
+	else if (b().updates - a().updates == 0){
+		return b().id.localeCompare(a().id);
+	}
+	
+	else return b().updates - a().updates;
 }
 
 function getLoginInfo(defaultCb, failCb){
