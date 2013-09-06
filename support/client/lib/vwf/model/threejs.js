@@ -1128,34 +1128,26 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             value = propertyValue;
                         }
                     }
-                    if(propertyName == 'ambientColor')
+                    if( propertyName == 'ambientColor' )
                     {
                         var lightsFound = 0;
                         if ( propertyValue instanceof String ) {
                             propertyValue = propertyValue.replace( /\s/g, '' );
                         }
                         var vwfColor = new utility.color( propertyValue );
+                        
                         if ( vwfColor ) {
-                            for( var i = threeObject.__lights.length -1; i >= 0; i-- )
+
+                            for( var i = 0; i < threeObject.children.length; i++ )
                             {
-                                if( threeObject.__lights[i] instanceof THREE.AmbientLight )
+                                if( threeObject.children[i] instanceof THREE.AmbientLight )
                                 {
- 
-                                    // The colladaloader instantiates a new THREE.AmbientLight for each SceneGraph object with an ambientLight.
-                                    // This leads to multiple ambient lights per scene.  In this case we remove all but one THREE.AmbientLight.
-                                    
-                                    if ( lightsFound = 0 )
-                                    {
-                                        threeObject.__lights[i].color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
-                                        lightsFound++;    
-                                    } else {
-                                        threeObject.__lights.splice( i, 1 );
-                                        this.logger.warn("More than one THREE.AmbientLight objects in the scene.  Removing additional ambient lights.");
-                                    }
-                                    
+                                    threeObject.children[i].color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
+                                    lightsFound++;
                                 }
                             
                             }
+
                             if ( lightsFound == 0 ) {
                                 var ambientlight = new THREE.AmbientLight( '#000000' );
                                 ambientlight.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
@@ -1502,9 +1494,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var vwfColor, color;
                 switch ( propertyName ) {
                     case "ambientColor":
-                        for( var i = 0; i < threeObject.__lights.length && !found; i++ ) {
-                            if( threeObject.__lights[i] instanceof THREE.AmbientLight ) {
-                                color = threeObject.__lights[i].color;
+                        for( var i = 0; i < threeObject.children.length && !found; i++ ) {
+                            if( threeObject.children[i] instanceof THREE.AmbientLight ) {
+                                color = threeObject.children[i].color;
                                 vwfColor = new utility.color( [ color.r*255, color.g*255, color.b*255 ] );
                                 value = vwfColor.toString();
                                 found = true;
@@ -2277,6 +2269,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             });
             nodeCopy.threeObject.animatedMesh = animatedMesh;
             nodeCopy.threeObject.updateMatrixWorld();
+            
+            removeAmbientLights.call(this, nodeCopy.threeObject);
+
             parentObject3.add( nodeCopy.threeObject );
             nodeCopy.threeObject.name = childName;
             nodeCopy.threeObject.vwfID = nodeID;
@@ -2508,6 +2503,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             nodeCopy.threeObject.matrix = new THREE.Matrix4();
             nodeCopy.threeObject.matrixAutoUpdate = false;
+            
+            removeAmbientLights.call(this, nodeCopy.threeObject);
+
             parentObject3.add( nodeCopy.threeObject );
             nodeCopy.threeObject.name = childName;
             nodeCopy.threeObject.vwfID = nodeID;
@@ -2531,6 +2529,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
     }
 
+
+    // Strips the imported scene's ambient lights
+    function removeAmbientLights( threeObject ) {
+        for( var i = threeObject.children.length -1; i >= 0; i-- )
+            {
+                if( threeObject.children[i] instanceof THREE.AmbientLight )
+                {
+                    threeObject.remove( threeObject.children[i] );
+                }
+            }
+    }
+    
 
     function getObjectID( objectToLookFor, bubbleUp, debug ) {
 
