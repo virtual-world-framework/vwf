@@ -42,6 +42,10 @@ function GUID()
             );
     }
 	
+function findInDB(obj, cb){
+	DB.find(obj, cb);
+}
+	
 function getUser (id,cb)
 {
 	getUsers(function(UserIndex){
@@ -1074,6 +1078,8 @@ function startup(callback)
 			exports.deleteUser = deleteUser;
 			exports.deleteUsers = deleteUsers;
 			exports.getAllUsersInfo = getAllUsersInfo;
+			
+			exports.find = findInDB;
 			
 			exports.getInstance = getInstance;
 			exports.updateInstance = updateInstance;

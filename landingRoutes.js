@@ -37,10 +37,10 @@ exports.generalHandler = function(req, res, next){
 		req.params.page = 'sandbox';
 		
 	
-	if(req.params.page.indexOf('admin') > -1 && (!sessionData || sessionData.UID != global.adminUID)){
+	/*if(req.params.page.indexOf('admin') > -1 && (!sessionData || sessionData.UID != global.adminUID)){
 		next();
 		return;
-	}
+	}*/
 		
 	var routeIndex = exports.acceptedRoutes.indexOf(req.params.page);
 
@@ -79,12 +79,12 @@ exports.help = function(req, res){
 exports.handlePostRequest = function(req, res, next){
 
 	var data = req.body ? JSON.parse(req.body) : '';
-	var sessionData = global.SandboxAPI.getSessionData(req);
+	//var sessionData = global.SandboxAPI.getSessionData(req);
 	
-	if(!sessionData || sessionData.UID != global.adminUID){
+	/*if(!sessionData || sessionData.UID != global.adminUID){
 		next();
 		return;
-	}
+	}*/
 	
 	switch(req.params.action){
 		case "delete_users":			
@@ -111,15 +111,65 @@ exports.handlePostRequest = function(req, res, next){
 				res.end(JSON.stringify(docs));
 			});
 			break;
+		
+		case "get_user_info":
 			
+			async.series([
+
+				function(cb){
+					DAL.find({owner: data.Username}, function(err, results){
+						cb(null, results);
+					});
+				
+				},
+				
+				function(cb){
+					DAL.getInstances(function(state)
+					{
+						cb(null, state);
+
+					});
+				}
+			], 
+			
+			function(err, results){
+			
+					var serveObj = {};
+					console.log(results);
+					for(var key in results[0]){
+						if(results[1][key]){
+							serveObj[key] = results[1][key];
+						}
+					}
+						
+					res.end(JSON.stringify(serveObj));
+			});
+			
+
+		
+		break;
+		
 		case "update_user":
-			var userId = data.id;
+			var userId = data.Username;
 			console.log(data);	
+			delete data.Salt;	
+			delete data.Username;				
+			delete data.inventoryKey;				
+			
+			//delete data.inventoryKey;	
 			//DAL.updateUser(userId, data, function(e){
 			
 						
 			//});
-			res.end();
+			
+			/*DAL.getInventoryForUser(userId, function(e){
+			
+				getInventoryItemMetaData(userId, data.inventoryKey, function(cool){
+				
+					res.end(JSON.stringify(e));
+				});
+			});*/
+			//res.end();
 			break;			
 			
 		case "update_world":
