@@ -87,7 +87,7 @@ function ServeProfile(UID,response,URL)
 				respond(response,401,"user not logged in, or profile not found");
 			}else
 			{
-				user.password = '';
+				user.Password = '';
 				respond(response,200,JSON.stringify(user));
 			}
 		

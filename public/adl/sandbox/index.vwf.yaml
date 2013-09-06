@@ -1153,7 +1153,7 @@ scripts:
     this.setTexture = function(value)
     {
             
-            
+             if(this.groundplane)
              this.setMaterialByDef(this.groundplane.material,value);
              
     }
@@ -1280,6 +1280,7 @@ scripts:
     }    
     this.setMaterialByDef = function(currentmat,value)
     {
+        
         currentmat.color.r = value.color.r;
         currentmat.color.g = value.color.g;
         currentmat.color.b = value.color.b;

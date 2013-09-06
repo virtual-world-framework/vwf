@@ -1827,6 +1827,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 			nodeCopy.threeObject.add(asset);
 			
             nodeCopy.threeObject.matrixAutoUpdate = false;
+			
+			
+			//get the entry from the asset registry
+			reg = threeModel.assetRegistry[nodeCopy.source];
+			//it's not pending, and it is loaded
+			reg.pending = false;
+			reg.loaded = true;
+			//store this asset in the registry
+			reg.node = asset;
+			
+			//if any callbacks were waiting on the asset, call those callbacks
+			for(var i = 0; i < reg.callbacks.length; i++)
+				reg.callbacks[i](asset);
+			//nothing should be waiting on callbacks now.	
+			reg.callbacks = [];	
+			
+			
+			
             //no idea what this is doing here
             if ( nodeCopy && nodeCopy.assetLoaded ) {
                 nodeCopy.assetLoaded( true );
@@ -1858,19 +1876,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
                 }
             }
 			
-			//get the entry from the asset registry
-			reg = threeModel.assetRegistry[nodeCopy.source];
-			//it's not pending, and it is loaded
-			reg.pending = false;
-			reg.loaded = true;
-			//store this asset in the registry
-			reg.node = asset;
 			
-			//if any callbacks were waiting on the asset, call those callbacks
-			for(var i = 0; i < reg.callbacks.length; i++)
-				reg.callbacks[i](asset);
-			//nothing should be waiting on callbacks now.	
-			reg.callbacks = [];	
         }
         node.name = childName;
 		//create an Object3D to hold the asset
@@ -1909,9 +1915,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 		//grab the registry entry for this asset
 		var reg = this.assetRegistry[node.source];
 		
+		this.currentCallback = callback;
 		//if the asset entry is not loaded and not pending, you'll have to actaully go download and parse it
 		if(reg.loaded == false && reg.pending == false)
 		{
+			callback( false );
 			//thus, it becomes pending
 			reg.pending = true;
 			
@@ -1922,7 +1930,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 		     //Do we need this when we have an async load? currently seems to break things
 			 //NOTE: yes, need to prevent the queue from advancing - I think
              //this pauses the queue. Resume by calling with true
-			 callback( false );
+			
 		
 			//call up the correct loader/parser
 			if(childType == "model/vnd.collada+xml")
@@ -1943,24 +1951,25 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 		//if the asset registry entry is not pending and it is loaded, then just grab a copy, no download or parse necessary
 		else if(reg.loaded == true && reg.pending == false)
 		{
+			
 			node.threeObject.add(reg.node.clone());
+			node.threeObject.updateMatrixWorld(true);
 			$(document).trigger('EndParse');
+			
 		}
 		//if it's pending but not done, register a callback so that when it is done, it can be attached.
 		else if(reg.loaded == false && reg.pending == true)
 		{	
+			callback( false );
+			
 			sceneNode.srcAssetObjects.push( node.threeObject );
 			node.threeObject.vwfID = nodeID;
-			sceneNode.pendingLoads++;
-		
-		     //Do we need this when we have an async load? currently seems to break things
-             //this pauses the queue. Resume by calling with true
-			 callback( false );
+			sceneNode.pendingLoads++;   
 			
 			//so, not necessary to do all the other VWF node goo stuff, as that will be handled by the node that requseted
 			//the asset in teh first place
 			//
-			var tcal = callback;
+			
 			reg.callbacks.push(function(node)
 			{
 				
@@ -1971,8 +1980,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 				nodeCopy.threeObject.add(node.clone());
 				nodeCopy.threeObject.updateMatrixWorld(true);
 				nodeCopy.threeObject.sceneManagerUpdate();
-				tcal( true );
-			});
+				this.tcal( true );
+			}.bind({tcal:callback}));
 		}
     }
     function loadComplete() {

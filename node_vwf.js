@@ -402,12 +402,17 @@ function ServeJSON(jsonobject,response,URL)
 function getNamespace(socket)
 {
 
+		try{
 		var referer = (socket.handshake.headers.referer);
 	  var host = (socket.handshake.headers.host);
 	  var namespace = referer.substr(7+host.length);
 	  if(namespace[namespace.length-1] != "/")
 		namespace += "/";
 	  return namespace;
+	  }catch(e)
+	  {
+		return null;
+	  }
 
 }
 function checkOwner(node,name)
@@ -651,11 +656,25 @@ function startVWF(){
 		}
 	} // close onRequest
 	
-	function WebSocketConnection(socket) {
+	function WebSocketConnection(socket, _namespace) {
 	  
 	
 	  //get instance for new connection
-	  var namespace = getNamespace(socket);
+	  var namespace = _namespace || getNamespace(socket);
+	
+	  if(!namespace)
+	  {
+		  socket.on('setNamespace',function(msg)
+		  {
+			console.log(msg.space);
+			WebSocketConnection(socket,msg.space);
+			socket.emit('namespaceSet',{});
+		  });
+		  return;
+	  }else
+	  {
+		console.log(namespace);
+	  }
 	  
 	  //create or setup instance data
 	  if(!global.instances)
@@ -703,7 +722,13 @@ function startVWF(){
 			for(var i in global.instances[namespace].clients)
 			{
 				var client = global.instances[namespace].clients[i];
-				client.emit('message',{"action":"tick","parameters":[],"time":global.instances[namespace].time});
+				if(!client.pending)
+					client.emit('message',{"action":"tick","parameters":[],"time":global.instances[namespace].time});
+				else
+				{
+					client.pendingList.push({"action":"tick","parameters":[],"time":global.instances[namespace].time});
+					console.log('pending tick');
+				}
 			}
 		
 		},50);
@@ -827,6 +852,7 @@ function startVWF(){
 		var firstclient = loadClient;//Object.keys(global.instances[namespace].clients)[0];
 		//firstclient = global.instances[namespace].clients[firstclient];
 		socket.pending = true;
+		global.instances[namespace].getStateTime = global.instances[namespace].time;
 		firstclient.emit('message',{"action":"getState","respond":true,"time":global.instances[namespace].time});
 		
 		var timeout = function(namespace){
@@ -836,7 +862,7 @@ function startVWF(){
 			{
 				try{
 				
-					var loadClient = null;
+					var loadClients = [];
 		  
 					  if(Object.keys(this.namespace.clients).length != 0)
 					  {
@@ -844,13 +870,14 @@ function startVWF(){
 						{
 						   var testClient = this.namespace.clients[i];
 						   if(!testClient.pending && testClient.loginData)
-							loadClient = testClient;
+							loadClients.push(testClient);
 						}
 					  }
-					
+					var loadClient = loadClients[Math.floor((Math.max(0,Math.random() -.001)) * loadClients.length)];
 					if(loadClient)
 					{
 						console.log('did not get state, resending request');	
+						this.namespace.getStateTime = this.namespace.time;
 						loadClient.emit('message',{"action":"getState","respond":true,"time":this.namespace.time});
 						this.handle = global.setTimeout(this.time.bind(this),2000);			
 					}else
@@ -872,10 +899,10 @@ function startVWF(){
 			(new timeout(global.instances[namespace]));
 		
 	  }
-	  
+	 
 	  socket.on('message', function (msg) {
 		
-		   
+		  
 			//need to add the client identifier to all outgoing messages
 			try{
 				var message = JSON.parse(msg);
@@ -1077,17 +1104,16 @@ function startVWF(){
 					var state = message.result;
 					
 					
-					var incommingscene = state.nodes[0].children;
-					var myscene = global.instances[namespace].state.nodes['index-vwf'].children;
-					var toadd = [];
+					
+					
 					
 					
 					if(message.client != i && client.pending===true)
-						client.emit('message',{"action":"setState","parameters":[state],"time":global.instances[namespace].time});
+						client.emit('message',{"action":"setState","parameters":[state],"time":global.instances[namespace].getStateTime});
 					client.pending = false;
 					for(var j = 0; j < client.pendingList.length; j++)
 					{
-						client.pendingList[j].time = global.instances[namespace].time;
+						
 						client.emit('message',client.pendingList[j]);
 						
 						
@@ -1125,11 +1151,12 @@ function startVWF(){
 		  if(loginData)
 		  {
 			  delete loginData.clients[socket.id];
+			  global.error("Unexpected disconnect. Deleting node for user avatar " + loginData.UID);
 			  for(var i in global.instances[namespace].clients)
 			  {
 					var avatarID = 'character-vwf-'+loginData.UID;
 					//deleting node for avatar
-					global.error("Unexpected disconnect. Deleting node for user avatar " + loginData.UID);
+					
 					var cl = global.instances[namespace].clients[i];
 					cl.emit('message',{"action":"deleteNode","node":avatarID,"time":global.instances[namespace].time});
 					global.instances[namespace].state.deleteNode(avatarID);					

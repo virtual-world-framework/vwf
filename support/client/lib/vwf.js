@@ -552,7 +552,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // in the instance.
 
         this.send = function( nodeID, actionName, memberName, parameters, when, callback /* ( result ) */ ) {
-
+		
             var time = when > 0 ? // absolute (+) or relative (-)
                 Math.max( this.now, when ) :
                 this.now + ( -when );
@@ -695,12 +695,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             while ( queue.ready && queue.length > 0 && queue[0].time <= queue.time  ) {
 
                 var fields = queue.shift();
-				// if(fields.action == 'getState' && this.creatingNodeCount!=0)
-				// {
-					// fields.time += .05;
-					// queue.push(fields);
-					// continue;
-				// }
+				this.message = fields;
+				 if(fields.action == 'getState' && this.creatingNodeCount!=0)
+				 {
+					 fields.time += .05;
+					 queue.push(fields);
+					 continue;
+				 }
                 // Advance the time.
 
                 if ( this.now != fields.time ) {
@@ -805,6 +806,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.setState = function( applicationState, set_callback /* () */ ) {
 
+			
             this.logger.group( "vwf.setState" );  // TODO: loggableState
 
             // Direct property accessors to suppress kernel reentry so that we can write the state
@@ -834,7 +836,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     // array in place so that existing references remain valid.
 
                     var private_queue = [], fields;
-
+					
                     while ( queue.length > 0 ) {
 
                         fields = queue.shift();
@@ -842,11 +844,12 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         vwf.logger.info( "setState:", "removing", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
                             return depth == 2 && object ? Array.prototype.slice.call( object ) : object
                         } ), "from queue" );
-
-			//this is where we loose the avatar!
-			//used to be fields.respond && private_queue.push( fields );
-                        private_queue.push( fields );
-
+						
+			//so, we now backdate the setstate so that create messges are not discarded, and now we need to
+			//actually process messages  that are currently on the queue, but happen in the future after the setstate;
+                       fields.respond &&  private_queue.push( fields );
+					   if(fields.time >= vwf.message.time)
+						   private_queue.push( fields );
                     }
 
                     while ( private_queue.length > 0 ) {
@@ -875,12 +878,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Restore kernel reentry from property accessors.
 
                 isolateProperties--;
-
+				
                 set_callback && set_callback();
-				$(document).trigger('setstatecomplete');
+				
+				
             } );
 
             this.logger.groupEnd();
+			
         };
 
         // -- getState -----------------------------------------------------------------------------
@@ -934,7 +939,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
 	    if(this.creatingNodeCount)
 	    {
-		debugger;
+		
 		for(var i in this.creatingNodeDefs)
 		{
 			var index = applicationState.nodes[0];
@@ -1010,8 +1015,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.createNode = function( nodeComponent, create_callback /* ( nodeID ) */ ) {
 			
-	    
-	    
+	   
+	    if(nodeComponent.id == "index-vwf")
+		{
+			$(document).trigger('setstatebegin');
+		}
 	    
 	    
             this.logger.group( "vwf.createNode " + (
@@ -1146,14 +1154,20 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 }
 
                 // Load the UI chrome if available.
-
+				
                 if ( nodeURI ) {  // TODO: normalizedComponent() on component["extends"] and use component.extends || component.source?
 if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  // TODO: any better way to only attempt to load chrome for the main application and not the prototypes?
                     jQuery("body").append( "<div />" ).children( ":last" ).load( remappedURI( nodeURI ) + ".html", function() {  // TODO: move to index.html; don't reach out to the window from the kernel; connect through a future vwf.initialize callback.
-                        $('#loadstatus').remove(); // remove 'loading' overlay
+                        // remove 'loading' overlay
                     } );
 }
                 }
+				
+				if(nodeComponent == "index-vwf")
+				{
+					$(document).trigger('setstatecomplete');
+					$('#loadstatus').remove(); 
+				}
 
             } );
 
@@ -1682,7 +1696,7 @@ if ( ! childComponent.source ) {
 
 									
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
-                                vwf.logger.debug( "vwf.construct: creatingNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
+                                console.log( "vwf.construct: creatingNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
                                 driver_ready = ready;
                                 driver_ready && each_callback( undefined );
                             }
@@ -1882,6 +1896,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 // application is now fully initialized.
 
 		vwf.creatingNodeCount--;
+		
 		delete vwf.creatingNodeDefs[childID];
 		
                 create_callback && create_callback( childID );

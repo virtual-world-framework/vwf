@@ -289,7 +289,7 @@ node.id = childID; // TODO: move to vwf/model/object
 		//allow a behavior node to directly acess the properties of it's parent
 		hookupBehaviorProperty: function(behaviorNode,parentid,propname)
 		{
-			jsDriverSelf = this;
+			//jsDriverSelf = this;
 			var node = this.nodes[parentid];
 			Object.defineProperty( behaviorNode, propname, 
 			{ // "this" is node in get/set

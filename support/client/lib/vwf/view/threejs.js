@@ -38,6 +38,17 @@ var stats;
 			stats = this.stats;
 			window.stats = stats;
 			window.stats.domElement.style.display = 'none';
+			window._dView = this;
+			
+			$(document).on('setstatebegin',function()
+			{
+				this.paused = true;
+			}.bind(this));
+			$(document).on('setstatecomplete',function()
+			{
+				this.paused = false;
+			}.bind(this));
+			
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -282,6 +293,9 @@ var stats;
         function renderScene(time) {
             requestAnimFrame( renderScene );
 	    
+			if(self.paused === true)
+				return;
+			
             sceneNode.frameCount++;
 			var now = ( window.performance !== undefined && window.performance.now !== undefined ) ? window.performance.now() : time;
 			var timepassed = now - sceneNode.lastTime;
@@ -337,7 +351,7 @@ var stats;
                 
                 sceneNode.frameCount = 0;
             
-               
+              
                 var newPick = ThreeJSPick.call(self,sceneNode);
                 
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
@@ -389,6 +403,7 @@ var stats;
 			$(document).trigger('postrender',[vp,wh,ww]);
 			sceneNode.lastTime = now;
 			stats.update();
+			
         };
 
         var mycanvas = this.canvasQuery.get( 0 );
@@ -1126,10 +1141,14 @@ var stats;
     
 		}else
 		{
+		
+			
 			if(vwf.models[0].model.nodes['index-vwf'].cameramode == 'FirstPerson')
 				intersects = _SceneManager.CPUPick([pos.x,pos.y,pos.z],[directionVector.x,directionVector.y,directionVector.z],{filter:function(o){return !(o.isAvatar === true)}});
 			else
 				intersects = _SceneManager.CPUPick([pos.x,pos.y,pos.z],[directionVector.x,directionVector.y,directionVector.z]);
+			
+				
 			return intersects;
 		}
     }

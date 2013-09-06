@@ -290,7 +290,7 @@ scripts:
         if(this.motionStack.length == 0)
             this.stand();
         
-        var motionvec = [0,0,0];
+        var motionvec;
         
         if(this.motionStack.length)
             this.playSound('./vwfDataManager.svc/datafile/sounds/footsteps.mp3',true,.1);
@@ -380,7 +380,7 @@ scripts:
             
         }
         
-        if(MATH.lengthVec3(motionvec) > 0)
+        if(motionvec)
         {
             var sphpt = finalt.slice(0);
             sphpt[2] += 1;
@@ -498,6 +498,7 @@ scripts:
           {
             
             vwf_view.kernel.setProperty(this.id,'transform',this.transform.internal_val,0,null);
+            vwf_view.kernel.setProperty(this.id,'rotZ',this.rotZ,0,null);
              this.updatecounter = 0;
           }
           
@@ -734,6 +735,7 @@ scripts:
          }
     this.keyDown = function(e)
          {
+           
             if(this.id == 'character-vwf') return;
            if(vwf.client() != this.ownerClientID) return;
             

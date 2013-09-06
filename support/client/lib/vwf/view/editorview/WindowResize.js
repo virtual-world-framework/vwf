@@ -5,6 +5,7 @@ define({
 		var toolsHidden = false;
 		$(window).resize(function(){
 		
+			
 			if(!toolsHidden)
 			{
 				$('#smoothmenu1').css('top','0px');
@@ -49,7 +50,8 @@ define({
 				   scripteditorheight = $(window).height() - scripteditorheight;
 				$('#index-vwf').css('height',window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - $('#toolbar').height() - (scripteditorheight-25) + 'px');
 				
-				$('#sidepanel').css('left',$('#index-vwf').width() + $('#index-vwf').offset().left);
+				if( $('#index-vwf').length)
+					$('#sidepanel').css('left',$('#index-vwf').width() + $('#index-vwf').offset().left);
 				//$('#sidepanel').css('width',320);
 				$('#sidepanel').css('top',$('#toolbar').offset().top+$('#toolbar').height());
 				$('#sidepanel').css('height',$(window).height());
@@ -63,8 +65,11 @@ define({
 				$('#index-vwf').css('width',$(window).width() + 'px');
 				$('#index-vwf').css('top', 0 + 'px');
 			}
+			if(_Editor.findcamera())
+			{
 			_Editor.findcamera().aspect = ($('#index-vwf').width()/$('#index-vwf').height());
 			_Editor.findcamera().updateProjectionMatrix();
+			}
 		});
 		$(window).resize();
 		window.setTimeout(function(){$(window).resize();hideSidePanel();},500);

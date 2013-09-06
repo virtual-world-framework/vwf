@@ -259,7 +259,7 @@ define(function ()
 				return;
 			} 
 			var newintersectxy = _LocationTools.getCurrentPlacemarkPosition()||_LocationTools.getPlacemarkPosition('Origin') || _Editor.GetInsertPoint();
-			vwf.models[0].model.nodes['index-vwf'].orbitPoint(newintersectxy);
+			//vwf.models[0].model.nodes['index-vwf'].orbitPoint(newintersectxy);
 			this.PlayerProto.properties.PlayerNumber = username;
 			this.PlayerProto.properties.owner = username;
 			this.PlayerProto.properties.ownerClientID = vwf.moniker();

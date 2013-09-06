@@ -79,9 +79,10 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/alertify.js-0.3.9/
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/sha256.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.ui.touch-punch.min.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/beautify.module.js"></script>');
-					
+					require("vwf/view/editorview/WindowResize").initialize();
 					$('input[type="text"]').keypress(function(e){e.stopImmediatePropagation();});
 					
+					$(window).resize();
 					//  $(document).ready(function(){
 					//	});
 				}
@@ -163,7 +164,7 @@ function InitializeEditor()
 	require("vwf/view/editorview/Toolbar").initialize();
 	require("vwf/view/editorview/InputSetup").initialize();
 	require("vwf/view/editorview/Menubar").initialize();
-	require("vwf/view/editorview/WindowResize").initialize();
+	
 	require("vwf/view/editorview/SaveLoadTimer").initialize();
 	
 	require("vwf/view/editorview/TouchHandler").initialize();
