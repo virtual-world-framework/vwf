@@ -140,16 +140,22 @@ function getWorldArrMap(arr1, arr2){
 	return tmpArr;
 }
 
-function objCompare(obj1, obj2){
+function objCompare(obj1, obj2, ignoreKeyLength){
 
+	if(! (obj1 && obj2))
+		return false;
+	
 	var keys1 = Object.keys(obj1);
 	var keys2 = Object.keys(obj2);
 	var saveKey2 = 0;
 	
-	if(keys1.length == keys2.length){
+	if(keys1.length == keys2.length || ignoreKeyLength === true){
 	
 		for(var k in keys1){
 			saveKey2 = keys2.indexOf(keys1[k]);
+			
+			if(ignoreKeyLength === true && keys2.length == k)
+				return true;
 			
 			if(saveKey2 == -1)
 				return false;
@@ -259,7 +265,7 @@ function showStates(cb){
 
 	$.getJSON("./vwfDataManager.svc/states",function(e){
 		
-		var tempArr = getFlatIdArr(), saveIndex = 0, featuredIndex = 0, i = 0, flatWorldArray = ko.toJS(vwfPortalModel.worldObjects);
+		var tempArr = getFlatIdArr(), saveIndex = 0, featuredCount = 0, i = 0, flatWorldArray = ko.toJS(vwfPortalModel.worldObjects);
 		
 		for(var tmpKey in e){
 			
@@ -276,9 +282,13 @@ function showStates(cb){
 				e[tmpKey].updates = e[tmpKey].updates > 0 ? e[tmpKey].updates : 0;
 				e[tmpKey].editVisible = ko.observable(false);
 				
-				if(e[tmpKey].featured === true && featuredIndex < 3){
-					vwfPortalModel.featuredWorldObjects()[featuredIndex] = e[tmpKey];
-					featuredIndex++;
+				if(e[tmpKey].featured === true && featuredCount < 3){
+					if(objCompare(ko.toJS(vwfPortalModel.featuredWorldObjects()[featuredCount]), ko.toJS(e[tmpKey]), true) == false || ! vwfPortalModel.featuredWorldObjects()[featuredCount]){
+						
+						vwfPortalModel.featuredWorldObjects()[featuredCount] = e[tmpKey];
+						vwfPortalModel.featuredWorldObjects.valueHasMutated();
+					};
+					featuredCount++;
 				}
 				
 				e[tmpKey].isVisible = checkFilter([e[tmpKey].title, e[tmpKey].description, e[tmpKey].owner]);
@@ -304,7 +314,6 @@ function showStates(cb){
 		}
 		
 		vwfPortalModel.getPage(0);
-		vwfPortalModel.featuredWorldObjects.valueHasMutated();
 		
 		$.getJSON("./admin/instances",function(e){
 		
