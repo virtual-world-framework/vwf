@@ -289,18 +289,6 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         //ticked: [ /* time */ ],
         
     } );
-
-    // -- getPropertyValues -----------------------------------------------------------------
-
-    function getPropertyValues( node ) {
-        var pv = {};
-        if ( node ) {
-            for ( var i = 0; i < node.properties.length; i++ ) {
-                pv[ node.properties[i] ] = vwf.getProperty( node.ID, node.properties[i], [] );
-            }
-        }
-        return pv;
-    };
     
     // -- getChildByName --------------------------------------------------------------------
     
