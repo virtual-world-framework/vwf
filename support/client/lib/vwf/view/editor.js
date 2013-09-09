@@ -223,6 +223,18 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         satProperty: function (nodeID, propertyName, propertyValue) {
             var node = this.nodes[ nodeID ];
             if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
+            
+            // It is possible for a property to have satProperty called for it without ever getting an
+            // initializedProperty (if that property delegated to itself or another on replication)
+            // Catch that case here and create the property
+            if ( ! node.properties[ propertyName ] ) {
+                var property = node.properties[ propertyName ] = {
+                    name: propertyName,
+                    value: propertyValue,
+                };
+                node.properties.push( property );
+            }
+            
             try {
                 propertyValue = utility.transform( propertyValue, utility.transforms.transit );
                 node.properties[ propertyName ].value = JSON.stringify( propertyValue );
