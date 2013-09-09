@@ -2836,7 +2836,7 @@ if ( ! childComponent.source ) {
             // Also don't notify if attempted delegation was blocked during replication since it
             // makes this like an inner call.
 
-            if ( ( delegated || assigned ) && ! ( entry.index !== undefined || blocked ) ) {
+            if ( !( entry.index !== undefined || blocked ) ) {
                 this.views.forEach( function( view ) {
                     view[satPropertyEtc] && view[satPropertyEtc]( nodeID, propertyName, propertyValue );
                 } );
