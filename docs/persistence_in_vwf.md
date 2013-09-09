@@ -85,27 +85,44 @@ is to provide a javascript API to application developers.
 
 ## Application Developer Use Cases
 
+### Instance Object
+
+TODO: Make it happen
+
+### State Object
+
+TODO: Make it happen
+
 ### Save the state of an instance
 
 **Motivation**
 
-Application developer wants to save the state of the application instance at a specific point in order to return to that "point in history" at some time in the future.
+Application developer wants to save the state of the application instance
+at a specific point in order to return to that "point in history" at some
+time in the future.
 
 **API**
 
 From within a running application:
 
 ```
-vwf_admin.saveState({"name": "state-name"}, function (stateName) {
-  // body of callback function to execute on completion
-});
+vwf_admin.saveState( {"name": "state-name"} ).then(
+    function( stateName ) {
+        // body of callback function to execute on success
+    },
+    function( error ) {
+        // body of callback function to execute on error
+    }
+);
 ```
 
-*Returns:* the name of the saved state if save is successful, false otherwise.
+*Returns:* the name of the saved state if save is successful, and an error
+otherwise.
 
 *Notes:*
 
-- If a save state with `"state-name"` already exists, it will be overwritten with the current state.
+- If a save state with `"state-name"` already exists, it will be
+  overwritten with the current state.
 
 **Web Service**
 
@@ -113,39 +130,43 @@ vwf_admin.saveState({"name": "state-name"}, function (stateName) {
 
 *Arguments*
 
-- *name* - The name assigned to the save state, which will be used to retrieve the save state.
-
-**Open Design Questions**
-
-- Should we make name optional and generate an ID automatically when no name is provided?
-- Should we return the generated ID or specified name rather than true when save is successful?
+- *name (Optional)* - The name assigned to the save state, which will
+  be used to retrieve the save state. If no name is specified, a name
+  will be generated.
 
 ### List instances of an application
 
 **Motivation**
 
-Application developer wants to retrieve a list of the instances of an application.
+Application developer wants to retrieve a list of the instances of an
+application.
 
 **API**
 
 From within a running application:
 
 ```
-vwf_view.admin.getInstances();
+vwf_admin.getInstances().then(
+    function( instances ) {
+        // body of callback function to execute on success
+    },
+    function( error ) {
+        // body of callback function to execute on error
+    }
+);
 ```
 
-*Returns:* Array of instance objects, with all metadata, including ID, name, description, and a URL to connect to the instance.
+*Returns:*
+
+- Array of instance objects, with all metadata, including ID,
+name, description, and a URL to connect to the instance.
+- Empty array if there are no instances.
 
 **Web Service**
 
 `GET /path/to/app/instances`
 
 *Returns:* An array of instance objects.
-
-**Open Design Questions**
-
-- Are ID and name different?
-- What does the instance object looks like exactly? Add an example JSON into the documentation.
 
 ### List saved states for an application
 
@@ -159,8 +180,13 @@ instances of an application.
 From within a running application:
 
 ```
-vwf_admin.getSaveStates(function (savedStates) {
-  // savedStates has 
+vwf_admin.application.getSaveStates().then(
+    function( savedStates ) {
+        // body of callback function to execute on success
+    },
+    function( error ) {
+        // body of callback function to execute on error
+    }
 });
 ```
 
@@ -176,11 +202,6 @@ vwf_admin.getSaveStates(function (savedStates) {
 
 *Returns:* An array of saved state objects.
 
-**Open Design Questions**
-
-- What does the saved state object looks like exactly? Add an example JSON into
-  the documentation.
-
 ### List saved states for an instance
 
 **Motivation**
@@ -193,8 +214,13 @@ instance of an application.
 From within a running application:
 
 ```
-vwf_admin.getSavedStates( function ( savedStates ) {
-
+vwf_admin.getSaveStates().then(
+    function( savedStates ) {
+        // body of callback function to execute on success
+    },
+    function( error ) {
+        // body of callback function to execute on error
+    }
 });
 ```
 
@@ -210,15 +236,13 @@ vwf_admin.getSavedStates( function ( savedStates ) {
 
 *Returns:* An array of saved state objects.
 
-**Open Design Questions**
-
-- What does the save state object looks like exactly? Add an example JSON into the documentation.
-
 ### Persist an instance
 
 **Motivation**
 
-Application developer wants to specify that this instance should persist, which means that the instance is available and the state maintained at the current URL even when all clients disconnect.
+Application developer wants to specify that this instance should persist,
+which means that the instance is available and the state maintained at the
+current URL even when all clients disconnect.
 
 **API**
 
@@ -287,10 +311,19 @@ Application developer wants to set specific metadata for an application to make 
 From within a running application:
 
 ```
-vwf_view.admin.updateMetadata();
+vwf_admin.updateMetadata( { ... } ).then(
+    function( metadata ) {
+        // body of callback function to execute on success
+    },
+    function( error ) {
+        // body of callback function to execute on error
+    }
+);
 ```
 
-*Returns:* true or false.
+*Returns:*
+
+- Returns the instance's metadata upon success.
 
 *Arguments*
 
@@ -305,11 +338,6 @@ An instance object with the name, description and whatever else set.
 *Arguments*
 
 An instance object with the name, description and whatever else set.
-
-**Open Design Questions**
-
-- What does an instance object look like?
-- Is setting an instance to be persistent just a special case of updating metadata?
 
 ---
 
@@ -329,14 +357,4 @@ An instance object with the name, description and whatever else set.
 ## Alternative Persistence Stores
 
 Currently, using the filesystem, but should be able to support databases, etc. Should be configurable by application developer.
-
----
-
-## "Server" Concerns
-
-1. Reflector - 
-2. Bootstrap the client - 
-3. Rendering vwf.yaml as json - 
-4. File serving - 
-5. Launching an app instance - 
 
