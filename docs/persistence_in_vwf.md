@@ -48,9 +48,18 @@ instance-x  o---A---o…
 instance-y      o---o---o...
 ```
 
-### Relationship Between State Persistence and Instance Persistence
+### Relationship Between Instance Persistence and Saving Instance State
 
-As it turns out, once we add the *state persistence* capability, we can have the server save the state automatically when the last client disconnects. When a client connects to the same instance ID, the server can load the last save state when it bootstraps the environment. In other words, we'll accomplish *instance persistence* using *state persistence*.
+As it turns out, once we add the *state persistence* capability, we can have
+the server save the state automatically when the last client disconnects. When
+a client connects to the same instance ID, the server can load the last save
+state when it bootstraps the environment. In other words, we'll accomplish
+*instance persistence* using *state persistence*.
+
+This will require the server to maintain an *authoritative client* so
+that the server always knows the correct state. For now, we will simply
+ask the client for the state and trust that there is not tampering going
+on.
 
 ## Socket Connection Versus Web Service
 
