@@ -21,7 +21,7 @@
 
 We're using the term persistence in VWF to describe two different capabilities:
 
-- **Instance persistence** - Persist an instance of an application so that
+- **Instance Persistence** - Persist an instance of an application so that
   the instance is able to be accessed later with the same instance ID and
   state.
 
@@ -50,11 +50,11 @@ instance-y      o---o---o...
 
 ### Relationship Between Instance Persistence and Saving Instance State
 
-As it turns out, once we add the *state persistence* capability, we can have
+As it turns out, once we add the capability to *save instance state*, we can have
 the server save the state automatically when the last client disconnects. When
 a client connects to the same instance ID, the server can load the last save
 state when it bootstraps the environment. In other words, we'll accomplish
-*instance persistence* using *state persistence*.
+*instance persistence* by *saving instance state*.
 
 This will require the server to maintain an *authoritative client* so
 that the server always knows the correct state. For now, we will simply
@@ -85,11 +85,11 @@ is to provide a javascript API to application developers.
 
 ## Application Developer Use Cases
 
-### Instance Object
+### Instance Object Format
 
 TODO: Make it happen
 
-### State Object
+### State Object Format
 
 TODO: Make it happen
 
@@ -236,23 +236,6 @@ vwf_admin.getSaveStates().then(
 
 *Returns:* An array of saved state objects.
 
-### Persist an instance
-
-**Motivation**
-
-Application developer wants to specify that instances should persist,
-which means that the instance is available and the state maintained at the
-current URL even when all clients disconnect.
-
-
-
-**Open Design Questions**
-
-- Do we want to persist instances by default?
-- Should the application developer be able to specify that instances persist in the index.vwf.config.yaml?
-- Should the application developer be able to specify that all instances automatically persist for all applications on the server? Some level of server configuration that we currently don't have?
-- Should `vwf_view.admin.persistInstance()` refer to this instance by default? Should we allow an ID to be passed to be able to persist other instances?
-
 ### Load a specific instance with the latest save state
 
 **Motivation**
@@ -282,6 +265,17 @@ Navigate to `/path/to/app/{INSTANCE_NAME}/saves/{SAVE_NAME}`.
 
 Browser will be redirected to `/path/to/app/{NEW_INSTANCE_NAME}` with the
 save state loaded.
+
+### Persist an instance
+
+**Motivation**
+
+Application developer wants to specify that instances should persist,
+which means that the instance is available and the state maintained at the
+current URL even when all clients disconnect.
+
+Application developer will specify that instances for this application
+will persist in the `index.vwf.config.yaml`.
 
 ### Set metadata for an instance
 
@@ -327,7 +321,10 @@ An instance object with the name, description and whatever else set.
 
 An instance object with the name, description and whatever else set.
 
----
+#### Naming Instances
+
+- No spaces, dots, or slashes to prevent clobbering resources served up by
+  the application server.
 
 ## Saving and Restoring Instances and Time
 
@@ -335,13 +332,7 @@ An instance object with the name, description and whatever else set.
 - Time should be restored to the saved value when the instance is
   loaded.
 
-## Naming Instances
-
-- No spaces, dots, or slashes to prevent clobbering resources served up by
-  the application server.
-
 ## Alternative Persistence Stores
 
 Currently, using the filesystem, but should eventually be able to support
 databases, etc. Should be configurable by application developer.
-
