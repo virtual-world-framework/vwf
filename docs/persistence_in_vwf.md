@@ -63,15 +63,25 @@ on.
 
 ## Socket Connection Versus Web Service
 
-Within the context of a running instance of an application, there are two different ways of interacting with the application instance.
+Within the context of a running instance of an application, there are
+two different ways of interacting with the application instance.
 
-**Socket Connection** - The socket connection is used to manipulate. This is currently represented by function calls on `vwf_view` in client code.
+**Socket Connection** - The socket connection is used to manipulate.
+This is currently represented by function calls on `vwf_view` in client
+code.
 
-**Web Service** - The web service is used to communicate information *about* an instance. This is currently supported by direct web service calls from the client.
+**Web Service** - The web service is used to communicate information
+*about* an instance. This is currently supported by direct web service
+calls from the client.
 
-However, from the perspective of an application developer, we want to *present a unified API* that does not force the developer to distinguish between those two use cases. To that end, we will wrap the web service in a VWF object with a namespace dedicated to communicating *about* the instance. For example, `vwf_view.admin.someFunction`.
+However, from the perspective of an application developer, we want to
+*present a unified API* that does not force the developer to distinguish
+between those two use cases. To that end, we will wrap the web service in
+a VWF object with a namespace dedicated to communicating *about* the
+instance. For example, `vwf_admin.someFunction()`.
 
-To reiterate, the web service is *primarily for internal use.* Our goal is to provide a javascript API to application developers.
+To reiterate, the web service is *primarily for internal use.* Our goal
+is to provide a javascript API to application developers.
 
 ## Application Developer Use Cases
 
