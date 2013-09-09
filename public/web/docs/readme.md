@@ -28,9 +28,9 @@ Prototypes for nodes are defined within the framework. Extend these prototypes a
 	--- 
 	children:
 	  hello:
-		extends: http://vwf.example.com/node3.vwf
-		source: hello.dae
-		type: model/vnd.collada+xml
+	    extends: http://vwf.example.com/node3.vwf
+	    source: hello.dae
+	    type: model/vnd.collada+xml
 
 * * *
 
@@ -67,11 +67,11 @@ Nodes inherit data from their prototype, including the following:
 	*   Creating one of a new name is a new definition
 	*   Using an existing name overrides the prototype's definition
 *   Children
-    * A derived node's children augment the prototype
-    * Creating one of a new name is a new definition
-    * Using an existing name configures the definition from the prototype
+	  * A derived node's children augment the prototype
+	  * Creating one of a new name is a new definition
+	  * Using an existing name configures the definition from the prototype
 *   Scripts
-    * A derived node's scripts augment the prototype
+	  * A derived node's scripts augment the prototype
 	
 * * *
 
@@ -83,21 +83,21 @@ Code View: *index.vwf.yaml*
 	extends: http://vwf.example.com/navscene.vwf
 	children:
 	  hello:
-		extends: http://vwf.example.com/node3.vwf
-		source: hello.dae
-		type: model/vnd.collada+xml
-		properties:
-		  translation: [ 0, 0, 5 ]
-		  rotation: [ 1, 0, 0, 0]
-		  scale: 1
+	    extends: http://vwf.example.com/node3.vwf
+	    source: hello.dae
+	    type: model/vnd.collada+xml
+	    properties:
+	      translation: [ 0, 0, 5 ]
+	      rotation: [ 1, 0, 0, 0]
+	      scale: 1
 	  world:
-		extends: http://vwf.example.com/node3.vwf
-		source: world.dae
-		type: model/vnd.collada+xml
-		properties:
-		  translation: [ 0, 0, -5 ]
-		  rotation: [ 1, 0, 0, 0]
-		  scale: 1
+	    extends: http://vwf.example.com/node3.vwf
+	    source: world.dae
+	    type: model/vnd.collada+xml
+	    properties:
+	      translation: [ 0, 0, -5 ]
+	      rotation: [ 1, 0, 0, 0]
+	      scale: 1
 
 Sample URL: *http://vwf.example.com/web/example/2/*
 
@@ -119,14 +119,14 @@ Define properties of the application and children with or without accessors.
 	extends: http://vwf.example.com/navscene.vwf
 	children:
 	  hello:
-		extends: http://vwf.example.com/node3.vwf
-		source: hello.dae
-		type: model/vnd.collada+xml
+	    extends: http://vwf.example.com/node3.vwf
+	    source: hello.dae
+	    type: model/vnd.collada+xml
 	    properties:
-          translation:
-            set: |
-              this.translation = value;
-            value: [ 0, 0, 5 ]
+	      translation:
+	        set: |
+	          this.translation = value;
+	        value: [ 0, 0, 5 ]
 
 * * *
 
@@ -136,13 +136,13 @@ Specifying set or get as null prevents writing and/or reading, respectively.
 	extends: http://vwf.example.com/navscene.vwf
 	children:
 	  hello:
-		extends: http://vwf.example.com/node3.vwf
-		source: hello.dae
-		type: model/vnd.collada+xml
+	    extends: http://vwf.example.com/node3.vwf
+	    source: hello.dae
+	    type: model/vnd.collada+xml
 	    properties:
-          translation:
-            set: null
-			get: null
+	      translation:
+	        set: null
+	        get: null
 			
 * * *	  
 
@@ -154,27 +154,27 @@ Code View: *index.vwf.yaml*
 	extends: http://vwf.example.com/navscene.vwf
 	children:
 	  hello:
-		extends: http://vwf.example.com/node3.vwf
-		source: hello.dae
-		type: model/vnd.collada+xml
-		properties:
-		  translation: [ 0, 0, 5 ]
-		children:
-		  material:
-			extends: http://vwf.example.com/material.vwf
-			properties: 
-			  color: red
+	    extends: http://vwf.example.com/node3.vwf
+	    source: hello.dae
+	    type: model/vnd.collada+xml
+	    properties:
+	      translation: [ 0, 0, 5 ]
+	    children:
+	      material:
+	        extends: http://vwf.example.com/material.vwf
+	        properties: 
+	          color: red
 	  world:
-		extends: http://vwf.example.com/node3.vwf
-		source: world.dae
-		type: model/vnd.collada+xml
-		properties:
-		  translation: [ 0, 0, -5 ]
-		children:
-		  material:
-			extends: http://vwf.example.com/material.vwf
-			properties: 
-			  color: blue
+	    extends: http://vwf.example.com/node3.vwf
+	    source: world.dae
+	    type: model/vnd.collada+xml
+	    properties:
+	      translation: [ 0, 0, -5 ]
+	    children:
+	      material:
+	        extends: http://vwf.example.com/material.vwf
+	        properties: 
+	          color: blue
 		  
 URL: *http://vwf.example.com/web/example/3/*
 
@@ -191,9 +191,9 @@ The properties of the default lighting and navigation can be specified within th
 	---
 	children:
 	  maincamera:
-        extends: http://vwf.example.com/camera.vwf
-		properties:
-		  rotation: [ 1, 0, 0, 90 ]
+	    extends: http://vwf.example.com/camera.vwf
+	    properties:
+	      rotation: [ 1, 0, 0, 90 ]
 
 * * *
 
@@ -202,13 +202,13 @@ Assemble applications from content on multiple servers.
 	--- 
 	children:
 	  hello:
-		extends: http://vwf.example.com/node3.vwf
-		source: hello.dae
-		type: model/vnd.collada+xml
+	    extends: http://vwf.example.com/node3.vwf
+	    source: hello.dae
+	    type: model/vnd.collada+xml
 	  world:
-		extends: http://vwf.example.com/node3.vwf
-		source: http://anotherserver.com/world.dae
-		type: model/vnd.collada+xml
+	    extends: http://vwf.example.com/node3.vwf
+	    source: http://anotherserver.com/world.dae
+	    type: model/vnd.collada+xml
 
 * * *
 
@@ -217,13 +217,13 @@ Specify methods related to children of application.
 	--- 
 	children:
 	  hello:
-		extends: http://vwf.example.com/node3.vwf
-		source: hello.dae
-		type: model/vnd.collada+xml
-		properties:
-		  rotation: [ 1, 0, 0, 0]
-		methods:
-		  click: this.rotation.z += 5
+	    extends: http://vwf.example.com/node3.vwf
+	    source: hello.dae
+	    type: model/vnd.collada+xml
+	    properties:
+	      rotation: [ 1, 0, 0, 0]
+	    methods:
+	      click: this.rotation.z += 5
 
 * * *
 
@@ -258,48 +258,42 @@ Code View: *index.vwf.yaml*
 	extends: http://vwf.example.com/navscene.vwf
 	children:
 	  hello:
-		extends: http://vwf.example.com/node3.vwf
-		source: hello.dae
-		type: model/vnd.collada+xml
-		properties:
-		  translation: [ 0, 0, 5 ]
-		children:
-		  material:
-            extends: http://vwf.example.com/material.vwf
-            properties: 
-              color: red
-        scripts:
-        - |
-            this.pointerClick = function() {
-	          if( this.material.color == "rgb(255,0,0)" )
-	          {
+	    extends: http://vwf.example.com/node3.vwf
+	    source: hello.dae
+	    type: model/vnd.collada+xml
+	    properties:
+	      translation: [ 0, 0, 5 ]
+	    children:
+	      material:
+	        extends: http://vwf.example.com/material.vwf
+	        properties: 
+	          color: red
+	    scripts:
+	    - |
+	        this.pointerClick = function() {
+	          if ( this.material.color == "rgb(255,0,0)" ) {
 	            this.material.color = "blue";
-	          }
-	          else
-	          {
+	          } else {
 	            this.material.color = "red";
 	          }
 	        }
 	  world: 
-		extends: http://vwf.example.com/node3.vwf
-		source: world.dae
-		type: model/vnd.collada+xml
-		properties: 
-		  translation: [ 0, 0, -5 ]
-		children:
-		  material:
-			extends: http://vwf.example.com/material.vwf
-			properties: 
-			  color: blue
+	    extends: http://vwf.example.com/node3.vwf
+	    source: world.dae
+	    type: model/vnd.collada+xml
+	    properties: 
+	      translation: [ 0, 0, -5 ]
+	    children:
+	      material:
+	        extends: http://vwf.example.com/material.vwf
+	        properties: 
+	          color: blue
 	    scripts:
 	    - |
-		    this.pointerClick = function() {
-	          if( this.material.color == "rgb(255,0,0)" )
-	          {
+	        this.pointerClick = function() {
+	          if ( this.material.color == "rgb(255,0,0)" ) {
 	            this.material.color = "blue";
-	          }
-	          else
-	          {
+	          } else {
 	            this.material.color = "red";
 	          }
 	        }
@@ -324,41 +318,41 @@ Code View: *index.vwf.yaml*
 	extends: http://vwf.example.com/node.vwf
 	children: 
 	  game:
-		extends: http://vwf.example.com/node.vwf
-		properties:
-		  position01: [ 0, 0 ]
+	    extends: http://vwf.example.com/node.vwf
+	    properties:
+	      position01: [ 0, 0 ]
 
 Code View: *index.vwf.html*
 
 	<!DOCTYPE html>
 	<html>
 	  <head>
-		<script type="text/javascript">
-		  function sample() {
-			// Set property value in the application
-			vwf_view.kernel.setProperty( vwf_view.kernel.find("", "/game")[0], 
-									  "position01", some_position );
-		  }
+	    <script type="text/javascript">
+	      function sample() {
+	        // Set property value in the application
+	        vwf_view.kernel.setProperty( vwf_view.kernel.find("", "/game")[0], "position01", some_position );
+	      }
 
-		  // Defines a function to execute upon an application property change	
-		  vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-      		if (nodeId == vwf_view.kernel.find("", "/game")[0] ) {
-      	  	  switch (propertyName) {
-      			case "position01":
-      		  	  doSomething( propertyValue );
-      		  	  break;
-          	  }
-        	}
-      	  }
-		</script>
+	      // Defines a function to execute upon an application property change	
+	      vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
+	        if (nodeId == vwf_view.kernel.find("", "/game")[0] ) {
+	          switch (propertyName) {
+	            case "position01":
+	              doSomething( propertyValue );
+	              break;
+	          }
+	        }
+	      }
+	    </script>
 	  </head>
 	  <body>
-		<div style="text-align:center">
-		  <div id="board" style="position:relative">
-			<span id="01" style="position:absolute">
-			  <img src="images/01.png" alt="01" onclick="sample()"/>
-			</span>
-		</div>
+	    <div style="text-align:center">
+	      <div id="board" style="position:relative">
+	        <span id="01" style="position:absolute">
+	          <img src="images/01.png" alt="01" onclick="sample()"/>
+	        </span>
+	      </div>
+	    </div>
 	  </body>
 	</html>
 
