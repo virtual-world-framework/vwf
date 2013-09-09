@@ -120,6 +120,14 @@ define( [ "module" ], function( module ) {
 
         },
 
+        /// Convert a component descriptor to a data URI component.
+
+        dataURIFromScriptText: function( scriptText ) {
+
+            return "data:application/javascript;base64," + btoa( scriptText );
+
+        },
+
     };
 
     /// Sequence counter for `uniqueName`.

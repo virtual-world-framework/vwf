@@ -77,30 +77,13 @@ class VWF::Pattern
 
     if extension
 
-      load_revision = nil
-      if segments.length > 1 and segments.first == "load"
-        segments.shift
-        loaded_component = segments.shift
-        if segments.length > 0
-          potential_revision = Integer(segments.first) rescue nil
-          if potential_revision
-            if File.exists?('documents' + public_path + '/' + loaded_component + '/saveState_' + potential_revision.to_s + '.vwf.json')
-              load_revision = potential_revision.to_s
-              segments.shift
-            end
-          end          
-        end
-      else
-        loaded_component = nil
-      end
-
       instance = segments.shift if instance?( segments.first )
 
       private_path = File.join( segments.shift segments.length ) unless segments.empty?      
 
         
 
-      Match.new [ public_path, application, instance, private_path, loaded_component, load_revision ]
+      Match.new [ public_path, application, instance, private_path ]
 
     end
 

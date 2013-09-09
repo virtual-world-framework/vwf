@@ -23,6 +23,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var navObjectRequested;
     var navObjectName;
     var navmode;
+    var touchmode;
     var ownerlessNavObjects = [];
     var numNavCandidates;
     var translationSpeed = 100; // Units per second
@@ -299,6 +300,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                     if ( propertyName == "navmode" ) {
                         navmode = propertyValue;
+                    } else if ( propertyName == "touchmode" ) {
+                        touchmode = propertyValue;
                     } else if ( propertyName == "translationSpeed" ) {
                         translationSpeed = propertyValue;
                     } else if ( propertyName == "rotationSpeed" ) {
@@ -617,6 +620,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         var touchID = undefined;
         var touchPick = undefined;
+        var touchPosition = undefined; 
 
         var pointerDownID = undefined;
         var pointerOverID = undefined;
@@ -801,10 +805,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined
             } ] };
 
+            if ( returnData.eventNodeData[ "" ][ 0 ].globalPosition ) {
+                positionUnderMouseClick = returnData.eventNodeData[ "" ][ 0 ].globalPosition;
+            }
+
             self.lastEventData = returnData;
             return returnData;
         }       
 
+        var prevGesture = undefined;
         function handleHammer(ev) {
             // disable browser scrolling
             ev.gesture.preventDefault();
@@ -828,8 +837,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     sceneView.kernel.dispatchEvent( touchID, "touchDoubleTap", eData.eventData, eData.eventNodeData );
                     break;
                 case 'drag': 
-                    // Fly Navigation Behavior
-                    //handleTouchNavigation( eData.eventData );
+                    // Fly or Orbit Navigation Behavior
+                    if ( touchmode != "none") {
+                        if ( prevGesture == "drag" || prevGesture == "dragleft" || prevGesture == "dragright") {
+                            handleTouchNavigation( eData.eventData );
+                        }
+                    }
                     sceneView.kernel.dispatchEvent( touchID, "touchDrag", eData.eventData, eData.eventNodeData );
                     break;
                 case 'dragstart':
@@ -882,12 +895,16 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     break;
                 case 'pinchin':
                     // Zoom Out
-                    handleScroll( ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
+                    if ( touchmode != "none" ) {
+                        handleScroll( ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
+                    }
                     sceneView.kernel.dispatchEvent( touchID, "touchPinchIn", eData.eventData, eData.eventNodeData );
                     break;
                 case 'pinchout':
                     // Zoom In
-                    handleScroll( -1 * ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
+                    if ( touchmode != "none" ) {
+                        handleScroll( -1 * ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
+                    }
                     sceneView.kernel.dispatchEvent( touchID, "touchPinchOut", eData.eventData, eData.eventNodeData );
                     break;
                 case 'touch':
@@ -899,6 +916,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     sceneView.kernel.dispatchEvent( touchID, "touchRelease", eData.eventData, eData.eventNodeData );
                     break;
             }
+
+            // Set previous gesture (only perform drag if the previous is not a pinch gesture - causes jumpiness)
+            prevGesture = ev.type;
         }
 
         // Do not emulate mouse events on touch
@@ -1741,7 +1761,108 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         }
 
         function handleTouchNavigation( touchEventData ) {
+            var currentMousePosition = touchEventData[ 0 ].position;
 
+            var deltaX = 0;
+            var deltaY = 0;
+
+            if ( touchPosition ) {
+                deltaX = currentMousePosition[ 0 ] - touchPosition [ 0 ];
+                deltaY = currentMousePosition[ 1 ] - touchPosition [ 1 ];
+            }
+
+            if ( deltaX || deltaY ) {
+                var yawQuat = new THREE.Quaternion();
+                var pitchQuat = new THREE.Quaternion();
+                var rotationSpeedRadians = degreesToRadians * rotationSpeed;
+
+                if ( touchmode == "orbit" ) {
+                    var pitchRadians = deltaY * rotationSpeedRadians;
+                    var yawRadians = deltaX * rotationSpeedRadians;
+                    orbit( pitchRadians, yawRadians );
+                } else if ( touchmode == "look" ) {
+                    if ( navObject ) {
+
+                        var navThreeObject = navObject.threeObject;
+                        var originalTransform = matCpy( navThreeObject.matrix.elements );
+
+                        // --------------------
+                        // Calculate new pitch
+                        // --------------------
+
+                        // deltaY is negated because a positive change (downward) generates a negative rotation 
+                        // around the horizontal x axis (clockwise as viewed from the right)
+                        pitchQuat.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), -deltaY * rotationSpeedRadians );
+                        var pitchDeltaMatrix = new THREE.Matrix4();
+                        pitchDeltaMatrix.makeRotationFromQuaternion( pitchQuat );
+
+                        if ( ( touchmode == "look" )  ||
+                             ( ( touchmode == "orbit" ) && ( cameraNode == navObject ) ) ) {
+                            pitchMatrix.multiplyMatrices( pitchDeltaMatrix, pitchMatrix );
+
+                            // Constrain the camera's pitch to +/- 90 degrees
+                            // We need to do something if zAxis.z is < 0
+                            var pitchMatrixElements = pitchMatrix.elements;
+                            if ( pitchMatrixElements[ 10 ] < 0 ) {
+
+                                var xAxis = goog.vec.Vec3.create();
+                                xAxis = goog.vec.Vec3.setFromArray( xAxis, [ pitchMatrixElements[ 0 ], 
+                                                                             pitchMatrixElements[ 1 ], 
+                                                                             pitchMatrixElements[ 2 ] ] );
+
+                                var yAxis = goog.vec.Vec3.create();
+
+                                // If forward vector is tipped up
+                                if ( pitchMatrixElements[ 6 ] > 0 ) {
+                                    yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
+                                } else {
+                                    yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
+                                }
+
+                                // Calculate the zAxis as a crossProduct of x and y
+                                var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
+
+                                // Put these values back in the camera matrix
+                                pitchMatrixElements[ 4 ] = yAxis[ 0 ];
+                                pitchMatrixElements[ 5 ] = yAxis[ 1 ];
+                                pitchMatrixElements[ 6 ] = yAxis[ 2 ];
+                                pitchMatrixElements[ 8 ] = zAxis[ 0 ];
+                                pitchMatrixElements[ 9 ] = zAxis[ 1 ];
+                                pitchMatrixElements[ 10 ] = zAxis[ 2 ];
+                            }
+                        } 
+
+                        // ------------------
+                        // Calculate new yaw
+                        // ------------------
+
+                        // deltaX is negated because a positive change (to the right) generates a negative rotation 
+                        // around the vertical z axis (clockwise as viewed from above)
+                        yawQuat.setFromAxisAngle( new THREE.Vector3( 0, 0, 1 ), -deltaX * rotationSpeedRadians );
+                        var yawDeltaMatrix = new THREE.Matrix4();
+                        yawDeltaMatrix.makeRotationFromQuaternion( yawQuat );
+                        yawMatrix.multiplyMatrices( yawDeltaMatrix, yawMatrix );
+
+                        // -------------------------------------------------
+                        // Put all components together and set the new pose
+                        // -------------------------------------------------
+                                            
+                        var navObjectWorldMatrix = navThreeObject.matrixWorld;
+                        navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
+                        navObjectWorldMatrix.multiplyMatrices( translationMatrix, navObjectWorldMatrix );
+                        if ( navThreeObject instanceof THREE.Camera ) {
+                            var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
+                            navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
+                        }
+                        setTransformFromWorldTransform( navObject.threeObject );
+                        callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+                    } else {
+                        self.logger.warnx( "handleMouseNavigation: There is no navigation object to move" );
+                    }
+
+                }
+            } 
+            touchPosition = currentMousePosition;
         }
 
         // END TODO
@@ -2512,6 +2633,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         // Request properties from the navigation object
         vwf_view.kernel.getProperty( navObject.ID, "navmode" );
+        vwf_view.kernel.getProperty( navObject.ID, "touchmode" );
         vwf_view.kernel.getProperty( navObject.ID, "translationSpeed" );
         vwf_view.kernel.getProperty( navObject.ID, "rotationSpeed" );
     }
@@ -2630,7 +2752,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     deltaModelTransform = deltaViewTransform;
                 }
                 vwf_view.kernel.fireEvent( nodeID, "changingTransformFromView");
-                vwf_view.kernel.callMethod( nodeID, "transformBy", [ Array.prototype.slice.call( deltaModelTransform ) ] );
+                vwf_view.kernel.callMethod( nodeID, "transformBy", [ deltaModelTransform ] );
                 node.outstandingTransformRequests = node.outstandingTransformRequests || [];
                 node.outstandingTransformRequests.push( deltaViewTransform );
 

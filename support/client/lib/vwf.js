@@ -665,6 +665,13 @@
                     resource: window.location.pathname.slice( 1,
                         window.location.pathname.lastIndexOf("/") ),
 
+                    // Use a secure connection when the application comes from https.
+
+                    secure: window.location.protocol === "https:",
+
+                    port: window.location.port ||
+                        ( window.location.protocol === "https:" ? 443 : 80 ),
+
                     // The ruby socket.io server only supports WebSockets. Don't try the others.
 
                     transports: [
@@ -858,7 +865,7 @@
                 node: nodeID,
                 action: actionName,
                 member: memberName,
-                parameters: parameters,
+                parameters: require( "vwf/utility" ).transform( parameters, require( "vwf/utility" ).transforms.transit ),
                 // callback: callback_async,  // TODO: provisionally add fields to queue (or a holding queue) then execute callback when received back from reflector
             };
 
@@ -902,8 +909,8 @@
                 node: nodeID,
                 action: actionName,
                 member: memberName,
-                parameters: parameters,
-                result: result,
+                parameters: require( "vwf/utility" ).transform( parameters, require( "vwf/utility" ).transforms.transit ),
+                result: require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ),
             };
 
             if ( socket ) {
@@ -955,8 +962,7 @@
 
             // Return the result.
 
-            respond && this.respond( nodeID, actionName, memberName, parameters,
-                require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ) );
+            respond && this.respond( nodeID, actionName, memberName, parameters, result );
 
             // origin == "reflector" ?
             //     this.logger.infou() : this.logger.debugu();
@@ -1018,8 +1024,7 @@
 
         this.log = function() {
 
-            this.respond( undefined, "log", undefined, undefined,
-                require( "vwf/utility" ).transform( arguments, require( "vwf/utility" ).transforms.transit ) );
+            this.respond( undefined, "log", undefined, undefined, arguments );
 
         }
 
@@ -1162,8 +1167,8 @@
                 // Global node and descendant deltas.
 
                 nodes: [  // TODO: all global objects
-                    require( "vwf/utility" ).transform( this.getNode( "http-vwf-example-com-clients-vwf", full ), require( "vwf/utility" ).transforms.transit ),
-                    require( "vwf/utility" ).transform( this.getNode( applicationID, full ), require( "vwf/utility" ).transforms.transit ),
+                    this.getNode( "http-vwf-example-com-clients-vwf", full ),
+                    this.getNode( applicationID, full ),
                 ],
 
                 // `createNode` annotations, keyed by `nodes` indexes.
@@ -1433,16 +1438,6 @@
                     } );
                 }
 
-                // Load the UI chrome if available.
-
-                if ( nodeURI && ! nodeURI.match( /^data:/ ) ) {  // TODO: normalizedComponent() on component["extends"] and use component.extends || component.source?
-if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  // TODO: any better way to only attempt to load chrome for the main application and not the prototypes?
-                    jQuery("body").append( "<div />" ).children( ":last" ).load( remappedURI( nodeURI ) + ".html", function() {  // TODO: move to vwf/view/document#initializedNode; don't reach out to the window from the kernel; connect through a future vwf.initialize callback.
-                        $('#loadstatus').remove(); // remove 'loading' overlay
-                    } );
-}
-                }
-
             } );
 
             this.logger.debugu();
@@ -1548,40 +1543,84 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             vwf.models.kernel.enable();
 
-            // Create and attach the children. For each child, call createChild() with the
-            // child's component specification. createChild() delegates to the models and
-            // views as before.
 
-            async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
+            async.series( [
 
-                var creating = ! nodeHasOwnChild.call( vwf, nodeID, childName );
+                function( series_callback_async /* ( err, results ) */ ) {
 
-                if ( creating ) {
-                    vwf.createChild( nodeID, childName, nodeComponent.children[childName], undefined, function( childID ) /* async */ {  // TODO: add in original order from nodeComponent.children  // TODO: ensure id matches nodeComponent.children[childName].id  // TODO: propagate childURI + fragment identifier to children of a URI component?
-                        each_callback_async( undefined );
+                    // Create and attach the children. For each child, call createChild() with the
+                    // child's component specification. createChild() delegates to the models and
+                    // views as before.
+
+                    async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
+
+                        var creating = ! nodeHasOwnChild.call( vwf, nodeID, childName );
+
+                        if ( creating ) {
+                            vwf.createChild( nodeID, childName, nodeComponent.children[childName], undefined, function( childID ) /* async */ {  // TODO: add in original order from nodeComponent.children  // TODO: ensure id matches nodeComponent.children[childName].id  // TODO: propagate childURI + fragment identifier to children of a URI component?
+                                each_callback_async( undefined );
+                            } );
+                        } else {
+                            vwf.setNode( nodeComponent.children[childName].id || nodeComponent.children[childName].patches,
+                                    nodeComponent.children[childName], function( childID ) /* async */ {
+                                each_callback_async( undefined );
+                            } );
+                        }  // TODO: delete when nodeComponent.children[childName] === null in patch
+
+                    }, function( err ) /* async */ {
+                        series_callback_async( err, undefined );
                     } );
-                } else {
-                    vwf.setNode( nodeComponent.children[childName].id || nodeComponent.children[childName].patches,
-                            nodeComponent.children[childName], function( childID ) /* async */ {
-                        each_callback_async( undefined );
+
+                },
+
+                function( series_callback_async /* ( err, results ) */ ) {
+
+                    // Attach the scripts. For each script, load the network resource if the script
+                    // is specified as a URI, then once loaded, call execute() to direct any model
+                    // that manages scripts of this script's type to evaluate the script where it
+                    // will perform any immediate actions and retain any callbacks as appropriate
+                    // for the script type.
+
+                    var scripts = nodeComponent.scripts ?
+                        [].concat( nodeComponent.scripts ) : []; // accept either an array or a single item
+
+                    async.map( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
+
+                        if ( valueHasType( script ) ) {
+                            if ( script.source ) {
+                                loadScript( script.source, function( scriptText ) /* async */ {  // TODO: this load would be better left to the driver, which may want to ignore it in certain cases, but that would require a completion callback from kernel.execute()
+                                    map_callback_async( undefined, { text: scriptText, type: script.type } );
+                                } );
+                            } else {
+                                map_callback_async( undefined, { text: script.text, type: script.type } );
+                            }
+                        } else {
+                            map_callback_async( undefined, { text: script, type: undefined } );
+                        }
+
+                    }, function( err, scripts ) /* async */ {
+
+                        // Suppress kernel reentry so that initialization functions don't make any
+                        // changes during replication.
+
+                        vwf.models.kernel.disable();
+
+                        // Create each script.
+
+                        scripts.forEach( function( script ) {
+                            vwf.execute( nodeID, script.text, script.type ); // TODO: callback
+                        } );
+
+                        // Restore kernel reentry.
+
+                        vwf.models.kernel.enable();
+
+                        series_callback_async( err, undefined );
                     } );
-                }  // TODO: delete when nodeComponent.children[childName] === null in patch
 
-            }, function( err ) /* async */ {
+                },
 
-                // Attach the scripts. For each script, load the network resource if the script is
-                // specified as a URI, then once loaded, call execute() to direct any model that
-                // manages scripts of this script's type to evaluate the script where it will
-                // perform any immediate actions and retain any callbacks as appropriate for the
-                // script type.
-
-                nodeComponent.scripts && nodeComponent.scripts.forEach( function( script ) {
-                    if ( valueHasType( script ) ) {
-                        script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
-                    } else {
-                        script && vwf.execute( nodeID, script, undefined ); // TODO: external scripts too // TODO: callback
-                    }
-                } );
+            ], function( err, results ) /* async */ {
 
                 callback_async && callback_async( nodeID );
 
@@ -1867,7 +1906,7 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                 childIndex = childURI;
             } else {  // descendant: parent id + next from parent's sequence
 if ( useLegacyID ) {  // TODO: fix static ID references and remove
-    childID = ( childComponent["extends"] || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
+    childID = ( childComponent.extends || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
     childIndex = this.children( nodeID ).length;
 } else {    
@@ -1960,8 +1999,8 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
 
                             // Create or find the prototype and save the ID in childPrototypeID.
 
-                            if ( childComponent["extends"] !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
-                                vwf.createNode( childComponent["extends"] || nodeTypeURI, function( prototypeID ) /* async */ {
+                            if ( childComponent.extends !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
+                                vwf.createNode( childComponent.extends || nodeTypeURI, function( prototypeID ) /* async */ {
                                     childPrototypeID = prototypeID;
 
 // TODO: the GLGE driver doesn't handle source/type or properties in prototypes properly; as a work-around pull those up into the component when not already defined
@@ -1993,7 +2032,10 @@ if ( ! childComponent.source ) {
 
                             // Create or find the behaviors and save the IDs in childBehaviorIDs.
 
-                            async.map( childComponent["implements"] || [], function( behaviorComponent, map_callback_async /* ( err, result ) */ ) {
+                            var behaviorComponents = childComponent.implements ?
+                                [].concat( childComponent.implements ) : []; // accept either an array or a single item
+
+                            async.map( behaviorComponents, function( behaviorComponent, map_callback_async /* ( err, result ) */ ) {
                                 vwf.createNode( behaviorComponent, function( behaviorID ) /* async */ {
                                     map_callback_async( undefined, behaviorID );
                                 } );
@@ -2186,40 +2228,53 @@ if ( ! childComponent.source ) {
 
                 function( series_callback_async /* ( err, results ) */ ) {
 
-                    // Watch for any async kernel calls generated as we run the scripts and wait for
-                    // them complete before completing the node.
+                    // Attach the scripts. For each script, load the network resource if the script is
+                    // specified as a URI, then once loaded, call execute() to direct any model that
+                    // manages scripts of this script's type to evaluate the script where it will
+                    // perform any immediate actions and retain any callbacks as appropriate for the
+                    // script type.
 
-                    vwf.models.kernel.capturingAsyncs( function() {
+                    var scripts = childComponent.scripts ?
+                        [].concat( childComponent.scripts ) : []; // accept either an array or a single item
 
-                        // Suppress kernel reentry so that initialization functions don't make any
-                        // changes during replication.
+                    async.map( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
 
-                        replicating && vwf.models.kernel.disable();
-
-                        // Attach the scripts. For each script, load the network resource if the script is
-                        // specified as a URI, then once loaded, call execute() to direct any model that
-                        // manages scripts of this script's type to evaluate the script where it will
-                        // perform any immediate actions and retain any callbacks as appropriate for the
-                        // script type.
-
-                        childComponent.scripts && childComponent.scripts.forEach( function( script ) {
-                            if ( valueHasType( script ) ) {
-                                script.text && vwf.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                        if ( valueHasType( script ) ) {
+                            if ( script.source ) {
+                                loadScript( script.source, function( scriptText ) /* async */ {  // TODO: this load would be better left to the driver, which may want to ignore it in certain cases, but that would require a completion callback from kernel.execute()
+                                    map_callback_async( undefined, { text: scriptText, type: script.type } );
+                                } );
                             } else {
-                                script && vwf.execute( childID, script, undefined ); // TODO: external scripts too // TODO: callback
+                                map_callback_async( undefined, { text: script.text, type: script.type } );
                             }
-                        } );
+                        } else {
+                            map_callback_async( undefined, { text: script, type: undefined } );
+                        }
 
-                        // Restore kernel reentry.
+                    }, function( err, scripts ) /* async */ {
 
-                        replicating && vwf.models.kernel.enable();
+                        // Watch for any async kernel calls generated as we run the scripts and wait for
+                        // them complete before completing the node.
 
-                        // Perform initializations for properties with setter functions. These are
-                        // assigned here so that the setters run on a fully-constructed node.
+                        vwf.models.kernel.capturingAsyncs( function() {
 
-                        Object.keys( deferredInitializations ).forEach( function( propertyName ) {
-                            vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
-                        } );
+                            // Suppress kernel reentry so that initialization functions don't make any
+                            // changes during replication.
+
+                            replicating && vwf.models.kernel.disable();
+
+                            // Create each script.
+
+                            scripts.forEach( function( script ) {
+                                vwf.execute( childID, script.text, script.type ); // TODO: callback
+                            } );
+
+                            // Perform initializations for properties with setter functions. These are
+                            // assigned here so that the setters run on a fully-constructed node.
+
+                            Object.keys( deferredInitializations ).forEach( function( propertyName ) {
+                                vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
+                            } );
 
 // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
@@ -2227,31 +2282,26 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
     vwf.tickable.nodeIDs.push( childID );
 }
 
-                        // Suppress kernel reentry so that initialization functions don't make any
-                        // changes during replication.
+                            // Call initializingNode() on each model and initializedNode() on each view to
+                            // indicate that the node is fully constructed.
 
-                        replicating && vwf.models.kernel.disable();
+                            vwf.models.forEach( function( model ) {
+                                model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                    childComponent.source, childComponent.type, childIndex, childName );
+                            } );
 
-                        // Call initializingNode() on each model and initializedNode() on each view to
-                        // indicate that the node is fully constructed.
+                            vwf.views.forEach( function( view ) {
+                                view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                    childComponent.source, childComponent.type, childIndex, childName );
+                            } );
 
-                        vwf.models.forEach( function( model ) {
-                            model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childIndex, childName );
+                            // Restore kernel reentry.
+
+                            replicating && vwf.models.kernel.enable();
+
+                        }, function() {
+                            series_callback_async( err, undefined );
                         } );
-
-                        vwf.views.forEach( function( view ) {
-                            view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childIndex, childName );
-                        } );
-
-                        // Restore kernel reentry.
-
-                        replicating && vwf.models.kernel.enable();
-
-                    }, function() {
-
-                        series_callback_async( undefined, undefined );
 
                     } );
 
@@ -3389,7 +3439,8 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
             } else if ( nodeURI.match( RegExp( "^data:application/json;base64," ) ) ) {
 
                 // Primarly for testing, parse one specific form of data URIs. We need to parse
-                // these ourselves since Chrome can't load data URIs (with a cross origin error).
+                // these ourselves since Chrome can't load data URIs due to cross origin
+                // restrictions.
 
                 callback_async( JSON.parse( atob( nodeURI.substring( 29 ) ) ) );  // TODO: support all data URIs
 
@@ -3411,6 +3462,33 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                     // },
 
                 } );
+
+            }
+
+        };
+
+        // -- loadScript ---------------------------------------------------------------------------
+
+        /// @name module:vwf~loadScript
+
+        var loadScript = function( scriptURI, callback_async /* ( scriptText ) */ ) {
+
+            if ( scriptURI.match( RegExp( "^data:application/javascript;base64," ) ) ) {
+
+                // Primarly for testing, parse one specific form of data URIs. We need to parse
+                // these ourselves since Chrome can't load data URIs due to cross origin
+                // restrictions.
+
+                callback_async( atob( scriptURI.substring( 35 ) ) );  // TODO: support all data URIs
+
+            } else {
+
+                queue.suspend( "while loading " + scriptURI ); // suspend the queue
+
+                jQuery.get( remappedURI( scriptURI ), function( scriptText ) /* async */ {
+                    callback_async( scriptText );
+                    queue.resume( "after loading " + scriptURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                }, "text" );
 
             }
 
@@ -3730,6 +3808,7 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
         var valueHasType = function( candidate ) {  // TODO: refactor and share with valueHasBody, valueHasAccessors and possibly objectIsComponent
 
             var typeAttributes = [
+                "source",
                 "text",
                 "type",
             ];
@@ -3911,7 +3990,6 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
             }
 
             return uri;
-
         };
 
         // -- queueTransitTransformation -----------------------------------------------------------
@@ -3953,12 +4031,9 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                 return filtered;
 
-            } else {
-
-                return require( "vwf/utility" ).transform( object, require( "vwf/utility" ).transforms.transit );
-
             }
 
+            return object;
         };
 
         // -- loggableComponentTransformation ------------------------------------------------------
@@ -4006,8 +4081,16 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                 } else if ( containerName == "implements" ) {
 
                     if ( containerIndex > 0 ) {
-                        var memberIndex = containerIndex - 1;
-                        var memberName = names[memberIndex];
+                        if ( typeof names[containerIndex-1] == "number" ) {
+                            var memberIndex = containerIndex - 1;
+                            var memberName = names[memberIndex];
+                        } else {
+                            var memberIndex = containerIndex;
+                            var memberName = undefined;
+                        }
+                    } else if ( typeof object != "object" || ! ( object instanceof Array ) ) {
+                        var memberIndex = containerIndex;
+                        var memberName = undefined;
                     }
 
                 } else if ( containerName == "properties" || containerName == "methods" || containerName == "events" ||
@@ -4021,8 +4104,16 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                 } else if ( containerName == "scripts" ) {
 
                     if ( containerIndex > 0 ) {
-                        var memberIndex = containerIndex - 1;
-                        var memberName = names[memberIndex];
+                        if ( typeof names[containerIndex-1] == "number" ) {
+                            var memberIndex = containerIndex - 1;
+                            var memberName = names[memberIndex];
+                        } else {
+                            var memberIndex = containerIndex;
+                            var memberName = undefined;
+                        }
+                    } else if ( typeof object != "object" || ! ( object instanceof Array ) ) {
+                        var memberIndex = containerIndex;
+                        var memberName = undefined;
                     }
 
                 } else {
@@ -4052,7 +4143,7 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                     // Omit component descriptors for the behaviors.
 
-                    if ( memberIndex == 1 && componentIsDescriptor( object ) ) {
+                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
                         return {};
                     }
 

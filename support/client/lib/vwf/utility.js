@@ -165,15 +165,20 @@ define( [ "module",
 
             hash: function( object ) {
 
+                // Apply the `transit` transform first to convert Array-likes into Arrays.
+
+                object = exports.transforms.transit( object );
+
+                // Reduce numeric precision slightly to match what passes through the reflector.
+
                 if ( typeof object == "number" ) {
 
-                    // Reduce precision slightly to match what passes through the reflector.
-
                     return Number( object.toPrecision(15) );
+                }
 
-                } else if ( typeof object == "object" && object != null && ! ( object instanceof Array ) ) {
-                    
-                    // Order objects alphabetically.
+                // Order objects alphabetically.
+
+                else if ( typeof object == "object" && object != null && ! ( object instanceof Array ) ) {
 
                     var ordered = {};
 
@@ -182,13 +187,9 @@ define( [ "module",
                     } );
 
                     return ordered;
-
-                } else {
-
-                    return object;
-
                 }
 
+                return object;
             },
 
         },

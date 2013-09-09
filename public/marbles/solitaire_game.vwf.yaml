@@ -101,7 +101,7 @@ scripts:
  - |
   //When initialized, create marbles.
   this.initialize = function( ) {
-    this.createMarbles( );
+    this.future(0).createMarbles( );
   };
 
   this.incrementLock = function() {

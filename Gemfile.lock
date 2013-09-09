@@ -1,7 +1,7 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    addressable (2.3.3)
+    addressable (2.3.5)
     backports (3.1.1)
     capybara (2.1.0)
       mime-types (>= 1.16)
