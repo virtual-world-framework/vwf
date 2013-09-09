@@ -21,17 +21,26 @@
 
 We're using the term persistence in VWF to describe two different capabilities:
 
-- **Instance persistence** - Persist an instance of an application so that it's available later with the same instance ID and state.
+- **Instance persistence** - Persist an instance of an application so that
+  the instance is able to be accessed later with the same instance ID and
+  state.
 
-  For example, a client connects to an application instance `instance-x`, at point `A` and then disconnects at point `B`. At that point, the instance has no connected clients. A client then reconnects to the same instance at point `C`. The state should be maintained for `instance-x` and be available to the client.
+  For example, a client connects to an application instance `instance-x`, at
+  point `A` and then disconnects at point `B`. At that point, the instance
+  has no connected clients. A client then reconnects to the same instance at
+  point `C`. The state should be maintained for `instance-x` and be available
+  to the client.
 
 ```
 instance-x  o---A---o---B...C---o---...
 ```
 
-- **State persistence** - Persist the state of any given instance of an application so that it's available later.
+- **Save Instance State** - Save the state of any given instance of an
+  application so that it's available later.
 
-  For example, the application instance `instance-x` has it's state saved at point `A`, and later new instance `instance-y` is created with the save state `A` of `application-x`. 
+  For example, the application instance `instance-x` has it's state saved at
+  point `A`, and later new instance `instance-y` is created with the save
+  state `A` of `application-x`. 
 
 ```
 instance-x  o---A---o…
