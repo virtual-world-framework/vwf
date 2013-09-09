@@ -240,35 +240,14 @@ vwf_admin.getSaveStates().then(
 
 **Motivation**
 
-Application developer wants to specify that this instance should persist,
+Application developer wants to specify that instances should persist,
 which means that the instance is available and the state maintained at the
 current URL even when all clients disconnect.
 
-**API**
 
-From within a running application:
-
-```
-vwf_view.admin.persistInstance();
-```
-
-*Returns:* true or false.
-
-**Web Service**
-
-`PUT /path/to/app/{INSTANCE_NAME}`
-
-Update the persistence flag of the instance object to be true, or something like that.
-
-*Returns:* True or false?
-
-*Arguments*
-
-An instance object with the persistence flag set to true.
 
 **Open Design Questions**
 
-- How do we represent the persistence option on the instance object in JSON?
 - Do we want to persist instances by default?
 - Should the application developer be able to specify that instances persist in the index.vwf.config.yaml?
 - Should the application developer be able to specify that all instances automatically persist for all applications on the server? Some level of server configuration that we currently don't have?
@@ -278,7 +257,8 @@ An instance object with the persistence flag set to true.
 
 **Motivation**
 
-Application developer wants to allow user to connect to an existing instance, loading the latest save state in the process.
+Application developer wants to allow user to connect to an existing
+instance, loading the latest save state in the process.
 
 **Browser Interface**
 
@@ -286,25 +266,29 @@ Navigate to `/path/to/app/{INSTANCE_NAME}`.
 
 *Note:* There is no web service or internal API for this.
 
-*Note:* Changes will need to be made to the loading process to look for save states for {INSTANCE_NAME} when bootstrapping the client.
+*Note:* Changes will need to be made to the loading process to look for
+save states for {INSTANCE_NAME} when bootstrapping the client.
 
 ### Load a specific save state as a new instance
 
 **Motivation**
 
-Application developer wants to allow user to load a specific save state in a new instance.
+Application developer wants to allow user to load a specific save state
+in a new instance.
 
 **Browser Interface**
 
 Navigate to `/path/to/app/{INSTANCE_NAME}/saves/{SAVE_NAME}`.
 
-Browser will be redirected to `/path/to/app/{NEW_INSTANCE_NAME}` with the save state loaded.
+Browser will be redirected to `/path/to/app/{NEW_INSTANCE_NAME}` with the
+save state loaded.
 
 ### Set metadata for an instance
 
 **Motivation**
 
-Application developer wants to set specific metadata for an application to make it easier to identify the instance within a list.
+Application developer wants to set specific metadata for an application to
+make it easier to identify the instance within a list.
 
 **API**
 
