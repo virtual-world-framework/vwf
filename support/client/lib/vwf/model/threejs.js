@@ -2487,32 +2487,32 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             reg.callbacks.push( function( node ) {
             
-            //just clone the node and attach it.
-            //this should not clone the geometry, so much lower memory.
-            //seems to take near nothing to duplicated animated avatar            
-            var n = node.clone();
-			cloneMaterials( n );
-            var skins = [];
-            walkGraph( n, function( node ) {
-                if( node instanceof THREE.SkinnedMesh ) {
-                    skins.push( node );
-                }            
-            });
-            n.animatedMesh = skins;
-            nodeCopy.threeObject = n;            
-
-            nodeCopy.threeObject.matrix = new THREE.Matrix4();
-            nodeCopy.threeObject.matrixAutoUpdate = false;
-            
-            removeAmbientLights.call(this, nodeCopy.threeObject);
-
-            parentObject3.add( nodeCopy.threeObject );
-            nodeCopy.threeObject.name = childName;
-            nodeCopy.threeObject.vwfID = nodeID;
-            nodeCopy.threeObject.matrixAutoUpdate = false;
-            nodeCopy.threeObject.updateMatrixWorld( true );
-            propertyNotifyCallback();
-            nodeCopy.loadingCallback( true ); 
+                //just clone the node and attach it.
+                //this should not clone the geometry, so much lower memory.
+                //seems to take near nothing to duplicated animated avatar            
+                var n = node.clone();
+                cloneMaterials( n );
+                var skins = [];
+                walkGraph( n, function( node ) {
+                    if( node instanceof THREE.SkinnedMesh ) {
+                        skins.push( node );
+                    }            
+                });
+                n.animatedMesh = skins;
+                nodeCopy.threeObject = n;            
+    
+                nodeCopy.threeObject.matrix = new THREE.Matrix4();
+                nodeCopy.threeObject.matrixAutoUpdate = false;
+                
+                removeAmbientLights.call(this, nodeCopy.threeObject);
+    
+                parentObject3.add( nodeCopy.threeObject );
+                nodeCopy.threeObject.name = childName;
+                nodeCopy.threeObject.vwfID = nodeID;
+                nodeCopy.threeObject.matrixAutoUpdate = false;
+                nodeCopy.threeObject.updateMatrixWorld( true );
+                propertyNotifyCallback();
+                nodeCopy.loadingCallback( true ); 
             
             });
         }
