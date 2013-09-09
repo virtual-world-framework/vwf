@@ -2896,6 +2896,20 @@ if ( ! childComponent.source ) {
             var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
             var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
 
+            // Keep track of the number of assignments made by this `setProperty` call and others
+            // invoked indirectly by it, starting with the outermost call.
+
+            var outermost = entrants.retrievals === undefined;
+
+            if ( outermost ) {
+                entrants.retrievals = 0;
+            }
+
+            // We'll need to know if the set was delegated to other properties, actually assigned
+            // here, or if blocked during replication while attempting to delegate.
+
+            var delegated = false, retrieved = false, blocked = false;
+
             // Call gettingProperty() on each model. The first model to return a non-undefined value
             // dictates the return value.
 
@@ -2903,11 +2917,17 @@ if ( ! childComponent.source ) {
 
                 // Skip models up through the one making the most recent call here (if any).
 
-                if ( entry.index === undefined || index > entry.index ) {
+                if ( ( entry.index === undefined || index > entry.index ) && ! reentry.completed ) {
 
                     // Record the active model number.
  
                     reentry.index = index;
+
+                    // Record the number of retrievals made since the outermost call. When
+                    // `entrants.retrievals` increases, a driver has called `getProperty` to make
+                    // an assignment elsewhere.
+
+                    var retrievals = entrants.retrievals;
 
                     // Make the call.
 
@@ -2928,6 +2948,7 @@ if ( ! childComponent.source ) {
 
                     if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
                         value = undefined;
+                        blocked = true;
                     }
 
                     // Record the value retrieved.
@@ -2943,51 +2964,59 @@ if ( ! childComponent.source ) {
 
             }, this );
 
-            if ( entry.index !== undefined ) {
+            // Delegate to the behaviors and prototype if we didn't get a result from the
+            // current node.
 
-                // For a reentrant call, restore the previous state, move the index forward to cover
-                // the models we called, and record the current result.
+            if ( propertyValue === undefined && ! ignorePrototype ) {
 
-                entrants[nodeID+'-'+propertyName] = entry;
-                entry.value = propertyValue;
+                var behaviorIDs = this.behaviors( nodeID );
 
-            } else {
-
-                // Delete the call record if this is the first, non-reentrant call here (the normal
-                // case).
-
-                delete entrants[nodeID+'-'+propertyName];
-
-                // Delegate to the behaviors and prototype if we didn't get a result from the
-                // current node.
-
-                if ( propertyValue === undefined && ! ignorePrototype ) {
-
-                    var behaviorIDs = this.behaviors( nodeID );
-
-                    while ( propertyValue === undefined && behaviorIDs.length ) {
-                        var behaviorID = behaviorIDs.pop();
-                        propertyValue = this.getProperty( behaviorID, propertyName, true ); // behavior node only, not its prototypes
-                    }
-
+                while ( propertyValue === undefined && behaviorIDs.length ) {
+                    var behaviorID = behaviorIDs.pop();
+                    propertyValue = this.getProperty( behaviorID, propertyName, true ); // behavior node only, not its prototypes
                 }
 
-                if ( propertyValue === undefined && ! ignorePrototype ) {
+            }
 
-                    var prototypeID = this.prototype( nodeID );
+            if ( propertyValue === undefined && ! ignorePrototype ) {
 
-                    if ( prototypeID !== nodeTypeURI ) {
-                        propertyValue = this.getProperty( prototypeID, propertyName );
-                    }
+                var prototypeID = this.prototype( nodeID );
 
+                if ( prototypeID !== nodeTypeURI ) {
+                    propertyValue = this.getProperty( prototypeID, propertyName );
                 }
 
-                // Call gotProperty() on each view.
+            }
 
+            // Call gotProperty() on each view.
+            // Don't notify for inner, reentrant calls since the outer call will notify.
+            // Also don't notify if attempted delegation was blocked during replication since it
+            // makes this like an inner call.
+
+            if ( !( entry.index !== undefined || blocked ) ) {
                 this.views.forEach( function( view ) {
                     view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
                 } );
+            }
 
+            // For a reentrant call, restore the previous state, move the index forward to cover
+            // the models we called, and record the current result.
+            if ( entry.index !== undefined ) {
+                entrants[nodeID+'-'+propertyName] = entry;
+                entry.value = propertyValue;
+
+            }
+
+            // Delete the call record if this is the first, non-reentrant call here (the normal
+            // case).
+            else {
+                delete entrants[nodeID+'-'+propertyName];
+            }
+
+            // Clear the assignment counter when the outermost `setProperty` completes.
+
+            if ( outermost ) {
+                delete entrants.assignments;
             }
 
             this.logger.debugu();
