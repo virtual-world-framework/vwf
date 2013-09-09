@@ -285,6 +285,10 @@ save state loaded.
 
 ### Set metadata for an instance
 
+**TODO:** Move out of the design doc. This should not be part of the
+persistence design doc as it is not required in order to support
+persistence. It's just a nice to have.
+
 **Motivation**
 
 Application developer wants to set specific metadata for an application to
@@ -325,20 +329,19 @@ An instance object with the name, description and whatever else set.
 
 ---
 
-## Open Design Questions
+## Saving and Restoring Instances and Time
 
-- What should the URL be to load an application?
-- What should we call a *save state* of an application instance? What should we call the *process* of creating a save state? Other suggested terms are "version", "historical state", "breadcrumb", or just "save".
-- What's in the state of an application and what's out?
-- If we save the timestamp of the state for an instance, should we set the time to that timestamp when we load the application? What ramifications does that have?
-- Should functions in the `vwf_view.admin` namespace be able to manipulate other that the one that is currently running?
-- Currently we're persisting save states to disk at `/documents`. Is that the best place? Is that the best name?
+- The timestamp should be saved along with the instance.
+- Time should be restored to the saved value when the instance is
+  loaded.
 
 ## Naming Instances
 
-- No spaces, dots, or slashes to prevent clobbering resources served up by the application server.
+- No spaces, dots, or slashes to prevent clobbering resources served up by
+  the application server.
 
 ## Alternative Persistence Stores
 
-Currently, using the filesystem, but should be able to support databases, etc. Should be configurable by application developer.
+Currently, using the filesystem, but should eventually be able to support
+databases, etc. Should be configurable by application developer.
 
