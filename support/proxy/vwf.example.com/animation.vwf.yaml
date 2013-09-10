@@ -114,6 +114,8 @@ properties:
         ( this.animationPause$ != null ? this.animationPause$ : this.time ) -
         ( this.animationStart$ != null ? this.animationStart$ : this.time )
       ) * rate + ( rate >= 0 ? this.animationStartTime : duration );
+      // Range limit the value.
+      value = Math.min( Math.max( this.animationStartTime, value ), this.animationStopTime );
       // If changed since last seen, update and fire the changed event.
       if ( value !== this.animationTimeUpdated ) {
         this.animationTimeUpdated = value;
@@ -288,9 +290,9 @@ properties:
 
   fps: 
     set: |
-      this.animationRate = value / 30;
+      this.animationRate = this.animationRate >= 0 ? value / 30 : value / -30;
     get: |
-      return this.animationRate * 30;
+      return Math.abs(this.animationRate) * 30;
 
 methods:
 
