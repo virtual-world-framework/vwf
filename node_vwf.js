@@ -746,7 +746,10 @@ function startVWF(){
 		{
 		   var testClient = global.instances[namespace].clients[i];
 		   if(!testClient.pending && testClient.loginData)
-			loadClient = testClient;
+		   {
+				loadClient = testClient;
+				break;
+			}
 		}
 	  }
 	  
@@ -804,7 +807,7 @@ function startVWF(){
 		
 		var blankscene = fs.readFileSync("./public/adl/sandbox/index.vwf.yaml", 'utf8');
 		blankscene= YAML.load(blankscene);
-		//blankscene.extends = 'index-vwf';
+		
 		blankscene.id = 'index-vwf';
 		blankscene.patches= "index.vwf";
 		if(!blankscene.children)
