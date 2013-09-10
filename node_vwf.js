@@ -837,6 +837,13 @@ function startVWF(){
 			{
 				blankscene.properties[i] = props[i];
 			}
+			for(var i in blankscene.properties)
+			{
+				if( blankscene.properties[i] && blankscene.properties[i].value)
+					blankscene.properties[i] = blankscene.properties[i].value;
+				else if(blankscene.properties[i] && (blankscene.properties[i].get || blankscene.properties[i].set))
+					delete blankscene.properties[i];
+			}
 		}
 		//global.log(Object.keys(global.instances[namespace].state.nodes['index-vwf'].children));
 		
