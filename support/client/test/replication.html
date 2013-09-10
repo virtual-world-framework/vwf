@@ -984,30 +984,6 @@
 
               vwf.models.kernel.disable();
 
-              // Setting a non-delegating property handled by vwf/model/object during replication
-
-              driverCalls = []; vwf.setProperty( id, "po", 1 );
-
-              deepEqual( driverCalls, [
-                { driver: "vwf/model/javascript",  node: id, action: "settingProperty", member: "po", value: 1 }, // pass
-                { driver: "vwf/model/test/script", node: id, action: "settingProperty", member: "po", value: 1 }, // pass
-                { driver: "vwf/model/test/scene",  node: id, action: "settingProperty", member: "po", value: 1 }, // pass
-                { driver: "vwf/model/object",      node: id, action: "settingProperty", member: "po", value: 1 }, // assign
-                { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "po", value: 1 }, // result
-              ], "non-delegating property terminating in vwf/model/object during replication" );
-
-              // Setting a non-delegating property handled before vwf/model/object during replication
-
-              driverCalls = []; vwf.setProperty( id, "ps", 1 );
-
-              deepEqual( driverCalls, [
-                { driver: "vwf/model/javascript",  node: id, action: "settingProperty", member: "ps", value: 1 }, // pass
-                { driver: "vwf/model/test/script", node: id, action: "settingProperty", member: "ps", value: 1 }, // pass
-                { driver: "vwf/model/test/scene",  node: id, action: "settingProperty", member: "ps", value: 1 }, // assign
-                // { driver: "vwf/model/object",   node: id, action: "settingProperty", member: "ps", value: 1 }, // omit
-                { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "ps", value: 1 }, // result
-              ], "non-delegating property terminating before vwf/model/object during replication" );
-
               // Setting a self-delegating property during replication
 
               driverCalls = []; vwf.setProperty( id, "qs", "1" );
@@ -1017,7 +993,7 @@
                 /* outer */  { driver: "vwf/model/test/script",    node: id, action: "settingProperty", member: "qs", value: "1" }, // ignore since delegated during replication
                 /* outer */  { driver: "vwf/model/test/scene",     node: id, action: "settingProperty", member: "qs", value: "1" }, // assign
                 /* outer */  // { driver: "vwf/model/object",      node: id, action: "settingProperty", member: "qs", value: "1" }, // omit since assigned
-                /* outer */  // { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "qs", value: "1" }, // no result since delegated during replication
+                /* outer */  { driver: "vwf/view/document",        node: id, action: "satProperty",     member: "qs", value: "1" }, // internal result
               ], "property delegating to self during replication" );
 
               // Setting a property delegating to a property delegating to a non-delegating property during replication
@@ -1029,7 +1005,7 @@
                 /* rs */  { driver: "vwf/model/test/script",    node: id, action: "settingProperty", member: "rs", value: 1 },   // ignore since delegated during replication
                 /* rs */  { driver: "vwf/model/test/scene",     node: id, action: "settingProperty", member: "rs", value: 1 },   // pass
                 /* rs */  { driver: "vwf/model/object",         node: id, action: "settingProperty", member: "rs", value: 1 },   // pass
-                /* rs */  // { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "rs", value: 1 },   // no result since delegated during replication
+                /* rs */  { driver: "vwf/view/document",        node: id, action: "satProperty",     member: "rs", value: 1 },   // internal result
               ], "property delegating to a property delegating to a non-delegating property during replication" );
 
               // Setting a property delegating to a property delegating to the initial property during replication
