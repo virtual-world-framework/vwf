@@ -2996,7 +2996,9 @@ if ( ! childComponent.source ) {
             // Also don't notify if attempted delegation was blocked during replication since it
             // makes this like an inner call.
 
-            if ( !( entry.index !== undefined || blocked ) ) {
+            var reentrant = (entry.index !== undefined);
+
+            if ( !reentrant ) {
                 this.views.forEach( function( view ) {
                     view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
                 } );
