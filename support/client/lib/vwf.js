@@ -2966,7 +2966,7 @@ if ( ! childComponent.source ) {
             // Clear the assignment counter when the outermost `setProperty` completes.
 
             if ( outermost ) {
-                delete entrants.assignments;
+                delete entrants.retrievals;
             }
 
             this.logger.debugu();
