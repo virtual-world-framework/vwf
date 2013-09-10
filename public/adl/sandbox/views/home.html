@@ -1,32 +1,41 @@
 	<div class="row" style="margin-top:30px;height:426px;clear:both;">
-		<div data-bind="css: featuredWorldObjects().length>0?'span7':'span12'">
-			<div style="height: 114px;">
-				<p>
-					NEW FRONT PAGE
-				</p>
-			</div>
-			<iframe data-bind="css:featuredWorldObjects().length>0?'wideFrame':'frame'" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
+		<div class="span4">
+			<h4>NEW FRONT PAGE</h4>
+			<ul>
+			
+				<li>Item 1</li>
+				<li>Item 2</li>
+				<li>Item 3</li>
+				
+			</ul>
 		</div>
-		<div class="span5" style="height:100%;" data-bind="visible:featuredWorldObjects().length>0">
-			<div class="featuredWorlds" data-bind="foreach:featuredWorldObjects">
-				<div class="featuredInstance" data-bind="css : $index() == 2 ? 'featuredInstanceLast' : 'featuredInstance'">
-					<div class="span2" style="margin-left:10px;">
-						<a data-bind="attr:{href:'{{root}}/'+id}">
-							<img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}" style="width:140px;height:110px;margin-top:4px;" />
-						</a>
-					</div>
-					<div class="span2" style="overflow:hidden; width:50%;">
-						<div>
-							<h4 style="margin-top:0;"><a style="color:inherit;" data-bind="text:title, attr:{href:'{{root}}/'+id}"></a></h4>
-							<p data-bind="text:$root.getShorterStr(description, 120)"></p>
-						</div>
-					</div>
-				</div>
-			</div>
+		<div class="span4">
+			<h4>NEW FRONT PAGE</h4>
+			<ul>
+			
+				<li>Item 1</li>
+				<li>Item 2</li>
+				<li>Item 3</li>
+				
+			</ul>
+		</div>
+		<div class="span4">
+			<h4>NEW FRONT PAGE</h4>
+			<ul>
+			
+				<li>Item 1</li>
+				<li>Item 2</li>
+				<li>Item 3</li>
+				
+			</ul>
+		</div>
+		<iframe data-bind="css:featuredWorldObjects().length>0?'wideFrame':'frame'" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
+		<div class="span5">
+			
 		</div>
 	</div>
 	<script>
-		$(document).ready(function(){	
+		$(document).ready(function(){
 			
 			ko.applyBindings(vwfPortalModel);
 			getLoginInfo(function(){
