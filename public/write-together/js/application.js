@@ -1,7 +1,7 @@
 function setContentOrTitle(nodeId, propertyName, propertyValue) {
-  var editorNodeId = vwf_view.kernel.find('', '/editor');
+  var applicationNodeId = vwf_view.kernel.application();
 
-  if ( nodeId == editorNodeId[0] ) {
+  if (nodeId == applicationNodeId) {
     switch ( propertyName ) {
       case "content":
         $("#doc-content").val(propertyValue);
@@ -45,22 +45,22 @@ $(function(){
     setSaveButtonToNotNeedSaving();
   }
 
-  vwf_view.kernel.getProperty(vwf_view.kernel.find('', '/editor'), 'content');
-  vwf_view.kernel.getProperty(vwf_view.kernel.find('', '/editor'), 'title');
-  vwf_view.kernel.getProperty(vwf_view.kernel.find('', '/editor'), 'savename');
+  vwf_view.kernel.getProperty(vwf_view.kernel.application(), 'content');
+  vwf_view.kernel.getProperty(vwf_view.kernel.application(), 'title');
+  vwf_view.kernel.getProperty(vwf_view.kernel.application(), 'savename');
 
   $('#doc-content').on('input propertychange', function() {
     vwf_view.logger.info("I changed content to: " + $(this).val());
     setSaveButtonToNeedsSaving();
-    var editorNodeId = vwf_view.kernel.find('', '/editor');
-    vwf_view.kernel.setProperty( editorNodeId[0], "content", $(this).val());
+    var applicationNodeId = vwf_view.kernel.application();
+    vwf_view.kernel.setProperty(applicationNodeId, "content", $(this).val());
   });
 
   $('#doc-title').on('input propertychange', function() {
     vwf_view.logger.info("I changed title to: " + $(this).val());
     setSaveButtonToNeedsSaving();
-    var editorNodeId = vwf_view.kernel.find('', '/editor');
-    vwf_view.kernel.setProperty( editorNodeId[0], "title", $(this).val());
+    var applicationNodeId = vwf_view.kernel.application();
+    vwf_view.kernel.setProperty(applicationNodeId, "title", $(this).val());
   });
 
   $('#doc-save').click(function() {

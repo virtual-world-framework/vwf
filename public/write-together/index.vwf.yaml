@@ -1,13 +1,10 @@
 ---
-children:
-  editor:
-    extends:  http://vwf.example.com/node.vwf
-    properties:
-      content: ""
-      title: ""
-      savename: 0
+properties:
+  content: ""
+  title: ""
+  savename: 0
 scripts:
 - |
   this.initialize = function() {
-    this.editor.savename = this.random().toString().split(".")[1];
+    this.savename = this.random().toString().split(".")[1];
   }
