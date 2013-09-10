@@ -129,6 +129,17 @@ height:315px;
 	line-height: 33px;
 }
 
+.h1-hero{
+
+margin-bottom: 0;
+font-size: 60px;
+line-height: 1;
+letter-spacing: -1px;
+color: inherit;
+padding-left: 39px;
+padding-top: 17px;
+}
+
 .content{
 	background-color: #fff;
 	margin: 0 auto;

@@ -26,6 +26,7 @@ routesMap = {
 	'edit': {sid: true},
 	'remove': {sid:true, title: 'Warning!'},
 	'user': {sid:true, title: 'Account'},
+	'home': {home:true},
 	'admin': {sid:true, title:'Admin', fileList: fileList, template: 'admin/admin'},
 	'admin/edit': {fileList: fileList}
 };
@@ -46,16 +47,17 @@ exports.generalHandler = function(req, res, next){
 
 	if(routeIndex >= 0){
 		
-		var currentAcceptedRoute = exports.acceptedRoutes[routeIndex], title = '', sid = '', template = currentAcceptedRoute, fileList = [];
+		var currentAcceptedRoute = exports.acceptedRoutes[routeIndex], title = '', sid = '', template = currentAcceptedRoute, fileList = [], home = false;
 		if(routesMap[currentAcceptedRoute]){
 			
 			title = routesMap[currentAcceptedRoute].title ? routesMap[currentAcceptedRoute].title : '';
 			sid = routesMap[currentAcceptedRoute].sid ?  root + '/' + (req.query.id?req.query.id:'') + '/' : '';
 			template = routesMap[currentAcceptedRoute].template ? routesMap[currentAcceptedRoute].template : currentAcceptedRoute;
 			fileList = routesMap[currentAcceptedRoute].fileList ? routesMap[currentAcceptedRoute].fileList : [];	
+			home = routesMap[currentAcceptedRoute].home ? routesMap[currentAcceptedRoute].home : false;	
 		}
 		
-		res.locals = {sid: sid, root: root, title: title, fileList:fileList};
+		res.locals = {sid: sid, root: root, title: title, fileList:fileList, home: home};
 		res.render(template);
 	}
 	
