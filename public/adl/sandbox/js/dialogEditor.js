@@ -20,6 +20,7 @@ DialogEditor.prototype.init = function(divID,VWFID)
 	
 	this.rootSelector = '#' + divID;
 	$(this.rootSelector).addClass("dialogEditorRoot");
+	$(this.rootSelector).attr('tabindex',43);
 	this.dialogSelector = '#' + divID + " .dialogEditor";
 	this.confirmSelector = this.dialogSelector + " .dialogEditConfirm";
 	$(this.rootSelector).append('<div class="dialogModal"/>');
@@ -29,9 +30,6 @@ DialogEditor.prototype.init = function(divID,VWFID)
 	$(this.confirmSelector).text('Ok');
 	$(this.confirmSelector).click(function(){self.ok()});
 	
-	//<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-  //<line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,0,0);stroke-width:2"/>
-//</svg>
 	
 	$(this.dialogSelector).append('<svg xmlns="http://www.w3.org/2000/svg" version="1.1"></>');
 	this.lineSelector = this.rootSelector + " svg";
@@ -41,6 +39,14 @@ DialogEditor.prototype.init = function(divID,VWFID)
 	$(this.createSelector).text('Add');
 	$(this.createSelector).click(function(){self.addNode()});
 	$(this.rootSelector).css('display','none');
+	
+	$(this.rootSelector).keyup(function(e)
+	{
+		
+		if(e.keyCode == 46 && e.srcElement == $(this.rootSelector)[0])
+			this.delete();
+		
+	}.bind(this));
 }
 
 DialogEditor.prototype.createLine = function()
@@ -75,7 +81,11 @@ DialogEditor.prototype.createLine = function()
 		
 		this.y2.baseVal.value = y2 - $(this.parentNode).offset().top;
 	};
-	
+	line.onclick = function()
+	{
+		
+		self.select(this);
+	}
 	return line;
 }
 DialogEditor.prototype.close = function()
@@ -131,6 +141,7 @@ DialogEditor.prototype.open = function()
 	
 	}.bind(this),300);
 	$(this.rootSelector).css('display','block');
+	$(this.rootSelector).focus();
 }
 DialogEditor.prototype.ok = function()
 {
@@ -158,14 +169,70 @@ DialogEditor.prototype.serialize = function()
 	}
 	return nodes;
 }
+
+DialogEditor.prototype.deselect = function()
+{
+	if(this.selectedObject)
+	{
+		if(this.selectedObject instanceof DialogNode)
+		{
+			$(this.selectedObject.idSelector).css('background-color','')
+		}
+		if(this.selectedObject.nodeName ==="svg:line")
+		{
+			this.selectedObject.style.stroke = 'black';
+		}
+		this.selectedObject = null;
+	}
+	
+}
+
+DialogEditor.prototype.select = function(obj)
+{
+	$(this.rootSelector).focus();
+	this.deselect();
+	this.selectedObject = obj;
+	if(this.selectedObject)
+	{
+		if(this.selectedObject instanceof DialogNode)
+		{
+			$(this.selectedObject.idSelector).css('background-color','red')
+		}
+		if(this.selectedObject.nodeName ==="svg:line")
+		{
+			this.selectedObject.style.stroke = 'red';
+		}
+		
+	}
+
+}
+
+DialogEditor.prototype.delete = function()
+{
+	if(this.selectedObject)
+	{
+		if(this.selectedObject instanceof DialogNode)
+		{
+			this.nodes.splice(this.nodes.indexOf(this.selectedObject),1);
+			this.selectedObject.delete();
+		}
+		if(this.selectedObject.nodeName ==="svg:line")
+		{
+				this.selectedObject.startNode.removeLine(this.selectedObject);
+				this.selectedObject.endNode.removeLine(this.selectedObject);
+				this.selectedObject.delete();
+		}
+		this.selectedObject = null;
+	}
+}
+
 DialogEditor.prototype.endAssociate = function(target)
 {
 	this.endAssociateTarget = target;
-	$(this.startAssociateTarget).text($(this.endAssociateTarget).text());
-	$(this.startAssociateTarget).css('background','#BBBBBB');
+	
 	$(this.endAssociateTarget).css('background','#BBBBBB');
 	{
-	
+		
 		var oldline = this.startAssociateTarget.node.getLineByStart(this.startAssociateTarget);
 		if(oldline)
 		{
@@ -178,6 +245,8 @@ DialogEditor.prototype.endAssociate = function(target)
 		this.endAssociateTarget.node.addIncomingLink(this.startAssociateTarget,this.endAssociateTarget,line);
 	
 	}
+	$(this.startAssociateTarget).text($(this.endAssociateTarget).text());
+	$(this.startAssociateTarget).css('background','#BBBBBB');
 	this.startAssociateTarget = this.endAssociateTarget = null;
 }
 DialogEditor.prototype.startAssociate = function(target)
@@ -218,6 +287,8 @@ DialogNode = function(parentSelector,parent,id,text)
 		this.node = self;
 		if(self.parent.startAssociateTarget)
 			self.parent.endAssociate(this);
+		else
+			self.parent.select(this.node);
 	});
 	$(this.idSelector).last().mouseover(function()
 	{
@@ -233,6 +304,23 @@ DialogNode = function(parentSelector,parent,id,text)
 	});
 	this.incomingLinks = [];
 	this.outgoingLinks = [];
+}
+DialogNode.prototype.delete = function()
+{
+	
+	for(var i = 0; i < this.outgoingLinks.length; i++)
+	{
+		this.outgoingLinks[i].line.endNode.removeLine(this.outgoingLinks[i].line);
+		this.outgoingLinks[i].line.delete();
+	}
+	
+	for(var i = 0; i < this.incomingLinks.length; i++)
+	{
+		this.incomingLinks[i].line.startNode.removeLine(this.incomingLinks[i].line);
+		this.incomingLinks[i].line.delete();
+	}
+	
+	$(this.selfSelector).remove();
 }
 DialogNode.prototype.drag = function()
 {
@@ -285,16 +373,25 @@ DialogNode.prototype.serialize = function()
 }
 DialogNode.prototype.removeLine = function(line)
 {
+	var rowsDivs = $(this.tableSelector + " .tablerow");
 	for(var i = 0; i < this.incomingLinks.length; i++)
 	{
 		if(this.incomingLinks[i].line === line)
+		{
 			this.incomingLinks.splice(i,1);
+			
+		}
 	}
 	
 	for(var i = 0; i < this.outgoingLinks.length; i++)
 	{
 		if(this.outgoingLinks[i].line === line)
+		{
+			
+			$(this.outgoingLinks[i].start).text('');
+			$(this.outgoingLinks[i].start).css('background-color','');
 			this.outgoingLinks.splice(i,1);
+		}
 	}	
 }
 
@@ -334,6 +431,7 @@ DialogNode.prototype.addRow = function(text,link)
 		this.node = self;
 		if(!self.parent.startAssociateTarget)
 		{
+			self.parent.deselect();
 			$(this).mouseout();
 			self.parent.startAssociate(this);
 			

@@ -1954,10 +1954,13 @@ define(function ()
 					{
 						if (vwf.getProperty(VWFNode[i].id, 'type') != 'Group')
 						{
-							while (vwf.getProperty(vwf.parent(VWFNode[i].id), 'type') == 'Group' && vwf.getProperty(vwf.parent(VWFNode[i].id), 'open') == false)
+							var testnode = VWFNode[i];
+							while (vwf.getProperty(testnode.id, 'type') != 'Group' || ( vwf.getProperty(testnode.id, 'type') == 'Group' && vwf.getProperty(testnode.id, 'open') == true))
 							{
-								VWFNode[i] = vwf.getNode(vwf.parent(VWFNode[i].id));
+								testnode = vwf.getNode(vwf.parent(testnode.id));
 							}
+							if(testnode)
+								VWFNode[i] = testnode;
 						}
 					}
 					catch (e)

@@ -499,7 +499,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
             if(nodeID)
             {
                 var childNode = this.state.nodes[nodeID];
-				
+				if(!childNode) return;
 				
 				if(childNode.children)
 				{

@@ -1180,25 +1180,35 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
         this.deleteNode = function( nodeID ) {
 
             this.logger.group( "vwf.deleteNode " + nodeID );
+			try{
+				
+				var children = this.children(nodeID);
+				for(var i =0; i < children.length; i++)
+				{
+					this.deleteNode(children[i]);
+				}
+				// Call deletingNode() on each model. The node is considered deleted after each model
+				// has run.
+				
+				this.models.forEach( function( model ) {
+					model.deletingNode && model.deletingNode( nodeID );
+				} );
 
-            // Call deletingNode() on each model. The node is considered deleted after each model
-            // has run.
-			
-            this.models.forEach( function( model ) {
-                model.deletingNode && model.deletingNode( nodeID );
-            } );
+				// Call deletedNode() on each view. The view is being notified that a node has been
+				// deleted.
 
-            // Call deletedNode() on each view. The view is being notified that a node has been
-            // deleted.
+				
+				this.views.forEach( function( view ) {
+					view.deletedNode && view.deletedNode( nodeID );
+				} );
 
-			
-            this.views.forEach( function( view ) {
-                view.deletedNode && view.deletedNode( nodeID );
-            } );
-
-			if(this.tickable.nodeIDs.indexOf(nodeID) > -1)
-			{	
-				this.tickable.nodeIDs.splice(this.tickable.nodeIDs.indexOf(nodeID),1);
+				if(this.tickable.nodeIDs.indexOf(nodeID) > -1)
+				{	
+					this.tickable.nodeIDs.splice(this.tickable.nodeIDs.indexOf(nodeID),1);
+				}
+			} catch(e)
+			{
+				console.log(e);
 			}
             this.logger.groupEnd();
         };

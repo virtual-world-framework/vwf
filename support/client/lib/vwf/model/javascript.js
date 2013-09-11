@@ -1261,6 +1261,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             var phase = eventParameters && eventParameters.phase; // the phase is smuggled across on the parameters array  // TODO: add "phase" as a fireEvent() parameter? it isn't currently needed in the kernel public API (not queueable, not called by the drivers), so avoid if possible
 
             var node = this.nodes[nodeID];
+			if(!node) return;
             var listeners = findListeners( node, eventName );
 
             var jsDriverSelf = this;
