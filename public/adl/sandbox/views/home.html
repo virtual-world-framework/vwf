@@ -5,7 +5,7 @@
 			<h1>Open source</h1>
 		</div>
 		
-		<div class="span4">
+		<div class="span3">
 			<h4>NEW FRONT PAGE</h4>
 			<ul>
 			
@@ -15,7 +15,7 @@
 				
 			</ul>
 		</div>
-		<div class="span4">
+		<div class="span3">
 			<h4>NEW FRONT PAGE</h4>
 			<ul>
 			
@@ -25,32 +25,24 @@
 				
 			</ul>
 		</div>
-		<div class="span4">
-			<h4>NEW FRONT PAGE</h4>
-			<ul>
-			
-				<li>Item 1</li>
-				<li>Item 2</li>
-				<li>Item 3</li>
-				
-			</ul>
-		</div>
-		<iframe data-bind="css:featuredWorldObjects().length>0?'wideFrame':'frame'" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
-		<div class="span5">
-			
+
+		<div class="span6">
+			<iframe class="wideFrame" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
 		</div>
 	</div>
 	<script>
 		var slideInterval;
 		$(document).ready(function(){
+			var totalSlides = 3, tempSlides = 0, transitionSpeed = 1500;
+			var currentSlideState = Math.floor(Math.random() * totalSlides);
 			
-			$(".slide-item").not(".slide-item0").css("left", "1200px");
+			$(".slide-item").not(".slide-item" + currentSlideState).css("left", "1200px");
 			$(".linkMenu").css("margin-bottom", "0");
 			
 			ko.applyBindings(vwfPortalModel);
 			getLoginInfo();
 			
-			var currentSlideState = 0, totalSlides = 3, tempSlides = 0, transitionSpeed = 800;
+			
 			
 			var incrementCurrentSlideState = function(){
 				tempSlides++;
@@ -70,7 +62,7 @@
 				});
 			};
 			
-			slideInterval = window.setInterval(animateSlides, 8000);
+			slideInterval = window.setInterval(animateSlides, 13000);
 		});
 		
 		
