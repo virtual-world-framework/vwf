@@ -21,7 +21,6 @@ class VWF::Storage
   # Function that takes the public path and the application and returns an array 
   # of the instance ID's for all instances with stored information. (Either metadata, persistence state, or saved states)
   def application_instances( public_path, application )
-    puts "In storage wrapper!"
     @storage_implementation.application_instances( public_path, application )
   end
 
