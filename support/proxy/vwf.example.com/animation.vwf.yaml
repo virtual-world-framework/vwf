@@ -32,7 +32,7 @@
 # 
 #   0 <= animationDuration
 #   0 <= animationTime <= animationDuration
-#   -Infinity < animationRate < Infinity
+#   0 < animationRate < Infinity
 # 
 # The animation play state and time index are maintained in `animationStart$` and
 # `animationPause$`. `animationPause$` is `null` while the animation is playing. The
@@ -40,9 +40,9 @@
 # (when paused) gives the time index, after accounting for the play rate.
 # 
 #   animationTime = ( ( animationPause$ || time ) - ( animationStart$ || time ) ) *
-#     animationRate (positive rates)
+#     animationRate * animationDirection (positive direction)
 #   animationTime = ( ( animationPause$ || time ) - ( animationStart$ || time ) ) *
-#     animationRate + animationDuration (negative rates)
+#     animationRate * animationDirection + animationDuration (negative direction)
 # 
 #   animationPlaying = this.animationStart$ != null && this.animationPause$ == null
 # 
@@ -56,9 +56,7 @@
 #   animationPause$ != null => animationStart$ <= animationPause$ <= time
 #   animationStop$ != null => animationStart$ + animationDuration$ == animationStop$
 # 
-#   animationDuration$ == animationDuration / animationRate (positive rates)
-#   animationDuration$ == -animationDuration / animationRate (negative rates)
-# 
+#   animationDuration$ == animationDuration / animationRate 
 # Properties named with a`$` suffix refer to times or durations on the simulation timeline. All
 # other time-related properties refer to the animation timeline.
 
@@ -69,7 +67,7 @@ properties:
   ## The current animation position in seconds.
   ## 
   ## `animationTime` automatically moves with the simulation time while the animation is playing,
-  ## tracking the change in time multiplied by `animationRate`. A negative `animationRate` will
+  ## tracking the change in time multiplied by `animationRate`. A negative `animationDirection` will
   ## cause `animationTime` to move backwards. Setting `animationTime` updates the postion whether or
   ## not the animation is currently playing.
 
@@ -84,7 +82,7 @@ properties:
       }
       // Save copies to avoid repeated reads.
       var duration = this.animationStopTime - this.animationStartTime,
-        rate = this.animationRate;
+        rate = this.animationRate, direction = this.animationDirection;
       // Range limit the incoming value.
       value = Math.min( Math.max( this.animationStartTime, value ), this.animationStopTime );
       // Keep paused if updating start/pause from null/null.
@@ -94,10 +92,9 @@ properties:
       // Calculate the start and stop times that makes the new time work.
       this.animationStart$ =
         ( this.animationPause$ != null ? this.animationPause$ : this.time ) -
-        ( rate >= 0 ? value - this.animationStartTime : value - duration ) / rate;
+        ( direction >= 0 ? value - this.animationStartTime : value - duration ) / (rate * direction);
       this.animationStop$ =
-        this.animationStart$ +
-        ( rate >= 0 ? duration : -duration ) / rate;
+        this.animationStart$ + duration / rate;
       // Update the node and fire the changed event.
       if ( value !== this.animationTimeUpdated ) {
         this.animationTimeUpdated = value;
@@ -108,12 +105,12 @@ properties:
     get: |
       // Save copies to avoid repeated reads.
       var duration = this.animationStopTime - this.animationStartTime,
-        rate = this.animationRate;
+        rate = this.animationRate, direction = this.animationDirection;
       // Calculate the time from the start and current/pause times.
       var value = (
         ( this.animationPause$ != null ? this.animationPause$ : this.time ) -
         ( this.animationStart$ != null ? this.animationStart$ : this.time )
-      ) * rate + ( rate >= 0 ? this.animationStartTime : duration );
+      ) * rate * direction + ( direction >= 0 ? this.animationStartTime : duration )* rate * direction;
       // Range limit the value.
       value = Math.min( Math.max( this.animationStartTime, value ), this.animationStopTime );
       // If changed since last seen, update and fire the changed event.
@@ -135,21 +132,33 @@ properties:
     set: |
       var duration = value, rate = this.animationRate;
       this.animationDuration = duration;
-      this.animationDuration$ = ( rate >= 0 ? duration : -duration ) / rate;
+      this.animationDuration$ = duration / rate;
     value: 1
 
   ## The animation playback rate.
   ## 
   ## Set `animationRate` to a value greater than `1` to increase the rate. Set a value between `0`
-  ## and `1` to decrease it. Negative rates will cause the animation to play backwards.
+  ## and `1` to decrease it. 
 
   animationRate:  # TODO: allow changes while playing
     set: |
       var duration = this.animationDuration, rate = value, startFrame = this.animationStartFrame, stopFrame = this.animationStopFrame;
       this.animationRate = rate;
-      this.animationDuration$ = ( rate >= 0 ? duration : -duration ) / rate;
+      this.animationDuration$ = duration / rate;
       this.animationStartFrame = startFrame;
       this.animationStopFrame = stopFrame;
+    value: 1
+
+  ## The animation direction.
+  ##
+  ## Set 'animationDirection' to 1 to play the animation forwards, and -1 to play backwards.
+  animationDirection:
+    set: |
+      switch(value) {
+        case 1:
+        case -1:
+          this.animationDirection = value;
+      }
     value: 1
 
   ## Automatically replay the animation from the start after reaching the end.
@@ -191,8 +200,7 @@ properties:
             ( this.animationPause$ || this.time ) +
             this.time;
           this.animationStop$ =
-            this.animationStart$ +
-            ( rate >= 0 ? duration : -duration ) / rate;
+            this.animationStart$ + duration / rate;
           this.animationPause$ = null;
           // Send the `animationStarted` event if starting from the beginning.
           if ( this.time == this.animationStart$ ) {
@@ -290,9 +298,9 @@ properties:
 
   fps: 
     set: |
-      this.animationRate = this.animationRate >= 0 ? value / 30 : value / -30;
+      this.animationRate = value / 30;
     get: |
-      return Math.abs(this.animationRate) * 30;
+      return this.animationRate * 30;
 
 methods:
 
@@ -341,7 +349,7 @@ methods:
       if ( this.time === this.animationStop$ ) {
         if ( this.animationLoop ) {
           this.animationLooped();
-          this.animationTime = this.animationRate >= 0 ?
+          this.animationTime = this.animationDirection >= 0 ?
             this.animationStartTime : this.animationStopTime;
         } else {
           this.animationPlaying = false;
