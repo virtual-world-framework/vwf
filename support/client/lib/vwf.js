@@ -2712,28 +2712,32 @@ if ( ! childComponent.source ) {
                 return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];
             } );
 
-            var node = nodes.existing[nodeID];
+            var node = nodes.existing[ nodeID ];
+
+            var entrants = this.setProperty.entrants;
 
             // Record calls into this function by nodeID and propertyName so that models may call
             // back here (directly or indirectly) to delegate responses further down the chain
             // without causing infinite recursion.
 
-            var entrants = this.setProperty.entrants;
+            // TODO: need unique nodeID+propertyName hash
+            var thisProperty = nodeID+'-'+propertyName;
 
-            var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
-            var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
+            var previousEntry = entrants[ thisProperty ] || {};
+            var currentEntry = {};
+            entrants[ thisProperty ] = currentEntry;
 
             // Select the actual driver calls. Create the property if it doesn't exist on this node
             // or its prototypes. Initialize it if it exists on a prototype but not on this node.
             // Set it if it already exists on this node.
 
-            if ( ! node.properties.has( propertyName ) || entry.creating ) {
-                reentry.creating = true;
+            if ( ! node.properties.has( propertyName ) || previousEntry.creating ) {
+                currentEntry.creating = true;
                 var settingPropertyEtc = "creatingProperty";
                 var satPropertyEtc = "createdProperty";
                 node.properties.create( propertyName );
-            } else if ( ! node.properties.hasOwn( propertyName ) || entry.initializing ) {
-                reentry.initializing = true;
+            } else if ( ! node.properties.hasOwn( propertyName ) || previousEntry.initializing ) {
+                currentEntry.initializing = true;
                 var settingPropertyEtc = "initializingProperty";
                 var satPropertyEtc = "initializedProperty";
                 node.properties.create( propertyName );
@@ -2743,21 +2747,13 @@ if ( ! childComponent.source ) {
             }
 
             // Keep track of the number of assignments made by this `setProperty` call and others
-            // invoked indirectly by it, starting with the outermost call.
+            // invoked indirectly by it, starting with the first call.
 
-            var outermost = entrants.assignments === undefined;
+            var isFirstEntry = ( previousEntry.index === undefined );
 
-            if ( outermost ) {
+            if ( isFirstEntry ) {
                 entrants.assignments = 0;
             }
-
-            // Have we been called for the same property on the same node for a property still being
-            // assigned (such as when a setter function assigns the property to itself)? If so, then
-            // the inner call should skip drivers that the outer call has already invoked, and the
-            // outer call should complete without invoking drivers that the inner call will have
-            // already called.
-
-            var reentered = ( entry.index !== undefined );
 
             // We'll need to know if the set was delegated to other properties or actually assigned
             // here.
@@ -2770,17 +2766,17 @@ if ( ! childComponent.source ) {
 
             this.models.some( function( model, index ) {
 
-                // Skip initial models that an outer call has already invoked for this node and
+                // Skip initial models that a previous call has already invoked for this node and
                 // property (if any). If an inner call completed for this node and property, skip
                 // the remaining models.
 
-                if ( ( ! reentered || index > entry.index ) && ! reentry.completed ) {
+                if ( ( isFirstEntry || index > previousEntry.index ) && ! currentEntry.completed ) {
 
                     // Record the active model number.
- 
-                    reentry.index = index;
 
-                    // Record the number of assignments made since the outermost call. When
+                    currentEntry.index = index;
+
+                    // Record the number of assignments made since the first entry. When
                     // `entrants.assignments` increases, a driver has called `setProperty` to make
                     // an assignment elsewhere.
 
@@ -2802,26 +2798,22 @@ if ( ! childComponent.source ) {
                         value = undefined;
                     }
 
-                    // The property was delegated if the call made any assignments.
+                    var valueExists = ( value !== undefined );
+                    var delegated = ( entrants.assignments !== assignments );
 
-                    if ( entrants.assignments !== assignments ) {
-                        delegated = true;
-                    }
+                    if ( valueExists ) {
+                        propertyValue = value;
 
-                    // Otherwise if the call returned a value, the property was assigned here.
-
-                    else if ( value !== undefined ) {
-                        entrants.assignments++;
-                        assigned = true;
+                        if ( ! delegated ) {
+                            entrants.assignments++;
+                            assigned = true;
+                        }
                     }
 
                     // Record the value actually assigned. This may differ from the incoming value
                     // if it was range limited, quantized, etc. by the model. This is the value
                     // passed to the views.
 
-                    if ( value !== undefined ) {
-                        propertyValue = value;
-                    }
 
                     // If we are setting, exit from the this.models.some() iterator once the value
                     // has been set. Don't exit early if we are creating or initializing since every
@@ -2847,28 +2839,28 @@ if ( ! childComponent.source ) {
 
             if ( assigned ) {
                 this.views.forEach( function( view ) {
-                    view[satPropertyEtc] && view[satPropertyEtc]( nodeID, propertyName, propertyValue );
+                    view[ satPropertyEtc ] && view[ satPropertyEtc ]( nodeID, propertyName, propertyValue );
                 } );
             }
 
             // For a reentrant call, restore the previous state, move the index forward to cover
             // the models we called.
 
-            if ( reentered ) {
-                entrants[nodeID+'-'+propertyName] = entry;
-                entry.completed = true;
+            if ( previousEntry.index !== undefined ) {
+                entrants[ thisProperty ] = previousEntry;
+                previousEntry.completed = true;
             }
 
             // Delete the call record if this is the first, non-reentrant call here (the normal
             // case).
 
             else {
-                delete entrants[nodeID+'-'+propertyName];
+                delete entrants[ thisProperty ];
             }
 
-            // Clear the assignment counter when the outermost `setProperty` completes.
+            // Clear the assignment counter when the first entry to the `setProperty` completes.
 
-            if ( outermost ) {
+            if ( isFirstEntry ) {
                 delete entrants.assignments;
             }
 
