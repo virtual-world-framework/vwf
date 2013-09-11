@@ -291,7 +291,8 @@
                 { library: "vwf/model/jiglib/jiglib", active: false },
                 { library: "vwf/view/webrtc/adapter", active: false },
                 { library: "vwf/view/google-earth", active: false },
-                { library: "vwf/model/cesium/Cesium", active: false }
+                { library: "vwf/model/cesium/Cesium", active: false },
+                { library: "vwf/admin", active: true }
             ];
 
             var initializers = {
