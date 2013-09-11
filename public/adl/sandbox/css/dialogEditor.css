@@ -104,9 +104,9 @@ border-radius: 5px;
 .dialogNodeTableAdd
 {
 	font-size: 20px;
-	bottom: 0%;
+	top: -1%;
 	position: absolute;
-	left: 2%;
+	left: 0%;
 	cursor:pointer;
 }
 .tablerow
@@ -135,4 +135,26 @@ position: absolute;
 border-radius: 10px;
 margin: 3px;
 overflow: hidden;
+}
+.dialogEditorLine
+{
+
+}
+.dialogEditorSVG
+{
+
+}
+.dialogNodePrompt
+{
+
+}
+.dialogNodePromptText
+{
+width: 98%;
+margin: 0px;
+padding: 0px;
+left: 0px;
+border-radius: 5px;
+max-width: 297px;
+min-width: 297px;
 }

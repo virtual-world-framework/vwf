@@ -194,6 +194,7 @@
 			
 			this.GetAllLeafMeshes = function(threeObject,list)
 			{
+				
 				if(threeObject instanceof THREE.Mesh)
 				{
 					list.push(threeObject);
@@ -202,7 +203,8 @@
 				{
 					for(var i=0; i < threeObject.children.length; i++)
 					{
-						GetAllLeafMeshes(threeObject.children[i],list);
+						if(!threeObject.children[i].vwfID)
+							GetAllLeafMeshes(threeObject.children[i],list);
 					}               
 				}     
 			}
@@ -218,7 +220,8 @@
 						
 					this.materialDef = propval;
 					var list = [];
-					GetAllLeafMeshes(this.getRoot(),list);
+					
+					this.GetAllLeafMeshes(this.getRoot(),list);
 					for(var i =0; i < list.length; i++)
 					{
 						//if(!(list[i].material instanceof THREE.MeshPhongMaterial))
@@ -242,12 +245,14 @@
 			{
 				if(propname == 'materialDef')
 				{
+					
 					return this.materialDef || this.defaultmaterialDef;
 				}
 			}
 		this.getDefForMaterial = function (currentmat)
 		{
 		   try{
+		   
 			var value = {};
 			value.color = {}
 			value.color.r = currentmat.color.r;
