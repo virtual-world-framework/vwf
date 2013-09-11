@@ -132,12 +132,22 @@ height:315px;
 .h1-hero{
 
 margin-bottom: 0;
+margin-top:0;
 font-size: 60px;
 line-height: 1;
 letter-spacing: -1px;
 color: inherit;
 padding-left: 39px;
 padding-top: 17px;
+text-align:left;
+}
+
+.slide-item{
+
+height:368px;
+width:1200px;
+position:absolute;
+float:left;
 }
 
 .content{

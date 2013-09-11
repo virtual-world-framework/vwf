@@ -1,4 +1,10 @@
 	<div class="row" style="margin-top:30px;height:426px;clear:both;">
+		
+		<div class="span12">
+		
+			<h1>Open source</h1>
+		</div>
+		
 		<div class="span4">
 			<h4>NEW FRONT PAGE</h4>
 			<ul>
@@ -35,17 +41,38 @@
 		</div>
 	</div>
 	<script>
+		var slideInterval;
 		$(document).ready(function(){
 			
+			$(".slide-item").not(".slide-item0").css("left", "1200px");
+			$(".linkMenu").css("margin-bottom", "0");
+			
 			ko.applyBindings(vwfPortalModel);
-			getLoginInfo(function(){
-					
-				showStates();
-
-				window.setInterval(function(){
-					showStates();
-				},5000);
-			});
+			getLoginInfo();
+			
+			var currentSlideState = 0, totalSlides = 3, tempSlides = 0, transitionSpeed = 800;
+			
+			var incrementCurrentSlideState = function(){
+				tempSlides++;
+				if(tempSlides == 2){
+					tempSlides = 0;
+					currentSlideState = (currentSlideState + 1)%totalSlides;
+				}
+			};
+			
+			var animateSlides = function(){
+				$(".slide-item" + currentSlideState).animate({left:"-1200px"}, transitionSpeed, "swing", function(){
+					incrementCurrentSlideState();
+					$(this).css("left", "1200px");
+				});
+				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).animate({left:"0px"}, transitionSpeed, "swing", function(){
+					incrementCurrentSlideState();
+				});
+			};
+			
+			slideInterval = window.setInterval(animateSlides, 8000);
 		});
+		
+		
 	</script>
 	

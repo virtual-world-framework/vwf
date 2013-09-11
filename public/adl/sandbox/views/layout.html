@@ -53,8 +53,18 @@
 		</div>	
 		
 		{{#home}}
-		<div style="background-image:url('{{root}}/img/huge_terrain.png'); height:368px;width:1200px;" class="container">
-			<h1 style="text-align:left" class="h1-hero">In Browser</h1>
+		<div style="height:368px;width:1200px;overflow:hidden;border-bottom:1px solid #EBEBEB" class="container">
+			<div style="width:2400px;position:relative">
+				<div style="background-image:url('{{root}}/img/huge_terrain.png');" class="slide-item slide-item0">
+					<h1 class="h1-hero">In Browser</h1>
+				</div>
+				<div style="background-image:url('{{root}}/img/huge_town.png');" class="slide-item slide-item1">
+					<h1 class="h1-hero">Scenario-Based Training</h1>
+				</div>
+				<div style="background-image:url('{{root}}/img/huge_office.png');" class="slide-item slide-item2">
+					<h1 class="h1-hero">In Browser</h1>
+				</div>
+			</div>
 		</div>
 		{{/home}}
 			
