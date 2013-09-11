@@ -1371,14 +1371,21 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 if(propertyName ==  "meshData")
                 {
                     value = [];
-                    var scale = this.gettingProperty( nodeID, "scale", [] ); 
+                    var pos, quat, scale = this.gettingProperty( nodeID, "scale", [] ); 
                     scale = [1,1,1];
                     var meshList = findAllMeshes.call( this, threeObject );
                     for ( var i = 0; i < meshList.length; i++ ) {
-                        value.push( {  "vertices": getMeshVertices.call( this, meshList[i],threeObject ),
-                                       "vertexIndices": getMeshVertexIndices.call( this, meshList[i] ),
-                                       "scale": scale 
-                                    } );
+
+                        pos = meshList[i].position;
+                        quat = meshList[i].quaterion;
+
+                        value.push( {  
+                            "vertices": getMeshVertices.call( this, meshList[i],threeObject ),
+                            "vertexIndices": getMeshVertexIndices.call( this, meshList[i] ),
+                            "position": [ pos.x, pos.y, pos.z ],
+                            "quaternion": quat ? [ quat.x, quat.y, quat.z, quat.w ] : [ 0, 0, 1, 0 ],
+                            "scale": scale 
+                        } );
                     }
                     return value;
                 }

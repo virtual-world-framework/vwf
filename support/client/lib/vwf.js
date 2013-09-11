@@ -270,6 +270,7 @@
                 { library: "vwf/kernel/model", active: true },
                 { library: "vwf/model/javascript", active: true },
                 { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], active: false },
+                { library: "vwf/model/cannon", linkedLibraries: ["vwf/model/cannon/cannon"], active: false },
                 { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
                 { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
@@ -290,6 +291,7 @@
                 { library: "vwf/model/threejs/js/loaders/ColladaLoader", active: false },
                 { library: "vwf/model/jiglib/jiglib", active: false },
                 { library: "vwf/view/webrtc/adapter", active: false },
+                { library: "vwf/model/cannon/cannon", active: false },
                 { library: "vwf/view/google-earth", active: false },
                 { library: "vwf/model/cesium/Cesium", active: false }
             ];
@@ -298,6 +300,7 @@
                 model: [
                     { library: "vwf/model/javascript", active: true },
                     { library: "vwf/model/jiglib", active: false },
+                    { library: "vwf/model/cannon", active: false },
                     { library: "vwf/model/glge", active: false },
                     { library: "vwf/model/threejs", active: false },
                     { library: "vwf/model/cesium", active: false },

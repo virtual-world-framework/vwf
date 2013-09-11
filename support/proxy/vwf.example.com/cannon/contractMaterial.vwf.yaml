@@ -11,9 +11,13 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
----
-model:
-  vwf/model/cannon:
-  vwf/model/threejs:
-view:
-  vwf/view/threejs: "#vwf-root"
+## The component representation of physics scene
+## 
+## @name physics2.vwf
+## @namespace
+
+--- 
+extends: http://vwf.example.com/node.vwf
+properties:
+  friction:
+  restitution:  

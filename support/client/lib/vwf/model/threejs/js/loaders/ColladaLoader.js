@@ -849,7 +849,7 @@ THREE.ColladaLoader = function () {
 				} else {
 
 					mesh = new THREE.Mesh( geom, material );
-					// mesh.geom.name = geometry.id;
+					mesh.name = instance_geometry.url || instance_geometry.name || instance_geometry.id || '';
 
 				}
 

@@ -11,9 +11,22 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
----
-model:
-  vwf/model/cannon:
-  vwf/model/threejs:
-view:
-  vwf/view/threejs: "#vwf-root"
+## The component representation of physics scene
+## 
+## @name cannon/physics2.vwf
+## @namespace
+
+--- 
+extends: http://vwf.example.com/scene.vwf
+properties: 
+  
+  ## Gravity
+  ## 
+  ## @name physics2.vwf#gravity
+  ## @property
+
+  gravity: 
+    set: |
+      this.gravity = value;
+    value: [ 0, 0, -3, 0 ]
+

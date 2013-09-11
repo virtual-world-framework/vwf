@@ -12,12 +12,13 @@
 # the License.
 
 --- 
-extends: http://vwf.example.com/physics2.vwf
+extends: http://vwf.example.com/cannon/physics2.vwf
 properties:
+  gravity: [ 0, 0, 0 ] 
   nodesCreated: 
   createCube: true
   cubesCreated: 0
-  spheresCreated: 0
+  spheresCreated: 0s
   colorIndex:
     set: |
       if ( ( value >= 0 ) && ( value <= 6 ) ) {
@@ -31,13 +32,13 @@ properties:
       if ( value >= 0 ) {
         this.tossCubeStrength = value;
       }   
-    value: 150
+    value: 120
   tossSphereStrength:
     set: |
       if ( value >= 0 ) {
         this.tossSphereStrength = value;
       }   
-    value: 250
+    value: 200
 methods:
   clear:
 scripts:
@@ -49,44 +50,34 @@ scripts:
     var materials = [ "red", "blue", "yellow", "green", "orange", "purple", "silver" ];
     var cube = { 
       "source": "cube.dae", 
-      "extends": "http://vwf.example.com/physics3.vwf",
+      "extends": "http://vwf.example.com/cannon/physics3.vwf",
       "type": "model/vnd.collada+xml",
       "properties": { 
-        "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
         "physics": [ "box", 3.0, 3.0, 3.0 ], 
-        "friction": 0.5, 
-        "mass": 400, 
-        "linVelocityDamping": [ 1, 1, 1, 0 ], 
-        "restitution": 0.10, 
-        "private": null,
+        "mass": 200, 
         },
         "children": {
           "material": {
             "extends": "http://vwf.example.com/material.vwf",
             "properties": {
-              "color": ""
+              "color": [ 0, 0, 0 ]
             }
           }
         }
       };
     var sphere = { 
       "source": "sphere.dae", 
-      "extends": "http://vwf.example.com/physics3.vwf",
+      "extends": "http://vwf.example.com/cannon/physics3.vwf",
       "type": "model/vnd.collada+xml",
       "properties": { 
-        "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
         "physics": [ "sphere", 2.0 ], 
-        "friction": 0.5, 
         "mass": 100, 
-        "linVelocityDamping": [ 0.99, 0.99, 0.99, 0 ], 
-        "restitution": 0.10, 
-        "private": null,
         },
         "children": {
           "material": {
             "extends": "http://vwf.example.com/material.vwf",
             "properties": {
-              "color": ""
+              "color": [ 0, 0, 0 ]
             }
           }
         }

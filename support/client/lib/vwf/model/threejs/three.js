@@ -7046,6 +7046,7 @@ THREE.EventDispatcher.prototype = {
 THREE.Object3D = function () {
 
 	this.id = THREE.Object3DIdCount ++;
+	this.sourceid = '';
 	this.uuid = THREE.Math.generateUUID();
 
 	this.name = '';
@@ -11604,6 +11605,7 @@ THREE.ObjectLoader.prototype = {
 		return function ( data, geometries, materials ) {
 
 			var object;
+
 
 			switch ( data.type ) {
 

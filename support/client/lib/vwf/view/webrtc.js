@@ -55,6 +55,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             this.videoElementsDiv = options.videoElementsDiv !== undefined  ? options.videoElementsDiv : 'videoSurfaces';
             this.videoProperties = options.videoProperties !== undefined  ? options.videoProperties : {};
             this.debug = options.debug !== undefined ? options.debug : false;
+            this.stunServer = options.stunServer !== undefined ? options.stunServer : { "iceServers": [ { "url": "stun:stun.l.google.com:19302" } ] };
 
             this.videosAdded = 0;
             this.msgQueue = [];
@@ -625,7 +626,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
         this.state = "created";
 
         // webrtc peerConnection parameters
-        this.pc_config = { "iceServers": [ { "url": "stun:stun.l.google.com:19302" } ] };
+        this.pc_config = this.view.stunServer;
         this.pc_constraints = { "optional": [ { "DtlsSrtpKeyAgreement": true } ] };
         // Set up audio and video regardless of what devices are present.
         this.sdpConstraints = { 'mandatory': {
