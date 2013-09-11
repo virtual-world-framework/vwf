@@ -696,7 +696,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             // The update in THREE.KeyFrameAnimation takes a delta time, so reset the animation to the beginning, 
                             // and pass the current VWF animation time. Multiply the time by the animation rate so that the threejs
                             // animation objects are in sync with VWf time.
-                            var animationRate = this.state.kernel.getProperty( nodeID, "animationRate" );
+                            var animationRate = Math.abs(this.state.kernel.getProperty( nodeID, "animationRate" ));
                             for(var i = 0; i < node.threeObject.kfAnimations.length; i++) {
                                 node.threeObject.kfAnimations[i].stop()
                                 node.threeObject.kfAnimations[i].play(false, 0);
