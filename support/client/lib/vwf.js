@@ -2771,7 +2771,7 @@ if ( ! childComponent.source ) {
 
                 // Skip initial model drivers that a previous call has already invoked for this node and
                 // property (if any).
-                var driverInvoked = ( !isFirstEntry && ( driverIndex <= outerEntry.driverIndex ) );
+                var driverInvoked = ( !isOutermostEntry && ( driverIndex <= outerEntry.driverIndex ) );
                 if ( driverInvoked ) {
                   return false;
                 }
