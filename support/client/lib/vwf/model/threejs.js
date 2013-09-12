@@ -1396,11 +1396,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                         value = animationDuration;
                     }
-                    else if(node.threeObject.animatedMesh) {
+                    else if( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length ) {
                         var fps = this.state.kernel.getProperty( nodeID, "fps");
-                        for(var i=0, il = node.threeObject.animatedMesh.length; i < il; i++) {
-                            if(node.threeObject.animatedMesh[i].morphTargetInfluences.length > animationDuration) {
-                                animationDuration = node.threeObject.animatedMesh[i].morphTargetInfluences.length;
+                        for( var i=0, il = node.threeObject.animatedMesh.length; i < il; i++ ) {
+                            if( node.threeObject.animatedMesh[ i ].morphTargetInfluences.length > animationDuration ) {
+                                animationDuration = node.threeObject.animatedMesh[ i ].morphTargetInfluences.length;
                             }
                         }
                         value = animationDuration / fps;
