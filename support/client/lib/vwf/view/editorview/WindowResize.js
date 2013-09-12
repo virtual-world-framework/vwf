@@ -14,6 +14,9 @@ define({
 				//$('#toolbar').css('height','35px');
 				$('#toolbar').css('left','0px');
 				$('#statusbar').css('left','0px');
+				
+				$('#index-vwf').css('top', ($('#smoothmenu1').height() + $('#toolbar').height()) + 'px');
+				
 				if($('#sidepanel').offset().left + 5 < window.innerWidth)
 					$('#index-vwf').css('width',window.innerWidth - $('#sidepanel').width() + 'px');
 				else

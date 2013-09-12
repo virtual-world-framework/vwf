@@ -82,7 +82,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/alertify.js-0.3.9/
 					require("vwf/view/editorview/WindowResize").initialize();
 					$('input[type="text"]').keypress(function(e){e.stopImmediatePropagation();});
 					
-					$(window).resize();
+					
 					//  $(document).ready(function(){
 					//	});
 				}
@@ -170,6 +170,7 @@ function InitializeEditor()
 	require("vwf/view/editorview/TouchHandler").initialize();
 	require("vwf/view/editorview/ChatSystemGUI").initialize();
 	$(document.body).css('overflow', 'hidden');
+	$(window).resize();
 	//	$('body *').not(':has(input)').not('input').disableSelection();
 	//	$('#vwf-root').enableSelection();
 	//	$('#vwf-root').parent().enableSelection();

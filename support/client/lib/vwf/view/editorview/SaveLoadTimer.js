@@ -2,7 +2,7 @@ define({
 	initialize:function()
 	{
 		
-		$(document).trigger('setstatecomplete');
+		
 		
 	
 		window.setTimeout(function(){_DataManager.saveTimer();},60000);		

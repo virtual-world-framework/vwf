@@ -104,7 +104,8 @@ define(function ()
 		{
 				
 				if(this.GetCurrentUserName()) return;
-				$(window).trigger('hashchange');
+				if($('#GuestLogin').length > 0) return;
+				
 				$.ajax('/vwfDataManager.svc/logindata',
 				{
 					cache:false,
