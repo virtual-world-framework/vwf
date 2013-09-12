@@ -11,7 +11,40 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-## The component representation of a node
+## The component representation of a node - this is the base unit in VWF
+##
+## All components in an application extend node.vwf.  They can then add their own properties, 
+## methods, events, and children.
+##
+## When a property is added to a component, its default value is undefined.
+## Alternately, it can be given a starting value.  Here is an example in yaml:
+##
+## <pre>
+## properties:
+##   myProperty: "fancy"
+## </pre>
+##
+## Setter and getter functions can be added to control access to the property:
+##
+## <pre>
+## properties:
+##   myProperty:
+##     set: |
+##       if ( value == "fancy" ) {
+##         this.myProperty = value + " coding!";
+##       } else {
+##         this.myProperty = value;
+##       }
+##     get: |
+##       return this.myProperty;
+##     value: "fancy"
+## </pre>
+## 
+## Note:
+## Currently, if an incoming value is "transformed" before it is set (as in the case above, where
+## "coding!" might be added to the end of the string), the value that will be sent with the 
+## "satProperty" event will be the transformed value "fancy coding!", not the value that came into
+## the setter ("fancy").
 ## 
 ## @name node.vwf
 ## @namespace
