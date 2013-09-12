@@ -24,11 +24,12 @@ methods:
 events:
 properties:
   source:
-  animationFrame:
+  animationFrame: 0
   animationLength:
-  animationStart:
-  animationEnd: 
+  animationStart: 0
+  animationEnd: 0
   animationState: 0
+  animationSpeed: 1
   materialDef:
 
     

@@ -14,6 +14,7 @@
 		function animatable(childID, childSource, childName)
 		{
 			this.animationFrame = 0;
+			this.animationSpeed = 1;
 			this.settingProperty = function(propertyName,propertyValue)
 			{
 				if(propertyName == 'animationFrame')
@@ -39,9 +40,9 @@
 						}
 						
 						
-						skins[i].morphTargetInfluences[frame] = 1.0-mod;
-						if(skins[i].morphTargetInfluences[frame-1])
-							skins[i].morphTargetInfluences[frame-1] = mod;
+						skins[i].morphTargetInfluences[frame] = mod;
+						if(frame > 1)
+							skins[i].morphTargetInfluences[frame-1] = 1.0-mod;
 						
 						
 						
@@ -59,6 +60,10 @@
 				if(propertyName == 'animationEnd')
 				{
 					this.animationEnd = parseInt(propertyValue);
+				}
+				if(propertyName == 'animationSpeed')
+				{
+					this.animationSpeed = propertyValue;
 				}				
 			}
 			this.gettingProperty = function(propertyName)
@@ -69,11 +74,11 @@
 				}
 				if(propertyName == 'animationStart')
 				{
-					return this.animationStart;		
+					return this.animationStart || 0;		
 				}
 				if(propertyName == 'animationEnd')
 				{
-					return this.animationEnd;		
+					return this.animationEnd || this.gettingProperty('animationLength');		
 				}
 				if(propertyName == 'animationLength')
 				{
@@ -85,6 +90,10 @@
 				{
 					return this.animationState;
 				}
+				if(propertyName == 'animationSpeed')
+				{
+					return this.animationSpeed;
+				}
 			}
 			this.ticking = function()
 			{
@@ -92,7 +101,7 @@
 				if(this.animationState == 1)
 				{
 					
-					var nextframe = this.animationFrame+1;
+					var nextframe = this.animationFrame+this.animationSpeed;
 					if(nextframe > this.animationEnd)
 						nextframe = this.animationStart;
 					this.settingProperty(	'animationFrame' , nextframe);
