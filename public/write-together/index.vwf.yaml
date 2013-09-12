@@ -1,0 +1,10 @@
+---
+properties:
+  content: ""
+  title: ""
+  savename: 0
+scripts:
+- |
+  this.initialize = function() {
+    this.savename = this.random().toString().split(".")[1];
+  }

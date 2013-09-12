@@ -5339,10 +5339,10 @@
   </library_lights>
   <library_images>
     <image id="CNN_MME_640x360_mov">
-      <init_from>../../../Textures/1_CNN_640x360.png</init_from>
+      <init_from>./Textures/1_CNN_640x360.png</init_from>
     </image>
     <image id="TV_tga">
-      <init_from>../../../Textures/TV.tga</init_from>
+      <init_from>./Textures/TV.png</init_from>
     </image>
   </library_images>
   <library_visual_scenes>
