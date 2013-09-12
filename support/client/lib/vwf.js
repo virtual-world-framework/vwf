@@ -2733,7 +2733,6 @@ if ( ! childComponent.source ) {
             // Select the actual driver calls. Create the property if it doesn't exist on this node
             // or its prototypes. Initialize it if it exists on a prototype but not on this node.
             // Set it if it already exists on this node.
-
             if ( ! node.properties.has( propertyName ) || outerEntry.creating ) {
                 thisEntry.creating = true;
                 var settingPropertyEtc = "creatingProperty";
@@ -2749,28 +2748,26 @@ if ( ! childComponent.source ) {
                 var satPropertyEtc = "satProperty";
             }
 
-            // Keep track of the number of assignments made by this `setProperty` call and others
-            // invoked indirectly by it, starting with the first call.
-
             var isOutermostEntry = ( outerEntry.driverIndex === undefined );
 
             if ( isOutermostEntry ) {
-                entries.assignments = 0; // TODO Make this a boolean
+                // Keep track of the number of assignments made by this `setProperty` call and 
+                // others invoked indirectly by it, starting with the first call.
+                entries.numAssignments = 0;
             }
 
-            // We'll need to know if the set was delegated to other properties or actually assigned
-            // here.
-
+            // We'll need to know if the set was:
+            // -delegated to other properties or
+            // -actually assigned here
             var delegated = false, assigned = false;
 
-            // Call settingProperty() on each model. The first model to return a non-undefined value
-            // has performed the set and dictates the return value. The property is considered set
-            // after all models have run.
-
+            // Call settingProperty() on each model. The first model to return a non-undefined 
+            // value has performed the set and dictates the return value. The property is 
+            // considered set after all models have run.
             this.models.some( function( modelDriver, driverIndex ) {
 
-                // Skip initial model drivers that a previous call has already invoked for this node and
-                // property (if any).
+                // Skip initial model drivers that a previous call has already invoked for this 
+                // node and property (if any).
                 var driverInvoked = ( !isOutermostEntry && ( driverIndex <= outerEntry.driverIndex ) );
                 if ( driverInvoked ) {
                   return false;
@@ -2785,10 +2782,9 @@ if ( ! childComponent.source ) {
                 // Record the active model driver number.
                 thisEntry.driverIndex = driverIndex;
 
-                // Record the number of assignments made since the first entry. When
-                // `entries.assignments` increases, a driver has called `setProperty` to make
-                // an assignment elsewhere.
-                var assignments = entries.assignments;
+                // Record the number of assignments so we can check after the driver call to see 
+                // if it delegated to another property.
+                var numAssignmentsBeforeDriverCall = entries.numAssignments;
 
                 // Make the call.
                 if ( ! delegated && ! assigned ) {
@@ -2806,7 +2802,10 @@ if ( ! childComponent.source ) {
                 }
 
                 var valueExists = ( value !== undefined );
-                var delegated = ( entries.assignments !== assignments );
+
+                // If 'entries.numAssignments' changes during the driver call, it means that it
+                // delegated to another property.
+                var delegated = ( entries.numAssignments !== numAssignmentsBeforeDriverCall );
 
                 if ( valueExists ) {
                     // Record the value actually assigned. This may differ from the incoming value
@@ -2816,7 +2815,7 @@ if ( ! childComponent.source ) {
                     propertyValue = value;
 
                     if ( ! delegated ) {
-                        entries.assignments++;
+                        entries.numAssignments++;
                         assigned = true;
                     }
                 }
