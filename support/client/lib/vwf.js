@@ -2808,10 +2808,10 @@ if ( ! childComponent.source ) {
                 var delegated = ( entries.numAssignments !== numAssignmentsBeforeDriverCall );
 
                 if ( valueExists ) {
+
                     // Record the value actually assigned. This may differ from the incoming value
                     // if it was range limited, quantized, etc. by the model driver. This is the value
                     // passed to the views.
-
                     propertyValue = value;
 
                     if ( ! delegated ) {
