@@ -133,20 +133,20 @@ height:315px;
 
 margin-bottom: 0;
 margin-top:0;
-font-size: 70px;
+font-size: 90px;
 line-height: 1;
 letter-spacing: -1px;
 text-align:left;
 }
 
 .divContent0{
-	width:360px;
+	width:485px;
 	left: 39px;
 	top: 17px;
 }
 .divContent3{
-	width:390px;
-	left: 800px;
+	width: 485px;
+	left: 738px;
 	top: 125px;
 	font-family: 'Trebuchet MS', Helvetica, sans-serif;
 	text-shadow: 0 1px 2px #5E7C33;
@@ -157,7 +157,7 @@ text-align:left;
 
 	color: #F0F0F0;
 	text-shadow: 0 1px 2px #1F1F1F;
-	width:380px;
+	width:485px;
 	left:30px;
 	top:15px;
 }
@@ -174,19 +174,18 @@ text-align:left;
 	position:relative;
 }
 .slide-item p{
-	font-size: 19px;
-	color: #000;
+	font-size: 31px;
+	color: #444;
 	text-shadow: none;
 	text-align: right;
 	width: 45%;
-	line-height: 24px;
-	background: #EEE;
-	border-radius: 0px;
-	border: 1px solid #D6D6D6;
+	line-height: 36px;
+	border-radius: 2px;
+	border: 1px solid rgba(201, 201, 201, 0.47);
 	padding: 6px;
-	opacity: 0.8;
+	background: rgba(238, 238, 238, 0.6);
 	position: absolute;
-	top: 330px;
+	top: 283px;
 	left: 646px;
 }
 

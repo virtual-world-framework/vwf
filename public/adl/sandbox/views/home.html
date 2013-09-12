@@ -1,9 +1,10 @@
-	<div class="row" style="margin-top:30px;height:426px;clear:both;">
+	<div class="row" style="margin-top:30px;height:426px;">
 		
 		<div class="span12" style="margin-bottom:20px;">
 		
 			<h1>Open source</h1>
 		</div>
+		<div class="span12" style="border-top:1px solid #eee;padding-top:30px;"></div>
 		
 		<div class="span3">
 			<h4>Cool Point</h4>
@@ -30,6 +31,21 @@
 			<iframe class="wideFrame" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
 		</div>
 	</div>
+	<div class="row" style="margin-top:60px;">
+		<div class="span12" style="border-top:1px solid #eee;padding-top:30px;"></div>
+	</div>
+	<div class="row" style="margin-top:30px;" data-bind="foreach:featuredWorldObjects">
+		<div class="span4">
+			<a data-bind="attr:{href:'{{root}}/'+id}" >
+				<img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}" style="width:140px;height:110px;margin-top:4px;border: 1px solid #ddd;padding:1px;"/>
+			</a>
+			
+			<div>
+				<h4 style="margin-top:0;"><a style="color:inherit;" data-bind="text:title, attr:{href:'{{root}}/'+id}"></a></h4>
+				<p data-bind="text:$root.getShorterStr(description, 120)"></p>
+			</div>
+		</div>
+	</div>
 	<script>
 		var slideInterval = 0;
 		$(document).ready(function(){
@@ -41,7 +57,7 @@
 			
 			ko.applyBindings(vwfPortalModel);
 			getLoginInfo();
-			
+			showStates();
 			
 			
 			var incrementCurrentSlideState = function(){
