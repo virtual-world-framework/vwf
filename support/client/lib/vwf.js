@@ -4984,6 +4984,8 @@ if ( ! childComponent.source ) {
 
                         } ),
 
+                        // TODO: Store nodes' methods and events here in the kernel
+
                         // methods: Object.create( nodeCollectionPrototype, {
 
                         //     existing: {
@@ -5029,6 +5031,8 @@ if ( ! childComponent.source ) {
                         //     // },
 
                         // } ),
+
+                        // END TODO
 
                         // Is this node patchable? Nodes are patchable if they were loaded from a
                         // component.
