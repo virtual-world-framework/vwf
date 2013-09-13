@@ -2669,7 +2669,12 @@ if ( ! childComponent.source ) {
 
             var node = nodes.existing[ nodeID ];
 
-            var entries = this.createProperty.entries;
+            // this.createProperty shares an entries object w/ this.initializeProperty and 
+            // this.setProperty so they can manage property delegations that occur from one 
+            // function to the other (for example, a createProperty that delegates to 
+            // another property in the property's setter, and thus calls setProperty for the 
+            // delegation)
+            var entries = this.setProperty.entries;
 
             // Record calls into this function by nodeID and propertyName so that models may call
             // back here (directly or indirectly) to delegate responses further down the chain
@@ -2792,8 +2797,6 @@ if ( ! childComponent.source ) {
             return propertyValue;
         };
 
-        this.createProperty.entries = {}; // maps ( nodeID + '-' + propertyName ) => { ... }
-
         // -- initializeProperty --------------------------------------------------------------------------
 
         /// Initialize a property value on a node.
@@ -2808,7 +2811,12 @@ if ( ! childComponent.source ) {
 
             var node = nodes.existing[ nodeID ];
 
-            var entries = this.initializeProperty.entries;
+            // this.initializeProperty shares an entries object w/ this.createProperty and 
+            // this.setProperty so they can manage property delegations that occur from one 
+            // function to the other (for example, an initializeProperty that delegates to 
+            // another property in the property's setter, and thus calls setProperty for the 
+            // delegation)
+            var entries = this.setProperty.entries;
 
             // Record calls into this function by nodeID and propertyName so that models may call
             // back here (directly or indirectly) to delegate responses further down the chain
@@ -2931,8 +2939,6 @@ if ( ! childComponent.source ) {
             return propertyValue;
         };
 
-        this.initializeProperty.entries = {}; // maps ( nodeID + '-' + propertyName ) => { index: i, value: v }
-
         // -- setProperty --------------------------------------------------------------------------
 
         /// Set a property value on a node.
@@ -2949,6 +2955,16 @@ if ( ! childComponent.source ) {
 
             var node = nodes.existing[ nodeID ];
 
+            // Determine if property needs to be created or intialized instead of just set:
+            // -Create the property if it doesn't exist on this node or its prototypes.
+            // -Initialize it if it exists on a prototype but not on this node.
+            if ( ! node.properties.has( propertyName ) ) {
+                return this.createProperty( nodeID, propertyName, propertyValue );
+            } 
+            if ( ! node.properties.hasOwn( propertyName ) ) {
+                return this.initializeProperty( nodeID, propertyName, propertyValue );
+            }
+
             var entries = this.setProperty.entries;
 
             // Record calls into this function by nodeID and propertyName so that models may call
@@ -2964,24 +2980,6 @@ if ( ! childComponent.source ) {
             // Current entry to setProperty for this property on this node
             var thisEntry = {};
             entries[ thisProperty ] = thisEntry;
-
-            // Select the actual driver calls. Create the property if it doesn't exist on this node
-            // or its prototypes. Initialize it if it exists on a prototype but not on this node.
-            // Set it if it already exists on this node.
-            if ( ! node.properties.has( propertyName ) || outerEntry.creating ) {
-                thisEntry.creating = true;
-                var settingPropertyEtc = "creatingProperty";
-                var satPropertyEtc = "createdProperty";
-                node.properties.create( propertyName );
-            } else if ( ! node.properties.hasOwn( propertyName ) || outerEntry.initializing ) {
-                thisEntry.initializing = true;
-                var settingPropertyEtc = "initializingProperty";
-                var satPropertyEtc = "initializedProperty";
-                node.properties.create( propertyName );
-            } else {
-                var settingPropertyEtc = "settingProperty";
-                var satPropertyEtc = "satProperty";
-            }
 
             var isOutermostEntry = ( outerEntry.driverIndex === undefined );
 
@@ -3022,11 +3020,7 @@ if ( ! childComponent.source ) {
                 var numAssignmentsBeforeDriverCall = entries.numAssignments;
 
                 // Make the call.
-                if ( ! delegated && ! assigned ) {
-                    var value = modelDriver[settingPropertyEtc] && modelDriver[settingPropertyEtc]( nodeID, propertyName, propertyValue );
-                } else {
-                    modelDriver[settingPropertyEtc] && modelDriver[settingPropertyEtc]( nodeID, propertyName, undefined );
-                }
+                var value = modelDriver.settingProperty && modelDriver.settingProperty( nodeID, propertyName, propertyValue );
 
                 // Ignore the result if reentry is disabled and the driver attempted to call
                 // back into the kernel. Kernel reentry is disabled during replication to 
@@ -3055,11 +3049,8 @@ if ( ! childComponent.source ) {
                     }
                 }
 
-                // If we are setting, exit from the this.models.some() iterator once the value
-                // has been set. Don't exit early if we are creating or initializing since every
-                // model driver needs the opportunity to register the property.
-
-                return settingPropertyEtc == "settingProperty" && ( delegated || assigned );
+                // Exit from the this.models.some() iterator once the valu has been set.
+                return delegated || assigned;
 
             }, this );
 
@@ -3078,7 +3069,7 @@ if ( ! childComponent.source ) {
 
             if ( assigned ) {
                 this.views.forEach( function( view ) {
-                    view[ satPropertyEtc ] && view[ satPropertyEtc ]( nodeID, propertyName, propertyValue );
+                    view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );
                 } );
 
                 // Clean up since we've assigned the property
@@ -3100,7 +3091,7 @@ if ( ! childComponent.source ) {
             return propertyValue;
         };
 
-        this.setProperty.entries = {}; // maps ( nodeID + '-' + propertyName ) => { index: i, value: v }
+        this.setProperty.entries = {}; // maps ( nodeID + '-' + propertyName ) => { ... }
 
         // -- getProperty --------------------------------------------------------------------------
 
