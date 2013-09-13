@@ -2678,10 +2678,10 @@ if ( ! childComponent.source ) {
             // TODO: need unique nodeID+propertyName hash
             var thisProperty = nodeID + '-' + propertyName;
 
-            // Previous entry to setProperty for this property on this node
+            // Previous entry to createProperty for this property on this node
             var outerEntry = entries[ thisProperty ] || {};
 
-            // Current entry to setProperty for this property on this node
+            // Current entry to createProperty for this property on this node
             var thisEntry = {};
             entries[ thisProperty ] = thisEntry;
 
@@ -2690,19 +2690,19 @@ if ( ! childComponent.source ) {
             var isOutermostEntry = ( outerEntry.driverIndex === undefined );
 
             if ( isOutermostEntry ) {
-                // Keep track of the number of assignments made by this `setProperty` call and 
+                // Keep track of the number of assignments made by this `createProperty` call and 
                 // others invoked indirectly by it, starting with the first call.
                 entries.numAssignments = 0;
             }
 
-            // We'll need to know if the set was:
+            // We'll need to know if the create was:
             // -delegated to other properties or
             // -actually assigned here
             var delegated = false, assigned = false;
 
-            // Call settingProperty() on each model. The first model to return a non-undefined 
-            // value has performed the set and dictates the return value. The property is 
-            // considered set after all models have run.
+            // Call creatingProperty() on each model. The first model to return a non-undefined 
+            // value has performed the create and dictates the return value. The property is 
+            // considered created after all models have run.
             this.models.forEach( function( modelDriver, driverIndex ) {
 
                 // Skip initial model drivers that a previous call has already invoked for this 
