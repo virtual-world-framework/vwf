@@ -77,7 +77,12 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
                         new Alea( JSON.stringify( parent.prng.state ), childID ) :  // ... the parent's prng and the child ID, or
                         new Alea( configuration.active["random-seed"], childID ),   // ... the global seed and the child ID
 
-                    // Change list for patchable objects. This field is omitted until needed.
+                    // TODO: The 'patches' object is in the process of moving to the kernel
+                    //       Those objects that are double-commented out have already moved
+                    //       Those that are single-commented out have yet to move.
+
+                    // Change list for patchable objects. This comment shows the structure of the 
+                    // object, but it is created later dynamically as needed
 
                     // patches: {
                     //     // root: true,             // node is the root of the component -- moved to kernel's node registry
@@ -86,6 +91,8 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
                     //     // properties: true,       // placeholder for a property change list -- moved to kernel's node registry
                     //     methods: [],               // array of method names for methods that changed
                     // },
+
+                    // END TODO
 
                     initialized: false,
 
