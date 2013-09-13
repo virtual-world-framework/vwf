@@ -2794,6 +2794,145 @@ if ( ! childComponent.source ) {
 
         this.createProperty.entries = {}; // maps ( nodeID + '-' + propertyName ) => { ... }
 
+        // -- initializeProperty --------------------------------------------------------------------------
+
+        /// Initialize a property value on a node.
+        /// 
+        /// @name module:vwf.initializeProperty
+
+        this.initializeProperty = function( nodeID, propertyName, propertyValue ) {
+
+            this.logger.debuggx( "initializeProperty", function() {
+                return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];
+            } );
+
+            var node = nodes.existing[ nodeID ];
+
+            var entries = this.initializeProperty.entries;
+
+            // Record calls into this function by nodeID and propertyName so that models may call
+            // back here (directly or indirectly) to delegate responses further down the chain
+            // without causing infinite recursion.
+
+            // TODO: need unique nodeID+propertyName hash
+            var thisProperty = nodeID + '-' + propertyName;
+
+            // Previous entry to initializeProperty for this property on this node
+            var outerEntry = entries[ thisProperty ] || {};
+
+            // Current entry to initializeProperty for this property on this node
+            var thisEntry = {};
+            entries[ thisProperty ] = thisEntry;
+
+            node.properties.create( propertyName );
+
+            var isOutermostEntry = ( outerEntry.driverIndex === undefined );
+
+            if ( isOutermostEntry ) {
+                // Keep track of the number of assignments made by this `initializeProperty` call
+                // and others invoked indirectly by it, starting with the first call.
+                entries.numAssignments = 0;
+            }
+
+            // We'll need to know if the initialize was:
+            // -delegated to other properties or
+            // -actually assigned here
+            var delegated = false, assigned = false;
+
+            // Call initializingProperty() on each model. The first model to return a non-undefined 
+            // value has performed the initialize and dictates the return value. The property is 
+            // considered initialized after all models have run.
+            this.models.forEach( function( modelDriver, driverIndex ) {
+
+                // Skip initial model drivers that a previous call has already invoked for this 
+                // node and property (if any).
+                var driverInvoked = ( !isOutermostEntry && ( driverIndex <= outerEntry.driverIndex ) );
+                if ( driverInvoked ) {
+                  return false;
+                }
+
+                // If a reentrant call completed for this node and property, skip the remaining
+                // model drivers.
+                if ( thisEntry.propertyAssignedByPreviousEntry ) {
+                  return true;
+                }
+
+                // Record the active model driver number.
+                thisEntry.driverIndex = driverIndex;
+
+                // Record the number of assignments so we can check after the driver call to see 
+                // if it delegated to another property.
+                var numAssignmentsBeforeDriverCall = entries.numAssignments;
+
+                // Make the call.
+                if ( ! delegated && ! assigned ) {
+                    var value = modelDriver.initializingProperty && modelDriver.initializingProperty( nodeID, propertyName, propertyValue );
+                } else {
+                    modelDriver.initializingProperty && modelDriver.initializingProperty( nodeID, propertyName, undefined );
+                }
+
+                // Ignore the result if reentry is disabled and the driver attempted to call
+                // back into the kernel. Kernel reentry is disabled during replication to 
+                // prevent coloring from accessor scripts.
+
+                if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
+                    value = undefined;
+                }
+
+                var valueExists = ( value !== undefined );
+
+                // If 'entries.numAssignments' changes during the driver call, it means that it
+                // delegated to another property.
+                var delegated = ( entries.numAssignments !== numAssignmentsBeforeDriverCall );
+
+                if ( valueExists ) {
+
+                    // Record the value actually assigned. This may differ from the incoming value
+                    // if it was range limited, quantized, etc. by the model driver. This is the value
+                    // passed to the views.
+                    propertyValue = value;
+
+                    if ( ! delegated ) {
+                        entries.numAssignments++;
+                        assigned = true;
+                    }
+                }
+            }, this );
+
+            // Record the change if the property was assigned here.
+
+            if ( assigned && node.initialized && node.patchable ) {
+                node.properties.change( propertyName );
+            }
+
+            if ( isOutermostEntry ) {
+
+                // The first entry calls initializedProperty() on each view.
+                this.views.forEach( function( view ) {
+                    view.initializedProperty && view.initializedProperty( nodeID, propertyName, propertyValue );
+                } );
+
+                // Clean up since we've assigned the property
+                delete entries[ thisProperty ];
+                delete entries.assignments;
+
+            } else {
+
+                // For a reentrant call, restore the previous state, move the index forward to cover
+                // the models we called.
+
+                entries[ thisProperty ] = outerEntry;
+                outerEntry.propertyAssignedByPreviousEntry = true;
+
+            }
+
+            this.logger.debugu();
+
+            return propertyValue;
+        };
+
+        this.initializeProperty.entries = {}; // maps ( nodeID + '-' + propertyName ) => { index: i, value: v }
+
         // -- setProperty --------------------------------------------------------------------------
 
         /// Set a property value on a node.
