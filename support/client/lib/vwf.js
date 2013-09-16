@@ -2677,8 +2677,7 @@ if ( ! childComponent.source ) {
                 return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];
             } );
 
-            propertyValue = prepareProperty( "creatingProperty", "createdProperty", 
-                                             nodeID, propertyName, propertyValue, 
+            propertyValue = prepareProperty( "create", nodeID, propertyName, propertyValue, 
                                              propertyGet, propertySet );
 
             this.logger.debugu();
@@ -2698,8 +2697,7 @@ if ( ! childComponent.source ) {
                 return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];
             } );
 
-            propertyValue = prepareProperty( "initializingProperty", "initializedProperty", 
-                                             nodeID, propertyName, propertyValue );
+            propertyValue = prepareProperty( "initialize", nodeID, propertyName, propertyValue );
 
             this.logger.debugu();
 
@@ -4640,8 +4638,25 @@ if ( ! childComponent.source ) {
         };
 
         // Contains the meat of what happens in createProperty and initializeProperty
-        var prepareProperty = function( modelFunc, viewFunc, nodeID, propertyName, propertyValue, 
+        var prepareProperty = function( action, nodeID, propertyName, propertyValue, 
                                         propertyGet, propertySet ) {
+
+            var modelFunc;
+            var viewFunc;
+            switch ( action ) {
+                case "create":
+                    modelFunc = "creatingProperty";
+                    viewFunc = "createdProperty";
+                    break;
+                case "initialize":
+                    modelFunc = "initializingProperty";
+                    viewFunc = "initializedProperty";
+                    break;
+                default:
+                    that.logger.errorx( "prepareProperty", "Cannot perform invalid action '" + 
+                                                           action + "'" );
+                    return;
+            }
 
             var node = nodes.existing[ nodeID ];
 
