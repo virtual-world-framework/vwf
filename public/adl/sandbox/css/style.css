@@ -183,7 +183,7 @@ text-align:left;
 .slide-item p{
 	font-size: 31px;
 	color: #eee;
-	text-shadow: none;
+	text-shadow: 0 1px 1px #445163;
 	text-align: right;
 	line-height: 36px;
 	border-radius: 2px;

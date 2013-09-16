@@ -4,35 +4,37 @@
 		
 			<h1>Open source</h1>
 		</div>
-		<div class="span12" style="border-top:1px solid #eee;padding-top:30px;"></div>
+		<div class="span6">
 		
-		<div class="span3">
-			<h4>Cool Point</h4>
-			<ul>
-			
-				<li>Item 1</li>
-				<li>Item 2</li>
-				<li>Item 3</li>
+			<div class="span3">
+				<h4>Cool Point</h4>
+				<ul>
 				
-			</ul>
-		</div>
-		<div class="span3">
-			<h4>Another cool point</h4>
-			<ul>
-			
-				<li>Item 1</li>
-				<li>Item 2</li>
-				<li>Item 3</li>
+					<li>Item 1</li>
+					<li>Item 2</li>
+					<li>Item 3</li>
+					
+				</ul>
+			</div>
+			<div class="span2">
+				<h4>Another cool point</h4>
+				<ul>
 				
-			</ul>
+					<li>Item 1</li>
+					<li>Item 2</li>
+					<li>Item 3</li>
+					
+				</ul>
+			</div>
 		</div>
-
-		<div class="span6" style="margin-top:10px">
+		<div class="span6">
 			<iframe class="wideFrame" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
 		</div>
+		
 	</div>
 	<div class="row" style="margin-top:60px;">
-		<div class="span12" style="border-top:1px solid #eee;padding-top:30px;"></div>
+		<div class="span12" style="border-top:1px solid #eee;padding-top:30px;"><h1>Explore</h1></div>
+
 	</div>
 	<div class="row" style="margin-top:30px;" data-bind="foreach:featuredWorldObjects">
 		<div class="span4" style="text-align:center;">
@@ -49,7 +51,7 @@
 	<script>
 		var slideInterval = 0;
 		$(document).ready(function(){
-			var totalSlides = 4, tempSlides = 0, transitionSpeed = 1500;
+			var totalSlides = 4, tempSlides = 0, transitionSpeed = 1500, isIntervalActive = true;
 			var currentSlideState = Math.floor(Math.random() * totalSlides);
 			
 			$(".slide-item").not(".slide-item" + currentSlideState).css("left", "1200px");
@@ -61,6 +63,19 @@
 				e.stopPropagation();
 				return false;
 			});
+			$('.sliderContainer').mouseover(function(e){
+				window.clearInterval(slideInterval);
+				isIntervalActive = false;
+				
+			}); 
+			$('.sliderContainer').mouseout(function(e){
+				if(! isIntervalActive){
+					isIntervalActive = true;
+					slideInterval = window.setInterval(animateSlides, 13000);
+				}
+			}); 
+			
+			
 			
 			ko.applyBindings(vwfPortalModel);
 			getLoginInfo();
