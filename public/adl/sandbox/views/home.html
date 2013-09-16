@@ -35,9 +35,9 @@
 		<div class="span12" style="border-top:1px solid #eee;padding-top:30px;"></div>
 	</div>
 	<div class="row" style="margin-top:30px;" data-bind="foreach:featuredWorldObjects">
-		<div class="span4">
+		<div class="span4" style="text-align:center;">
 			<a data-bind="attr:{href:'{{root}}/'+id}" >
-				<img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}" style="width:140px;height:110px;margin-top:4px;border: 1px solid #ddd;padding:1px;"/>
+				<img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}" style="width:190px;height:130px;margin-top:4px;border: 1px solid #ddd;padding:1px;"/>
 			</a>
 			
 			<div>
@@ -53,7 +53,14 @@
 			var currentSlideState = Math.floor(Math.random() * totalSlides);
 			
 			$(".slide-item").not(".slide-item" + currentSlideState).css("left", "1200px");
+			$(".slide-item" + currentSlideState + " .pContainer").css({top:"317px"});
 			$(".linkMenu").css("margin-bottom", "0");
+			
+			$('.slide-item').mousedown(function(e){
+				e.preventDefault();
+				e.stopPropagation();
+				return false;
+			});
 			
 			ko.applyBindings(vwfPortalModel);
 			getLoginInfo();
@@ -69,12 +76,14 @@
 			};
 			
 			var animateSlides = function(){
+				$(".slide-item" + currentSlideState + " .pContainer").animate({top:"370px"});
 				$(".slide-item" + currentSlideState).animate({left:"-1200px"}, transitionSpeed, "swing", function(){
 					incrementCurrentSlideState();
 					$(this).css("left", "1200px");
 				});
 				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).animate({left:"0px"}, transitionSpeed, "swing", function(){
 					incrementCurrentSlideState();
+					$(this).children(".pContainer").animate({top:"317px"});
 				});
 			};
 			

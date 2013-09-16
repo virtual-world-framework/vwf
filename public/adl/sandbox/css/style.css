@@ -141,8 +141,7 @@ text-align:left;
 
 .divContent0{
 	width:485px;
-	left: 39px;
-	top: 17px;
+	left: 15px;
 }
 .divContent3{
 	width: 485px;
@@ -163,30 +162,34 @@ text-align:left;
 }
 
 .slide-item{
-
 	height:368px;
 	width:1200px;
 	position:absolute;
 	float:left;
+	cursor: default;
 }
 
 .slide-item div{
-	position:relative;
+	position:absolute;
 }
+
+.pContainer{
+
+	top: 370px;
+	height: 55px;
+	width:100%;
+}
+
 .slide-item p{
 	font-size: 31px;
-	color: #444;
+	color: #eee;
 	text-shadow: none;
 	text-align: right;
-	width: 45%;
 	line-height: 36px;
 	border-radius: 2px;
-	border: 1px solid rgba(201, 201, 201, 0.47);
+	border: 1px solid rgba(160, 160, 160, 0.2);
 	padding: 6px;
-	background: rgba(238, 238, 238, 0.6);
-	position: absolute;
-	top: 283px;
-	left: 646px;
+	background: rgba(15, 15, 15, 0.25);
 }
 
 .content{
