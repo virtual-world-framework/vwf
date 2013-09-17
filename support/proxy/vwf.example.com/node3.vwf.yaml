@@ -254,6 +254,15 @@ properties:
                         t = this.transformAPI.scaleMatrix(scale,t);
                         this.transform = t;
                     }
+                    if(axis == '-Y')
+                    {
+                        t[0] = -side[0]; t[1] = -side[1]; t[2] = -side[2]; t[3] = 0;
+                        t[4] = -tovec[0]; t[5] = -tovec[1]; t[6] = -tovec[2]; t[7] = 0;
+                        t[8] = up[0]; t[9] = up[1]; t[10] = up[2]; t[11] = 0;
+                        t[12] = pos[0]; t[13] = pos[1]; t[14] = pos[2]; t[15] =1;
+                        t = this.transformAPI.scaleMatrix(scale,t);
+                        this.transform = t;
+                    }
                     if(axis == 'X')
                     {
                         t[0] = -tovec[0]; t[1] = -tovec[1]; t[2] = -tovec[2]; t[3] = 0;
