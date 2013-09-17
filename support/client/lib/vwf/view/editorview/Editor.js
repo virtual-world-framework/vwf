@@ -1801,7 +1801,10 @@ define(function ()
 		this.updateGizmoLocation = function ()
 		{
 			if(!this.GetSelectedVWFNode()) return;
-			var childmat = toGMat(this.findviewnode(this.GetSelectedVWFNode().id).matrixWorld);
+			var viewnode = this.findviewnode(this.GetSelectedVWFNode().id);
+			if(!viewnode)
+				return;
+			var childmat = toGMat(viewnode.matrixWorld);
 			lastpos[0] = [childmat[3], childmat[7], childmat[11]];
 			var gizpos = [0, 0, 0];
 			gizpos = [childmat[3], childmat[7], childmat[11]];
@@ -1840,6 +1843,10 @@ define(function ()
 			SelectionBounds = [];
 			for (var i = 0; i < SelectedVWFNodes.length; i++)
 			{
+				//for nodes that have no 3D viewnode
+				if(!self.findviewnode(SelectedVWFNodes[i].id))
+					continue;
+					
 				var box;
 				var mat;
 				box = self.findviewnode(SelectedVWFNodes[i].id).getBoundingBox(true);

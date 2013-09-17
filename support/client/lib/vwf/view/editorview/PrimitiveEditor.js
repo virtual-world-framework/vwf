@@ -214,6 +214,29 @@ define(function ()
 				}
 			}
 		}
+		
+		this.callMethod = function (id, method)
+		{
+			if(document.PlayerNumber == null)
+			{
+			_Notifier.notify('You must log in to participate');
+			return;
+			}
+			if (id != 'selection')
+			{
+				if(_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),id) == 0)
+				{
+				_Notifier.notify('You do not have permission to edit this object');
+				return;
+				}
+				vwf_view.kernel.callMethod(id, method);
+			}
+			if (id == 'selection')
+			{
+				alertify.alert('calling methods on multiple selections is not supported');
+			}
+		}
+		
 		this.SelectionChanged = function (e, node)
 		{
 			try
@@ -386,6 +409,7 @@ define(function ()
 			var nodeid = node.id;
 			if (wholeselection && _Editor.getSelectionCount() > 1) nodeid = 'selection';
 			var editordata = vwf.getProperty(node.id, 'EditorData');
+			
 			editordatanames = [];
 			for (var i in editordata)
 			{
@@ -430,6 +454,19 @@ define(function ()
 						$('#' + i + nodeid).attr('checked', 'checked');
 					}
 					//$('#'+i).
+				}
+				if (editordata[i].type == 'button')
+				{
+					
+					$('#basicSettings' + nodeid).append('<div id="' + nodeid + i + '" nodename="' + nodeid + '" methodname="' + editordata[i].method + '"/>');
+					$('#' + nodeid + i).button({label:editordata[i].label});
+					$('#' + nodeid + i).css('display','block');
+					$('#' + nodeid + i).click(function()
+					{
+						var nodename = $(this).attr('nodename');
+						var method = $(this).attr('methodname');
+						_PrimitiveEditor.callMethod(nodename, method);
+					});
 				}
 				if (editordata[i].type == 'choice')
 				{

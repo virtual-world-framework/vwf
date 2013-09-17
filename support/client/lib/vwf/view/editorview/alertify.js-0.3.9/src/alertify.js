@@ -126,6 +126,7 @@
 
 				// ok event handler
 				ok = function (event) {
+				
 					if (typeof event.preventDefault !== "undefined") event.preventDefault();
 					common(event);
 					if (typeof input !== "undefined") val = input.value;
@@ -596,6 +597,7 @@
 						choices[i].className = 'choice';
 					}
 					
+					if(choices[0])
 					choices[0].className = 'choiceSelected';
 					input.value = item.placeholder[0];
 					

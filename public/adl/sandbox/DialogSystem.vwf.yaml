@@ -1,0 +1,99 @@
+---
+  extends: "http://vwf.example.com/behavior.vwf"
+  properties: 
+    NotProto: ""
+    type: "behavior"
+    DisplayName: "DialogSystem"
+    owner: "Rob"
+    initialDialogIndex: "8e0b6a42313d45aed6103ee4bd53b264"
+    prompt: 
+      - 
+        message: "Hi!"
+        id: "8e0b6a42313d45aed6103ee4bd53b264"
+        choices: 
+          - "Hello!"
+          - "How was your day?"
+        outputs: 
+          - "20b3bda85d2d1d544d4956051e01d561"
+          - "91eba7c7daec316eb788bcdd10a1a64"
+        editorData: 
+          - 110
+          - 245
+      - 
+        message: "Goodbye!"
+        id: "20b3bda85d2d1d544d4956051e01d561"
+        choices: []
+        outputs: []
+        editorData: 
+          - 1400
+          - 275
+      - 
+        message: "Not bad. Yours?"
+        id: "91eba7c7daec316eb788bcdd10a1a64"
+        choices: 
+          - "Good, thanks"
+          - "Long...."
+        outputs: 
+          - "316a0fbb1e573f91bcf3676b4171d6"
+          - "8b1ccb71f53dcd17b6556c73084f287"
+        editorData: 
+          - 475
+          - 410
+      - 
+        message: "I'm sorry to hear that."
+        id: "8b1ccb71f53dcd17b6556c73084f287"
+        choices: 
+          - "Well, I've got to go"
+        outputs: 
+          - "20b3bda85d2d1d544d4956051e01d561"
+        editorData: 
+          - 860
+          - 596
+      - 
+        message: "I'm glad to hear that"
+        id: "316a0fbb1e573f91bcf3676b4171d6"
+        choices: 
+          - "Well, I've got to go."
+        outputs: 
+          - "20b3bda85d2d1d544d4956051e01d561"
+        editorData: 
+          - 859
+          - 409
+    EditorData: 
+      edit: 
+        type: "button"
+        method: "EditDialog"
+        label: "Edit Dialog"
+      choose: 
+        type: "button"
+        method: "SetStartNode"
+        label: "Select Start Prompt"
+  methods: 
+    findPrompt: 
+      body: "                                                                                                                                                                                                                            var prompts = this.prompt.internal_val;\n    for(var i = 0; i < prompts.length; i++)\n    {\n        if(prompts[i].id == promptnum)\n            return prompts[i];\n    }                                                                                                                                                                                                                            "
+      parameters: 
+        - "promptnum"
+    promptChoice: 
+      body: "                                                                                                                                                                                                                            var c = -1;\n    for (var i = 0; i < prompt.choices.length; i++)\n    {\n        if (prompt.choices[i] == choice) c = i;\n    }\n    this.showPrompt(prompt.outputs[c]);                                                                                                                                                                                                                            "
+      parameters: 
+        - "choice"
+        - "prompt"
+    showPrompt: 
+      body: "                                                                                                                                                                                                                            var cur_prompt = this.findPrompt(promptnum);\n\n  \n    if (this.client == this.moniker)\n    {\n        alertify.choice(cur_prompt.message, function(ok, val)\n        {\n            if (ok)\n                vwf_view.kernel.callMethod(this.id, 'promptChoice', [val, this.prompt]);\n\n        }.bind(\n        {\n            id: this.id,\n            prompt: cur_prompt\n        }), cur_prompt.choices);\n    }                                                                                                                                                                                                                            "
+      parameters: 
+        - "promptnum"
+    initialize: 
+      body: "               $(document.head).append('<script type=\\\"text/javascript\\\" src=\\\"./js/dialogEditor.js\\\"></script>');\n      this.editor = new DialogEditor();\n      this.editor.init(null, this.id);               "
+      parameters: []
+    EditDialog: 
+      body: "       if(this.client == this.moniker)\n        this.editor.open();       "
+      parameters: []
+    SetStartNode: 
+      body: "       if (this.client == this.moniker)\n    {\n        var choices = [];\n        for (var i = 0; i < this.prompt.internal_val.length; i++)\n        {\n            choices.push(this.prompt[i].internal_val.message);\n        }\n        alertify.choice(\"Choose the node to start the conversation\", function(ok, val)\n        {\n            if (!ok) return;\n            var id = '';\n            for (var i = 0; i < this.prompt.internal_val.length; i++)\n            {\n                if (this.prompt[i].internal_val.message == val)\n                    id = this.prompt[i].internal_val.id;\n            }\n            vwf_view.kernel.setProperty(this.id, 'initialDialogIndex', id);\n        }.bind(this), choices);\n\n    }       "
+      parameters: []
+  events: 
+    pointerClick: 
+      parameters: 
+        - "                                                                                                                                                                                                                            eventData"
+        - "                                                                                                                                                                                                                            nodeData                                                                                                                                                                                                                            "
+      body: "                                                                                                                                                                                                                            if(eventData.button == 'left')\n      this.showPrompt(this.initialDialogIndex);"

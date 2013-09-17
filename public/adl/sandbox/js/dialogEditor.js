@@ -94,6 +94,11 @@ DialogEditor.prototype.close = function()
 }
 DialogEditor.prototype.open = function()
 {
+	
+	$(this.rootSelector).css('display','block');
+	$(this.dialogSelector).children('.dialogNodeRoot').remove();
+	this.nodes = [];
+	$(this.lineSelector).empty();
 	var prompts = vwf.getProperty(this.vwfID,'prompt');
 	if(prompts)
 	{
@@ -140,7 +145,7 @@ DialogEditor.prototype.open = function()
 	}.bind(this),300);
 	
 	}.bind(this),300);
-	$(this.rootSelector).css('display','block');
+	
 	$(this.rootSelector).focus();
 }
 DialogEditor.prototype.ok = function()
@@ -342,9 +347,8 @@ DialogNode.prototype.drag = function()
 DialogNode.prototype.setPosition = function(pos)
 {
 	if(pos)
-	{
-		pos[0] += $(this.parent.dialogSelector).offset().left; 
-		pos[1] -= $(this.parent.dialogSelector).offset().top;
+	{	
+		
 		$(this.selfSelector).css('left',pos[0]+'px');
 		$(this.selfSelector).css('top',pos[1]+'px');
 		$(this.selfSelector).css('position','absolute');
@@ -356,7 +360,13 @@ DialogNode.prototype.serialize = function()
 	var rowsDivs = $(this.tableSelector + " .tablerow");
 	var rowText = [];
 	var rowLink = [];
+	
 	var offset = $(this.selfSelector).offset();
+	
+	
+		offset.left -= $(this.parent.dialogSelector).offset().left; 
+		offset.top -= $(this.parent.dialogSelector).offset().top;
+	
 	for(var i =0 ; i< rowsDivs.length; i++)
 	{
 		rowText.push($(rowsDivs[i]).children('input').val());

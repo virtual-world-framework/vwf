@@ -6,6 +6,7 @@ function heightmapTerrainAlgorithm()
 	{
 		this.data = data.data;
 		console.log('data received');
+		
 		this.dataHeight = data.dataHeight;
 		this.dataWidth = data.dataWidth;
 		this.worldLength = data.worldLength || 13500;
@@ -68,6 +69,10 @@ function heightmapTerrainAlgorithm()
 			xhr.onload = function(e) {
 				if (xhr.status === 200) {
 				  buff = xhr.response;
+				  
+				  var t = new Date();
+					while((new Date()) - t < 10000){};
+				  
 				  self2.parseBT(buff,cb);
 				} else
 				{

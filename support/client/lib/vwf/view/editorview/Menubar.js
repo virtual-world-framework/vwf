@@ -237,6 +237,12 @@ define(
 		{
 			_Editor.CreateBehavior('rotator', _UserManager.GetCurrentUserName());
 		});
+		$('#MenuCreateBehaviorDialog').click(function (e)
+		{
+			_Editor.CreateBehavior('DialogSystem', _UserManager.GetCurrentUserName());
+		});
+		
+		
 		$('#MenuCreateBehaviorOrbit').click(function (e)
 		{
 			_Editor.CreateBehavior('orbit', _UserManager.GetCurrentUserName());
