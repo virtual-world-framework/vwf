@@ -55,7 +55,7 @@
 			var currentSlideState = Math.floor(Math.random() * totalSlides);
 			
 			$(".slide-item").not(".slide-item" + currentSlideState).css("left", "1200px");
-			$(".slide-item" + currentSlideState + " .pContainer").css({top:"317px"});
+			$(".slide-item" + currentSlideState + " .pContainer").css({top:"324px"});
 			$(".linkMenu").css("margin-bottom", "0");
 			
 			$('.slide-item').mousedown(function(e){
@@ -71,7 +71,7 @@
 			$('.sliderContainer').mouseout(function(e){
 				if(! isIntervalActive){
 					isIntervalActive = true;
-					slideInterval = window.setInterval(animateSlides, 13000);
+					slideInterval = window.setInterval(animateSlides, 15000);
 				}
 			}); 
 			
@@ -98,11 +98,11 @@
 				});
 				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).animate({left:"0px"}, transitionSpeed, "swing", function(){
 					incrementCurrentSlideState();
-					$(this).children(".pContainer").animate({top:"317px"});
+					$(this).children(".pContainer").animate({top:"324px"});
 				});
 			};
 			
-			slideInterval = window.setInterval(animateSlides, 13000);
+			slideInterval = window.setInterval(animateSlides, 15000);
 		});
 		
 		
