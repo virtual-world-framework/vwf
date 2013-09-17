@@ -210,7 +210,7 @@ SceneManager.prototype.getTexture = function(src,noclone)
 	if(noclone) 
 		return ret;
 	ret = new THREE.Texture(ret.image);
-    ret.needsUpdate  = true;
+	ret.needsUpdate  = true;
 	this.textureList[src].clones.push(ret);
     return ret;	
 }

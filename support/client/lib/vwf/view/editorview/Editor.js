@@ -213,6 +213,7 @@ define(function ()
 		//	$('#vwf-root').mousedown(function(e){
 		this.mousedown_Gizmo = function (e)
 		{
+			
 			$('#index-vwf').focus();
 			$('#ContextMenu').hide();
 			$('#ContextMenu').css('z-index', '-1');

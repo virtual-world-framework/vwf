@@ -713,7 +713,7 @@ scripts:
     }
     this.localpointerDown = function( parms, pickInfo ){
      
-     
+      parms.preventDefault();
       if(parms.which == 1) this.leftdown = true;
       if(parms.which == 2) this.middledown = true;
       if(parms.which == 3) this.rightdown = true;
@@ -752,6 +752,7 @@ scripts:
     }
     this.localpointerUp = function( parms, pickInfo ){
       
+      parms.preventDefault();
       if(parms.which == 1) this.leftdown = false;
       if(parms.which == 3) this.rightdown = false;
       if(parms.which == 2) this.middledown = false;
