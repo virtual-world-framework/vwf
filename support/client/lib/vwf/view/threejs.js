@@ -40,6 +40,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var translationMatrix;
     var positionUnderMouseClick;
     var boundingBox = undefined;
+    var userObjectRequested = false;
     // End Navigation
 
     return view.load( module, {
@@ -256,37 +257,42 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                     // it for this user (the rest of the logic is in the gotProperty call for 
                                     // userObject)
                                     this.kernel.getProperty( sceneRootID, "userObject" );
+                                    userObjectRequested = true;
                                 }
                             }
                         }
                     }
                 } else if ( propertyName == "userObject" ) {
 
-                    // The userObject property is only requested when the system wishes to create one for this 
-                    // user.  We do that here.
-                    
-                    // Set the userObject from the value received or a default if it is null/undefined
-                    var userObject = propertyValue || {
-                        "extends": "http://vwf.example.com/camera.vwf",
-                        "implements": [ "http://vwf.example.com/navigable.vwf" ]
-                    };
+                    if ( userObjectRequested ) {
+                        // The userObject property is only requested when the system wishes to create one for this 
+                        // user.  We do that here.
+                        
+                        // Set the userObject from the value received or a default if it is null/undefined
+                        var userObject = propertyValue || {
+                            "extends": "http://vwf.example.com/camera.vwf",
+                            "implements": [ "http://vwf.example.com/navigable.vwf" ]
+                        };
+    
+                        // Makes sure that the userObject has a properties field
+                        userObject[ "properties" ] = userObject[ "properties" ] || {};
+    
+                        // Set the object's owner to be this object
+                        userObject[ "properties" ][ "owner" ] = me;
+    
+                        // Save the name of the object globally so we can recognize it in 
+                        // initializedNode so we can take control of it there
+                        navObjectName = "navobj_" + me;
+    
+                        // TODO: The callback function is commented out because callbacks have not yet been 
+                        //       implemented for createChild - see workaround in initializedNode
+                        this.kernel.createChild( sceneRootID, navObjectName, userObject, undefined, undefined /*,
+                                                 function( nodeID ) {
+                            controlNavObject( this.state.nodes[ nodeID ] );
+                        } */ );
 
-                    // Makes sure that the userObject has a properties field
-                    userObject[ "properties" ] = userObject[ "properties" ] || {};
-
-                    // Set the object's owner to be this object
-                    userObject[ "properties" ][ "owner" ] = me;
-
-                    // Save the name of the object globally so we can recognize it in 
-                    // initializedNode so we can take control of it there
-                    navObjectName = "navobj_" + me;
-
-                    // TODO: The callback function is commented out because callbacks have not yet been 
-                    //       implemented for createChild - see workaround in initializedNode
-                    this.kernel.createChild( sceneRootID, navObjectName, userObject, undefined, undefined /*,
-                                             function( nodeID ) {
-                        controlNavObject( this.state.nodes[ nodeID ] );
-                    } */ );
+                        userObjectRequested = false;
+                    }                    
                 } else if ( propertyName == "makeOwnAvatarVisible" ) {
                     makeOwnAvatarVisible = propertyValue;
                     if ( navObject ) {
@@ -2657,6 +2663,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             vwf_view.kernel.getProperty( sceneRootID, "makeOwnAvatarVisible" );
             vwf_view.kernel.getProperty( sceneRootID, "boundingBox" );
             vwf_view.kernel.getProperty( sceneRootID, "userObject" );
+            userObjectRequested = true;
+
         }
     }
 
