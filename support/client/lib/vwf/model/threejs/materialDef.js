@@ -18,7 +18,32 @@
 					return this.materials[id];				
 					
 				}
-			}	
+			}
+			//assign the new material to the mesh, keep reference count of material use
+			this.setMaterial = function(mesh,def)
+			{
+				
+				var oldmat = mesh.material;
+				if(oldmat && oldmat.refCount === undefined)
+					oldmat.refCount = 1;
+				if(oldmat)
+					oldmat.refCount--;	
+				mesh.material = this.getMaterialbyDef(def);
+				if(mesh.material && mesh.material.refCount === undefined)
+					mesh.material.refCount = 0;
+				if(mesh.material)
+					mesh.material.refCount++;
+				this.cleanup();
+			}
+			//remove materials that are not used by any meshes
+			this.cleanup = function()
+			{
+				for(var i in this.materials)
+				{
+					if(this.materials[i].refCount === 0)
+						delete this.materials[i];
+				}
+			}
 			this.setMaterialByDef = function(currentmat,value)
 			{
 				if(!value) return;
@@ -155,8 +180,8 @@
 		
 		
 		}
-		var _materialCache = new MaterialCache();
-		window._materialCache = _materialCache;
+		var _MaterialCache = new MaterialCache();
+		window._MaterialCache = _MaterialCache;
 		function materialDef(childID, childSource, childName)
 		{
 		    this.defaultmaterialDef = {
@@ -224,13 +249,14 @@
 					this.GetAllLeafMeshes(this.getRoot(),list);
 					for(var i =0; i < list.length; i++)
 					{
-						//if(!(list[i].material instanceof THREE.MeshPhongMaterial))
+						
 						if(list[i].morphTargetInfluences)
 							propval.morphTargets = true;
 						else
 							propval.morphTargets = false;
-							list[i].material =  _materialCache.getMaterialbyDef(propval);
-						//this.setMaterialByDef(list[i].material || new THREE.MeshPhongMaterial,propval);
+						_MaterialCache.setMaterial(list[i],propval);
+							
+						
 						list[i].materialUpdated();
 					}
 					
@@ -241,6 +267,18 @@
 					}
 				}
 			}
+			//get the material cache a chance to decrement the ref counter for the materails used by this object
+			this.deletingNode = function()
+			{
+				
+				var list = [];
+					
+				this.GetAllLeafMeshes(this.getRoot(),list);
+				for(var i =0; i < list.length; i++)
+				{
+					_MaterialCache.setMaterial(list[i],null);
+				}
+			}	
 			this.gettingProperty = function(propname,propval)
 			{
 				if(propname == 'materialDef')

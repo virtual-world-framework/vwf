@@ -143,6 +143,8 @@ properties:
         - Night1
         - Night2
         - Bright
+        - White
+        - Black
       values:
         - cloudy_noon
         - early_morning
@@ -153,6 +155,8 @@ properties:
         - night1
         - night2
         - bright
+        - white
+        - black
 events:
   keyDown:
   keyUp:
