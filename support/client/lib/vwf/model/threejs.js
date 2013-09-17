@@ -684,7 +684,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                     else if ( propertyName == "animationTimeUpdated" ) {
                         if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined) {
-                            var fps = this.state.kernel.getProperty( nodeID, "fps");
+                            var fps = this.state.kernel.getProperty( nodeID, "animationFPS") || 30;
                             for(var i = 0; i < node.threeObject.animatedMesh.length; i++) {
                                 for(var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++) {
                                     node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
@@ -692,15 +692,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * fps) ] = 1;
                             }
                         }
-                        else if(node.threeObject.kfAnimations && propertyValue !== undefined) {
-                            // The update in THREE.KeyFrameAnimation takes a delta time, so reset the animation to the beginning, 
-                            // and pass the current VWF animation time. Multiply the time by the animation rate so that the threejs
-                            // animation objects are in sync with VWf time.
-                            var animationRate = Math.abs(this.state.kernel.getProperty( nodeID, "animationRate" ));
+                        if(node.threeObject.kfAnimations && propertyValue !== undefined) {
                             for(var i = 0; i < node.threeObject.kfAnimations.length; i++) {
                                 node.threeObject.kfAnimations[i].stop()
                                 node.threeObject.kfAnimations[i].play(false, 0);
-                                node.threeObject.kfAnimations[i].update(propertyValue * animationRate);
+                                node.threeObject.kfAnimations[i].update(propertyValue);
                             } 
                         }
                     }
@@ -1397,13 +1393,48 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         value = animationDuration;
                     }
                     else if(node.threeObject.animatedMesh) {
-                        var fps = this.state.kernel.getProperty( nodeID, "fps");
+                        var fps = this.state.kernel.getProperty( nodeID, "animationFPS") || 30;
                         for(var i=0, il = node.threeObject.animatedMesh.length; i < il; i++) {
                             if(node.threeObject.animatedMesh[i].morphTargetInfluences.length > animationDuration) {
                                 animationDuration = node.threeObject.animatedMesh[i].morphTargetInfluences.length;
                             }
                         }
                         value = animationDuration / fps;
+                    }
+                    return value;
+                }
+
+                if(propertyName == "animationFPS") {
+                    if(node.threeObject.animations) {
+                        var animationDuration = 0;
+                        var animationFrameCount = 0;
+                        for(var i=0, il = node.threeObject.animations.length; i < il; i++) {
+                            for(var i=0, il = node.threeObject.animations.length; i < il; i++) {
+                                if(node.threeObject.animations[i].length > animationDuration) {
+                                    animationDuration = node.threeObject.animations[i].length;
+                                }
+                                if(node.threeObject.animations[i].hierarchy[0].keys.length > animationFrameCount) {
+                                    animationFrameCount = node.threeObject.animations[i].hierarchy[0].keys.length;
+                                }
+                            }
+                        }
+                        value = Math.floor(animationFrameCount / animationDuration);
+                    }
+                    return value;
+                }
+
+                if(propertyName == "animationFrameCount") {
+                    var animationFrameCount = 0;
+                    if(node.threeObject.animations) {
+                        for(var i=0, il = node.threeObject.animations.length; i < il; i++) {
+                            if(node.threeObject.animations[i].hierarchy[0].keys.length > animationFrameCount) {
+                                animationFrameCount = node.threeObject.animations[i].hierarchy[0].keys.length;
+                            }
+                        }
+                        value = animationFrameCount;
+                    }
+                    else if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length) {
+                        value = node.threeObject.animatedMesh[i].morphTargetInfluences.length;
                     }
                     return value;
                 }

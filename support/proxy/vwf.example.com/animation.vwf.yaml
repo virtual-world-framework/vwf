@@ -113,7 +113,7 @@ properties:
       var value = (
         ( this.animationPause$ != null ? this.animationPause$ : this.time ) -
         ( this.animationStart$ != null ? this.animationStart$ : this.time )
-      ) * rate + ( rate >= 0 ? this.animationStartTime : duration );
+      ) * rate + ( rate >= 0 ? this.animationStartTime : this.animationStopTime );
       // Range limit the value.
       value = Math.min( Math.max( this.animationStartTime, value ), this.animationStopTime );
       // If changed since last seen, update and fire the changed event.
@@ -148,8 +148,6 @@ properties:
       var duration = this.animationDuration, rate = value, startFrame = this.animationStartFrame, stopFrame = this.animationStopFrame;
       this.animationRate = rate;
       this.animationDuration$ = ( rate >= 0 ? duration : -duration ) / rate;
-      this.animationStartFrame = startFrame;
-      this.animationStopFrame = stopFrame;
     value: 1
 
   ## Automatically replay the animation from the start after reaching the end.
@@ -287,12 +285,35 @@ properties:
 
   ## The animation playback rate in frames per second. Setting this value automatically updates the "animationRate"
   ## to "fps" / 30
+  ## @deprecated
 
   fps: 
     set: |
-      this.animationRate = this.animationRate >= 0 ? value / 30 : value / -30;
+      this.animationRate = value / 30;
     get: |
-      return Math.abs(this.animationRate) * 30;
+      return this.animationRate * 30;
+
+  ## The frames per second of the animation loaded from the source model. This value cannot be changed.
+
+  animationFPS: 
+    set: |
+      this.logger.info("WARNING: animation animationFPS cannot be set" )
+
+  ## The number of frames of the animation loaded from the source model. This value cannot be changed.
+  animationFrameCount:
+    set: |
+      this.logger.info("WARNING: animation animationFrameCount cannot be set" )      
+
+  ## The current frame the animation is on. Equivalent to animationTime.
+  animationFrame:
+    set: |
+      if(this.animationFPS) {
+        this.animationTime = value / this.fps;
+      }
+    get: |
+      if(this.animationFPS) {
+        return Math.floor(this.animationTime * this.fps);
+      }
 
 methods:
 
@@ -309,7 +330,6 @@ methods:
       if(!isNaN(startTime)) {
         this.animationStartTime = startTime;
       }
-      this.animationTime = 0;
       this.animationPlaying = true;
 
   # Pause the animation at the current position.
