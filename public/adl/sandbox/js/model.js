@@ -352,7 +352,13 @@ function showStates(cb){
 }
 
 function sortArrByUpdates(a, b){
-	if(a().hotState == true && b().hotState == false)
+	if(a().featured == true && !b().featured)
+		return -1;			
+		
+	else if(b().featured == true && !a().featured)
+		return 1;		
+	
+	else if(a().hotState == true && b().hotState == false)
 		return -1;			
 	
 	else if(b().hotState == true && a().hotState == false)

@@ -1,39 +1,6 @@
-	<div class="row" style="height:426px;clear:both;">
-		<div data-bind="css: featuredWorldObjects().length>0?'span7':'span12'">
-			<div style="height: 114px;">
-				<p>
-					Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in
-					"cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a
-					new world" 
-				</p>
-			</div>
-			<iframe data-bind="css:featuredWorldObjects().length>0?'wideFrame':'frame'" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
-		</div>
-		<div class="span5" style="height:100%;" data-bind="visible:featuredWorldObjects().length>0">
-			<div class="featuredWorlds" data-bind="foreach:featuredWorldObjects">
-				<div class="featuredInstance" data-bind="css : $index() == 2 ? 'featuredInstanceLast' : 'featuredInstance'">
-					<div class="span2" style="margin-left:10px;">
-						<a data-bind="attr:{href:'{{root}}/'+id}">
-							<img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}" style="width:140px;height:110px;margin-top:4px;" />
-						</a>
-					</div>
-					<div class="span2" style="overflow:hidden; width:50%;">
-						<div>
-							<h4 style="margin-top:0;"><a style="color:inherit;" data-bind="text:title, attr:{href:'{{root}}/'+id}"></a></h4>
-							<p data-bind="text:$root.getShorterStr(description, 120)"></p>
-						</div>
-					</div>
-					<!--<div style="text-align:right;width:100%;float:left;">
-						<a href="/" data-bind="attr:{href:'{{root}}/'+id}">Load World</a>
-					</div>-->
-				</div>
-			</div>
-		</div>
-	</div>
 	<div class="row" style="margin-top:30px;">
 		<div class="span12">
 			<div class="row">
-			
 				<div class="span4" style="text-align:left;">
 					<button id="allWorlds" class="btn btn-small active" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">All Worlds</button>
 					<button id="yourWorlds" class="btn btn-small" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">Your Worlds</button>
@@ -48,20 +15,22 @@
 					<input id="filter" class="span3" style="width:90%;" type="text" placeholder="Filter Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
 				</div>
 			</div>
+			
 			<div class="row" id="activeRow" data-bind="foreach:displayWorldObjects">				
-				<div data-bind="visible:isVisible" class="span3">
-					<div class="worldBox" data-bind="event: {mouseover:$root.handleEditDisplay, mouseout:$root.handleEditDisplay}">
+				<div data-bind="visible:isVisible" class="span3 worldHeightPadding">
+					<div data-bind="event: {mouseover:$root.handleEditDisplay, mouseout:$root.handleEditDisplay}, css: $data.featured?'featuredInstance':'worldBox'">
+						
 						<div class="boxContentWrapper">
 							<div style="margin-bottom: 10px;">
 								<a data-bind="attr:{href:'{{root}}/'+id}, text:$root.getShorterStr(title, 20)" href="">Title</a>
 								<span class="owner" data-bind="text:' - ' + owner"></span>
 							</div>
-												
+							<img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}, visible:$data.featured" style="margin:0 auto;display:block;border:1px solid #ddd;padding:1px;" src="" />
 							<div class="worldInfo">
 								<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
 									<span class="description" data-bind="text:description?$root.getShorterStr(description, 75):'No description'"></span>
 									
-									<div style="margin-top: 5px;">
+									<div style="margin-top: 5px;" data-bind="visible:!$data.featured">
 										<span class="objects" data-bind="text: objects + (objects == 1 ? ' object ' : ' objects ')"></span>
 										&nbsp;<span class="lastModified stateid" data-bind="text:' (' + lastUpdate + ')' "></span>
 									</div>
@@ -76,7 +45,6 @@
 								<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
 							<!-- /ko -->
 						</div>
-						
 					</div>
 				</div>
 			</div>
