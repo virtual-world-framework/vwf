@@ -523,23 +523,23 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var oldMouseY = 0;
             var hovering = false;
             var view = this;
-            window.onresize = function () {
+            window.onresize = function ( ) {
                 var origWidth = self.width;
                 var origHeight = self.height;
                 if ( window && window.innerHeight ) self.height = window.innerHeight - 20;
                 if ( window && window.innerWidth ) self.width = window.innerWidth - 20;
 
-                if ((origWidth != self.width) || (origHeight != self.height)) {
+                if ( ( origWidth != self.width ) || ( origHeight != self.height ) ) {
                     mycanvas.height = self.height;
                     mycanvas.width = self.width;
                     if ( sceneNode.renderer ) {
-                        sceneNode.renderer.setViewport(0,0,window.innerWidth,window.innerHeight);
+                        sceneNode.renderer.setViewport( 0, 0, self.width, self.height );
                     }
                     
                     var viewCam = view.state.cameraInUse;
                     if ( viewCam ) {
                         viewCam.aspect =  mycanvas.width / mycanvas.height;
-                        viewCam.updateProjectionMatrix();
+                        viewCam.updateProjectionMatrix( );
                     }
                 }
             }
