@@ -63,23 +63,26 @@
             /*  views */ []
           );
 
-          test( "The universe is not wonky", function() {
+          // Typical case: Create a three.js scene for the application root and create or bind the 
+          //               child to the three.js child of the same name
+          // 
+          // scene.vwf
+          //   node3.vwf
 
-            equal( 1, 1, "That the universe is not wonky." );
+          // Non 3D node: node.vwf node should not bind to a three.js node since the type doesn’t 
+          //             match. 
+          //
+          // scene.vwf
+          //   node3.vwf
 
-          } );
+          // Trivial application: The three.js driver should not activate at all—no three.js scene 
+          //                      or nodes created.
+          //
+          // node.vwf
 
-          asyncTest( "The universe is wonky", function() {
-
-            setTimeout( function() {
-              equal( 0, 1, "That the universe is wonky." );
-              start();
-            }, 2000 );
-            
-          } );
-
-          // Look at qunit api for all the assertions that you can make:
-          // http://api.qunitjs.com/category/assert/ 
+          // 3D application without explicit scene
+          //
+          // node3.vwf
 
         } );
 
