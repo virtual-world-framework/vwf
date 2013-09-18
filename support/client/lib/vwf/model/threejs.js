@@ -700,6 +700,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             } 
                         }
                     }
+
+                    else if ( propertyName == "animationDuration") {
+                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations) {
+                            value = this.gettingProperty( nodeID, "animationDuration" );
+                        }
+                        else {
+                            value = propertyValue;
+                        }
+                    }
+
+                    else if ( propertyName == "animationFPS") {
+                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations) {
+                            value = this.gettingProperty( nodeID, "animationFPS" );
+                        }
+                        else {
+                            value = propertyValue;
+                        }
+                    }
                 }
                 if(threeObject instanceof THREE.ParticleSystem)
                 {
@@ -1419,22 +1437,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             }
                         }
                         value = Math.floor(animationFrameCount / animationDuration);
-                    }
-                    return value;
-                }
-
-                if(propertyName == "animationFrameCount") {
-                    var animationFrameCount = 0;
-                    if(node.threeObject.animations) {
-                        for(var i=0, il = node.threeObject.animations.length; i < il; i++) {
-                            if(node.threeObject.animations[i].hierarchy[0].keys.length > animationFrameCount) {
-                                animationFrameCount = node.threeObject.animations[i].hierarchy[0].keys.length;
-                            }
-                        }
-                        value = animationFrameCount;
-                    }
-                    else if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length) {
-                        value = node.threeObject.animatedMesh[i].morphTargetInfluences.length;
                     }
                     return value;
                 }

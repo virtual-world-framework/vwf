@@ -145,7 +145,7 @@ properties:
 
   animationRate:  # TODO: allow changes while playing
     set: |
-      var duration = this.animationDuration, rate = value, startFrame = this.animationStartFrame, stopFrame = this.animationStopFrame;
+      var duration = this.animationDuration, rate = value;
       this.animationRate = rate;
       this.animationDuration$ = ( rate >= 0 ? duration : -duration ) / rate;
     value: 1
@@ -270,49 +270,39 @@ properties:
 
   animationStartFrame:
     set: |
-      this.animationStartTime = value / this.fps;
+      this.animationStartTime = value / this.animationFPS;
     get: |
-      return Math.floor(this.animationStartTime * this.fps);
+      return Math.floor(this.animationStartTime * this.animationFPS);
 
   ## The frame that the animation should stop at. Setting this value automatically updates the "animationStopTime"
   ## to the "animationStopFrame" / "fps"
 
   animationStopFrame:
     set: |
-      this.animationStopTime = value / this.fps;
+      this.animationStopTime = value / this.animationFPS;
     get: |
-      return Math.floor(this.animationStopTime * this.fps);
+      return Math.floor(this.animationStopTime * this.animationFPS);
 
-  ## The animation playback rate in frames per second. Setting this value automatically updates the "animationRate"
-  ## to "fps" / 30
-  ## @deprecated
+  ## The frames per second of the animation loaded from the source model.
 
-  fps: 
+  animationFPS: 30
+
+  ## The number of frames of the animation loaded from the source model. 
+  animationFrames:
     set: |
-      this.animationRate = value / 30;
+      this.animationDuration = value / this.animationFPS;
     get: |
-      return this.animationRate * 30;
-
-  ## The frames per second of the animation loaded from the source model. This value cannot be changed.
-
-  animationFPS: 
-    set: |
-      this.logger.info("WARNING: animation animationFPS cannot be set" )
-
-  ## The number of frames of the animation loaded from the source model. This value cannot be changed.
-  animationFrameCount:
-    set: |
-      this.logger.info("WARNING: animation animationFrameCount cannot be set" )      
+      return Math.ceil(this.animationFPS * this.animationDuration); 
 
   ## The current frame the animation is on. Equivalent to animationTime.
   animationFrame:
     set: |
       if(this.animationFPS) {
-        this.animationTime = value / this.fps;
+        this.animationTime = value / this.animationFPS;
       }
     get: |
       if(this.animationFPS) {
-        return Math.floor(this.animationTime * this.fps);
+        return Math.floor(this.animationTime * this.animationFPS);
       }
 
 methods:
