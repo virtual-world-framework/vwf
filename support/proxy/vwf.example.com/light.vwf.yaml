@@ -119,3 +119,15 @@ properties:
   ## @name light.vwf#shadowCameraFar
   ## @property
   shadowDarkness: 0.5
+
+  ## The height of the shadow map
+  ##
+  ## @name light.vwf#shadowMapHeight
+  ## @property
+  shadowMapHeight: 512
+
+  ## The width of the shadow map
+  ##
+  ## @name light.vwf#shadowMapWidth
+  ## @property
+  shadowMapWidth: 512

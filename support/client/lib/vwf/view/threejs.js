@@ -553,7 +553,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 sceneNode.renderer.setSize(window.innerWidth,window.innerHeight);
             }
 
-            // backgroundColor and enableShadows are dependent on the renderer object, but if they are set in a prototype,
+            // backgroundColor, enableShadows, shadowMapCullFace and shadowMapType are dependent on the renderer object, but if they are set in a prototype,
             // the renderer is not available yet, so set them now.
             for(var key in sceneNode.rendererProperties) {
                 if(key == "backgroundColor") {
@@ -565,6 +565,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 else if(key == "enableShadows") {
                     value = Boolean( sceneNode.rendererProperties["enableShadows"] );
                     sceneNode.renderer.shadowMapEnabled = value;
+                }
+                else if(key == 'shadowMapCullFace') {
+                    sceneNode.renderer.shadowMapCullFace = Number( sceneNode.rendererProperties["shadowMapCullFace"] );
+                }
+                else if(key == 'shadowMapType') {
+                    sceneNode.renderer.shadowMapType = Number( sceneNode.rendererProperties["shadowMapType"] );
                 }
             }
             
