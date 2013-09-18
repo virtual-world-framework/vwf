@@ -80,8 +80,8 @@
                 }
               }
             }, "application", function( id ) {
-              strictEqual( Object.keys( threejsDriver.state.nodes ).length , 2, 
-                           "Number of bound nodes" );
+              var numThreejsNodes = Object.keys( threejsDriver.state.nodes ).length;
+              strictEqual( numThreejsNodes , 2, "Number of bound nodes" );
               vwf.deleteNode( id );
               start();
             } );
@@ -102,8 +102,8 @@
                 }
               }
             }, "application", function( id ) {
-              strictEqual( Object.keys( threejsDriver.state.nodes ).length , 1, 
-                           "Number of bound nodes" );
+              var numThreejsNodes = Object.keys( threejsDriver.state.nodes ).length;
+              strictEqual( numThreejsNodes , 1, "Number of bound nodes" );
               vwf.deleteNode( id );
               start();
             } );
@@ -118,8 +118,8 @@
             vwf.createNode( {
               "extends": "http://vwf.example.com/node.vwf"
             }, "application", function( id ) {
-              strictEqual( Object.keys( threejsDriver.state.nodes ).length , 0, 
-                           "Number of bound nodes" );
+              var numThreejsNodes = Object.keys( threejsDriver.state.nodes ).length;
+              strictEqual( numThreejsNodes , 0, "Number of bound nodes" );
               vwf.deleteNode( id );
               start();
             } );
@@ -133,8 +133,8 @@
             vwf.createNode( {
               "extends": "http://vwf.example.com/node3.vwf"
             }, "application", function( id ) {
-              strictEqual( Object.keys( threejsDriver.state.nodes ).length , 1, 
-                           "Number of bound nodes" );
+              var numThreejsNodes = Object.keys( threejsDriver.state.nodes ).length;
+              strictEqual( numThreejsNodes , 1, "Number of bound nodes" );
               vwf.deleteNode( id );
               start();
             } );
@@ -145,8 +145,8 @@
             vwf.createNode( {
               "extends": "http://vwf.example.com/scene.vwf"
             }, function( id ) {
-              strictEqual( Object.keys( threejsDriver.state.nodes ).length , 0, 
-                           "Number of bound nodes" );
+              var numThreejsNodes = Object.keys( threejsDriver.state.nodes ).length;
+              strictEqual( numThreejsNodes , 0, "Number of bound nodes" );
               vwf.deleteNode( id );
               start();
             } );
