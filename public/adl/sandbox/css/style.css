@@ -275,6 +275,16 @@ text-align:left;
 	margin-bottom: 0;
 }
 
+.pointList div{
+	width:100%;
+	height:35px;
+}
+.pointList .lead{
+
+	display:block;
+	float:left;
+}
+
 .worldBox{
 
 	border: 1px solid #eee;
@@ -303,8 +313,7 @@ text-align:left;
 .worldHeightMiniPadding{
 	
 	overflow: hidden;
-	height: 170px;
-	padding: 30px 0 0 0;
+	height: 160px;
 }
 
 .featuredInstance .boxContentWrapper{
