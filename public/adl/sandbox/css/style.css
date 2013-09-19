@@ -5,6 +5,7 @@ html, body{
 	background-color:#f4f4f4;
 	height: 100%;
 	color: #555;
+	background-image: url(http://localhost:3000/adl/sandbox/img/back.png)
 }
 
 a{
