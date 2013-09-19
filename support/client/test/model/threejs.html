@@ -144,7 +144,7 @@
           asyncTest( "Typical case: scene with node3 child", function() {
             vwf.createNode( {
               "extends": "http://vwf.example.com/scene.vwf"
-            }, function( id ) {
+            }, undefined, function( id ) {
               var numThreejsNodes = Object.keys( threejsDriver.state.nodes ).length;
               strictEqual( numThreejsNodes , 0, "Number of bound nodes" );
               vwf.deleteNode( id );
