@@ -253,7 +253,7 @@ text-align:left;
 .worldBox{
 
 	border: 1px solid #eee;
-	margin-bottom: 21px;
+	margin: 0;
 	border-radius: 8px;
 	padding: 5px 5px 3px 5px;
 	max-height: 150px;
@@ -273,7 +273,18 @@ text-align:left;
 .worldHeightPadding{
 	
 	overflow:hidden;
-	height:265px;
+	height:235px;
+}
+.worldHeightMiniPadding{
+	
+	overflow: hidden;
+	height: 170px;
+	padding: 30px 0 0 0;
+}
+
+.featuredInstance .boxContentWrapper{
+
+	padding: 0 5px;
 }
 
 .featuredInstance{
@@ -281,12 +292,21 @@ text-align:left;
 	border: 1px #E6E6E6 solid;
 	border-bottom: 1px #dfdfdf solid;
 	background-color: #f5f5f5;
-	margin-bottom: 21px;
 	border-radius: 8px;
 	padding: 5px 5px 3px 5px;
 	max-height: 225px;
 	min-height: 225px;
 	width: 95%;
+}
+
+.worldImage{
+	margin:0 auto 2px auto;
+	display:block;
+	border:1px solid #ddd;
+	padding:1px;
+	width:97%;
+	height:115px;
+	border-radius:3px;
 }
 
 .featuredInstanceLast{
@@ -296,10 +316,13 @@ text-align:left;
 .editstate, .editstateGuest
 {
 	display: block;
-	border-top: 1px solid #eee;
 	margin-top: 31px;
 	width:100%;
 	color: gray;
+}
+.editstate
+{
+	margin-top: 105px;
 }
 
 .boxContentWrapper{

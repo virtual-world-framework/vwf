@@ -17,7 +17,7 @@
 			</div>
 			
 			<div class="row" id="activeRow" data-bind="foreach:displayWorldObjects">				
-				<div data-bind="visible:isVisible" class="span3 worldHeightPadding">
+				<div data-bind="visible:isVisible, css:$data.featured?'span3 worldHeightPadding':'span3 worldHeightMiniPadding'">
 					<div data-bind="event: {mouseover:$root.handleEditDisplay, mouseout:$root.handleEditDisplay}, css: $data.featured?'featuredInstance':'worldBox'">
 						
 						<div class="boxContentWrapper">
@@ -25,7 +25,7 @@
 								<a data-bind="attr:{href:'{{root}}/'+id}, text:$root.getShorterStr(title, 20)" href="">Title</a>
 								<span class="owner" data-bind="text:' - ' + owner"></span>
 							</div>
-							<img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}, visible:$data.featured" style="margin:0 auto;display:block;border:1px solid #ddd;padding:1px;" src="" />
+							<img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}, visible:$data.featured" class="worldImage" />
 							<div class="worldInfo">
 								<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
 									<span class="description" data-bind="text:description?$root.getShorterStr(description, 75):'No description'"></span>
@@ -37,7 +37,7 @@
 								</a>
 							</div>
 						</div>
-						<div class="editstateGuest">
+						<div data-bind="css:$data.featured?'editstate' : 'editstateGuest'">
 							<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState">Active</a>
 							
 							<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible -->
@@ -73,7 +73,7 @@
 
 				window.setInterval(function(){
 					showStates();
-				},5000);
+				},15000);
 			});
 		});
 	</script>
