@@ -523,7 +523,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var oldMouseY = 0;
             var hovering = false;
             var view = this;
-            window.onresize = function ( ) {
+            window.onresize = function () {
                 var origWidth = self.width;
                 var origHeight = self.height;
                 if ( window && window.innerHeight ) self.height = window.innerHeight - 20;
@@ -539,7 +539,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     var viewCam = view.state.cameraInUse;
                     if ( viewCam ) {
                         viewCam.aspect =  mycanvas.width / mycanvas.height;
-                        viewCam.updateProjectionMatrix( );
+                        viewCam.updateProjectionMatrix();
                     }
                 }
             }
