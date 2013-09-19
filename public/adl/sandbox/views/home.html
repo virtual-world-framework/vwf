@@ -3,7 +3,7 @@
 		<div class="span6">
 			<div class="row">
 				<div class="span3">
-					<h4>Persistant Worlds</h4>
+					<h4 class="lead">Persistent Worlds</h4>
 					<ul>
 					
 						<li>Make worlds that evolve over time.</li>
@@ -13,7 +13,7 @@
 					</ul>
 				</div>
 				<div class="span3">
-					<h4>In Browser Editing</h4>
+					<h4 class="lead">In Browser Editing</h4>
 					<ul>
 					
 						<li>Create a world right in your web browser.</li>
@@ -25,7 +25,7 @@
 			</div>
 			<div class="row" style="margin-top:50px;">
 				<div class="span3">
-					<h4>Collaborative</h4>
+					<h4 class="lead">Collaborative</h4>
 					<ul>
 					
 						<li>Video chat with other users with WebRTC.</li>
@@ -35,7 +35,7 @@
 					</ul>
 				</div>
 				<div class="span3">
-					<h4>Creative</h4>
+					<h4 class="lead">Creative</h4>
 					<ul>
 					
 						<li>You can create some basic worlds with the build in tools.</li>
@@ -52,14 +52,14 @@
 		
 	</div>
 	<div class="row" style="margin-top:60px;">
-		<div class="span12" style="border-top:1px solid #eee;padding-top:20px;"><h1>Explore</h1></div>
+		<div class="span12" style="border-top:1px solid #eee;padding-top:20px;"><h1 class="featurette-heading">Explore</h1></div>
 
 	</div>
 	<div class="row" style="margin-top:25px;margin-bottom:50px;" data-bind="foreach:displayWorldObjects">
 		<!-- ko if: $data.featured == true && $index() < 3 -->
 		<div class="span4" style="text-align:center;">
 			<div>
-				<h4 style="margin-top:0;"><a style="color:inherit;" data-bind="text:title, attr:{href:'{{root}}/'+id}"></a></h4>
+				<h4 style="margin-top:0;" class="lead"><a style="color:inherit;" data-bind="text:title, attr:{href:'{{root}}/'+id}"></a></h4>
 			</div>
 			<a data-bind="attr:{href:'{{root}}/'+id}" >
 				<img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}" style="width:190px;height:130px;margin-top:4px;border: 1px solid #ddd;padding:1px;"/>
