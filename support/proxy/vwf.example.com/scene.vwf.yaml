@@ -99,9 +99,9 @@ properties:
   makeOwnAvatarVisible: false
 
   ## Determine which face will be culled when working with the shadow map
-  ## Possible options are "None", "Back", "Front" and "FrontAndBack",
+  ## Possible options are "none", "back", "front" and "both",
   ## which map to 0, 1, 2 and 3
-  ## Defaults to "Front"
+  ## Defaults to "front"
   ##
   ## @name navscene.vwf#shadowMapCullFace
   ## @property
@@ -109,27 +109,27 @@ properties:
   shadowMapCullFace:
     set: |
       switch(value) {
-        case "None":
+        case "none":
         case 0: 
-          this.shadowMapCullFace = 0;
+          this.shadowMapCullFace = "none";
           break;
-        case "Back":
+        case "back":
         case 1:
-          this.shadowMapCullFace = 1;
+          this.shadowMapCullFace = "back";
           break;
-        case "Front":
+        case "front":
         case 2:
-          this.shadowMapCullFace = 2;
+          this.shadowMapCullFace = "front";
           break;
-        case "FrontAndBack":
+        case "both":
         case 3:
-          this.shadowMapCullFace = 3;
+          this.shadowMapCullFace = "both";
           break;
       }
-    value: 2
+    value: "front"
 
   ## Determines the type of shadow map to use
-  ## Possible options are "Basic", "PCF" and "PCFSoft",
+  ## Possible options are "basic", "PCF" and "PCFSoft",
   ## which map to 0, 1, and 2
   ## Defaults to "PCFSoft"
   ##
@@ -139,20 +139,20 @@ properties:
   shadowMapType: 
     set: |
       switch(value) {
-        case "Basic":
+        case "basic":
         case 0: 
-          this.shadowMapType = 0;
+          this.shadowMapType = "basic";
           break;
         case "PCF":
         case 1:
-          this.shadowMapType = 1;
+          this.shadowMapType = "PCF";
           break;
         case "PCFSoft":
         case 2:
-          this.shadowMapType = 2;
+          this.shadowMapType = "PCFSoft";
           break;
       }
-    value: 2
+    value: "PCFSoft"
 
 methods:
   initializeActiveCamera:

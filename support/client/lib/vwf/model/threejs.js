@@ -1190,21 +1190,53 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         this.state.kernel.dispatchEvent( nodeID, "resetViewport" );
                     }
                     if ( propertyName == 'shadowMapCullFace') {
+                        var shadowMapCullFace;
+                        switch(propertyValue) {
+                            case "none":
+                                shadowMapCullFace = 0;
+                                value = propertyValue;
+                                break;
+                            case "back":
+                                shadowMapCullFace = 1;
+                                value = propertyValue;
+                                break;
+                            case "front":
+                                shadowMapCullFace = 2;
+                                value = propertyValue;
+                                break;
+                            case "both":
+                                shadowMapCullFace = 3;
+                                value = propertyValue;
+                                break;
+                        }
                         if ( node && node.renderer ) {
-                            value = Number( propertyValue );
-                            node.renderer.shadowMapCullFace = value;
+                            node.renderer.shadowMapCullFace = shadowMapCullFace;
                         }
                         else if ( node ) {
-                            node.rendererProperties["shadowMapCullFace"] = propertyValue;
+                            node.rendererProperties["shadowMapCullFace"] = shadowMapCullFace;
                         }
                     }
                     if ( propertyName == 'shadowMapType') {
+                        var shadowMapType;
+                        switch(propertyValue) {
+                            case "basic":
+                                shadowMapType = 0;
+                                value = propertyValue;
+                                break;
+                            case "PCF":
+                                shadowMapType = 1;
+                                value = propertyValue;
+                                break;
+                            case "PCFSoft":
+                                shadowMapType = 2;
+                                value = propertyValue;
+                                break;
+                        }                        
                         if ( node && node.renderer ) {
-                            value = Number( propertyValue );
-                            node.renderer.shadowMapType = value;
+                            node.renderer.shadowMapType = shadowMapType;
                         }
                         else if ( node ) {
-                            node.rendererProperties["shadowMapType"] = propertyValue;
+                            node.rendererProperties["shadowMapType"] = shadowMapType;
                         }
                     }
                 }   
