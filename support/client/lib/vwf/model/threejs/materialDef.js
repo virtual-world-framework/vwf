@@ -47,6 +47,7 @@
 			this.setMaterialByDef = function(currentmat,value)
 			{
 				if(!value) return;
+				
 				currentmat.color.r = value.color.r;
 				currentmat.color.g = value.color.g;
 				currentmat.color.b = value.color.b;
@@ -66,13 +67,37 @@
 				
 				currentmat.side = value.side || 0;
 				currentmat.opacity = value.alpha;
-				if(value.alpha < 1)
+				//if the alpha value less than 1, and the blendmode is defined but not noblending
+				if(value.alpha < 1 || (value.blendMode !== undefined && value.blendMode !== THREE.NoBlending))
 					currentmat.transparent = true;
 				else
 					currentmat.transparent = false;
-					
+				
+				if(value.blendMode !== undefined)
+				{
+					currentmat.blending = value.blendMode;
+				}
+				if(value.fog !== undefined)
+				{
+					currentmat.fog = value.fog;
+				}
+				
+				currentmat.wireframe = value.wireframe || false;
+				currentmat.metal = value.metal || false;
+				currentmat.combine = value.combine || 0;
+				
 				currentmat.shininess = value.shininess * 5 ;
 				
+				if(value.depthtest === true || value.depthtest === undefined)
+					currentmat.depthTest = true;
+				else 	
+					currentmat.depthTest = false;
+					
+				if(value.depthwrite === true || value.depthwrite === undefined)
+					currentmat.depthWrite = true;
+				else 	
+					currentmat.depthWrite = false;
+					
 				var mapnames = ['map','bumpMap','lightMap','normalMap','specularMap','envMap'];
 				currentmat.reflectivity = value.reflect/10;
 				
@@ -240,9 +265,11 @@
 					
 					var needRebuild = false;
 					
+					if(this.materialDef)
+					{
 					if(this.materialDef && propval.layers.length > this.materialDef.layers.length)
 						needRebuild = true;
-						
+					}	
 					this.materialDef = propval;
 					var list = [];
 					
@@ -281,6 +308,7 @@
 			}	
 			this.gettingProperty = function(propname,propval)
 			{
+				
 				if(propname == 'materialDef')
 				{
 					

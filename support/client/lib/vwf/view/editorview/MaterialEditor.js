@@ -318,6 +318,122 @@ define(["vwf/view/editorview/mapbrowser"], function ()
 					_MaterialEditor.updateObject();
 				}
 			});
+			
+			$('#' + 'MaterialBasicSettings').append('<div><input style="vertical-align: middle" type="checkbox" id="MaterialBasicSettingsFog" /><div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Fog Enabled </div></div>');
+			$('#' + 'MaterialBasicSettings').append('<div><input style="vertical-align: middle" type="checkbox" id="MaterialBasicSettingsShading" /><div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Shading Enabled </div></div>');
+			$('#' + 'MaterialBasicSettings').append('<div><input style="vertical-align: middle" type="checkbox" id="MaterialBasicSettingsMetal" /><div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Metal </div></div>');
+			$('#' + 'MaterialBasicSettings').append('<div><input style="vertical-align: middle" type="checkbox" id="MaterialBasicSettingsWireFrame" /><div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Wireframe </div></div>');
+			$('#' + 'MaterialBasicSettings').append('<div><input style="vertical-align: middle" type="checkbox" id="MaterialBasicSettingsDepthTest" /><div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Depth Test </div></div>');
+			$('#' + 'MaterialBasicSettings').append('<div><input style="vertical-align: middle" type="checkbox" id="MaterialBasicSettingsDepthWrite" /><div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Depth Write </div></div>');
+			
+			$('#MaterialBasicSettingsFog').click(function()
+			{
+				if ($(this).attr('checked') == 'checked') 
+					_MaterialEditor.currentMaterial.fog = true;
+				else  
+					_MaterialEditor.currentMaterial.fog = false;
+				_MaterialEditor.updateObject();
+			});
+			if (this.currentMaterial.fog === true || this.currentMaterial.fog === undefined)
+			{
+				$('#MaterialBasicSettingsFog').attr('checked', 'checked');
+			}
+			
+			
+			
+			
+			$('#MaterialBasicSettingsMetal').click(function()
+			{
+				if ($(this).attr('checked') == 'checked') 
+					_MaterialEditor.currentMaterial.metal = true;
+				else  
+					_MaterialEditor.currentMaterial.metal = false;
+				_MaterialEditor.updateObject();
+			});
+			if (this.currentMaterial.metal === true)
+			{
+				$('#MaterialBasicSettingsMetal').attr('checked', 'checked');
+			}
+			
+			$('#MaterialBasicSettingsWireFrame').click(function()
+			{
+				if ($(this).attr('checked') == 'checked') 
+					_MaterialEditor.currentMaterial.wireframe = true;
+				else  
+					_MaterialEditor.currentMaterial.wireframe = false;
+				_MaterialEditor.updateObject();
+			});
+			if (this.currentMaterial.wireframe === true)
+			{
+				$('#MaterialBasicSettingsWireFrame').attr('checked', 'checked');
+			}
+			
+			$('#MaterialBasicSettingsDepthTest').click(function()
+			{
+				if ($(this).attr('checked') == 'checked') 
+					_MaterialEditor.currentMaterial.depthtest = true;
+				else  
+					_MaterialEditor.currentMaterial.depthtest = false;
+				_MaterialEditor.updateObject();
+			});
+			if (this.currentMaterial.depthtest === true  || this.currentMaterial.depthtest === undefined)
+			{
+				$('#MaterialBasicSettingsDepthTest').attr('checked', 'checked');
+			}
+			
+			$('#MaterialBasicSettingsDepthWrite').click(function()
+			{
+				if ($(this).attr('checked') == 'checked') 
+					_MaterialEditor.currentMaterial.depthwrite = true;
+				else  
+					_MaterialEditor.currentMaterial.depthwrite = false;
+				_MaterialEditor.updateObject();
+			});
+			if (this.currentMaterial.depthwrite === true || this.currentMaterial.depthwrite === undefined)
+			{
+				$('#MaterialBasicSettingsDepthWrite').attr('checked', 'checked');
+			}
+			
+			
+			$('#MaterialBasicSettingsShading').click(function()
+			{
+				if ($(this).attr('checked') == 'checked') 
+					_MaterialEditor.currentMaterial.shading = true;
+				else  
+					_MaterialEditor.currentMaterial.shading = false;
+				_MaterialEditor.updateObject();
+			});
+			if (this.currentMaterial.shading === true || this.currentMaterial.shading === undefined)
+			{
+				$('#MaterialBasicSettingsShading').attr('checked', 'checked');
+			}
+			
+			$('#' + 'MaterialBasicSettings').append('<div id="MaterialBasicSettingsBlending" style=width:100%;margin-top:10px/>');
+			$('#' + 'MaterialBasicSettingsBlending').button(
+			{
+				label: 'Normal Blending'
+			});
+			$('#' + 'MaterialBasicSettingsBlending').click(function()
+			{
+				alertify.choice("Choose a blending mode",function(ok,val)
+				{
+					if(val)
+					{
+						if(val == 'No Blending')
+							_MaterialEditor.currentMaterial.blendMode = 0;
+						if(val == 'Additive Blending')
+							_MaterialEditor.currentMaterial.blendMode = 2;
+						if(val == 'Subtractive Blending')
+							_MaterialEditor.currentMaterial.blendMode = 3;
+						if(val == 'Normal Blending')
+							_MaterialEditor.currentMaterial.blendMode = 1;							
+						_MaterialEditor.updateObject();
+						$('#' + 'MaterialBasicSettingsBlending').button('option', 'label', val);
+					}
+				},['No Blending','Additive Blending','Subtractive Blending','Normal Blending'])
+			
+			});
+			
 			$('#' + 'MaterialBasicSettings').append('<div id="MaterialBasicSettingsnewLayer" style=width:100%;margin-top:10px/>');
 			$('#' + 'MaterialBasicSettingsnewLayer').button(
 			{
