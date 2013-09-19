@@ -34,8 +34,13 @@ $(function(){
   $('.full-screen').parent().css('backgroundColor', '#f1f1f1');
 
   vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-    vwf_view.logger.info("Another changed content to: " + propertyValue);
-    setContentOrTitle(nodeId, propertyName, propertyValue);
+    var clientThatSatProperty = this.kernel.client();
+    var me = this.kernel.moniker();
+
+    if (clientThatSatProperty != me) {
+      vwf_view.logger.info("Another changed content to: " + propertyValue);
+      setContentOrTitle(nodeId, propertyName, propertyValue);
+    }
   }
 
   vwf_view.gotProperty = function (nodeId, propertyName, propertyValue) {
