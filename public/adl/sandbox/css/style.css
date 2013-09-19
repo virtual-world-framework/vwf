@@ -1,11 +1,13 @@
-*{	margin:0; padding:0; }
-
 html, body{
 
 	background-color:#f4f4f4;
 	height: 100%;
 	color: #555;
 	background-image: url(http://localhost:3000/adl/sandbox/img/back.png)
+}
+
+.container{
+	max-width: 1200px;
 }
 
 a{
@@ -114,6 +116,16 @@ font-size: 90px;
 line-height: 1;
 letter-spacing: -1px;
 text-align:left;
+}
+
+.sliderContainer{
+	height:368px;
+	width:1200px;
+	overflow:hidden;
+	border:none;
+	border-bottom:1px solid #EBEBEB;
+	position:relative;
+	padding: 0;
 }
 
 .divContent0{

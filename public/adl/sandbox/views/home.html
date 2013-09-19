@@ -1,8 +1,8 @@
 	<div class="row" style="margin-top:15px;">
 		
-		<div class="span6">
+		<div class="col-md-6">
 			<div class="row">
-				<div class="span3">
+				<div class="col-md-6">
 					<h4 class="lead">Persistent Worlds</h4>
 					<ul>
 					
@@ -12,7 +12,7 @@
 						
 					</ul>
 				</div>
-				<div class="span3">
+				<div class="col-md-6">
 					<h4 class="lead">In Browser Editing</h4>
 					<ul>
 					
@@ -23,8 +23,8 @@
 					</ul>
 				</div>
 			</div>
-			<div class="row" style="margin-top:50px;">
-				<div class="span3">
+			<div class="row" style="margin-top:20px;">
+				<div class="col-md-6">
 					<h4 class="lead">Collaborative</h4>
 					<ul>
 					
@@ -34,7 +34,7 @@
 						
 					</ul>
 				</div>
-				<div class="span3">
+				<div class="col-md-6">
 					<h4 class="lead">Creative</h4>
 					<ul>
 					
@@ -46,18 +46,18 @@
 				</div>
 				</div>
 		</div>
-		<div class="span6">
+		<div class="col-md-6">
 			<iframe class="wideFrame" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
 		</div>
 		
 	</div>
 	<div class="row" style="margin-top:60px;">
-		<div class="span12" style="border-top:1px solid #eee;padding-top:20px;"><h1 class="featurette-heading">Explore</h1></div>
+		<div class="col-md-12" style="border-top:1px solid #eee;padding-top:20px;"><h1 class="featurette-heading">Explore</h1></div>
 
 	</div>
 	<div class="row" style="margin-top:25px;margin-bottom:50px;" data-bind="foreach:displayWorldObjects">
 		<!-- ko if: $data.featured == true && $index() < 3 -->
-		<div class="span4" style="text-align:center;">
+		<div class="col-md-4" style="text-align:center;">
 			<div>
 				<h4 style="margin-top:0;" class="lead"><a style="color:inherit;" data-bind="text:title, attr:{href:'{{root}}/'+id}"></a></h4>
 			</div>
