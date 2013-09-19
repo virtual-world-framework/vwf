@@ -57,7 +57,8 @@
 		<div class="span12" style="border-top:1px solid #eee;padding-top:20px;"><h1>Explore</h1></div>
 
 	</div>
-	<div class="row" style="margin-top:25px;margin-bottom:50px;" data-bind="foreach:featuredWorldObjects">
+	<div class="row" style="margin-top:25px;margin-bottom:50px;" data-bind="foreach:displayWorldObjects">
+		<!-- ko if: $data.featured == true && $index() < 3 -->
 		<div class="span4" style="text-align:center;">
 			<div>
 				<h4 style="margin-top:0;"><a style="color:inherit;" data-bind="text:title, attr:{href:'{{root}}/'+id}"></a></h4>
@@ -67,6 +68,7 @@
 			</a>
 
 		</div>
+		<!-- /ko -->
 	</div>
 	<script>
 		var slideInterval = 0;

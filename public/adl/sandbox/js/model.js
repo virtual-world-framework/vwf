@@ -52,7 +52,6 @@ var vwfPortalModel = new function(){
 	self.returnVal = (root + '/' + window.location.search.substr(window.location.search.indexOf('=')+1)).replace('//', '/') + window.location.hash;
 	self.worldObjects = ko.observableArray([]);
 	self.displayWorldObjects = ko.observableArray([]);
-	self.featuredWorldObjects = ko.observableArray([]);
 	self.adminDisplayList = ko.observableArray();
 	self.currentAdminItem = ko.observable(false); 
 	self.getNextPage = function(){
@@ -265,7 +264,7 @@ function showStates(cb){
 
 	$.getJSON("./vwfDataManager.svc/states",function(e){
 		
-		var tempArr = getFlatIdArr(), saveIndex = 0, featuredCount = 0, i = 0, flatWorldArray = ko.toJS(vwfPortalModel.worldObjects);
+		var tempArr = getFlatIdArr(), saveIndex = 0, i = 0, flatWorldArray = ko.toJS(vwfPortalModel.worldObjects);
 		
 		for(var tmpKey in e){
 			
@@ -280,17 +279,7 @@ function showStates(cb){
 				e[tmpKey].lastUpdate = e[tmpKey].lastUpdate?removeAgoFromMoment(e[tmpKey].lastUpdate):removeAgoFromMoment(new Date());
 				e[tmpKey].description = e[tmpKey].description ? e[tmpKey].description : "";
 				e[tmpKey].updates = e[tmpKey].updates > 0 ? e[tmpKey].updates : 0;
-				e[tmpKey].editVisible = ko.observable(false);
-				
-				if(e[tmpKey].featured === true && featuredCount < 3){
-					if(objCompare(ko.toJS(vwfPortalModel.featuredWorldObjects()[featuredCount]), ko.toJS(e[tmpKey]), true) == false || ! vwfPortalModel.featuredWorldObjects()[featuredCount]){
-						
-						vwfPortalModel.featuredWorldObjects()[featuredCount] = e[tmpKey];
-						vwfPortalModel.featuredWorldObjects.valueHasMutated();
-					};
-					featuredCount++;
-				}
-				
+				e[tmpKey].editVisible = ko.observable(false);				
 				e[tmpKey].isVisible = checkFilter([e[tmpKey].title, e[tmpKey].description, e[tmpKey].owner]);
 				
 				if(ko.isObservable(vwfPortalModel.worldObjects()[saveIndex])){
