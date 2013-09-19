@@ -275,10 +275,23 @@ text-align:left;
 	margin-bottom: 0;
 }
 
+.pointList{
+	margin-top: 35px;
+}
+
 .pointList div{
 	width:100%;
 	height:35px;
 }
+
+.pointList li{
+
+	font-size: 17px;
+	line-height: 23px;
+	color: #747474;
+	margin-bottom: 12px;
+}
+
 .pointList .lead{
 
 	display:block;
