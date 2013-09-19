@@ -250,6 +250,18 @@ text-align:left;
 	box-shadow: 5px 5px 5px;
 }
 
+.featurette-heading {
+	font-size: 50px;
+	font-weight: 300;
+	line-height: 1;
+	letter-spacing: -1px;
+}
+
+.lead{
+	
+	margin-bottom: 0;
+}
+
 .worldBox{
 
 	border: 1px solid #eee;
