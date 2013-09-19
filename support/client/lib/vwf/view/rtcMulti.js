@@ -69,6 +69,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             this.connection = new RTCMultiConnection();
             
             this.connection.userid = this.kernel.moniker();
+            // what about admin mode, it's set through usertype
             this.connection.session = this.session;
             this.connection.direction = this.direction;
 
@@ -228,7 +229,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                     
                     // local client object
                     // grab access to the webcam 
-                    this.connection.
+                    this.connection.open( this.sessionid ); 
                    
                     var remoteClient = undefined;
                     // existing connections
@@ -329,10 +330,130 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
             var client = this.state.connections[ nodeID ];
 
-            if ( client ) {
+            if ( client && this.local.ID == nodeID ) {
                 switch( propertyName ) {
                     
-                    
+                    case "session":
+                        if ( propertyValue ) {
+                            this.connection.session = propertyValue;
+                        }
+                        break;
+
+                    case "direction":
+                        switch ( propertyValue ) {
+                            case 'many-to-many':
+                            case 'one-to-one':
+                            case 'one-to-many':
+                            case 'one-way':
+                                this.connection.direction = propertyValue;
+                                break;
+                        }
+                        break;                    
+
+                    case "disableDtlsSrtp":
+                        if ( propertyValue ) {
+                            this.connection.disableDtlsSrtp = Boolean( propertyValue );
+                        }
+                        break;
+
+                    case "autoCloseEntireSession":
+                        if ( propertyValue ) {
+                            this.connection.autoCloseEntireSession = Boolean( propertyValue );
+                        }
+                        break;
+
+                    case "autoSaveToDisk":
+                        if ( propertyValue ) {
+                            this.connection.autoSaveToDisk = Boolean( propertyValue );
+                        }
+                        break;                   
+
+                    case "interval":
+                        if ( propertyValue ) {
+                            this.connection.interval = Number( propertyValue );
+                        }
+                        break; 
+
+                    case "maxParticipantsAllowed":
+                        if ( propertyValue ) {
+                            this.connection.maxParticipantsAllowed = Number( propertyValue );
+                        }
+                        break; 
+
+                    case "mediaMaxHeight":
+                        if ( propertyValue ) {
+                            this.connection.media.maxHeight = Number( propertyValue );
+                        }
+                        break; 
+
+                    case "mediaMinHeight":
+                        if ( propertyValue ) {
+                            this.connection.media.minHeight = Number( propertyValue );
+                        }
+                        break; 
+
+                    case "mediaMaxWidth":
+                        if ( propertyValue ) {
+                            this.connection.media.maxWidth = Number( propertyValue );
+                        }
+                        break; 
+
+                    case "mediaMinWidth":
+                        if ( propertyValue ) {
+                            this.connection.media.minWidth = Number( propertyValue );
+                        }
+                        break; 
+
+                    case "mediaMinAspectRatio":
+                        if ( propertyValue ) {
+                            this.connection.media.minAspectRatio = parseFloat( propertyValue );
+                        }
+                        break;
+                    case "hostCandidate":
+                        if ( propertyValue ) {
+                            this.connection.hostCandidate = Boolean( propertyValue );
+                        }
+                        break;                        
+                    case "reflexiveCandidate":
+                        if ( propertyValue ) {
+                            this.connection.reflexiveCandidate = Boolean( propertyValue );
+                        }
+                        break;
+                    case "relayCandidate":
+                        if ( propertyValue ) {
+                            this.connection.relayCandidate = Boolean( propertyValue );
+                        }
+                        break;
+
+                    case "audioBandwidth":
+                        if ( propertyValue ) {
+                            this.connection.bandwidth.audio = Number( propertyValue );
+                        }
+                        break;
+
+                    case "videoBandwidth":
+                        if ( propertyValue ) {
+                            this.connection.bandwidth.video = Number( propertyValue );
+                        }
+                        break;
+
+                    case "dataBandwidth":
+                        if ( propertyValue ) {
+                            this.connection.bandwidth.data = Number( propertyValue );
+                        }
+                        break;
+
+                    case "minFramerate":
+                        if ( propertyValue ) {
+                            this.connection.framerate.min = Number( propertyValue );
+                        }
+                        break;
+                    case "maxFramerate":
+                        if ( propertyValue ) {
+                            this.connection.framerate.max = Number( propertyValue );
+                        }
+                        break;
+
                     case "username":
                         if ( propertyValue ) {
                             if ( this.connection.extra === undefined ) this.connection.extra = {};
@@ -364,13 +485,12 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                     default:  
                         // propertyName is the moniker of the client that 
                         // this connection supports
-                        if ( nodeID == this.local.ID ) {
-                            if ( propertyValue ) {
-                                // propertyName - moniker of the client
-                                // propertyValue - peerConnection message
-                                handlePeerMessage.call( this, propertyName, propertyValue );
-                            }
+                        if ( propertyValue ) {
+                            // propertyName - moniker of the client
+                            // propertyValue - peerConnection message
+                            handlePeerMessage.call( this, propertyName, propertyValue );
                         }
+
                         break;
                 }
             }
@@ -382,6 +502,15 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 this.kernel.logger.infox( "   G === gotProperty ", nodeID, propertyName, propertyValue );
             }
             var value = undefined;
+            var client = this.state.connections[ nodeID ];
+
+            if ( client && this.local.ID == nodeID ) {
+                switch( propertyName ) {
+                    case "userid":
+                        value = this.kernel.moniker();
+                        break;
+                }
+            }
 
             return value;
         },
