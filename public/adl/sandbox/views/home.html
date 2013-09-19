@@ -1,8 +1,7 @@
 	<div class="row" style="margin-top:15px;">
-		
-		<div class="col-md-6">
-			<div class="row">
-				<div class="col-md-6 pointList">
+		<div class="col-md-12">
+			<div class="row" style="margin-top:30px;">
+				<div class="col-md-3 pointList">
 					<div>
 						<span class="lead glyphicon glyphicon-globe"></span><span class="lead">&nbsp;Persistent Worlds</span>
 					</div>
@@ -14,7 +13,7 @@
 						
 					</ul>
 				</div>
-				<div class="col-md-6 pointList">
+				<div class="col-md-3 pointList">
 					<div>
 						<span class="lead glyphicon glyphicon-pencil"></span><span class="lead">&nbsp;In Browser Editing</span>
 					</div>
@@ -26,9 +25,17 @@
 						
 					</ul>
 				</div>
+				<div class="col-md-6">
+					<iframe class="wideFrame" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
+				</div>
 			</div>
-			<div class="row" style="margin-top:20px;">
-				<div class="col-md-6 pointList">
+		</div>	
+		<div class="col-md-12">
+			<div class="row" style="margin-top:65px;">
+				<div class="col-md-6">
+					<img src="{{root}}/img/screenshot.png" style="margin:0 auto;display:block;" />
+				</div>
+				<div class="col-md-3 pointList">
 					<div>
 						<span class="lead glyphicon glyphicon-retweet"></span><span class="lead">&nbsp;Collaborative</span>
 					</div>
@@ -40,7 +47,7 @@
 						
 					</ul>
 				</div>
-				<div class="col-md-6 pointList">
+				<div class="col-md-3 pointList">
 					<div>
 						<span class="lead glyphicon glyphicon-picture"></span><span class="lead" style="padding-top:1px">&nbsp;Creative</span>
 					</div>
@@ -52,20 +59,16 @@
 						
 					</ul>
 				</div>
-				</div>
+			</div>
 		</div>
-		<div class="col-md-6">
-			<iframe class="wideFrame" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
-		</div>
-		
 	</div>
 	<div class="row" style="margin-top:60px;">
-		<div class="col-md-12" style="border-top:1px solid #eee;padding-top:20px;"><h1 class="featurette-heading">Explore</h1></div>
+		<div class="col-md-12"><h1 class="featurette-heading" style="border-top:1px solid #eee;padding-top:20px;width:95%;margin:0 auto;">Explore</h1></div>
 
 	</div>
-	<div class="row" style="margin-top:25px;margin-bottom:50px;" data-bind="foreach:displayWorldObjects">
-		<!-- ko if: $data.featured == true && $index() < 3 -->
-		<div class="col-md-4" style="text-align:center;">
+	<div class="row" style="margin-bottom:50px;" data-bind="foreach:displayWorldObjects">
+		<!-- ko if: $data.featured == true && $index() < 6 -->
+		<div class="col-md-4" style="text-align:center;margin-top:45px;">
 			<div>
 				<h4 style="margin-top:0;" class="lead"><a style="color:inherit;" data-bind="text:title, attr:{href:'{{root}}/'+id}"></a></h4>
 			</div>
