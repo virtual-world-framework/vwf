@@ -705,17 +705,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations) {
                             value = this.gettingProperty( nodeID, "animationDuration" );
                         }
-                        else {
-                            value = propertyValue;
-                        }
                     }
 
                     else if ( propertyName == "animationFPS") {
                         if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations) {
                             value = this.gettingProperty( nodeID, "animationFPS" );
-                        }
-                        else {
-                            value = propertyValue;
                         }
                     }
                 }
