@@ -1157,7 +1157,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                     }
 
-                    // backgroundColor and enableShadows are dependent on the renderer object, but if they are set in a prototype,
+                    // backgroundColor, enableShadows, shadowMapCullFace and shadowMapType are dependent 
+                    // on the renderer object, but if they are set in a prototype,
                     // the renderer is not available yet, so store them until it is ready.
                     if ( propertyName == 'backgroundColor' )
                     {
@@ -1188,6 +1189,56 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         // Need to reset the viewport or you just get a blank screen
                         this.state.kernel.dispatchEvent( nodeID, "resetViewport" );
                     }
+                    if ( propertyName == 'shadowMapCullFace') {
+                        var shadowMapCullFace;
+                        switch(propertyValue) {
+                            case "none":
+                                shadowMapCullFace = 0;
+                                value = propertyValue;
+                                break;
+                            case "back":
+                                shadowMapCullFace = 1;
+                                value = propertyValue;
+                                break;
+                            case "front":
+                                shadowMapCullFace = 2;
+                                value = propertyValue;
+                                break;
+                            case "both":
+                                shadowMapCullFace = 3;
+                                value = propertyValue;
+                                break;
+                        }
+                        if ( node && node.renderer ) {
+                            node.renderer.shadowMapCullFace = shadowMapCullFace;
+                        }
+                        else if ( node ) {
+                            node.rendererProperties["shadowMapCullFace"] = shadowMapCullFace;
+                        }
+                    }
+                    if ( propertyName == 'shadowMapType') {
+                        var shadowMapType;
+                        switch(propertyValue) {
+                            case "basic":
+                                shadowMapType = 0;
+                                value = propertyValue;
+                                break;
+                            case "PCF":
+                                shadowMapType = 1;
+                                value = propertyValue;
+                                break;
+                            case "PCFSoft":
+                                shadowMapType = 2;
+                                value = propertyValue;
+                                break;
+                        }                        
+                        if ( node && node.renderer ) {
+                            node.renderer.shadowMapType = shadowMapType;
+                        }
+                        else if ( node ) {
+                            node.rendererProperties["shadowMapType"] = shadowMapType;
+                        }
+                    }
                 }   
                 if(threeObject instanceof THREE.PointLight || threeObject instanceof THREE.DirectionalLight || threeObject instanceof THREE.SpotLight )
                 {
@@ -1208,6 +1259,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             "shadowCameraNear": threeObject.shadowCameraNear,
                             "shadowCameraFar": threeObject.shadowCameraFar,
                             "shadowDarkness": threeObject.shadowDarkness,
+                            "shadowMapHeight": threeObject.shadowMapHeight,
+                            "shadowMapWidth": threeObject.shadowMapWidth,
                             "clone": function( newObj ) {
                                 newObj.name = this.name;
                                 newObj.distance = this.distance;
@@ -1222,6 +1275,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 newObj.shadowCameraNear = this.shadowCameraNear;
                                 newObj.shadowCameraFar = this.shadowCameraFar;
                                 newObj.shadowDarkness = this.shadowDarkness;
+                                newObj.shadowMapHeight = this.shadowMapHeight;
+                                newObj.shadowMapWidth = this.shadowMapWidth;
                             }
                         };
 
@@ -1313,6 +1368,26 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     else if ( propertyName == 'shadowDarkness' ) {
                         value = Number( propertyValue );
                         threeObject.shadowDarkness = value;
+                    }
+                    else if ( propertyName == 'shadowMapHeight' ) {
+                        value = Number ( propertyValue );
+                        threeObject.shadowMapHeight = value;
+                        if(threeObject.shadowMapSize) {
+                            threeObject.shadowMapSize.y = value;
+                        }
+                        if(threeObject.shadowMap) {
+                            threeObject.shadowMap.height = value;
+                        }
+                    }
+                    else if ( propertyName == 'shadowMapWidth' ) {
+                        value = Number ( propertyValue );
+                        threeObject.shadowMapWidth = value;
+                        if(threeObject.shadowMapSize) {
+                            threeObject.shadowMapSize.x = value;
+                        }
+                        if(threeObject.shadowMap) {
+                            threeObject.shadowMap.width = value;
+                        }
                     }
 
                 }
@@ -1523,6 +1598,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     case "activeCamera":
                         value = node.camera.ID;
                         break;
+                    case "shadowMapCullFace":
+                        if ( node.renderer ) {
+                            value = node.renderer.shadowMapCullFace;
+                        }
+                        break;
+                    case "shadowMapType":
+                        if ( node.renderer ) {
+                            value = node.renderer.shadowMapType;
+                        }
+                        break;
                 }
             }
             if( threeObject instanceof THREE.Light ) {
@@ -1570,6 +1655,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         break;
                     case "shadowDarkness":
                         value = threeObject.shadowDarkness;
+                        break;
+                    case "shadowMapHeight":
+                        value = threeObject.shadowMapHeight;
+                        break;
+                    case "shadowMapWidth":
+                        value = threeObject.shadowMapWidth;
+                        break;
                 }
             }
             return value;
