@@ -298,6 +298,7 @@ var stats;
 			
             sceneNode.frameCount++;
 			var now = ( window.performance !== undefined && window.performance.now !== undefined ) ? window.performance.now() : time;
+			
 			var timepassed = now - sceneNode.lastTime;
 			window.deltaTime = timepassed;
 			if(_SceneManager)
@@ -306,7 +307,7 @@ var stats;
 			for(var i in pss)
 			{
 				if(pss[i].update)
-					pss[i].update(timepassed);
+					pss[i].update(timepassed || 0);
 			}
 
 			var cam = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
