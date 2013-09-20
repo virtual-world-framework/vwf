@@ -54,6 +54,7 @@ var vwfPortalModel = new function(){
 	self.displayWorldObjects = ko.observableArray([]);
 	self.adminDisplayList = ko.observableArray();
 	self.currentAdminItem = ko.observable(false); 
+	self.errorText = ko.observable('');
 	self.getNextPage = function(){
 		if(self.nextDisabled() === false)
 			self.getPage(1);
@@ -276,9 +277,10 @@ function showStates(cb){
 				//The incoming data elements may not be in the same order as existing elements, get proper index
 				saveIndex = tempArr.indexOf(id) > -1 ? tempArr.indexOf(id) : i++;
 				
+				e[tmpKey].updates = Date.parse(e[tmpKey].lastUpdate);
 				e[tmpKey].lastUpdate = e[tmpKey].lastUpdate?removeAgoFromMoment(e[tmpKey].lastUpdate):removeAgoFromMoment(new Date());
 				e[tmpKey].description = e[tmpKey].description ? e[tmpKey].description : "";
-				e[tmpKey].updates = e[tmpKey].updates > 0 ? e[tmpKey].updates : 0;
+				
 				e[tmpKey].editVisible = ko.observable(false);				
 				e[tmpKey].isVisible = checkFilter([e[tmpKey].title, e[tmpKey].description, e[tmpKey].owner]);
 				
