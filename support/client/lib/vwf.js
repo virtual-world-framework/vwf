@@ -2832,14 +2832,9 @@ if ( ! childComponent.source ) {
             }
 
             // Call satProperty() on each view. The view is being notified that a property has
-            // been set. Don't notify for inner, reentrant calls since the outer call will notify.
-            // Also don't notify if attempted delegation was blocked during replication since it
-            // makes this like an inner call.
+            // been set. Only call if the property was assigned in this entry into setProperty
 
-            // TODO: pull this up to the top and replace all comparisons on entry.index
-            var reentrant = (entry.index !== undefined);
-
-            if ( !reentrant ) {
+            if ( assigned ) {
                 this.views.forEach( function( view ) {
                     view[satPropertyEtc] && view[satPropertyEtc]( nodeID, propertyName, propertyValue );
                 } );
