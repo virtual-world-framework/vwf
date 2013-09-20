@@ -814,7 +814,7 @@
                 { driver: "vwf/model/test/scene",  node: id, action: "settingProperty", member: "po", value: 1 }, // pass
                 { driver: "vwf/model/object",      node: id, action: "settingProperty", member: "po", value: 1 }, // assign
                 { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "po", value: 1 }, // result
-              ], "non-delegating property terminating in vwf/model/object" );
+              ], "setProperty on non-delegating property terminating in vwf/model/object" );
 
               // Setting a non-delegating property handled before vwf/model/object.
 
@@ -826,7 +826,7 @@
                 { driver: "vwf/model/test/scene",  node: id, action: "settingProperty", member: "ps", value: 1 }, // assign
                 // { driver: "vwf/model/object",   node: id, action: "settingProperty", member: "ps", value: 1 }, // omit
                 { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "ps", value: 1 }, // result
-              ], "non-delegating property terminating before vwf/model/object" );
+              ], "setProperty on non-delegating property terminating before vwf/model/object" );
 
               // Setting a self-delegating property.
 
@@ -839,11 +839,11 @@
                 /* inner */  // { driver: "vwf/model/test/script", node: id, action: "settingProperty", member: "qs", value: "1" }, // skip for reentrant call
                 /* inner */  { driver: "vwf/model/test/scene",     node: id, action: "settingProperty", member: "qs", value: "1" }, // assign
                 /* inner */  // { driver: "vwf/model/object",      node: id, action: "settingProperty", member: "qs", value: "1" }, // omit since assigned
-                /* inner */  // { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "qs", value: "1" }, // no result from reentrant call
+                /* inner */  { driver: "vwf/view/document",        node: id, action: "satProperty",     member: "qs", value: "1" }, // result
                 /* outer */  // { driver: "vwf/model/test/scene",  node: id, action: "settingProperty", member: "qs", value: 1 },   // omit since delegated
                 /* outer */  // { driver: "vwf/model/object",      node: id, action: "settingProperty", member: "qs", value: 1 },   // omit since delegated
-                /* outer */  { driver: "vwf/view/document",        node: id, action: "satProperty",     member: "qs", value: 1 },   // result
-              ], "property delegating to self" );
+                /* outer */  // { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "qs", value: 1 },   // no result from delegated call
+              ], "setProperty on property delegating to self" );
 
               // Setting a property delegating to a property delegating to a non-delegating property.
 
@@ -861,11 +861,11 @@
                 /* ts */  { driver: "vwf/view/document",        node: id, action: "satProperty",     member: "ts", value: "0" }, // `ts` result
                 /* ss */  // { driver: "vwf/model/test/scene",  node: id, action: "settingProperty", member: "ss", value: 0 },   // omit since `ss` delegated
                 /* ss */  // { driver: "vwf/model/object",      node: id, action: "settingProperty", member: "ss", value: 0 },   // omit since `ss` delegated
-                /* ss */  { driver: "vwf/view/document",        node: id, action: "satProperty",     member: "ss", value: 0 },   // `ss` result
+                /* ss */  // { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "ss", value: 0 },   // no result since `ss` delegated
                 /* rs */  // { driver: "vwf/model/test/scene",  node: id, action: "settingProperty", member: "rs", value: 1 },   // omit since `rs` delegated
                 /* rs */  // { driver: "vwf/model/object",      node: id, action: "settingProperty", member: "rs", value: 1 },   // omit since `rs` delegated
-                /* rs */  { driver: "vwf/view/document",        node: id, action: "satProperty",     member: "rs", value: 1 },   // `rs` result
-              ], "property delegating to a property delegating to a non-delegating property" );
+                /* rs */  //{ driver: "vwf/view/document",      node: id, action: "satProperty",     member: "rs", value: 1 },   // no result since `rs` delegated
+              ], "setProperty on property delegating to a property delegating to a non-delegating property" );
 
               // Setting a property delegating to a property delegating to the initial property.
 
@@ -880,14 +880,14 @@
                 /* us */  // { driver: "vwf/model/test/script", node: id, action: "settingProperty", member: "us", value: "0" }, // skip for reentrant call
                 /* us */  { driver: "vwf/model/test/scene",     node: id, action: "settingProperty", member: "us", value: "0" }, // assign
                 /* us */  // { driver: "vwf/model/object",      node: id, action: "settingProperty", member: "us", value: "0" }, // omit since `us` assigned
-                /* us */  // { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "us", value: "0" }, // no result from reentrant call
+                /* us */  { driver: "vwf/view/document",        node: id, action: "satProperty",     member: "us", value: "0" }, // result
                 /* vs */  // { driver: "vwf/model/test/scene",  node: id, action: "settingProperty", member: "vs", value: 0 },   // omit since `vs` delegated
                 /* vs */  // { driver: "vwf/model/object",      node: id, action: "settingProperty", member: "vs", value: 0 },   // omit since `vs` delegated
-                /* vs */  { driver: "vwf/view/document",        node: id, action: "satProperty",     member: "vs", value: 0 },   // `vs` result
+                /* vs */  // { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "vs", value: 0 },   // no result since `vs` delegated 
                 /* us */  // { driver: "vwf/model/test/scene",  node: id, action: "settingProperty", member: "us", value: 1 },   // omit since `us` delegated
                 /* us */  // { driver: "vwf/model/object",      node: id, action: "settingProperty", member: "us", value: 1 },   // omit since `us` delegated
-                /* us */  { driver: "vwf/view/document",        node: id, action: "satProperty",     member: "us", value: 1 },   // `us` result
-              ], "property delegating to a property delegating to initial property" );
+                /* us */  // { driver: "vwf/view/document",     node: id, action: "satProperty",     member: "us", value: 1 },   // `us` result
+              ], "setProperty on property delegating to a property delegating to initial property" );
 
               driverCalls = undefined;
 
@@ -903,7 +903,7 @@
                 { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "po", value: undefined }, // pass
                 { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "po", value: undefined }, // retrieve
                 { driver: "vwf/view/document",     node: id, action: "gotProperty",     member: "po", value: 1 }, // result
-              ], "non-delegating property terminating in vwf/model/object" );
+              ], "getProperty on non-delegating property terminating in vwf/model/object" );
 
               // Getting a non-delegating property handled before vwf/model/object.
 
@@ -915,7 +915,7 @@
                 { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "ps", value: undefined }, // retrieve
                 // { driver: "vwf/model/object",   node: id, action: "gettingProperty", member: "ps", value: 1 }, // omit
                 { driver: "vwf/view/document",     node: id, action: "gotProperty",     member: "ps", value: 1 }, // result
-              ], "non-delegating property terminating before vwf/model/object" );
+              ], "getProperty on non-delegating property terminating before vwf/model/object" );
 
               // Getting a self-delegating property.
 
@@ -932,7 +932,7 @@
                 /* outer */  // { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "qs", value: 1 },   // omit since delegated
                 /* outer */  // { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "qs", value: 1 },   // omit since delegated
                 /* outer */  { driver: "vwf/view/document",        node: id, action: "gotProperty",     member: "qs", value: 1 },   // result
-              ], "property delegating to self" );
+              ], "getProperty on property delegating to self" );
 
               // Getting a property delegating to a property delegating to a non-delegating property.
 
@@ -954,7 +954,7 @@
                 /* rs */  // { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "rs", value: 1 },   // omit since `rs` delegated
                 /* rs */  // { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "rs", value: 1 },   // omit since `rs` delegated
                 /* rs */  { driver: "vwf/view/document",        node: id, action: "gotProperty",     member: "rs", value: 1 },   // `rs` result
-              ], "property delegating to a property delegating to a non-delegating property" );
+              ], "getProperty on property delegating to a property delegating to a non-delegating property" );
 
               // Setting a property delegating to a property delegating to the initial property.
 
@@ -976,7 +976,7 @@
                 /* us */  // { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "us", value: 1 },   // omit since `us` delegated
                 /* us */  // { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "us", value: 1 },   // omit since `us` delegated
                 /* us */  { driver: "vwf/view/document",        node: id, action: "gotProperty",     member: "us", value: 1 },   // `us` result
-              ], "property delegating to a property delegating to initial property" );
+              ], "getProperty on property delegating to a property delegating to initial property" );
 
               driverCalls = undefined;
 
@@ -994,7 +994,7 @@
                 /* outer */  { driver: "vwf/model/test/scene",     node: id, action: "settingProperty", member: "qs", value: "1" }, // assign
                 /* outer */  // { driver: "vwf/model/object",      node: id, action: "settingProperty", member: "qs", value: "1" }, // omit since assigned
                 /* outer */  { driver: "vwf/view/document",        node: id, action: "satProperty",     member: "qs", value: "1" }, // internal result
-              ], "property delegating to self during replication" );
+              ], "setProperty on property delegating to self during replication" );
 
               // Setting a property delegating to a property delegating to the initial property during replication
 
@@ -1006,7 +1006,7 @@
                 /* us */  { driver: "vwf/model/test/scene",     node: id, action: "settingProperty", member: "us", value: "0" }, // assign
                 /* us */  // { driver: "vwf/model/object",      node: id, action: "settingProperty", member: "us", value: "0" }, // omit since assigned
                 /* us */  { driver: "vwf/view/document",        node: id, action: "satProperty",     member: "us", value: "0" }, // internal result
-              ], "property delegating to a property delegating to initial property during replication" );
+              ], "setProperty on property delegating to a property delegating to initial property during replication" );
 
               driverCalls = undefined;
 
@@ -1022,7 +1022,7 @@
                 /* outer */  { driver: "vwf/model/test/scene",     node: id, action: "gettingProperty", member: "qs", value: undefined }, // retrieve
                 /* outer */  // { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "qs", value: "1" }, // omit since retrieved
                 /* outer */  { driver: "vwf/view/document",        node: id, action: "gotProperty",     member: "qs", value: "1" }, // internal result
-              ], "property delegating to self during replication" );
+              ], "getProperty on property delegating to self during replication" );
 
               // Getting a property delegating to a property delegating to a non-delegating property during replication
 
@@ -1034,7 +1034,7 @@
                 /* rs */  { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "rs", value: undefined }, // pass
                 /* rs */  { driver: "vwf/model/object",      node: id, action: "gettingProperty", member: "rs", value: undefined }, // pass
                 /* rs */  { driver: "vwf/view/document",     node: id, action: "gotProperty",     member: "rs", value: undefined }, // internal result
-              ], "property delegating to a property delegating to a non-delegating property during replication" );
+              ], "getProperty on property delegating to a property delegating to a non-delegating property during replication" );
 
               // Getting a property delegating to a property delegating to the initial property during replication
 
@@ -1046,7 +1046,7 @@
                 /* us */  { driver: "vwf/model/test/scene",  node: id, action: "gettingProperty", member: "us", value: undefined }, // retrieve
                 /* us */  // { driver: "vwf/model/object",   node: id, action: "gettingProperty", member: "us", value: "-1" },      // omit since retrieved
                 /* us */  { driver: "vwf/view/document",     node: id, action: "gotProperty",     member: "us", value: "0" },       // internal result
-              ], "property delegating to a property delegating to initial property during replication" );
+              ], "getProperty on property delegating to a property delegating to initial property during replication" );
 
               driverCalls = undefined;
 
