@@ -7,21 +7,21 @@
     <title>Virtual World Framework</title>
 
     <!-- For testing -->
-    <script type="text/javascript" src="../qunit.js"></script>
+    <script type="text/javascript" src="qunit.js"></script>
 
     <!-- BEGIN VWF kernel libraries (that are not require.js modules) -->
-    <script type="text/javascript" src="../../lib/jquery-1.7.1.js"></script>
-    <script type="text/javascript" src="../../lib/async.js"></script>
+    <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="../lib/async.js"></script>
 
-    <script type="text/javascript" src="../../lib/crypto.js"></script>
-    <script type="text/javascript" src="../../lib/md5.js"></script>
+    <script type="text/javascript" src="../lib/crypto.js"></script>
+    <script type="text/javascript" src="../lib/md5.js"></script>
 
-    <script type="text/javascript" src="../../lib/alea.js"></script>
-    <script type="text/javascript" src="../../lib/mash.js"></script>
+    <script type="text/javascript" src="../lib/alea.js"></script>
+    <script type="text/javascript" src="../lib/mash.js"></script>
 
-    <script type="text/javascript" src="../../lib/vwf.js"></script>
+    <script type="text/javascript" src="../lib/vwf.js"></script>
 
-    <script type="text/javascript" src="../../lib/require.js"></script>
+    <script type="text/javascript" src="../lib/require.js"></script>
     <!-- END VWF kernel libraries -->
 
     <!-- The tests:
@@ -34,12 +34,12 @@
       require( {
 
         // The path to the require.js libraries that need loading
-        baseUrl: "../../lib"
+        baseUrl: "../lib"
 
       }, [
 
         "domReady",
-        "../utility.js",
+        "utility.js",
 
         "vwf/configuration",
         "vwf/kernel/model",
@@ -88,7 +88,7 @@
     </script>
 
     <!-- qunit's css for the output -->
-    <link rel="stylesheet" type="text/css" href="../qunit.css" />
+    <link rel="stylesheet" type="text/css" href="qunit.css" />
 
   </head>
 
