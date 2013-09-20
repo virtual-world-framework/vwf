@@ -65,6 +65,8 @@ class VWF::Application
     def call env
       if %w[ GET HEAD ].include?( env["REQUEST_METHOD"] ) && env["PATH_INFO"] == "/"
         env["PATH_INFO"] = "/index.html"
+      elsif %w[ GET HEAD ].include?( env["REQUEST_METHOD"] ) && env["PATH_INFO"] == "/socket.io.js"
+        env["PATH_INFO"] = "/socket.io-0.6.js"
       end
       @file.call env
     end

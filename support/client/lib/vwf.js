@@ -657,46 +657,56 @@
             // communicates using a channel back to the server that provided the client documents.
 
             try {
-
-                socket = new io.Socket( undefined, {
-
-                    // The socket is relative to the application path.
-
-                    resource: window.location.pathname.slice( 1,
-                        window.location.pathname.lastIndexOf("/") ),
-
-                    // Use a secure connection when the application comes from https.
-
-                    secure: window.location.protocol === "https:",
-
-                    port: window.location.port ||
-                        ( window.location.protocol === "https:" ? 443 : 80 ),
-
-                    // The ruby socket.io server only supports WebSockets. Don't try the others.
-
-                    transports: [
-                        'websocket',
-                        // 'flashsocket',
-                        // 'htmlfile',
-                        // 'xhr-multipart',
-                        // 'xhr-polling',
-                        // 'jsonp-polling',
-                    ],
-
-                    // Increase the timeout due to starvation while loading the scene. The server
-                    // timeout must also be increased.
-                    // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
-
-                    transportOptions: {
-                        "websocket": { timeout: 90000 }
-                        // "flashsocket": { timeout: 90000 },
-                        // "htmlfile": { timeout: 90000 },
-                        // "xhr-multipart": { timeout: 90000 },
-                        // "xhr-polling": { timeout: 90000 },
-                        // "jsonp-polling": { timeout: 90000 },
+                if ( isSocketIO07() ) {
+                    if ( window.location.protocol === "https:" )
+                    {
+                        socket = io.connect("wss://"+window.location.host);
+                    } else {
+                        socket = io.connect("ws://"+window.location.host); 
                     }
+ 
+                } else {  // Ruby Server
 
-                } );
+                    socket = new io.Socket( undefined, {
+    
+                        // The socket is relative to the application path.
+    
+                        resource: window.location.pathname.slice( 1,
+                            window.location.pathname.lastIndexOf("/") ),
+
+                        // Use a secure connection when the application comes from https.
+
+                        secure: window.location.protocol === "https:",
+
+                        port: window.location.port ||
+                            ( window.location.protocol === "https:" ? 443 : 80 ),
+    
+                        // The ruby socket.io server only supports WebSockets. Don't try the others.
+    
+                        transports: [
+                            'websocket',
+                            // 'flashsocket',
+                            // 'htmlfile',
+                            // 'xhr-multipart',
+                            // 'xhr-polling',
+                            // 'jsonp-polling',
+                        ],
+    
+                        // Increase the timeout due to starvation while loading the scene. The server
+                        // timeout must also be increased.
+                        // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
+    
+                        transportOptions: {
+                            "websocket": { timeout: 90000 }
+                            // "flashsocket": { timeout: 90000 },
+                            // "htmlfile": { timeout: 90000 },
+                            // "xhr-multipart": { timeout: 90000 },
+                            // "xhr-polling": { timeout: 90000 },
+                            // "jsonp-polling": { timeout: 90000 },
+                        }
+    
+                    } );
+                }
 
             } catch ( e ) {
 
@@ -726,7 +736,11 @@
 
                     vwf.logger.infox( "-socket", "connected" );
 
-                    vwf.moniker_ = this.transport.sessionid;
+                    if ( isSocketIO07() ) {
+                        vwf.moniker_ = this.json.namespace.socket.sessionid;                        
+                    } else {  //Ruby Server
+                        vwf.moniker_ = this.transport.sessionid;
+                    }
 
                 } );
 
@@ -744,9 +758,11 @@
 
                     try {
 
-                        // Unpack the arguments.
-
-                        var fields = JSON.parse( message );
+                        if ( isSocketIO07() ) {
+                            var fields = message;
+                        } else { // Ruby Server - Unpack the arguements
+                            var fields = JSON.parse( message );
+                        }
 
                         fields.time = Number( fields.time );
                         // TODO: other message validation (check node id, others?)
@@ -789,9 +805,11 @@
 
                 } );
 
-                // Start communication with the reflector. 
+                if ( !isSocketIO07() ) {
+                    // Start communication with the reflector. 
 
-                socket.connect();  // TODO: errors can occur here too, particularly if a local client contains the socket.io files but there is no server; do the loopback here instead of earlier in response to new io.Socket.
+                    socket.connect();  // TODO: errors can occur here too, particularly if a local client contains the socket.io files but there is no server; do the loopback here instead of earlier in response to new io.Socket.
+                }
 
             } else if ( component_uri_or_json_or_object ) {
 
@@ -872,10 +890,9 @@
             if ( socket ) {
     
                 // Send the message.
-
                 var message = JSON.stringify( fields );
                 socket.send( message );
-
+ 
             } else {
                 
                 // In single-user mode, loop the message back to the incoming queue.
@@ -3425,6 +3442,10 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
         };
 
         // == Private functions ====================================================================
+
+        var isSocketIO07 = function() {
+            return ( parseFloat( io.version ) >= 0.7 );
+        }
 
         // -- loadComponent ------------------------------------------------------------------------
 
