@@ -2,21 +2,25 @@
 define([
         '../Core/clone',
         '../Core/defaultValue',
+        '../Core/defined',
         '../Core/freezeObject',
         '../Core/writeTextToCanvas',
         '../Core/DeveloperError',
         '../Core/Event',
         '../Core/Extent',
+        './Credit',
         './ImageryProvider',
         './GeographicTilingScheme'
     ], function(
         clone,
         defaultValue,
+        defined,
         freezeObject,
         writeTextToCanvas,
         DeveloperError,
         Event,
         Extent,
+        Credit,
         ImageryProvider,
         GeographicTilingScheme) {
     "use strict";
@@ -33,7 +37,7 @@ define([
      * @param {Extent} [description.extent=Extent.MAX_VALUE] The extent of the layer.
      * @param {Number} [description.maximumLevel] The maximum level-of-detail supported by the imagery provider.
      *        If not specified, there is no limit.
-     * @param {String} [description.credit] A string crediting the data source, which is displayed on the canvas.
+     * @param {Credit|String} [description.credit] A credit for the data source, which is displayed on the canvas.
      * @param {Object} [description.proxy] A proxy to use for requests. This object is
      *        expected to have a getURL function which returns the proxied URL, if needed.
      *
@@ -59,11 +63,11 @@ define([
     var WebMapServiceImageryProvider = function WebMapServiceImageryProvider(description) {
         description = defaultValue(description, {});
 
-        if (typeof description.url === 'undefined') {
+        if (!defined(description.url)) {
             throw new DeveloperError('description.url is required.');
         }
 
-        if (typeof description.layers === 'undefined') {
+        if (!defined(description.layers)) {
             throw new DeveloperError('description.layers is required.');
         }
 
@@ -74,7 +78,7 @@ define([
 
         // Merge the parameters with the defaults, and make all parameter names lowercase
         var parameters = clone(WebMapServiceImageryProvider.DefaultParameters);
-        if (typeof description.parameters !== 'undefined') {
+        if (defined(description.parameters)) {
             for (var parameter in description.parameters) {
                 if (description.parameters.hasOwnProperty(parameter)) {
                     var parameterLowerCase = parameter.toLowerCase();
@@ -94,11 +98,11 @@ define([
             extent : extent
         });
 
-        if (typeof description.credit !== 'undefined') {
-            this._logo = writeTextToCanvas(description.credit, {
-                font : '12px sans-serif'
-            });
+        var credit = description.credit;
+        if (typeof credit === 'string') {
+            credit = new Credit(credit);
         }
+        this._credit = credit;
 
         this._errorEvent = new Event();
 
@@ -123,30 +127,30 @@ define([
             }
         }
 
-        if (typeof parameters.layers === 'undefined') {
+        if (!defined(parameters.layers)) {
             url += 'layers=' + imageryProvider._layers + '&';
         }
 
-        if (typeof parameters.srs === 'undefined') {
+        if (!defined(parameters.srs)) {
             url += 'srs=EPSG:4326&';
         }
 
-        if (typeof parameters.bbox === 'undefined') {
+        if (!defined(parameters.bbox)) {
             var nativeExtent = imageryProvider._tilingScheme.tileXYToNativeExtent(x, y, level);
             var bbox = nativeExtent.west + ',' + nativeExtent.south + ',' + nativeExtent.east + ',' + nativeExtent.north;
             url += 'bbox=' + bbox + '&';
         }
 
-        if (typeof parameters.width === 'undefined') {
+        if (!defined(parameters.width)) {
             url += 'width=256&';
         }
 
-        if (typeof parameters.height === 'undefined') {
+        if (!defined(parameters.height)) {
             url += 'height=256&';
         }
 
         var proxy = imageryProvider._proxy;
-        if (typeof proxy !== 'undefined') {
+        if (defined(proxy)) {
             url = proxy.getURL(url);
         }
 
@@ -364,20 +368,15 @@ define([
     };
 
     /**
-     * Gets the logo to display when this imagery provider is active.  Typically this is used to credit
+     * Gets the credit to display when this imagery provider is active.  Typically this is used to credit
      * the source of the imagery.  This function should not be called before {@link WebMapServiceImageryProvider#isReady} returns true.
      *
      * @memberof WebMapServiceImageryProvider
      *
-     * @returns {Image|Canvas} A canvas or image containing the log to display, or undefined if there is no logo.
-     *
-     * @exception {DeveloperError} <code>getLogo</code> must not be called before the imagery provider is ready.
+     * @returns {Credit} The credit, or undefined if no credit exists
      */
-    WebMapServiceImageryProvider.prototype.getLogo = function() {
-        if (!this._ready) {
-            throw new DeveloperError('getLogo must not be called before the imagery provider is ready.');
-        }
-        return this._logo;
+    WebMapServiceImageryProvider.prototype.getCredit = function() {
+        return this._credit;
     };
 
     /**
