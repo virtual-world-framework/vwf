@@ -2,8 +2,8 @@
 		<div class="col-md-12">
 			<div class="row">
 				<div class="col-md-4" style="text-align:left;">
-					<button id="allWorlds" class="btn btn-sm active" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">All Worlds</button>
-					<button id="yourWorlds" class="btn btn-sm" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">Your Worlds</button>
+					<button id="allWorlds" class="btn btn-default btn-sm active" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">All Worlds</button>
+					<button id="yourWorlds" class="btn btn-default btn-sm" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">Your Worlds</button>
 				</div>
 				
 				<div class="col-md-1 col-md-offset-4" style="text-align:right;">
@@ -12,7 +12,7 @@
 					</a>
 				</div>
 				<div class="col-md-3">
-					<input id="filter" class="col-md-3" style="width:90%;" type="text" placeholder="Filter Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
+					<input id="filter" class="col-md-3 form-control" style="width:90%;" type="text" placeholder="Filter Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
 				</div>
 			</div>
 			
