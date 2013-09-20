@@ -317,6 +317,10 @@ var stats;
 			var vp =  MATH.transposeMat4(_viewProjectionMatrix.flattenToArray([]));
 			
 			var rootdiv = document.getElementById('index-vwf');
+			
+			var minD = Math.min($('#index-vwf').width(),$('#index-vwf').height());
+			if(minD < 100) return;
+			
 			var h = rootdiv.style.height;
 			var w = rootdiv.style.width;
 			var wh = parseInt(h.substr(0,h.length-2));

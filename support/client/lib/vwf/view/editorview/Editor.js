@@ -650,6 +650,7 @@ define(function ()
 			}
 			if (e.keyCode == 87 && SelectMode == 'Pick')
 			{
+				
 				this.SetGizmoMode(Move);
 			}
 			if (e.keyCode == 69&& SelectMode == 'Pick')
@@ -2033,6 +2034,8 @@ define(function ()
 		}.bind(this);
 		this.hideMoveGizmo = function ()
 		{
+			
+			
 			while (MoveGizmo.children.length)
 			{
 				MoveGizmo.remove(MoveGizmo.children[MoveGizmo.children.length - 1])
@@ -2040,6 +2043,8 @@ define(function ()
 		}
 		this.showMoveGizmo = function ()
 		{
+			
+			
 			this.SetGizmoMode(this.GizmoMode);
 		}
 		this.updateBoundsAndGizmoLoc = function ()
@@ -2209,8 +2214,10 @@ define(function ()
 		}.bind(this);
 		this.SetGizmoMode = function (type)
 		{
+			
 			this.GizmoMode = type;
-			if (MoveGizmo.visible == false) return;
+			
+			if(!this.GetSelectedVWFID()) return;
 			if (type == Move)
 			{
 				$('#StatusTransform').text('Move');
@@ -2961,26 +2968,32 @@ define(function ()
 		}
 		this.mouseup = function (e)
 		{
+			if(!toolsOpen()) return;
 			if (this.activeTool && this.activeTool.mouseup) this.activeTool.mouseup(e);
 		}
 		this.click = function (e)
 		{
+			if(!toolsOpen()) return;
 			if (this.activeTool && this.activeTool.click) this.activeTool.click(e);
 		}
 		this.mousemove = function (e)
 		{
+			if(!toolsOpen()) return;
 			if (this.activeTool && this.activeTool.mousemove) this.activeTool.mousemove(e);
 		}
 		this.mousewheel = function (e)
 		{
+			if(!toolsOpen()) return;
 			if (this.activeTool && this.activeTool.mousewheel) this.activeTool.mousewheel(e);
 		}
 		this.keyup = function (e)
 		{
+			if(!toolsOpen()) return;
 			if (this.activeTool && this.activeTool.keyup) this.activeTool.keyup(e);
 		}
 		this.keydown = function (e)
 		{
+			if(!toolsOpen()) return;
 			if (this.activeTool && this.activeTool.keydown) this.activeTool.keydown(e);
 		}
 		this.tools = {};

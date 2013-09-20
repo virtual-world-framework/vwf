@@ -156,6 +156,7 @@ define(
 		$('#MenuInventory').click(function (e)
 		{
 			_InventoryManager.show();
+			$( "#InventoryTypeChoicePersonal" ).click()
 		});
 		$('#MenuObjectProperties').click(function (e)
 		{
@@ -163,7 +164,8 @@ define(
 		});
 		$('#MenuGlobalInventory').click(function (e)
 		{
-			
+			_InventoryManager.show();
+			$( "#InventoryTypeChoiceGlobal" ).click()
 		});
 		$('#MenuLatencyTest').click(function (e)
 		{

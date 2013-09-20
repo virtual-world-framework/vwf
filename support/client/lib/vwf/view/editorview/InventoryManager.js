@@ -27,7 +27,7 @@ define(function ()
 		$('#InventoryControls').append("<div id='InventoryTypeChoice' class=''></div>");
 		$('#InventoryTypeChoice').append("<input type='radio' id='InventoryTypeChoicePersonal' name='InventoryTypeChoice' class='' checked='checked'></input><label for='InventoryTypeChoicePersonal'>Personal</label>");
 		$('#InventoryTypeChoice').append("<input type='radio' id='InventoryTypeChoiceGlobal' name='InventoryTypeChoice' class=''></input><label for='InventoryTypeChoiceGlobal'>Global</label>");
-		$('#InventoryControls').append("<input type='text' id='InventoryFilter' class=''></input>");
+		$('#InventoryControls').append("<input type='text' id='InventoryFilter' placeholder='filter' class=''></input>");
 		$( "#InventoryTypeChoice" ).buttonset();
 		$( "#InventoryTypeChoiceGlobal" ).click(function(e){
 			
