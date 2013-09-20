@@ -263,6 +263,10 @@ text-align:left;
 	box-shadow: 5px 5px 5px;
 }
 
+.accountCreation input{
+	margin-bottom:10px;
+}
+
 .featurette-heading {
 	font-size: 50px;
 	font-weight: 300;
