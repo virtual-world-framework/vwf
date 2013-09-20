@@ -3,6 +3,7 @@ define([
         '../Core/BoundingSphere',
         '../Core/Cartesian3',
         '../Core/ComponentDatatype',
+        '../Core/defined',
         '../Core/destroyObject',
         '../Core/Math',
         '../Core/PrimitiveType',
@@ -16,6 +17,7 @@ define([
         BoundingSphere,
         Cartesian3,
         ComponentDatatype,
+        defined,
         destroyObject,
         CesiumMath,
         PrimitiveType,
@@ -50,9 +52,6 @@ define([
 
         /**
          * Determines if the sun will be shown.
-         * <p>
-         * The default is <code>true</code>.
-         * </p>
          *
          * @type {Boolean}
          * @default true
@@ -79,7 +78,7 @@ define([
 
         var command = this._command;
 
-        if (typeof command.vertexArray === 'undefined') {
+        if (!defined(command.vertexArray)) {
             var attributeIndices = {
                 direction : 0
             };
@@ -143,7 +142,7 @@ define([
      *
      * @memberof Sun
      *
-     * @return {Boolean} <code>true</code> if this object was destroyed; otherwise, <code>false</code>.
+     * @returns {Boolean} <code>true</code> if this object was destroyed; otherwise, <code>false</code>.
      *
      * @see Sun#destroy
      */
@@ -161,7 +160,7 @@ define([
      *
      * @memberof Sun
      *
-     * @return {undefined}
+     * @returns {undefined}
      *
      * @exception {DeveloperError} This object was destroyed, i.e., destroy() was called.
      *
