@@ -13,9 +13,9 @@
 
 ( function () { 
 
-    // Only patch if running Socket.io version 0.6.3, i.e. Ruby server
+    // Only patch if running older Socket.io version i.e. 0.6.3, Ruby server
 
-	if (io.version !=="0.6.3") {
+	if ( parseFloat( io.version ) >= 0.7 ) {
 	    return;
     }
 

@@ -657,8 +657,14 @@
             // communicates using a channel back to the server that provided the client documents.
 
             try {
-                if (isNodeServer()) {
-                    socket = io.connect("ws://"+window.location.host);
+                if ( isSocketIO07() ) {
+                    if ( window.location.protocol === "https:" )
+                    {
+                        socket = io.connect("wss://"+window.location.host);
+                    } else {
+                        socket = io.connect("ws://"+window.location.host); 
+                    }
+ 
                 } else {  // Ruby Server
 
                     socket = new io.Socket( undefined, {
@@ -730,7 +736,7 @@
 
                     vwf.logger.infox( "-socket", "connected" );
 
-                    if (isNodeServer()) {
+                    if ( isSocketIO07() ) {
                         vwf.moniker_ = this.json.namespace.socket.sessionid;                        
                     } else {  //Ruby Server
                         vwf.moniker_ = this.transport.sessionid;
@@ -752,7 +758,7 @@
 
                     try {
 
-                        if (isNodeServer()) {
+                        if ( isSocketIO07() ) {
                             var fields = message;
                         } else { // Ruby Server - Unpack the arguements
                             var fields = JSON.parse( message );
@@ -799,7 +805,7 @@
 
                 } );
 
-                if (!isNodeServer()) {
+                if ( !isSocketIO07() ) {
                     // Start communication with the reflector. 
 
                     socket.connect();  // TODO: errors can occur here too, particularly if a local client contains the socket.io files but there is no server; do the loopback here instead of earlier in response to new io.Socket.
@@ -3437,8 +3443,8 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
         // == Private functions ====================================================================
 
-        var isNodeServer = function() {
-            return (io.version !== "0.6.3");
+        var isSocketIO07 = function() {
+            return ( parseFloat( io.version ) >= 0.7 );
         }
 
         // -- loadComponent ------------------------------------------------------------------------
