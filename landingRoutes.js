@@ -20,9 +20,10 @@ exports.setDAL = function(d){
 	DAL = d;
 };
 
-exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'home', 'admin', 'admin/users', 'admin/worlds', 'admin/edit'];
+exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'home', 'worlds', 'admin', 'admin/users', 'admin/worlds', 'admin/edit'];
 routesMap = {
-	'sandbox': {template:'index'},
+	'sandbox': {template:'home'},
+	'worlds': {template:'index'},
 	'edit': {sid: true},
 	'remove': {sid:true, title: 'Warning!'},
 	'user': {sid:true, title: 'Account'},
@@ -35,7 +36,7 @@ exports.generalHandler = function(req, res, next){
 	
 	var sessionData = global.SandboxAPI.getSessionData(req);
 	if(!req.params.page)
-		req.params.page = 'sandbox';
+		req.params.page = 'home';
 		
 	
 	if(req.params.page.indexOf('admin') > -1 && (!sessionData || sessionData.UID != global.adminUID)){
