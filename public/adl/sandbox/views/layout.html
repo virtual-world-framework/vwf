@@ -25,8 +25,6 @@
 	<div id="wrapper">
 		<div id="header" style="text-align: center">
 			<div class="headerMenu">
-				
-				
 				<div id="username" data-bind="visible:user().isLoggedIn">
 					<span class="headerSpan" data-bind="text:'Logged in as: '"></span>
 					<a class="headerA" href="{{root}}/user" id="userOptions" data-bind="text: user().username"></a>
@@ -38,66 +36,68 @@
 				</div>
 			</div>
 		</div>		
-		<div class="content container">
-			<div id="pageLogo">
-				<h4 style="text-align:center;">ADL</h4>
-				<h1 style="text-align:center;">Sandbox</h1>
-				<h3 style="text-align:center;">Virtual worlds right in your browser</h3>
-			</div>
-			<div class="linkMenu">
-				<a href="/">Home</a>
-				<a href="{{root}}/worlds">Worlds</a> 
-				<a href="http://www.youtube.com/watch?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2&v=aWRQJJnBi5c">Videos</a> 
-				<a href="{{root}}/help">Help</a> 
-			</div>
-		</div>	
-		
-		{{#home}}
-		<div class="container sliderContainer">
-			<div style="background-image:url('{{root}}/img/huge_terrain.jpg');" class="slide-item slide-item0">
-				<div class="pContainer">
-					<p>No extra plugins needed - just click and go</p>	
+		<div class="container" style="box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.25);padding:0">
+			<div class="content container">
+				<div id="pageLogo">
+					<h4 style="text-align:center;">ADL</h4>
+					<h1 style="text-align:center;">Sandbox</h1>
+					<h3 style="text-align:center;">Virtual worlds right in your browser</h3>
 				</div>
-				<div class="divContent0">
-					<h1 class="h1-hero">In Browser</h1>
+				<div class="linkMenu">
+					<a href="/">Home</a>
+					<a href="{{root}}/worlds">Worlds</a> 
+					<a href="http://www.youtube.com/watch?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2&v=aWRQJJnBi5c">Videos</a> 
+					<a href="{{root}}/help">Help</a> 
 				</div>
-			</div>
-			<div style="background-image:url('{{root}}/img/huge_town.jpg');" class="slide-item slide-item1">
-				<div class="pContainer">
-					<p>Advanced scripting controls every aspect of your scenario</p>
-				</div>	
-				<div class="divContent1">
-					<h1 class="h1-hero">Full Control</h1>
-				</div>
-			</div>
-			<div style="background-image:url('{{root}}/img/huge_office.jpg');" class="slide-item slide-item2">
-				<div class="pContainer">
-					<p>Web RTC enables a higher level of collaboration</p>
-				</div>	
-				<div class="divContent2">
-					<h1 class="h1-hero"></h1>
-				</div>
-			</div>
-			<div style="background-image:url('{{root}}/img/huge_editor.jpg');" class="slide-item slide-item3">
-				<div class="pContainer">
-					<p>A full featured set of tools makes building worlds easy</p>
-				</div>	
-				<div class="divContent3">
-					<h1 class="h1-hero">Rich Editor</h1>
-					
-				</div>
-			</div>
-		</div>
-		{{/home}}
+			</div>	
 			
-		<div class="content container">	
-			<h3>{{title}}</h3>
-			{{{yield}}}
-			
+			{{#home}}
+			<div class="container sliderContainer">
+				<div style="background-image:url('{{root}}/img/huge_terrain.jpg');" class="slide-item slide-item0">
+					<div class="pContainer">
+						<p>No extra plugins needed - just click and go</p>	
+					</div>
+					<div class="divContent0">
+						<h1 class="h1-hero">In Browser</h1>
+					</div>
+				</div>
+				<div style="background-image:url('{{root}}/img/huge_town.jpg');" class="slide-item slide-item1">
+					<div class="pContainer">
+						<p>Advanced scripting controls every aspect of your scenario</p>
+					</div>	
+					<div class="divContent1">
+						<h1 class="h1-hero">Full Control</h1>
+					</div>
+				</div>
+				<div style="background-image:url('{{root}}/img/huge_office.jpg');" class="slide-item slide-item2">
+					<div class="pContainer">
+						<p>Web RTC enables a higher level of collaboration</p>
+					</div>	
+					<div class="divContent2">
+						<h1 class="h1-hero"></h1>
+					</div>
+				</div>
+				<div style="background-image:url('{{root}}/img/huge_editor.jpg');" class="slide-item slide-item3">
+					<div class="pContainer">
+						<p>A full featured set of tools makes building worlds easy</p>
+					</div>	
+					<div class="divContent3">
+						<h1 class="h1-hero">Rich Editor</h1>
+						
+					</div>
+				</div>
+			</div>
+			{{/home}}
+				
+			<div class="content container">	
+				<h3>{{title}}</h3>
+				{{{yield}}}
+				
 
-		</div>
-		<div id="footer" class="container">
-			<br/><p style="color:#eee">A project from <a href='http://www.adlnet.gov'>ADL</a></p>
+			</div>
+			<div id="footer" class="container">
+				<br/><p style="color:#eee">A project from <a href='http://www.adlnet.gov'>ADL</a></p>
+			</div>
 		</div>
 	</div>
 	<a href="https://github.com/adlnet/vwf/tree/node_threejs"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
