@@ -12,6 +12,14 @@
 // the License.
 
 ( function () { 
+
+    // Only patch if running older Socket.io version i.e. 0.6.3, Ruby server
+
+	if ( parseFloat( io.version ) >= 0.7 ) {
+	    return;
+    }
+
+
 	var transport = io.Transport;
 	var transports = [ transport, transport.websocket, transport.flashsocket ];
 

@@ -1,7 +1,37 @@
 VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
+
 ----------------------------------
-0.6.14
+0.6.16
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+Server:
+- CHG: Add flag to the Threejs View Driver to check if there is an outstanding getProperty request on 'userObject'.  This eliminates the issue of creating multiple user nodes in gotProperty (not currently implemented through a callback). Fixes #2671
+- FIX: Updates threejs onresize behavior to adjust viewport based on the webgl canvas without the unused border included. Fixes #2800. 
+- NEW: Add initial implementation of the node.js server. 
+
+Client:
+- NEW: Add new properties for controlling shadows. Refs #2806
+- CHG: Fix bug linking the animationRate to the threejs driver. Deprecate fps property, and add new read-only property animationFPS that only comes from the collada model. Add new animationFrameCount and animationFrame properties. Allow for negative animationRate. Refs #2801
+
+Demonstration Applications:
+- Command Center: Texture Update for backboard. Fixes #2668
+- Command Center: Fix bad path for command-center artwork.
+- Write Togeter: Create a new 2D editor application for collaborate document creation. 
+- Radio Lesson: Updates the 'turn the radio on' step of the lesson to listen for control value updated events rather than pointer up events. Fixes #2590.
+
+Documentation:
+- CHG: Update spacing on readme.md file for the 'Getting Started' documentation page. Fixes #2716. 
+- CHG: Crispen warning about unzipping build w/ Windows utility. Fixes #2808
+
+Test Applications:
+- NEW: Add multi-nav-test app to debug Redmine #2671.
+
+
+
+----------------------------------
+0.6.15
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change.
 

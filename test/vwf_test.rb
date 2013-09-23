@@ -143,22 +143,13 @@ class VWFTest < MiniTest::Unit::TestCase
     assert last_response.body.include?( "vwf.loadConfiguration" )
   end
 
-  # Serves the socket.io client from an application session.
+  # Serves the socket.io client version 0.6.3 from an application session.
 
   def test_application_session_socketio_client
     get "/test/component.vwf/0000000000000000/socket.io.js"
     assert last_response.ok?
+    assert last_response.body.include?( "Socket.IO 0.6.3" )
   end
-
-
-
-
-
-
-
-
-
-
 
   # / => /index.html for application "index"
   # /index.html => /index.html for application "index"
@@ -175,7 +166,4 @@ class VWFTest < MiniTest::Unit::TestCase
   # /directory/application => /index.html for application "application"
   # /directory/application/index.html => /index.html for application "application"
   # /directory/application/index.css => /index.css for application "application"
-
-
-
 end

@@ -29,6 +29,9 @@
 
     <!-- The Virtual World Framework makes use of the jQuery library.                            -->
 
+    <script type="text/javascript" src="socket.io.js"></script>
+    <script type="text/javascript" src="socket.io-sessionid-patch.js"></script>
+
     <script type="text/javascript" src="require.js"></script>
 
     <script type="text/javascript" src="jquery-1.7.1.js"></script>
@@ -42,8 +45,6 @@
     <script type="text/javascript">goog.require('goog.vec.Quaternion')</script>
 
     <script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
-    <script type="text/javascript" src="socket.io.js"></script>
-    <script type="text/javascript" src="socket.io-sessionid-patch.js"></script>
 
     <script type="text/javascript" src="crypto.js"></script>
     <script type="text/javascript" src="md5.js"></script>
