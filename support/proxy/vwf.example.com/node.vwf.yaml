@@ -16,7 +16,7 @@
 ## All components in an application extend node.vwf.  They can then add their own properties, 
 ## methods, events, and children.
 ##
-## When a property is added to a component, its default value is undefined.
+## When a property is added to a component, its default value is null.
 ## Alternately, it can be given a starting value.  Here is an example in yaml:
 ##
 ##    properties:
