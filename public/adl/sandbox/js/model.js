@@ -69,7 +69,8 @@ var vwfPortalModel = new function(){
 	
 	
 	self.getPage = function(i){
-	
+
+		self.worldObjects.sort(sortArrByUpdates);
 		var worldObjectsLength = getArrVisibleLength(self.worldObjects());
 		pageIndex += i;
 		
@@ -85,20 +86,18 @@ var vwfPortalModel = new function(){
 		
 		resultsArr = getWorldArrMap(tmpArray, displayIdArr);
 		resultsArr2 = getWorldArrMap(self.displayWorldObjects(), tmpIdArr);
-		
+
 		for(var j = resultsArr2.length; j >= 0; j--){
 			if(resultsArr2[j] == -1){
-				self.displayWorldObjects.splice(j);
+				self.displayWorldObjects.splice(j, 1);
 			}
 		}
-		
+
 		for(var g = 0; g < resultsArr.length; g++){
 			if(resultsArr[g] == -1){
 				self.displayWorldObjects.push(tmpArray[g]);
 			}
-		}				
-		
-		self.displayWorldObjects.sort(sortArrByUpdates);
+		}
 
 		if((pageIndex+1)*pageLength < worldObjectsLength){
 			self.nextDisabled(false);
@@ -266,19 +265,18 @@ function showStates(cb){
 	$.getJSON("./vwfDataManager.svc/states",function(e){
 		
 		var tempArr = getFlatIdArr(), saveIndex = 0, i = 0, flatWorldArray = ko.toJS(vwfPortalModel.worldObjects);
-		
 		for(var tmpKey in e){
 			
 			if(e.hasOwnProperty(tmpKey)){
 				
-				var id = tmpKey.substr(13,16);
+				var id = tmpKey.substr(13,16), saveDate = Date.now() - 31536000000;
 				e[tmpKey].id = id;
 
 				//The incoming data elements may not be in the same order as existing elements, get proper index
 				saveIndex = tempArr.indexOf(id) > -1 ? tempArr.indexOf(id) : i++;
-				
-				e[tmpKey].updates = Date.parse(e[tmpKey].lastUpdate);
-				e[tmpKey].lastUpdate = e[tmpKey].lastUpdate?removeAgoFromMoment(e[tmpKey].lastUpdate):removeAgoFromMoment(new Date());
+
+				e[tmpKey].updates = e[tmpKey].lastUpdate && !isNaN(Date.parse(e[tmpKey].lastUpdate)) ? Date.parse(e[tmpKey].lastUpdate) : saveDate;
+				e[tmpKey].lastUpdate = e[tmpKey].lastUpdate && !isNaN(Date.parse(e[tmpKey].lastUpdate))?removeAgoFromMoment(e[tmpKey].lastUpdate):removeAgoFromMoment(new Date(saveDate));
 				e[tmpKey].description = e[tmpKey].description ? e[tmpKey].description : "";
 				
 				e[tmpKey].editVisible = ko.observable(false);				
@@ -349,10 +347,10 @@ function sortArrByUpdates(a, b){
 	else if(b().featured == true && !a().featured)
 		return 1;		
 	
-	else if(a().hotState == true && b().hotState == false)
+	else if(a().hotState == true && !b().hotState)
 		return -1;			
 	
-	else if(b().hotState == true && a().hotState == false)
+	else if(b().hotState == true && !a().hotState)
 		return 1;
 		
 	else if (b().updates - a().updates == 0){
