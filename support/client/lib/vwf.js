@@ -2677,7 +2677,7 @@ if ( ! childComponent.source ) {
                 return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];
             } );
 
-            propertyValue = prepareProperty( "create", nodeID, propertyName, propertyValue, 
+            propertyValue = modifyProperty( "create", nodeID, propertyName, propertyValue, 
                                              propertyGet, propertySet );
 
             this.logger.debugu();
@@ -2697,7 +2697,7 @@ if ( ! childComponent.source ) {
                 return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];
             } );
 
-            propertyValue = prepareProperty( "initialize", nodeID, propertyName, propertyValue );
+            propertyValue = modifyProperty( "initialize", nodeID, propertyName, propertyValue );
 
             this.logger.debugu();
 
@@ -4638,29 +4638,40 @@ if ( ! childComponent.source ) {
         };
 
         // Contains the meat of what happens in createProperty and initializeProperty
-        var prepareProperty = function( action, nodeID, propertyName, propertyValue, 
+        var modifyProperty = function( action, nodeID, propertyName, propertyValue, 
                                         propertyGet, propertySet ) {
 
+            var node = nodes.existing[ nodeID ];
             var modelFunc;
             var viewFunc;
+            var propertyHasBeenSet;
+            var stopAfterSet;
+
             switch ( action ) {
                 case "create":
+                    node.properties.create( propertyName );
                     modelFunc = "creatingProperty";
                     viewFunc = "createdProperty";
+                    stopAfterSet = false;
                     break;
                 case "initialize":
+                    node.properties.create( propertyName );
                     modelFunc = "initializingProperty";
                     viewFunc = "initializedProperty";
+                    stopAfterSet = false;
+                    break;
+                case "set":
+                    modelFunc = "settingProperty";
+                    viewFunc = "satProperty";
+                    stopAfterSet = true;
                     break;
                 default:
-                    that.logger.errorx( "prepareProperty", "Cannot perform invalid action '" + 
+                    that.logger.errorx( "modifyProperty", "Cannot perform invalid action '" + 
                                                            action + "'" );
                     return;
             }
 
-            var node = nodes.existing[ nodeID ];
-
-            // prepareProperty shares an entries object w/ that.setProperty so they can manage 
+            // modifyProperty shares an entries object w/ that.setProperty so they can manage 
             // property delegations that occur from one function to the other (for example, a 
             // createProperty that delegates to another property in the property's setter, and 
             // thus calls setProperty for the delegation)
@@ -4680,8 +4691,6 @@ if ( ! childComponent.source ) {
             var thisEntry = {};
             entries[ thisProperty ] = thisEntry;
 
-            node.properties.create( propertyName );
-
             var isOutermostEntry = ( outerEntry.driverIndex === undefined );
 
             if ( isOutermostEntry ) {
@@ -4698,7 +4707,7 @@ if ( ! childComponent.source ) {
             // Call modelFunc on each model driver. The first model to return a non-undefined 
             // value has performed the create and dictates the return value.
             // The property is considered set after all model drivers have run.
-            that.models.forEach( function( modelDriver, driverIndex ) {
+            that.models.some( function( modelDriver, driverIndex ) {
 
                 // Skip initial model drivers that a previous call has already invoked for this 
                 // node and property (if any).
@@ -4721,7 +4730,7 @@ if ( ! childComponent.source ) {
                 var numAssignmentsBeforeDriverCall = entries.numAssignments;
 
                 // Make the call.
-                if ( ! delegated && ! assigned ) {
+                if ( !propertyHasBeenSet ) {
                     var value = modelDriver[ modelFunc ] && modelDriver[ modelFunc ]( nodeID, propertyName, propertyValue, propertyGet, propertySet );
                 } else {
                     modelDriver[ modelFunc ] && modelDriver[ modelFunc ]( nodeID, propertyName, undefined, propertyGet, propertySet );
@@ -4753,6 +4762,9 @@ if ( ! childComponent.source ) {
                         assigned = true;
                     }
                 }
+
+                propertyHasBeenSet = assigned || delegated;
+                return propertyHasBeenSet && stopAfterSet;
             }, this );
 
             // Record the change if the property was assigned here.
