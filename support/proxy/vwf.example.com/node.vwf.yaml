@@ -11,7 +11,7 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-## The component representation of a node - this is the base unit in VWF
+## The component representation of a node - this is the base unit in VWF.
 ##
 ## All components in an application extend node.vwf.  They can then add their own properties, 
 ## methods, events, and children.
