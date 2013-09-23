@@ -76,7 +76,9 @@ Install with command: ruby setup.rb
 
 *B.2 Extract VWF from ZIP File*
 
-Download the latest baseline from our downloads page and extract to C:\Users\YOU\pathto\VirtualWorldFramework.  Please note that you should use WinRAR, WinZip, or 7-Zip to extract your archive to prevent any path length issues you may encounter with Windows built-in zip utility.
+[Download](../downloads.html) the latest release and unzip to your user directory (for example, "C:\Users\YOU\pathto\VirtualWorldFramework") to ensure that you have full directory permissions.
+
+**Note:** Windows' built-in zip utility may report path length errors when unzipping.  We recommend [7-Zip](http://www.7-zip.org/) (free), [WinRAR](http://www.rarlab.com/) (not free), or [WinZip](http://www.winzip.com/win/en/index.htm) (not free) to unzip the file.
 
 *B.3 Install the Gems*
 
