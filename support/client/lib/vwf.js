@@ -4678,17 +4678,19 @@ if ( ! childComponent.source ) {
         modifyProperty.entries = {}; // maps ( nodeID + '-' + propertyName ) => { ... }
 
         var createEntry = function( entries, nodeID, propertyName ) {
-            var entryManager = {};
-            entryManager.thisProperty = nodeID + '-' + propertyName;
-
-            // Previous entry for this property on this node
+            var entryManager = {
+                "thisProperty": nodeID + '-' + propertyName,
+                // Current function entry for this property on this node
+                "thisEntry": {}
+            };
+            
+            // Previous function entry for this property on this node
             entryManager.outerEntry = entries[ entryManager.thisProperty ] || {};
 
-            // Current entry to setProperty for this property on this node
-            entryManager.thisEntry = {};
-            entries[ entryManager.thisProperty ] = entryManager.thisEntry;
-
             entryManager.isOutermostEntry = ( entryManager.outerEntry.driverIndex === undefined );
+
+            // Set the current function entry in the entries object
+            entries[ entryManager.thisProperty ] = entryManager.thisEntry;
 
             return entryManager;
         }
