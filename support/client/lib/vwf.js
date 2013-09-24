@@ -2505,7 +2505,7 @@ if ( ! childComponent.source ) {
 
             var node = nodes.existing[nodeID];
 
-            var entries = this.setProperty.entries;
+            var entries = modifyProperty.entries;
 
             // Call settingProperties() on each model driver.
 
@@ -2719,7 +2719,7 @@ if ( ! childComponent.source ) {
             } );
 
             var node = nodes.existing[ nodeID ];
-            var entries = this.setProperty.entries;
+            var entries = modifyProperty.entries;
             var thisProperty = nodeID + '-' + propertyName;
 
             // Previous entry to modifyProperty for this property on this node
@@ -2742,8 +2742,6 @@ if ( ! childComponent.source ) {
 
             return propertyValue;
         };
-
-        this.setProperty.entries = {}; // maps ( nodeID + '-' + propertyName ) => { ... }
 
         // -- getProperty --------------------------------------------------------------------------
 
@@ -4538,7 +4536,7 @@ if ( ! childComponent.source ) {
             // property delegations that occur from one function to the other (for example, a 
             // createProperty that delegates to another property in the property's setter, and 
             // thus calls setProperty for the delegation)
-            var entries = that.setProperty.entries;
+            var entries = modifyProperty.entries;
 
             // Record calls into this function by nodeID and propertyName so that model drivers 
             // may call back here (directly or indirectly) to delegate responses further down the 
@@ -4700,6 +4698,8 @@ if ( ! childComponent.source ) {
 
             return propertyValue;
         }
+
+        modifyProperty.entries = {}; // maps ( nodeID + '-' + propertyName ) => { ... }
 
         // == Private variables ====================================================================
 
