@@ -369,8 +369,8 @@ text-align:left;
 	background-color: #f5f5f5;
 	border-radius: 8px;
 	padding: 5px 5px 3px 5px;
-	max-height: 225px;
-	min-height: 225px;
+	max-height: 230px;
+	min-height: 230px;
 }
 
 .worldImage{
@@ -396,12 +396,17 @@ text-align:left;
 }
 .editstate
 {
-	margin-top: 105px;
+	margin-top: 0;
 }
 
 .boxContentWrapper{
-	height: 96px;
-	max-height:96px;
+	height: 86px;
+	max-height:86px;
+}
+
+.featuredInstance .boxContentWrapper{
+	height: 197px;
+	max-height:197px;
 }
 
 .editstateGuest{
