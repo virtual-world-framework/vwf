@@ -4531,7 +4531,6 @@ if ( ! childComponent.source ) {
 
             var node = nodes.existing[ nodeID ];
             var modelFunc;
-            var viewFunc;
             var propertyHasBeenSet;
             var stopAfterSet;
 
@@ -4559,20 +4558,17 @@ if ( ! childComponent.source ) {
                 case "create":
                     node.properties.create( propertyName );
                     modelFunc = "creatingProperty";
-                    viewFunc = "createdProperty";
                     thisEntry.creating = true;
                     stopAfterSet = false;
                     break;
                 case "initialize":
                     node.properties.create( propertyName );
                     modelFunc = "initializingProperty";
-                    viewFunc = "initializedProperty";
                     thisEntry.initializing = true;
                     stopAfterSet = false;
                     break;
                 case "set":
                     modelFunc = "settingProperty";
-                    viewFunc = "satProperty";
                     stopAfterSet = true;
                     break;
                 default:
@@ -4666,9 +4662,23 @@ if ( ! childComponent.source ) {
             // The entry that assigns the value calls the viewFunc on each view
             if ( assigned ) {
                 that.views.forEach( function( view ) {
-                    view[ viewFunc ] &&
-                    view[ viewFunc ]( nodeID, propertyName, propertyValue,
-                                      propertyGet, propertySet );
+                    switch ( action ) {
+                        case "create":
+                            if ( view.createdProperty ) {
+                                view.createdProperty( nodeID, propertyName, propertyValue,
+                                              propertyGet, propertySet );
+                                break;
+                            }
+                        case "initialize":
+                            if ( view.initializedProperty ) {
+                                view.initializedProperty( nodeID, propertyName, propertyValue );
+                                break;
+                            }
+                        case "set":
+                            view.satProperty && 
+                            view.satProperty( nodeID, propertyName, propertyValue );
+                            break;
+                    }
                 } );
             }
 
