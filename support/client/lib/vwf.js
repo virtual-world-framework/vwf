@@ -2758,22 +2758,11 @@ if ( ! childComponent.source ) {
             var propertyValue = undefined;
 
             var entries = this.getProperty.entries;
-
-            // Record calls into this function by nodeID and propertyName so that model drivers 
-            // may call back here (directly or indirectly) to delegate responses further down the
-            // chain without causing infinite recursion.
-
-            // TODO: need unique nodeID+propertyName hash
-            var thisProperty = nodeID + '-' + propertyName;
-
-            // Previous entry to setProperty for this property on this node
-            var outerEntry = entries[ thisProperty ] || {};
-
-            // Current entry to setProperty for this property on this node
-            var thisEntry = {};
-            entries[ thisProperty ] = thisEntry;
-
-            var isOutermostEntry = ( outerEntry.driverIndex === undefined );
+            var entryManager = createEntry( entries, nodeID, propertyName );
+            var thisProperty = entryManager.thisProperty;
+            var thisEntry = entryManager.thisEntry;
+            var outerEntry = entryManager.outerEntry;
+            var isOutermostEntry = entryManager.isOutermostEntry;
 
             if ( isOutermostEntry ) {
                 // Keep track of the number of retrievals made by this `getProperty` call and others
@@ -4531,26 +4520,12 @@ if ( ! childComponent.source ) {
             var modelFunc;
             var propertyHasBeenSet;
             var stopAfterSet;
-
-            // modifyProperty shares an entries object w/ that.setProperty so they can manage 
-            // property delegations that occur from one function to the other (for example, a 
-            // createProperty that delegates to another property in the property's setter, and 
-            // thus calls setProperty for the delegation)
             var entries = modifyProperty.entries;
-
-            // Record calls into this function by nodeID and propertyName so that model drivers 
-            // may call back here (directly or indirectly) to delegate responses further down the 
-            // chain without causing infinite recursion.
-
-            // TODO: need unique nodeID+propertyName hash
-            var thisProperty = nodeID + '-' + propertyName;
-
-            // Previous entry to createProperty for this property on this node
-            var outerEntry = entries[ thisProperty ] || {};
-
-            // Current entry to createProperty for this property on this node
-            var thisEntry = {};
-            entries[ thisProperty ] = thisEntry;
+            var entryManager = createEntry( entries, nodeID, propertyName );
+            var thisProperty = entryManager.thisProperty;
+            var thisEntry = entryManager.thisEntry;
+            var outerEntry = entryManager.outerEntry;
+            var isOutermostEntry = entryManager.isOutermostEntry;
 
             switch ( action ) {
                 case "create":
@@ -4574,8 +4549,6 @@ if ( ! childComponent.source ) {
                                                            action + "'" );
                     return;
             }
-
-            var isOutermostEntry = ( outerEntry.driverIndex === undefined );
 
             if ( isOutermostEntry ) {
                 // Keep track of the number of assignments made by this call and others invoked 
@@ -4700,6 +4673,22 @@ if ( ! childComponent.source ) {
         }
 
         modifyProperty.entries = {}; // maps ( nodeID + '-' + propertyName ) => { ... }
+
+        var createEntry = function( entries, nodeID, propertyName ) {
+            var entryManager = {};
+            entryManager.thisProperty = nodeID + '-' + propertyName;
+
+            // Previous entry for this property on this node
+            entryManager.outerEntry = entries[ entryManager.thisProperty ] || {};
+
+            // Current entry to setProperty for this property on this node
+            entryManager.thisEntry = {};
+            entries[ entryManager.thisProperty ] = entryManager.thisEntry;
+
+            entryManager.isOutermostEntry = ( entryManager.outerEntry.driverIndex === undefined );
+
+            return entryManager;
+        }
 
         // == Private variables ====================================================================
 
