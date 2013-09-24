@@ -2720,16 +2720,6 @@ if ( ! childComponent.source ) {
 
             var node = nodes.existing[ nodeID ];
 
-            // Determine if property needs to be created or intialized instead of just set:
-            // -Create the property if it doesn't exist on this node or its prototypes.
-            // -Initialize it if it exists on a prototype but not on this node.
-            if ( ! node.properties.has( propertyName ) ) {
-                return this.createProperty( nodeID, propertyName, propertyValue );
-            } 
-            if ( ! node.properties.hasOwn( propertyName ) ) {
-                return this.initializeProperty( nodeID, propertyName, propertyValue );
-            }
-
             var entries = this.setProperty.entries;
 
             // Record calls into this function by nodeID and propertyName so that model drivers 
@@ -2741,6 +2731,16 @@ if ( ! childComponent.source ) {
 
             // Previous entry to setProperty for this property on this node
             var outerEntry = entries[ thisProperty ] || {};
+
+            // Determine if property needs to be created or intialized instead of just set:
+            // -Create the property if it doesn't exist on this node or its prototypes.
+            // -Initialize it if it exists on a prototype but not on this node.
+            if ( !node.properties.has( propertyName ) || outerEntry.creating ) {
+                return this.createProperty( nodeID, propertyName, propertyValue );
+            } 
+            if ( !node.properties.hasOwn( propertyName ) || outerEntry.initializing ) {
+                return this.initializeProperty( nodeID, propertyName, propertyValue );
+            }
 
             // Current entry to setProperty for this property on this node
             var thisEntry = {};
@@ -4647,30 +4647,6 @@ if ( ! childComponent.source ) {
             var propertyHasBeenSet;
             var stopAfterSet;
 
-            switch ( action ) {
-                case "create":
-                    node.properties.create( propertyName );
-                    modelFunc = "creatingProperty";
-                    viewFunc = "createdProperty";
-                    stopAfterSet = false;
-                    break;
-                case "initialize":
-                    node.properties.create( propertyName );
-                    modelFunc = "initializingProperty";
-                    viewFunc = "initializedProperty";
-                    stopAfterSet = false;
-                    break;
-                case "set":
-                    modelFunc = "settingProperty";
-                    viewFunc = "satProperty";
-                    stopAfterSet = true;
-                    break;
-                default:
-                    that.logger.errorx( "modifyProperty", "Cannot perform invalid action '" + 
-                                                           action + "'" );
-                    return;
-            }
-
             // modifyProperty shares an entries object w/ that.setProperty so they can manage 
             // property delegations that occur from one function to the other (for example, a 
             // createProperty that delegates to another property in the property's setter, and 
@@ -4690,6 +4666,32 @@ if ( ! childComponent.source ) {
             // Current entry to createProperty for this property on this node
             var thisEntry = {};
             entries[ thisProperty ] = thisEntry;
+
+            switch ( action ) {
+                case "create":
+                    node.properties.create( propertyName );
+                    modelFunc = "creatingProperty";
+                    viewFunc = "createdProperty";
+                    thisEntry.creating = true;
+                    stopAfterSet = false;
+                    break;
+                case "initialize":
+                    node.properties.create( propertyName );
+                    modelFunc = "initializingProperty";
+                    viewFunc = "initializedProperty";
+                    thisEntry.initializing = true;
+                    stopAfterSet = false;
+                    break;
+                case "set":
+                    modelFunc = "settingProperty";
+                    viewFunc = "satProperty";
+                    stopAfterSet = true;
+                    break;
+                default:
+                    that.logger.errorx( "modifyProperty", "Cannot perform invalid action '" + 
+                                                           action + "'" );
+                    return;
+            }
 
             var isOutermostEntry = ( outerEntry.driverIndex === undefined );
 
