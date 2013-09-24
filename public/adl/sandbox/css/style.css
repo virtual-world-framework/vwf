@@ -15,8 +15,17 @@ a{
 }
 
 ul{
-
 	padding-left:30px;
+}
+
+.videoList td{
+	border: none !important;
+	padding-top:10px !important;
+	padding-bottom:10px !important;
+}
+
+.videoList table{
+	margin-bottom:7px !important;
 }
 
 .btn{
@@ -143,6 +152,11 @@ text-align:left;
 	font-family: 'Trebuchet MS', Helvetica, sans-serif;
 	text-shadow: 0 1px 2px #5E7C33;
 	color: #A0CE60;
+}
+
+.videoList{
+	
+	list-style:none;
 }
 
 .divContent1{
