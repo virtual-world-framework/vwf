@@ -2719,30 +2719,24 @@ if ( ! childComponent.source ) {
             } );
 
             var node = nodes.existing[ nodeID ];
-
             var entries = this.setProperty.entries;
-
-            // Record calls into this function by nodeID and propertyName so that model drivers 
-            // may call back here (directly or indirectly) to delegate responses further down the
-            // chain without causing infinite recursion.
-
-            // TODO: need unique nodeID+propertyName hash
             var thisProperty = nodeID + '-' + propertyName;
 
-            // Previous entry to setProperty for this property on this node
+            // Previous entry to modifyProperty for this property on this node
             var outerEntry = entries[ thisProperty ] || {};
 
             // Determine if property needs to be created or intialized instead of just set:
             // -Create the property if it doesn't exist on this node or its prototypes.
+            //  (or if it is a reentrant call from createProperty)
             // -Initialize it if it exists on a prototype but not on this node.
+            //  (or if it is a reentrant call from initializeProperty)
             if ( !node.properties.has( propertyName ) || outerEntry.creating ) {
-                return this.createProperty( nodeID, propertyName, propertyValue );
-            } 
-            if ( !node.properties.hasOwn( propertyName ) || outerEntry.initializing ) {
-                return this.initializeProperty( nodeID, propertyName, propertyValue );
+                propertyValue = this.createProperty( nodeID, propertyName, propertyValue );
+            } else if ( !node.properties.hasOwn( propertyName ) || outerEntry.initializing ) {
+                propertyValue = this.initializeProperty( nodeID, propertyName, propertyValue );
+            } else {
+                propertyValue = modifyProperty( "set", nodeID, propertyName, propertyValue );
             }
-
-            propertyValue = modifyProperty( "set", nodeID, propertyName, propertyValue );
 
             this.logger.debugu();
 
