@@ -134,7 +134,7 @@
 	<script>
 		var slideInterval = 0;
 		$(document).ready(function(){
-			var totalSlides = 4, tempSlides = 0, transitionSpeed = 1500, isIntervalActive = true;
+			var totalSlides = 4, tempSlides = 0, transitionSpeed = 1500;
 			var currentSlideState = Math.floor(Math.random() * totalSlides);
 			
 			$(".slide-item").not(".slide-item" + currentSlideState).css("left", "1200px");
@@ -147,19 +147,6 @@
 				e.stopPropagation();
 				return false;
 			});
-			$('.sliderContainer').mouseover(function(e){
-				window.clearInterval(slideInterval);
-				isIntervalActive = false;
-				
-			}); 
-			$('.sliderContainer').mouseout(function(e){
-				if(! isIntervalActive){
-					isIntervalActive = true;
-					slideInterval = window.setInterval(animateSlides, 15000);
-				}
-			}); 
-			
-			
 			
 			ko.applyBindings(vwfPortalModel);
 			getLoginInfo();
@@ -175,18 +162,19 @@
 			};
 			
 			var animateSlides = function(){
-				$(".slide-item" + currentSlideState + " .pContainer").animate({top:"370px"});
-				$(".slide-item" + currentSlideState).animate({left:"-1200px"}, transitionSpeed, "swing", function(){
-					incrementCurrentSlideState();
-					$(this).css("left", "1200px");
-				});
+				$(".slide-item" + currentSlideState + " .pContainer").animate({top:"370px"});				
+				
+				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).css({"z-index":1});
+				$(".slide-item" + currentSlideState).css({"z-index": 0});
+				
 				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).animate({left:"0px"}, transitionSpeed, "swing", function(){
+					$(".slide-item" + currentSlideState).css("left", "1200px");
 					incrementCurrentSlideState();
 					$(this).children(".pContainer").animate({top:"324px"});
 				});
 			};
 			
-			slideInterval = window.setInterval(animateSlides, 15000);
+			slideInterval = window.setInterval(animateSlides, 10000);
 		});
 		
 		
