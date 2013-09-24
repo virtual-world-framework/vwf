@@ -2756,7 +2756,6 @@ if ( ! childComponent.source ) {
             this.logger.debuggx( "getProperty", nodeID, propertyName );
 
             var propertyValue = undefined;
-
             var entries = this.getProperty.entries;
             var entryManager = createEntry( entries, nodeID, propertyName );
             var thisProperty = entryManager.thisProperty;
