@@ -160,6 +160,7 @@ text-align:left;
 	position:absolute;
 	float:left;
 	cursor: default;
+	z-index: 0;
 }
 
 .slide-item div{
