@@ -2742,113 +2742,7 @@ if ( ! childComponent.source ) {
                 return this.initializeProperty( nodeID, propertyName, propertyValue );
             }
 
-            // Current entry to setProperty for this property on this node
-            var thisEntry = {};
-            entries[ thisProperty ] = thisEntry;
-
-            var isOutermostEntry = ( outerEntry.driverIndex === undefined );
-
-            if ( isOutermostEntry ) {
-                // Keep track of the number of assignments made by this `setProperty` call and 
-                // others invoked indirectly by it, starting with the first call.
-                entries.numAssignments = 0;
-            }
-
-            // We'll need to know if the set was:
-            // -delegated to other properties or
-            // -actually assigned here
-            var delegated = false, assigned = false;
-
-            // Call settingProperty() on each model driver. The first model driver to return a 
-            // non-undefined value has performed the set and dictates the return value.
-            // The property is considered set after all model drivers have run.
-            this.models.some( function( modelDriver, driverIndex ) {
-
-                // Skip initial model drivers that a previous call has already invoked for this 
-                // node and property (if any).
-                var driverInvoked = ( !isOutermostEntry && ( driverIndex <= outerEntry.driverIndex ) );
-                if ( driverInvoked ) {
-                  return false;
-                }
-
-                // If a reentrant call completed for this node and property, skip the remaining
-                // model drivers.
-                if ( thisEntry.propertyAssignedByPreviousEntry ) {
-                  return true;
-                }
-
-                // Record the active model driver number.
-                thisEntry.driverIndex = driverIndex;
-
-                // Record the number of assignments so we can check after the driver call to see 
-                // if it delegated to another property.
-                var numAssignmentsBeforeDriverCall = entries.numAssignments;
-
-                // Make the call.
-                var value = modelDriver.settingProperty && modelDriver.settingProperty( nodeID, propertyName, propertyValue );
-
-                // Ignore the result if reentry is disabled and the driver attempted to call
-                // back into the kernel. Kernel reentry is disabled during replication to 
-                // prevent coloring from accessor scripts.
-
-                if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
-                    value = undefined;
-                }
-
-                var valueExists = ( value !== undefined );
-
-                // If 'entries.numAssignments' changes during the driver call, it means that it
-                // delegated to another property.
-                delegated = ( entries.numAssignments !== numAssignmentsBeforeDriverCall );
-
-                if ( valueExists ) {
-
-                    // Record the value actually assigned. This may differ from the incoming value
-                    // if it was range limited, quantized, etc. by the model driver. This is the value
-                    // passed to the views.
-                    propertyValue = value;
-
-                    if ( ! delegated ) {
-                        entries.numAssignments++;
-                        assigned = true;
-                    }
-                }
-
-                // Exit from the this.models.some() iterator once the value has been set.
-                return delegated || assigned;
-
-            }, this );
-
-            // Record the change if the property was assigned here.
-
-            if ( assigned && node.initialized && node.patchable ) {
-                node.properties.change( propertyName );
-            }
-
-            // Call satProperty() on each view. The view is being notified that a property has
-            // been set. Only call for value properties as they are actually assigned. Don't call
-            // for accessor properties that have delegated to other properties. Notifying when
-            // setting an accessor property would be useful, but since that information is
-            // ephemeral, and views on late-joining clients would never see it, it's best to never
-            // send those notifications.
-
-            if ( assigned ) {
-                this.views.forEach( function( view ) {
-                    view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );
-                } );
-
-                // Clean up since we've assigned the property
-                delete entries[ thisProperty ];
-                delete entries.assignments;
-
-            } else {
-
-                // For a reentrant call, restore the previous state and set its flag that lets it 
-                // know that the property was assigned
-                entries[ thisProperty ] = outerEntry;
-                outerEntry.propertyAssignedByPreviousEntry = true;
-
-            }
+            propertyValue = modifyProperty( "set", nodeID, propertyName, propertyValue );
 
             this.logger.debugu();
 
@@ -4775,12 +4669,16 @@ if ( ! childComponent.source ) {
                 node.properties.change( propertyName );
             }
 
-            if ( isOutermostEntry ) {
-
-                // The first entry calls satProperty() on each view.
+            // The entry that assigns the value calls the viewFunc on each view
+            if ( assigned ) {
                 that.views.forEach( function( view ) {
-                    view[ viewFunc ] && view[ viewFunc ]( nodeID, propertyName, propertyValue, propertyGet, propertySet );
+                    view[ viewFunc ] &&
+                    view[ viewFunc ]( nodeID, propertyName, propertyValue,
+                                      propertyGet, propertySet );
                 } );
+            }
+
+            if ( isOutermostEntry ) {
 
                 // Clean up since we've assigned the property
                 delete entries[ thisProperty ];
