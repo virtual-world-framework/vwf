@@ -14,9 +14,6 @@
 						</div>
 					</div>
 				</div>
-				
-
-				
 				<div class="col-md-3 col-md-offset-3" style="margin-bottom:5px;text-align:right;float:right;">
 					<input id="filter" class="form-control" type="text" placeholder="Search Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
 				</div>
@@ -47,8 +44,8 @@
 							<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState">Active</a>
 							
 							<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible -->
-								<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
-								<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
+								<a class="editstatedelete glyphicon glyphicon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
+								<a class="editstatedata glyphicon glyphicon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
 							<!-- /ko -->
 						</div>
 					</div>

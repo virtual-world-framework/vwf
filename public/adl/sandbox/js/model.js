@@ -98,7 +98,8 @@ var vwfPortalModel = new function(){
 				self.displayWorldObjects.push(tmpArray[g]);
 			}
 		}
-
+		
+		self.displayWorldObjects.sort(sortArrByUpdates);
 		if((pageIndex+1)*pageLength < worldObjectsLength){
 			self.nextDisabled(false);
 		}
