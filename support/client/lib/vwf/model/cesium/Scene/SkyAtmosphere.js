@@ -1,29 +1,33 @@
 /*global define*/
 define([
         '../Core/defaultValue',
-        '../Core/CubeMapEllipsoidTessellator',
+        '../Core/defined',
+        '../Core/EllipsoidGeometry',
         '../Core/destroyObject',
-        '../Core/MeshFilters',
+        '../Core/GeometryPipeline',
         '../Core/PrimitiveType',
         '../Core/Ellipsoid',
         '../Renderer/BufferUsage',
         '../Renderer/DrawCommand',
         '../Renderer/CullFace',
         '../Renderer/BlendingState',
+        '../Renderer/createShaderSource',
         '../Scene/SceneMode',
         '../Shaders/SkyAtmosphereVS',
         '../Shaders/SkyAtmosphereFS'
     ], function(
         defaultValue,
-        CubeMapEllipsoidTessellator,
+        defined,
+        EllipsoidGeometry,
         destroyObject,
-        MeshFilters,
+        GeometryPipeline,
         PrimitiveType,
         Ellipsoid,
         BufferUsage,
         DrawCommand,
         CullFace,
         BlendingState,
+        createShaderSource,
         SceneMode,
         SkyAtmosphereVS,
         SkyAtmosphereFS) {
@@ -52,9 +56,6 @@ define([
 
         /**
          * Determines if the atmosphere is shown.
-         * <p>
-         * The default is <code>true</code>.
-         * </p>
          *
          * @type {Boolean}
          * @default true
@@ -63,6 +64,7 @@ define([
 
         this._ellipsoid = ellipsoid;
         this._command = new DrawCommand();
+        this._command.owner = this;
         this._spSkyFromSpace = undefined;
         this._spSkyFromAtmosphere = undefined;
 
@@ -107,7 +109,7 @@ define([
      *
      * @memberof SkyAtmosphere
      *
-     * @return {Ellipsoid}
+     * @returns {Ellipsoid}
      */
     SkyAtmosphere.prototype.getEllipsoid = function() {
         return this._ellipsoid;
@@ -133,11 +135,15 @@ define([
 
         var command = this._command;
 
-        if (typeof command.vertexArray === 'undefined') {
-            var mesh = CubeMapEllipsoidTessellator.compute(Ellipsoid.fromCartesian3(this._ellipsoid.getRadii().multiplyByScalar(1.025)), 60);
-            command.vertexArray = context.createVertexArrayFromMesh({
-                mesh : mesh,
-                attributeIndices : MeshFilters.createAttributeIndices(mesh),
+        if (!defined(command.vertexArray)) {
+            var geometry = EllipsoidGeometry.createGeometry(new EllipsoidGeometry({
+                radii : this._ellipsoid.getRadii().multiplyByScalar(1.025),
+                slicePartitions : 256,
+                stackPartitions : 256
+            }));
+            command.vertexArray = context.createVertexArrayFromGeometry({
+                geometry : geometry,
+                attributeIndices : GeometryPipeline.createAttributeIndices(geometry),
                 bufferUsage : BufferUsage.STATIC_DRAW
             });
             command.primitiveType = PrimitiveType.TRIANGLES;
@@ -149,21 +155,18 @@ define([
                 blending : BlendingState.ALPHA_BLEND
             });
 
-            var vs;
-            var fs;
             var shaderCache = context.getShaderCache();
+            var vs = createShaderSource({
+                defines : ['SKY_FROM_SPACE'],
+                sources : [SkyAtmosphereVS]
+            });
+            this._spSkyFromSpace = shaderCache.getShaderProgram(vs, SkyAtmosphereFS);
 
-            vs = '#define SKY_FROM_SPACE\n' +
-                 '#line 0\n' +
-                 SkyAtmosphereVS;
-            fs = '#line 0\n' +
-                 SkyAtmosphereFS;
-            this._spSkyFromSpace = shaderCache.getShaderProgram(vs, fs);
-
-            vs = '#define SKY_FROM_ATMOSPHERE\n' +
-                 '#line 0\n' +
-                 SkyAtmosphereVS;
-            this._spSkyFromAtmosphere = shaderCache.getShaderProgram(vs, fs);
+            vs = createShaderSource({
+                defines : ['SKY_FROM_ATMOSPHERE'],
+                sources : [SkyAtmosphereVS]
+            });
+            this._spSkyFromAtmosphere = shaderCache.getShaderProgram(vs, SkyAtmosphereFS);
         }
 
         var cameraPosition = frameState.camera.getPositionWC();
@@ -190,7 +193,7 @@ define([
      *
      * @memberof SkyAtmosphere
      *
-     * @return {Boolean} <code>true</code> if this object was destroyed; otherwise, <code>false</code>.
+     * @returns {Boolean} <code>true</code> if this object was destroyed; otherwise, <code>false</code>.
      *
      * @see SkyAtmosphere#destroy
      */
@@ -208,7 +211,7 @@ define([
      *
      * @memberof SkyAtmosphere
      *
-     * @return {undefined}
+     * @returns {undefined}
      *
      * @exception {DeveloperError} This object was destroyed, i.e., destroy() was called.
      *
