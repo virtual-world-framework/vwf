@@ -51,7 +51,7 @@ scripts:
       var connectionDef = { 
         "extends": "http://vwf.example.com/rtcMulti/connection.vwf",
         "properties": {
-          "fullname": loginName,
+          "username": loginName,
           "session": mediaSharing,
           "color": clr
         },
@@ -84,4 +84,4 @@ scripts:
           client.parent.children.delete( client );
         }
       }
-    } //@ sourceURL = webrtc.vwf
+    } //@ sourceURL = index.vwf
