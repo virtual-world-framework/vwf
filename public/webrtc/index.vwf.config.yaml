@@ -13,7 +13,6 @@
 
 ---
 model:
-  vwf/model/threejs:
+  nodriver:
 view:
-  vwf/view/threejs: "#vwf-root"
   vwf/view/webrtc: { debug: false, videoProperties: { create: false } }
