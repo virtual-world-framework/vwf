@@ -42,12 +42,12 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
             // turns on logger debugger console messages 
             this.debugVwf = {
-                "creation": true,
-                "initializing": true,
+                "creation": false,
+                "initializing": false,
                 "parenting": false,
                 "deleting": false,
                 "properties": false,
-                "setting": true,
+                "setting": false,
                 "getting": false,
                 "calling": false
             };
