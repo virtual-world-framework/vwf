@@ -416,7 +416,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         pss[i].update(timepassed);
                 }
 
-                if ( navmode != "none" ) {
+                if ( navmode != "none" && !self.disableInputs ) {
 
                     // Move the user's camera according to their input
                     self.moveNavObject( timepassed );
