@@ -163,7 +163,7 @@ properties:
   maxFramerate: 60
 
   ## userid definition.  
-  ## Custom user id which will be set to the moniker for the application instance 
+  ## Connection user id, defined by the RTCMultiConnection object  
   ##
   ## @name connection.vwf#userid
   ## @property

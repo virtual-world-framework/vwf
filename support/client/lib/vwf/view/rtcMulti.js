@@ -36,17 +36,18 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 "ID": undefined,
                 "url": undefined,
                 "stream": undefined,
-                "sharing": { audio: true, video: true } 
+                "sharing": { audio: true, video: true },
+                "connectionID": undefined
             };
 
             // turns on logger debugger console messages 
             this.debugVwf = {
-                "creation": false,
-                "initializing": false,
+                "creation": true,
+                "initializing": true,
                 "parenting": false,
                 "deleting": false,
                 "properties": false,
-                "setting": false,
+                "setting": true,
                 "getting": false,
                 "calling": false
             };
@@ -68,14 +69,42 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
             this.connection = new RTCMultiConnection();
             
-            this.connection.userid = this.kernel.moniker();
+            this.local.connectionID = this.connection.userid;
+            if ( this.connection.extra === undefined ) { this.connection.extra = {} }
+            //this.connection.extra.moniker = this.kernel.moniker();  
+
+            console.info( "Connection created: userid = " + this.connection.userid ); 
             // what about admin mode, it's set through usertype
             this.connection.session = this.session;
             this.connection.direction = this.direction;
 
-            this.connection.openSignalingChannel = function( config ) {
-                debugger;
-            };
+            // this.connection.openSignalingChannel = function( config ) {
+            //     var channel = config.channel || self.sessionid;
+            //     var SIGNALING_SERVER = 'https://www.webrtc-experiment.com:2013/';
+            //     var sender = self.kernel.moniker();
+
+
+            //     debugger;
+            //     io.connect(SIGNALING_SERVER).emit('new-channel', {
+            //         channel: channel,
+            //         sender: sender
+            //     });
+
+            //     var socket = io.connect(SIGNALING_SERVER + channel);
+            //     socket.channel = channel;
+            //     socket.on('connect', function() {
+            //         if (config.callback) config.callback(socket);
+            //     });
+
+            //     socket.send = function(message) {
+            //         socket.emit('message', {
+            //             sender: sender,
+            //             data: message
+            //         });
+            //     };
+
+            //     socket.on('message', config.onmessage);
+            // };
 
             // must call join if this is overridden
             //this.connection.onNewMessage = function( config ) {
@@ -92,14 +121,35 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             // e.extra: extra data passed by the user
             // e.userid: id of the user stream
             this.connection.onstream = function( e ) {
-                console.info( " ======= this.connection.onstream ====== " )
+                console.info( e.type + " ======= this.connection.onstream ====== " )
+
+                var username, color, videoMoniker;
+                var conn = getClientNode.call( self, e.userid );
+
+                if ( conn !== undefined ) {
+                    color = conn.color !== undefined ? conn.color : [ 0, 0, 0 ];
+                    username = conn.username;
+                    videoMoniker = conn.moniker;
+                }
 
                 if ( e.type === 'local' ) {
+                    
                     // display local
-                    //mainVideo.src = e.blobURL;
+                    self.local.url = e.blobURL;
+                    self.local.stream = e.stream;
+                    username = username !== undefined ? username : "local";
+                    displayLocal.call( self, e.stream, e.blobURL, username, color );
+
                 } else if ( e.type === 'remote' ) { 
+                    
                     // display remote
-                    //document.body.appendChild( e.mediaElement );
+                    if ( username === undefined ) {
+                        username = e.extra !== undefined ? e.extra.username : "remote";
+                    }
+                    if ( videoMoniker === undefined ) {
+                        videoMoniker = e.userid;
+                    }
+                    displayRemote.call( self, videoMoniker, e.stream, e.blobURL, username, self.kernel.moniker(), color );
                 }  
 
                 self.state.streams[ e.steamid ] = {
@@ -114,6 +164,9 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             };     
 
             this.connection.onstreamended = function( event ) {
+                var conn = getClientNode.call( self, e.userid );
+
+                removeClient.call( this, conn );
 
             };         
 
@@ -121,7 +174,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             // event.userid
             // event.extra
             this.connection.onmessage = function( event ) {
-     
+                console.info( " ======= this.connection.onmessage ====== " )
             }; 
  
             // e object
@@ -129,11 +182,12 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             // event.extra
             // event.data
             this.connection.onopen = function( event ) {
-     
+                console.info( " ======= this.connection.onopen ====== " )
             }; 
 
             this.connection.onleave = function( event ) {
      
+
             }; 
 
             // file transfer
@@ -149,8 +203,10 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             //this.connection.onRequest = function( userid, extra ) { };
             //this.connection.onstats = function( stats, userinfo ) { };
 
-            this.connection.connect( this.sessionid );
+            //this.connection.connect( this.sessionid );
+            this.connection.connect();
 
+            window.skipRTCMultiConnectionLogs = true;
             // still need to call open, will wait until the initializeNode to do that
         },
   
@@ -182,8 +238,11 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                     "type": childType,
                     "name": childName,
                     "prototypes": protos,
-                    "displayName": "",
-                    "connection": undefined,
+                    "userid": undefined,
+                    "username": "",
+                    "fullname": undefined,
+                    "email": undefined,
+                    "connectionID": undefined,
                     "localUrl": undefined, 
                     "remoteUrl": undefined,
                     "color": "rgb(0,0,0)",
@@ -200,6 +259,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 node.prototypes = protos;
 
                 if ( this.kernel.moniker() == node.moniker ) { 
+                    
+                    node.connectionID = this.local.connectionID;
                     this.local.ID = childID;
                     
                     if ( this.videoElementsDiv ) {
@@ -227,9 +288,15 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             if ( client ) {
                 if ( this.local.ID == childID ){
                     
-                    // local client object
-                    // grab access to the webcam 
-                    this.connection.open( this.sessionid ); 
+                    client.connectionID = this.connection.userid;
+                    this.kernel.setProperty( childID, "userid", this.connection.userid ); 
+
+                    // this.connection.open( this.sessionid ); 
+                    // this may only need to be called when the first
+                    // client joins, not exactly sure how we will know that
+
+                    console.info( "OPENING Connection" )
+                    this.connection.open();
                    
                     var remoteClient = undefined;
                     // existing connections
@@ -265,7 +332,6 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             if ( this.debugVwf.deleting ) {
                 this.kernel.logger.infox( "deletedNode", nodeID );
             }
-            debugger;
 
             if ( nodeID.indexOf( "-connection-vwf" ) != -1 ) {
                 var moniker = nodeID.substr( nodeID.lastIndexOf('-')+1, 16 );
@@ -330,168 +396,168 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
             var client = this.state.connections[ nodeID ];
 
-            if ( client && this.local.ID == nodeID ) {
-                switch( propertyName ) {
+            if ( client && propertyValue ) {
+
+                if ( nodeID == this.local.ID ) {
                     
-                    case "session":
-                        if ( propertyValue ) {
+                    // this local client so we can set the non-replicating
+                    // connection properties, most all of the properties in
+                    // this 'if' statement should really be in a view
+                    // component
+                    switch( propertyName ) {
+                        
+                        case "session":
                             this.connection.session = propertyValue;
-                        }
-                        break;
+                            break;
 
-                    case "direction":
-                        switch ( propertyValue ) {
-                            case 'many-to-many':
-                            case 'one-to-one':
-                            case 'one-to-many':
-                            case 'one-way':
-                                this.connection.direction = propertyValue;
-                                break;
-                        }
-                        break;                    
+                        case "direction":
+                            switch ( propertyValue ) {
+                                case 'many-to-many':
+                                case 'one-to-one':
+                                case 'one-to-many':
+                                case 'one-way':
+                                    this.connection.direction = propertyValue;
+                                    break;
+                            }
+                            break;                    
 
-                    case "disableDtlsSrtp":
-                        if ( propertyValue ) {
+                        case "disableDtlsSrtp":
                             this.connection.disableDtlsSrtp = Boolean( propertyValue );
-                        }
-                        break;
+                            break;
 
-                    case "autoCloseEntireSession":
-                        if ( propertyValue ) {
+                        case "autoCloseEntireSession":
                             this.connection.autoCloseEntireSession = Boolean( propertyValue );
-                        }
-                        break;
+                            break;
 
-                    case "autoSaveToDisk":
-                        if ( propertyValue ) {
+                        case "autoSaveToDisk":
                             this.connection.autoSaveToDisk = Boolean( propertyValue );
-                        }
-                        break;                   
+                            break;                   
 
-                    case "interval":
-                        if ( propertyValue ) {
+                        case "interval":
                             this.connection.interval = Number( propertyValue );
-                        }
-                        break; 
+                            break; 
 
-                    case "maxParticipantsAllowed":
-                        if ( propertyValue ) {
+                        case "maxParticipantsAllowed":
                             this.connection.maxParticipantsAllowed = Number( propertyValue );
-                        }
-                        break; 
+                            break; 
 
-                    case "mediaMaxHeight":
-                        if ( propertyValue ) {
+                        case "mediaMaxHeight":
                             this.connection.media.maxHeight = Number( propertyValue );
-                        }
-                        break; 
+                            break; 
 
-                    case "mediaMinHeight":
-                        if ( propertyValue ) {
+                        case "mediaMinHeight":
                             this.connection.media.minHeight = Number( propertyValue );
-                        }
-                        break; 
+                            break; 
 
-                    case "mediaMaxWidth":
-                        if ( propertyValue ) {
+                        case "mediaMaxWidth":
                             this.connection.media.maxWidth = Number( propertyValue );
-                        }
-                        break; 
+                            break; 
 
-                    case "mediaMinWidth":
-                        if ( propertyValue ) {
+                        case "mediaMinWidth":
                             this.connection.media.minWidth = Number( propertyValue );
-                        }
-                        break; 
+                            break; 
 
-                    case "mediaMinAspectRatio":
-                        if ( propertyValue ) {
+                        case "mediaMinAspectRatio":
                             this.connection.media.minAspectRatio = parseFloat( propertyValue );
-                        }
-                        break;
-                    case "hostCandidate":
-                        if ( propertyValue ) {
+                            break;
+
+                        case "hostCandidate":
                             this.connection.hostCandidate = Boolean( propertyValue );
-                        }
-                        break;                        
-                    case "reflexiveCandidate":
-                        if ( propertyValue ) {
+                            break;                        
+
+                        case "reflexiveCandidate":
                             this.connection.reflexiveCandidate = Boolean( propertyValue );
-                        }
-                        break;
-                    case "relayCandidate":
-                        if ( propertyValue ) {
+                            break;
+
+                        case "relayCandidate":
                             this.connection.relayCandidate = Boolean( propertyValue );
-                        }
-                        break;
+                            break;
 
-                    case "audioBandwidth":
-                        if ( propertyValue ) {
+                        case "audioBandwidth":
                             this.connection.bandwidth.audio = Number( propertyValue );
-                        }
-                        break;
+                            break;
 
-                    case "videoBandwidth":
-                        if ( propertyValue ) {
+                        case "videoBandwidth":
                             this.connection.bandwidth.video = Number( propertyValue );
-                        }
-                        break;
+                            break;
 
-                    case "dataBandwidth":
-                        if ( propertyValue ) {
+                        case "dataBandwidth":
                             this.connection.bandwidth.data = Number( propertyValue );
-                        }
-                        break;
+                            break;
 
-                    case "minFramerate":
-                        if ( propertyValue ) {
+                        case "minFramerate":
                             this.connection.framerate.min = Number( propertyValue );
-                        }
-                        break;
-                    case "maxFramerate":
-                        if ( propertyValue ) {
-                            this.connection.framerate.max = Number( propertyValue );
-                        }
-                        break;
+                            break;
 
-                    case "username":
-                        if ( propertyValue ) {
+                        case "maxFramerate":
+                            this.connection.framerate.max = Number( propertyValue );
+                            break;
+
+                        case "userid":
+                            client.userid = propertyValue;
+                            break;
+
+                        case "username":
                             if ( this.connection.extra === undefined ) this.connection.extra = {};
                             this.connection.extra.username = propertyValue;
-                        }
-                        break;
+                            client.username = propertyValue;
+                            break;
 
-                    case "fullname":
-                        if ( propertyValue ) {
+                        case "fullname":
                             if ( this.connection.extra === undefined ) this.connection.extra = {};
                             this.connection.extra.fullname = propertyValue;
-                        }
-                        break;
+                            client.fullname = propertyValue;
+                            break;
 
-                    case "email":
-                        if ( propertyValue ) {
+                        case "email":
                             if ( this.connection.extra === undefined ) this.connection.extra = {};
                             this.connection.extra.email = propertyValue;
-                        }
-                        break;
+                            client.email = propertyValue;
+                            break;
 
-                    case "color":
-                        var clr = new utility.color( propertyValue );
-                        if ( clr ) {
-                            client.color = clr.toString();
-                        }
-                        break;    
+                        case "color":
+                            var clr = new utility.color( propertyValue );
+                            if ( clr ) {
+                                client.color = clr.toString();
+                            }
+                            break;    
 
-                    default:  
-                        // propertyName is the moniker of the client that 
-                        // this connection supports
-                        if ( propertyValue ) {
+                        default:  
+                            // old way of dealing with the rtc messages going back 
+                            // and forth
+                            //debugger;
                             // propertyName - moniker of the client
                             // propertyValue - peerConnection message
-                            handlePeerMessage.call( this, propertyName, propertyValue );
-                        }
+                            //handlePeerMessage.call( this, propertyName, propertyValue );
+                            break;
+                    }
+                } else {
+                    
+                    switch ( propertyName ) {
+                        
+                        case "userid":
+                            client.userid = propertyValue;
+                            break;
 
-                        break;
+                        case "username":
+                            client.username = propertyValue;
+                            break;
+
+                        case "fullname":
+                            client.fullname = propertyValue;
+                            break;
+
+                        case "email":
+                            client.email = propertyValue;
+                            break;
+
+                        case "color":
+                            var clr = new utility.color( propertyValue );
+                            if ( clr ) {
+                                client.color = clr.toString();
+                            }
+                            break; 
+                    }                     
                 }
             }
         },
@@ -507,7 +573,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             if ( client && this.local.ID == nodeID ) {
                 switch( propertyName ) {
                     case "userid":
-                        value = this.kernel.moniker();
+                        value = this.connection.userid;
                         break;
                 }
             }
@@ -547,20 +613,20 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
         return prototypes;
     }
 
-    function getPeer( moniker ) {
-        var clientNode;
+    function getClientNode( connectionID ) {
+        var connection;
         for ( var id in this.state.connections ) {
-            if ( this.state.connections[id].moniker == moniker ) {
-                clientNode = this.state.connections[id];
+            if ( this.state.connections[ id ].connectionID == connectionID ) {
+                connection = this.state.connections[ id ];
                 break;
             }
         }
-        return clientNode;
+        return connection;
     }
 
-    function displayLocal( stream, name, color ) {
+    function displayLocal( stream, url, name, color ) {
         var id = this.kernel.moniker();
-        return displayVideo.call( this, id, stream, this.local.url, name, id, true, color );
+        return displayVideo.call( this, id, stream, url, name, id, true, color );
     }
 
     function displayVideo( id, stream, url, name, destMoniker, muted, color ) {
@@ -723,7 +789,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundClient; i++ ) {
-                foundClient = ( prototypes[i] == "http-vwf-example-com-rtcmulti-connection-vwf" );    
+                foundClient = ( prototypes[i] == "http-vwf-example-com-rtcMulti-connection-vwf" );    
             }
         }
 
