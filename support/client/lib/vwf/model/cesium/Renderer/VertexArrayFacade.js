@@ -2,14 +2,18 @@
 define([
         '../Core/ComponentDatatype',
         '../Core/defaultValue',
+        '../Core/defined',
         '../Core/destroyObject',
         '../Core/DeveloperError',
+        '../Core/Math',
         './BufferUsage'
     ], function(
         ComponentDatatype,
         defaultValue,
+        defined,
         destroyObject,
         DeveloperError,
+        CesiumMath,
         BufferUsage) {
     "use strict";
 
@@ -62,13 +66,13 @@ define([
 
             purpose = attribute.purpose;
             attributesByUsage = attributesByPurposeAndUsage[purpose];
-            if (typeof attributesByUsage === 'undefined') {
+            if (!defined(attributesByUsage)) {
                 attributesByUsage = attributesByPurposeAndUsage[purpose] = {};
             }
 
             usage = attribute.usage.toString();
             attributesForUsage = attributesByUsage[usage];
-            if (typeof attributesForUsage === 'undefined') {
+            if (!defined(attributesForUsage)) {
                 attributesForUsage = attributesByUsage[usage] = [];
             }
 
@@ -90,7 +94,7 @@ define([
                 attributesByUsage = attributesByPurposeAndUsage[purpose];
 
                 var buffersByUsage = this._buffersByPurposeAndUsage[purpose];
-                if (typeof buffersByUsage === 'undefined') {
+                if (!defined(buffersByUsage)) {
                     buffersByUsage = this._buffersByPurposeAndUsage[purpose] = {};
                 }
 
@@ -199,7 +203,7 @@ define([
                 if (uniqueIndex === true) {
                     throw new DeveloperError('Index ' + index + ' is used by more than one attribute.');
                 }
-                if (typeof uniqueIndex !== 'undefined') {
+                if (defined(uniqueIndex)) {
                     if (uniqueIndex[purpose]) {
                         throw new DeveloperError('Index ' + index + ' is used by more than one attribute with the same purpose.');
                     }
@@ -281,7 +285,7 @@ define([
             VertexArrayFacade._resize(buffer, this._size);
 
             var writersForPurpose = this.writers[buffer.purpose];
-            if (typeof writersForPurpose === 'undefined') {
+            if (!defined(writersForPurpose)) {
                 writersForPurpose = this.writers[buffer.purpose] = [];
             }
 
@@ -313,7 +317,7 @@ define([
             var length = views.length;
             for ( var i = 0; i < length; ++i) {
                 var view = views[i];
-                view.view = view.componentDatatype.createArrayBufferView(arrayBuffer, view.offsetInBytes);
+                view.view = ComponentDatatype.createArrayBufferView(view.componentDatatype, arrayBuffer, view.offsetInBytes);
             }
 
             buffer.arrayBuffer = arrayBuffer;
@@ -371,9 +375,6 @@ define([
         }
     };
 
-    // Using unsigned short indices, 64K vertices can be indexed by one index buffer
-    var sixtyFourK = 64 * 1024;
-
     /**
      * DOC_TBA
      *
@@ -392,7 +393,7 @@ define([
 
         ///////////////////////////////////////////////////////////////////////
 
-        if (recreateVA || typeof this.vaByPurpose === 'undefined') {
+        if (recreateVA || !defined(this.vaByPurpose)) {
             var buffersByPurposeAndUsage = this._buffersByPurposeAndUsage;
 
             destroyVA(this);
@@ -403,7 +404,7 @@ define([
                     var buffersByUsage = buffersByPurposeAndUsage[purpose];
 
                     var va = [];
-                    var numberOfVertexArrays = Math.ceil(this._size / sixtyFourK);
+                    var numberOfVertexArrays = Math.ceil(this._size / CesiumMath.SIXTY_FOUR_KILOBYTES);
                     for ( var k = 0; k < numberOfVertexArrays; ++k) {
                         var attributes = [];
 
@@ -413,7 +414,7 @@ define([
                             for (var allPurposeUsage in allPurposeBuffersByUsage) {
                                 if (allPurposeBuffersByUsage.hasOwnProperty(allPurposeUsage)) {
                                     var allPurposeBuffer = allPurposeBuffersByUsage[allPurposeUsage];
-                                    VertexArrayFacade._appendAttributes(attributes, allPurposeBuffer, k * (allPurposeBuffer.vertexSizeInBytes * sixtyFourK));
+                                    VertexArrayFacade._appendAttributes(attributes, allPurposeBuffer, k * (allPurposeBuffer.vertexSizeInBytes * CesiumMath.SIXTY_FOUR_KILOBYTES));
                                 }
                             }
                         }
@@ -422,7 +423,7 @@ define([
                         for (var usage in buffersByUsage) {
                             if (buffersByUsage.hasOwnProperty(usage)) {
                                 buffer = buffersByUsage[usage];
-                                VertexArrayFacade._appendAttributes(attributes, buffer, k * (buffer.vertexSizeInBytes * sixtyFourK));
+                                VertexArrayFacade._appendAttributes(attributes, buffer, k * (buffer.vertexSizeInBytes * CesiumMath.SIXTY_FOUR_KILOBYTES));
                             }
                         }
 
@@ -430,7 +431,7 @@ define([
 
                         va.push({
                             va : this._context.createVertexArray(attributes, indexBuffer),
-                            indicesCount : 1.5 * ((k !== (numberOfVertexArrays - 1)) ? sixtyFourK : (this._size % sixtyFourK))
+                            indicesCount : 1.5 * ((k !== (numberOfVertexArrays - 1)) ? CesiumMath.SIXTY_FOUR_KILOBYTES : (this._size % CesiumMath.SIXTY_FOUR_KILOBYTES))
                         // TODO: not hardcode 1.5
                         });
                     }
@@ -447,7 +448,7 @@ define([
 
             var vertexBuffer = buffer.vertexBuffer;
             var vertexBufferSizeInBytes = vertexArrayFacade._size * buffer.vertexSizeInBytes;
-            var vertexBufferDefined = typeof vertexBuffer !== 'undefined';
+            var vertexBufferDefined = defined(vertexBuffer);
             if (!vertexBufferDefined || (vertexBuffer.getSizeInBytes() < vertexBufferSizeInBytes)) {
                 if (vertexBufferDefined) {
                     vertexBuffer.destroy();
@@ -530,7 +531,7 @@ define([
 
     function destroyVA(vertexArrayFacade) {
         var vaByPurpose = vertexArrayFacade.vaByPurpose;
-        if (typeof vaByPurpose === 'undefined') {
+        if (!defined(vaByPurpose)) {
             return;
         }
 
