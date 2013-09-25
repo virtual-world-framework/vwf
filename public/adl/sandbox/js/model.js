@@ -59,15 +59,16 @@ var vwfPortalModel = new function(){
 	self.alignWorldsList = function(i, f){
 		var temp = self.displayWorldObjects()[i];
 		var prevTemp = self.displayWorldObjects()[i-1];
-		if(i > 0 && i%4 != 0 && temp && !temp().featured && (prevTemp().featured || !prevTemp().featured && prevTemp().marginFix)){
+		if(i%4 != 0 && !self.usersPage && temp && !temp().featured && (prevTemp().featured || (!prevTemp().featured && prevTemp().marginFix))){
 			temp().marginFix = true;
 			return {'margin':'37px 0 53px 0'};
 		}
 		
-		else {
+		else if(temp().marginFix){
 			delete temp().marginFix;
-			return {'margin':''};
 		}
+		
+		return {'margin':''};
 	};
 	
 	self.getNextPage = function(){
