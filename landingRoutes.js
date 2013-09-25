@@ -75,7 +75,7 @@ exports.help = function(req, res){
 	var currentIndex = fileList.indexOf(req.params.page);
 	var displayPage = currentIndex >= 0 ? fileList[currentIndex] : 'index';
 	
-	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: '', script: displayPage + ".js"};
+	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, script: displayPage + ".js"};
 	res.render('help/template');
 };
 
@@ -143,15 +143,15 @@ exports.handlePostRequest = function(req, res, next){
 			
 			function(err, results){
 			
-					var serveObj = [{},{}];
-					console.log(results);
-					for(var key in results[0]){
-						if(results[1][key]){
-							serveObj[0][key] = results[1][key];
-						}
+				var serveObj = [{},{}];
+				console.log(results);
+				for(var key in results[0]){
+					if(results[1][key]){
+						serveObj[0][key] = results[1][key];
 					}
-					serveObj[1] = results[2];
-					res.end(JSON.stringify(serveObj));
+				}
+				serveObj[1] = results[2];
+				res.end(JSON.stringify(serveObj));
 			});
 			
 
