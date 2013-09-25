@@ -4,6 +4,7 @@
 if (!window.console) console = {log: function() {}};
 		
 var filter = '', pageIndex = 0, pageLength = 12, userNameFilter = '', selectAll = false;
+
 var vwfPortalModel = new function(){
 	var self = this;
 	self.getShorterStr = function(a, length){
@@ -55,6 +56,20 @@ var vwfPortalModel = new function(){
 	self.adminDisplayList = ko.observableArray();
 	self.currentAdminItem = ko.observable(false); 
 	self.errorText = ko.observable('');
+	self.alignWorldsList = function(i, f){
+		var temp = self.displayWorldObjects()[i];
+		var prevTemp = self.displayWorldObjects()[i-1];
+		if(i > 0 && i%4 != 0 && temp && !temp().featured && (prevTemp().featured || !prevTemp().featured && prevTemp().marginFix)){
+			temp().marginFix = true;
+			return {'margin':'37px 0 53px 0'};
+		}
+		
+		else {
+			delete temp().marginFix;
+			return {'margin':''};
+		}
+	};
+	
 	self.getNextPage = function(){
 		if(self.nextDisabled() === false)
 			self.getPage(1);
@@ -100,6 +115,7 @@ var vwfPortalModel = new function(){
 		}
 		
 		self.displayWorldObjects.sort(sortArrByUpdates);
+		//self.alignWorldsList.valueHasMutated();
 		if((pageIndex+1)*pageLength < worldObjectsLength){
 			self.nextDisabled(false);
 		}
