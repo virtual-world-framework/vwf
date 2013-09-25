@@ -187,7 +187,6 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             if ( this.debugVwf.deleting ) {
                 this.kernel.logger.infox( "deletedNode", nodeID );
             }
-            // debugger;
 
             if ( nodeID.indexOf( "-clients-vwf" ) != -1 ) {
                 var moniker = nodeID.substr( nodeID.lastIndexOf('-')+1, 16 );
