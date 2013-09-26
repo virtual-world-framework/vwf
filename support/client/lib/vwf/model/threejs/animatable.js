@@ -39,10 +39,12 @@
 							
 						}
 						
-						
-						skins[i].morphTargetInfluences[frame] = mod;
-						if(frame > 1)
-							skins[i].morphTargetInfluences[frame-1] = 1.0-mod;
+						if(frame == this.animationEnd)
+							mod = 0;
+							
+						skins[i].morphTargetInfluences[frame] = 1.0-mod;
+						if(frame < this.animationEnd)
+							skins[i].morphTargetInfluences[frame+1] = mod;
 						
 						
 						
