@@ -12,8 +12,5 @@
 # the License.
 
 ---
-model:
-  vwf/model/threejs:
 view:
-  vwf/view/threejs: "#vwf-root"
   vwf/view/rtcMulti: { "session": { "audio": true, "video": true }, "direction": "many-to-many"  }
