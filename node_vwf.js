@@ -11,6 +11,7 @@ var libpath = require('path'),
 	express = require('express'),
 	app = express(),
 	Landing = require('./landingRoutes');
+	
 var zlib = require('zlib');
 	
 // pick the application name out of the URL by finding the index.vwf.yaml
@@ -718,7 +719,18 @@ function startVWF(){
 		//keep track of the timer for this instance
 		global.instances[namespace].timerID = setInterval(function(){
 		
+			var now = process.hrtime();
+			now = now[0] * 1e9 + now[1];
+			now = now/1e9;
+			
+			
+			var timedelta = now - global.instances[namespace].lasttime;
+			var timeerr = (timedelta - .050)*1000;
+			global.instances[namespace].lasttime = now;
+			
+			
 			global.instances[namespace].time += .05;
+			
 			for(var i in global.instances[namespace].clients)
 			{
 				var client = global.instances[namespace].clients[i];

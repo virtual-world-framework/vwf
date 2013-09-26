@@ -49,12 +49,120 @@ var stats;
 				this.paused = false;
 			}.bind(this));
 			
+			this.nodes = {};
+			this.interpolateTransforms = true;
+			this.tickTime = 0;
+			this.realTickDif = 50;
+			this.lastrealTickDif = 50;
+			this.lastRealTick = performance.now();
+			this.leftover = 0;
         },
-
+		lerp: function(a,b,l)
+		{
+			l = Math.min(1,Math.max(l,0));
+			return (b*l) + a*(1.0-l);
+		},
+		setInterpolatedTransforms: function(deltaTime)
+		{
+			this.tickTime += deltaTime || 0;
+		
+			var step = this.tickTime / (this.realTickDif);
+			
+			//if going slower than tick rate, don't make life harder by changing values. it would be invisible anyway
+			if(step > 1) return;
+		
+			for(var i in this.nodes)
+			{
+				
+					var last = this.nodes[i].lastTickTransform;
+					var now = this.nodes[i].thisTickTransform;
+					if(last && now)
+					{
+						
+						var interp = last.slice(0);
+						 
+						for(var j = 0; j < 16; j++)
+						{						
+							interp[j] =  this.lerp(last[j],now[j],step);
+						}
+						
+						vwf.setProperty(i,'transform',interp);
+						
+					}
+					
+					last = this.nodes[i].lastAnimationFrame;
+					now = this.nodes[i].thisAnimationFrame;
+					
+					if(last != null && now != null)
+					{
+					var interp = this.lerp(last,now,step);
+					if(Math.abs(now-last) < 3)
+					vwf.setProperty(i,'animationFrame',interp);
+					}
+			}
+		},
+		restoreTransforms: function()
+		{
+			for(var i in this.nodes)
+			{
+				
+				var now = this.nodes[i].thisTickTransform;
+				
+				if(now)
+				{
+					vwf.setProperty(i,'transform',now);
+				}
+				
+				now = this.nodes[i].thisAnimationFrame;
+				if(now != null)
+					vwf.setProperty(i,'animationFrame',now);
+				
+			}
+		},
+		ticked: function()
+		{
+			var now = performance.now();
+			this.lastrealTickDif = this.realTickDif
+			this.realTickDif = now - this.lastRealTick;
+			this.lastRealTick = now;
+			
+			this.tickTime = 0;
+			
+			
+			
+			for(var i in this.nodes)
+			{
+				if(this.nodes[i].transformTickChanged)
+				{
+					this.nodes[i].lastTickTransform = this.nodes[i].thisTickTransform;
+					this.nodes[i].thisTickTransform = vwf.getProperty(i,'transform');
+					if(this.nodes[i].thisTickTransform) this.nodes[i].thisTickTransform = matCpy(this.nodes[i].thisTickTransform);
+					this.nodes[i].transformTickChanged = false;
+				}else
+				{
+					this.nodes[i].lastTickTransform = this.nodes[i].thisTickTransform = null;
+				}
+				if(this.nodes[i].animationFrameTickChanged)
+				{
+					this.nodes[i].lastAnimationFrame = this.nodes[i].thisAnimationFrame;
+					this.nodes[i].thisAnimationFrame = vwf.getProperty(i,'animationFrame');
+					this.nodes[i].animationFrameTickChanged = false;
+				}else
+				{
+					this.nodes[i].lastAnimationFrame = this.nodes[i].thisAnimationFrame = null;
+				}
+			}
+		
+		},
+		deletedNode: function(childID)
+		{
+			delete this.nodes[childID];
+		},
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childURI, childName, callback /* ( ready ) */) {
             
-            
+            this.nodes[childID] = {id:childID};
+			
             //the created node is a scene, and has already been added to the state by the model.
             //how/when does the model set the state object? 
             if(this.state.scenes[childID])
@@ -104,6 +212,38 @@ var stats;
             if(!node) node = this.state.scenes[nodeID];
             var value = undefined;
           
+			
+			if(this.nodes[nodeID])
+			{
+				if(vwf.client())
+				{
+					if(propertyName == 'transform')
+					{
+						this.nodes[nodeID].lastTickTransform = null;
+						this.nodes[nodeID].thisTickTransform = null;
+					}
+					if(propertyName == 'animationFrame')
+					{
+						this.nodes[nodeID].lastAnimationFrame = null;
+						this.nodes[nodeID].thisAnimationFrame = null;
+					}
+				}else
+				{
+					
+					if(propertyName == 'transform')
+					{
+						this.nodes[nodeID].transformTickChanged = true;
+						
+					}
+					if(propertyName == 'animationFrame')
+					{
+						this.nodes[nodeID].animationFrameTickChanged = true;
+						
+					}
+				
+				}
+			}
+			
 			
             //this driver has no representation of this node, so there is nothing to do.
             if(!node) return;
@@ -310,6 +450,9 @@ var stats;
 					pss[i].update(timepassed || 0);
 			}
 
+			if(self.interpolateTransforms)
+				self.setInterpolatedTransforms(timepassed);
+				
 			var cam = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
 			cam.matrixWorldInverse.getInverse( cam.matrixWorld );
 			var _viewProjectionMatrix = new THREE.Matrix4();
@@ -408,6 +551,9 @@ var stats;
 			$(document).trigger('postrender',[vp,wh,ww]);
 			sceneNode.lastTime = now;
 			stats.update();
+			
+			if(self.interpolateTransforms)
+				self.restoreTransforms();
 			
         };
 

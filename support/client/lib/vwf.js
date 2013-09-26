@@ -711,18 +711,18 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 					if(time < 1)
 					{
 						
-						while(time > .045)
+						while(time > .049)
 						{	
 							
+							var now = performance.now();
+							var realTickDif = now - this.lastRealTick;
+							this.lastRealTick = now;
+							var tickErr = (50 -realTickDif)/1000; 
 							
 							this.tick();
-						//	window.setTimeout(function(){
+						
+							time -= .05 ;
 							
-						//	this.tick();
-							
-						//	}.bind(this),25);
-							time -= .05;
-							//console.log('tick',this.now);
 						}
 						//save the leftovers
 						this.lastTick = this.now  - time;
@@ -790,15 +790,17 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 			
             // Call ticked() on each view.
 
-            this.views.forEach( function( view ) {
-                view.ticked && view.ticked( this.now ); // TODO: maintain a list of tickable views and only call those
-            }, this );
-
-            // Call tick() on each tickable node.
+			 // Call tick() on each tickable node.
 
             this.tickable.nodeIDs.forEach( function( nodeID ) {
                 this.callMethod( nodeID, "tick", [ this.now ] );
             }, this ); 
+			
+            this.views.forEach( function( view ) {
+                view.ticked && view.ticked( this.now ); // TODO: maintain a list of tickable views and only call those
+            }, this );
+
+           
 
         };
 
@@ -2458,7 +2460,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                 if ( propertyValue === undefined ) {
                     var prototypeID = nodePrototypeID.call( this, nodeID );
-                    if ( prototypeID != nodeTypeURI.replace( /[^0-9A-Za-z_]+/g, "-" ) ) {
+                    if (prototypeID&& prototypeID != nodeTypeURI.replace( /[^0-9A-Za-z_]+/g, "-" ) ) {
                         propertyValue = this.getProperty( prototypeID, propertyName );
                     }
                 }

@@ -43,7 +43,7 @@
 							mod = 0;
 							
 						skins[i].morphTargetInfluences[frame] = 1.0-mod;
-						if(frame < this.animationEnd)
+						if(frame < this.animationEnd -1)
 							skins[i].morphTargetInfluences[frame+1] = mod;
 						
 						
@@ -104,9 +104,13 @@
 				{
 					
 					var nextframe = this.animationFrame+this.animationSpeed;
-					if(nextframe > this.animationEnd)
-						nextframe = this.animationStart;
-					this.settingProperty(	'animationFrame' , nextframe);
+					if(nextframe > this.animationEnd-1)
+					{
+						nextframe = this.animationStart || 0;
+						
+					}
+					
+					vwf.setProperty(this.ID,	'animationFrame' , nextframe);
 				}
 			
 			}

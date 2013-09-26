@@ -381,7 +381,14 @@ define(
 		
 		});
 		
-		
+		$('#MenuViewInterpolation').click(function(e)
+		{
+			_dView.interpolateTransforms = !_dView.interpolateTransforms;
+			if(!_dView.interpolateTransforms)
+				alertify.log('Animation interpolation disabled');
+			else
+				alertify.log('Animation interpolation enabled');
+		});
 		$('#MenuViewToggleWireframe').click(function (e)
 		{
 			
@@ -399,6 +406,7 @@ define(
 				_Editor.findscene().overrideMaterial.fog = false;
 			}
 		});
+		
 		
 		
 		$('#MenuViewToggleAO').click(function (e)
