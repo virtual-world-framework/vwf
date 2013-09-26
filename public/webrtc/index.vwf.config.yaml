@@ -12,7 +12,5 @@
 # the License.
 
 ---
-model:
-  nodriver:
 view:
   vwf/view/webrtc: { debug: false, videoProperties: { create: false } }
