@@ -83,12 +83,12 @@ function swapPanes( divId ) {
 
 }
 
-function newWindow( id, title, type, url, color, muted, aspectRatio ) {
+function newWindow( id, title, type, url, color, muted, width, height ) {
 
   //--------------------------
   // Set up window parameters
   //--------------------------
-
+  var aspectRatio = 4 / 3;
   var newWin = windowsCreated[ id ] = {
     "title": title,
     "type": type,
@@ -149,8 +149,12 @@ function newWindow( id, title, type, url, color, muted, aspectRatio ) {
 			"</div>"
 		);
 		var $div = $( divSelector );
-		$div.resizable( {
-      aspectRatio: aspectRatio !== undefined ? aspectRatio : 4 / 3,
+		if ( width && height ) {
+      aspectRatio = width / height;
+    }
+
+    $div.resizable( {
+      aspectRatio: aspectRatio,
 			handles: 'ne, se, sw, nw',
 			minHeight: 125,
       minWidth: 170
@@ -229,6 +233,7 @@ function newWindow( id, title, type, url, color, muted, aspectRatio ) {
   //---------------------------------
 
   switch (type) {
+    
     case "canvas":
       $div.append(
         "<i id='scale-" + divId + "' class='scale icon-chevron-up icon-white' alt='' onclick='scale(this.id.substr(6));'/>" +
@@ -254,6 +259,7 @@ function newWindow( id, title, type, url, color, muted, aspectRatio ) {
         // }
       // });
       break;
+
     case "html":
       var iframeId = newWin.iframeId  = "iframe-" + divId;
       var iframeWidth = $div.width() - 20;
@@ -263,13 +269,16 @@ function newWindow( id, title, type, url, color, muted, aspectRatio ) {
         "<iframe id='" + iframeId + "' width='" + iframeWidth + "' height='" + iframeHeight + "' src='" + url +"' />"
       );
       break;
+
 		case "video":
 			var videoId = newWin.videoId = "video-" + divId;
 			var mutedAttr = muted ? "muted " : "";
+      if ( width === undefined ) { width = 320; }
+      if ( height === undefined ) { height = 240; }
 
       $div.append(
 				"<i id='enlarge-" + divId + "' style='position:absolute;right:5px;top:5px;z-index: 4;'  alt='' onclick='swapPanes(this.id.substr(8));' class='icon-chevron-up icon-white'/>" +
-				"<video id='" + videoId + "' width='320' height='240' loop='loop' autoplay "+mutedAttr+"style='position: absolute; left: 0; top: 0; z-index: 2;width:100%;height:100%;' />" +
+				"<video id='" + videoId + "' width='"+width+"' height='"+height+"' loop='loop' autoplay "+mutedAttr+"style='position: absolute; left: 0; top: 0; z-index: 2;width:100%;height:100%;' />" +
 				"<div id='"+ divId + "-overlay' style='position: absolute; left: 0; top: 0; z-index: 2;'>" +
 				"<span class='label label-inverse' style='margin-left:5px;margin-top:5px;'>" + title + "</span>"+
 				"</div>"

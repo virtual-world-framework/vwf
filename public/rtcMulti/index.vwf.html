@@ -133,15 +133,17 @@
           }
 
           switch ( methodName ) {
+
             case "createVideo":
                 var moniker = methodParameters[1];
                 if ( moniker && moniker == this.kernel.moniker() ) {
 	                var parms = methodParameters[0];
 
 					// defined in videoWindow.js
-					newWindow( parms.ID, parms.name, "video", parms.url, parms.color, parms.muted );
+					newWindow( parms.ID, parms.name, "video", parms.url, parms.color, parms.muted, parms.width, parms.height );
 				}
               	break;
+              	
             case "removeVideo":
 				// defined in videoWindow.js
 				removeWindow( methodParameters[0] );

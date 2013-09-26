@@ -163,7 +163,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                         if ( videoMoniker === undefined ) {
                             videoMoniker = e.userid;
                         }
-                        displayRemote.call( self, videoMoniker, e.stream, e.blobURL, username, self.kernel.moniker(), color );
+                        displayRemote.call( self, videoMoniker, e.stream, e.blobURL, username, 
+                                            self.kernel.moniker(), color );
                     }
                 }  
             };     
@@ -640,14 +641,21 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
         return connection;
     }
 
-    function displayLocal( stream, url, name, color ) {
+    function displayLocal( stream, url, name, color, aspectRatio ) {
         var id = this.kernel.moniker();
-        return displayVideo.call( this, id, stream, url, name, id, true, color );
+        return displayVideo.call( this, id, stream, url, name, id, true, color, aspectRatio );
     }
 
-    function displayVideo( id, stream, url, name, destMoniker, muted, color ) {
+    function displayVideo( id, stream, url, name, destMoniker, muted, color, aspectRatio ) {
         
+        var videoWidth = 320; 
+        var videoHeight = 240; 
         var divId = undefined;
+
+        if ( stream && stream.videoHeight ) {
+            videoHeight = stream.videoHeight;
+            videoWidth = stream.videoWidth;
+        }        
 
         if ( this.videoProperties.create ) {
             this.videosAdded++
@@ -660,7 +668,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 $container.append(
                     "<div id='"+ divId + "'>" +
                         "<video class='vwf-webrtc-video' id='" + videoId +
-                            "' width='320' height='240' " +
+                            "' width='"+videoWidth+"' height='"+videoHeight+"' " +
                             "loop='loop' autoplay muted " +
                             "style='position: absolute; left: 0; top: 0; z-index: 40;'>" +
                         "</video>" +
@@ -671,7 +679,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 $container.append(
                     "<div id='"+ divId + "'>" +
                         "<video class='vwf-webrtc-video' id='" + videoId +
-                            "' width='320' height='240'" +
+                            "' width='"+videoWidth+"' height='"+videoHeight+"'" +
                             " loop='loop' autoplay " +
                             "style='position: absolute; left: 0; top: 0; z-index: 40;'>" +
                         "</video>" +
@@ -701,7 +709,9 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             "url": url, 
             "name": name, 
             "muted": muted, 
-            "color": clr ? clr : color
+            "color": clr ? clr : color,
+            "width": videoWidth,
+            "height": videoHeight
         }, destMoniker ] );          
 
         return divId;
@@ -721,8 +731,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
     }
 
-    function displayRemote( id, stream, url, name, destMoniker, color ) {
-        return displayVideo.call( this, id, stream, url, name, destMoniker, false, color );
+    function displayRemote( id, stream, url, name, destMoniker, color, aspectRatio ) {
+        return displayVideo.call( this, id, stream, url, name, destMoniker, false, color, aspectRatio );
     }
 
     function capture( media ) {
