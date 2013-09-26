@@ -18,6 +18,13 @@ ul{
 	padding-left:30px;
 }
 
+.glyphicon-star{
+	color: #F3E003;
+	font-size: 17px;
+	text-shadow: 0 0 1px #A8A8A8;
+	margin-left: 5px;
+}
+
 .videoList td{
 	border: none !important;
 	padding-top:10px !important;

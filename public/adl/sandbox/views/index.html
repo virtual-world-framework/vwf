@@ -41,6 +41,7 @@
 							</div>
 						</div>
 						<div data-bind="css:$data.featured?'editstate' : 'editstateGuest'">
+							<!--<span class="glyphicon glyphicon-star" data-bind="attr:{href:'{{root}}/'+id}, visible:$data.featured && !hotState"></span>-->
 							<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState">Active</a>
 							
 							<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible -->
