@@ -31,6 +31,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             
             this.state.connections = {};
             this.state.streams = {};
+            this.state.delayedStreams = {};
 
             this.local = {
                 "ID": undefined,
@@ -126,6 +127,16 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 var username, color, videoMoniker;
                 var conn = getClientNode.call( self, e.userid );
 
+                var streamInfo = self.state.streams[ e.steamid ] = {
+                    mediaElement: e.mediaElement,
+                    steamid: e.streamid,
+                    session: e.session,
+                    blobURL: e.blobURL,
+                    type: e.type,
+                    extra: e.extra,
+                    userid: e.userid
+                }; 
+
                 if ( conn !== undefined ) {
                     color = conn.color !== undefined ? conn.color : [ 0, 0, 0 ];
                     username = conn.username;
@@ -141,26 +152,20 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                     displayLocal.call( self, e.stream, e.blobURL, username, color );
 
                 } else if ( e.type === 'remote' ) { 
-                    
-                    // display remote
-                    if ( username === undefined ) {
-                        username = e.extra !== undefined ? e.extra.username : "remote";
+                   
+                    if ( conn === undefined ) {
+                        this.state.delayedStreams[ e.userid ] = streamInfo;
+                    } else {
+                        // display remote
+                        if ( username === undefined ) {
+                            username = e.extra !== undefined ? e.extra.username : "remote";
+                        }
+                        if ( videoMoniker === undefined ) {
+                            videoMoniker = e.userid;
+                        }
+                        displayRemote.call( self, videoMoniker, e.stream, e.blobURL, username, self.kernel.moniker(), color );
                     }
-                    if ( videoMoniker === undefined ) {
-                        videoMoniker = e.userid;
-                    }
-                    displayRemote.call( self, videoMoniker, e.stream, e.blobURL, username, self.kernel.moniker(), color );
                 }  
-
-                self.state.streams[ e.steamid ] = {
-                    mediaElement: e.mediaElement,
-                    steamid: e.streamid,
-                    session: e.session,
-                    blobURL: e.blobURL,
-                    type: e.type,
-                    extra: e.extra,
-                    userid: e.userid
-                };  
             };     
 
             this.connection.onstreamended = function( event ) {
@@ -360,7 +365,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                         client.connection && client.connection.disconnect();
 
                         removeClient.call( this, client );
-                        delete this.state.connections[ client ]
+                        delete this.state.connections[ client ];
                     }
 
                      
@@ -537,6 +542,12 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                         
                         case "userid":
                             client.userid = propertyValue;
+                            if ( this.state.delayedStreams[ client.userid ] !== undefined ) {              
+                                var e = this.state.delayedStreams[ client.userid ];
+                                displayRemote.call( this, client.moniker, e.stream, e.blobURL, 
+                                                    client.username, this.kernel.moniker(), client.color );
+                                delete this.state.delayedStreams[ client.userid ];
+                            }
                             break;
 
                         case "username":
@@ -568,15 +579,20 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 this.kernel.logger.infox( "   G === gotProperty ", nodeID, propertyName, propertyValue );
             }
             var value = undefined;
-            var client = this.state.connections[ nodeID ];
 
-            if ( client && this.local.ID == nodeID ) {
-                switch( propertyName ) {
-                    case "userid":
-                        value = this.connection.userid;
-                        break;
-                }
-            }
+            //var client = this.state.connections[ nodeID ];
+            // if ( client ) {
+            //     if ( this.local.ID == nodeID ) {
+            //         // local client
+            //         switch( propertyName ) {
+            //             case "userid":
+            //                 value = this.connection.userid;
+            //                 break;
+            //         }
+            //     } else {
+            //         // non local client
+            //     }
+            // }
 
             return value;
         },

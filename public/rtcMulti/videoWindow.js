@@ -83,7 +83,7 @@ function swapPanes( divId ) {
 
 }
 
-function newWindow( id, title, type, url, color, muted ) {
+function newWindow( id, title, type, url, color, muted, aspectRatio ) {
 
   //--------------------------
   // Set up window parameters
@@ -150,7 +150,7 @@ function newWindow( id, title, type, url, color, muted ) {
 		);
 		var $div = $( divSelector );
 		$div.resizable( {
-      aspectRatio: 4 / 3,
+      aspectRatio: aspectRatio !== undefined ? aspectRatio : 4 / 3,
 			handles: 'ne, se, sw, nw',
 			minHeight: 125,
       minWidth: 170
