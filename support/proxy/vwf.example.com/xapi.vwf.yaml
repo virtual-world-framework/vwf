@@ -1,0 +1,10 @@
+properties:
+    xAPI:
+        get: |
+            return {
+
+                configure: function(config){
+                    vwf.callMethod(this.id, 'xapiConfigure', config);
+                }.bind(this)
+
+            }
