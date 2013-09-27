@@ -12,9 +12,8 @@
 # the License.
 
 --- 
-extends: http://vwf.example.com/scene.vwf
+extends: http://vwf.example.com/node2.vwf
 properties:
-  rotationSpeed: 10
   backgroundColor: "rgba(0,0,0,0)"
   clientColors: [ [ 0, 0, 255 ], [ 255, 0, 0 ], [ 255, 255, 0 ], [ 0, 255, 0 ], [ 0, 255, 255 ], [ 255, 0, 255 ], [ 255, 153, 0 ], [ 153, 153, 153 ], [ 230, 230, 250 ], [ 0, 0, 0 ] ]
 methods:
@@ -42,11 +41,10 @@ scripts:
 
     this.createConnection = function( moniker, loginName, mediaSharing ) {
       
-      var clr, colorList = this.clientColors;
+      var clr; 
+      var colorList = this.clientColors;
       clr = colorList.shift();
       this.clientColors = colorList;
-
-      //console.info( "createClient( "+moniker+", "+loginName+", "+mediaSharing+" )   clr = " + clr );
 
       var connectionDef = { 
         "extends": "http://vwf.example.com/rtcMulti/connection.vwf",
@@ -56,9 +54,7 @@ scripts:
           "color": clr
         },
       }
-      this.connections.children.create( "connection"+moniker, connectionDef, function( child ) {
-        
-      } );
+      this.connections.children.create( "connection"+moniker, connectionDef );
     } 
     this.clientMoniker = function( name ) {
         return name.substr( 6, name.length-1 );

@@ -31,7 +31,7 @@
 	<script type="text/javascript">
 
 		
-		var appRoot = vwf_view.kernel.find( "", "/" )[0];
+		var appRoot = vwf_view.kernel.application();
 		var local = { 
 			"client": {
 				"name": "",
@@ -57,8 +57,7 @@
 
 						var capture = { 
 							"audio": local.client.captureAudio, 
-							"video": local.client.captureVideo,
-							
+							"video": local.client.captureVideo
 						};
 
 						$( "#main" ).show();
@@ -151,18 +150,6 @@
           }
         }
 
-        // VWF view - sat Property
-		vwf_view.satProperty = function( nodeID, propertyName, propertyValue ) {
-			if ( propertyValue === undefined || propertyValue == null ) {
-				return;
-			}
-
-			switch ( propertyName ) {
-				default:
-					break;
-			}
-		}
-
 		// VWF view - fired event
 		vwf_view.firedEvent = function(nodeId, eventName, eventArgs) {
 			if ( eventName == "participantRemoved" ) {
@@ -224,22 +211,7 @@
 				</li>
 				<li class="divider-vertical"></li>
 			</ul>
-			<div id='appBar' class="pull-left">
-				<!-- <input type="button" id="1" value="" class="buttonDown" style="visibility:hidden"/>
-				<input type="button" id="2" value="" class="buttonDown" style="visibility:hidden"/>
-				<input type="button" id="3" value="" class="buttonDown" style="visibility:hidden"/>
-				<input type="button" id="4" value="" class="buttonDown" style="visibility:hidden"/>
-				<input type="button" id="5" value="" class="buttonDown" style="visibility:hidden"/>
-				<input type="button" id="6" value="" class="buttonDown" style="visibility:hidden"/> -->
-			</div>			
-			<div id='appBar' class="pull-left">
-				<!-- <input type="button" id="1" value="" class="buttonDown" style="visibility:hidden"/>
-				<input type="button" id="2" value="" class="buttonDown" style="visibility:hidden"/>
-				<input type="button" id="3" value="" class="buttonDown" style="visibility:hidden"/>
-				<input type="button" id="4" value="" class="buttonDown" style="visibility:hidden"/>
-				<input type="button" id="5" value="" class="buttonDown" style="visibility:hidden"/>
-				<input type="button" id="6" value="" class="buttonDown" style="visibility:hidden"/> -->
-			</div>
+			<div id='appBar' class="pull-left"> </div>			
 		</div>
 	</div>
 
