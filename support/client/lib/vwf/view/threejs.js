@@ -182,8 +182,10 @@ var stats;
 					
 					if(last != null && now != null && Math.abs(now - last) < 3 && Math.abs(now - last) > .01)
 					{
+						
 						var interp = this.lerp(last,now,step,true);
-						if(Math.abs(now-last) < 3)
+						
+						
 						vwf.setProperty(i,'animationFrame',interp);
 						this.nodes[i].needFrameRestore = true;
 					}

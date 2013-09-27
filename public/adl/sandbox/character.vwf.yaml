@@ -12,7 +12,7 @@
 # the License.
 ---
 
-extends: http://vwf.example.com/node3.vwf
+extends: asset.vwf
 properties:
   translation:
   rotZ: 0       
@@ -36,8 +36,9 @@ scripts:
         this.parent.newClient(this.PlayerNumber);
     }
     this.initialize = function(){
+
         
-        if(this.id == 'character.vwf') return;
+        if(this.id == 'character-vwf') return;
        
          this.DownKeys= [];
         // this.motionStack= [];
@@ -92,9 +93,9 @@ scripts:
           //this.mesh.sceneManagerIgnore();
          // if(!this.mesh)
            
-          this.mesh.children[0].children[0].position.z = -.85
-          this.mesh.children[0].children[0].updateMatrixWorld(true);
-          this.skin = this.mesh.children[0].children[0].children[1];
+          this.mesh.children[0].children[0].children[0].position.z = -.85
+          this.mesh.children[0].children[0].children[0].updateMatrixWorld(true);
+          this.skin = this.mesh.children[0].children[0].children[0].children[1];
           this.skin.material.ambient.r = 1;
           this.skin.material.ambient.g = 1;
           this.skin.material.ambient.b = 1;
@@ -268,10 +269,12 @@ scripts:
                 
                
                
-               for(var i = 0; i < this.skin.morphTargetInfluences.length; i++)
-                    this.skin.morphTargetInfluences[i] = 0;
+               //for(var i = 0; i < this.skin.morphTargetInfluences.length; i++)
+               //     this.skin.morphTargetInfluences[i] = 0;
                
-               this.skin.morphTargetInfluences[parseInt(newframe)] = 1;     
+               //this.skin.morphTargetInfluences[parseInt(newframe)] = 1;     
+               this.animationFrame = newframe;
+              
             }
             this.prevframe = this.currentframe;
             this.currentframe = newframe;
