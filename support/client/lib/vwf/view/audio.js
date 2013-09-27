@@ -151,7 +151,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 		//Update the sound volume based on the position of the camera and the position of the object
 		ticked : function()
 		{
-			
+			try{
 			var cameraID = vwf.getProperty('index-vwf','activeCamera');
 			if(!cameraID) return;
 			
@@ -161,7 +161,10 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 				this.soundSources[i].updateSourcePosition();
 				this.soundSources[i].updateVolume(campos);
 			}
-
+			}catch(e)
+			{
+			
+			}
 		
 		},
 		deletedNode: function(id)

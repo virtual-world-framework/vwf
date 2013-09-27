@@ -56,50 +56,141 @@ var stats;
 			this.lastrealTickDif = 50;
 			this.lastRealTick = performance.now();
 			this.leftover = 0;
+			this.future = 0;
         },
-		lerp: function(a,b,l)
+		lerp: function(a,b,l,c)
 		{
-			l = Math.min(1,Math.max(l,0));
+			if(c) l = Math.min(1,Math.max(l,0));
 			return (b*l) + a*(1.0-l);
+		},
+		matCmp: function(a,b,delta)
+		{
+			for(var i =0; i < 16; i++)
+			{
+				if(Math.abs(a[i] - b[i]) > delta)
+					return false;
+			}
+			return true;
+		},
+		rotMatFromVec: function(x,y,z)
+		{
+			var n = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1];
+			n[0] = x[0];n[1] = x[1];n[2] = x[2];
+			n[4] = y[0];n[5] = y[1];n[6] = y[2];
+			n[8] = z[0];n[9] = z[1];n[10] = z[2];
+			return n;
+		},
+		matrixLerp: function(a,b,l)
+		{
+			var n = a.slice(0);
+			n[12] = this.lerp(a[12],b[12],l);
+			n[13] = this.lerp(a[13],b[13],l);
+			n[14] = this.lerp(a[14],b[14],l);
+			
+			var x = [a[0],a[1],a[2]];
+			var xl = Vec3.magnitude(x);
+			
+			var y = [a[4],a[5],a[6]];
+			var yl = Vec3.magnitude(y);
+			
+			var z = [a[8],a[9],a[10]];
+			var zl = Vec3.magnitude(z);
+			
+			
+			var x2 = [b[0],b[1],b[2]];
+			var xl2 = Vec3.magnitude(x2);
+			
+			var y2 = [b[4],b[5],b[6]];
+			var yl2 = Vec3.magnitude(y2);
+			
+			var z2 = [b[8],b[9],b[10]];
+			var zl2 = Vec3.magnitude(z2);
+			
+			var nxl = this.lerp(xl,xl2,l);
+			var nyl = this.lerp(yl,yl2,l);
+			var nzl = this.lerp(zl,zl2,l);
+			
+			x = Vec3.normalize(x,[]);
+			y = Vec3.normalize(y,[]);
+			z = Vec3.normalize(z,[]);
+			
+			x2 = Vec3.normalize(x2,[]);
+			y2 = Vec3.normalize(y2,[]);
+			z2 = Vec3.normalize(z2,[]);
+			
+			var q = Quaternion.fromRotationMatrix4(this.rotMatFromVec(x,y,z),[]);
+			var q2 = Quaternion.fromRotationMatrix4(this.rotMatFromVec(x2,y2,z2),[]);
+			
+			var nq = Quaternion.slerp(q,q2,l,[]);
+			var nqm = Quaternion.toRotationMatrix4(nq,[]);
+			
+			
+			var nx = [nqm[0],nqm[1],nqm[2]];
+			var ny = [nqm[4],nqm[5],nqm[6]];
+			var nz = [nqm[8],nqm[9],nqm[10]];
+			
+			nx = Vec3.scale(nx,nxl,[]);
+			ny = Vec3.scale(ny,nyl,[]);
+			nz = Vec3.scale(nz,nzl,[]);
+			
+			
+			nqm = this.rotMatFromVec(nx,ny,nz);
+			
+			nqm[12] = n[12];
+			nqm[13] = n[13];
+			nqm[14] = n[14];
+			
+			return nqm;
 		},
 		setInterpolatedTransforms: function(deltaTime)
 		{
-			this.tickTime += deltaTime || 0;
-		
-			var step = this.tickTime / (this.realTickDif);
 			
+			
+			var step = (this.tickTime) / (this.realTickDif);
+			
+			
+			deltaTime = Math.min(deltaTime,this.realTickDif)
+			this.tickTime += deltaTime || 0;
+
+			if(this.tickTime > this.realTickDif)
+				this.future = this.tickTime - this.realTickDif;
+			else
+				this.future = 0;
 			//if going slower than tick rate, don't make life harder by changing values. it would be invisible anyway
-			if(step > 1) return;
-		
+			if(step > 2) return;
+			
 			for(var i in this.nodes)
 			{
 				
 					var last = this.nodes[i].lastTickTransform;
 					var now = this.nodes[i].thisTickTransform;
-					if(last && now)
+					if(last && now && !this.matCmp(last,now,.001))
 					{
 						
 						var interp = last.slice(0);
 						 
-						for(var j = 0; j < 16; j++)
-						{						
-							interp[j] =  this.lerp(last[j],now[j],step);
-						}
+						
+						interp = this.matrixLerp(last,now,step);
+						
 						
 						vwf.setProperty(i,'transform',interp);
-						
+						this.nodes[i].needTransformRestore = true;
 					}
 					
 					last = this.nodes[i].lastAnimationFrame;
 					now = this.nodes[i].thisAnimationFrame;
 					
-					if(last != null && now != null)
+					if(last != null && now != null && Math.abs(now - last) < 3 && Math.abs(now - last) > .01)
 					{
-					var interp = this.lerp(last,now,step);
-					if(Math.abs(now-last) < 3)
-					vwf.setProperty(i,'animationFrame',interp);
+						var interp = this.lerp(last,now,step,true);
+						if(Math.abs(now-last) < 3)
+						vwf.setProperty(i,'animationFrame',interp);
+						this.nodes[i].needFrameRestore = true;
 					}
 			}
+			
+		
+			
 		},
 		restoreTransforms: function()
 		{
@@ -108,49 +199,45 @@ var stats;
 				
 				var now = this.nodes[i].thisTickTransform;
 				
-				if(now)
+				if(now && this.nodes[i].needTransformRestore)
 				{
 					vwf.setProperty(i,'transform',now);
+					this.nodes[i].needTransformRestore = false;
 				}
 				
 				now = this.nodes[i].thisAnimationFrame;
-				if(now != null)
+				if(now != null &&  this.nodes[i].needFrameRestore)
+				{
 					vwf.setProperty(i,'animationFrame',now);
+					this.nodes[i].needFrameRestore = true;
+				}
 				
 			}
 		},
 		ticked: function()
 		{
 			var now = performance.now();
-			this.lastrealTickDif = this.realTickDif
 			this.realTickDif = now - this.lastRealTick;
 			this.lastRealTick = now;
 			
-			this.tickTime = 0;
+			this.tickTime = this.future;
+			//reset - loading can cause us to get behind and always but up against the max prediction value
+			//if(this.future > 1) this.future = 0;
+			this.future = 0;
 			
 			
 			
 			for(var i in this.nodes)
 			{
-				if(this.nodes[i].transformTickChanged)
-				{
+		
 					this.nodes[i].lastTickTransform = this.nodes[i].thisTickTransform;
 					this.nodes[i].thisTickTransform = vwf.getProperty(i,'transform');
 					if(this.nodes[i].thisTickTransform) this.nodes[i].thisTickTransform = matCpy(this.nodes[i].thisTickTransform);
-					this.nodes[i].transformTickChanged = false;
-				}else
-				{
-					this.nodes[i].lastTickTransform = this.nodes[i].thisTickTransform = null;
-				}
-				if(this.nodes[i].animationFrameTickChanged)
-				{
+			
 					this.nodes[i].lastAnimationFrame = this.nodes[i].thisAnimationFrame;
 					this.nodes[i].thisAnimationFrame = vwf.getProperty(i,'animationFrame');
 					this.nodes[i].animationFrameTickChanged = false;
-				}else
-				{
-					this.nodes[i].lastAnimationFrame = this.nodes[i].thisAnimationFrame = null;
-				}
+			
 			}
 		
 		},
@@ -212,36 +299,26 @@ var stats;
             if(!node) node = this.state.scenes[nodeID];
             var value = undefined;
           
-			
-			if(this.nodes[nodeID])
+			if(vwf.client())
 			{
-				if(vwf.client())
-				{
-					if(propertyName == 'transform')
-					{
-						this.nodes[nodeID].lastTickTransform = null;
-						this.nodes[nodeID].thisTickTransform = null;
-					}
-					if(propertyName == 'animationFrame')
-					{
-						this.nodes[nodeID].lastAnimationFrame = null;
-						this.nodes[nodeID].thisAnimationFrame = null;
-					}
-				}else
+			if(propertyName == 'transform')
+			{
+				if(this.nodes[nodeID])
 				{
 					
-					if(propertyName == 'transform')
-					{
-						this.nodes[nodeID].transformTickChanged = true;
-						
-					}
-					if(propertyName == 'animationFrame')
-					{
-						this.nodes[nodeID].animationFrameTickChanged = true;
-						
-					}
+					this.nodes[nodeID].lastTickTransform = null;
+					this.nodes[nodeID].thisTickTransform = null;
 				
 				}
+			}
+			if(propertyName == 'animationFrame')
+			{
+				if(this.nodes[nodeID])
+				{
+					this.nodes[nodeID].lastAnimationFrame = null;
+					this.nodes[nodeID].thisAnimationFrame = null;
+				}
+			}
 			}
 			
 			
@@ -431,6 +508,7 @@ var stats;
 				return list;
 		}
         function renderScene(time) {
+			self.inFrame = true;
             requestAnimFrame( renderScene );
 	    
 			if(self.paused === true)
@@ -555,6 +633,7 @@ var stats;
 			if(self.interpolateTransforms)
 				self.restoreTransforms();
 			
+			self.inFrame = false;
         };
 
         var mycanvas = this.canvasQuery.get( 0 );
@@ -565,7 +644,7 @@ var stats;
 
             $(document.body).append('<canvas width="100" height="100" id="testWebGLSupport" />');
             canvas = $('#testWebGLSupport');
-            console.log(canvas);
+            
 
             // check to see if we can do webgl
             // ALERT FOR JQUERY PEEPS: canvas is a jquery obj - access the dom obj at canvas[0]

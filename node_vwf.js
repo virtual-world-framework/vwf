@@ -10,7 +10,8 @@ var libpath = require('path'),
 	DAL = require('./DAL'),
 	express = require('express'),
 	app = express(),
-	Landing = require('./landingRoutes');
+	Landing = require('./landingRoutes'),
+	NanoTimer = require('nanotimer');
 	
 var zlib = require('zlib');
 	
@@ -715,18 +716,21 @@ function startVWF(){
 		
 		
 		
+		global.instances[namespace].totalerr = 0;
 		
+		global.instances[namespace].timerID = new NanoTimer();
 		//keep track of the timer for this instance
-		global.instances[namespace].timerID = setInterval(function(){
+		global.instances[namespace].timerID.setInterval(function(){
 		
 			var now = process.hrtime();
 			now = now[0] * 1e9 + now[1];
 			now = now/1e9;
 			
 			
-			var timedelta = now - global.instances[namespace].lasttime;
+			var timedelta = (now - global.instances[namespace].lasttime) || 0;
 			var timeerr = (timedelta - .050)*1000;
 			global.instances[namespace].lasttime = now;
+			global.instances[namespace].totalerr += timeerr;
 			
 			
 			global.instances[namespace].time += .05;
@@ -743,7 +747,7 @@ function startVWF(){
 				}
 			}
 		
-		},50);
+		},[],'50m');
 		
 	  }
 	 
@@ -1188,7 +1192,7 @@ function startVWF(){
 		  
 		  if(Object.keys(global.instances[namespace].clients).length == 0)
 		  {
-			clearInterval(global.instances[namespace].timerID);
+			global.instances[namespace].timerID.clearInterval();
 			delete global.instances[namespace];
 		  }
 

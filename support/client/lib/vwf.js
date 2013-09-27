@@ -711,17 +711,16 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 					if(time < 1)
 					{
 						
-						while(time > .049)
+						while(time > .045)
 						{	
 							
 							var now = performance.now();
 							var realTickDif = now - this.lastRealTick;
 							this.lastRealTick = now;
-							var tickErr = (50 -realTickDif)/1000; 
 							
 							this.tick();
 						
-							time -= .05 ;
+							time -= .05;
 							
 						}
 						//save the leftovers
@@ -748,6 +747,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         queue.ready && vwf.dispatch( queue.time );
                     }
                 } );
+				this.client_ = null;;
 
             }
 
