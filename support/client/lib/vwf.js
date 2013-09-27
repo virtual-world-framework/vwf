@@ -2805,7 +2805,6 @@ if ( ! childComponent.source ) {
                 // Ignore the result if reentry is disabled and the driver attempted to call
                 // back into the kernel. Kernel reentry is disabled during replication to 
                 // prevent coloring from accessor scripts.
-
                 if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
                     value = undefined;
                 }
@@ -4599,7 +4598,6 @@ if ( ! childComponent.source ) {
                 // Ignore the result if reentry is disabled and the driver attempted to call
                 // back into the kernel. Kernel reentry is disabled during replication to 
                 // prevent coloring from accessor scripts.
-
                 if ( that.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
                     value = undefined;
                 }
@@ -4628,7 +4626,6 @@ if ( ! childComponent.source ) {
             }, this );
 
             // Record the change if the property was assigned here.
-
             if ( assigned && node.initialized && node.patchable ) {
                 node.properties.change( propertyName );
             }
