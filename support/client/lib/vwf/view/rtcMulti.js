@@ -37,8 +37,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 "ID": undefined,
                 "url": undefined,
                 "stream": undefined,
-                "sharing": { audio: true, video: true },
-                "connectionID": undefined
+                "sharing": { audio: true, video: true }
             };
 
             // turns on logger debugger console messages 
@@ -50,7 +49,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 "properties": false,
                 "setting": false,
                 "getting": false,
-                "calling": false
+                "calling": false,
+                "propertyName": ""
             };
 
             if ( options === undefined ) { options = {}; }
@@ -70,7 +70,6 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
             this.connection = new RTCMultiConnection();
             
-            this.local.connectionID = this.connection.userid;
             if ( this.connection.extra === undefined ) { this.connection.extra = {} }
             //this.connection.extra.moniker = this.kernel.moniker();  
 
@@ -141,6 +140,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                     color = conn.color !== undefined ? conn.color : [ 0, 0, 0 ];
                     username = conn.username;
                     videoMoniker = conn.moniker;
+                } else {
+                    console.info( "++++++ conn not found ++++++" );
                 }
 
                 if ( e.type === 'local' ) {
@@ -154,7 +155,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 } else if ( e.type === 'remote' ) { 
                    
                     if ( conn === undefined ) {
-                        this.state.delayedStreams[ e.userid ] = streamInfo;
+                        self.state.delayedStreams[ e.userid ] = streamInfo;
                     } else {
                         // display remote
                         if ( username === undefined ) {
@@ -248,7 +249,6 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                     "username": "",
                     "fullname": undefined,
                     "email": undefined,
-                    "connectionID": undefined,
                     "localUrl": undefined, 
                     "remoteUrl": undefined,
                     "color": "rgb(0,0,0)",
@@ -266,7 +266,6 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
                 if ( this.kernel.moniker() == node.moniker ) { 
                     
-                    node.connectionID = this.local.connectionID;
                     this.local.ID = childID;
                     
                     if ( this.videoElementsDiv ) {
@@ -294,7 +293,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             if ( client ) {
                 if ( this.local.ID == childID ){
                     
-                    client.connectionID = this.connection.userid;
+                    console.info( "setting userid: " + this.connection.userid );
                     this.kernel.setProperty( childID, "userid", this.connection.userid ); 
 
                     // this.connection.open( this.sessionid ); 
@@ -396,7 +395,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
         satProperty: function( nodeID, propertyName, propertyValue ) {
             
             
-            if ( this.debugVwf.properties || this.debugVwf.setting ) {
+            if ( this.debugVwf.properties || this.debugVwf.setting || propertyName == this.debugVwf.propertyName ) {
                 this.kernel.logger.infox( "    S === satProperty ", nodeID, propertyName, propertyValue );
             } 
 
@@ -630,10 +629,10 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
         return prototypes;
     }
 
-    function getClientNode( connectionID ) {
+    function getClientNode( userid ) {
         var connection;
         for ( var id in this.state.connections ) {
-            if ( this.state.connections[ id ].connectionID == connectionID ) {
+            if ( this.state.connections[ id ].userid == userid ) {
                 connection = this.state.connections[ id ];
                 break;
             }
