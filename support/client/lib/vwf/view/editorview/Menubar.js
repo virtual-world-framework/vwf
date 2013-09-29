@@ -21,6 +21,19 @@ define(
 			contentsource: "markup", //"markup" or ["container_id", "path_to_menu_file"]
 			method: 'hover'
 		});
+		
+		$('#MenuEn').click(function (e)
+		{
+			localStorage.setItem("language","en");
+			location.reload();
+		});
+		$('#MenuRu').click(function (e)
+		{
+			localStorage.setItem("language","ru");
+			location.reload();
+		});
+
+
 		//make the menu items disappear when you click one
 		//$(".ddsmoothmenu").find('li').click(function(){$(".ddsmoothmenu").find('li').trigger('mouseleave');});
 		$('#MenuLogOut').attr('disabled', 'true');

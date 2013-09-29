@@ -21,6 +21,7 @@
   <!-- URI and loaded from a network-visible location.                                           -->
 
   <head>
+    <meta charset="utf-8" />
 
     <title>Virtual World Framework</title>
 
@@ -66,6 +67,14 @@
 	<script type="text/javascript" src="../vwf/model/threejs/ColladaLoader.js"></script>
 	<script type="text/javascript" src="../vwf/model/threejs/UTF8JSONLoader.js"></script>
     <script type="text/javascript" src="../vwf/model/jiglib/jiglib.js"></script>
+
+
+    <!-- localization libs  -->
+    <script type="text/javascript" src="../vwf/view/localization/json2.min.js"></script>
+    <script type="text/javascript" src="../vwf/view/localization/l10n.min.js"></script>
+    <script type="text/javascript" src="../vwf/view/localization/localizations.js"></script>
+
+    
     <script type="text/javascript">
 
 	//remove the instnace name from requests to make things cache
@@ -216,7 +225,12 @@
     </script>
 
 	
-	
+	<script type="text/javascript">
+        if (localStorage.language == null) {
+                localStorage.setItem("language","en");
+            };
+        String.locale = localStorage.getItem("language");
+     </script>
 	
 	
 	

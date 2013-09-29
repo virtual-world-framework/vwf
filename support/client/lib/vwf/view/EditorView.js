@@ -178,6 +178,9 @@ function InitializeEditor()
 	//	$('#index-vwf').enableSelection();
 	//	$('* :not(input)').disableSelection();
 	
+	//localization
+	$(document.head).append('<script type="text/javascript" src="vwf/view/localization/translate.js"></script>');
+	translateMenu();
 	
 }
 
