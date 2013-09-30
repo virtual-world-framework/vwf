@@ -37,7 +37,7 @@
 		  corners: 1, // Corner roundness (0..1)
 		  rotate: 0, // The rotation offset
 		  direction: 1, // 1: clockwise, -1: counterclockwise
-		  color: '#333', // #rgb or #rrggbb or array of colors
+		  color: '#000', // #rgb or #rrggbb or array of colors
 		  speed: 0.8, // Rounds per second
 		  trail: 60, // Afterglow percentage
 		  shadow: false, // Whether to render a shadow
@@ -47,16 +47,16 @@
 		  top: 'auto', // Top position relative to parent in px
 		  left: 'auto' // Left position relative to parent in px
 		};
-	
+		window.onscroll = function () { window.scrollTo(0, 0); };
 		$(document).ready(function(){
-			$("html").css("overflow", "hidden");
-			$("html").css("opacity", "0");
+			$("body").addClass("bodyLoad");
 		});
 		
 		$(window).load(function(){
-			$("html").animate({opacity:1}, 500);
+			//$("body").animate({opacity:1}, 500);
 			$("#loadOverlay").animate({opacity:0}, 500);
-			$("html").css("overflow", "visible");
+			$("body").removeClass("bodyLoad");
+			window.onscroll = function(){};
 		});
 	</script>
 	{{/home}}

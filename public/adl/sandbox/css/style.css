@@ -18,6 +18,13 @@ ul{
 	padding-left:30px;
 }
 
+.bodyLoad{
+	visibility:none;
+	overflow:hidden;
+	height:500px;
+	max-height:500px;
+}
+
 #loadOverlay{
 	position:absolute;
 	width: 100%;
@@ -26,6 +33,7 @@ ul{
 	left: 0;
 	z-index: 1000;
 	background-color: #fff;
+	visibility:visible;
 	
 }
 
