@@ -167,7 +167,6 @@ methods:
   AmLocal:
   newplayer:
   deleteplayer:
-  updateCamera:
   initialize:
   receiveChat:
   CreatePlane:
@@ -795,7 +794,7 @@ scripts:
         
         this.x_rot += this.rel_x;
         this.y_rot += this.rel_y;
-        this.updateCamera();
+        
         
       }
       
@@ -831,7 +830,7 @@ scripts:
        
        ////console.log(this.zoom);
         this.center = MATH.addVec3(this.center,MATH.scaleVec3(MATH.subVec3(worldmousepos2,worldmousepos),panfactor * this.zoom));
-        this.updateCamera();
+        
         
       }
       
@@ -850,14 +849,33 @@ scripts:
            
            this.center = MATH.addVec3(this.center,MATH.subVec3(this.navpoint,newintersectxy));
           
-         //  this.updateCamera();
+         
       }
       
       this.last_x = parms.clientX/window.screen.width;
       this.last_y = parms.clientY/window.screen.height;
     }
+    var tempvec = new THREE.Vector3(0,0,0);
+    var tside = [0,0,0];
+    var tfinaloffset = [0,0,0];
+    var tfinalpos = [0,0,0];
+    var XAXIS = [1,0,0];
+    var YAXIS = [0,1,0];
+    var ZAXIS = [0,0,1];
+    var toffset = [0,0,0];
+    var tstage2offset = [0,0,0];
+    var txmatrix = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    var tcrossmatrix = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    function TempVec3(arr)
+    {
+        tempvec.x = arr[0];
+        tempvec.y = arr[1];
+        tempvec.z = arr[2];
+        return  tempvec;
+    }
     this.updateCamera = function()
       {
+        
         if(!_dView.inDefaultCamera()) return;
         
         
@@ -871,29 +889,33 @@ scripts:
         
         if(this.cameramode != '3RDPerson' && this.cameramode != 'FirstPerson')
         {
-            if(this.x_rot == undefined) return;
-            var xmatrix = MATH.angleAxis(this.x_rot*10,[0,0,1]);
             
-            var offset = MATH.mulMat4Vec3(xmatrix,[1,0,0]);
-            offset = MATH.scaleVec3(offset,1/MATH.lengthVec3(offset));
-            var side = MATH.crossVec3([0,0,1],offset);
+            if(this.x_rot == undefined) return;
+            var xmatrix = MATH.angleAxis(this.x_rot*10,ZAXIS,txmatrix);
+            
+            var offset = MATH.mulMat4Vec3(xmatrix,XAXIS,toffset);
+            offset = Vec3.scale(offset,1/MATH.lengthVec3(offset),offset);
+            tside = Vec3.cross([0,0,1],offset,tside);
             
             if(this.y_rot < .479 ) this.y_rot = .479;
             if(this.y_rot > .783 && (this.cameramode != 'Free' && this.cameramode != 'Fly')) this.y_rot = .783;
             if(this.y_rot > .783 && (this.cameramode == 'Free' || this.cameramode == 'Fly')) this.y_rot = .783;
             
-            var crossmatrix = MATH.angleAxis(this.y_rot*10,side);
-            var stage2offset = MATH.mulMat4Vec3(crossmatrix,offset);
+            var crossmatrix = MATH.angleAxis(this.y_rot*10,tside,tcrossmatrix);
+            var stage2offset = MATH.mulMat4Vec3(crossmatrix,offset,tstage2offset);
             
-            stage2offset = MATH.scaleVec3(stage2offset,1/MATH.lengthVec3(stage2offset));
-            var finaloffset = MATH.scaleVec3(stage2offset,this.zoom);
+            stage2offset = Vec3.scale(stage2offset,1/MATH.lengthVec3(stage2offset),stage2offset);
+            tfinaloffset = Vec3.scale(stage2offset,this.zoom,tfinaloffset);
             if(this.center[2] < .05)
              this.center[2] = .05;
-            var finalpos = MATH.addVec3(finaloffset,this.center);
+            tfinalpos = Vec3.add(tfinaloffset,this.center,tfinalpos);
             
-            //this.camera.translation = finalpos;
-            findcamera().position = to3Vec(finalpos[0],finalpos[1],finalpos[2]);
-            findcamera().lookAt(to3Vec(this.center));
+           
+            findcamera().position.x = tfinalpos[0];
+            findcamera().position.y = tfinalpos[1];
+            findcamera().position.z = tfinalpos[2];
+            findcamera().lookAt(TempVec3(this.center));
+            
             findcamera().far = 5000;
             findcamera().near = .1;
         }else if(this.cameramode == 'FirstPerson')
@@ -919,8 +941,10 @@ scripts:
             var finalpos = MATH.addVec3(finaloffset,this.center);
             
             //this.camera.translation = finalpos;
-            findcamera().position = to3Vec(finalpos[0],finalpos[1],finalpos[2]);
-            findcamera().lookAt(to3Vec(this.center));
+            findcamera().position.x = finalpos[0];
+            findcamera().position.y = finalpos[1];
+            findcamera().position.z = finalpos[2];
+            findcamera().lookAt(TempVec3(this.center));
             findcamera().far = 5000;
             findcamera().near = .3;
             findcamera().updateProjectionMatrix(true);
@@ -947,8 +971,10 @@ scripts:
             offset = MATH.scaleVec3(offset,finaldist);
             
             var finalpos = MATH.addVec3(offset,start);
-            findcamera().position = to3Vec(finalpos[0],finalpos[1],finalpos[2]);
-            findcamera().lookAt(to3Vec(this.center));
+            findcamera().position.x = finalpos[0];
+            findcamera().position.y = finalpos[1];
+            findcamera().position.z = finalpos[2];
+            findcamera().lookAt(TempVec3(this.center));
             
         }
         this.callUpdateCallbacks();
@@ -1093,7 +1119,7 @@ scripts:
             this.y_rot =.6245;
             this.cameramode = 'FirstPerson';
         }
-        this.updateCamera();
+        
     }
     this.receiveChat = function(e)
     {
@@ -1195,8 +1221,6 @@ scripts:
     this.prerender = function()
     {
         
-        
-        
         if(this.cameramode == 'Fly')
         { 
             var dist = window.deltaTime/(this.flyspeed * 30.0);
@@ -1220,6 +1244,7 @@ scripts:
         
         this.updateCamera();
     }
+    var shadowLSOffset = new THREE.Vector3(0,0,-3);
     this.postrender = function(e,viewprojection, wh, ww)
     {
         //set the skybox position
@@ -1229,9 +1254,7 @@ scripts:
         this.skycube.position.z = findcamera().matrixWorld.elements[14];
         this.skycube.updateMatrixWorld();
       var div = this.nametag;
-      var pos = [0,0,0];
-      pos = [pos[0],pos[1],pos[2],1];
-         
+      var pos = [0,0,0,1];
       
       
       var screen = MATH.mulMat4Vec4(viewprojection,pos);
@@ -1275,7 +1298,7 @@ scripts:
       {
        
       
-       var campos = findcamera().localToWorld(new THREE.Vector3(0,0,-3));
+       var campos = findcamera().localToWorld(shadowLSOffset);
        
        this.sun.shadowCamera.updateMatrixWorld(true)
         var lm = this.sun.shadowCamera.matrixWorld.clone();

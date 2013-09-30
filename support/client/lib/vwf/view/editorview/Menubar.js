@@ -257,6 +257,14 @@ define(
 		{
 			_Editor.CreateBehavior('hoverlabel', _UserManager.GetCurrentUserName());
 		});
+		$('#MenuCreateBehaviorLookat').click(function (e)
+		{
+			_Editor.CreateBehavior('lookat', _UserManager.GetCurrentUserName());
+		});
+		$('#MenuCreateBehaviorSeek').click(function (e)
+		{
+			_Editor.CreateBehavior('seek', _UserManager.GetCurrentUserName());
+		});
 		$('#MenuCreateBehaviorPathFollow').click(function (e)
 		{
 			_Editor.CreateBehavior('pathfollow', _UserManager.GetCurrentUserName());
@@ -431,17 +439,27 @@ define(
 				focusID =  _UserManager.GetAvatarForClientID(vwf.moniker()) &&  _UserManager.GetAvatarForClientID(vwf.moniker()).id;
 			if (focusID)
 			{
-				
+					
 					var t = _Editor.GetMoveGizmo().parent.matrixWorld.getPosition();
 					var gizpos = [t.x, t.y, t.z];
 					var box = _Editor.findviewnode(focusID).getBoundingBox();
-					var dist = MATH.distanceVec3([box.max.x, box.max.y, box.max.z], [box.min.x, box.min.y, box.min.z]);
+					
+					var dist = 1;
+					if(box)
+						dist = MATH.distanceVec3([box.max.x, box.max.y, box.max.z], [box.min.x, box.min.y, box.min.z]);
+					if(dist == Infinity)
+						dist = 1;
 					vwf.models[0].model.nodes['index-vwf'].orbitPoint(gizpos);
 					vwf.models[0].model.nodes['index-vwf'].zoom = dist * 2;
 					vwf.models[0].model.nodes['index-vwf'].updateCamera();
 				
 			}
 		}
+		
+		$('#MenuActivateCamera').click(function (e)
+		{
+			_dView.chooseCamera();
+		});
 		$('#MenuFocusSelected').click(function (e)
 		{
 			_dView.setCameraDefault();
@@ -575,6 +593,12 @@ define(
 			{
 				_Notifier.alert('First person mode is not available when you are not logged in.');
 			}
+		});
+		
+		
+		$('#MenuCreateCameraPerspective').click(function (e)
+		{
+			_Editor.CreateCamera(_Editor.GetInsertPoint(),document.PlayerNumber);
 		});
 		$('#MenuCreateParticlesBasic').click(function (e)
 		{

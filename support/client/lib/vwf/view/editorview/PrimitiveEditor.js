@@ -416,7 +416,7 @@ define(function ()
 				editordatanames.push(i);
 			}
 			editordatanames.sort();
-			section = '<h3 class="modifiersection" ><a href="#"><div style="font-weight:bold;display:inline">' + node.properties.type + ": </div>" + node.properties.DisplayName + '</a></h3>' + '<div class="modifiersection" id="basicSettings' + nodeid + '">' + '</div>';
+			section = '<h3 class="modifiersection" ><a href="#"><div style="font-weight:bold;display:inline">' + vwf.getProperty(node.id,'type') + ": </div>" + node.properties.DisplayName + '</a></h3>' + '<div class="modifiersection" id="basicSettings' + nodeid + '">' + '</div>';
 			$("#accordion").append(section);
 			for (var j = 0; j < editordatanames.length; j++)
 			{

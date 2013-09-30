@@ -3,6 +3,9 @@
 		{
 
 			this.inherits = ['vwf/model/threejs/transformable.js'];
+			this.near = 1;
+			this.far = 1000;
+			this.fov = 45;
 			this.initializingNode = function()
 			{
 				this.near = 1;
@@ -17,6 +20,8 @@
 					return this.far;
 				if(propertyName == 'fov')
 					return this.fov;
+				if(propertyName == 'type')
+					return 'Camera';	
 			}
 			this.settingProperty = function(propertyName,propertyValue)
 			{
@@ -25,6 +30,7 @@
 					this.near = propertyValue;
 					this.rootnode.near = this.near;
 					this.rootnode.updateProjectionMatrix();
+					this.rootnode.position.y = -(this.near +1);
 				}
 				if(propertyName == 'far')
 				{
@@ -45,6 +51,8 @@
 				return this.rootnode;
 			}
 			this.rootnode = new THREE.PerspectiveCamera();
+			this.rootnode.rotation.x = Math.PI/2;
+			this.rootnode.position.y = -this.near -1;
 			this.rootnode.fov = 45;
 			this.rootnode.far = 1000;
 			this.rootnode.near = 1;

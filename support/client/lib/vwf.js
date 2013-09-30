@@ -780,27 +780,26 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.tick = function() {
 			
-            // Call ticking() on each model.
+		// Call ticking() on each model.
 
-			
 		
-            this.models.forEach( function( model ) {
-                model.ticking && model.ticking( this.now ); // TODO: maintain a list of tickable models and only call those
-            }, this );
-			
-            // Call ticked() on each view.
+		for(var i =0; i < this.models.length; i ++)
+		{	
+		  this.models[i].ticking && this.models[i].ticking( this.now );
+		}	
+		   
 
-			 // Call tick() on each tickable node.
-
-            this.tickable.nodeIDs.forEach( function( nodeID ) {
-                this.callMethod( nodeID, "tick", [ this.now ] );
-            }, this ); 
-			
-            this.views.forEach( function( view ) {
-                view.ticked && view.ticked( this.now ); // TODO: maintain a list of tickable views and only call those
-            }, this );
-
-           
+		 // Call tick() on each tickable node.
+		
+		for(var i =0; i < this.tickable.nodeIDs.length; i ++)
+		{	
+		  this.callMethod( this.tickable.nodeIDs[i], "tick", [ this.now ] );
+		}
+		
+		for(var i =0; i < this.views.length; i ++)
+		{	
+		  this.views[i].ticked && this.views[i].ticked( this.now );
+		}
 
         };
 
@@ -2398,14 +2397,16 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             // without causing infinite recursion.
 
             var entrants = this.getProperty.entrants;
-
             var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
             var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
 
             // Call gettingProperty() on each model. The first model to return a non-undefined value
             // dictates the return value.
 
-            this.models.some( function( model, index ) {
+	    for(var index = 0; index < this.models.length; index++)
+	    {
+		var model = this.models[index];
+	    
 
                 // Skip models up through the one making the most recent call here (if any).
 
@@ -2436,10 +2437,11 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                     // Exit from the this.models.some() iterator once we have a return value.
 
-                    return value !== undefined;
+                    if( value !== undefined)
+			break;
                 }
 
-            } );
+            } ;
 
             if ( entry.index !== undefined ) {
 
@@ -2467,9 +2469,10 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                 // Call gotProperty() on each view.
 
-                this.views.forEach( function( view ) {
-                    view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
-                } );
+		for(var i = 0; i < this.views.length; i++)
+		{
+			this.views[i].gotProperty && this.views[i].gotProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
+		}
 
             }
 
@@ -2545,16 +2548,21 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             var methodValue = undefined;
 
-            this.models.forEach( function( model ) {
-                var value = model.callingMethod && model.callingMethod( nodeID, methodName, methodParameters );
-                methodValue = value !== undefined ? value : methodValue;
-            } );
+	    
+	    for(var i =0; i < this.models.length; i ++)
+	    {	
+		  var value = this.models[i].callingMethod && this.models[i].callingMethod( nodeID, methodName, methodParameters );
+		  methodValue = value !== undefined ? value : methodValue;
+	    }	
+	    
+           
 
             // Call calledMethod() on each view.
-
-            this.views.forEach( function( view ) {
-                view.calledMethod && view.calledMethod( nodeID, methodName, methodParameters );  // TODO: should also have result
-            } );
+	    for(var i =0; i < this.views.length; i ++)
+	    {
+		this.views[i].calledMethod && this.views[i].calledMethod( nodeID, methodName, methodParameters );
+	    }
+            
 
             this.logger.groupEnd();
 
