@@ -1411,6 +1411,22 @@ define(function ()
 			};
 			this.createChild('index-vwf', GUID(), proto, null, null);
 		}
+		this.CreateCamera = function(translation, owner, id)
+		{
+			var CamProto = {
+				extends: 'SandboxCamera' + '.vwf',
+				properties: {}
+			};
+			CamProto.type = 'subDriver/threejs';
+			CamProto.source = 'vwf/model/threejs/' + 'camera' + '.js';
+		
+			CamProto.properties.translation = translation;
+			CamProto.properties.scale = [1, 1, 1];
+			CamProto.properties.rotation = [0, 0, 1, 0];
+			CamProto.properties.owner = owner;
+			CamProto.properties.DisplayName = self.GetUniqueName('Camera');
+			this.createChild('index-vwf', GUID(), CamProto, null, null);
+		};
 		this.CreatePrim = function (type, translation, size, texture, owner, id)
 		{
 			translation[0] = this.SnapTo(translation[0], MoveSnap);
@@ -2586,7 +2602,7 @@ define(function ()
 		{
 			try
 			{
-				return vwf.views[0].state.scenes["index-vwf"].camera.threeJScameras[vwf.views[0].state.scenes["index-vwf"].camera.defaultCamID];
+				return _dView.getCamera();
 			}
 			catch (e)
 			{

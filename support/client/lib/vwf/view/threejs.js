@@ -142,6 +142,7 @@ var stats;
 			
 			return nqm;
 		},
+		
 		setInterpolatedTransforms: function(deltaTime)
 		{
 			
@@ -250,7 +251,8 @@ var stats;
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childURI, childName, callback /* ( ready ) */) {
             
-            this.nodes[childID] = {id:childID};
+			if(childID != 'http-vwf-example-com-camera-vwf-camera')
+				this.nodes[childID] = {id:childID};
 			
             //the created node is a scene, and has already been added to the state by the model.
             //how/when does the model set the state object? 
@@ -293,7 +295,42 @@ var stats;
         // TODO: deletedProperty
 
         // -- satProperty ------------------------------------------------------------------------------
-
+		getCamera: function()
+		{
+			if( !this.activeCamera)
+				this.setCamera();
+			return this.activeCamera;	
+		},
+		setCamera: function(camID)
+		{
+			this.cameraID = camID;
+			
+			var cam = this.state.scenes['index-vwf'].camera.threeJScameras[this.state.scenes['index-vwf'].camera.ID];
+			
+			if(this.cameraID)
+			{
+				clearCameraModeIcons();
+				if(this.state.nodes[this.cameraID])
+				if(this.state.nodes[this.cameraID].getRoot && this.state.nodes[this.cameraID].getRoot())
+				{
+					cam = this.state.nodes[this.cameraID].getRoot();
+				}
+			}
+			
+			var aspect = $('#index-vwf').width()/$('#index-vwf').height();
+			cam.aspect = aspect;
+			cam.updateProjectionMatrix();
+			this.activeCamera = cam;
+		
+		},
+		inDefaultCamera: function()
+		{
+			return this.cameraID == null || this.cameraID =='' || this.cameraID ==undefined;
+		},
+		setCameraDefault: function()
+		{
+			this.setCamera();
+		},
         satProperty: function (nodeID, propertyName, propertyValue) {
         
             //console.log([nodeID,propertyName,propertyValue]);
@@ -533,7 +570,9 @@ var stats;
 			if(self.interpolateTransforms)
 				self.setInterpolatedTransforms(timepassed);
 				
-			var cam = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
+				
+			var cam = self.getCamera();
+			
 			cam.matrixWorldInverse.getInverse( cam.matrixWorld );
 			var _viewProjectionMatrix = new THREE.Matrix4();
 			_viewProjectionMatrix.multiplyMatrices( cam.projectionMatrix, cam.matrixWorldInverse );
@@ -569,18 +608,14 @@ var stats;
 			{
 				$(document).trigger('glyphRender',[vp,wh,ww]);
 			}
-			var camera = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
-			var pos = camera.localToWorld(new THREE.Vector3(-.4,.275,-1.0))
-			sceneNode.axes.position = pos;
-			sceneNode.axes.scale = new THREE.Vector3(.005,.005,.005);
-			sceneNode.axes.updateMatrix();
+			
             if(sceneNode.frameCount > 5)
             {
                 
                 sceneNode.frameCount = 0;
             
               
-                var newPick = ThreeJSPick.call(self,sceneNode);
+                var newPick = ThreeJSPick.call(self,sceneNode,cam);
                 
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
                 
@@ -611,7 +646,7 @@ var stats;
                 
             }
 			renderer.clear();
-			var cam = sceneNode.camera.threeJScameras[sceneNode.camera.ID]
+			
 			var far = cam.far;
 			var near = cam.near;
 			
@@ -701,12 +736,9 @@ var stats;
                     mycanvas.width = self.width;
                     sceneNode.renderer.setViewport(0,0,window.innerWidth,window.innerHeight)
                     sceneNode.renderer.setSize($('#index-vwf').width(),$('#index-vwf').height());
-					view.state.cameraInUse.aspect =  mycanvas.width / mycanvas.height;
-					view.state.cameraInUse.updateProjectionMatrix()
-                    //var cam = self.state.cameraInUse;
-                    //if ( cam ) {
-                    //    cam.aspect = mycanvas.width / mycanvas.height;
-                    //}
+					self.getCamera().aspect =  mycanvas.width / mycanvas.height;
+					self.getCamera().updateProjectionMatrix()
+                   
                 }
             }
 
@@ -869,7 +901,7 @@ var stats;
 
 
 
-            var camera = sceneView.state.cameraInUse;
+            var camera = self.getCamera();//sceneView.state.cameraInUse;
             var worldCamPos, worldCamTrans, camInverse;
             if ( camera ) { 
                 worldCamTrans = new THREE.Vector3();
@@ -898,7 +930,7 @@ var stats;
             }
 
             if ( sceneView && sceneView.state.nodes[ pointerPickID ] ) {
-                var camera = sceneView.state.cameraInUse;
+                var camera = sceneView.getCamera();
                 var childID = pointerPickID;
                 var child = sceneView.state.nodes[ childID ];
                 var parentID = child.parentID;
@@ -1307,12 +1339,12 @@ var stats;
     function mouseYPos(e) {
         return e.clientY - e.currentTarget.offsetTop + window.scrollY;
     }
-    function ThreeJSPick(sceneNode)
+    function ThreeJSPick(sceneNode,cam)
     {
         if(!this.lastEventData) return;
         
         
-        var threeCam = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
+        var threeCam = cam;//sceneNode.camera.threeJScameras[sceneNode.camera.ID];
         if(!this.ray) this.ray = new THREE.Ray();
         if(!this.projector) this.projector = new THREE.Projector();
         
@@ -1327,7 +1359,7 @@ var stats;
         this.projector.unprojectVector(directionVector, threeCam);
         var pos = new THREE.Vector3();
 		var pos2 = new THREE.Vector3();
-		pos2.getPositionFromMatrix(threeCam.matrix);
+		pos2.getPositionFromMatrix(threeCam.matrixWorld);
         pos.copy(pos2);
         directionVector.sub(pos);
         directionVector.normalize();
