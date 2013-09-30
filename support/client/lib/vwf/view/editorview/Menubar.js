@@ -457,12 +457,10 @@ define(
 		}
 		$('#MenuFocusSelected').click(function (e)
 		{
-			_dView.setCameraDefault();
 			focusSelected();
 		});
 		$('#MenuCameraOrbit').click(function (e)
 		{
-			_dView.setCameraDefault();
 			clearCameraModeIcons();
 			$('#MenuCameraOrbiticon').css('background', '#9999FF');
 			var campos = [_Editor.findcamera().position.x, _Editor.findcamera().position.y, _Editor.findcamera().position.z];
@@ -480,7 +478,6 @@ define(
 		
 		$('#MenuCameraNavigate').click(function (e)
 		{
-			_dView.setCameraDefault();
 			clearCameraModeIcons();
 			$('#MenuCameraNavigateicon').css('background', '#9999FF');
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Orbit');
@@ -490,7 +487,7 @@ define(
 		
 		$('#MenuCameraShare').click(function (e)
 		{
-		    _dView.setCameraDefault();
+		    
 		    var broadcasting = vwf.callMethod('index-vwf','getBroadcasting',[]);
 		    if(!broadcasting)
 		    {
@@ -518,7 +515,6 @@ define(
 		
 		$('#MenuCameraFly').click(function (e)
 		{
-			_dView.setCameraDefault();
 			clearCameraModeIcons();
 			$('#MenuCameraNavigateicon').css('background', '#9999FF');
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Fly');
@@ -527,13 +523,11 @@ define(
 		
 		$('#MenuCameraNone').click(function (e)
 		{
-			_dView.setCameraDefault();
 			clearCameraModeIcons();
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('None');
 		});
 		$('#MenuCameraFree').click(function (e)
 		{
-			_dView.setCameraDefault();
 			clearCameraModeIcons();
 			$('#MenuCameraFreeicon').css('background', '#9999FF');
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Orbit');
@@ -578,7 +572,6 @@ define(
 			
 			if (_UserManager.GetCurrentUserName())
 			{
-				_dView.setCameraDefault();
 				clearCameraModeIcons();
 				$('#MenuCamera3RDPersonicon').css('background', '#9999FF');
 				vwf.models[0].model.nodes['index-vwf'].followObject(vwf.models[0].model.nodes[_UserManager.GetCurrentUserID()]);

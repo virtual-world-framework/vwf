@@ -713,7 +713,6 @@ scripts:
     }
     this.localpointerDown = function( parms, pickInfo ){
      
-      if(!_dView.inDefaultCamera()) return;
       parms.preventDefault();
       if(parms.which == 1) this.leftdown = true;
       if(parms.which == 2) this.middledown = true;
@@ -753,7 +752,6 @@ scripts:
     }
     this.localpointerUp = function( parms, pickInfo ){
       
-      if(!_dView.inDefaultCamera()) return;
       parms.preventDefault();
       if(parms.which == 1) this.leftdown = false;
       if(parms.which == 3) this.rightdown = false;
@@ -766,7 +764,7 @@ scripts:
     }
     this.localpointerMove = function( parms, pickInfo ){
 
-      if(!_dView.inDefaultCamera()) return;
+      
       if(document.AxisSelected != null)  
       if(document.AxisSelected != -1)
         return;
@@ -858,7 +856,7 @@ scripts:
     }
     this.updateCamera = function()
       {
-        if(!_dView.inDefaultCamera()) return;
+        
         
         
         if(this.objectFollowed != null)    
@@ -962,7 +960,7 @@ scripts:
       }
       function findcamera()
       {
-             return _Editor.findcamera();
+             return vwf.views[0].state.scenes["index-vwf"].camera.threeJScameras[vwf.views[0].state.scenes["index-vwf"].camera.defaultCamID];
       }
       function matcpy(mat)
       {
@@ -1224,9 +1222,7 @@ scripts:
     {
         //set the skybox position
       
-        this.skycube.position.x = findcamera().matrixWorld.elements[12];
-        this.skycube.position.y = findcamera().matrixWorld.elements[13];
-        this.skycube.position.z = findcamera().matrixWorld.elements[14];
+        this.skycube.position = findcamera().position;
         this.skycube.updateMatrixWorld();
       var div = this.nametag;
       var pos = [0,0,0];
