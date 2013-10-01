@@ -1,2 +1,0 @@
-This version of command-center removes problematic diffuse map references so the app can be tested using Three.js.  
-It can be removed once we resolve the uv mapping issue and/or get a VCTE artwork drop.  See Redmine tasks #2326 & #2467.
