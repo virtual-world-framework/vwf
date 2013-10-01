@@ -191,8 +191,10 @@ define(function ()
 		this.scalePropertyName = 'scale';
 		$(document.body).append('<div id="statusbar" class="statusbar" />');
 		$('#statusbar').css('top', (document.height - 25) + 'px');
-		$('#statusbar').append('<div id="SceneName" class="statusbarElement" />');
-		$('#SceneName').text('Not Saved');
+		$('#statusbar').append('<div id="SceneSaved" class="statusbarElement" />');
+		$('#SceneSaved').text('Not Saved');
+		$('#statusbar').append('<div id="StatusSelectedName" style="color:lightblue" class="statusbarElement" />');
+		$('#StatusSelectedName').text('No Selection');
 		$('#statusbar').append('<div id="StatusSelectedID" class="statusbarElement" />');
 		$('#StatusSelectedID').text('No Selection');
 		$('#statusbar').append('<div id="StatusPickMode" class="statusbarElement" />');
@@ -237,6 +239,7 @@ define(function ()
 				var ray = this.GetWorldPickRay(e);
 				var dxy = this.intersectLinePlaneTEST(ray, campos, gizpos, WorldZ);
 				oldintersectxy = dxy; //MATH.addVec3(campos,MATH.scaleVec3(ray,dxy));
+				
 				var dxz = this.intersectLinePlaneTEST(ray, campos, gizpos, WorldY);
 				oldintersectxz = dxz; //MATH.addVec3(campos,MATH.scaleVec3(ray,dxz));
 				var dyz = this.intersectLinePlaneTEST(ray, campos, gizpos, WorldX);
@@ -298,13 +301,14 @@ define(function ()
 		}.bind(this);
 		this.GetUniqueName = function (newname)
 		{
+			
 			if (!newname) newname = 'Object';
 			newname = newname.replace(/[0-9]*$/g, "");
 			var nodes = vwf.models[3].model.objects;
 			var count = 1;
 			for (var i in nodes)
 			{
-				var thisname = nodes[i].properties.DisplayName || '';
+				var thisname = vwf.getProperty(nodes[i].id,'DisplayName') || '';
 				thisname = thisname.replace(/[0-9]*$/g, "");
 				if (thisname == newname) count++;
 			}
@@ -457,6 +461,9 @@ define(function ()
 							if (vwf.views[0].lastPickId)
 							{
 								this.SelectObject(vwf.getNode(vwf.views[0].lastPickId), this.PickMod);
+							}else
+							{
+								this.SelectObject(null);
 							}
 						}
 						else
@@ -612,6 +619,7 @@ define(function ()
 				{
 					vwf_view.kernel.deleteNode(SelectedVWFNodes[s].id);
 					$('#StatusSelectedID').text('No Selection');
+					$('#StatusSelectedName').text('No Selection');
 					$('#StatusPickMode').text('Pick: None');
 					
 				}
@@ -2014,6 +2022,8 @@ define(function ()
 						for (var j = 0; j < SelectedVWFNodes.length; j++) if (SelectedVWFNodes[j] && SelectedVWFNodes[j].id == VWFNode[i].id) index = j;
 						SelectedVWFNodes.splice(index, 1);
 					}
+					
+					
 			}
 			if (SelectedVWFNodes[0]) this.SelectedVWFID = SelectedVWFNodes[0].id;
 			else this.SelectedVWFID = null;
@@ -2026,6 +2036,7 @@ define(function ()
 			this.backupTransfroms = [];
 			if (SelectedVWFNodes[0])
 			{
+				
 				for (var s = 0; s < SelectedVWFNodes.length; s++)
 				{
 					lastscale[s] = this.getScaleCallback(SelectedVWFNodes[s].id);
@@ -2054,6 +2065,21 @@ define(function ()
 					SelectionBounds = [];
 				}
 			}
+			
+			$('#StatusSelectedID').text('No Selection');
+					$('#StatusSelectedName').text('No Selection');
+					if(SelectedVWFNodes.length > 0)
+					{
+						if(SelectedVWFNodes.length == 1)
+							$('#StatusSelectedID').text(SelectedVWFNodes[0].id);
+						else
+							$('#StatusSelectedID').text(SelectedVWFNodes.length + ' objects');
+						
+						$('#StatusSelectedName').text(vwf.getProperty(SelectedVWFNodes[0].id,'DisplayName'));
+						for(var i = 1; i < 	SelectedVWFNodes.length; i++)
+							$('#StatusSelectedName').text($('#StatusSelectedName').text() + ', ' + vwf.getProperty(SelectedVWFNodes[i].id,'DisplayName'));
+					}
+					
 		}.bind(this);
 		this.hideMoveGizmo = function ()
 		{
@@ -2076,7 +2102,7 @@ define(function ()
 			self.updateGizmoSize();
 			self.updateGizmoOrientation(false);
 			self.updateBounds();
-			$('#StatusSelectedID').text(SelectedVWFNodes[0].id);
+			
 		}.bind(this);
 		var tempcammatinverse = new THREE.Matrix4();
 		var tgizpos2 = [0,0,0];
@@ -2088,12 +2114,13 @@ define(function ()
 		{
 			
 			tgizpos[0] = MoveGizmo.parent.matrixWorld.elements[12];
-			tgizpos[1] = MoveGizmo.parent.matrixWorld.elements[12];
-			tgizpos[2] = MoveGizmo.parent.matrixWorld.elements[12];
+			tgizpos[1] = MoveGizmo.parent.matrixWorld.elements[13];
+			tgizpos[2] = MoveGizmo.parent.matrixWorld.elements[14];
 			var campos = this.getCameraPosition();
 			var dist = MATH.lengthVec3(Vec3.subtract(tgizpos, campos,tempvec1));
 			var cam = this.findcamera();
 			cam.updateMatrixWorld(true);
+			var fovadj = cam.fov/75;
 			cam.matrixWorldInverse.getInverse(cam.matrixWorld);
 			tgizpos2 = MATH.mulMat4Vec3(MATH.transposeMat4(cam.matrixWorldInverse.elements,transposeTemp), tgizpos,tgizpos2);
 			dist = -tgizpos2[2] / 65;
@@ -2102,7 +2129,7 @@ define(function ()
 			var windowXadj = 1600.0 / $('#index-vwf').width();
 			var windowYadj = 1200.0 / $('#index-vwf').height();
 			var winadj = Math.max(windowXadj, windowYadj);
-			MoveGizmo.matrix.scale(new THREE.Vector3(dist * winadj, dist * winadj, dist * winadj));
+			MoveGizmo.matrix.scale(new THREE.Vector3(dist * winadj * fovadj, dist * winadj * fovadj, dist * winadj * fovadj));
 			
 			tempcammatinverse.getInverse(MoveGizmo.parent.matrixWorld);
 			tcamposGizSpace = MATH.mulMat4Vec3(MATH.transposeMat4(tempcammatinverse.elements,transposeTemp), campos,tcamposGizSpace);

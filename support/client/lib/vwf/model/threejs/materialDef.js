@@ -297,9 +297,12 @@
 			//get the material cache a chance to decrement the ref counter for the materails used by this object
 			this.deletingNode = function()
 			{
+				//dont remove the materials, as the actual view node might still exist
+				if(this.initializedFromAsset) return;
 				
+				//else, this object is deleting for real, and we can remvoe the materials from the cache.
 				var list = [];
-					
+			
 				this.GetAllLeafMeshes(this.getRoot(),list);
 				for(var i =0; i < list.length; i++)
 				{

@@ -14,7 +14,7 @@
 // the License.
 
 define( [ "module", "vwf/view" ], function( module, view ) {
-var stats;
+	var stats;
     return view.load( module, {
 
 		
@@ -616,8 +616,9 @@ var stats;
 	var vpargs = [];
         function renderScene(time) {
 			
+			
             requestAnimFrame( renderScene );
-	    
+			
 			if(self.paused === true)
 				return;
 			self.inFrame = true;	
@@ -659,6 +660,7 @@ var stats;
 			vpargs[0] = vp;
 			vpargs[1] = wh;
 			vpargs[2] = ww;
+			
 			
 			$(document).trigger('prerender',vpargs);
 			
@@ -719,6 +721,7 @@ var stats;
 			
 			
 			renderer.render(backgroundScene,cam);
+			
 			renderer.clear(false,true,false);
 			
 			//use this for drawing really really far. Not usually necessary
@@ -793,7 +796,8 @@ var stats;
 			
 			
 			sceneNode.lastTime = now;
-			stats.update();
+			if(stats.domElement.style.display == 'block')
+				stats.update();
 			
 			if(self.interpolateTransforms)
 				self.restoreTransforms();

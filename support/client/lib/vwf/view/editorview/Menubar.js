@@ -29,6 +29,11 @@ define(
 			if ($('#MenuLogIn').attr('disabled') == 'disabled') return;
 			_UserManager.showLogin();
 		});
+		$('#MenuSaveNow').click(function (e)
+		{
+			_DataManager.saveToServer();
+		});
+		
 		$('#MenuLogOut').click(function (e)
 		{
 			if ($('#MenuLogOut').attr('disabled') == 'disabled') return;

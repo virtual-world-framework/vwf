@@ -219,11 +219,25 @@ define(function ()
 							{};
 							document.location.reload(true);
 						}
-					
-					
+						
+						$('#SceneSaved').text('Saved ' + (new Date()).toLocaleTimeString());
+						$('#SceneSaved').css('color','lightblue');
+						$('#SceneSaved').animate({'color':'#808080'},2000);
+					},
+					error: function(e)
+					{
+						if (xhr.status != 200)
+						{
+							alert('Save failed! Reloading');
+							window.onunload = function (e)
+							{};
+							window.onbeforeunload = function (e)
+							{};
+							document.location.reload(true);
+						}
 					},
 					async: !sync,
-					dataType: "json"
+					dataType: "text"
 				});
 			
 			

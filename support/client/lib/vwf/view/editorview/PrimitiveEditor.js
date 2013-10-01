@@ -55,7 +55,7 @@ define(function ()
 			}
 		});
 		$('#sidepanel').append("<div id='PrimitiveEditor'>" 
-		+ "<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Object Properties</span></div>" +
+		+ "<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span id='primeditortitletext' class='ui-dialog-title' id='ui-dialog-title-Players'>Object Properties</span></div>" +
 		'<div id="accordion" style="height:100%;overflow:hidden">' +
 		'<h3><a href="#">Flags</a></h3>' +
 		'<div>' +
@@ -249,8 +249,15 @@ define(function ()
 					node = vwf.getNode(node.id);
 					node.properties = vwf.getProperties(node.id);
 					if (!node.properties) return;
+					
+					
+					
 					$('#ui-dialog-title-ObjectProperties').text(vwf.getProperty(node.id, 'DisplayName') + " Properties");
-					$('#dispName').val(vwf.getProperty(node.id, 'DisplayName'));
+					$('#dispName').val(vwf.getProperty(node.id, 'DisplayName') || node.id);
+					
+					
+					$('#primeditortitletext').text($('#dispName').val() + ' Properties')
+					
 					if ($('#dispName').val() == "")
 					{
 						$('#dispName').val(node.name);

@@ -83,6 +83,7 @@ scripts:
       $(newdiv).mouseup(function(e){$('#index-vwf').focus();$('#index-vwf').trigger(e)});
       $(newdiv).mousemove(function(e){$('#index-vwf').trigger(e)});
       $(newdiv).click(function(e){$('#index-vwf').focus(); if(_Editor.GetSelectMode() != "None") _Editor.SelectObjectPublic(this.id)}.bind(this));
+      $(newdiv).dblclick(function(e){_dView.setCamera(this.id)}.bind(this));
       this.nametag = newdiv;
                  
     }

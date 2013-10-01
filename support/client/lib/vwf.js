@@ -2299,10 +2299,11 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             // has performed the set and dictates the return value. The property is considered set
             // after each model has run.
 
-            this.models.some( function( model, index ) {
-
+          
+		   for(var index = 0; index < this.models.length; index++)
+			{
                 // Skip models up through the one making the most recent call here (if any).
-
+				var model = this.models[index];
                 if ( entry.index === undefined || index > entry.index ) {
 
                     // Record the active model number.
@@ -2339,10 +2340,11 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                     // has been set. Don't exit early if we are initializing since every model needs
                     // the opportunity to register the property.
 
-                    return ! initializing && value !== undefined;  // TODO: this stops after p: { set: "this.p = value" } or p: { set: "return value" }, but should it also stop on p: { set: "this.q = value" }?
+                    if( ! initializing && value !== undefined)  // TODO: this stops after p: { set: "this.p = value" } or p: { set: "return value" }, but should it also stop on p: { set: "this.q = value" }?
+						break;
                 }
 
-            } );
+            } 
 
             if ( entry.index !== undefined ) {
 
@@ -2362,13 +2364,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 // Call satProperty() on each view. The view is being notified that a property has
                 // been set.  TODO: only want to call when actually set and with final value
 
-                this.views.forEach( function( view ) {
+                
+				for(var i=0; i < this.views.length; i++)
+				{
                     if ( initializing ) {
-                        view.initializedProperty && view.initializedProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
+                        this.views[i].initializedProperty && this.views[i].initializedProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
                     } else {
-                        view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
+                        this.views[i].satProperty && this.views[i].satProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
                     }
-                } );
+                } 
 
             }
 
