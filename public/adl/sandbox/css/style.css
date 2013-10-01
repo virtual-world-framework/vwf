@@ -19,7 +19,7 @@ ul{
 }
 
 .bodyLoad{
-	visibility:none;
+	visibility:invisible;
 	overflow:hidden;
 	height:500px;
 	max-height:500px;
@@ -32,7 +32,7 @@ ul{
 	top: 0;
 	left: 0;
 	z-index: 1000;
-	background-color: #fff;
+	background-color: #eee;
 	visibility:visible;
 	
 }
@@ -221,8 +221,10 @@ text-align:left;
 	text-align: right;
 	line-height: 30px;
 	border-radius: 2px;
+	border: 1px solid #444;
 	border: 1px solid rgba(160, 160, 160, 0.2);
 	padding: 6px;
+	background: #333;
 	background: rgba(15, 15, 15, 0.25);
 }
 
