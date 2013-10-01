@@ -1,7 +1,4 @@
 (function(){
-
-
-
 		function MaterialCache()
 		{
 			this.materials = {};
@@ -12,9 +9,9 @@
 					return this.materials[id];
 				else
 				{
-					this.materials[id] = new THREE.MeshPhongMaterial();
+					
 					//this.materials[id].morphTargets  = true;
-					this.setMaterialByDef(this.materials[id],def);
+					this.materials[id] =  this.setMaterialByDef(this.materials[id],def);
 					return this.materials[id];				
 					
 				}
@@ -46,7 +43,68 @@
 			}
 			this.setMaterialByDef = function(currentmat,value)
 			{
+				
+				if(!value.type)
+					value.type = 'phong';
+				if(value.type == 'phong')	
+					return this.setMaterialDefPhong(currentmat,value);
+				if(value.type == 'diffuse')	
+				{
+						return this.setMaterialDefDiffuse(currentmat,value)
+				}
+			}
+			this.setMaterialDefDiffuse = function(currentmat,value)
+			{
+				
+				if(!currentmat)
+				{
+					
+					//startColor:{type: "v4", value:new THREE.Vector4(1,1,1,1)},
+					currentmat = new THREE.ShaderMaterial({
+						uniforms: {
+							color:{type: "v4", value:new THREE.Vector4(1,1,1,1)},
+							texture1:   { type: "t", value: THREE.ImageUtils.loadTexture( "textures/sprites/ball.png" ) },
+							texture2:   { type: "t", value: THREE.ImageUtils.loadTexture( "textures/sprites/ball.png" ) },
+						},
+						attributes: {},
+						vertexShader: 
+						"varying vec2 tc;"+
+						"void main() {    "+
+						"    gl_Position = modelViewMatrix * vec4( position, 1.0 );\n"+
+						"    gl_Position = projectionMatrix * gl_Position;\n"+
+						"    tc = uv;"+
+						"} ",
+						fragmentShader: "uniform vec4 color; "+
+						"uniform sampler2D texture1;"+
+						"uniform sampler2D texture2;"+
+						"varying vec2 tc;"+
+						"void main() { "+
+						"vec4 color1 = texture2D(texture1,tc);"+
+						"vec4 color2 = texture2D(texture2,tc);"+
+						"gl_FragColor = mix(color1,color2,.5);"+
+						
+						"}"
+						
+					});
+
+				
+				}
+				currentmat.uniforms.color.value.x = value.color.r;
+				currentmat.uniforms.color.value.y = value.color.g;
+				if(value.layers[0])
+					currentmat.uniforms.texture1.value = _SceneManager.getTexture(value.layers[0].src);
+				if(value.layers[1])
+					currentmat.uniforms.texture2.value = _SceneManager.getTexture(value.layers[1].src);
+				
+				
+				
+				
+				return currentmat;
+			}
+			this.setMaterialDefPhong = function(currentmat,value)
+			{
 				if(!value) return;
+				if(!currentmat) currentmat = new THREE.MeshPhongMaterial();
 				
 				currentmat.color.r = value.color.r;
 				currentmat.color.g = value.color.g;
@@ -108,8 +166,6 @@
 						if(value.layers[i].mapTo == 1)
 						{
 							mapname = 'map';
-							
-							
 							currentmat.alphaTest = 1 - value.layers[i].alpha;
 							
 						}
@@ -195,6 +251,7 @@
 					}
 				}
 				currentmat.needsUpdate = true;
+				return currentmat;
 			}
 			
 			
