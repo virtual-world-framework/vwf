@@ -37,24 +37,34 @@
 			{
 				for(var i in this.materials)
 				{
-					if(this.materials[i].refCount === 0)
+					if(this.materials[i] && this.materials[i].refCount === 0)
+						delete this.materials[i];
+					if(!this.materials[i])
 						delete this.materials[i];
 				}
 			}
 			this.setMaterialByDef = function(currentmat,value)
 			{
-				
+				if(!value) return null;
 				if(!value.type)
 					value.type = 'phong';
 				if(value.type == 'phong')	
 					return this.setMaterialDefPhong(currentmat,value);
-				if(value.type == 'diffuse')	
+				if(value.type == 'video')	
 				{
-						return this.setMaterialDefDiffuse(currentmat,value)
+						return this.setMaterialDefVideo(currentmat,value)
 				}
 			}
-			this.setMaterialDefDiffuse = function(currentmat,value)
+			this.setMaterialDefVideo = function(currentmat,value)
 			{
+				
+				if(currentmat && !(currentmat instanceof THREE.ShaderMaterial))
+				{
+					if(currentmat.dispose)
+						currentmat.dispose();
+						
+					currentmat = null;
+				}
 				
 				if(!currentmat)
 				{
@@ -63,8 +73,7 @@
 					currentmat = new THREE.ShaderMaterial({
 						uniforms: {
 							color:{type: "v4", value:new THREE.Vector4(1,1,1,1)},
-							texture1:   { type: "t", value: THREE.ImageUtils.loadTexture( "textures/sprites/ball.png" ) },
-							texture2:   { type: "t", value: THREE.ImageUtils.loadTexture( "textures/sprites/ball.png" ) },
+							texture1:   { type: "t", value: null }
 						},
 						attributes: {},
 						vertexShader: 
@@ -76,12 +85,10 @@
 						"} ",
 						fragmentShader: "uniform vec4 color; "+
 						"uniform sampler2D texture1;"+
-						"uniform sampler2D texture2;"+
 						"varying vec2 tc;"+
 						"void main() { "+
 						"vec4 color1 = texture2D(texture1,tc);"+
-						"vec4 color2 = texture2D(texture2,tc);"+
-						"gl_FragColor = mix(color1,color2,.5);"+
+						"gl_FragColor = color1;"+
 						
 						"}"
 						
@@ -89,21 +96,69 @@
 
 				
 				}
-				currentmat.uniforms.color.value.x = value.color.r;
-				currentmat.uniforms.color.value.y = value.color.g;
+				
+				
+				currentmat.dispose = function()
+				{
+					$(document).unbind('prerender',currentmat.videoUpdateCallback);
+					delete currentmat.videoUpdateCallback;
+				}.bind(currentmat);
+				
+				if(currentmat.videoUpdateCallback)
+				{
+					$(document).unbind('prerender',currentmat.videoUpdateCallback);
+					delete currentmat.videoUpdateCallback;
+				}
+				
+				if(!currentmat.videoUpdateCallback)
+				{
+					currentmat.videoUpdateCallback = function()
+					{
+						
+						if(this.uniforms.texture1.value.image.readyState === this.uniforms.texture1.value.image.HAVE_ENOUGH_DATA)
+						{
+							this.uniforms.texture1.value.needsUpdate = true;
+						}
+					
+					}.bind(currentmat);
+					
+					$(document).bind('prerender',currentmat.videoUpdateCallback.bind(currentmat));
+					
+				}
 				if(value.layers[0])
-					currentmat.uniforms.texture1.value = _SceneManager.getTexture(value.layers[0].src);
-				if(value.layers[1])
-					currentmat.uniforms.texture2.value = _SceneManager.getTexture(value.layers[1].src);
+				{
+					var src = value.videosrc;
+					var video = document.createElement('video');
+					video.autoplay = true;
+					video.loop = true;
+					
+					video.src = src;
+					video.onload = function(){this.play();};
+					//document.body.appendChild(video);
+					//video.style.zIndex = 1000;
+					//video.style.position = 'absolute';
 				
-				
-				
-				
+					currentmat.uniforms.texture1.value = new THREE.Texture(video);
+					currentmat.uniforms.texture1.value.minFilter = THREE.LinearFilter;
+					currentmat.uniforms.texture1.value.magFilter = THREE.LinearFilter;
+					currentmat.uniforms.texture1.value.format = THREE.RGBFormat;
+					currentmat.uniforms.texture1.value.generateMipmaps = false;
+				}
 				return currentmat;
 			}
 			this.setMaterialDefPhong = function(currentmat,value)
 			{
 				if(!value) return;
+				
+				
+				if(currentmat && !(currentmat instanceof THREE.MeshPhongMaterial))
+				{
+					if(currentmat.dispose)
+						currentmat.dispose();
+						
+					currentmat = null;
+				}
+				
 				if(!currentmat) currentmat = new THREE.MeshPhongMaterial();
 				
 				currentmat.color.r = value.color.r;
