@@ -45,7 +45,12 @@ var vwfPortalModel = new function(){
 			if(filter != str){
 				filter = str;
 				pageIndex = 0;
-				showStates(); 
+				var tempWorlds = self.worldObjects();
+				for(var i = 0; i < tempWorlds.length; i++){
+					tempWorlds[i]().isVisible = checkFilter([tempWorlds[i]().title, tempWorlds[i]().description, tempWorlds[i]().owner]);
+				}
+				
+				self.getPage(0);
 			}
 		}	
 	}).extend({throttle:500});
@@ -219,7 +224,6 @@ function handleHash(propStr){
 function checkFilter(textArr){
 	
 	//textArr[2] is the owner of the world
-	
 	if(userNameFilter && userNameFilter != textArr[2]){
 		return false;
 	}
