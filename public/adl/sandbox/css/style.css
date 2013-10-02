@@ -14,6 +14,46 @@ a{
 	text-decoration: none;
 }
 
+ul{
+	padding-left:30px;
+}
+
+.bodyLoad{
+	visibility:invisible;
+	overflow:hidden;
+	height:500px;
+	max-height:500px;
+}
+
+#loadOverlay{
+	position:absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	z-index: 1000;
+	background-color: #eee;
+	visibility:visible;
+	
+}
+
+.glyphicon-star{
+	color: #F3E003;
+	font-size: 17px;
+	text-shadow: 0 0 1px #A8A8A8;
+	margin-left: 5px;
+}
+
+.videoList td{
+	border: none !important;
+	padding-top:10px !important;
+	padding-bottom:10px !important;
+}
+
+.videoList table{
+	margin-bottom:7px !important;
+}
+
 .btn{
 
 	-webkit-touch-callout: none;
@@ -29,9 +69,7 @@ a{
 display:block;
 margin:0px auto;
 width:80%;
-height:315px;
-
-
+height:320px;
 }
 .frame{
 
@@ -144,6 +182,11 @@ text-align:left;
 	color: #A0CE60;
 }
 
+.videoList{
+	
+	list-style:none;
+}
+
 .divContent1{
 
 	color: #F0F0F0;
@@ -159,6 +202,7 @@ text-align:left;
 	position:absolute;
 	float:left;
 	cursor: default;
+	z-index: 0;
 }
 
 .slide-item div{
@@ -179,8 +223,10 @@ text-align:left;
 	text-align: right;
 	line-height: 30px;
 	border-radius: 2px;
+	border: 1px solid #444;
 	border: 1px solid rgba(160, 160, 160, 0.2);
 	padding: 6px;
+	background: #333;
 	background: rgba(15, 15, 15, 0.25);
 }
 
@@ -285,15 +331,19 @@ text-align:left;
 	margin-top: 35px;
 }
 
+.pointList .glyphicon{
+	color: #77C9FF;
+}
+
 .pointList div{
 	width:100%;
-	height:35px;
+	height:45px;
 }
 
 .pointList li{
 
 	font-size: 17px;
-	line-height: 23px;
+	line-height: 20px;
 	color: #747474;
 	margin-bottom: 12px;
 }
@@ -302,6 +352,7 @@ text-align:left;
 
 	display:block;
 	float:left;
+	font-size: 25px;
 }
 
 .worldBox{
@@ -312,7 +363,6 @@ text-align:left;
 	padding: 5px 5px 3px 5px;
 	max-height: 150px;
 	min-height: 150px;
-	width: 95%;
 }
 
 .activeWorld{
@@ -328,11 +378,13 @@ text-align:left;
 	
 	overflow:hidden;
 	height:235px;
+	margin-bottom:15px;
 }
 .worldHeightMiniPadding{
 	
 	overflow: hidden;
 	height: 160px;
+	margin-bottom:15px;
 }
 
 .featuredInstance .boxContentWrapper{
@@ -347,9 +399,8 @@ text-align:left;
 	background-color: #f5f5f5;
 	border-radius: 8px;
 	padding: 5px 5px 3px 5px;
-	max-height: 225px;
-	min-height: 225px;
-	width: 95%;
+	max-height: 230px;
+	min-height: 230px;
 }
 
 .worldImage{
@@ -375,12 +426,17 @@ text-align:left;
 }
 .editstate
 {
-	margin-top: 105px;
+	margin-top: 0;
 }
 
 .boxContentWrapper{
-	height: 96px;
-	max-height:96px;
+	height: 86px;
+	max-height:86px;
+}
+
+.featuredInstance .boxContentWrapper{
+	height: 197px;
+	max-height:197px;
 }
 
 .editstateGuest{

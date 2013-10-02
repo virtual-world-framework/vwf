@@ -20,22 +20,23 @@ exports.setDAL = function(d){
 	DAL = d;
 };
 
-exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'home','worlds', 'admin', 'admin/users', 'admin/worlds', 'admin/edit'];
+exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'worlds', 'admin', 'admin/users', 'admin/worlds', 'admin/edit'];
 routesMap = {
 	'sandbox': {template:'index'},
+	'home': {template:'index'},
 	'edit': {sid: true},
 	'remove': {sid:true, title: 'Warning!'},
 	'user': {sid:true, title: 'Account'},
-	'home': {home:true},
 	'admin': {sid:true, title:'Admin', fileList: fileList, template: 'admin/admin'},
-	'admin/edit': {fileList: fileList}
+	'admin/edit': {fileList: fileList},
+	'index': {home:true}
 };
 
 exports.generalHandler = function(req, res, next){
 	
 	var sessionData = global.SandboxAPI.getSessionData(req);
 	if(!req.params.page)
-		req.params.page = 'sandbox';
+		req.params.page = 'index';
 		
 	
 	if(req.params.page.indexOf('admin') > -1 && (!sessionData || sessionData.UID != global.adminUID)){
@@ -74,7 +75,7 @@ exports.help = function(req, res){
 	var currentIndex = fileList.indexOf(req.params.page);
 	var displayPage = currentIndex >= 0 ? fileList[currentIndex] : 'index';
 	
-	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, title: '', script: displayPage + ".js"};
+	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, script: displayPage + ".js"};
 	res.render('help/template');
 };
 
@@ -142,15 +143,15 @@ exports.handlePostRequest = function(req, res, next){
 			
 			function(err, results){
 			
-					var serveObj = [{},{}];
-					console.log(results);
-					for(var key in results[0]){
-						if(results[1][key]){
-							serveObj[0][key] = results[1][key];
-						}
+				var serveObj = [{},{}];
+				console.log(results);
+				for(var key in results[0]){
+					if(results[1][key]){
+						serveObj[0][key] = results[1][key];
 					}
-					serveObj[1] = results[2];
-					res.end(JSON.stringify(serveObj));
+				}
+				serveObj[1] = results[2];
+				res.end(JSON.stringify(serveObj));
 			});
 			
 

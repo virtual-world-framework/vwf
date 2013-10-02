@@ -1,9 +1,9 @@
 	<div class="row" style="margin-top:15px;">
 		<div class="col-md-12">
-			<div class="row" style="margin-top:30px;">
-				<div class="col-md-3 pointList">
+			<div class="row">
+				<div class="col-md-3 pointList" style="margin-left:45px;">
 					<div>
-						<span class="lead glyphicon glyphicon-globe"></span><span class="lead">&nbsp;Persistent Worlds</span>
+						<span class="lead glyphicon glyphicon-cloud" style="color: #90DBFF;"></span><span class="lead">&nbsp;Persistent Worlds</span>
 					</div>
 					<ul>
 					
@@ -15,7 +15,7 @@
 				</div>
 				<div class="col-md-3 pointList">
 					<div>
-						<span class="lead glyphicon glyphicon-pencil"></span><span class="lead">&nbsp;In Browser Editing</span>
+						<span class="lead glyphicon glyphicon-pencil" style="color: #E2E215;-webkit-transform: rotate(0.8turn);"></span><span class="lead">&nbsp;In Browser Editing</span>
 					</div>
 					<ul>
 					
@@ -25,19 +25,17 @@
 						
 					</ul>
 				</div>
-				<div class="col-md-6">
-					<iframe class="wideFrame" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
+				<div class="col-md-5" style="margin-top:45px">
+					<img src="{{root}}/img/screenshot2.jpg" style="margin:0 auto;display:block;" />
 				</div>
 			</div>
-		</div>	
-		<div class="col-md-12">
 			<div class="row" style="margin-top:65px;">
 				<div class="col-md-5">
-					<img src="{{root}}/img/screenshot.png" style="margin:0 auto;display:block;" />
+					<img src="{{root}}/img/screenshot.jpg" style="margin:0 auto;display:block;" />
 				</div>
 				<div class="col-md-3 col-md-offset-1 pointList" style="margin-left:4.3333%">
 					<div>
-						<span class="lead glyphicon glyphicon-retweet"></span><span class="lead">&nbsp;Collaborative</span>
+						<span class="lead glyphicon glyphicon-retweet" style="color: #FAB400;"></span><span class="lead">&nbsp;Collaborative</span>
 					</div>
 					<ul>
 					
@@ -49,7 +47,7 @@
 				</div>
 				<div class="col-md-3 pointList">
 					<div>
-						<span class="lead glyphicon glyphicon-picture"></span><span class="lead" style="padding-top:1px">&nbsp;Creative</span>
+						<span class="lead glyphicon glyphicon-picture" style="color: #CF4242;"></span><span class="lead" style="padding-top:1px">&nbsp;Creative</span>
 					</div>
 					<ul>
 					
@@ -60,13 +58,11 @@
 					</ul>
 				</div>
 			</div>
-		</div>
-		<div class="col-md-12">
 			<div class="row" style="margin-top:65px;">
 				
-				<div class="col-md-3 pointList">
+				<div class="col-md-3 pointList" style="margin-left:45px;">
 					<div>
-						<span class="lead glyphicon glyphicon-retweet"></span><span class="lead">&nbsp;Open</span>
+						<span class="lead glyphicon glyphicon-globe" style="color: #35C235;"></span><span class="lead">&nbsp;Open</span>
 					</div>
 					<ul>
 					
@@ -78,7 +74,7 @@
 				</div>
 				<div class="col-md-3 pointList">
 					<div>
-						<span class="lead glyphicon glyphicon-picture"></span><span class="lead" style="padding-top:1px">&nbsp;Low Cost</span>
+						<span class="lead glyphicon glyphicon-usd" style="color: #979797;"></span><span class="lead" style="padding-top:1px">&nbsp;Low Cost</span>
 					</div>
 					<ul>
 					
@@ -88,10 +84,44 @@
 						
 					</ul>
 				</div>
-				<div class="col-md-6">
-					<img src="{{root}}/img/screenshot.png" style="margin:0 auto;display:block;" />
+				<div class="col-md-5">
+					<img src="{{root}}/img/screenshot3.jpg" style="margin:0 auto;display:block;" />
 				</div>
 			</div>
+			<div class="row" style="margin-top:35px;">
+				<div class="col-md-3" style="margin:0 auto; float:none;text-align:center;">
+					<a href="{{root}}/signup" class="btn btn-info">Create account</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row" style="margin-top:45px;">
+		<div class="col-md-12"><h1 class="featurette-heading" style="border-top:1px solid #eee;padding-top:20px;width:95%;margin:0 auto;">Learn</h1></div>
+	</div>
+	<div class="row" style="margin:30px 0;" >
+		<div class="col-md-11" style="float:none; margin:0 auto;">
+			<div class="row">
+				<div class="col-md-4 videoList" style="padding-right:0;">
+					<table class="table table-striped" style="border: 1px solid #ebebeb">
+						<tbody data-bind="foreach:youtubeList.slice(0, 8)">
+							<tr><td>
+								<a href="" data-bind="text:$data, click: $root.playVideoInList"></a>
+							</td></tr>
+						</tbody>
+					</table>
+					<a href="http://www.youtube.com/watch?v=aWRQJJnBi5c&list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" class="btn btn-default">More videos</a>
+				</div>
+				<div class="col-md-8">
+					<div id="ytapiplayer">
+						You need Flash player 8+ and JavaScript enabled to view this video.
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-2" style="margin: 15px auto 0px auto;float:none;text-align:center;">
+			<a href="{{root}}/help" class="btn btn-info">View Help Pages</a>
 		</div>
 	</div>
 	<div class="row" style="margin-top:60px;">
@@ -118,13 +148,45 @@
 		</div>
 	</div>
 	<script>
-		var slideInterval = 0;
+		var slideInterval = 0, params = { allowScriptAccess: "always" }, atts = { id: "ytplayer" }, player; 
+		vwfPortalModel.youtubeList = [  "Tutorial 1: Camera Motion",
+										"Tutorial 2: Selection Tools",
+										"Tutorial 3: Transform Tools",
+										"Tutorial 4: Copy and Paste",
+										"Tutorial 5: Groups And Links",
+										"Tutorial 6: Primitive and Object Properties",
+										"Tutorial 7: Geometry Modifiers",
+										"Tutorial 8: Noise Terrain with Modifiers",
+										"Tutorial 9: Materials and Textures",
+										"Tutorial 10: Scene Properties",
+										"Tutorial 11: Importing 3D Models",
+										"Tutorial 12: Inventory and Public Assets",
+										"Tutorial 13: Particle Systems",
+										"Tutorial 14: Scripting",
+										"Tutorial 15: Behaviors"
+									];
+		swfobject.embedSWF("http://www.youtube.com/v/aWRQJJnBi5c?enablejsapi=1&playerapiid=ytplayer&version=3&list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2&listType=playlist", "ytapiplayer", "680", "360", "8", null, null, params, atts);
+		
+		vwfPortalModel.playVideoInList = function(a, b){
+			console.log(a, b, vwfPortalModel.youtubeList.indexOf(a));
+			player.playVideo();
+			
+			window.setTimeout(function(){
+				player.pauseVideo();
+				player.playVideoAt(vwfPortalModel.youtubeList.indexOf(a));
+			}, 1000);
+		};		
+		
+		function onYouTubePlayerReady(id){
+			player = document.getElementById(id); 
+		}
 		$(document).ready(function(){
-			var totalSlides = 4, tempSlides = 0, transitionSpeed = 1500, isIntervalActive = true;
+			var totalSlides = 4, tempSlides = 0, transitionSpeed = 1500;
 			var currentSlideState = Math.floor(Math.random() * totalSlides);
 			
 			$(".slide-item").not(".slide-item" + currentSlideState).css("left", "1200px");
 			$(".slide-item" + currentSlideState + " .pContainer").css({top:"324px"});
+			$(".slide-item" + currentSlideState).css({left:"0"});
 			$(".linkMenu").css("margin-bottom", "0");
 			
 			$('.slide-item').mousedown(function(e){
@@ -132,19 +194,6 @@
 				e.stopPropagation();
 				return false;
 			});
-			$('.sliderContainer').mouseover(function(e){
-				window.clearInterval(slideInterval);
-				isIntervalActive = false;
-				
-			}); 
-			$('.sliderContainer').mouseout(function(e){
-				if(! isIntervalActive){
-					isIntervalActive = true;
-					slideInterval = window.setInterval(animateSlides, 15000);
-				}
-			}); 
-			
-			
 			
 			ko.applyBindings(vwfPortalModel);
 			getLoginInfo();
@@ -160,18 +209,19 @@
 			};
 			
 			var animateSlides = function(){
-				$(".slide-item" + currentSlideState + " .pContainer").animate({top:"370px"});
-				$(".slide-item" + currentSlideState).animate({left:"-1200px"}, transitionSpeed, "swing", function(){
-					incrementCurrentSlideState();
-					$(this).css("left", "1200px");
-				});
+				$(".slide-item" + currentSlideState + " .pContainer").animate({top:"370px"});				
+				
+				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).css({"z-index":1});
+				$(".slide-item" + currentSlideState).css({"z-index": 0});
+				
 				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).animate({left:"0px"}, transitionSpeed, "swing", function(){
+					$(".slide-item" + currentSlideState).css("left", "1200px");
 					incrementCurrentSlideState();
 					$(this).children(".pContainer").animate({top:"324px"});
 				});
 			};
 			
-			slideInterval = window.setInterval(animateSlides, 15000);
+			slideInterval = window.setInterval(animateSlides, 10000);
 		});
 		
 		
