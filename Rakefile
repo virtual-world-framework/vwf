@@ -164,6 +164,26 @@ Rake::TestTask.new do |task|
 
 end
 
+desc "Run the QUnit JavaScript tests"
+namespace :test do
+  task :qunit do
+    passed, failed, total = [0, 0, 0]
+    FileList["support/client/test/**/*.html"].each do |file|
+      puts "Testing #{file}"
+      pwd = `pwd`.strip
+      phantomjs_binary = defined?(PHANTOMJS_HOME) ? PHANTOMJS_HOME : "phantomjs"
+      output = `#{phantomjs_binary} support/client/test/run-qunit.js file://#{pwd}/#{file}`
+      result = output.split("\n").last
+      unless result.empty?
+        passed += result.split(" ")[0].to_i
+        total += result.split(" ")[3].to_i
+        failed += result.split(" ")[5].to_i
+      end
+    end
+    puts "#{passed} assertions of #{total} passed, #{failed} failed."
+  end
+end
+
 # Environment for running the standalone ruby.
 
 def standalone_run_env
