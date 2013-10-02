@@ -1,33 +1,14 @@
 function translateMenu(){
 
+var toTranslateElements = document.getElementsByTagName("a");
 
-var translateStrings = [
-	"MenuLogIn",
-	"MenuLogOut",
-	"MenuFile",
-	"MenuLanguage",
-	"MenuEdit",
-	"MenuCopy",
-	"MenuPaste",
-	"MenuDuplicate",
-	"MenuDelete",
-	"MenuSaveCopy",
-	"MenuPublish",
-	"MenuShare",
-	"MenuSaveNow",
-	"MenuSelect",
-	"MenuSelectName",
-	"MenuSelectPick",
-	"MenuSelectNone",
-	"MenuSelectScene"
-];
-
-
-for (var i = 0; i < translateStrings.length; i ++)
-{
-
-document.getElementById(translateStrings[i]).firstChild.nodeValue = document.getElementById(translateStrings[i]).firstChild.nodeValue.toLocaleString();
-}
+for (var i=0; i<toTranslateElements.length; i++){
+	if (toTranslateElements[i].firstChild != null) {
+		if (toTranslateElements[i].firstChild.nodeType == 3) {
+			toTranslateElements[i].firstChild.nodeValue = toTranslateElements[i].firstChild.nodeValue.toLocaleString();
+			}
+		}
+	}
 }
 
 
