@@ -130,6 +130,7 @@ height:315px;
 	border-bottom: 1px solid #ebebeb;
 	border-top: 1px solid #ebebeb;
 	margin-bottom: 30px;
+	text-align: center;
 }
 
 .linkMenu a{
@@ -137,6 +138,7 @@ height:315px;
 	font-size: 18px;
 	font-weight: bold;
 	margin: 0 20px;
+	text-align: center;
 }
 #pageLogo {
 	padding: 10px 0;
@@ -485,4 +487,20 @@ text-align:left;
 
 	font-size: 17.5px;
 	font-weight:bold;
+}
+.linkMenu a {
+	background: #EEE;
+	padding-right: 15px;
+	padding-left: 15px;
+	border-radius: 2px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	border: 1px solid #DDD;
+	margin: 0px;
+	font-weight: normal;
+	text-shadow: 1px 1px 3px #CCC;
+}
+#filter
+{
+margin-bottom: 3px;
 }

@@ -1245,7 +1245,7 @@ scripts:
         
         this.updateCamera();
     }
-    var shadowLSOffset = new THREE.Vector3(0,0,-3);
+   
     this.postrender = function(e,viewprojection, wh, ww)
     {
         //set the skybox position
@@ -1299,7 +1299,7 @@ scripts:
       {
        
       
-       var campos = findcamera().localToWorld(shadowLSOffset);
+       var campos = findcamera().localToWorld(new THREE.Vector3(0,0,-3));
        
        this.sun.shadowCamera.updateMatrixWorld(true)
         var lm = this.sun.shadowCamera.matrixWorld.clone();

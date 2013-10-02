@@ -1,0 +1,84 @@
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-4" style="text-align:left;">
+					<button id="allWorlds" class="btn btn-default btn-sm active" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">All Worlds</button>
+					<button id="yourWorlds" class="btn btn-default btn-sm" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">Your Worlds</button>
+				</div>
+				
+				<div class="col-md-1 col-md-offset-4" style="text-align:right;">
+					<a href="{{root}}/create" class="coldstate" id="newinstancebutton" data-bind="visible:user().isLoggedIn">
+						<img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"/>
+					</a>
+				</div>
+				<div class="col-md-3">
+					<input id="filter" class="col-md-3 form-control" style="width:90%;" type="text" placeholder="Filter Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
+				</div>
+			</div>
+			
+			<div class="row" id="activeRow" data-bind="foreach:displayWorldObjects">				
+				<div data-bind="visible:isVisible, css:$data.featured?'col-md-3 worldHeightPadding':'col-md-3 worldHeightMiniPadding'">
+					<div data-bind="event: {mouseover:$root.handleEditDisplay, mouseout:$root.handleEditDisplay}, css: $data.featured?'featuredInstance':'worldBox'">
+						
+						<div class="boxContentWrapper">
+							<div style="margin-bottom: 10px;">
+								<a data-bind="attr:{href:'{{root}}/'+id}, text:$root.getShorterStr(title, 20)" href="">Title</a>
+								<span class="owner" data-bind="text:' - ' + owner"></span>
+							</div>
+							<img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}, visible:$data.featured" class="worldImage" />
+							<div class="worldInfo">
+								<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
+									<span class="description" data-bind="text:description?$root.getShorterStr(description, 75):'No description'"></span>
+									
+									<div style="margin-top: 5px;" data-bind="visible:!$data.featured">
+										<span class="objects" data-bind="text: objects + (objects == 1 ? ' object ' : ' objects ')"></span>
+										&nbsp;<span class="lastModified stateid" data-bind="text:' (' + lastUpdate + ')' "></span>
+									</div>
+								</a>
+							</div>
+						</div>
+						<div data-bind="css:$data.featured?'editstate' : 'editstateGuest'">
+							<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState">Active</a>
+							
+							<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible -->
+								<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
+								<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
+							<!-- /ko -->
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row" style="margin-top:45px;margin-bottom:70px;" data-bind="visible:displayWorldObjects().length==0">	
+				<div class="col-md-4 col-md-offset-4" style="text-align:center;">
+					<span style="font-weight:bold;">No worlds found</span>
+				</div>
+			</div>
+			<div class="row" style="margin-bottom:45px;">
+				<div class="col-md-1 col-md-offset-4" style="text-align:right;">
+					<a class="btn btn-default" data-bind="click:getPreviousPage, css:previousDisabled()?'disabled btn btn-default':'btn btn-default'"><i class="glyphicon glyphicon-chevron-left"></i></a>
+				</div>				
+				<div class="col-md-1 col-md-offset-2">
+					<a class="btn btn-default" data-bind="click:getNextPage, css:nextDisabled()?'disabled btn btn-default':'btn btn-default'"><i class="glyphicon glyphicon-chevron-right"></i></a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		$(document).ready(function(){	
+			
+			ko.applyBindings(vwfPortalModel);
+			getLoginInfo(function(){
+					
+				showStates();
+
+				window.setInterval(function(){
+					showStates();
+				},15000);
+			});
+		});
+	</script>
+	   
+    
+	
+	
+	

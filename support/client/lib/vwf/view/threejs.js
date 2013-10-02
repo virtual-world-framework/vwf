@@ -538,7 +538,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         },
 		createRenderTarget: function(cameraID)
 		{
-			var rtt = new THREE.WebGLRenderTarget( 512, 512, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat } );
+			
+			var rtt = new THREE.WebGLRenderTarget( 512,512, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBAFormat } );
 			this.renderTargetPasses.push({camera:cameraID,target:rtt});
 			return rtt;
 		},
@@ -751,14 +752,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			//cam.updateProjectionMatrix();
 			renderer.render(scene,cam);
 			
-			for(var i = 0; i < self.renderTargetPasses.length; i++)
-			{
-				
-				var rttcam = self.renderTargetPasses[i].camera;
-				var rtt = self.renderTargetPasses[i].target;
-				renderer.render(backgroundScene,rttcam,rtt);
-				renderer.render(scene,rttcam,rtt);
-			}
+			
 			
 			if(self.selection && vwf.getProperty(self.selection.id,'type') =='Camera' && self.cameraID != self.selection.id)
 			{
@@ -793,7 +787,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 				
 				$(document).trigger('postprerender',[insetvp,w,w]);
 				
-				renderer.clear(true,true,false);
+				renderer.clear(true,true,true);
 				renderer.render(backgroundScene,selcam);
 				
 				renderer.clear(false,true,false);
@@ -817,6 +811,23 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			}
 			
 			$(document).trigger('postrender',vpargs);
+			
+			
+			
+			
+			for(var i = 0; i < self.renderTargetPasses.length; i++)
+			{
+				
+				var rttcamID = self.renderTargetPasses[i].camera;
+				var rttcam = self.state.nodes[rttcamID].getRoot();
+				var rtt = self.renderTargetPasses[i].target;
+				//renderer.render(backgroundScene,rttcam,rtt,true);
+				renderer.render(scene,cam,rtt);
+				
+				
+			}
+			
+			
 			
 			
 			sceneNode.lastTime = now;

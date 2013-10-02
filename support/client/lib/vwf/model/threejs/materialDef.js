@@ -54,6 +54,10 @@
 				{
 						return this.setMaterialDefVideo(currentmat,value)
 				}
+				if(value.type == 'camera')	
+				{
+						return this.setMaterialDefCamera(currentmat,value)
+				}
 			}
 			this.setMaterialDefVideo = function(currentmat,value)
 			{
@@ -144,6 +148,70 @@
 					currentmat.uniforms.texture1.value.format = THREE.RGBFormat;
 					currentmat.uniforms.texture1.value.generateMipmaps = false;
 				}
+				return currentmat;
+			}
+			this.setMaterialDefCamera = function(currentmat,value)
+			{
+				
+				if(currentmat && !(currentmat instanceof THREE.ShaderMaterial))
+				{
+					if(currentmat.dispose)
+						currentmat.dispose();
+						
+					currentmat = null;
+				}
+				
+				if(!currentmat)
+				{
+					
+					//startColor:{type: "v4", value:new THREE.Vector4(1,1,1,1)},
+					currentmat = new THREE.ShaderMaterial({
+						uniforms: {
+							color:{type: "v4", value:new THREE.Vector4(1,1,1,1)},
+							texture1:   { type: "t", value: _SceneManager.getTexture('./checker.jpg') }
+						},
+						attributes: {},
+						vertexShader: 
+						"varying vec2 tc;"+
+						"void main() {    "+
+						"    gl_Position = modelViewMatrix * vec4( position, 1.0 );\n"+
+						"    gl_Position = projectionMatrix * gl_Position;\n"+
+						"    tc = uv;"+
+						"} ",
+						fragmentShader: "uniform vec4 color; "+
+						"uniform sampler2D texture1;"+
+						"varying vec2 tc;"+
+						"void main() { "+
+						"vec4 color1 = texture2D(texture1,tc);"+
+						"color1.a = 1.0;"+
+						"gl_FragColor = color1;"+
+						
+						"}"
+						
+					});
+
+				
+				}
+				
+				
+				currentmat.dispose = function()
+				{
+					_dView.deleteRenderTarget(this.renderTarget);
+				}.bind(currentmat);
+				
+				
+				
+				if(currentmat.renderTarget)
+				{
+					_dView.deleteRenderTarget(currentmat.renderTarget);
+				}
+				
+					
+					currentmat.uniforms.texture1.value = _dView.createRenderTarget(value.RTTCameraID);
+					
+					currentmat.renderTarget = currentmat.uniforms.texture1.value;
+					
+				
 				return currentmat;
 			}
 			this.setMaterialDefPhong = function(currentmat,value)
