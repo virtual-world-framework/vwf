@@ -13,7 +13,13 @@ var translateStrings = [
 	"MenuDelete",
 	"MenuSaveCopy",
 	"MenuPublish",
-	"MenuShare"
+	"MenuShare",
+	"MenuSaveNow",
+	"MenuSelect",
+	"MenuSelectName",
+	"MenuSelectPick",
+	"MenuSelectNone",
+	"MenuSelectScene"
 ];
 
 
@@ -23,3 +29,5 @@ for (var i = 0; i < translateStrings.length; i ++)
 document.getElementById(translateStrings[i]).firstChild.nodeValue = document.getElementById(translateStrings[i]).firstChild.nodeValue.toLocaleString();
 }
 }
+
+

@@ -15,6 +15,14 @@ String.toLocaleString({
 		"Delete": "Удалить",
 		"Save Copy": "Сохранить копию",
 		"Publish": "Опубликовать",
-		"Set Permissions": "Установить права"	
+		"Set Permissions": "Установить права",
+		"Save now": "Сохранить сейчас",	
+		"Select": "Выбрать",
+		"Select By Name": "Выбрать по имени",
+		"Pick": "Выбрать",
+		"Select None": "Снять выбор",
+		"Select Scene": "Выбрать сцену"
 	}
 });
+
+
