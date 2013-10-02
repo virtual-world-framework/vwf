@@ -872,7 +872,9 @@ define(function ()
 					if(diag.type == 'text')
 						diag.element.val(propVal);
 					if(diag.type == 'slider')
-						diag.element.slider('value',propVal);	
+						diag.element.slider('value',propVal);
+					if(diag.type == 'check')
+						diag.element.attr('checked',propVal);						
 				}
 			}
 		}
