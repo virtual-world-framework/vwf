@@ -22,6 +22,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
            
 	 
 	    $(document).on('selectionChanged',this.selectionChanged.bind(this));
+		this.renderTargetPasses = [];
             this.rootSelector = rootSelector;
             this.height = 600;
             this.width = 800;
@@ -534,7 +535,22 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         
         
         
-        }
+        },
+		createRenderTarget: function(cameraID)
+		{
+			var rtt = new THREE.WebGLRenderTarget( 512, 512, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat } );
+			this.renderTargetPasses.push({camera:cameraID,target:rtt});
+			return rtt;
+		},
+		deleteRenderTarget: function(rtt)
+		{
+			for(var i = 0; i < this.renderTargetPasses.length; i++)
+			{
+				if(this.renderTargetPasses[i].target == rtt)
+					this.renderTargetPasses.splice(i,1);
+			}
+		}
+		
 
         // -- gotProperty ------------------------------------------------------------------------------
 
@@ -735,6 +751,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			//cam.updateProjectionMatrix();
 			renderer.render(scene,cam);
 			
+			for(var i = 0; i < self.renderTargetPasses.length; i++)
+			{
+				
+				var rttcam = self.renderTargetPasses[i].camera;
+				var rtt = self.renderTargetPasses[i].target;
+				renderer.render(backgroundScene,rttcam,rtt);
+				renderer.render(scene,rttcam,rtt);
+			}
 			
 			if(self.selection && vwf.getProperty(self.selection.id,'type') =='Camera' && self.cameraID != self.selection.id)
 			{
