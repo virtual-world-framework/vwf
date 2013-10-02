@@ -415,10 +415,13 @@ MATH.inverseMat4=function(mat){
 * multiplies two mat4's
 * @returns {MATH.Mat} the matrix multiplication of the matrices
 */
-MATH.mulMat4Vec3=function(mat1,vec2){
-	return MATH.Vec3(mat1[0]*vec2[0]+mat1[1]*vec2[1]+mat1[2]*vec2[2]+mat1[3],
-			          mat1[4]*vec2[0]+mat1[5]*vec2[1]+mat1[6]*vec2[2]+mat1[7],
-			          mat1[8]*vec2[0]+mat1[9]*vec2[1]+mat1[10]*vec2[2]+mat1[11]);
+MATH.mulMat4Vec3=function(mat1,vec2,arr){
+	if(!arr)
+		arr = [0,0,0];
+	arr[0] = mat1[0]*vec2[0]+mat1[1]*vec2[1]+mat1[2]*vec2[2]+mat1[3];
+	arr[1] = mat1[4]*vec2[0]+mat1[5]*vec2[1]+mat1[6]*vec2[2]+mat1[7];
+	arr[2] = mat1[8]*vec2[0]+mat1[9]*vec2[1]+mat1[10]*vec2[2]+mat1[11];
+	return arr;
 };
 
 /**
@@ -639,11 +642,27 @@ MATH.transposeInPlaceMat4=function(m) {
 * Builds the transpose of the matrix
 * @returns {MATH.Mat} the transposed matrix
 */
-MATH.transposeMat4=function(m) {
-    return MATH.matrix4(m[0],m[4],m[8],m[12],
-		              m[1],m[5],m[9],m[13],
-		              m[2],m[6],m[10],m[14],
-		              m[3],m[7],m[11],m[15]);
+MATH.transposeMat4=function(m,matrix) {
+	if(!matrix) matrix = new MATH.matrix4();
+	
+	matrix[0] = m[0];
+	matrix[1] = m[4];
+	matrix[2] = m[8];
+	matrix[3] = m[12];
+	matrix[4] = m[1];
+	matrix[5] = m[5];;
+	matrix[6] = m[9];
+	matrix[7] = m[13];
+	matrix[8] = m[2];
+	matrix[9] = m[6];
+	matrix[10] = m[10];
+	matrix[11] = m[14];
+	matrix[12] = m[3];
+	matrix[13] = m[7];
+	matrix[14] = m[11];
+	matrix[15] = m[15];
+	
+	return matrix;
 };
 
 /**
@@ -880,9 +899,9 @@ MATH.rotateMatrix=function(value,type) {
 	}
 }
 
-
-MATH.angleAxis=function(angle, axis) {
-    var xmx,ymy,zmz,xmy,ymz,zmx,xms,yms,zms;
+var xmx,ymy,zmz,xmy,ymz,zmx,xms,yms,zms;
+MATH.angleAxis=function(angle, axis,matrix) {
+    
 	axis=[axis[0],axis[1],axis[2],0];
 
         var x = axis[0];
@@ -898,10 +917,24 @@ MATH.angleAxis=function(angle, axis) {
         xmx = x * x;ymy = y * y;zmz = z * z;
         xmy = x * y;ymz = y * z;zmx = z * x;
 	
-	var matrix = MATH.matrix4((cosi * xmx) + cos,(cosi * xmy) - zms,(cosi * zmx) + yms,0,
-			(cosi * xmy) + zms,(cosi * ymy) + cos,(cosi * ymz) - xms,0,
-			(cosi * zmx) - yms,(cosi * ymz) + xms,(cosi * zmz) + cos,0,
-			0,0,0,1);
+	if(!matrix)
+		matrix = MATH.matrix4();
+	matrix[0] = (cosi * xmx) + cos;
+	matrix[1] = (cosi * xmy) - zms;
+	matrix[2] = (cosi * zmx) + yms;
+	matrix[3] = 0;
+	matrix[4] = (cosi * xmy) + zms;
+	matrix[5] = (cosi * ymy) + cos;
+	matrix[6] = (cosi * ymz) - xms;
+	matrix[7] = 0;
+	matrix[8] = (cosi * zmx) - yms;
+	matrix[9] = (cosi * ymz) + xms;
+	matrix[10] = (cosi * zmz) + cos;
+	matrix[11] = 0;
+	matrix[12] = 0;
+	matrix[13] = 0;
+	matrix[14] = 0;
+	matrix[15] = 1;
 
         return MATH.Mat(matrix);
 };

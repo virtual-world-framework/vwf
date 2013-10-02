@@ -58,9 +58,28 @@ properties:
                 }.bind(this),
                 getPosition: function()
                 {
-                    var transform = this.transform;
+                    var transform = this.transform.internal_val;
                     return [transform[12],transform[13],transform[14]];
                 }.bind(this),
+                getWorldPosition: function()
+                {
+                    var transform = this.worldTransform.internal_val;
+                    return [transform[12],transform[13],transform[14]];
+                }.bind(this),
+                localToGlobal: function(x,y,z)
+                {
+                    if(x.length)
+                    {
+                        y = x[1];
+                        z = x[2];
+                        x = x[0];
+                    }
+                    var vec = [x,y,z];
+                    var targetTransform = this.worldTransform.internal_val;
+                   
+                    vec = Mat4.multVec3(targetTransform,vec,[]);
+                    return vec;
+                },
                 setPosition: function(x,y,z)
                 {
                     if(x.length)

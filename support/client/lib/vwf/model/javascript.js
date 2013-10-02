@@ -1057,6 +1057,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
         callingMethod: function( nodeID, methodName, methodParameters ) {
 
+		
             var node = this.nodes[nodeID];
 			if(!node) return undefined;
 			

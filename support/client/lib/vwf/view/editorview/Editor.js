@@ -191,8 +191,10 @@ define(function ()
 		this.scalePropertyName = 'scale';
 		$(document.body).append('<div id="statusbar" class="statusbar" />');
 		$('#statusbar').css('top', (document.height - 25) + 'px');
-		$('#statusbar').append('<div id="SceneName" class="statusbarElement" />');
-		$('#SceneName').text('Not Saved');
+		$('#statusbar').append('<div id="SceneSaved" class="statusbarElement" />');
+		$('#SceneSaved').text('Not Saved');
+		$('#statusbar').append('<div id="StatusSelectedName" style="color:lightblue" class="statusbarElement" />');
+		$('#StatusSelectedName').text('No Selection');
 		$('#statusbar').append('<div id="StatusSelectedID" class="statusbarElement" />');
 		$('#StatusSelectedID').text('No Selection');
 		$('#statusbar').append('<div id="StatusPickMode" class="statusbarElement" />');
@@ -233,10 +235,11 @@ define(function ()
 				var t = new THREE.Vector3();
 				t.getPositionFromMatrix(MoveGizmo.parent.matrixWorld);
 				var gizpos = [t.x, t.y, t.z];
-				var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
+				var campos = this.getCameraPosition();
 				var ray = this.GetWorldPickRay(e);
 				var dxy = this.intersectLinePlaneTEST(ray, campos, gizpos, WorldZ);
 				oldintersectxy = dxy; //MATH.addVec3(campos,MATH.scaleVec3(ray,dxy));
+				
 				var dxz = this.intersectLinePlaneTEST(ray, campos, gizpos, WorldY);
 				oldintersectxz = dxz; //MATH.addVec3(campos,MATH.scaleVec3(ray,dxz));
 				var dyz = this.intersectLinePlaneTEST(ray, campos, gizpos, WorldX);
@@ -298,13 +301,14 @@ define(function ()
 		}.bind(this);
 		this.GetUniqueName = function (newname)
 		{
+			
 			if (!newname) newname = 'Object';
 			newname = newname.replace(/[0-9]*$/g, "");
 			var nodes = vwf.models[3].model.objects;
 			var count = 1;
 			for (var i in nodes)
 			{
-				var thisname = nodes[i].properties.DisplayName || '';
+				var thisname = vwf.getProperty(nodes[i].id,'DisplayName') || '';
 				thisname = thisname.replace(/[0-9]*$/g, "");
 				if (thisname == newname) count++;
 			}
@@ -328,7 +332,7 @@ define(function ()
 			e.preventDefault();
 			e.stopPropagation();
 			var ray = this.GetWorldPickRay(e);
-			var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
+			var campos = this.getCameraPosition();
 			var pickopts = new THREE.CPUPickOptions();
 			pickopts.OneHitPerMesh = true;
 			MoveGizmo.InvisibleToCPUPick = true;
@@ -457,6 +461,9 @@ define(function ()
 							if (vwf.views[0].lastPickId)
 							{
 								this.SelectObject(vwf.getNode(vwf.views[0].lastPickId), this.PickMod);
+							}else
+							{
+								this.SelectObject(null);
 							}
 						}
 						else
@@ -499,7 +506,7 @@ define(function ()
 								clientX: right,
 								clientY: bottom
 							});
-							var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
+							var campos = this.getCameraPosition();
 							var ntl = MATH.addVec3(campos, TopLeftRay);
 							var ntr = MATH.addVec3(campos, TopRightRay);
 							var nbl = MATH.addVec3(campos, BottomLeftRay);
@@ -612,6 +619,7 @@ define(function ()
 				{
 					vwf_view.kernel.deleteNode(SelectedVWFNodes[s].id);
 					$('#StatusSelectedID').text('No Selection');
+					$('#StatusSelectedName').text('No Selection');
 					$('#StatusPickMode').text('Pick: None');
 					
 				}
@@ -731,7 +739,7 @@ define(function ()
 			worldmousepos[0] /= worldmousepos[3];
 			worldmousepos[1] /= worldmousepos[3];
 			worldmousepos[2] /= worldmousepos[3];
-			var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
+			var campos = this.getCameraPosition();
 			var ray = MATH.subVec3(worldmousepos, campos);
 			var dist = MATH.lengthVec3(ray);
 			ray = MATH.scaleVec3(ray, 1.0 / MATH.lengthVec3(ray));
@@ -751,7 +759,7 @@ define(function ()
 			worldmousepos[0] /= worldmousepos[3];
 			worldmousepos[1] /= worldmousepos[3];
 			worldmousepos[2] /= worldmousepos[3];
-			var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
+			var campos = this.getCameraPosition();
 			var ray = MATH.subVec3(worldmousepos, campos);
 			var dist = MATH.lengthVec3(ray);
 			ray = MATH.scaleVec3(ray, 1.0 / MATH.lengthVec3(ray));
@@ -993,7 +1001,7 @@ define(function ()
 				t.getPositionFromMatrix(MoveGizmo.parent.matrixWorld);
 				var gizpos = [t.x, t.y, t.z];
 				$('#StatusGizmoLocation').text(this.displayVec(gizpos));
-				var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
+				var campos = this.getCameraPosition();
 				$('#StatusCameraLocation').text(this.displayVec(campos));
 				var ray = this.GetWorldPickRay(e);
 				var IntersectPlaneNormalX = CurrentX;
@@ -1338,7 +1346,7 @@ define(function ()
 		
 		this.GetInsertPoint = function (e)
 		{
-			var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
+			var campos = this.getCameraPosition();
 			if(e)
 			{
 				var ray;
@@ -1411,6 +1419,22 @@ define(function ()
 			};
 			this.createChild('index-vwf', GUID(), proto, null, null);
 		}
+		this.CreateCamera = function(translation, owner, id)
+		{
+			var CamProto = {
+				extends: 'SandboxCamera' + '.vwf',
+				properties: {}
+			};
+			CamProto.type = 'subDriver/threejs';
+			CamProto.source = 'vwf/model/threejs/' + 'camera' + '.js';
+		
+			CamProto.properties.translation = translation;
+			CamProto.properties.scale = [1, 1, 1];
+			CamProto.properties.rotation = [0, 0, 1, 0];
+			CamProto.properties.owner = owner;
+			CamProto.properties.DisplayName = self.GetUniqueName('Camera');
+			this.createChild('index-vwf', GUID(), CamProto, null, null);
+		};
 		this.CreatePrim = function (type, translation, size, texture, owner, id)
 		{
 			translation[0] = this.SnapTo(translation[0], MoveSnap);
@@ -1684,6 +1708,13 @@ define(function ()
 				_CopiedNodes.push(t);
 			}
 		}.bind(this);
+		this.getCameraPosition = function()
+		{
+			var cam = this.findcamera();
+			cam.updateMatrixWorld(true);
+			return [cam.matrixWorld.elements[12],cam.matrixWorld.elements[13],cam.matrixWorld.elements[14]];
+			
+		}
 		this.Paste = function (useMousePoint)
 		{
 			self.SelectObject(null);
@@ -1691,7 +1722,7 @@ define(function ()
 			{
 				var t = _CopiedNodes[i];
 				t = _DataManager.getCleanNodePrototype(t);
-				var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
+				var campos = this.getCameraPosition();
 				var newintersectxy;
 				if (!useMousePoint) newintersectxy = self.GetInsertPoint();
 				else
@@ -1991,6 +2022,8 @@ define(function ()
 						for (var j = 0; j < SelectedVWFNodes.length; j++) if (SelectedVWFNodes[j] && SelectedVWFNodes[j].id == VWFNode[i].id) index = j;
 						SelectedVWFNodes.splice(index, 1);
 					}
+					
+					
 			}
 			if (SelectedVWFNodes[0]) this.SelectedVWFID = SelectedVWFNodes[0].id;
 			else this.SelectedVWFID = null;
@@ -2003,6 +2036,7 @@ define(function ()
 			this.backupTransfroms = [];
 			if (SelectedVWFNodes[0])
 			{
+				
 				for (var s = 0; s < SelectedVWFNodes.length; s++)
 				{
 					lastscale[s] = this.getScaleCallback(SelectedVWFNodes[s].id);
@@ -2031,6 +2065,21 @@ define(function ()
 					SelectionBounds = [];
 				}
 			}
+			
+			$('#StatusSelectedID').text('No Selection');
+					$('#StatusSelectedName').text('No Selection');
+					if(SelectedVWFNodes.length > 0)
+					{
+						if(SelectedVWFNodes.length == 1)
+							$('#StatusSelectedID').text(SelectedVWFNodes[0].id);
+						else
+							$('#StatusSelectedID').text(SelectedVWFNodes.length + ' objects');
+						
+						$('#StatusSelectedName').text(vwf.getProperty(SelectedVWFNodes[0].id,'DisplayName'));
+						for(var i = 1; i < 	SelectedVWFNodes.length; i++)
+							$('#StatusSelectedName').text($('#StatusSelectedName').text() + ', ' + vwf.getProperty(SelectedVWFNodes[i].id,'DisplayName'));
+					}
+					
 		}.bind(this);
 		this.hideMoveGizmo = function ()
 		{
@@ -2053,31 +2102,39 @@ define(function ()
 			self.updateGizmoSize();
 			self.updateGizmoOrientation(false);
 			self.updateBounds();
-			$('#StatusSelectedID').text(SelectedVWFNodes[0].id);
+			
 		}.bind(this);
+		var tempcammatinverse = new THREE.Matrix4();
+		var tgizpos2 = [0,0,0];
+		var tcamposGizSpace = [0,0,0];
+		var tgizpos= [0,0,0];
+		var tempvec1 = [0,0,0];
+		var transposeTemp = [];
 		this.updateGizmoSize = function ()
 		{
-			var pos = new THREE.Vector3();
-			pos.getPositionFromMatrix(MoveGizmo.parent.matrixWorld);
-			var gizpos = [pos.x, pos.y, pos.z];
-			var campos = [this.findcamera().position.x, this.findcamera().position.y, this.findcamera().position.z];
-			var dist = MATH.lengthVec3(MATH.subVec3(gizpos, campos));
+			
+			tgizpos[0] = MoveGizmo.parent.matrixWorld.elements[12];
+			tgizpos[1] = MoveGizmo.parent.matrixWorld.elements[13];
+			tgizpos[2] = MoveGizmo.parent.matrixWorld.elements[14];
+			var campos = this.getCameraPosition();
+			var dist = MATH.lengthVec3(Vec3.subtract(tgizpos, campos,tempvec1));
 			var cam = this.findcamera();
 			cam.updateMatrixWorld(true);
+			var fovadj = cam.fov/75;
 			cam.matrixWorldInverse.getInverse(cam.matrixWorld);
-			var gizpos2 = MATH.mulMat4Vec3(MATH.transposeMat4(cam.matrixWorldInverse.elements), gizpos);
-			dist = -gizpos2[2] / 65;
+			tgizpos2 = MATH.mulMat4Vec3(MATH.transposeMat4(cam.matrixWorldInverse.elements,transposeTemp), tgizpos,tgizpos2);
+			dist = -tgizpos2[2] / 65;
 			var oldscale = [MoveGizmo.matrix.elements[0],MoveGizmo.matrix.elements[5],MoveGizmo.matrix.elements[10]];
 			MoveGizmo.matrix.scale(new THREE.Vector3(1 / oldscale[0], 1 / oldscale[1], 1 / oldscale[2]));
 			var windowXadj = 1600.0 / $('#index-vwf').width();
 			var windowYadj = 1200.0 / $('#index-vwf').height();
 			var winadj = Math.max(windowXadj, windowYadj);
-			MoveGizmo.matrix.scale(new THREE.Vector3(dist * winadj, dist * winadj, dist * winadj));
-			var cammatinverse = new THREE.Matrix4();
-			cammatinverse.getInverse(MoveGizmo.parent.matrixWorld);
-			var camposGizSpace = MATH.mulMat4Vec3(MATH.transposeMat4(cammatinverse.elements), campos);
-			//document.title = camposGizSpace[0];
-			MoveGizmo.matrix.scale(new THREE.Vector3(camposGizSpace[0]>0?1:-1,camposGizSpace[1]>0?1:-1,camposGizSpace[2]>0?1:-1));
+			MoveGizmo.matrix.scale(new THREE.Vector3(dist * winadj * fovadj, dist * winadj * fovadj, dist * winadj * fovadj));
+			
+			tempcammatinverse.getInverse(MoveGizmo.parent.matrixWorld);
+			tcamposGizSpace = MATH.mulMat4Vec3(MATH.transposeMat4(tempcammatinverse.elements,transposeTemp), campos,tcamposGizSpace);
+			//document.title = tcamposGizSpace[0];
+			MoveGizmo.matrix.scale(new THREE.Vector3(tcamposGizSpace[0]>0?1:-1,tcamposGizSpace[1]>0?1:-1,tcamposGizSpace[2]>0?1:-1));
 			
 			MoveGizmo.updateMatrixWorld(true);
 		}.bind(this);
@@ -2586,7 +2643,7 @@ define(function ()
 		{
 			try
 			{
-				return vwf.views[0].state.scenes["index-vwf"].camera.threeJScameras[vwf.views[0].state.scenes["index-vwf"].camera.defaultCamID];
+				return _dView.getCamera();
 			}
 			catch (e)
 			{

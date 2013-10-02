@@ -148,7 +148,7 @@ define(function ()
 		$(document.body).append("<div id='ScriptEditorMessage'>This script contains syntax errors, and cannot be saved;</div>");
 		$(document.body).append("<div id='ScriptEditor'  style=''>" +
 		"<div id='scripteditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' >"+
-		"<span class='ui-dialog-title' id='ui-dialog-title-Players'>ScriptEditor</span></div>" +
+		"<span id='scripteditortitletext' class='ui-dialog-title' id='ui-dialog-title-Players'>ScriptEditor</span></div>" +
 		 '<div id="ScriptEditorTabs" style="width:100%;height:100%;overflow:hidden;padding: 0px 10px 0px 0px;">' +
 		 '	<ul>' +
 		 '		<li><a href="#methods">Methods</a></li>'+ 
@@ -821,6 +821,17 @@ define(function ()
 			//window.clearInterval(window.scripthideinterval);
 			if (!this.isOpen())
 			{
+				if(!this.currentNode)
+				{
+					alertify.alert('No object is selected.');
+					return;
+				}
+				if(this.currentNode.id == 'index-vwf')
+				{
+					alertify.alert('The Scene object cannot accept scripts. Try creating a behavior on the scene instead.');
+					return;
+				}
+				
 				//window.scripthideinterval = window.setInterval(function(){
 				//		$('#ScriptEditorTabs').css('height',$('#ScriptEditor').height() + 'px');
 				//		$('#index-vwf').css('height',window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - //$('#toolbar').height() - ($(window).height() - $('#ScriptEditor').offset().top-25) + 'px');
@@ -1130,6 +1141,7 @@ define(function ()
 		}
 		this.BuildGUI = function (refresh)
 		{
+			$('#scripteditortitletext').text('Script Editor - '+ (vwf.getProperty(this.currentNode.id,'DisplayName') || this.currentNode.id))
 			if (!refresh)
 			{
 				this.selectedMethod = null;
@@ -1385,6 +1397,14 @@ define(function ()
 		}
 		this.changeSelection = function (node)
 		{
+			if(!node)
+			{
+				if (this.isOpen()) this.hide();
+			}
+			if(node.id == 'index-vwf')
+			{
+				if (this.isOpen()) this.hide();
+			}
 			if (node && this.isOpen())
 			{
 				if (!this.currentNode || (this.currentNode.id != node.id))

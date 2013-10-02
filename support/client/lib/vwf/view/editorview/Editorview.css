@@ -307,13 +307,15 @@
 		box-shadow: 0px 0px 13px gray inset;
 		display: inline;
 		height: 100%;
-		padding: 5px;
+		padding-left: 5px;
+		padding-right: 5px;
 		line-height: 25px;
 		border-radius: 5px;
 		color: gray;
 		margin-left: 3px;
 		margin-right: 3px;
 		font-family: sans-serif;
+		font-size: 1.8em;
 		text-shadow: 1px 1px 3px black;
 	}
 	#sidepanel

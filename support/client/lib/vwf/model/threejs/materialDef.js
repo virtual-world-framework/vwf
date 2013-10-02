@@ -1,7 +1,4 @@
 (function(){
-
-
-
 		function MaterialCache()
 		{
 			this.materials = {};
@@ -12,9 +9,9 @@
 					return this.materials[id];
 				else
 				{
-					this.materials[id] = new THREE.MeshPhongMaterial();
+					
 					//this.materials[id].morphTargets  = true;
-					this.setMaterialByDef(this.materials[id],def);
+					this.materials[id] =  this.setMaterialByDef(this.materials[id],def);
 					return this.materials[id];				
 					
 				}
@@ -40,13 +37,129 @@
 			{
 				for(var i in this.materials)
 				{
-					if(this.materials[i].refCount === 0)
+					if(this.materials[i] && this.materials[i].refCount === 0)
+						delete this.materials[i];
+					if(!this.materials[i])
 						delete this.materials[i];
 				}
 			}
 			this.setMaterialByDef = function(currentmat,value)
 			{
+				if(!value) return null;
+				if(!value.type)
+					value.type = 'phong';
+				if(value.type == 'phong')	
+					return this.setMaterialDefPhong(currentmat,value);
+				if(value.type == 'video')	
+				{
+						return this.setMaterialDefVideo(currentmat,value)
+				}
+			}
+			this.setMaterialDefVideo = function(currentmat,value)
+			{
+				
+				if(currentmat && !(currentmat instanceof THREE.ShaderMaterial))
+				{
+					if(currentmat.dispose)
+						currentmat.dispose();
+						
+					currentmat = null;
+				}
+				
+				if(!currentmat)
+				{
+					
+					//startColor:{type: "v4", value:new THREE.Vector4(1,1,1,1)},
+					currentmat = new THREE.ShaderMaterial({
+						uniforms: {
+							color:{type: "v4", value:new THREE.Vector4(1,1,1,1)},
+							texture1:   { type: "t", value: null }
+						},
+						attributes: {},
+						vertexShader: 
+						"varying vec2 tc;"+
+						"void main() {    "+
+						"    gl_Position = modelViewMatrix * vec4( position, 1.0 );\n"+
+						"    gl_Position = projectionMatrix * gl_Position;\n"+
+						"    tc = uv;"+
+						"} ",
+						fragmentShader: "uniform vec4 color; "+
+						"uniform sampler2D texture1;"+
+						"varying vec2 tc;"+
+						"void main() { "+
+						"vec4 color1 = texture2D(texture1,tc);"+
+						"gl_FragColor = color1;"+
+						
+						"}"
+						
+					});
+
+				
+				}
+				
+				
+				currentmat.dispose = function()
+				{
+					$(document).unbind('prerender',currentmat.videoUpdateCallback);
+					delete currentmat.videoUpdateCallback;
+				}.bind(currentmat);
+				
+				if(currentmat.videoUpdateCallback)
+				{
+					$(document).unbind('prerender',currentmat.videoUpdateCallback);
+					delete currentmat.videoUpdateCallback;
+				}
+				
+				if(!currentmat.videoUpdateCallback)
+				{
+					currentmat.videoUpdateCallback = function()
+					{
+						
+						if(this.uniforms.texture1.value.image.readyState === this.uniforms.texture1.value.image.HAVE_ENOUGH_DATA)
+						{
+							this.uniforms.texture1.value.needsUpdate = true;
+						}
+					
+					}.bind(currentmat);
+					
+					$(document).bind('prerender',currentmat.videoUpdateCallback.bind(currentmat));
+					
+				}
+				if(value.layers[0])
+				{
+					var src = value.videosrc;
+					var video = document.createElement('video');
+					video.autoplay = true;
+					video.loop = true;
+					
+					video.src = src;
+					video.onload = function(){this.play();};
+					//document.body.appendChild(video);
+					//video.style.zIndex = 1000;
+					//video.style.position = 'absolute';
+				
+					currentmat.uniforms.texture1.value = new THREE.Texture(video);
+					currentmat.uniforms.texture1.value.minFilter = THREE.LinearFilter;
+					currentmat.uniforms.texture1.value.magFilter = THREE.LinearFilter;
+					currentmat.uniforms.texture1.value.format = THREE.RGBFormat;
+					currentmat.uniforms.texture1.value.generateMipmaps = false;
+				}
+				return currentmat;
+			}
+			this.setMaterialDefPhong = function(currentmat,value)
+			{
 				if(!value) return;
+				
+				
+				if(currentmat && !(currentmat instanceof THREE.MeshPhongMaterial))
+				{
+					if(currentmat.dispose)
+						currentmat.dispose();
+						
+					currentmat = null;
+				}
+				
+				if(!currentmat) currentmat = new THREE.MeshPhongMaterial();
 				
 				currentmat.color.r = value.color.r;
 				currentmat.color.g = value.color.g;
@@ -108,8 +221,6 @@
 						if(value.layers[i].mapTo == 1)
 						{
 							mapname = 'map';
-							
-							
 							currentmat.alphaTest = 1 - value.layers[i].alpha;
 							
 						}
@@ -195,6 +306,7 @@
 					}
 				}
 				currentmat.needsUpdate = true;
+				return currentmat;
 			}
 			
 			
@@ -297,9 +409,12 @@
 			//get the material cache a chance to decrement the ref counter for the materails used by this object
 			this.deletingNode = function()
 			{
+				//dont remove the materials, as the actual view node might still exist
+				if(this.initializedFromAsset) return;
 				
+				//else, this object is deleting for real, and we can remvoe the materials from the cache.
 				var list = [];
-					
+			
 				this.GetAllLeafMeshes(this.getRoot(),list);
 				for(var i =0; i < list.length; i++)
 				{
