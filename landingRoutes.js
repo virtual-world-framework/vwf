@@ -20,7 +20,7 @@ exports.setDAL = function(d){
 	DAL = d;
 };
 
-exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'home', 'admin', 'admin/users', 'admin/worlds', 'admin/edit'];
+exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'home','worlds', 'admin', 'admin/users', 'admin/worlds', 'admin/edit'];
 routesMap = {
 	'sandbox': {template:'index'},
 	'edit': {sid: true},
