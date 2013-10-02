@@ -20,12 +20,13 @@ exports.setDAL = function(d){
 	DAL = d;
 };
 
-exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'admin', 'admin/users', 'admin/worlds', 'admin/edit'];
+exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'home', 'admin', 'admin/users', 'admin/worlds', 'admin/edit'];
 routesMap = {
 	'sandbox': {template:'index'},
 	'edit': {sid: true},
 	'remove': {sid:true, title: 'Warning!'},
 	'user': {sid:true, title: 'Account'},
+	'home': {home:true},
 	'admin': {sid:true, title:'Admin', fileList: fileList, template: 'admin/admin'},
 	'admin/edit': {fileList: fileList}
 };
@@ -46,16 +47,17 @@ exports.generalHandler = function(req, res, next){
 
 	if(routeIndex >= 0){
 		
-		var currentAcceptedRoute = exports.acceptedRoutes[routeIndex], title = '', sid = '', template = currentAcceptedRoute, fileList = [];
+		var currentAcceptedRoute = exports.acceptedRoutes[routeIndex], title = '', sid = '', template = currentAcceptedRoute, fileList = [], home = false;
 		if(routesMap[currentAcceptedRoute]){
 			
 			title = routesMap[currentAcceptedRoute].title ? routesMap[currentAcceptedRoute].title : '';
 			sid = routesMap[currentAcceptedRoute].sid ?  root + '/' + (req.query.id?req.query.id:'') + '/' : '';
 			template = routesMap[currentAcceptedRoute].template ? routesMap[currentAcceptedRoute].template : currentAcceptedRoute;
 			fileList = routesMap[currentAcceptedRoute].fileList ? routesMap[currentAcceptedRoute].fileList : [];	
+			home = routesMap[currentAcceptedRoute].home ? routesMap[currentAcceptedRoute].home : false;	
 		}
 		
-		res.locals = {sid: sid, root: root, title: title, fileList:fileList};
+		res.locals = {sid: sid, root: root, title: title, fileList:fileList, home: home};
 		res.render(template);
 	}
 	
@@ -129,19 +131,25 @@ exports.handlePostRequest = function(req, res, next){
 						cb(null, state);
 
 					});
+				},
+				
+				function(cb){
+					DAL.getInventoryDisplayData(data.Username, function(inventoryInfo){
+						cb(null, inventoryInfo);
+					});
 				}
 			], 
 			
 			function(err, results){
 			
-					var serveObj = {};
+					var serveObj = [{},{}];
 					console.log(results);
 					for(var key in results[0]){
 						if(results[1][key]){
-							serveObj[key] = results[1][key];
+							serveObj[0][key] = results[1][key];
 						}
 					}
-						
+					serveObj[1] = results[2];
 					res.end(JSON.stringify(serveObj));
 			});
 			
@@ -154,7 +162,7 @@ exports.handlePostRequest = function(req, res, next){
 			console.log(data);	
 			delete data.Salt;	
 			delete data.Username;				
-			delete data.inventoryKey;				
+			//delete data.inventoryKey;				
 			
 			//delete data.inventoryKey;	
 			//DAL.updateUser(userId, data, function(e){
@@ -162,13 +170,7 @@ exports.handlePostRequest = function(req, res, next){
 						
 			//});
 			
-			/*DAL.getInventoryForUser(userId, function(e){
-			
-				getInventoryItemMetaData(userId, data.inventoryKey, function(cool){
-				
-					res.end(JSON.stringify(e));
-				});
-			});*/
+
 			//res.end();
 			break;			
 			

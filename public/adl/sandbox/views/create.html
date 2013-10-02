@@ -25,7 +25,11 @@
 				},
 				error:function(xhr,status,err)
 				{
-					$('#error').text("Error: " + xhr.responseText);
+					vwfPortalModel.errorText("Error: " + xhr.responseText);
+					
+					window.setTimeout(function(){
+						vwfPortalModel.errorText("");				
+					}, 6000);
 				},
 				dataType: "text"
 			});
@@ -43,17 +47,14 @@
 		});	
 	</script>
     <div class="row">
-		<div class="span5 offset3">
+		<div class="col-md-5" style="margin:0 auto;float:none;height:260px;">
 			<form data-bind="submit:handleCreateButton">
 				<fieldset>
 					<legend>Create a world</legend>
-					<input type='text' id='txtInstanceName' placeholder='World Name' class="span5" />
-					<textarea id='txtInstanceDescription' placeholder='Description' class="span5"></textarea><br/>
-					<input type="submit" class='btn' style="float:right;" value="Create"/>
+					<input type='text' id='txtInstanceName' placeholder='World Name' class="form-control" /><br/>
+					<textarea id='txtInstanceDescription' placeholder='Description' class="form-control"></textarea><br/>
+					<input type="submit" class='btn btn-default' style="float:right;" value="Create"/>
 				</fieldset>
 			</form>
 		</div>
-	</div>
-	<div class="row">	
-		<div id='error' style="margin-top: 20px;margin-bottom:20px;font-size: 3EM;color: red;" class="span12"></div>
 	</div>
