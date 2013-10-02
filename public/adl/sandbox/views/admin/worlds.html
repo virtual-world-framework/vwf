@@ -1,18 +1,18 @@
 	<div class="row">
-		<div class="span3">
+		<div class="col-md-3">
 			<h3 data-bind="text:currentAdminItem() == false?'Worlds':currentAdminItem().title"></h3>
 		</div>
 	</div>
 	<div class="row" data-bind="visible:currentAdminItem() == false">
-		<div class="span3">
+		<div class="col-md-3">
 			<a href="{{root}}/create">Create World</a><br/>
 			<a data-bind="click:deleteSelected" href="">Delete Selected</a><br/><br/>
 			<a href="{{root}}/admin/users">Users List</a><br/>
 			<a href="{{root}}/admin">Admin Page</a>
 		</div>
-		<div class="span9">
+		<div class="col-md-9">
 			<div class="row">
-				<div class="usersList span6">
+				<div class="usersList col-md-6">
 					<table class="table table-striped" style="border: 1px solid #ddd;">
 						<tr>
 							<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllBox" class="checkAllBox" data-bind="click:handleSelectAll" /></th>
@@ -47,20 +47,20 @@
 		</div>
 	</div>
 <div class="row" data-bind="visible:currentAdminItem() != false">
-	<div class="span4">
+	<div class="col-md-4">
 		<a href="#">View full list of worlds</a>
 	</div>
-	<div class="adminDisplayList span4">
+	<div class="adminDisplayList col-md-4">
 		<div class="row">
 			<form data-bind="with:currentAdminItem"> 
 				
 				<div style="height:50px;">
 					<span>Edit title:</span>
-					<input type="text" style="float:right;" data-bind="value:title" />			
+					<input type="text" style="float:right; width:60%;" data-bind="value:title" class="form-control" />			
 				</div>
 				<div style="height:70px;">
 					<span>Change description:</span>
-					<textarea style="float:right;" data-bind="value:description"></textarea><br/>
+					<textarea style="float:right;width:60%;" data-bind="value:description" class="form-control"></textarea><br/>
 				</div>
 				<div>
 					<span>Feature this?</span>
@@ -75,8 +75,8 @@
 			</form>
 		</div>
 		<div class="row" style="margin:15px auto;">
-			<p class="span2 offset1" style="padding-top:5px;font-weight:bold;" data-bind="text:updateSuccess"></p>
-			<button class="btn" style="margin: 0 auto;float:left;" data-bind="click:updateWorld">Submit</button>
+			<p class="col-md-2 col-md-offset-5" style="padding-top:5px;font-weight:bold;" data-bind="text:updateSuccess"></p>
+			<button class="btn btn-default" style="margin: 0 auto;float:right;" data-bind="click:updateWorld">Submit</button>
 		</div>
 	</div>
 </div>
