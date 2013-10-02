@@ -539,7 +539,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 		createRenderTarget: function(cameraID)
 		{
 			
-			var rtt = new THREE.WebGLRenderTarget( 512,512, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBAFormat } );
+			var rtt = new THREE.WebGLRenderTarget( 512,512, { format: THREE.RGBFormat } );
 			this.renderTargetPasses.push({camera:cameraID,target:rtt});
 			return rtt;
 		},
@@ -821,9 +821,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 				var rttcamID = self.renderTargetPasses[i].camera;
 				var rttcam = self.state.nodes[rttcamID].getRoot();
 				var rtt = self.renderTargetPasses[i].target;
-				//renderer.render(backgroundScene,rttcam,rtt,true);
-				renderer.render(scene,cam,rtt);
-				
+				renderer.render(backgroundScene,rttcam,rtt,true);
+				renderer.render(scene,rttcam,rtt);
+				console.log('updated target');
 				
 			}
 			
