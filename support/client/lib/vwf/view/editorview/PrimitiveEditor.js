@@ -17,6 +17,7 @@ define(function ()
 	function initialize()
 	{
 		$(document.body).append("<div id='ShareWithDialog'> <select id='ShareWithNames'/> </div>");
+		this.propertyEditorDialogs = [];
 		$('#ShareWithDialog').dialog(
 		{
 			title: "Share With User",
@@ -243,6 +244,7 @@ define(function ()
 			{
 				if (node)
 				{
+					this.clearPropertyEditorDialogs();
 					$("#accordion").accordion('destroy');
 					$("#accordion").children('.modifiersection').remove();
 					//update to ensure freshness
@@ -255,6 +257,7 @@ define(function ()
 					$('#ui-dialog-title-ObjectProperties').text(vwf.getProperty(node.id, 'DisplayName') + " Properties");
 					$('#dispName').val(vwf.getProperty(node.id, 'DisplayName') || node.id);
 					
+					this.addPropertyEditorDialog(node.id,'DisplayName',$('#dispName'),'text');
 					
 					$('#primeditortitletext').text($('#dispName').val() + ' Properties')
 					
@@ -450,6 +453,9 @@ define(function ()
 						stop: this.primPropertyUpdate,
 						value: val
 					});
+					
+					this.addPropertyEditorDialog(node.id,editordata[i].property,$('#' + nodeid + i),'slider');
+					this.addPropertyEditorDialog(node.id,editordata[i].property,$('#' + nodeid + editordata[i].property + 'value'),'text');
 				}
 				if (editordata[i].type == 'check')
 				{
@@ -460,6 +466,8 @@ define(function ()
 					{
 						$('#' + i + nodeid).attr('checked', 'checked');
 					}
+					
+					this.addPropertyEditorDialog(node.id,editordata[i].property,$('#' + i + nodeid),'check');
 					//$('#'+i).
 				}
 				if (editordata[i].type == 'button')
@@ -504,7 +512,7 @@ define(function ()
 							}
 						},labels);
 					});
-					
+					this.addPropertyEditorDialog(node.id,editordata[i].property,$('#' + nodeid + i),'text');
 					
 					//$('#'+i).
 				}
@@ -639,6 +647,7 @@ define(function ()
 						var nodename = $(this).attr('nodename');
 						_PrimitiveEditor.setProperty(nodename, propname, $(this).val());
 					});
+					this.addPropertyEditorDialog(node.id,editordata[i].property,$('#' + nodeid + i),'text');
 				}
 				if (editordata[i].type == 'prompt')
 				{
@@ -683,6 +692,8 @@ define(function ()
 						_Editor.SetSelectMode('TempPick');
 						
 					});
+					
+					this.addPropertyEditorDialog(node.id,editordata[i].property,$('#' + nodeid + i),'text');
 				}
 				if (editordata[i].type == 'color')
 				{
@@ -720,6 +731,7 @@ define(function ()
 					$('#' + $('#' + nodeid + i + 'ColorPicker').data('colorpickerId')).attr('parentid', parentid);;
 					$('#' + $('#' + nodeid + i + 'ColorPicker').data('colorpickerId')).attr('propname', editordata[i].property);
 					$('#' + $('#' + nodeid + i + 'ColorPicker').data('colorpickerId')).attr('nodeid', nodeid);
+					this.addPropertyEditorDialog(node.id,editordata[i].property,$('#' + nodeid + i + 'ColorPicker'),'color');
 				}
 			}
 			$('#basicSettings' + nodeid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + 'deletebutton"/>');
@@ -848,6 +860,38 @@ define(function ()
 			var theta3 = Math.atan2(s1 * m[8] - c1 * m[4], c1 * m[5] - s1 * m[9]);
 			return [theta1, theta2, theta3];
 		}
+		this.NodePropertyUpdate = function(nodeID,propName,propVal)
+		{
+			
+			for(var i = 0; i < this.propertyEditorDialogs.length; i++)
+			{	
+				
+				var diag = this.propertyEditorDialogs[i];
+				if(diag.propName == propName && diag.nodeid == nodeID)
+				{
+					if(diag.type == 'text')
+						diag.element.val(propVal);
+					if(diag.type == 'slider')
+						diag.element.slider('value',propVal);
+					if(diag.type == 'check')
+						diag.element.attr('checked',propVal);						
+				}
+			}
+		}
+		this.addPropertyEditorDialog = function(nodeid,propname,element,type)
+		{
+			this.propertyEditorDialogs.push({
+				propName:propname,
+				type:type,
+				element:element,
+				nodeid:nodeid
+			
+			});
+		}
+		this.clearPropertyEditorDialogs = function()
+		{
+			this.propertyEditorDialogs=[];
+		}
 		this.SelectionTransformed = function (e, node)
 		{
 			try
@@ -879,6 +923,7 @@ define(function ()
 		$(document).bind('selectionChanged', this.SelectionChanged.bind(this));
 		$(document).bind('modifierCreated', this.SelectionChanged.bind(this));
 		$(document).bind('selectionTransformedLocal', this.SelectionTransformed.bind(this));
+		$(document).bind('nodePropChanged', this.NodePropertyUpdate.bind(this));
 		$('#PositionX').change(this.positionChanged.bind(this));
 		$('#PositionY').change(this.positionChanged.bind(this));
 		$('#PositionZ').change(this.positionChanged.bind(this));

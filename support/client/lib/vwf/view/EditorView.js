@@ -128,7 +128,10 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/alertify.js-0.3.9/
 					_Editor.updateGizmoSize();
 					_Editor.updateGizmoOrientation(false);
 				}
+				$(document).trigger('selectionTransformedLocal',[vwf.getNode(nodeID)]);
 			}
+			
+			_PrimitiveEditor.NodePropertyUpdate(nodeID, propertyName, propertyValue);
 		},
 		createdMethod: function (nodeID, methodName, methodParameters, methodBody)
 		{},
