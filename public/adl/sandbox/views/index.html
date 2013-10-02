@@ -28,7 +28,7 @@
 								<a data-bind="attr:{href:'{{root}}/'+id}, text:$root.getShorterStr(title, 20)" href="">Title</a>
 								<span class="owner" data-bind="text:' - ' + owner"></span>
 							</div>
-							<img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}, visible:$data.featured" class="worldImage" />
+							<!-- ko if: $data.featured --><img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}" class="worldImage" /><!-- /ko -->
 							<div class="worldInfo">
 								<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
 									<span class="description" data-bind="text:description?$root.getShorterStr(description, 75):'No description'"></span>
