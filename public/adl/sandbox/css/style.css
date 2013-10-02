@@ -125,12 +125,13 @@ height:315px;
 
 .linkMenu{
 	width: 100%;
-	clear:both;
-	padding: 10px 0;
-	border-bottom: 1px solid #ebebeb;
-	border-top: 1px solid #ebebeb;
+	clear: both;
+	padding-top: 22px;
+	border-bottom: 1px solid #EBEBEB;
+	border-top: 1px solid #EBEBEB;
 	margin-bottom: 30px;
 	text-align: center;
+	height: 70px;
 }
 
 .linkMenu a{
@@ -489,16 +490,14 @@ text-align:left;
 	font-weight:bold;
 }
 .linkMenu a {
-	background: #EEE;
-	padding-right: 15px;
-	padding-left: 15px;
-	border-radius: 2px;
-	padding-top: 5px;
-	padding-bottom: 5px;
-	border: 1px solid #DDD;
-	margin: 0px;
+	background: #F7F7F7;
+	padding: 6px 25px;
+	border: 1px solid #DFDFDF;
+	margin: 0px 8px;
 	font-weight: normal;
-	text-shadow: 1px 1px 3px #CCC;
+	text-shadow: 1px 1px 1px #ECECEC;
+	color: #3788C9;
+	border-radius: 4px;
 }
 #filter
 {
