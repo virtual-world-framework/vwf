@@ -167,7 +167,7 @@
 					//startColor:{type: "v4", value:new THREE.Vector4(1,1,1,1)},
 					currentmat = new THREE.ShaderMaterial({
 						uniforms: {
-							color:{type: "v4", value:new THREE.Vector4(1,1,1,1)},
+							
 							texture1:   { type: "t", value: _SceneManager.getTexture('./checker.jpg') }
 						},
 						attributes: {},
@@ -178,12 +178,12 @@
 						"    gl_Position = projectionMatrix * gl_Position;\n"+
 						"    tc = uv;"+
 						"} ",
-						fragmentShader: "uniform vec4 color; "+
+						fragmentShader: 
 						"uniform sampler2D texture1;"+
 						"varying vec2 tc;"+
 						"void main() { "+
-						"vec4 color1 = texture2D(texture1,tc);"+
-						"color1.a = 1.0;"+
+						"vec4 color1 = texture2D(texture1,tc,0.0);"+
+						
 						"gl_FragColor = color1;"+
 						
 						"}"
@@ -210,6 +210,10 @@
 					currentmat.uniforms.texture1.value = _dView.createRenderTarget(value.RTTCameraID);
 					
 					currentmat.renderTarget = currentmat.uniforms.texture1.value;
+					//currentmat.uniforms.texture1.value.minFilter = THREE.LinearFilter;
+					//currentmat.uniforms.texture1.value.magFilter = THREE.LinearFilter;
+				
+					currentmat.uniforms.texture1.value.generateMipmaps = true;
 					
 				
 				return currentmat;

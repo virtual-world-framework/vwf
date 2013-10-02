@@ -823,7 +823,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 				var rtt = self.renderTargetPasses[i].target;
 				renderer.render(backgroundScene,rttcam,rtt,true);
 				renderer.render(scene,rttcam,rtt);
-				console.log('updated target');
+				
 				
 			}
 			
