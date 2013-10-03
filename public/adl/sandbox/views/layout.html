@@ -54,7 +54,7 @@
 		
 		$(window).load(function(){
 			//$("body").animate({opacity:1}, 500);
-			$("#loadOverlay").animate({opacity:0}, 500);
+			$("#loadOverlay").animate({opacity:0}, {duration:500,complete:function(){$("#loadOverlay").remove();}});
 			$("body").removeClass("bodyLoad");
 			window.onscroll = function(){};
 		});
