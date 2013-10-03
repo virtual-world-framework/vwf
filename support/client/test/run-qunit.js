@@ -25,7 +25,7 @@ function waitFor(testFx, onReady, timeOutMillis) {
                     phantom.exit(1);
                 } else {
                     // Condition fulfilled (timeout and/or condition is 'true')
-                    console.log("'waitFor()' finished in " + (new Date().getTime() - start) + "ms.");
+                    // console.log("'waitFor()' finished in " + (new Date().getTime() - start) + "ms.");
                     typeof(onReady) === "string" ? eval(onReady) : onReady(); //< Do what it's supposed to do once the condition is fulfilled
                     clearInterval(interval); //< Stop this interval
                 }
@@ -51,6 +51,10 @@ page.open(phantom.args[0], function(status){
         console.log("Unable to access network");
         phantom.exit(1);
     } else {
+        console.log("-------------");
+        console.log("Running QUnit tests for: " + phantom.args[0]);
+        console.log("-------------");
+
         waitFor(function(){
             return page.evaluate(function(){
                 var el = document.getElementById('qunit-testresult');
@@ -61,8 +65,26 @@ page.open(phantom.args[0], function(status){
             });
         }, function(){
             var failedNum = page.evaluate(function(){
+                // Print out any failed tests
+                var failedTests = document.body.querySelectorAll('#qunit-tests > .fail');
+
+                for (var i = 0; i < failedTests.length; ++i) {
+                    var failedTest = failedTests[i];
+                    var testName = failedTest.querySelector('.test-name').innerText;
+                    console.log(String.fromCharCode( "0x2717" ) + " Test failed: " + testName);
+
+                    var failedAsserts = failedTest.getElementsByClassName('fail')
+                    for (var j = 0; j < failedAsserts.length; ++j) {
+                        var failedAssert = failedAsserts[j];
+                        var assertMessage = failedAssert.querySelector('.test-message').innerText;
+                        console.log("  " + String.fromCharCode( "0x21B3" ) + " Failed assertion: " + assertMessage);
+                    };
+                };
+
                 var el = document.getElementById('qunit-testresult');
+                console.log("-------------");
                 console.log(el.innerText);
+                console.log("-------------");
                 try {
                     return el.getElementsByClassName('failed')[0].innerHTML;
                 } catch (e) { }
@@ -70,5 +92,6 @@ page.open(phantom.args[0], function(status){
             });
             phantom.exit((parseInt(failedNum, 10) > 0) ? 1 : 0);
         });
+
     }
 });

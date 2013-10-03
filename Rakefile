@@ -167,21 +167,49 @@ end
 desc "Run the QUnit JavaScript tests"
 namespace :test do
   task :qunit do
-    passed, failed, total = [0, 0, 0]
+    puts dashed_line
+    puts "Running All QUnit Tests for VWF"
+    puts dashed_line
+
+    pass_count, fail_count, total, total_time = [0, 0, 0, 0]
     FileList["support/client/test/**/*.html"].each do |file|
-      puts "Testing #{file}"
+      puts "Running #{file}"
+
       pwd = `pwd`.strip
-      phantomjs_binary = defined?(PHANTOMJS_HOME) ? PHANTOMJS_HOME : "phantomjs"
+      phantomjs_binary = defined?( PHANTOMJS_HOME ) ? PHANTOMJS_HOME : "phantomjs"
       output = `#{phantomjs_binary} support/client/test/run-qunit.js file://#{pwd}/#{file}`
-      result = output.split("\n").last
+
+      result_lines = output.split("\n")
+
+      result = result_lines[-2]
+      failed = false
       unless result.empty?
-        passed += result.split(" ")[0].to_i
+        pass_count += result.split(" ")[0].to_i
         total += result.split(" ")[3].to_i
-        failed += result.split(" ")[5].to_i
+        this_fail_count = result.split(" ")[5].to_i
+        fail_count += this_fail_count
+        failed = true if this_fail_count > 0
+      end
+
+      if failed
+        result_output_start = result_lines.index("-------------")
+        result_lines[result_output_start+3..-5].each { |l| puts l }
+      end
+
+      time_result = result_lines[-3]
+      unless time_result.empty?
+        total_time += time_result.split(" ")[3].to_i
       end
     end
-    puts "#{passed} assertions of #{total} passed, #{failed} failed."
+
+    puts dashed_line
+    puts "Took #{total_time/1000.0}s to run #{total} assertions, #{pass_count} passed, #{fail_count} failed."
+    puts dashed_line
   end
+end
+
+def dashed_line
+  "----------------"
 end
 
 # Environment for running the standalone ruby.
