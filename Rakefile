@@ -153,20 +153,21 @@ end
 
 # == test ==========================================================================================
 
-# Create the test task.
+desc "Run all tests"
+task :test => ["test:ruby", "test:qunit"]
 
-Rake::TestTask.new do |task| 
-
+namespace :test do
+  Rake::TestTask.new(:ruby) do |task| 
     task.libs << "test"
     task.test_files = FileList[ "test/*_test.rb", "test/*/*_test.rb" ]
 
     task.verbose = true
+  end
 
-end
-
-desc "Run the QUnit JavaScript tests"
-namespace :test do
+  desc "Run tests for JavaScript using QUnit"
   task :qunit do
+    dashed_line = "----------------"
+
     puts dashed_line
     puts "Running All QUnit Tests for VWF"
     puts dashed_line
@@ -206,10 +207,6 @@ namespace :test do
     puts "Took #{total_time/1000.0}s to run #{total} assertions, #{pass_count} passed, #{fail_count} failed."
     puts dashed_line
   end
-end
-
-def dashed_line
-  "----------------"
 end
 
 # Environment for running the standalone ruby.
