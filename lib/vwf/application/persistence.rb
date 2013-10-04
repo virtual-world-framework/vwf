@@ -27,42 +27,42 @@ class VWF::Application::Persistence < Sinatra::Base
   end
 
   get "/saves" do
+    content_type :json
     # List saves. First need to determine if we're running per instance or across entire application.
-    result = []
+    result = [ ]
     if @env[ 'vwf.instance' ]
       # Listing all saves from this particular instance.
-      save_names = @storage.instance_save_states( @env[ 'vwf.root' ], @env[ 'vwf.application' ], @env[ 'vwf.instance' ] )
-      save_names.each do | save_name |
-        result.push generate_save_hash( request.scheme, request.host_with_port, @env[ 'vwf.root' ], @env[ 'vwf.application' ], @env[ 'vwf.instance' ], save_name )
+      instance_save_names = @storage.list_instance_save_states( @env[ 'vwf.root' ], @env[ 'vwf.application' ], @env[ 'vwf.instance' ] )
+      instance_save_names.each do | instance_save_name |
+        result.push generate_save_hash( request.scheme, request.host_with_port, @env[ 'vwf.root' ], @env[ 'vwf.application' ], @env[ 'vwf.instance' ], instance_save_name )
       end
     else
-      save_hash = @storage.application_save_states( @env[ 'vwf.root' ], @env[ 'vwf.application' ] )
-      save_hash.each do | instance_id, save_names |
-        save_names.each do | save_name |
-          result.push generate_save_hash( request.scheme, request.host_with_port, @env[ 'vwf.root' ], @env[ 'vwf.application' ], instance_id, save_name )
+	  result = { }
+      application_save_states = @storage.list_application_save_states( @env[ 'vwf.root' ], @env[ 'vwf.application' ] )
+      application_save_states.each do | instance_id, instance_save_names |
+	    instance_save_array = [ ]
+        instance_save_names.each do | instance_save_name |
+          instance_save_array.push generate_save_hash( request.scheme, request.host_with_port, @env[ 'vwf.root' ], @env[ 'vwf.application' ], instance_id, instance_save_name )
         end
+		result[ instance_id ] = instance_save_array
       end
     end
-    result.compact
     result.to_json
   end
   
   get "/listallsaves" do
     result = recursiveSavesInDirectory( request.scheme, request.host_with_port, "" )
-    result.compact
-    result.to_json
+    result.compact.to_json
   end
   
   get "/listdescendentsaves" do
     result = recursiveSavesInDirectory( request.scheme, request.host_with_port, request.env["vwf.root"] )
-    result.compact
-    result.to_json  
+    result.compact.to_json
   end
 
   get "/listsaves" do
     result = savesInDirectory( request.scheme, request.host_with_port, request.env["vwf.root"] )
-    result.compact
-    result.to_json
+    result.compact.to_json
   end
 
   get "/load/:loadname/:loadrevision" do
@@ -136,7 +136,7 @@ class VWF::Application::Persistence < Sinatra::Base
       result[ "vwf_info" ][ "application" ] = application
       result[ "vwf_info" ][ "path_to_application" ] = public_path + "/" + application
       result[ "vwf_info" ][ "instance" ] = instance
-      metadata = @storage.save_metadata( public_path, application, instance, save_name )
+      metadata = @storage.get_save_metadata( public_path, application, instance, save_name )
       if metadata.nil?
         result[ "metadata" ] = {}
       else
