@@ -1,3 +1,4 @@
+global.version = 23;
 var libpath = require('path'),
     http = require("http"),
     fs = require('fs'),
@@ -1233,6 +1234,15 @@ function startVWF(){
 	SandboxAPI.setDataPath(datapath);
 	Shell.setDAL(DAL);
 	Landing.setDAL(DAL);
+	
+	function _301(url,response)
+	{
+				response.writeHead(301, {
+					"Location": url 
+				});
+				response.end();
+	}
+	
 	DAL.startup(function(){
 		
 		global.sessions = [];
@@ -1244,6 +1254,42 @@ function startVWF(){
 		app.set('views', __dirname + '/public/adl/sandbox/views');
 		app.set('view engine', 'html');
 		app.engine('.html', require('hogan-express'));
+		
+		
+		app.use(function(req, res, next)
+		{
+			var version = req.url.match(/^\/[0-9]+\//);
+			console.log(req.url);
+			
+			if(version)
+			{
+				 console.log(version.toString());
+				 var versionInt = version.toString().match(/[0-9]+/);
+				 versionInt = parseInt(versionInt);
+				 
+				 
+				 
+				
+				 req.url =  req.url.substr(version.toString().length -1);
+				 if(versionInt != global.version)
+				 { 
+					console.log(versionInt + ' is old, redirect');
+					_301('/'+global.version+''+req.url,res);
+					return;
+				 
+				 }
+			}
+			if(!version)
+			{
+				console.log(' no version, redirect');
+				_301('/'+global.version+''+req.url,res);
+				return;
+			}
+			console.log('version is good');
+			next();
+		
+		});
+		
 		
 		app.use(express.methodOverride());
 		
