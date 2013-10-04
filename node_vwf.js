@@ -11,8 +11,8 @@ var libpath = require('path'),
 	DAL = require('./DAL'),
 	express = require('express'),
 	app = express(),
-	Landing = require('./landingRoutes'),
-	NanoTimer = require('nanotimer');
+	Landing = require('./landingRoutes');
+	
 	
 var zlib = require('zlib');
 	
@@ -719,9 +719,9 @@ function startVWF(){
 		
 		global.instances[namespace].totalerr = 0;
 		
-		global.instances[namespace].timerID = new NanoTimer();
+		
 		//keep track of the timer for this instance
-		global.instances[namespace].timerID.setInterval(function(){
+		global.instances[namespace].timerID = setInterval(function(){
 		
 			var now = process.hrtime();
 			now = now[0] * 1e9 + now[1];
@@ -748,7 +748,7 @@ function startVWF(){
 				}
 			}
 		
-		},[],'50m');
+		},50);
 		
 	  }
 	 
@@ -1193,7 +1193,7 @@ function startVWF(){
 		  
 		  if(Object.keys(global.instances[namespace].clients).length == 0)
 		  {
-			global.instances[namespace].timerID.clearInterval();
+			clearInterval(global.instances[namespace].timerID);
 			delete global.instances[namespace];
 		  }
 
@@ -1256,36 +1256,49 @@ function startVWF(){
 		app.engine('.html', require('hogan-express'));
 		
 		
+		//This first handler in the pipeline deal with the version numbers
+		// we append a version to the front if every request to keep the clients fresh
+		// otherwise, a user would have to know to refresh the cache every time we release
 		app.use(function(req, res, next)
 		{
+			//disable for now
+			next();
+			return;
+			//find the version number
 			var version = req.url.match(/^\/[0-9]+\//);
-			console.log(req.url);
 			
+			//if there was a match
 			if(version)
 			{
-				 console.log(version.toString());
+				 //parse the version as an integer
 				 var versionInt = version.toString().match(/[0-9]+/);
 				 versionInt = parseInt(versionInt);
 				 
 				 
 				 
-				
+				 //remove the version number from the request
 				 req.url =  req.url.substr(version.toString().length -1);
+				 
+				 //if the version number from the request was not the current version number
+				 //301 redirect to he proper version
 				 if(versionInt != global.version)
 				 { 
-					console.log(versionInt + ' is old, redirect');
+
 					_301('/'+global.version+''+req.url,res);
 					return;
 				 
 				 }
 			}
+			//if there is no version number, redirect to the current version
 			if(!version)
 			{
-				console.log(' no version, redirect');
+				
 				_301('/'+global.version+''+req.url,res);
 				return;
 			}
-			console.log('version is good');
+			
+			//if we got here, then there is a good version number
+			//and, we have stripped it out, so we can continue processing as if the version was not in the url
 			next();
 		
 		});

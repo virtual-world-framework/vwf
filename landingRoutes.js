@@ -59,7 +59,9 @@ exports.generalHandler = function(req, res, next){
 			home = routesMap[currentAcceptedRoute].home ? routesMap[currentAcceptedRoute].home : false;	
 		}
 		
-		res.locals = {versionRoot: versionRoot,sid: sid, root: versionRoot, title: title, fileList:fileList, home: home};
+		//this will change when we enable the versioning of all requests
+		//res.locals = {versionRoot: versionRoot,sid: sid, root: versionRoot, title: title, fileList:fileList, home: home};
+		res.locals = {versionRoot: root,sid: sid, root: root, title: title, fileList:fileList, home: home};
 		res.render(template);
 	}
 	
