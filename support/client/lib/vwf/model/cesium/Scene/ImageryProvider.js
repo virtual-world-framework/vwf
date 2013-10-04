@@ -1,10 +1,12 @@
 /*global define*/
 define([
+        '../Core/defined',
         '../Core/loadImage',
         '../Core/loadImageViaBlob',
         '../Core/DeveloperError',
         '../Core/throttleRequestByServer'
     ], function(
+        defined,
         loadImage,
         loadImageViaBlob,
         DeveloperError,
@@ -236,16 +238,14 @@ define([
     };
 
     /**
-     * Gets the logo to display when this imagery provider is active.  Typically this is used to credit
+     * Gets the credit to display when this imagery provider is active.  Typically this is used to credit
      * the source of the imagery.  This function should not be called before {@link ImageryProvider#isReady} returns true.
      *
      * @memberof ImageryProvider
      *
-     * @returns {Image|Canvas} A canvas or image containing the log to display, or undefined if there is no logo.
-     *
-     * @exception {DeveloperError} <code>getLogo</code> must not be called before the imagery provider is ready.
+     * @returns {Credit} The credit, or undefined if no credit exists
      */
-    ImageryProvider.prototype.getLogo = function() {
+    ImageryProvider.prototype.getCredit = function() {
         throw new DeveloperError('This type should not be instantiated directly.');
     };
 
@@ -297,7 +297,7 @@ define([
      *          Image or a Canvas DOM object.
      */
     ImageryProvider.loadImage = function(imageryProvider, url) {
-        if (typeof imageryProvider.getTileDiscardPolicy() !== 'undefined') {
+        if (defined(imageryProvider.getTileDiscardPolicy())) {
             return throttleRequestByServer(url, loadImageViaBlob);
         }
         return throttleRequestByServer(url, loadImage);

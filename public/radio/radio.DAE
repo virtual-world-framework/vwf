@@ -990,79 +990,6 @@
         </technique>
       </extra>
     </effect>
-    <effect id="MultiMat_2__ic40Channel_">
-      <profile_COMMON>
-        <newparam sid="ic40channeldiffusemap_tga-surface">
-          <surface type="2D">
-            <init_from>ic40channeldiffusemap_tga</init_from>
-          </surface>
-        </newparam>
-        <newparam sid="ic40channeldiffusemap_tga-sampler">
-          <sampler2D>
-            <source>ic40channeldiffusemap_tga-surface</source>
-          </sampler2D>
-        </newparam>
-        <newparam sid="ic40channelambient_occlusion__mr__tga-surface">
-          <surface type="2D">
-            <init_from>ic40channelambient_occlusion__mr__tga</init_from>
-          </surface>
-        </newparam>
-        <newparam sid="ic40channelambient_occlusion__mr__tga-sampler">
-          <sampler2D>
-            <source>ic40channelambient_occlusion__mr__tga-surface</source>
-          </sampler2D>
-        </newparam>
-        <technique sid="common">
-          <phong>
-            <emission>
-              <color>0 0 0 1</color>
-            </emission>
-            <ambient>
-              <texture texture="ic40channeldiffusemap_tga-sampler" texcoord="CHANNEL1"/>
-            </ambient>
-            <diffuse>
-              <texture texture="ic40channelambient_occlusion__mr__tga-sampler" texcoord="CHANNEL1"/>
-            </diffuse>
-            <specular>
-              <color>0.9 0.9 0.9 1</color>
-            </specular>
-            <shininess>
-              <float>50</float>
-            </shininess>
-            <reflective>
-              <color>0 0 0 1</color>
-            </reflective>
-            <transparent opaque="A_ONE">
-              <color>1 1 1 1</color>
-            </transparent>
-            <transparency>
-              <float>1</float>
-            </transparency>
-          </phong>
-        </technique>
-      </profile_COMMON>
-      <extra>
-        <technique profile="OpenCOLLADA3dsMax">
-          <extended_shader>
-            <apply_reflection_dimming>0</apply_reflection_dimming>
-            <dim_level>0</dim_level>
-            <falloff_type>0</falloff_type>
-            <index_of_refraction>1.5</index_of_refraction>
-            <opacity_type>0</opacity_type>
-            <reflection_level>3</reflection_level>
-            <wire_size>1</wire_size>
-            <wire_units>0</wire_units>
-          </extended_shader>
-          <shader>
-            <ambient_diffuse_lock>1</ambient_diffuse_lock>
-            <ambient_diffuse_texture_lock>1</ambient_diffuse_texture_lock>
-            <diffuse_specular_lock>0</diffuse_specular_lock>
-            <soften>0.1</soften>
-            <use_self_illum_color>0</use_self_illum_color>
-          </shader>
-        </technique>
-      </extra>
-    </effect>
     <effect id="icomLCD_2">
       <profile_COMMON>
         <technique sid="common">
@@ -3420,9 +3347,6 @@
     <material id="icomLCD_1-material" name="icomLCD">
       <instance_effect url="#icomLCD_1"/>
     </material>
-    <material id="MultiMat_2__ic40Channel_-material" name="MultiMat_2__ic40Channel_">
-      <instance_effect url="#MultiMat_2__ic40Channel_"/>
-    </material>
     <material id="icomLCD_2-material" name="icomLCD">
       <instance_effect url="#icomLCD_2"/>
     </material>
@@ -4828,12 +4752,6 @@
     <image id="earpiece_psd">
       <init_from>./images/earpiece.png</init_from>
     </image>
-    <image id="ic40channelambient_occlusion__mr__tga">
-      <init_from>./images/ic40channelambient%20occlusion%20_mr_.tga</init_from>
-    </image>
-    <image id="ic40channeldiffusemap_tga">
-      <init_from>./images/ic40channeldiffusemap.png</init_from>
-    </image>
     <image id="BeltClipFront_png">
       <init_from>./images/BeltClipFront.png</init_from>
     </image>
@@ -4961,14 +4879,8 @@
           <instance_geometry url="#geom-ic40Channel">
             <bind_material>
               <technique_common>
-                <instance_material symbol="icomKnobBlack_1" target="#MultiMat_2__ic40Channel_-material">
-                  <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
-                  <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
-                </instance_material>
-                <instance_material symbol="icomWhite_1" target="#MultiMat_2__ic40Channel_-material">
-                  <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
-                  <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
-                </instance_material>
+                <instance_material symbol="icomKnobBlack_1" target="#icomKnobBlack-material"/>
+                <instance_material symbol="icomWhite_1" target="#icomGrey-material"/>
               </technique_common>
             </bind_material>
           </instance_geometry>
