@@ -1,5 +1,4 @@
 var root = '/adl/sandbox',
-versionRoot = '/'+global.version+'/adl/sandbox',
 fileList = [],
 routesMap = {},
 DAL = {},
@@ -21,23 +20,23 @@ exports.setDAL = function(d){
 	DAL = d;
 };
 
-exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'home', 'worlds', 'admin', 'admin/users', 'admin/worlds', 'admin/edit'];
+exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'worlds', 'admin', 'admin/users', 'admin/worlds', 'admin/edit'];
 routesMap = {
-	'sandbox': {template:'home'},
-	'worlds': {template:'index'},
+	'sandbox': {template:'index'},
+	'home': {template:'index'},
 	'edit': {sid: true},
 	'remove': {sid:true, title: 'Warning!'},
 	'user': {sid:true, title: 'Account'},
-	'home': {home:true},
 	'admin': {sid:true, title:'Admin', fileList: fileList, template: 'admin/admin'},
-	'admin/edit': {fileList: fileList}
+	'admin/edit': {fileList: fileList},
+	'index': {home:true}
 };
 
 exports.generalHandler = function(req, res, next){
 	
 	var sessionData = global.SandboxAPI.getSessionData(req);
 	if(!req.params.page)
-		req.params.page = 'home';
+		req.params.page = 'index';
 		
 	
 	if(req.params.page.indexOf('admin') > -1 && (!sessionData || sessionData.UID != global.adminUID)){
@@ -59,9 +58,7 @@ exports.generalHandler = function(req, res, next){
 			home = routesMap[currentAcceptedRoute].home ? routesMap[currentAcceptedRoute].home : false;	
 		}
 		
-		//this will change when we enable the versioning of all requests
-		//res.locals = {versionRoot: versionRoot,sid: sid, root: versionRoot, title: title, fileList:fileList, home: home};
-		res.locals = {versionRoot: root,sid: sid, root: root, title: title, fileList:fileList, home: home};
+		res.locals = {sid: sid, root: root, title: title, fileList:fileList, home: home};
 		res.render(template);
 	}
 	
