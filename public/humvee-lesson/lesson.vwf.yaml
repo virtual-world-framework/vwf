@@ -264,7 +264,6 @@ children:
               text: "Press the 'G' key to simulate gas pedal interaction to drive the vehicle forward." 
             scripts:
             - |
-
               this.entering = function() {
                 this.logger.info( "Step: Drive Vehicle" );
                 var complete = false;
@@ -291,7 +290,6 @@ children:
                   }
                 }, this );
                 app.keyUp = this.events.add( function(e) {
-                  var kd = $.extend(true, {}, e.keysUp);
                   clearInterval(intervalId);
                 }, this);
               } //@ sourceURL=moveVehicleTask.vwf
