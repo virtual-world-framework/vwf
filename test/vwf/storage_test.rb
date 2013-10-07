@@ -483,6 +483,7 @@ class VWF::StorageTest < MiniTest::Unit::TestCase
   def test_list_application_save_states_empty_both_save_directories
     create_both_save_paths
     assert_equal_cleanup( {}, @storage_fs.list_application_save_states( @fake_public_path, @fake_application ) )
+    clean_directory
   end
 
   def test_list_application_save_states_first_valid_second_empty
