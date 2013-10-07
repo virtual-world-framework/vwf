@@ -11,6 +11,7 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+
 class VWF::StorageFS
 
   def initialize
@@ -25,7 +26,10 @@ class VWF::StorageFS
     if File.directory?( potential_app_dir )
       Dir.foreach( potential_app_dir ) do | filename |
         if File.directory?( potential_app_dir + "/" + filename ) && filename =~ /^instance_*/
-          result.push filename.slice( 9, filename.length - 9 )
+		  potential_instance_id = filename.slice( 9, filename.length - 9 )
+		  unless get_instance_metadata( public_path, application, potential_instance_id ).nil? and get_persistence_state( public_path, application, potential_instance_id ).nil? and list_instance_save_states( public_path, application, potential_instance_id ).length == 0
+            result.push potential_instance_id
+	      end
         end
       end
     end
@@ -85,6 +89,8 @@ class VWF::StorageFS
   # instance.
   # Takes the state to actually save (expects ruby hash format)
   # Takes an optional metadata argument for save specific metadata (expects ruby hash format )
+  # WARNING: Take note, if an instance already has metadata, but you provide 'nil' metadata, the
+  #          old metadata will persist.
   def set_persistence_state( public_path, application, instance, state, metadata )
     segments = public_path.split( "/" )
     segments.push( application )
@@ -103,7 +109,7 @@ class VWF::StorageFS
     
     unless metadata.nil?
       meta_file = File.open( @save_folder + public_path + "/" + application + "/instance_" + instance + "/metadata.json", 'w')
-      meta_file.puts metdata.to_json
+      meta_file.puts metadata.to_json
       meta_file.close
     end
   end
@@ -122,7 +128,7 @@ class VWF::StorageFS
         end
       end
     end
-    result
+	result.sort!
   end
   
   # Function that returns a ruby hash.  Each key is an instance ID, each value is an array containing
