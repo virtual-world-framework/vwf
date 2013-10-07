@@ -279,7 +279,7 @@ children:
                   for ( var keyPress in kd ) {
                     if (Number( kd[ keyPress ].code == 71)) // G
                     {
-                      intervalId = setInterval(moveHumvee, 200);
+                      intervalId = setInterval(moveHumvee, 50);
                       if(!complete)
                       {
                         this.logger.info( "Step: Drive Vehicle - Completed" );
