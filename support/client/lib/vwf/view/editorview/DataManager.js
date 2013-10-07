@@ -264,14 +264,11 @@ define(function ()
 		}
 		this.getCurrentSession = function ()
 		{
-			var reg = /\w*?(?=\/#*$)/;
-			return window.location.pathname;
-			return reg.exec(window.location.pathname)[0];
+			return (/\/adl\/sandbox\/.*\//).exec(window.location.toString()).toString();
 		}
 		this.getCurrentApplication = function ()
 		{
-			var reg = /^.*(?=\/\w*?\/)/;
-			return reg.exec(window.location.href)[0];
+			return location.protocol +'//'+  location.host + '/adl/sandbox';
 		}
 		this.getClientCount = function ()
 		{

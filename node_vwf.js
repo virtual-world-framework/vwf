@@ -1,40 +1,60 @@
 global.version = 23;
 var libpath = require('path'),
-    http = require("http"),
-    fs = require('fs'),
-    url = require("url"),
-    mime = require('mime'),
-	sio = require('socket.io'),
-	YAML = require('js-yaml'),
-	SandboxAPI = require('./sandboxAPI'),
-	Shell = require('./ShellInterface'),
-	DAL = require('./DAL'),
-	express = require('express'),
-	app = express(),
-	Landing = require('./landingRoutes');
-	
-	
+http = require("http"),
+fs = require('fs'),
+url = require("url"),
+mime = require('mime'),
+sio = require('socket.io'),
+YAML = require('js-yaml'),
+SandboxAPI = require('./sandboxAPI'),
+Shell = require('./ShellInterface'),
+DAL = require('./DAL'),
+express = require('express'),
+app = express(),
+Landing = require('./landingRoutes');
 var zlib = require('zlib');
-	
+var requirejs = require('requirejs');
+var compressor = require('node-minify');
+
+//Get the version number. This will used to redirect clients to the proper url, to defeat their local cache when we release
+global.version = require('./Version').version;
+
+var  appNameCache = [];
 // pick the application name out of the URL by finding the index.vwf.yaml
+// Cache - this means that adding applications to the server will requrie a restart
 function findAppName(uri)
 {
 		
-		var current = "."+libpath.sep;
-		while(!fs.existsSync(current+"index.vwf.yaml"))
-		{	
+	var current = "."+libpath.sep;
+	var testcache = (current + uri);
+	
+	//cache and avoid some sync directory operations
+	for(var i =0; i < appNameCache.length; i++)
+	{
+		if(testcache.indexOf(appNameCache[i]) ==0)
+		{
 			
-			var next = uri.substr(0,Math.max(uri.indexOf('/'),uri.indexOf('\\'))+1);
-			current += next;
-			if(!next)
-				break;
-			
-			
-			uri = uri.substr(next.length);
+			return appNameCache[i];
 		}
-		if(fs.existsSync(current+"index.vwf.yaml"))
-			return current;
-		return null;	
+	}
+	while(!fs.existsSync(current+"index.vwf.yaml"))
+	{	
+		
+		var next = uri.substr(0,Math.max(uri.indexOf('/'),uri.indexOf('\\'))+1);
+		current += next;
+		if(!next)
+			break;
+		
+		
+		uri = uri.substr(next.length);
+	}
+	if(fs.existsSync(current+"index.vwf.yaml"))
+	{
+		
+		appNameCache.push(current);
+		return current;
+	}
+	return null;	
 }
 
 //Generate a random ID for a instance
@@ -83,7 +103,7 @@ global.log = function()
 	if(level <= global.logLevel)
 		console.log.apply(this,args);
 }
-
+//amke a random VWF Instance id
 function makeid()
 {
     var text = "";
@@ -129,30 +149,31 @@ function RedirectToInstance(request,response,appname,newid)
 	redirect(newid,response);			
 }
 
+//Redirect, just used on some invalid paths
 function redirect(url,response)
 {
-				url = url.replace(/\\\\/g,'/');
-				url = url.replace(/\\/g,'/');
-				url = url.replace(/\/\//g,'/');
-				
-				url = url.replace(/\/\/\//g,'/');
-				//url = url.replace('http://','');
-				url = url.replace(/\/\/\//g,"/");
-				url = url.replace(/\/\/\/\//g,"/");
-				//url = 'http://' + url;
-				response.writeHead(200, {
-					"Content-Type": "text/html" 
-				});
-				response.write( "<html>" +
-								"<head>" +
-								"	<title>Virtual World Framework</title>" +
-								"	<meta http-equiv=\"REFRESH\" content=\"0;url="+url+"\">" +
-								"</head>" +
-								"<body>" +
-								"</body>" +
-								"</html>");
-				response.end();
-				return;
+	url = url.replace(/\\\\/g,'/');
+	url = url.replace(/\\/g,'/');
+	url = url.replace(/\/\//g,'/');
+	
+	url = url.replace(/\/\/\//g,'/');
+	//url = url.replace('http://','');
+	url = url.replace(/\/\/\//g,"/");
+	url = url.replace(/\/\/\/\//g,"/");
+	//url = 'http://' + url;
+	response.writeHead(200, {
+		"Content-Type": "text/html" 
+	});
+	response.write( "<html>" +
+					"<head>" +
+					"	<title>Virtual World Framework</title>" +
+					"	<meta http-equiv=\"REFRESH\" content=\"0;url="+url+"\">" +
+					"</head>" +
+					"<body>" +
+					"</body>" +
+					"</html>");
+	response.end();
+	return;
 }
 //Find the instance(instance) ID in a URL
 function Findinstance(uri)
@@ -209,17 +230,20 @@ function _FileCache()
 		}
 		else return "binary";
 	}
+	//Get the file entry, or load it
 	this.getFile = function(path,callback)
 	{
 		path = libpath.normalize(path);
 		path = libpath.resolve(__dirname, path);
 		
+		//Cannot escape above the application paths!!!!
 		if(path.toLowerCase().indexOf(__dirname.toLowerCase()) != 0 && path.toLowerCase().indexOf(global.datapath.toLowerCase()) != 0)
 		{
 			global.error(path + " is illegal");
 			callback(null);
 			return;
 		}
+		//Cannot have the users.db!
 		if(path.toLowerCase().indexOf('users.db') != -1)
 		{
 			global.error(path + " is illegal");
@@ -227,56 +251,144 @@ function _FileCache()
 			return;
 		}
 		
+		//Find the record
 		for(var i =0; i < this.files.length; i++)
 		{
 			if(this.files[i].path == path)
 			{	
 				global.log('serving from cache: ' + path,2);
+				//Callback with the record
 				callback(this.files[i]);
 				return;
 			}
 		}
 		// if got here, have no record;
 		var datatype = this.getDataType(path);
-		var file = fs.readFileSync(path);
-		var stats = fs.statSync(path);
-		
-		if(file)
-		{
-			var self = this;
-			zlib.gzip(file,function(_,zippeddata)
+		//Read the raw file
+		fs.readFile(path,function(err,file){
+			fs.stat(path,function(err,stats)
 			{
-				
-				var newentry = {};
-				newentry.path = path;
-				newentry.data = file;
-				newentry.stats = stats;
-				newentry.zippeddata = zippeddata;
-				newentry.datatype = datatype;
-				newentry.hash = hash(file);
-				
-				global.log(newentry.hash,2);
-				global.log('loading into cache: ' + path,2);
-				if(self.enabled == true)
+				var self = this;
+				//Call this after minify, or right away if not js or minify disabled
+				var preMin = function(file)
 				{
-					self.files.push(newentry);
-					fs.watch(path,{},function(event,filename){
-				
-					global.log(newentry.path + ' has changed on disk',2);
-				      self.files.splice(self.files.indexOf(newentry),1);
-					});
+					if(file)
+					{
+						//gzip the data
+						zlib.gzip(file,function(_,zippeddata)
+						{
+							//record the data
+							var newentry = {};
+							
+							newentry.path = path;
+							newentry.data = file;
+							newentry.stats = stats;
+							newentry.zippeddata = zippeddata;
+							newentry.datatype = datatype;
+							newentry.hash = hash(file);
+							
+							global.log(newentry.hash,2);
+							global.log('loading into cache: ' + path,2);
+							
+							// if enabled, cache in memory
+							if(FileCache.enabled == true)
+							{
+								global.log('cache ' + path,2); 
+								FileCache.files.push(newentry);
+								
+								//minify is currently not compatable with auto-watch of files
+								if(!FileCache.minify)
+								{
+									//reload files that change on disk
+									fs.watch(path,{},function(event,filename){
+									
+									
+									
+										global.log(newentry.path + ' has changed on disk',2);
+										FileCache.files.splice(FileCache.files.indexOf(newentry),1);
+									
+									});
+								}
+							}
+							//send the record to the caller . Usually FileCache.serveFile
+							callback(newentry);
+							return;
+						});
+						return;
+					}
+					callback(null);
 				}
-				callback(newentry);
-				return;
+				//Send right away if not minifying
+				if(!FileCache.minify)
+				{
+					
+					preMin(file);
+				}
+				else
+				{
+					//if minifying and ends with js
+					if(strEndsWith(path,'js'))
+					{
+						//compress the JS then gzip and save the results
+						console.log('minify ' + path);
+						new compressor.minify({
+						    type: 'uglifyjs',
+						    fileIn: path,
+						    fileOut: path+'_min.js',
+						    callback: function(err, min){
+							
+							if(err)
+								preMin(file)
+							else
+							{	
+							//remove the file on disk - cached in memory
+							fs.unlinkSync(path+'_min.js');
+							//completed minify, go ahead and cache and serve
+							preMin(min);
+							}
+						    }
+						});
+					}
+					// likewise, try to minify the css
+					else if(strEndsWith(path,'css'))
+					{
+						//compress the css then gzip and save the results
+						console.log('minify ' + path);
+						new compressor.minify({
+						    type: 'yui-css',
+						    fileIn: path,
+						    fileOut: path+'_min.css',
+						    callback: function(err, min){
+							
+							if(err)
+								preMin(file)
+							else
+							{	
+							//remove the file on disk - cached in memory
+							fs.unlinkSync(path+'_min.css');
+							//completed minify, go ahead and cache and serve
+							preMin(min);
+							}
+						    }
+						});
+					}else
+					{
+						//minifying, but not a file that can minify
+						preMin(file);
+					}
+
+				}				
 			});
-			return;
-		}
-		callback(null);
-	}
+		});
+	} // end getFile
+	//Serve a file, takes absolute path
+	//TODO, handle streaming of audio and video
 	this.ServeFile = function(request,filename,response,URL)
 	{
+		//check if already loaded
 		FileCache.getFile(filename,function(file)
 		{
+			//error if not found
 			if (!file) {
 				response.writeHead(500, {
 					"Content-Type": "text/plain"
@@ -285,8 +397,10 @@ function _FileCache()
 				response.end();
 				return;
 			}
+			//get the type
 			var type = mime.lookup(filename);
 			
+			//deal with the ETAG
 			if(request.headers['if-none-match'] === file.hash)
 			{
 				response.writeHead(304, {
@@ -300,6 +414,7 @@ function _FileCache()
 				return;
 			}
 			
+			//If the clinet can take the gzipped encoding, send that
 			if(request.headers['accept-encoding'] && request.headers['accept-encoding'].indexOf('gzip') >= 0)
 			{
 				response.writeHead(200, {
@@ -312,7 +427,9 @@ function _FileCache()
 				response.write(file.zippeddata, file.datatype);
 			
 			
-			}else
+			}
+			//if the client cannot accept the gzip, send raw
+			else
 			{
 				response.writeHead(200, {
 					"Content-Type": type,
@@ -330,7 +447,7 @@ function _FileCache()
 		
 		});	
 	}
-}
+}  //end FileCache
 
 var FileCache = new _FileCache();
 global.FileCache = FileCache;
@@ -418,6 +535,7 @@ function getNamespace(socket)
 	  }
 
 }
+//Check that a user has permission on a node
 function checkOwner(node,name)
 {
 	var level = 0;
@@ -440,10 +558,13 @@ function checkOwner(node,name)
 	return level?level:0;	
 	
 }
+
+//***node, uses REGEX, escape properly!
 function strEndsWith(str, suffix) {
     return str.match(suffix+"$")==suffix;
 }
 
+//Is an event in the websocket stream a mouse event?
 function isPointerEvent(message)
 {
 	if(!message) return false;
@@ -462,29 +583,29 @@ function isPointerEvent(message)
 
 }
 //change up the ID of the loaded scene so that they match what the client will have
-		var fixIDs = function(node)
-		{
-			if(node.children)
-			var childnames = {};
-			for(var i in node.children)
-			{
-				childnames[i] = null;
-			}
-			for(var i in childnames)
-			{
-				var childComponent = node.children[i];
-				var childName = childComponent.name || i;
-				var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName.replace(/ /g,'-'); 
-				childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
-				childComponent.id = childID;
-				node.children[childID] = childComponent;
-				node.children[childID].parent = node;
-				delete node.children[i];
-				fixIDs(childComponent);
-			}
-		}
+var fixIDs = function(node)
+{
+	if(node.children)
+	var childnames = {};
+	for(var i in node.children)
+	{
+		childnames[i] = null;
+	}
+	for(var i in childnames)
+	{
+		var childComponent = node.children[i];
+		var childName = childComponent.name || i;
+		var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName.replace(/ /g,'-'); 
+		childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
+		childComponent.id = childID;
+		node.children[childID] = childComponent;
+		node.children[childID].parent = node;
+		delete node.children[i];
+		fixIDs(childComponent);
+	}
+}
 		
-//Start the VWF server
+//Start the VWF HTTP server
 function startVWF(){
 	
 	global.activeinstances = [];
@@ -518,10 +639,11 @@ function startVWF(){
 			filename = filterinstance(filename,instance);
 			
 			
-			
+			//obey some old VWF URL formatting
 			if(uri.indexOf('/admin/'.replace(safePathRE)) != -1)
 			{
 				
+				//gets a list of all active sessions on the server, and all clients
 				if(uri.indexOf('/admin/instances'.replace(safePathRE)) != -1)
 				{	
 					
@@ -546,106 +668,112 @@ function startVWF(){
 			
 			
 			//global.log(filename);
-			c1 = libpath.existsSync(filename);
-			c2 = libpath.existsSync(filename+".yaml");
-			if(!c1 && !c2)
-			{
-					
-				 //try to find the correct support file	
-				 var appname = findAppName(filename);
-				 if(!appname)
-				 {
-					
-						filename = filename.substr(13);
-						filename = "./support/".replace(safePathRE) + filename;
-						filename = filename.replace('vwf.example.com','proxy/vwf.example.com');
-						
-				 }
-				 else
-				 {
-						
-					 filename = filename.substr(appname.length-2);
-					 if(appname == "")
-						filename = './support/client/lib/index.html'.replace(safePathRE);
-					 else	
-						filename = './support/client/lib/'.replace(safePathRE) + filename;
-					
-				 }
-
-			}
-			//file does exist, serve normally 
-			var c3 = libpath.existsSync(filename);
-			var c4 = libpath.existsSync(filename +".yaml");
-			if(c3)
-			{
-				//if requesting directory, setup instance
-				//also, redirect to current instnace name of does not end in slash
-				if (fs.statSync(filename).isDirectory()) 
-				{
-					var appname = findAppName(filename);
-					if(!appname)
-						appname = findAppName(filename+libpath.sep);
-					
-					//no instance id is given, new instance
-					if(appname && instance == null)
-					{			
-						//GenerateNewInstance(request,response,appname);
-						
-						
-						redirect(URL.pathname+"/index.html",response);
-						//console.log('redirect ' + appname+"./index.html");
-						return;
-					}
-					//instance needs to end in a slash, so redirect but keep instance id
-					if(appname && strEndsWith(URL.pathname,instance))
+			libpath.exists(filename,function(c1){
+				libpath.exists(filename+".yaml",function(c2){
+					if(!c1 && !c2)
 					{
-						RedirectToInstance(request,response,appname,"");
-						return;
-					}
-					//no app name but is directory. Not listing directories, so 404
-					if(!appname)
-					{
-						
-						_404(response);
-						
-						return;
-					}
-					
-					//this is the bootstrap html. Must have instnace and appname
-					filename = './support/client/lib/index.html'.replace(safePathRE);
-					
-					//when loading the bootstrap, you must have an instance that exists in the database
-					global.log('Appname:', appname);
-					var instanceName = appname.substr(8).replace(/\//g,'_').replace(/\\/g,'_') + instance + "_";
-					DAL.getInstance(instanceName,function(data)
-					{
-						if(data)
-							ServeFile(request,filename,response,URL);
-						else {
 							
-							redirect(filterinstance(URL.pathname,instance)+"/index.html",response);
-						}
-					});
-					return;
-				}
-				//just serve the file
-				ServeFile(request,filename,response,URL);
-				
-			}
-			else if(c4)
-			{
-				//was not found, but found if appending .yaml. Serve as yaml
-				ServeYAML(filename +".yaml",response,URL);
+						 //try to find the correct support file	
+						 var appname = findAppName(filename);
+						 if(!appname)
+						 {
+							
+								filename = filename.substr(13);
+								filename = "./support/".replace(safePathRE) + filename;
+								filename = filename.replace('vwf.example.com','proxy/vwf.example.com');
+								
+						 }
+						 else
+						 {
+								
+							 filename = filename.substr(appname.length-2);
+							 if(appname == "")
+								filename = './support/client/lib/index.html'.replace(safePathRE);
+							 else	
+								filename = './support/client/lib/'.replace(safePathRE) + filename;
+							
+						 }
 
-			}
-			// is an admin call, currently only serving instances
-			else
-			{
-				global.log("404 : " + filename)
-				_404(response);
-				
-				return;
-			}
+					}
+					//file does exist, serve normally 
+					libpath.exists(filename,function(c3){
+						libpath.exists(filename +".yaml",function(c4){
+							if(c3)
+							{
+								//if requesting directory, setup instance
+								//also, redirect to current instnace name of does not end in slash
+								fs.stat(filename,function(err,isDir)
+								{
+									if (isDir.isDirectory()) 
+									{
+										var appname = findAppName(filename);
+										if(!appname)
+											appname = findAppName(filename+libpath.sep);
+										
+										//no instance id is given, new instance
+										if(appname && instance == null)
+										{			
+											//GenerateNewInstance(request,response,appname);
+											
+											
+											redirect(URL.pathname+"/index.html",response);
+											//console.log('redirect ' + appname+"./index.html");
+											return;
+										}
+										//instance needs to end in a slash, so redirect but keep instance id
+										if(appname && strEndsWith(URL.pathname,instance))
+										{
+											RedirectToInstance(request,response,appname,"");
+											return;
+										}
+										//no app name but is directory. Not listing directories, so 404
+										if(!appname)
+										{
+											
+											_404(response);
+											
+											return;
+										}
+										
+										//this is the bootstrap html. Must have instnace and appname
+										filename = './support/client/lib/index.html'.replace(safePathRE);
+										
+										//when loading the bootstrap, you must have an instance that exists in the database
+										global.log('Appname:', appname);
+										var instanceName = appname.substr(8).replace(/\//g,'_').replace(/\\/g,'_') + instance + "_";
+										DAL.getInstance(instanceName,function(data)
+										{
+											if(data)
+												ServeFile(request,filename,response,URL);
+											else {
+												
+												redirect(filterinstance(URL.pathname,instance)+"/index.html",response);
+											}
+										});
+										return;
+									}
+									//just serve the file
+									ServeFile(request,filename,response,URL);
+								});
+							}
+							else if(c4)
+							{
+								//was not found, but found if appending .yaml. Serve as yaml
+								ServeYAML(filename +".yaml",response,URL);
+
+							}
+							// is an admin call, currently only serving instances
+							else
+							{
+								global.log("404 : " + filename)
+								_404(response);
+								
+								return;
+							}
+						});
+					});
+				});	
+			});
 		}
 		catch(e)
 		{
@@ -822,55 +950,57 @@ function startVWF(){
 			}
 		}
 		
-		var blankscene = fs.readFileSync("./public/adl/sandbox/index.vwf.yaml", 'utf8');
-		blankscene= YAML.load(blankscene);
-		
-		blankscene.id = 'index-vwf';
-		blankscene.patches= "index.vwf";
-		if(!blankscene.children)
-			blankscene.children = {};
-		//only really doing this to keep track of the ownership
-		for(var i =0; i < state.length-1; i++)
+		fs.readFile("./public/adl/sandbox/index.vwf.yaml", 'utf8',function(err,blankscene)
 		{
+			blankscene= YAML.load(blankscene);
 			
-			var childComponent = state[i];
-			var childName = state[i].name || state[i].properties.DisplayName + i;
-			var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName.replace(/ /g,'-'); 
-			childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
-			//state[i].id = childID;
-			//state2[i].id = childID;
-			blankscene.children[childName] = state2[i];
-			state[i].id = childID;
-			global.instances[namespace].state.nodes['index-vwf'].children[childID] = state[i];
-			global.instances[namespace].state.nodes['index-vwf'].children[childID].parent = global.instances[namespace].state.nodes['index-vwf'];
-			fixIDs(state[i]);
-		}
-		var props = state[state.length-1];
-		if(props)
-		{
-			if(!blankscene.properties)
-				blankscene.properties = {};
-			for(var i in props)
+			blankscene.id = 'index-vwf';
+			blankscene.patches= "index.vwf";
+			if(!blankscene.children)
+				blankscene.children = {};
+			//only really doing this to keep track of the ownership
+			for(var i =0; i < state.length-1; i++)
 			{
-				blankscene.properties[i] = props[i];
+				
+				var childComponent = state[i];
+				var childName = state[i].name || state[i].properties.DisplayName + i;
+				var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName.replace(/ /g,'-'); 
+				childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
+				//state[i].id = childID;
+				//state2[i].id = childID;
+				blankscene.children[childName] = state2[i];
+				state[i].id = childID;
+				global.instances[namespace].state.nodes['index-vwf'].children[childID] = state[i];
+				global.instances[namespace].state.nodes['index-vwf'].children[childID].parent = global.instances[namespace].state.nodes['index-vwf'];
+				fixIDs(state[i]);
 			}
-			for(var i in blankscene.properties)
+			var props = state[state.length-1];
+			if(props)
 			{
-				if( blankscene.properties[i] && blankscene.properties[i].value)
-					blankscene.properties[i] = blankscene.properties[i].value;
-				else if(blankscene.properties[i] && (blankscene.properties[i].get || blankscene.properties[i].set))
-					delete blankscene.properties[i];
+				if(!blankscene.properties)
+					blankscene.properties = {};
+				for(var i in props)
+				{
+					blankscene.properties[i] = props[i];
+				}
+				for(var i in blankscene.properties)
+				{
+					if( blankscene.properties[i] && blankscene.properties[i].value)
+						blankscene.properties[i] = blankscene.properties[i].value;
+					else if(blankscene.properties[i] && (blankscene.properties[i].get || blankscene.properties[i].set))
+						delete blankscene.properties[i];
+				}
 			}
-		}
-		//global.log(Object.keys(global.instances[namespace].state.nodes['index-vwf'].children));
-		
-		//this is a blank world, go ahead and load the default
-		
-		
-		
-		
-		socket.emit('message',{"action":"createNode","parameters":[blankscene],"time":global.instances[namespace].time});
-		socket.pending = false;
+			//global.log(Object.keys(global.instances[namespace].state.nodes['index-vwf'].children));
+			
+			//this is a blank world, go ahead and load the default
+			
+			
+			
+			
+			socket.emit('message',{"action":"createNode","parameters":[blankscene],"time":global.instances[namespace].time});
+			socket.pending = false;
+		});
 	  }
 	  //this client is not the first, we need to get the state and mark it pending
 	  else
@@ -1199,8 +1329,8 @@ function startVWF(){
 
 		});
 		  
-	}
-	//create the server
+	}  // end WebSocketConnection
+	
 	
 	
 	
@@ -1230,154 +1360,244 @@ function startVWF(){
 	   FileCache.enabled = false;
 	   console.log('server cache disabled');
 	}
-	SandboxAPI.setDAL(DAL);
-	SandboxAPI.setDataPath(datapath);
-	Shell.setDAL(DAL);
-	Landing.setDAL(DAL);
 	
-	function _301(url,response)
+	p = process.argv.indexOf('-build');
+	if(p >= 0)
 	{
-				response.writeHead(301, {
-					"Location": url 
-				});
-				response.end();
+	  //build the VWF AMD with requrie optimizer
+	  BuildVWF();
 	}
 	
-	DAL.startup(function(){
+	p = process.argv.indexOf('-min');
+	if(p >= 0)
+	{
+		FileCache.minify = true;
+	}
+	
+	var compile = false;
+	p = process.argv.indexOf('-compile');
+	if(p >= 0)
+	{
+		compile = true;
+	}
+	
+	var versioning = false;
+	p = process.argv.indexOf('-v');
+	if(p >= 0)
+	{
+		versioning = true;
+		console.log(brown + 'Versioning is on. Version is ' + global.version + reset);
+	}else
+	{
+		console.log(brown+'Versioning is off.'+reset);
+		delete global.version;
+	}	
+	
+	//301 redirect
+	function _301(url,response)
+	{
+		response.writeHead(301, {
+			"Location": url 
+		});
+		response.end();
+	}
+	
+	//Boot up sequence. May call immediately, or after build step	
+	function StartUp()
+	{
+		SandboxAPI.setDAL(DAL);
+		SandboxAPI.setDataPath(datapath);
+		Shell.setDAL(DAL);
+		Landing.setDAL(DAL);
 		
-		global.sessions = [];
-		global.adminUID = adminUID;
-		
-		//var srv = http.createServer(OnRequest).listen(port);
-		
-		app.set('layout', 'layout');
-		app.set('views', __dirname + '/public/adl/sandbox/views');
-		app.set('view engine', 'html');
-		app.engine('.html', require('hogan-express'));
 		
 		
-		//This first handler in the pipeline deal with the version numbers
-		// we append a version to the front if every request to keep the clients fresh
-		// otherwise, a user would have to know to refresh the cache every time we release
-		app.use(function(req, res, next)
-		{
-			//disable for now
-			next();
-			return;
-			//find the version number
-			var version = req.url.match(/^\/[0-9]+\//);
+		DAL.startup(function(){
 			
-			//if there was a match
-			if(version)
-			{
-				 //parse the version as an integer
-				 var versionInt = version.toString().match(/[0-9]+/);
-				 versionInt = parseInt(versionInt);
-				 
-				 
-				 
-				 //remove the version number from the request
-				 req.url =  req.url.substr(version.toString().length -1);
-				 
-				 //if the version number from the request was not the current version number
-				 //301 redirect to he proper version
-				 if(versionInt != global.version)
-				 { 
-
-					_301('/'+global.version+''+req.url,res);
-					return;
-				 
-				 }
-			}
-			//if there is no version number, redirect to the current version
-			if(!version)
+			global.sessions = [];
+			global.adminUID = adminUID;
+			
+			//var srv = http.createServer(OnRequest).listen(port);
+			
+			app.set('layout', 'layout');
+			app.set('views', __dirname + '/public/adl/sandbox/views');
+			app.set('view engine', 'html');
+			app.engine('.html', require('hogan-express'));
+			
+			
+			//This first handler in the pipeline deal with the version numbers
+			// we append a version to the front if every request to keep the clients fresh
+			// otherwise, a user would have to know to refresh the cache every time we release
+			app.use(function(req, res, next)
 			{
 				
-				_301('/'+global.version+''+req.url,res);
-				return;
-			}
-			
-			//if we got here, then there is a good version number
-			//and, we have stripped it out, so we can continue processing as if the version was not in the url
-			next();
-		
-		});
-		
-		
-		app.use(express.methodOverride());
-		
-		app.use (function(req, res, next) {
-			
-		   var data='';
-		   req.setEncoding('utf8');
-		   req.on('data', function(chunk) { 
-			  data += chunk;
-		   });
-
-		   req.on('end', function() {
-			req.body = data;
-			next();
-		   });
-		});
-//CORS support
-		app.use(function(req, res, next) {
-			
-			if(req.headers['access-control-request-headers']) {
-				res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers']);
-			}else
-			{
-				res.header('Access-Control-Allow-Headers', 'Content-Type');
-			}
-			
-			if(req.headers['Access-Control-Allow-Origin']) {
-				res.header('Access-Control-Allow-Origin', req.headers.origin);
-			}else
-			{
-				res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-			}
-			
-			if(req.headers['access-control-request-method']) {
-				res.header('Access-Control-Allow-Methods', req.headers['access-control-request-method']);
-			}else
-			{
-				res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-			}
-			
-			res.header('Access-Control-Max-Age', 60 * 60 * 24 * 365);
-			
-			if (req.method == 'OPTIONS') {
-				res.send(200);
-			}
-			else
+				//find the version number
+				var version = req.url.match(/^\/[0-9]+\//);
+				
+				//if there was a match
+				if(version)
+				{
+					 //parse the version as an integer
+					 var versionInt = version.toString().match(/[0-9]+/);
+					 versionInt = parseInt(versionInt);
+					 
+					 
+					 
+					 //remove the version number from the request
+					 req.url =  req.url.substr(version.toString().length -1);
+					 
+					 //if the version number from the request was not the current version number
+					 //301 redirect to he proper version
+					 if(versionInt != global.version)
+					 { 
+						if(global.version)
+							_301('/'+global.version+''+req.url,res);
+						else
+							_301(req.url,res);
+						return;
+					 
+					 }
+				}
+				//if there is no version number, redirect to the current version
+				if(!version && global.version)
+				{
+					
+					_301('/'+global.version+''+req.url,res);
+					return;
+				}
+				
+				//if we got here, then there is a good version number
+				//and, we have stripped it out, so we can continue processing as if the version was not in the url
 				next();
-		});
-		app.use(app.router);
-		app.get('/adl/sandbox/help', Landing.help);
-		app.get('/adl/sandbox/help/:page([a-zA-Z]+)', Landing.help);
-		app.get('/adl/sandbox', Landing.generalHandler);
-		app.get('/adl/sandbox/:page([a-zA-Z/]+)', Landing.generalHandler);		
-		
-		app.post('/adl/sandbox/admin/:page([a-zA-Z]+)', Landing.handlePostRequest);
-		app.post('/adl/sandbox/data/:action([a-zA-Z_]+)', Landing.handlePostRequest);
-		
-		app.use(OnRequest); 
-		var listen = app.listen(port);
-		
-		global.log(brown+'Admin is "' + global.adminUID+"\""+reset,0);
-		global.log(brown+'Serving on port ' + port+reset,0);
-		
-		Shell.StartShellInterface();  
-		//create socket server
-		sio = sio.listen(listen,{log:false});
-		sio.configure(function()
-		{
-		sio.set('transports', ['websocket']);
-		sio.set('heartbeat interval', 5);
-		
-		});
-		sio.sockets.on('connection', WebSocketConnection);
-	});
+			
+			});
+			
+			
+			app.use(express.methodOverride());
+			
+			//Wait until all data is loaded before continuing
+			app.use (function(req, res, next) {
+				
+			   var data='';
+			   req.setEncoding('utf8');
+			   req.on('data', function(chunk) { 
+				  data += chunk;
+			   });
 
+			   req.on('end', function() {
+				req.body = data;
+				next();
+			   });
+			});
+			//CORS support
+			app.use(function(req, res, next) {
+				
+				if(req.headers['access-control-request-headers']) {
+					res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers']);
+				}else
+				{
+					res.header('Access-Control-Allow-Headers', 'Content-Type');
+				}
+				
+				if(req.headers['Access-Control-Allow-Origin']) {
+					res.header('Access-Control-Allow-Origin', req.headers.origin);
+				}else
+				{
+					res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+				}
+				
+				if(req.headers['access-control-request-method']) {
+					res.header('Access-Control-Allow-Methods', req.headers['access-control-request-method']);
+				}else
+				{
+					res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+				}
+				
+				res.header('Access-Control-Max-Age', 60 * 60 * 24 * 365);
+				
+				if (req.method == 'OPTIONS') {
+					res.send(200);
+				}
+				else
+					next();
+			});
+			app.use(app.router);
+			app.get('/adl/sandbox/help', Landing.help);
+			app.get('/adl/sandbox/help/:page([a-zA-Z]+)', Landing.help);
+			app.get('/adl/sandbox', Landing.generalHandler);
+			app.get('/adl/sandbox/:page([a-zA-Z/]+)', Landing.generalHandler);		
+			
+			app.post('/adl/sandbox/admin/:page([a-zA-Z]+)', Landing.handlePostRequest);
+			app.post('/adl/sandbox/data/:action([a-zA-Z_]+)', Landing.handlePostRequest);
+			
+			//The file handleing logic for vwf engine files
+			app.use(OnRequest); 
+			var listen = app.listen(port);
+			
+			global.log(brown+'Admin is "' + global.adminUID+"\""+reset,0);
+			global.log(brown+'Serving on port ' + port+reset,0);
+			global.log(brown+'minify is ' + FileCache.minify+reset,0);
+			Shell.StartShellInterface();  
+			//create socket server
+			sio = sio.listen(listen,{log:false});
+			sio.configure(function()
+			{
+				//VWF requries websocket. We will not allow socket.io to fallback on flash or long polling
+				sio.set('transports', ['websocket']);
+				//Somehow, we still need to get the timeouts lower. This does tot seem to do it.
+				sio.set('heartbeat interval', 5);
+			
+			});
+			//When there is a new connection, goto WebSocketConnection.
+			sio.sockets.on('connection', WebSocketConnection);
+		});
+	} //end StartUp
+	//Use Require JS to optimize and the main application file.
+	if(compile)
+	{
+		var config = {
+		    baseUrl: './support/client/lib',
+		    name:'boot',
+		    out:'./build/boot.js'
+		};
+		
+		//This will concatenate almost 50 of the project JS files, and serve one file in it's place
+		requirejs.optimize(config, function (buildResponse) {
+		
+			console.log('Build complete');	   
+			var contents = fs.readFileSync(config.out, 'utf8');
+			//here, we read the contents of the built boot.js file
+			var path = libpath.normalize('./support/client/lib/boot.js');
+			path = libpath.resolve(__dirname, path);			
+			//we zip it, then load it into the file cache so that it can be served in place of the noraml boot.js 
+			zlib.gzip(contents,function(_,zippeddata)
+			{		   
+				    var newentry = {};				
+				    newentry.path = path;
+				    newentry.data = contents;
+				    newentry.stats = fs.statSync(config.out);
+				    newentry.zippeddata = zippeddata;
+				    newentry.datatype = "utf8";
+				    newentry.hash = hash(contents);
+				    FileCache.files.push(newentry); 
+				    //now that it's loaded into the filecache, we can delete it
+				    fs.unlinkSync(config.out);
+				    StartUp();
+			});
+		}, function(err) {
+			//there was a requireJS build error. Not a prob, keep going.
+			console.log(err);
+			StartUp();
+		});
+	
+	}else
+	{
+		//boot up the rest of the server
+		StartUp();
+	}
+	
+	
+	
 }
 
 exports.startVWF = startVWF;
