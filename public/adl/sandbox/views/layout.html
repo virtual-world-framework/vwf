@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<link rel="stylesheet" type="text/css" href="{{root}}/css/colorpicker.css" />
+	<link rel="stylesheet" type="text/css" href="{{root}}/css/colorpicker.css" /> 
     <link rel="stylesheet" media="screen" type="text/css" href="{{root}}/css/bootstrap.min.css" />
 	<link rel="stylesheet" media="screen" type="text/css" href="{{root}}/css/style.css" />
 	<style>
@@ -54,7 +54,10 @@
 		
 		$(window).load(function(){
 			//$("body").animate({opacity:1}, 500);
-			$("#loadOverlay").animate({opacity:0}, {duration:500,complete:function(){$("#loadOverlay").remove();}});
+			$("#loadOverlay").animate({opacity:0}, 500, 'swing', function(){
+				spinner.stop();
+				$("#loadOverlay").remove();
+			});
 			$("body").removeClass("bodyLoad");
 			window.onscroll = function(){};
 		});
@@ -79,9 +82,9 @@
 					<a class="headerA" href="{{root}}/user" id="userOptions" data-bind="text: user().username"></a>
 				</div>
 				<div id="login">
-					<a class="headerA" href="{{root}}/login?return=index"  id="login"  data-bind="visible:!user().isLoggedIn">Login</a>
+					<a class="headerA" href="{{root}}/login?return=worlds"  id="login"  data-bind="visible:!user().isLoggedIn">Login</a>
 					<a class="headerA" href="{{root}}/logout?return=index" id="logout" data-bind="visible:user().isLoggedIn">Logout</a>
-					<a class="headerA" href="{{root}}/signup?return=index" id="signup" data-bind="visible:!user().isLoggedIn">Create Account</a>
+					<a class="headerA" href="{{root}}/signup?return=worlds" id="signup" data-bind="visible:!user().isLoggedIn">Create Account</a>
 				</div>
 			</div>
 		</div>		

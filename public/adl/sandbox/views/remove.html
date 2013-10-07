@@ -3,7 +3,7 @@
 	$(document).ready(function()
 	{
 		getLoginInfo(false, redirect);
-		ko.applyBindings(vwfPortalModel);
+		ko.applyBindings(vwfPortalModel); 
 			
 		$.ajax('/vwfDataManager.svc/statedata?SID=' + sid,
 		{
