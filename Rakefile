@@ -166,6 +166,9 @@ namespace :test do
 
   desc "Run tests for JavaScript using QUnit"
   task :qunit do
+    phantomjs = phantomjs_binary(ENV['PHANTOMJS_BIN'])
+    next unless phantomjs
+
     dashed_line = "----------------"
 
     puts dashed_line
@@ -177,8 +180,7 @@ namespace :test do
       puts "Running #{file}"
 
       pwd = `pwd`.strip
-      phantomjs_binary = defined?( ENV['PHANTOMJS_BIN'] ) ? ENV['PHANTOMJS_BIN'] : "phantomjs"
-      output = `#{phantomjs_binary} support/client/test/run-qunit.js file://#{pwd}/#{file}`
+      output = `#{phantomjs} support/client/test/run-qunit.js file://#{pwd}/#{file}`
 
       result_lines = output.split("\n")
 
@@ -249,4 +251,25 @@ def standalone_build_env
 
     }
 
+end
+
+def phantomjs_binary(phantomjs_binary_env)
+  if phantomjs_binary_env.nil? || phantomjs_binary_env.empty?
+    output = %x[which phantomjs]
+    unless output.empty?
+      return "phantomjs"
+    else
+      puts "The QUnit tests require phantomjs. Please install before running."
+      return false
+    end
+  else
+    if File.exists?(phantomjs_binary_env) && File.executable?(phantomjs_binary_env)
+      return phantomjs_binary_env
+    elsif ! %x[which #{phantomjs_binary_env}].empty?
+      return "phantomjs"
+    else
+      puts "The QUnit tests require phantomjs. Please install before running."
+      return false
+    end
+  end
 end
