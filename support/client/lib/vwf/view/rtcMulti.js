@@ -121,7 +121,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             // e.extra: extra data passed by the user
             // e.userid: id of the user stream
             this.connection.onstream = function( e ) {
-                console.info( e.type + " ======= this.connection.onstream ====== " )
+                //console.info( e.type + " ======= this.connection.onstream ====== " )
 
                 var username, color, videoMoniker;
                 var conn = getClientNode.call( self, e.userid );
@@ -293,14 +293,14 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             if ( client ) {
                 if ( this.local.ID == childID ){
                     
-                    console.info( "setting userid: " + this.connection.userid );
+                    //console.info( "setting userid: " + this.connection.userid );
                     this.kernel.setProperty( childID, "userid", this.connection.userid ); 
 
                     // this.connection.open( this.sessionid ); 
                     // this may only need to be called when the first
                     // client joins, not exactly sure how we will know that
 
-                    console.info( "OPENING Connection" )
+                    //console.info( "OPENING Connection" )
                     this.connection.open();
                    
                     var remoteClient = undefined;
@@ -573,29 +573,15 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             }
         },
 
-        gotProperty: function( nodeID, propertyName, propertyValue ) {
+        // gotProperty: function( nodeID, propertyName, propertyValue ) {
 
-            if ( this.debugVwf.properties || this.debugVwf.getting ) {
-                this.kernel.logger.infox( "   G === gotProperty ", nodeID, propertyName, propertyValue );
-            }
-            var value = undefined;
+        //     if ( this.debugVwf.properties || this.debugVwf.getting ) {
+        //         this.kernel.logger.infox( "   G === gotProperty ", nodeID, propertyName, propertyValue );
+        //     }
+        //     var value = undefined;
 
-            //var client = this.state.connections[ nodeID ];
-            // if ( client ) {
-            //     if ( this.local.ID == nodeID ) {
-            //         // local client
-            //         switch( propertyName ) {
-            //             case "userid":
-            //                 value = this.connection.userid;
-            //                 break;
-            //         }
-            //     } else {
-            //         // non local client
-            //     }
-            // }
-
-            return value;
-        },
+        //     return value;
+        // },
 
         calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
             
