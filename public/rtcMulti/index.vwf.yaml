@@ -32,11 +32,6 @@ children:
 scripts:
 - |
     this.initialize = function(){
-      this.future( 0 ).initializeCamera();
-    }
-
-    this.initializeCamera = function() {
-      this.camera.navmode = "none";
     }
 
     this.createConnection = function( moniker, loginName, mediaSharing ) {
