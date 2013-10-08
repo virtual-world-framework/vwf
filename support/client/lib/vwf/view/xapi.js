@@ -17,7 +17,22 @@ define( ["module", "vwf/view", "vwf/view/editorview/sha256", "vwf/view/editorvie
 
 		calledMethod: function(id,fn,params)
 		{
-			if( ['xapiConfigure'].indexOf(fn) != -1 )
+			var methods = [
+				'xapi_configure',
+				'xapi_getActivities',
+				'xapi_getActivityProfile',
+				'xapi_getAgentProfile',
+				'xapi_getAgents',
+				'xapi_getState',
+				'xapi_getStatements',
+				'xapi_prepareStatement',
+				'xapi_sendActivityProfile',
+				'xapi_sendAgentProfile',
+				'xapi_sendState',
+				'xapi_sendStatement',
+				'xapi_sendStatements'];
+
+			if( methods.indexOf(fn) != -1 )
 			{
 				console.log('XAPI:', id, fn, params);
 
@@ -29,7 +44,7 @@ define( ["module", "vwf/view", "vwf/view/editorview/sha256", "vwf/view/editorvie
 				}
 
 				// if they're trying to initialize, do that
-				else if( fn === 'xapiConfigure' ){
+				else if( fn === 'xapi_configure' ){
 					this.wrapperOf[id] = new XAPIWrapper(params);
 					return;
 				}
@@ -44,9 +59,23 @@ define( ["module", "vwf/view", "vwf/view/editorview/sha256", "vwf/view/editorvie
 				// select based on call method
 				switch(fn)
 				{
-					case 'xapiConfigure':
+					case 'xapi_configure':
 						wrapper.changeConfig(params);
 						break;
+					case 'xapi_getActivities':
+					case 'xapi_getActivityProfile':
+					case 'xapi_getAgentProfile':
+					case 'xapi_getAgents':
+					case 'xapi_getState':
+					case 'xapi_getStatements':
+					case 'xapi_prepareStatement':
+					case 'xapi_sendActivityProfile':
+					case 'xapi_sendAgentProfile':
+					case 'xapi_sendState':
+					case 'xapi_sendStatement':
+					case 'xapi_sendStatements':
+						break;
+
 				}
 			}
 		}

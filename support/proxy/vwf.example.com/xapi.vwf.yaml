@@ -3,8 +3,82 @@ properties:
         get: |
             return {
 
-                configure: function(config){
-                    vwf.callMethod(this.id, 'xapiConfigure', config);
-                }.bind(this)
+                'configure':
+                    function(){
+                        var args = Array.prototype.slice.call(arguments);
+                        vwf.callMethod(this.id, 'xapiConfigure', args);
+                    }.bind(this),
+
+				'getActivities':
+                    function(){
+                        var args = Array.prototype.slice.call(arguments);
+                        vwf.callMethod(this.id, 'xapi_getActivities', args);
+                    }.bind(this),
+
+				'getActivityProfile':
+                    function(){
+                        var args = Array.prototype.slice.call(arguments);
+                        vwf.callMethod(this.id, 'xapi_getActivityProfile', args);
+                    }.bind(this),
+
+				'getAgentProfile':
+                    function(){
+                        var args = Array.prototype.slice.call(arguments);
+                        vwf.callMethod(this.id, 'xapi_getAgentProfile', args);
+                    }.bind(this),
+
+				'getAgents':
+                    function(){
+                        var args = Array.prototype.slice.call(arguments);
+                        vwf.callMethod(this.id, 'xapi_getAgents', args);
+                    }.bind(this),
+
+				'getState':
+                    function(){
+                        var args = Array.prototype.slice.call(arguments);
+                        vwf.callMethod(this.id, 'xapi_getState', args);
+                    }.bind(this),
+
+				'getStatements':
+                    function(){
+                        var args = Array.prototype.slice.call(arguments);
+                        vwf.callMethod(this.id, 'xapi_getStatements', args);
+                    }.bind(this),
+
+				'prepareStatement':
+                    function(){
+                        var args = Array.prototype.slice.call(arguments);
+                        vwf.callMethod(this.id, 'xapi_prepareStatement', args);
+                    }.bind(this),
+
+				'sendActivityProfile':
+                    function(){
+                        var args = Array.prototype.slice.call(arguments);
+                        vwf.callMethod(this.id, 'xapi_sendActivityProfile', args);
+                    }.bind(this),
+
+				'sendAgentProfile':
+                    function(){
+                        var args = Array.prototype.slice.call(arguments);
+                        vwf.callMethod(this.id, 'xapi_sendAgentProfile', args);
+                    }.bind(this),
+
+				'sendState':
+                    function(){
+                        var args = Array.prototype.slice.call(arguments);
+                        vwf.callMethod(this.id, 'xapi_sendState', args);
+                    }.bind(this),
+
+				'sendStatement':
+                    function(){
+                        var args = Array.prototype.slice.call(arguments);
+                        vwf.callMethod(this.id, 'xapi_sendStatement', args);
+                    }.bind(this),
+
+				'sendStatements':
+                    function(){
+                        var args = Array.prototype.slice.call(arguments);
+                        vwf.callMethod(this.id, 'xapi_sendStatements', args);
+                    }.bind(this)
 
             }
