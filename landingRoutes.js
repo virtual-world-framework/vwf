@@ -84,12 +84,22 @@ exports.handlePostRequest = function(req, res, next){
 	var data = req.body ? JSON.parse(req.body) : '';
 	var sessionData = global.SandboxAPI.getSessionData(req);
 	
-	if(!sessionData || sessionData.UID != global.adminUID){
+	//Temporarily commenting out authorization
+	/*if(!sessionData || sessionData.UID != global.adminUID){
 		next();
 		return;
-	}
+	}*/
 	
 	switch(req.params.action){
+	
+		case "get_world_test":
+			var worldId = "_adl_sandbox_" + data.id + "_";
+			DAL.copyInstance(worldId, function(result){
+				res.end("Hi there: " + JSON.stringify(result));
+			});
+
+			break;
+	
 		case "delete_users":			
 			DAL.deleteUsers(data, function(){
 				res.end("done");

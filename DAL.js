@@ -1030,8 +1030,41 @@ function searchInstances (terms,cb)
 
 };
 
+var ValidIDChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+function makeid()
+{
+    var text = "";
+    
+
+    for( var i=0; i < 16; i++ )
+        text += ValidIDChars.charAt(Math.floor(Math.random() * ValidIDChars.length));
+
+    return text;
+}
 
 
+function copyInstance (id,cb){
+
+	getInstance(id, function(instance){
+		
+		if(instance){
+			var newId = '_adl_sandbox_' + makeid() + '_';
+			createInstance (newId, instance, function(success){
+				
+				//From here, copy state file
+				if(success){
+					var oldStateFile = datapath + '/States/' + id + '/state', newStateFile = datapath + '/States/' + newId + '/state';
+					fs.createReadStream(oldStateFile).pipe(fs.createWriteStream(newStateFile));
+					cb(newId);
+				}
+				
+				else cb(false);
+			});
+		}
+		
+		else cb(false);	
+	});
+}
 
 function startup(callback)
 {
@@ -1086,6 +1119,7 @@ function startup(callback)
 			exports.createInstance = createInstance;
 			exports.deleteInstance = deleteInstance;
 			exports.deleteInstances = deleteInstances;
+			exports.copyInstance = copyInstance;
 			
 			exports.getUsers = getUsers;
 			exports.getInstances = getInstances;
