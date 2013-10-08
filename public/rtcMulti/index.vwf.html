@@ -31,128 +31,125 @@
     <script type="text/javascript">
 
         
-        var appRoot = vwf_view.kernel.application();
-        var local = { 
-            "client": {
-                "name": "",
-                "captureAudio": true,
-                "captureVideo": true
+      var appRoot = vwf_view.kernel.application();
+      var local = { 
+        "client": {
+          "name": "",
+          "captureAudio": true,
+          "captureVideo": true
+        },
+      };
+
+      $( function() {
+
+        $( "#loginDialog" ).dialog( { 
+          "modal": true, 
+          "resizable": false,
+          "draggable": true,
+          "zIndex": 4000,
+          "buttons": {
+            "Login": function() {
+              local.client.name = $( '#userName' ).val().replace(/ /g,"_");
+              clientName = local.client.name.replace(/([^0-9A-Za-z])/g,"");
+
+              local.client.captureVideo = $( '#capVideo' )[0].checked;
+              local.client.captureAudio = $( '#capAudio' )[0].checked;
+
+              var capture = { 
+                "audio": local.client.captureAudio, 
+                "video": local.client.captureVideo
+              };
+
+              $( "#main" ).show();
+              $( "#participantPanes" ).show();
+              $( "#toolbox" ).show();
+              $( "#wrapper" ).show(); 
+
+              $( this ).dialog( "close" );
+
+              var parms = [ vwf_view.kernel.moniker(), local.client.name, capture ];
+              vwf_view.kernel.callMethod( appRoot, "createConnection", parms );
             },
-        };
+          }
+        } );
 
-        $( function() {
-
-            $( "#loginDialog" ).dialog( { 
-                "modal": true, 
-                "resizable": false,
-                "draggable": true,
-                "zIndex": 4000,
-                "buttons": {
-                    "Login": function() {
-                        local.client.name = $( '#userName' ).val().replace(/ /g,"_");
-                        clientName = local.client.name.replace(/([^0-9A-Za-z])/g,"");
-
-                        local.client.captureVideo = $( '#capVideo' )[0].checked;
-                        local.client.captureAudio = $( '#capAudio' )[0].checked;
-
-                        var capture = { 
-                            "audio": local.client.captureAudio, 
-                            "video": local.client.captureVideo
-                        };
-
-                        $( "#main" ).show();
-                        $( "#participantPanes" ).show();
-                        $( "#toolbox" ).show();
-                        $( "#wrapper" ).show(); 
-
-                        $( this ).dialog( "close" );
-
-                        var parms = [ vwf_view.kernel.moniker(), local.client.name, capture ];
-                        vwf_view.kernel.callMethod( appRoot, "createConnection", parms );
-                    },
-                }
-            } );
-
-            $( "#loginDialog" ).keydown( function( e ) {
-                e.stopPropagation();
-            }).keyup( function( e ) {
-                if( e.keyCode == $.ui.keyCode.ENTER ) {
-                  $( "#loginButton" ).click();
-                }
-                e.stopPropagation();
-            }).on( 'shown', function () {
-                $( '#userName' ).focus();
-            });
+        $( "#loginDialog" ).keydown( function( e ) {
+            e.stopPropagation();
+        }).keyup( function( e ) {
+            if( e.keyCode == $.ui.keyCode.ENTER ) {
+              $( "#loginButton" ).click();
+            }
+            e.stopPropagation();
+        }).on( 'shown', function () {
+            $( '#userName' ).focus();
         });
+      });
 
         $(document).ready( function(){ 
-            //console.info( "$document is ready!" );
-            $( "#main" ).hide();
-            $( "#mainVideoDivOverlay" ).hide();
-            $( "#participantPanes" ).hide();
-            $( "#wrapper" ).hide();
+          //console.info( "$document is ready!" );
+          $( "#main" ).hide();
+          $( "#mainVideoDivOverlay" ).hide();
+          $( "#participantPanes" ).hide();
+          $( "#wrapper" ).hide();
 
-            $( window ).resize( function() {
-                $( '#main' ).width( $( window ).width() - 10);
-                $( '#main' ).height( $( window ).height() - 80);
-                var boxHeight = $( '#main' ).height();
-                var boxWidth = $( '#main' ).width();
-                var initW = $( '#mainVideo' ).width();
-                var initH = $( '#mainVideo' ).height();
-                var ratio = initH / initW;
-                var imgWidth = boxWidth;
-                var imgHeight = boxWidth * ratio;
-                if ( imgHeight > boxHeight ) {
-                    imgHeight = boxHeight;
-                    imgWidth = imgHeight / ratio;
-                }           
-                $( '#mainVideo' ).width( imgWidth ).height( imgHeight );
-                $( '#main' ).width( $( '#mainVideo' ).width());
-                $( '#main' ).height( $( '#mainVideo' ).height());
-            } );        
+          $( window ).resize( function() {
+            $( '#main' ).width( $( window ).width() - 10);
+            $( '#main' ).height( $( window ).height() - 80);
+            var boxHeight = $( '#main' ).height();
+            var boxWidth = $( '#main' ).width();
+            var initW = $( '#mainVideo' ).width();
+            var initH = $( '#mainVideo' ).height();
+            var ratio = initH / initW;
+            var imgWidth = boxWidth;
+            var imgHeight = boxWidth * ratio;
+            if ( imgHeight > boxHeight ) {
+              imgHeight = boxHeight;
+              imgWidth = imgHeight / ratio;
+            }           
+            $( '#mainVideo' ).width( imgWidth ).height( imgHeight );
+            $( '#main' ).width( $( '#mainVideo' ).width() );
+            $( '#main' ).height( $( '#mainVideo' ).height() );
+          } );        
         } );
 
         // VWF view - call Method
         vwf_view.calledMethod = function( nodeID, methodName, methodParameters, methodValue ) {
             
-            if ( !methodParameters  ) {
-                return;
-            }
+          if ( !methodParameters  ) {
+            return;
+          }
 
-            switch ( methodName ) {
+          switch ( methodName ) {
 
-                case "createVideo":
-                    var moniker = methodParameters[1];
-                    if ( moniker && moniker == this.kernel.moniker() ) {
-                        var parms = methodParameters[0];
+            case "createVideo":
+              var moniker = methodParameters[1];
+              if ( moniker && moniker == this.kernel.moniker() ) {
+                var parms = methodParameters[0];
 
-                        // defined in videoWindow.js
-                        newVideoWindow( parms.ID, parms.name, parms.url, parms.color, parms.muted, parms.width, parms.height );
-                    }
-                    break;
+                // defined in videoWindow.js
+                newVideoWindow( parms.ID, parms.name, parms.url, parms.color, parms.muted, parms.width, parms.height );
+              }
+              break;
 
-                case "removeVideo":
-                    // defined in videoWindow.js
-                    removeWindow( methodParameters[0] );
-                    break;
-            
-            }
+            case "removeVideo":
+              // defined in videoWindow.js
+              removeWindow( methodParameters[0] );
+              break;
+          
+          }
         }
 
         // VWF view - fired event
         vwf_view.firedEvent = function(nodeId, eventName, eventArgs) {
             
-            if ( eventName == "participantRemoved" ) {
-                var clientMoniker = eventArgs[0];
-                var divId = clientMap[ clientMoniker ].divId;
+          if ( eventName == "participantRemoved" ) {
+            var clientMoniker = eventArgs[0];
+            var divId = clientMap[ clientMoniker ].divId;
 
-                // Only the third to join and on have divs associated w/ them (the second was the big 
-                // screen in the back, which, for now, we are treating differently - it freezes when the 
-                // participant leaves)
-                if ( divId ) {
-                    removeWindow( divId );
-                }
+            if ( divId ) {
+                removeWindow( divId );
             }
+          }
 
         }   
 
