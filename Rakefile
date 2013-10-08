@@ -177,7 +177,7 @@ namespace :test do
       puts "Running #{file}"
 
       pwd = `pwd`.strip
-      phantomjs_binary = defined?( PHANTOMJS_HOME ) ? PHANTOMJS_HOME : "phantomjs"
+      phantomjs_binary = defined?( ENV['PHANTOMJS_BIN'] ) ? ENV['PHANTOMJS_BIN'] : "phantomjs"
       output = `#{phantomjs_binary} support/client/test/run-qunit.js file://#{pwd}/#{file}`
 
       result_lines = output.split("\n")
