@@ -498,6 +498,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         if (this.editorOpen && this.editorView == 1) // Hierarchy view open
         {
             $(topdownName).hide('slide', {direction: 'right'}, 175);
+            $(topdownName).empty();
             $(this.clientList).hide();
             $(this.timeline).hide();
             $(this.about).hide();
