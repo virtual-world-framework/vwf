@@ -67,6 +67,7 @@
 								<ul>
 									<li><a href='reqs.html' title='Requirements'>Requirements</a></li>
 									<li><a href='install.html' title='Installation'>Installation</a></li>
+									<li><a href='testing.html' title='Testing'>Testing</a></li>
 									<li><a href='architecture.html' title='Architecture'>Architecture</a></li>
 									<li><a href='components.html' title='Components'>Components</a></li>
 									<li><a href='cameras.html' title='Cameras'>Cameras</a></li>
