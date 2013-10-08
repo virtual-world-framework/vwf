@@ -83,7 +83,7 @@ function swapPanes( divId ) {
 
 }
 
-function newVideoWindow( id, title, url, color, muted, width, height ) {
+function newVideoWindow( id, title, url, color, isSelf, width, height ) {
 
   //--------------------------
   // Set up window parameters
@@ -167,11 +167,14 @@ function newVideoWindow( id, title, url, color, muted, width, height ) {
   {
     var buttonName = newWin.buttonName = "button-" + divId;
     var buttonHtml = "<div class='btn-group dropup' id='"+buttonName+"'><button class='btn btn-success' id='"+buttonName+"-button'>"+title+"</button>" + 
-      "<button class='btn btn-success dropdown-toggle' data-toggle='dropdown'><span class='caret'></span></button>" +
-      "<ul class='dropdown-menu pull-right'><li>" +
-      "<a id='"+buttonName+"-reset' href='#'>Reset</a>" + 
-      "<a id='"+buttonName+"-share' href='#'>Share</a>" +
-      "</li></ul></div>";
+        "<button class='btn btn-success dropdown-toggle' data-toggle='dropdown'><span class='caret'></span></button>" +
+        "<ul class='dropdown-menu pull-right'><li>" +
+        "<a id='"+buttonName+"-reset' href='#'>Reset</a>";
+
+    if ( isSelf ) { 
+        buttonHtml += "<a id='"+buttonName+"-share' href='#'>Share</a>";
+    }
+    buttonHtml += "</li></ul></div>";
     
     $appBar.append( buttonHtml );
     
@@ -181,16 +184,19 @@ function newVideoWindow( id, title, url, color, muted, width, height ) {
     $("#" + buttonName + "-reset").click(function() {
       resetPosition( divId );
     });
-    $("#" + buttonName + "-share").click(function() {
-      shareDesktop( divId );
-    });
+
+    if ( isSelf ) {
+        $("#" + buttonName + "-share").click(function() {
+            shareDesktop( divId );
+        });
+    }
   } 
 
   //---------------------------------
   // Specialize window based on type
   //---------------------------------
 	var videoId = newWin.videoId = "video-" + divId;
-	var mutedAttr = muted ? "muted " : "";
+	var mutedAttr = isSelf ? "muted " : "";
   if ( width === undefined ) { width = 320; }
   if ( height === undefined ) { height = 240; }
 
@@ -207,7 +213,7 @@ function newVideoWindow( id, title, url, color, muted, width, height ) {
       if ( url ) {
         videoE.src = url;
       }
-      if ( muted ) {
+      if ( isSelf ) {
           videoE.muted = true;  // firefox isn't mapping the muted property correctly
       }
   } 
