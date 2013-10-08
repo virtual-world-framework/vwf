@@ -30,14 +30,16 @@ end
 task :full do 
 end
 
+desc "Clean up the generated web site files."
+
 task :clean do 
 	# Clean the web folders of generated html
 	sh "rm -rf web/*.html web/**/*.html"
 end
 
+desc "Build the web site."
 
 task :web => "web/catalog.html"  do
-
 
     # Add the build tools to the path.
     original_path = ENV["PATH"]
