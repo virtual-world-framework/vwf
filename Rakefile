@@ -180,13 +180,13 @@ namespace :test do
       puts "Running #{file}"
 
       pwd = `pwd`.strip
-      output = `#{phantomjs} support/client/test/run-qunit.js file://#{pwd}/#{file}`
+      output = `#{phantomjs} support/client/test/run-qunit.js #{file}`
 
       result_lines = output.split("\n")
 
       result = result_lines[-2]
       failed = false
-      unless result.empty?
+      unless result.nil? || result.empty?
         pass_count += result.split(" ")[0].to_i
         total += result.split(" ")[3].to_i
         this_fail_count = result.split(" ")[5].to_i
