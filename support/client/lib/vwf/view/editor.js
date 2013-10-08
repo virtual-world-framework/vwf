@@ -194,21 +194,21 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             var property = node.properties[ propertyName ] = {
                 name: propertyName,
                 rawValue: propertyValue,
-				value: undefined,
-				getValue: function() {
-				    var propertyValue;
-				    if ( this.value == undefined ) {
+                value: undefined,
+                getValue: function() {
+                    var propertyValue;
+                    if ( this.value == undefined ) {
                         try {
-						    propertyValue = utility.transform( this.rawValue, utility.transforms.transit );
-							this.value = JSON.stringify( propertyValue );
-				        } catch (e) {
-						    this.logger.warnx( "createdProperty", nodeID, this.propertyName, this.rawValue,
-							    "stringify error:", e.message );
-						    this.value = this.rawValue;
-					    }
-					}
-					return this.value;
-				}
+                            propertyValue = utility.transform( this.rawValue, utility.transforms.transit );
+                            this.value = JSON.stringify( propertyValue );
+                        } catch (e) {
+                            this.logger.warnx( "createdProperty", nodeID, this.propertyName, this.rawValue,
+                                "stringify error:", e.message );
+                            this.value = this.rawValue;
+                        }
+                    }
+                    return this.value;
+                }
             };
             
             node.properties.push( property );
@@ -229,16 +229,16 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         satProperty: function (nodeID, propertyName, propertyValue) {
             var node = this.nodes[ nodeID ];
             if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
-			node.properties[ propertyName ].value = undefined;
-			node.properties[ propertyName ].rawValue = propertyValue;
-			
-			if ( ( this.editorView == 1 ) && ( this.currentNodeID == nodeID ) ) {
+            node.properties[ propertyName ].value = undefined;
+            node.properties[ propertyName ].rawValue = propertyValue;
+            
+            if ( ( this.editorView == 1 ) && ( this.currentNodeID == nodeID ) ) {
                 var nodeIDAttribute = $.encoder.encodeForAlphaNumeric(nodeID); // $.encoder.encodeForHTMLAttribute("id", nodeID, true);
                 var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", propertyName, true);
             
                 // No need to escape propertyValue, because .val does its own escaping
                 $( '#input-' + nodeIDAttribute + '-' + propertyNameAttribute ).val( node.properties[ propertyName ].getValue() );
-	        }
+            }
         },
         
         //gotProperty: [ /* nodeID, propertyName, propertyValue */ ],
