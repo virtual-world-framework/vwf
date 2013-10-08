@@ -83,7 +83,7 @@ function swapPanes( divId ) {
 
 }
 
-function newWindow( id, title, type, url, color, muted, width, height ) {
+function newVideoWindow( id, title, url, color, muted, width, height ) {
 
   //--------------------------
   // Set up window parameters
@@ -91,7 +91,6 @@ function newWindow( id, title, type, url, color, muted, width, height ) {
   var aspectRatio = 4 / 3;
   var newWin = windowsCreated[ id ] = {
     "title": title,
-    "type": type,
     "url": url,
     "color": color
   };  // the id should be unique
@@ -117,97 +116,50 @@ function newWindow( id, title, type, url, color, muted, width, height ) {
   // Set up type-specific parameters
   //---------------------------------
 
-  // Set up variables for element creation
-  switch ( type ) {
-    case "canvas":
-      $container = $('#contentPanes');
-      classString = "'appDiv vnc'";
-      resizeFunction = resizeCanvas;
-      break;
-    case "html":
-      $container = $('#contentPanes');
-      classString = "'appDiv vwfApp'";
-      resizeFunction = resizeHtml;
-      break;
-    case "video":
-      $container = (numClients % 8) < 4 ? $('#panesRight') : $('#panesLeft');
-      classString = "'smallDiv video'";
-      numClients++;
-      break;
-  }
+  $container = (numClients % 8) < 4 ? $('#panesRight') : $('#panesLeft');
+  classString = "'smallDiv video'";
+  numClients++;
   
   //-------------------
   // Create the window
   //-------------------
 
-  // Set up element
- switch ( type ) {
-	case "video":
-		$container.append(
-			"<div id='"+ divId + "' class=" + classString + " style='border-color:" + borderColor + ";'>" +
-			"<i id='minimize-" + divId + "' class='minimize icon-chevron-down icon-white' alt='' onclick='minimize(this.id.substr(9));'/>" +
-			"</div>"
-		);
-		var $div = $( divSelector );
-		if ( width && height ) {
-      aspectRatio = width / height;
-    }
+  $container.append(
+    "<div id='"+ divId + "' class=" + classString + " style='border-color:" + borderColor + ";'>" +
+    "<i id='minimize-" + divId + "' class='minimize icon-chevron-down icon-white' alt='' onclick='minimize(this.id.substr(9));'/>" +
+    "</div>"
+  );
+  var $div = $( divSelector );
+  if ( width && height ) {
+    aspectRatio = width / height;
+  }
 
-    $div.resizable( {
-      aspectRatio: aspectRatio,
-			handles: 'ne, se, sw, nw',
-			minHeight: 125,
-      minWidth: 170
-		});
-		
-		$div.draggable({
-      containment: "window",
-			cancel: "#container-"+divId
-    });
-		
-		$div.mousedown(function() {
-			$('#panesRight').children().css( "z-index", 3 );
-			$('#panesLeft').children().css( "z-index", 3 );
-			$('#contentPanes').children().css( "z-index", 3 );
-			mainDiv.css('z-index', 0);
-			$(this).css('z-index', 4);
-			disablePointerEvents();
-		});
-			
-		$div.mouseup(enablePointerEvents);
-		
-   	$div.data("originalSize", {width: $div.width(), height: $div.height()});
-		break;
-	default:	
-		$container.append(
-		"<div id='"+ divId + "' class=" + classString + " style='border-color:" + borderColor + "'>" +
-		  "<i id='minimize-" + divId + "' class='minimize icon-chevron-down icon-white' alt='' onclick='minimize(this.id.substr(9));'/>" +
-		  "<div id='"+ divId + "-overlay' width='100%' height='100%'<p>" + title + "</p></div>" +
-		"</div>"
-	  );
-		  var $div = $(divSelector);
-		  $div.draggable( {
-  			containment: "window",
-  			cancel: "#container-"+divId
-  		  } ).resizable( {
-  			minWidth: 206, //This is the smallest that the VNC window can be w/o its buttons wrapping
-  			minHeight: 60,
-  			handles: 'ne, se, sw, nw',
-  			autoHide: true,
-  			resize: function(e) { resizeFunction($(this)); }
-		  }).mousedown( function() {
-			$('#panesRight').children().css( "z-index", 3 );
-			$('#panesLeft').children().css( "z-index", 3 );
-			$('#contentPanes').children().css( "z-index", 3 );
-			mainDiv.css('z-index', 0);
-			$(this).css('z-index', 4);
+  $div.resizable( {
+    aspectRatio: aspectRatio,
+    handles: 'ne, se, sw, nw',
+    minHeight: 125,
+    minWidth: 170
+  });
 
-			// Disable pointer events for any canvas, iframes or videos, so they won't steal the mouse pointer during resize
-			disablePointerEvents();
-    }).mouseup( enablePointerEvents );
+  $div.draggable({
+    containment: "window",
+    cancel: "#container-"+divId
+  });
 
-		break;
- }
+  $div.mousedown( function() {
+    
+    $( '#panesRight' ).children().css( "z-index", 3 );
+    $( '#panesLeft' ).children().css( "z-index", 3 );
+    mainDiv.css( 'z-index', 0 );
+    $( this ).css( 'z-index', 4 );
+    disablePointerEvents();
+    
+  });
+
+  $div.mouseup(enablePointerEvents);
+
+  $div.data("originalSize", {width: $div.width(), height: $div.height()});
+
   $div.data("originalOffset", $div.offset());
  
   var $appBar = $("#appBar");
@@ -231,73 +183,28 @@ function newWindow( id, title, type, url, color, muted, width, height ) {
   //---------------------------------
   // Specialize window based on type
   //---------------------------------
+	var videoId = newWin.videoId = "video-" + divId;
+	var mutedAttr = muted ? "muted " : "";
+  if ( width === undefined ) { width = 320; }
+  if ( height === undefined ) { height = 240; }
 
-  switch (type) {
-    
-    case "canvas":
-      $div.append(
-        "<i id='scale-" + divId + "' class='scale icon-chevron-up icon-white' alt='' onclick='scale(this.id.substr(6));'/>" +
-        "<i id='exit-" + divId + "' class='exit icon-remove-circle icon-white' alt='' onclick='removeWindow(this.id.substr(5));'/>" +
-        "<div id='container-" + divId +"' class='canvasContainer'>" +
-          "<canvas id='canvas-" + divId + "' src='" + url + "' />" +
-        "</div>" +
-        "<div class='btn-group' id='ctrlaltdel-" + divId + "'><button class='btn btn-info' onclick='ctrlaltdel(this.id.substr(11));'>CTRL-ALT-DEL</button></div>" +
-        "<div class='btn-group' id='vnccontrol-" + divId + "'><button class='btn btn-info switchVNCControl' onclick='controlVnc(this.parentNode.id.substr(11));'></button></div>"
-      );
+  $div.append(
+		"<i id='enlarge-" + divId + "' style='position:absolute;right:5px;top:5px;z-index: 4;'  alt='' onclick='swapPanes(this.id.substr(8));' class='icon-chevron-up icon-white'/>" +
+		"<video id='" + videoId + "' width='"+width+"' height='"+height+"' loop='loop' autoplay "+mutedAttr+"style='position: absolute; left: 0; top: 0; z-index: 2;width:100%;height:100%;' />" +
+		"<div id='"+ divId + "-overlay' style='position: absolute; left: 0; top: 0; z-index: 2;'>" +
+		"<span class='label label-inverse' style='margin-left:5px;margin-top:5px;'>" + title + "</span>"+
+		"</div>"
+	);  
 
-      var $canvasContainer = newWin.canvasContainer = $('#container-'+divId);
-      var $canvas = newWin.canvas = $('#canvas-'+divId);
-      // $canvas.resize( function () {
-        // $div.width( $canvas.width()+20 );
-        // $canvasContainer.height( $canvas.height()+5 );
-        // $canvasContainer.width( $canvas.width()+5 );
-        // if($canvasContainer.css('overflow') == 'visible') {
-          // $canvas.height( $div.height()-65 );
-        // }
-        // else {
-          // $canvas.width('').height('');
-        // }
-      // });
-      break;
-
-    case "html":
-      var iframeId = newWin.iframeId  = "iframe-" + divId;
-      var iframeWidth = $div.width() - 20;
-      var iframeHeight = $div.height() - 45;
-      $div.append(
-        "<i id='exit-" + divId + "' class='exit icon-remove-circle icon-white' alt='' onclick='removeWindow(this.id.substr(5));'/>" +
-        "<iframe id='" + iframeId + "' width='" + iframeWidth + "' height='" + iframeHeight + "' src='" + url +"' />"
-      );
-      break;
-
-		case "video":
-			var videoId = newWin.videoId = "video-" + divId;
-			var mutedAttr = muted ? "muted " : "";
-      if ( width === undefined ) { width = 320; }
-      if ( height === undefined ) { height = 240; }
-
-      $div.append(
-				"<i id='enlarge-" + divId + "' style='position:absolute;right:5px;top:5px;z-index: 4;'  alt='' onclick='swapPanes(this.id.substr(8));' class='icon-chevron-up icon-white'/>" +
-				"<video id='" + videoId + "' width='"+width+"' height='"+height+"' loop='loop' autoplay "+mutedAttr+"style='position: absolute; left: 0; top: 0; z-index: 2;width:100%;height:100%;' />" +
-				"<div id='"+ divId + "-overlay' style='position: absolute; left: 0; top: 0; z-index: 2;'>" +
-				"<span class='label label-inverse' style='margin-left:5px;margin-top:5px;'>" + title + "</span>"+
-				"</div>"
-			);  
-
-      var videoE = $( '#'+ videoId )[0];
-      if ( videoE ) {
-          if ( url ) {
-            videoE.src = url;
-          }
-          if ( muted ) {
-              videoE.muted = true;  // firefox isn't mapping the muted property correctly
-          }
-      } 
-			break;
-
-		default:
-			break;
-  }
+  var videoE = $( '#'+ videoId )[0];
+  if ( videoE ) {
+      if ( url ) {
+        videoE.src = url;
+      }
+      if ( muted ) {
+          videoE.muted = true;  // firefox isn't mapping the muted property correctly
+      }
+  } 
 
   windowIndex++;  
   return $div; 
@@ -317,26 +224,20 @@ function removeWindow( id ) {
 function resizeCanvas( jQueryWindow ) {
   var $container = jQueryWindow.children(".canvasContainer");
   var $canvas = $container.children();
-	if ($container.css('overflow') == 'scroll') {
+	
+  if ($container.css('overflow') == 'scroll') {
 		// Unset canvas width and height so it renders VNC at full scale
 		$canvas.width( jQueryWindow.width() - 20 );
 		$canvas.height( jQueryWindow.height() - 65 );
 		$container.height($canvas.height() + 5);
 		$container.width($canvas.width() + 5);
 		$canvas.width('').height('');
-	}
-	else {
-  		$canvas.width( jQueryWindow.width() - 20 );
+	} else {
+  	$canvas.width( jQueryWindow.width() - 20 );
 		$canvas.height( jQueryWindow.height() - 65 );
 		$container.height($canvas.height() + 5);
 		$container.width($canvas.width() + 5);
 	}
-}
-
-function resizeHtml(jQueryWindow) {
-  var $iframe = jQueryWindow.children("iframe");
-  $iframe.width( jQueryWindow.width() - 20);
-  $iframe.height( jQueryWindow.height() - 45);
 }
 
 function disablePointerEvents() {

@@ -19,18 +19,6 @@ body {
 	z-index: 5;
 }
 
-#cameraModeDiv {
-	z-index: 2;
-	font-family: 'Verdana', 'Tahoma', sans-serif; 
-	text-align: center; 
-	border: 1px solid white; 
-	padding: 3px; 
-	background: black; 
-	color: white; 
-	width: 340px; 
-	position: absolute;
-}
-
 .loginClass {
 	font-family: 'Verdana', 'Tahoma', sans-serif;
 	font-size: 12px;
@@ -171,13 +159,6 @@ body {
 	position: absolute;
 	top: 4px;
 	right: 25px;
-}
-
-#contentPanes {
-	width: 90%;
-	left: 4px;
-	top: 4px;
-	pointer-events: none;
 }
 
 .smallDiv {
@@ -370,39 +351,8 @@ span.inputField select {
 	width: 152px;
 }
 
-#vncOptions {
-	display: none;
-}
-
 #vwfOptions {
 	display: none;
-}
-
-.vnc {
-	width:220px;
-}
-
-.vwfApp {
-	width:470px;
-	height:490px;
-}
-
-.canvasContainer {
-	height:130px;
-	overflow: visible;
-	width:205px;
-}
-
-.vnc .minimize {
-	position:absolute;
-	right:35px;
-	top:5px;
-}
-
-.vnc .scale {
-	position:absolute;
-	right:20px;
-	top:5px;
 }
 
 .video .minimize {
@@ -413,11 +363,6 @@ span.inputField select {
 }
 
 
-.vwfApp .minimize {
-	position:absolute;
-	right:20px;
-	top:5px
-}
 
 .exit {
 	position:absolute;

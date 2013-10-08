@@ -17,203 +17,193 @@
   <head>
 
 
-	<style type="text/css">
-		a:link {color:#FFFFFF;}    /* unvisited link */
-		a:visited {color:#FFFFFF;} /* visited link */
-		a:hover {color:#FF0000;}   /* mouse over link */
-		a:active {color:#FF8888;}  /* selected link */
-	</style>
-	<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css" />	
-	<link rel="stylesheet" type="text/css" href="style.css" />
+    <style type="text/css">
+        a:link {color:#FFFFFF;}    /* unvisited link */
+        a:visited {color:#FFFFFF;} /* visited link */
+        a:hover {color:#FF0000;}   /* mouse over link */
+        a:active {color:#FF8888;}  /* selected link */
+    </style>
+    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css" />    
+    <link rel="stylesheet" type="text/css" href="style.css" />
 
-	<script type="text/javascript" src="videoWindow.js"></script>
+    <script type="text/javascript" src="videoWindow.js"></script>
 
-	<script type="text/javascript">
+    <script type="text/javascript">
 
-		
-		var appRoot = vwf_view.kernel.application();
-		var local = { 
-			"client": {
-				"name": "",
-				"captureAudio": true,
-				"captureVideo": true
-			},
-		};
+        
+        var appRoot = vwf_view.kernel.application();
+        var local = { 
+            "client": {
+                "name": "",
+                "captureAudio": true,
+                "captureVideo": true
+            },
+        };
 
-		$( function() {
+        $( function() {
 
-			$( "#loginDialog" ).dialog( { 
-				"modal": true, 
-				"resizable": false,
-				"draggable": true,
-				"zIndex": 4000,
-				"buttons": {
-					"Login": function() {
-						local.client.name = $('#userName').val().replace(/ /g,"_");
-						clientName = local.client.name.replace(/([^0-9A-Za-z])/g,"");
+            $( "#loginDialog" ).dialog( { 
+                "modal": true, 
+                "resizable": false,
+                "draggable": true,
+                "zIndex": 4000,
+                "buttons": {
+                    "Login": function() {
+                        local.client.name = $( '#userName' ).val().replace(/ /g,"_");
+                        clientName = local.client.name.replace(/([^0-9A-Za-z])/g,"");
 
-						local.client.captureVideo = $('#capVideo')[0].checked;
-						local.client.captureAudio = $('#capAudio')[0].checked;
+                        local.client.captureVideo = $( '#capVideo' )[0].checked;
+                        local.client.captureAudio = $( '#capAudio' )[0].checked;
 
-						var capture = { 
-							"audio": local.client.captureAudio, 
-							"video": local.client.captureVideo
-						};
+                        var capture = { 
+                            "audio": local.client.captureAudio, 
+                            "video": local.client.captureVideo
+                        };
 
-						$( "#main" ).show();
-						$( "#participantPanes" ).show();
-						$( "#contentPanes" ).show();
-						$( "#toolbox" ).show();
-						$( "#wrapper" ).show();	
+                        $( "#main" ).show();
+                        $( "#participantPanes" ).show();
+                        $( "#toolbox" ).show();
+                        $( "#wrapper" ).show(); 
 
-						$( this ).dialog( "close" );
+                        $( this ).dialog( "close" );
 
-						var parms = [ vwf_view.kernel.moniker(), local.client.name, capture ];
-						vwf_view.kernel.callMethod( appRoot, "createConnection", parms );
-					},
-				}
-			} );
+                        var parms = [ vwf_view.kernel.moniker(), local.client.name, capture ];
+                        vwf_view.kernel.callMethod( appRoot, "createConnection", parms );
+                    },
+                }
+            } );
 
-			$( "#loginDialog" ).keydown(function(e) {
-				e.stopPropagation();
-			}).keyup(function(e) {
-				if(e.keyCode == $.ui.keyCode.ENTER) {
-				  $( "#loginButton" ).click();
-				}
-				e.stopPropagation();
-			}).on('shown', function () {
-				$('#userName').focus();
-			});
-		});
+            $( "#loginDialog" ).keydown( function( e ) {
+                e.stopPropagation();
+            }).keyup( function( e ) {
+                if( e.keyCode == $.ui.keyCode.ENTER ) {
+                  $( "#loginButton" ).click();
+                }
+                e.stopPropagation();
+            }).on( 'shown', function () {
+                $( '#userName' ).focus();
+            });
+        });
 
-		$(document).ready( function(){ 
-			//console.info( "$document is ready!" );
-			//$( "#loadVWFModal" ).hide();
-			$( "#main" ).hide();
-			$( "#mainVideoDivOverlay" ).hide();
-			$( "#participantPanes" ).hide();
-			$( "#contentPanes" ).hide();
-			//$( "#toolbox" ).hide();
-			$( "#wrapper" ).hide();
-			//$( "#dialogGroup" ).hide();		
-			//$( "#loginDialog" ).modal('show');
+        $(document).ready( function(){ 
+            //console.info( "$document is ready!" );
+            $( "#main" ).hide();
+            $( "#mainVideoDivOverlay" ).hide();
+            $( "#participantPanes" ).hide();
+            $( "#wrapper" ).hide();
 
-			//initHolowall(); 
-			//showTools();
-			$(window).resize(function() {
-				$('#main').width($(window).width() - 10);
-				$('#main').height($(window).height() - 80);
-				var boxHeight = $('#main').height();
-				var boxWidth = $('#main').width();
-				var initW = $('#mainVideo').width();
-				var initH = $('#mainVideo').height();
-				var ratio = initH / initW;
-				var imgWidth = boxWidth;
-				var imgHeight = boxWidth * ratio;
-				if (imgHeight > boxHeight) {
-								imgHeight = boxHeight;
-								imgWidth = imgHeight / ratio;
-							}			
-				$('#mainVideo').width(imgWidth).height(imgHeight);
-				$('#main').width($('#mainVideo').width());
-				$('#main').height($('#mainVideo').height());
-			});		
-		});
-
-
-		//$( window ).unload( function() {
-		//	vwf_view.kernel.callMethod( appRoot, "removeClient", [ vwf_view.kernel.moniker() ] )
-		//} );
+            $( window ).resize( function() {
+                $( '#main' ).width( $( window ).width() - 10);
+                $( '#main' ).height( $( window ).height() - 80);
+                var boxHeight = $( '#main' ).height();
+                var boxWidth = $( '#main' ).width();
+                var initW = $( '#mainVideo' ).width();
+                var initH = $( '#mainVideo' ).height();
+                var ratio = initH / initW;
+                var imgWidth = boxWidth;
+                var imgHeight = boxWidth * ratio;
+                if ( imgHeight > boxHeight ) {
+                    imgHeight = boxHeight;
+                    imgWidth = imgHeight / ratio;
+                }           
+                $( '#mainVideo' ).width( imgWidth ).height( imgHeight );
+                $( '#main' ).width( $( '#mainVideo' ).width());
+                $( '#main' ).height( $( '#mainVideo' ).height());
+            } );        
+        } );
 
         // VWF view - call Method
         vwf_view.calledMethod = function( nodeID, methodName, methodParameters, methodValue ) {
-          if ( !methodParameters  ) {
-            return;
-          }
+            
+            if ( !methodParameters  ) {
+                return;
+            }
 
-          switch ( methodName ) {
+            switch ( methodName ) {
 
-            case "createVideo":
-                var moniker = methodParameters[1];
-                if ( moniker && moniker == this.kernel.moniker() ) {
-	                var parms = methodParameters[0];
+                case "createVideo":
+                    var moniker = methodParameters[1];
+                    if ( moniker && moniker == this.kernel.moniker() ) {
+                        var parms = methodParameters[0];
 
-					// defined in videoWindow.js
-					newWindow( parms.ID, parms.name, "video", parms.url, parms.color, parms.muted, parms.width, parms.height );
-				}
-              	break;
-              	
-            case "removeVideo":
-				// defined in videoWindow.js
-				removeWindow( methodParameters[0] );
-              	break;
-          }
+                        // defined in videoWindow.js
+                        newVideoWindow( parms.ID, parms.name, parms.url, parms.color, parms.muted, parms.width, parms.height );
+                    }
+                    break;
+
+                case "removeVideo":
+                    // defined in videoWindow.js
+                    removeWindow( methodParameters[0] );
+                    break;
+            
+            }
         }
 
-		// VWF view - fired event
-		vwf_view.firedEvent = function(nodeId, eventName, eventArgs) {
-			if ( eventName == "participantRemoved" ) {
-				var clientMoniker = eventArgs[0];
-				var divId = clientMap[ clientMoniker ].divId;
+        // VWF view - fired event
+        vwf_view.firedEvent = function(nodeId, eventName, eventArgs) {
+            
+            if ( eventName == "participantRemoved" ) {
+                var clientMoniker = eventArgs[0];
+                var divId = clientMap[ clientMoniker ].divId;
 
-				// Only the third to join and on have divs associated w/ them (the second was the big 
-				// screen in the back, which, for now, we are treating differently - it freezes when the 
-				// participant leaves)
-				if ( divId ) {
-					removeWindow( divId );
-				}
-			}
-		}	
+                // Only the third to join and on have divs associated w/ them (the second was the big 
+                // screen in the back, which, for now, we are treating differently - it freezes when the 
+                // participant leaves)
+                if ( divId ) {
+                    removeWindow( divId );
+                }
+            }
 
-	</script>	
+        }   
+
+    </script>   
   </head>
   <body>
 
-	<!-- Dialog boxes that are shown as necessary -->
-	<div id="loginDialog" title="Client Login">
-		<p>Enter your display name:</p>
-		<input id="userName" value="name"><br>
-		<div id="capture">
-		  <input type="checkbox" id="capAudio" checked="checked" /><label for="capAudio">Audio</label>
-		  <input type="checkbox" id="capVideo" checked="checked" /><label for="capVideo">Video</label>
-		</div>		
-	</div>
+    <!-- Dialog boxes that are shown as necessary -->
+    <div id="loginDialog" title="Client Login">
+        <p>Enter your display name:</p>
+        <input id="userName" value="name"><br>
+        <div id="capture">
+          <input type="checkbox" id="capAudio" checked="checked" /><label for="capAudio">Audio</label>
+          <input type="checkbox" id="capVideo" checked="checked" /><label for="capVideo">Video</label>
+        </div>      
+    </div>
 
-  	<!-- The main video window -->
-  	<div id="mainWrapper" class="mainWrapper">
-		<div id='main' class="mainDiv">
-			<div id="mainVideoDiv" width="100%" height="100%" style="position: absolute; left: 0; top: 0; z-index: 1;width:100%;height:100%;">
-				<video id='mainVideo' loop='loop' autoplay width="480" height="360" style="z-index: 1;"></video>
-			</div>
-			<div id="mainVideoDivOverlay" width="100%" height="100%" style="position: absolute; left: 0; top: 0; z-index: 2; margin-left:5px;margin-top:5px;display:none;">
-				<span class="label label-inverse">Host</span>
-			</div>
-		</div>
-	</div>
+    <!-- The main video window -->
+    <div id="mainWrapper" class="mainWrapper">
+        <div id='main' class="mainDiv">
+            <div id="mainVideoDiv" width="100%" height="100%" style="position: absolute; left: 0; top: 0; z-index: 1;width:100%;height:100%;">
+                <video id='mainVideo' loop='loop' autoplay width="480" height="360" style="z-index: 1;"></video>
+            </div>
+            <div id="mainVideoDivOverlay" width="100%" height="100%" style="position: absolute; left: 0; top: 0; z-index: 2; margin-left:5px;margin-top:5px;display:none;">
+                <span class="label label-inverse">Host</span>
+            </div>
+        </div>
+    </div>
 
-	<!-- Placeholder divs for the participant windows and apps as each are added -->
-	<div id="participantPanes">
-		<div id="panesRight">
-		</div>
-		<div id="panesLeft">
-		</div>
-	</div>
-	<div id="contentPanes"></div>
+    <!-- Placeholder divs for the participant windows and apps as each are added -->
+    <div id="participantPanes">
+        <div id="panesRight">
+        </div>
+        <div id="panesLeft">
+        </div>
+    </div>
 
-	<!-- Taskbar -->
-	<div id="wrapper" class="navbar navbar-fixed-bottom">
-		<div class="navbar-inner" id="taskbar">
-			<ul class="nav pull-left">
-				<li id='volumeBar'>
-					<button id="muteButton" type="button" class="btn btn-info" onclick="setMute()">
-						<i class="icon-volume-up icon-white" id="mute" alt="Mute"/></i>
-					</button>
-				</li>
-				<li class="divider-vertical"></li>
-			</ul>
-			<div id='appBar' class="pull-left"> </div>			
-		</div>
-	</div>
+    <!-- Taskbar -->
+    <div id="wrapper" class="navbar navbar-fixed-bottom">
+        <div class="navbar-inner" id="taskbar">
+            <ul class="nav pull-left">
+                <li id='volumeBar'>
+                    <button id="muteButton" type="button" class="btn btn-info" onclick="setMute()">
+                        <i class="icon-volume-up icon-white" id="mute" alt="Mute"/></i>
+                    </button>
+                </li>
+                <li class="divider-vertical"></li>
+            </ul>
+            <div id='appBar' class="pull-left"> </div>          
+        </div>
+    </div>
 
   </body>
 </html>
