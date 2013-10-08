@@ -168,7 +168,10 @@ function newVideoWindow( id, title, url, color, muted, width, height ) {
     var buttonName = newWin.buttonName = "button-" + divId;
     var buttonHtml = "<div class='btn-group dropup' id='"+buttonName+"'><button class='btn btn-success' id='"+buttonName+"-button'>"+title+"</button>" + 
       "<button class='btn btn-success dropdown-toggle' data-toggle='dropdown'><span class='caret'></span></button>" +
-      "<ul class='dropdown-menu pull-right'><li><a id='"+buttonName+"-reset' href='#'>Reset</a></li></ul></div>";
+      "<ul class='dropdown-menu pull-right'><li>" +
+      "<a id='"+buttonName+"-reset' href='#'>Reset</a>" + 
+      "<a id='"+buttonName+"-share' href='#'>Share</a>" +
+      "</li></ul></div>";
     
     $appBar.append( buttonHtml );
     
@@ -177,6 +180,9 @@ function newVideoWindow( id, title, url, color, muted, width, height ) {
     });
     $("#" + buttonName + "-reset").click(function() {
       resetPosition( divId );
+    });
+    $("#" + buttonName + "-share").click(function() {
+      shareDesktop( divId );
     });
   } 
 
@@ -298,6 +304,11 @@ function deleteWindow( name ) {
 
   $('#button-'+name).remove();
 }
+
+function shareDesktop( name ) {
+    //var jQueryWindow = $('#' + name);
+}
+
 
 function resetPosition(name) {
   var jQueryWindow = $('#' + name);
