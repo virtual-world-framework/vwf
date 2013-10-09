@@ -735,6 +735,11 @@ function CopyState(URL,filename,newname,response)
 	});
 }
 
+function CopyInstance(URL, SID, response){
+
+	response.end(JSON.stringify(SID) + JSON.stringify(URL));
+}
+
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function DeleteState(URL,SID,response)
 {
@@ -1115,6 +1120,9 @@ function serve (request, response)
 			} break;
 			case "clonestate":{
 				CopyState(URL,SID,URL.query.SID2,response,'GetStateResult');		
+			} break;
+			case "copyinstance":{
+				CopyInstance(URL, SID, response);		
 			} break;
 			case "salt":{
 				Salt(URL,response);		
