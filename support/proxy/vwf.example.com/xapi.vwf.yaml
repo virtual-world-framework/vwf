@@ -4,21 +4,22 @@ properties:
             function genCaller(fn){
                 return function (){
                     var args = Array.prototype.slice.call(arguments);
-                    vwf.callMethod(this.id, 'xapi_'+fn, args);
+                    return vwf.callMethod(this.id, 'xapi_'+fn, args);
                 }
             }
             return {
-                'configure':           genCaller('configure'),
-                'getActivities':       genCaller('getActivities'),
-                'getActivityProfile':  genCaller('getActivityProfile'),
-                'getAgentProfile':     genCaller('getAgentProfile'),
-                'getAgents':           genCaller('getAgents'),
-                'getState':            genCaller('getState'),
-                'getStatements':       genCaller('getStatements'),
-                'prepareStatement':    genCaller('prepareStatement'),
-                'sendActivityProfile': genCaller('sendActivityProfile'),
-                'sendAgentProfile':    genCaller('sendAgentProfile'),
-                'sendState':           genCaller('sendState'),
-                'sendStatement':       genCaller('sendStatement'),
-                'sendStatements':      genCaller('sendStatements')
+                'configure':           genCaller('configure').bind(this),
+                'testConfig':          genCaller('testConfig').bind(this),
+                'getActivities':       genCaller('getActivities').bind(this),
+                'getActivityProfile':  genCaller('getActivityProfile').bind(this),
+                'getAgentProfile':     genCaller('getAgentProfile').bind(this),
+                'getAgents':           genCaller('getAgents').bind(this),
+                'getState':            genCaller('getState').bind(this),
+                'getStatements':       genCaller('getStatements').bind(this),
+                'prepareStatement':    genCaller('prepareStatement').bind(this),
+                'sendActivityProfile': genCaller('sendActivityProfile').bind(this),
+                'sendAgentProfile':    genCaller('sendAgentProfile').bind(this),
+                'sendState':           genCaller('sendState').bind(this),
+                'sendStatement':       genCaller('sendStatement').bind(this),
+                'sendStatements':      genCaller('sendStatements').bind(this)
             }

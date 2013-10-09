@@ -16,6 +16,7 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 		{
 			var methods = [
 				'configure',
+				'testConfig',
 				'getActivities',
 				'getActivityProfile',
 				'getAgentProfile',
@@ -29,7 +30,7 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 				'sendStatement',
 				'sendStatements'];
 
-			if( methods.indexOf(fn.slice(5)) != -1 )
+			if( fn.slice(0,5) == 'xapi_' && methods.indexOf(fn.slice(5)) != -1 )
 			{
 				console.log('XAPI:', id, fn, params);
 
@@ -54,16 +55,18 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 
 
 				// select based on call method
+				console.log(fn.slice(5));
 				switch(fn.slice(5))
 				{
 					// reconfigure
 					case 'configure':
-						wrapper.changeConfig(params);
+						return wrapper.changeConfig(params);
 						break;
 
 					// if not one of the special cases, just pass params through to wrapper
 					default:
-						wrapper[fn.slice(5)].apply(wrapper, params)
+						console.log('Default path');
+						return wrapper[fn.slice(5)].apply(wrapper, params)
 						break;
 
 				}
