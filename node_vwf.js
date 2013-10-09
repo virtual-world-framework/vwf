@@ -524,10 +524,13 @@ function getNamespace(socket)
 
 		try{
 		var referer = (socket.handshake.headers.referer);
-	  var host = (socket.handshake.headers.host);
-	  var namespace = referer.substr(7+host.length);
+		
+		var index = referer.indexOf('/adl/sandbox');
+		var namespace = referer.substring(index);
+		
 	  if(namespace[namespace.length-1] != "/")
 		namespace += "/";
+	 
 	  return namespace;
 	  }catch(e)
 	  {
@@ -1309,15 +1312,13 @@ function startVWF(){
 		  {
 			  delete loginData.clients[socket.id];
 			  global.error("Unexpected disconnect. Deleting node for user avatar " + loginData.UID);
-			  for(var i in global.instances[namespace].clients)
+			 var avatarID = 'character-vwf-'+loginData.UID;
+			 for(var i in global.instances[namespace].clients)
 			  {
-					var avatarID = 'character-vwf-'+loginData.UID;
-					//deleting node for avatar
-					
 					var cl = global.instances[namespace].clients[i];
-					cl.emit('message',{"action":"deleteNode","node":avatarID,"time":global.instances[namespace].time});
-					global.instances[namespace].state.deleteNode(avatarID);					
+					cl.emit('message',{"action":"deleteNode","node":avatarID,"time":global.instances[namespace].time});					
 			  }
+			  global.instances[namespace].state.deleteNode(avatarID);	
 		  }
 		  
 		  
@@ -1394,9 +1395,9 @@ function startVWF(){
 	}	
 	
 	//301 redirect
-	function _301(url,response)
+	function _302(url,response)
 	{
-		response.writeHead(301, {
+		response.writeHead(302, {
 			"Location": url 
 		});
 		response.end();
@@ -1451,9 +1452,9 @@ function startVWF(){
 					 if(versionInt != global.version)
 					 { 
 						if(global.version)
-							_301('/'+global.version+''+req.url,res);
+							_302('/'+global.version+''+req.url,res);
 						else
-							_301(req.url,res);
+							_302(req.url,res);
 						return;
 					 
 					 }
@@ -1462,7 +1463,7 @@ function startVWF(){
 				if(!version && global.version)
 				{
 					
-					_301('/'+global.version+''+req.url,res);
+					_302('/'+global.version+''+req.url,res);
 					return;
 				}
 				

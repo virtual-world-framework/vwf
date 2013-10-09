@@ -14,7 +14,7 @@
     "fs-extra": "~0.6.0",
     "gm": "~1.8.1",
     "hogan-express": "~0.3.3",
-    "mime": "~1.2.9",
+    "mime": "~1.2.11",
     "js-yaml": "~2.0.2",
     "node-minify": "~0.8.1",
     "nstore": "~0.5.2",
