@@ -104,9 +104,9 @@ function startVWF( ) {
 
 
     //create socket server
-    sio = sio.listen( srv, { log: false } );
-    sio.set( 'transports', [ 'websocket' ] );
-    sio.sockets.on( 'connection', reflector.OnConnection );
+    var socketManager = sio.listen( srv, { log: false } );
+    socketManager.set( 'transports', [ 'websocket' ] );
+    socketManager.sockets.on( 'connection', reflector.OnConnection );
 }
 
 exports.startVWF = startVWF;

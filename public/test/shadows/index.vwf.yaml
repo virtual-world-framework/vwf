@@ -15,6 +15,7 @@
 extends: http://vwf.example.com/scene.vwf
 properties:
   enableShadows: true
+  counter: 0
 methods:
   initializeCamera:
   update:
