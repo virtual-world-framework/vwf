@@ -22,6 +22,20 @@ The QUnit tests exercise some of the front-end JavaScript code. They require you
 
 To install PhantomJS, follow the instructions for your platform.
 
+**Linux**
+
+1\. Install PhantomJS using APT-GET or YUM install commands depending on your Linux flavor.
+
+~~~
+apt-get install phantomjs or yum instal phantomjs
+~~~
+
+2\. Run the tests.
+
+~~~
+rake test:qunit
+~~~
+
 **Mac**
 
 1\. Install PhantomJS using [Homebrew](http://brew.sh/).
