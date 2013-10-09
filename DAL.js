@@ -1043,19 +1043,32 @@ function makeid()
 }
 
 
-function copyInstance (id,cb){
+function copyInstance (id,cb,newowner){
 
 	getInstance(id, function(instance){
 		
 		if(instance){
 			var newId = '_adl_sandbox_' + makeid() + '_';
+			
 			createInstance (newId, instance, function(success){
-				
+				instance.owner = newowner
 				//From here, copy state file
 				if(success){
 					var oldStateFile = datapath + '/States/' + id + '/state', newStateFile = datapath + '/States/' + newId + '/state';
-					fs.createReadStream(oldStateFile).pipe(fs.createWriteStream(newStateFile));
-					cb(newId);
+					
+					fs.readFile(oldStateFile,function(err, olddata)
+					{
+						var oldstate = JSON.parse(olddata);
+						oldstate[oldstate.length-1].owner = newowner;
+						var newstate = JSON.stringify(oldstate);
+						fs.writeFile(newStateFile,newstate,'utf8',function(err)
+						{
+							cb(newId);
+						});
+					});
+					
+					
+					
 				}
 				
 				else cb(false);
