@@ -92,6 +92,12 @@
 	    paths: {
 		"vwf": "../vwf"
 	    },
+		shims: {
+			'vwf/view/xapi/xapiwrapper': {
+				deps: ['vwf/view/editorview/sha256', "vwf/view/editorview/_3DRIntegration"],
+				exports: 'XAPIWrapper'
+			}
+		},
 	    waitSeconds: 15
 	  });		
         require( [

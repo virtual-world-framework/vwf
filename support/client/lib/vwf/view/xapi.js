@@ -2,15 +2,12 @@
  * Provide a per-object interface to the xAPIWrapper
  ***************************/
 
-define( ["module", "vwf/view", "vwf/view/editorview/sha256", "vwf/view/editorview/_3DRIntegration"], function( module, view ) {
+define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, view ) {
 
 	return view.load( module, {
 
 		initialize : function()
 		{
-			// pull in the xapi wrapper
-			$('<script type="text/javascript" src="vwf/view/xapi/xapiwrapper.js"></script>').appendTo('head');
-
 			// initialize object mappings
 			this.wrapperOf = {};
 		},
