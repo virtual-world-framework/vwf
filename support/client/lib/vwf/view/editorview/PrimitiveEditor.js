@@ -454,31 +454,6 @@ define(function ()
 					this.addPropertyEditorDialog(node.id,'animationFrame',$('#' + nodeid + 'animationFrame'),'slider');
 					this.addPropertyEditorDialog(node.id,'animationFrame',$('#' + nodeid + 'animationFrame' + 'value'),'text');
 					
-				$('#animationSettings' + nodeid).append('<div id="animationSpeed">');
-					var inputstyle = "";
-					$('#animationSettings' + nodeid).append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">' + 'animationSpeed' + ': </div>');
-					$('#animationSettings' + nodeid).append('<input class="primeditorinputbox" style="' + inputstyle + '" type="number" id="' + nodeid + 'animationSpeed' + 'value"></input>');
-					$('#' + nodeid + 'animationSpeed' + 'value').val(vwf.getProperty(node.id, 'animationSpeed'));
-					$('#' + nodeid + 'animationSpeed' + 'value').change(this.primPropertyTypein);
-					$('#' + nodeid + 'animationSpeed' + 'value').attr("nodename", nodeid);
-					$('#' + nodeid + 'animationSpeed' + 'value').attr("propname", 'animationSpeed');
-					$('#' + nodeid + 'animationSpeed' + 'value').attr("slider", '#' + nodeid + 'animationSpeed');
-					$('#animationSettings' + nodeid).append('<div id="' + nodeid + 'animationSpeed' + '" nodename="' + nodeid + '" propname="' + 'animationSpeed' + '"/>');
-					var val = vwf.getProperty(node.id, 'animationSpeed');
-					if (val == undefined) val = 0;
-					$('#' + nodeid + 'animationSpeed').slider(
-					{
-						step: .01,
-						min: parseFloat(0),
-						max: parseFloat(10),
-						slide: this.primPropertyUpdate,
-						stop: this.primPropertyUpdate,
-						value: val
-					});
-					
-					this.addPropertyEditorDialog(node.id,'animationSpeed',$('#' + nodeid + 'animationSpeed'),'slider');
-					this.addPropertyEditorDialog(node.id,'animationSpeed',$('#' + nodeid + 'animationSpeed' + 'value'),'text');	
-			
 				$('#animationSettings' + nodeid).append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">' +'Animation Cycle' + ': </div>');
 					$('#animationSettings' + nodeid).append('<div style="display: block;margin: 5px;" id="' + nodeid + i + '" nodename="' + nodeid + '" propnamemax="' + 'animationEnd' + '" propnamemin="' + 'animationStart' + '"/>');
 					
@@ -508,6 +483,53 @@ define(function ()
 							_PrimitiveEditor.setProperty(nodeid, propmin, parseFloat(ui.values[0]));
 							_PrimitiveEditor.setProperty(nodeid, propmax, parseFloat(ui.values[1]));
 						}
+					});	
+					
+				$('#animationSettings' + nodeid).append('<div id="animationSpeed">');
+					var inputstyle = "";
+					$('#animationSettings' + nodeid).append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">' + 'animationSpeed' + ': </div>');
+					$('#animationSettings' + nodeid).append('<input class="primeditorinputbox" style="' + inputstyle + '" type="number" id="' + nodeid + 'animationSpeed' + 'value"></input>');
+					$('#' + nodeid + 'animationSpeed' + 'value').val(vwf.getProperty(node.id, 'animationSpeed'));
+					$('#' + nodeid + 'animationSpeed' + 'value').change(this.primPropertyTypein);
+					$('#' + nodeid + 'animationSpeed' + 'value').attr("nodename", nodeid);
+					$('#' + nodeid + 'animationSpeed' + 'value').attr("propname", 'animationSpeed');
+					$('#' + nodeid + 'animationSpeed' + 'value').attr("slider", '#' + nodeid + 'animationSpeed');
+					$('#animationSettings' + nodeid).append('<div id="' + nodeid + 'animationSpeed' + '" nodename="' + nodeid + '" propname="' + 'animationSpeed' + '"/>');
+					var val = vwf.getProperty(node.id, 'animationSpeed');
+					if (val == undefined) val = 0;
+					$('#' + nodeid + 'animationSpeed').slider(
+					{
+						step: .01,
+						min: parseFloat(0),
+						max: parseFloat(10),
+						slide: this.primPropertyUpdate,
+						stop: this.primPropertyUpdate,
+						value: val
+					});
+					
+					this.addPropertyEditorDialog(node.id,'animationSpeed',$('#' + nodeid + 'animationSpeed'),'slider');
+					this.addPropertyEditorDialog(node.id,'animationSpeed',$('#' + nodeid + 'animationSpeed' + 'value'),'text');	
+			
+				
+					
+					$('#animationSettings' + nodeid).append('<div id="' + nodeid + 'play' + '" nodename="' + nodeid + '" methodname="' + 'play' + '"/>');
+					$('#' + nodeid + 'play').button({label:'Play'});
+					$('#' + nodeid + 'play').css('display','block');
+					$('#' + nodeid + 'play').click(function()
+					{
+						var nodename = $(this).attr('nodename');
+						var method = $(this).attr('methodname');
+						_PrimitiveEditor.callMethod(nodename, method);
+					});
+					
+					$('#animationSettings' + nodeid).append('<div id="' + nodeid + 'pause' + '" nodename="' + nodeid + '" methodname="' + 'pause' + '"/>');
+					$('#' + nodeid + 'pause').button({label:'Pause'});
+					$('#' + nodeid + 'pause').css('display','block');
+					$('#' + nodeid + 'pause').click(function()
+					{
+						var nodename = $(this).attr('nodename');
+						var method = $(this).attr('methodname');
+						_PrimitiveEditor.callMethod(nodename, method);
 					});
 			
 			}
