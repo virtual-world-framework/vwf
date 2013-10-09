@@ -26,14 +26,14 @@ class VWF::StorageFS
     if File.directory?( potential_app_dir )
       Dir.foreach( potential_app_dir ) do | filename |
         if File.directory?( potential_app_dir + "/" + filename ) && filename =~ /^instance_*/
-		  potential_instance_id = filename.slice( 9, filename.length - 9 )
-		  unless get_instance_metadata( public_path, application, potential_instance_id ).nil? and get_persistence_state( public_path, application, potential_instance_id ).nil? and list_instance_save_states( public_path, application, potential_instance_id ).length == 0
+          potential_instance_id = filename.slice( 9, filename.length - 9 )
+          unless get_instance_metadata( public_path, application, potential_instance_id ).nil? and get_persistence_state( public_path, application, potential_instance_id ).nil? and list_instance_save_states( public_path, application, potential_instance_id ).length == 0
             result.push potential_instance_id
-	      end
+          end
         end
       end
     end
-    result
+    result.sort!
   end
 
   # Function that takes the public_path, application and instance and returns the 
@@ -128,7 +128,7 @@ class VWF::StorageFS
         end
       end
     end
-	result.sort!
+    result.sort!
   end
   
   # Function that returns a ruby hash.  Each key is an instance ID, each value is an array containing
