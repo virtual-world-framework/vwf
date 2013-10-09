@@ -82,10 +82,18 @@
 			
 			$.ajaxPrefilter( function(options, originalOptions, jqXHR) 
 			{
+				
 				var p = window.location.pathname;
 				if(p[p.length-1] == '/') {p = p.substring(0,p.length -1)};
 				p = p.substring(p.lastIndexOf('/')+1);
-				options.url = options.url.replace(p,'');
+				
+				var query = options.url.indexOf('?');
+				var found = options.url.indexOf(p);
+				
+				//dont strip the url out of query strings
+				//I can't beleive this did not cause problems before
+				if(found < query)
+					options.url = options.url.replace(p,'');
 				
 			
 			

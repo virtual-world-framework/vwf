@@ -47,6 +47,24 @@ define(
 			_DataManager.saveToServer();
 		});
 		
+		$('#MenuShareWorld').click(function (e)
+		{
+			debugger;
+			var state =_DataManager.getCurrentSession();
+			state = state.replace(/\//g,'_');
+			var turl = "/vwfdatamanager.svc/statedata?SID=" +state;
+			$.getJSON(turl,function(data)
+			{
+				placehodler = '';
+				if(data)
+					placeholder = data.title;
+				alertify.prompt('Use the URL below to share this world with your friends! Just have them paste it into their browsers address bar.',function(){},
+				window.location.host + '/worlds/' + placeholder);
+			
+			});
+			
+		});
+		
 		$('#MenuLogOut').click(function (e)
 		{
 			if ($('#MenuLogOut').attr('disabled') == 'disabled') return;
