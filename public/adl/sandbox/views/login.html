@@ -2,7 +2,7 @@
 	var EncryptPassword = function (password, username,salt)
 	{
 		
-		var unencrpytedpassword = password + username + salt;
+		var unencrpytedpassword = password + username + salt; 
 		for (var i = 0; i < 1000; i++)
 		{
 			unencrpytedpassword = CryptoJS.SHA256(unencrpytedpassword) + '';
@@ -45,25 +45,27 @@
 			error:function(xhr,status,err)
 			{
 				$('#txtpassword').val('');
-				$('#error').text("Error: " + xhr.responseText);
+				vwfPortalModel.errorText("Error: Please ensure your username and password are both correct");
+				
+				window.setTimeout(function(){
+					vwfPortalModel.errorText("");				
+				}, 6000);
 			}
 		});
 	};
 </script>
 <div class="row">
-	<div class="span5 offset3">
+	<div class="col-md-5" style="margin:10px auto;float:none;text-align:center;height:260px;">
 		<form data-bind="submit:handleLoginButton" >
 			<fieldset>
-				<legend>Enter your username and password below</legend>
-				<div style="width:58%; margin: 0 auto;">
-					<input type='text' id='txtusername' placeholder='Username' class="span3" />
-					<input type='password' id='txtpassword' placeholder='Password' class="span3"/><br/>
-					<input type="submit" class='btn' style="float:right;"  value="Submit"/>
+				<legend style="padding-bottom:5px;">Enter your username and password below</legend>
+				<div class="col-md-10" style="margin:0 auto;float:none;">
+					<input type='text' id='txtusername' placeholder='Username' class="form-control" /><br/>
+					<input type='password' id='txtpassword' placeholder='Password' class="form-control"/><br/>
+					<input type="submit" class='btn btn-default' style="float:right;"  value="Submit"/><br/>
+					<p class="help-block" style="width:100%;margin-top:20px;" data-bind="visible:errorText,text:errorText"></p>
 				</div>
 			</fieldset>
 		</form>
 	</div>
-</div>
-<div class="row">	
-	<div id='error' style="margin-top: 20px;margin-bottom:20px;font-size: 3EM;color: red;" class="span12"></div>
 </div>

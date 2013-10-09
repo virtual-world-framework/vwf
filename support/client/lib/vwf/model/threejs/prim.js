@@ -171,7 +171,7 @@
 				
 				
 				this.rootnode.add(mesh);
-				
+				this.mesh.updateMatrixWorld();
 				var cast = this.gettingProperty('castShadows');
 				var rec = this.gettingProperty('receiveShadows');
 				

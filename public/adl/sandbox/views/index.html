@@ -1,130 +1,229 @@
-	<div class="row" style="margin-top:30px;height:426px;clear:both;">
-		<div data-bind="css: featuredWorldObjects().length>0?'span7':'span12'">
-			<div style="height: 114px;">
-				<p>
-					Welcome to the Virtual World Framework Sandbox application. This landing page lists the worlds that currently exist. Worlds in green are currently active, while worlds in white are in
-					"cold storage". Active worlds are worlds that currently have at least one client viewing them. You can click on any of the world names to launch that world. Or, you can choose "Make a
-					new world" 
-				</p>
+	<div class="row" style="margin-top:15px;">
+		<div class="col-md-12">
+			<div class="row"> 
+				<div class="col-md-3 pointList" style="margin-left:45px;">
+					<div>
+						<span class="lead glyphicon glyphicon-cloud" style="color: #90DBFF;"></span><span class="lead">&nbsp;Persistent Worlds</span>
+					</div>
+					<ul>
+					
+						<li>Make worlds that evolve over time.</li>
+						<li>Share your creativity!</li>
+						<li>Make as many differnet worlds as you like.</li>
+						
+					</ul>
+				</div>
+				<div class="col-md-3 pointList">
+					<div>
+						<span class="lead glyphicon glyphicon-pencil" style="color: #E2E215;-webkit-transform: rotate(0.8turn);"></span><span class="lead">&nbsp;In Browser Editing</span>
+					</div>
+					<ul>
+					
+						<li>Create a world right in your web browser.</li>
+						<li>Add scripts, 3D models, sounds and behaviors.</li>
+						<li>Works in Chrome, Opera, Firefox and Safari</li>
+						
+					</ul>
+				</div>
+				<div class="col-md-5" style="margin-top:45px">
+					<img src="{{root}}/img/screenshot2.jpg" style="margin:0 auto;display:block;" />
+				</div>
 			</div>
-			<iframe data-bind="css:featuredWorldObjects().length>0?'wideFrame':'frame'" src="http://www.youtube.com/embed/videoseries?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" frameborder="0" allowfullscreen></iframe>
-		</div>
-		<div class="span5" style="height:100%;" data-bind="visible:featuredWorldObjects().length>0">
-			<div class="featuredWorlds" data-bind="foreach:featuredWorldObjects">
-				<div class="featuredInstance" data-bind="css : $index() == 2 ? 'featuredInstanceLast' : 'featuredInstance'">
-					<div class="span2" style="margin-left:10px;">
-						<a data-bind="attr:{href:'{{root}}/'+id}">
-							<img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}" style="width:140px;height:110px;margin-top:4px;" />
-						</a>
+			<div class="row" style="margin-top:65px;">
+				<div class="col-md-5">
+					<img src="{{root}}/img/screenshot.jpg" style="margin:0 auto;display:block;" />
+				</div>
+				<div class="col-md-3 col-md-offset-1 pointList" style="margin-left:4.3333%">
+					<div>
+						<span class="lead glyphicon glyphicon-retweet" style="color: #FAB400;"></span><span class="lead">&nbsp;Collaborative</span>
 					</div>
-					<div class="span2" style="overflow:hidden; width:50%;">
-						<div>
-							<h4 style="margin-top:0;"><a style="color:inherit;" data-bind="text:title, attr:{href:'{{root}}/'+id}"></a></h4>
-							<p data-bind="text:$root.getShorterStr(description, 120)"></p>
-						</div>
+					<ul>
+					
+						<li>Video chat with other users with WebRTC.</li>
+						<li>Share your world and allow other users to help build.</li>
+						<li>You can even have many authors working at once!</li>
+						
+					</ul>
+				</div>
+				<div class="col-md-3 pointList">
+					<div>
+						<span class="lead glyphicon glyphicon-picture" style="color: #CF4242;"></span><span class="lead" style="padding-top:1px">&nbsp;Creative</span>
 					</div>
-					<!--<div style="text-align:right;width:100%;float:left;">
-						<a href="/" data-bind="attr:{href:'{{root}}/'+id}">Load World</a>
-					</div>-->
+					<ul>
+					
+						<li>You can create some basic worlds with the built in tools.</li>
+						<li>Create materials, 3D models, and scripts.</li>
+						<li>You can even import 3D models, or publish objects for other users to use!</li>
+						
+					</ul>
+				</div>
+			</div>
+			<div class="row" style="margin-top:65px;">
+				
+				<div class="col-md-3 pointList" style="margin-left:45px;">
+					<div>
+						<span class="lead glyphicon glyphicon-globe" style="color: #35C235;"></span><span class="lead">&nbsp;Open</span>
+					</div>
+					<ul>
+					
+						<li>Based on open source technologies.</li>
+						<li>Sources available on Github.</li>
+						<li>We welcome patches and pull requests!</li>
+						
+					</ul>
+				</div>
+				<div class="col-md-3 pointList">
+					<div>
+						<span class="lead glyphicon glyphicon-usd" style="color: #979797;"></span><span class="lead" style="padding-top:1px">&nbsp;Low Cost</span>
+					</div>
+					<ul>
+					
+						<li>Our demonstration server is free to use.</li>
+						<li>Setting up your own server is free and easy.</li>
+						<li>Please note: our demo server gets updates frequently. Things can and do break!</li>
+						
+					</ul>
+				</div>
+				<div class="col-md-5">
+					<img src="{{root}}/img/screenshot3.jpg" style="margin:0 auto;display:block;" />
+				</div>
+			</div>
+			<div class="row" style="margin-top:35px;">
+				<div class="col-md-3" style="margin:0 auto; float:none;text-align:center;">
+					<a href="{{root}}/signup" class="btn btn-info">Create account</a>
 				</div>
 			</div>
 		</div>
 	</div>
-	<div class="row" style="margin-top:30px;">
-		<div class="span12">
+	<div class="row" style="margin-top:45px;">
+		<div class="col-md-12"><h1 class="featurette-heading" style="border-top:1px solid #eee;padding-top:20px;width:95%;margin:0 auto;">Learn</h1></div>
+	</div>
+	<div class="row" style="margin:30px 0;" >
+		<div class="col-md-11" style="float:none; margin:0 auto;">
 			<div class="row">
-			
-				<div class="span4" style="text-align:left;">
-					<button id="allWorlds" class="btn btn-small active" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">All Worlds</button>
-					<button id="yourWorlds" class="btn btn-small" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">Your Worlds</button>
+				<div class="col-md-4 videoList" style="padding-right:0;">
+					<table class="table table-striped" style="border: 1px solid #ebebeb">
+						<tbody data-bind="foreach:youtubeList.slice(0, 8)">
+							<tr><td>
+								<a href="" data-bind="text:$data, click: $root.playVideoInList"></a>
+							</td></tr>
+						</tbody>
+					</table>
+					<a href="http://www.youtube.com/watch?v=aWRQJJnBi5c&list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" class="btn btn-default">More videos</a>
 				</div>
-				
-				<div class="span1 offset4" style="text-align:right;">
-					<a href="{{root}}/create" class="coldstate" id="newinstancebutton" data-bind="visible:user().isLoggedIn">
-						<img style="height: 20px; width: 20px" src="{{root}}/icons/add.png"/>
-					</a>
-				</div>
-				<div class="span3">
-					<input id="filter" class="span3" style="width:90%;" type="text" placeholder="Filter Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
-				</div>
-			</div>
-			<div class="row" id="activeRow" data-bind="foreach:displayWorldObjects">				
-				<div data-bind="visible:isVisible" class="span3">
-					<div class="worldBox" data-bind="event: {mouseover:$root.handleEditDisplay, mouseout:$root.handleEditDisplay}">
-						<div class="boxContentWrapper">
-							<div style="margin-bottom: 10px;">
-								<a data-bind="attr:{href:'{{root}}/'+id}, text:$root.getShorterStr(title, 20)" href="">Title</a>
-								<span class="owner" data-bind="text:' - ' + owner"></span>
-							</div>
-												
-							<div class="worldInfo">
-								<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
-									<span class="description" data-bind="text:description?$root.getShorterStr(description, 75):'No description'"></span>
-									
-									<div style="margin-top: 5px;">
-										<span class="objects" data-bind="text: objects + (objects == 1 ? ' object ' : ' objects ')"></span>
-										&nbsp;<span class="lastModified stateid" data-bind="text:' (' + lastUpdate + ')' "></span>
-									</div>
-								</a>
-							</div>
-						</div>
-						<div class="editstateGuest">
-							<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState">Active</a>
-							
-							<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible -->
-								<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
-								<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
-							<!-- /ko -->
-						</div>
-						
+				<div class="col-md-8">
+					<div id="ytapiplayer">
+						You need Flash player 8+ and JavaScript enabled to view this video.
 					</div>
 				</div>
 			</div>
-			<div class="row" style="margin-top:45px;margin-bottom:70px;" data-bind="visible:displayWorldObjects().length==0">	
-				<div class="span4 offset4" style="text-align:center;">
-					<span style="font-weight:bold;">No worlds found</span>
-				</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-2" style="margin: 15px auto 0px auto;float:none;text-align:center;">
+			<a href="{{root}}/help" class="btn btn-info">View Help Pages</a>
+		</div>
+	</div>
+	<div class="row" style="margin-top:60px;">
+		<div class="col-md-12"><h1 class="featurette-heading" style="border-top:1px solid #eee;padding-top:20px;width:95%;margin:0 auto;">Explore</h1></div>
+
+	</div>
+	<div class="row" style="margin-bottom:50px;" data-bind="foreach:displayWorldObjects">
+		<!-- ko if: $data.featured == true && $index() < 6 -->
+		<div class="col-md-4" style="text-align:center;margin-top:45px;">
+			<div>
+				<h4 style="margin-top:0;" class="lead"><a style="color:inherit;" data-bind="text:title, attr:{href:'{{root}}/'+id}"></a></h4>
 			</div>
-			<div class="row" style="margin-bottom:45px;">
-				<div class="span1 offset4" style="text-align:right;">
-					<a class="btn" data-bind="click:getPreviousPage, css:previousDisabled()?'disabled btn':'btn'"><i class="icon-chevron-left"></i></a>
-				</div>				
-				<div class="span1 offset2">
-					<a class="btn" data-bind="click:getNextPage, css:nextDisabled()?'disabled btn':'btn'"><i class="icon-chevron-right"></i></a>
-				</div>
-			</div>
+			<a data-bind="attr:{href:'{{root}}/'+id}" >
+				<img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}" style="width:190px;height:130px;margin-top:4px;border: 1px solid #ddd;padding:1px;"/>
+			</a>
+
+		</div>
+		<!-- /ko -->
+	</div>
+	<div class="row">
+	
+		<div class="col-md-2" style="margin:-25px auto 25px auto;float:none;text-align:center;">
+			<a href="{{root}}/worlds" class="btn btn-info">View All Worlds</a>
 		</div>
 	</div>
 	<script>
-		$(document).ready(function(){	
+		var slideInterval = 0, params = { allowScriptAccess: "always" }, atts = { id: "ytplayer" }, player; 
+		vwfPortalModel.youtubeList = [  "Tutorial 1: Camera Motion",
+										"Tutorial 2: Selection Tools",
+										"Tutorial 3: Transform Tools",
+										"Tutorial 4: Copy and Paste",
+										"Tutorial 5: Groups And Links",
+										"Tutorial 6: Primitive and Object Properties",
+										"Tutorial 7: Geometry Modifiers",
+										"Tutorial 8: Noise Terrain with Modifiers",
+										"Tutorial 9: Materials and Textures",
+										"Tutorial 10: Scene Properties",
+										"Tutorial 11: Importing 3D Models",
+										"Tutorial 12: Inventory and Public Assets",
+										"Tutorial 13: Particle Systems",
+										"Tutorial 14: Scripting",
+										"Tutorial 15: Behaviors"
+									];
+		swfobject.embedSWF("http://www.youtube.com/v/aWRQJJnBi5c?enablejsapi=1&playerapiid=ytplayer&version=3&list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2&listType=playlist", "ytapiplayer", "680", "360", "8", null, null, params, atts);
+		
+		vwfPortalModel.playVideoInList = function(a, b){
+			console.log(a, b, vwfPortalModel.youtubeList.indexOf(a));
+			player.playVideo();
+			
+			window.setTimeout(function(){
+				player.pauseVideo();
+				player.playVideoAt(vwfPortalModel.youtubeList.indexOf(a));
+			}, 1000);
+		};		
+		
+		function onYouTubePlayerReady(id){
+			player = document.getElementById(id); 
+		}
+		$(document).ready(function(){
+			var totalSlides = 4, tempSlides = 0, transitionSpeed = 1500;
+			var currentSlideState = Math.floor(Math.random() * totalSlides);
+			
+			$(".slide-item").not(".slide-item" + currentSlideState).css("left", "1200px");
+			$(".slide-item" + currentSlideState + " .pContainer").css({top:"324px"});
+			$(".slide-item" + currentSlideState).css({left:"0"});
+			$(".linkMenu").css("margin-bottom", "0");
+			
+			$('.slide-item').mousedown(function(e){
+				e.preventDefault();
+				e.stopPropagation();
+				return false;
+			});
 			
 			ko.applyBindings(vwfPortalModel);
-			getLoginInfo(function(){
-					
-				showStates();
-
-				window.setInterval(function(){
-					showStates();
-				},5000);
-			});
+			getLoginInfo();
+			showStates();
+			
+			
+			var incrementCurrentSlideState = function(){
+				tempSlides++;
+				if(tempSlides == 2){
+					tempSlides = 0;
+					currentSlideState = (currentSlideState + 1)%totalSlides;
+				}
+			};
+			
+			var animateSlides = function(){
+				$(".slide-item" + currentSlideState + " .pContainer").animate({top:"370px"});				
+				
+				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).css({"z-index":1});
+				$(".slide-item" + currentSlideState).css({"z-index": 0});
+				
+				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).animate({left:"0px"}, transitionSpeed, "swing", function(){
+					$(".slide-item" + currentSlideState).css("left", "1200px");
+					incrementCurrentSlideState();
+					$(this).children(".pContainer").animate({top:"324px"});
+				});
+			};
+			
+			slideInterval = window.setInterval(animateSlides, 10000);
 		});
+		
+		
 	</script>
-	    <div id="disqus_thread"></div>
-	    <script type="text/javascript">
-		/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-		var disqus_shortname = 'vwfsandbox'; // required: replace example with your forum shortname
-
-		/* * * DON'T EDIT BELOW THIS LINE * * */
-		(function() {
-		    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-		    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-		    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-		})();
-	    </script>
-	    <a href="https://github.com/adlnet/vwf/tree/node_threejs"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
-    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-    
-	
-	
 	

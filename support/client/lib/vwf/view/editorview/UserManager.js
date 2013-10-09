@@ -200,8 +200,8 @@ define(function ()
 		}
 		this.PlayerProto = {
 			extends: 'character.vwf',
-			source: $("#AvatarChoice :radio:checked").attr('value'),
-			type: 'model/vnd.collada+xml',
+			source: './'+$("#AvatarChoice :radio:checked").attr('value'),
+			type: 'subDriver/threejs/asset/vnd.collada+xml',
 			properties: {
 				PlayerNumber: 1,
 			},

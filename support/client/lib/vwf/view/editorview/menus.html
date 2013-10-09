@@ -3,14 +3,17 @@
 <div id="toolbar" style=""> </div>		
 <div id="smoothmenu1" class="ddsmoothmenu" style="z-index: 1000;position: fixed;width: 100%;border-bottom: 1px solid #555555;">
 <ul>
-<li><a href="#">File</a>
+<li><a href="#" id="MenuFile">File</a>
 <ul>
-	  <li><a href="#" id="MenuLogIn">Log In</a></li>	  
+	<li><a href="#" id="MenuLogIn">Log In</a></li>	  
 	  <li><a href="#" id="MenuLogOut">Log Out</a></li>
+	  <li><a href="#" id="MenuSaveNow">Save Now</a></li>
+	  <li><a href="#" id="MenuPublish">Publish (Coming Soon!)</a></li>
+	  
 </ul>
 </li>
 
-<li><a href="#">Edit</a>
+<li><a href="#" id="MenuEdit">Edit</a>
   <ul>
 	  	  
 	  <li><a href="#" id="MenuCopy">Copy</a></li>
@@ -46,25 +49,29 @@
 				  <li><a href="#" id="MenuSnapOff">Off</a></li>
 				  
 			  </ul>
-		  </li>
+			</li>
 		  </ul>
 	  </li>
 	  
 </ul>
 </li>
-<li><a href="#">Camera</a>
+<li><a href="#" id="MenuCamera">Camera</a>
   <ul>
   <li><a href="#" id="MenuFocusSelected" >Focus Selected</a></li>
-  <li><a href="#" id="MenuCameraOrbit">Orbit</a></li>
-  <li><a href="#" id="MenuCameraFree">Free</a></li>
-  <li><a href="#" id="MenuCamera3RDPerson">Avatar View</a></li>
-  <li><a href="#" id="MenuCameraNavigate">Navigate</a></li>
-  <li><a href="#" id="MenuCameraFly">Fly</a></li>
-  <li><a href="#" id="MenuCameraNone">None (World Script Control)</a></li>
   <li><a href="#" id="MenuCameraShare">Share Camera View</a></li>
+  <li><a href="#" id="MenuActivateCamera">Activate Camera</a></li>
+  <li><a id="MenuDefaultCameras" href="#">Default Cameras</a>
+       <ul>
+	<li><a href="#" id="MenuCameraOrbit">Orbit</a></li>
+	<li><a href="#" id="MenuCameraFree">Free</a></li>
+	<li><a href="#" id="MenuCamera3RDPerson">Avatar View</a></li>
+	<li><a href="#" id="MenuCameraNavigate">Navigate</a></li>
+	<li><a href="#" id="MenuCameraFly">Fly</a></li>
+	<li><a href="#" id="MenuCameraNone">None</a></li>
+       </ul></li>
   </ul>
 </li>
-<li><a href="#">Hierarchy</a>
+<li><a href="#" id="MenuHierarchy">Hierarchy</a>
   <ul>
   <li><a href="#" id="MenuSetParent" >Link</a></li>
   <li><a href="#" id="MenuRemoveParent" >Unlink</a></li>
@@ -79,7 +86,7 @@
   </ul>
 </li>
 
-<li><a href="#">Create</a>
+<li><a href="#" id="MenuCreate">Create</a>
   <ul>
     <li><a id="MenuPrimitives" href="#">Primitives</a>
 		<ul>
@@ -127,6 +134,8 @@
 		  <li><a href="#" id="MenuCreateBehaviorHoverlabel">Hover label</a></li>
 		  <li><a href="#" id="MenuCreateBehaviorPathFollow">Path Follow</a></li>
 		  <li><a href="#" id="MenuCreateBehaviorClampToGround">Clamp To Ground</a></li>
+		  <li><a href="#" id="MenuCreateBehaviorLookat">LookAt</a></li>
+		  <li><a href="#" id="MenuCreateBehaviorSeek">Seek</a></li>
 		  <li><a href="#" id="MenuCreateBehaviorDialog">Dialog System</a></li>
 		</ul>
 	</li>
@@ -142,11 +151,17 @@
 		  <li><a href="#" id="MenuCreateParticlesBasic">Basic</a></li>
 		</ul>
 	</li>
+	<li><a id="MenuCameras" href="#">Cameras</a>
+		<ul>
+		  <li><a href="#" id="MenuCreateCameraPerspective">Perspective</a></li>
+		  <li><a href="#" id="MenuCreateCameraOrthographic">Orthographic (comming soon!)</a></li>
+		</ul>
+	</li>
 	<li><a href="#" id="MenuCreateTerrain">Terrain</a></li>
 	<li><a href="#" id="MenuCreateLoadMeshURL">Load Mesh URL</a></li>
   </ul>
 </li>
-<li><a href="#">Tools</a>
+<li><a href="#" id="MenuTools">Tools</a>
   <ul>
   <li><a href="#" id="MenuAlign">Align</a></li>
   <li><a href="#" id="MenuBlockPainter">Block Painter</a></li>
@@ -154,7 +169,7 @@
   <li><a href="#" id="MenuSplineTools">Spline Tools</a></li>
   </ul>
 </li>
-<li><a href="#">Windows</a>
+<li><a href="#" id="MenuWindows">Windows</a>
   <ul>
   <li><a href="#" id="MenuChat">Chat</a></li>
   <li><a href="#" id="MenuUsers">Users</a></li>
@@ -167,7 +182,7 @@
   <li><a href="#" id="MenuHierarchyManager">Show Hierarchy</a></li>
   </ul>
 </li>
-<li><a href="#">Rendering</a>
+<li><a href="#" id="MenuRendering">Rendering</a>
   <ul>
  
   <li><a href="#" id="MenuViewToggleWireframe">Toggle Wireframe</a></li>
@@ -175,6 +190,7 @@
   <li><a href="#" id="MenuViewShadows">Toggle Sun Shadows</a></li>
   <li><a href="#" id="MenuViewFullscreen">Toggle Full Screen</a></li>
   <li><a href="#" id="MenuViewStats">Toggle Stats</a></li>
+   <li><a href="#" id="MenuViewInterpolation">Toggle Interpolation</a></li>
   
   
   <li><a href="#" id="MenuViewBatching">Batching</a>
@@ -185,7 +201,7 @@
 	</li>
   </ul>
 </li>
-<li><a href="#">Location</a>
+<li><a href="#" id="MenuLocation">Location</a>
   <ul>
   <li><a href="#" id="LocationGoToPosition">Go to Position...</a></li>
   <li><a href="#" id="LocationGoToPlacemark">Go to Placemark...</a></li>
@@ -193,11 +209,17 @@
   <li><a href="#" id="LocationMoveToGround">Move to ground</a></li>
   </ul>
 </li>
-<li><a href="#">Help</a>
+<li><a href="#" id="MenuHelp">Help</a>
   <ul>
   <li><a href="#" id="MenuHelpAbout">About</a></li>
   <li><a href="#" id="MenuHelpBrowse">Browse All Topics...</a></li>
   <li><a href="#" id="MenuLatencyTest">Test Latency</a></li>
+  <li><a id="MenuLanguage" href="#">Language</a>
+		<ul>
+	  		<li><a href="#" id="MenuEn">English</a></li>	  
+	  		<li><a href="#" id="MenuRu">Русский</a></li>
+	 	</ul> 
+	  </li>
   </ul>
 </li>
 </ul>

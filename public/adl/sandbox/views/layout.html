@@ -1,63 +1,157 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<link rel="stylesheet" type="text/css" href="{{root}}/css/colorpicker.css" />
+	<link rel="stylesheet" type="text/css" href="{{root}}/css/colorpicker.css" /> 
     <link rel="stylesheet" media="screen" type="text/css" href="{{root}}/css/bootstrap.min.css" />
-    <link rel="stylesheet" media="screen" type="text/css" href="{{root}}/css/bootstrap-responsive.css" />
 	<link rel="stylesheet" media="screen" type="text/css" href="{{root}}/css/style.css" />
+	<style>
+		@media (max-width: 1180px){
+			.sliderContainer{
+				display: none;
+			}
+		}
+	</style>
 	<!--[if !IE 7]>
 	<style type="text/css">
 		#wrapper {display:table;height:100%}
 	</style>
 	<![endif]-->
-    <title>Virtual World Framework</title>
+    <title>ADL Sandbox - Virtual Worlds in your browser</title>
 
 	<script type="text/javascript" src="{{root}}/js/jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" src="{{root}}/js/knockout-2.2.1.js"></script>
+    <script type="text/javascript" src="{{root}}/js/knockout-2.3.0.js"></script>
 	<script type="text/javascript" src="{{root}}/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="{{root}}/vwf/view/editorview/sha256.js"></script>
 	<script type="text/javascript" src="{{root}}/js/moment.min.js"></script>
-	<script type="text/javascript">
-		var root = '{{root}}';	
-	</script>
+	<script type="text/javascript">var root = '{{root}}';</script>
     <script type="text/javascript" src="{{root}}/js/model.js"></script>
+    {{#home}}
+	<script type="text/javascript" src="{{root}}/js/swfobject.js"></script>
+	<script type="text/javascript" src="{{root}}/js/spin.min.js"></script>
+	<script type="text/javascript">
+		var opts = {
+		  lines: 7, // The number of lines to draw
+		  length: 2, // The length of each line
+		  width: 5, // The line thickness
+		  radius: 15, // The radius of the inner circle
+		  corners: 1, // Corner roundness (0..1)
+		  rotate: 0, // The rotation offset
+		  direction: 1, // 1: clockwise, -1: counterclockwise
+		  color: '#000', // #rgb or #rrggbb or array of colors
+		  speed: 0.8, // Rounds per second
+		  trail: 60, // Afterglow percentage
+		  shadow: false, // Whether to render a shadow
+		  hwaccel: false, // Whether to use hardware acceleration
+		  className: 'spinner', // The CSS class to assign to the spinner
+		  zIndex: 2e9, // The z-index (defaults to 2000000000)
+		  top: 'auto', // Top position relative to parent in px
+		  left: 'auto' // Left position relative to parent in px
+		};
+		window.onscroll = function () { window.scrollTo(0, 0); };
+		$(document).ready(function(){
+			$("body").addClass("bodyLoad");
+		});
+		
+		$(window).load(function(){
+			//$("body").animate({opacity:1}, 500);
+			$("#loadOverlay").animate({opacity:0}, 500, 'swing', function(){
+				spinner.stop();
+				$("#loadOverlay").remove();
+			});
+			$("body").removeClass("bodyLoad");
+			window.onscroll = function(){};
+		});
+	</script>
+	{{/home}}
 </head>
 <body>
+	{{#home}}
+	<div id="loadOverlay">
+		<div id="overlayInner" style="position:absolute;top:50%;left:50%;"></div>
+	</div>
+		<script type="text/javascript">
+			var target = document.getElementById('overlayInner');
+			var spinner = new Spinner(opts).spin(target);
+		</script>
+	{{/home}}
 	<div id="wrapper">
 		<div id="header" style="text-align: center">
 			<div class="headerMenu">
-				
-				
 				<div id="username" data-bind="visible:user().isLoggedIn">
 					<span class="headerSpan" data-bind="text:'Logged in as: '"></span>
 					<a class="headerA" href="{{root}}/user" id="userOptions" data-bind="text: user().username"></a>
 				</div>
 				<div id="login">
-					<a class="headerA" href="{{root}}/login?return=index"  id="login"  data-bind="visible:!user().isLoggedIn">Login</a>
+					<a class="headerA" href="{{root}}/login?return=worlds"  id="login"  data-bind="visible:!user().isLoggedIn">Login</a>
 					<a class="headerA" href="{{root}}/logout?return=index" id="logout" data-bind="visible:user().isLoggedIn">Logout</a>
-					<a class="headerA" href="{{root}}/signup?return=index" id="signup" data-bind="visible:!user().isLoggedIn">Create Account</a>
+					<a class="headerA" href="{{root}}/signup?return=worlds" id="signup" data-bind="visible:!user().isLoggedIn">Create Account</a>
 				</div>
 			</div>
 		</div>		
-		<div id="content" class="container">
-			<div id="pageLogo">
-				<h1 style="text-align:center;">Virtual World Framework</h1>
-				<h2 style="text-align:center;">Sandbox</h2>
-			</div>
-			<div class="linkMenu">
-				<a href="/">Home</a>
-				<a href="">About</a> 
-				<a href="http://www.youtube.com/watch?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2&v=aWRQJJnBi5c">Videos</a> 
-				<a href="{{root}}/help">Help</a> 
-			</div>
-			<h3>{{title}}</h3>
-			{{{yield}}}
+		<div class="container" style="box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.25);padding:0">
+			<div class="content container">
+				<div id="pageLogo">
+					<h4 style="text-align:center;">ADL</h4>
+					<h1 style="text-align:center;">Sandbox</h1>
+					<h3 style="text-align:center;">Virtual worlds right in your browser</h3>
+				</div>
+				<div class="linkMenu">
+					<a href="/">Home</a>
+					<a href="{{root}}/worlds">Worlds</a> 
+					<a href="http://www.youtube.com/watch?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2&v=aWRQJJnBi5c">Videos</a> 
+					<a href="{{root}}/help">Help</a> 
+				</div>
+			</div>	
 			
+			{{#home}}
+			<div class="container sliderContainer">
+				<div style="background-image:url('{{root}}/img/huge_terrain.jpg');" class="slide-item slide-item0">
+					<div class="pContainer">
+						<p>No extra plugins needed - just click and go</p>	
+					</div>
+					<div class="divContent0">
+						<h1 class="h1-hero">In Browser</h1>
+					</div>
+				</div>
+				<div style="background-image:url('{{root}}/img/huge_town.jpg');" class="slide-item slide-item1">
+					<div class="pContainer">
+						<p>Advanced scripting controls every aspect of your scenario</p>
+					</div>	
+					<div class="divContent1">
+						<h1 class="h1-hero">Full Control</h1>
+					</div>
+				</div>
+				<div style="background-image:url('{{root}}/img/huge_office.jpg');" class="slide-item slide-item2">
+					<div class="pContainer">
+						<p>Web RTC enables a higher level of collaboration</p>
+					</div>	
+					<div class="divContent2">
+						<h1 class="h1-hero"></h1>
+					</div>
+				</div>
+				<div style="background-image:url('{{root}}/img/huge_editor.jpg');" class="slide-item slide-item3">
+					<div class="pContainer">
+						<p>A full featured set of tools makes building worlds easy</p>
+					</div>	
+					<div class="divContent3">
+						<h1 class="h1-hero">Rich Editor</h1>
+						
+					</div>
+				</div>
+			</div>
+			{{/home}}
+				
+			<div class="content container">	
+				<h3>{{title}}</h3>
+				{{{yield}}}
+				
 
-		</div>
-		<div id="footer" class="container">
-			<br/><p style="color:#eee">This is the footer.</p>
+			</div>
+			<div id="footer" class="container">
+				<br/><p style="color:#eee">A project from <a href='http://www.adlnet.gov'>ADL</a></p>
+			</div>
 		</div>
 	</div>
+	<a href="https://github.com/adlnet/vwf/tree/node_threejs"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
 </body>
 </html>

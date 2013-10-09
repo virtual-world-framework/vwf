@@ -18,7 +18,7 @@ define(function ()
 	{
 		var self = this;
 		$('#sidepanel').append("<div id='hierarchyManager' class='ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
-		$('#hierarchyManager').append("<div id='hierarchyManagertitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Hierarchy</span></div>");
+		$('#hierarchyManager').append("<div id='hierarchyManagertitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span id='hierarchyManagertitletext' class='ui-dialog-title' id='ui-dialog-title-Players'>Hierarchy</span></div>");
 		$('#hierarchyManager').append("<span>Filter: </span><input type='text' id='HeirarchyFilter' class=''></input>");
 		$('#hierarchyManager').append("<div id='hierarchyDisplay' style='font:1.5em sans-serif;padding-bottom:5px;background:#FFFFF8;border: 1px black solid;margin: 3px 3px 3px 3px;height:auto'></div>");
 		$('#hierarchyManager').append("<div id='hierarchyManagerMakeNode'></div>");
@@ -147,6 +147,8 @@ define(function ()
 		{
 			if (HierarchyManager.selectedType == 'glge')
 			{
+				
+				var node = this.findTHREEChild(_Editor.findviewnode(this.selectedID),  this.selectedName);
 				var parent = this.selectedID;
 				var childname = HierarchyManager.selectedName;
 				var proto = {
@@ -156,7 +158,8 @@ define(function ()
 					properties: {
 						owner: document.PlayerNumber,
 						type: '3DR Object',
-						DisplayName: childname
+						DisplayName: childname,
+						transform: node.matrix.elements
 					}
 				};
 				vwf_view.kernel.createChild(parent, GUID(), proto, null);
@@ -284,6 +287,9 @@ define(function ()
 		}
 		this.BuildGUI = function ()
 		{
+		
+			
+			$('#hierarchyManagertitletext').text(vwf.getProperty(this.selectedID,'DisplayName') + ' Hierarchy');
 			$('#hierarchyDisplay').empty();
 			$('#InventoryRename').hide();
 			$('#InventoryRename').keypress(HierarchyManager.rename)

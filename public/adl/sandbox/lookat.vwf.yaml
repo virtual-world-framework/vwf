@@ -1,0 +1,51 @@
+extends: 'http://vwf.example.com/behavior.vwf'
+properties:
+  Active: true
+  type: behavior
+  Axis: Z
+  NotProto: null
+  DisplayName: LookAt
+  EditorData:
+    Active:
+      property: Active
+      displayname: Active
+      type: check
+    Path:
+      property: Target
+      displayname: Target
+      type: nodeid
+    lookaxis:
+      displayname: look axis
+      property: lookatVec
+      type: choice
+      labels: 
+        - X
+        - Y
+        - Z
+        - -Y
+      values:
+        - X
+        - Y
+        - Z
+        - -Y        
+    lookup:
+      displayname: look axis
+      property: lookatUp
+      type: choice
+      labels: 
+        - X
+        - Y
+        - Z
+      values:
+        - X
+        - Y
+        - Z         
+  Target: line ID
+  lookatVec: 'Y'
+  lookatUp: 'Z'
+methods:
+  tick: |
+    if(!this.owner) return;       
+    if (this.Active && this.Target)    {
+        this.parent.transformAPI.lookat(vwf.getProperty(this.Target,'worldPosition'),'',this.lookatVec,this.lookatUp);
+    }

@@ -9,7 +9,7 @@
 			this.inherits = ['vwf/model/threejs/transformable.js','vwf/model/threejs/materialDef.js','vwf/model/threejs/animatable.js','vwf/model/threejs/shadowcaster.js','vwf/model/threejs/passable.js'];
 			this.initializingNode = function()
 			{
-				this.materialDef = null;
+				
 			}
 			this.gettingProperty = function(propertyName)
 			{
@@ -24,6 +24,7 @@
 			{
 				if(propertyName == 'materialDef')
 				{
+					
 					if(this.materialDef == null)
 					{
 						
@@ -51,6 +52,7 @@
 				this.backupmats = [];
 				this.backupMatrix = asset.matrix.clone();
 				this.rootnode = asset;
+				this.rootnode = asset;
 				asset.initializedFromAsset = true;
 				var list = [];
 				this.GetAllLeafMeshes(this.rootnode,list);
@@ -61,8 +63,11 @@
 						this.backupmats.push([list[i],list[i].material.clone()]);
 					}					
 				}
+				asset.matrixAutoUpdate = false;
+				asset.updateMatrixWorld(true);      
+				_SceneManager.setDirty(asset);	
 				
-				
+				this.settingProperty('transform',this.gettingProperty('transform'));
 			
 			}
 			this.deletingNode = function()
@@ -76,6 +81,7 @@
 					
 					for(var i =0; i < this.backupmats.length; i++)
 					{
+						
 						this.backupmats[i][0].material = this.backupmats[i][1];
 					}
 					this.rootnode.matrix = this.backupMatrix

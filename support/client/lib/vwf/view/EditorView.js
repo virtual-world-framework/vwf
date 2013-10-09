@@ -128,7 +128,10 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/alertify.js-0.3.9/
 					_Editor.updateGizmoSize();
 					_Editor.updateGizmoOrientation(false);
 				}
+				$(document).trigger('selectionTransformedLocal',[vwf.getNode(nodeID)]);
 			}
+			
+			_PrimitiveEditor.NodePropertyUpdate(nodeID, propertyName, propertyValue);
 		},
 		createdMethod: function (nodeID, methodName, methodParameters, methodBody)
 		{},
@@ -178,6 +181,9 @@ function InitializeEditor()
 	//	$('#index-vwf').enableSelection();
 	//	$('* :not(input)').disableSelection();
 	
+	//localization
+	$(document.head).append('<script type="text/javascript" src="vwf/view/localization/translate.js"></script>');
+	translateMenu();
 	
 }
 

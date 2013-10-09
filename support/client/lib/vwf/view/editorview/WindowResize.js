@@ -90,6 +90,8 @@ define({
 			_Editor.findcamera().aspect = ($('#index-vwf').width()/$('#index-vwf').height());
 			$('#index-vwf').focus()
 			_Editor.findcamera().updateProjectionMatrix();
+			_Editor.SelectObject(null);
+			_Editor.SetSelectMode('none');
 		}
 		window.showTools = function()
 		{
@@ -107,11 +109,17 @@ define({
 			_Editor.findcamera().updateProjectionMatrix();
 			$(window).resize();
 			
+			
+		}
+		window.toolsOpen = function()
+		{
+			return !toolsHidden;
 		}
 		$(window).keypress(function(e)
 		{
-			if(e.charCode == 92)
+			if( e.charCode == 92)
 			{
+				
 				if(!toolsHidden)
 					hideTools();
 				else

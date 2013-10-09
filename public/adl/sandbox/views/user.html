@@ -1,96 +1,126 @@
-    <script type="text/javascript">
-	
-		var EncryptPassword = function (password, username,salt)
-		{
-			var unencrpytedpassword = password + username + salt;
-			for (var i = 0; i < 1000; i++)
-			{
-				unencrpytedpassword = CryptoJS.SHA256(unencrpytedpassword) + '';
-			}
-			return unencrpytedpassword;
-		}
-		
-		$(document).ready(function()
-		{
-			getLoginInfo(false, redirect);
-			ko.applyBindings(vwfPortalModel);
-		});	
-		
-		function redirect()
-		{
-			var ret = window.location.search.substr(window.location.search.indexOf('=')+1);
-			var path = window.location.pathname.substr(0,window.location.pathname.lastIndexOf('/')+1);
-			
-			var url = window.location.protocol + "//" + window.location.host + path + ret;
-			window.location = url;
-		}
-		function GUID()
-		{
-			var S4 = function ()
-			{
-				return Math.floor(
-						Math.random() * 0x10000 /* 65536 */
-					).toString(16);
-			};
-
-			return (
-					S4() + S4() + "-" +
-					S4() + "-" +
-					S4() + "-" +
-					S4() + "-" +
-					S4() + S4() + S4()
-				);
-		}
-		vwfPortalModel.handleAccountButton = function(o, e){
-		
-			var username = $('#txtusername').val();
-			var password = $('#txtpassword').val();
-			
-			var salt = GUID();
-			password = EncryptPassword(password,username,salt);
-			
-			var profile = {};
-			
-			
-			profile.Username = username;
-			profile.Password = password;
-			profile.Avatar = 'usmale.dae';
-			profile.Salt = salt;
-			
-		}
-	</script>
-
 <div class="row">
-	<div class="span5 offset3">
-		<form data-bind="submit:handleAccountButton" >
-			<fieldset>
-				<legend>In progress!</legend>
-				<div class='required'>
-					<div class='label'>Required Information</div><br/><br/>
-					<input type='text' id='txtusername' class="span5" placeholder='Username'/>
-					<input type='password' id='txtpassword' class="span5" placeholder='Password'/>
-					<input type='password' id='txtpasswordconfirm' class="span5" placeholder='Confirm Password'/>
-					<input type="submit" class='btn' style="float:right;"  value="Edit Account"/>
-				</div><br/><br/><br/>
-				<legend></legend>
-				<div class='optional'>
-					<div class='label'>Optional Information</div><br/><br/>
-					<input type='text' id='dob' class='input' placeholder='Date Of Birth'/>
-					<input type='text' id='location' class='input' placeholder='Sex'/>
-					<input type='text' id='relationship' class='input' placeholder='Relationship Status'/>
-					<input type='text' id='name' class='input' placeholder='Full Name'/>
-					<input type='text' id='location' class='input' placeholder='Location'/>
-					<input type='text' id='homepage' class='input' placeholder='Homepage'/>
-					<input type='text' id='employer' class='input' placeholder='Employer'/>
+	<div class="col-md-2" style="text-align:left;">
+		<a href="{{root}}/create" id="newinstancebutton" data-bind="visible:user().isLoggedIn">
+			<span class="btn btn-default btn-sm" style="width:100%;">Create World</span>
+		</a>
+	</div> 
+	<div class="col-md-10">			
+		<div class="row" id="activeRow" data-bind="foreach:displayWorldObjects">				
+			<div data-bind="style: $root.alignWorldsList($index()), visible:isVisible, css:'col-md-3 worldHeightMiniPadding'">
+				<div data-bind="event: {mouseover:$root.handleEditDisplay, mouseout:$root.handleEditDisplay}, css: 'worldBox'">
+					
+					<div class="boxContentWrapper">
+						<div style="margin-bottom: 10px;">
+							<a data-bind="attr:{href:'{{root}}/'+id}, text:$root.getShorterStr(title, 20)" href="">Title</a>
+							<span class="owner" data-bind="text:' - ' + owner"></span>
+						</div>
+						<div class="worldInfo">
+							<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
+								<span class="description" data-bind="text:description?$root.getShorterStr(description, 75):'No description'"></span>
+								
+								<div style="margin-top: 5px;">
+									<span class="objects" data-bind="text: objects + (objects == 1 ? ' object ' : ' objects ')"></span>
+									&nbsp;<span class="lastModified stateid" data-bind="text:' (' + lastUpdate + ')' "></span>
+								</div>
+							</a>
+						</div>
+					</div>
+					<div data-bind="css:'editstateGuest'">
+						<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState">Active</a>
+						
+						<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible -->
+							<a class="editstatedelete glyphicon glyphicon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
+							<a class="editstatedata glyphicon glyphicon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
+						<!-- /ko -->
+					</div>
 				</div>
-			</fieldset>
-		</form>
+			</div>
+		</div>
+		<div class="row" style="margin-top:45px;margin-bottom:70px;" data-bind="visible:displayWorldObjects().length==0">	
+			<div class="col-md-4 col-md-offset-4" style="text-align:center;">
+				<span style="font-weight:bold;">No worlds found</span>
+			</div>
+		</div>
+		<div class="row" style="margin-bottom:45px;">
+			<div class="col-md-1 col-md-offset-4" style="text-align:right;">
+				<a class="btn btn-default" data-bind="click:getPreviousPage, css:previousDisabled()?'disabled btn btn-default':'btn btn-default'"><i class="glyphicon glyphicon-chevron-left"></i></a>
+			</div>				
+			<div class="col-md-1 col-md-offset-2">
+				<a class="btn btn-default" data-bind="click:getNextPage, css:nextDisabled()?'disabled btn btn-default':'btn btn-default'"><i class="glyphicon glyphicon-chevron-right"></i></a>
+			</div>
+		</div>
 	</div>
 </div>
-<div class="row">	
-	<div id='error' style="margin-top: 20px;margin-bottom:20px;font-size: 3EM;color: red;" class="span12"></div>
-</div>
 
+<script type="text/javascript">
+
+	var EncryptPassword = function (password, username,salt)
+	{
+		var unencrpytedpassword = password + username + salt;
+		for (var i = 0; i < 1000; i++)
+		{
+			unencrpytedpassword = CryptoJS.SHA256(unencrpytedpassword) + '';
+		}
+		return unencrpytedpassword;
+	}
+	
+	$(document).ready(function()
+	{
+		getLoginInfo(function(){
+		
+			filter = vwfPortalModel.user().username;
+			showStates();
+		}, redirect);
+		
+		vwfPortalModel.usersPage = true;
+		ko.applyBindings(vwfPortalModel);
+		
+
+	});	
+	
+	function redirect()
+	{
+		var ret = window.location.search.substr(window.location.search.indexOf('=')+1);
+		var path = window.location.pathname.substr(0,window.location.pathname.lastIndexOf('/')+1);
+		
+		var url = window.location.protocol + "//" + window.location.host + path + ret;
+		window.location = url;
+	}
+	function GUID()
+	{
+		var S4 = function ()
+		{
+			return Math.floor(
+					Math.random() * 0x10000 /* 65536 */
+				).toString(16);
+		};
+
+		return (
+				S4() + S4() + "-" +
+				S4() + "-" +
+				S4() + "-" +
+				S4() + "-" +
+				S4() + S4() + S4()
+			);
+	}
+	vwfPortalModel.handleAccountButton = function(o, e){
+	
+		var username = $('#txtusername').val();
+		var password = $('#txtpassword').val();
+		
+		var salt = GUID();
+		password = EncryptPassword(password,username,salt);
+		
+		var profile = {};
+		
+		
+		profile.Username = username;
+		profile.Password = password;
+		profile.Avatar = 'usmale.dae';
+		profile.Salt = salt;
+		
+	}
+</script>
 
 
 		

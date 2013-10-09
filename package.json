@@ -1,0 +1,45 @@
+{
+  "name": "Sandbox",
+  "version": "0.0.0",
+  "description": "A html5 based virtual world",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "crypto": "~0.0.3",
+    "express": "~3.2.3",
+    "forever": "~0.10.0",
+    "async": "~0.2.7",
+    "fs-extra": "~0.6.0",
+    "gm": "~1.8.1",
+    "hogan-express": "~0.3.3",
+    "mime": "~1.2.9",
+    "js-yaml": "~2.0.2",
+    "node-minify": "~0.8.1",
+    "nstore": "~0.5.2",
+    "requirejs": "~2.1.8",
+    "socket.io": "~0.9.13",
+    "ws": "~0.4.25",
+    "yamljs": "~0.1.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adlnet/Sandbox.git"
+  },
+  "keywords": [
+    "virtual",
+    "world",
+    "framework",
+    "webgl",
+    "adl"
+  ],
+  "author": "Rob Chadwick",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "gitHead": "e4c7b8389b2cb889d900a3bc960c2662a03119fe"
+}

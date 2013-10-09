@@ -21,6 +21,19 @@ define(
 			contentsource: "markup", //"markup" or ["container_id", "path_to_menu_file"]
 			method: 'hover'
 		});
+		
+		$('#MenuEn').click(function (e)
+		{
+			localStorage.setItem("language","en");
+			location.reload();
+		});
+		$('#MenuRu').click(function (e)
+		{
+			localStorage.setItem("language","ru");
+			location.reload();
+		});
+
+
 		//make the menu items disappear when you click one
 		//$(".ddsmoothmenu").find('li').click(function(){$(".ddsmoothmenu").find('li').trigger('mouseleave');});
 		$('#MenuLogOut').attr('disabled', 'true');
@@ -29,6 +42,11 @@ define(
 			if ($('#MenuLogIn').attr('disabled') == 'disabled') return;
 			_UserManager.showLogin();
 		});
+		$('#MenuSaveNow').click(function (e)
+		{
+			_DataManager.saveToServer();
+		});
+		
 		$('#MenuLogOut').click(function (e)
 		{
 			if ($('#MenuLogOut').attr('disabled') == 'disabled') return;
@@ -156,6 +174,7 @@ define(
 		$('#MenuInventory').click(function (e)
 		{
 			_InventoryManager.show();
+			$( "#InventoryTypeChoicePersonal" ).click()
 		});
 		$('#MenuObjectProperties').click(function (e)
 		{
@@ -163,7 +182,8 @@ define(
 		});
 		$('#MenuGlobalInventory').click(function (e)
 		{
-			
+			_InventoryManager.show();
+			$( "#InventoryTypeChoiceGlobal" ).click()
 		});
 		$('#MenuLatencyTest').click(function (e)
 		{
@@ -254,6 +274,14 @@ define(
 		$('#MenuCreateBehaviorHoverlabel').click(function (e)
 		{
 			_Editor.CreateBehavior('hoverlabel', _UserManager.GetCurrentUserName());
+		});
+		$('#MenuCreateBehaviorLookat').click(function (e)
+		{
+			_Editor.CreateBehavior('lookat', _UserManager.GetCurrentUserName());
+		});
+		$('#MenuCreateBehaviorSeek').click(function (e)
+		{
+			_Editor.CreateBehavior('seek', _UserManager.GetCurrentUserName());
 		});
 		$('#MenuCreateBehaviorPathFollow').click(function (e)
 		{
@@ -379,7 +407,14 @@ define(
 		
 		});
 		
-		
+		$('#MenuViewInterpolation').click(function(e)
+		{
+			_dView.interpolateTransforms = !_dView.interpolateTransforms;
+			if(!_dView.interpolateTransforms)
+				alertify.log('Animation interpolation disabled');
+			else
+				alertify.log('Animation interpolation enabled');
+		});
 		$('#MenuViewToggleWireframe').click(function (e)
 		{
 			
@@ -397,6 +432,7 @@ define(
 				_Editor.findscene().overrideMaterial.fog = false;
 			}
 		});
+		
 		
 		
 		$('#MenuViewToggleAO').click(function (e)
@@ -421,23 +457,35 @@ define(
 				focusID =  _UserManager.GetAvatarForClientID(vwf.moniker()) &&  _UserManager.GetAvatarForClientID(vwf.moniker()).id;
 			if (focusID)
 			{
-				
+					
 					var t = _Editor.GetMoveGizmo().parent.matrixWorld.getPosition();
 					var gizpos = [t.x, t.y, t.z];
 					var box = _Editor.findviewnode(focusID).getBoundingBox();
-					var dist = MATH.distanceVec3([box.max.x, box.max.y, box.max.z], [box.min.x, box.min.y, box.min.z]);
+					
+					var dist = 1;
+					if(box)
+						dist = MATH.distanceVec3([box.max.x, box.max.y, box.max.z], [box.min.x, box.min.y, box.min.z]);
+					if(dist == Infinity)
+						dist = 1;
 					vwf.models[0].model.nodes['index-vwf'].orbitPoint(gizpos);
 					vwf.models[0].model.nodes['index-vwf'].zoom = dist * 2;
 					vwf.models[0].model.nodes['index-vwf'].updateCamera();
 				
 			}
 		}
+		
+		$('#MenuActivateCamera').click(function (e)
+		{
+			_dView.chooseCamera();
+		});
 		$('#MenuFocusSelected').click(function (e)
 		{
+			_dView.setCameraDefault();
 			focusSelected();
 		});
 		$('#MenuCameraOrbit').click(function (e)
 		{
+			_dView.setCameraDefault();
 			clearCameraModeIcons();
 			$('#MenuCameraOrbiticon').css('background', '#9999FF');
 			var campos = [_Editor.findcamera().position.x, _Editor.findcamera().position.y, _Editor.findcamera().position.z];
@@ -455,6 +503,7 @@ define(
 		
 		$('#MenuCameraNavigate').click(function (e)
 		{
+			_dView.setCameraDefault();
 			clearCameraModeIcons();
 			$('#MenuCameraNavigateicon').css('background', '#9999FF');
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Orbit');
@@ -464,7 +513,7 @@ define(
 		
 		$('#MenuCameraShare').click(function (e)
 		{
-		    
+		    _dView.setCameraDefault();
 		    var broadcasting = vwf.callMethod('index-vwf','getBroadcasting',[]);
 		    if(!broadcasting)
 		    {
@@ -492,6 +541,7 @@ define(
 		
 		$('#MenuCameraFly').click(function (e)
 		{
+			_dView.setCameraDefault();
 			clearCameraModeIcons();
 			$('#MenuCameraNavigateicon').css('background', '#9999FF');
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Fly');
@@ -500,11 +550,13 @@ define(
 		
 		$('#MenuCameraNone').click(function (e)
 		{
+			_dView.setCameraDefault();
 			clearCameraModeIcons();
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('None');
 		});
 		$('#MenuCameraFree').click(function (e)
 		{
+			_dView.setCameraDefault();
 			clearCameraModeIcons();
 			$('#MenuCameraFreeicon').css('background', '#9999FF');
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Orbit');
@@ -549,6 +601,7 @@ define(
 			
 			if (_UserManager.GetCurrentUserName())
 			{
+				_dView.setCameraDefault();
 				clearCameraModeIcons();
 				$('#MenuCamera3RDPersonicon').css('background', '#9999FF');
 				vwf.models[0].model.nodes['index-vwf'].followObject(vwf.models[0].model.nodes[_UserManager.GetCurrentUserID()]);
@@ -558,6 +611,12 @@ define(
 			{
 				_Notifier.alert('First person mode is not available when you are not logged in.');
 			}
+		});
+		
+		
+		$('#MenuCreateCameraPerspective').click(function (e)
+		{
+			_Editor.CreateCamera(_Editor.GetInsertPoint(),document.PlayerNumber);
 		});
 		$('#MenuCreateParticlesBasic').click(function (e)
 		{

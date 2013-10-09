@@ -1,8 +1,8 @@
-var maxObjects = 1; 
+var maxObjects = 5; 
 var maxDepth = 16;
 var batchAtLevel = 8;
 var drawSceneManagerRegions = false;
-
+var maxSize = 64000;
 function SceneManager(scene)
 {
 	
@@ -49,8 +49,8 @@ SceneManager.prototype.rebuild = function(mo,md)
 	maxDepth = md;
 	var children = this.root.getChildren();
 	this.root.deinitialize();
-	this.min = [-64000,-64000,-64000];
-	this.max = [64000,64000,64000];
+	this.min = [-maxSize,-maxSize,-maxSize];
+	this.max = [maxSize,maxSize,maxSize];
 	this.root = new SceneManagerRegion(this.min,this.max,0,this.scene,0);
 	for(var i =0; i < children.length; i++)
 		this.root.addChild(children[i]);

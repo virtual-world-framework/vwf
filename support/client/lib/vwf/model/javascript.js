@@ -561,6 +561,28 @@ node.id = childID; // TODO: move to vwf/model/object
 					},configurable:true,enumerable:true});
 					})();
 				}
+				
+				Object.defineProperty(watchable,'defineProperty',{
+				value:function(name,newvalue)
+				{
+					Object.defineProperty(this,name,{set:function(value){
+						this.internal_val[name] = value; 
+						
+						jsDriverSelf.setWatchableValue(this.id,this.propertyname,this.internal_val,this.dotNotation);
+					},
+					get:function(){
+						var ret = this.internal_val[name];
+						//This recursively builds new watchables, such that you can do things like
+						//this.materialDef.layers[0].alpha -= .1;
+						ret =  jsDriverSelf.createWatchable(ret,this.propertyname,this.id,this.masterval,this.dotNotation+'.'+name);
+						return ret;
+					},configurable:true,enumerable:true});
+					this[name] = newvalue;
+				
+				
+				}
+				,configurable:true,enumerable:true});
+				
 		
 		
 		
@@ -1035,6 +1057,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
         callingMethod: function( nodeID, methodName, methodParameters ) {
 
+		
             var node = this.nodes[nodeID];
 			if(!node) return undefined;
 			

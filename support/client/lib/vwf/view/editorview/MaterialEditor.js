@@ -114,7 +114,78 @@ define(["vwf/view/editorview/mapbrowser"], function ()
 		}
 		this.BuildGUI = function ()
 		{
-			var sliderprops = [
+		
+			$("#materialeditor").empty();
+			$("#materialeditor").append("<div id='materialeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Material Editor</span></div>");
+			$('#materialeditortitle').append('<a href="#" id="materialeditorclose" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
+			$('#materialeditortitle').prepend('<img class="headericon" src="../vwf/view/editorview/images/icons/material.png" />');
+			$("#materialeditor").append('<div id="materialaccordion" style="height:100%;overflow:hidden">' + '	<h3>' + '		<a href="#">Material Base</a>' + '	</h3>' + '	<div id="MaterialBasicSettings">' + '	</div>' + '</div>');
+			$("#materialeditorclose").click(function ()
+			{
+				_MaterialEditor.hide()
+			});
+			
+			
+			
+			if(!this.currentMaterial.type)
+				this.currentMaterial.type = 'phong';
+				
+			$('#MaterialBasicSettings').append('<div id="materialtype"  style="width:100%;margin-top:10px"/>');
+			$('#materialtype').button({label:('Material Type: ' + this.currentMaterial.type)})
+	
+			$('#materialtype').click(function()
+			{
+				alertify.choice('Choose the material type',function(ok,val)
+				{
+					if(ok)
+					{
+						this.currentMaterial.type = val;
+						this.updateObject();
+						this.BuildGUI();
+					}
+				
+				}.bind(this),['phong','video']);
+			
+			}.bind(this));
+				
+			if(this.currentMaterial.type == 'phong')
+				this.BuildGUIPhong();	
+			if(this.currentMaterial.type == 'video')
+				this.BuildGUIVideo();	
+			
+			$("#materialaccordion").accordion(
+			{
+				fillSpace: true,
+				heightStyle: "content",
+				change: function ()
+				{
+					if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
+				}
+			});
+			$(".ui-accordion-content").css('height', 'auto');	
+		}
+		
+		this.BuildGUIVideo = function()
+		{
+		
+			$('#MaterialBasicSettings').append('<div id="videosrc"  style="width:100%;margin-top:10px"/>');
+			$('#videosrc').button({label:'Enter Video URL'});
+			$('#videosrc').click(function()
+			{
+				var src = '' || this.currentMaterial.videosrc;
+				alertify.prompt('Enter a URL to a video file.',function(ok,val)
+				{
+					if(ok)
+					{
+						this.currentMaterial.videosrc = val;
+						this.updateObject();
+					}
+				}.bind(this),src);
+			}.bind(this));
+		}
+		this.BuildGUIPhong = function()
+		{
+				var sliderprops = [
 				{
 					prop: 'alpha',
 					min: 0,
@@ -146,15 +217,7 @@ define(["vwf/view/editorview/mapbrowser"], function ()
 					step: 1
 				}
 			];
-			$("#materialeditor").empty();
-			$("#materialeditor").append("<div id='materialeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Material Editor</span></div>");
-			$('#materialeditortitle').append('<a href="#" id="materialeditorclose" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
-			$('#materialeditortitle').prepend('<img class="headericon" src="../vwf/view/editorview/images/icons/material.png" />');
-			$("#materialeditor").append('<div id="materialaccordion" style="height:100%;overflow:hidden">' + '	<h3>' + '		<a href="#">Material Base</a>' + '	</h3>' + '	<div id="MaterialBasicSettings">' + '	</div>' + '</div>');
-			$("#materialeditorclose").click(function ()
-			{
-				_MaterialEditor.hide()
-			});
+			
 			for (var i = 0; i < sliderprops.length; i++)
 			{
 				var prop = sliderprops[i].prop;
@@ -318,6 +381,122 @@ define(["vwf/view/editorview/mapbrowser"], function ()
 					_MaterialEditor.updateObject();
 				}
 			});
+			
+			$('#' + 'MaterialBasicSettings').append('<div><input style="vertical-align: middle" type="checkbox" id="MaterialBasicSettingsFog" /><div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Fog Enabled </div></div>');
+			$('#' + 'MaterialBasicSettings').append('<div><input style="vertical-align: middle" type="checkbox" id="MaterialBasicSettingsShading" /><div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Shading Enabled </div></div>');
+			$('#' + 'MaterialBasicSettings').append('<div><input style="vertical-align: middle" type="checkbox" id="MaterialBasicSettingsMetal" /><div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Metal </div></div>');
+			$('#' + 'MaterialBasicSettings').append('<div><input style="vertical-align: middle" type="checkbox" id="MaterialBasicSettingsWireFrame" /><div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Wireframe </div></div>');
+			$('#' + 'MaterialBasicSettings').append('<div><input style="vertical-align: middle" type="checkbox" id="MaterialBasicSettingsDepthTest" /><div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Depth Test </div></div>');
+			$('#' + 'MaterialBasicSettings').append('<div><input style="vertical-align: middle" type="checkbox" id="MaterialBasicSettingsDepthWrite" /><div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Depth Write </div></div>');
+			
+			$('#MaterialBasicSettingsFog').click(function()
+			{
+				if ($(this).attr('checked') == 'checked') 
+					_MaterialEditor.currentMaterial.fog = true;
+				else  
+					_MaterialEditor.currentMaterial.fog = false;
+				_MaterialEditor.updateObject();
+			});
+			if (this.currentMaterial.fog === true || this.currentMaterial.fog === undefined)
+			{
+				$('#MaterialBasicSettingsFog').attr('checked', 'checked');
+			}
+			
+			
+			
+			
+			$('#MaterialBasicSettingsMetal').click(function()
+			{
+				if ($(this).attr('checked') == 'checked') 
+					_MaterialEditor.currentMaterial.metal = true;
+				else  
+					_MaterialEditor.currentMaterial.metal = false;
+				_MaterialEditor.updateObject();
+			});
+			if (this.currentMaterial.metal === true)
+			{
+				$('#MaterialBasicSettingsMetal').attr('checked', 'checked');
+			}
+			
+			$('#MaterialBasicSettingsWireFrame').click(function()
+			{
+				if ($(this).attr('checked') == 'checked') 
+					_MaterialEditor.currentMaterial.wireframe = true;
+				else  
+					_MaterialEditor.currentMaterial.wireframe = false;
+				_MaterialEditor.updateObject();
+			});
+			if (this.currentMaterial.wireframe === true)
+			{
+				$('#MaterialBasicSettingsWireFrame').attr('checked', 'checked');
+			}
+			
+			$('#MaterialBasicSettingsDepthTest').click(function()
+			{
+				if ($(this).attr('checked') == 'checked') 
+					_MaterialEditor.currentMaterial.depthtest = true;
+				else  
+					_MaterialEditor.currentMaterial.depthtest = false;
+				_MaterialEditor.updateObject();
+			});
+			if (this.currentMaterial.depthtest === true  || this.currentMaterial.depthtest === undefined)
+			{
+				$('#MaterialBasicSettingsDepthTest').attr('checked', 'checked');
+			}
+			
+			$('#MaterialBasicSettingsDepthWrite').click(function()
+			{
+				if ($(this).attr('checked') == 'checked') 
+					_MaterialEditor.currentMaterial.depthwrite = true;
+				else  
+					_MaterialEditor.currentMaterial.depthwrite = false;
+				_MaterialEditor.updateObject();
+			});
+			if (this.currentMaterial.depthwrite === true || this.currentMaterial.depthwrite === undefined)
+			{
+				$('#MaterialBasicSettingsDepthWrite').attr('checked', 'checked');
+			}
+			
+			
+			$('#MaterialBasicSettingsShading').click(function()
+			{
+				if ($(this).attr('checked') == 'checked') 
+					_MaterialEditor.currentMaterial.shading = true;
+				else  
+					_MaterialEditor.currentMaterial.shading = false;
+				_MaterialEditor.updateObject();
+			});
+			if (this.currentMaterial.shading === true || this.currentMaterial.shading === undefined)
+			{
+				$('#MaterialBasicSettingsShading').attr('checked', 'checked');
+			}
+			
+			$('#' + 'MaterialBasicSettings').append('<div id="MaterialBasicSettingsBlending" style=width:100%;margin-top:10px/>');
+			$('#' + 'MaterialBasicSettingsBlending').button(
+			{
+				label: 'Normal Blending'
+			});
+			$('#' + 'MaterialBasicSettingsBlending').click(function()
+			{
+				alertify.choice("Choose a blending mode",function(ok,val)
+				{
+					if(val)
+					{
+						if(val == 'No Blending')
+							_MaterialEditor.currentMaterial.blendMode = 0;
+						if(val == 'Additive Blending')
+							_MaterialEditor.currentMaterial.blendMode = 2;
+						if(val == 'Subtractive Blending')
+							_MaterialEditor.currentMaterial.blendMode = 3;
+						if(val == 'Normal Blending')
+							_MaterialEditor.currentMaterial.blendMode = 1;							
+						_MaterialEditor.updateObject();
+						$('#' + 'MaterialBasicSettingsBlending').button('option', 'label', val);
+					}
+				},['No Blending','Additive Blending','Subtractive Blending','Normal Blending'])
+			
+			});
+			
 			$('#' + 'MaterialBasicSettings').append('<div id="MaterialBasicSettingsnewLayer" style=width:100%;margin-top:10px/>');
 			$('#' + 'MaterialBasicSettingsnewLayer').button(
 			{
@@ -437,22 +616,8 @@ define(["vwf/view/editorview/mapbrowser"], function ()
 				$('#' + rootid + 'deleteLayer').attr('layer', i);
 				$('#' + rootid + 'deleteLayer').click(this.deletelayer);
 			}
-			$("#materialaccordion").accordion(
-			{
-				fillSpace: true,
-				heightStyle: "content",
-				change: function ()
-				{
-					if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
-				}
-			});
-			$(".ui-accordion-content").css('height', 'auto');
-			//$('#materialeditor').resizable({
-			//    maxHeight: 550,
-			//    maxWidth: 320,
-			//    minHeight: 150,
-			//    minWidth: 320
-			//});
+			
+			
 		}
 		this.setActiveTextureSrc = function (e)
 		{

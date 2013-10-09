@@ -21,6 +21,7 @@
   <!-- URI and loaded from a network-visible location.                                           -->
 
   <head>
+    <meta charset="utf-8" />
 
     <title>Virtual World Framework</title>
 
@@ -66,6 +67,14 @@
 	<script type="text/javascript" src="../vwf/model/threejs/ColladaLoader.js"></script>
 	<script type="text/javascript" src="../vwf/model/threejs/UTF8JSONLoader.js"></script>
     <script type="text/javascript" src="../vwf/model/jiglib/jiglib.js"></script>
+
+
+    <!-- localization libs  -->
+    <script type="text/javascript" src="../vwf/view/localization/json2.min.js"></script>
+    <script type="text/javascript" src="../vwf/view/localization/l10n.min.js"></script>
+    <script type="text/javascript" src="../vwf/view/localization/localizations.js"></script>
+
+    
     <script type="text/javascript">
 
 	//remove the instnace name from requests to make things cache
@@ -87,100 +96,8 @@
 	window.Vec4 = goog.vec.Vec4;
 	window.Mat4 = goog.vec.Mat4;
 	window.Quaternion = goog.vec.Quaternion;
-	require.config({
-	   
-	    paths: {
-		"vwf": "../vwf"
-	    },
-		shims: {
-			'vwf/view/xapi/xapiwrapper': {
-				deps: ['vwf/view/editorview/sha256', "vwf/view/editorview/_3DRIntegration"],
-				exports: 'XAPIWrapper'
-			}
-		},
-	    waitSeconds: 15
-	  });		
-        require( [
 
-            "domReady",
-			"/socket.io/socket.io.js",
-            // This is the common model implementation and an example model that connects the
-            // simulation to a WebGL scene manager.
-            "vwf/kernel/model",
-            "vwf/model/javascript",
-            "vwf/model/jiglib",
-            "vwf/model/threejs",
-            "vwf/model/scenejs",
-            "vwf/model/object",
-            "vwf/model/stage/log",
-            "vwf/kernel/view",
-            "vwf/view/document",
-	        "vwf/view/EditorView",
-            "vwf/view/threejs",
-            "vwf/view/googleEarth",
-            "vwf/utility",
-			"vwf/view/WebRTC",
-			"vwf/view/audio",
-			"vwf/view/xapi"
-
-        ], function( ready ) {
-
-            ready( function() {
-
-                // With the scripts loaded, we must initialize the framework. vwf.initialize()
-                // accepts three parameters: a world specification, model configuration parameters,
-                // and view configuration parameters.
-				$(document.body).append('<div id="glyphOverlay" style="display:none"/>');
-                vwf.initialize(
-
-                    // This is the world specification. The world may be specified using a component
-                    // literal as shown here, or the specification may be placed in a network-
-                    // visible location and specified here as a URI or as a query parameter to this
-                    // index page.
-     
-                    // As a literal:
-                    //     { extends: "http://vwf.example.com/example-type.vwf", properties: { ... }, ... }
-     
-                    // As a string:
-                    //     "http://vwf.example.com/example-type.vwf",
-     
-                    // These are the model configurations. Each key within the configuration object
-                    // is a model name, and each value is an argument or an array of arguments to be
-                    // passed to the model's constructor.
-     
-                    // With an array of arguments for the "example" model:
-                    //     { example: [ p1, p2, ... ], // ==> new vwf.modules.example( vwf, p1, p2, ... ) }
-     
-                    // As a single argument to the "html" view:
-                    //     { html: "#vwf-root" // ==> new vwf.modules.html( vwf, "#vwf-root" ) }
-     
-                    [
-                        "vwf/model/javascript",
-                        "vwf/model/jiglib",
-                        "vwf/model/threejs",
-                        "vwf/model/object",
-                    ],
-
-                    // These are the view configurations. They use the same format as the model
-                    // configurations.
-
-                    [
-						
-						{ "vwf/view/threejs": "#vwf-root" },
-                        "vwf/view/document",
-                        //"vwf/view/editor",
-						"vwf/view/EditorView",
-                    	"vwf/view/googleEarth",
-						"vwf/view/WebRTC",
-						"vwf/view/audio",
-						"vwf/view/xapi"
-                    ]
-
-                );
-
-            } );
-
-        } );
+	require(['boot'], function () {});
 
     </script>
 
@@ -224,7 +141,12 @@
     </script>
 
 	
-	
+	<script type="text/javascript">
+        if (localStorage.language == null) {
+                localStorage.setItem("language","en");
+            };
+        String.locale = localStorage.getItem("language");
+     </script>
 	
 	
 	

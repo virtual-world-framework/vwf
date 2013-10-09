@@ -28,10 +28,11 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 	//since HTML cant actually play it louder, but we can make it 'carry' farther
 	SoundSource.prototype.updateVolume = function(camerapos)
 	{
-		var x = Vec3.distance(camerapos,this.position)-this.startrange* this.volume;
+		var x = Vec3.distance(camerapos,this.position);
 		x = Math.max(0,x);
-		var r = this.endrange* this.volume - this.startrange* this.volume;
-		var vol = (((r+1)*(1/(x+1)))-1)/r;
+		var v = this.volume;
+		
+		var vol = ((-x+v)/v) * ((-x+v)/v);
 		this.sound.setVolume(Math.max(Math.min(vol,1),0) * 100 );
 	}
 	//the driver
@@ -150,7 +151,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 		//Update the sound volume based on the position of the camera and the position of the object
 		ticked : function()
 		{
-			
+			try{
 			var cameraID = vwf.getProperty('index-vwf','activeCamera');
 			if(!cameraID) return;
 			
@@ -160,7 +161,10 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 				this.soundSources[i].updateSourcePosition();
 				this.soundSources[i].updateVolume(campos);
 			}
-
+			}catch(e)
+			{
+			
+			}
 		
 		},
 		deletedNode: function(id)

@@ -6,6 +6,9 @@ define(
 
 		function createIcon(src, menuitemname, tooltip)
 		{
+
+			var translatedTooltip = tooltip.toLocaleString();
+					
 			var iconname = menuitemname + "icon";
 			var mn = menuitemname;
 			$('#toolbar').append('<img src="' + src + '" id="' + iconname + '" class="icon" />');
@@ -17,7 +20,7 @@ define(
 			});
 			$('#' + iconname).qtip(
 			{
-				content: tooltip,
+				content: translatedTooltip,
 				show: {
 					delay: 1000
 				}

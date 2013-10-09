@@ -528,7 +528,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 					
 					
 					var parentNode = childNode.parentNode;
-					parentNode.children.splice(parentNode.children.indexOf(childNode));
+					parentNode.children.splice(parentNode.children.indexOf(childNode),1);
 					
                     delete this.state.nodes[nodeID];
                 }               

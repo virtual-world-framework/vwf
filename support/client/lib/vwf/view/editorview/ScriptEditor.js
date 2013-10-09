@@ -30,6 +30,53 @@ jQuery.fn.extend(
 		})
 	}
 });
+
+jQuery.fn.sortElements = (function(){
+ 
+    var sort = [].sort;
+ 
+    return function(comparator, getSortable) {
+ 
+        getSortable = getSortable || function(){return this;};
+ 
+        var placements = this.map(function(){
+ 
+            var sortElement = getSortable.call(this),
+                parentNode = sortElement.parentNode,
+ 
+                // Since the element itself will change position, we have
+                // to have some way of storing its original position in
+                // the DOM. The easiest way is to have a 'flag' node:
+                nextSibling = parentNode.insertBefore(
+                    document.createTextNode(''),
+                    sortElement.nextSibling
+                );
+ 
+            return function() {
+ 
+                if (parentNode === this) {
+                    throw new Error(
+                        "You can't sort elements if any one is a descendant of another."
+                    );
+                }
+ 
+                // Insert before flag:
+                parentNode.insertBefore(this, nextSibling);
+                // Remove flag:
+                parentNode.removeChild(nextSibling);
+ 
+            };
+ 
+        });
+ 
+        return sort.call(this, comparator).each(function(i){
+            placements[i].call(getSortable.call(this));
+        });
+ 
+    };
+ 
+})();
+
 define(function ()
 {
 	var ScriptEditor = {};
@@ -101,7 +148,7 @@ define(function ()
 		$(document.body).append("<div id='ScriptEditorMessage'>This script contains syntax errors, and cannot be saved;</div>");
 		$(document.body).append("<div id='ScriptEditor'  style=''>" +
 		"<div id='scripteditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' >"+
-		"<span class='ui-dialog-title' id='ui-dialog-title-Players'>ScriptEditor</span></div>" +
+		"<span id='scripteditortitletext' class='ui-dialog-title' id='ui-dialog-title-Players'>ScriptEditor</span></div>" +
 		 '<div id="ScriptEditorTabs" style="width:100%;height:100%;overflow:hidden;padding: 0px 10px 0px 0px;">' +
 		 '	<ul>' +
 		 '		<li><a href="#methods">Methods</a></li>'+ 
@@ -113,7 +160,7 @@ define(function ()
 		 '      <div id="methodlist"/><div id="saveMethod"/></div>' +
 		 '      <div id="textinnerm" style="display: inline-block;position:absolute">' +
 		'          <div style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;"  id="methodtext" />' +
-		 '         <div id="callMethod"/><div id="deleteMethod"/><div id="newMethod"/><div id="checkSyntaxMethod"/><div id="saveMethodCopy"/>'+
+		 '         <div id="callMethod"/><div id="deleteMethod"/><div id="newMethod"/><div id="checkSyntaxMethod"/>'+
 		 '      </div>' + 
 		 '	</div>' + 
 		 '	<div id="events" style="height: 100%;padding:4px">'+
@@ -121,7 +168,7 @@ define(function ()
 		'       <div id="eventlist"/><div id="saveEvent"/></div>' + 
 		'		<div id="textinnere" style="display: inline-block;position:absolute">' +
 		'          <div style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;"  id="eventtext" />'		+
-		'		   <div id="callEvent"/><div id="deleteEvent"/><div id="newEvent"/><div id="checkSyntaxEvent"/><div id="saveEventCopy"/>' +
+		'		   <div id="callEvent"/><div id="deleteEvent"/><div id="newEvent"/><div id="checkSyntaxEvent"/>' +
 		'		</div>' +
 		'	</div>' +
 		 '	<div id="properties" style="height: 100%;padding:4px">'+
@@ -349,23 +396,12 @@ define(function ()
 		//$('#saveEvent').css('bottom','6px');
 		$('#saveEvent').css('width', '175px');
 		$('#saveProperty').css('width', '175px');
-		//$('#saveEventCopy').css('position','absolute');
-		$('#saveEventCopy').css('bottom', '10px');
-		$('#saveEventCopy').css('width', '145px');
-		//$('#saveMethodCopy').css('position','absolute');
-		$('#saveMethodCopy').css('bottom', '10px');
-		$('#saveMethodCopy').css('width', '145px');
+		
+		
 		$('#saveMethod').css('position', 'absolute');
 		//$('#saveMethod').css('bottom','6px');
 		$('#saveMethod').css('width', '175px');
-		$('#saveEventCopy').button(
-		{
-			label: 'Save in Inventory'
-		});
-		$('#saveMethodCopy').button(
-		{
-			label: 'Save in Inventory'
-		});
+		
 		$('#saveEvent').button(
 		{
 			label: 'Save Event'
@@ -410,10 +446,7 @@ define(function ()
 		$('#checkSyntaxEvent').css('float', 'right');
 		$('#checkSyntaxMethod').css('margin-top', '3px');
 		$('#checkSyntaxEvent').css('margin-top', '3px');
-		$('#saveEventCopy').css('float', 'right');
-		$('#saveMethodCopy').css('float', 'right');
-		$('#saveMethodCopy').css('margin-top', '3px');
-		$('#saveEventCopy').css('margin-top', '3px');
+		
 		$('#callMethod').css('float', 'right');
 		$('#deleteMethod').css('float', 'right');
 		$('#newMethod').css('float', 'right');
@@ -623,6 +656,8 @@ define(function ()
 								{
 									paramstr += params[i] + ',';
 								}
+								if(paramcount == 0)
+									paramstr = '()';
 								paramstr = paramstr.substr(0,paramstr.length-1) +')';
 								_ScriptEditor.setSelectedMethod(name, 'function ' + name+paramstr + '{\n\n console.log("got here"); \n\n}');
 							});
@@ -689,6 +724,8 @@ define(function ()
 									paramstr += params[i] + ',';
 								}
 								paramstr = paramstr.substr(0,paramstr.length-1) +')';
+								if(paramcount == 0)
+									paramstr = '()';
 								_ScriptEditor.setSelectedEvent(name, 'function ' + name+paramstr + '{\n\n console.log("got here"); \n\n}');
 							});
 						}
@@ -784,6 +821,17 @@ define(function ()
 			//window.clearInterval(window.scripthideinterval);
 			if (!this.isOpen())
 			{
+				if(!this.currentNode)
+				{
+					alertify.alert('No object is selected.');
+					return;
+				}
+				if(this.currentNode.id == 'index-vwf')
+				{
+					alertify.alert('The Scene object cannot accept scripts. Try creating a behavior on the scene instead.');
+					return;
+				}
+				
 				//window.scripthideinterval = window.setInterval(function(){
 				//		$('#ScriptEditorTabs').css('height',$('#ScriptEditor').height() + 'px');
 				//		$('#index-vwf').css('height',window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - //$('#toolbar').height() - ($(window).height() - $('#ScriptEditor').offset().top-25) + 'px');
@@ -882,6 +930,7 @@ define(function ()
 			}
 			var body = rawtext.substring(rawtext.indexOf('{') + 1, rawtext.lastIndexOf('}'));
 			body = $.trim(body);
+			body += '\n';
 			//body = body.replace(/\s*\n\s+/gm,'\n');
 			if (_ScriptEditor.currentNode.methods && _ScriptEditor.currentNode.methods[methodname])
 			{
@@ -922,6 +971,7 @@ define(function ()
 			}
 			var body = rawtext.substring(rawtext.indexOf('{') + 1, rawtext.lastIndexOf('}'));
 			body = $.trim(body);
+			body += '\n';
 			if (_ScriptEditor.currentNode.events && _ScriptEditor.currentNode.events[eventname])
 			{
 				vwf_view.kernel.deleteEvent(_ScriptEditor.currentNode.id, eventname);
@@ -1091,6 +1141,7 @@ define(function ()
 		}
 		this.BuildGUI = function (refresh)
 		{
+			$('#scripteditortitletext').text('Script Editor - '+ (vwf.getProperty(this.currentNode.id,'DisplayName') || this.currentNode.id))
 			if (!refresh)
 			{
 				this.selectedMethod = null;
@@ -1285,6 +1336,10 @@ define(function ()
 					});
 				}
 			}
+			
+			$('#methodlist').children().sortElements(function(a,b){return ($(a).text().toLowerCase() > $(b).text().toLowerCase()  ? 1 : -1)});
+			$('#eventlist').children().sortElements(function(a,b){return ($(a).text().toLowerCase() > $(b).text().toLowerCase()  ? 1 : -1)});
+			$('#propertylist').children().sortElements(function(a,b){return ($(a).text().toLowerCase() > $(b).text().toLowerCase()  ? 1 : -1)});
 		}
 		this.getMethods = function()
 		{
@@ -1301,7 +1356,7 @@ define(function ()
 			}
 			node = vwf.getNode(vwf.prototype(node.id),true);
 			}
-
+			
 			return methods;
 
 		}
@@ -1342,6 +1397,14 @@ define(function ()
 		}
 		this.changeSelection = function (node)
 		{
+			if(!node)
+			{
+				if (this.isOpen()) this.hide();
+			}
+			if(node.id == 'index-vwf')
+			{
+				if (this.isOpen()) this.hide();
+			}
 			if (node && this.isOpen())
 			{
 				if (!this.currentNode || (this.currentNode.id != node.id))
