@@ -1474,6 +1474,73 @@ function startVWF(){
 			});
 			
 			
+			//find pretty world URL's, and redirect to the non-pretty url for the world
+			app.use(function(req, res, next)
+			{
+				var url = req.url
+				// only do this at all of the url contians /worlds/
+				var index = url.toLowerCase().indexOf('/worlds/');
+				if(index != -1)
+				{
+					//find the name to search for
+					var worldName = url.substring(index+8);
+					
+					//decode from URL encoding, which will happen if there are spaces
+					worldName = decodeURIComponent(worldName);
+					
+					//search the DB for worlds that have that title
+					DAL.find({title:worldName},function(err,worlds)
+					{
+						//if there is one , just forward to it
+						if(worlds && Object.keys(worlds).length == 1)
+						{
+							 var worldURL = Object.keys(worlds)[0];
+							 worldURL = worldURL.replace(/_/g,'/');
+							 _302(worldURL,res);
+							 return;
+						}
+						//If there are more than one, create a page with links to each
+						if(worlds && Object.keys(worlds).length > 1)
+						{
+							worlds = Object.keys(worlds);
+							
+							res.writeHead(200, {
+								"Content-Type": "text/html" 
+							});
+							res.write( "<html>" +
+											"<head>" +
+											"	<title>Virtual World Framework</title>" +
+											
+											"</head>" +
+											"<body>" );
+						
+							
+							 //create a link for each world
+							 for(var i = 0; i < worlds.length; i++)
+							 {
+								var worldURL = worlds[i];
+								worldURL = worldURL.replace(/_/g,'/');
+								
+								res.write(  "<a href='"+worldURL+"'>"+worldURL+"</a><br/>" );
+								
+							 }
+							 
+							 res.write(  "</body> </html>" );
+							 res.end();
+							 return;
+						}
+						
+						//if we did not find any results, just continue - which will 404
+						next();
+					
+					
+					});
+				}
+				//does not contain /worlds/, so continue
+				else
+					next();
+			});
+			
 			app.use(express.methodOverride());
 			
 			//Wait until all data is loaded before continuing
