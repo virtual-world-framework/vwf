@@ -16,7 +16,6 @@ properties:
                 'getAgents':           genCaller('getAgents').bind(this),
                 'getState':            genCaller('getState').bind(this),
                 'getStatements':       genCaller('getStatements').bind(this),
-                'prepareStatement':    genCaller('prepareStatement').bind(this),
                 'sendActivityProfile': genCaller('sendActivityProfile').bind(this),
                 'sendAgentProfile':    genCaller('sendAgentProfile').bind(this),
                 'sendState':           genCaller('sendState').bind(this),

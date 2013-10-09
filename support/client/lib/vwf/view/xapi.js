@@ -23,7 +23,6 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 				'getAgents',
 				'getState',
 				'getStatements',
-				'prepareStatement',
 				'sendActivityProfile',
 				'sendAgentProfile',
 				'sendState',
@@ -43,6 +42,7 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 
 				// if they're trying to initialize, do that
 				else if( fn === 'xapi_configure' ){
+					console.log('Initializing xAPI for', id, 'with', params);
 					this.wrapperOf[id] = new XAPIWrapper(params);
 					return;
 				}
@@ -53,20 +53,35 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 					return;
 				}
 
+				// build a callback that replicates response to other clients
+				var successCallback = params[0];
+				var callback = function(data){
+					console.log('Callback arguments:', arguments);
+					if( successCallback ){
+						vwf_view.kernel.callMethod(id, successCallback, [data]);
+					}
+				};
 
 				// select based on call method
-				console.log(fn.slice(5));
 				switch(fn.slice(5))
 				{
 					// reconfigure
 					case 'configure':
-						return wrapper.changeConfig(params);
+						wrapper.changeConfig(params);
 						break;
+
+					case 'testConfig':
+						console.log('testConfig result:', wrapper.testConfig());
+						break;
+
 
 					// if not one of the special cases, just pass params through to wrapper
 					default:
 						console.log('Default path');
-						return wrapper[fn.slice(5)].apply(wrapper, params)
+						var args = params.splice(1);
+						args.push(callback);
+						console.log(wrapper, fn.slice(5), args);
+						wrapper[fn.slice(5)].apply(wrapper, args);
 						break;
 
 				}
