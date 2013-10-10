@@ -3,16 +3,18 @@
 <div id="toolbar" style=""> </div>		
 <div id="smoothmenu1" class="ddsmoothmenu" style="z-index: 1000;position: fixed;width: 100%;border-bottom: 1px solid #555555;">
 <ul>
-<li><a href="#">File</a>
+<li><a href="#" id="MenuFile">File</a>
 <ul>
-	  <li><a href="#" id="MenuLogIn">Log In</a></li>	  
+	<li><a href="#" id="MenuLogIn">Log In</a></li>	  
 	  <li><a href="#" id="MenuLogOut">Log Out</a></li>
 	  <li><a href="#" id="MenuSaveNow">Save Now</a></li>
+	  <li><a href="#" id="MenuShareWorld">Share</a></li>
 	  <li><a href="#" id="MenuPublish">Publish (Coming Soon!)</a></li>
+	  
 </ul>
 </li>
 
-<li><a href="#">Edit</a>
+<li><a href="#" id="MenuEdit">Edit</a>
   <ul>
 	  	  
 	  <li><a href="#" id="MenuCopy">Copy</a></li>
@@ -54,7 +56,7 @@
 	  
 </ul>
 </li>
-<li><a href="#">Camera</a>
+<li><a href="#" id="MenuCamera">Camera</a>
   <ul>
   <li><a href="#" id="MenuFocusSelected" >Focus Selected</a></li>
   <li><a href="#" id="MenuCameraShare">Share Camera View</a></li>
@@ -70,7 +72,7 @@
        </ul></li>
   </ul>
 </li>
-<li><a href="#">Hierarchy</a>
+<li><a href="#" id="MenuHierarchy">Hierarchy</a>
   <ul>
   <li><a href="#" id="MenuSetParent" >Link</a></li>
   <li><a href="#" id="MenuRemoveParent" >Unlink</a></li>
@@ -85,7 +87,7 @@
   </ul>
 </li>
 
-<li><a href="#">Create</a>
+<li><a href="#" id="MenuCreate">Create</a>
   <ul>
     <li><a id="MenuPrimitives" href="#">Primitives</a>
 		<ul>
@@ -160,7 +162,7 @@
 	<li><a href="#" id="MenuCreateLoadMeshURL">Load Mesh URL</a></li>
   </ul>
 </li>
-<li><a href="#">Tools</a>
+<li><a href="#" id="MenuTools">Tools</a>
   <ul>
   <li><a href="#" id="MenuAlign">Align</a></li>
   <li><a href="#" id="MenuBlockPainter">Block Painter</a></li>
@@ -168,7 +170,7 @@
   <li><a href="#" id="MenuSplineTools">Spline Tools</a></li>
   </ul>
 </li>
-<li><a href="#">Windows</a>
+<li><a href="#" id="MenuWindows">Windows</a>
   <ul>
   <li><a href="#" id="MenuChat">Chat</a></li>
   <li><a href="#" id="MenuUsers">Users</a></li>
@@ -181,7 +183,7 @@
   <li><a href="#" id="MenuHierarchyManager">Show Hierarchy</a></li>
   </ul>
 </li>
-<li><a href="#">Rendering</a>
+<li><a href="#" id="MenuRendering">Rendering</a>
   <ul>
  
   <li><a href="#" id="MenuViewToggleWireframe">Toggle Wireframe</a></li>
@@ -200,7 +202,7 @@
 	</li>
   </ul>
 </li>
-<li><a href="#">Location</a>
+<li><a href="#" id="MenuLocation">Location</a>
   <ul>
   <li><a href="#" id="LocationGoToPosition">Go to Position...</a></li>
   <li><a href="#" id="LocationGoToPlacemark">Go to Placemark...</a></li>
@@ -208,11 +210,17 @@
   <li><a href="#" id="LocationMoveToGround">Move to ground</a></li>
   </ul>
 </li>
-<li><a href="#">Help</a>
+<li><a href="#" id="MenuHelp">Help</a>
   <ul>
   <li><a href="#" id="MenuHelpAbout">About</a></li>
   <li><a href="#" id="MenuHelpBrowse">Browse All Topics...</a></li>
   <li><a href="#" id="MenuLatencyTest">Test Latency</a></li>
+  <li><a id="MenuLanguage" href="#">Language</a>
+		<ul>
+	  		<li><a href="#" id="MenuEn">English</a></li>	  
+	  		<li><a href="#" id="MenuRu">Русский</a></li>
+	 	</ul> 
+	  </li>
   </ul>
 </li>
 </ul>
