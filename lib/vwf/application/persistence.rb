@@ -30,8 +30,24 @@ class VWF::Application::Persistence < Sinatra::Base
     content_type :json
     result = [ ]
     instance_id_list = @storage.list_application_instances( @env[ 'vwf.root' ], @env[ 'vwf.application' ] )
+    active_instance_id_list = [ ]
+    VWF::Application::Reflector.instances( env ).map do |resource, instance|
+      resource_segments = resource.split( "/" )
+      if resource_segments.length > 3
+          active_instance_id = resource_segments.pop
+          active_instance_application = resource_segments.pop
+          active_instance_public_path = resource_segments.join( "/" )
+          if @env[ 'vwf.root' ] == active_instance_public_path and @env[ 'vwf.application' ] == active_instance_application
+            active_instance_id_list.push active_instance_id
+            unless instance_id_list.include? active_instance_id
+              instance_id_list.push active_instance_id
+            end
+          end
+      end
+    end
+    instance_id_list.sort!
     instance_id_list.each do | instance_id |
-      result.push generate_instance_hash( request.scheme, request.host_with_port, @env[ 'vwf.root' ], @env[ 'vwf.application' ], instance_id )
+      result.push generate_instance_hash( request.scheme, request.host_with_port, @env[ 'vwf.root' ], @env[ 'vwf.application' ], instance_id, active_instance_id_list.include?( instance_id ) )
     end
     result.to_json
   end
@@ -137,10 +153,11 @@ class VWF::Application::Persistence < Sinatra::Base
   
   helpers do
 
-    def generate_instance_hash( scheme, host_with_port, public_path, application, instance )
+    def generate_instance_hash( scheme, host_with_port, public_path, application, instance, active )
       result = {}
       result[ "instance_id" ] = instance
       result[ "url" ] = scheme + "://" + host_with_port + public_path + "/" + application + "/" + instance
+      result[ "active" ] = active
       result[ "vwf_info" ] = {}
       result[ "vwf_info" ][ "public_path" ] = public_path
       result[ "vwf_info" ][ "application" ] = application
