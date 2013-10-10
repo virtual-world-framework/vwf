@@ -29,10 +29,11 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 				'sendStatement',
 				'sendStatements'];
 
-			if( fn.slice(0,5) == 'xapi_' && methods.indexOf(fn.slice(5)) != -1 )
+			if( fn.slice(0,5) == 'xapi_' && methods.indexOf(fn.slice(5)) != -1
+			&& (vwf.client() == null || vwf.client() == vwf.moniker()) )
 			{
 				console.log('XAPI:', id, fn, params);
-
+				//console.log('Client:', vwf.client(), 'Moniker:', vwf.moniker());
 				var wrapper;
 
 				// if an obj has already initialized, use that
@@ -43,7 +44,7 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 				// if they're trying to initialize, do that
 				else if( fn === 'xapi_configure' ){
 					console.log('Initializing xAPI for', id, 'with', params);
-					this.wrapperOf[id] = new XAPIWrapper(params);
+					this.wrapperOf[id] = new XAPIWrapper(params[0]);
 					return;
 				}
 
@@ -55,10 +56,9 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 
 				// build a callback that replicates response to other clients
 				var successCallback = params[0];
-				var callback = function(data){
-					console.log('Callback arguments:', arguments);
+				var callback = function(xhr){
 					if( successCallback ){
-						vwf_view.kernel.callMethod(id, successCallback, [data]);
+						vwf_view.kernel.callMethod(id, successCallback, [xhr]);
 					}
 				};
 
@@ -67,7 +67,7 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 				{
 					// reconfigure
 					case 'configure':
-						wrapper.changeConfig(params);
+						wrapper.changeConfig(params[0]);
 						break;
 
 					case 'testConfig':
@@ -77,10 +77,8 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 
 					// if not one of the special cases, just pass params through to wrapper
 					default:
-						console.log('Default path');
 						var args = params.splice(1);
 						args.push(callback);
-						console.log(wrapper, fn.slice(5), args);
 						wrapper[fn.slice(5)].apply(wrapper, args);
 						break;
 
