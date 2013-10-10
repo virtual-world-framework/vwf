@@ -737,7 +737,22 @@ function CopyState(URL,filename,newname,response)
 
 function CopyInstance(URL, SID, response){
 
-	response.end(JSON.stringify(SID) + JSON.stringify(URL));
+	if(!URL.loginData)
+	{
+		respond(response,401,'Anonymous users cannot copy instances');
+		return;
+	}
+	
+	SID = SID ? SID : URL.query.SID;
+	if(SID.length == 16){
+		SID = '_adl_sandbox_' + SID + '_';
+	}
+	
+	DAL.copyInstance(SID, URL.loginData.UID, function(newId){
+	
+		if(newId) respond(response, 200, JSON.stringify(newId));
+		else respond(response, 500, 'Error in trying to copy world');
+	});
 }
 
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author

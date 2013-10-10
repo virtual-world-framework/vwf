@@ -1042,33 +1042,44 @@ function makeid()
     return text;
 }
 
+//If arg3 exists, it must be a callback function and arg2 must be the newowner. 
+//Else, a callback is defined as arg2 and arg3 is undefined. Keep current owner.
+function copyInstance (id, arg2, arg3){
 
-function copyInstance (id,cb,newowner){
-
+	var cb, newowner;
+	if(arg3){
+		cb = arg3;
+		newowner = arg2;
+	}
+	
+	else cb = arg2;
+	
 	getInstance(id, function(instance){
 		
 		if(instance){
 			var newId = '_adl_sandbox_' + makeid() + '_';
+			instance.owner = newowner ? newowner : instance.owner;
 			
 			createInstance (newId, instance, function(success){
-				instance.owner = newowner
-				//From here, copy state file
 				if(success){
 					var oldStateFile = datapath + '/States/' + id + '/state', newStateFile = datapath + '/States/' + newId + '/state';
 					
 					fs.readFile(oldStateFile,function(err, olddata)
 					{
+						//olddata may not exist..
+						if(!olddata || err){
+							cb(newId);
+							return;
+						}
+						
 						var oldstate = JSON.parse(olddata);
-						oldstate[oldstate.length-1].owner = newowner;
+						oldstate[oldstate.length-1].owner = instance.owner;
 						var newstate = JSON.stringify(oldstate);
-						fs.writeFile(newStateFile,newstate,'utf8',function(err)
+						fs.writeFile(newStateFile, newstate, function(err)
 						{
 							cb(newId);
 						});
 					});
-					
-					
-					
 				}
 				
 				else cb(false);
