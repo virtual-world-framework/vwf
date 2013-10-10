@@ -49,7 +49,7 @@ define(
 		
 		$('#MenuShareWorld').click(function (e)
 		{
-			debugger;
+			
 			var state =_DataManager.getCurrentSession();
 			state = state.replace(/\//g,'_');
 			var turl = "/vwfdatamanager.svc/statedata?SID=" +state;
