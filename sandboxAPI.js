@@ -1065,7 +1065,7 @@ function serve (request, response)
 {
 	var URL = url.parse(request.url,true);
 	var serviceRoute = "vwfdatamanager.svc/";
-	var pathAfterRoute = URL.pathname.toLowerCase().substr(URL.pathname.toLowerCase().lastIndexOf(serviceRoute)+serviceRoute.length);
+	var pathAfterRoute = URL.pathname.substr(URL.pathname.toLowerCase().lastIndexOf(serviceRoute)+serviceRoute.length);
 	var command = pathAfterRoute.substr(0,pathAfterRoute.indexOf('/')) || pathAfterRoute;
 	var pathAfterCommand = pathAfterRoute.substr(command.length);
 	
