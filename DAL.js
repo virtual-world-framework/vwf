@@ -1059,6 +1059,7 @@ function copyInstance (id, arg2, arg3){
 		if(instance){
 			var newId = '_adl_sandbox_' + makeid() + '_';
 			instance.owner = newowner ? newowner : instance.owner;
+			instance.featured = false;
 			
 			createInstance (newId, instance, function(success){
 				if(success){

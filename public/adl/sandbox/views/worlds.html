@@ -79,7 +79,7 @@
 					$.get('/vwfDataManager.svc/copyinstance?SID=' + world.id, function(o){
 		
 						if(o){
-							window.location = '{{root}}/' + o.substr(13,16);
+							window.location = '{{root}}/edit?id=' + o.substr(13,16);
 						}
 
 						else{
