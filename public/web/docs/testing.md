@@ -12,7 +12,7 @@ The Virtual World Framework has tests against the server and some of the core cl
 
 The Ruby tests exercise parts of the Ruby server and are run using rake.
 
-    rake test
+    bundle exec rake test
 
 -------------------
 
@@ -33,7 +33,7 @@ apt-get install phantomjs or yum instal phantomjs
 2\. Run the tests.
 
 ~~~
-rake test:qunit
+    bundle exec rake test:qunit
 ~~~
 
 **Mac**
@@ -47,7 +47,7 @@ brew install phantomjs
 2\. Run the tests.
 
 ~~~
-rake test:qunit
+    bundle exec rake test:qunit
 ~~~
 
 **Windows**
