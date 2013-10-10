@@ -29,6 +29,7 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 				'sendStatement',
 				'sendStatements'];
 
+			// process only if prefixed method is handled, and this client or the system initiated the event
 			if( fn.slice(0,5) == 'xapi_' && methods.indexOf(fn.slice(5)) != -1
 			&& (vwf.client() == null || vwf.client() == vwf.moniker()) )
 			{
@@ -54,14 +55,6 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 					return;
 				}
 
-				// build a callback that replicates response to other clients
-				var successCallback = params[0];
-				var callback = function(xhr){
-					if( successCallback ){
-						vwf_view.kernel.callMethod(id, successCallback, [xhr]);
-					}
-				};
-
 				// select based on call method
 				switch(fn.slice(5))
 				{
@@ -74,9 +67,17 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 						console.log('testConfig result:', wrapper.testConfig());
 						break;
 
-
 					// if not one of the special cases, just pass params through to wrapper
 					default:
+
+						// build a callback that replicates response to other clients
+						var successCallback = params[0];
+						var callback = function(xhr){
+							if( successCallback ){
+								vwf_view.kernel.callMethod(id, successCallback, [xhr]);
+							}
+						};
+
 						var args = params.splice(1);
 						args.push(callback);
 						wrapper[fn.slice(5)].apply(wrapper, args);
