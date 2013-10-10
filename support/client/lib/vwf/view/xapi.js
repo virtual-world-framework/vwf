@@ -14,23 +14,23 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 
 		calledMethod: function(id,fn,params)
 		{
-			var methods = [
-				'configure',
-				'testConfig',
-				'getActivities',
-				'getActivityProfile',
-				'getAgentProfile',
-				'getAgents',
-				'getState',
-				'getStatements',
-				'sendActivityProfile',
-				'sendAgentProfile',
-				'sendState',
-				'sendStatement',
-				'sendStatements'];
+			var methods = {
+				'configure':null,
+				'testConfig':null,
+				'getActivities':2,
+				'getActivityProfile':4,
+				'getAgentProfile':4,
+				'getAgents':2,
+				'getState':6,
+				'getStatements':3,
+				'sendActivityProfile':6,
+				'sendAgentProfile':6,
+				'sendState':8,
+				'sendStatement':2,
+				'sendStatements':2};
 
 			// process only if prefixed method is handled, and this client or the system initiated the event
-			if( fn.slice(0,5) == 'xapi_' && methods.indexOf(fn.slice(5)) != -1
+			if( fn.slice(0,5) == 'xapi_' && Object.keys(methods).indexOf(fn.slice(5)) != -1
 			&& (vwf.client() == null || vwf.client() == vwf.moniker()) )
 			{
 				console.log('XAPI:', id, fn, params);
@@ -56,7 +56,8 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 				}
 
 				// select based on call method
-				switch(fn.slice(5))
+				var method = fn.slice(5);
+				switch(method)
 				{
 					// reconfigure
 					case 'configure':
@@ -78,9 +79,15 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 							}
 						};
 
-						var args = params.splice(1);
+						// rearrange args so callback is always in proper position
+						var args = params.slice(1);
+						while( args.length < methods[method]-1 )
+							args.push(undefined);
 						args.push(callback);
+
+						// call the function
 						wrapper[fn.slice(5)].apply(wrapper, args);
+
 						break;
 
 				}
