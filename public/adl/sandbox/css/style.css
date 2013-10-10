@@ -463,7 +463,7 @@ text-align:left;
 
 	padding-bottom: 3px;
 }
-.editstatedata, .editstatedelete
+.editstatedata, .editstatedelete, .editstatecopy
 {
 	cursor: pointer;
 	border-radius: 7px;

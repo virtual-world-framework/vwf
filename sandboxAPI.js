@@ -750,7 +750,7 @@ function CopyInstance(URL, SID, response){
 	
 	DAL.copyInstance(SID, URL.loginData.UID, function(newId){
 	
-		if(newId) respond(response, 200, JSON.stringify(newId));
+		if(newId) respond(response, 200, newId);
 		else respond(response, 500, 'Error in trying to copy world');
 	});
 }
