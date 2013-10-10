@@ -85,10 +85,10 @@ exports.handlePostRequest = function(req, res, next){
 	var sessionData = global.SandboxAPI.getSessionData(req);
 	
 	//Temporarily commenting out authorization
-	/*if(!sessionData || sessionData.UID != global.adminUID){
+	if(!sessionData || sessionData.UID != global.adminUID){
 		next();
 		return;
-	}*/
+	}
 	
 	switch(req.params.action){
 	
