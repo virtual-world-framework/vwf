@@ -1,6 +1,9 @@
+var disableCompress = false;
 var messageCompress =  {
         pack:function(message)
 		{
+			if(disableCompress) return message;
+			
 			if(message.constructor != String)
 				return message;
 			if(!this.initialized)
@@ -21,6 +24,8 @@ var messageCompress =  {
 		},
         unpack:function(message)
 		{
+			if(disableCompress) return message;
+			
 			if(message.constructor != String)
 				return message;
 				
@@ -93,7 +98,8 @@ var messageCompress =  {
 			this.addMapping('"mods"');
 			this.addMapping('"space"');
 			this.addMapping('null');
-			this.addMapping('deltaY');
+			this.addMapping('"deltaY"');
+			this.addMapping('"client"');
 			
 			this.initialized = true;
 		},
@@ -111,7 +117,6 @@ var messageCompress =  {
 
 
 
-if(window.define)
-	define(messageCompress);
-if(window.global && window.global.exports)
-    exports.messageCompress = messageCompress;
+try{define(messageCompress);}catch(e){console.log('no define')}
+try{exports.messageCompress = messageCompress;}catch(e){console.log('no exports')}
+    

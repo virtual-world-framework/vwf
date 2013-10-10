@@ -802,7 +802,7 @@ function startVWF(){
 		  {
 			console.log(msg.space);
 			WebSocketConnection(socket,msg.space);
-			socket.emit('namespaceSet',{});
+			socket.emit('namespaceSet',messageCompress.pack(JSON.stringify({})));
 		  });
 		  return;
 	  }else
@@ -871,7 +871,7 @@ function startVWF(){
 			{
 				var client = global.instances[namespace].clients[i];
 				if(!client.pending)
-					client.emit('message',{"action":"tick","parameters":[],"time":global.instances[namespace].time});
+					client.emit('message',messageCompress.pack(JSON.stringify({"action":"tick","parameters":[],"time":global.instances[namespace].time})));
 				else
 				{
 					client.pendingList.push({"action":"tick","parameters":[],"time":global.instances[namespace].time});
@@ -1001,7 +1001,7 @@ function startVWF(){
 			
 			
 			
-			socket.emit('message',{"action":"createNode","parameters":[blankscene],"time":global.instances[namespace].time});
+			socket.emit('message',messageCompress.pack(JSON.stringify({"action":"createNode","parameters":[blankscene],"time":global.instances[namespace].time})));
 			socket.pending = false;
 		});
 	  }
@@ -1013,7 +1013,7 @@ function startVWF(){
 		//firstclient = global.instances[namespace].clients[firstclient];
 		socket.pending = true;
 		global.instances[namespace].getStateTime = global.instances[namespace].time;
-		firstclient.emit('message',{"action":"getState","respond":true,"time":global.instances[namespace].time});
+		firstclient.emit('message',messageCompress.pack(JSON.stringify({"action":"getState","respond":true,"time":global.instances[namespace].time})));
 		
 		var timeout = function(namespace){
 			
@@ -1038,7 +1038,7 @@ function startVWF(){
 					{
 						console.log('did not get state, resending request');	
 						this.namespace.getStateTime = this.namespace.time;
-						loadClient.emit('message',{"action":"getState","respond":true,"time":this.namespace.time});
+						loadClient.emit('message',messageCompress.pack(JSON.stringify({"action":"getState","respond":true,"time":this.namespace.time})));
 						this.handle = global.setTimeout(this.time.bind(this),2000);			
 					}else
 					{
@@ -1065,7 +1065,7 @@ function startVWF(){
 		  
 			//need to add the client identifier to all outgoing messages
 			try{
-				var message = JSON.parse(msg);
+				var message = JSON.parse(messageCompress.unpack(msg));
 			}catch(e)
 			{
 				return;
@@ -1115,7 +1115,7 @@ function startVWF(){
 					var client = global.instances[namespace].clients[i];
 					if(client && client.loginData && (client.loginData.UID == textmessage.receiver || client.loginData.UID == textmessage.sender))
 					{	
-						client.emit('message',message);
+						client.emit('message',messageCompress.pack(JSON.stringify(message)));
 						
 					}
 						
@@ -1143,7 +1143,7 @@ function startVWF(){
 					for( var i in global.instances[namespace].clients ){
 						var client = global.instances[namespace].clients[i];
 						if( client && client.loginData && client.loginData.UID == params.target )
-							client.emit('message', message);
+							client.emit('message', messageCompress.pack(JSON.stringify(message)));
 					}
 				}
 				return;
@@ -1269,12 +1269,12 @@ function startVWF(){
 					
 					
 					if(message.client != i && client.pending===true)
-						client.emit('message',{"action":"setState","parameters":[state],"time":global.instances[namespace].getStateTime});
+						client.emit('message',messageCompress.pack(JSON.stringify({"action":"setState","parameters":[state],"time":global.instances[namespace].getStateTime})));
 					client.pending = false;
 					for(var j = 0; j < client.pendingList.length; j++)
 					{
 						
-						client.emit('message',client.pendingList[j]);
+						client.emit('message',messageCompress.pack(JSON.stringify(client.pendingList[j])));
 						
 						
 					}
@@ -1291,7 +1291,7 @@ function startVWF(){
 					}else
 					{
 						
-						client.emit('message',message);
+						client.emit('message',messageCompress.pack(JSON.stringify(message)));
 						
 					}
 				}
@@ -1316,7 +1316,7 @@ function startVWF(){
 			 for(var i in global.instances[namespace].clients)
 			  {
 					var cl = global.instances[namespace].clients[i];
-					cl.emit('message',{"action":"deleteNode","node":avatarID,"time":global.instances[namespace].time});					
+					cl.emit('message',messageCompress.pack(JSON.stringify({"action":"deleteNode","node":avatarID,"time":global.instances[namespace].time})));					
 			  }
 			  global.instances[namespace].state.deleteNode(avatarID);	
 		  }

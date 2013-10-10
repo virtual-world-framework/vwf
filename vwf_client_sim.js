@@ -4,7 +4,7 @@ var  url = require("url");
 var  mime = require('mime');
 var  io = require('socket.io-client');
 var  CryptoJS = require('cryptojs');
-
+var messageCompress = require('./support/client/lib/messageCompress').messageCompress;
 function GUID()
 {
 	var S4 = function ()
@@ -74,7 +74,8 @@ function LaunchAvatar(username_in,password_in,server_in,port_in,session_in)
 	//quick macro to send a message
 	function send(data)
 	{
-		socket.emit('message',JSON.stringify(data));	
+		console.log(data);
+		socket.emit('message',messageCompress.pack(JSON.stringify(data)));	
 	}
 	//generate a key event and send it
 	// State is either UP or DOWN, key is a char
@@ -182,13 +183,16 @@ function LaunchAvatar(username_in,password_in,server_in,port_in,session_in)
 				]
 			}
 		console.log('sending avatar');
-		socket.emit('message',JSON.stringify(component));
+		socket.emit('message',messageCompress.pack(JSON.stringify(component)));
 	  });
 	}
 
 	//here, we handle incomming data from the server
 	function OnMessage(data)
 	{
+		
+		data = JSON.parse(messageCompress.unpack(data));
+		console.log(data);
 		//keep track of the server time pulse
 		currenttime = data.time;
 		//if we are keeping track of state and the server requests it, send it
@@ -204,7 +208,7 @@ function LaunchAvatar(username_in,password_in,server_in,port_in,session_in)
 		}
 		if(data.action == 'createChild')
 		{
-			console.log(data);
+			
 			
 			
 			var childComponent = JSON.parse(JSON.stringify(data.parameters[0]));
@@ -226,7 +230,13 @@ function LaunchAvatar(username_in,password_in,server_in,port_in,session_in)
 		//This bot randomly hits the keys, and the avatar will move.
 		if(data.action == 'tick')
 		{
-			var rnd = Math.floor(Math.random() * 100)
+		
+		
+			//send a fake mouse event, to test server 
+			
+			var mouseevent  = {"time":5.799999999999987,"node":"index-vwf","action":"dispatchEvent","member":"pointerMove","parameters":[[{"button":"right","clicks":1,"buttons":{"left":false,"middle":false,"right":true},"modifiers":{"alt":false,"ctrl":false,"shift":false,"meta":false},"position":[0.37105263157894736,0.20229405630865485],"screenPosition":[705,194]}],{"":[{"distance":0.25039778107183475,"globalPosition":[null,null,null],"globalNormal":[0,0,1],"globalSource":[1.202807068824768,-3.8025035858154297,-3.8025035858154297]}],"box2-vwf-9d1cb46-c41b-e63-1ac-8fb9a3f7f073":[{"source":{"0":-1.5917856693267822,"1":5.0322041511535645,"2":-5.0322041511535645},"distance":0.25039778107183475,"globalSource":[1.202807068824768,-3.8025035858154297,-3.8025035858154297]}]}],"client":"wRI1voo6_Fp_h5ZMYXrM"};
+			send(mouseevent);
+			var rnd = Math.floor(Math.random() * 100);
 			if(rnd == 0)
 			{
 				KeyEvent(DOWN,'w');
@@ -289,7 +299,7 @@ function LaunchAvatar(username_in,password_in,server_in,port_in,session_in)
 	  //This is a special case for the simulated client
 	  //we must ask the server to associate this websocket with a the given world
 	  //when complete, the server will call namespaceSet
-	  socket.emit('setNamespace', { space: session });
+	  socket.emit('setNamespace', messageCompress.pack({ space: session }));
 	 
 	  
 	}
