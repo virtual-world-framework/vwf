@@ -1232,15 +1232,26 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 sceneView.kernel.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
             }
         }
-
+		var lastpoll = performance.now();
         canvas.onmousemove = function( e ) {
             
 			var eData = getEventData( e, false );
             
             if ( eData ) {
                 if ( mouseLeftDown || mouseRightDown || mouseMiddleDown ) {
+					// lets begin filtering this - it should be possible to only send the data when the change is greater than some value
 					if(pointerDownID)
-						sceneView.kernel.dispatchEvent( pointerDownID, "pointerMove", eData.eventData, eData.eventNodeData );
+					{
+						
+							var now = performance.now();
+							var timediff = (now - lastpoll);
+						if(timediff > 50)   //condition for filter
+						{	
+							lastpoll = now;
+							sceneView.lastData = eData;
+							sceneView.kernel.dispatchEvent( pointerDownID, "pointerMove", eData.eventData, eData.eventNodeData );
+						}
+					}
                 } else {
                     if ( pointerPickID ) {
                         if ( pointerOverID ) {

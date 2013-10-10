@@ -25,7 +25,9 @@ require.config({
             "vwf/view/googleEarth",
             "vwf/utility",
 			"vwf/view/WebRTC",
-			"vwf/view/audio"
+			"vwf/view/audio",
+			"messageCompress"
+		
 
         ], function( ready ) {
 

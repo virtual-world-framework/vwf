@@ -15,7 +15,7 @@ Landing = require('./landingRoutes');
 var zlib = require('zlib');
 var requirejs = require('requirejs');
 var compressor = require('node-minify');
-
+var messageCompress = require('./support/client/lib/messageCompress').messageCompress;
 //Get the version number. This will used to redirect clients to the proper url, to defeat their local cache when we release
 global.version = require('./Version').version;
 
