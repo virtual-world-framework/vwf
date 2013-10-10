@@ -25,7 +25,17 @@ class VWF::Application::Persistence < Sinatra::Base
     @env = env
     @storage = VWF::Storage.new()
   end
-
+  
+  get "/instances" do
+    content_type :json
+    result = [ ]
+    instance_id_list = @storage.list_application_instances( @env[ 'vwf.root' ], @env[ 'vwf.application' ] )
+    instance_id_list.each do | instance_id |
+      result.push generate_instance_hash( request.scheme, request.host_with_port, @env[ 'vwf.root' ], @env[ 'vwf.application' ], instance_id )
+    end
+    result.to_json
+  end
+  
   get "/saves" do
     content_type :json
     # List saves. First need to determine if we're running per instance or across entire application.
@@ -44,7 +54,7 @@ class VWF::Application::Persistence < Sinatra::Base
         instance_save_names.each do | instance_save_name |
           instance_save_array.push generate_save_hash( request.scheme, request.host_with_port, @env[ 'vwf.root' ], @env[ 'vwf.application' ], instance_id, instance_save_name )
         end
-		result[ instance_id ] = instance_save_array
+		    result[ instance_id ] = instance_save_array
       end
     end
     result.to_json
@@ -126,7 +136,25 @@ class VWF::Application::Persistence < Sinatra::Base
 
   
   helpers do
-  
+
+    def generate_instance_hash( scheme, host_with_port, public_path, application, instance )
+      result = {}
+      result[ "instance_id" ] = instance
+      result[ "url" ] = scheme + "://" + host_with_port + public_path + "/" + application + "/" + instance
+      result[ "vwf_info" ] = {}
+      result[ "vwf_info" ][ "public_path" ] = public_path
+      result[ "vwf_info" ][ "application" ] = application
+      result[ "vwf_info" ][ "path_to_application" ] = public_path + "/" + application
+      result[ "vwf_info" ][ "instance" ] = instance
+      metadata = @storage.get_instance_metadata( public_path, application, instance )
+      if metadata.nil?
+        result[ "metadata" ] = {}
+      else
+        result[ "metadata" ] = metadata
+      end
+      result
+    end
+    
     def generate_save_hash( scheme, host_with_port, public_path, application, instance, save_name )
       result = {}
       result[ "name" ] = save_name
