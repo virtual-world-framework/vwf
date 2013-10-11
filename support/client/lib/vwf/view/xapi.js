@@ -44,7 +44,7 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 
 				// if they're trying to initialize, do that
 				else if( fn === 'xapi_configure' ){
-					console.log('Initializing xAPI for', id, 'with', params);
+					console.log('Initializing xAPI for', id, 'with', params[0]);
 					this.wrapperOf[id] = new XAPIWrapper(params[0]);
 					return;
 				}
@@ -55,12 +55,20 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 					return;
 				}
 
-				// select based on call method
 				var method = fn.slice(5);
+
+				// fail request if they are trying to anonymously post
+				if( vwf.client() == null && /^send/.test(method) ){
+					console.error(id, ': posting to an LRS is only allowed from within events');
+					return;
+				}
+
+				// select based on call method
 				switch(method)
 				{
 					// reconfigure
 					case 'configure':
+						console.log('Reconfiguring xAPI for', id, 'with', params[0]);
 						wrapper.changeConfig(params[0]);
 						break;
 
