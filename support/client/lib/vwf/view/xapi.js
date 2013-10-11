@@ -33,8 +33,7 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 			if( fn.slice(0,5) == 'xapi_' && Object.keys(methods).indexOf(fn.slice(5)) != -1
 			&& (vwf.client() == null || vwf.client() == vwf.moniker()) )
 			{
-				console.log('XAPI:', id, fn, params);
-				//console.log('Client:', vwf.client(), 'Moniker:', vwf.moniker());
+				//console.log('XAPI:', id, fn, params);
 				var wrapper;
 
 				// if an obj has already initialized, use that
@@ -90,11 +89,12 @@ define( ["module", "vwf/view", "vwf/view/xapi/xapiwrapper"], function( module, v
 						// rearrange args so callback is always in proper position
 						var args = params.slice(1);
 						while( args.length < methods[method]-1 )
-							args.push(undefined);
+							args.push(null);
 						args.push(callback);
 
 						// call the function
-						wrapper[fn.slice(5)].apply(wrapper, args);
+						console.log( 'XAPIWrapper.'+method, JSON.stringify(args) );
+						wrapper[method].apply(wrapper, args);
 
 						break;
 
