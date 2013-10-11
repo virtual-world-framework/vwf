@@ -279,16 +279,15 @@ node.id = childID; // TODO: move to vwf/model/object
             node.private.change = 1; // incremented whenever "future"-related changes occur
 	
 			
-			if(this.isBehavior(node))
-			{
-				jsDriverSelf.hookupBehavior(node,nodeID);
 			
-
-			}
         },
 		//allow a behavior node to directly acess the properties of it's parent
 		hookupBehaviorProperty: function(behaviorNode,parentid,propname)
 		{
+			if(behaviorNode[propname] !== undefined) return;
+			if(Object.keys(behaviorNode).indexOf(propname) != -1)
+				return;
+		
 			//jsDriverSelf = this;
 			var node = this.nodes[parentid];
 			Object.defineProperty( behaviorNode, propname, 
@@ -301,6 +300,10 @@ node.id = childID; // TODO: move to vwf/model/object
 		//Allow the behavior to call the parent's methods
 		hookupBehaviorMethod: function(behaviorNode,parentid,propname)
 		{
+			if(behaviorNode[propname] !== undefined) return;
+			if(Object.keys(behaviorNode).indexOf(propname) != -1)
+				return;
+				
 			var node = this.nodes[parentid];
 			
 				Object.defineProperty(behaviorNode, propname, {
@@ -336,6 +339,13 @@ node.id = childID; // TODO: move to vwf/model/object
         initializingNode: function( nodeID, childID ) {
 
             var child = this.nodes[childID];
+			
+			if(this.isBehavior(child))
+			{
+				this.hookupBehavior(child,nodeID);
+			
+
+			}
 			
             var scriptText = "this.initialize && this.initialize()";
 
