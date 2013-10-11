@@ -11,7 +11,12 @@
 				{
 					
 					//this.materials[id].morphTargets  = true;
-					this.materials[id] =  this.setMaterialByDef(this.materials[id],def);
+					if(def)
+					{
+						this.materials[id] =  this.setMaterialByDef(this.materials[id],def);
+						this.materials[id].def = def;
+					}else
+						return null;
 					return this.materials[id];				
 					
 				}
@@ -25,6 +30,13 @@
 					oldmat.refCount = 1;
 				if(oldmat)
 					oldmat.refCount--;	
+				if(oldmat.refCount == 0)
+				{
+					if(oldmat.dispose)
+						oldmat.dispose();
+					var olddef = oldmat.def;
+					delete this.materials[olddef];
+				}				
 				mesh.material = this.getMaterialbyDef(def);
 				if(mesh.material && mesh.material.refCount === undefined)
 					mesh.material.refCount = 0;
@@ -62,11 +74,11 @@
 			this.setMaterialDefVideo = function(currentmat,value)
 			{
 				
+				if(currentmat && currentmat.dispose)
+					currentmat.dispose();
+						
 				if(currentmat && !(currentmat instanceof THREE.ShaderMaterial))
 				{
-					if(currentmat.dispose)
-						currentmat.dispose();
-						
 					currentmat = null;
 				}
 				
@@ -104,8 +116,12 @@
 				
 				currentmat.dispose = function()
 				{
-					$(document).unbind('prerender',currentmat.videoUpdateCallback);
-					delete currentmat.videoUpdateCallback;
+					;
+					$(document).unbind('prerender',this.videoUpdateCallback);
+					delete this.videoUpdateCallback;
+					if(this.video)
+						this.video.pause();
+					delete this.video;
 				}.bind(currentmat);
 				
 				if(currentmat.videoUpdateCallback)
@@ -133,6 +149,8 @@
 				{
 					var src = value.videosrc;
 					var video = document.createElement('video');
+					
+					video.setAttribute('crossorigin',  "anonymous");
 					video.autoplay = true;
 					video.loop = true;
 					
@@ -142,6 +160,7 @@
 					//video.style.zIndex = 1000;
 					//video.style.position = 'absolute';
 				
+					currentmat.video = video;
 					currentmat.uniforms.texture1.value = new THREE.Texture(video);
 					currentmat.uniforms.texture1.value.minFilter = THREE.LinearFilter;
 					currentmat.uniforms.texture1.value.magFilter = THREE.LinearFilter;
@@ -153,11 +172,12 @@
 			this.setMaterialDefCamera = function(currentmat,value)
 			{
 				
+				if(currentmat && currentmat.dispose)
+					currentmat.dispose();
+					
 				if(currentmat && !(currentmat instanceof THREE.ShaderMaterial))
 				{
-					if(currentmat.dispose)
-						currentmat.dispose();
-						
+					
 					currentmat = null;
 				}
 				
@@ -222,12 +242,12 @@
 			{
 				if(!value) return;
 				
+				if(currentmat && currentmat.dispose)
+					currentmat.dispose();
 				
 				if(currentmat && !(currentmat instanceof THREE.MeshPhongMaterial))
 				{
-					if(currentmat.dispose)
-						currentmat.dispose();
-						
+					
 					currentmat = null;
 				}
 				
