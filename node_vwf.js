@@ -867,14 +867,15 @@ function startVWF(){
 			
 			global.instances[namespace].time += .05;
 			
+			var tickmessage = messageCompress.pack(JSON.stringify({"action":"tick","parameters":[],"time":global.instances[namespace].time}));
 			for(var i in global.instances[namespace].clients)
 			{
 				var client = global.instances[namespace].clients[i];
 				if(!client.pending)
-					client.emit('message',messageCompress.pack(JSON.stringify({"action":"tick","parameters":[],"time":global.instances[namespace].time})));
+					client.emit('message',tickmessage);
 				else
 				{
-					client.pendingList.push({"action":"tick","parameters":[],"time":global.instances[namespace].time});
+					client.pendingList.push(tickmessage);
 					console.log('pending tick');
 				}
 			}
@@ -1250,6 +1251,8 @@ function startVWF(){
 					return;
 				  }
 			}
+			
+			var compressedMessage = messageCompress.pack(JSON.stringify(message))
 			//distribute message to all clients on given instance
 			for(var i in global.instances[namespace].clients)
 			{
@@ -1291,7 +1294,7 @@ function startVWF(){
 					}else
 					{
 						
-						client.emit('message',messageCompress.pack(JSON.stringify(message)));
+						client.emit('message',compressedMessage);
 						
 					}
 				}

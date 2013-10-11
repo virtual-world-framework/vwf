@@ -108,7 +108,7 @@ var messageCompress =  {
 		addMapping:function(from)
 		{
 			var fromex = new RegExp(from,'g');
-			var to = String.fromCharCode(this.enc_mappings.length + 255);
+			var to = String.fromCharCode(7) + String.fromCharCode(this.enc_mappings.length + 255);
 			var toex =  new RegExp(to,'g');
 			this.enc_mappings.push([fromex,to]);
 			this.dnc_mappings.push([toex,from]);
