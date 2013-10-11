@@ -414,8 +414,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     // this.logger.info( "vwf.socket message " + message );
 					
                     try {
-
+						
                         // Unpack the arguments.
+						
+						message = messageCompress.unpack(message);
+						
 						var fields = message;
 						if(typeof message == "string")
 							fields = JSON.parse( message );
@@ -580,6 +583,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Send the message.
 
                 var message = JSON.stringify( fields );
+				message = messageCompress.pack(message);
                 socket.send( message );
 
             }
