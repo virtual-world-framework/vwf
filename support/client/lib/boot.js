@@ -3,6 +3,12 @@ require.config({
 	    paths: {
 		"vwf": "../vwf"
 	    },
+		shims: {
+			'vwf/view/xapi/xapiwrapper': {
+				deps: ['vwf/view/editorview/sha256', "vwf/view/editorview/_3DRIntegration"],
+				exports: 'XAPIWrapper'
+			}
+		},
 	    waitSeconds: 15
 	  });		
         require( [
@@ -26,8 +32,8 @@ require.config({
             "vwf/utility",
 			"vwf/view/WebRTC",
 			"vwf/view/audio",
-			"messageCompress"
-		
+			"messageCompress",
+			"vwf/view/xapi"
 
         ], function( ready ) {
 
@@ -78,7 +84,8 @@ require.config({
 						"vwf/view/EditorView",
                     	"vwf/view/googleEarth",
 						"vwf/view/WebRTC",
-						"vwf/view/audio"
+						"vwf/view/audio",
+						"vwf/view/xapi"
                     ]
 
                 );
