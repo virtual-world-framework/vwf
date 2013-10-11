@@ -155,6 +155,7 @@ scripts:
       newdiv.style.top = '0px';
       
       $(document.body).append(newdiv);
+      newdiv._offsetWidth = newdiv.offsetWidth;
       $(newdiv).disableSelection();
       this.nametag = newdiv;
                  
@@ -197,7 +198,7 @@ scripts:
       screen[1] = wh - screen[1];
 
       div.style.top = (screen[1])  +  'px';
-      div.style.left = (screen[0] - div.offsetWidth/2)  +'px';
+      div.style.left = (screen[0] - div._offsetWidth/2)  +'px';
      
       
       if((screen[0] < 0 || screen[0] > ww || screen[1] < 0 || screen[1] > wh))
