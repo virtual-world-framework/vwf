@@ -33,16 +33,16 @@ children:
               text: "Select the On/Off Vol switch"
         scripts:
         - |
-          this.entering = function() {
+          this.entering = function( ) {
             this.logger.info( "Step 1 entering", this );
             var radio = this.find( "/radio" )[ 0 ];
-            radio.Radio.ic40Volume.pointerUp = radio.events.add( function() {
-              if (radio.Radio.ic40Volume.controlValue == 0) {
-                radio.Radio.ic40Volume.pointerUp = radio.events.flush( this );
+            radio.Radio.ic40Volume.controlValueUpdated = radio.events.add( function( ) {
+              if ( radio.Radio.ic40Volume.controlValue == 1 ) {
+                radio.Radio.ic40Volume.controlValueUpdated = radio.events.flush( this );
                 this.logger.info( "Step 1 completed" );
                 this.completed();
-                this.logger.info( "Step 1 after completed");
-              }  
+                this.logger.info( "Step 1 after completed" );
+              }
             }, this );
           } //@ sourceURL=step1.entering
       selectRedButton:
