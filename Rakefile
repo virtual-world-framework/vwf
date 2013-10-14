@@ -254,22 +254,24 @@ def standalone_build_env
 end
 
 def phantomjs_binary(phantomjs_binary_env)
-  if phantomjs_binary_env.nil? || phantomjs_binary_env.empty?
-    output = %x[which phantomjs]
-    unless output.empty?
-      return "phantomjs"
-    else
-      puts "The QUnit tests require phantomjs. Please install before running."
-      return false
-    end
+  return phantomjs_on_path if (phantomjs_binary_env.nil? || phantomjs_binary_env.empty?)
+
+  # File expects the string to be escaped, and there's no consistent way to escape across Windows and Unix-based
+  phantomjs_binary_env_escaped = phantomjs_binary_env.gsub("\\ ", " ")
+  if File.exists?(phantomjs_binary_env_escaped) && File.executable?(phantomjs_binary_env_escaped)
+    return phantomjs_binary_env
   else
-    if File.exists?(phantomjs_binary_env) && File.executable?(phantomjs_binary_env)
-      return phantomjs_binary_env
-    elsif ! %x[which #{phantomjs_binary_env}].empty?
-      return "phantomjs"
-    else
-      puts "The QUnit tests require phantomjs. Please install before running."
-      return false
-    end
+    return phantomjs_on_path
+  end
+end
+
+def phantomjs_on_path
+  output = %x[which phantomjs]
+  # 'which phantomjs' on Mac/Linux returns nothing, but on Cygwin returns "which: no phantomjs in (PATH)"
+  if output.empty? || output =~ /no phantomjs in/
+    puts "The QUnit tests require phantomjs. Please install before running."
+    return false
+  else
+    return "phantomjs"
   end
 end
