@@ -35,7 +35,7 @@ apt-get install phantomjs or yum instal phantomjs
 2\. Run the tests.
 
 ~~~
-bundle exec rake test:qunit
+bundle exec rake client:test
 ~~~
 
 **Mac**
@@ -49,7 +49,7 @@ brew install phantomjs
 2\. Run the tests.
 
 ~~~
-bundle exec rake test:qunit
+bundle exec rake client:test
 ~~~
 
 **Windows**
@@ -62,14 +62,14 @@ bundle exec rake test:qunit
 3\. Run the tests, specifying the location of phantomjs.exe, like so.
 
 ~~~
-PHANTOMJS_BIN=/path/to/phantomjs.exe rake test:qunit
+PHANTOMJS_BIN=/path/to/phantomjs.exe rake client:test
 ~~~
 
 NOTE: If you have a space in your path, make sure to surround it with quotes 
 and escape it with a "\", like so.
 
 ~~~
-PHANTOMJS_BIN="/space\ path/path/to/phantomjs.exe rake test:qunit
+PHANTOMJS_BIN="/space\ path/path/to/phantomjs.exe rake client:test
 ~~~
 
 -------------------
