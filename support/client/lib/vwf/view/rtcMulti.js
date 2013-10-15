@@ -69,6 +69,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             this.sessionid = window.location.href;
 
             this.connection = new RTCMultiConnection();
+            this.screenConnection = undefined;
             
             if ( this.connection.extra === undefined ) { this.connection.extra = {} }
             //this.connection.extra.moniker = this.kernel.moniker();  
@@ -165,7 +166,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                             videoMoniker = e.userid;
                         }
                         displayRemote.call( self, videoMoniker, e.stream, e.blobURL, username, 
-                                            self.kernel.moniker(), color );
+                                            self.kernel.moniker(), color, 1.7, false );
                     }
                 }  
             };     
@@ -210,8 +211,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             //this.connection.onRequest = function( userid, extra ) { };
             //this.connection.onstats = function( stats, userinfo ) { };
 
-            //this.connection.connect( this.sessionid );
-            this.connection.connect();
+            this.connection.connect( this.sessionid );
+            //this.connection.connect();
 
             window.skipRTCMultiConnectionLogs = true;
             // still need to call open, will wait until the initializeNode to do that
@@ -301,7 +302,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                     // client joins, not exactly sure how we will know that
 
                     //console.info( "OPENING Connection" )
-                    this.connection.open();
+                    this.connection.open( this.sessionid );
                    
                     var remoteClient = undefined;
                     // existing connections
@@ -540,12 +541,16 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                     
                     switch ( propertyName ) {
                         
+                        case "session":
+                            client.session = propertyValue
+                            break;
+
                         case "userid":
                             client.userid = propertyValue;
                             if ( this.state.delayedStreams[ client.userid ] !== undefined ) {              
                                 var e = this.state.delayedStreams[ client.userid ];
                                 displayRemote.call( this, client.moniker, e.stream, e.blobURL, 
-                                                    client.username, this.kernel.moniker(), client.color );
+                                                    client.username, this.kernel.moniker(), client.color, 1.7, false );
                                 delete this.state.delayedStreams[ client.userid ];
                             }
                             break;
@@ -589,10 +594,76 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 this.kernel.logger.infox( "  CM === calledMethod ", nodeID, methodName, methodParameters );
             }
 
+            var self = this;
             switch ( methodName ) {
                 case "setLocalMute":
                     if ( this.kernel.moniker() == this.kernel.client() ) {
                         methodValue = setMute.call( this, methodParameters );
+                    }
+                    break;
+                case "shareDesktop":
+                    //debugger;
+                    if ( this.kernel.moniker() == this.kernel.client() ) {
+                        if ( this.screenConnection === undefined ) {
+                            this.screenConnection = new RTCMultiConnection();
+
+                            this.screenConnection.session = { "screen": true };
+                            this.screenConnection.direction = "one-to-many";
+
+                            // onstream - e object
+                            // e.mediaElement: HTMLVideoElement or HTMLAudioElement
+                            // e.stream: MediaStream
+                            // e.steamid: id of stream
+                            // e.session: eg. { audio: true, video: true }
+                            // e.blobURL: the url of the stream
+                            // e.type: remote or local
+                            // e.extra: extra data passed by the user
+                            // e.userid: id of the user stream
+                            this.screenConnection.onstream = function( e ) {
+                                var username, color, videoMoniker;
+                                var conn = getClientNode.call( self, e.userid );
+
+                                var streamInfo = self.state.streams[ e.steamid ] = {
+                                    mediaElement: e.mediaElement,
+                                    steamid: e.streamid,
+                                    session: e.session,
+                                    blobURL: e.blobURL,
+                                    type: e.type,
+                                    extra: e.extra,
+                                    userid: e.userid
+                                }; 
+
+                                if ( conn !== undefined ) {
+                                    color = conn.color !== undefined ? conn.color : [ 0, 0, 0 ];
+                                    username = conn.username;
+                                    videoMoniker = conn.moniker;
+                                } else {
+                                    console.info( "++++++ conn not found ++++++" );
+                                }
+
+                                // there's no reason to show the desktop locally
+                                if ( e.type === 'remote' ) { 
+                                   
+                                    if ( conn === undefined ) {
+                                        self.state.delayedStreams[ e.userid ] = streamInfo;
+                                    } else {
+                                        // display remote
+                                        if ( username === undefined ) {
+                                            username = e.extra !== undefined ? e.extra.username : "remote";
+                                        }
+                                        if ( videoMoniker === undefined ) {
+                                            videoMoniker = e.userid;
+                                        }
+                                        displayRemote.call( self, videoMoniker, e.stream, e.blobURL, username, 
+                                                            self.kernel.moniker(), color, 1.7, true );
+                                    }
+                                }                                  
+                            }
+
+                            this.screenConnection.connect( this.sessionid );
+
+                            this.screenConnection.open( this.sessionid );
+                        }
                     }
                     break;
             }
@@ -716,7 +787,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
     }
 
-    function displayRemote( id, stream, url, name, destMoniker, color, aspectRatio ) {
+    function displayRemote( id, stream, url, name, destMoniker, color, aspectRatio, fullscreen ) {
         return displayVideo.call( this, id, stream, url, name, destMoniker, false, color, aspectRatio );
     }
 
