@@ -155,7 +155,8 @@ end
 
 Rake::TestTask.new do |task| 
   task.libs << "test"
-  task.test_files = FileList[ "test/*_test.rb", "test/*/*_test.rb" ]
+  
+  task.test_files = FileList[ "test/*_test.rb", "test/*/*_test.rb", "test/*_spec.rb", "test/*/*_spec.rb" ]
 
   task.verbose = true
 end
