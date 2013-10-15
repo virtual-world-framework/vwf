@@ -68,9 +68,12 @@ function swapPanes( divId ) {
     var buttonID = "button-" + divId;
     remove( buttonID );
 
-    var buttonHtml = "<div class='btn-group dropup' id='"+buttonID+"'><button class='btn btn-success' id='"+buttonID+"-button'>"+tempMainTitle+"</button>" + 
+    var buttonHtml = "<div class='btn-group dropup' id='"+buttonID+"'>"+
+        "<button class='btn btn-success' id='"+buttonID+"-button'>"+tempMainTitle+"</button>" + 
         "<button class='btn btn-success dropdown-toggle' data-toggle='dropdown'><span class='caret'></span></button>" +
-        "<ul class='dropdown-menu pull-right'><li><a id='"+buttonID+"-reset' href='#'>Reset</a></li></ul></div>";
+        "<ul class='dropdown-menu pull-right'><li>"+
+            "<a id='"+buttonID+"-reset' href='#'>Reset</a>"+
+        "</li></ul></div>";
 
     $( '#appBar' ).append( buttonHtml );
 
@@ -165,7 +168,8 @@ function newVideoWindow( id, title, url, color, isSelf, width, height ) {
     var $appBar = $( "#appBar" );
     if ( $appBar.children().length < 12 ) {
         var buttonName = newWin.buttonName = "button-" + divId;
-        var buttonHtml = "<div class='btn-group dropup' id='"+buttonName+"'><button class='btn btn-success' id='"+buttonName+"-button'>"+title+"</button>" + 
+        var buttonHtml = "<div class='btn-group dropup' id='"+buttonName+"'>"+
+            "<button class='btn btn-success' id='"+buttonName+"-button'>"+title+"</button>" + 
             "<button class='btn btn-success dropdown-toggle' data-toggle='dropdown'><span class='caret'></span></button>" +
             "<ul class='dropdown-menu pull-right'><li>" +
             "<a id='"+buttonName+"-reset' href='#'>Reset</a>";
@@ -204,8 +208,10 @@ function newVideoWindow( id, title, url, color, isSelf, width, height ) {
     }
 
     $div.append(
-        "<i id='enlarge-" + divId + "' style='position:absolute;right:5px;top:5px;z-index: 4;'  alt='' onclick='swapPanes(this.id.substr(8));' class='icon-chevron-up icon-white'/>" +
-        "<video id='" + videoId + "' width='"+width+"' height='"+height+"' loop='loop' autoplay "+mutedAttr+"style='position: absolute; left: 0; top: 0; z-index: 2;width:100%;height:100%;' />" +
+        "<i id='enlarge-" + divId + "' style='position:absolute;right:5px;top:5px;z-index: 4;'  "+
+        "alt='' onclick='swapPanes(this.id.substr(8));' class='icon-chevron-up icon-white'/>" +
+        "<video id='" + videoId + "' width='"+width+"' height='"+height+"' loop='loop' autoplay " + mutedAttr +
+        "style='position: absolute; left: 0; top: 0; z-index: 2;width:100%;height:100%;' />" +
         "<div id='"+ divId + "-overlay' style='position: absolute; left: 0; top: 0; z-index: 2;'>" +
         "<span class='label label-inverse' style='margin-left:5px;margin-top:5px;'>" + title + "</span>"+
         "</div>"
@@ -312,7 +318,9 @@ function deleteWindow( name ) {
 }
 
 function shareDesktop( name ) {
-    //var jQueryWindow = $('#' + name);
+    var appID = vwf_view.kernel.application();
+    var clientID = vwf_view.kernel.moniker();
+    vwf_view.kernel.callMethod( appID, "shareDesktop", { "moniker": clientID , "value": true } );
 }
 
 
