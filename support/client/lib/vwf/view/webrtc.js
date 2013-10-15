@@ -327,6 +327,16 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                         methodValue = setMute.call( this, methodParameters );
                     }
                     break;
+
+                case "shareDesktop":
+                    debugger;
+                    if ( this.kernel.moniker() == this.kernel.client() ) {
+                        if ( this.connection ) {
+                            this.connection.session.screen = true;
+                            this.kernel.setProperty( nodeID, "session", this.connection.session );
+                        }
+                    }
+                    break;
             }
         },       
 
@@ -445,33 +455,86 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
     function capture( media ) {
 
-        if ( this.local.stream === undefined && ( media.video || media.audio ) ) {
+        if ( this.local.stream === undefined && ( media.video || media.audio || media.screen ) ) {
             var self = this;
-            var constraints = { 
-                "audio": media.audio, 
-                "video": media.video ? { "mandatory": {}, "optional": [] } : false, 
-            };
             
-            var successCallback = function( stream ) {
-                self.local.url = URL.createObjectURL( stream );
-                self.local.stream = stream;
-
-                self.kernel.setProperty( self.local.ID, "localUrl", self.local.url );
-
-                var localNode = self.state.clients[ self.local.ID ];
-                displayLocal.call( self, stream, localNode.displayName, localNode.color );
-                sendOffers.call( self );
+            var videoConstraints = {
+                "mandatory": {
+                    "minWidth": 640,
+                    "minHeight": 360,
+                    "maxWidth": 1920,
+                    "maxHeight": 1080,
+                    "minAspectRatio": 1.77
+                },
+                "optional": []
             };
 
-            var errorCallback = function( error ) { 
-                console.log("failed to get video stream error: " + error); 
+            var constraints = {
+                "audio": media.audio,
+                "video": media.video ? videoConstraints : false, 
+            }; 
+
+            var screenConstraints = {
+                "audio": false,
+                "video": {
+                    "mandatory": {
+                        "chromeMediaSource": "screen",
+                        "minWidth": 640,
+                        "minHeight": 360,
+                        "maxWidth": 1920,
+                        "maxHeight": 1080,
+                        "minAspectRatio": 1.77
+                    },
+                    "optional": []
+                }
             };
 
-            try { 
-                getUserMedia( constraints, successCallback, errorCallback );
-            } catch (e) { 
-                console.log("getUserMedia: error " + e ); 
-            };
+            if ( media.video || media.audio ) {
+                var successCallback = function( stream ) {
+                    self.local.url = URL.createObjectURL( stream );
+                    self.local.stream = stream;
+
+                    self.kernel.setProperty( self.local.ID, "localUrl", self.local.url );
+
+                    var localNode = self.state.clients[ self.local.ID ];
+                    displayLocal.call( self, stream, localNode.displayName, localNode.color );
+                    sendOffers.call( self );
+                };
+
+                var errorCallback = function( error ) { 
+                    console.log("failed to get video stream error: " + error); 
+                };
+
+                try { 
+                    getUserMedia( constraints, successCallback, errorCallback );
+                } catch (e) { 
+                    console.log("getUserMedia: error " + e ); 
+                };
+            }
+
+            if ( media.screen ) {
+                var successCallback = function( stream ) {
+                    self.local.url = URL.createObjectURL( stream );
+                    self.local.stream = stream;
+
+                    self.kernel.setProperty( self.local.ID, "localUrl", self.local.url );
+
+                    var localNode = self.state.clients[ self.local.ID ];
+                    displayLocal.call( self, stream, localNode.displayName, localNode.color );
+                    sendOffers.call( self );
+                };
+
+                var errorCallback = function( error ) { 
+                    console.log("failed to capture screen image: " + error); 
+                };
+
+                try { 
+                    getUserMedia( screenConstraints, successCallback, errorCallback );
+                } catch (e) { 
+                    console.log("getUserMedia: error " + e ); 
+                };                
+            }
+
         }
     }  
 
