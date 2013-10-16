@@ -211,10 +211,10 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             //this.connection.onRequest = function( userid, extra ) { };
             //this.connection.onstats = function( stats, userinfo ) { };
 
-            this.connection.connect( this.sessionid );
-            //this.connection.connect();
+            //this.connection.connect( this.sessionid );
+            this.connection.connect();
 
-            window.skipRTCMultiConnectionLogs = true;
+            window.skipRTCMultiConnectionLogs = this.debug;
             // still need to call open, will wait until the initializeNode to do that
         },
   
@@ -302,7 +302,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                     // client joins, not exactly sure how we will know that
 
                     //console.info( "OPENING Connection" )
-                    this.connection.open( this.sessionid );
+                    this.connection.open();
+                    //this.connection.open( this.sessionid );
                    
                     var remoteClient = undefined;
                     // existing connections
@@ -601,8 +602,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                         methodValue = setMute.call( this, methodParameters );
                     }
                     break;
+                
                 case "shareDesktop":
-                    //debugger;
                     if ( this.kernel.moniker() == this.kernel.client() ) {
                         if ( this.screenConnection === undefined ) {
                             this.screenConnection = new RTCMultiConnection();
@@ -660,9 +661,10 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                                 }                                  
                             }
 
-                            this.screenConnection.connect( this.sessionid );
+                            this.screenConnection.connect();
+                            //this.screenConnection.connect( this.sessionid );
 
-                            this.screenConnection.open( this.sessionid );
+                            //this.screenConnection.open( this.sessionid );
                         }
                     }
                     break;
