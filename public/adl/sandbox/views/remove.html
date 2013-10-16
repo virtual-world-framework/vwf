@@ -34,7 +34,7 @@
 	vwfPortalModel.handleDeleteButton = function(o, e){
 		
 			
-		var confirm = $('#confirm').val();
+	/*	var confirm = $('#confirm').val();
 		var pass = $('#txtpassword').val();
 		if(confirm != 'Yes' || !pass)
 		{
@@ -45,7 +45,7 @@
 				}, 6000);
 			return;
 		}	
-		
+	*/	
 		jQuery.ajax(
 		{
 			type: 'DELETE',
@@ -71,9 +71,7 @@
 	<div class="col-md-5 col-md-offset-3">
 		<form data-bind="submit:handleDeleteButton" >
 			<fieldset>
-				<legend>Type yes in the box below then hit "Delete"</legend>
-				<input type='text' id='confirm' placeholder='Type "Yes"' class="col-md-5 form-control" /><br/><br/>
-				<input type='password' id='txtpassword' placeholder='Password' class="col-md-5 form-control"/><br/>
+				<legend>Are you really sure? This action cannot be undone!</legend>
 				<input type="submit" class='btn btn-default' style="float:right;margin-top:7px;"  value="Delete"/>
 				<p class="help-block" style="width:100%;margin-top:20px;" data-bind="visible:errorText,text:errorText"></p>
 			</fieldset>

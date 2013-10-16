@@ -189,6 +189,14 @@ define(function ()
 				//console.log('no user logged in, so not saving');
 				return;
 			}
+			
+			//published states are never saved. 
+			if(_DataManager.instanceData.publishSettings)
+			{
+				console.log('State is published, cannot save');
+				return;
+			}
+			
 			var scene = vwf.getNode('index-vwf');
 			var nodes = [];
 			for (var i in scene.children)
@@ -262,14 +270,17 @@ define(function ()
 			}
 			return data;
 		}
+		//get the Id of the current world from the url
 		this.getCurrentSession = function ()
 		{
 			return (/\/adl\/sandbox\/.*\//).exec(window.location.toString()).toString();
 		}
+		//at this point, this server pretty much only supports the sandbox. This will return the sandbox root url
 		this.getCurrentApplication = function ()
 		{
 			return location.protocol +'//'+  location.host + '/adl/sandbox';
 		}
+		//Get the number of users in this space. NOTE: Counts anonymous
 		this.getClientCount = function ()
 		{
 			var instances = jQuery.ajax(
@@ -294,9 +305,22 @@ define(function ()
 			for (var i in clients) count++;
 			return count;
 		}
-		
-		
-		
+		//Get the metadata for the current world, like title, lastupdate, publishsettings....
+		this.getInstanceData = function()
+		{
+			if(this.instanceData) return this.instanceData;
+			var instanceData = jQuery.ajax(
+			{
+				type: 'GET',
+				url: "/vwfDataManager.svc/statedata?SID=" + this.getCurrentSession(),
+				data: null,
+				success: null,
+				async: false,
+				dataType: "json"
+			});
+			this.instanceData = JSON.parse(instanceData.responseText);
+			return this.instanceData;
+		}
 		this.saveTimer = function ()
 		{
 			var num = this.getClientCount();

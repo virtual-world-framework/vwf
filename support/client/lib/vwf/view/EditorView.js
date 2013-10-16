@@ -41,10 +41,18 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/alertify.js-0.3.9/
 						return nvpair;
 					}
 				});
-				if ($.parseQuerystring().Edit != 'false')
-				{
-					window._EditorInitialized = true;
+				
+					
 					console.log('initialize Index-vwf');
+					
+					window._DataManager = require("vwf/view/editorview/DataManager").getSingleton();;
+					
+					
+					var instanceData = _DataManager.getInstanceData() || {};
+					
+					//set the title of the window to the title of the world.
+					document.title = instanceData.title;
+					
 					var data = $.ajax('vwf/view/editorview/menus.html',
 					{
 						async: false,
@@ -67,7 +75,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/alertify.js-0.3.9/
 					window._InventoryManager = require("vwf/view/editorview/InventoryManager").getSingleton();;
 					window.HierarchyManager = require("vwf/view/editorview/HeirarchyManager").getSingleton();;
 					window._PermissionsManager = require("vwf/view/editorview/_PermissionsManager").getSingleton();
-					window._DataManager = require("vwf/view/editorview/DataManager").getSingleton();;
+					
 					window._UserManager = require("vwf/view/editorview/UserManager").getSingleton();;
 					window.alertify = require("vwf/view/editorview/alertify.js-0.3.9/src/alertify");
 					require("vwf/view/editorview/help").getSingleton();
@@ -85,7 +93,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/alertify.js-0.3.9/
 					
 					//  $(document).ready(function(){
 					//	});
-				}
+				
 			}
 		},
 		createdNode: function (nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback /* ( ready ) */ )

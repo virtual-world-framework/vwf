@@ -790,25 +790,97 @@ function startVWF(){
 		}
 	} // close onRequest
 	
+	
+	function ServeSinglePlayer(socket, namespace,instancedata)
+	{
+		console.log('single player');
+		var instance = namespace;
+		var state = SandboxAPI.getState(instance) || [{owner:undefined}];
+		var state2 = SandboxAPI.getState(instance) || [{owner:undefined}];
+		
+		fs.readFile("./public/adl/sandbox/index.vwf.yaml", 'utf8',function(err,blankscene)
+		{
+			blankscene= YAML.load(blankscene);
+			
+			blankscene.id = 'index-vwf';
+			blankscene.patches= "index.vwf";
+			if(!blankscene.children)
+				blankscene.children = {};
+			//only really doing this to keep track of the ownership
+			for(var i =0; i < state.length-1; i++)
+			{
+				
+				var childComponent = state[i];
+				var childName = state[i].name || state[i].properties.DisplayName + i;
+				var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName.replace(/ /g,'-'); 
+				childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
+				//state[i].id = childID;
+				//state2[i].id = childID;
+				blankscene.children[childName] = state2[i];
+				state[i].id = childID;
+				
+				fixIDs(state[i]);
+			}
+			var props = state[state.length-1];
+			if(props)
+			{
+				if(!blankscene.properties)
+					blankscene.properties = {};
+				for(var i in props)
+				{
+					blankscene.properties[i] = props[i];
+				}
+				for(var i in blankscene.properties)
+				{
+					if( blankscene.properties[i] && blankscene.properties[i].value)
+						blankscene.properties[i] = blankscene.properties[i].value;
+					else if(blankscene.properties[i] && (blankscene.properties[i].get || blankscene.properties[i].set))
+						delete blankscene.properties[i];
+				}
+			}
+			//global.log(Object.keys(global.instances[namespace].state.nodes['index-vwf'].children));
+			
+			//this is a blank world, go ahead and load the default
+			
+			
+			
+			
+			socket.emit('message',{"action":"createNode","parameters":[blankscene],"time":0});
+			socket.emit('message',{"action":"goOffline","parameters":[blankscene],"time":0});
+			socket.pending = false;
+		});
+		
+	}
+	
 	function WebSocketConnection(socket, _namespace) {
-	  
 	
-	  //get instance for new connection
-	  var namespace = _namespace || getNamespace(socket);
-	
-	  if(!namespace)
-	  {
-		  socket.on('setNamespace',function(msg)
+		var namespace = _namespace || getNamespace(socket);
+		
+		 if(!namespace)
 		  {
-			console.log(msg.space);
-			WebSocketConnection(socket,msg.space);
-			socket.emit('namespaceSet',{});
-		  });
-		  return;
-	  }else
-	  {
-		console.log(namespace);
-	  }
+			  socket.on('setNamespace',function(msg)
+			  {
+				console.log(msg.space);
+				WebSocketConnection(socket,msg.space);
+				socket.emit('namespaceSet',{});
+			  });
+			  return;
+		  }
+	  
+		DAL.getInstance(namespace.replace(/\//g,"_"),function(instancedata)
+		{
+			
+			//if this is a single player published world, there is no need for the server to get involved. Server the world state and tell the client to disconnect
+			if(instancedata && instancedata.publishSettings && instancedata.publishSettings.singlePlayer)
+			{
+				ServeSinglePlayer(socket, namespace,instancedata)
+			}else
+				ClientConnected(socket, namespace,instancedata);
+		});
+	};
+	
+	function ClientConnected(socket, namespace, instancedata) {
+	  
 	  
 	  //create or setup instance data
 	  if(!global.instances)

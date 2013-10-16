@@ -20,11 +20,13 @@ exports.setDAL = function(d){
 	DAL = d;
 };
 
-exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','user', 'worlds', 'admin', 'admin/users', 'admin/worlds', 'admin/edit'];
+exports.acceptedRoutes = ['sandbox','index','create', 'signup', 'login','logout','edit','remove','history','user', 'worlds', 'admin', 'admin/users', 'admin/worlds', 'admin/edit','publish'];
 routesMap = {
 	'sandbox': {template:'index'},
 	'home': {template:'index'},
 	'edit': {sid: true},
+	'publish': {sid: true},
+	'history': {sid: true},
 	'remove': {sid:true, title: 'Warning!'},
 	'user': {sid:true, title: 'Account'},
 	'admin': {sid:true, title:'Admin', fileList: fileList, template: 'admin/admin'},

@@ -319,59 +319,31 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         };
 
         // -- ready --------------------------------------------------------------------------------
-
+		this.generateTick = function()
+		{
+			
+			 var fields = {
+                time: queue.time + .05,
+                action: "tick"
+                // callback: callback,  // TODO: provisionally add fields to queue (or a holding queue) then execute callback when received back from reflector
+            };
+			this.queue( fields );
+			this.dispatch( fields.time );
+		}
+		this.goOffline = function()
+		{
+			this.offline = true;
+			socket.disconnect();
+			socket = null;
+			window.setInterval(this.generateTick.bind(this),50);
+		};		
         this.ready = function( component_uri_or_json_or_object ) {
 
             // Connect to the reflector. This implementation uses the socket.io library, which
             // communicates using a channel back to the server that provided the client documents.
 
             try {
-				
-             /*   socket = new io.Socket( {
 
-                    // The socket is relative to the application path.
-
-                    resource: window.location.pathname.slice( 1,
-                        window.location.pathname.lastIndexOf("/") ),
-					
-					port:3000,
-                    // The ruby socket.io server only supports WebSockets. Don't try the others.
-					rememberTransport: false,
-					tryTransportsOnConnectTimeout: false,
-                    transports: [
-                        'websocket',
-                        // 'flashsocket',
-                        // 'htmlfile',
-                        // 'xhr-multipart',
-                        // 'xhr-polling',
-                        // 'jsonp-polling',
-                    ],
-
-                    // Increase the timeout due to starvation while loading the scene. The server
-                    // timeout must also be increased.
-                    // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
-
-                    transportOptions: {
-                        "websocket": { timeout: 90000 }
-                        // "flashsocket": { timeout: 90000 },
-                        // "htmlfile": { timeout: 90000 },
-                        // "xhr-multipart": { timeout: 90000 },
-                        // "xhr-polling": { timeout: 90000 },
-                        // "jsonp-polling": { timeout: 90000 },
-                    }
-
-                } );
-				
-				socket.transports =  [
-                        'websocket',
-                        // 'flashsocket',
-                        // 'htmlfile',
-                        // 'xhr-multipart',
-                        // 'xhr-polling',
-                        // 'jsonp-polling',
-                    ];
-				*/
-				
 				var space = window.location.pathname.slice( 1,
                         window.location.pathname.lastIndexOf("/") );
 				socket = io.connect("ws://"+window.location.host);
@@ -449,8 +421,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 } );
 
                 socket.on( "disconnect", function() {
+				
+					//don't bother prompting the error, we're going to work offline;
+					if(vwf.offline === true)
+					{
+						return;
+					}
                     vwf.logger.info( "vwf.socket disconnected" );
-					
 					vwf.dispatchEvent('index-vwf','disconnected',[]);
                 } );
 
@@ -571,9 +548,10 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             if ( ! socket ) { // single-user mode
     
                 // Loop the message back to the incoming queue.
-
+				
                 fields.client = this.moniker_; // stamp with the originating client like the reflector does
                 this.queue( fields );
+				vwf.dispatch( fields.time );
     
             } else {
                 

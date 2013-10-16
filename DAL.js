@@ -701,6 +701,7 @@ function createInstance (id,data,cb)
 		}
 		else
 		{
+			data.created = new Date();
 			DB.save(id,data,function(err,doc,key)
 			{
 				DB.get('StateIndex',function(err,stateIndex,key)
@@ -1042,6 +1043,132 @@ function makeid()
     return text;
 }
 
+
+function getHistory(id,cb)
+{
+	var returndata = {};
+	returndata.children = [];
+	returndata.parents = [];
+	getInstance(id, function(instance){
+
+		console.log(id);
+		console.log(instance);
+		if(!instance)
+		{
+			cb({error:"inner state not found"});
+			return;
+		}
+		var parent = instance.publishedFrom || instance.clonedFrom;
+		returndata.children = [];
+        var children = instance.children || [];
+		
+		//iterate over children, collect details
+		async.each(children,function(item,cb2)
+		{
+			//get each child
+			getInstance(item,function(cinst)
+			{
+				if(cinst.publishedFrom)
+					returndata.children.push({world:item,type:1,created:cinst.created,title:cinst.title});
+				if(cinst.clonedFrom)
+					returndata.children.push({world:item,type:0,created:cinst.created,title:cinst.title});	
+				
+				//goto next child in children
+				cb2();
+			});
+		
+		},function(err)   //done collecting children
+		{
+			//get parents data
+			var cbparent = parent;
+			var cloneType = cbparent == instance.publishedFrom ? 1 : 0
+			async.whilst(function(){return cbparent},function(cb2)
+			{
+				
+				getInstance(cbparent,function(actualparent)
+				{
+					
+					if(actualparent)
+					{
+						returndata.parents.push({world:cbparent,type:cloneType,created:actualparent.created,title:actualparent.title});
+						cbparent = actualparent.publishedFrom || actualparent.clonedFrom;
+						cloneType = cbparent == actualparent.publishedFrom ? 1 : 0
+					}else
+					{
+					 cbparent = null;
+					}
+					cb2();
+				});
+			},function(err)
+			{
+				
+				cb(returndata);
+			});
+		
+		});
+	});
+}
+
+//create a new state from the old one, setting the publish settings for the new state
+//cb with the ID of the new state
+function Publish(id, publishSettings, cb)
+{
+	//get the orignial instance
+	getInstance(id, function(instance){
+		
+		if(instance){
+			//create a new ID for the published world
+			var newId = '_adl_sandbox_' + makeid() + '_';
+			instance.featured = false;
+			instance.publishedFrom = id;
+			delete instance.clonedFrom;
+			delete instance.children;
+			instance.created = new Date();
+			instance.publishSettings = publishSettings;
+			createInstance (newId, instance, function(success){
+				if(success){
+					var oldStateFile = datapath + libpath.sep + 'States' +libpath.sep + id + libpath.sep+'state', newStateFile = datapath + libpath.sep+'States'+libpath.sep + newId + libpath.sep + 'state';
+					
+					fs.readFile(oldStateFile,function(err, olddata)
+					{
+						//olddata may not exist..
+						if(!olddata || err){
+							cb(newId);
+							return;
+						}
+						//set the publish settings on the state file as well, just for grins.
+						var oldstate = JSON.parse(olddata);
+						oldstate[oldstate.length-1].publishSettings = publishSettings;
+						var newstate = JSON.stringify(oldstate);
+						fs.writeFile(newStateFile, newstate, function(err)
+						{
+						
+							//get the orignial instance and record the new one as a child
+							getInstance(id, function(instance){
+							
+								if(!instance.children)
+									instance.children = [];
+								instance.children.push(newId);
+								
+								updateInstance(id,instance,function()
+								{
+									cb(newId);
+								});
+							});
+							
+						});
+					});
+				}
+				
+				else cb(false);
+			});
+		}
+		
+		else cb(false);	
+	});
+
+}
+
 //If arg3 exists, it must be a callback function and arg2 must be the newowner. 
 //Else, a callback is defined as arg2 and arg3 is undefined. Keep current owner.
 function copyInstance (id, arg2, arg3){
@@ -1060,7 +1187,12 @@ function copyInstance (id, arg2, arg3){
 			var newId = '_adl_sandbox_' + makeid() + '_';
 			instance.owner = newowner ? newowner : instance.owner;
 			instance.featured = false;
-			
+			instance.clonedFrom = id;
+			instance.created = new Date();
+			//when cloning a world, it becomes unpublished so you can edit it.
+			delete instance.publishSettings;
+			delete instance.publishedFrom;
+			delete instance.children;
 			createInstance (newId, instance, function(success){
 				if(success){
 					var oldStateFile = datapath + '/States/' + id + '/state', newStateFile = datapath + '/States/' + newId + '/state';
@@ -1078,7 +1210,20 @@ function copyInstance (id, arg2, arg3){
 						var newstate = JSON.stringify(oldstate);
 						fs.writeFile(newStateFile, newstate, function(err)
 						{
-							cb(newId);
+							
+							//get the orignial instance and record the new one as a child
+							getInstance(id, function(instance){
+							
+								if(!instance.children)
+									instance.children = [];
+								instance.children.push(newId);
+								
+								updateInstance(id,instance,function()
+								{
+									cb(newId);
+								});
+							});
+							
 						});
 					});
 				}
@@ -1152,7 +1297,7 @@ function startup(callback)
 			exports.searchUsers = searchUsers;
 			exports.searchInstances = searchInstances;
 			exports.saveInstanceState = saveInstanceState;
-			
+			exports.Publish = Publish;
 			exports.importStates = importStates;
 			exports.purgeInstances = purgeInstances;
 			exports.findState = findState;
@@ -1166,6 +1311,7 @@ function startup(callback)
 			exports.importUsers = importUsers;
 			exports.clearUsers = clearUsers;
 			exports.searchInventory = searchInventory;
+			exports.getHistory = getHistory;
 			callback();
 		}
 	
