@@ -154,6 +154,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                     // local client object
                     // grab access to the webcam 
                     capture.call( this, this.local.sharing );
+                    //capture.call( this, { "screen": true } );
                    
                     var remoteClient = undefined;
                     // existing clients
@@ -453,8 +454,9 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
     function capture( media ) {
 
+        var self = this;
+
         if ( this.local.stream === undefined && ( media.video || media.audio ) ) {
-            var self = this;
             
             var videoConstraints = {
                 "mandatory": {
@@ -475,6 +477,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             var successCallback = function( stream ) {
                 self.local.url = URL.createObjectURL( stream );
                 self.local.stream = stream;
+
+                console.info( "video url         : " + self.local.url );
 
                 self.kernel.setProperty( self.local.ID, "localUrl", self.local.url );
 
@@ -509,15 +513,24 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 }
             };
 
+            var consts = {
+                "video": {
+                    "mandatory": {
+                        "chromeMediaSource": 'screen'
+                    }
+                }
+            };
+
 
             var successCallback = function( stream ) {
                 self.local.desktopUrl = URL.createObjectURL( stream );
                 self.local.desktopStream = stream;
 
+                console.info( "screen capture url: " + self.local.desktopUrl );
                 self.kernel.setProperty( self.local.ID, "localDesktopUrl", self.local.url );
 
                 var localNode = self.state.clients[ self.local.ID ];
-                //displayLocal.call( self, stream, localNode.displayName, localNode.color );
+                displayLocal.call( self, stream, localNode.displayName, localNode.color );
                 //sendOffers.call( self );
             };
 
@@ -525,9 +538,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 console.log("failed to capture screen image: " + error); 
             };
 
-            try { 
-                navigator.webkitGetUserMedia( screenConstraints, successCallback, errorCallback );
-            } catch (e) { 
+            try { getUserMedia( screenConstraints, successCallback, errorCallback ); } 
+            catch (e) { 
                 console.log("getUserMedia: error " + e ); 
             };                
 
