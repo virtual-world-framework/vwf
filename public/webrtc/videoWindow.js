@@ -83,7 +83,7 @@ function swapPanes( divId ) {
 
 }
 
-function newWindow( id, title, type, url, color, muted ) {
+function newWindow( id, title, type, url, color, isSelf ) {
 
   //--------------------------
   // Set up window parameters
@@ -210,10 +210,17 @@ function newWindow( id, title, type, url, color, muted ) {
   if ($appBar.children().length < 12)
   {
     var buttonName = newWin.buttonName = "button-" + divId;
-    var buttonHtml = "<div class='btn-group dropup' id='"+buttonName+"'><button class='btn btn-success' id='"+buttonName+"-button'>"+title+"</button>" + 
-      "<button class='btn btn-success dropdown-toggle' data-toggle='dropdown'><span class='caret'></span></button>" +
-      "<ul class='dropdown-menu pull-right'><li><a id='"+buttonName+"-reset' href='#'>Reset</a></li></ul></div>";
-    
+    var buttonHtml = "<div class='btn-group dropup' id='"+buttonName+"'>"+
+        "<button class='btn btn-success' id='"+buttonName+"-button'>"+title+"</button>" + 
+        "<button class='btn btn-success dropdown-toggle' data-toggle='dropdown'><span class='caret'></span></button>" +
+        "<ul class='dropdown-menu pull-right'><li>" +
+        "<a id='"+buttonName+"-reset' href='#'>Reset</a>";
+
+    if ( isSelf ) { 
+        buttonHtml += "<a id='"+buttonName+"-share' href='#'>Share</a>";
+    }
+    buttonHtml += "</li></ul></div>";
+
     $appBar.append( buttonHtml );
     
     $("#" + buttonName + "-button").click(function() {
@@ -222,6 +229,11 @@ function newWindow( id, title, type, url, color, muted ) {
     $("#" + buttonName + "-reset").click(function() {
       resetPosition( divId );
     });
+    if ( isSelf ) {
+        $( "#" + buttonName + "-share" ).click( function() {
+            shareDesktop( divId );
+        } );
+    } 
   } 
 
   //---------------------------------
@@ -265,7 +277,7 @@ function newWindow( id, title, type, url, color, muted ) {
       break;
 		case "video":
 			var videoId = newWin.videoId = "video-" + divId;
-			var mutedAttr = muted ? "muted " : "";
+			var mutedAttr = isSelf ? "muted " : "";
 
       $div.append(
 				"<i id='enlarge-" + divId + "' style='position:absolute;right:5px;top:5px;z-index: 4;'  alt='' onclick='swapPanes(this.id.substr(8));' class='icon-chevron-up icon-white'/>" +
@@ -280,7 +292,7 @@ function newWindow( id, title, type, url, color, muted ) {
           if ( url ) {
             videoE.src = url;
           }
-          if ( muted ) {
+          if ( isSelf ) {
               videoE.muted = true;  // firefox isn't mapping the muted property correctly
           }
       } 
@@ -387,6 +399,12 @@ function deleteWindow( name ) {
     jQueryWindow.remove();
 
   $('#button-'+name).remove();
+}
+
+function shareDesktop( name ) {
+  var appID = vwf_view.kernel.application();
+  var clientID = vwf_view.kernel.moniker();
+  vwf_view.kernel.callMethod( appID, "shareDesktop", { "moniker": clientID , "value": true } );
 }
 
 function resetPosition(name) {
