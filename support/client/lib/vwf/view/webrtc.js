@@ -33,7 +33,9 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             this.local = {
                 "ID": undefined,
                 "url": undefined,
+                "desktopUrl": undefined,
                 "stream": undefined,
+                "desktopStream": undefined,
                 "sharing": { audio: true, video: true } 
             };
 
@@ -329,12 +331,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                     break;
 
                 case "shareDesktop":
-                    debugger;
                     if ( this.kernel.moniker() == this.kernel.client() ) {
-                        if ( this.connection ) {
-                            this.connection.session.screen = true;
-                            this.kernel.setProperty( nodeID, "session", this.connection.session );
-                        }
+                        capture.call( this, { "screen": true } );
                     }
                     break;
             }
@@ -455,7 +453,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
     function capture( media ) {
 
-        if ( this.local.stream === undefined && ( media.video || media.audio || media.screen ) ) {
+        if ( this.local.stream === undefined && ( media.video || media.audio ) ) {
             var self = this;
             
             var videoConstraints = {
@@ -474,6 +472,28 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 "video": media.video ? videoConstraints : false, 
             }; 
 
+            var successCallback = function( stream ) {
+                self.local.url = URL.createObjectURL( stream );
+                self.local.stream = stream;
+
+                self.kernel.setProperty( self.local.ID, "localUrl", self.local.url );
+
+                var localNode = self.state.clients[ self.local.ID ];
+                displayLocal.call( self, stream, localNode.displayName, localNode.color );
+                sendOffers.call( self );
+            };
+
+            var errorCallback = function( error ) { 
+                console.log("failed to get video stream error: " + error); 
+            };
+
+            try { 
+                getUserMedia( constraints, successCallback, errorCallback );
+            } catch (e) { 
+                console.log("getUserMedia: error " + e ); 
+            };
+        } else if ( this.local.desktopStream === undefined && media.screen ) {
+
             var screenConstraints = {
                 "audio": false,
                 "video": {
@@ -489,51 +509,27 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 }
             };
 
-            if ( media.video || media.audio ) {
-                var successCallback = function( stream ) {
-                    self.local.url = URL.createObjectURL( stream );
-                    self.local.stream = stream;
 
-                    self.kernel.setProperty( self.local.ID, "localUrl", self.local.url );
+            var successCallback = function( stream ) {
+                self.local.desktopUrl = URL.createObjectURL( stream );
+                self.local.desktopStream = stream;
 
-                    var localNode = self.state.clients[ self.local.ID ];
-                    displayLocal.call( self, stream, localNode.displayName, localNode.color );
-                    sendOffers.call( self );
-                };
+                self.kernel.setProperty( self.local.ID, "localDesktopUrl", self.local.url );
 
-                var errorCallback = function( error ) { 
-                    console.log("failed to get video stream error: " + error); 
-                };
+                var localNode = self.state.clients[ self.local.ID ];
+                //displayLocal.call( self, stream, localNode.displayName, localNode.color );
+                //sendOffers.call( self );
+            };
 
-                try { 
-                    getUserMedia( constraints, successCallback, errorCallback );
-                } catch (e) { 
-                    console.log("getUserMedia: error " + e ); 
-                };
-            }
+            var errorCallback = function( error ) { 
+                console.log("failed to capture screen image: " + error); 
+            };
 
-            if ( media.screen ) {
-                var successCallback = function( stream ) {
-                    self.local.url = URL.createObjectURL( stream );
-                    self.local.stream = stream;
-
-                    self.kernel.setProperty( self.local.ID, "localUrl", self.local.url );
-
-                    var localNode = self.state.clients[ self.local.ID ];
-                    displayLocal.call( self, stream, localNode.displayName, localNode.color );
-                    sendOffers.call( self );
-                };
-
-                var errorCallback = function( error ) { 
-                    console.log("failed to capture screen image: " + error); 
-                };
-
-                try { 
-                    getUserMedia( screenConstraints, successCallback, errorCallback );
-                } catch (e) { 
-                    console.log("getUserMedia: error " + e ); 
-                };                
-            }
+            try { 
+                navigator.webkitGetUserMedia( screenConstraints, successCallback, errorCallback );
+            } catch (e) { 
+                console.log("getUserMedia: error " + e ); 
+            };                
 
         }
     }  
@@ -733,7 +729,6 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                 } 
 
                 this.pc.onnegotiationeeded = function( event ) {
-                    //debugger;
                     //console.info( "onnegotiationeeded." );
                 }
 
