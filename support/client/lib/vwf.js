@@ -3718,46 +3718,6 @@ if ( ! childComponent.source ) {
 
         };
 
-        /// Determine if a node has a property with the given name, either directly on the node or
-        /// inherited from a prototype.
-        /// 
-        /// This function must run as a method of the kernel. Invoke as: nodeHasProperty.call(
-        ///   kernel, nodeID, propertyName ).
-        /// 
-        /// @name module:vwf~nodeHasProperty
-        /// 
-        /// @param {ID} nodeID
-        /// @param {String} propertyName
-        /// 
-        /// @returns {Boolean}
-
-        var nodeHasProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-            var node = this.models.javascript.nodes[ nodeID ];
-            if ( node ) {
-                return propertyName in node.properties;
-            } else {
-                this.logger.error( "Could not find node '" + nodeID + "'" );
-            }
-        };
-
-        /// Determine if a node has a property with the given name. The node's prototypes are not
-        /// considered.
-        /// 
-        /// This function must run as a method of the kernel. Invoke as: nodeHasOwnProperty.call(
-        ///   kernel, nodeID, propertyName ).
-        /// 
-        /// @name module:vwf~nodeHasOwnProperty
-        /// 
-        /// @param {ID} nodeID
-        /// @param {String} propertyName
-        /// 
-        /// @returns {Boolean}
-
-        var nodeHasOwnProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-            var node = this.models.javascript.nodes[nodeID];
-            return node.properties.hasOwnProperty( propertyName );  // TODO: this is peeking inside of vwf-model-javascript
-        };
-
         /// Determine if a given property of a node has a setter function, either directly on the
         /// node or inherited from a prototype.
         /// 
