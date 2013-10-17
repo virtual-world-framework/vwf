@@ -1068,13 +1068,18 @@ function getHistory(id,cb)
 			//get each child
 			getInstance(item,function(cinst)
 			{
+					var thischild = {world:item,type:1,created:cinst.created,title:cinst.title};
 				if(cinst.publishedFrom)
-					returndata.children.push({world:item,type:1,created:cinst.created,title:cinst.title});
+					thischild.type = 1;
 				if(cinst.clonedFrom)
-					returndata.children.push({world:item,type:0,created:cinst.created,title:cinst.title});	
+					thischild.type = 0;
 				
-				//goto next child in children
-				cb2();
+				thischild.children = [];
+				
+					returndata.children.push(thischild);
+					//goto next child in children
+					cb2();
+				
 			});
 		
 		},function(err)   //done collecting children
@@ -1090,13 +1095,41 @@ function getHistory(id,cb)
 					
 					if(actualparent)
 					{
-						returndata.parents.push({world:cbparent,type:cloneType,created:actualparent.created,title:actualparent.title});
+						returndata.parents.push({world:cbparent,type:cloneType,created:actualparent.created,title:actualparent.title,children:[]});
 						cbparent = actualparent.publishedFrom || actualparent.clonedFrom;
 						cloneType = cbparent == actualparent.publishedFrom ? 1 : 0
+						
+						async.each(actualparent.children || [],function(item3,cb3)
+						{
+							
+							getInstance(item3,function(realitem3)
+							{
+								if(realitem3)
+								{
+								var childtype = 0;
+								if(realitem3.publishedFrom)
+									childtype = 1;
+								returndata.parents[returndata.parents.length-1].children.push({world:item3,type:childtype,created:realitem3.created,title:realitem3.title})
+								}else
+								{
+								returndata.parents[returndata.parents.length-1].children.push({world:item3,type:-1});
+								}
+								cb3();
+							});
+							
+						
+						},function(err)
+						{
+						
+							cb2();
+						});
+						return;
+						
 					}else
 					{
 					 cbparent = null;
 					}
+					
 					cb2();
 				});
 			},function(err)
