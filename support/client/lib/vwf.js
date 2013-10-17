@@ -2759,10 +2759,10 @@ if ( ! childComponent.source ) {
 
             var reentered = ( entry.index !== undefined );
 
-            // We'll need to know if the set was delegated to other properties, actually assigned
-            // here, or blocked during replication while attempting to delegate.
+            // We'll need to know if the set was delegated to other properties or actually assigned
+            // here.
 
-            var delegated = false, assigned = false, blocked = false;
+            var delegated = false, assigned = false;
 
             // Call settingProperty() on each model. The first model to return a non-undefined value
             // has performed the set and dictates the return value. The property is considered set
@@ -2800,7 +2800,6 @@ if ( ! childComponent.source ) {
 
                     if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
                         value = undefined;
-                        blocked = true;
                     }
 
                     // The property was delegated if the call made any assignments.
@@ -2920,10 +2919,10 @@ if ( ! childComponent.source ) {
 
             var reentered = ( entry.index !== undefined );
 
-            // We'll need to know if the get was delegated to other properties, actually retrieved
-            // here, or blocked during replication while attempting to delegate.
+            // We'll need to know if the get was delegated to other properties or actually retrieved
+            // here.
 
-            var delegated = false, retrieved = false, blocked = false;
+            var delegated = false, retrieved = false;
 
             // Call gettingProperty() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -2957,7 +2956,6 @@ if ( ! childComponent.source ) {
 
                     if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
                         value = undefined;
-                        blocked = true;
                     }
 
                     // The property was delegated if the call made any retrievals.
