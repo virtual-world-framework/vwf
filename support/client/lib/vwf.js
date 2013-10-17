@@ -2760,7 +2760,7 @@ if ( ! childComponent.source ) {
             var reentered = ( entry.index !== undefined );
 
             // We'll need to know if the set was delegated to other properties, actually assigned
-            // here, or if blocked during replication while attempting to delegate.
+            // here, or blocked during replication while attempting to delegate.
 
             var delegated = false, assigned = false, blocked = false;
 
@@ -2809,7 +2809,7 @@ if ( ! childComponent.source ) {
                         delegated = true;
                     }
 
-                    // Otherwise if the called returned a value, the property was assigned here.
+                    // Otherwise if the call returned a value, the property was assigned here.
 
                     else if ( value !== undefined ) {
                         entrants.assignments++;
@@ -2840,7 +2840,11 @@ if ( ! childComponent.source ) {
             }
 
             // Call satProperty() on each view. The view is being notified that a property has
-            // been set. Only call if the property was assigned in this entry into setProperty
+            // been set. Only call for value properties as they are actually assigned. Don't call
+            // for accessor properties that have delegated to other properties. Notifying when
+            // setting an accessor property would be useful, but since that information is
+            // ephemeral, and views on late-joining clients would never see it, it's best to never
+            // send those notifications.
 
             if ( assigned ) {
                 this.views.forEach( function( view ) {
@@ -2888,9 +2892,6 @@ if ( ! childComponent.source ) {
 
             this.logger.debuggx( "getProperty", nodeID, propertyName );
 
-            // Call gettingProperty() on each model. The first model to return a non-undefined value
-            // dictates the return value.
-
             var propertyValue = undefined;
 
             // Record calls into this function by nodeID and propertyName so that models may call
@@ -2902,7 +2903,7 @@ if ( ! childComponent.source ) {
             var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
             var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
 
-            // Keep track of the number of assignments made by this `setProperty` call and others
+            // Keep track of the number of retrievals made by this `getProperty` call and others
             // invoked indirectly by it, starting with the outermost call.
 
             var outermost = entrants.retrievals === undefined;
@@ -2919,8 +2920,8 @@ if ( ! childComponent.source ) {
 
             var reentered = ( entry.index !== undefined );
 
-            // We'll need to know if the set was delegated to other properties, actually assigned
-            // here, or if blocked during replication while attempting to delegate.
+            // We'll need to know if the get was delegated to other properties, actually retrieved
+            // here, or blocked during replication while attempting to delegate.
 
             var delegated = false, retrieved = false, blocked = false;
 
@@ -2929,7 +2930,9 @@ if ( ! childComponent.source ) {
 
             this.models.some( function( model, index ) {
 
-                // Skip models up through the one making the most recent call here (if any).
+                // Skip initial models that an outer call has already invoked for this node and
+                // property (if any). If an inner call completed for this node and property, skip
+                // the remaining models.
 
                 if ( ( ! reentered || index > entry.index ) && ! reentry.completed ) {
 
@@ -2939,7 +2942,7 @@ if ( ! childComponent.source ) {
 
                     // Record the number of retrievals made since the outermost call. When
                     // `entrants.retrievals` increases, a driver has called `getProperty` to make
-                    // an assignment elsewhere.
+                    // a retrieval elsewhere.
 
                     var retrievals = entrants.retrievals;
 
@@ -2947,14 +2950,6 @@ if ( ! childComponent.source ) {
 
                     var value = model.gettingProperty &&
                         model.gettingProperty( nodeID, propertyName, propertyValue );  // TODO: probably don't need propertyValue here
-
-                    // Look for a return value potentially stored here by a reentrant call if the
-                    // model didn't return one explicitly (such as with a JavaScript accessor
-                    // method).
-
-                    if ( value === undefined ) {
-                        value = reentry.value;
-                    }
 
                     // Ignore the result if reentry is disabled and the driver attempted to call
                     // back into the kernel. Kernel reentry is disabled during replication to 
@@ -2965,6 +2960,19 @@ if ( ! childComponent.source ) {
                         blocked = true;
                     }
 
+                    // The property was delegated if the call made any retrievals.
+
+                    if ( entrants.retrievals !== retrievals ) {
+                        delegated = true;
+                    }
+
+                    // Otherwise if the call returned a value, the property was retrieved here.
+
+                    else if ( value !== undefined ) {
+                        entrants.retrievals++;
+                        retrieved = true;
+                    }
+
                     // Record the value retrieved.
 
                     if ( value !== undefined ) {
@@ -2973,61 +2981,59 @@ if ( ! childComponent.source ) {
 
                     // Exit from the this.models.some() iterator once we have a return value.
 
-                    return value !== undefined;
+                    return delegated || retrieved;
                 }
 
             }, this );
 
-            // Delegate to the behaviors and prototype if we didn't get a result from the
-            // current node.
+            if ( reentered ) {
 
-            if ( propertyValue === undefined && ! ignorePrototype ) {
+                // For a reentrant call, restore the previous state, move the index forward to cover
+                // the models we called.
 
-                var behaviorIDs = this.behaviors( nodeID );
+                entrants[nodeID+'-'+propertyName] = entry;
+                entry.completed = true;
 
-                while ( propertyValue === undefined && behaviorIDs.length ) {
-                    var behaviorID = behaviorIDs.pop();
-                    propertyValue = this.getProperty( behaviorID, propertyName, true ); // behavior node only, not its prototypes
+            } else {
+
+                // Delete the call record if this is the first, non-reentrant call here (the normal
+                // case).
+
+                delete entrants[nodeID+'-'+propertyName];
+
+                // Delegate to the behaviors and prototype if we didn't get a result from the
+                // current node.
+
+                if ( propertyValue === undefined && ! ignorePrototype ) {
+
+                    var behaviorIDs = this.behaviors( nodeID );
+
+                    while ( propertyValue === undefined && behaviorIDs.length ) {
+                        var behaviorID = behaviorIDs.pop();
+                        propertyValue = this.getProperty( behaviorID, propertyName, true ); // behavior node only, not its prototypes
+                    }
+
                 }
 
-            }
+                if ( propertyValue === undefined && ! ignorePrototype ) {
 
-            if ( propertyValue === undefined && ! ignorePrototype ) {
+                    var prototypeID = this.prototype( nodeID );
 
-                var prototypeID = this.prototype( nodeID );
+                    if ( prototypeID !== nodeTypeURI ) {
+                        propertyValue = this.getProperty( prototypeID, propertyName );
+                    }
 
-                if ( prototypeID !== nodeTypeURI ) {
-                    propertyValue = this.getProperty( prototypeID, propertyName );
                 }
 
-            }
+                // Call gotProperty() on each view.
 
-            // Call gotProperty() on each view.
-            // Don't notify for inner, reentrant calls since the outer call will notify.
-            // Also don't notify if attempted delegation was blocked during replication since it
-            // makes this like an inner call.
-
-            if ( ! reentered ) {
                 this.views.forEach( function( view ) {
                     view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
                 } );
-            }
-
-            // For a reentrant call, restore the previous state, move the index forward to cover
-            // the models we called, and record the current result.
-            if ( reentered ) {
-                entrants[nodeID+'-'+propertyName] = entry;
-                entry.value = propertyValue;
 
             }
 
-            // Delete the call record if this is the first, non-reentrant call here (the normal
-            // case).
-            else {
-                delete entrants[nodeID+'-'+propertyName];
-            }
-
-            // Clear the assignment counter when the outermost `setProperty` completes.
+            // Clear the retrieval counter when the outermost `getProperty` completes.
 
             if ( outermost ) {
                 delete entrants.retrievals;
