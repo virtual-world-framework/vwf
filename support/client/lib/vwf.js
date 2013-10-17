@@ -3004,22 +3004,18 @@ if ( ! childComponent.source ) {
 
                 if ( propertyValue === undefined && ! ignorePrototype ) {
 
-                    var behaviorIDs = this.behaviors( nodeID );
+                    this.behaviors( nodeID ).reverse().concat( this.prototype( nodeID ) ).
+                        some( function( prototypeID, prototypeIndex, prototypeArray ) {
 
-                    while ( propertyValue === undefined && behaviorIDs.length ) {
-                        var behaviorID = behaviorIDs.pop();
-                        propertyValue = this.getProperty( behaviorID, propertyName, true ); // behavior node only, not its prototypes
-                    }
+                        if ( prototypeIndex < prototypeArray.length - 1 ) {
+                            propertyValue = this.getProperty( prototypeID, propertyName, true ); // behavior node only, not its prototypes
+                        } else if ( prototypeID !== nodeTypeURI ) {
+                            propertyValue = this.getProperty( prototypeID, propertyName ); // prototype node, recursively
+                        }
 
-                }
+                        return propertyValue !== undefined;
 
-                if ( propertyValue === undefined && ! ignorePrototype ) {
-
-                    var prototypeID = this.prototype( nodeID );
-
-                    if ( prototypeID !== nodeTypeURI ) {
-                        propertyValue = this.getProperty( prototypeID, propertyName );
-                    }
+                    }, this );
 
                 }
 
