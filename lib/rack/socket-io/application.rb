@@ -263,6 +263,31 @@ module Rack
         end
       end
 
+      def self.create_instance env
+        @@sessions[ resource env ] ||= {}
+      end
+
+      def self.instance_persistence_state env
+        result = nil
+        unless @@sessions[ resource env ].nil?
+          result = @@sessions[ resource env ][ "persistence_state" ]
+        end
+        result
+      end
+
+      def self.set_instance_persistence_state( env, state )
+        create_instance env
+        @@sessions[ resource env ][ "persistence_state" ] = state
+      end
+
+      def self.empty_instance? env
+        result = true
+        unless @@clients[ resource env ].nil?
+          result = ( @@clients[ resource env ].length == 0 )
+        end
+        result
+      end
+
       # This client's id. Generate it when first accessed.
 
       def id
