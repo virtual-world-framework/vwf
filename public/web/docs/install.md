@@ -35,6 +35,7 @@ Select the following packages for installation. Use the search box or scroll dow
 * 	git
 *   make
 *   ruby
+*   openssl
 *   perl
 *   python
 *   p7zip
@@ -230,3 +231,73 @@ The server runs on port 3000 in development mode by default. Use Google Chrome t
 </div>
 --------------------------
 
+<div class="well" markdown="1">
+Node.js Server Installation / Launch / Debug
+--------------------------
+--------------------------
+
+**Installation**
+
+--------------------------
+
+*1. Install Node.js for your specific environment [http://www.nodejs.org](http://www.nodejs.org).  At the time of this update the current version was v0.10.20.*  
+
+*2.	Download the VWF source from [github](https://github.com/virtual-world-framework/vwf).*
+
+*3.	Launch a terminal window and cd to your VWF root directory.  For windows a ‘node.js command prompt’ was provided with the node.js windows install.  Cygwin may also be used assuming the Cygwin Windows Installation instructions have been successfully completed.  Caveat, there are known issued using Node.js with Cygwin.*
+
+    $ cd "//path/to/VirtualWorldFramework"
+
+*4.	Run the Node Package Manager (npm) to install the correct version of the node module dependencies.  npm is included with your Node.js install.  This will construct the node_modules directory at the top level VWF.*
+
+    $ npm install
+
+*5.	(Optional) Check to see that all packages were successful installed.*
+
+    $ npm ls 
+
+--------------------------
+
+**Launch Node Server**
+
+--------------------------
+
+*6.	Launch the node server.*
+
+    $ npm start
+
+    or
+
+    $ node node-server.js
+
+*7. Connect*
+
+The server runs on port 3000 in development mode by default. Use your browser to connect to [http://localhost:3000/duck](http://localhost:3000/duck) and [http://localhost:3000/plane](http://localhost:3000/plane). 
+
+--------------------------
+
+**Node.js Debugging Tool**
+
+--------------------------
+
+One option for Node.js runtime debugging is the 'node-inspector' tool.  To use the tool do the following:
+
+*1. Install the node-inspector (from root VWF directory).*
+    
+    $ npm install -g node-inspector   //global install
+
+*2. Run node-inspector from your terminal.*
+    
+    $ node-inspector &
+
+ *3. Run the node server with debug flag.*
+
+     $ node --debug node-server.js  
+
+     or
+
+     $ node --debug-brk node-server.js  // to pause debugger at start    
+
+ *4. In your browser go to [http://127.0.0.1:8080/debug?port=5858](http://127.0.0.1:8080/debug?port=5858) and use as you would with your typical browser tools.*
+
+</div>
