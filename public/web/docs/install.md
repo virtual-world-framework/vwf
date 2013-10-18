@@ -300,4 +300,6 @@ One option for Node.js runtime debugging is the 'node-inspector' tool.  To use t
 
  *4. In your browser go to [http://127.0.0.1:8080/debug?port=5858](http://127.0.0.1:8080/debug?port=5858) and use as you would with your typical browser tools.*
 
+ Additional configuration options can be found at [https://github.com/node-inspector/node-inspector](https://github.com/node-inspector/node-inspector)
+
 </div>
