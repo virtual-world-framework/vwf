@@ -156,13 +156,14 @@ Base64DecodeEnumerator.prototype = {
 define(["vwf/view/editorview/Editor"], function (Editor)
 {
 	var __3DRIntegration = {};
-	Editor = Editor.getSingleton();
+	
 	var isInitialized = false;
 	return {
 		getSingleton: function ()
 		{
 			if (!isInitialized)
 			{
+				Editor = Editor.getSingleton();
 				initialize.call(__3DRIntegration);
 				isInitialized = true;
 			}

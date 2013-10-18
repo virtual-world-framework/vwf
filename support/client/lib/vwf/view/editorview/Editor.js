@@ -189,28 +189,36 @@ define(function ()
 		this.translationPropertyName = 'translation';
 		this.transformPropertyName = 'transform';
 		this.scalePropertyName = 'scale';
-		$(document.body).append('<div id="statusbar" class="statusbar" />');
-		$('#statusbar').css('top', (document.height - 25) + 'px');
-		$('#statusbar').append('<div id="SceneSaved" class="statusbarElement" />');
-		$('#SceneSaved').text('Not Saved');
-		$('#statusbar').append('<div id="StatusSelectedName" style="color:lightblue" class="statusbarElement" />');
-		$('#StatusSelectedName').text('No Selection');
-		$('#statusbar').append('<div id="StatusSelectedID" class="statusbarElement" />');
-		$('#StatusSelectedID').text('No Selection');
-		$('#statusbar').append('<div id="StatusPickMode" class="statusbarElement" />');
-		$('#StatusPickMode').text('Pick: None');
-		$('#statusbar').append('<div id="StatusSnaps" class="statusbarElement" />');
-		$('#StatusSnaps').text('Snaps: 15deg, .5m, .1%');
-		$('#statusbar').append('<div id="StatusAxis" class="statusbarElement" />');
-		$('#StatusAxis').text('Axis: -1');
-		$('#statusbar').append('<div id="StatusCoords" class="statusbarElement" />');
-		$('#StatusCoords').text('World Coords');
-		$('#statusbar').append('<div id="StatusTransform" class="statusbarElement" />');
-		$('#StatusTransform').text('Move');
-		$('#statusbar').append('<div id="StatusGizmoLocation" class="statusbarElement" />');
-		$('#StatusGizmoLocation').text('[0,0,0]');
-		$('#statusbar').append('<div id="StatusCameraLocation" class="statusbarElement" />');
-		$('#StatusCameraLocation').text('[0,0,0]');
+
+		var instanceData = _DataManager.getInstanceData() || {};
+					
+		var needTools = instanceData && instanceData.publishSettings? instanceData.publishSettings.allowTools : true;
+
+		if(needTools)
+		{
+			$(document.body).append('<div id="statusbar" class="statusbar" />');
+			$('#statusbar').css('top', (document.height - 25) + 'px');
+			$('#statusbar').append('<div id="SceneSaved" class="statusbarElement" />');
+			$('#SceneSaved').text('Not Saved');
+			$('#statusbar').append('<div id="StatusSelectedName" style="color:lightblue" class="statusbarElement" />');
+			$('#StatusSelectedName').text('No Selection');
+			$('#statusbar').append('<div id="StatusSelectedID" class="statusbarElement" />');
+			$('#StatusSelectedID').text('No Selection');
+			$('#statusbar').append('<div id="StatusPickMode" class="statusbarElement" />');
+			$('#StatusPickMode').text('Pick: None');
+			$('#statusbar').append('<div id="StatusSnaps" class="statusbarElement" />');
+			$('#StatusSnaps').text('Snaps: 15deg, .5m, .1%');
+			$('#statusbar').append('<div id="StatusAxis" class="statusbarElement" />');
+			$('#StatusAxis').text('Axis: -1');
+			$('#statusbar').append('<div id="StatusCoords" class="statusbarElement" />');
+			$('#StatusCoords').text('World Coords');
+			$('#statusbar').append('<div id="StatusTransform" class="statusbarElement" />');
+			$('#StatusTransform').text('Move');
+			$('#statusbar').append('<div id="StatusGizmoLocation" class="statusbarElement" />');
+			$('#StatusGizmoLocation').text('[0,0,0]');
+			$('#statusbar').append('<div id="StatusCameraLocation" class="statusbarElement" />');
+			$('#StatusCameraLocation').text('[0,0,0]');
+		}
 		var _CopiedNodes = [];
 		//	$('#vwf-root').mousedown(function(e){
 		this.mousedown_Gizmo = function (e)
@@ -1765,8 +1773,9 @@ define(function ()
 		}
 		this.setTransform = function(id,val)
 		{
+			this.waitingForSet.push(id);
 			var success = this.setProperty(id,this.transformPropertyName,val);
-			if (success) this.waitingForSet.push(id);
+			if (!success) this.waitingForSet.pop();
 			if (!success) this.SetLocation(MoveGizmo, originalGizmoPos);
 			return success;
 		}

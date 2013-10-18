@@ -332,7 +332,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 		}
 		this.goOffline = function()
 		{
-			this.offline = true;
+			socket.removeListener( "disconnect", vwf.disconnected);
 			socket.disconnect();
 			socket = null;
 			window.setInterval(this.generateTick.bind(this),50);
@@ -423,16 +423,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 } );
 
-                socket.on( "disconnect", function() {
-				
-					//don't bother prompting the error, we're going to work offline;
-					if(vwf.offline === true)
-					{
-						return;
-					}
-                    vwf.logger.info( "vwf.socket disconnected" );
-					vwf.dispatchEvent('index-vwf','disconnected',[]);
-                } );
+                socket.on( "disconnect", vwf.disconnected);
 
                 socket.on( "error", function(e) { 
 					
@@ -466,6 +457,12 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         };
 
+        this.disconnected = function()
+        {   
+            
+            vwf.logger.info( "vwf.socket disconnected" );
+            vwf.dispatchEvent('index-vwf','disconnected',[]);
+        }
         // -- queue --------------------------------------------------------------------------------
 
         this.queue = function( fields ) {

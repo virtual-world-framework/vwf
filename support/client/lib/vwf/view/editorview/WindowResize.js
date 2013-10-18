@@ -67,9 +67,13 @@ define({
 				$('#sidepanel').css('height',$(window).height() - ($('#statusbar').height() + $('#toolbar').height()+$('#smoothmenu1').height()) + 'px');
 			}else
 			{
+				$('#vwf-root').css('overflow','visible');
+				$('#vwf-root').css('left','0px');
+				$('#vwf-root').css('top','0px');
 				$('#index-vwf').css('height',$(window).height() + 'px');
 				$('#index-vwf').css('width',$(window).width() + 'px');
 				$('#index-vwf').css('top', 0 + 'px');
+				$('#index-vwf').css('left', 0 + 'px');
 			}
 			if(_Editor.findcamera())
 			{
@@ -78,8 +82,8 @@ define({
 			}
 		});
 		$(window).resize();
-		if(toolsLoaded)
-			window.setTimeout(function(){$(window).resize();hideSidePanel();},500);
+		
+			window.setTimeout(function(){$(window).resize();if(toolsLoaded)hideSidePanel();},500);
 		window.hideTools = function()
 		{
 			if(!toolsLoaded) return;

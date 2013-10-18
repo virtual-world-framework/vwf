@@ -175,7 +175,7 @@ define(function ()
 					//this is a published world, and you do not need to hit the login server
 				
 					
-					this.Login('Anonymous');
+					this.Login('Anonymous' + _UserManager.getPlayers().length);
 				
 				
 				}
@@ -392,8 +392,15 @@ define(function ()
 		{
 			//if (!_UserManager.GetCurrentUserName()) return;
 			
+			var needlogin = true;
+			var statedata = _DataManager.getInstanceData();
 			
+			//published worlds may choose to allow anonymous users
+			//singleplayers worlds do not need login
+			if(statedata && statedata.publishSettings && (statedata.publishSettings.allowAnonymous ||  statedata.publishSettings.singlePlayer))
+				needlogin = false;
 			
+
 			$('#MenuLogOuticon').css('background', "#555555");
 			$('#MenuLogInicon').css('background', "");
 			$('#MenuLogIn').removeAttr('disabled');
@@ -408,25 +415,31 @@ define(function ()
 				sender: '*System*',
 				text: (document.PlayerNumber + " logging off")
 			}));
+
+		
 			//
 			//vwf_view.kernel.callMethod('index-vwf','receiveChat',parms);
 			if (document[document.PlayerNumber + 'link']) vwf_view.kernel.deleteNode(document[document.PlayerNumber + 'link'].id);
 			//take ownership of the client connection
 			var profile = _DataManager.GetProfileForUser(_UserManager.GetCurrentUserName());
 			var S = window.location.pathname;
-			var data = jQuery.ajax(
-			{
-				type: 'GET',
-				url: PersistanceServer + "/vwfDataManager.svc/logout?S=" + S + "&CID=" + vwf.moniker(),
-				data: null,
-				success: null,
-				async: false,
-				dataType: "json"
-			});
-			if (data.status != 200)
-			{
-				alert(data.responseText);
-				return;
+			
+			if(needlogin)
+			{	
+				var data = jQuery.ajax(
+				{
+					type: 'GET',
+					url: PersistanceServer + "/vwfDataManager.svc/logout?S=" + S + "&CID=" + vwf.moniker(),
+					data: null,
+					success: null,
+					async: false,
+					dataType: "json"
+				});
+				if (data.status != 200)
+				{
+					alert(data.responseText);
+					return;
+				}
 			}
 			document[document.PlayerNumber + 'link'] = null;
 			document.PlayerNumber = null;

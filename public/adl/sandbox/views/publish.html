@@ -4,6 +4,7 @@
 	{
 		getLoginInfo(function(){}, redirect);
 			
+		$('#txtCamera').hide();	
 		$.ajax('/vwfDataManager.svc/statedata?SID=' + sid,
 		{
 			cache:false,
@@ -18,6 +19,36 @@
 				$('#error').text("Error: " + xhr.responseText);
 			}
 		});
+
+		$('#chkDefaultCamera').click(
+		 function(e){
+		   var checked = ($(this).is(':checked'));
+		   if(checked)
+		   {
+		   		$('#txtCamera').hide('fade');	
+		   		$('#txtCamera').val('');	
+		   }
+		   	else
+		   		$('#txtCamera').show('fade');	
+		 }
+		);
+
+
+		$('#chkSinglePlayer').click(
+		 function(e){
+		   var checked = ($(this).is(':checked'));
+		   if(checked)
+		   {
+		   	 $('#chkAllowAnonymous')[0].checked = true;
+		   	  $('#chkAllowAnonymous').prop('disabled', true);
+		   }else
+		   {
+  			$('#chkAllowAnonymous').prop('disabled', false);
+
+		   }
+		 }
+		)
+
 		
 		ko.applyBindings(vwfPortalModel);
 	});	
@@ -73,6 +104,8 @@
 				<input type='checkbox' id='chkAllowAnonymous'  name='AllowAnonymous'></input><label for='AllowAnonymous'>Allow Anonymouse Users</label>
 				<br/>
 				<input type='checkbox' id='chkCreateAvatar' name='CreateAvatar'></input><label for='CreateAvatar'>Create and Avatar for each user</label>
+				<br/>
+				<input type='checkbox' id='chkDefaultCamera' name='DefaultCamera'  checked='checked'></input><label for='DefaultCamera'>Use Default Camera</label>
 				<br/>
 				<input type='text' id='txtCamera' placeholder='CameraName: Default' class="col-md-5 form-control" name='Camera'></input>
 				<br/>

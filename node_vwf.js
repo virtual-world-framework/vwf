@@ -886,6 +886,10 @@ function startVWF(){
 	  if(!global.instances)
 	    global.instances = {};
 	   
+	  socket.loginData = {};
+	  var allowAnonymous = false;
+	  if(instancedata.publishSettings && instancedata.publishSettings.allowAnonymous)
+	  		   allowAnonymous = true;
 	  //if it's a new instance, setup record 
 	  if(!global.instances[namespace])
 	  {
@@ -1163,7 +1167,7 @@ function startVWF(){
 			
 			//do not accept messages from clients that have not been claimed by a user
 			//currently, allow getstate from anonymous clients
-			if(!sendingclient.loginData && message.action != "getState" && message.member != "latencyTest")
+			if(!allowAnonymous && !sendingclient.loginData && message.action != "getState" && message.member != "latencyTest")
 			{
 				if(isPointerEvent(message))
 					global.instances[namespace].Error('DENIED ' + JSON.stringify(message), 4);
@@ -1232,7 +1236,7 @@ function startVWF(){
 					global.instances[namespace].Log('server has no record of ' + message.node,1);
 					return;
 				  }
-				  if(checkOwner(node,sendingclient.loginData.UID))
+				  if(allowAnonymous || checkOwner(node,sendingclient.loginData.UID))
 				  {	
 						//We need to keep track internally of the properties
 						//mostly just to check that the user has not messed with the ownership manually
@@ -1257,7 +1261,7 @@ function startVWF(){
 					global.instances[namespace].Error('server has no record of ' + message.node,1);
 					return;
 				  }
-				  if(checkOwner(node,sendingclient.loginData.UID))
+				  if(allowAnonymous || checkOwner(node,sendingclient.loginData.UID))
 				  {	
 						global.instances[namespace].Log("Do " +message.action +" of " +node.id,2);
 				  }
@@ -1276,7 +1280,7 @@ function startVWF(){
 					global.instances[namespace].Error('server has no record of ' + message.node,1);
 					return;
 				  }
-				  if(checkOwner(node,sendingclient.loginData.UID))
+				  if(allowAnonymous || checkOwner(node,sendingclient.loginData.UID))
 				  {	
 						//we do need to keep some state data, and note that the node is gone
 						global.instances[namespace].state.deleteNode(message.node)
@@ -1300,7 +1304,7 @@ function startVWF(){
 					return;
 				  }
 				  //Keep a record of the new node
-				  if(checkOwner(node,sendingclient.loginData.UID) || message.node == 'index-vwf')
+				  if(allowAnonymous || checkOwner(node,sendingclient.loginData.UID) || message.node == 'index-vwf')
 				  {	
 						var childComponent = JSON.parse(JSON.stringify(message.parameters[0]));
 						if(!childComponent) return;
@@ -1383,7 +1387,7 @@ function startVWF(){
 		  delete global.instances[namespace].clients[socket.id];
 		  //if it's the last client, delete the data and the timer
 		  
-		  if(loginData)
+		  if(loginData && loginData.clients)
 		  {
 			  delete loginData.clients[socket.id];
 			  global.error("Unexpected disconnect. Deleting node for user avatar " + loginData.UID);
@@ -1401,6 +1405,7 @@ function startVWF(){
 		  {
 			clearInterval(global.instances[namespace].timerID);
 			delete global.instances[namespace];
+			console.log('Shutting down ' + namespace )
 		  }
 
 		});

@@ -140,6 +140,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/alertify.js-0.3.9/
 		},
 		satProperty: function (nodeID, propertyName, propertyValue)
 		{
+			
 			if (window._Editor && _Editor.isSelected(nodeID) && propertyName == _Editor.transformPropertyName)
 			{
 				_Editor.updateBoundsTransform(nodeID);
@@ -190,12 +191,14 @@ function InitializeEditor()
 		}
 	}
 
+	require("vwf/view/editorview/InputSetup").initialize();
+
 	if(needTools)
 	{
 		$('#sidepanel').css('height', $(window).height() - ($('#statusbar').height() + $('#toolbar').height() + $('#smoothmenu1').height()) + 'px')
 		$('#sidepanel').jScrollPane();
 		require("vwf/view/editorview/Toolbar").initialize();
-		require("vwf/view/editorview/InputSetup").initialize();
+		
 		require("vwf/view/editorview/Menubar").initialize();
 		require("vwf/view/editorview/ChatSystemGUI").initialize();
 		$(document.head).append('<script type="text/javascript" src="vwf/view/localization/translate.js"></script>');
