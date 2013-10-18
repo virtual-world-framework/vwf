@@ -1269,6 +1269,19 @@ function copyInstance (id, arg2, arg3){
 	});
 }
 
+function getFileList(cb){
+	fs.readdir(datapath + '/States/_adl_sandbox_1f41Hz25o0VVStIW_', function(err, files){
+		async.each(files,function(item,cb2)
+		{
+			fs.stat('.', function(err, stats){
+				if(stats.isFile()){
+					console.log(item, stats);
+				}
+			});
+		});
+	});
+}
+
 function startup(callback)
 {
 	async.series([
@@ -1323,6 +1336,7 @@ function startup(callback)
 			exports.deleteInstance = deleteInstance;
 			exports.deleteInstances = deleteInstances;
 			exports.copyInstance = copyInstance;
+			exports.getFileList = getFileList;
 			
 			exports.getUsers = getUsers;
 			exports.getInstances = getInstances;
