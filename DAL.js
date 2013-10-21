@@ -1269,15 +1269,35 @@ function copyInstance (id, arg2, arg3){
 	});
 }
 
-function getFileList(cb){
-	fs.readdir(datapath + '/States/_adl_sandbox_1f41Hz25o0VVStIW_', function(err, files){
-		async.each(files,function(item,cb2)
-		{
-			fs.stat('.', function(err, stats){
+function getStatesFilelist(id, cb){
+	fs.readdir(datapath + '/States/' + id, function(err, files){
+		
+		if(err || !files || files.length <= 0){
+			cb(false);
+			return;
+		}
+		
+		var infoArr = [];
+		async.each(files,function(item,cb2){
+		
+			fs.stat(datapath + '/States/'+id+'/' + item, function(err, stats){
+			
 				if(stats.isFile()){
-					console.log(item, stats);
+					infoArr.push({file:item, time:stats.mtime});
 				}
+				
+				cb2(null);
 			});
+		}, 
+		function(err){
+		
+			if(err){
+				cb(false);
+				return;
+			}
+			
+			cb(infoArr);
+			return;			
 		});
 	});
 }
@@ -1336,7 +1356,7 @@ function startup(callback)
 			exports.deleteInstance = deleteInstance;
 			exports.deleteInstances = deleteInstances;
 			exports.copyInstance = copyInstance;
-			exports.getFileList = getFileList;
+			exports.getStatesFilelist = getStatesFilelist;
 			
 			exports.getUsers = getUsers;
 			exports.getInstances = getInstances;

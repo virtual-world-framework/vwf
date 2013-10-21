@@ -95,7 +95,12 @@ exports.handlePostRequest = function(req, res, next){
 	switch(req.params.action){
 	
 		case "dal_test":
-			DAL.getFileList();
+			var id = '_adl_sandbox_1f41Hz25o0VVStIW_';
+			DAL.getStatesFilelist(id, function(obj){
+			
+				res.end(JSON.stringify(obj));
+			});
+			
 			break;
 	
 		case "delete_users":			
