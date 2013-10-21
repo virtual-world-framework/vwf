@@ -302,6 +302,7 @@ function FaceIntersect()
 
 }
 
+_ObjectPools.FaceIntersect = _ObjectPools.registerType(FaceIntersect);
 var temparray = [];
 //intersect a ray with a face
 face.prototype.intersect1 = function(p,d)
@@ -326,9 +327,9 @@ face.prototype.intersect1 = function(p,d)
 		this.e2 = [0,0,0];
 		vector(this.e2,v2,v0);
 	}
-	var h = _ALLOC(Array); h[0]=0; h[1]=0; h[2]=0;
-	var s = _ALLOC(Array); s[0]=0; s[1]=0; s[2]=0;
-	var q = _ALLOC(Array); q[0]=0; q[1]=0; q[2]=0;
+	var h = _ALLOC(_ObjectPools.ARRAY); h[0]=0; h[1]=0; h[2]=0;
+	var s = _ALLOC(_ObjectPools.ARRAY); s[0]=0; s[1]=0; s[2]=0;
+	var q = _ALLOC(_ObjectPools.ARRAY); q[0]=0; q[1]=0; q[2]=0;
 	var a = 0;
 	var f = 0;
 	var u = 0;
@@ -369,12 +370,12 @@ face.prototype.intersect1 = function(p,d)
 
 	if (t > 0.00001) // ray intersection
 	{
-		var point = Vec3.add(p,Vec3.scale(d,t,temparray),_ALLOC(Array));
+		var point = Vec3.add(p,Vec3.scale(d,t,temparray),_ALLOC(_ObjectPools.ARRAY));
 		var norm = this.norm;
 		if(MATH.dotVec3(d,norm) > 0)
-		  norm = Vec3.scale(norm,-1,_ALLOC(Array));
+		  norm = Vec3.scale(norm,-1,_ALLOC(_ObjectPools.ARRAY));
 
-		var ret = _ALLOC(FaceIntersect)
+		var ret = _ALLOC(_ObjectPools.FaceIntersect)
 		ret.point = point;
 		ret.norm = norm;
 		ret.face = this;
@@ -534,7 +535,7 @@ function SimpleFaceListRTAS(faces,verts)
 //Intersect a ray with a list of faces
 SimpleFaceListRTAS.prototype.intersect = function(origin,direction,opts)
 {
-	var intersects = _ALLOC(Array);
+	var intersects = _ALLOC(_ObjectPools.ARRAY);
 	 intersects.length = 0;
 	intersects.length = 0;
     for(var i =0; i < this.faces.length; i++)
@@ -685,9 +686,9 @@ BoundingBoxRTAS.prototype.intersectFrustrum = function(frustrum,opts)
 BoundingBoxRTAS.prototype.intersect = function(o,d)
 {	
 		//TODO: are these loose bounds necessary?
-		var min = _ALLOC(Array); min[0] = this.min[0]-.01; min[1] = this.min[1]-.01; min[2] = this.min[2]-.01;
-		var max = _ALLOC(Array); max[0] = this.max[0]+.01; max[1] = this.max[1]+.01; max[2] = this.max[2]+.01;
- 		var dirfrac = _ALLOC(Array); dirfrac[0] = 0; dirfrac[1] = 0; dirfrac[2] = 0; 
+		var min = _ALLOC(_ObjectPools.ARRAY); min[0] = this.min[0]-.01; min[1] = this.min[1]-.01; min[2] = this.min[2]-.01;
+		var max = _ALLOC(_ObjectPools.ARRAY); max[0] = this.max[0]+.01; max[1] = this.max[1]+.01; max[2] = this.max[2]+.01;
+ 		var dirfrac = _ALLOC(_ObjectPools.ARRAY); dirfrac[0] = 0; dirfrac[1] = 0; dirfrac[2] = 0; 
 		var t;
 		// d is unit direction vector of ray
 		dirfrac[0] = 1.0 / d[0];
@@ -876,7 +877,7 @@ OctreeRegion.prototype.distributeFace = function(face)
 OctreeRegion.prototype.intersect = function(o,d,opts)
 {
 	
-	var hits = _ALLOC(Array);
+	var hits = _ALLOC(_ObjectPools.ARRAY);
 	hits.length = 0;
 	//if no faces, can be no hits. 
 	//remember, faces is all faces in this node AND its children
@@ -1257,7 +1258,7 @@ THREE.Geometry.prototype.CPUPick = function(origin,direction,options,collisionTy
 	  //*** profiling shows reject based on bounding sphere function is way too slow.
 	  // ** faster just to check AABB	
 	  //var hit = this.BoundingSphere.intersect(origin,direction);
-	  var intersections = _ALLOC(Array);
+	  var intersections = _ALLOC(_ObjectPools.ARRAY);
 	  intersections.length = 0;
 	  //if(hit > 0 && hit < maxdist)
 	  {
@@ -1427,7 +1428,7 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 		return null;
 
 		
-	  var ret = _ALLOC(Array);
+	  var ret = _ALLOC(_ObjectPools.ARRAY);
 	  ret.length = 0;
 	  //iterate the children and concat all hits
 	  //note - still in world space here
@@ -1451,8 +1452,8 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 	  {	
 	  	
 	  //at this point, were going to move the ray into the space relative to the mesh. until now, the ray has been in worldspace.
-	  var mat = this.getModelMatrix(_ALLOC(Array));
-	  var tmp2 = _ALLOC(Array);
+	  var mat = this.getModelMatrix(_ALLOC(_ObjectPools.ARRAY));
+	  var tmp2 = _ALLOC(_ObjectPools.ARRAY);
 	  Mat4.invert(mat,tmp2);
 	  _DEALLOC(mat);
 	  mat = tmp2;
@@ -1460,17 +1461,17 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 	  _DEALLOC(mat);
 	  
 
-	  mat = this.getModelMatrix(_ALLOC(Array));
+	  mat = this.getModelMatrix(_ALLOC(_ObjectPools.ARRAY));
 	  mat[3] = 0;
 	  mat[7] = 0;
 	  mat[11] = 0;
-	  var tmp = _ALLOC(Array);
+	  var tmp = _ALLOC(_ObjectPools.ARRAY);
 	  Mat4.invert(mat,tmp);
 	  _DEALLOC(mat);
 	  mat = tmp;
       var newd = MATH.mulMat4Vec3(mat,direction);
-	  var mat2 = this.getModelMatrix(_ALLOC(Array));
-	  var mat3 = this.getModelMatrix(_ALLOC(Array));
+	  var mat2 = this.getModelMatrix(_ALLOC(_ObjectPools.ARRAY));
+	  var mat3 = this.getModelMatrix(_ALLOC(_ObjectPools.ARRAY));
 	  mat3[3] = 0;
 	  mat3[7] = 0;
 	  mat3[11] = 0;
@@ -1488,15 +1489,15 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 					//move the normal and hit point into worldspace
 					
 
-					var tmp = MATH.mulMat4Vec3(mat2,ret2[i].point,_ALLOC(Array));
+					var tmp = MATH.mulMat4Vec3(mat2,ret2[i].point,_ALLOC(_ObjectPools.ARRAY));
 					_DEALLOC(ret2[i].point);
 					ret2[i].point = tmp;
 
-					tmp = MATH.mulMat4Vec3(mat3,ret2[i].norm,_ALLOC(Array));
+					tmp = MATH.mulMat4Vec3(mat3,ret2[i].norm,_ALLOC(_ObjectPools.ARRAY));
 					_DEALLOC(ret2[i].norm);
 					ret2[i].norm = tmp;
 
-					tmp = Vec3.normalize(ret2[i].norm,_ALLOC(Array));
+					tmp = Vec3.normalize(ret2[i].norm,_ALLOC(_ObjectPools.ARRAY));
 					_DEALLOC(ret2[i].norm);
 					ret2[i].norm = tmp;
 					ret2[i].distance = MATH.distanceVec3(origin,ret2[i].point);

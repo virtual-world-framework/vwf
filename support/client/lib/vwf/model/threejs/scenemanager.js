@@ -777,7 +777,7 @@ SceneManagerRegion.prototype.contains = function(o)
 SceneManagerRegion.prototype.CPUPick = function(o,d,opts)
 {
 	
-	var hits = _ALLOC(Array);
+	var hits = _ALLOC(_ObjectPools.ARRAY);
 	hits.length = 0;
 	//if no faces, can be no hits. 
 	//remember, faces is all faces in this node AND its children
@@ -831,7 +831,7 @@ SceneManagerRegion.prototype.CPUPick = function(o,d,opts)
 SceneManagerRegion.prototype.FrustrumCast = function(frustrum,opts)
 {
 	
-	var hits = _ALLOC(Array);
+	var hits = _ALLOC(_ObjectPools.ARRAY);
 	hits.length = 0;
 	//if no faces, can be no hits. 
 	//remember, faces is all faces in this node AND its children
@@ -881,7 +881,7 @@ SceneManagerRegion.prototype.FrustrumCast = function(frustrum,opts)
 SceneManagerRegion.prototype.SphereCast = function(center,r,opts)
 {
 	
-	var hits = _ALLOC(Array);
+	var hits = _ALLOC(_ObjectPools.ARRAY);
 	hits.length = 0;
 	//if no faces, can be no hits. 
 	//remember, faces is all faces in this node AND its children

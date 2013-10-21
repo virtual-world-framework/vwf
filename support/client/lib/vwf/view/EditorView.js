@@ -42,7 +42,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/alertify.js-0.3.9/
 					}
 				});
 
-				require("vwf/view/editorview/ObjectPools").getSingleton();
+				
 
 				if ($.parseQuerystring().Edit != 'false')
 				{

@@ -12,8 +12,9 @@ require.config({
 	    waitSeconds: 15
 	  });		
         require( [
-
+            
             "domReady",
+            "vwf/view/editorview/ObjectPools",
 			"/socket.io/socket.io.js",
             // This is the common model implementation and an example model that connects the
             // simulation to a WebGL scene manager.
@@ -37,6 +38,7 @@ require.config({
 
         ], function( ready ) {
 
+            require("vwf/view/editorview/ObjectPools").getSingleton();
             ready( function() {
 
                 // With the scripts loaded, we must initialize the framework. vwf.initialize()

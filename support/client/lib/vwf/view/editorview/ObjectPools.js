@@ -24,7 +24,15 @@ define(function()
 		this.count = 0;
 		this._allocate = function(parms)
 		{
-			var obj = new this.type();
+
+			var obj;
+
+			if(this.type === 0)
+				obj = [];
+			else
+				obj = new _ObjectPools.__PoolTypes[this.type]();
+
+			Object.defineProperty(obj,"__POOLTYPE",{enumerable:false,configurable:false,value:this.type})
 			//if(parms)
 			//	this.type.apply(obj,parms);
 			this.objects.push(obj);
@@ -63,7 +71,7 @@ define(function()
 				_DEALLOC(val);
 				obj[i] = null;
 			}
-			//if(obj.length) obj.length = 0;
+			if(obj.__PoolTypes === 0) obj.length = 0;
 		}
 		this.free = function(obj)
 		{
@@ -92,6 +100,12 @@ define(function()
 	{
 		
 		this.pools = {};
+		this.registerType = function(type)
+		{
+			this.__PoolTypes.push(type);
+			return this.__PoolTypes.length -1;
+		}
+		this.__PoolTypes = [];
 		this.allocate = function(type,p)
 		{
 			if(!window._ALLOC_Manual)
@@ -104,10 +118,15 @@ define(function()
 		}
 		this.deallocate = function(obj)
 		{
+			if(!window._ALLOC_Manual)
+				return;
+
 			if(!obj) return;
-			if(this.pools[obj.constructor])
-				this.pools[obj.constructor].free(obj);
+			if(this.pools[obj.__POOLTYPE])
+				this.pools[obj.__POOLTYPE].free(obj);
 		}
+		this.ARRAY = this.registerType(Array);
+		this.NUMBER = this.registerType(Number);
 		window._ALLOC_Manual = true;
 		window._DEALLOC = this.deallocate.bind(this);
 		window._ALLOC = this.allocate.bind(this);
