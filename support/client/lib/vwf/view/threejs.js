@@ -550,6 +550,45 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 				if(this.renderTargetPasses[i].target == rtt)
 					this.renderTargetPasses.splice(i,1);
 			}
+		},
+		trigger: function(name,args)
+		{
+			if(!this.args)
+			this.args = [null];
+			for(var i = 0; i < args.length; i++)
+				this.args[i+1] = args[i];
+
+			var queue = this.events[name];
+			if(!queue) return;
+			for(var i = 0; i < queue.length; i++)
+			{
+				this.events[name][i].apply(this,this.args);
+			}
+
+		},
+		bind:function (name,func)
+		{
+
+			if(!this.events)
+				this.events = {};
+			if(!this.events[name])
+				this.events[name] = [];
+			this.events[name].push(func);
+			return this.events[name].length -1;
+		},
+		unbind:function (name,func)
+		{
+
+			var queue = this.events[name];
+			if(!queue) return;
+
+			if(func instanceof Number)
+				queue.splice(func,1);
+			else
+			{
+				func = queue.indexOf(func);
+				queue.splice(func,1);
+			}
 		}
 		
 
@@ -599,12 +638,15 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         
         function GetParticleSystems(node,list)
 		{
-			if(!list)
-				list = [];
+			
 			for(var i =0; i<node.children.length; i++)
 			{
 				if(node.children[i] instanceof THREE.ParticleSystem)
+				{
+					if(!list)
+						list = [];
 					list.push(node.children[i]);
+				}
 				list = 	GetParticleSystems(node.children[i],list);
 			}			
 				return list;
@@ -631,11 +673,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 	var camback;
 	var insetvp;
 	var vpargs = [];
+	var documentselector = $(document);
         function renderScene(time) {
 			
 			
             requestAnimFrame( renderScene );
 			
+			
+
 			if(self.paused === true)
 				return;
 			self.inFrame = true;	
@@ -662,25 +707,26 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			cam.matrixWorldInverse.getInverse( cam.matrixWorld );
 			 
 			_viewProjectionMatrix.multiplyMatrices( cam.projectionMatrix, cam.matrixWorldInverse );
-			vp =  MATH.transposeMat4(_viewProjectionMatrix.flattenToArray(temparray));
+			vp =  _viewProjectionMatrix.transpose().flattenToArray(temparray);
 			
-			rootdiv = document.getElementById('index-vwf');
+			if(!rootdiv)
+				rootdiv = document.getElementById('index-vwf');
 			
-			minD = Math.min($('#index-vwf').width(),$('#index-vwf').height());
+			wh = 100;//$('#index-vwf').height();
+			ww = 100;//$('#index-vwf').width();
+			minD = Math.min(ww,wh);
 			if(minD < 100) return;
 			
-			 h = rootdiv.style.height;
-			 w = rootdiv.style.width;
-			 wh = parseInt(h.substr(0,h.length-2));
-			 ww = parseInt(w.substr(0,w.length-2));
+			
 			
 			vpargs[0] = vp;
 			vpargs[1] = wh;
 			vpargs[2] = ww;
 			
 			
-			$(document).trigger('prerender',vpargs);
-			
+			self.trigger('prerender',vpargs);
+
+		
 			for(var i in vwf.models[0].model.nodes)
 			{
 				var node = vwf.models[0].model.nodes[i];
@@ -691,7 +737,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			//the camera changes the view projection in the prerender call
 			
 			_viewProjectionMatrix.multiplyMatrices( cam.projectionMatrix, cam.matrixWorldInverse );
-			 vp =  MATH.transposeMat4(_viewProjectionMatrix.flattenToArray(temparray));
+			 vp =  _viewProjectionMatrix.transpose().flattenToArray(temparray);
 			
 			
 			
@@ -700,10 +746,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 
                 sceneNode.frameCount = 0;
             
-              
-                var newPick = ThreeJSPick.call(self,sceneNode,cam);
-                
+             
+                var newPick = ThreeJSPick.call(self,sceneNode,cam,ww,wh);
+
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
+                
                 
 				if(self.lastPickId != newPickId && self.lastEventData)
                 {
@@ -714,7 +761,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     view.kernel.dispatchEvent( newPickId, "pointerOver", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                 }
                 
-                self.lastPickId = newPickId
+                self.lastPickId = newPickId;
+                _DEALLOC(self.lastPick);
                 self.lastPick = newPick;
                 if(view.lastEventData && (view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || view.lastEventData.eventData[0].screenPosition[1] != oldMouseY)) {
                     oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
@@ -785,7 +833,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 				insetvp =  MATH.transposeMat4(_viewProjectionMatrix.flattenToArray(temparray));
 				
 				
-				$(document).trigger('postprerender',[insetvp,w,w]);
+				self.trigger('postprerender',[insetvp,w,w]);
 				
 				renderer.clear(true,true,true);
 				renderer.render(backgroundScene,selcam);
@@ -803,14 +851,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			
 			}
 			
-			$(document).trigger('postprerender',vpargs);
+			self.trigger('postprerender',vpargs);
 			
 			if($('#glyphOverlay').css('display') != 'none')
 			{
-				$(document).trigger('glyphRender',vpargs);
+				self.trigger('glyphRender',vpargs);
 			}
 			
-			$(document).trigger('postrender',vpargs);
+			self.trigger('postrender',vpargs);
 			
 			
 			
@@ -838,6 +886,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 				self.restoreTransforms();
 			
 			self.inFrame = false;
+			
         };
 
         var mycanvas = this.canvasQuery.get( 0 );
@@ -1003,6 +1052,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }
     }
         // -- initInputEvents ------------------------------------------------------------------------
+
 
     function initInputEvents( canvas ) {
         var sceneNode = this.state.scenes[this.state.sceneRootID], child;
@@ -1517,37 +1567,46 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     function mouseYPos(e) {
         return e.clientY - e.currentTarget.offsetTop + window.scrollY;
     }
-    function ThreeJSPick(sceneNode,cam)
+
+    function ThreeJSPick(sceneNode,cam,SCREEN_WIDTH,SCREEN_HEIGHT)
     {
         if(!this.lastEventData) return;
         
+        if(!this.tempposarr)
+        {
+	        this.tempposarr = [0,0,0];
+	    	this.tempdirarr = [0,0,0];
+	    	this.firstpersonopts = {filter:function(o){return !(o.isAvatar === true)}};
+    	}
         
         var threeCam = cam;//sceneNode.camera.threeJScameras[sceneNode.camera.ID];
         if(!this.ray) this.ray = new THREE.Ray();
         if(!this.projector) this.projector = new THREE.Projector();
         
-        var SCREEN_HEIGHT = $('#index-vwf').height();
-        var SCREEN_WIDTH = $('#index-vwf').width();
+      
         var x = ( this.lastEventData.eventData[0].screenPosition[0] / SCREEN_WIDTH ) * 2 - 1;
         var y = -( this.lastEventData.eventData[0].screenPosition[1] / SCREEN_HEIGHT ) * 2 + 1;
-        var directionVector = new THREE.Vector3();
         
-        directionVector.set(x, y, .5);
-        
-        this.projector.unprojectVector(directionVector, threeCam);
-        var pos = new THREE.Vector3();
-		var pos2 = new THREE.Vector3();
-		pos2.getPositionFromMatrix(threeCam.matrixWorld);
-        pos.copy(pos2);
-        directionVector.sub(pos);
-        directionVector.normalize();
+        if(!this.directionVector)
+        	this.directionVector = new THREE.Vector3();
+        this.directionVector.set(x, y, .5);
         
         
-        this.ray.set(pos, directionVector);
-		var caster = new THREE.Raycaster(pos,directionVector);
 		var intersects;
 		if(!sceneNode.threeScene.CPUPick || !_SceneManager)
 		{
+			this.projector.unprojectVector(directionVector, threeCam);
+	        var pos = new THREE.Vector3();
+			var pos2 = new THREE.Vector3();
+			pos2.getPositionFromMatrix(threeCam.matrixWorld);
+	        pos.copy(pos2);
+	        this.directionVector.sub(pos);
+	        this.directionVector.normalize();
+	        
+	        
+	        this.ray.set(pos, directionVector);
+			var caster = new THREE.Raycaster(pos,this.directionVector);
+
 			intersects = caster.intersectObjects(sceneNode.threeScene.children, true);
 			if (intersects.length) {
             // intersections are, by default, ordered by distance,
@@ -1584,11 +1643,18 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 		}else
 		{
 		
-			
+			this.tempposarr[0] = threeCam.matrixWorld.elements[12];
+			this.tempposarr[1] = threeCam.matrixWorld.elements[13];
+			this.tempposarr[2] = threeCam.matrixWorld.elements[14];
+
+			this.tempdirarr[0] = this.directionVector.x;
+			this.tempdirarr[1] = this.directionVector.y;
+			this.tempdirarr[2] = this.directionVector.z;
+
 			if(vwf.models[0].model.nodes['index-vwf'].cameramode == 'FirstPerson')
-				intersects = _SceneManager.CPUPick([pos.x,pos.y,pos.z],[directionVector.x,directionVector.y,directionVector.z],{filter:function(o){return !(o.isAvatar === true)}});
+				intersects = _SceneManager.CPUPick(this.tempposarr,this.tempdirarr,this.firstpersonopts);
 			else
-				intersects = _SceneManager.CPUPick([pos.x,pos.y,pos.z],[directionVector.x,directionVector.y,directionVector.z]);
+				intersects = _SceneManager.CPUPick(this.tempposarr,this.tempdirarr);
 			
 				
 			return intersects;
