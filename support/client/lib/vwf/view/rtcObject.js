@@ -17,11 +17,11 @@ function MyRTC(localPlayer, remotePlayer, channelSendCallback, channelReceiveCal
 	// set status text constants
 	this.statusText = {
 		initializing: {text:'\uE183', color: '#c58000'},
-		//ringing: {text:'\uE183\uE091', color: 'green'},
-		calling: {text:'\uE182\uE092\uE135', color: '#c58000'},
+		calling: {text:'\uE182\uE092', color: '#c58000'},
 		connecting: {text:'\uE182\uE178', color: '#c58000'},
 		connected: {text:'\uE182\uE120', color: 'green'},
-		error: {text:'\uE183', color: 'red'}
+		nolocal: {text:'\uE036', color: 'red', sticky: true},
+		error: {text:'\uE183', color: 'red', sticky: true}
 	};
 
 	// set flags and session variables
@@ -45,9 +45,12 @@ function MyRTC(localPlayer, remotePlayer, channelSendCallback, channelReceiveCal
 
 MyRTC.prototype.setStatus = function( params )
 {
+	if( this.statusLocked ) return;
+
 	$('#vidFrame #connectionStatus').text( params.text );
 	$('#vidFrame #connectionStatus').css( 'color', params.color );
-
+	if( params.sticky )
+		this.statusLocked = true;
 }
 
 /*
@@ -126,7 +129,7 @@ MyRTC.prototype.initialize = function( params )
 					clearTimeout(reminderTimeout);
 					$('#permission-reminder').hide( 'fade', 'fast' );
 					console.error('An error occurred while binding webcam: ', error);
-					this.setStatus( this.statusText.error );
+					this.setStatus( this.statusText.nolocal );
 
 					this.isMediaSet = true;
 					if( this.readyToOffer ){
@@ -157,6 +160,9 @@ MyRTC.prototype.initialize = function( params )
 
 MyRTC.prototype.disconnect = function()
 {
+	if( !this.initialized )
+		return;
+
 	// reset all state variables to pristine state
 	if( this.peerConn ){
 		this.peerConn.close();
@@ -174,6 +180,7 @@ MyRTC.prototype.disconnect = function()
 	this.readyForIce = false;
 	
 	console.log('Peer connection disconnected');
+	$('#vidFrame').dialog('close');
 }
 
 
