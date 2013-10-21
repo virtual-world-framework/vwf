@@ -87,20 +87,14 @@ exports.handlePostRequest = function(req, res, next){
 	var sessionData = global.SandboxAPI.getSessionData(req);
 	
 	//Temporarily commenting out authorization
-	/*if(!sessionData || sessionData.UID != global.adminUID){
+	if(!sessionData || sessionData.UID != global.adminUID){
 		next();
 		return;
-	}*/
+	}
 	
 	switch(req.params.action){
 	
-		case "dal_test":
-			var id = '_adl_sandbox_1f41Hz25o0VVStIW_';
-			DAL.getStatesFilelist(id, function(obj){
-			
-				res.end(JSON.stringify(obj));
-			});
-			
+		case "dal_test":			
 			break;
 	
 		case "delete_users":			

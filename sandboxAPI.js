@@ -689,6 +689,21 @@ function CopyInstance(URL, SID, response){
 	});
 }
 
+//Get list of files in State dir of a given world id
+function GetStateList(URL, SID, response){
+	
+	SID = SID ? SID : URL.query.SID;
+	if(SID.length == 16){
+		SID = '_adl_sandbox_' + SID + '_';
+	}
+	
+	DAL.getStatesFilelist(SID, function(fileList){
+	
+		if(fileList) respond(response, 200, JSON.stringify(fileList));
+		else respond(response, 500, 'Error in trying to retrieve file list');
+	});
+}
+
 //Publish the world to a new world
 //This is just a copy with some special settings
 function Publish(URL, SID, publishdata, response){
@@ -1180,6 +1195,9 @@ function serve (request, response)
 			} break;
 			case "copyinstance":{
 				CopyInstance(URL, SID, response);		
+			} break;
+			case "stateslist":{
+				GetStateList(URL, SID, response);		
 			} break;
 			case "salt":{
 				Salt(URL,response);		
