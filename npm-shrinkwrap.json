@@ -4,8 +4,7 @@
   "dependencies": {
     "crypto": {
       "version": "0.0.3",
-      "from": "crypto@0.0.3",
-      "resolved": "https://registry.npmjs.org/crypto/-/crypto-0.0.3.tgz"
+      "from": "crypto@0.0.x"
     },
     "socket.io": {
       "version": "0.9.16",
@@ -67,7 +66,8 @@
         },
         "redis": {
           "version": "0.7.3",
-          "from": "redis@0.7.3"
+          "from": "redis@0.7.3",
+          "resolved": "https://registry.npmjs.org/redis/-/redis-0.7.3.tgz"
         }
       }
     },
@@ -77,8 +77,7 @@
     },
     "mime": {
       "version": "1.2.11",
-      "from": "mime@1.2.11",
-      "resolved": "https://registry.npmjs.org/mime/-/mime-1.2.11.tgz"
+      "from": "mime@1.2.x"
     },
     "js-yaml": {
       "version": "2.1.3",

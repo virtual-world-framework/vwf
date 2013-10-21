@@ -17,15 +17,15 @@
     "url": "https://github.com/virtual-world-framework/vwf.git"
   },
   "dependencies": {
-    "crypto": "0.0.3",
+    "crypto": "0.0.x",
     "socket.io": "0.9.x",
     "async": "0.2.x",
-    "mime": "1.2.11",
+    "mime": "1.2.x",
     "js-yaml": "2.1.x"
   },
   "devDependencies": {
-    "node-inspector": "0.5.x",
-    "nodebug": "0.1.x"
+    "node-inspector": "x.x.x",
+    "nodebug": "x.x.x"
   },
   "license": {
     "type": "Apache",
