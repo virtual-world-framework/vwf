@@ -71,7 +71,7 @@ define(function()
 				_DEALLOC(val);
 				obj[i] = null;
 			}
-			if(obj.__PoolTypes === 0) obj.length = 0;
+			if(obj.__POOLTYPE === 0) obj.length = 0;
 		}
 		this.free = function(obj)
 		{
@@ -109,7 +109,7 @@ define(function()
 		this.allocate = function(type,p)
 		{
 			if(!window._ALLOC_Manual)
-				return new type;
+				return new _ObjectPools.__PoolTypes[type]();
 			if(!this.pools[type])
 			{
 				this.pools[type] = new ObjectPool(type);
