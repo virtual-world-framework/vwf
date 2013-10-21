@@ -11,7 +11,8 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 		{
 			var html = 
 '<div id="vidFrame">'+
-'	<div id="vidPanel" style="position: absolute; top: 10px; left: 10px;">'+
+'   <style>@font-face {font-family: "Glyphicons"; src: url(/adl/sandbox/fonts/glyphicons-halflings-regular.ttf) format("truetype");}</style>'+
+'	<div id="vidPanel" style="position: absolute; top: 10px; left: 10px; width: 320px; height: 240px;">'+
 '		<video id="remote" width="320" height="240" '+
 '			style="position: absolute;" '+
 '			poster="/adl/sandbox/vwf/view/webrtc/avatar.png"/>'+
@@ -19,7 +20,8 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 '			style="position: absolute;" '+
 '			poster="/adl/sandbox/vwf/view/webrtc/avatar.png" muted/>'+
 '		<input id="chatButton" type="button" value="Send Message" '+
-'			style="position: absolute; left: 210px;"/>'+
+'			style="position: absolute; right: 0px;"/>'+
+'		<span id="connectionStatus" style="font-family: \'Glyphicons\', arial; font-size: 18pt; position: absolute; right: 5px; bottom: 5px;">\uE182\uE091</span>'+
 '	</div>'+
 '	<div id="messagePanel" style="position: absolute; top: 10px; left: 10px; width: 320px; height: 240px; background-color: #fff">'+
 '		<p id="message">'+
@@ -93,7 +95,7 @@ define( [ "module", "vwf/view", "vwf/view/rtcObject" ], function( module, view, 
 				$('#vidFrame > div').css(ratioSize)
 				$('#vidFrame > #vidPanel > video#remote').css(ratioSize);
 				$('#vidFrame > #vidPanel > video#self').css({width: ratioSize.width/4, height: ratioSize.height/4});
-				$('#vidFrame > #vidPanel > input#chatButton').css({left: ratioSize.width - $('#vidFrame #chatButton').width() - 30});
+				//$('#vidFrame > #vidPanel > input#chatButton').css({left: ratioSize.width - $('#vidFrame #chatButton').width() - 30});
 			});
 		},
 

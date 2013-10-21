@@ -14,6 +14,16 @@ function bind_safetydance(context, fn){
  */
 function MyRTC(localPlayer, remotePlayer, channelSendCallback, channelReceiveCallback)
 {
+	// set status text constants
+	this.statusText = {
+		initializing: {text:'\uE183', color: '#c58000'},
+		//ringing: {text:'\uE183\uE091', color: 'green'},
+		calling: {text:'\uE182\uE092\uE135', color: '#c58000'},
+		connecting: {text:'\uE182\uE178', color: '#c58000'},
+		connected: {text:'\uE182\uE120', color: 'green'},
+		error: {text:'\uE183', color: 'red'}
+	};
+
 	// set flags and session variables
 	this.peerConn = null;
 	this.localStream = null;
@@ -33,6 +43,12 @@ function MyRTC(localPlayer, remotePlayer, channelSendCallback, channelReceiveCal
 	this.localCandidateCache = [];
 }
 
+MyRTC.prototype.setStatus = function( params )
+{
+	$('#vidFrame #connectionStatus').text( params.text );
+	$('#vidFrame #connectionStatus').css( 'color', params.color );
+
+}
 
 /*
  * MyRTC initialization function
@@ -41,6 +57,7 @@ function MyRTC(localPlayer, remotePlayer, channelSendCallback, channelReceiveCal
 MyRTC.prototype.initialize = function( params )
 {
 	this.initialized = true;
+	this.setStatus( this.statusText.initializing );
 
 	// register socket message callback
 	if( this.registerReceiveCallback ){
@@ -85,6 +102,9 @@ MyRTC.prototype.initialize = function( params )
 
 					this.attachStreamToFrame(stream, this.localPlayer);
 					this.localStream = stream;
+
+					this.setStatus( this.statusText.calling );
+
 					if( this.trySetLocalMedia() ){
 						if( this.readyToOffer ){
 							this.readyToOffer = false;
@@ -106,6 +126,7 @@ MyRTC.prototype.initialize = function( params )
 					clearTimeout(reminderTimeout);
 					$('#permission-reminder').hide( 'fade', 'fast' );
 					console.error('An error occurred while binding webcam: ', error);
+					this.setStatus( this.statusText.error );
 
 					this.isMediaSet = true;
 					if( this.readyToOffer ){
@@ -124,6 +145,7 @@ MyRTC.prototype.initialize = function( params )
 	}
 	else {
 		console.error('getUserMedia not supported by this browser');
+		this.setStatus( this.statusText.error );
 		this.isMediaSet = true;
 	}
 	
@@ -201,6 +223,7 @@ MyRTC.prototype.receiveMessage = function( msg )
 			// if failed
 			function(error){
 				console.error('Failed to set remote description from offer', error);
+				this.setStatus( this.statusText.error );
 			}
 		);
 	}
@@ -219,6 +242,7 @@ MyRTC.prototype.receiveMessage = function( msg )
 			// if failed
 			function(error){
 				console.error('Failed to set remote description from answer', error);
+				this.setStatus( this.statusText.error );
 			}
 		);
 	}
@@ -269,6 +293,7 @@ MyRTC.prototype.createPeerConnection = function()
 		console.log('Ice change:', evt.currentTarget.iceConnectionState);
 		if( evt.currentTarget.iceConnectionState == 'connected' ){
 			this.isRemoteStreamStarted = true;
+			this.setStatus( this.statusText.connected );
 		}
 		// if disconnected, reset and wait for connection
 		else if( evt.currentTarget.iceConnectionState == 'disconnected' )
@@ -286,6 +311,8 @@ MyRTC.prototype.createPeerConnection = function()
 
 MyRTC.prototype.makeOffer = function()
 {
+	this.setStatus( this.statusText.connecting );
+
 	var mediaConstraints = {
 		'mandatory': {
 			'OfferToReceiveAudio': true,
@@ -310,6 +337,7 @@ MyRTC.prototype.makeOffer = function()
 		}),
 		function(error){
 			console.error('An error occurred during peer invitation: ', error);
+			this.setStatus( this.statusText.error );
 		},
 		mediaConstraints
 	);
@@ -318,6 +346,8 @@ MyRTC.prototype.makeOffer = function()
 
 MyRTC.prototype.makeAnswer = function()
 {
+	this.setStatus( this.statusText.connecting );
+
 	var mediaConstraints = {
 		'mandatory': {
 			'OfferToReceiveAudio': true,
@@ -334,6 +364,7 @@ MyRTC.prototype.makeAnswer = function()
 		}),
 		function(error){
 			console.error('An error occurred during peer reply: ', error);
+			this.setStatus( this.statusText.error );
 		},
 		mediaConstraints
 	);
