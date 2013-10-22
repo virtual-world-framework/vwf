@@ -782,7 +782,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 }
                 
                 self.lastPickId = newPickId;
-                _DEALLOC(self.lastPick);
                 self.lastPick = newPick;
                 if(view.lastEventData && (view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || view.lastEventData.eventData[0].screenPosition[1] != oldMouseY)) {
                     oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
@@ -1588,46 +1587,38 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         return e.clientY - e.currentTarget.offsetTop + window.scrollY;
     }
 
-    function ThreeJSPick(sceneNode,cam,SCREEN_WIDTH,SCREEN_HEIGHT)
+   function ThreeJSPick(sceneNode,cam,SCREEN_WIDTH,SCREEN_HEIGHT)
     {
         if(!this.lastEventData) return;
         
-        if(!this.tempposarr)
-        {
-	        this.tempposarr = [0,0,0];
-	    	this.tempdirarr = [0,0,0];
-	    	this.firstpersonopts = {filter:function(o){return !(o.isAvatar === true)}};
-    	}
         
         var threeCam = cam;//sceneNode.camera.threeJScameras[sceneNode.camera.ID];
         if(!this.ray) this.ray = new THREE.Ray();
         if(!this.projector) this.projector = new THREE.Projector();
+        if(!this.directionVector) this.directionVector = new THREE.Vector3();
         
-      
+        
         var x = ( this.lastEventData.eventData[0].screenPosition[0] / SCREEN_WIDTH ) * 2 - 1;
         var y = -( this.lastEventData.eventData[0].screenPosition[1] / SCREEN_HEIGHT ) * 2 + 1;
+      
         
-        if(!this.directionVector)
-        	this.directionVector = new THREE.Vector3();
         this.directionVector.set(x, y, .5);
+        
+        this.projector.unprojectVector(this.directionVector, threeCam);
+        var pos = new THREE.Vector3();
+		var pos2 = new THREE.Vector3();
+		pos2.getPositionFromMatrix(threeCam.matrixWorld);
+        pos.copy(pos2);
+        this.directionVector.sub(pos);
+        this.directionVector.normalize();
+        
         
         
 		var intersects;
-		debugger;
 		if(!sceneNode.threeScene.CPUPick || !_SceneManager)
 		{
-			this.projector.unprojectVector(directionVector, threeCam);
-	        var pos = new THREE.Vector3();
-			var pos2 = new THREE.Vector3();
-			pos2.getPositionFromMatrix(threeCam.matrixWorld);
-	        pos.copy(pos2);
-	        this.directionVector.sub(pos);
-	        this.directionVector.normalize();
-	        
-	        
-	        this.ray.set(pos, directionVector);
-			var caster = new THREE.Raycaster(pos,this.directionVector);
-
+			this.ray.set(pos, this.directionVector);
+			var caster = new THREE.Raycaster(pos,directionVector);
 			intersects = caster.intersectObjects(sceneNode.threeScene.children, true);
 			if (intersects.length) {
             // intersections are, by default, ordered by distance,
@@ -1664,22 +1655,16 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 		}else
 		{
 		
-			this.tempposarr[0] = threeCam.matrixWorld.elements[12];
-			this.tempposarr[1] = threeCam.matrixWorld.elements[13];
-			this.tempposarr[2] = threeCam.matrixWorld.elements[14];
-
-			this.tempdirarr[0] = this.directionVector.x;
-			this.tempdirarr[1] = this.directionVector.y;
-			this.tempdirarr[2] = this.directionVector.z;
-
+			
 			if(vwf.models[0].model.nodes['index-vwf'].cameramode == 'FirstPerson')
-				intersects = _SceneManager.CPUPick(this.tempposarr,this.tempdirarr,this.firstpersonopts);
+				intersects = _SceneManager.CPUPick([pos.x,pos.y,pos.z],[directionVector.x,directionVector.y,directionVector.z],{filter:function(o){return !(o.isAvatar === true)}});
 			else
-				intersects = _SceneManager.CPUPick(this.tempposarr,this.tempdirarr);
+				intersects = _SceneManager.CPUPick([pos.x,pos.y,pos.z],[this.directionVector.x,this.directionVector.y,this.directionVector.z]);
 			
 				
 			return intersects;
 		}
+    
     }
     function getPickObjectID(threeObject)
     {   

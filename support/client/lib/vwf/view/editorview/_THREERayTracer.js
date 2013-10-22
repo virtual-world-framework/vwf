@@ -677,7 +677,7 @@ BoundingBoxRTAS.prototype.intersectFrustrum = function(frustrum,opts)
 	}
 	for(var i=0; i < 4; i ++)
 	{
-		if(this.intersect(frustrum.cornerRays[i].o,frustrum.cornerRays[i].d).length > 0)
+		if(this.intersect(frustrum.cornerRays[i].o,frustrum.cornerRays[i].d))
 			return [true];
 	}
 	return [];
