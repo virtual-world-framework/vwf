@@ -5,6 +5,7 @@
   "author": "VWF <http://virtual.wf>",
   "scripts": {
     "start": "node ./node-server.js",
+    "debug": "node --debug ./node-server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "directories": {
