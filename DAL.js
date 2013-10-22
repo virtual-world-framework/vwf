@@ -1302,6 +1302,45 @@ function getStatesFilelist(id, cb){
 	});
 }
 
+function restoreBackup(id, stateFileName, cb){
+	
+	//console.log(id, stateFileName);
+	
+	var basePath = datapath + '/States/' + id + '/';
+	var oldPath =  basePath +  stateFileName, statePath = basePath + 'state', tempPath = basePath + 'temp';
+	
+	//Rename current state file to a temp file
+	fs.rename(statePath, tempPath, function(err){
+		
+		if(err){
+			cb(false);
+			return;
+		}
+		
+		//Make old backup file current state file
+		fs.rename(oldPath, statePath, function(err){
+		
+			if(err){
+				cb(false);
+				return;
+			}
+			
+			//Make temp file no different than any other backup state file
+			fs.rename(tempPath, oldPath, function(err){
+			
+				if(err){
+					cb(false);
+					return;
+				}
+			
+				cb(statePath);
+				return;
+			});
+		
+		});
+	});
+}
+
 function startup(callback)
 {
 	async.series([
@@ -1357,6 +1396,7 @@ function startup(callback)
 			exports.deleteInstances = deleteInstances;
 			exports.copyInstance = copyInstance;
 			exports.getStatesFilelist = getStatesFilelist;
+			exports.restoreBackup = restoreBackup;
 			
 			exports.getUsers = getUsers;
 			exports.getInstances = getInstances;
