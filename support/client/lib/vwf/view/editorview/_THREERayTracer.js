@@ -8,9 +8,9 @@ var OCTMaxDepth = 4;
 
 
 
-THREE.Object3D.prototype.getModelMatrix = function()
+THREE.Object3D.prototype.getModelMatrix = function(mat)
 {
-	var mat = new Array(16);
+	if(!mat) mat = [];
 	var ele = this.matrixWorld.elements;
 	mat[0] = ele[0]; mat[4] = ele[1]; mat[8] = ele[2]; mat[12] = ele[3];
 	mat[1] = ele[4]; mat[5] = ele[5]; mat[9] = ele[6]; mat[13] = ele[7];
@@ -20,9 +20,10 @@ THREE.Object3D.prototype.getModelMatrix = function()
 	return mat;
 }
 
-THREE.Object3D.prototype.getLocalMatrix = function()
+THREE.Object3D.prototype.getLocalMatrix = function(mat)
 {
-	var mat = new Array(16);
+	
+	if(!mat) mat = [];
 	var ele = this.matrix.elements;
 	mat[0] = ele[0]; mat[4] = ele[1]; mat[8] = ele[2]; mat[12] = ele[3];
 	mat[1] = ele[4]; mat[5] = ele[5]; mat[9] = ele[6]; mat[13] = ele[7];
@@ -30,7 +31,7 @@ THREE.Object3D.prototype.getLocalMatrix = function()
 	mat[3] = ele[12]; mat[7] = ele[13]; mat[11] = ele[14]; mat[15] = ele[15];
 	
 	return mat;
-	return MATH.transposeMat4(mat);
+	
 }
 
 THREE.CPUPickOptions = function()
@@ -267,6 +268,8 @@ function pointInFrustrum(point,frustrum)
 
 }
 
+
+
 face.prototype.intersectFrustrum = function(frustrum,opts)
 {
 	if(pointInFrustrum(this.v0,frustrum)||pointInFrustrum(this.v0,frustrum)||pointInFrustrum(this.v0,frustrum))
@@ -288,6 +291,19 @@ face.prototype.intersectFrustrum = function(frustrum,opts)
 	return null;
 }
 
+
+
+function FaceIntersect()
+{
+
+	this.point = null;
+	this.face = null;
+	this.norm = null;
+
+}
+
+_ObjectPools.FaceIntersect = _ObjectPools.registerType(FaceIntersect);
+var temparray = [];
 //intersect a ray with a face
 face.prototype.intersect1 = function(p,d)
 {
@@ -311,9 +327,9 @@ face.prototype.intersect1 = function(p,d)
 		this.e2 = [0,0,0];
 		vector(this.e2,v2,v0);
 	}
-	var h = [0,0,0];
-	var s = [0,0,0];
-	var q = [0,0,0];
+	var h = [0,0,0]; 
+	var s = [0,0,0]; 
+	var q = [0,0,0]; 
 	var a = 0;
 	var f = 0;
 	var u = 0;
@@ -323,20 +339,30 @@ face.prototype.intersect1 = function(p,d)
 	a = innerProduct(this.e1,h);
 
 	if (a > -0.00001 && a < 0.00001)
+	{
+		
 		return null;
+	}
+		
 
 	f = 1/a;
 	vector(s,p,v0);
 	u = f * (innerProduct(s,h));
 
 	if (u < 0.0 || u > 1.0)
+	{
+		
 		return null;
+	}
 
 	crossProduct(q,s,this.e1);
 	v = f * innerProduct(d,q);
 
 	if (v < 0.0 || u + v > 1.0)
+	{
+		
 		return null;
+	}
 
 	// at this stage we can compute t to find out where
 	// the intersection point is on the line
@@ -344,16 +370,26 @@ face.prototype.intersect1 = function(p,d)
 
 	if (t > 0.00001) // ray intersection
 	{
-		var point = MATH.addVec3(p,MATH.scaleVec3(d,t));
+		var point = Vec3.add(p,Vec3.scale(d,t,temparray),[]);
 		var norm = this.norm;
 		if(MATH.dotVec3(d,norm) > 0)
-		  norm = MATH.scaleVec3(norm,-1);
-		return {point:point,norm:norm,face:this};
+		  norm = Vec3.scale(norm,-1,[]);
+
+		var ret = new FaceIntersect();
+		ret.point = point;
+		ret.norm = norm;
+		ret.face = this;
+		
+		
+		return ret;
 	}
 
 	else // this means that there is a line intersection
 		 // but not a ray intersection
-		 return null;
+	{
+		
+		return null;
+	}
 
 }
 
@@ -500,6 +536,8 @@ function SimpleFaceListRTAS(faces,verts)
 SimpleFaceListRTAS.prototype.intersect = function(origin,direction,opts)
 {
 	var intersects = [];
+	 intersects.length = 0;
+	intersects.length = 0;
     for(var i =0; i < this.faces.length; i++)
 	{
 		var intersect = this.faces[i].intersect1(origin,direction);
@@ -507,7 +545,9 @@ SimpleFaceListRTAS.prototype.intersect = function(origin,direction,opts)
 		{
 			intersects.push(intersect);
 			if(opts && opts.OneHitPerMesh)
+			{
 				return intersects;
+			}
 		}
 	}
 	return intersects;
@@ -646,9 +686,9 @@ BoundingBoxRTAS.prototype.intersectFrustrum = function(frustrum,opts)
 BoundingBoxRTAS.prototype.intersect = function(o,d)
 {	
 		//TODO: are these loose bounds necessary?
-		var min = [this.min[0]-.01,this.min[1]-.01,this.min[2]-.01];
-		var max = [this.max[0]+.01,this.max[1]+.01,this.max[2]+.01];
- 		var dirfrac = [0,0,0];
+		var min = [0,0,0]; min[0] = this.min[0]-.01; min[1] = this.min[1]-.01; min[2] = this.min[2]-.01;
+		var max = [0,0,0]; max[0] = this.max[0]+.01; max[1] = this.max[1]+.01; max[2] = this.max[2]+.01;
+ 		var dirfrac = [0,0,0]; dirfrac[0] = 0; dirfrac[1] = 0; dirfrac[2] = 0; 
 		var t;
 		// d is unit direction vector of ray
 		dirfrac[0] = 1.0 / d[0];
@@ -666,25 +706,26 @@ BoundingBoxRTAS.prototype.intersect = function(o,d)
 		var tMathmin = Math.max(Math.max(Math.min(t1, t2), Math.min(t3, t4)), Math.min(t5, t6));
 		var tMathmax = Math.min(Math.min(Math.max(t1, t2), Math.max(t3, t4)), Math.max(t5, t6));
 
+		
 		// if tMath.max < 0, ray (line) is intersecting AABB, but whole AABB is behing us
 		if (tMathmax < 0)
 		{
 			t = tMathmax;
-			return [];
+			return false;
 		}
 
 		// if tMath.min > tMath.max, ray doesn't intersect AABB
 		if (tMathmin > tMathmax)
 		{
 			t = tMathmax;
-			return [];
+			return false;
 		}
 
 		t = tMathmin;
 		
     
    
-    return [true]; // if we made it here, there was an intersection - YAY
+    return true; // if we made it here, there was an intersection - YAY
 
 }
 BoundingBoxRTAS.prototype.buildFacelist = function()
@@ -835,6 +876,7 @@ OctreeRegion.prototype.intersect = function(o,d,opts)
 {
 	
 	var hits = [];
+	hits.length = 0;
 	//if no faces, can be no hits. 
 	//remember, faces is all faces in this node AND its children
 	if(this.faces.length == 0)
@@ -862,7 +904,7 @@ OctreeRegion.prototype.intersect = function(o,d,opts)
 	}
 	
 	//reject this node if the ray does not intersect it's bounding box
-	if(this.testBounds(o,d).length == 0)
+	if(this.testBounds(o,d)== false)
 	{
 		//console.log('region rejected');
 		return hits;
@@ -881,10 +923,13 @@ OctreeRegion.prototype.intersect = function(o,d,opts)
 				    hits.push(childhits[j]);
 					if(opts && opts.OneHitPerMesh)
 					{
+						childhits[j] = null;
 						
 						return hits;
 					}
 				}
+				childhits.length = 0;
+				
 			}
 		}
 	}
@@ -1212,7 +1257,7 @@ THREE.Geometry.prototype.CPUPick = function(origin,direction,options,collisionTy
 	  // ** faster just to check AABB	
 	  //var hit = this.BoundingSphere.intersect(origin,direction);
 	  var intersections = [];
-	  
+	  intersections.length = 0;
 	  //if(hit > 0 && hit < maxdist)
 	  {
 		 
@@ -1220,7 +1265,7 @@ THREE.Geometry.prototype.CPUPick = function(origin,direction,options,collisionTy
 		 var bbhit = this.BoundingBox.intersect(origin,direction); 
 		 if(collisionType == 'mesh')
 		 {
-			 if(bbhit.length > 0)
+			 if(bbhit)
 			 {
 				
 				 //build the octree or the facelist
@@ -1230,6 +1275,7 @@ THREE.Geometry.prototype.CPUPick = function(origin,direction,options,collisionTy
 					
 				 }
 				 //do actual mesh intersection
+				 
 				 intersections = this.RayTraceAccelerationStructure.intersect(origin,direction,options); 		 
 			 }
 		 }
@@ -1267,7 +1313,7 @@ THREE.Geometry.prototype.FrustrumCast = function(frustrum,opts)
 	 //try to reject based on bounding box.
 	 var bbhit = this.BoundingBox.intersectFrustrum(frustrum,opts); 
 	
-	 if(bbhit.length > 0)
+	 if(bbhit)
 	 {
 				
 		 //build the octree or the facelist
@@ -1381,6 +1427,7 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 
 		
 	  var ret = [];
+	  ret.length = 0;
 	  //iterate the children and concat all hits
 	  //note - still in world space here
 	  for(var i=0; i <  this.children.length; i++)
@@ -1392,6 +1439,8 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 			 {
 				for(var j =0; j<hit.length; j++)
 					ret.push(hit[j]);
+				hit.length = 0;
+				
 			 }
 		 }
 	  }
@@ -1399,19 +1448,28 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 		
 	  if(this.geometry)
 	  {	
+	  	
 	  //at this point, were going to move the ray into the space relative to the mesh. until now, the ray has been in worldspace.
-	  var mat = this.getModelMatrix().slice(0);
-	  mat = MATH.inverseMat4(mat);
+	  var mat = this.getModelMatrix([]);
+	  var tmp2 = [];
+	  Mat4.invert(mat,tmp2);
+	 
+	  mat = tmp2;
 	  var newo = MATH.mulMat4Vec3(mat,origin);
 	  
-	  mat = this.getModelMatrix().slice(0);
+	  
+
+	  mat = this.getModelMatrix([]);
 	  mat[3] = 0;
 	  mat[7] = 0;
 	  mat[11] = 0;
-	  mat = MATH.inverseMat4(mat);
+	  var tmp = [];
+	  Mat4.invert(mat,tmp);
+	  
+	  mat = tmp;
       var newd = MATH.mulMat4Vec3(mat,direction);
-	  var mat2 = this.getModelMatrix().slice(0);
-	  var mat3 = this.getModelMatrix().slice(0);
+	  var mat2 = this.getModelMatrix([]);
+	  var mat3 = this.getModelMatrix([]);
 	  mat3[3] = 0;
 	  mat3[7] = 0;
 	  mat3[11] = 0;
@@ -1428,15 +1486,26 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 					
 					//move the normal and hit point into worldspace
 					
-					ret2[i].point = MATH.mulMat4Vec3(mat2,ret2[i].point);
+
+					var tmp = MATH.mulMat4Vec3(mat2,ret2[i].point,[0,0,0]);
 					
-					ret2[i].norm = MATH.mulMat4Vec3(mat3,ret2[i].norm);
-					ret2[i].norm = MATH.toUnitVec3(ret2[i].norm);
+					ret2[i].point = tmp;
+
+					tmp = MATH.mulMat4Vec3(mat3,ret2[i].norm,[0,0,0]);
+					
+					ret2[i].norm = tmp;
+
+					tmp = Vec3.normalize(ret2[i].norm,[0,0,0]);
+					
+					ret2[i].norm = tmp;
 					ret2[i].distance = MATH.distanceVec3(origin,ret2[i].point);
 					ret2[i].object = this;
 					ret2[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
 				}
-				ret = ret.concat(ret2);
+				for(var i = 0; i < ret2.length; i++)
+					ret.push(ret2[i]);
+				ret2.length = 0;
+				
 			}
 			if(this instanceof THREE.Line)
 			{
@@ -1461,6 +1530,7 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 					}
 				}
 			}
+		
 	}
 	return ret;  
 	  

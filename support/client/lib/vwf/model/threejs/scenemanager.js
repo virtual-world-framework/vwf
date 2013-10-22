@@ -74,19 +74,26 @@ SceneManager.prototype.removeFromRoot = function(child)
 	if(this.specialCaseObjects.indexOf(child) != -1)
 		this.specialCaseObjects.splice(this.specialCaseObjects.indexOf(child),1);
 }
+SceneManager.prototype.defaultPickOptions = new THREE.CPUPickOptions();
 SceneManager.prototype.CPUPick = function(o,d,opts)
 {
 	if(d[0] == 0 && d[1] ==0 && d[2] == 0)
 		return null;
 	//console.profile("PickProfile");
 
-	var hitlist = this.root.CPUPick(o,d,opts || new THREE.CPUPickOptions());
+	
+	var hitlist = this.root.CPUPick(o,d,opts|| this.defaultPickOptions);
 	
 	for(var i = 0; i < this.specialCaseObjects.length; i++)
 	{
-		var childhits = this.specialCaseObjects[i].CPUPick(o,d,opts|| new THREE.CPUPickOptions());
+		var childhits = this.specialCaseObjects[i].CPUPick(o,d,opts|| this.defaultPickOptions);
 		if(childhits)
-			hitlist = hitlist.concat(childhits);
+		{
+			for(var j = 0; j < childhits.length; j++)
+			hitlist.push(childhits[j]);
+		}
+		
+	
 	}
 	
 	//sort the hits by priority and distance
@@ -99,35 +106,50 @@ SceneManager.prototype.CPUPick = function(o,d,opts)
 	});
 	// Enter name of script here
 	//console.profileEnd();
-	return hitlist[0];
+	var ret = hitlist[0];
+	hitlist[0] = null;
+	
+
+	//var intersect = new FaceIntersect();
+	//for(var i in ret)
+	//	intersect[i] = ret[i];
+
+	//_DEALLOC(ret);
+	return ret;
 }
 SceneManager.prototype.FrustrumCast = function(f,opts)
 {
 	//console.profile("PickProfile");
 
-	var hitlist = this.root.FrustrumCast(f,opts || new THREE.CPUPickOptions());
+	var hitlist = this.root.FrustrumCast(f,opts || this.defaultPickOptions);
 	for(var i = 0; i < this.specialCaseObjects.length; i++)
 	{
-		var childhits = this.specialCaseObjects[i].FrustrumCast(f,opts || new THREE.CPUPickOptions());
+		var childhits = this.specialCaseObjects[i].FrustrumCast(f,opts || this.defaultPickOptions);
 		if(childhits)
 			hitlist = hitlist.concat(childhits);
 	}
 	
-	return hitlist;
+	//return an array that is not tracked by the pool, so users will not have to manually deallocate
+	var unTrackedReturn = [];
+	unTrackedReturn = hitlist.slice(0);
+	return unTrackedReturn;
 }
 SceneManager.prototype.SphereCast = function(center,r,opts)
 {
 	//console.profile("PickProfile");
 
-	var hitlist = this.root.SphereCast(center,r,opts || new THREE.CPUPickOptions());
+	var hitlist = this.root.SphereCast(center,r,opts || this.defaultPickOptions);
 	for(var i = 0; i < this.specialCaseObjects.length; i++)
 	{
-		var childhits = this.specialCaseObjects[i].SphereCast(center,r,opts || new THREE.CPUPickOptions());
+		var childhits = this.specialCaseObjects[i].SphereCast(center,r,opts || this.defaultPickOptions);
 		if(childhits)
 			hitlist = hitlist.concat(childhits);
 	}
 	
-	return hitlist;
+	//return an array that is not tracked by the pool, so users will not have to manually deallocate
+	var unTrackedReturn = [];
+	unTrackedReturn = hitlist.slice(0);
+	return unTrackedReturn;
 }		
 SceneManager.prototype.dirtyObjects = [];
 SceneManager.prototype.setDirty = function(object)
@@ -756,13 +778,14 @@ SceneManagerRegion.prototype.CPUPick = function(o,d,opts)
 {
 	
 	var hits = [];
+	
 	//if no faces, can be no hits. 
 	//remember, faces is all faces in this node AND its children
 	if(this.getChildCount().length == 0)
 		return hits;
 		
 	//reject this node if the ray does not intersect it's bounding box
-	if(this.testBoundsRay(o,d).length == 0)
+	if(this.testBoundsRay(o,d) == false)
 		return hits;
 	
 	//the the opts specify a max dist
@@ -780,14 +803,25 @@ SceneManagerRegion.prototype.CPUPick = function(o,d,opts)
 	{
 		var childhits = this.childRegions[i].CPUPick(o,d,opts);
 		if(childhits)
-			hits = hits.concat(childhits);
+		{
+			for(var j=0; j < childhits.length; j++)
+				hits.push(childhits[j]);
+			
+			
+		}
+
 	}
 	for(var i = 0; i < this.childObjects.length; i++)
 	{
 		
 		var childhits = this.childObjects[i].CPUPick(o,d,opts);
 		if(childhits)
-			hits = hits.concat(childhits);
+		{
+			for(var j=0; j < childhits.length; j++)
+					hits.push(childhits[j]);
+			
+		}	
+			
 	}
 	return hits;
 	
@@ -798,6 +832,7 @@ SceneManagerRegion.prototype.FrustrumCast = function(frustrum,opts)
 {
 	
 	var hits = [];
+	
 	//if no faces, can be no hits. 
 	//remember, faces is all faces in this node AND its children
 	if(this.getChildCount().length == 0)
@@ -821,13 +856,22 @@ SceneManagerRegion.prototype.FrustrumCast = function(frustrum,opts)
 	{
 		var childhits = this.childRegions[i].FrustrumCast(frustrum,opts);
 		if(childhits)
-			hits = hits.concat(childhits);
+		{
+			for(var j=0; j < childhits.length; j++)
+				hits.push(childhits[j]);
+			
+			
+		}
 	}
 	for(var i = 0; i < this.childObjects.length; i++)
 	{
 		var childhits = this.childObjects[i].FrustrumCast(frustrum,opts);
 		if(childhits)
-			hits = hits.concat(childhits);
+		{
+			for(var j=0; j < childhits.length; j++)
+				hits.push(childhits[j]);
+			
+		}
 	}
 	return hits;
 }
@@ -837,6 +881,7 @@ SceneManagerRegion.prototype.SphereCast = function(center,r,opts)
 {
 	
 	var hits = [];
+	
 	//if no faces, can be no hits. 
 	//remember, faces is all faces in this node AND its children
 	if(this.getChildCount().length == 0)
@@ -860,13 +905,21 @@ SceneManagerRegion.prototype.SphereCast = function(center,r,opts)
 	{
 		var childhits = this.childRegions[i].SphereCast(center,r,opts);
 		if(childhits)
-			hits = hits.concat(childhits);
+		{
+			for(var j=0; j < childhits.length; j++)
+				hits.push(childhits[j]);
+			
+		}
 	}
 	for(var i = 0; i < this.childObjects.length; i++)
 	{
 		var childhits = this.childObjects[i].SphereCast(center,r,opts);
 		if(childhits)
-			hits = hits.concat(childhits);
+		{
+			for(var j=0; j < childhits.length; j++)
+				hits.push(childhits[j]);
+			
+		}
 	}
 	return hits;
 }

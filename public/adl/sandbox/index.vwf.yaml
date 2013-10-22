@@ -300,9 +300,11 @@ scripts:
        */
          if(this.id == 'Scene-vwf') return;
           this.prerendercallback = this.prerender.bind(this);
+          this.glyphrendercallback = this.glyphRender.bind(this);
           this.postrendercallback = this.postrender.bind(this);
-          $(document).bind('prerender',this.prerendercallback);
-          $(document).bind('postprerender',this.postrendercallback);
+          _dView.bind('prerender',this.prerendercallback);
+          _dView.bind('postprerender',this.postrendercallback);
+          _dView.bind('glyphrender',this.glyphrendercallback);
           this.createNameTag();
           this.updateCamera();
     }
@@ -1215,13 +1217,15 @@ scripts:
     }
     this.deinitialize = function()
     {
-       $(document).unbind('prerender',this.prerendercallback);
-       $(document).unbind('postprerender',this.postrendercallback);
+       _dView.unbind('prerender',this.prerendercallback);
+       _dView.unbind('postprerender',this.postrendercallback);
+       _dView.unbind('glyphrender',this.glyphrendercallback);
        $(this.nametag).remove();
     }
     this.prerender = function()
     {
         
+       
         if(this.cameramode == 'Fly')
         { 
             var dist = window.deltaTime/(this.flyspeed * 30.0);
@@ -1244,16 +1248,13 @@ scripts:
         
         
         this.updateCamera();
+        this.updateCamera();
     }
-   
-    this.postrender = function(e,viewprojection, wh, ww)
+    this.tempmatrix = (new THREE.Matrix4());
+    this.lightvec = new THREE.Vector3(0,0,-3);
+    this.glyphRender = function(e,viewprojection, wh, ww)
     {
-        //set the skybox position
-      
-        this.skycube.position.x = findcamera().matrixWorld.elements[12];
-        this.skycube.position.y = findcamera().matrixWorld.elements[13];
-        this.skycube.position.z = findcamera().matrixWorld.elements[14];
-        this.skycube.updateMatrixWorld();
+
       var div = this.nametag;
       var pos = [0,0,0,1];
       
@@ -1291,6 +1292,17 @@ scripts:
           if(screen[2] < 10 && screen[2] > 0 && div.style.display == 'none')
              div.style.display = 'block';
       }
+
+    }
+    this.postrender = function(e,viewprojection, wh, ww)
+    {
+        //set the skybox position
+      
+        this.skycube.position.x = findcamera().matrixWorld.elements[12];
+        this.skycube.position.y = findcamera().matrixWorld.elements[13];
+        this.skycube.position.z = findcamera().matrixWorld.elements[14];
+        this.skycube.updateMatrixWorld();
+    
       
       
       
@@ -1299,11 +1311,14 @@ scripts:
       {
        
       
-       var campos = findcamera().localToWorld(new THREE.Vector3(0,0,-3));
+       this.lightvec.x = 0;
+       this.lightvec.y = 0;
+       this.lightvec.z = -3;
+       var campos = findcamera().localToWorld(this.lightvec);
        
        this.sun.shadowCamera.updateMatrixWorld(true)
         var lm = this.sun.shadowCamera.matrixWorld.clone();
-        lm = (new THREE.Matrix4()).getInverse(lm);
+        lm = this.tempmatrix.getInverse(lm);
         var camposLS = campos.applyMatrix4(lm);
         
        

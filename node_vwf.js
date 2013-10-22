@@ -1355,7 +1355,7 @@ function startVWF(){
 					for(var j = 0; j < client.pendingList.length; j++)
 					{
 						
-						client.emit('message',messageCompress.pack(JSON.stringify(client.pendingList[j])));
+						client.emit('message',client.pendingList[j]);
 						
 						
 					}
@@ -1366,7 +1366,7 @@ function startVWF(){
 					//just a regular message, so push if the client is pending a load, otherwise just send it.
 					if(client.pending == true)
 					{
-						client.pendingList.push(message);
+						client.pendingList.push(compressedMessage);
 						console.log('PENDING');
 						
 					}else

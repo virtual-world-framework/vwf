@@ -388,7 +388,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     try {
 						
                         // Unpack the arguments.
-						
+					
 						message = messageCompress.unpack(message);
 						
 						var fields = message;

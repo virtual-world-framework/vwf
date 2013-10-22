@@ -296,10 +296,10 @@ scripts:
         
         var motionvec;
         
-        if(this.motionStack.length)
-            this.playSound('./vwfDataManager.svc/datafile/sounds/footsteps.mp3',true,.1);
-        else
-            this.pauseSound('./vwfDataManager.svc/datafile/sounds/footsteps.mp3');
+        //if(this.motionStack.length)
+        //    this.playSound('./vwfDataManager.svc/datafile/sounds/footsteps.mp3',true,.1);
+        //else
+        //    this.pauseSound('./vwfDataManager.svc/datafile/sounds/footsteps.mp3');
         
         for(var i=0; i < this.motionStack.length; i++)
         {
@@ -428,6 +428,7 @@ scripts:
                         finalt = MATH.addVec3(finalt,R);
                     }
                 }
+                _DEALLOC(intersectfront);
                 var falldist = 1000;
                
                 var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,1.7]),[0,0,-1],{filter:function(o){ return !(o.isAvatar === true || o.passable === true)},maxDist: 100,ignore:[this.skin,_Editor.GetMoveGizmo()]});
@@ -462,6 +463,7 @@ scripts:
                     }
                     
                 }
+                _DEALLOC(intersect);
                 this.skin.PickPriority = 1;
                 
             }
@@ -488,6 +490,7 @@ scripts:
                         this.jumpcounter  = 0;
                     }
                 }
+                _DEALLOC(intersect);
                 this.skin.PickPriority = 1;
             }
             

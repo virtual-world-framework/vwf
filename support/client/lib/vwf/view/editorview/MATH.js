@@ -902,8 +902,9 @@ MATH.rotateMatrix=function(value,type) {
 var xmx,ymy,zmz,xmy,ymz,zmx,xms,yms,zms;
 MATH.angleAxis=function(angle, axis,matrix) {
     
-	axis=[axis[0],axis[1],axis[2],0];
-
+	if(axis.length == 3)
+        axis.push(0);
+    axis[3] = 0;
         var x = axis[0];
         var y = axis[1];
         var z = axis[2];
@@ -936,7 +937,7 @@ MATH.angleAxis=function(angle, axis,matrix) {
 	matrix[14] = 0;
 	matrix[15] = 1;
 
-        return MATH.Mat(matrix);
+        return matrix;
 };
 
 
