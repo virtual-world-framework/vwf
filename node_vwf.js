@@ -15,7 +15,9 @@ Landing = require('./landingRoutes');
 var zlib = require('zlib');
 var requirejs = require('requirejs');
 var compressor = require('node-minify');
+var async = require('async');
 var messageCompress = require('./support/client/lib/messageCompress').messageCompress;
+var exec=require('child_process').exec;
 //Get the version number. This will used to redirect clients to the proper url, to defeat their local cache when we release
 global.version = require('./Version').version;
 
@@ -1712,25 +1714,66 @@ function startVWF(){
 		//This will concatenate almost 50 of the project JS files, and serve one file in it's place
 		requirejs.optimize(config, function (buildResponse) {
 		
-			console.log('Build complete');	   
-			var contents = fs.readFileSync(config.out, 'utf8');
-			//here, we read the contents of the built boot.js file
-			var path = libpath.normalize('./support/client/lib/boot.js');
-			path = libpath.resolve(__dirname, path);			
-			//we zip it, then load it into the file cache so that it can be served in place of the noraml boot.js 
-			zlib.gzip(contents,function(_,zippeddata)
-			{		   
-				    var newentry = {};				
-				    newentry.path = path;
-				    newentry.data = contents;
-				    newentry.stats = fs.statSync(config.out);
-				    newentry.zippeddata = zippeddata;
-				    newentry.datatype = "utf8";
-				    newentry.hash = hash(contents);
-				    FileCache.files.push(newentry); 
-				    //now that it's loaded into the filecache, we can delete it
-				    fs.unlinkSync(config.out);
-				    StartUp();
+			console.log('RequrieJS Build complete');
+			async.series([
+			function(cb3)
+			{
+				
+				console.log('Closure Build start');
+				//lets do the most agressive compile possible here!
+				if(fs.existsSync("./build/compiler.jar"))
+				{
+
+					var c1 = exec('java -jar compiler.jar --js boot.js --compilation_level ADVANCED_OPTIMIZATIONS --js_output_file boot-c.js',{cwd:"./build/"},
+					function (error, stdout, stderr) {
+					  
+					 	//console.log('stdout: ' + stdout);
+					    //console.log('stderr: ' + stderr);
+					    if (error !== null) {
+					      console.log('exec error: ' + error);
+					    }
+						if(fs.existsSync("./build/boot-c.js"))
+						{
+							config.out = './build/boot-c.js';
+						}
+						cb3();
+
+					});
+
+
+
+				}else
+				{
+					console.log('compiler.jar not found');
+					cb3();
+				}
+			},
+			function(cb3)
+			{
+				console.log('loading '+ config.out);
+				var contents = fs.readFileSync(config.out, 'utf8');
+				//here, we read the contents of the built boot.js file
+				var path = libpath.normalize('./support/client/lib/boot.js');
+				path = libpath.resolve(__dirname, path);			
+				//we zip it, then load it into the file cache so that it can be served in place of the noraml boot.js 
+				zlib.gzip(contents,function(_,zippeddata)
+				{		   
+					    var newentry = {};				
+					    newentry.path = path;
+					    newentry.data = contents;
+					    newentry.stats = fs.statSync(config.out);
+					    newentry.zippeddata = zippeddata;
+					    newentry.datatype = "utf8";
+					    newentry.hash = hash(contents);
+					    FileCache.files.push(newentry); 
+					    //now that it's loaded into the filecache, we can delete it
+					    //fs.unlinkSync(config.out);
+					   cb3();
+				});
+			}],function(err)
+			{
+				console.log(err);
+ 				StartUp();
 			});
 		}, function(err) {
 			//there was a requireJS build error. Not a prob, keep going.
