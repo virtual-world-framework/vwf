@@ -711,6 +711,12 @@ function RestoreBackupState(URL, SID, response){
 	var statename = URL.query.statename;
 	
 	var backup = URL.query.backup;
+	
+	if(backup == "state"){
+		respond(response, 500, 'Cannot restore from current state file');
+		return;
+	}
+	
 	if(SID.length == 16){
 		SID = '_adl_sandbox_' + SID + '_';
 	}
