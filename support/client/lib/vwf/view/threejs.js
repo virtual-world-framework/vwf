@@ -1613,6 +1613,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         
         
 		var intersects;
+		debugger;
 		if(!sceneNode.threeScene.CPUPick || !_SceneManager)
 		{
 			this.projector.unprojectVector(directionVector, threeCam);
