@@ -263,27 +263,46 @@ module Rack
         end
       end
 
+
+      # Create a placeholder session object on request for the specified instance
       def self.create_instance env
-        @@sessions[ resource env ] ||= {}
+        @@sessions[ resource env ] ||= { }
       end
 
+      # Retrieve the persistence state for a session
       def self.instance_persistence_state env
         result = nil
         unless @@sessions[ resource env ].nil?
-          result = @@sessions[ resource env ][ "persistence_state" ]
+          unless @@sessions[ resource env ][ "persistence" ].nil?
+            result = @@sessions[ resource env ][ "persistence" ][ "state" ]
+          end
         end
         result
       end
 
+      # Set the persistence state for a session.
       def self.set_instance_persistence_state( env, state )
         create_instance env
-        @@sessions[ resource env ][ "persistence_state" ] = state
+        @@sessions[ resource env ][ "persistence" ] ||= { }
+        @@sessions[ resource env ][ "persistence" ][ "state" ] = state
       end
 
-      def self.empty_instance? env
-        result = true
-        unless @@clients[ resource env ].nil?
-          result = ( @@clients[ resource env ].length == 0 )
+      # Set flag denoting that persistence is enabled for an instance.
+      def self.instance_enable_persistence( env, enabled )
+        create_instance env
+        @@sessions[ resource env ][ "persistence" ] ||= { }
+        @@sessions[ resource env ][ "persistence" ][ "enabled" ] = enabled
+      end
+      
+      # Retrieve falge denoting if persistence is enabled for an instance.
+      def self.instance_is_persistence_enabled?( env )
+        result = false
+        unless @@sessions[ resource env ].nil?
+          unless @@sessions[ resource env ][ "persistence" ].nil?
+            unless @@sessions[ resource env ][ "persistence" ][ "enabled" ].nil?
+              result = @@sessions[ resource env ][ "persistence" ][ "enabled" ]
+            end
+          end
         end
         result
       end

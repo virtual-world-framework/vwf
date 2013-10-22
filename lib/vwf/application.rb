@@ -64,9 +64,6 @@ class VWF::Application
 
     def call env
       if %w[ GET HEAD ].include?( env["REQUEST_METHOD"] ) && env["PATH_INFO"] == "/"
-        if Reflector.instance_persistence_state( env ).nil?
-          Reflector.set_instance_persistence_state( env, "one" )
-        end
         env["PATH_INFO"] = "/index.html"
       elsif %w[ GET HEAD ].include?( env["REQUEST_METHOD"] ) && env["PATH_INFO"] == "/socket.io.js"
         env["PATH_INFO"] = "/socket.io-0.6.js"
