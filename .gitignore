@@ -4,3 +4,5 @@
 *.swp
 /node_modules/*
 cleanup.bat
+*.bak
+/build/*

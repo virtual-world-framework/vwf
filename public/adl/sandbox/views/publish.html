@@ -1,0 +1,120 @@
+<script type="text/javascript">
+	var sid = '{{sid}}'; 
+	$(document).ready(function()
+	{
+		getLoginInfo(function(){}, redirect);
+			
+		$('#txtCamera').hide();	
+		$.ajax('/vwfDataManager.svc/statedata?SID=' + sid,
+		{
+			cache:false,
+			success:function(data,status,xhr)
+			{
+				var data = JSON.parse(xhr.responseText);
+				$('#txtInstanceName').val(data.title);
+				$('#txtInstanceDescription').val(data.description);
+			},
+			error:function(xhr,status,err)
+			{
+				$('#error').text("Error: " + xhr.responseText);
+			}
+		});
+
+		$('#chkDefaultCamera').click(
+		 function(e){
+		   var checked = ($(this).is(':checked'));
+		   if(checked)
+		   {
+		   		$('#txtCamera').hide('fade');	
+		   		$('#txtCamera').val('');	
+		   }
+		   	else
+		   		$('#txtCamera').show('fade');	
+		 }
+		);
+
+
+		$('#chkSinglePlayer').click(
+		 function(e){
+		   var checked = ($(this).is(':checked'));
+		   if(checked)
+		   {
+		   	 $('#chkAllowAnonymous')[0].checked = true;
+		   	  $('#chkAllowAnonymous').prop('disabled', true);
+		   }else
+		   {
+  			$('#chkAllowAnonymous').prop('disabled', false);
+
+		   }
+		 }
+		)
+
+		
+		ko.applyBindings(vwfPortalModel);
+	});	
+	function redirect()
+	{
+		window.location = '{{root}}/worlds';
+	}
+	vwfPortalModel.handleEditButton = function(o, e){
+
+		var name = $('#txtInstanceName').val();
+		var des = $('#txtInstanceDescription').val();
+		
+		var statedata = {};
+		statedata.title = name;
+		statedata.description = des;
+		statedata.SinglePlayer = $('#chkSinglePlayer')[0].checked;
+		statedata.camera = $('#txtCamera').val();
+		statedata.allowAnonymous = $('#chkAllowAnonymous')[0].checked;
+		statedata.createAvatar = $('#chkCreateAvatar')[0].checked;
+		statedata.allowTools = $('#chkAllowTools')[0].checked;
+		
+		
+		
+		jQuery.ajax(
+		{
+			type: 'POST',
+			url: '/vwfDataManager.svc/publish?SID='+sid,
+			data: JSON.stringify(statedata),
+			success:function(data,status,xhr)
+			{
+				redirect();
+			},
+			error:function(xhr,status,err)
+			{
+				$('#error').text("Error: " + xhr.responseText);
+			},
+			dataType: "text"
+		});	
+	};
+</script>
+<div class="row">
+	<div class="col-md-5 col-md-offset-3">
+		<form data-bind="submit:handleEditButton" >
+			<fieldset>
+				<legend>Settings for the published world.</legend>
+				<input type='text' id='txtInstanceName' placeholder='World Name' class="col-md-5 form-control" /><br/><br/>
+				<textarea id='txtInstanceDescription' placeholder='Description' class="col-md-5 form-control"></textarea>
+				<br/>
+				<input type='checkbox' id='chkAllowTools' name='AllowTools'></input><label for='AllowTools'>Allow Editor Tools</label>
+				<br/>
+				<input type='checkbox' id='chkSinglePlayer'   name='SinglePlayer'></input><label for='SinglePlayer'>Single Player</label>
+				<br/>
+				<input type='checkbox' id='chkAllowAnonymous'  name='AllowAnonymous'></input><label for='AllowAnonymous'>Allow Anonymouse Users</label>
+				<br/>
+				<input type='checkbox' id='chkCreateAvatar' name='CreateAvatar'></input><label for='CreateAvatar'>Create and Avatar for each user</label>
+				<br/>
+				<input type='checkbox' id='chkDefaultCamera' name='DefaultCamera'  checked='checked'></input><label for='DefaultCamera'>Use Default Camera</label>
+				<br/>
+				<input type='text' id='txtCamera' placeholder='CameraName: Default' class="col-md-5 form-control" name='Camera'></input>
+				<br/>
+				<br/>
+				<input type="submit" class='btn btn-default' style="float:right;margin-top:7px;"  value="Publish"/>
+			</fieldset>
+		</form>
+	</div>
+</div>
+<div class="row">	
+	<div id='error' style="margin-top: 20px;margin-bottom:20px;font-size: 3EM;color: red;" class="span12"></div>
+</div>

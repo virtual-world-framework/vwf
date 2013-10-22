@@ -115,6 +115,11 @@ define(["vwf/view/editorview/Editor"], function (Editor)
 			var parent = vwf.parent(id);
 			if(parent)
 				level = Math.max(level?level:0,this.getPermission(user,parent));
+
+			var allowAnonymous = false;
+			var instanceData = _DataManager.getInstanceData();
+			allowAnonymous = instanceData && instanceData.publishSettings? instanceData.publishSettings.allowAnonymous : false;
+			level = allowAnonymous?1:level;
 			return level?level:0;	
 		}
 		this.setProperty = function(id,name,val,deniedMessage)
@@ -124,6 +129,7 @@ define(["vwf/view/editorview/Editor"], function (Editor)
 			     _Notifier.notify("You must log in to participate");
 			     return false;
 			}
+
 			var allowed = this.getPermission(_UserManager.GetCurrentUserName(),id);
 			if(!allowed)
 			{

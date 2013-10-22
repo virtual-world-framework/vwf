@@ -3,10 +3,13 @@ define({
 	initialize:function()
 	{
 		var toolsHidden = false;
+		var toolsLoaded = true;
+		if(_DataManager.getInstanceData().publishSettings)
+				 toolsLoaded = _DataManager.getInstanceData().publishSettings.allowTools;
 		$(window).resize(function(){
 		
 			
-			if(!toolsHidden)
+			if(!toolsHidden && toolsLoaded)
 			{
 				$('#smoothmenu1').css('top','0px');
 				$('#smoothmenu1').css('left','0px');
@@ -64,9 +67,13 @@ define({
 				$('#sidepanel').css('height',$(window).height() - ($('#statusbar').height() + $('#toolbar').height()+$('#smoothmenu1').height()) + 'px');
 			}else
 			{
+				$('#vwf-root').css('overflow','visible');
+				$('#vwf-root').css('left','0px');
+				$('#vwf-root').css('top','0px');
 				$('#index-vwf').css('height',$(window).height() + 'px');
 				$('#index-vwf').css('width',$(window).width() + 'px');
 				$('#index-vwf').css('top', 0 + 'px');
+				$('#index-vwf').css('left', 0 + 'px');
 			}
 			if(_Editor.findcamera())
 			{
@@ -75,9 +82,11 @@ define({
 			}
 		});
 		$(window).resize();
-		window.setTimeout(function(){$(window).resize();hideSidePanel();},500);
+		
+			window.setTimeout(function(){$(window).resize();if(toolsLoaded)hideSidePanel();},500);
 		window.hideTools = function()
 		{
+			if(!toolsLoaded) return;
 			toolsHidden = true;
 			$('#smoothmenu1').hide();
 			$('#toolbar').hide();
@@ -95,6 +104,7 @@ define({
 		}
 		window.showTools = function()
 		{
+			if(!toolsLoaded) return;
 			toolsHidden = false;
 			$('#smoothmenu1').show();
 			$('#toolbar').show();
@@ -113,13 +123,14 @@ define({
 		}
 		window.toolsOpen = function()
 		{
+			if(!toolsLoaded) return false;
 			return !toolsHidden;
 		}
 		$(window).keypress(function(e)
 		{
 			if( e.charCode == 92)
 			{
-				
+				if(!toolsLoaded) return;
 				if(!toolsHidden)
 					hideTools();
 				else

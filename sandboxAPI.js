@@ -668,70 +668,99 @@ function strEndsWith(str, suffix) {
     return str.match(suffix+"$")==suffix;
 }
 
-//Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
-function CopyState(URL,filename,newname,response)
-{
-	
-	var UID = URL.query.UID || (URL.loginData && URL.loginData.UID);
-	var P = URL.query.P || (URL.loginData && URL.loginData.Password);
-	
-	if(!UID || !P)
-	{
-		
-		respond(response,401,'No Credentials to copy state to ' + newname);
-		return;
-	}
-	
-	newname = newname.replace(/[\\\/]/g,'_');
-	var appname = filename.replace(/_[a-zA-Z0-9]*?_$/,'');
-	
-	var stateID = newname.match(/_([a-zA-Z0-9]*?)_$/)[1];
-	if(!strBeginsWith(newname,appname) || !strEndsWith(newname,'_') || !stateID || stateID.length != 16)
-	{
-		
-		respond(response,401,'Bad new name ' + newname);
-		return;
-	}
-	
-	filename = datapath+"/states/".replace(safePathRE) + filename;
-	newname = datapath+"/states/".replace(safePathRE) + newname;
+//Copy the world to a new world
+function CopyInstance(URL, SID, response){
 
+	if(!URL.loginData)
+	{
+		respond(response,401,'Anonymous users cannot copy instances');
+		return;
+	}
 	
-	CheckPassword(UID,P,function(e){
+	SID = SID ? SID : URL.query.SID;
+	if(SID.length == 16){
+		SID = '_adl_sandbox_' + SID + '_';
+	}
 	
-		//Did not supply a good name password pair
-		if(!e)
+	DAL.copyInstance(SID, URL.loginData.UID, function(newId){
+	
+		if(newId) respond(response, 200, newId);
+		else respond(response, 500, 'Error in trying to copy world');
+	});
+}
+
+//Publish the world to a new world
+//This is just a copy with some special settings
+function Publish(URL, SID, publishdata, response){
+
+	publishdata = JSON.parse(publishdata);
+	if(!URL.loginData)
+	{
+		respond(response,401,'Anonymous users cannot copy instances');
+		return;
+	}
+	
+	SID = SID ? SID : URL.query.SID;
+	if(SID.length == 16){
+		SID = '_adl_sandbox_' + SID + '_';
+	}
+	
+	console.log(SID);
+	DAL.getInstance(SID,function(state)
+	{
+	
+		if(!state)
 		{
-				
-				respond(response,401,'Incorrect password when deleting state ' + filename);
-				return;
+			respond(response,500,'State ID is incorrect');
+			return;
 		}
-		else
+		
+		//Make sure the world is not already published
+		if(state.publishSettings)
 		{
-				//the asset is new
-				if(!fs.existsSync(filename))
+			respond(response,500,'Cannot publish a world that has already been published');
+			return;
+		}
+		
+		//Make sure that the logged in user is the owner of the world they are trying to publish
+		if(state.owner != URL.loginData.UID)
+		{
+			respond(response,500,'You must be the owner of a world you publish');
+			return;
+		}
+		
+		//The settings  for the published state. 
+		//have to handle these in the client side code, with some enforcement at the server
+		var singlePlayer = publishdata.SinglePlayer;
+		var camera = publishdata.camera;
+		var allowAnonymous = publishdata.allowAnonymous;
+		var createAvatar = publishdata.createAvatar;
+		var allowTools = publishdata.allowTools;
+		
+		var publishSettings = {singlePlayer:singlePlayer,camera:camera,allowAnonymous:allowAnonymous,createAvatar:createAvatar,allowTools:allowTools};
+		
+		//publish the state, and get the new id for the pubished state
+		DAL.Publish(SID, publishSettings, function(newId){
+		
+			//get the db entry for the published state
+			DAL.getInstance(newId,function(statedata)
+			{
+				//this should really never happen
+				if(!statedata)
 				{
-					
-					respond(response,401,'cant delete state that does not exist' + filename);
+					respond(response,401,'State not found. State ' + SID);
 					return;
 				}
-				else
+				
+				statedata.title = publishdata.title;
+				statedata.description = publishdata.description;
+				//Should not need to check permission again
+				DAL.updateInstance(newId,statedata,function()
 				{
-					if(fs.existsSync(newname))
-					{
-						
-						respond(response,500,'new state name in use' + filename);
-						return;
-					}
-					else
-					{
-						fs.copy(filename,newname,function()
-						{
-							respond(response,200,"Copied state " + filename + " to " + newname);
-						});
-					}
-				}
-		}
+					respond(response,200,newId);
+				});
+			});	
+		});
 	});
 }
 
@@ -812,12 +841,28 @@ function SaveState(URL,id,data,response)
 		respond(response,401,'No login data when saving state');
 		return;
 	}
-	//not currently checking who saves the state, so long as they are logged in
-	DAL.saveInstanceState(id,data,function()
+	
+	DAL.getInstance(id,function(state)
 	{
-		respond(response,200,'saved ' + id);
-		return;
+	
+		//not allowed to update a published world
+		if(state.publishSettings)
+		{
+			respond(response,500,'World is published, Should never have tried to save. How did we get here? ' + id);
+			return;
+		}
+	
+		//not currently checking who saves the state, so long as they are logged in
+		DAL.saveInstanceState(id,data,function()
+		{
+			respond(response,200,'saved ' + id);
+			return;
+		});
+	
 	});
+	
+	
+	
 		
 }
 
@@ -1063,16 +1108,26 @@ function Salt(URL,response)
 //router
 function serve (request, response)
 {
+
+
 	var URL = url.parse(request.url,true);
 	var serviceRoute = "vwfdatamanager.svc/";
 	var pathAfterRoute = URL.pathname.substr(URL.pathname.toLowerCase().lastIndexOf(serviceRoute)+serviceRoute.length);
+	
+	//format is /{anything}/vwfDataManager.svc/command/path/after/command
+	
+	
+	//the first string after /vwfDataManager.svc/
 	var command = pathAfterRoute.substr(0,pathAfterRoute.indexOf('/')) || pathAfterRoute;
 	var pathAfterCommand = pathAfterRoute.substr(command.length);
 	
 	command = command.toLowerCase();
 	
+	//Load the session data
 	URL.loginData = GetSessionData(request);
 	
+	
+	//Allow requests to submit the username in the URL querystring if not session data
 	var UID;
 	if(URL.loginData)
 		UID = URL.loginData.UID;
@@ -1082,7 +1137,7 @@ function serve (request, response)
 	if(SID)
 	 SID = SID.replace(/[\\,\/]/g,'_');
 	 
-	
+	//Normalize the path for max/unix
 	pathAfterCommand = pathAfterCommand.replace(/\//g,libpath.sep);
 	var basedir = datapath + libpath.sep;
 	//console.log(basedir+"DataFiles"+ pathAfterCommand);
@@ -1113,8 +1168,18 @@ function serve (request, response)
 						respond(response,500,'state not found' );
 				});
 			} break;
-			case "clonestate":{
-				CopyState(URL,SID,URL.query.SID2,response,'GetStateResult');		
+			case "statehistory":{
+				console.log("statehistory");
+				DAL.getHistory(SID,function(statehistory)
+				{
+					if(statehistory)
+						ServeJSON(statehistory,response,URL);
+					else
+						respond(response,500,'state not found' );
+				});
+			} break;
+			case "copyinstance":{
+				CopyInstance(URL, SID, response);		
 			} break;
 			case "salt":{
 				Salt(URL,response);		
@@ -1247,6 +1312,9 @@ function serve (request, response)
 			}break;
 			case "inventoryitemmetadata":{
 				updateInventoryItemMetadata(URL,body,response);
+			} break;
+			case "publish":{
+				Publish(URL, SID,body, response);		
 			} break;
 			default:
 			{

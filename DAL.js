@@ -701,6 +701,7 @@ function createInstance (id,data,cb)
 		}
 		else
 		{
+			data.created = new Date();
 			DB.save(id,data,function(err,doc,key)
 			{
 				DB.get('StateIndex',function(err,stateIndex,key)
@@ -1030,8 +1031,243 @@ function searchInstances (terms,cb)
 
 };
 
+var ValidIDChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+function makeid()
+{
+    var text = "";
+    
+
+    for( var i=0; i < 16; i++ )
+        text += ValidIDChars.charAt(Math.floor(Math.random() * ValidIDChars.length));
+
+    return text;
+}
 
 
+function getHistory(id,cb)
+{
+	var returndata = {};
+	returndata.children = [];
+	returndata.parents = [];
+	getInstance(id, function(instance){
+
+		console.log(id);
+		console.log(instance);
+		if(!instance)
+		{
+			cb({error:"inner state not found"});
+			return;
+		}
+		var parent = instance.publishedFrom || instance.clonedFrom;
+		returndata.children = [];
+        var children = instance.children || [];
+		
+		//iterate over children, collect details
+		async.each(children,function(item,cb2)
+		{
+			//get each child
+			getInstance(item,function(cinst)
+			{
+					var thischild = {world:item,type:1,created:cinst.created,title:cinst.title};
+				if(cinst.publishedFrom)
+					thischild.type = 1;
+				if(cinst.clonedFrom)
+					thischild.type = 0;
+				
+				thischild.children = [];
+				
+					returndata.children.push(thischild);
+					//goto next child in children
+					cb2();
+				
+			});
+		
+		},function(err)   //done collecting children
+		{
+			//get parents data
+			var cbparent = parent;
+			var cloneType = cbparent == instance.publishedFrom ? 1 : 0
+			async.whilst(function(){return cbparent},function(cb2)
+			{
+				
+				getInstance(cbparent,function(actualparent)
+				{
+					
+					if(actualparent)
+					{
+						returndata.parents.push({world:cbparent,type:cloneType,created:actualparent.created,title:actualparent.title,children:[]});
+						cbparent = actualparent.publishedFrom || actualparent.clonedFrom;
+						cloneType = cbparent == actualparent.publishedFrom ? 1 : 0
+						
+						async.each(actualparent.children || [],function(item3,cb3)
+						{
+							
+							getInstance(item3,function(realitem3)
+							{
+								if(realitem3)
+								{
+								var childtype = 0;
+								if(realitem3.publishedFrom)
+									childtype = 1;
+								returndata.parents[returndata.parents.length-1].children.push({world:item3,type:childtype,created:realitem3.created,title:realitem3.title})
+								}else
+								{
+								returndata.parents[returndata.parents.length-1].children.push({world:item3,type:-1});
+								}
+								cb3();
+							});
+							
+						
+						},function(err)
+						{
+						
+							cb2();
+						});
+						return;
+						
+					}else
+					{
+					 cbparent = null;
+					}
+					
+					cb2();
+				});
+			},function(err)
+			{
+				
+				cb(returndata);
+			});
+		
+		});
+	});
+}
+
+//create a new state from the old one, setting the publish settings for the new state
+//cb with the ID of the new state
+function Publish(id, publishSettings, cb)
+{
+	//get the orignial instance
+	getInstance(id, function(instance){
+		
+		if(instance){
+			//create a new ID for the published world
+			var newId = '_adl_sandbox_' + makeid() + '_';
+			instance.featured = false;
+			instance.publishedFrom = id;
+			delete instance.clonedFrom;
+			delete instance.children;
+			instance.created = new Date();
+			instance.publishSettings = publishSettings;
+			createInstance (newId, instance, function(success){
+				if(success){
+					var oldStateFile = datapath + libpath.sep + 'States' +libpath.sep + id + libpath.sep+'state', newStateFile = datapath + libpath.sep+'States'+libpath.sep + newId + libpath.sep + 'state';
+					
+					fs.readFile(oldStateFile,function(err, olddata)
+					{
+						//olddata may not exist..
+						if(!olddata || err){
+							cb(newId);
+							return;
+						}
+						//set the publish settings on the state file as well, just for grins.
+						var oldstate = JSON.parse(olddata);
+						oldstate[oldstate.length-1].publishSettings = publishSettings;
+						var newstate = JSON.stringify(oldstate);
+						fs.writeFile(newStateFile, newstate, function(err)
+						{
+						
+							//get the orignial instance and record the new one as a child
+							getInstance(id, function(instance){
+							
+								if(!instance.children)
+									instance.children = [];
+								instance.children.push(newId);
+								
+								updateInstance(id,instance,function()
+								{
+									cb(newId);
+								});
+							});
+							
+						});
+					});
+				}
+				
+				else cb(false);
+			});
+		}
+		
+		else cb(false);	
+	});
+
+}
+
+//If arg3 exists, it must be a callback function and arg2 must be the newowner. 
+//Else, a callback is defined as arg2 and arg3 is undefined. Keep current owner.
+function copyInstance (id, arg2, arg3){
+
+	var cb, newowner;
+	if(arg3){
+		cb = arg3;
+		newowner = arg2;
+	}
+	
+	else cb = arg2;
+	
+	getInstance(id, function(instance){
+		
+		if(instance){
+			var newId = '_adl_sandbox_' + makeid() + '_';
+			instance.owner = newowner ? newowner : instance.owner;
+			instance.featured = false;
+			instance.clonedFrom = id;
+			instance.created = new Date();
+			//when cloning a world, it becomes unpublished so you can edit it.
+			delete instance.publishSettings;
+			delete instance.publishedFrom;
+			delete instance.children;
+			createInstance (newId, instance, function(success){
+				if(success){
+					var oldStateFile = datapath + '/States/' + id + '/state', newStateFile = datapath + '/States/' + newId + '/state';
+					
+					fs.readFile(oldStateFile,function(err, olddata)
+					{
+						//olddata may not exist..
+						if(!olddata || err){
+							cb(newId);
+							return;
+						}
+						
+						var oldstate = JSON.parse(olddata);
+						oldstate[oldstate.length-1].owner = instance.owner;
+						var newstate = JSON.stringify(oldstate);
+						fs.writeFile(newStateFile, newstate, function(err)
+						{
+							
+							//get the orignial instance and record the new one as a child
+							getInstance(id, function(instance){
+							
+								if(!instance.children)
+									instance.children = [];
+								instance.children.push(newId);
+								
+								updateInstance(id,instance,function()
+								{
+									cb(newId);
+								});
+							});
+							
+						});
+					});
+				}
+				
+				else cb(false);
+			});
+		}
+		
+		else cb(false);	
+	});
+}
 
 function startup(callback)
 {
@@ -1086,6 +1322,7 @@ function startup(callback)
 			exports.createInstance = createInstance;
 			exports.deleteInstance = deleteInstance;
 			exports.deleteInstances = deleteInstances;
+			exports.copyInstance = copyInstance;
 			
 			exports.getUsers = getUsers;
 			exports.getInstances = getInstances;
@@ -1093,7 +1330,7 @@ function startup(callback)
 			exports.searchUsers = searchUsers;
 			exports.searchInstances = searchInstances;
 			exports.saveInstanceState = saveInstanceState;
-			
+			exports.Publish = Publish;
 			exports.importStates = importStates;
 			exports.purgeInstances = purgeInstances;
 			exports.findState = findState;
@@ -1107,6 +1344,7 @@ function startup(callback)
 			exports.importUsers = importUsers;
 			exports.clearUsers = clearUsers;
 			exports.searchInventory = searchInventory;
+			exports.getHistory = getHistory;
 			callback();
 		}
 	

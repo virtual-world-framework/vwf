@@ -463,11 +463,44 @@ text-align:left;
 
 	padding-bottom: 3px;
 }
-.editstatedata, .editstatedelete
+.editstatedata, .editstatedelete, .editstatecopy
 {
 	cursor: pointer;
 	border-radius: 7px;
 	margin: 0 10px;
+}
+
+.historychildstate
+{
+border: 1px solid darkcyan;
+text-align: center;
+background: #DDD;
+padding: 10px;
+border-radius: 5px;
+margin: 10px;
+display: inline-block;
+}
+
+.historythisstate
+{
+border: 1px solid darkcyan;
+text-align: center;
+background: #DDF;
+padding: 10px;
+border-radius: 10px;
+margin: 10px;
+font-size: 1.5em
+}
+
+.historyparentstate
+{
+border: 1px solid darkcyan;
+text-align: center;
+background: #DDD;
+padding: 10px;
+border-radius: 5px;
+margin: 10px;
+display: block;
 }
 
 .editstatedata img

@@ -15,7 +15,9 @@ Landing = require('./landingRoutes');
 var zlib = require('zlib');
 var requirejs = require('requirejs');
 var compressor = require('node-minify');
+var async = require('async');
 var messageCompress = require('./support/client/lib/messageCompress').messageCompress;
+var exec=require('child_process').exec;
 //Get the version number. This will used to redirect clients to the proper url, to defeat their local cache when we release
 global.version = require('./Version').version;
 
@@ -790,30 +792,106 @@ function startVWF(){
 		}
 	} // close onRequest
 	
+	
+	function ServeSinglePlayer(socket, namespace,instancedata)
+	{
+		console.log('single player');
+		var instance = namespace;
+		var state = SandboxAPI.getState(instance) || [{owner:undefined}];
+		var state2 = SandboxAPI.getState(instance) || [{owner:undefined}];
+		
+		fs.readFile("./public/adl/sandbox/index.vwf.yaml", 'utf8',function(err,blankscene)
+		{
+			blankscene= YAML.load(blankscene);
+			
+			blankscene.id = 'index-vwf';
+			blankscene.patches= "index.vwf";
+			if(!blankscene.children)
+				blankscene.children = {};
+			//only really doing this to keep track of the ownership
+			for(var i =0; i < state.length-1; i++)
+			{
+				
+				var childComponent = state[i];
+				var childName = state[i].name || state[i].properties.DisplayName + i;
+				var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName.replace(/ /g,'-'); 
+				childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
+				//state[i].id = childID;
+				//state2[i].id = childID;
+				blankscene.children[childName] = state2[i];
+				state[i].id = childID;
+				
+				fixIDs(state[i]);
+			}
+			var props = state[state.length-1];
+			if(props)
+			{
+				if(!blankscene.properties)
+					blankscene.properties = {};
+				for(var i in props)
+				{
+					blankscene.properties[i] = props[i];
+				}
+				for(var i in blankscene.properties)
+				{
+					if( blankscene.properties[i] && blankscene.properties[i].value)
+						blankscene.properties[i] = blankscene.properties[i].value;
+					else if(blankscene.properties[i] && (blankscene.properties[i].get || blankscene.properties[i].set))
+						delete blankscene.properties[i];
+				}
+			}
+			//global.log(Object.keys(global.instances[namespace].state.nodes['index-vwf'].children));
+			
+			//this is a blank world, go ahead and load the default
+			
+			
+			
+			
+			socket.emit('message',{"action":"createNode","parameters":[blankscene],"time":0});
+			socket.emit('message',{"action":"goOffline","parameters":[blankscene],"time":0});
+			socket.pending = false;
+		});
+		
+	}
+	
 	function WebSocketConnection(socket, _namespace) {
-	  
 	
-	  //get instance for new connection
-	  var namespace = _namespace || getNamespace(socket);
-	
-	  if(!namespace)
-	  {
-		  socket.on('setNamespace',function(msg)
+		var namespace = _namespace || getNamespace(socket);
+		
+		 if(!namespace)
 		  {
-			console.log(msg.space);
-			WebSocketConnection(socket,msg.space);
-			socket.emit('namespaceSet',messageCompress.pack(JSON.stringify({})));
-		  });
-		  return;
-	  }else
-	  {
-		console.log(namespace);
-	  }
+			  socket.on('setNamespace',function(msg)
+			  {
+				console.log(msg.space);
+				WebSocketConnection(socket,msg.space);
+				socket.emit('namespaceSet',{});
+			  });
+			  return;
+		  }
+	  
+		DAL.getInstance(namespace.replace(/\//g,"_"),function(instancedata)
+		{
+			
+			//if this is a single player published world, there is no need for the server to get involved. Server the world state and tell the client to disconnect
+			if(instancedata && instancedata.publishSettings && instancedata.publishSettings.singlePlayer)
+			{
+				ServeSinglePlayer(socket, namespace,instancedata)
+			}else
+				ClientConnected(socket, namespace,instancedata);
+		});
+	};
+	
+	function ClientConnected(socket, namespace, instancedata) {
+	  
 	  
 	  //create or setup instance data
 	  if(!global.instances)
 	    global.instances = {};
 	   
+	  socket.loginData = {};
+	  var allowAnonymous = false;
+	  if(instancedata.publishSettings && instancedata.publishSettings.allowAnonymous)
+	  		   allowAnonymous = true;
 	  //if it's a new instance, setup record 
 	  if(!global.instances[namespace])
 	  {
@@ -1091,7 +1169,7 @@ function startVWF(){
 			
 			//do not accept messages from clients that have not been claimed by a user
 			//currently, allow getstate from anonymous clients
-			if(!sendingclient.loginData && message.action != "getState" && message.member != "latencyTest")
+			if(!allowAnonymous && !sendingclient.loginData && message.action != "getState" && message.member != "latencyTest")
 			{
 				if(isPointerEvent(message))
 					global.instances[namespace].Error('DENIED ' + JSON.stringify(message), 4);
@@ -1160,7 +1238,7 @@ function startVWF(){
 					global.instances[namespace].Log('server has no record of ' + message.node,1);
 					return;
 				  }
-				  if(checkOwner(node,sendingclient.loginData.UID))
+				  if(allowAnonymous || checkOwner(node,sendingclient.loginData.UID))
 				  {	
 						//We need to keep track internally of the properties
 						//mostly just to check that the user has not messed with the ownership manually
@@ -1185,7 +1263,7 @@ function startVWF(){
 					global.instances[namespace].Error('server has no record of ' + message.node,1);
 					return;
 				  }
-				  if(checkOwner(node,sendingclient.loginData.UID))
+				  if(allowAnonymous || checkOwner(node,sendingclient.loginData.UID))
 				  {	
 						global.instances[namespace].Log("Do " +message.action +" of " +node.id,2);
 				  }
@@ -1204,7 +1282,7 @@ function startVWF(){
 					global.instances[namespace].Error('server has no record of ' + message.node,1);
 					return;
 				  }
-				  if(checkOwner(node,sendingclient.loginData.UID))
+				  if(allowAnonymous || checkOwner(node,sendingclient.loginData.UID))
 				  {	
 						//we do need to keep some state data, and note that the node is gone
 						global.instances[namespace].state.deleteNode(message.node)
@@ -1228,7 +1306,7 @@ function startVWF(){
 					return;
 				  }
 				  //Keep a record of the new node
-				  if(checkOwner(node,sendingclient.loginData.UID) || message.node == 'index-vwf')
+				  if(allowAnonymous || checkOwner(node,sendingclient.loginData.UID) || message.node == 'index-vwf')
 				  {	
 						var childComponent = JSON.parse(JSON.stringify(message.parameters[0]));
 						if(!childComponent) return;
@@ -1311,7 +1389,7 @@ function startVWF(){
 		  delete global.instances[namespace].clients[socket.id];
 		  //if it's the last client, delete the data and the timer
 		  
-		  if(loginData)
+		  if(loginData && loginData.clients)
 		  {
 			  delete loginData.clients[socket.id];
 			  global.error("Unexpected disconnect. Deleting node for user avatar " + loginData.UID);
@@ -1329,6 +1407,7 @@ function startVWF(){
 		  {
 			clearInterval(global.instances[namespace].timerID);
 			delete global.instances[namespace];
+			console.log('Shutting down ' + namespace )
 		  }
 
 		});
@@ -1635,25 +1714,66 @@ function startVWF(){
 		//This will concatenate almost 50 of the project JS files, and serve one file in it's place
 		requirejs.optimize(config, function (buildResponse) {
 		
-			console.log('Build complete');	   
-			var contents = fs.readFileSync(config.out, 'utf8');
-			//here, we read the contents of the built boot.js file
-			var path = libpath.normalize('./support/client/lib/boot.js');
-			path = libpath.resolve(__dirname, path);			
-			//we zip it, then load it into the file cache so that it can be served in place of the noraml boot.js 
-			zlib.gzip(contents,function(_,zippeddata)
-			{		   
-				    var newentry = {};				
-				    newentry.path = path;
-				    newentry.data = contents;
-				    newentry.stats = fs.statSync(config.out);
-				    newentry.zippeddata = zippeddata;
-				    newentry.datatype = "utf8";
-				    newentry.hash = hash(contents);
-				    FileCache.files.push(newentry); 
-				    //now that it's loaded into the filecache, we can delete it
-				    fs.unlinkSync(config.out);
-				    StartUp();
+			console.log('RequrieJS Build complete');
+			async.series([
+			function(cb3)
+			{
+				
+				console.log('Closure Build start');
+				//lets do the most agressive compile possible here!
+				if(fs.existsSync("./build/compiler.jar"))
+				{
+
+					var c1 = exec('java -jar compiler.jar --js boot.js --compilation_level ADVANCED_OPTIMIZATIONS --js_output_file boot-c.js',{cwd:"./build/"},
+					function (error, stdout, stderr) {
+					  
+					 	//console.log('stdout: ' + stdout);
+					    //console.log('stderr: ' + stderr);
+					    if (error !== null) {
+					      console.log('exec error: ' + error);
+					    }
+						if(fs.existsSync("./build/boot-c.js"))
+						{
+							config.out = './build/boot-c.js';
+						}
+						cb3();
+
+					});
+
+
+
+				}else
+				{
+					console.log('compiler.jar not found');
+					cb3();
+				}
+			},
+			function(cb3)
+			{
+				console.log('loading '+ config.out);
+				var contents = fs.readFileSync(config.out, 'utf8');
+				//here, we read the contents of the built boot.js file
+				var path = libpath.normalize('./support/client/lib/boot.js');
+				path = libpath.resolve(__dirname, path);			
+				//we zip it, then load it into the file cache so that it can be served in place of the noraml boot.js 
+				zlib.gzip(contents,function(_,zippeddata)
+				{		   
+					    var newentry = {};				
+					    newentry.path = path;
+					    newentry.data = contents;
+					    newentry.stats = fs.statSync(config.out);
+					    newentry.zippeddata = zippeddata;
+					    newentry.datatype = "utf8";
+					    newentry.hash = hash(contents);
+					    FileCache.files.push(newentry); 
+					    //now that it's loaded into the filecache, we can delete it
+					    //fs.unlinkSync(config.out);
+					   cb3();
+				});
+			}],function(err)
+			{
+				console.log(err);
+ 				StartUp();
 			});
 		}, function(err) {
 			//there was a requireJS build error. Not a prob, keep going.

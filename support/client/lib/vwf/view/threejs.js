@@ -60,6 +60,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			this.lastRealTick = performance.now();
 			this.leftover = 0;
 			this.future = 0;
+
         },
 		lerp: function(a,b,l,c)
 		{
@@ -302,7 +303,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 		getCamera: function()
 		{
 			if( !this.activeCamera)
-				this.setCamera();
+				return this.state.scenes['index-vwf'].camera.threeJScameras[this.state.scenes['index-vwf'].camera.ID];
 			return this.activeCamera;	
 		},
 		chooseCamera: function()
@@ -350,13 +351,20 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 		},
 		setCamera: function(camID)
 		{
-			this.cameraID = camID;
+			var defaultCameraID;
+			var instanceData = _DataManager.getInstanceData();
+			var publishSettings = instanceData.publishSettings;
+
+			if(publishSettings) defaultCameraID = publishSettings.camera;
+
+			this.cameraID = camID || defaultCameraID;
 			
 			var cam = this.state.scenes['index-vwf'].camera.threeJScameras[this.state.scenes['index-vwf'].camera.ID];
 			
 			if(this.cameraID)
 			{
 				clearCameraModeIcons();
+				cam = null;
 				if(this.state.nodes[this.cameraID])
 				if(this.state.nodes[this.cameraID].getRoot && this.state.nodes[this.cameraID].getRoot())
 				{
@@ -364,9 +372,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 				}
 			}
 			
-			var aspect = $('#index-vwf').width()/$('#index-vwf').height();
-			cam.aspect = aspect;
-			cam.updateProjectionMatrix();
+			if(cam)
+			{
+				var aspect = $('#index-vwf').width()/$('#index-vwf').height();
+				cam.aspect = aspect;
+				cam.updateProjectionMatrix();
+			}
 			this.activeCamera = cam;
 		
 		},
@@ -562,6 +573,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     // private ===============================================================================
         function initScene( sceneNode ) {
     
+
+		
         var self = this;
         var requestAnimFrame, cancelAnimFrame;
         (function() {
@@ -634,8 +647,18 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         function renderScene(time) {
 			
 			
+			
             requestAnimFrame( renderScene );
 			
+			//get the camera. If a default was specified, but not yet availabe, get the system default.
+			cam = self.getCamera();
+			//if for some reason even the system default is not availabe, wait a frame
+			if(!cam) return;
+
+			//if we have a camera, but self.activecamera is null, then we were expecting a default camera, but it was not yet available
+			//try to set it, so next frame we use it. 
+			if(!self.activeCamera) self.setCamera();
+
 			if(self.paused === true)
 				return;
 			self.inFrame = true;	
@@ -656,8 +679,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			if(self.interpolateTransforms)
 				self.setInterpolatedTransforms(timepassed);
 				
-				
-			cam = self.getCamera();
+			
 			
 			cam.matrixWorldInverse.getInverse( cam.matrixWorld );
 			 

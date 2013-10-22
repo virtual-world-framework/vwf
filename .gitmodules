@@ -1,3 +1,0 @@
-[submodule "support/client/lib/vwf/view/xapi"]
-	path = support/client/lib/vwf/view/xapi
-	url = https://github.com/adlnet/xAPIWrapper.git

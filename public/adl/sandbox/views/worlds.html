@@ -44,10 +44,20 @@
 							<!--<span class="glyphicon glyphicon-star" data-bind="attr:{href:'{{root}}/'+id}, visible:$data.featured && !hotState"></span>-->
 							<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState">Active</a>
 							
-							<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible -->
-								<a class="editstatedelete glyphicon glyphicon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
-								<a class="editstatedata glyphicon glyphicon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
-							<!-- /ko -->
+							
+							<div style="border-left:1px solid #e7e7e7;float:right;height:18px;width:120px;" data-bind="visible:$root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible">
+								<a title="Delete World" class="editstatedelete glyphicon glyphicon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
+								<a title="Edit World" class="editstatedata glyphicon glyphicon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>
+								<a title="Publish World" class="editstatedata glyphicon glyphicon-print" data-bind="visible:!($data.publishSettings), attr:{href:'{{root}}/'+'publish?id='+id}"></a>								
+							</div>
+							<div data-bind="visible:$root.user().isLoggedIn && editVisible">
+								<a title="Clone World" class="editstatecopy glyphicon glyphicon-export" data-bind="click:$root.cloneWorld" style="margin-right:18px;"></a>
+								
+							</div>
+							<div data-bind="visible:editVisible">
+								
+								<a title="World History" class="editstatecopy glyphicon glyphicon-time" data-bind="attr:{href:'{{root}}/'+'history?id='+id}" style="margin-right:18px;"></a>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -70,9 +80,29 @@
 	<script>
 		$(document).ready(function(){	
 			
+			vwfPortalModel.cloneWorld = function(world){
+				if(window.confirm("Copy this world?")){
+					$.get('/vwfDataManager.svc/copyinstance?SID=' + world.id, function(o){
+		
+						if(o){
+							window.location = '{{root}}/edit?id=' + o.substr(13,16);
+						}
+
+						else{
+							window.alert("World was not successfully copied.");
+						}
+					})
+					.error(function(){
+						window.alert("World was not successfully copied.");
+					});
+				}
+			};
+			
 			ko.applyBindings(vwfPortalModel);
 			getLoginInfo(function(){
-					
+				
+				$('#filter').val(window.location.hash.substr(1));
+				$('#filter').keydown();
 				showStates();
 
 				window.setInterval(function(){

@@ -106,59 +106,79 @@ define(function ()
 				if(this.GetCurrentUserName()) return;
 				if($('#GuestLogin').length > 0) return;
 				
-				$.ajax('/vwfDataManager.svc/logindata',
+				//by default, you need to log in. Only in the case of published states do you not need to log in.
+				var needlogin = true;
+				var statedata = _DataManager.getInstanceData();
+				
+				//published worlds may choose to allow anonymous users
+				//singleplayers worlds do not need login
+				if(statedata && statedata.publishSettings && (statedata.publishSettings.allowAnonymous ||  statedata.publishSettings.singlePlayer))
+					needlogin = false;
+				
+				if(needlogin)
 				{
-					cache:false,
-					async:false,
-					success:function(data,status,xhr)
+					$.ajax('/vwfDataManager.svc/logindata',
 					{
-						var logindata = JSON.parse(xhr.responseText);
-						var username = logindata.username;
-						
-						if(logindata.instances.indexOf(window.location.pathname) != -1)
+						cache:false,
+						async:false,
+						success:function(data,status,xhr)
 						{
-							_Notifier.alert('You are already logged into this space from another tab, browser or computer. This session will be a guest.');
-						}
-						else
-						{
-							if(vwf.models[0].model.nodes['character-vwf-' + username.replace(/ /g,'-')] == undefined)
-							this.Login(username);
-						}
-						
-					}.bind(this),
-					error:function(xhr,status,err)
-					{
-						
-						hideTools();
-						//$('#NotifierAlertMessage').dialog('open');
-						//$('#NotifierAlertMessage').html('You are viewing this world as a guest. Please <a style="color:blue" href="'+_DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13)+'">sign in</a> to participate');
-						alertify.set({ labels: {
-						    ok     : "Login",
-						    cancel : "Continue As Guest"
-						} });
-						alertify.confirm("You are viewing this world as a guest. You will be able to view the world, but not interact with it. Would you like to go back and log in?",
-						function(e)
-						{
-							alertify.set({ labels: {
-							    ok     : "Ok",
-							    cancel : "Cancel"
-							} });
-						
-							if(e)
-								window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13) + window.location.hash;
+							var logindata = JSON.parse(xhr.responseText);
+							var username = logindata.username;
+							
+							if(logindata.instances.indexOf(window.location.pathname) != -1)
+							{
+								_Notifier.alert('You are already logged into this space from another tab, browser or computer. This session will be a guest.');
+							}
 							else
 							{
-								
-								$(document.body).append('<a href="#" id="GuestLogin" style="font-family: sans-serif;z-index:99;position:fixed;font-size: 2em;" class="alertify-button alertify-button-ok" id="alertify-ok">Login</a>');
-								$('#GuestLogin').click(function()
-								{
-									window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13) + window.location.hash;
-								});
+								if(vwf.models[0].model.nodes['character-vwf-' + username.replace(/ /g,'-')] == undefined)
+								this.Login(username);
 							}
-						}
-						);
-					}.bind(this)
-				});
+							
+						}.bind(this),
+						error:function(xhr,status,err)
+						{
+							
+							hideTools();
+							//$('#NotifierAlertMessage').dialog('open');
+							//$('#NotifierAlertMessage').html('You are viewing this world as a guest. Please <a style="color:blue" href="'+_DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13)+'">sign in</a> to participate');
+							alertify.set({ labels: {
+								ok     : "Login",
+								cancel : "Continue As Guest"
+							} });
+							alertify.confirm("You are viewing this world as a guest. You will be able to view the world, but not interact with it. Would you like to go back and log in?",
+							function(e)
+							{
+								alertify.set({ labels: {
+									ok     : "Ok",
+									cancel : "Cancel"
+								} });
+							
+								if(e)
+									window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13) + window.location.hash;
+								else
+								{
+									
+									$(document.body).append('<a href="#" id="GuestLogin" style="font-family: sans-serif;z-index:99;position:fixed;font-size: 2em;" class="alertify-button alertify-button-ok" id="alertify-ok">Login</a>');
+									$('#GuestLogin').click(function()
+									{
+										window.location = _DataManager.getCurrentApplication() + "/login?return=" + _DataManager.getCurrentSession().substr(13) + window.location.hash;
+									});
+								}
+							}
+							);
+						}.bind(this)
+					});
+				}else
+				{
+					//this is a published world, and you do not need to hit the login server
+				
+					
+					this.Login('Anonymous' + _UserManager.getPlayers().length);
+				
+				
+				}
 			
 			
 			
@@ -215,38 +235,53 @@ define(function ()
 		this.Login = function (username)
 		{
 		
-			
+			var needlogin = true;
+			var createAvatar = true;
+			var statedata = _DataManager.getInstanceData();
+				
+				//published worlds may choose to allow anonymous users
+				//singleplayers worlds do not need login
+				if(statedata && statedata.publishSettings && (statedata.publishSettings.allowAnonymous ||  statedata.publishSettings.singlePlayer))
+					needlogin = false;
+				
+				if(statedata && statedata.publishSettings && statedata.publishSettings.createAvatar === false)
+					createAvatar = false;				
+					
+					
 			if(this.GetCurrentUserName()) return;
 			//clear this. No reason to have it saved in the dom
 			
-			
-			//take ownership of the client connection
-			var S = window.location.pathname;
-			var data = jQuery.ajax(
+			//only take control of hte websocket if you have to log in. Don't do this for allow anon and or singleplayer
+			if(needlogin)
 			{
-				type: 'GET',
-				url: PersistanceServer + "/vwfDataManager.svc/login?S=" + S + "&CID=" + vwf.moniker(),
-				data: null,
-				success: null,
-				async: false,
-				dataType: "json"
-			});
-			
-			var profile = _DataManager.GetProfileForUser(username, true);
-			if (!profile)
-			{
-				alert('There is no account with that username');
-				return;
-			}
-			if (profile.constructor == String)
-			{
-				alert(profile);
-				return;
-			}
-			if (data.status != 200)
-			{
-				alert(data.responseText);
-				return;
+				//take ownership of the client connection
+				var S = window.location.pathname;
+				var data = jQuery.ajax(
+				{
+					type: 'GET',
+					url: PersistanceServer + "/vwfDataManager.svc/login?S=" + S + "&CID=" + vwf.moniker(),
+					data: null,
+					success: null,
+					async: false,
+					dataType: "json"
+				});
+				
+				var profile = _DataManager.GetProfileForUser(username, true);
+				if (!profile)
+				{
+					alert('There is no account with that username');
+					return;
+				}
+				if (profile.constructor == String)
+				{
+					alert(profile);
+					return;
+				}
+				if (data.status != 200)
+				{
+					alert(data.responseText);
+					return;
+				}
 			}
 			$('#MenuLogInicon').css('background', "#555555");
 			$('#MenuLogOuticon').css('background', "");
@@ -271,10 +306,19 @@ define(function ()
 			document["PlayerNumber"] = username;
 			var parms = new Array();
 			parms.push(JSON.stringify(this.PlayerProto));
-			this.currentUsername = profile.Username;
+			this.currentUsername = username;
 			//vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
-			vwf_view.kernel.createChild('index-vwf', this.currentUsername, this.PlayerProto);
+			
+			if(createAvatar)
+				vwf_view.kernel.createChild('index-vwf', this.currentUsername, this.PlayerProto);
+			
+			//if no one has logged in before, this world is yours
 			if (vwf.getProperty('index-vwf', 'owner') == null) vwf.setProperty('index-vwf', 'owner', this.currentUsername);
+			
+			//if single player, world is yours
+			if(statedata && statedata.publishSettings && statedata.publishSettings.singlePlayer)
+				vwf.setProperty('index-vwf', 'owner', this.currentUsername);
+			
 			var parms = new Array();
 			parms.push(JSON.stringify(
 			{
@@ -348,8 +392,15 @@ define(function ()
 		{
 			//if (!_UserManager.GetCurrentUserName()) return;
 			
+			var needlogin = true;
+			var statedata = _DataManager.getInstanceData();
 			
+			//published worlds may choose to allow anonymous users
+			//singleplayers worlds do not need login
+			if(statedata && statedata.publishSettings && (statedata.publishSettings.allowAnonymous ||  statedata.publishSettings.singlePlayer))
+				needlogin = false;
 			
+
 			$('#MenuLogOuticon').css('background', "#555555");
 			$('#MenuLogInicon').css('background', "");
 			$('#MenuLogIn').removeAttr('disabled');
@@ -364,25 +415,31 @@ define(function ()
 				sender: '*System*',
 				text: (document.PlayerNumber + " logging off")
 			}));
+
+		
 			//
 			//vwf_view.kernel.callMethod('index-vwf','receiveChat',parms);
 			if (document[document.PlayerNumber + 'link']) vwf_view.kernel.deleteNode(document[document.PlayerNumber + 'link'].id);
 			//take ownership of the client connection
 			var profile = _DataManager.GetProfileForUser(_UserManager.GetCurrentUserName());
 			var S = window.location.pathname;
-			var data = jQuery.ajax(
-			{
-				type: 'GET',
-				url: PersistanceServer + "/vwfDataManager.svc/logout?S=" + S + "&CID=" + vwf.moniker(),
-				data: null,
-				success: null,
-				async: false,
-				dataType: "json"
-			});
-			if (data.status != 200)
-			{
-				alert(data.responseText);
-				return;
+			
+			if(needlogin)
+			{	
+				var data = jQuery.ajax(
+				{
+					type: 'GET',
+					url: PersistanceServer + "/vwfDataManager.svc/logout?S=" + S + "&CID=" + vwf.moniker(),
+					data: null,
+					success: null,
+					async: false,
+					dataType: "json"
+				});
+				if (data.status != 200)
+				{
+					alert(data.responseText);
+					return;
+				}
 			}
 			document[document.PlayerNumber + 'link'] = null;
 			document.PlayerNumber = null;
