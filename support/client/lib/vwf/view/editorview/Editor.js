@@ -524,7 +524,7 @@ define(function ()
 							var fbl = MATH.addVec3(campos, MATH.scaleVec3(BottomLeftRay, 10000));
 							var fbr = MATH.addVec3(campos, MATH.scaleVec3(BottomRighttRay, 10000));
 							var frustrum = new Frustrum(ntl, ntr, nbl, nbr, ftl, ftr, fbl, fbr);
-							debugger;
+							
 							var hits = _SceneManager.FrustrumCast(frustrum,
 							{
 								OneHitPerMesh: true
