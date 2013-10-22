@@ -153,16 +153,16 @@ end
 
 # == test ==========================================================================================
 
-# Create the test task.
-
 Rake::TestTask.new do |task| 
+  task.libs << "test"
+  
+  task.test_files = FileList[ "test/*_test.rb", "test/*/*_test.rb", "test/*_spec.rb", "test/*/*_spec.rb" ]
 
-    task.libs << "test"
-    task.test_files = FileList[ "test/*_test.rb", "test/*/*_test.rb", "test/*_spec.rb", "test/*/*_spec.rb" ]
-
-    task.verbose = true
-
+  task.verbose = true
 end
+
+desc "Run JavaScript client tests"
+task "client:test" => "support-client:test"
 
 # Environment for running the standalone ruby.
 
@@ -205,3 +205,4 @@ def standalone_build_env
     }
 
 end
+
