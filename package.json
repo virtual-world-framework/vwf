@@ -22,7 +22,8 @@
     "socket.io": "~0.9.13",
     "ws": "~0.4.25",
     "yamljs": "~0.1.4",
-    "socket.io-client": "~0.9.16"
+    "socket.io-client": "~0.9.16",
+	"mkdirp": "~0.3.5"
   },
   "devDependencies": {},
   "scripts": {

@@ -1426,7 +1426,7 @@ function startVWF(){
 	var port = p >= 0 ? parseInt(process.argv[p+1]) : 3000;
 		
 	p = process.argv.indexOf('-d');
-	var datapath = p >= 0 ? process.argv[p+1] : "C:\\VWFData";
+	var datapath = p >= 0 ? process.argv[p+1] : libpath.join(__dirname, "data");
 	global.datapath = datapath;	
 	p = process.argv.indexOf('-l');
 	global.logLevel = p >= 0 ? process.argv[p+1] : 1;
