@@ -35,17 +35,19 @@ var vwfPortalModel = new function(){
 			$("#allWorlds").removeClass("active").blur();
 		}
 		
+		console.log(filter);
 		self.filter(filter || userNameFilter);
 		pageIndex = 0;
 		showStates();
 	};			
 	self.filter = ko.observable(filter);
 	self.filterVal = ko.computed({
-		read:  function(){ return ""; }, 
+		read:  function(){ return filter; }, 
 		write: function(str){ 
 			if(filter != str){
 				filter = str;
 				self.filter(filter || userNameFilter);
+				
 				pageIndex = 0;
 				var tempWorlds = self.worldObjects();
 				for(var i = 0; i < tempWorlds.length; i++){
@@ -53,6 +55,9 @@ var vwfPortalModel = new function(){
 				}
 				
 				self.getPage(0);
+				
+				$(".filter").val(filter);
+				console.log(filter);
 			}
 		}	
 	}).extend({throttle:500});
@@ -92,7 +97,6 @@ var vwfPortalModel = new function(){
 	
 	
 	self.getPage = function(i){
-
 		self.worldObjects.sort(sortArrByUpdates);
 		var worldObjectsLength = getArrVisibleLength(self.worldObjects());
 		pageIndex += i;
@@ -287,7 +291,7 @@ function removeAgoFromMoment(date){
 function showStates(cb){
 
 	$.getJSON("./vwfDataManager.svc/states",function(e){
-		
+
 		var tempArr = getFlatIdArr(), saveIndex = 0, i = 0, flatWorldArray = ko.toJS(vwfPortalModel.worldObjects), saveDate = Date.now() - 31536000000;
 		for(var tmpKey in e){
 			
