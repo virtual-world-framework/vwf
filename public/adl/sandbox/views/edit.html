@@ -40,7 +40,6 @@
 					return b.unix - a.unix;
 				});
 				
-				console.log(JSON.parse(data));
 				vwfPortalModel.restoreList(tempData);
 				
 				if(cb){
@@ -99,7 +98,7 @@
 	};
 </script>
 <div class="row">
-	<div class="col-md-5" style="margin:0 auto;float:none;">
+	<div class="col-md-6 col-md-offset-1">
 		<form data-bind="submit:handleEditButton" >
 			<fieldset>
 				<legend>Edit world name and description</legend>
@@ -109,16 +108,13 @@
 			</fieldset>
 		</form>
 	</div>
-	<div class="col-md-6" style="margin:50px auto;float:none;">
-		<table data-bind="submit:handleEditButton" class="table">
-			<tr>
-				<th>Name</th>
-				<th>Date</th>
-			</tr>
+	<div class="col-md-4 col-md-offset-1">
+		<legend style="">Restore Backup</legend>
+		<p style="text-align:center;margin-top:60px;" data-bind="visible:restoreList().length==0">No backups found</p>
+		<table data-bind="submit:handleEditButton" class="table table-striped" style="border-top:none;">
 			<tbody data-bind="foreach:restoreList">
 				<tr>
-					<td><a href="#" data-bind="text:file, click:$root.restoreState"></a></td>
-					<td data-bind="text:time"></td>
+					<td><a href="#" data-bind="text:time, click:$root.restoreState"></a></td>
 				</tr>
 			</tbody>
 		</table>

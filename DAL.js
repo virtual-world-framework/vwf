@@ -23,6 +23,10 @@ Array.prototype.getUnique = function(){
    return a;
 }
 
+function sanitizeString(str){
+	return str.replace(/[^a-zA-Z0-9\-\_ ]/gi,'')
+}
+
 //generate a random id.
 function GUID()
     {
@@ -1270,7 +1274,8 @@ function copyInstance (id, arg2, arg3){
 }
 
 function getStatesFilelist(id, cb){
-	fs.readdir(datapath + '/States/' + id, function(err, files){
+	id = sanitizeString(id);
+	fs.readdir(libpath.join(datapath, '/States/', id), function(err, files){
 		
 		if(err || !files || files.length <= 0){
 			cb(false);
@@ -1280,7 +1285,7 @@ function getStatesFilelist(id, cb){
 		var infoArr = [];
 		async.each(files,function(item,cb2){
 		
-			fs.stat(datapath + '/States/'+id+'/' + item, function(err, stats){
+			fs.stat(libpath.join(datapath, '/States/', id, '/', item), function(err, stats){
 			
 				if(stats.isFile()){
 					infoArr.push({file:item, time:stats.mtime});
@@ -1303,11 +1308,11 @@ function getStatesFilelist(id, cb){
 }
 
 function restoreBackup(id, stateFileName, cb){
-	
-	//console.log(id, stateFileName);
-	
-	var basePath = datapath + '/States/' + id + '/';
-	var oldPath =  basePath +  stateFileName, statePath = basePath + 'state', tempPath = basePath + 'temp';
+
+	id = sanitizeString(id);
+	stateFileName = sanitizeString(stateFileName);
+	var basePath = libpath.join(datapath, '/States/', id, '/');
+	var oldPath =  libpath.join(basePath,  stateFileName), statePath = libpath.join(basePath, 'state'), tempPath = libpath.join(basePath, 'temp');
 	
 	//Rename current state file to a temp file
 	fs.rename(statePath, tempPath, function(err){
