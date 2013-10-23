@@ -5,7 +5,7 @@ DAL = {},
 fs = require('fs'),
 async = require('async');
 
-fs.readdir('./public' + root + '/views/help', function(err, files){
+fs.readdir(__dirname + '/public' + root + '/views/help', function(err, files){
 	var tempArr = [];
 	
 	for(var i = 0; i < files.length; i++){

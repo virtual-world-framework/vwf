@@ -4,27 +4,52 @@
 	{
 		getLoginInfo(function(){}, redirect);
 		vwfPortalModel.restoreList = ko.observableArray();
-		vwfPortalModel.restoreState = function(obj){
+		vwfPortalModel.restoreState = function(obj, e){
 		
-			if(window.confirm("Are you sure you want to restore this state?")){
-				$.get('/vwfDataManager.svc/restorebackup?SID=' + sid + '&statename=' + obj.file, function(data){
-					console.log(data);
-				});
-			}
-		};
-		$.get('/vwfDataManager.svc/stateslist?SID=' + sid, function(data){
-			
-			var tempData = JSON.parse(data);
-			for(var i = 0; i < tempData.length; i++){
-				if(tempData[i].file == "state"){
-					tempData.splice(i, 1);
-					break;
+			alertify.confirm("Are you sure you want to restore this state?", function(e){
+				if(e){
+					$.get('/vwfDataManager.svc/restorebackup?SID=' + sid + '&statename=' + obj.file, function(data){
+						getBackupList(function(){
+							alertify.success("State successfully restored");
+						});
+					}).error(function(){
+						alertify.error("Error: State not restored");
+					});
 				}
-			}
+			});
 			
-			console.log(JSON.parse(data));
-			vwfPortalModel.restoreList(tempData);
-		});
+			e.preventDefault();
+			e.stopPropagation();
+			return false;
+		};
+		
+		function getBackupList(cb){
+			$.get('/vwfDataManager.svc/stateslist?SID=' + sid, function(data){
+				
+				var tempData = JSON.parse(data);
+				for(var i = 0; i < tempData.length; i++){
+					if(tempData[i].file == "state"){
+						tempData.splice(i, 1);
+					}
+					
+					tempData[i].unix = moment(tempData[i].time).unix();
+					tempData[i].time = moment(tempData[i].time).format('MMM Do YYYY, h:mm a');
+				}
+				
+				tempData.sort(function(a, b){
+					return b.unix - a.unix;
+				});
+				
+				console.log(JSON.parse(data));
+				vwfPortalModel.restoreList(tempData);
+				
+				if(cb){
+					cb();
+				}
+			});
+		}
+		
+		getBackupList();
 		
 		$.ajax('/vwfDataManager.svc/statedata?SID=' + sid,
 		{
@@ -74,7 +99,7 @@
 	};
 </script>
 <div class="row">
-	<div class="col-md-5 col-md-offset-3">
+	<div class="col-md-5" style="margin:0 auto;float:none;">
 		<form data-bind="submit:handleEditButton" >
 			<fieldset>
 				<legend>Edit world name and description</legend>
@@ -84,7 +109,7 @@
 			</fieldset>
 		</form>
 	</div>
-	<div class="col-md-5 col-md-offset-3">
+	<div class="col-md-6" style="margin:50px auto;float:none;">
 		<table data-bind="submit:handleEditButton" class="table">
 			<tr>
 				<th>Name</th>
@@ -92,7 +117,7 @@
 			</tr>
 			<tbody data-bind="foreach:restoreList">
 				<tr>
-					<td><a href="" data-bind="text:file, click:$root.restoreState"></a></td>
+					<td><a href="#" data-bind="text:file, click:$root.restoreState"></a></td>
 					<td data-bind="text:time"></td>
 				</tr>
 			</tbody>
