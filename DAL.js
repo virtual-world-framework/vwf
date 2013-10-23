@@ -4,6 +4,7 @@ nStore = nStore.extend(require('nstore/query')());
 var async = require('async');
 var fs = require('fs-extra');
 require('./hash.js');
+var mkdirp = require('mkdirp');
 var datapath = '';
 
 var DBTablePath = libpath.sep+'users.db';
@@ -1355,12 +1356,69 @@ function startup(callback)
 
 exports.setDataPath = function(p)
 {
+	p = libpath.resolve(p);
 	global.log("datapath is " + p,0);
 	datapath = p;
 	DBTablePath = datapath + DBTablePath;
 	
+	// create data directory if doesn't exist
+	mkdirp(datapath, '755', function(err){
+		if(err){
+			global.error('Could not create data path!');
+		}
+
+		else {
 	
+			// create various subdirectories
+			fs.mkdir( libpath.join(datapath, 'DataFiles'), '755', function(err){
+				if( !err )
+					global.log('Created DataFiles dir');
+				else if( err.code != 'EEXIST' )
+					global.error('Error checking DataFiles dir:', err);
+			});
 	
+			fs.mkdir( libpath.join(datapath, 'GlobalAssets'), '755', function(err){
+				if( !err )
+					global.log('Created GlobalAssets dir');
+				else if( err.code != 'EEXIST' )
+					global.error('Error checking GlobalAssets dir:', err);
+			});
 	
+			fs.mkdir( libpath.join(datapath, 'Logs'), '755', function(err){
+				if( !err )
+					global.log('Created Logs dir');
+				else if( err.code != 'EEXIST' )
+					global.error('Error checking Logs dir:', err);
+			});
+	
+			fs.mkdir( libpath.join(datapath, 'Profiles'), '755', function(err){
+				if( !err )
+					global.log('Created Profiles dir');
+				else if( err.code != 'EEXIST' )
+					global.error('Error checking Profiles dir:', err);
+			});
+	
+			fs.mkdir( libpath.join(datapath, 'States'), '755', function(err){
+				if( !err )
+					global.log('Created States dir');
+				else if( err.code != 'EEXIST' )
+					global.error('Error checking States dir:', err);
+			});
+	
+			fs.mkdir( libpath.join(datapath, 'Textures'), '755', function(err){
+				if( !err )
+					global.log('Created Textures dir');
+				else if( err.code != 'EEXIST' )
+					global.error('Error checking Textures dir:', err);
+			});
+	
+			fs.mkdir( libpath.join(datapath, 'Thumbnails'), '755', function(err){
+				if( !err )
+					global.log('Created Thumbnails dir');
+				else if( err.code != 'EEXIST' )
+					global.error('Error checking Thumbnails dir:', err);
+			});
+		}
+	}); // end mkdirp
 }
 exports.startup = startup;

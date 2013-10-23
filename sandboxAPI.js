@@ -1357,6 +1357,7 @@ exports.getState = getState;
 exports.getSessionData = GetSessionData;
 exports.setDataPath = function(p)
 {
+	p = libpath.resolve(p);
 	global.log("datapath is " + p,0);
 	datapath = p;
 	if(DAL)
