@@ -81,21 +81,24 @@
 		$(document).ready(function(){	
 			
 			vwfPortalModel.cloneWorld = function(world){
-				if(window.confirm("Copy this world?")){
-					$.get('/vwfDataManager.svc/copyinstance?SID=' + world.id, function(o){
-		
-						if(o){
-							window.location = '{{root}}/edit?id=' + o.substr(13,16);
-						}
+				alertify.confirm("Copy this world?", function(e){
+					if(e){
+						
+						$.get('/vwfDataManager.svc/copyinstance?SID=' + world.id, function(o){
+			
+							if(o){
+								window.location = '{{root}}/edit?id=' + o.substr(13,16);
+							}
 
-						else{
+							else{
+								window.alert("World was not successfully copied.");
+							}
+						})
+						.error(function(){
 							window.alert("World was not successfully copied.");
-						}
-					})
-					.error(function(){
-						window.alert("World was not successfully copied.");
-					});
-				}
+						});
+					}
+				});	
 			};
 			
 			ko.applyBindings(vwfPortalModel);

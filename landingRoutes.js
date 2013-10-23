@@ -5,7 +5,7 @@ DAL = {},
 fs = require('fs'),
 async = require('async');
 
-fs.readdir('./public' + root + '/views/help', function(err, files){
+fs.readdir(__dirname + '/public' + root + '/views/help', function(err, files){
 	var tempArr = [];
 	
 	for(var i = 0; i < files.length; i++){
@@ -94,12 +94,7 @@ exports.handlePostRequest = function(req, res, next){
 	
 	switch(req.params.action){
 	
-		case "get_world_test":
-			var worldId = "_adl_sandbox_" + data.id + "_";
-			DAL.copyInstance(worldId, function(result){
-				res.end("Hi there: " + JSON.stringify(result));
-			});
-
+		case "dal_test":			
 			break;
 	
 		case "delete_users":			
