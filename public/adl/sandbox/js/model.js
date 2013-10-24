@@ -35,12 +35,16 @@ var vwfPortalModel = new function(){
 			$("#allWorlds").removeClass("active").blur();
 		}
 		
-		console.log(filter);
+		//console.log(filter);
 		self.filter(filter || userNameFilter);
+		if(self.filter() && self.displayWorldObjects().length > 0){
+			self.initialSearchDisplay(false);
+		}
 		pageIndex = 0;
 		showStates();
 	};			
 	self.filter = ko.observable(filter);
+	self.initialSearchDisplay = ko.observable(true);
 	self.filterVal = ko.computed({
 		read:  function(){ return filter; }, 
 		write: function(str){ 
@@ -57,7 +61,10 @@ var vwfPortalModel = new function(){
 				self.getPage(0);
 				
 				$(".filter").val(filter);
-				console.log(filter);
+				if(self.filter() && self.displayWorldObjects().length > 0){
+					self.initialSearchDisplay(false);
+				}
+				//console.log(filter);
 			}
 		}	
 	}).extend({throttle:500});
