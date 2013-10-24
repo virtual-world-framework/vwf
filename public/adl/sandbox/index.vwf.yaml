@@ -304,7 +304,7 @@ scripts:
           this.postrendercallback = this.postrender.bind(this);
           _dView.bind('prerender',this.prerendercallback);
           _dView.bind('postprerender',this.postrendercallback);
-          _dView.bind('glyphrender',this.glyphrendercallback);
+          _dView.bind('glyphRender',this.glyphrendercallback);
           this.createNameTag();
           this.updateCamera();
     }
@@ -1219,7 +1219,7 @@ scripts:
     {
        _dView.unbind('prerender',this.prerendercallback);
        _dView.unbind('postprerender',this.postrendercallback);
-       _dView.unbind('glyphrender',this.glyphrendercallback);
+       _dView.unbind('glyphRender',this.glyphrendercallback);
        $(this.nametag).remove();
     }
     this.prerender = function()

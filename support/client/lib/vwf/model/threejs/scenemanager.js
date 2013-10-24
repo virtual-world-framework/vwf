@@ -232,6 +232,18 @@ SceneManager.prototype.getTexture = function(src,noclone)
 	if(noclone) 
 		return ret;
 	ret = new THREE.Texture(ret.image);
+
+	ret.wrapS =  this.textureList[src].wrapS;
+	ret.wrapT =  this.textureList[src].wrapT;
+	ret.magFilter =  this.textureList[src].magFilter;
+	ret.minFilter =  this.textureList[src].minFilter;
+	ret.repeat.x = this.textureList[src].repeat.x;
+	ret.repeat.y = this.textureList[src].repeat.y;
+	ret.offset.x = this.textureList[src].offset.x;
+	ret.offset.y = this.textureList[src].offset.y;
+	ret.anisotropy = this.textureList[src].anisotropy;
+	ret.flipY = this.textureList[src].flipY;
+	ret.generateMipmaps = this.textureList[src].generateMipmaps;
 	ret.needsUpdate  = true;
 	this.textureList[src].clones.push(ret);
     return ret;	

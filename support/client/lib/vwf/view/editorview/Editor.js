@@ -2981,7 +2981,7 @@ define(function ()
 		{
 			this.BuildMoveGizmo();
 			this.SelectObject(null);
-			$(document).bind('prerender', this.updateGizmoSize.bind(this));
+			_dView.bind('prerender', this.updateGizmoSize.bind(this));
 			document.oncontextmenu = function ()
 			{
 				return false;

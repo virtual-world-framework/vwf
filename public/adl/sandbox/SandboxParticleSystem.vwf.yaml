@@ -239,7 +239,7 @@ scripts:
         
           if(this.id == 'SandboxParticleSystem-vwf') return;
           this.prerendercallback = this.placeNameTag.bind(this);
-          $(document).bind('glyphRender',this.prerendercallback);
+          _dView.bind('glyphRender',this.prerendercallback);
           this.createNameTag();
           if(this.endColor === undefined)
              this.endColor = [0,0,0];
@@ -271,7 +271,7 @@ scripts:
     }
     this.deinitialize = function()
     {
-       $(document).unbind('glyphRender',this.prerendercallback);
+       _dView.unbind('glyphRender',this.prerendercallback);
        $(this.nametag).remove();
     }
     this.placeNameTag = function(e,viewprojection, wh, ww)

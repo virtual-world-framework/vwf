@@ -147,7 +147,7 @@
 						}
 				
 					
-					
+				
 				
 				this.settingProperty('materialDef',this.materialDef);
 				//if any callbacks were waiting on the asset, call those callbacks
@@ -238,6 +238,7 @@
 			else if(reg.loaded == true && reg.pending == false)
 			{
 				this.getRoot().add(reg.node.clone());
+				
 				var list = [];
 					
 					this.GetAllLeafMeshes(this.rootnode,list);

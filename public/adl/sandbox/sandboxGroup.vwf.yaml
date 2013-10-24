@@ -22,7 +22,7 @@ scripts:
           
           if(this.id == 'sandboxGroup-vwf') return;
           this.prerendercallback = this.placeNameTag.bind(this);
-          $(document).bind('glyphRender',this.prerendercallback);
+          _dView.bind('glyphRender',this.prerendercallback);
           this.createNameTag();
           
         
@@ -51,7 +51,7 @@ scripts:
     }
     this.deinitialize = function()
     {
-       $(document).unbind('glyphRender',this.prerendercallback);
+      _dView.unbind('glyphRender',this.prerendercallback);
        $(this.nametag).remove();
     }
     this.placeNameTag = function(e,viewprojection, wh, ww)

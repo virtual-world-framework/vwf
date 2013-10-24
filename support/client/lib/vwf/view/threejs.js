@@ -344,7 +344,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			{
 				var selcam = _Editor.findviewnode(this.selection.id).children[0];
 				this.cameraHelper = new THREE.CameraHelper(selcam);
-				selcam.add(this.cameraHelper,false);
+				this.cameraHelper.InvisibleToCPUPick = true;
+				selcam.add(this.cameraHelper,true);
 			}
 			
 			
@@ -739,7 +740,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			
 			
 			
-			vpargs[0] = vp;
+			vpargs[0] = vp.slice(0);
 			vpargs[1] = wh;
 			vpargs[2] = ww;
 			
@@ -878,7 +879,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			
 			if($('#glyphOverlay').css('display') != 'none')
 			{
-				self.trigger('glyphrender',vpargs);
+				self.trigger('glyphRender',vpargs);
 			}
 			
 			

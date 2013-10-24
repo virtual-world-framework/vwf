@@ -305,6 +305,7 @@ define(["vwf/view/editorview/Editor"], function (Editor)
 						owner: document.PlayerNumber,
 						type: '3DR Object',
 						DisplayName: _ModelLibrary.MetadataCache[pid].Title
+
 					}
 				};
 				proto.properties.DisplayName = Editor.GetUniqueName(proto.properties.DisplayName);

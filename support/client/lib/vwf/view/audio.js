@@ -16,7 +16,30 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 		this.endrange = 100;
 		this.startrange = 1;
 		this.loop = false;
-		
+		this.playing = false;
+		this.play = function()
+		{
+
+			
+			if(!this.playing)
+				this.sound.play();
+
+			this.playing = true;
+
+
+		}
+		this.pause = function()
+		{
+
+			
+			if(this.playing)
+				this.sound.pause();
+			
+			this.playing = false;
+
+
+		}
+		this.stop = this.pause;
 	}
 	//Get the position of your source object
 	//note: the 3D driver must keep track of this
@@ -108,7 +131,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 					window._dSound = Sound;
 				}else
 				{
-					Sound.sound.play();
+					Sound.play();
 					if(loop)
 					Sound.sound.loop();
 					else
@@ -123,7 +146,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 				var soundid = id+url;
 				var Sound = this.soundSources[soundid];
 				if(Sound)
-				Sound.sound.pause();
+				Sound.pause();
 			}
 			//stop the sound
 			if(name == 'stopSound')
@@ -132,7 +155,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 				var soundid = id+url;
 				var Sound = this.soundSources[soundid];
 				if(Sound)
-				Sound.sound.stop();
+				Sound.stop();
 			}
 			//delete the sound completely - only use this if you sure the sound will not play again anytime soon.
 			if(name == 'deleteSound')
@@ -142,7 +165,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 				var Sound = this.soundSources[soundid];
 				if(Sound)
 				{
-					Sound.sound.stop();
+					Sound.stop();
 					Sound.sound = null;
 				}
 				delete this.soundSources[soundid];

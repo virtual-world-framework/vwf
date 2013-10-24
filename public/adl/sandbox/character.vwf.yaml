@@ -85,8 +85,8 @@ scripts:
                 runningjump:{start:109,length:48,speed:1.25,current:0,loop:false}
             };
           this.prerendercallback = this.placeNameTag.bind(this);
-          $(document).bind('postprerender',this.prerendercallback);
-          //this.callbacknum = findVWFscene().addUpdateCallback(this.placeNameTag.bind(this));
+          _dView.bind('postprerender',this.prerendercallback);
+           //this.callbacknum = findVWFscene().addUpdateCallback(this.placeNameTag.bind(this));
           this.updatecounter = 0;
           this.mesh = findChildViewNode(findscene(),this.id);
           //debugger;
@@ -163,7 +163,7 @@ scripts:
     this.deinitialize = function()
     {
        //findVWFscene().removeUpdateCallback(this.callbacknum);
-       $(document).unbind('postprerender',this.prerendercallback);
+       _dView.unbind('postprerender',this.prerendercallback);
         _UserManager.PlayerDeleted(this.PlayerNumber);
        //this.deleteMe = true;            
        $(this.nametag).remove()
@@ -296,10 +296,10 @@ scripts:
         
         var motionvec;
         
-        //if(this.motionStack.length)
-        //    this.playSound('./vwfDataManager.svc/datafile/sounds/footsteps.mp3',true,.1);
-        //else
-        //    this.pauseSound('./vwfDataManager.svc/datafile/sounds/footsteps.mp3');
+        if(this.motionStack.length)
+            this.playSound('./vwfDataManager.svc/datafile/sounds/footsteps.mp3',true,.1);
+        else
+            this.pauseSound('./vwfDataManager.svc/datafile/sounds/footsteps.mp3');
         
         for(var i=0; i < this.motionStack.length; i++)
         {
