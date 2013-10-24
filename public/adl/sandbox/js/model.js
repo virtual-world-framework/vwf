@@ -35,22 +35,36 @@ var vwfPortalModel = new function(){
 			$("#allWorlds").removeClass("active").blur();
 		}
 		
+		//console.log(filter);
+		self.filter(filter || userNameFilter);
+		if(self.filter() && self.displayWorldObjects().length > 0){
+			self.initialSearchDisplay(false);
+		}
 		pageIndex = 0;
 		showStates();
 	};			
-	
+	self.filter = ko.observable(filter);
+	self.initialSearchDisplay = ko.observable(true);
 	self.filterVal = ko.computed({
-		read:  function(){ return ''; }, 
+		read:  function(){ return filter; }, 
 		write: function(str){ 
 			if(filter != str){
 				filter = str;
+				self.filter(filter || userNameFilter);
+				
 				pageIndex = 0;
 				var tempWorlds = self.worldObjects();
 				for(var i = 0; i < tempWorlds.length; i++){
-					tempWorlds[i]().isVisible = checkFilter([tempWorlds[i]().title, tempWorlds[i]().description, tempWorlds[i]().owner]);
+					tempWorlds[i]().isVisible = checkFilter([tempWorlds[i]().title, tempWorlds[i]().description, tempWorlds[i]().owner], tempWorlds[i]().featured);
 				}
 				
 				self.getPage(0);
+				
+				$(".filter").val(filter);
+				if(self.filter() && self.displayWorldObjects().length > 0){
+					self.initialSearchDisplay(false);
+				}
+				//console.log(filter);
 			}
 		}	
 	}).extend({throttle:500});
@@ -90,7 +104,6 @@ var vwfPortalModel = new function(){
 	
 	
 	self.getPage = function(i){
-
 		self.worldObjects.sort(sortArrByUpdates);
 		var worldObjectsLength = getArrVisibleLength(self.worldObjects());
 		pageIndex += i;
@@ -221,7 +234,7 @@ function handleHash(propStr){
 	else vwfPortalModel.currentAdminItem(false);
 }
 
-function checkFilter(textArr){
+function checkFilter(textArr, isFeatured){
 	
 	//textArr[2] is the owner of the world
 	if(userNameFilter && userNameFilter != textArr[2]){
@@ -236,7 +249,7 @@ function checkFilter(textArr){
 		return false;
 	}			
 	
-	else return true;
+	else return (!!isFeatured && !userNameFilter) || userNameFilter == textArr[2];
 }
 
 function getFlatIdArr(resetHotstate){
@@ -285,13 +298,13 @@ function removeAgoFromMoment(date){
 function showStates(cb){
 
 	$.getJSON("./vwfDataManager.svc/states",function(e){
-		
-		var tempArr = getFlatIdArr(), saveIndex = 0, i = 0, flatWorldArray = ko.toJS(vwfPortalModel.worldObjects);
+
+		var tempArr = getFlatIdArr(), saveIndex = 0, i = 0, flatWorldArray = ko.toJS(vwfPortalModel.worldObjects), saveDate = Date.now() - 31536000000;
 		for(var tmpKey in e){
 			
 			if(e.hasOwnProperty(tmpKey)){
 				
-				var id = tmpKey.substr(13,16), saveDate = Date.now() - 31536000000;
+				var id = tmpKey.substr(13,16);
 				e[tmpKey].id = id;
 
 				//The incoming data elements may not be in the same order as existing elements, get proper index
@@ -302,7 +315,7 @@ function showStates(cb){
 				e[tmpKey].description = e[tmpKey].description ? e[tmpKey].description : "";
 				
 				e[tmpKey].editVisible = ko.observable(false);				
-				e[tmpKey].isVisible = checkFilter([e[tmpKey].title, e[tmpKey].description, e[tmpKey].owner]);
+				e[tmpKey].isVisible = checkFilter([e[tmpKey].title, e[tmpKey].description, e[tmpKey].owner], e[tmpKey].featured);
 				
 				if(ko.isObservable(vwfPortalModel.worldObjects()[saveIndex])){
 				
