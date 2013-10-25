@@ -126,7 +126,7 @@ define(function ()
 							var logindata = JSON.parse(xhr.responseText);
 							var username = logindata.username;
 							
-							if(logindata.instances.indexOf(window.location.pathname) != -1)
+							if(logindata.instances.indexOf(_DataManager.getCurrentSession()) != -1)
 							{
 								_Notifier.alert('You are already logged into this space from another tab, browser or computer. This session will be a guest.');
 							}
@@ -255,11 +255,11 @@ define(function ()
 			if(needlogin)
 			{
 				//take ownership of the client connection
-				var S = window.location.pathname;
+				var S = _DataManager.getCurrentSession();
 				var data = jQuery.ajax(
 				{
 					type: 'GET',
-					url: PersistanceServer + "/vwfDataManager.svc/login?S=" + S + "&CID=" + vwf.moniker(),
+					url: PersistanceServer + "./vwfDataManager.svc/login?S=" + S + "&CID=" + vwf.moniker(),
 					data: null,
 					success: null,
 					async: false,
@@ -422,14 +422,16 @@ define(function ()
 			if (document[document.PlayerNumber + 'link']) vwf_view.kernel.deleteNode(document[document.PlayerNumber + 'link'].id);
 			//take ownership of the client connection
 			var profile = _DataManager.GetProfileForUser(_UserManager.GetCurrentUserName());
-			var S = window.location.pathname;
+			var S = _DataManager.getCurrentSession();
 			
+			_DataManager.saveToServer(true);
+
 			if(needlogin)
 			{	
 				var data = jQuery.ajax(
 				{
 					type: 'GET',
-					url: PersistanceServer + "/vwfDataManager.svc/logout?S=" + S + "&CID=" + vwf.moniker(),
+					url:   "./vwfDataManager.svc/logout?S=" + S + "&CID=" + vwf.moniker(),
 					data: null,
 					success: null,
 					async: false,
@@ -461,7 +463,7 @@ define(function ()
 						var logindata = JSON.parse(xhr.responseText);
 						var username = logindata.username;
 						
-						if(logindata.instances.indexOf(window.location.pathname) != -1)
+						if(logindata.instances.indexOf(_DataManager.getCurrentSession()) != -1)
 						{
 							_Notifier.alert('You are already logged into this space from another tab, browser or computer. This session will be a guest.');
 						}

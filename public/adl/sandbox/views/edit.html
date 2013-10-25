@@ -32,8 +32,11 @@
 						tempData.splice(i, 1);
 					}
 					
-					tempData[i].unix = moment(tempData[i].time).unix();
-					tempData[i].time = moment(tempData[i].time).format('MMM Do YYYY, h:mm a');
+					if(tempData[i])
+					{
+						tempData[i].unix = moment(tempData[i].time).unix();
+						tempData[i].time = moment(tempData[i].time).format('MMM Do YYYY, h:mm a');
+					}
 				}
 				
 				tempData.sort(function(a, b){
@@ -83,10 +86,11 @@
 		jQuery.ajax(
 		{
 			type: 'POST',
-			url: '/vwfDataManager.svc/statedata?SID='+sid,
+			url: './vwfDataManager.svc/statedata?SID='+sid,
 			data: JSON.stringify(statedata),
 			success:function(data,status,xhr)
 			{
+				
 				redirect();
 			},
 			error:function(xhr,status,err)

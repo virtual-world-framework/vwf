@@ -47,6 +47,9 @@ define(
 			_DataManager.saveToServer();
 		});
 		
+
+		
+
 		$('#MenuShareWorld').click(function (e)
 		{
 			
