@@ -7,3 +7,4 @@ cleanup.bat
 *.bak
 /build/*
 /data/*
+startup.bat

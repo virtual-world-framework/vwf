@@ -75,7 +75,7 @@
 		jQuery.ajax(
 		{
 			type: 'POST',
-			url: '/vwfDataManager.svc/publish?SID='+sid,
+			url: './vwfDataManager.svc/publish?SID='+sid,
 			data: JSON.stringify(statedata),
 			success:function(data,status,xhr)
 			{
@@ -83,6 +83,7 @@
 			},
 			error:function(xhr,status,err)
 			{
+				
 				$('#error').text("Error: " + xhr.responseText);
 			},
 			dataType: "text"

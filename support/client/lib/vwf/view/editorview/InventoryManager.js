@@ -285,7 +285,7 @@ define(function ()
 		}
 		this.addInventoryItem = function(data,title,type,cb)
 		{
-			$.ajax('/vwfDataManager.svc/inventoryitem?title=' + title +'&type=' + type,{
+			$.ajax('./vwfDataManager.svc/inventoryitem?title=' + title +'&type=' + type,{
 				
 				type:'POST',
 				success:function(err,d,xhr)
@@ -299,7 +299,7 @@ define(function ()
 		}
 		this.addGlobalInventoryItem = function(data,title,type,cb)
 		{
-			$.ajax('/vwfDataManager.svc/globalasset?title=' + title +'&type=' + type,{
+			$.ajax('./vwfDataManager.svc/globalasset?title=' + title +'&type=' + type,{
 				
 				type:'POST',
 				success:function(err,d,xhr)
@@ -441,7 +441,7 @@ define(function ()
 		this.renameInventoryItem = function(id,val,cb)
 		{
 			
-			$.ajax('/vwfDataManager.svc/inventoryitemmetadata?AID=' + id,{
+			$.ajax('./vwfDataManager.svc/inventoryitemmetadata?AID=' + id,{
 				
 				type:'POST',
 				success:function(err,d,xhr)

@@ -213,7 +213,7 @@ define(function ()
 			if (nodes.length > 0) var ret = jQuery.ajax(
 				{
 					type: 'POST',
-					url: PersistanceServer + '/vwfDataManager.svc/state?SID=' + _DataManager.getCurrentSession(),
+					url:  './vwfDataManager.svc/state?SID=' + _DataManager.getCurrentSession(),
 					data: JSON.stringify(nodes),
 					success: function(err,data,xhr)
 					{
@@ -296,7 +296,7 @@ define(function ()
 			var clients = null;
 			for (var i in instances)
 			{
-				if (i == window.location.pathname)
+				if (i == _DataManager.getCurrentSession())
 				{
 					clients = instances[i].clients;
 				}
