@@ -1253,7 +1253,7 @@ function serve (request, response)
 			case "datafile":{
 				global.FileCache.ServeFile(request,basedir+"DataFiles"+ pathAfterCommand,response,URL);		
 			} break;
-			case "thumbnail":{
+			case "texturethumbnail":{
 				global.FileCache.ServeFile(request,basedir+"Thumbnails"+libpath.sep + URL.query.UID,response,URL);		
 			} break;
 			case "state":{

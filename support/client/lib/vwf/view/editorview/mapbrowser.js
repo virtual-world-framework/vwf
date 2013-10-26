@@ -120,7 +120,7 @@ define(function ()
 				if (typeof _TextureList[i] == 'string')
 				{
 					$('#MapBrowser').append('<img id="MapChoice' + i + '" class="textureChoice" />');
-					$('#MapChoice' + i).attr('src', PersistanceServer + '/vwfDataManager.svc/thumbnail?UID=' + _TextureList[i]);
+					$('#MapChoice' + i).attr('src', PersistanceServer + '/vwfDataManager.svc/texturethumbnail?UID=' + _TextureList[i]);
 					$('#MapChoice' + i).attr('texture', PersistanceServer + '/vwfDataManager.svc/texture?UID=' + _TextureList[i]);
 					$('#MapChoice' + i).click(this.texturePicked);
 				}
