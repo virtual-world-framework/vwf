@@ -1465,7 +1465,7 @@ function startVWF(){
 	}
 	
 	var versioning = false;
-	p = process.argv.indexOf('-uv');
+	p = process.argv.indexOf('-cc');
 	if(p >= 0)
 	{
 		versioning = true;
