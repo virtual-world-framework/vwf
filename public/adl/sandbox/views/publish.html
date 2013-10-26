@@ -11,14 +11,78 @@
 			success:function(data,status,xhr)
 			{
 				var data = JSON.parse(xhr.responseText);
+				
 				$('#txtInstanceName').val(data.title);
 				$('#txtInstanceDescription').val(data.description);
+				if(data.publishSettings)
+				{
+
+					$('#txtInstanceDescription').prop('disabled', false);
+					$('#chkDefaultCamera').prop('disabled', false);
+					$('#chkSinglePlayer').prop('disabled', false);
+					$('#chkAllowTools').prop('disabled', false);
+					$('#chkAllowAnonymous').prop('disabled', false);
+					$('#chkCreateAvatar').prop('disabled', false);
+
+					$('#chkPublish')[0].checked = true;
+
+					if(data.publishSettings.allowAnonymous)
+						$('#chkAllowAnonymous')[0].checked = true;
+					if(data.publishSettings.allowTools)
+						$('#chkAllowTools')[0].checked = true;
+					if(data.publishSettings.singlePlayer)
+						$('#chkSinglePlayer')[0].checked = true;
+					if(data.publishSettings.createAvatar)
+						$('#chkCreateAvatar')[0].checked = true;
+					if(data.publishSettings.camera)
+					{
+						$('#chkDefaultCamera')[0].checked = true;
+						$('#txtCamera').show('fade');
+						$('#txtCamera').val(data.publishSettings.camera);
+					}
+
+	
+				}
 			},
 			error:function(xhr,status,err)
 			{
 				$('#error').text("Error: " + xhr.responseText);
 			}
 		});
+
+		$('#txtInstanceName').prop('disabled', true);
+		$('#txtInstanceDescription').prop('disabled', true);
+		$('#chkDefaultCamera').prop('disabled', true);
+		$('#chkSinglePlayer').prop('disabled', true);
+		$('#chkAllowTools').prop('disabled', true);
+		$('#chkAllowAnonymous').prop('disabled', true);
+		$('#chkCreateAvatar').prop('disabled', true);
+
+
+
+		$('#chkPublish').click(
+		 function(e){
+		   var checked = ($(this).is(':checked'));
+		   if(!checked)
+		   {
+		   		$('#txtInstanceDescription').prop('disabled', true);
+				$('#chkDefaultCamera').prop('disabled', true);
+				$('#chkSinglePlayer').prop('disabled', true);
+				$('#chkAllowTools').prop('disabled', true);
+				$('#chkAllowAnonymous').prop('disabled', true);
+				$('#chkCreateAvatar').prop('disabled', true);
+		   }
+		   	else
+		   	{
+		   		$('#txtInstanceDescription').prop('disabled', false);
+				$('#chkDefaultCamera').prop('disabled', false);
+				$('#chkSinglePlayer').prop('disabled', false);
+				$('#chkAllowTools').prop('disabled', false);
+				$('#chkAllowAnonymous').prop('disabled', false);
+				$('#chkCreateAvatar').prop('disabled', false);
+			}
+		 }
+		);
 
 		$('#chkDefaultCamera').click(
 		 function(e){
@@ -32,7 +96,6 @@
 		   		$('#txtCamera').show('fade');	
 		 }
 		);
-
 
 		$('#chkSinglePlayer').click(
 		 function(e){
@@ -62,15 +125,18 @@
 		var des = $('#txtInstanceDescription').val();
 		
 		var statedata = {};
-		statedata.title = name;
-		statedata.description = des;
-		statedata.SinglePlayer = $('#chkSinglePlayer')[0].checked;
-		statedata.camera = $('#txtCamera').val();
-		statedata.allowAnonymous = $('#chkAllowAnonymous')[0].checked;
-		statedata.createAvatar = $('#chkCreateAvatar')[0].checked;
-		statedata.allowTools = $('#chkAllowTools')[0].checked;
-		
-		
+
+		if($('#chkPublish')[0].checked == true)
+		{
+			statedata.title = name;
+			statedata.description = des;
+			statedata.SinglePlayer = $('#chkSinglePlayer')[0].checked;
+			statedata.camera = $('#txtCamera').val();
+			statedata.allowAnonymous = $('#chkAllowAnonymous')[0].checked;
+			statedata.createAvatar = $('#chkCreateAvatar')[0].checked;
+			statedata.allowTools = $('#chkAllowTools')[0].checked;
+		}else
+			statedata = null;
 		
 		jQuery.ajax(
 		{
@@ -97,6 +163,8 @@
 				<legend>Settings for the published world.</legend>
 				<input type='text' id='txtInstanceName' placeholder='World Name' class="col-md-5 form-control" /><br/><br/>
 				<textarea id='txtInstanceDescription' placeholder='Description' class="col-md-5 form-control"></textarea>
+				<br/>
+				<input type='checkbox' id='chkPublish' name='PublishWorld'></input><label for='PublishWorld'>Publish World</label>
 				<br/>
 				<input type='checkbox' id='chkAllowTools' name='AllowTools'></input><label for='AllowTools'>Allow Editor Tools</label>
 				<br/>

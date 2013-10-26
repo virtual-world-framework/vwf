@@ -22,6 +22,90 @@ define(
 			method: 'hover'
 		});
 		
+		$(document).on('setstatecomplete',function()
+		{
+
+			
+			//lets try to grab a screenshot if it's not set already
+
+			if(vwf.getProperty('index-vwf','owner') != _UserManager.GetCurrentUserName())
+			{
+				//don't bother if this is not the owner
+				return;
+			}
+
+				jQuery.ajax(
+				{
+					type: 'GET',
+					url: './vwfDataManager.svc/thumbnail?SID='+_DataManager.getCurrentSession().replace(/\//g,'_'),
+					
+					success:function(data,status,xhr)
+					{
+						//there is a thumb, don't do anything
+					},
+					error:function(xhr,status,err)
+					{
+						window.setTimeout(function(){
+							$('#SetThumbnail').click();
+
+						},10000)
+						
+						
+					},
+					dataType: "text"
+				});	
+
+
+
+		});
+
+		$('#SetThumbnail').click(function(e){
+
+			
+			if(vwf.getProperty('index-vwf','owner') != _UserManager.GetCurrentUserName())
+			{
+				alertify.alert('Sorry, only the world owner can set the thumbnail');
+				return;
+			}
+
+			var h = $('#index-vwf').attr('height');
+			var w = $('#index-vwf').attr('width');
+			_dRenderer.setSize(256,256);
+			_dView.getCamera().aspect = 1;
+			
+			window.takeimage = function()
+			{
+
+				var img = $('#index-vwf')[0].toDataURL();
+				_dRenderer.setSize(w,h);
+
+				
+				jQuery.ajax(
+				{
+					type: 'POST',
+					url: './vwfDataManager.svc/thumbnail?SID='+_DataManager.getCurrentSession().replace(/\//g,'_'),
+					data: img,
+					success:function(data,status,xhr)
+					{
+						
+					},
+					error:function(xhr,status,err)
+					{
+						
+						
+					},
+					dataType: "text"
+				});	
+				_dView.unbind('postrender',takeimage);
+				$(window).resize();
+			}
+			_dView.bind('postrender',takeimage);
+
+			
+
+		});
+
+
 		$('#MenuEn').click(function (e)
 		{
 			localStorage.setItem("language","en");

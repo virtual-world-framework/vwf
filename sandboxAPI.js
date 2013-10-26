@@ -732,7 +732,14 @@ function RestoreBackupState(URL, SID, response){
 //This is just a copy with some special settings
 function Publish(URL, SID, publishdata, response){
 
+	try{
 	publishdata = JSON.parse(publishdata);
+	}catch(e){
+
+		if(publishdata != 'null')
+			respond(response,500,'Bad format');
+
+	}
 	if(!URL.loginData)
 	{
 		respond(response,401,'Anonymous users cannot copy instances');
@@ -754,13 +761,6 @@ function Publish(URL, SID, publishdata, response){
 			return;
 		}
 		
-		//Make sure the world is not already published
-		if(state.publishSettings)
-		{
-			respond(response,500,'Cannot publish a world that has already been published');
-			return;
-		}
-		
 		//Make sure that the logged in user is the owner of the world they are trying to publish
 		if(state.owner != URL.loginData.UID)
 		{
@@ -768,16 +768,20 @@ function Publish(URL, SID, publishdata, response){
 			return;
 		}
 		
+		var publishSettings = null;
 		//The settings  for the published state. 
 		//have to handle these in the client side code, with some enforcement at the server
-		var singlePlayer = publishdata.SinglePlayer;
-		var camera = publishdata.camera;
-		var allowAnonymous = publishdata.allowAnonymous;
-		var createAvatar = publishdata.createAvatar;
-		var allowTools = publishdata.allowTools;
+		console.log(publishdata);
+		if(publishdata)
+		{
+			var singlePlayer = publishdata.SinglePlayer;
+			var camera = publishdata.camera;
+			var allowAnonymous = publishdata.allowAnonymous;
+			var createAvatar = publishdata.createAvatar;
+			var allowTools = publishdata.allowTools;
 		
-		var publishSettings = {singlePlayer:singlePlayer,camera:camera,allowAnonymous:allowAnonymous,createAvatar:createAvatar,allowTools:allowTools};
-		
+			 publishSettings = {singlePlayer:singlePlayer,camera:camera,allowAnonymous:allowAnonymous,createAvatar:createAvatar,allowTools:allowTools};
+		}
 		//publish the state, and get the new id for the pubished state
 		DAL.Publish(SID, publishSettings, function(newId){
 		
@@ -791,16 +795,70 @@ function Publish(URL, SID, publishdata, response){
 					return;
 				}
 				
-				statedata.title = publishdata.title;
-				statedata.description = publishdata.description;
-				//Should not need to check permission again
-				DAL.updateInstance(newId,statedata,function()
+				if(publishdata)
+				{
+					statedata.title = publishdata.title;
+					statedata.description = publishdata.description;
+					//Should not need to check permission again
+					DAL.updateInstance(newId,statedata,function()
+					{
+						respond(response,200,newId);
+					});
+				}else
 				{
 					respond(response,200,newId);
-				});
+				}
 			});	
 		});
 	});
+}
+
+function SaveThumbnail(URL,SID,body,response)
+{
+
+
+	if(!URL.loginData)
+	{
+		respond(response,401,'Anonymous users cannot delete instances');
+		return;
+	}
+
+	var data = body.replace(/^data:image\/\w+;base64,/, "");
+	var buf = new Buffer(data, 'base64');
+	SID = SID ? SID : request.url.query.SID;
+	if(SID.length == 16){
+		SID = '_adl_sandbox_' + SID + '_';
+	}
+	DAL.getInstance(SID,function(state)
+	{
+		if(state.owner != URL.loginData.UID && URL.loginData.UID != global.adminUID)
+		{
+			respond(response,401,'User does not have permission to edit instance');
+			return;
+		}else
+		{
+			var filename = datapath + libpath.sep+"States"+libpath.sep+ SID + libpath.sep + "thumbnail.png";
+			fs.writeFile(filename, buf,function(err)
+			{
+
+				if(err)
+				respond(response,500,err.toString());
+				else	
+				respond(response,200,'');
+
+			});
+		}
+	});
+}
+
+function GetThumbnail(request,SID,response)
+{
+
+	SID = SID ? SID : request.url.query.SID;
+	if(SID.length == 16){
+		SID = '_adl_sandbox_' + SID + '_';
+	}
+	global.FileCache.ServeFile(request,datapath + libpath.sep+"States"+libpath.sep+ SID + libpath.sep + "thumbnail.png" ,response,request.url);		
 }
 
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
@@ -1189,6 +1247,9 @@ function serve (request, response)
 			case "texture":{
 				global.FileCache.ServeFile(request,basedir+"Textures"+libpath.sep+ URL.query.UID,response,URL);		
 			} break;
+			case "thumbnail":{
+				GetThumbnail(request,SID,response);	
+			} break;
 			case "datafile":{
 				global.FileCache.ServeFile(request,basedir+"DataFiles"+ pathAfterCommand,response,URL);		
 			} break;
@@ -1325,15 +1386,22 @@ function serve (request, response)
 		
 		//Have to do this here! throw does not work quite as you would think 
 		//with all the async stuff. Do error checking first.
-		try{
-			JSON.parse(body);
-		}catch(e)
+		if(command != 'thumbnail')   //excpetion for the base64 encoded thumbnails
 		{
-			respond(response,500,"Error in post: data is not json");
-			return;
+			try{
+				JSON.parse(body);
+			}catch(e)
+			{
+				respond(response,500,"Error in post: data is not json");
+				return;
+			}
 		}
 		switch(command)
 		{	
+
+			case "thumbnail":{
+				SaveThumbnail(URL,SID,body,response);	
+			} break;
 			case "state":{
 				SaveState(URL,SID,body,response);
 			}break;

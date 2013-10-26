@@ -1156,52 +1156,12 @@ function Publish(id, publishSettings, cb)
 		
 		if(instance){
 			//create a new ID for the published world
-			var newId = '_adl_sandbox_' + makeid() + '_';
-			instance.featured = false;
-			instance.publishedFrom = id;
-			delete instance.clonedFrom;
-			delete instance.children;
-			instance.created = new Date();
 			instance.publishSettings = publishSettings;
-			createInstance (newId, instance, function(success){
-				if(success){
-					var oldStateFile = datapath + libpath.sep + 'States' +libpath.sep + id + libpath.sep+'state', newStateFile = datapath + libpath.sep+'States'+libpath.sep + newId + libpath.sep + 'state';
-					
-					fs.readFile(oldStateFile,function(err, olddata)
-					{
-						//olddata may not exist..
-						if(!olddata || err){
-							cb(newId);
-							return;
-						}
-						//set the publish settings on the state file as well, just for grins.
-						var oldstate = JSON.parse(olddata);
-						oldstate[oldstate.length-1].publishSettings = publishSettings;
-						var newstate = JSON.stringify(oldstate);
-						fs.writeFile(newStateFile, newstate, function(err)
-						{
-						
-							//get the orignial instance and record the new one as a child
-							getInstance(id, function(instance){
-							
-								if(!instance.children)
-									instance.children = [];
-								instance.children.push(newId);
-								
-								updateInstance(id,instance,function()
-								{
-									cb(newId);
-								});
-							});
-							
-						});
-					});
-				}
-				
-				else cb(false);
+			updateInstance(id,instance,function()
+			{
+				cb(id);
 			});
 		}
-		
 		else cb(false);	
 	});
 
