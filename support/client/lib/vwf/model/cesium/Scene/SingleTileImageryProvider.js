@@ -1,21 +1,25 @@
 /*global define*/
 define([
         '../Core/defaultValue',
+        '../Core/defined',
         '../Core/loadImage',
         '../Core/writeTextToCanvas',
         '../Core/DeveloperError',
         '../Core/Event',
         '../Core/Extent',
+        './Credit',
         './GeographicTilingScheme',
         './TileProviderError',
         '../ThirdParty/when'
     ], function(
         defaultValue,
+        defined,
         loadImage,
         writeTextToCanvas,
         DeveloperError,
         Event,
         Extent,
+        Credit,
         GeographicTilingScheme,
         TileProviderError,
         when) {
@@ -30,7 +34,7 @@ define([
      *
      * @param {String} description.url The url for the tile.
      * @param {Extent} [description.extent=Extent.MAX_VALUE] The extent, in radians, covered by the image.
-     * @param {String} [description.credit] A string crediting the data source, which is displayed on the canvas.
+     * @param {Credit|String} [description.credit] A credit for the data source, which is displayed on the canvas.
      * @param {Object} [description.proxy] A proxy to use for requests. This object is expected to have a getURL function which returns the proxied URL, if needed.
      *
      * @exception {DeveloperError} description.url is required.
@@ -45,7 +49,7 @@ define([
         description = defaultValue(description, {});
 
         var url = description.url;
-        if (typeof url === 'undefined') {
+        if (!defined(url)) {
             throw new DeveloperError('url is required.');
         }
 
@@ -72,15 +76,15 @@ define([
         this._ready = false;
 
         var imageUrl = url;
-        if (typeof proxy !== 'undefined') {
+        if (defined(proxy)) {
             imageUrl = proxy.getURL(imageUrl);
         }
 
-        if (typeof description.credit !== 'undefined') {
-            this._logo = writeTextToCanvas(description.credit, {
-                font : '12px sans-serif'
-            });
+        var credit = description.credit;
+        if (typeof credit === 'string') {
+            credit = new Credit(credit);
         }
+        this._credit = credit;
 
         var that = this;
         var error;
@@ -305,20 +309,15 @@ define([
     };
 
     /**
-     * Gets the logo to display when this imagery provider is active.  Typically this is used to credit
+     * Gets the credit to display when this imagery provider is active.  Typically this is used to credit
      * the source of the imagery.  This function should not be called before {@link SingleTileImageryProvider#isReady} returns true.
      *
      * @memberof SingleTileImageryProvider
      *
-     * @returns {Image|Canvas} A canvas or image containing the log to display, or undefined if there is no logo.
-     *
-     * @exception {DeveloperError} <code>getLogo</code> must not be called before the imagery provider is ready.
+     * @returns {Credit} The credit, or undefined if no credit exists
      */
-    SingleTileImageryProvider.prototype.getLogo = function() {
-        if (!this._ready) {
-            throw new DeveloperError('getLogo must not be called before the imagery provider is ready.');
-        }
-        return this._logo;
+    SingleTileImageryProvider.prototype.getCredit = function() {
+        return this._credit;
     };
 
     return SingleTileImageryProvider;

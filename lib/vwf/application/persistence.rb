@@ -17,29 +17,52 @@
 
 class VWF::Application::Persistence < Sinatra::Base
 
+  require "vwf/storage"
+  
   def initialize( root, env )
     super nil
     @root = root
     @env = env
+    @storage = VWF::Storage.new()
   end
 
+  get "/saves" do
+    content_type :json
+    # List saves. First need to determine if we're running per instance or across entire application.
+    result = [ ]
+    if @env[ 'vwf.instance' ]
+      # Listing all saves from this particular instance.
+      instance_save_names = @storage.list_instance_save_states( @env[ 'vwf.root' ], @env[ 'vwf.application' ], @env[ 'vwf.instance' ] )
+      instance_save_names.each do | instance_save_name |
+        result.push generate_save_hash( request.scheme, request.host_with_port, @env[ 'vwf.root' ], @env[ 'vwf.application' ], @env[ 'vwf.instance' ], instance_save_name )
+      end
+    else
+	  result = { }
+      application_save_states = @storage.list_application_save_states( @env[ 'vwf.root' ], @env[ 'vwf.application' ] )
+      application_save_states.each do | instance_id, instance_save_names |
+	    instance_save_array = [ ]
+        instance_save_names.each do | instance_save_name |
+          instance_save_array.push generate_save_hash( request.scheme, request.host_with_port, @env[ 'vwf.root' ], @env[ 'vwf.application' ], instance_id, instance_save_name )
+        end
+		result[ instance_id ] = instance_save_array
+      end
+    end
+    result.to_json
+  end
   
   get "/listallsaves" do
     result = recursiveSavesInDirectory( request.scheme, request.host_with_port, "" )
-    result.compact
-    result.to_json
+    result.compact.to_json
   end
   
   get "/listdescendentsaves" do
     result = recursiveSavesInDirectory( request.scheme, request.host_with_port, request.env["vwf.root"] )
-    result.compact
-    result.to_json  
+    result.compact.to_json
   end
 
   get "/listsaves" do
     result = savesInDirectory( request.scheme, request.host_with_port, request.env["vwf.root"] )
-    result.compact
-    result.to_json
+    result.compact.to_json
   end
 
   get "/load/:loadname/:loadrevision" do
@@ -104,6 +127,24 @@ class VWF::Application::Persistence < Sinatra::Base
   
   helpers do
   
+    def generate_save_hash( scheme, host_with_port, public_path, application, instance, save_name )
+      result = {}
+      result[ "name" ] = save_name
+      result[ "url" ] = scheme + "://" + host_with_port + public_path + "/" + application + "/" + instance + "/saves/" + save_name
+      result[ "vwf_info" ] = {}
+      result[ "vwf_info" ][ "public_path" ] = public_path
+      result[ "vwf_info" ][ "application" ] = application
+      result[ "vwf_info" ][ "path_to_application" ] = public_path + "/" + application
+      result[ "vwf_info" ][ "instance" ] = instance
+      metadata = @storage.get_save_metadata( public_path, application, instance, save_name )
+      if metadata.nil?
+        result[ "metadata" ] = {}
+      else
+        result[ "metadata" ] = metadata
+      end
+      result
+    end
+    
     def random_instance_id  # TODO: don't count on this for security; migrate to a proper instance id, in a cookie, at least twice as long, and with verified randomness
       "%08x" % rand( 1 << 32 ) + "%08x" % rand( 1 << 32 ) # rand has 52 bits of randomness; call twice to get 64 bits
     end

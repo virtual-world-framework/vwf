@@ -193,17 +193,23 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
             var property = node.properties[ propertyName ] = {
                 name: propertyName,
-                value: propertyValue,
+                rawValue: propertyValue,
+                value: undefined,
+                getValue: function() {
+                    var propertyValue;
+                    if ( this.value == undefined ) {
+                        try {
+                            propertyValue = utility.transform( this.rawValue, utility.transforms.transit );
+                            this.value = JSON.stringify( propertyValue );
+                        } catch (e) {
+                            this.logger.warnx( "createdProperty", nodeID, this.propertyName, this.rawValue,
+                                "stringify error:", e.message );
+                            this.value = this.rawValue;
+                        }
+                    }
+                    return this.value;
+                }
             };
-
-            try {
-                propertyValue = utility.transform( propertyValue, utility.transforms.transit );
-                node.properties[ propertyName ].value = JSON.stringify( propertyValue );
-            } catch (e) {
-                this.logger.warnx( "createdProperty", nodeID, propertyName, propertyValue,
-                    "stringify error:", e.message );
-                node.properties[ propertyName ].value = propertyValue;
-            }
             
             node.properties.push( property );
         },
@@ -223,20 +229,16 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         satProperty: function (nodeID, propertyName, propertyValue) {
             var node = this.nodes[ nodeID ];
             if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
-            try {
-                propertyValue = utility.transform( propertyValue, utility.transforms.transit );
-                node.properties[ propertyName ].value = JSON.stringify( propertyValue );
-            } catch (e) {
-                this.logger.warnx( "satProperty", nodeID, propertyName, propertyValue,
-                    "stringify error:", e.message );
-                node.properties[ propertyName ].value = propertyValue;
-            }
-
-            var nodeIDAttribute = $.encoder.encodeForAlphaNumeric(nodeID); // $.encoder.encodeForHTMLAttribute("id", nodeID, true);
-            var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", propertyName, true);
+            node.properties[ propertyName ].value = undefined;
+            node.properties[ propertyName ].rawValue = propertyValue;
             
-            // No need to escape propertyValue, because .val does its own escaping
-            $('#input-' + nodeIDAttribute + '-' + propertyNameAttribute).val(node.properties[ propertyName ].value);
+            if ( ( this.editorView == 1 ) && ( this.currentNodeID == nodeID ) ) {
+                var nodeIDAttribute = $.encoder.encodeForAlphaNumeric(nodeID); // $.encoder.encodeForHTMLAttribute("id", nodeID, true);
+                var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", propertyName, true);
+            
+                // No need to escape propertyValue, because .val does its own escaping
+                $( '#input-' + nodeIDAttribute + '-' + propertyNameAttribute ).val( node.properties[ propertyName ].getValue() );
+            }
         },
         
         //gotProperty: [ /* nodeID, propertyName, propertyValue */ ],
@@ -496,6 +498,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         if (this.editorOpen && this.editorView == 1) // Hierarchy view open
         {
             $(topdownName).hide('slide', {direction: 'right'}, 175);
+            $(topdownName).empty();
             $(this.clientList).hide();
             $(this.timeline).hide();
             $(this.about).hide();
@@ -721,7 +724,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", node.properties[i].name, true);
                 var propertyNameAlpha = $.encoder.encodeForAlphaNumeric(node.properties[i].name);
                 var propertyNameHTML = $.encoder.encodeForHTML(node.properties[i].name);
-                var propertyValueAttribute = $.encoder.encodeForHTMLAttribute("val", node.properties[i].value, true);
+                var propertyValueAttribute = $.encoder.encodeForHTMLAttribute("val", node.properties[i].getValue(), true);
                 $('#clientProperties').append("<div id='" + nodeIDAlpha + "-" + propertyNameAlpha + "' class='propEntry'><table><tr><td><b>" + propertyNameHTML + " </b></td><td><input type='text' class='input_text' id='input-" + nodeIDAlpha + "-" + propertyNameAlpha + "' value='" + propertyValueAttribute + "' data-propertyName='" + propertyNameAttribute + "' readonly></td></tr></table></div>");
             }
         }
@@ -850,7 +853,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", node.properties[i].name, true);
                 var propertyNameAlpha = $.encoder.encodeForAlphaNumeric(node.properties[i].name);
                 var propertyNameHTML = $.encoder.encodeForHTML(node.properties[i].name);
-                var propertyValueAttribute = $.encoder.encodeForHTMLAttribute("val", node.properties[i].value, true);
+                var propertyValueAttribute = $.encoder.encodeForHTMLAttribute("val", node.properties[i].getValue(), true);
                 $('#properties').append("<div id='" + nodeIDAlpha + "-" + propertyNameAlpha + "' class='propEntry'><table><tr><td><b>" + propertyNameHTML + " </b></td><td><input type='text' class='input_text' id='input-" + nodeIDAlpha + "-" + propertyNameAlpha + "' value='" + propertyValueAttribute + "' data-propertyName='" + propertyNameAttribute + "'></td></tr></table></div>");
             
                 $('#input-' + nodeIDAlpha + '-' + propertyNameAttribute).change( function(evt) {

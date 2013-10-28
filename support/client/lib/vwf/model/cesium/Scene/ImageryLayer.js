@@ -1,6 +1,7 @@
 /*global define*/
 define([
         '../Core/defaultValue',
+        '../Core/defined',
         '../Core/destroyObject',
         '../Core/BoundingRectangle',
         '../Core/ComponentDatatype',
@@ -8,8 +9,11 @@ define([
         '../Core/Cartesian4',
         '../Core/Color',
         '../Core/Extent',
+        '../Core/FeatureDetection',
         '../Core/Math',
         '../Core/PrimitiveType',
+        '../Core/Geometry',
+        '../Core/GeometryAttribute',
         '../Renderer/BufferUsage',
         '../Renderer/MipmapHint',
         '../Renderer/TextureMagnificationFilter',
@@ -28,6 +32,7 @@ define([
         '../Shaders/ReprojectWebMercatorVS'
     ], function(
         defaultValue,
+        defined,
         destroyObject,
         BoundingRectangle,
         ComponentDatatype,
@@ -35,8 +40,11 @@ define([
         Cartesian4,
         Color,
         Extent,
+        FeatureDetection,
         CesiumMath,
         PrimitiveType,
+        Geometry,
+        GeometryAttribute,
         BufferUsage,
         MipmapHint,
         TextureMagnificationFilter,
@@ -114,6 +122,10 @@ define([
      *        for texture filtering.  If this parameter is not specified, the maximum anisotropy supported
      *        by the WebGL stack will be used.  Larger values make the imagery look better in horizon
      *        views.
+     * @param {Number} [description.minimumTerrainLevel] The minimum terrain level-of-detail at which to show this imagery layer,
+     *                 or undefined to show it at all levels.  Level zero is the least-detailed level.
+     * @param {Number} [description.maximumTerrainLevel] The maximum terrain level-of-detail at which to show this imagery layer,
+     *                 or undefined to show it at all levels.  Level zero is the least-detailed level.
      */
     var ImageryLayer = function ImageryLayer(imageryProvider, description) {
         this._imageryProvider = imageryProvider;
@@ -212,6 +224,9 @@ define([
          * @default true
          */
         this.show = defaultValue(description.show, true);
+
+        this._minimumTerrainLevel = description.minimumTerrainLevel;
+        this._maximumTerrainLevel = description.maximumTerrainLevel;
 
         this._extent = defaultValue(description.extent, Extent.MAX_VALUE);
         this._maximumAnisotropy = description.maximumAnisotropy;
@@ -315,7 +330,7 @@ define([
      *
      * @memberof ImageryLayer
      *
-     * @return {Boolean} True if this object was destroyed; otherwise, false.
+     * @returns {Boolean} True if this object was destroyed; otherwise, false.
      *
      * @see ImageryLayer#destroy
      */
@@ -333,7 +348,7 @@ define([
      *
      * @memberof ImageryLayer
      *
-     * @return {undefined}
+     * @returns {undefined}
      *
      * @exception {DeveloperError} This object was destroyed, i.e., destroy() was called.
      *
@@ -361,9 +376,16 @@ define([
      * @returns {Boolean} true if this layer overlaps any portion of the terrain tile; otherwise, false.
      */
     ImageryLayer.prototype._createTileImagerySkeletons = function(tile, terrainProvider, insertionPoint) {
+        if (defined(this._minimumTerrainLevel) && tile.level < this._minimumTerrainLevel) {
+            return false;
+        }
+        if (defined(this._maximumTerrainLevel) && tile.level > this._maximumTerrainLevel) {
+            return false;
+        }
+
         var imageryProvider = this._imageryProvider;
 
-        if (typeof insertionPoint === 'undefined') {
+        if (!defined(insertionPoint)) {
             insertionPoint = tile.imagery.length;
         }
 
@@ -427,7 +449,7 @@ define([
             imageryLevel = maximumLevel;
         }
 
-        if (typeof imageryProvider.getMinimumLevel !== 'undefined') {
+        if (defined(imageryProvider.getMinimumLevel)) {
             var minimumLevel = imageryProvider.getMinimumLevel();
             if (imageryLevel < minimumLevel) {
                 imageryLevel = minimumLevel;
@@ -449,23 +471,20 @@ define([
         var veryCloseY = (tile.extent.east - tile.extent.west) / 512.0;
 
         var northwestTileExtent = imageryTilingScheme.tileXYToExtent(northwestTileCoordinates.x, northwestTileCoordinates.y, imageryLevel);
-        if (Math.abs(northwestTileExtent.south - extent.north) < veryCloseY && northwestTileCoordinates.y < southeastTileCoordinates.y) {
+        if (Math.abs(northwestTileExtent.south - tile.extent.north) < veryCloseY && northwestTileCoordinates.y < southeastTileCoordinates.y) {
             ++northwestTileCoordinates.y;
         }
-        if (Math.abs(northwestTileExtent.east - extent.west) < veryCloseX && northwestTileCoordinates.x < southeastTileCoordinates.x) {
+        if (Math.abs(northwestTileExtent.east - tile.extent.west) < veryCloseX && northwestTileCoordinates.x < southeastTileCoordinates.x) {
             ++northwestTileCoordinates.x;
         }
 
         var southeastTileExtent = imageryTilingScheme.tileXYToExtent(southeastTileCoordinates.x, southeastTileCoordinates.y, imageryLevel);
-        if (Math.abs(southeastTileExtent.north - extent.south) < veryCloseY && southeastTileCoordinates.y > northwestTileCoordinates.y) {
+        if (Math.abs(southeastTileExtent.north - tile.extent.south) < veryCloseY && southeastTileCoordinates.y > northwestTileCoordinates.y) {
             --southeastTileCoordinates.y;
         }
-        if (Math.abs(southeastTileExtent.west - extent.east) < veryCloseX && southeastTileCoordinates.x > northwestTileCoordinates.x) {
+        if (Math.abs(southeastTileExtent.west - tile.extent.east) < veryCloseX && southeastTileCoordinates.x > northwestTileCoordinates.x) {
             --southeastTileCoordinates.x;
         }
-
-        var imageryMaxX = imageryTilingScheme.getNumberOfXTilesAtLevel(imageryLevel);
-        var imageryMaxY = imageryTilingScheme.getNumberOfYTilesAtLevel(imageryLevel);
 
         // Create TileImagery instances for each imagery tile overlapping this terrain tile.
         // We need to do all texture coordinate computations in the imagery tile's tiling scheme.
@@ -482,11 +501,11 @@ define([
         // If this is the northern-most or western-most tile in the imagery tiling scheme,
         // it may not start at the northern or western edge of the terrain tile.
         // Calculate where it does start.
-        if (!this.isBaseLayer() && northwestTileCoordinates.x === 0) {
+        if (!this.isBaseLayer() && Math.abs(imageryExtent.west - tile.extent.west) >= veryCloseX) {
             maxU = Math.min(1.0, (imageryExtent.west - terrainExtent.west) / (terrainExtent.east - terrainExtent.west));
         }
 
-        if (!this.isBaseLayer() && northwestTileCoordinates.y === 0) {
+        if (!this.isBaseLayer() && Math.abs(imageryExtent.north - tile.extent.north) >= veryCloseY) {
             minV = Math.max(0.0, (imageryExtent.north - terrainExtent.south) / (terrainExtent.north - terrainExtent.south));
         }
 
@@ -502,7 +521,7 @@ define([
             // and there are more imagery tiles to the east of this one, the maxU
             // should be 1.0 to make sure rounding errors don't make the last
             // image fall shy of the edge of the terrain tile.
-            if (i === southeastTileCoordinates.x && (this.isBaseLayer() || i < imageryMaxX - 1)) {
+            if (i === southeastTileCoordinates.x && (this.isBaseLayer() || Math.abs(imageryExtent.east - tile.extent.east) < veryCloseX)) {
                 maxU = 1.0;
             }
 
@@ -518,7 +537,7 @@ define([
                 // and there are more imagery tiles to the south of this one, the minV
                 // should be 0.0 to make sure rounding errors don't make the last
                 // image fall shy of the edge of the terrain tile.
-                if (j === southeastTileCoordinates.y && (this.isBaseLayer() || j < imageryMaxY - 1)) {
+                if (j === southeastTileCoordinates.y && (this.isBaseLayer() || Math.abs(imageryExtent.south - tile.extent.south) < veryCloseY)) {
                     minV = 0.0;
                 }
 
@@ -574,7 +593,7 @@ define([
         var that = this;
 
         function success(image) {
-            if (typeof image === 'undefined') {
+            if (!defined(image)) {
                 return failure();
             }
 
@@ -603,7 +622,7 @@ define([
             imagery.state = ImageryState.TRANSITIONING;
             var imagePromise = imageryProvider.requestImage(imagery.x, imagery.y, imagery.level);
 
-            if (typeof imagePromise === 'undefined') {
+            if (!defined(imagePromise)) {
                 // Too many parallel requests, so postpone loading tile.
                 imagery.state = ImageryState.UNLOADED;
                 return;
@@ -629,9 +648,9 @@ define([
 
         // If this imagery provider has a discard policy, use it to check if this
         // image should be discarded.
-        if (typeof imageryProvider.getTileDiscardPolicy !== 'undefined') {
+        if (defined(imageryProvider.getTileDiscardPolicy)) {
             var discardPolicy = imageryProvider.getTileDiscardPolicy();
-            if (typeof discardPolicy !== 'undefined') {
+            if (defined(discardPolicy)) {
                 // If the discard policy is not ready yet, transition back to the
                 // RECEIVED state and we'll try again next time.
                 if (!discardPolicy.isReady()) {
@@ -685,7 +704,7 @@ define([
         // Use mipmaps if this texture has power-of-two dimensions.
         if (CesiumMath.isPowerOfTwo(texture.getWidth()) && CesiumMath.isPowerOfTwo(texture.getHeight())) {
             var mipmapSampler = context.cache.imageryLayer_mipmapSampler;
-            if (typeof mipmapSampler === 'undefined') {
+            if (!defined(mipmapSampler)) {
                 var maximumSupportedAnisotropy = context.getMaximumTextureFilterAnisotropy();
                 mipmapSampler = context.cache.imageryLayer_mipmapSampler = context.createSampler({
                     wrapS : TextureWrap.CLAMP,
@@ -699,7 +718,7 @@ define([
             texture.setSampler(mipmapSampler);
         } else {
             var nonMipmapSampler = context.cache.imageryLayer_nonMipmapSampler;
-            if (typeof nonMipmapSampler === 'undefined') {
+            if (!defined(nonMipmapSampler)) {
                 nonMipmapSampler = context.cache.imageryLayer_nonMipmapSampler = context.createSampler({
                     wrapS : TextureWrap.CLAMP,
                     wrapT : TextureWrap.CLAMP,
@@ -717,7 +736,7 @@ define([
         var cacheKey = getImageryCacheKey(x, y, level);
         var imagery = this._imageryCache[cacheKey];
 
-        if (typeof imagery === 'undefined') {
+        if (!defined(imagery)) {
             imagery = new Imagery(this, x, y, level, imageryExtent);
             this._imageryCache[cacheKey] = imagery;
         }
@@ -767,12 +786,12 @@ define([
         oneOverMercatorHeight : 0
     };
 
-    var float32ArrayScratch = typeof Float32Array !== 'undefined' ? new Float32Array(1) : undefined;
+    var float32ArrayScratch = FeatureDetection.supportsTypedArrays() ? new Float32Array(1) : undefined;
 
     function reprojectToGeographic(imageryLayer, context, texture, extent) {
         var reproject = context.cache.imageryLayer_reproject;
 
-        if (typeof reproject === 'undefined') {
+        if (!defined(reproject)) {
             reproject = context.cache.imageryLayer_reproject = {
                 framebuffer : undefined,
                 vertexArray : undefined,
@@ -780,13 +799,13 @@ define([
                 renderState : undefined,
                 sampler : undefined,
                 destroy : function() {
-                    if (typeof this.framebuffer !== 'undefined') {
+                    if (defined(this.framebuffer)) {
                         this.framebuffer.destroy();
                     }
-                    if (typeof this.vertexArray !== 'undefined') {
+                    if (defined(this.vertexArray)) {
                         this.vertexArray.destroy();
                     }
-                    if (typeof this.shaderProgram !== 'undefined') {
+                    if (defined(this.shaderProgram)) {
                         this.shaderProgram.release();
                     }
                 }
@@ -814,26 +833,24 @@ define([
                 }
             }
 
-            var reprojectMesh = {
+            var reprojectGeometry = new Geometry({
                 attributes : {
-                    position : {
+                    position : new GeometryAttribute({
                         componentDatatype : ComponentDatatype.FLOAT,
                         componentsPerAttribute : 2,
                         values : positions
-                    }
+                    })
                 },
-                indexLists : [{
-                    primitiveType : PrimitiveType.TRIANGLES,
-                    values : TerrainProvider.getRegularGridIndices(256, 256)
-                }]
-            };
+                indices : TerrainProvider.getRegularGridIndices(256, 256),
+                primitiveType : PrimitiveType.TRIANGLES
+            });
 
             var reprojectAttribInds = {
                 position : 0
             };
 
-            reproject.vertexArray = context.createVertexArrayFromMesh({
-                mesh : reprojectMesh,
+            reproject.vertexArray = context.createVertexArrayFromGeometry({
+                geometry : reprojectGeometry,
                 attributeIndices : reprojectAttribInds,
                 bufferUsage : BufferUsage.STATIC_DRAW
             });
@@ -897,7 +914,7 @@ define([
         command.framebuffer = reproject.framebuffer;
         command.execute(context);
 
-        if ((typeof reproject.renderState === 'undefined') ||
+        if ((!defined(reproject.renderState)) ||
                 (reproject.renderState.viewport.width !== width) ||
                 (reproject.renderState.viewport.height !== height)) {
 
