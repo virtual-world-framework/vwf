@@ -143,6 +143,9 @@ height:315px;
 }
 #pageLogo {
 	padding: 10px 0;
+	background: url('../img/header.png');
+	height:158px;
+	width:100%;
 }
 #pageLogo h1, #pageLogo h2{
 
