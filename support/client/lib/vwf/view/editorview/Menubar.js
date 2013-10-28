@@ -70,14 +70,19 @@ define(
 
 			var h = $('#index-vwf').attr('height');
 			var w = $('#index-vwf').attr('width');
-			_dRenderer.setSize(256,256);
-			_dView.getCamera().aspect = 1;
+			_dRenderer.setSize(240,120);
+			var camera = _dView.getCamera();
+			var a = camera.aspect;
+			camera.aspect = 2;
+			camera.updateProjectionMatrix();
 			
 			window.takeimage = function()
 			{
 
 				var img = $('#index-vwf')[0].toDataURL();
 				_dRenderer.setSize(w,h);
+				camera.aspect = a;
+				camera.updateProjectionMatrix();
 
 				
 				jQuery.ajax(
