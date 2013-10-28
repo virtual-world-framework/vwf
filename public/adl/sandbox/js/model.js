@@ -242,11 +242,13 @@ function checkFilter(textArr, isFeatured){
 	}
 	
 	if(filter != ""){
-		for(var i = 0; i < textArr.length; i++){
-			if(textArr[i] && textArr[i].toLowerCase().indexOf(filter.toLowerCase()) != -1)
-				return true;
+		//debugger;
+		var filterArr = filter.split(" "), textStr = textArr.join();
+		for(var i = 0; i < filterArr.length; i++){
+			if(textStr.indexOf(filterArr[i]) == -1)
+				return false;
 		}
-		return false;
+		return true;
 	}			
 	
 	else return (!!isFeatured && !userNameFilter) || userNameFilter == textArr[2];
