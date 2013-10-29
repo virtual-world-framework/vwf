@@ -98,8 +98,10 @@ height:315px;
 
 #header{
 	width: 100%;
-	background-color: #C4DCEC;
-	border-bottom: 1px solid #A2C8E2;
+	/*background-color: #C4DCEC;
+	border-bottom: 1px solid #A2C8E2;*/
+	background-color: #4F89AA;
+	border-bottom: 1px solid #3784B9;
 	height: 25px;
 	clear:both;
 }
@@ -124,28 +126,39 @@ height:315px;
 }
 
 .linkMenu{
-	width: 100%;
-	clear: both;
-	padding-top: 22px;
-	border-bottom: 1px solid #EBEBEB;
-	border-top: 1px solid #EBEBEB;
-	margin-bottom: 30px;
+	width: 50%;
+	padding-top: 40px;
 	text-align: center;
 	height: 70px;
+	float:right;
 }
 
-.linkMenu a{
+.linkMenu a {
+	padding: 6px 10px;
+	margin: 0px 8px;
+	font-weight: normal;
+	text-shadow: 1px 1px 1px #999;
+	color: #fafafa;
+	font-size: 25px;
+}
 
-	font-size: 18px;
-	font-weight: bold;
-	margin: 0 20px;
-	text-align: center;
+.headerMenu,.headerMenu a{
+	color: #efefef;
+}
+#logo{
+	position:relative;
+	float:left;
+	top:-25px;
+	left:-20px;
+	z-index:3;
+	height:100px;
 }
 #pageLogo {
-	padding: 10px 0;
-	background: url('../img/header.png');
-	height:158px;
+	padding: 0;
+	background: #98B8E0;
+	height:100px;
 	width:100%;
+	overflow:visible;
 }
 #pageLogo h1, #pageLogo h2{
 
@@ -170,6 +183,7 @@ text-align:left;
 	border-bottom:1px solid #EBEBEB;
 	position:relative;
 	padding: 0;
+	border-top: 1px solid #84A0C4;
 }
 
 .divContent0{
@@ -531,16 +545,6 @@ display: block;
 
 	font-size: 17.5px;
 	font-weight:bold;
-}
-.linkMenu a {
-	background: #F7F7F7;
-	padding: 6px 25px;
-	border: 1px solid #DFDFDF;
-	margin: 0px 8px;
-	font-weight: normal;
-	text-shadow: 1px 1px 1px #ECECEC;
-	color: #3788C9;
-	border-radius: 4px;
 }
 #filter
 {

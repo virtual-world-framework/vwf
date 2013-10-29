@@ -242,13 +242,18 @@ function checkFilter(textArr, isFeatured){
 	}
 	
 	if(filter != ""){
-		//debugger;
-		var filterArr = filter.split(" "), textStr = textArr.join();
+		var filterArr = filter.split(" "), textStr = textArr.join(), spaceFix = false;
 		for(var i = 0; i < filterArr.length; i++){
-			if(textStr.indexOf(filterArr[i]) == -1)
+			if(textStr.indexOf(filterArr[i]) == -1){
 				return false;
+			}
+			
+			if(!spaceFix && filterArr[i] != ""){
+				spaceFix = true;
+			}
 		}
-		return true;
+
+		return spaceFix;
 	}			
 	
 	else return (!!isFeatured && !userNameFilter) || userNameFilter == textArr[2];
