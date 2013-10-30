@@ -1,73 +1,75 @@
-Virtual World Framework
-=====================
+# Virtual World Framework
 
----------------------
+The Virtual World Framework (VWF) allows you to build collaborative, immersive applications in the browser. VWF provides:
 
-The Virtual World Framework (VWF) is a fast, light-weight, web-based architecture for creating and distributing secure, scalable, component-based, and collaborative virtual spaces. It leverages existing web-based standards, infrastructure, and emerging technologies with the intent of establishing a powerful yet simple to use platform that is built on top of the next generation of web browsers. These technologies include:
+- Realtime state synchronization.
+- A set of drivers that support immersive applications - 3D, audio, video and modern graphics.
 
-* HTML 5 – a significant upgrade in expressive power for the web
-* WebGL – an integrated 3D graphics capability
-* WebSockets – providing a full TCP/IP connection between the client and server
-* JavaScript – the programming language of the web  
+VWF applications are written in JavaScript leveraging emerging web technologies such as WebGL, WebRTC, and WebSockets to provide a full 3D environment that is automatically synchronized across clients.
 
-The VWF serves as a replicated computing platform for multi-user interactive 2D and 3D components with a high degree of customizability of the environment and high bandwidth communication between users. These are environments that are focused on work and working together – whether for training, collaboration and/or entertainment. It is a zero-install platform, where additional software components can be added dynamically. VWF spaces can be embedded in virtually any application including web pages and emails. Furthermore, VWF spaces can embed existing applications and browsers. The next big 3D platform is simply the current world wide web with additional capabilities, and the Virtual World Framework embraces this ever growing technology.
+## Installation
 
----------------------
+**Install on Mac/Linux:**
 
-Installation/Upgrade Instructions
-=====================
+```
+curl https://get.virtual.wf | bash
+```
 
-Windows
--
-Download the latest VWF Windows Build zip file from: 
-<pre><code>http://virtualworldframework.com/web/downloads.html
-</code></pre>
+This command may be re-run to upgrade the installation to the latest version of VWF.
 
-and then execute the _run.bat_ file provided at the root level of the extracted folder.
+**Install on Windows:**
 
-Development Environment Setup and Manual Installation 
--
-For additional information please visit: http://www.virtual.wf/web/docs/install.html
+[Download and run the latest Windows installer](http://www.virtual.wf/web/downloads.html).
 
-Macintosh OS X
--
-NOTE: For OSX, please make sure you have XCode, and XCode Command Line Tools installed prior to executing the script below (https://developer.apple.com/xcode/).
+This exe may be re-run to upgrade the installation to the latest version of VWF.
 
-Perform the following shell command at a user shell prompt:
-<pre><code>sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_osx.sh  | bash
-</code></pre>
+For more complex installations, such as hacking on VWF core, please see our [Installation Instructions](http://www.virtual.wf/web/docs/install.html).
 
-This command may be re-executed to upgrade the installation to the latest version of VWF at any time.
+## Quick Start
 
-Ubuntu/Debian
--
-Perform the following shell command at a user shell prompt:
-<pre><code>sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_debian.sh  | bash
-</code></pre>
+Create a new VWF application.
 
-This command may be re-executed to upgrade the installation to the latest version of VWF at any time.
+```
+$ vwf create my-app
+```
 
-Red Hat Enterprise Linux
--
-Perform the following shell command at a user shell prompt:
-<pre><code>sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_redhat.sh  | bash
-</code></pre>
+Change directory into that app and run the application.
 
-This command may be re-executed to upgrade the installation to the latest version of VWF at any time.
+```
+$ cd my-app
+$ vwf
+```
 
+Your application is now up and running at [http://localhost:3000](http://localhost:3000).
 
-VWF Examples
-=====================
+To get started with VWF, check out [Getting Started](http://virtual.wf/docs).
 
-Upon installation completion, VWF examples may be executed via the browser at http://servername/web/catalog.html. Demo application code is located in the public directory. Please refer to http://virtual.wf/web/docs/readme.html for additional information.
+## Examples
 
+Watch our [screencast]() for an example of building an application quickly with VWF.
 
-VWF Branches
-=====================
+For more examples, check out our [demos](http://www.virtual.wf/web/catalog.html).
 
-There are currently four VWF branches available on github:
-* master 		- This branch contains a stable release of VWF. 
-* integration 	- This branch serves as the main location for merging features from development into the stable baseline. 
-* development 	- This branch contains the latest development and new features of the framework. 
+## Contributing
 
-For more information on Branches, and our available subdomains for your usage, please visit: http://forum.virtualworldframework.com/viewtopic.php?f=3&t=1841
+Our development process utilizes several branches:
+
+* `master`                - Stable release of VWF. Running on http://virtual.wf.
+* `integration`           - Integrationg testing features from development before merging into master. Running on http://integration.virtual.wf.
+* `development`           - The latest development and new features of the framework. Running on http://development.virtual.wf.
+* `feature/feature-name`  - Feature development is done on a feature branch before being merged back to development.
+
+When submitting a pull request, please use the `development` branch.
+
+Also, please be sure that your pull request conforms to our [Coding Standard](http://redmine.virtualworldframework.com/projects/vwf/wiki/JavaScript_Coding_Standard).
+
+## Community
+
+Keep track of development and community news.
+
+- Have a question about VWF? Ask a question on [StackOverflow](http://stackoverflow.com/questions/tagged/vwf).
+- in IRC on the irc.freenode.net server, in the #vwf channel.
+
+## License
+
+Copyright 2013 United States Government, as represented byd the Secretary of Defense, Under Secretary of Defense (Personnel & Readiness) licensed under the [Apache 2.0 License](https://github.com/virtual-world-framework/vwf/blob/master/LICENSE).
