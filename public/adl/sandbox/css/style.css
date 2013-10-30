@@ -126,9 +126,10 @@ height:315px;
 }
 
 .linkMenu{
-	width: 50%;
+	width: 460px;
 	padding-top: 40px;
-	text-align: center;
+	padding-right: 20px;
+	text-align: right;
 	height: 70px;
 	float:right;
 }
@@ -178,13 +179,14 @@ text-align:left;
 
 .sliderContainer{
 	height:368px;
-	width:1200px;
+	width:100%;
 	overflow:hidden;
 	border:none;
 	border-bottom:1px solid #EBEBEB;
 	position:relative;
 	padding: 0;
 	border-top: 1px solid #84A0C4;
+	box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.25);
 }
 
 .divContent0{
@@ -217,11 +219,13 @@ text-align:left;
 
 .slide-item{
 	height:368px;
-	width:1200px;
+	width:100%;
 	position:absolute;
 	float:left;
 	cursor: default;
 	z-index: 0;
+	background-size: 100% 368px;
+	background-repeat:no-repeat;
 }
 
 .slide-item div{

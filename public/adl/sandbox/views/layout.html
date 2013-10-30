@@ -7,11 +7,11 @@
 	<link rel="stylesheet" media="screen" type="text/css" href="{{root}}/css/alertify.core.css" />
 	<link rel="stylesheet" media="screen" type="text/css" href="{{root}}/css/alertify.default.css" />
 	<style>
-		@media (max-width: 1180px){
-			.sliderContainer{
+		@media (max-width: 1420px){
+			#gitBanner{
 				display: none;
 			}
-		}
+		}					
 	</style>
 	<!--[if !IE 7]>
 	<style type="text/css">
@@ -66,7 +66,7 @@
 	</script>
 	{{/home}}
 </head>
-<body>
+<body style="min-width:1000px;">
 	{{#home}}
 	<div id="loadOverlay">
 		<div id="overlayInner" style="position:absolute;top:50%;left:50%;"></div>
@@ -90,23 +90,25 @@
 				</div>
 			</div>
 		</div>		
-		<div class="container" style="box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.25);padding:0">
+		<div class="container" style="box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.25);padding:0;">
 			<div class="content container" style="border:none;padding:0;">
 				<div id="pageLogo">
 					<div id="logo">
-						<div style=" float:left;">
-							<img src="{{root}}/img/VWS_Logo.png" />
-						</div>
-						<div style=" margin-left:10px;margin-top:50px;float:left;">
-							<img src="{{root}}/img/VW_text.png" />
-							<img src="{{root}}/img/Sandbox_text.png" />
-						</div>
+						<a href="{{root}}">
+							<div style=" float:left;">
+								<img src="{{root}}/img/VWS_Logo.png" />
+							</div>
+							<div style=" margin-left:10px;margin-top:50px;float:left;">
+								<img src="{{root}}/img/VW_text.png" />
+								<img src="{{root}}/img/Sandbox_text.png" />
+							</div>
+						</a>
 					</div>
 					<div class="linkMenu">
-						<a href="/">Home</a>
+						<a href="{{root}}">Home</a> 
 						<a href="{{root}}/worlds">Worlds</a> 
 						<a href="http://www.youtube.com/watch?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2&v=aWRQJJnBi5c">Videos</a> 
-						<a href="{{root}}/help">Help</a> 	
+						<a href="{{root}}/help">Help</a>
 					</div>
 				</div>
 			</div>	
@@ -160,7 +162,7 @@
 			</div>
 		</div>
 	</div>
-	<a href="https://github.com/adlnet/Sandbox"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+	<a href="https://github.com/adlnet/Sandbox" id="gitBanner"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
 	<script type="text/javascript" src="{{root}}/js/alertify.min.js"></script>
 </body>
 </html>
