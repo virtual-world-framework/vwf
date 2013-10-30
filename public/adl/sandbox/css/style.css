@@ -402,12 +402,12 @@ text-align:left;
 	margin-bottom:15px;
 }
 
-.featuredInstance .boxContentWrapper{
+.featuredInstance .boxContentWrapper, .worldBox .boxContentWrapper{
 
 	padding: 0 5px;
 }
 
-.featuredInstance{
+.featuredInstance, .worldBox{
 	
 	border: 1px #E6E6E6 solid;
 	border-bottom: 1px #dfdfdf solid;
@@ -419,18 +419,7 @@ text-align:left;
 }
 
 .worldBox{
-
-	border: 1px #E6E6E6 solid;
-	border-bottom: 1px #dfdfdf solid;
 	background-color: #fDfDfD;
-	border-radius: 8px;
-	padding: 5px 5px 3px 5px;
-	max-height: 230px;
-	min-height: 230px;
-}
-.worldBox .boxContentWrapper{
-
-	padding: 0 5px;
 }
 
 .worldImage{
@@ -450,21 +439,12 @@ text-align:left;
 .editstate, .editstateGuest
 {
 	display: block;
-	margin-top: 31px;
+	margin-top: 0;
 	width:100%;
 	color: gray;
 }
-.editstate
-{
-	margin-top: 0;
-}
 
 .boxContentWrapper{
-	height: 86px;
-	max-height:86px;
-}
-
-.featuredInstance .boxContentWrapper{
 	height: 197px;
 	max-height:197px;
 }

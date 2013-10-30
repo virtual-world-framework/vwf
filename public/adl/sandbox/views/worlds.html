@@ -29,7 +29,7 @@
 				</div>
 			</div>
 			<div class="row" id="activeRow" data-bind="foreach:displayWorldObjects">				
-				<div data-bind="style: $root.alignWorldsList($index()), visible:isVisible, css:$data.featured?'col-md-3 worldHeightPadding':'col-md-3 worldHeightPadding'">
+				<div data-bind="visible:isVisible" class="col-md-3 worldHeightPadding">
 					<div data-bind="event: {mouseover:$root.handleEditDisplay, mouseout:$root.handleEditDisplay}, css: $data.featured?'featuredInstance':'worldBox'">
 						
 						<div class="boxContentWrapper">
@@ -114,7 +114,7 @@
 
 				window.setInterval(function(){
 					showStates();
-				},15000);
+				},1500000);
 			});
 		});
 	</script>
