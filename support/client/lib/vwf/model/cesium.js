@@ -1111,6 +1111,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
 
                     switch ( propertyName ) {
 
+                        case "clientControl":
+                            this.state.clientControl = propertyValue;
+                            break;
+
                         case "cameraViewData":
                             if ( this.kernel.client() != this.kernel.moniker() ) {
                                 var camera = scene.getCamera();
@@ -1401,9 +1405,32 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
                             break;
 
 
-                        case "controlClient":
-                            node.controlClient = propertyValue;
-                            value = propertyValue;
+                        case "clientControl": //
+                            // propertyValue.event is being ignored 
+                            if ( this.state.clientControl.locked == false ) {
+
+                                if ( this.state.clientControl.controller != propertyValue.controller ) {
+                                    // switching controllers, disable all non-controllers
+                                    if ( propertyValue.controller != this.kernel.moniker() ) {
+                                        this.state.mouse.enable( false );
+                                    }
+                                }
+
+                                // new client in control
+                                this.state.clientControl = propertyValue;
+
+                            } else if ( !propertyValue.locked ) {
+                                // leave the controller set, but update locked 
+                                // this will allow the camera to keep moving by the 
+                                // current controller
+                                if ( this.state.clientControl.controller == propertyValue.controller ) {
+                                    this.state.clientControl.locked = false;
+                                    this.state.mouse.enable( true );
+                                }
+                            } else {
+                                console.info( "state.clientControl ignoring:{ event: " + propertyValue.event + ", controller: " + propertyValue.controller + ", locked: " + propertyValue.locked + " }" );
+                            }
+
                             break;
 
                         default:
@@ -1684,8 +1711,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
                     }
                     break;
 
-                case "controlClient":
-                    value = node.controlClient;
+                case "clientControl":
+                    value = this.state.clientControl;
                     break;
 
                 case "direction":
