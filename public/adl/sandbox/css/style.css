@@ -159,6 +159,7 @@ height:315px;
 	height:100px;
 	width:100%;
 	overflow:visible;
+	background-image: url('/adl/sandbox/img/grid.png');
 }
 #pageLogo h1, #pageLogo h2{
 
