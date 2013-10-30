@@ -57,7 +57,7 @@
 			profile.Avatar = 'usmale.dae';
 			profile.Salt = salt;
 			
-			$.ajax("/VWFDataManager.svc/CreateProfile?UID=" + profile.Username + "&P=" + profile.Password,
+			$.ajax("./VWFDataManager.svc/CreateProfile?UID=" + profile.Username + "&P=" + profile.Password,
 			{
 				cache:false,
 				data:JSON.stringify(profile),
