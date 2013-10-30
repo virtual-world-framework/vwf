@@ -67,7 +67,7 @@
 					$('#txtusername').val('');
 					$('#txtpassword').val('');
 					
-					$.ajax('/vwfDataManager.svc/sitelogin?UID=' + username +"&P=" + password,
+					$.ajax('./vwfDataManager.svc/sitelogin?UID=' + username +"&P=" + password,
 					{
 						cache:false,
 						success:function(data,status,xhr)
