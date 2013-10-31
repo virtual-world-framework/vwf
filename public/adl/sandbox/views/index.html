@@ -148,7 +148,7 @@
 		</div>
 	</div>
 	<script>
-		var slideInterval = 0, params = { allowScriptAccess: "always" }, atts = { id: "ytplayer" }, player; 
+		var slideInterval = 0, params = { allowScriptAccess: "always" }, atts = { id: "ytplayer" }, player, isAnimating = false;
 		vwfPortalModel.youtubeList = [  "Tutorial 1: Camera Motion",
 										"Tutorial 2: Selection Tools",
 										"Tutorial 3: Transform Tools",
@@ -185,7 +185,7 @@
 			var currentSlideState = Math.floor(Math.random() * totalSlides);
 			
 			$(".slide-item").not(".slide-item" + currentSlideState).css("left", "1200px");
-			$(".slide-item" + currentSlideState + " .pContainer").css({top:"324px"});
+			$(".slide-item" + currentSlideState + " .pContainer").css({'margin-top':getBottom()});
 			$(".slide-item" + currentSlideState).css({left:"0"});
 			$(".linkMenu").css("margin-bottom", "0");
 			
@@ -209,7 +209,8 @@
 			};
 			
 			var animateSlides = function(){
-				$(".slide-item" + currentSlideState + " .pContainer").animate({top:"370px"});				
+				isAnimating = true;
+				$(".slide-item" + currentSlideState + " .pContainer").animate({'margin-top':getBottom(true)});				
 				
 				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).css({"z-index":1});
 				$(".slide-item" + currentSlideState).css({"z-index": 0});
@@ -217,13 +218,25 @@
 				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).animate({left:"0px"}, transitionSpeed, "swing", function(){
 					$(".slide-item" + currentSlideState).css("left", "1200px");
 					incrementCurrentSlideState();
-					$(this).children(".pContainer").animate({top:"324px"});
+					$(this).children(".pContainer").animate({'margin-top':getBottom()});
+					isAnimating = false;
 				});
 			};
 			
+
+			
 			slideInterval = window.setInterval(animateSlides, 10000);
+			
+			$(window).resize(function(){
+			
+				if(!isAnimating){
+					$(".slide-item" + currentSlideState + " .pContainer").css("margin-top", getBottom());
+				}
+			});
 		});
 		
-		
+		function getBottom(offScreen){
+			return offScreen ? ($(".sliderWrapper").height() + 12)*100 / $('.sliderWrapper').width() + "%" : ($(".sliderWrapper").height()-$(".pContainer").height() + 12)*100/ $('.sliderWrapper').width() + "%";
+		};
 	</script>
 	
