@@ -3,19 +3,18 @@
 			<div class="row"> 
 				<div class="col-md-3 pointList" style="margin-left:45px;">
 					<div>
-						<span class="lead glyphicon glyphicon-cloud" style="color: #90DBFF;"></span><span class="lead">&nbsp;Persistent Worlds</span>
+						<span class="lead glyphicon glyphicon-cloud" style="color: #90DBFF;"></span><span class="lead">&nbsp;Persistent Worlds</span><br/><br/>
+						<ul>
+							<li>Make worlds that evolve over time.</li>
+							<li>Share your creativity!</li>
+							<li>Make as many differnet worlds as you like.</li>
+						</ul>
 					</div>
-					<ul>
-					
-						<li>Make worlds that evolve over time.</li>
-						<li>Share your creativity!</li>
-						<li>Make as many differnet worlds as you like.</li>
-						
-					</ul>
+
 				</div>
 				<div class="col-md-3 pointList">
 					<div>
-						<span class="lead glyphicon glyphicon-pencil" style="color: #E2E215;-webkit-transform: rotate(0.8turn);"></span><span class="lead">&nbsp;In Browser Editing</span>
+						<span class="lead glyphicon glyphicon-pencil" style="color: #E2E215;-webkit-transform: rotate(0.8turn);"></span><span class="lead">&nbsp;In Browser Editing</span><br/><br/>
 					</div>
 					<ul>
 					
@@ -35,7 +34,7 @@
 				</div>
 				<div class="col-md-3 col-md-offset-1 pointList" style="margin-left:4.3333%">
 					<div>
-						<span class="lead glyphicon glyphicon-retweet" style="color: #FAB400;"></span><span class="lead">&nbsp;Collaborative</span>
+						<span class="lead glyphicon glyphicon-retweet" style="color: #FAB400;"></span><span class="lead">&nbsp;Collaborative</span><br/><br/>
 					</div>
 					<ul>
 					
@@ -47,7 +46,7 @@
 				</div>
 				<div class="col-md-3 pointList">
 					<div>
-						<span class="lead glyphicon glyphicon-picture" style="color: #CF4242;"></span><span class="lead" style="padding-top:1px">&nbsp;Creative</span>
+						<span class="lead glyphicon glyphicon-picture" style="color: #CF4242;"></span><span class="lead" style="padding-top:1px">&nbsp;Creative</span><br/><br/>
 					</div>
 					<ul>
 					
@@ -62,7 +61,7 @@
 				
 				<div class="col-md-3 pointList" style="margin-left:45px;">
 					<div>
-						<span class="lead glyphicon glyphicon-globe" style="color: #35C235;"></span><span class="lead">&nbsp;Open</span>
+						<span class="lead glyphicon glyphicon-globe" style="color: #35C235;"></span><span class="lead">&nbsp;Open</span><br/><br/>
 					</div>
 					<ul>
 					
@@ -74,7 +73,7 @@
 				</div>
 				<div class="col-md-3 pointList">
 					<div>
-						<span class="lead glyphicon glyphicon-usd" style="color: #979797;"></span><span class="lead" style="padding-top:1px">&nbsp;Low Cost</span>
+						<span class="lead glyphicon glyphicon-usd" style="color: #979797;"></span><span class="lead" style="padding-top:1px">&nbsp;Low Cost</span><br/><br/>
 					</div>
 					<ul>
 					
@@ -135,7 +134,7 @@
 				<h4 style="margin-top:0;" class="lead"><a style="color:inherit;" data-bind="text:title, attr:{href:'{{root}}/'+id}"></a></h4>
 			</div>
 			<a data-bind="attr:{href:'{{root}}/'+id}" >
-				<img data-bind="attr:{src:'{{root}}/img/' + id + '_small.png'}" style="width:190px;height:130px;margin-top:4px;border: 1px solid #ddd;padding:1px;"/>
+				<img data-bind="attr:{src: '{{root}}/vwfDataManager.svc/thumbnail?SID=' + id}" style="width:190px;height:130px;margin-top:4px;border: 1px solid #ddd;padding:1px;"/>
 			</a>
 
 		</div>
@@ -148,7 +147,7 @@
 		</div>
 	</div>
 	<script>
-		var slideInterval = 0, params = { allowScriptAccess: "always" }, atts = { id: "ytplayer" }, player; 
+		var slideInterval = 0, params = { allowScriptAccess: "always" }, atts = { id: "ytplayer" }, player, isAnimating = false;
 		vwfPortalModel.youtubeList = [  "Tutorial 1: Camera Motion",
 										"Tutorial 2: Selection Tools",
 										"Tutorial 3: Transform Tools",
@@ -185,7 +184,7 @@
 			var currentSlideState = Math.floor(Math.random() * totalSlides);
 			
 			$(".slide-item").not(".slide-item" + currentSlideState).css("left", "1200px");
-			$(".slide-item" + currentSlideState + " .pContainer").css({top:"324px"});
+			$(".slide-item" + currentSlideState + " .pContainer").css({'margin-top':getBottom()});
 			$(".slide-item" + currentSlideState).css({left:"0"});
 			$(".linkMenu").css("margin-bottom", "0");
 			
@@ -209,7 +208,8 @@
 			};
 			
 			var animateSlides = function(){
-				$(".slide-item" + currentSlideState + " .pContainer").animate({top:"370px"});				
+				isAnimating = true;
+				$(".slide-item" + currentSlideState + " .pContainer").animate({'margin-top':getBottom(true)});				
 				
 				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).css({"z-index":1});
 				$(".slide-item" + currentSlideState).css({"z-index": 0});
@@ -217,13 +217,25 @@
 				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).animate({left:"0px"}, transitionSpeed, "swing", function(){
 					$(".slide-item" + currentSlideState).css("left", "1200px");
 					incrementCurrentSlideState();
-					$(this).children(".pContainer").animate({top:"324px"});
+					$(this).children(".pContainer").animate({'margin-top':getBottom()});
+					isAnimating = false;
 				});
 			};
 			
+
+			
 			slideInterval = window.setInterval(animateSlides, 10000);
+			
+			$(window).resize(function(){
+			
+				if(!isAnimating){
+					$(".slide-item" + currentSlideState + " .pContainer").css("margin-top", getBottom());
+				}
+			});
 		});
 		
-		
+		function getBottom(offScreen){
+			return offScreen ? ($(".sliderWrapper").height() + 12)*100 / $('.sliderWrapper').width() + "%" : ($(".sliderWrapper").height()-$(".pContainer").height() + 12)*100/ $('.sliderWrapper').width() + "%";
+		};
 	</script>
 	
