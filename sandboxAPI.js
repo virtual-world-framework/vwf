@@ -515,9 +515,12 @@ function CreateProfile(URL,data,response)
 {
 	data = JSON.parse(data);
 	data.Password = Hash(URL.query.P);
-	DAL.createUser(URL.query.UID,data,function()
+	DAL.createUser(URL.query.UID,data,function(ok,err)
 	{
-		respond(response,200,'');
+		if(ok)
+			respond(response,200,'');
+		else
+			respond(response,500,err);
 		return;
 	});
 }

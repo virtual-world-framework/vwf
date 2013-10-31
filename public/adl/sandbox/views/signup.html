@@ -45,7 +45,17 @@
 		
 			var username = $('#txtusername').val();
 			var password = $('#txtpassword').val();
+
+			var password2 = $('#txtpasswordconfirm').val();
 			
+			if(password != password2)
+			{
+
+				vwfPortalModel.errorText("Passwords do not match");	
+
+				return;
+			}
+
 			var salt = GUID();
 			password = EncryptPassword(password,username,salt);
 			
@@ -64,6 +74,7 @@
 				type:'POST',
 				success:function(data,status,xhr)
 				{
+
 					$('#txtusername').val('');
 					$('#txtpassword').val('');
 					
@@ -78,7 +89,7 @@
 						error:function(xhr,status,err)
 						{
 							
-							vwfPortalModel.errorText("Error: Please ensure that all required account information is entered correctly");
+							vwfPortalModel.errorText("Error: Please ensure that all required account information is entered correctly: " + xhr.responseText);
 							window.setTimeout(function(){
 								vwfPortalModel.errorText("");				
 							}, 6000);
@@ -88,7 +99,7 @@
 				},
 				error:function(xhr,status,err)
 				{
-					vwfPortalModel.errorText("Error: Please ensure that all required account information is entered correctly");
+					vwfPortalModel.errorText("Error: Please ensure that all required account information is entered correctly: " + xhr.responseText);
 					window.setTimeout(function(){
 						vwfPortalModel.errorText("");				
 					}, 6000);

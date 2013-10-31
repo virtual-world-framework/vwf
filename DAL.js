@@ -365,7 +365,8 @@ function createUser (id,data,cb)
 		if(user)
 		{
 			global.log('user '+ id + ' already exists');
-			cb(false);
+			cb(false,'user '+ id + ' already exists');
+			return;
 		}
 		else
 		{
