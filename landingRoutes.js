@@ -1,9 +1,11 @@
 var root = '/adl/sandbox',
+frontEndRoot = '',
 fileList = [],
 routesMap = {},
 DAL = {},
 fs = require('fs'),
-async = require('async');
+async = require('async'),
+URL = require('url');
 
 fs.readdir(__dirname + '/public' + root + '/views/help', function(err, files){
 	var tempArr = [];
@@ -39,7 +41,17 @@ exports.generalHandler = function(req, res, next){
 	var sessionData = global.SandboxAPI.getSessionData(req);
 	if(!req.params.page)
 		req.params.page = 'index';
-		
+	
+	
+	var pathname = URL.parse(req.url).pathname;
+	var currentIndex = pathname.indexOf("sandbox/");
+	if(currentIndex >= 0){
+		//does anything come after "sandbox/" and does the browser consider it a directory?
+		frontEndRoot = currentIndex + 7 != pathname.length - 1 &&  pathname.charAt(pathname.length - 1) == '/' ? '..' : '.';
+	}
+	else{
+		frontEndRoot = './sandbox';
+	}
 	
 	if(req.params.page.indexOf('admin') > -1 && (!sessionData || sessionData.UID != global.adminUID)){
 		next();
@@ -60,7 +72,7 @@ exports.generalHandler = function(req, res, next){
 			home = routesMap[currentAcceptedRoute].home ? routesMap[currentAcceptedRoute].home : false;	
 		}
 		
-		res.locals = {sid: sid, root: root, title: title, fileList:fileList, home: home};
+		res.locals = {sid: sid, root: frontEndRoot, title: title, fileList:fileList, home: home};
 		res.render(template);
 	}
 	
@@ -76,8 +88,17 @@ exports.help = function(req, res){
 	
 	var currentIndex = fileList.indexOf(req.params.page);
 	var displayPage = currentIndex >= 0 ? fileList[currentIndex] : 'index';
+	var pathname = URL.parse(req.url).pathname;
+	var currentIndex = pathname.indexOf("sandbox/");
+	if(currentIndex >= 0){
+		//does anything come after "sandbox/" and does the browser consider it a directory?
+		frontEndRoot = currentIndex + 7 != pathname.length - 1 &&  pathname.charAt(pathname.length - 1) == '/' ? '..' : '.';
+	}
+	else{
+		frontEndRoot = './sandbox';
+	}
 	
-	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, script: displayPage + ".js"};
+	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: frontEndRoot, script: displayPage + ".js"};
 	res.render('help/template');
 };
 
