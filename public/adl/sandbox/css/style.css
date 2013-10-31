@@ -253,7 +253,7 @@ text-align:left;
 	float:right;
 }
 #username{
-	float:left;
+	float:right;
 }
 
 .accordion{
@@ -386,7 +386,7 @@ text-align:left;
 .worldHeightMiniPadding{
 	
 	overflow: hidden;
-	height: 160px;
+	height: 233px;
 	margin-bottom:15px;
 }
 
