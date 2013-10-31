@@ -16,6 +16,7 @@ a{
 
 ul{
 	padding-left:30px;
+	margin-top:5px;
 }
 
 .bodyLoad{
@@ -189,36 +190,9 @@ text-align:left;
   height: 100%;
 }
 
-.divContent0{
-	width:485px;
-	left: 15px;
-	text-shadow: 0 1px 2px #78A6C0;
-}
-.divContent3{
-	width: 485px;
-	left: 62%;
-	top: 145px;
-	font-family: 'Trebuchet MS', Helvetica, sans-serif;
-	text-shadow: 0 1px 2px #5E7C33;
-	color: #A0CE60;
-}
-
-.divContent3 .h1-hero{
-	font-size: 80px;
-}
-
 .videoList{
 	
 	list-style:none;
-}
-
-.divContent1{
-
-	color: #F0F0F0;
-	text-shadow: 0 1px 2px #1F1F1F;
-	width:485px;
-	left:30px;
-	top:15px;
 }
 
 .slide-item{
@@ -364,8 +338,7 @@ text-align:left;
 }
 
 .pointList div{
-	width:100%;
-	height:45px;
+	min-width:267px;
 }
 
 .pointList li{
