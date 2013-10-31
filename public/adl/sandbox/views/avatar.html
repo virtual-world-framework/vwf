@@ -1,0 +1,147 @@
+<div class="row">
+	<div class="col-md-2">
+		<div class="row avatarchoice" model="./avatars/VWS_Business_Female1.DAE" texture = "./avatars/VWS_B_Female1-1.jpg">
+			<img src="./avatars/Female1_1.png">
+		</div>
+	</div>
+	<div class="col-md-2">
+		<div class="row avatarchoice" model="./avatars/VWS_Business_Female1.DAE" texture = "./avatars/VWS_B_Female1-2.jpg">
+			<img src="./avatars/Female1_2.png">
+		</div>
+	</div>
+	<div class="col-md-2">
+		<div class="row avatarchoice" model="./avatars/VWS_Business_Female1.DAE" texture = "./avatars/VWS_B_Female1-3.jpg">
+			<img src="./avatars/Female1_3.png">
+		</div>
+	</div>
+	<div class="col-md-2">
+		<div class="row avatarchoice" model="./avatars/VWS_Business_Female2.DAE" texture = "./avatars/VWS_B_Female2-3.jpg">
+			<img src="./avatars/Female2_1.png">
+		</div>
+	</div>
+	<div class="col-md-2">
+		<div class="row avatarchoice" model="./avatars/VWS_Business_Male1.DAE" texture = "./avatars/VWS_B_Male1-1.jpg">
+			<img src="./avatars/Male1_1.png">
+		</div>
+	</div>
+	<div class="col-md-2">
+		<div class="row avatarchoice" model="./avatars/VWS_Business_Male1.DAE" texture = "./avatars/VWS_B_Male1-2.jpg">
+			<img src="./avatars/Male1_2.png">
+		</div>
+	</div>
+	<div class="col-md-2">
+		<div class="row avatarchoice" model="./avatars/VWS_Business_Male2.DAE" texture = "./avatars/VWS_B_Male2-1.jpg">
+			<img src="./avatars/Male2_1.png" >
+		</div>
+	</div>
+	<div class="col-md-2">
+		<div class="row avatarchoice" model="./avatars/VWS_Business_Male2.DAE" texture = "./avatars/VWS_B_Male2-2.jpg">
+			<img src="./avatars/Male2_2.png" >
+		</div>
+	</div>
+	<div class="col-md-2">
+		<div class="row avatarchoice" model="./avatars/VWS_Business_Male2.DAE" texture = "./avatars/VWS_B_Male2-3.jpg">
+			<img src="./avatars/Male2_3.png" >
+		</div>
+	</div>
+	<div class="col-md-2">
+		<div class="row avatarchoice" model="./avatars/VWS_Business_Male2.DAE" texture = "./avatars/VWS_B_Male2-4.jpg">
+			<img src="./avatars/Male2_4.png" >
+		</div>
+	</div>
+
+</div>
+
+<script type="text/javascript">
+
+	var EncryptPassword = function (password, username,salt)
+	{
+		var unencrpytedpassword = password + username + salt;
+		for (var i = 0; i < 1000; i++)
+		{
+			unencrpytedpassword = CryptoJS.SHA256(unencrpytedpassword) + '';
+		}
+		return unencrpytedpassword;
+	}
+	
+	$(document).ready(function()
+	{
+		getLoginInfo(function(){
+		
+			var UID = vwfPortalModel.user().username;
+			var profile;
+			var data = jQuery.ajax(
+				{
+					type: 'GET',
+					url:  '/vwfDataManager.svc/Profile?UID='+UID,
+					data: null,
+					success: null,
+					async: false,
+					dataType: "json"
+				});
+				if (data.status == 200)
+				{
+					try
+					{
+						data = JSON.parse(data.responseText);
+						profile = data;
+						
+					}
+					catch (e)
+					{
+						return data.responseText;
+					}
+				}
+				else
+				{
+					return data.responseText;
+				}
+
+				
+
+				$('.avatarchoice').click(
+					function()
+					{
+						$('.avatarchoice').css('border','');
+						$('.avatarchoice').css('padding','');
+						$(this).css('border','1px solid blue');
+						$(this).css('padding','0px');
+
+						profile.avatarModel = $(this).attr('model');
+						profile.avatarTexture = $(this).attr('texture');
+						var data = JSON.stringify(profile);
+						
+						jQuery.ajax(
+						{
+
+							type: 'POST',
+							url:  './vwfDataManager.svc/Profile?UID='+UID,
+							data: JSON.stringify(profile),
+							success: null,
+							async: false,
+							dataType: "text"
+						});
+
+					});
+
+				$("[model='"+profile.avatarModel+"']").filter("[texture='"+profile.avatarTexture+"']").css('border','1px solid blue');
+				$("[model='"+profile.avatarModel+"']").filter("[texture='"+profile.avatarTexture+"']").css('padding','0px');
+
+				vwfPortalModel.usersPage = true;
+		ko.applyBindings(vwfPortalModel);
+			
+		}, redirect);
+	});	
+	
+	function redirect()
+	{
+		var ret = window.location.search.substr(window.location.search.indexOf('=')+1);
+		var path = window.location.pathname.substr(0,window.location.pathname.lastIndexOf('/')+1);
+		
+		var url = window.location.protocol + "//" + window.location.host + path + ret;
+		window.location = url;
+	}
+</script>
+
+
+		

@@ -218,20 +218,7 @@ define(function ()
 		{
 			return 'character-vwf-' + this.currentUsername.replace(/ /g,'-');
 		}
-		this.PlayerProto = {
-			extends: 'character.vwf',
-			source: './'+$("#AvatarChoice :radio:checked").attr('value'),
-			type: 'subDriver/threejs/asset/vnd.collada+xml',
-			properties: {
-				PlayerNumber: 1,
-			},
-			events: {
-				ShowProfile: null,
-				Message: null
-			},
-			scripts: ["this.ShowProfile = function(){if(vwf.client() != vwf.moniker()) return; _UserManager.showProfile(_DataManager.GetProfileForUser(this.PlayerNumber))     }; \n" +
-					          "this.Message = function(){if(vwf.client() != vwf.moniker()) return; setupPmWindow(this.PlayerNumber)     }"]
-		};
+		
 		this.Login = function (username)
 		{
 		
@@ -287,8 +274,90 @@ define(function ()
 			$('#MenuLogOuticon').css('background', "");
 			$('#MenuLogIn').attr('disabled', 'disabled');
 			$('#MenuLogOut').removeAttr('disabled');
-			//disabled until 
-			this.PlayerProto.source = 'usmale.dae'; //profile['Avatar'];
+			
+
+			this.PlayerProto = {
+			extends: 'character.vwf',
+			source:  'usmale.dae',
+			type: 'subDriver/threejs/asset/vnd.collada+xml',
+			properties: {
+				PlayerNumber: 1,
+			},
+			events: {
+				ShowProfile: null,
+				Message: null
+			},
+			scripts: ["this.ShowProfile = function(){if(vwf.client() != vwf.moniker()) return; _UserManager.showProfile(_DataManager.GetProfileForUser(this.PlayerNumber))     }; \n" +
+					          "this.Message = function(){if(vwf.client() != vwf.moniker()) return; setupPmWindow(this.PlayerNumber)     }"]
+			};
+
+			//this.PlayerProto.source = 'usmale.dae'; //profile['Avatar'];
+
+			this.PlayerProto.source = profile.avatarModel || './avatars/VWS_Business_Female1.DAE';
+
+            this.PlayerProto.properties.cycles = 
+            {
+                stand:{start:1,length:0,speed:1.25,current:0,loop:true},
+                walk:{start:6,length:27,speed:1.0,current:0,loop:true},
+                straferight:{start:108,length:16,speed:1.5,current:0,loop:true},
+                strafeleft:{start:124,length:16,speed:-1.5,current:0,loop:true},
+                walkback:{start:0,length:30,speed:-1.25,current:0,loop:true},
+                run:{start:70,length:36,speed:1.25,current:0,loop:true},
+                jump:{start:70,length:36,speed:1.25,current:0,loop:false},
+                runningjump:{start:109,length:48,speed:1.25,current:0,loop:false}
+            };
+
+            
+            this.PlayerProto.properties.materialDef = {
+			    "color":
+			    {
+			        "r": 1,
+			        "g": 1,
+			        "b": 1
+			    },
+			    "ambient":
+			    {
+			        "r": 1,
+			        "g": 1,
+			        "b": 1
+			    },
+			    "emit":
+			    {
+			        "r": 0.27058823529411763,
+			        "g": 0.2549019607843137,
+			        "b": 0.2549019607843137
+			    },
+			    "specularColor":
+			    {
+			        "r": 0.2,
+			        "g": 0.2,
+			        "b": 0.2
+			    },
+			    "specularLevel": 1,
+			    "alpha": 1,
+			    "shininess": 0,
+			    "side": 0,
+			    "reflect": 0,
+			    "layers": [
+			        {
+			            "mapTo": 1,
+			            "scalex": 1,
+			            "scaley": 1,
+			            "offsetx": 0,
+			            "offsety": 0,
+			            "alpha": 1,
+			            "src": profile.avatarTexture || "http://localhost:3000/adl/sandbox/gvpGcxtL0EF2SVOQ/avatars/VWS_B_Female1-1.jpg",
+			            "mapInput": 0
+			        }
+			    ],
+			    "type": "phong",
+			    "depthtest": true,
+			    "morphTargets": true
+			}
+
+            this.PlayerProto.properties.standing = 0;
+
+
 			if (document.Players && document.Players.indexOf(username) != -1)
 			{
 				alert('User is already logged into this space');
@@ -301,6 +370,7 @@ define(function ()
 			this.PlayerProto.properties.ownerClientID = vwf.moniker();
 			this.PlayerProto.properties.profile = profile;
 			this.PlayerProto.properties.translation = newintersectxy;
+			this.PlayerProto.properties.scale = [proto.svatarHeight || 1.15,proto.svatarHeight || 1.15,proto.svatarHeight || 1.15];
 			document[username + 'link'] = null;
 			//this.PlayerProto.id = "player"+username;
 			document["PlayerNumber"] = username;

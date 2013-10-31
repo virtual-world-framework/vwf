@@ -496,7 +496,15 @@ function SaveProfile(URL,data,response)
 		respond(response,401,'no login data saving profile ' + filename);
 		return;
 	}
-	
+	data = JSON.parse(data);
+	//do not allow update of password in this way.
+	delete data.Password;
+	delete data.password;
+	delete data.Username;
+	delete data.username;
+	delete data.Salt;
+	delete data.salt;
+	delete data.inventoryKey;
 	DAL.updateUser(URL.loginData.UID,data,function()
 	{
 		respond(response,200,'');

@@ -94,7 +94,7 @@ function updateUser (id,data,cb)
 		},
 		function(user,cb2)
 		{
-			if(data.username)
+			if(data.Username)
 			{
 				
 				cb2('cant change username');
@@ -102,6 +102,7 @@ function updateUser (id,data,cb)
 			}
 			for(var key in data)
 			{
+				console.log('changing ' + key + ' to ' + data[key] + ' in user ' + user.Username )
 				user[key] = data[key];
 			}
 			

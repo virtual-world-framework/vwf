@@ -44,6 +44,16 @@ ul{
 	margin-left: 5px;
 }
 
+.avatarchoice:hover {
+	padding: 0px;
+	border: 1px solid #DDD;
+}
+
+.avatarchoice {
+	text-align: center;
+	padding: 1px;
+	border-radius:10px;
+}
 .videoList td{
 	border: none !important;
 	padding-top:10px !important;
