@@ -3,13 +3,22 @@
 			<div class="row">
 				<div class="col-md-4" style="text-align:left;">
 					<div class="row"> 
-						<div class="col-md-7" style="text-align:left;text-align: left; border-right: 1px solid #e5e5e5;width:51.33333%">
-							<button id="allWorlds" class="btn btn-default btn-sm active" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">All Worlds</button>
-							<button id="yourWorlds" class="btn btn-default btn-sm" data-bind="click:toggleNameFilter, visible: user().isLoggedIn">Your Worlds</button>
+						<div style="float: left;padding-left:15px;">
+						<!-- Split button -->
+							<div class="btn-group">
+							  <button type="button" class="btn btn-default" data-toggle="dropdown" data-bind="text:dropDownMap[currentDropDown()]">All worlds</button>
+							  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+								<span class="caret"></span>
+								<span class="sr-only">Toggle Dropdown</span>
+							  </button>
+							  <ul class="dropdown-menu" role="menu" data-bind="foreach:Object.keys(dropDownMap)">
+								<li><a data-bind="text:$root.dropDownMap[$data], click: $root.toggleNameFilter, css:$data==$root.currentDropDown()?'dropdown-selected':''" href="">All worlds</a></li>
+							  </ul>
+							</div>
 						</div>
-						<div class="col-md-5" style="text-align:left;">
+						<div style="float:left;margin-left:10px;">
 							<a href="{{root}}/create" id="newinstancebutton" data-bind="visible:user().isLoggedIn">
-								<span class="btn btn-default btn-sm" style="width:100%;">Create World</span>
+								<span class="btn btn-default" style="width:100%;">Create World</span>
 							</a>
 						</div>
 					</div>

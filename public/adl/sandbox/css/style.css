@@ -6,6 +6,12 @@ html, body{
 	background-image: url('../img/back.png')
 }
 
+.dropdown-selected{
+	color: #FFF !important;
+	text-decoration: none;
+	background-color: #428BCA;
+}
+
 .container{
 	max-width: 1200px;
 }

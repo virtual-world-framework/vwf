@@ -3,7 +3,7 @@
 //IE undefined console fix
 if (!window.console) console = {log: function() {}};
 		
-var filter = '', pageIndex = 0, pageLength = 12, userNameFilter = '', selectAll = false;
+var filter = '', pageIndex = 0, pageLength = 12, secondaryFilter = '', selectAll = false;
 
 var vwfPortalModel = new function(){
 	var self = this;
@@ -22,25 +22,31 @@ var vwfPortalModel = new function(){
 		username: 'Guest'
 	});
 	
-	self.toggleNameFilter = function(){
 	
-		if(userNameFilter){
-			userNameFilter  = '';
-			$("#allWorlds").addClass("active");
-			$("#yourWorlds").removeClass("active").blur();
-		}			
-		else{
-			userNameFilter  = self.user().username;
-			$("#yourWorlds").addClass("active");
-			$("#allWorlds").removeClass("active").blur();
-		}
+	self.dropDownMap = {featured: "Featured worlds", yours: "Your worlds", published: "Published worlds", active: "Active worlds"};
+	self.currentDropDown = ko.observable("featured");
+	self.toggleNameFilter = function(e, o){
 		
-		self.filter(filter || userNameFilter);
+		console.log(e, o);
+		self.currentDropDown(e);
+		
+		switch(e){
+			case "yours":
+				secondaryFilter = self.user().username;
+				break;
+			case "featured":
+				secondaryFilter = "";
+				break;
+			default:
+				secondaryFilter = e;
+		}
+
+		self.filter(filter || secondaryFilter);
 		pageIndex = 0;
 		
 		var tempWorlds = self.worldObjects();
 		for(var i = 0; i < tempWorlds.length; i++){
-			tempWorlds[i]().isVisible = checkFilter([tempWorlds[i]().title, tempWorlds[i]().description, tempWorlds[i]().owner], tempWorlds[i]().featured);
+			tempWorlds[i]().isVisible = checkFilter([tempWorlds[i]().title, tempWorlds[i]().description, tempWorlds[i]().owner], tempWorlds[i]().featured, tempWorlds[i]().hotState);
 		}
 		
 		self.getPage(0);
@@ -55,12 +61,12 @@ var vwfPortalModel = new function(){
 		write: function(str){ 
 			if(filter != str){
 				filter = str;
-				self.filter(filter || userNameFilter);
+				self.filter(filter || secondaryFilter);
 				
 				pageIndex = 0;
 				var tempWorlds = self.worldObjects();
 				for(var i = 0; i < tempWorlds.length; i++){
-					tempWorlds[i]().isVisible = checkFilter([tempWorlds[i]().title, tempWorlds[i]().description, tempWorlds[i]().owner], tempWorlds[i]().featured);
+					tempWorlds[i]().isVisible = checkFilter([tempWorlds[i]().title, tempWorlds[i]().description, tempWorlds[i]().owner], tempWorlds[i]().featured, tempWorlds[i]().hotState);
 				}
 				
 				self.getPage(0);
@@ -239,10 +245,14 @@ function handleHash(propStr){
 	else vwfPortalModel.currentAdminItem(false);
 }
 
-function checkFilter(textArr, isFeatured){
+function checkFilter(textArr, isFeatured, hotState){
 	
-	//textArr[2] is the owner of the world
-	if(userNameFilter && userNameFilter != textArr[2]){
+	//secondaryFilter must be filtering on username. textArr[2] is the owner of the world
+	if(secondaryFilter && secondaryFilter != textArr[2] && secondaryFilter != "published" && secondaryFilter != "active"){
+		return false;
+	}
+	
+	if(secondaryFilter == "active" && !hotState){
 		return false;
 	}
 	
@@ -261,7 +271,7 @@ function checkFilter(textArr, isFeatured){
 		return spaceFix;
 	}			
 	
-	else return (!!isFeatured && !userNameFilter) || userNameFilter == textArr[2];
+	else return (!!isFeatured && !secondaryFilter) || secondaryFilter == textArr[2] || (secondaryFilter == "active" && hotState);
 }
 
 function getFlatIdArr(resetHotstate){
@@ -327,11 +337,12 @@ function showStates(cb){
 				e[tmpKey].description = e[tmpKey].description ? e[tmpKey].description : "";
 				
 				e[tmpKey].editVisible = ko.observable(false);				
-				e[tmpKey].isVisible = checkFilter([e[tmpKey].title, e[tmpKey].description, e[tmpKey].owner], e[tmpKey].featured);
+				
 				
 				if(ko.isObservable(vwfPortalModel.worldObjects()[saveIndex])){
 				
 					e[tmpKey].hotState = flatWorldArray[saveIndex].hotState ? flatWorldArray[saveIndex].hotState : false;
+					e[tmpKey].isVisible = checkFilter([e[tmpKey].title, e[tmpKey].description, e[tmpKey].owner], e[tmpKey].featured, e[tmpKey].hotState);
 					
 					for(var saveProp in e[tmpKey]){
 						
@@ -344,6 +355,7 @@ function showStates(cb){
 				
 				else{
 					e[tmpKey].hotState = false;
+					e[tmpKey].isVisible = checkFilter([e[tmpKey].title, e[tmpKey].description, e[tmpKey].owner], e[tmpKey].featured, false);
 					vwfPortalModel.worldObjects()[saveIndex] = ko.observable(e[tmpKey]);
 				}
 			}
