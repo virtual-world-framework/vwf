@@ -242,9 +242,9 @@ function checkFilter(textArr, isFeatured){
 	}
 	
 	if(filter != ""){
-		var filterArr = filter.split(" "), textStr = textArr.join(), spaceFix = false;
+		var filterArr = filter.split(" "), textStr = textArr.join().toLowerCase(), spaceFix = false;
 		for(var i = 0; i < filterArr.length; i++){
-			if(textStr.indexOf(filterArr[i]) == -1){
+			if(textStr.indexOf(filterArr[i].toLowerCase()) == -1){
 				return false;
 			}
 			
