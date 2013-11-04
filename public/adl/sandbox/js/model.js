@@ -35,13 +35,18 @@ var vwfPortalModel = new function(){
 			$("#allWorlds").removeClass("active").blur();
 		}
 		
-		//console.log(filter);
 		self.filter(filter || userNameFilter);
+		pageIndex = 0;
+		
+		var tempWorlds = self.worldObjects();
+		for(var i = 0; i < tempWorlds.length; i++){
+			tempWorlds[i]().isVisible = checkFilter([tempWorlds[i]().title, tempWorlds[i]().description, tempWorlds[i]().owner], tempWorlds[i]().featured);
+		}
+		
+		self.getPage(0);
 		if(self.filter() && self.displayWorldObjects().length > 0){
 			self.initialSearchDisplay(false);
 		}
-		pageIndex = 0;
-		showStates();
 	};			
 	self.filter = ko.observable(filter);
 	self.initialSearchDisplay = ko.observable(true);
