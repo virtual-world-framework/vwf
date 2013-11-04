@@ -304,7 +304,7 @@ function removeAgoFromMoment(date){
 
 function showStates(cb){
 
-	$.getJSON("./vwfDataManager.svc/states",function(e){
+	$.getJSON(root + "/vwfDataManager.svc/states",function(e){
 
 		var tempArr = getFlatIdArr(), saveIndex = 0, i = 0, flatWorldArray = ko.toJS(vwfPortalModel.worldObjects), saveDate = Date.now() - 31536000000;
 		for(var tmpKey in e){
@@ -346,7 +346,7 @@ function showStates(cb){
 		
 		vwfPortalModel.getPage(0);
 		
-		$.getJSON("./admin/instances",function(e){
+		$.getJSON(root + "/admin/instances",function(e){
 		
 			//Get all world IDs in flat array form
 			var tempArr = getFlatIdArr();
@@ -404,7 +404,7 @@ function sortArrByUpdates(a, b){
 
 function getLoginInfo(defaultCb, failCb){
 	
-	$.ajax('/vwfDataManager.svc/logindata',
+	$.ajax(root + '/vwfDataManager.svc/logindata',
 	{
 		cache:false,
 		success:function(data,status,xhr){
