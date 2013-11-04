@@ -56,7 +56,7 @@
 		});
 		
 		$.ajax({
-			url: '../admin/' + currentHelpPage, 
+			url: root + '/admin/' + currentHelpPage, 
 			data: JSON.stringify(jsonToServer),
 			success: function(){
 				console.log("done");
@@ -80,7 +80,7 @@
 		
 		$.ajax({
 			type: 'GET',
-			url: "{{root}}/views/help/" + e + ".js",
+			url: root + "/views/help/" + e + ".js",
 			dataType: "json",
 			success: function(json) {
 				

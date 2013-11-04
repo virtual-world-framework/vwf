@@ -103,7 +103,7 @@
 			console.log("Delete worlds ", tempWorldArr, dataSendArr);
 			
 			//Make the request to the server to delete these users
-			$.post('../data/delete_worlds', JSON.stringify(dataSendArr), function(o){
+			$.post(root + '/data/delete_worlds', JSON.stringify(dataSendArr), function(o){
 				
 				for(var i in tempWorldArr){
 					for(var g in vwfPortalModel.adminDisplayList()){
@@ -121,7 +121,7 @@
 		vwfPortalModel.updateWorld = function(e){
 
 			//Make the request to the server to delete these users
-			$.post('../data/update_world', ko.toJSON(vwfPortalModel.currentAdminItem), function(o){
+			$.post(root + '/data/update_world', ko.toJSON(vwfPortalModel.currentAdminItem), function(o){
 				
 				vwfPortalModel.updateSuccess(o == "done" ? "Success" : "Error");
 				window.setTimeout(function(){

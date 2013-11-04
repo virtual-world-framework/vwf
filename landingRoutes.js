@@ -3,7 +3,8 @@ fileList = [],
 routesMap = {},
 DAL = {},
 fs = require('fs'),
-async = require('async');
+async = require('async'),
+URL = require('url');
 
 fs.readdir(__dirname + '/public' + root + '/views/help', function(err, files){
 	var tempArr = [];
@@ -37,10 +38,10 @@ routesMap = {
 exports.generalHandler = function(req, res, next){
 	
 	var sessionData = global.SandboxAPI.getSessionData(req);
+	
 	if(!req.params.page)
 		req.params.page = 'index';
-		
-	
+
 	if(req.params.page.indexOf('admin') > -1 && (!sessionData || sessionData.UID != global.adminUID)){
 		next();
 		return;
@@ -60,7 +61,7 @@ exports.generalHandler = function(req, res, next){
 			home = routesMap[currentAcceptedRoute].home ? routesMap[currentAcceptedRoute].home : false;	
 		}
 		
-		res.locals = {sid: sid, root: root, title: title, fileList:fileList, home: home};
+		res.locals = {sid: sid, root: getFrontEndRoot(req), title: title, fileList:fileList, home: home};
 		res.render(template);
 	}
 	
@@ -76,8 +77,9 @@ exports.help = function(req, res){
 	
 	var currentIndex = fileList.indexOf(req.params.page);
 	var displayPage = currentIndex >= 0 ? fileList[currentIndex] : 'index';
+
 	
-	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: root, script: displayPage + ".js"};
+	res.locals = { sid: root + '/' + (req.query.id?req.query.id:'') + '/', root: getFrontEndRoot(req), script: displayPage + ".js"};
 	res.render('help/template');
 };
 
@@ -199,4 +201,31 @@ exports.handlePostRequest = function(req, res, next){
 			break;
 	}
 };
+
+function getFrontEndRoot(req){
+	var pathname = URL.parse(req.url).pathname, 
+	currentIndex = pathname.indexOf("sandbox/"), 
+	frontEndRoot = '', 
+	numSlashes = 0;
+	
+	if(currentIndex >= 0){
+
+		numSlashes = (pathname.substr(pathname.indexOf("sandbox/") + 8).match(/\//g) || []).length;
+		if(numSlashes == 0){
+			frontEndRoot = '.';
+		}
+		
+		else{
+			for(var i = 0; i < numSlashes; i++){
+				frontEndRoot += i > 0 ? "/.." : "..";
+			}
+		}
+	}
+	
+	else{
+		frontEndRoot = './sandbox';
+	}
+
+	return frontEndRoot;
+}
 

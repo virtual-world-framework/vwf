@@ -4,7 +4,7 @@
 	{
 		
 		
-		$.ajax('/vwfDataManager.svc/statedata?SID=' + sid,
+		$.ajax(root + '/vwfDataManager.svc/statedata?SID=' + sid,
 		{
 			cache:false,
 			success:function(data,status,xhr)
@@ -16,7 +16,7 @@
 				$('#data').append('<a style="display:block" href="./worlds#'+statedata.title+'" class="historythisstate">'+statedata.title+'</a>');
 				
 				
-				$.ajax('/vwfDataManager.svc/statehistory?SID=' + sid,
+				$.ajax(root + '/vwfDataManager.svc/statehistory?SID=' + sid,
 				{
 					cache:false,
 					success:function(data,status,xhr)

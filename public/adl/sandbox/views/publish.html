@@ -5,7 +5,7 @@
 		getLoginInfo(function(){}, redirect);
 			
 		$('#txtCamera').hide();	
-		$.ajax('/vwfDataManager.svc/statedata?SID=' + sid,
+		$.ajax(root + '/vwfDataManager.svc/statedata?SID=' + sid,
 		{
 			cache:false,
 			success:function(data,status,xhr)
@@ -117,7 +117,7 @@
 	});	
 	function redirect()
 	{
-		window.location = '{{root}}/worlds';
+		window.location = root + '/worlds';
 	}
 	vwfPortalModel.handleEditButton = function(o, e){
 
@@ -141,7 +141,7 @@
 		jQuery.ajax(
 		{
 			type: 'POST',
-			url: './vwfDataManager.svc/publish?SID='+sid,
+			url: root + '/vwfDataManager.svc/publish?SID='+sid,
 			data: JSON.stringify(statedata),
 			success:function(data,status,xhr)
 			{

@@ -20,8 +20,7 @@
 	
 	function redirect()
 	{
-		var ret = window.location.search.substr(window.location.search.indexOf('=')+1);
-		window.location = window.location.protocol + "//" + window.location.host + vwfPortalModel.returnVal;
+		window.location = vwfPortalModel.returnVal;
 	}
 	
 	vwfPortalModel.handleLoginButton = function(o, e){
@@ -29,11 +28,11 @@
 		var username = $('#txtusername').val();
 		var password = $('#txtpassword').val();
 		
-		var salt = $.ajax('/vwfDataManager.svc/salt?UID='+ username,{async:false}).responseText;
+		var salt = $.ajax( root + '/vwfDataManager.svc/salt?UID='+ username,{async:false}).responseText;
 		
 		password = EncryptPassword(password,username,$.trim(salt));
 		
-		$.ajax('/vwfDataManager.svc/sitelogin?UID=' + username +"&P=" + password,
+		$.ajax(root + '/vwfDataManager.svc/sitelogin?UID=' + username +"&P=" + password,
 		{
 			cache:false,
 			success:function(data,status,xhr)

@@ -18,7 +18,7 @@
 					<input class="form-control filter" type="text" placeholder="Search Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
 				</div>
 			</div>
-			<div class="row" style="margin-top:45px;margin-bottom:70px;" data-bind="visible:(displayWorldObjects().length==0) || initialSearchDisplay">	
+			<div class="row" style="margin-top:45px;margin-bottom:70px;" data-bind="visible:(displayWorldObjects().length==0) || initialSearchDisplay()">	
 				<div class="col-md-4 col-md-offset-4" style="text-align:center;">
 					<p style="font-weight:bold;" data-bind="visible:filter().length > 0">No worlds found, please try again</p>
 					<div style="font-weight:bold;" data-bind="visible:initialSearchDisplay">
@@ -88,10 +88,10 @@
 				alertify.confirm("Copy this world?", function(e){
 					if(e){
 						
-						$.get('/vwfDataManager.svc/copyinstance?SID=' + world.id, function(o){
+						$.get(root + '/vwfDataManager.svc/copyinstance?SID=' + world.id, function(o){
 			
 							if(o){
-								window.location = '{{root}}/edit?id=' + o.substr(13,16);
+								window.location = root + '/edit?id=' + o.substr(13,16);
 							}
 
 							else{
