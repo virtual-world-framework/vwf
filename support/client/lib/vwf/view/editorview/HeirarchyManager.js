@@ -159,7 +159,7 @@ define(function ()
 						owner: document.PlayerNumber,
 						type: '3DR Object',
 						DisplayName: childname,
-						transform: node.matrix.elements
+						transform: matCpy(node.matrix.elements)
 					}
 				};
 				vwf_view.kernel.createChild(parent, GUID(), proto, null);

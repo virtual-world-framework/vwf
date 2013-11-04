@@ -14,8 +14,14 @@
 					var threeObject = this.getRoot().parent;
 					if(this.getRoot().initializedFromAsset)
 						threeObject = this.getRoot();
-					var transform = goog.vec.Mat4.createFromArray( propertyValue || [] );
+					var transform = propertyValue || goog.vec.Mat4.createIdentity();
 
+					var det = goog.vec.Mat4.determinant(transform);
+					if(det == 0)
+					{
+						console.log('error setting matrix. determinant is 0');
+						return;
+					}
 					// Rotate 90 degress around X to convert from VWF Z-up to MATH Y-up.
 					if ( threeObject instanceof THREE.Camera ) {
 						var columny = goog.vec.Vec4.create();
@@ -34,7 +40,8 @@
 						}
 						
 						threeObject.matrixAutoUpdate = false;
-						threeObject.matrix.elements = matCpy(transform);
+						for(var i = 0; i < 16; i++)
+						threeObject.matrix.elements[i] = transform[i];
 						threeObject.updateMatrixWorld(true);      
 						_SceneManager.setDirty(threeObject);							
 					}

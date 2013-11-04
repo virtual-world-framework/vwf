@@ -2091,6 +2091,13 @@ define(function ()
 					}
 					
 		}.bind(this);
+		this.ResetTransforms = function()
+		{
+			for(var i =0; i < SelectedVWFNodes.length; i++)
+			{
+				_PermissionsManager.setProperty(SelectedVWFNodes[i].id,'transform', [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1], "You do not have permission to reset the transforms for this object");
+			}
+		}
 		this.hideMoveGizmo = function ()
 		{
 			
@@ -3117,6 +3124,7 @@ define(function ()
 		{
 			return SelectMode;
 		}
+
 		//$(document).bind('prerender',this.rt.bind(this));
 	}
 });

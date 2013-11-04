@@ -64,6 +64,7 @@ define(function ()
 		"<input class='TransformEditorInput' style='width:50%;margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='text' id='dispName'>Name</input><br/>" +
 		"<input disabled='disabled' class='TransformEditorInput' style='width:50%;margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='text' id='dispOwner'>Owners</input><br/>" +
 		
+		"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='isVisible'>Visible</input><br/>" +
 		"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='isStatic'>Static</input><br/>" +
 		"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='isDynamic'>Dynamic</input><br/>" +
 		"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='castShadows'>Cast Shadows</input><br/>" +
@@ -103,6 +104,10 @@ define(function ()
 		$('#isStatic').change(function (e)
 		{
 			_PrimitiveEditor.setProperty('selection', 'isStatic', this.checked)
+		});
+		$('#isVisible').change(function (e)
+		{
+			_PrimitiveEditor.setProperty('selection', 'visible', this.checked)
 		});
 		$('#isDynamic').change(function (e)
 		{
@@ -275,6 +280,16 @@ define(function ()
 					{
 						$('#isStatic').removeAttr('checked');
 					}
+
+					if (vwf.getProperty(node.id, 'visible'))
+					{
+						$('#isVisible').attr('checked', 'checked');
+					}
+					else
+					{
+						$('#isVisible').removeAttr('checked');
+					}
+
 					if (vwf.getProperty(node.id, 'isDynamic'))
 					{
 						$('#isDynamic').attr('checked', 'checked');

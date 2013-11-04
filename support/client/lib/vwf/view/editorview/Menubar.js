@@ -301,10 +301,16 @@ define(
 			e.time = new Date();
 			vwf_view.kernel.callMethod('index-vwf', 'latencyTest', [e]);
 		});
+		$('#ResetTransforms').click(function (e)
+		{
+			_Editor.ResetTransforms();
+		});
 		$('#MenuCopy').click(function (e)
 		{
 			_Editor.Copy();
 		});
+
+		
 		$('#MenuPaste').click(function (e)
 		{
 			_Editor.Paste();
