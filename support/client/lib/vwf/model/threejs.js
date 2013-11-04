@@ -1805,13 +1805,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
         var sceneNode = this.state.scenes[ this.state.sceneRootID ];
 		
 		//callback for failure of asset parse
-		function assetFailed(err)
+		function assetFailed(data)
 		{
 			$(document).trigger('EndParse');
-			if(window._Notifier)
-				_Notifier.alert('error loading asset ' + err);
+            //the collada loader uses the failed callback as progress. data means this is not really an error;
+			if(!data && window._Notifier)
+				_Notifier.alert('error loading asset ' + data);
 			
-			var id = nodeCopy.vwfID;
+			var id = nodeCopy.ID;
                 if ( !id ) id = getObjectID.call( threeModel, asset, true, false );
                 if ( id && id != "" ){
                    
@@ -1952,7 +1953,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color","vwf/model/t
 				$(document).trigger('BeginParse',['Loading...',node.source]);
 				node.parse = true;
 				node.loader = new THREE.ColladaLoader();
-				node.loader.load(node.source,assetLoaded.bind(this));
+               
+				node.loader.load(node.source,assetLoaded.bind(this),assetFailed.bind(this));
 			}
 			if(childType == "model/vnd.osgjs+json+compressed")
 			{

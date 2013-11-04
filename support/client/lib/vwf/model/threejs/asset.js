@@ -91,8 +91,9 @@
 			this.loadFailed = function(id)
 			{
 				$(document).trigger('EndParse');
-				if(window._Notifier)
-					_Notifier.alert('error loading asset ' + id);
+				//the collada loader uses the failed callback as progress. data means this is not really an error;
+				if(!id && window._Notifier)
+					_Notifier.alert('error loading asset ' + this.assetSource);
 			
 			}
 			this.loaded = function(asset)
@@ -219,7 +220,8 @@
 				if(childType == 'subDriver/threejs/asset/vnd.collada+xml')
 				{
 					this.loader = new THREE.ColladaLoader();
-					this.loader.load(assetSource,this.loaded);
+					
+					this.loader.load(assetSource,this.loaded,this.loadFailed.bind(this));
 					
 					asyncCallback(false);
 				}

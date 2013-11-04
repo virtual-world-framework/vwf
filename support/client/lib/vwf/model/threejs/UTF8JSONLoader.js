@@ -133,7 +133,7 @@
         this.error = function(e)
         {
            if(errorCallback)
-				errorCallback(this.url);
+				errorCallback();
         }.bind(this);
         
         $.ajax({

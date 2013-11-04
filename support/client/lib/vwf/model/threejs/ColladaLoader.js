@@ -82,6 +82,7 @@ THREE.ColladaLoader = function () {
 						} else {
 
 							console.error( "ColladaLoader: Empty or non-existing file (" + url + ")" );
+							progressCallback( );
 
 						}
 
