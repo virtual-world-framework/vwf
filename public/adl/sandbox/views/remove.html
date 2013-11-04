@@ -5,7 +5,7 @@
 		getLoginInfo(false, redirect);
 		ko.applyBindings(vwfPortalModel); 
 			
-		$.ajax('/vwfDataManager.svc/statedata?SID=' + sid,
+		$.ajax(root + '/vwfDataManager.svc/statedata?SID=' + sid,
 		{
 			cache:false,
 			success:function(data,status,xhr)
@@ -29,7 +29,7 @@
 	});	
 	function redirect()
 	{
-		window.location = '{{root}}/worlds';
+		window.location = root + '/worlds';
 	}
 	vwfPortalModel.handleDeleteButton = function(o, e){
 		
@@ -49,7 +49,7 @@
 		jQuery.ajax(
 		{
 			type: 'DELETE',
-			url: '/vwfDataManager.svc/state?SID='+sid,
+			url: root + '/vwfDataManager.svc/state?SID='+sid,
 			success:function(data,status,xhr)
 			{
 				redirect();

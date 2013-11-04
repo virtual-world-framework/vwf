@@ -15,7 +15,7 @@
 		getLoginInfo();
 		$.ajax({
 			type: 'GET',
-			url: "{{root}}/views/help/{{script}}",
+			url: root + "/views/help/{{script}}",
 			dataType: "json",
 			success: function(json) {
 				vwfPortalModel.help = json;
@@ -27,7 +27,7 @@
 				var test = JSON.parse( x.responseText.replace(/\n/g,"").replace(/\r/g,"") );
 				
 			}
-		/*$.getJSON("{{root}}/views/help/{{script}}", function(data){
+		/*$.getJSON(root + "/views/help/{{script}}", function(data){
 			vwfPortalModel.help = data;
 			ko.applyBindings(vwfPortalModel);
 		});*/

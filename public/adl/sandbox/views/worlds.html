@@ -88,10 +88,10 @@
 				alertify.confirm("Copy this world?", function(e){
 					if(e){
 						
-						$.get('/vwfDataManager.svc/copyinstance?SID=' + world.id, function(o){
+						$.get(root + '/vwfDataManager.svc/copyinstance?SID=' + world.id, function(o){
 			
 							if(o){
-								window.location = '{{root}}/edit?id=' + o.substr(13,16);
+								window.location = root + '/edit?id=' + o.substr(13,16);
 							}
 
 							else{

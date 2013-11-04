@@ -73,7 +73,7 @@
 			var data = jQuery.ajax(
 				{
 					type: 'GET',
-					url:  '/vwfDataManager.svc/Profile?UID='+UID,
+					url:  root + '/vwfDataManager.svc/Profile?UID='+UID,
 					data: null,
 					success: null,
 					async: false,
@@ -115,7 +115,7 @@
 						{
 
 							type: 'POST',
-							url:  './vwfDataManager.svc/Profile?UID='+UID,
+							url:  root + '/vwfDataManager.svc/Profile?UID='+UID,
 							data: JSON.stringify(profile),
 							success: null,
 							async: false,
@@ -136,10 +136,7 @@
 	function redirect()
 	{
 		var ret = window.location.search.substr(window.location.search.indexOf('=')+1);
-		var path = window.location.pathname.substr(0,window.location.pathname.lastIndexOf('/')+1);
-		
-		var url = window.location.protocol + "//" + window.location.host + path + ret;
-		window.location = url;
+		window.location = ret.charAt(0) == '/' ? root + ret : root + '/' + ret;
 	}
 </script>
 

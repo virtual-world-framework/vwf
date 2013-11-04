@@ -5,13 +5,10 @@
 			function redirect()
 			{
 				var ret = window.location.search.substr(window.location.search.indexOf('=')+1);
-				var path = window.location.pathname.substr(0,window.location.pathname.lastIndexOf('/')+1);
-				
-				var url = window.location.protocol + "//"+ window.location.host + path + ret;
-				window.location = url;
+				window.location = ret.charAt(0) == '/' ? root + ret : root + '/' + ret;
 			}
 			window.setTimeout(function(){
-			$.ajax('/vwfDataManager.svc/sitelogout',
+			$.ajax(root + '/vwfDataManager.svc/sitelogout',
 				{
 					
 					async:false,

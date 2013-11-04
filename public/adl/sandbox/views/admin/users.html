@@ -71,7 +71,7 @@
 	var getCurrentUserInfo = function(){
 	
 		if(vwfPortalModel.currentAdminItem().Username){
-			$.post('../data/get_user_info', JSON.stringify(vwfPortalModel.currentAdminItem()), function(data){
+			$.post(root + '/data/get_user_info', JSON.stringify(vwfPortalModel.currentAdminItem()), function(data){
 				
 				var tempArr = [];
 				data = JSON.parse(data);
@@ -89,7 +89,7 @@
 		}
 	};
 	
-	$.post('../data/get_users', function(o){
+	$.post(root + '/data/get_users', function(o){
 		o = JSON.parse(o);
 		var newObject = [];
 		
@@ -115,7 +115,7 @@
 		}
 		
 		//Make the request to the server to delete these users
-		$.post('../data/delete_users', JSON.stringify(tempArr), function(o){
+		$.post(root + '/data/delete_users', JSON.stringify(tempArr), function(o){
 			
 			for(var i in tempUserArr){
 				vwfPortalModel.adminDisplayList.remove(tempUserArr[i]);
@@ -128,7 +128,7 @@
 	
 	vwfPortalModel.updateUser = function(e){
 		//Make the request to the server to update these users
-		$.post('../data/update_user', JSON.stringify(vwfPortalModel.currentAdminItem()), function(o){
+		$.post(root + '/data/update_user', JSON.stringify(vwfPortalModel.currentAdminItem()), function(o){
 			console.log("done");
 		});
 	}; 
@@ -148,7 +148,7 @@
 		console.log("Delete worlds ", tempWorldArr, dataSendArr);
 
 		//Make the request to the server to delete these worlds
-		$.post('../data/delete_worlds', JSON.stringify(dataSendArr), function(o){
+		$.post(root + '/data/delete_worlds', JSON.stringify(dataSendArr), function(o){
 			
 			for(var i in tempWorldArr){
 				for(var g in vwfPortalModel.userWorlds()){
