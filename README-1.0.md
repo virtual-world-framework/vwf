@@ -9,72 +9,46 @@ VWF applications are written in JavaScript and leverage emerging web technologie
 
 ## Installation
 
-**Install on Mac:**
-
-NOTE: Please make sure you have XCode, and XCode Command Line Tools installed prior to executing the script below (https://developer.apple.com/xcode/).
+**Install on Mac/Linux:**
 
 ```
-$ sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_osx.sh  | bash
+curl https://get.virtual.wf | bash
 ```
 
 This command may be re-run to upgrade the installation to the latest version of VWF.
 
 **Install on Windows:**
 
-- Download the latest VWF Windows Build zip file from http://virtualworldframework.com/web/downloads.html.
+[Download and run the latest Windows installer](http://www.virtual.wf/web/downloads.html).
 
-- Execute the _run.bat_ file provided at the root level of the extracted folder.
-
-**Install on Ubuntu/Debian:**
-
-```
-$ sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_debian.sh  | bash
-```
-
-This command may be re-run to upgrade the installation to the latest version of VWF.
-
-**Install on Red Hat:**
-
-```
-$ sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_redhat.sh  | bash
-```
-
-This command may be re-run to upgrade the installation to the latest version of VWF.
+This exe may be re-run to upgrade the installation to the latest version of VWF.
 
 For more complex installations, such as hacking on VWF core, please see our [Installation Instructions](http://www.virtual.wf/web/docs/install.html).
 
 ## Quick Start
 
-Navigate to the VWF directory on your computer (`/var/www/vwf` on a *nix machine).
+Create a new VWF application.
 
 ```
-$ cd /var/www/vwf
+$ vwf create my-app
 ```
 
-Change directory into the public folder and create a new folder for your app.
+Change directory into that app and run the application.
 
 ```
-$ cd public
-$ mkdir my-app
+$ cd my-app
+$ vwf
 ```
 
-Follow the directions on the [Getting Started](http://virtual.wf/docs) to create your first app.
+Your application is now up and running at [http://localhost:3000](http://localhost:3000).
 
-Go back to the root VWF directory and start the server.
-
-```
-$ cd /var/www/vwf
-$ bundle exec thin start
-```
-
-Your application is now up and running at [http://localhost:3000/my-app](http://localhost:3000/my-app).
+To get started with VWF, check out [Getting Started](http://virtual.wf/docs).
 
 ## Examples
 
-For examples, check out our [demos](http://www.virtual.wf/web/catalog.html).
+Watch our [screencast]() for an example of building an application quickly with VWF.
 
-Also, browse through other example applications in the `public` folder of your
-local VWF repository.
+For more examples, check out our [demos](http://www.virtual.wf/web/catalog.html).
 
 ## Contributing
 
@@ -93,8 +67,8 @@ Also, please be sure that your pull request conforms to our [Coding Standard](ht
 
 Keep track of developments and get help with VWF.
 
-- Discover an issue? Head over to [Issues](https://github.com/virtual-world-framework/vwf/issues) and report it.
 - Have a question about VWF? Ask away on [StackOverflow](http://stackoverflow.com/questions/tagged/vwf).
+- Join us in IRC on the irc.freenode.net server, in the #vwf channel.
 
 ## License
 
