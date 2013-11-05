@@ -108,7 +108,7 @@ function startVWF( ) {
         log: false,
         resource: {
             exec: function( url ) {
-                var match = /\/1\/\?t=\d{13}/.exec( url ) || /\/1\/websocket/.exec( url );
+                var match = /\/1\/\?t=\d*/.exec( url ) || /\/1\/websocket/.exec( url );
                 var urlSubstring = null
                 if(match) {
                     urlSubstring = [url.substring(0, url.indexOf(match[0]))];
