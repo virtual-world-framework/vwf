@@ -972,7 +972,7 @@ patch to honor Collada document names:
 - NEW: ThreeJS: updated app to store local vars for access node3
 - NEW: ThreeJS: had to modify the mesh creation code to store the normals in the correct object. Added utility.color support for material.color, needs to be added to other setRGB calls
 - NEW: ThreeJS: removed the duplicated lightType definition, updated lights, major light work, added a directional light sample and pointlight demo.
-- NEW: ThreeJS: Replace ‘tick’ with a call to this.future. Insert threejs light property values. Insert the glgeLight behavior. Modify any glge light properties to the new name. Remove any calls to vwf.setProperty with calls to directly access the objects/properties
+- NEW: ThreeJS: Replace ï¿½tickï¿½ with a call to this.future. Insert threejs light property values. Insert the glgeLight behavior. Modify any glge light properties to the new name. Remove any calls to vwf.setProperty with calls to directly access the objects/properties
 - NEW: ThreeJS: renderer selection in the url, light setup for the new API, the duck is the best test app so far
 - NEW: ThreeJS: Implemented createMesh for the threejs model. added camera types, fov, near and far. initial work on supporting shadows
 - NEW: ThreeJS: deleteNode implemented
