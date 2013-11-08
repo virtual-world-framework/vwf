@@ -30,7 +30,7 @@ children:
     extends: http://vwf.example.com/node3.vwf
     implements:
     - http://vwf.example.com/animation.vwf
-    source: JumpSuitMaleNewSkin.js
+    source: JumpSuitMale_wLadder.js
     type: application/json
     properties:
       translation: [0,-0.3,0]    
