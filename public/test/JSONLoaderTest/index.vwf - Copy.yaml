@@ -1,0 +1,76 @@
+---
+extends: http://vwf.example.com/navscene.vwf
+properties:
+  navmode: walk
+  backgroundColor: [ 83, 157, 194 ]
+  ambientColor: [255, 255, 255]
+children:
+  Omni01:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "point"
+      enable: true
+      distance: 30
+      intensity: 5
+      color: [255 , 68 , 0]
+      translation: [ 5, 0, 0 ]
+  Monster:
+    extends: http://vwf.example.com/node3.vwf
+    implements:
+    - http://vwf.example.com/animation.vwf
+    source: monster.js
+    type: application/json
+    properties:
+      #translation: [-12,431,0]
+      scale: [0.01,0.01,0.01]
+      # animationDuration: 19.0666
+      #animationLoop: false
+      #animationPlaying: false
+      #animationType: -1
+      #animationRate: 1
+      #fps: 30
+  VCTE_characters:
+    extends: http://vwf.example.com/node3.vwf
+    implements:
+    - http://vwf.example.com/animation.vwf
+    source: AirForceAll.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [-12,431,0]
+      # animationDuration: 19.0666
+      animationLoop: false
+      animationPlaying: false
+      animationType: -1
+      animationRate: 1
+      fps: 30
+    scripts:
+    - |
+      this.initialize = function() {
+        //this.animationPlay();
+      }
+      this.pointerDown = function( pointerInfo, pickInfo ) {
+        if (++this.animationType > 2) this.animationType = 0;
+        switch (this.animationType) {
+          case 0:
+            //this.animationStopTime = 10;
+            //this.animationStartTime = 0;
+            //this.animationTime = 0;
+            this.animationPlay(0,10);
+            break;
+          case 1:
+            //this.animationStopTime = 17.7333;
+            //this.animationStartTime = 10.0666;
+            //this.animationTime = 10.0666;
+            this.animationPlay(10.0666,17.7333);
+            break;
+          case 2:
+            //this.animationStopTime = 19.066;
+            //this.animationStartTime = 17.7666;
+            //this.animationTime = 17.7666;
+            this.animationPlay(17.7666,19.066);
+            break;
+        }
+        //if(!this.animationPlaying) {
+        //  this.animationPlaying = true;
+        //}
+      }

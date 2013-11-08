@@ -239,7 +239,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             } else if ( protos && isNodeDefinition.call( this, protos ) && childName !== undefined ) {
                 
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-                if ( childType == "model/vnd.collada+xml" || childType == "model/vnd.osgjs+json+compressed") {
+                if ( childType == "model/vnd.collada+xml" || 
+                    childType == "model/vnd.osgjs+json+compressed" ||
+                    childType == "application/json" ) {
                     
                     // Most often this callback is used to suspend the queue until the load is complete
                     callback( false );
@@ -344,7 +346,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             // the driver properties w/ the stop-gap function below.
             // Else, it will be called at the end of the assetLoaded callback
             if ( ! ( childType == "model/vnd.collada+xml" || 
-                     childType == "model/vnd.osgjs+json+compressed") )
+                     childType == "model/vnd.osgjs+json+compressed" ||
+                     childType == "application/json") )
                 notifyDriverOfPrototypeAndBehaviorProps();
 
             // Since prototypes are created before the object, it does not get "setProperty" updates for
@@ -698,6 +701,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 node.threeObject.kfAnimations[i].play(false, 0);
                                 node.threeObject.kfAnimations[i].update(propertyValue);
                             } 
+                        } else {  // MorphAnimMesh
+                            if(node.threeObject.geometry.morphTargets && propertyValue !== undefined) {
+
+                                var fps = this.state.kernel.getProperty( nodeID, "animationFPS") || 30;
+                            
+//still troubleshooting                            
+if (propertyValue != 0) {
+//this.logger.info(propertyValue * fps);  
+//end troubleshooting                              
+                                
+                                node.threeObject.updateAnimation(propertyValue * fps);
+                                } 
+                            }
                         }
                     }
 
@@ -2338,11 +2354,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var parentObject3 = parentNode.threeObject ? parentNode.threeObject : parentNode.threeScene;
         //console.info( "---- loadAsset( "+parentNode.name+", "+node.name+", "+childType+" )" );
 
-        node.assetLoaded = function( asset ) { 
+        node.assetLoaded = function( geometry , materials) { 
             //console.info( "++++ assetLoaded( "+parentNode.name+", "+node.name+", "+childType+" )" );
             sceneNode.pendingLoads--;
             var removed = false;
             
+            // Temp, assume if callback returns 2 parameters then it's a JSON model
+            if (materials){
+                var material = materials[ 0 ];
+                material.morphTargets = true;
+                var faceMaterial = new THREE.MeshFaceMaterial( materials );
+                var asset = new THREE.MorphAnimMesh( geometry, faceMaterial );
+
+                asset.updateMatrix();
+
+            } else {  // Collada model
+                var asset = geometry;
+            }
+         
             var animations, animatedMesh;
             if(asset.animations && asset.animations.length > 0) {
                 animations = asset.animations;
@@ -2561,6 +2590,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
           
             if( childType == "model/vnd.osgjs+json+compressed" ) {
                 node.loader = new UTF8JsonLoader( node,node.assetLoaded.bind( this ) );
+            }
+
+            if( childType == "application/json" ) {
+                node.loader = new THREE.JSONLoader()
+                
+                node.loader.load(node.source,node.assetLoaded.bind( this ));
             }
         }
 
