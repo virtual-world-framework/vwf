@@ -30,46 +30,28 @@ children:
     extends: http://vwf.example.com/node3.vwf
     implements:
     - http://vwf.example.com/animation.vwf
-    source: JumpSuitMaleNoEyes.js
+    source: JumpSuitMaleNewSkin.js
     type: application/json
     properties:
-      rotation: [ 0, 0, 1, 180 ]
-      animationLoop: true      
+      translation: [0,-0.3,0]    
+      rotation: [ 0, 1, 1, 180 ]
+      animationLoop: false
+      animationPlaying: true
+      animationType: -1
+      animationRate: 1
+      fps: 30
 scripts:
 - |
   this.initialize = function() {
     this.Monster.animationPlay();
-    this.Avatar.animationPlay();
+    //this.Avatar.animationPlay();
     this.future( 0 ).initializeCamera();
   }
   this.pointerDown = function( pointerInfo, pickInfo ) {
-    if (++this.animationType > 2) this.animationType = 0;
-    switch (this.animationType) {
-      case 0:
-        //this.animationStopTime = 10;
-        //this.animationStartTime = 0;
-        //this.animationTime = 0;
-        this.animationPlay(0,10);
-        break;
-      case 1:
-        //this.animationStopTime = 17.7333;
-        //this.animationStartTime = 10.0666;
-        //this.animationTime = 10.0666;
-        this.animationPlay(10.0666,17.7333);
-        break;
-      case 2:
-        //this.animationStopTime = 19.066;
-        //this.animationStartTime = 17.7666;
-        //this.animationTime = 17.7666;
-        this.animationPlay(17.7666,19.066);
-        break;
-    }
-    //if(!this.animationPlaying) {
-    //  this.animationPlaying = true;
-    //}
+    this.Avatar.animationPlay();
   }
   this.initializeCamera = function() {
     //this.camera.near = 1;
-    this.camera.translation = [4.087302207946777,1.3551141023635864,0]; 
+    this.camera.translation = [5.593170642852783,-0.050479382276535034,0]; 
     this.camera.rotation = [0,0,1,90.53998565673828];
   }//@ sourceURL=index.vwf
