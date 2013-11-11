@@ -42,7 +42,7 @@ $ vwf
 
 Your application is now up and running at [http://localhost:3000](http://localhost:3000).
 
-To get started with VWF, check out [Getting Started](http://virtual.wf/docs).
+To get started with VWF, check out [Getting Started](http://virtual.wf/web/docs/readme.html).
 
 ## Examples
 

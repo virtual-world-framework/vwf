@@ -58,7 +58,7 @@ $ cd public
 $ mkdir my-app
 ```
 
-Follow the directions on the [Getting Started](http://virtual.wf/docs) to create your first app.
+To get started with VWF, check out [Getting Started](http://virtual.wf/web/docs/readme.html).
 
 Go back to the root VWF directory and start the server.
 
