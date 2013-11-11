@@ -48,7 +48,10 @@ To get started with VWF, check out [Getting Started](http://virtual.wf/docs).
 
 Watch our [screencast]() for an example of building an application quickly with VWF.
 
-For more examples, check out our [demos](http://www.virtual.wf/web/catalog.html).
+For more examples, check out our [demos](http://virtual.wf/web/catalog.html).
+
+Check out [what people are building with
+VWF](http://virtual.wf/something).
 
 ## Contributing
 
