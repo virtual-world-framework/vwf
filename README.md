@@ -3,7 +3,7 @@
 The Virtual World Framework (VWF) allows you to build collaborative, immersive applications in the browser. VWF provides:
 
 - Realtime state synchronization.
-- A set of drivers that support immersive applications - 3D, audio, video and modern graphics.
+- Support for immersive applications - a set of drivers for 3D, audio, video and modern graphics.
 
 VWF applications are written in JavaScript and leverage emerging web technologies such as WebGL, WebRTC, and WebSockets to provide a full 3D environment that is automatically synchronized across clients.
 
@@ -41,7 +41,7 @@ $ sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/bu
 
 This command may be re-run to upgrade the installation to the latest version of VWF.
 
-For more complex installations, such as hacking on VWF core, please see our [Installation Instructions](http://www.virtual.wf/web/docs/install.html).
+For more complex installations, such as working on VWF core, please see our [Installation Instructions](http://www.virtual.wf/web/docs/install.html).
 
 ## Quick Start
 
