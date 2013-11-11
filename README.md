@@ -81,7 +81,7 @@ local VWF repository.
 Our development process utilizes several branches:
 
 * `master`                - Stable release of VWF. Running on http://virtual.wf.
-* `integration`           - Integrationg testing features from development before merging into master. Running on http://integration.virtual.wf.
+* `integration`           - Integration testing features from development before merging into master. Running on http://integration.virtual.wf.
 * `development`           - The latest development and new features of the framework. Running on http://development.virtual.wf.
 * `branch/feature-name`   - Feature development is done on a feature branch before being merged back to development.
 
@@ -98,4 +98,4 @@ Keep track of developments and get help with VWF.
 
 ## License
 
-Copyright 2013 United States Government, as represented byd the Secretary of Defense, Under Secretary of Defense (Personnel & Readiness) licensed under the [Apache 2.0 License](https://github.com/virtual-world-framework/vwf/blob/master/LICENSE).
+Copyright 2013 United States Government, as represented by the Secretary of Defense, Under Secretary of Defense (Personnel & Readiness) licensed under the [Apache 2.0 License](https://github.com/virtual-world-framework/vwf/blob/master/LICENSE).
