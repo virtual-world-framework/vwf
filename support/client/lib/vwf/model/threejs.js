@@ -686,7 +686,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
 
                     else if ( propertyName == "animationTimeUpdated" ) {
-                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined) {
+                        if(node.threeObject.animatedMesh && propertyValue !== undefined) {
                             var fps = this.state.kernel.getProperty( nodeID, "animationFPS") || 30;
                             for(var i = 0; i < node.threeObject.animatedMesh.length; i++) {
                                 for(var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++) {
@@ -703,28 +703,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             } 
                         } else {  // MorphAnimMesh
                             if(node.threeObject.geometry.morphTargets && propertyValue !== undefined) {
-
-                                var fps = this.state.kernel.getProperty( nodeID, "animationFPS") || 30;
-                            
-//still troubleshooting                            
-if (propertyValue != 0) {
-//this.logger.info(propertyValue * fps);  
-//end troubleshooting                              
-                                
-                                node.threeObject.updateAnimation(propertyValue * fps);
-                                } 
+                                var animRate = this.state.kernel.getProperty( nodeID, "animationRate") || 1;
+                                node.threeObject.updateAnimation(animRate);
                             }
                         }
                     }
 
                     else if ( propertyName == "animationDuration") {
-                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations) {
+                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length 
+                            || node.threeObject.kfAnimations
+                            || node.threeObject instanceof THREE.MorphAnimMesh ) {
                             value = this.gettingProperty( nodeID, "animationDuration" );
                         }
                     }
 
                     else if ( propertyName == "animationFPS") {
-                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations) {
+                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length 
+                            || node.threeObject.kfAnimations
+                            || node.threeObject instanceof THREE.MorphAnimMesh ) {
                             value = this.gettingProperty( nodeID, "animationFPS" );
                         }
                     }
@@ -2359,7 +2355,7 @@ if (propertyValue != 0) {
             sceneNode.pendingLoads--;
             var removed = false;
             
-            // Temp, assume if callback returns 2 parameters then it's a JSON model
+            // Temp, assume if callback returns 2 parameters then it's a JSON MorphAnimMesh model
             if (materials){
                 var material = materials[ 0 ];
                 material.morphTargets = true;
