@@ -94,7 +94,7 @@ Also, please be sure that your pull request conforms to our [Coding Standard](ht
 Keep track of developments and get help with VWF.
 
 - Discover an issue? Head over to [Issues](https://github.com/virtual-world-framework/vwf/issues) and report it.
-- Have a question about VWF? Ask away on [StackOverflow](http://stackoverflow.com/questions/tagged/vwf).
+- Have a question about VWF? Ask away on [our forum](http://www.virtual.wf/web/forum.html).
 
 ## License
 
