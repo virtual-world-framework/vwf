@@ -6,14 +6,11 @@ var libpath = require( 'path' ),
     reflector = require( './lib/nodejs/reflector' ),
     vwf = require( './lib/nodejs/vwf' );
 
-    
-
-
 // Basic error handler.
-global.error = function ( ) {
+global.error = function () {
     var red, brown, reset;
 		red   = '\u001b[31m';
-		brown  = '\u001b[33m';
+		brown = '\u001b[33m';
 		reset = '\u001b[0m';
 
     var args = Array.prototype.slice.call( arguments );
@@ -22,8 +19,7 @@ global.error = function ( ) {
 	
     if ( !isNaN( parseInt( level ) ) ) {
         level = parseInt( level );
-    }
-    else {
+    } else {
         args.push( level )
         level = 1;
     };
@@ -34,14 +30,13 @@ global.error = function ( ) {
 };
 
 // Basic logging function.
-global.log = function ( ) {
+global.log = function () {
     var args = Array.prototype.slice.call( arguments );
     var level = args.splice( args.length - 1 )[ 0 ];
 
     if ( !isNaN( parseInt( level ) ) ) {
         level = parseInt( level );
-    }
-    else {
+    } else {
         args.push( level )
         level = 1;
     };
@@ -51,57 +46,43 @@ global.log = function ( ) {
     }
 };
 
-
-
-
-
-
 //Start the VWF server
-function startVWF( ) {
-    global.activeinstances = [ ];
+function startVWF() {
+    global.activeinstances = [];
     function OnRequest( request, response ) {
-        try{
+        try {
             vwf.Serve( request, response );
-        }
-        catch ( e ) {
+        } catch ( e ) {
             response.writeHead( 500, {
                 "Content-Type": "text/plain"
             } );
-            response.write( e.toString( ), "utf8" );
-            response.end( );
+            response.write( e.toString(), "utf8" );
+            response.end();
         }
     } // close onRequest
 
-
-
     //create the server
-
     var red, brown, reset;
     red   = '\u001b[31m';
-    brown  = '\u001b[33m';
+    brown = '\u001b[33m';
     reset = '\u001b[0m';
 
     //start the DAL
-    var p = process.argv.indexOf( '-p' );
-    var port = p >= 0 ? parseInt( process.argv[ p + 1 ] ) : 3000;
+    var pIndex = process.argv.indexOf( '-p' );
+    var port = ( pIndex >= 0 ? parseInt( process.argv[ pIndex + 1 ] ) : 3000 );
 		
-    p = process.argv.indexOf( '-d' );
-    var datapath = p >= 0 ? process.argv[ p + 1 ] : "C:\\VWFData";
-		
-    p = process.argv.indexOf( '-l' );
-    global.logLevel = p >= 0 ? process.argv[ p + 1 ] : 1;
+    var lIndex = process.argv.indexOf( '-l' );
+    global.logLevel = ( lIndex >= 0 ? process.argv[ lIndex + 1 ] : 1 );
     global.log( brown + 'LogLevel = ' +  global.logLevel + reset, 0 );	
-
 
     p = process.argv.indexOf( '-nocache' );
     if ( p >= 0 ) {
         FileCache.enabled = false;
-        console.log('server cache disabled');
+        console.log( 'server cache disabled' );
     }
 
     var srv = http.createServer( OnRequest ).listen( port );
     global.log( brown + 'Serving on port ' + port + reset, 0 );
-
 
     //create socket server
     var socketManager = sio.listen( srv, { log: false } );
