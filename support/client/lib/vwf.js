@@ -992,7 +992,8 @@
         /// message received from the reflector.
         /// 
         /// @name module:vwf.dispatch
-
+	this.lastTickOvershoot = 0;
+	this.lastTick = 0;
         this.dispatch = function() {
 
             var fields;
@@ -1008,9 +1009,29 @@
                     this.sequence_ = undefined; // clear after the previous action
                     this.client_ = undefined;   // clear after the previous action
                     this.now = fields.time;
-                    this.tick();
+                    //this.tick();
                 }
-
+		
+		if(this.now > this.lastTick)
+		{
+			var timepassed = this.now - this.lastTick;
+			while(timepassed > .05)
+			{
+				timepassed -= .05;
+				this.tick();
+				this.lastTick += .05;
+			
+				var now = performance.now();;
+				//console.log(now - this.lastRealTick );
+				this.lastRealTick = now;
+			}
+			
+			
+			
+			
+			
+		}
+		//console.log(fields);
                 // Perform the action.
 
                 if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
@@ -1028,7 +1049,10 @@
                 this.sequence_ = undefined; // clear after the previous action
                 this.client_ = undefined;   // clear after the previous action
                 this.now = queue.time;
-                this.tick();
+		
+		//this tick seems to  be unnecessary... causes ticks like 100ms 1ms 100ms 1ms 100ms .....   
+		//cant do animation smoothing with that...
+                //this.tick();
             }
             
         };
@@ -1062,16 +1086,15 @@
                 model.ticking && model.ticking( this.now ); // TODO: maintain a list of tickable models and only call those
             }, this );
 
-            // Call ticked() on each view.
-
-            this.views.forEach( function( view ) {
-                view.ticked && view.ticked( this.now ); // TODO: maintain a list of tickable views and only call those
-            }, this );
-
             // Call tick() on each tickable node.
 
             this.tickable.nodeIDs.forEach( function( nodeID ) {
                 this.callMethod( nodeID, "tick", [ this.now ] );
+            }, this );
+	    
+	    // Call ticked() on each view.
+	     this.views.forEach( function( view ) {
+                view.ticked && view.ticked( this.now ); // TODO: maintain a list of tickable views and only call those
             }, this );
 
         };
