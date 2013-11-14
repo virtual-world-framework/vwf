@@ -694,18 +694,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 }
                                 node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * fps) ] = 1;
                             }
-                        }
-                        if(node.threeObject.kfAnimations && propertyValue !== undefined) {
+                        } else if(node.threeObject.kfAnimations && propertyValue !== undefined) {
                             for(var i = 0; i < node.threeObject.kfAnimations.length; i++) {
                                 node.threeObject.kfAnimations[i].stop()
                                 node.threeObject.kfAnimations[i].play(false, 0);
                                 node.threeObject.kfAnimations[i].update(propertyValue);
                             } 
-                        } else {  // MorphAnimMesh
-                            if(node.threeObject.geometry.morphTargets && propertyValue !== undefined) {
-                                var animRate = this.state.kernel.getProperty( nodeID, "animationRate") || 1;
-                                node.threeObject.updateAnimation(animRate);
-                            }
                         }
                     }
 
@@ -2407,7 +2401,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 		
             animatedMesh = [];
             walkGraph(nodeCopy.threeObject,function( node ){
-                if( node instanceof THREE.SkinnedMesh ) {
+                if( node instanceof THREE.SkinnedMesh  || node instanceof THREE.MorphAnimMesh ) {
                     animatedMesh.push( node );
                 }
             });
