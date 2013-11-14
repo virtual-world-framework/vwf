@@ -84,6 +84,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             yawMatrix = new THREE.Matrix4();
             translationMatrix = new THREE.Matrix4();
 	    
+        window._dView = this;
 		this.nodes = {};
 		this.interpolateTransforms = true;
 		this.tickTime = 0;
@@ -92,10 +93,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 		this.lastRealTick = performance.now();
 		this.leftover = 0;
 		this.future = 0;
-		window.setInterval(function()
-		{
-			this.lerpTick()
-		}.bind(this),50);
+		
 			
         },
 
@@ -397,8 +395,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 navObjectRequested = true;
                 findNavObject();
             }
-	    
-	    
+	        
+	        this.lerpTick();
 	    
 	    
 		
@@ -411,13 +409,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 		this.realTickDif = now - this.lastRealTick;
 		this.lastRealTick = now;
 		
-	
+	  
 	
 		this.tickTime = this.future;
 		//reset - loading can cause us to get behind and always but up against the max prediction value
-		//if(this.future > 1) this.future = 0;
-		this.future = 0;
+		if(this.future > 1) this.future = 0;
+		 
 		
+        
 		
 		
 		for(var i in this.nodes)
@@ -538,8 +537,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 		
 		
 		var step = (this.tickTime) / (this.realTickDif);
-		
-		
+		step = Math.min(step,1);
 		deltaTime = Math.min(deltaTime,this.realTickDif)
 		this.tickTime += deltaTime || 0;
 
@@ -548,6 +546,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 		else
 			this.future = 0;
 		
+        
+        
 		
 		//if going slower than tick rate, don't make life harder by changing values. it would be invisible anyway
 		//if(step > 2) return;
@@ -567,7 +567,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 					
 					
 					vwf.setProperty(i,'transform',interp);
-					console.log('here');
+					
 					this.nodes[i].needTransformRestore = true;
 				}
 				

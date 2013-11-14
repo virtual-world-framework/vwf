@@ -1028,8 +1028,7 @@
         /// message received from the reflector.
         /// 
         /// @name module:vwf.dispatch
-	this.lastTickOvershoot = 0;
-	this.lastTick = 0;
+	
         this.dispatch = function() {
 
             var fields;
@@ -1045,32 +1044,13 @@
                     this.sequence_ = undefined; // clear after the previous action
                     this.client_ = undefined;   // clear after the previous action
                     this.now = fields.time;
-                    //this.tick();
+                    //this.tick();    //remove this - only fire the tick when the server sents a tick event!
                 }
 		
-		if(this.now > this.lastTick)
-		{
-			var timepassed = this.now - this.lastTick;
-			while(timepassed > .05)
-			{
-				timepassed -= .05;
-				this.tick();
-				this.lastTick += .05;
-			
-				var now = performance.now();;
-				//console.log(now - this.lastRealTick );
-				this.lastRealTick = now;
-			}
-			
-			
-			
-			
-			
-		}
-		//console.log(fields);
+		
                 // Perform the action.
 
-                if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
+                if ( fields.action  ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
                     this.sequence_ = fields.sequence; // note the message's queue sequence number for the duration of the action
                     this.client_ = fields.client;     // ... and note the originating client
                     this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, fields.origin );
