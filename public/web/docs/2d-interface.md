@@ -86,6 +86,8 @@ Similarly, the html can monitor other application updates, such as those listed 
 
 To learn more about these events, you can look at the system api for the [view](jsdoc/a2d7e1ef81.html).  Earlier we mentioned that calls to set a property and call a method are asynchronous.  If you would like to know when the action has completed, you may do so in [satProperty](jsdoc/a2d7e1ef81.html#satProperty)/[calledMethod](jsdoc/a2d7e1ef81.html#calledMethod)/etc.  However, remember that you will get calls into those event handlers for every property/method/etc that is set/called/etc.
 
+Note: if a property setter alters the incoming value before storing it, [satProperty](jsdoc/a2d7e1ef81.html#satProperty) will notify the app of the transformed value that is stored, not the original value.  See the API description of [node](jsdoc_cmp/symbols/node.vwf.html) for more details.
+
 -------------------
 
 **Change the Application Title and Favicon**

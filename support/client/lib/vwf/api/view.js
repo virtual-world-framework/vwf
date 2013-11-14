@@ -136,6 +136,8 @@ define( function() {
         /// @param {ID} nodeID
         /// @param {String} propertyName
         /// @param {Value} propertyValue
+        ///   The internal value of the property set in the model driver (which 
+        ///   may differ from the value originally passed in to the model driver).
         /// 
         /// @returns {}
 

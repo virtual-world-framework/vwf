@@ -722,7 +722,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
 
             renderer.render( scene, camera );
-			sceneNode.lastTime = now;
+            sceneNode.lastTime = now;
 			
 	if(self.interpolateTransforms)
 				self.restoreTransforms();		
@@ -1203,33 +1203,44 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         canvas.onmousedown = function( e ) {
             var event = getEventData( e, false );
-            switch( e.button ) {
-                case 2:
-                    if ( pointerLockImplemented && ( navmode != "none" ) ) {
-                        canvas.requestPointerLock();
-                    }
-                    mouseRightDown = true;
-                    break;
-                case 1:
-                    if ( pointerLockImplemented && ( navmode == "fly" ) ) {
-                        canvas.requestPointerLock();
-                        positionUnderMouseClick = event.eventNodeData[ "" ][ 0 ].globalPosition;
-                    }
-                    mouseMiddleDown = true;
-                    break;
-                case 0:
-                    mouseLeftDown = true;
-                    break;
-            };
-            if ( event ) {
-                pointerDownID = pointerPickID ? pointerPickID : sceneID;
-                sceneView.kernel.dispatchEvent( pointerDownID, "pointerDown", event.eventData, event.eventNodeData );
-                
-                // TODO: Navigation - see main "TODO: Navigation" comment for explanation
-                startMousePosition = event.eventData[ 0 ].position;
-                // END TODO
+            var shiftDown = e.shiftKey;
+            
+            if ( shiftDown ) {
+                if ( pointerLockImplemented && ( navmode == "fly" ) ) {
+                    canvas.requestPointerLock();
+                    positionUnderMouseClick = event.eventNodeData[ "" ][ 0 ].globalPosition;
+                }
+                mouseMiddleDown = true;        
             }
-            e.preventDefault();
+            else {
+                switch( e.button ) {
+                    case 2:
+                        if ( pointerLockImplemented && ( navmode != "none" ) ) {
+                            canvas.requestPointerLock();
+                        }
+                        mouseRightDown = true;
+                        break;
+                    case 1:
+                        if ( pointerLockImplemented && ( navmode == "fly" ) ) {
+                            canvas.requestPointerLock();
+                            positionUnderMouseClick = event.eventNodeData[ "" ][ 0 ].globalPosition;
+                        }
+                        mouseMiddleDown = true;
+                        break;
+                    case 0:
+                        mouseLeftDown = true;
+                        break;
+                };
+                if ( event ) {
+                    pointerDownID = pointerPickID ? pointerPickID : sceneID;
+                    sceneView.kernel.dispatchEvent( pointerDownID, "pointerDown", event.eventData, event.eventNodeData );
+                    
+                    // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                    startMousePosition = event.eventData[ 0 ].position;
+                    // END TODO
+                }
+                e.preventDefault();
+            }
         }
 
         // Listen for onmouseup from the document (instead of the canvas like all the other mouse events)
@@ -1239,6 +1250,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var ctrlDown = e.ctrlKey;
             var atlDown = e.altKey;
             var ctrlAndAltDown = ctrlDown && atlDown;
+            
+            if ( pointerLockImplemented && ( navmode == "fly" ) && mouseMiddleDown ) {
+                document.exitPointerLock();
+            }
+            mouseMiddleDown = false;
 
             switch( e.button ) {
                 case 2:
@@ -1409,7 +1425,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                             break;
                     }
-
+                    
                     if (!sceneView.keyStates.mods) sceneView.keyStates.mods = {};
                     sceneView.keyStates.mods.alt = event.altKey;
                     sceneView.keyStates.mods.shift = event.shiftKey;
@@ -1445,7 +1461,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                             break;
                     }
-
+                    
                     sceneView.keyStates.mods.alt = event.altKey;
                     sceneView.keyStates.mods.shift = event.shiftKey;
                     sceneView.keyStates.mods.ctrl = event.ctrlKey;
