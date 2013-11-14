@@ -128,5 +128,73 @@ task :documentation do |task|
         end
 
     end
+end
 
+desc "Run JavaScript client tests" # TODO: Doesn't show up yet
+task :test do
+  phantomjs = phantomjs_binary(ENV['PHANTOMJS_BIN'])
+  next unless phantomjs
+
+  dashed_line = "----------------"
+
+  puts dashed_line
+  puts "Running All QUnit Tests for VWF"
+  puts dashed_line
+
+  pass_count, fail_count, total, total_time = [0, 0, 0, 0]
+  FileList["test/**/*.html"].each do |file|
+    puts "Running #{file}"
+
+    pwd = `pwd`.strip
+    output = `#{phantomjs} test/run-qunit.js #{file}`
+
+    result_lines = output.split("\n")
+
+    result = result_lines[-2]
+    failed = false
+    unless result.nil? || result.empty?
+      pass_count += result.split(" ")[0].to_i
+      total += result.split(" ")[3].to_i
+      this_fail_count = result.split(" ")[5].to_i
+      fail_count += this_fail_count
+      failed = true if this_fail_count > 0
+    end
+
+    if failed
+      result_output_start = result_lines.index("-------------")
+      result_lines[result_output_start+3..-5].each { |l| puts l }
+    end
+
+    time_result = result_lines[-3]
+    unless time_result.empty?
+      total_time += time_result.split(" ")[3].to_i
+    end
+  end
+
+  puts dashed_line
+  puts "Took #{total_time/1000.0}s to run #{total} assertions, #{pass_count} passed, #{fail_count} failed."
+  puts dashed_line
+end
+
+def phantomjs_binary(phantomjs_binary_env)
+  return phantomjs_on_path if (phantomjs_binary_env.nil? || phantomjs_binary_env.empty?)
+
+  # File expects the string to be escaped, and there's no consistent way to escape across Windows and Unix-based
+  phantomjs_binary_env_escaped = phantomjs_binary_env.gsub("\\ ", " ")
+  if File.exists?(phantomjs_binary_env_escaped) && File.executable?(phantomjs_binary_env_escaped)
+    return phantomjs_binary_env
+  else
+    return phantomjs_on_path
+  end
+end
+
+def phantomjs_on_path
+  output = %x[which phantomjs]
+  # 'which phantomjs' on Mac/Linux returns nothing, but on Cygwin returns "which: no phantomjs in (PATH)"
+  if output.empty? || output =~ /no phantomjs in/
+    puts "The QUnit tests require phantomjs. Please install before running."
+    return false
+  else
+    return "phantomjs"
+  end
 end

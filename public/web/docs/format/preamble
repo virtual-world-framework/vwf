@@ -62,148 +62,54 @@
 							<li><a href='introduction.html' title='Introduction'>Introduction</a></li>
 							<li><a href='readme.html' title='Getting Started with VWF'>Getting Started</a></li>
 							<li><a href='tutorial.html' title='Tutorial'>Sandtable Tutorial</a></li>
-							<li><a href='introduction.html' title='Developers Guide'>Developer's Guide</a></li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='reqs.html' title='Requirements'>Requirements</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='install.html' title='Installation'>Installation</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='architecture.html' title='Architecture'>Architecture</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='components.html' title='Components'>Components</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='cameras.html' title='Cameras'>Cameras</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='lights.html' title='Lights'>Lights</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='prototypes.html' title='Prototypes'>Prototypes</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='behaviors.html' title='Behaviors'>Behaviors</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='animations.html' title='Animations'>Animations</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='html.html' title='HTML'>HTML</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='drivers.html' title='Drivers'>Drivers</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='editor.html' title='Editor'>Editor</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='query.html' title='Querying'>Querying</a>
-									</span>
-								</li>
-							<li><a href='cookbook.html' title='Cookbook'>Cookbook</a></li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='multiuser.html' title='Multiuser'>Multiuser</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='simulation.html' title='Simulation'>Simulation</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='2d-interface.html' title='2D-Interface'>2D Interface</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='materials.html' title='Materials'>Materials</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='chat.html' title='Chat'>Chat</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='sound.html' title='Sound'>Sound</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='transforms.html' title='Transforms'>Transforms</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='lesson.html' title='Lesson'>Lesson</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='logging.html' title='Logging'>Logging</a>
-									</span>
-								</li>
-								<!-- 
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='events.html' title='Events'>Events</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='latency.html' title='Latency'>Performance</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='files.html' title='Files'>Files I/O</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='login.html' title='Login'>Login</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
-										<a href='lod.html' title='LOD'>LOD</a>
-									</span>
-								</li>
-								-->
-							<!-- <li><a href='application.html' title='Application'>Application</a></li>
-							    <li><span style='position:relative;left:20px'><a href='specification.html' title='Specification'>Specification</a></span></li>
-							    <li><span style='position:relative;left:20px'><a href='binding.html' title='Binding'>Binding</a></span></li> -->
+							<li>
+								<a href='introduction.html' title='Developers Guide'>Developer's Guide</a>
+								<ul>
+									<li><a href='reqs.html' title='Requirements'>Requirements</a></li>
+									<li><a href='install.html' title='Installation'>Installation</a></li>
+									<li><a href='testing.html' title='Testing'>Testing</a></li>
+									<li><a href='architecture.html' title='Architecture'>Architecture</a></li>
+									<li><a href='components.html' title='Components'>Components</a></li>
+									<li><a href='cameras.html' title='Cameras'>Cameras</a></li>
+									<li><a href='lights.html' title='Lights'>Lights</a></li>
+									<li><a href='prototypes.html' title='Prototypes'>Prototypes</a></li>
+									<li><a href='behaviors.html' title='Behaviors'>Behaviors</a></li>
+									<li><a href='animations.html' title='Animations'>Animations</a></li>
+									<li><a href='html.html' title='HTML'>HTML</a></li>
+									<li><a href='drivers.html' title='Drivers'>Drivers</a></li>
+									<li><a href='editor.html' title='Editor'>Editor</a></li>
+									<li><a href='query.html' title='Querying'>Querying</a></li>
+								</ul>
+							</li>
+							<li>
+								<a href='cookbook.html' title='Cookbook'>Cookbook</a>
+								<ul>
+									<li> <a href='multiuser.html' title='Multiuser'>Multiuser</a> </li>
+									<li> <a href='simulation.html' title='Simulation'>Simulation</a> </li>
+									<li> <a href='2d-interface.html' title='2D-Interface'>2D Interface</a> </li>
+									<li> <a href='materials.html' title='Materials'>Materials</a> </li>
+									<li> <a href='chat.html' title='Chat'>Chat</a> </li>
+									<li> <a href='sound.html' title='Sound'>Sound</a> </li>
+									<li> <a href='transforms.html' title='Transforms'>Transforms</a> </li>
+									<li> <a href='lesson.html' title='Lesson'>Lesson</a> </li>
+									<li> <a href='logging.html' title='Logging'>Logging</a> </li>
+									<!-- 
+									<li> <a href='events.html' title='Events'>Events</a> </li>
+									<li> <a href='latency.html' title='Latency'>Performance</a> </li>
+									<li> <a href='files.html' title='Files'>Files I/O</a> </li>
+									<li> <a href='login.html' title='Login'>Login</a> </li>
+									<li> <a href='lod.html' title='LOD'>LOD</a> </li>
+									-->
+								</ul>
+							</li>
+							<!--
+						    <li><a href='application.html' title='Application'>Application</a>
+						    	<ul>
+								    <li><a href='specification.html' title='Specification'>Specification</a></li>
+								    <li><a href='binding.html' title='Binding'>Binding</a></li>
+								</ul>
+						    </li>
+							-->
 							<li><a href='pitfalls.html' title='Application API'>Pitfalls</a></li>
 							<li><a href='application.html' title='Application API'>Application API</a></li>
 							<li><a href='system.html' title='System API'>System API</a></li>

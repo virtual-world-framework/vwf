@@ -6,7 +6,7 @@ Animations
 
 The primary way to accomplish animations in VWF is the animation behavior. All components that extend node3 automatically implement the animation behavior, which provides standardized methods and properties for creating and executing an animation. 
 
-In order to create an animation on a node, the <code>animationUpdate</code> method needs to implemented. This method is called each time the animation time changes, and is used to update the node to the correct state for that time.
+In order to create an animation on a node, the <code>animationUpdate</code> method needs to be implemented. This method is called each time the animation time changes, and is used to update the node to the correct state for that time.
 
 	scripts:
 	- |

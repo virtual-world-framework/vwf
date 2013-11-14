@@ -74,14 +74,49 @@
 
         this.views = [];
 
-        /// this.models and this.views are lists of references to the head of each driver pipeline.
-        /// Define an "actual" property on each that evaluates to a list of references to the
-        /// pipeline tails. This is a list of the actual drivers after any intermediate stages and is
-        /// useful for debugging.
+        /// this.models is a list of references to the head of each driver pipeline. Define an
+        /// `actual` property that evaluates to a list of references to the pipeline tails. This is
+        /// a list of the actual drivers after any intermediate stages and is useful for debugging.
         /// 
         /// @name module:vwf.models.actual
 
-        Object.defineProperty( this.models, "actual", {  // TODO: for this.views too once that's converted to use the RequireJS loader
+        Object.defineProperty( this.models, "actual", {
+
+            get: function() {
+
+                // Map the array to the result.
+
+                var actual = this.map( function( model ) {
+                    return last( model );
+                } );
+
+                // Map the non-integer properties too.
+
+                for ( var propertyName in this ) {
+                    if ( isNaN( Number( propertyName ) ) ) {
+                        actual[propertyName] = last( this[propertyName] );
+                    }
+                }
+
+                // Follow a pipeline to the last stage.
+
+                function last( model ) {
+                    while ( model.model ) model = model.model;
+                    return model;
+                }
+
+                return actual;
+            }
+
+        } );
+
+        /// this.views is a list of references to the head of each driver pipeline. Define an
+        /// `actual` property that evaluates to a list of references to the pipeline tails. This is
+        /// a list of the actual drivers after any intermediate stages and is useful for debugging.
+        /// 
+        /// @name module:vwf.views.actual
+
+        Object.defineProperty( this.views, "actual", {
 
             get: function() {
 
@@ -291,7 +326,8 @@
                 { library: "vwf/model/jiglib/jiglib", active: false },
                 { library: "vwf/view/webrtc/adapter", active: false },
                 { library: "vwf/view/google-earth", active: false },
-                { library: "vwf/model/cesium/Cesium", active: false }
+                { library: "vwf/model/cesium/Cesium", active: false },
+                { library: "vwf/admin", active: true }
             ];
 
             var initializers = {
@@ -658,11 +694,43 @@
 
             try {
                 if ( isSocketIO07() ) {
+                    var options = {
+    
+                        // The socket is relative to the application path.
+    
+                        resource: window.location.pathname.slice( 1,
+                            window.location.pathname.lastIndexOf("/") ),
+    
+                        // The ruby socket.io server only supports WebSockets. Don't try the others.
+    
+                        transports: [
+                            'websocket',
+                            // 'flashsocket',
+                            // 'htmlfile',
+                            // 'xhr-multipart',
+                            // 'xhr-polling',
+                            // 'jsonp-polling',
+                        ],
+    
+                        // Increase the timeout due to starvation while loading the scene. The server
+                        // timeout must also be increased.
+                        // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
+    
+                        transportOptions: {
+                            "websocket": { timeout: 90000 }
+                            // "flashsocket": { timeout: 90000 },
+                            // "htmlfile": { timeout: 90000 },
+                            // "xhr-multipart": { timeout: 90000 },
+                            // "xhr-polling": { timeout: 90000 },
+                            // "jsonp-polling": { timeout: 90000 },
+                        }
+    
+                    };
                     if ( window.location.protocol === "https:" )
                     {
-                        socket = io.connect("wss://"+window.location.host);
+                        socket = io.connect("wss://"+window.location.host, options);
                     } else {
-                        socket = io.connect("ws://"+window.location.host); 
+                        socket = io.connect("ws://"+window.location.host, options); 
                     }
  
                 } else {  // Ruby Server
