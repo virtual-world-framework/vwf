@@ -20,10 +20,6 @@ class VWF::Application::Admin < Sinatra::Base
     set :root, VWF.settings.root
   end
 
-  get "/" do
-    erb :"admin.html"
-  end
-
   # get "/state" do  # TODO: restore when next handler is switched back to post
   # 
   #   if transport = Rack::SocketIO::Application.session( env )[:transport]
