@@ -1,12 +1,10 @@
 ﻿<div id="wrapper" style="height:100%;width:100%;z-index:2;position:absolute;top:0px;left:0px;pointer-events:none;">
 	<!-- JAVASCRIPT -->
 
-	<script src="js/jquery-ui-1.8.21.custom.min.js" type="text/javascript"></script>
-	<script src="js/jquery.ui.core.js" type="text/javascript"></script>
-	<script src="js/jquery.ui.widget.js" type="text/javascript"></script>
-	<script src="js/jquery.ui.tabs.js" type="text/javascript"></script>
+	<script src="js/jquery-ui-1.10.3.custom.min.js" type="text/javascript"></script>
 	<script src="js/events.js" type="text/javascript"></script>
-				
+
+
 	<script type="text/javascript">
 		$(function(){
 			$("#bztabs").tabs();
@@ -59,7 +57,7 @@
         e.stopPropogation();
       });
       $( '#selectPlayerInput' ).keyup( function(e) {
-        e.stopPropogation();
+       e.stopPropogation();
         var code = ( e.keyCode ? e.keyCode : e.which );
         if ( ( code == 13 ) && ( sanitizedUsername.length > 0 ) ) {
           var buttonEnabled = true;

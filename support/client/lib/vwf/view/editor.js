@@ -1018,7 +1018,8 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         var prototypeEvents = getEvents.call( this, this.kernel, node.extendsID );
         for ( var key in prototypeEvents ) {
             var nodeEvent = prototypeEvents[key];
-            var prototypeEventNameAlpha = $.encoder.encodeForHTMLAttribute(key);
+            console.log("prototypeEvents " + key);
+            var prototypeEventNameAlpha = $.encoder.encodeForAlphaNumeric(key);
             var prototypeEventNameAttribute = $.encoder.encodeForHTMLAttribute("id", key, true);
             var prototypeEventNameHTML = $.encoder.encodeForHTML(key);
             $('#prototypeEvents').append("<div id='" + prototypeEventNameAlpha + "' class='methodEntry'><table><tr><td><b>" + prototypeEventNameHTML + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + prototypeEventNameAlpha + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + prototypeEventNameAlpha + "' value='Fire' data-eventName='" + prototypeEventNameAttribute + "'><img id='arg-" + prototypeEventNameAlpha + "' data-eventName='" + prototypeEventNameAttribute + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div>");
