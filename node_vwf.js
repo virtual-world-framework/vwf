@@ -47,8 +47,11 @@ global.log = function () {
 };
 
 //Start the VWF server
-function startVWF() {
+function startVWF( currentScriptDirectory) {
     global.activeinstances = [];
+    global.vwfRoot = process.env.HOME + "/.vwf/";
+    global.applicationRoot = currentScriptDirectory;
+
     function OnRequest( request, response ) {
         try {
             vwf.Serve( request, response );
