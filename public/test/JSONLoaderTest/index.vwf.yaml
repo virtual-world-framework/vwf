@@ -20,24 +20,22 @@ children:
     implements:
     - http://vwf.example.com/animation.vwf
     source: monster.js
-    type: application/json
+    type: model/x-threejs-morphanim+json
     properties:
       scale: [0.00075, 0.00075, 0.00075]
       rotation: [-100,-100,-100,-100]
       animationLoop: true
+      animationRate: 1
   Avatar: 
     extends: http://vwf.example.com/node3.vwf
     implements:
     - http://vwf.example.com/animation.vwf
     source: JumpSuitMale_wLadder.js
-    type: application/json
+    type: model/x-threejs-morphanim+json
     properties:
       translation: [0,-0.3,0]    
       rotation: [ 0, 1, 1, 180 ]
-      animationLoop: false
-      animationPlaying: true
       animationRate: 1
-      animationDuration: 100
       animationType: -1
 scripts:
 - |
@@ -47,17 +45,18 @@ scripts:
     this.future( 0 ).initializeCamera();
   }
   this.pointerDown = function( pointerInfo, pickInfo ) {
-    if (++this.Avatar.animationType > 2) this.Avatar.animationType = 0;
+    if (++this.Avatar.animationType > 1) this.Avatar.animationType = 0;
     switch (this.Avatar.animationType) {
       case 0:
-        this.Avatar.animationTime = 0;
-        this.Avatar.animationPlay(0,11);
+        //this.Avatar.animationTime = 0;
+        //this.Avatar.animationStartTime = 0;
+        //this.Avatar.animationStopTime = 5;
+        this.Avatar.animationPlay(0,5);
         break;
       case 1:
-        this.Avatar.animationPlay(11,17);
-        break;
-      case 2:
-        this.Avatar.animationPlay(17,20);
+        //this.Avatar.animationStartTime = 5;
+        //this.Avatar.animationStopTime = 8.25;
+        this.Avatar.animationPlay(5,8.25);
         break;
     }
   }  
