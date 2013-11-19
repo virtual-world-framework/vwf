@@ -2,6 +2,7 @@
 	<!-- JAVASCRIPT -->
 
 	<script src="js/jquery-ui-1.10.3.custom.min.js" type="text/javascript"></script>
+	<script src="js/events.js" type="text/javascript"></script>
 
 
 	<script type="text/javascript">
@@ -53,10 +54,10 @@
       });
 
       $( '#selectPlayerInput' ).keydown( function(e) {
-        e.stopPropogation();
+//        e.stopPropogation();
       });
       $( '#selectPlayerInput' ).keyup( function(e) {
-        e.stopPropogation();
+//       e.stopPropogation();
         var code = ( e.keyCode ? e.keyCode : e.which );
         if ( ( code == 13 ) && ( sanitizedUsername.length > 0 ) ) {
           var buttonEnabled = true;
