@@ -686,7 +686,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
 
                     else if ( propertyName == "animationTimeUpdated" ) {
-                        if( node.threeObject.animatedMesh && propertyValue !== undefined ) {
+                        if( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined ) {
                             var fps = this.state.kernel.getProperty( nodeID, "animationFPS" ) || 30;
                             for( var i = 0; i < node.threeObject.animatedMesh.length; i++ ) {
                                 for( var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++ ) {
@@ -694,7 +694,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 }
                                 node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * fps) ] = 1;
                             }
-                        } else if ( node.threeObject.kfAnimations && propertyValue !== undefined ) {
+                        }
+                        if ( node.threeObject.kfAnimations && node.threeObject.kfAnimations.length && propertyValue !== undefined ) {
                             for ( var i = 0; i < node.threeObject.kfAnimations.length; i++ ) {
                                 node.threeObject.kfAnimations[i].stop()
                                 node.threeObject.kfAnimations[i].play( false, 0 );
