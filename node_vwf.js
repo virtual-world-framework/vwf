@@ -109,11 +109,11 @@ function startVWF( ) {
         resource: {
             exec: function( url ) {
                 var match = /\/1\/\?t=\d*/.exec( url ) || /\/1\/websocket/.exec( url );
-                var urlSubstring = null
-                if(match) {
-                    urlSubstring = [url.substring(0, url.indexOf(match[0]))];
+                if (match) {
+                    return [url.substring(0, url.indexOf(match[0]))];
+                } else {
+                    return null;
                 }
-                return urlSubstring;
             }
         } 
     } );
