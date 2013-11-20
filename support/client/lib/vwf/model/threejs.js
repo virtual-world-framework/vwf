@@ -686,35 +686,31 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
 
                     else if ( propertyName == "animationTimeUpdated" ) {
-                        if(node.threeObject.animatedMesh && propertyValue !== undefined) {
-                            var fps = this.state.kernel.getProperty( nodeID, "animationFPS") || 30;
-                            for(var i = 0; i < node.threeObject.animatedMesh.length; i++) {
-                                for(var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++) {
+                        if( node.threeObject.animatedMesh && propertyValue !== undefined ) {
+                            var fps = this.state.kernel.getProperty( nodeID, "animationFPS" ) || 30;
+                            for( var i = 0; i < node.threeObject.animatedMesh.length; i++ ) {
+                                for( var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++ ) {
                                     node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
                                 }
                                 node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * fps) ] = 1;
                             }
-                        } else if(node.threeObject.kfAnimations && propertyValue !== undefined) {
-                            for(var i = 0; i < node.threeObject.kfAnimations.length; i++) {
+                        } else if ( node.threeObject.kfAnimations && propertyValue !== undefined ) {
+                            for ( var i = 0; i < node.threeObject.kfAnimations.length; i++ ) {
                                 node.threeObject.kfAnimations[i].stop()
-                                node.threeObject.kfAnimations[i].play(false, 0);
-                                node.threeObject.kfAnimations[i].update(propertyValue);
+                                node.threeObject.kfAnimations[i].play( false, 0 );
+                                node.threeObject.kfAnimations[i].update( propertyValue );
                             } 
                         }
                     }
 
-                    else if ( propertyName == "animationDuration") {
-                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length 
-                            || node.threeObject.kfAnimations
-                            || node.threeObject instanceof THREE.MorphAnimMesh ) {
+                    else if ( propertyName == "animationDuration" ) {
+                        if( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations ) {
                             value = this.gettingProperty( nodeID, "animationDuration" );
                         }
                     }
 
-                    else if ( propertyName == "animationFPS") {
-                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length 
-                            || node.threeObject.kfAnimations
-                            || node.threeObject instanceof THREE.MorphAnimMesh ) {
+                    else if ( propertyName == "animationFPS" ) {
+                        if( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations ) {
                             value = this.gettingProperty( nodeID, "animationFPS" );
                         }
                     }
@@ -2351,9 +2347,25 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             // THREE.morphAnimMesh JSON model
             if ( childType == "model/x-threejs-morphanim+json" ) {
-                var material = materials[ 0 ];
-                material.morphTargets = true;
-                var asset = new THREE.MorphAnimMesh( geometry, material );
+
+                for ( var i = 0; i < materials.length; i++ ) {
+                    var m = materials[ i ];
+                    m.morphTargets = true;
+                }
+                
+                var meshMaterial;
+                if ( materials.length > 1 ) {
+
+                    // THREE.MeshFaceMaterial for meshes that have multiple materials
+                    meshMaterial = new THREE.MeshFaceMaterial( materials );    
+                
+                } else {
+
+                    // This mesh has only one material
+                    meshMaterial = materials[ 0 ];
+                }
+
+                var asset = new THREE.MorphAnimMesh( geometry, meshMaterial );
 
                 asset.updateMatrix();
 
