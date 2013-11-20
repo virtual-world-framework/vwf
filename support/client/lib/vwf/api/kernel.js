@@ -610,6 +610,21 @@ define( function() {
 
         findClients: [ /* nodeID, matchPattern, callback( matchID ) */ ],
 
+        /// Return device object matching the given search pattern.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
+        /// @param {String} matchPattern
+        ///   The search pattern.
+        /// @param {Function} [callback]
+        ///   A callback to receive the search results. If callback is provided, find invokes
+        ///   callback( matchID ) for each match. Otherwise the result is returned as an array.
+
+        findDevices: [ /* nodeID, matchPattern, callback( matchID ) */ ],
+
         /// Description.
         /// 
         /// @callback module:vwf/api/kernel~nodeCallback

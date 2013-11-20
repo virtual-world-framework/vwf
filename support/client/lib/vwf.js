@@ -1041,13 +1041,40 @@
             if ( memberName ) args.push( memberName );
             if ( parameters ) args = args.concat( parameters ); // flatten
 
+            var self = this;
+
+            var callback;
+            if( respond ) {
+                switch(actionName) {
+                    case "createChild":
+                        callback = args[4];
+                        args[4] = respondFunction;
+                        break;
+                    case "createNode":
+                        callback = args[2];
+                        args[2] = respondFunction;
+                        break;
+                }
+            }
+
             // Invoke the action.
 
             var result = this[actionName] && this[actionName].apply( this, args );
 
             // Return the result.
 
-            respond && this.respond( nodeID, actionName, memberName, parameters, result );
+            switch(actionName) {
+                case "createChild":
+                case "createNode":
+                    break;
+                default:
+                    respond && this.respond( nodeID, actionName, memberName, parameters, result );
+            }
+
+            function respondFunction (result) { 
+                callback && callback.apply(this, arguments); 
+                respond && self.respond( nodeID, actionName, memberName, parameters, result );
+            }
 
             // origin == "reflector" ?
             //     this.logger.infou() : this.logger.debugu();
@@ -3633,6 +3660,44 @@ if ( ! childComponent.source ) {
 
             var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
                 "http-vwf-example-com-clients-vwf", nodeID, xpathResolver, this );
+
+            if ( callback ) {
+
+                matchIDs.forEach( function( matchID ) {
+                    callback( matchID );
+                } );
+
+            } else { 
+
+                return matchIDs;
+            }
+
+        };
+
+        // -- findDevices ------------------------------------------------------------------------------
+
+        /// Locate device nodes matching a search pattern. 
+        ///
+        /// @name module:vwf.findDevices
+        ///
+        /// @param {ID} nodeID
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
+        /// @param {String} matchPattern
+        ///   The search pattern.
+        /// @param {Function} [callback]
+        ///   A callback to receive the search results. If callback is provided, find invokes
+        ///   callback( matchID ) for each match. Otherwise the result is returned as an array.
+        /// 
+        /// @returns {ID[]|undefined}
+        ///   If callback is provided, undefined; otherwise an array of the node ids of the result.
+        /// 
+        /// @see {@link module:vwf/api/kernel.devices}
+
+        this.findDevices = function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
+
+            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
+                "http-vwf-example-com-devices-vwf", nodeID, xpathResolver, this );
 
             if ( callback ) {
 

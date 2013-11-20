@@ -580,6 +580,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             case "find":
             case "test":
             case "findClients":
+            case "findDevices":
 
                 return function() {
                     return this.kernel[kernelFunctionName].apply( this.kernel, arguments );
