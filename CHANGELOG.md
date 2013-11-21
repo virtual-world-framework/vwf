@@ -2,6 +2,25 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.6.17 and 0.6.18 Combined Release
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change. 0.6.17 and 0.6.18 were combined into a single release do to internal sprint planning changes.
+
+Server:
+- NEW: Merge pull request #47 from virtual-world-framework/branch/headless-qunit. Headless QUnit - Run qunit tests from command line. Move the qunit tests into the client Rakefile and update docs. Update docs with instructions to handle spaces in paths. Support paths with spaces across Windows and Mac. Added bundle exec to call. Update testing.md. Document how to run qunit tests. Add descriptions to tasks so they show up in 'rake -T'. Enable phantomjs to run on Windows. Check if phantomjs is installed before trying to run qunit tests. Pull phantomjs binary location from ENV. Add `kernel.views.actual` to match models, and update tests to use. This duplicates some code, but branch/model-sandbox moves the pipeline-following function to the driver modules so it will be short-lived. Update Gemfile.lock after pulling out the phantomjs gem. Include rake test:qunit in the rake test run so that all tests are run by rake test. Add expect nothing to broken tests to meet new qunit requirements. Improve console output from run-qunit and rake task. Remove phantomjs gem because not needed. Add a task for running the qunit tests using phantomjs. Add qunit runner for phantomjs. Upgrade qunit to most recent version
+- NEW: Merge pull request #58 from virtual-world-framework/branch/node-doc. Add Node.js Server documentation. Add node-inspector configuration options to nodejs documentation Refs #2828. Add Node.js Server installation, execution, & debugging instructions.  Fixes #2855. Create Node Server 'Logs' directory on demand.  Fixes #2828
+- CHG: Create Node Server 'Logs' directory on demand. Refs #2828
+- CHG: Update install.md to include SSL setup instructions. Fixes #2807
+- NEW: Streamline node package list. Add debug script for running node in debug mode. Switch out https for http npm registry. Adjust node module version strings. Set dependencies to N.N.x in order to retrive the most recent patches. Set devDependences to x.x.x to be the most expansive. For development tools, I assume we want the most recent versions, always. Removed all unused packages. I think I *only* removed unused packages, so if you notice something missing, add it back in! Upgraded libraries to the most recent versions. Switched to 0.0.x semantic versioning for specifying dependencies. The ".x" in the version will pull in patches, but not minor or major version changes. Changed sections referring to ADL to refer to VWF. Added start script so you can start the server by typing `npm start`. Moved testing and debugging tools to devDependencies so that they won't be installed in production. Changed license to Apache 2 from MIT. Regenerated `npm-shrinkwrap.json` with the new packages.
+
+Client:
+- NEW: Shift Key now allows for MouseMiddleDown behavior when held down and a mouse click is made. This allows a user without a middle mouse button to still access the orbit functionality. Fixes #2901
+
+Demonstration Applications:
+- NEW: 2D Editor Example Application
+- NEW: Add link to Kimray Valve Demo to VWF main website.
+
+----------------------------------
 0.6.16
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change.
@@ -953,7 +972,7 @@ patch to honor Collada document names:
 - NEW: ThreeJS: updated app to store local vars for access node3
 - NEW: ThreeJS: had to modify the mesh creation code to store the normals in the correct object. Added utility.color support for material.color, needs to be added to other setRGB calls
 - NEW: ThreeJS: removed the duplicated lightType definition, updated lights, major light work, added a directional light sample and pointlight demo.
-- NEW: ThreeJS: Replace ‘tick’ with a call to this.future. Insert threejs light property values. Insert the glgeLight behavior. Modify any glge light properties to the new name. Remove any calls to vwf.setProperty with calls to directly access the objects/properties
+- NEW: ThreeJS: Replace ï¿½tickï¿½ with a call to this.future. Insert threejs light property values. Insert the glgeLight behavior. Modify any glge light properties to the new name. Remove any calls to vwf.setProperty with calls to directly access the objects/properties
 - NEW: ThreeJS: renderer selection in the url, light setup for the new API, the duck is the best test app so far
 - NEW: ThreeJS: Implemented createMesh for the threejs model. added camera types, fov, near and far. initial work on supporting shadows
 - NEW: ThreeJS: deleteNode implemented

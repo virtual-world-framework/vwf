@@ -244,7 +244,7 @@ Node.js Server Installation / Launch / Debug
 
 *2.	Download the VWF source from [github](https://github.com/virtual-world-framework/vwf).*
 
-*3.	Launch a terminal window and cd to your VWF root directory.  For windows a ‘node.js command prompt’ was provided with the node.js windows install.  Cygwin may also be used assuming the Cygwin Windows Installation instructions have been successfully completed.  Caveat, there are known issued using Node.js with Cygwin.*
+*3.	Launch a terminal window and cd to your VWF root directory.  For windows a ‘node.js command prompt’ was provided with the node.js windows install.  Cygwin may also be used assuming the Cygwin Windows Installation instructions have been successfully completed.  Caveat, there are known issues using Node.js with Cygwin.*
 
     $ cd "//path/to/VirtualWorldFramework"
 

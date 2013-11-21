@@ -239,7 +239,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             } else if ( protos && isNodeDefinition.call( this, protos ) && childName !== undefined ) {
                 
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-                if ( childType == "model/vnd.collada+xml" || childType == "model/vnd.osgjs+json+compressed") {
+                if ( childType == "model/vnd.collada+xml" || 
+                    childType == "model/vnd.osgjs+json+compressed" ||
+                    childType == "model/x-threejs-morphanim+json" ) {
                     
                     // Most often this callback is used to suspend the queue until the load is complete
                     callback( false );
@@ -344,7 +346,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             // the driver properties w/ the stop-gap function below.
             // Else, it will be called at the end of the assetLoaded callback
             if ( ! ( childType == "model/vnd.collada+xml" || 
-                     childType == "model/vnd.osgjs+json+compressed") )
+                     childType == "model/vnd.osgjs+json+compressed" ||
+                     childType == "model/x-threejs-morphanim+json") )
                 notifyDriverOfPrototypeAndBehaviorProps();
 
             // Since prototypes are created before the object, it does not get "setProperty" updates for
@@ -683,32 +686,32 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
 
                     else if ( propertyName == "animationTimeUpdated" ) {
-                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined) {
-                            var fps = this.state.kernel.getProperty( nodeID, "animationFPS") || 30;
-                            for(var i = 0; i < node.threeObject.animatedMesh.length; i++) {
-                                for(var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++) {
+                        if( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined ) {
+                            var fps = this.state.kernel.getProperty( nodeID, "animationFPS" ) || 30;
+                            for( var i = 0; i < node.threeObject.animatedMesh.length; i++ ) {
+                                for( var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++ ) {
                                     node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
                                 }
                                 node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * fps) ] = 1;
                             }
                         }
-                        if(node.threeObject.kfAnimations && propertyValue !== undefined) {
-                            for(var i = 0; i < node.threeObject.kfAnimations.length; i++) {
+                        if ( node.threeObject.kfAnimations && node.threeObject.kfAnimations.length && propertyValue !== undefined ) {
+                            for ( var i = 0; i < node.threeObject.kfAnimations.length; i++ ) {
                                 node.threeObject.kfAnimations[i].stop()
-                                node.threeObject.kfAnimations[i].play(false, 0);
-                                node.threeObject.kfAnimations[i].update(propertyValue);
+                                node.threeObject.kfAnimations[i].play( false, 0 );
+                                node.threeObject.kfAnimations[i].update( propertyValue );
                             } 
                         }
                     }
 
-                    else if ( propertyName == "animationDuration") {
-                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations) {
+                    else if ( propertyName == "animationDuration" ) {
+                        if( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations ) {
                             value = this.gettingProperty( nodeID, "animationDuration" );
                         }
                     }
 
-                    else if ( propertyName == "animationFPS") {
-                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations) {
+                    else if ( propertyName == "animationFPS" ) {
+                        if( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations ) {
                             value = this.gettingProperty( nodeID, "animationFPS" );
                         }
                     }
@@ -2338,11 +2341,39 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var parentObject3 = parentNode.threeObject ? parentNode.threeObject : parentNode.threeScene;
         //console.info( "---- loadAsset( "+parentNode.name+", "+node.name+", "+childType+" )" );
 
-        node.assetLoaded = function( asset ) { 
+        node.assetLoaded = function( geometry , materials) { 
             //console.info( "++++ assetLoaded( "+parentNode.name+", "+node.name+", "+childType+" )" );
             sceneNode.pendingLoads--;
             var removed = false;
             
+            // THREE.morphAnimMesh JSON model
+            if ( childType == "model/x-threejs-morphanim+json" ) {
+
+                for ( var i = 0; i < materials.length; i++ ) {
+                    var m = materials[ i ];
+                    m.morphTargets = true;
+                }
+                
+                var meshMaterial;
+                if ( materials.length > 1 ) {
+
+                    // THREE.MeshFaceMaterial for meshes that have multiple materials
+                    meshMaterial = new THREE.MeshFaceMaterial( materials );    
+                
+                } else {
+
+                    // This mesh has only one material
+                    meshMaterial = materials[ 0 ];
+                }
+
+                var asset = new THREE.MorphAnimMesh( geometry, meshMaterial );
+
+                asset.updateMatrix();
+
+            } else {  // Collada model
+                var asset = geometry;
+            }
+         
             var animations, animatedMesh;
             if(asset.animations && asset.animations.length > 0) {
                 animations = asset.animations;
@@ -2382,7 +2413,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 		
             animatedMesh = [];
             walkGraph(nodeCopy.threeObject,function( node ){
-                if( node instanceof THREE.SkinnedMesh ) {
+                if( node instanceof THREE.SkinnedMesh  || node instanceof THREE.MorphAnimMesh ) {
                     animatedMesh.push( node );
                 }
             });
@@ -2562,6 +2593,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if( childType == "model/vnd.osgjs+json+compressed" ) {
                 node.loader = new UTF8JsonLoader( node,node.assetLoaded.bind( this ) );
             }
+
+            if( childType == "model/x-threejs-morphanim+json" ) {
+                node.loader = new THREE.JSONLoader()
+                node.loader.load( node.source, node.assetLoaded.bind( this ) );
+            }
         }
 
         //if the asset registry entry is not pending and it is loaded, then just grab a copy, 
@@ -2575,7 +2611,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var n = asset;
             var skins = [];
             walkGraph( n, function( node ) {
-                if( node instanceof THREE.SkinnedMesh ) {
+                if( node instanceof THREE.SkinnedMesh || node instanceof THREE.MorphAnimMesh ) {
                     skins.push( node );
                 }
             });
@@ -2613,7 +2649,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 cloneMaterials( n );
                 var skins = [];
                 walkGraph( n, function( node ) {
-                    if( node instanceof THREE.SkinnedMesh ) {
+                    if( node instanceof THREE.SkinnedMesh || node instanceof THREE.MorphAnimMesh ) {
                         skins.push( node );
                     }            
                 });
