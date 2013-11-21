@@ -14,6 +14,9 @@
 class VWF < Sinatra::Base
 
   require "vwf/pattern"
+  require "vwf/storage"
+  require "vwf/application"
+  require "vwf/application/reflector"
 
   configure do
 
@@ -67,7 +70,7 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
     elsif instance.nil? && private_path.nil?
 
-      redirect to request.path_info + random_instance_id + "/" + ( request.query_string.length > 0 ? "?" + request.query_string : "" )
+      redirect to request.path_info + random_instance_id( public_path, application ) + "/" + ( request.query_string.length > 0 ? "?" + request.query_string : "" )
 
     # Delegate everything else to the application.
 
@@ -164,8 +167,32 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
     # Generate a random string to be used as an instance id.
 
-    def random_instance_id  # TODO: don't count on this for security; migrate to a proper instance id, in a cookie, at least twice as long, and with verified randomness
-      "%08x" % rand( 1 << 32 ) + "%08x" % rand( 1 << 32 ) # rand has 52 bits of randomness; call twice to get 64 bits
+    def random_instance_id public_path, application  # TODO: don't count on this for security; migrate to a proper instance id, in a cookie, at least twice as long, and with verified randomness
+
+      # First, get the array of current instances that are saved.
+      current_instances = VWF::Storage.new().list_application_instances( public_path, application )
+      # Next, loop over the currently active instances, adding any not yet in the current instances list to the list.
+      VWF::Application::Reflector.instances( ::File.join( public_path, application ) ).map do |resource, instance|
+        resource_segments = resource.split( "/" )
+        if resource_segments.length > 3
+          active_instance_id = resource_segments.pop
+          active_instance_application = resource_segments.pop
+          active_instance_public_path = resource_segments.join( "/" )
+          if public_path == active_instance_public_path and application == active_instance_application
+            unless current_instances.include? active_instance_id
+              current_instances.push active_instance_id
+            end
+          end
+        end
+      end
+
+      # Finally, loop creating new randomized instance ids, until one doesn't match an existing instance.
+      result = nil
+      loop do
+        result = "%08x" % rand( 1 << 32 ) + "%08x" % rand( 1 << 32 ) # rand has 52 bits of randomness; call twice to get 64 bits
+        break if ! current_instances.include?( result )
+      end
+      result
     end
 
   end

@@ -124,6 +124,32 @@ class VWF::Application::Persistence < Sinatra::Base
 
   end
 
+  # Given an env, attempt to load the appropriate application config file.
+  # Return the Persistence.enabled value from the file, if present.
+  # Default to false, otherwise.
+  def self.enabledForApplication env
+    result = false
+    unless env[ "vwf.root" ].nil? or env[ "vwf.application" ].nil?
+      if ( File.exists?( "public#{ env[ "vwf.root" ] }/#{ env[ "vwf.application" ] }.config.yaml") )
+        config = File.read( "public#{ env[ "vwf.root" ] }/#{ env[ "vwf.application" ] }.config.yaml" )
+        config = YAML.load( config )
+        unless config[ "persistence" ].nil?
+          if config[ "persistence" ][ "enabled" ].class == TrueClass
+            result = true
+          end
+        end
+      elsif ( File.exists?( "public#{ env[ "vwf.root" ] }/#{ env[ "vwf.application" ] }.config.json" ) )
+        config = File.read( "public#{ env[ "vwf.root" ] }/#{ env[ "vwf.application" ] }.config.json" )
+        config = JSON.load( config )
+        unless config[ "persistence" ].nil?
+          if config[ "persistence" ][ "enabled" ].class == TrueClass
+            result = true
+          end
+        end
+      end
+    end
+    result
+  end
   
   helpers do
   
