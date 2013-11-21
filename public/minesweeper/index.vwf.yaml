@@ -634,8 +634,8 @@ scripts:
       }
       // Disable button
       top.$("#startButton").button("option", "disabled", true);
-      top.$("#winMessage").dialog("close");
-      top.$("#loseMessage").dialog("close");
+      top.$("#winMessage").dialog().dialog("close");
+      top.$("#loseMessage").dialog().dialog("close");
       // Start game
       this.gameInProgress = true;
     }
