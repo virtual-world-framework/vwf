@@ -1018,7 +1018,6 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         var prototypeEvents = getEvents.call( this, this.kernel, node.extendsID );
         for ( var key in prototypeEvents ) {
             var nodeEvent = prototypeEvents[key];
-            console.log("prototypeEvents " + key);
             var prototypeEventNameAlpha = $.encoder.encodeForAlphaNumeric(key);
             var prototypeEventNameAttribute = $.encoder.encodeForHTMLAttribute("id", key, true);
             var prototypeEventNameHTML = $.encoder.encodeForHTML(key);
