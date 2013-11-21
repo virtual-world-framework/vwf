@@ -47,10 +47,9 @@ global.log = function () {
 };
 
 //Start the VWF server
-function startVWF( currentScriptDirectory) {
+function startVWF() {
     global.activeinstances = [];
     global.vwfRoot = process.env.HOME + "/.vwf/";
-    global.applicationRoot = currentScriptDirectory;
 
     function OnRequest( request, response ) {
         try {
@@ -82,6 +81,21 @@ function startVWF( currentScriptDirectory) {
     if ( p >= 0 ) {
         FileCache.enabled = false;
         console.log( 'server cache disabled' );
+    }
+
+    // Set the root directory where applications will be served from. Default
+    // to the current directory if none is specified.
+    // Use --applicationPath or -a to specify an alternative path.
+    var argv = require('optimist').argv;
+    if ( argv.applicationPath || argv.a ) {
+        var applicationPath = argv.applicationPath || argv.a;
+
+        if ( fs.existsSync( applicationPath ) && fs.statSync( applicationPath ).isDirectory() ) {
+            console.log( brown + applicationPath + " is a directory!" + reset );
+            global.applicationRoot = applicationPath;
+        } else {
+            console.log( red + applicationPath + " is NOT a directory!" + reset );
+        }
     }
 
     var srv = http.createServer( OnRequest ).listen( port );

@@ -1,3 +1,5 @@
-var server = require("./node_vwf");
+#!/usr/bin/env node
 
-server.startVWF( process.cwd() );
+var server = require( "./node_vwf" );
+
+server.startVWF();
