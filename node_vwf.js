@@ -46,6 +46,42 @@ global.log = function () {
     }
 };
 
+function consoleNotice( string ) {
+    var brown = '\u001b[33m';
+    var reset = '\u001b[0m';
+    global.log( brown + string + reset );
+}
+
+function consoleError( string ) {
+    var red   = '\u001b[31m';
+    var reset = '\u001b[0m';
+    global.log( red + string + reset );
+}
+
+// Set the root directory where applications will be served from. Default
+// to the current directory if none is specified.
+// Use --applicationPath or -a to specify an alternative path.
+function parseApplicationPath () {
+    var argv = require('optimist').argv;
+
+    if ( argv.applicationPath || argv.a ) {
+
+        var applicationPath = argv.applicationPath || argv.a;
+
+        if ( fs.existsSync( applicationPath ) && fs.statSync( applicationPath ).isDirectory() ) {
+            consoleNotice( "Serving VWF applications from " + applicationPath );
+            return applicationPath;
+        } else {
+            consoleError ( applicationPath + " is NOT a directory! Serving VWF applications from " + process.cwd() );
+            return process.cwd();
+        }
+
+    } else {
+        consoleNotice( "Serving VWF applications from " + process.cwd() );
+        return process.cwd();
+    }
+}
+
 //Start the VWF server
 function startVWF() {
     global.activeinstances = [];
@@ -65,8 +101,8 @@ function startVWF() {
 
     //create the server
     var red, brown, reset;
-    red   = '\u001b[31m';
     brown = '\u001b[33m';
+    red   = '\u001b[31m';
     reset = '\u001b[0m';
 
     //start the DAL
@@ -83,20 +119,7 @@ function startVWF() {
         console.log( 'server cache disabled' );
     }
 
-    // Set the root directory where applications will be served from. Default
-    // to the current directory if none is specified.
-    // Use --applicationPath or -a to specify an alternative path.
-    var argv = require('optimist').argv;
-    if ( argv.applicationPath || argv.a ) {
-        var applicationPath = argv.applicationPath || argv.a;
-
-        if ( fs.existsSync( applicationPath ) && fs.statSync( applicationPath ).isDirectory() ) {
-            console.log( brown + applicationPath + " is a directory!" + reset );
-            global.applicationRoot = applicationPath;
-        } else {
-            console.log( red + applicationPath + " is NOT a directory!" + reset );
-        }
-    }
+    global.applicationRoot = parseApplicationPath();
 
     var srv = http.createServer( OnRequest ).listen( port );
     global.log( brown + 'Serving on port ' + port + reset, 0 );
