@@ -14,6 +14,27 @@
 require "rack/socket-io/application"
 require "json"
 
+ # Override PeriodicTimer  
+ module EventMachine  
+   class PeriodicTimer  
+     alias :old_initialize :initialize  
+     def initialize interval, callback=nil, &block  
+       # Added two additional instance variables to compensate difference.   
+       @start = Time.now  
+       @fixed_interval = interval  
+       old_initialize interval, callback, &block  
+     end  
+     alias :old_schedule :schedule  
+     def schedule  
+       # print "Started at #{@start}..: "  
+       compensation = (Time.now - @start) % @fixed_interval   
+       @interval = @fixed_interval - compensation  
+       # Schedule   
+       old_schedule  
+     end  
+   end  
+ end  
+
 class VWF::Application::Reflector < Rack::SocketIO::Application
 
   def call env
