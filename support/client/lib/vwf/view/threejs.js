@@ -43,6 +43,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var userObjectRequested = false;
     // End Navigation
 
+    var Vec3 = goog.vec.Vec3;
+    var Quaternion = goog.vec.Quaternion;
     return view.load( module, {
 
         initialize: function( options ) {
@@ -81,6 +83,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             rollMatrix = new THREE.Matrix4();
             yawMatrix = new THREE.Matrix4();
             translationMatrix = new THREE.Matrix4();
+	    
+        window._dView = this;
+		this.nodes = {};
+		this.interpolateTransforms = true;
+		this.tickTime = 0;
+		this.realTickDif = 50;
+		this.lastrealTickDif = 50;
+		this.lastRealTick = performance.now();
+		this.leftover = 0;
+		this.future = 0;
+		
+			
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -96,6 +110,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 
                 initScene.call(this,this.state.scenes[childID]);
             }
+	    
+	    this.nodes[childID] = {id:childID,extends:childExtendsID};
         },
 
         initializedNode: function( nodeID, childID ) {
@@ -123,7 +139,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
  
         // -- deletedNode ------------------------------------------------------------------------------
 
-        //deletedNode: function( nodeID ) { },
+        deletedNode: function(childID)
+	{
+		delete this.nodes[childID];
+	},
 
         // -- addedChild -------------------------------------------------------------------------------
 
@@ -169,6 +188,31 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         satProperty: function ( nodeID, propertyName, propertyValue ) { 
             
+	    
+	    if(vwf.client() && false)
+		{
+			if(propertyName == 'transform')
+			{
+				if(this.nodes[nodeID])
+				{
+					
+					this.nodes[nodeID].lastTickTransform = null;
+					this.nodes[nodeID].thisTickTransform = null;
+				
+				}
+			}
+			if(propertyName == 'animationFrame')
+			{
+				if(this.nodes[nodeID])
+				{
+					this.nodes[nodeID].lastAnimationFrame = null;
+					this.nodes[nodeID].thisAnimationFrame = null;
+				}
+			}
+		}
+	    
+	    
+	    
             // If this is this user's navObject, pay attention to changes in navmode, translationSpeed, and 
             // rotationSpeed
             if ( navObject && ( nodeID == navObject.ID ) ) {
@@ -351,7 +395,205 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 navObjectRequested = true;
                 findNavObject();
             }
-        }
+	        
+	        this.lerpTick();
+	    
+	    
+		
+			
+        },
+	lerpTick: function()
+	{
+	
+		var now = performance.now();
+		this.realTickDif = now - this.lastRealTick;
+		this.lastRealTick = now;
+		
+	  
+	
+		this.tickTime = this.future;
+		//reset - loading can cause us to get behind and always but up against the max prediction value
+		if(this.future > 1) this.future = 0;
+		 
+		
+        
+		
+		
+		for(var i in this.nodes)
+		{
+			if(this.state.nodes[i])
+			{		
+				
+				this.nodes[i].lastTickTransform = this.nodes[i].thisTickTransform;
+				this.nodes[i].thisTickTransform = this.matCpy(vwf.getProperty(i,'transform'));
+				
+				
+				
+				if(this.nodes[i].thisTickTransform) this.nodes[i].thisTickTransform = this.nodes[i].thisTickTransform.slice(0);
+				
+				
+			}
+		}
+	},
+	lerp: function(a,b,l,c)
+	{
+		if(c) l = Math.min(1,Math.max(l,0));
+		return (b*l) + a*(1.0-l);
+	},
+	matCmp: function(a,b,delta)
+	{
+		
+		for(var i =0; i < 16; i++)
+		{
+			if(Math.abs(a[i] - b[i]) > delta)
+				return false;
+		}
+		
+		return true;
+	},
+	matCpy: function(a)
+	{
+		var ret = [];
+		for(var i =0; i < 16; i++)
+		{
+			ret[i] = a[i]
+		}
+		
+		return ret;
+	},
+	rotMatFromVec: function(x,y,z)
+	{
+		var n = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1];
+		n[0] = x[0];n[1] = x[1];n[2] = x[2];
+		n[4] = y[0];n[5] = y[1];n[6] = y[2];
+		n[8] = z[0];n[9] = z[1];n[10] = z[2];
+		return n;
+	},
+	matrixLerp: function(a,b,l)
+	{
+		var n = a.slice(0);
+		n[12] = this.lerp(a[12],b[12],l);
+		n[13] = this.lerp(a[13],b[13],l);
+		n[14] = this.lerp(a[14],b[14],l);
+		
+		var x = [a[0],a[1],a[2]];
+		var xl = Vec3.magnitude(x);
+		
+		var y = [a[4],a[5],a[6]];
+		var yl = Vec3.magnitude(y);
+		
+		var z = [a[8],a[9],a[10]];
+		var zl = Vec3.magnitude(z);
+		
+		
+		var x2 = [b[0],b[1],b[2]];
+		var xl2 = Vec3.magnitude(x2);
+		
+		var y2 = [b[4],b[5],b[6]];
+		var yl2 = Vec3.magnitude(y2);
+		
+		var z2 = [b[8],b[9],b[10]];
+		var zl2 = Vec3.magnitude(z2);
+		
+		var nxl = this.lerp(xl,xl2,l);
+		var nyl = this.lerp(yl,yl2,l);
+		var nzl = this.lerp(zl,zl2,l);
+		
+		x = Vec3.normalize(x,[]);
+		y = Vec3.normalize(y,[]);
+		z = Vec3.normalize(z,[]);
+		
+		x2 = Vec3.normalize(x2,[]);
+		y2 = Vec3.normalize(y2,[]);
+		z2 = Vec3.normalize(z2,[]);
+		
+		var q = Quaternion.fromRotationMatrix4(this.rotMatFromVec(x,y,z),[]);
+		var q2 = Quaternion.fromRotationMatrix4(this.rotMatFromVec(x2,y2,z2),[]);
+		
+		var nq = Quaternion.slerp(q,q2,l,[]);
+		var nqm = Quaternion.toRotationMatrix4(nq,[]);
+		
+		
+		var nx = [nqm[0],nqm[1],nqm[2]];
+		var ny = [nqm[4],nqm[5],nqm[6]];
+		var nz = [nqm[8],nqm[9],nqm[10]];
+		
+		nx = Vec3.scale(nx,nxl,[]);
+		ny = Vec3.scale(ny,nyl,[]);
+		nz = Vec3.scale(nz,nzl,[]);
+		
+		
+		nqm = this.rotMatFromVec(nx,ny,nz);
+		
+		nqm[12] = n[12];
+		nqm[13] = n[13];
+		nqm[14] = n[14];
+		
+		return nqm;
+	},
+	
+	setInterpolatedTransforms: function(deltaTime)
+	{
+		
+		
+		var step = (this.tickTime) / (this.realTickDif);
+		step = Math.min(step,1);
+		deltaTime = Math.min(deltaTime,this.realTickDif)
+		this.tickTime += deltaTime || 0;
+
+		if(this.tickTime > this.realTickDif)
+			this.future = this.tickTime - this.realTickDif;
+		else
+			this.future = 0;
+		
+        
+        
+		
+		//if going slower than tick rate, don't make life harder by changing values. it would be invisible anyway
+		//if(step > 2) return;
+		
+		for(var i in this.nodes)
+		{
+				
+				var last = this.nodes[i].lastTickTransform;
+				var now = this.nodes[i].thisTickTransform;
+				if(last && now && !this.matCmp(last,now,.0001) )
+				{
+					
+					var interp = last.slice(0);
+					
+					
+					interp = this.matrixLerp(last,now,step||0);
+					
+					
+					vwf.setProperty(i,'transform',interp);
+					
+					this.nodes[i].needTransformRestore = true;
+				}
+				
+				
+		}
+		
+	
+		
+	},
+	restoreTransforms: function()
+	{
+		for(var i in this.nodes)
+		{
+			
+			var now = this.nodes[i].thisTickTransform;
+			
+			if(now && this.nodes[i].needTransformRestore)
+			{
+				vwf.setProperty(i,'transform',now);
+				this.nodes[i].needTransformRestore = false;
+			}
+			
+			
+			
+		}
+	},
     } );
 
     // private ===============================================================================
@@ -396,6 +638,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Schedule the next render
             window.requestAnimationFrame( renderScene );
 
+	    
+	    
+	    now = ( window.performance !== undefined && window.performance.now !== undefined ) ? window.performance.now() : time;
+			
+	   timepassed = now - sceneNode.lastTime;
+			
+		
+			if(self.interpolateTransforms)
+				self.setInterpolatedTransforms(timepassed);
+				
+	    
+	    
             // Verify that there is a camera to render from before going any farther
             var camera = self.state.cameraInUse;
             if ( !camera ) {
@@ -470,7 +724,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
 
             renderer.render( scene, camera );
-            sceneNode.lastTime = now;
+			sceneNode.lastTime = now;
+			
+	if(self.interpolateTransforms)
+				self.restoreTransforms();		
         };
 
         var mycanvas = this.canvasQuery.get( 0 );
