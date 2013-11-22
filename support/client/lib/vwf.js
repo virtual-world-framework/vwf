@@ -1072,7 +1072,7 @@
                     this.sequence_ = undefined; // clear after the previous action
                     this.client_ = undefined;   // clear after the previous action
                     this.now = fields.time;
-                    this.tick();
+                    //this.tick();    //remove this - only fire the tick when the server sents a tick event!
                 }
 
                 // Perform the action.
@@ -1092,7 +1092,10 @@
                 this.sequence_ = undefined; // clear after the previous action
                 this.client_ = undefined;   // clear after the previous action
                 this.now = queue.time;
-                this.tick();
+		
+		//this tick seems to  be unnecessary... causes ticks like 100ms 1ms 100ms 1ms 100ms .....   
+		//cant do animation smoothing with that...
+                //this.tick();
             }
             
         };
