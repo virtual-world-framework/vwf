@@ -241,7 +241,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                 if ( childType == "model/vnd.collada+xml" || 
                     childType == "model/vnd.osgjs+json+compressed" ||
-                    childType == "model/x-threejs-morphanim+json" ) {
+                    childType == "model/x-threejs-morphanim+json" ||
+                    childType == "model/x-threejs-skinned+json" ) {
                     
                     // Most often this callback is used to suspend the queue until the load is complete
                     callback( false );
@@ -347,7 +348,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             // Else, it will be called at the end of the assetLoaded callback
             if ( ! ( childType == "model/vnd.collada+xml" || 
                      childType == "model/vnd.osgjs+json+compressed" ||
-                     childType == "model/x-threejs-morphanim+json") )
+                     childType == "model/x-threejs-morphanim+json" ||
+                     childType == "model/x-threejs-skinned+json" ) )
                 notifyDriverOfPrototypeAndBehaviorProps();
 
             // Since prototypes are created before the object, it does not get "setProperty" updates for
@@ -2347,26 +2349,40 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var removed = false;
             
             // THREE.morphAnimMesh JSON model
-            if ( childType == "model/x-threejs-morphanim+json" ) {
+            if ( childType == "model/x-threejs-morphanim+json" || childType == "model/x-threejs-skinned+json" ) {
 
                 for ( var i = 0; i < materials.length; i++ ) {
                     var m = materials[ i ];
                     m.morphTargets = true;
+                    if ( childType == "model/x-threejs-skinned+json" ) {
+                        m.skinning = true;
+                    }
                 }
                 
                 var meshMaterial;
                 if ( materials.length > 1 ) {
 
                     // THREE.MeshFaceMaterial for meshes that have multiple materials
-                    meshMaterial = new THREE.MeshFaceMaterial( materials );    
-                
+                    meshMaterial = new THREE.MeshFaceMaterial( materials );
+
                 } else {
 
                     // This mesh has only one material
                     meshMaterial = materials[ 0 ];
                 }
 
-                var asset = new THREE.MorphAnimMesh( geometry, meshMaterial );
+                if ( childType == "model/x-threejs-morphanim+json" ) {
+                    var asset = new THREE.MorphAnimMesh( geometry, meshMaterial );
+                } else {  // childType == "model/x-threejs-skinned+json"
+                  // var asset = new THREE.SkinnedMesh( geometry, meshMaterial );
+
+                    var asset = new THREE.SkinnedMesh( geometry, new THREE.MeshFaceMaterial( materials ));
+                    //THREE.AnimationHandler.add( geometry.animation );   
+                    //animation = new THREE.Animation( asset, geometry.animation.name ); 
+                    //animation.JITCompile = false;
+                    //animation.interpolationType = THREE.AnimationHandler.LINEAR;
+                    //animation.play();
+                }
 
                 asset.updateMatrix();
 
@@ -2594,7 +2610,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 node.loader = new UTF8JsonLoader( node,node.assetLoaded.bind( this ) );
             }
 
-            if( childType == "model/x-threejs-morphanim+json" ) {
+            if( childType == "model/x-threejs-morphanim+json" || "model/x-threejs-skinned+json" ) {
                 node.loader = new THREE.JSONLoader()
                 node.loader.load( node.source, node.assetLoaded.bind( this ) );
             }

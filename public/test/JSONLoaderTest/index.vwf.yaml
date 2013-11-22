@@ -37,10 +37,38 @@ children:
       rotation: [ 0, 1, 1, 180 ]
       animationRate: 1
       animationType: -1
+  VCTE: 
+    extends: http://vwf.example.com/node3.vwf
+    implements:
+    - http://vwf.example.com/animation.vwf
+    source: AirForceAll.dae
+    type: model/vnd.collada+xml
+    properties:
+      translation: [ 0, -1, 0 ]    
+      rotation: [ 0, 1, 1, 90 ]
+      animationLoop: true
+      scale: [ 0.01, 0.01, 0.01 ]
+      animationRate: 1
+      animationType: -1
+  Knight: 
+    extends: http://vwf.example.com/node3.vwf
+    implements:
+    - http://vwf.example.com/animation.vwf
+    source: knight.js
+    type: model/x-threejs-skinned+json
+    properties:
+      translation: [ 0, -2, 0 ]    
+      rotation: [ 0, 1, 1, 180 ]
+      animationLoop: true
+      scale: [ 0.1, 0.1, 0.1 ]
+      animationRate: 0.1
+      animationType: -1
 scripts:
 - |
   this.initialize = function() {
     this.Monster.animationPlay();
+    this.Knight.animationPlay();
+    this.VCTE.animationPlay();
     //this.Avatar.animationPlay();
     this.future( 0 ).initializeCamera();
   }
