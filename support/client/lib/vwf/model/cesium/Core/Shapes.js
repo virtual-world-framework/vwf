@@ -1,6 +1,7 @@
 /*global define*/
 define([
         './defaultValue',
+        './defined',
         './DeveloperError',
         './Math',
         './Cartesian3',
@@ -8,6 +9,7 @@ define([
         './Matrix3'
     ], function(
         defaultValue,
+        defined,
         DeveloperError,
         CesiumMath,
         Cartesian3,
@@ -102,7 +104,7 @@ define([
          *     Cartographic.fromDegrees(-75.59777, 40.03883, 0.0)), 100000.0));
          */
         computeCircleBoundary : function(ellipsoid, center, radius, granularity) {
-            if (typeof ellipsoid === 'undefined' || typeof center === 'undefined' || typeof radius === 'undefined') {
+            if (!defined(ellipsoid) || !defined(center) || !defined(radius)) {
                 throw new DeveloperError('ellipsoid, center, and radius are required.');
             }
 
@@ -110,7 +112,7 @@ define([
                 throw new DeveloperError('radius must be greater than zero.');
             }
 
-            granularity = defaultValue(granularity, CesiumMath.toRadians(1.0));
+            granularity = defaultValue(granularity, CesiumMath.RADIANS_PER_DEGREE);
             if (granularity <= 0.0) {
                 throw new DeveloperError('granularity must be greater than zero.');
             }
@@ -143,7 +145,7 @@ define([
          * @see Polyline#setPositions
          * @see Polygon#setPositions
          *
-         * @return The set of points that form the ellipse's boundary.
+         * @returns The set of points that form the ellipse's boundary.
          *
          * @example
          * // Create a filled ellipse.
@@ -153,7 +155,7 @@ define([
          *      Cartographic.fromDegrees(-75.59777, 40.03883)), 500000.0, 300000.0, Math.toRadians(60)));
          */
         computeEllipseBoundary : function(ellipsoid, center, semiMajorAxis, semiMinorAxis, bearing, granularity) {
-            if (typeof ellipsoid === 'undefined' || typeof center === 'undefined' || typeof semiMajorAxis === 'undefined' || typeof semiMinorAxis === 'undefined') {
+            if (!defined(ellipsoid) || !defined(center) || !defined(semiMajorAxis) || !defined(semiMinorAxis)) {
                 throw new DeveloperError('ellipsoid, center, semiMajorAxis, and semiMinorAxis are required.');
             }
 
@@ -162,7 +164,7 @@ define([
             }
 
             bearing = bearing || 0.0;
-            granularity = defaultValue(granularity, CesiumMath.toRadians(1.0));
+            granularity = defaultValue(granularity, CesiumMath.RADIANS_PER_DEGREE);
 
             if (granularity <= 0.0) {
                 throw new DeveloperError('granularity must be greater than zero.');

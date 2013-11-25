@@ -4,10 +4,13 @@ define([
         './Math',
         './Cartesian2',
         './Cartesian3',
+        './defined',
+        './Geometry',
+        './GeometryAttribute',
         './Ellipsoid',
         './EllipsoidTangentPlane',
         './defaultValue',
-        './pointInsideTriangle2D',
+        './pointInsideTriangle',
         './ComponentDatatype',
         './PrimitiveType',
         './Queue',
@@ -17,65 +20,18 @@ define([
         CesiumMath,
         Cartesian2,
         Cartesian3,
+        defined,
+        Geometry,
+        GeometryAttribute,
         Ellipsoid,
         EllipsoidTangentPlane,
         defaultValue,
-        pointInsideTriangle2D,
+        pointInsideTriangle,
         ComponentDatatype,
         PrimitiveType,
         Queue,
         WindingOrder) {
     "use strict";
-
-    function DoublyLinkedList() {
-        this.head = undefined;
-        this.tail = undefined;
-        this.length = 0;
-    }
-
-    DoublyLinkedList.prototype.add = function(item) {
-        if (typeof item !== 'undefined') {
-            var node = {
-                item : item,
-                previous : this.tail,
-                next : undefined
-            };
-
-            if (typeof this.tail !== 'undefined') {
-                this.tail.next = node;
-                this.tail = node;
-            } else {
-                // Insert into empty list.
-                this.head = node;
-                this.tail = node;
-            }
-
-            ++this.length;
-        }
-    };
-
-    DoublyLinkedList.prototype.remove = function(item) {
-        if (typeof item !== 'undefined') {
-            if (typeof item.previous !== 'undefined' && typeof item.next  !== 'undefined') {
-                item.previous.next = item.next;
-                item.next.previous = item.previous;
-            } else if (typeof item.previous  !== 'undefined') {
-                // Remove last node.
-                item.previous.next = undefined;
-                this.tail = item.previous;
-            } else if (typeof item.next !== 'undefined') {
-                // Remove first node.
-                item.next.previous = undefined;
-                this.head = item.next;
-            } else {
-                // Remove last node in linked list.
-                this.head = undefined;
-                this.tail = undefined;
-            }
-
-            --this.length;
-        }
-    };
 
     function isTipConvex(p0, p1, p2) {
         var u = p1.subtract(p0);
@@ -153,28 +109,29 @@ define([
      * Returns true if the given point is contained in the list of positions.
      *
      * @param {Array} positions A list of Cartesian elements defining a polygon.
-     * @param {Cartesian} point The point to check.
-     * @returns {Boolean} <code>true></code> if <code>point</code> is found in <code>polygon</code>, <code>false</code> otherwise.
+     * @param {Cartesian2} point The point to check.
+     * @returns {Number} The index of <code>point</code> in <code>positions</code> or -1 if it was not found.
      *
      * @private
      */
     function isVertex(positions, point) {
         for ( var i = 0; i < positions.length; i++) {
             if (point.equals(positions[i])) {
-                return true;
+                return i;
             }
         }
-        return false;
+        return -1;
     }
 
     /**
      * Given a point inside a polygon, find the nearest point directly to the right that lies on one of the polygon's edges.
      *
-     * @param {Cartesian} point A point inside the polygon defined by <code>ring</code>.
+     * @param {Cartesian2} point A point inside the polygon defined by <code>ring</code>.
      * @param {Array} ring A list of Cartesian points defining a polygon.
      * @param {Array} [edgeIndices]  An array containing the indices two endpoints of the edge containing the intersection.
      *
-     * @returns {Cartesian} The intersection point.
+     * @returns {Cartesian2} The intersection point.
+     *
      * @private
      */
     function intersectPointWithRing(point, ring, edgeIndices) {
@@ -182,7 +139,7 @@ define([
 
         var minDistance = Number.MAX_VALUE;
         var rightmostVertexIndex = getRightmostPositionIndex(ring);
-        var intersection = new Cartesian3(ring[rightmostVertexIndex].x, point.y, 0.0);
+        var intersection = new Cartesian2(ring[rightmostVertexIndex].x, point.y);
         edgeIndices.push(rightmostVertexIndex);
         edgeIndices.push((rightmostVertexIndex + 1) % ring.length);
 
@@ -245,51 +202,50 @@ define([
         var edgeIndices = [];
         var intersection = intersectPointWithRing(innerRingVertex, outerRing, edgeIndices);
 
-        var visibleVertex;
-        if (isVertex(outerRing, intersection)) {
-            visibleVertex = intersection;
-        } else {
-            // Set P to be the edge endpoint closest to the inner ring vertex
-            var d1 = (outerRing[edgeIndices[0]].subtract(innerRingVertex)).magnitudeSquared();
-            var d2 = (outerRing[edgeIndices[1]].subtract(innerRingVertex)).magnitudeSquared();
-            var p = (d1 < d2) ? outerRing[edgeIndices[0]] : outerRing[edgeIndices[1]];
+        var visibleVertex = isVertex(outerRing, intersection);
+        if (visibleVertex !== -1) {
+            return visibleVertex;
+        }
 
-            var reflexVertices = getReflexVertices(outerRing);
-            var reflexIndex = reflexVertices.indexOf(p);
-            if (reflexIndex !== -1) {
-                reflexVertices.splice(reflexIndex, 1); // Do not include p if it happens to be reflex.
+        // Set P to be the edge endpoint closest to the inner ring vertex
+        var d1 = (outerRing[edgeIndices[0]].subtract(innerRingVertex)).magnitudeSquared();
+        var d2 = (outerRing[edgeIndices[1]].subtract(innerRingVertex)).magnitudeSquared();
+        var p = (d1 < d2) ? outerRing[edgeIndices[0]] : outerRing[edgeIndices[1]];
+
+        var reflexVertices = getReflexVertices(outerRing);
+        var reflexIndex = reflexVertices.indexOf(p);
+        if (reflexIndex !== -1) {
+            reflexVertices.splice(reflexIndex, 1); // Do not include p if it happens to be reflex.
+        }
+
+        var pointsInside = [];
+        for ( var i = 0; i < reflexVertices.length; i++) {
+            var vertex = reflexVertices[i];
+            if (pointInsideTriangle(vertex, innerRingVertex, intersection, p)) {
+                pointsInside.push(vertex);
             }
+        }
 
-            var pointsInside = [];
-            for ( var i = 0; i < reflexVertices.length; i++) {
-                var vertex = reflexVertices[i];
-                if (pointInsideTriangle2D(vertex, innerRingVertex, intersection, p)) {
-                    pointsInside.push(vertex);
-                }
-            }
-
-            // If all reflexive vertices are outside the triangle formed by points
-            // innerRingVertex, intersection and P, then P is the visible vertex.
-            // Otherwise, return the reflex vertex that minimizes the angle between <1,0> and <k, reflex>.
-            var minAngle = Number.MAX_VALUE;
-            if (pointsInside.length > 0) {
-                var v1 = new Cartesian2(1.0, 0.0, 0.0);
-                for (i = 0; i < pointsInside.length; i++) {
-                    var v2 = pointsInside[i].subtract(innerRingVertex);
-                    var denominator = v1.magnitude() * v2.magnitude();
-                    if (denominator !== 0) {
-                        var angle = Math.abs(Math.acos(v1.dot(v2) / denominator));
-                        if (angle < minAngle) {
-                            minAngle = angle;
-                            p = pointsInside[i];
-                        }
+        // If all reflexive vertices are outside the triangle formed by points
+        // innerRingVertex, intersection and P, then P is the visible vertex.
+        // Otherwise, return the reflex vertex that minimizes the angle between <1,0> and <k, reflex>.
+        var minAngle = Number.MAX_VALUE;
+        if (pointsInside.length > 0) {
+            var v1 = new Cartesian2(1.0, 0.0, 0.0);
+            for (i = 0; i < pointsInside.length; i++) {
+                var v2 = pointsInside[i].subtract(innerRingVertex);
+                var denominator = v1.magnitude() * v2.magnitude();
+                if (denominator !== 0) {
+                    var angle = Math.abs(Math.acos(v1.dot(v2) / denominator));
+                    if (angle < minAngle) {
+                        minAngle = angle;
+                        p = pointsInside[i];
                     }
                 }
             }
-            visibleVertex = p;
         }
 
-        return outerRing.indexOf(visibleVertex);
+        return outerRing.indexOf(p);
     }
 
     /**
@@ -299,7 +255,7 @@ define([
      * @param {Array} outerRing An array of Cartesian points defining the outer boundary of the polygon.
      * @param {Array} innerRings An array of arrays of Cartesian points, where each array represents a hole in the polygon.
      *
-     * @return A single list of Cartesian points defining the polygon, including the eliminated inner ring.
+     * @returns {Array} A single list of Cartesian points defining the polygon, including the eliminated inner ring.
      *
      * @private
      */
@@ -370,20 +326,449 @@ define([
         return newPolygonVertices;
     }
 
-    var c3 = new Cartesian3();
-    function getXZIntersectionOffsetPoints(p, p1, u1, v1) {
-        p.add(p1.subtract(p, c3).multiplyByScalar(p.y/(p.y-p1.y), c3), u1);
-        Cartesian3.clone(u1, v1);
-        offsetPointFromXZPlane(u1, true);
-        offsetPointFromXZPlane(v1, false);
+    /**
+     * Use seeded pseudo-random number to be testable.
+     *
+     * @param {Number} length
+     * @returns {Number} Random integer from 0 to <code>length - 1</code>
+     *
+     * @private
+     */
+    function getRandomIndex(length) {
+        var random = '0.' + Math.sin(rseed).toString().substr(5);
+        rseed += 0.2;
+        var i = Math.floor(random * length);
+        if (i === length) {
+            i--;
+        }
+        return i;
+    }
+    var rseed = 0;
+
+    /**
+     * Determine whether a cut between two polygon vertices is clean.
+     *
+     * @param {Number} a1i Index of first vertex.
+     * @param {Number} a2i Index of second vertex.
+     * @param {Array} pArray Array of <code>{ position, index }</code> objects representing the polygon.
+     * @returns {Boolean} If true, a cut from the first vertex to the second is internal and does not cross any other sides.
+     *
+     * @private
+     */
+    function cleanCut(a1i, a2i, pArray) {
+        return (internalCut(a1i, a2i, pArray) && internalCut(a2i, a1i, pArray)) &&
+                !intersectsSide(pArray[a1i].position, pArray[a2i].position, pArray) &&
+                !pArray[a1i].position.equals(pArray[a2i].position);
     }
 
-    function offsetPointFromXZPlane(p, isBehind) {
-        if (Math.abs(p.y) < CesiumMath.EPSILON11){
-            if (isBehind) {
-                p.y = -CesiumMath.EPSILON11;
+    /**
+     * Determine whether the cut formed between the two vertices is internal
+     * to the angle formed by the sides connecting at the first vertex.
+     *
+     * @param {Number} a1i Index of first vertex.
+     * @param {Number} a2i Index of second vertex.
+     * @param {Array} pArray Array of <code>{ position, index }</code> objects representing the polygon.
+     * @returns {Boolean} If true, the cut formed between the two vertices is internal to the angle at vertex 1
+     *
+     * @private
+     */
+    var BEFORE = -1;
+    var AFTER = 1;
+    function internalCut(a1i, a2i, pArray) {
+        // Make sure vertex is valid
+        validateVertex(a1i, pArray);
+
+        // Get the nodes from the array
+        var a1 = pArray[a1i];
+        var a2 = pArray[a2i];
+
+        // Define side and cut vectors
+        var before = getNextVertex(a1i, pArray, BEFORE);
+        var after = getNextVertex(a1i, pArray, AFTER);
+
+        var s1 = pArray[before].position.subtract(a1.position);
+        var s2 = pArray[after].position.subtract(a1.position);
+        var cut = a2.position.subtract(a1.position);
+
+        // Convert to 3-dimensional so we can use cross product
+        s1 = new Cartesian3(s1.x, s1.y, 0.0);
+        s2 = new Cartesian3(s2.x, s2.y, 0.0);
+        cut = new Cartesian3(cut.x, cut.y, 0.0);
+
+        if (isParallel(s1, cut)) { // Cut is parallel to s1
+            return isInternalToParallelSide(s1, cut);
+        } else if (isParallel(s2, cut)) { // Cut is parallel to s2
+            return isInternalToParallelSide(s2, cut);
+        } else if (angleLessThan180(s1, s2)) { // Angle at point is less than 180
+            if (isInsideSmallAngle(s1, s2, cut)) { // Cut is in-between sides
+                return true;
+            }
+
+            return false;
+        } else if (angleGreaterThan180(s1, s2)) { // Angle at point is greater than 180
+            if (isInsideBigAngle(s1, s2, cut)) { // Cut is in-between sides
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    /**
+     * Checks whether cut parallel to side is internal.
+     *
+     *  e.g.
+     *
+     *  7_________6
+     *  |         |
+     *  | 4 ______|
+     *  |  |       5
+     *  |  |______2     Is cut from 1 to 6 internal? No.
+     *  | 3       |
+     *  |_________|
+     * 0           1
+     *
+     * Note that this function simply checks whether the cut is longer or shorter.
+     *
+     * An important valid cut:
+     *
+     * Polygon:
+     *
+     * 0 ___2__4
+     *  |  /\  |
+     *  | /  \ |   Is cut 0 to 2 or 2 to 4 internal? Yes.
+     *  |/    \|
+     * 1       3
+     *
+     * This situation can occur and the only solution is a cut along a parallel
+     * side.
+     *
+     * This method is technically incomplete, however, for the following case:
+     *
+     *
+     *  7_________6
+     *  |         |
+     *  |         |______4
+     *  |          5     |    Now is 1 to 6 internal? Yes, but we'll never need it.
+     *  |         2______|
+     *  |         |      5
+     *  |_________|
+     * 0           1
+     *
+     * In this case, although the cut from 1 to 6 is valid, the side 1-2 is
+     * shorter and thus this cut will be called invalid. Assuming there are no
+     * superfluous vertices (a requirement for this method to work), however,
+     * we'll never need this cut because we can always find cut 2-5 as a substitute.
+     *
+     * @param {Cartesian3} side
+     * @param {Cartesian3} cut
+     * @returns {Boolean}
+     *
+     * @private
+     */
+    function isInternalToParallelSide(side, cut) {
+        return cut.magnitude() < side.magnitude();
+    }
+
+    /**
+     * Provides next vertex in some direction and also validates that vertex.
+     *
+     * @param {Number} index Index of original vertex.
+     * @param {Number} pArray Array of vertices.
+     * @param {Number} direction Direction of traversal.
+     * @returns {Number} Index of vertex.
+     *
+     * @private
+     */
+    function getNextVertex(index, pArray, direction) {
+        var next = index + direction;
+        if (next < 0) {
+            next = pArray.length - 1;
+        }
+        if (next === pArray.length) {
+            next = 0;
+        }
+
+        validateVertex(next, pArray);
+
+        return next;
+    }
+
+    /**
+     * Checks to make sure vertex is not superfluous.
+     *
+     * @param {Number} index Index of vertex.
+     * @param {Number} pArray Array of vertices.
+     *
+     * @exception {DeveloperError} Superfluous vertex found.
+     *
+     * @private
+     */
+    function validateVertex(index, pArray) {
+        var before = index - 1;
+        var after = index + 1;
+        if (before < 0) {
+            before = pArray.length - 1;
+        }
+        if (after === pArray.length) {
+            after = 0;
+        }
+
+        var s1 = pArray[before].position.subtract(pArray[index].position);
+        var s2 = pArray[after].position.subtract(pArray[index].position);
+
+        // Convert to 3-dimensional so we can use cross product
+        s1 = new Cartesian3(s1.x, s1.y, 0.0);
+        s2 = new Cartesian3(s2.x, s2.y, 0.0);
+
+        if (s1.cross(s2).z === 0.0) {
+            var e = new DeveloperError("Superfluous vertex found.");
+            e.vertexIndex = index;
+            throw e;
+        }
+    }
+
+    /**
+     * Determine whether s1 and s2 are parallel.
+     *
+     * @param {Cartesian3} s1
+     * @param {Cartesian3} s2
+     * @returns {Boolean}
+     *
+     * @private
+     */
+    function isParallel(s1, s2) {
+        return s1.cross(s2).z === 0.0;
+    }
+
+    /**
+     * Assuming s1 is to the left of s2, determine whether
+     * the angle between them is less than 180 degrees.
+     *
+     * @param {Cartesian3} s1
+     * @param {Cartesian3} s2
+     * @returns {Boolean}
+     *
+     * @private
+     */
+    function angleLessThan180(s1, s2) {
+        return s1.cross(s2).z < 0.0;
+    }
+
+    /**
+     * Assuming s1 is to the left of s2, determine whether
+     * the angle between them is greater than 180 degrees.
+     *
+     * @param {Cartesian3} s1
+     * @param {Cartesian3} s2
+     * @returns {Boolean}
+     *
+     * @private
+     */
+    function angleGreaterThan180(s1, s2) {
+        return s1.cross(s2).z > 0.0;
+    }
+
+    /**
+     * Determines whether s3 is inside the greater-than-180-degree angle
+     * between s1 and s2.
+     *
+     * Important: s1 must be to the left of s2.
+     *
+     * @param {Cartesian3} s1
+     * @param {Cartesian3} s2
+     * @param {Cartesian3} s3
+     * @returns {Boolean}
+     *
+     * @private
+     */
+    function isInsideBigAngle(s1, s2, s3) {
+        return (s1.cross(s3).z > 0.0) && (s3.cross(s2).z > 0.0);
+    }
+
+    /**
+     * Determines whether s3 is inside the less-than-180-degree angle
+     * between s1 and s2.
+     *
+     * Important: s1 must be to the left of s2.
+     *
+     * @param {Cartesian3} s1
+     * @param {Cartesian3} s2
+     * @param {Cartesian3} s3
+     * @returns {Boolean}
+     *
+     * @private
+     */
+    function isInsideSmallAngle(s1, s2, s3) {
+        return (s1.cross(s3).z < 0.0) && (s3.cross(s2).z < 0.0);
+    }
+
+    /**
+     * Determine whether this segment intersects any other polygon sides.
+     *
+     * @param {Cartesian2} a1 Position of first vertex.
+     * @param {Cartesian2} a2 Position of second vertex.
+     * @param {Array} pArray Array of <code>{ position, index }</code> objects representing polygon.
+     * @returns {Boolean} The segment between a1 and a2 intersect another polygon side.
+     *
+     * @private
+     */
+    function intersectsSide(a1, a2, pArray) {
+        for ( var i = 0; i < pArray.length; i++) {
+            var b1 = pArray[i].position;
+            var b2;
+            if (i < pArray.length - 1) {
+                b2 = pArray[i + 1].position;
             } else {
-                p.y = CesiumMath.EPSILON11;
+                b2 = pArray[0].position;
+            }
+
+            // If there's a duplicate point, there's no intersection here.
+            if (a1.equals(b1) || a2.equals(b2) || a1.equals(b2) || a2.equals(b1)) {
+                continue;
+            }
+
+            // Slopes (NaN means vertical)
+            var slopeA = (a2.y - a1.y) / (a2.x - a1.x);
+            var slopeB = (b2.y - b1.y) / (b2.x - b1.x);
+
+            // If parallel, no intersection
+            if (slopeA === slopeB || (isNaN(slopeA) && isNaN(slopeB))) {
+                continue;
+            }
+
+            // Calculate intersection point
+            var intX;
+            if (isNaN(slopeA)) {
+                intX = a1.x;
+            } else if (isNaN(slopeB)) {
+                intX = b1.x;
+            } else {
+                intX = (a1.y - b1.y - slopeA * a1.x + slopeB * b1.x) / (slopeB - slopeA);
+            }
+            var intY = slopeA * intX + a1.y - slopeA * a1.x;
+
+            var intersection = new Cartesian2(intX, intY);
+
+            // If intersection is on an endpoint, count no intersection
+            if (intersection.equals(a1) || intersection.equals(a2) || intersection.equals(b1) || intersection.equals(b2)) {
+                continue;
+            }
+
+            // Is intersection point between segments?
+            var intersects = isBetween(intX, a1.x, a2.x) && isBetween(intY, a1.y, a2.y) && isBetween(intX, b1.x, b2.x) && isBetween(intY, b1.y, b2.y);
+
+            // If intersecting, the cut is not clean
+            if (intersects) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function triangleInLine(pArray) {
+        // Get two sides
+        var v1 = pArray[0].position;
+        var v2 = pArray[1].position;
+        var v3 = pArray[2].position;
+
+        var side1 = v2.subtract(v1);
+        var side2 = v3.subtract(v1);
+
+        // Convert to 3-dimensional so we can use cross product
+        side1 = new Cartesian3(side1.x, side1.y, 0.0);
+        side2 = new Cartesian3(side2.x, side2.y, 0.0);
+
+        // If they're parallel, so is the last
+        return side1.cross(side2).z === 0.0;
+    }
+
+    /**
+     * Determine whether number is between n1 and n2.
+     * Do not include number === n1 or number === n2.
+     * Do include n1 === n2 === number.
+     *
+     * @param {number} number The number tested.
+     * @param {number} n1 First bound.
+     * @param {number} n2 Secound bound.
+     * @returns {Boolean} number is between n1 and n2.
+     *
+     * @private
+     */
+    function isBetween(number, n1, n2) {
+        return ((number > n1 || number > n2) && (number < n1 || number < n2)) || (n1 === n2 && n1 === number);
+    }
+
+    /**
+     * This recursive algorithm takes a polygon, randomly selects two vertices
+     * which form a clean cut through the polygon, and divides the polygon
+     * then continues to "chop" the two resulting polygons.
+     *
+     * @param {Array} nodeArray Array of <code>{ position, index }</code> objects representing polygon
+     * @returns {Array} Index array representing triangles that fill the polygon
+     *
+     * @exception {DeveloperError} Invalid polygon: must have at least three vertices.
+     * @exception {DeveloperERror} Tried x times to find a vild cut and couldn't.
+     *
+     * @private
+     */
+    function randomChop(nodeArray) {
+        // Determine & verify number of vertices
+        var numVertices = nodeArray.length;
+
+        // Is it already a triangle?
+        if (numVertices === 3) {
+            // Only return triangle if it has area (not a line)
+            if (!triangleInLine(nodeArray)) {
+                return [nodeArray[0].index, nodeArray[1].index, nodeArray[2].index];
+            }
+
+            // If it's a line, we don't need it.
+            return [];
+        } else if (nodeArray.length < 3) {
+            throw new DeveloperError('Invalid polygon: must have at least three vertices.');
+        }
+
+        // Search for clean cut
+        var cutFound = false;
+        var tries = 0;
+        while (!cutFound) {
+            // Make sure we don't go into an endless loop
+            var maxTries = nodeArray.length * 10;
+            if (tries > maxTries) {
+                throw new DeveloperError('Tried ' + maxTries + ' times to find a valid cut and couldn\'t.');
+            }
+            tries++;
+
+            // Generate random indices
+            var index1 = getRandomIndex(nodeArray.length);
+            var index2 = index1 + 1;
+            while (Math.abs(index1 - index2) < 2 || Math.abs(index1 - index2) > nodeArray.length - 2) {
+                index2 = getRandomIndex(nodeArray.length);
+            }
+
+            // Make sure index2 is bigger
+            if (index1 > index2) {
+                var index = index1;
+                index1 = index2;
+                index2 = index;
+            }
+            try {
+                // Check for a clean cut
+                if (cleanCut(index1, index2, nodeArray)) {
+                    // Divide polygon
+                    var nodeArray2 = nodeArray.splice(index1, (index2 - index1 + 1), nodeArray[index1], nodeArray[index2]);
+
+                    // Chop up resulting polygons
+                    return randomChop(nodeArray).concat(randomChop(nodeArray2));
+                }
+            } catch (exception) {
+                // Eliminate superfluous vertex and start over
+                if (exception.hasOwnProperty("vertexIndex")) {
+                    nodeArray.splice(exception.vertexIndex, 1);
+                    return randomChop(nodeArray);
+                }
+                throw exception;
             }
         }
     }
@@ -406,8 +791,8 @@ define([
          * @exception {DeveloperError} positions is required.
          * @exception {DeveloperError} At least three positions are required.
          */
-        cleanUp : function(positions) {
-            if (typeof positions  === 'undefined') {
+        removeDuplicates : function(positions) {
+            if (!defined(positions)) {
                 throw new DeveloperError('positions is required.');
             }
 
@@ -422,7 +807,7 @@ define([
                 var v0 = positions[i0];
                 var v1 = positions[i1];
 
-                if (!v0.equals(v1)) {
+                if (!Cartesian3.equals(v0, v1)) {
                     cleanedPositions.push(v1); // Shallow copy!
                 }
             }
@@ -437,7 +822,7 @@ define([
          * @exception {DeveloperError} At least three positions are required.
          */
         computeArea2D : function(positions) {
-            if (typeof positions  === 'undefined') {
+            if (!defined(positions)) {
                 throw new DeveloperError('positions is required.');
             }
 
@@ -461,7 +846,7 @@ define([
         /**
          * DOC_TBA
          *
-         * @return {WindingOrder} DOC_TBA
+         * @returns {WindingOrder} DOC_TBA
          *
          * @exception {DeveloperError} positions is required.
          * @exception {DeveloperError} At least three positions are required.
@@ -472,18 +857,16 @@ define([
         },
 
         /**
-         * DOC_TBA
+         * Triangulate a polygon
+         *
+         * @param {Array} positions - Cartesian2 array containing the vertices of the polygon
+         * @returns {Array} - Index array representing triangles that fill the polygon
          *
          * @exception {DeveloperError} positions is required.
          * @exception {DeveloperError} At least three positions are required.
          */
-        earClip2D : function(positions) {
-            // PERFORMANCE_IDEA:  This is slow at n^3.  Make it faster with:
-            //   * http://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
-            //   * http://cgm.cs.mcgill.ca/~godfried/publications/triangulation.held.ps.gz
-            //   * http://blogs.agi.com/insight3d/index.php/2008/03/20/triangulation-rhymes-with-strangulation/
-
-            if (typeof positions  === 'undefined') {
+        triangulate : function(positions) {
+            if (!defined(positions)) {
                 throw new DeveloperError('positions is required.');
             }
 
@@ -492,184 +875,26 @@ define([
                 throw new DeveloperError('At least three positions are required.');
             }
 
-            var remainingPositions = new DoublyLinkedList();
-
+            // Keep track of indices for later
+            var nodeArray = [];
             for ( var i = 0; i < length; ++i) {
-                remainingPositions.add({
+                nodeArray[i] = {
                     position : positions[i],
                     index : i
-                });
+                };
             }
 
-            var indices = [];
-
-            var previousNode = remainingPositions.head;
-            var node = previousNode.next;
-            var nextNode = node.next;
-
-            var bailCount = length * length;
-
-            while (remainingPositions.length > 3) {
-                var p0 = previousNode.item.position;
-                var p1 = node.item.position;
-                var p2 = nextNode.item.position;
-
-                if (isTipConvex(p0, p1, p2)) {
-                    var isEar = true;
-
-                    for ( var n = (nextNode.next ? nextNode.next : remainingPositions.head); n !== previousNode; n = (n.next ? n.next : remainingPositions.head)) {
-                        if (pointInsideTriangle2D(n.item.position, p0, p1, p2)) {
-                            isEar = false;
-                            break;
-                        }
-                    }
-
-                    if (isEar) {
-                        indices.push(previousNode.item.index);
-                        indices.push(node.item.index);
-                        indices.push(nextNode.item.index);
-
-                        remainingPositions.remove(node);
-
-                        node = nextNode;
-                        nextNode = nextNode.next ? nextNode.next : remainingPositions.head;
-                        continue;
-                    }
-                }
-
-                previousNode = previousNode.next ? previousNode.next : remainingPositions.head;
-                node = node.next ? node.next : remainingPositions.head;
-                nextNode = nextNode.next ? nextNode.next : remainingPositions.head;
-
-                if (--bailCount === 0) {
-                    break;
-                }
-            }
-
-            var n0 = remainingPositions.head;
-            var n1 = n0.next;
-            var n2 = n1.next;
-            indices.push(n0.item.index);
-            indices.push(n1.item.index);
-            indices.push(n2.item.index);
-
-            return indices;
+            // Recursive chop
+            return randomChop(nodeArray);
         },
 
         /**
-         * Subdivides a {@link Polygon} such that no triangles cross the &plusmn;180 degree meridian of an ellipsoid.
-         * @memberof PolygonPipeline
+         * This function is used for predictable testing.
          *
-         * @param {Array} positions The Cartesian positions of triangles that make up a polygon.
-         * @param {Array} indices The indices of positions in the positions array that make up triangles
-         *
-         * @returns {Object} The full set of indices, including those for positions added for newly created triangles
-         *
-         * @exception {DeveloperError} positions and indices are required
-         * @exception {DeveloperError} At least three indices are required.
-         * @exception {DeveloperError} The number of indices must be divisable by three.
-         *
-         * @see Polygon
-         *
-         * @example
-         * var positions = [new Cartesian3(-1, -1, 0), new Cartesian3(-1, 1, 2), new Cartesian3(-1, 2, 2)];
-         * var indices = [0, 1, 2];
-         * indices = PolygonPipeline.wrapLongitude(positions, indices);
+         * @private
          */
-
-        wrapLongitude : function(positions, indices) {
-            if ((typeof positions === 'undefined') ||
-                (typeof indices === 'undefined')) {
-                throw new DeveloperError('positions and indices are required.');
-            }
-
-            if (indices.length < 3) {
-                throw new DeveloperError('At least three indices are required.');
-            }
-
-            if (indices.length % 3 !== 0) {
-                throw new DeveloperError('The number of indices must be divisable by three.');
-            }
-
-            var newIndices = [];
-
-            var len = indices.length;
-            for (var i = 0; i < len; i += 3) {
-                var i0 = indices[i];
-                var i1 = indices[i + 1];
-                var i2 = indices[i + 2];
-                var p0 = positions[i0];
-                var p1 = positions[i1];
-                var p2 = positions[i2];
-
-                // In WGS84 coordinates, for a triangle approximately on the
-                // ellipsoid to cross the IDL, first it needs to be on the
-                // negative side of the plane x = 0.
-                if ((p0.x < 0.0) && (p1.x < 0.0) && (p2.x < 0.0)) {
-                    var p0Behind = p0.y < 0.0;
-                    var p1Behind = p1.y < 0.0;
-                    var p2Behind = p2.y < 0.0;
-
-                    offsetPointFromXZPlane(p0, p0Behind);
-                    offsetPointFromXZPlane(p1, p1Behind);
-                    offsetPointFromXZPlane(p2, p2Behind);
-
-                    var numBehind = 0;
-                    numBehind += p0Behind ? 1 : 0;
-                    numBehind += p1Behind ? 1 : 0;
-                    numBehind += p2Behind ? 1 : 0;
-
-                    var u1, u2, v1, v2;
-
-                    if (numBehind === 1 || numBehind === 2) {
-                        u1 = new Cartesian3();
-                        u2 = new Cartesian3();
-                        v1 = new Cartesian3();
-                        v2 = new Cartesian3();
-                    }
-                    var iu1 = positions.length;
-                    if (numBehind === 1) {
-                        if (p0Behind) {
-                            getXZIntersectionOffsetPoints(p0, p1, u1, v1);
-                            getXZIntersectionOffsetPoints(p0, p2, u2, v2);
-                            positions.push(u1, u2, v1, v2);
-                            newIndices.push(i0, iu1, iu1+1, i1, i2, iu1+3, i1, iu1+3, iu1+2);
-                        } else if (p1Behind) {
-                            getXZIntersectionOffsetPoints(p1, p0, u1, v1);
-                            getXZIntersectionOffsetPoints(p1, p2, u2, v2);
-                            positions.push(u1, u2, v1, v2);
-                            newIndices.push(i1, iu1, iu1+1, i2, i0, iu1+3, i2, iu1+3, iu1+2);
-                        } else if (p2Behind) {
-                            getXZIntersectionOffsetPoints(p2, p0, u1, v1);
-                            getXZIntersectionOffsetPoints(p2, p1, u2, v2);
-                            positions.push(u1, u2, v1, v2);
-                            newIndices.push(i2, iu1, iu1+1, i0, i1, iu1+3, i0, iu1+3, iu1+2);
-                        }
-                    } else if (numBehind === 2) {
-                        if (!p0Behind) {
-                            getXZIntersectionOffsetPoints(p0, p1, u1, v1);
-                            getXZIntersectionOffsetPoints(p0, p2, u2, v2);
-                            positions.push(u1, u2, v1, v2);
-                            newIndices.push(i1, i2, iu1+1, i1, iu1+1, iu1, i0, iu1+2, iu1+3);
-                        } else if (!p1Behind) {
-                            getXZIntersectionOffsetPoints(p1, p2, u1, v1);
-                            getXZIntersectionOffsetPoints(p1, p0, u2, v2);
-                            positions.push(u1, u2, v1, v2);
-                            newIndices.push(i2, i0, iu1+1, i2, iu1+1, iu1, i1, iu1+2, iu1+3);
-                        } else if (!p2Behind) {
-                            getXZIntersectionOffsetPoints(p2, p0, u1, v1);
-                            getXZIntersectionOffsetPoints(p2, p1, u2, v2);
-                            positions.push(u1, u2, v1, v2);
-                            newIndices.push(i0, i1, iu1+1, i0, iu1+1, iu1, i2, iu1+2, iu1+3);
-                        }
-                    } else {
-                        newIndices.push(i0, i1, i2);
-                    }
-                } else {
-                    newIndices.push(i0, i1, i2);
-                }
-            }
-            return newIndices;
+        resetSeed : function(seed) {
+            rseed = defaultValue(seed, 0);
         },
 
         /**
@@ -686,11 +911,11 @@ define([
          * @exception {DeveloperError} Granularity must be greater than zero.
          */
         computeSubdivision : function(positions, indices, granularity) {
-            if (typeof positions === 'undefined') {
+            if (!defined(positions)) {
                 throw new DeveloperError('positions is required.');
             }
 
-            if (typeof indices === 'undefined') {
+            if (!defined(indices)) {
                 throw new DeveloperError('indices is required.');
             }
 
@@ -702,7 +927,7 @@ define([
                 throw new DeveloperError('The number of indices must be divisable by three.');
             }
 
-            granularity = defaultValue(granularity, CesiumMath.toRadians(1.0));
+            granularity = defaultValue(granularity, CesiumMath.RADIANS_PER_DEGREE);
             if (granularity <= 0.0) {
                 throw new DeveloperError('granularity must be greater than zero.');
             }
@@ -720,7 +945,7 @@ define([
             }
 
             // New positions due to edge splits are appended to the positions list.
-            var subdividedPositions = positions.slice(0); // shadow copy!
+            var subdividedPositions = positions.slice(0); // shallow copy!
             var subdividedIndices = [];
 
             // Used to make sure shared edges are not split more than once.
@@ -734,12 +959,13 @@ define([
                 var v1 = subdividedPositions[triangle.i1];
                 var v2 = subdividedPositions[triangle.i2];
 
-                var g0 = v0.angleBetween(v1);
-                var g1 = v1.angleBetween(v2);
-                var g2 = v2.angleBetween(v0);
+                var g0 = Cartesian3.angleBetween(v0, v1);
+                var g1 = Cartesian3.angleBetween(v1, v2);
+                var g2 = Cartesian3.angleBetween(v2, v0);
 
                 var max = Math.max(g0, Math.max(g1, g2));
                 var edge;
+                var mid;
 
                 if (max > granularity) {
                     if (g0 === max) {
@@ -747,7 +973,9 @@ define([
 
                         i = edges[edge];
                         if (!i) {
-                            subdividedPositions.push(v0.add(v1).multiplyByScalar(0.5));
+                            mid = Cartesian3.add(v0, v1);
+                            Cartesian3.multiplyByScalar(mid, 0.5, mid);
+                            subdividedPositions.push(mid);
                             i = subdividedPositions.length - 1;
                             edges[edge] = i;
                         }
@@ -767,7 +995,9 @@ define([
 
                         i = edges[edge];
                         if (!i) {
-                            subdividedPositions.push(v1.add(v2).multiplyByScalar(0.5));
+                            mid = Cartesian3.add(v1, v2);
+                            Cartesian3.multiplyByScalar(mid, 0.5, mid);
+                            subdividedPositions.push(mid);
                             i = subdividedPositions.length - 1;
                             edges[edge] = i;
                         }
@@ -787,7 +1017,9 @@ define([
 
                         i = edges[edge];
                         if (!i) {
-                            subdividedPositions.push(v2.add(v0).multiplyByScalar(0.5));
+                            mid = Cartesian3.add(v2, v0);
+                            Cartesian3.multiplyByScalar(mid, 0.5, mid);
+                            subdividedPositions.push(mid);
                             i = subdividedPositions.length - 1;
                             edges[edge] = i;
                         }
@@ -823,20 +1055,17 @@ define([
                 flattenedPositions[q++] = item.z;
             }
 
-            return {
+            return new Geometry({
                 attributes : {
-                    position : {
-                        componentDatatype : ComponentDatatype.FLOAT,
+                    position : new GeometryAttribute({
+                        componentDatatype : ComponentDatatype.DOUBLE,
                         componentsPerAttribute : 3,
                         values : flattenedPositions
-                    }
+                    })
                 },
-
-                indexLists : [{
-                    primitiveType : PrimitiveType.TRIANGLES,
-                    values : subdividedIndices
-                }]
-            };
+                indices : subdividedIndices,
+                primitiveType : PrimitiveType.TRIANGLES
+            });
         },
 
         /**
@@ -844,7 +1073,7 @@ define([
          *
          * @exception {DeveloperError} ellipsoid is required.
          */
-        scaleToGeodeticHeight : function(mesh, height, ellipsoid) {
+        scaleToGeodeticHeight : function(geometry, height, ellipsoid) {
             ellipsoid = defaultValue(ellipsoid, Ellipsoid.WGS84);
 
             var n = scaleToGeodeticHeightN;
@@ -852,14 +1081,12 @@ define([
 
             height = defaultValue(height, 0.0);
 
-            if (typeof mesh !== 'undefined' && typeof mesh.attributes !== 'undefined' && typeof mesh.attributes.position !== 'undefined') {
-                var positions = mesh.attributes.position.values;
+            if (defined(geometry) && defined(geometry.attributes) && defined(geometry.attributes.position)) {
+                var positions = geometry.attributes.position.values;
                 var length = positions.length;
 
                 for ( var i = 0; i < length; i += 3) {
-                    p.x = positions[i];
-                    p.y = positions[i + 1];
-                    p.z = positions[i + 2];
+                    p = Cartesian3.fromArray(positions, i, p);
 
                     ellipsoid.scaleToGeodeticSurface(p, p);
                     ellipsoid.geodeticSurfaceNormal(p, n);
@@ -872,7 +1099,7 @@ define([
                 }
             }
 
-            return mesh;
+            return geometry;
         },
 
         /**
@@ -882,7 +1109,7 @@ define([
          * @param {Array} outerRing An array of Cartesian points defining the outer boundary of the polygon.
          * @param {Array} innerRings An array of arrays of Cartesian points, where each array represents a hole in the polygon.
          *
-         * @return A single list of Cartesian points defining the polygon, including the eliminated inner ring.
+         * @returns A single list of Cartesian points defining the polygon, including the eliminated inner ring.
          *
          * @exception {DeveloperError} <code>outerRing</code> is required.
          * @exception {DeveloperError} <code>outerRing</code> must not be empty.
@@ -894,13 +1121,13 @@ define([
          * polygon.setPositions(outerRing);
          */
         eliminateHoles : function(outerRing, innerRings, ellipsoid) {
-            if (typeof outerRing === 'undefined') {
+            if (!defined(outerRing)) {
                 throw new DeveloperError('outerRing is required.');
             }
             if (outerRing.length === 0) {
                 throw new DeveloperError('outerRing must not be empty.');
             }
-            if (typeof innerRings === 'undefined') {
+            if (!defined(innerRings)) {
                 throw new DeveloperError('innerRings is required.');
             }
             ellipsoid = defaultValue(ellipsoid, Ellipsoid.WGS84);

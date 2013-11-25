@@ -12,8 +12,5 @@
 # the License.
 
 ---
-model:
-  vwf/model/threejs:
 view:
-  vwf/view/threejs: "#vwf-root"
   vwf/view/webrtc: { debug: false, videoProperties: { create: false } }

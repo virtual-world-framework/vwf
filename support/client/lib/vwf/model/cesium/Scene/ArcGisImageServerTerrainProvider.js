@@ -1,6 +1,7 @@
 /*global define*/
 define([
         '../Core/defaultValue',
+        '../Core/defined',
         '../Core/loadImage',
         '../Core/getImagePixels',
         '../Core/throttleRequestByServer',
@@ -9,12 +10,14 @@ define([
         '../Core/Math',
         '../Core/Ellipsoid',
         '../Core/Event',
+        './Credit',
         './TerrainProvider',
         './GeographicTilingScheme',
         './HeightmapTerrainData',
         '../ThirdParty/when'
     ], function(
         defaultValue,
+        defined,
         loadImage,
         getImagePixels,
         throttleRequestByServer,
@@ -23,6 +26,7 @@ define([
         CesiumMath,
         Ellipsoid,
         Event,
+        Credit,
         TerrainProvider,
         GeographicTilingScheme,
         HeightmapTerrainData,
@@ -45,7 +49,7 @@ define([
      * @param {Ellipsoid} [description.ellipsoid] The ellipsoid.  If the tilingScheme is specified,
      *                    this parameter is ignored and the tiling scheme's ellipsoid is used instead.
      *                    If neither parameter is specified, the WGS84 ellipsoid is used.
-     * @param {String} [description.credit] A string crediting the data source, which is displayed on the canvas.
+     * @param {Credit|String} [description.credit] The credit, which will is displayed on the canvas.
      *
      * @see TerrainProvider
      *
@@ -58,7 +62,7 @@ define([
      * centralBody.terrainProvider = terrainProvider;
      */
     var ArcGisImageServerTerrainProvider = function ArcGisImageServerTerrainProvider(description) {
-        if (typeof description === 'undefined' || typeof description.url === 'undefined') {
+        if (!defined(description) || !defined(description.url)) {
             throw new DeveloperError('description.url is required.');
         }
 
@@ -66,7 +70,7 @@ define([
         this._token = description.token;
 
         this._tilingScheme = description.tilingScheme;
-        if (typeof this._tilingScheme === 'undefined') {
+        if (!defined(this._tilingScheme)) {
             this._tilingScheme = new GeographicTilingScheme({
                 ellipsoid : defaultValue(description.ellipsoid, Ellipsoid.WGS84)
             });
@@ -88,12 +92,11 @@ define([
 
         this._errorEvent = new Event();
 
-        if (typeof description.credit !== 'undefined') {
-            // Create the copyright message.
-            this._logo = writeTextToCanvas(description.credit, {
-                font : '12px sans-serif'
-            });
+        var credit = description.credit;
+        if (typeof credit === 'string') {
+            credit = new Credit(credit);
         }
+        this._credit = credit;
     };
 
     /**
@@ -133,12 +136,12 @@ define([
         }
 
         var proxy = this._proxy;
-        if (typeof proxy !== 'undefined') {
+        if (defined(proxy)) {
             url = proxy.getURL(url);
         }
 
         var promise = throttleRequestByServer(url, loadImage);
-        if (typeof promise === 'undefined') {
+        if (!defined(promise)) {
             return undefined;
         }
 
@@ -180,17 +183,15 @@ define([
     };
 
     /**
-     * Gets the logo to display when this terrain provider is active.  Typically this is used to credit
+     * Gets the credit to display when this terrain provider is active.  Typically this is used to credit
      * the source of the terrain.  This function should not be called before {@link ArcGisImageServerTerrainProvider#isReady} returns true.
      *
      * @memberof ArcGisImageServerTerrainProvider
      *
-     * @returns {Image|Canvas} A canvas or image containing the log to display, or undefined if there is no logo.
-     *
-     * @exception {DeveloperError} <code>getLogo</code> must not be called before the terrain provider is ready.
+     * @returns {Credit} The credit, or undefined if no credit exists
      */
-    ArcGisImageServerTerrainProvider.prototype.getLogo = function() {
-        return this._logo;
+    ArcGisImageServerTerrainProvider.prototype.getCredit = function() {
+        return this._credit;
     };
 
     /**

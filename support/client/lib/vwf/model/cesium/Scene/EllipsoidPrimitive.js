@@ -1,8 +1,10 @@
 /*global define*/
 define([
-        '../Core/BoxTessellator',
+        '../Core/BoxGeometry',
         '../Core/Cartesian3',
+        '../Core/Cartesian4',
         '../Core/combine',
+        '../Core/defined',
         '../Core/DeveloperError',
         '../Core/destroyObject',
         '../Core/Matrix4',
@@ -13,15 +15,17 @@ define([
         '../Renderer/BufferUsage',
         '../Renderer/CommandLists',
         '../Renderer/DrawCommand',
-        '../Renderer/createPickFragmentShaderSource',
+        '../Renderer/createShaderSource',
         './Material',
         './SceneMode',
         '../Shaders/EllipsoidVS',
         '../Shaders/EllipsoidFS'
     ], function(
-        BoxTessellator,
+        BoxGeometry,
         Cartesian3,
+        Cartesian4,
         combine,
+        defined,
         DeveloperError,
         destroyObject,
         Matrix4,
@@ -32,7 +36,7 @@ define([
         BufferUsage,
         CommandLists,
         DrawCommand,
-        createPickFragmentShaderSource,
+        createShaderSource,
         Material,
         SceneMode,
         EllipsoidVS,
@@ -113,12 +117,11 @@ define([
          * Local reference frames can be used by providing a different transformation matrix, like that returned
          * by {@link Transforms.eastNorthUpToFixedFrame}.  This matrix is available to GLSL vertex and fragment
          * shaders via {@link czm_model} and derived uniforms.
-         * <p>
-         * The default is {@link Matrix4.IDENTITY}.
-         * </p>
          *
          * @type {Matrix4}
          * @default {@link Matrix4.IDENTITY}
+         *
+         * @default Matrix4.IDENTITY
          *
          * @example
          * var origin = ellipsoid.cartographicToCartesian(
@@ -133,9 +136,6 @@ define([
 
         /**
          * Determines if the ellipsoid primitive will be shown.
-         * <p>
-         * The default is <code>true</code>.
-         * </p>
          *
          * @type {Boolean}
          * @default true
@@ -172,7 +172,9 @@ define([
         this._pickId = undefined;
 
         this._colorCommand = new DrawCommand();
+        this._colorCommand.owner = this;
         this._pickCommand = new DrawCommand();
+        this._pickCommand.owner = this;
         this._commandLists = new CommandLists();
 
         var that = this;
@@ -195,16 +197,16 @@ define([
     function getVertexArray(context) {
         var vertexArray = context.cache.ellipsoidPrimitive_vertexArray;
 
-        if (typeof vertexArray !== 'undefined') {
+        if (defined(vertexArray)) {
             return vertexArray;
         }
 
-        var mesh = BoxTessellator.compute({
+        var geometry = BoxGeometry.createGeometry(BoxGeometry.fromDimensions({
             dimensions : new Cartesian3(2.0, 2.0, 2.0)
-        });
+        }));
 
-        vertexArray = context.createVertexArrayFromMesh({
-            mesh: mesh,
+        vertexArray = context.createVertexArrayFromGeometry({
+            geometry: geometry,
             attributeIndices: attributeIndices,
             bufferUsage: BufferUsage.STATIC_DRAW
         });
@@ -221,16 +223,16 @@ define([
     EllipsoidPrimitive.prototype.update = function(context, frameState, commandList) {
         if (!this.show ||
             (frameState.mode !== SceneMode.SCENE3D) ||
-            (typeof this.center === 'undefined') ||
-            (typeof this.radii === 'undefined')) {
+            (!defined(this.center)) ||
+            (!defined(this.radii))) {
             return;
         }
 
-        if (typeof this.material === 'undefined') {
+        if (!defined(this.material)) {
             throw new DeveloperError('this.material must be defined.');
         }
 
-        if (typeof this._rs === 'undefined') {
+        if (!defined(this._rs)) {
             this._rs = context.createRenderState({
                 // Cull front faces - not back faces - so the ellipsoid doesn't
                 // disappear if the viewer enters the bounding box.
@@ -251,7 +253,7 @@ define([
             });
         }
 
-        if (typeof this._va === 'undefined') {
+        if (!defined(this._va)) {
             this._va = getVertexArray(context);
         }
 
@@ -281,11 +283,7 @@ define([
 
             // Recompile shader when material changes
             if (materialChanged) {
-                var colorFS =
-                    '#line 0\n' +
-                    this.material.shaderSource +
-                    '#line 0\n' +
-                    EllipsoidFS;
+                var colorFS = createShaderSource({ sources : [this.material.shaderSource, EllipsoidFS] });
 
                 this._sp = context.getShaderCache().replaceShaderProgram(this._sp, EllipsoidVS, colorFS, attributeIndices);
 
@@ -306,17 +304,16 @@ define([
         if (frameState.passes.pick) {
             var pickCommand = this._pickCommand;
 
-            if (typeof this._pickId === 'undefined') {
+            if (!defined(this._pickId)) {
                 this._pickId = context.createPickId(this);
             }
 
             // Recompile shader when material changes
-            if (materialChanged || typeof this._pickSP === 'undefined') {
-                var pickFS = createPickFragmentShaderSource(
-                    '#line 0\n' +
-                    this.material.shaderSource +
-                    '#line 0\n' +
-                    EllipsoidFS, 'uniform');
+            if (materialChanged || !defined(this._pickSP)) {
+                var pickFS = createShaderSource({
+                    sources : [this.material.shaderSource, EllipsoidFS],
+                    pickColorQualifier : 'uniform'
+                });
 
                 this._pickSP = context.getShaderCache().replaceShaderProgram(this._pickSP, EllipsoidVS, pickFS, attributeIndices);
 
@@ -345,7 +342,7 @@ define([
      *
      * @memberof EllipsoidPrimitive
      *
-     * @return {Boolean} <code>true</code> if this object was destroyed; otherwise, <code>false</code>.
+     * @returns {Boolean} <code>true</code> if this object was destroyed; otherwise, <code>false</code>.
      *
      * @see EllipsoidPrimitive#destroy
      */
@@ -363,7 +360,7 @@ define([
      *
      * @memberof EllipsoidPrimitive
      *
-     * @return {undefined}
+     * @returns {undefined}
      *
      * @exception {DeveloperError} This object was destroyed, i.e., destroy() was called.
      *

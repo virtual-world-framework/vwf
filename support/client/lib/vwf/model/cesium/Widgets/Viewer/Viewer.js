@@ -2,6 +2,7 @@
 define([
         '../../Core/Cartesian2',
         '../../Core/defaultValue',
+        '../../Core/defined',
         '../../Core/DeveloperError',
         '../../Core/defineProperties',
         '../../Core/destroyObject',
@@ -9,6 +10,7 @@ define([
         '../../Core/EventHelper',
         '../../Core/requestAnimationFrame',
         '../../Core/ScreenSpaceEventType',
+        '../../DynamicScene/DataSourceCollection',
         '../../DynamicScene/DataSourceDisplay',
         '../Animation/Animation',
         '../Animation/AnimationViewModel',
@@ -25,6 +27,7 @@ define([
     ], function(
         Cartesian2,
         defaultValue,
+        defined,
         DeveloperError,
         defineProperties,
         destroyObject,
@@ -32,6 +35,7 @@ define([
         EventHelper,
         requestAnimationFrame,
         ScreenSpaceEventType,
+        DataSourceCollection,
         DataSourceDisplay,
         Animation,
         AnimationViewModel,
@@ -57,6 +61,10 @@ define([
         viewer._renderLoopRunning = true;
 
         function render() {
+            if (viewer.isDestroyed()) {
+                return;
+            }
+
             try {
                 if (viewer._useDefaultRenderLoop) {
                     viewer.resize();
@@ -68,7 +76,12 @@ define([
             } catch (e) {
                 viewer._useDefaultRenderLoop = false;
                 viewer._renderLoopRunning = false;
-                viewer.onRenderLoopError.raiseEvent(viewer, e);
+                viewer._onRenderLoopError.raiseEvent(viewer, e);
+                if (viewer._showRenderLoopErrors) {
+                    /*global console*/
+                    viewer.cesiumWidget.showErrorPanel('An error occurred while rendering.  Rendering has stopped.', e);
+                    console.error(e);
+                }
             }
         }
 
@@ -95,7 +108,8 @@ define([
      * @param {ImageryProvider} [options.imageryProvider=new BingMapsImageryProvider()] The imagery provider to use.  This value is only valid if options.baseLayerPicker is set to false.
      * @param {TerrainProvider} [options.terrainProvider=new EllipsoidTerrainProvider()] The terrain provider to use
      * @param {Element} [options.fullscreenElement=container] The element to make full screen when the full screen button is pressed.
-     * @param {Object} [options.useDefaultRenderLoop=true] True if this widget should control the render loop, false otherwise.
+     * @param {Boolean} [options.useDefaultRenderLoop=true] True if this widget should control the render loop, false otherwise.
+     * @param {Boolean} [options.showRenderLoopErrors=true] If true, this widget will automatically display an HTML panel to the user containing the error, if a render loop error occurs.
      * @param {Object} [options.contextOptions=undefined] Properties corresponding to <a href='http://www.khronos.org/registry/webgl/specs/latest/#5.2'>WebGLContextAttributes</a> used to create the WebGL context.  This object will be passed to the {@link Scene} constructor.
      * @param {SceneMode} [options.sceneMode=SceneMode.SCENE3D] The initial scene mode.
      *
@@ -116,34 +130,27 @@ define([
      *
      * @example
      * //Initialize the viewer widget with several custom options and mixins.
-     * var viewer = new Viewer('cesiumContainer', {
+     * var viewer = new Cesium.Viewer('cesiumContainer', {
      *     //Start in Columbus Viewer
-     *     sceneMode : SceneMode.COLUMBUS_VIEW,
+     *     sceneMode : Cesium.SceneMode.COLUMBUS_VIEW,
      *     //Use standard Cesium terrain
-     *     terrainProvider : new CesiumTerrainProvider({
+     *     terrainProvider : new Cesium.CesiumTerrainProvider({
      *         url : 'http://cesium.agi.com/smallterrain',
      *         credit : 'Terrain data courtesy Analytical Graphics, Inc.'
      *     }),
      *     //Hide the base layer picker
      *     baseLayerPicker : false,
      *     //Use OpenStreetMaps
-     *     selectedImageryProviderViewModel : new ImageryProviderViewModel({
-     *         name : 'Open\u00adStreet\u00adMap',
-     *         iconUrl : buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
-     *         tooltip : 'OpenStreetMap (OSM) is a collaborative project to create a free editable map',
-     *         creationFunction : function() {
-     *             return new OpenStreetMapImageryProvider({
-     *                 url : 'http://tile.openstreetmap.org/'
-     *             });
-     *         }
+     *     imageryProvider : new Cesium.OpenStreetMapImageryProvider({
+     *         url : 'http://tile.openstreetmap.org/'
      *     })
      * });
      *
      * //Add basic drag and drop functionality
-     * viewer.extend(viewerDragDropMixin);
+     * viewer.extend(Cesium.viewerDragDropMixin);
      *
      * //Allow users to zoom and follow objects loaded from CZML by clicking on it.
-     * viewer.extend(viewerDynamicObjectMixin);
+     * viewer.extend(Cesium.viewerDynamicObjectMixin);
      *
      * //Show a pop-up alert if we encounter an error when processing a dropped file
      * viewer.onDropError.addEventListener(function(dropHandler, name, error) {
@@ -152,23 +159,23 @@ define([
      * });
      */
     var Viewer = function(container, options) {
-        if (typeof container === 'undefined') {
+        if (!defined(container)) {
             throw new DeveloperError('container is required.');
         }
 
         container = getElement(container);
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
 
-        var createBaseLayerPicker = typeof options.baseLayerPicker === 'undefined' || options.baseLayerPicker !== false;
+        var createBaseLayerPicker = !defined(options.baseLayerPicker) || options.baseLayerPicker !== false;
 
         //If using BaseLayerPicker, imageryProvider is an invalid option
-        if (createBaseLayerPicker && typeof options.imageryProvider !== 'undefined') {
+        if (createBaseLayerPicker && defined(options.imageryProvider)) {
             throw new DeveloperError('options.imageryProvider is not available when using the BaseLayerPicker widget. \
 Either specify options.selectedImageryProviderViewModel instead or set options.baseLayerPicker to false.');
         }
 
         //If not using BaseLayerPicker, selectedImageryProviderViewModel is an invalid option
-        if (!createBaseLayerPicker && typeof options.selectedImageryProviderViewModel !== 'undefined') {
+        if (!createBaseLayerPicker && defined(options.selectedImageryProviderViewModel)) {
             throw new DeveloperError('options.selectedImageryProviderViewModel is not available when not using the BaseLayerPicker widget. \
 Either specify options.imageryProvider instead or set options.baseLayerPicker to true.');
         }
@@ -189,20 +196,11 @@ Either specify options.imageryProvider instead or set options.baseLayerPicker to
             useDefaultRenderLoop : false
         });
 
-        //Data source display
-        var dataSourceDisplay = new DataSourceDisplay(cesiumWidget.scene);
-        this._dataSourceDisplay = dataSourceDisplay;
+        var dataSourceCollection = new DataSourceCollection();
+        var dataSourceDisplay = new DataSourceDisplay(cesiumWidget.scene, dataSourceCollection);
 
         var clock = cesiumWidget.clock;
-
-        this._eventHelper = new EventHelper();
-
-        function updateDataSourceDisplay(clock) {
-            dataSourceDisplay.update(clock.currentTime);
-        }
-        this._eventHelper.add(clock.onTick, updateDataSourceDisplay);
-
-        this._clockViewModel = new ClockViewModel(clock);
+        var clockViewModel = new ClockViewModel(clock);
 
         var toolbar = document.createElement('div');
         toolbar.className = 'cesium-viewer-toolbar';
@@ -210,7 +208,7 @@ Either specify options.imageryProvider instead or set options.baseLayerPicker to
 
         //HomeButton
         var homeButton;
-        if (typeof options.homeButton === 'undefined' || options.homeButton !== false) {
+        if (!defined(options.homeButton) || options.homeButton !== false) {
             var homeButtonContainer = document.createElement('div');
             homeButtonContainer.className = 'cesium-viewer-homeButtonContainer';
             toolbar.appendChild(homeButtonContainer);
@@ -219,7 +217,7 @@ Either specify options.imageryProvider instead or set options.baseLayerPicker to
 
         //SceneModePicker
         var sceneModePicker;
-        if (typeof options.sceneModePicker === 'undefined' || options.sceneModePicker !== false) {
+        if (!defined(options.sceneModePicker) || options.sceneModePicker !== false) {
             var sceneModePickerContainer = document.createElement('div');
             sceneModePickerContainer.className = 'cesium-viewer-sceneModePickerContainer';
             toolbar.appendChild(sceneModePickerContainer);
@@ -243,16 +241,16 @@ Either specify options.imageryProvider instead or set options.baseLayerPicker to
 
         //Animation
         var animation;
-        if (typeof options.animation === 'undefined' || options.animation !== false) {
+        if (!defined(options.animation) || options.animation !== false) {
             var animationContainer = document.createElement('div');
             animationContainer.className = 'cesium-viewer-animationContainer';
             viewerContainer.appendChild(animationContainer);
-            animation = new Animation(animationContainer, new AnimationViewModel(this._clockViewModel));
+            animation = new Animation(animationContainer, new AnimationViewModel(clockViewModel));
         }
 
         //Timeline
         var timeline;
-        if (typeof options.timeline === 'undefined' || options.timeline !== false) {
+        if (!defined(options.timeline) || options.timeline !== false) {
             var timelineContainer = document.createElement('div');
             timelineContainer.className = 'cesium-viewer-timelineContainer';
             viewerContainer.appendChild(timelineContainer);
@@ -263,7 +261,7 @@ Either specify options.imageryProvider instead or set options.baseLayerPicker to
 
         //Fullscreen
         var fullscreenButton;
-        if (typeof options.fullscreenButton === 'undefined' || options.fullscreenButton !== false) {
+        if (!defined(options.fullscreenButton) || options.fullscreenButton !== false) {
             var fullscreenContainer = document.createElement('div');
             fullscreenContainer.className = 'cesium-viewer-fullscreenContainer';
             viewerContainer.appendChild(fullscreenContainer);
@@ -277,20 +275,46 @@ Either specify options.imageryProvider instead or set options.baseLayerPicker to
                 } else {
                     fullscreenContainer.style.display = 'none';
                 }
-                if (typeof timeline !== 'undefined') {
+                if (defined(timeline)) {
                     timeline.container.style.right = fullscreenContainer.clientWidth + 'px';
                     timeline.resize();
                 }
             };
             this._fullscreenSubscription = knockout.getObservable(fullscreenButton.viewModel, 'isFullscreenEnabled').subscribe(fullScreenEnabledCallback);
             fullScreenEnabledCallback(fullscreenButton.viewModel.isFullscreenEnabled);
-        } else if (typeof timeline !== 'undefined') {
+        } else if (defined(timeline)) {
             timeline.container.style.right = 0;
         }
 
+        var eventHelper = new EventHelper();
+
+        function updateDataSourceDisplay(clock) {
+            dataSourceDisplay.update(clock.currentTime);
+        }
+
+        eventHelper.add(clock.onTick, updateDataSourceDisplay);
+
+        function setClockFromDataSource(dataSourceCollection, dataSource) {
+            if (dataSourceCollection.getLength() === 1) {
+                var dataSourceClock = dataSource.getClock();
+                if (defined(dataSourceClock)) {
+                    dataSourceClock.clone(clock);
+                    if (defined(timeline)) {
+                        timeline.updateFromClock();
+                        timeline.zoomTo(dataSourceClock.startTime, dataSourceClock.stopTime);
+                    }
+                }
+            }
+        }
+
+        eventHelper.add(dataSourceCollection.dataSourceAdded, setClockFromDataSource);
+
         this._container = container;
-        this._viewerContainer = viewerContainer;
+        this._element = viewerContainer;
         this._cesiumWidget = cesiumWidget;
+        this._dataSourceCollection = dataSourceCollection;
+        this._dataSourceDisplay = dataSourceDisplay;
+        this._clockViewModel = clockViewModel;
         this._toolbar = toolbar;
         this._homeButton = homeButton;
         this._sceneModePicker = sceneModePicker;
@@ -298,10 +322,12 @@ Either specify options.imageryProvider instead or set options.baseLayerPicker to
         this._animation = animation;
         this._timeline = timeline;
         this._fullscreenButton = fullscreenButton;
+        this._eventHelper = eventHelper;
         this._lastWidth = 0;
         this._lastHeight = 0;
         this._useDefaultRenderLoop = undefined;
         this._renderLoopRunning = false;
+        this._showRenderLoopErrors = defaultValue(options.showRenderLoopErrors, true);
         this._onRenderLoopError = new Event();
 
         //Start the render loop if not explicitly disabled in options.
@@ -415,7 +441,7 @@ Either specify options.imageryProvider instead or set options.baseLayerPicker to
          */
         dataSources : {
             get : function() {
-                return this._dataSourceDisplay.getDataSources();
+                return this._dataSourceCollection;
             }
         },
 
@@ -549,7 +575,7 @@ Either specify options.imageryProvider instead or set options.baseLayerPicker to
      * @see viewerDynamicObjectMixin
      */
     Viewer.prototype.extend = function(mixin, options) {
-        if (typeof mixin === 'undefined') {
+        if (!defined(mixin)) {
             throw new DeveloperError('mixin is required.');
         }
         mixin(this, options);
@@ -573,13 +599,13 @@ Either specify options.imageryProvider instead or set options.baseLayerPicker to
         }
 
         var baseLayerPickerDropDown = this._baseLayerPickerDropDown;
-        if (typeof baseLayerPickerDropDown !== 'undefined') {
+        if (defined(baseLayerPickerDropDown)) {
             var baseLayerPickerMaxHeight = height - 125;
             baseLayerPickerDropDown.style.maxHeight = baseLayerPickerMaxHeight + 'px';
         }
 
-        var timelineExists = typeof this._timeline !== 'undefined';
-        var animationExists = typeof this._animation !== 'undefined';
+        var timelineExists = defined(this._timeline);
+        var animationExists = defined(this._animation);
         var animationContainer;
 
         var resizeWidgets = !animationExists;
@@ -614,22 +640,17 @@ Either specify options.imageryProvider instead or set options.baseLayerPicker to
 
         if (resizeWidgets) {
             var logoBottom = 0;
-            var logoLeft = animationWidth;
+            var logoLeft = animationWidth + 5;
 
             if (timelineExists) {
-                logoBottom = this._timeline.container.clientHeight + 1;
+                logoBottom = this._timeline.container.clientHeight + 3;
                 this._timeline.container.style.left = animationWidth + 'px';
             }
 
             if (timelineExists || animationExists) {
-                var logo = cesiumWidget.cesiumLogo;
-                var logoStyle = logo.style;
-                logoStyle.bottom = logoBottom + 'px';
-                logoStyle.left = logoLeft + 'px';
-
-                var logoOffset = cesiumWidget.centralBody.logoOffset;
-                logoOffset.x = logoLeft + logo.clientWidth + 5;
-                logoOffset.y = logoBottom;
+                var creditContainer = cesiumWidget.creditContainer;
+                creditContainer.style.bottom = logoBottom + 'px';
+                creditContainer.style.left = logoLeft + 'px';
             }
         }
 
@@ -664,43 +685,45 @@ Either specify options.imageryProvider instead or set options.baseLayerPicker to
      * @memberof Viewer
      */
     Viewer.prototype.destroy = function() {
-        this._container.removeChild(this._viewerContainer);
-        this._viewerContainer.removeChild(this._toolbar);
+        this._container.removeChild(this._element);
+        this._element.removeChild(this._toolbar);
 
         this._eventHelper.removeAll();
 
-        if (typeof this._homeButton !== 'undefined') {
+        if (defined(this._homeButton)) {
             this._homeButton = this._homeButton.destroy();
         }
 
-        if (typeof this._sceneModePicker !== 'undefined') {
+        if (defined(this._sceneModePicker)) {
             this._sceneModePicker = this._sceneModePicker.destroy();
         }
 
-        if (typeof this._baseLayerPicker !== 'undefined') {
+        if (defined(this._baseLayerPicker)) {
             this._baseLayerPicker = this._baseLayerPicker.destroy();
         }
 
-        if (typeof this._animation !== 'undefined') {
-            this._viewerContainer.removeChild(this._animation.container);
+        if (defined(this._animation)) {
+            this._element.removeChild(this._animation.container);
             this._animation = this._animation.destroy();
         }
 
-        if (typeof this._timeline !== 'undefined') {
+        if (defined(this._timeline)) {
             this._timeline.removeEventListener('settime', onTimelineScrubfunction, false);
-            this._viewerContainer.removeChild(this._timeline.container);
+            this._element.removeChild(this._timeline.container);
             this._timeline = this._timeline.destroy();
         }
 
-        if (typeof this._fullscreenButton !== 'undefined') {
+        if (defined(this._fullscreenButton)) {
             this._fullscreenSubscription.dispose();
-            this._viewerContainer.removeChild(this._fullscreenButton.container);
+            this._element.removeChild(this._fullscreenButton.container);
             this._fullscreenButton = this._fullscreenButton.destroy();
         }
 
         this._clockViewModel = this._clockViewModel.destroy();
         this._dataSourceDisplay = this._dataSourceDisplay.destroy();
         this._cesiumWidget = this._cesiumWidget.destroy();
+
+        this._dataSourceCollection = this._dataSourceCollection.destroy();
 
         return destroyObject(this);
     };

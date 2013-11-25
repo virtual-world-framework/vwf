@@ -170,7 +170,10 @@
 			  onSubmit: function( hsb, hex, rgb, el) {
 				  $( '#newUserColor' ).css( 'backgroundColor', '#' + hex );
           $( el ).ColorPickerHide();
-			  }
+			  },
+        onHide: function( colpkr ) {
+          $( '#newUserColor' ).css( 'backgroundColor', '#' + colpkr.children[4].children[0].value );
+        }
 		  } );
 
       $( '#changeTextColor' ).ColorPicker( {
@@ -182,6 +185,12 @@
             vwf_view.kernel.callMethod( sceneId, "userColorChange", [ $( '#changeTextColor' ).css( 'backgroundColor' ), localUsername ] );
           }
           $( el ).ColorPickerHide();
+			  },
+        onHide: function( colpkr ) {
+				  $( '#changeTextColor' ).css( 'backgroundColor', '#' + colpkr.children[4].children[0].value );
+          if ( isConnected( ) ) {
+            vwf_view.kernel.callMethod( sceneId, "userColorChange", [ $( '#changeTextColor' ).css( 'backgroundColor' ), localUsername ] );
+          }
 			  }
 		  } );
       

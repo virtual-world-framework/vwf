@@ -268,13 +268,18 @@ children:
                 this.logger.info( "Step: Drive Vehicle" );
                 var complete = false;
                 var app = this.parent.parent.parent.parent;
+                var activeMotion = false;
+                var intervalId;
+                function moveHumvee() {
+                  app.camera.translation = [ app.camera.translation[0] - 10, app.camera.translation[1], app.camera.translation[2] ];
+                  app.humvee.translation = [ app.humvee.translation[0] - 10, app.humvee.translation[1], app.humvee.translation[2] ];
+                }
                 app.keyDown = this.events.add( function(e) {
-                  var kd = $.extend(true, {}, e.keysDown, e.keysUp);
+                  var kd = $.extend(true, {}, e.keysDown);
                   for ( var keyPress in kd ) {
                     if (Number( kd[ keyPress ].code == 71)) // G
                     {
-                      app.camera.translation = [ app.camera.translation[0] - 10, app.camera.translation[1], app.camera.translation[2] ];
-                      app.humvee.translation = [ app.humvee.translation[0] - 10, app.humvee.translation[1], app.humvee.translation[2] ];
+                      intervalId = setInterval(moveHumvee, 50);
                       if(!complete)
                       {
                         this.logger.info( "Step: Drive Vehicle - Completed" );
@@ -284,6 +289,9 @@ children:
                     }
                   }
                 }, this );
+                app.keyUp = this.events.add( function(e) {
+                  clearInterval(intervalId);
+                }, this);
               } //@ sourceURL=moveVehicleTask.vwf
   cameraPoseEnteringVehicle:
     extends: http://vwf.example.com/node3.vwf
