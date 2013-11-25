@@ -2,6 +2,112 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.6.19
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change. 0.6.17 and 0.6.18 were combined into a single release do to internal sprint planning changes.
+
+- NEW: Adding map files for symbol debugging in jquery
+- CHG: Fix bug introduced by upgrading jQuery.
+- CHG: Update editor.js to remove console log messages.
+- CHG: Add nokogiri requirements to the build script for debian.
+- NEW: Packaging script to put a tarball in the scripts executed directory of the built package. Used by the VWF team to create Linux packages. Refs #2958
+- NEW: Branch/node.js websocket url
+- NEW: Don't look for a specific number of digits for the time parameter
+- NEW: Change parseSocketUrl to get the application from the socket URL instead of the referrer URL
+- NEW: Update node.js websocket URL format to include the app name and instance id
+- NEW: Change 'else if' back to an 'if' for kfAnimations on animationTimeUpdated property. Add additional check for array length.
+- NEW: In response to PR #74 (branch/jsonloader) peer review findings.   Refs #2951
+- NEW: Refactor JSONLoader THREE.MorphAnimMesh, cleaned up for submission.  Refs: #2951
+- NEW: Added additional touch data.Refs #2951
+- NEW: Allow three.js JSON model format to load as a skinned mesh, since both skinned and morph anim meshes utilize morph target influences.
+- NEW: Add animationRate, animationDuration, & animationFPS to Three.js JSON MorphAnimMesh nodes.  Updated testcase.  Refs #2951
+- NEW: New Three.js JSON models.  Refs #2950
+- NEW: Add new JSONLoader avatar model.  Refs #2950
+- NEW: Add THREE.js JSONLoader and MorphAnimMesh support.  (initial commit)  Refs #2936, #2949, #2951
+- NEW: Adding new build script to put jenkins build scripts under source control. Refs #2958
+- NEW: Deleting travis.yml on main vwf core repo.  Forked repos may utilize their own continuous integration servers as needed.
+- NEW: Merge pull request #67 from virtual-world-framework/branch/readme-rewrite
+- NEW: Rewrite README Change questions link to our forum until StackOverflow migration is completed.
+- NEW: Rewrite README Fix link to Getting Started.
+- NEW: Rewrite README Improve wording.
+- NEW: Rewrite README Fix spelling errors.
+- NEW: Rewrite README Add link to what people are building with VWF.
+- NEW: Rewrite README Add an ideal and a realistic README rewrite.
+- NEW: Rewrite README Update README to the ideal.
+- CHG: Add back stopPropogation calls on dialog keyup and keydown. Refs #2972
+- CHG: BZFlag add javascript events back into application baseline. Closes #2972
+- CHG: Merge pull request #71 from virtual-world-framework/branch/remove-vestigial-admin. Remove admin page that is no longer used.
+- CHG: BZFlag fix for create button and to update application JQuery UI. References #2972
+- CHG: Editor update to reference correct encoder function for prototypeEvents. Refs #2972
+- CHG: Merge pull request #73 from virtual-world-framework/branch/nodejs-client-object. Send the message to all existing clients too. Refs #2971 Add message to create the client object in the "clients.vwf" global on connection Fixes #2971
+- CHG: Caught a few references to old version of jQuery.
+- CHG: Removed the extra css file in the js folder and updated admin.html.erb to include new jquery minfile. Refs #2660
+- CHG: Update JQuery and JQuery UI to latest baseline. Refs #2660
+- NEW: Branch/property delegation Refactor `getProperty` delegation to the behaviors and to the prototype.
+- NEW: Branch/property delegation The `blocked` flag is no longer used during sets and gets.
+- NEW: Branch/property delegation Update `getProperty` with `delegated`/`retrieved` like `setProperty`.
+- NEW: Branch/property delegation Remove the `entry.value`/`reentry.value` field used to detect retrieval from an inner call since that is superseded by `retrieved`.
+- NEW: Branch/property delegation Detect retrievals and delegations explicitly.
+- NEW: Branch/property delegation Exit the `gettingProperty` loop on `delegated || retrieved` instead of on `value !== undefined`.
+- NEW: Branch/property delegation Set the `entry.completed`/`reentry.completed` flag in an inner call so that the outer call won't reinvoke drivers already called when a property delegates to itself.
+- NEW: Branch/property delegation Move delegation of the behaviors and prototype to not occur on the inner call when a property delegates to itself. This was unintentionally changed in commit:7d3dc92.
+- NEW: Branch/property delegation Fix comments that refer to "set" and "assign" to describe getting instead.
+- NEW: Branch/property delegation Add a `reentered` flag to clarify how property reentry is handled.
+- NEW: Branch/property delegation Remove `nodeHasProperty` and `nodeHasOwnProperty` restored in a rebase. commit:89d018f removed them, but they were retained when the commit was rebased as commit:5702c04.
+- NEW: Branch/property delegation Update node, settingProperty, and satProperty documentation refs #2593
+- NEW: Branch/property delegation Change documentation that says properties default to value undefined
+- NEW: Branch/property delegation refs #2593
+- NEW: Branch/property delegation Removed inappropriate markup from node documentation and cleaned up documentation refs #2593
+- NEW: Branch/property delegation Make satProperty only fire in an entry to setProperty if property was assigned refs #2593
+- NEW: Branch/property delegation Update tests to only expect inner properties to send satProperty event. refs #2593
+- NEW: Branch/property delegation Mark commented-out section of kernel node storage (methods and events) as TODO refs #2593
+- NEW: Branch/property delegation Add comment to commented-out patches object to explain why it's commented out refs #2593
+- NEW: Branch/property delegation Add documentation for the update of how property delegation behaves If a property setter transforms a property in a setter, satProperty is fired w/ the transformed value, not the original value
+- NEW: Branch/property delegation Fire gotProperty event during replication when appropriate refs #2593
+- NEW: Branch/property delegation Fix copy-paste error in getProperty refs #2593
+- NEW: Branch/property delegation Fire satProperty event with the internal value when setProperty is called during replication. refs #2593
+- NEW: Branch/property delegation Guard against cases when satProperty is called without an initializeProperty. The current implementation of property delegation allows an initializeProperty event to be skipped for properties that delegate. refs #2593
+- NEW: Branch/property delegation Remove unused getPropertyValues function
+- NEW: Branch/property delegation Modify getProperty to pass tests refs #2593
+- NEW: Branch/property delegation Remove erroneous conditions that cause satProperty when it should not occur refs #2627
+- NEW: Branch/property delegation Add tests to ensure "gets" and "sets" take proper path through drivers fixes #2563
+- NEW: Branch/property delegation Detect delegation during property assignments. When a property assignment is executing, execution should stop once the property is assigned. If the kernel is configured with drivers A and B, for example, the kernel shouldn't call B if A handles the assignment. The existing implmentation only does this correctly when a property accepts the assignment directly or when it delegates to itself (such as
+with `set: this.name = parseInt( value )`). If the assignment delegates to another property, this isn't considered assignment, and execution on
+the initiating property continues with the remaining drivers. This causes extra work when invoking drivers lower in the stack for
+properties that have already been delegated, change flags to be set on nodes that haven't actually changed (for example n, in the case of n.p
+=> m.q), and properties delegating to other propertes to be incorrectly included in change sets (for example p in the case of n.p => n.q). This commit detects delegation to other properties by watching for other assignments made while executing `setProperty`. When delegation is
+detected, execution completes just as it would if a driver accepted an assignment directly. Also, lots of tests. Closes #1635.
+- NEW: Allow descriptors to declare properties without assigning a value. `kernel.createProperty( nodeID, name, undefined )` will create a new property without assigning an initial value. This can be useful if the property should have the value `undefined` or if a driver binds the node to an internal object that already has a value (such as `transform` in a Collada object). But since YAML and JSON have no representation for `undefined`, there has been no way to do the same thing using a component descriptor. This commit extends the detailed initializer format slightly to allow an `undefined` value to be explicitly declared:
+
+    properties:
+	  alpha:
+	    "alpha"
+	  beta:
+	    value: "beta"
+	  gamma:
+	    undefined: true
+
+`alpha` is created with the value `"alpha"` using a simple initializer. `beta` is created with the value `"beta"` using a detailed initializer.
+And `gamma` is created using a detailed initializer with the initial value undefined.
+
+- NEW: Track kernel re-entry originating with aggregate property sets and gets. Set the markers so that if `kernel.setProperties` or
+`kernel.getProperties` set or get a property having an accessor function that refers back to the property, or if a driver calls back to the
+kernel to refer to the property, `setProperty` or `getProperty` will start the action with the correct driver. Previously, only actions originating with `setProperty` or `getProperty` were tracked this way. This commit adds tracking for actions originating in `setProperties` and `getProperties` as well.
+- NEW:  Only record changed properties in `getState`. Previously, after any property changed on a patchable node, `getNode` (which feeds `getState`) would include all of the node's properties in the patch. Now, only the properties that actually changed are included. Fixes #2236.
+- NEW: Begin moving the node registry to the kernel from model/object. The kernel has been delegating knowledge of the node graph and node
+change flags to the model/object driver. But this doesn't work well since model/object isn't normally notified about changes to a node until
+after the other drivers. Extra calls into model/object are in place so that preceding drivers can ask about a node's ancestors or prototypes in
+creatingNode, for example, but this is an abuse of the driver API. Tracking changes in model/object also requires extra work since
+model/object doesn't see changes to properties handled by other drivers. Change flags may not be set in some cases, which can cause replication
+errors. The kernel will be better off if it manages this data itself. With a local registry, it will be easier for the kernel to register a new node
+just before it is first exposed to any driver and unregister a deleted node right after its last driver message. This commit creates the node and per-node property registries, and records per-node property change flags. Fixes #1815.
+- CHG: Update KimRayValve to kimray. Closes #2952
+- CHG: Fixes the issue with clients not initialiy syncing up correctly UCE - Fixes 2263 and there was a bug listed in VWF for this as well, but can't find the number
+
+
+
+
+----------------------------------
 0.6.17 and 0.6.18 Combined Release
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change. 0.6.17 and 0.6.18 were combined into a single release do to internal sprint planning changes.
