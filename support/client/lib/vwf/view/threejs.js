@@ -806,10 +806,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             var pickInfo = touchPick;
 
+            var gestureTouches = {};
+            for (var i = 0; i < e.gesture.touches.length; i++) {
+                gestureTouches[i] = {x: e.gesture.touches[i].clientX, y: e.gesture.touches[i].clientY};
+                gestureTouches.length = i + 1;
+            }
+
             returnData.eventData = [ {
                 gestures: touchGesture,
                 position: [ mousePos.x / sceneView.width, mousePos.y / sceneView.height ],
-                screenPosition: [ mousePos.x, mousePos.y ]
+                screenPosition: [ mousePos.x, mousePos.y ],
+                angle: e.gesture.angle,
+                touches: gestureTouches
             } ];
 
             returnData.eventNodeData = { "": [ {

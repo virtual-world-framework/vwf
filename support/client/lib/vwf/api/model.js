@@ -141,14 +141,20 @@ define( function() {
         initializingProperty: [],
 
         // TODO: deletingProperty
-      
+
         /// Description.
         /// 
         /// @function
         /// 
-        /// @param {}
+        /// @param {ID} nodeID
+        /// @param {String} propertyName
+        /// @param {Object} propertyValue
         /// 
-        /// @returns {}
+        /// @returns {Object}
+        ///   A value set on property or undefined if not set.
+        ///   
+        ///   The first non-undefined return value will be sent with the "satProperty" event (which 
+        ///   may differ from the incoming propertyValue).
 
         settingProperty: [],
 
