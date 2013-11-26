@@ -1,4 +1,4 @@
-var libpath = require( 'path' ),
+var path = require( 'path' ),
     http = require( 'http' ),
     fs = require( 'fs' ),
     url = require( 'url' ),
@@ -82,10 +82,31 @@ function parseApplicationPath () {
     }
 }
 
+// Set the VWF directory where VWF files will be served from. Default to
+// "$HOME/.vwf". If not found at $HOME/.vwf, try the current working
+// directory.
+function parseVWFPath () {
+    var home = ( process.env.HOME || process.env.USERPROFILE );
+    var vwfHome = path.join( home, ".vwf" );
+
+    if ( fs.existsSync( path.join( vwfHome, "support/client/lib" ) ) ) {
+        return vwfHome;
+    } else if ( fs.existsSync( path.join( process.cwd(), "support/client/lib" ) ) ) {
+        return process.cwd();
+    } else {
+        consoleError( "Could not find VWF support files." );
+        return false;
+    }
+}
+
 //Start the VWF server
 function startVWF() {
     global.activeinstances = [];
-    global.vwfRoot = process.env.HOME + "/.vwf/";
+    global.vwfRoot = parseVWFPath();
+
+    if ( !global.vwfRoot ) {
+        // Need to exit out because of an error
+    }
 
     function OnRequest( request, response ) {
         try {
