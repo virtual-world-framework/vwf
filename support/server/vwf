@@ -1,0 +1,52 @@
+#/bin/bash
+
+# OS Check because we download precompiled bundles that are arch specific.
+UNAME=$(uname)
+if [ "$UNAME" != "Linux" -a "$UNAME" != "Darwin" ] ; then
+    echo "Sorry, this OS is not supported."
+    exit 1
+fi
+
+if [ "$UNAME" = "Darwin" ] ; then
+    if [ "i386" != "$(uname -p)" -o "1" != "$(sysctl -n hw.cpu64bit_capable 2>/dev/null || echo 0)" ] ; then
+
+        # Can't just test uname -m = x86_64, because Snow Leopard can
+        # return other values.
+        echo "Only 64-bit Intel processors are supported at this time."
+        exit 1
+    fi
+    ARCH="x86_64"
+elif [ "$UNAME" = "Linux" ] ; then
+    ARCH="$(uname -m)"
+    if [ "$ARCH" != "i686" -a "$ARCH" != "x86_64" ] ; then
+        echo "Unsupported architecture: $ARCH"
+        echo "VWF only supports i686 and x86_64 for now."
+        exit 1
+    fi
+fi
+
+command_exists() {
+	command -v "$1" >/dev/null 2>&1
+}
+
+# Find out if node is installed. If not, then abort.
+if ! command_exists node ; then
+	echo "ERROR: Couldn't find node." >&2
+	echo "Node can be downloaded from: http://nodejs.org/download/" >&2
+	exit 1
+fi
+
+# Find where VWF is installed, starting with ~/.vwf, then going to 
+# look in the current directory. If it's not installed in either
+# place, then abort.
+if [ -f "$HOME/.vwf/node-server.js" ] ; then
+	VWF_CORE_DIR="$HOME/.vwf"
+elif [ -f "$(pwd)/node-server.js" ] ; then
+	VWF_CORE_DIR="$(pwd)"
+else
+	echo "ERROR: Couldn't find VWF." >&2
+	echo "VWF can be downloaded from: http://www.virtual.wf/web/docs/install.html" >&2
+	exit 1
+fi
+
+node "$VWF_CORE_DIR/node-server.js"
