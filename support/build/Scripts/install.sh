@@ -55,7 +55,9 @@ curl --progress-bar --fail "$TARBALL_URL" | tar -xzf - -C "$INSTALL_TMPDIR"
 # bomb out if it didn't work, eg no net
 test -x "${INSTALL_TMPDIR}/public"
 mv "${INSTALL_TMPDIR}" "$HOME/.vwf"
+if [ -d "$INSTALL_TMPDIR" ];then
 rmdir "${INSTALL_TMPDIR}"
+fi
 # just double-checking :)
 test -x "$HOME/.vwf"
 cd "$HOME/.vwf"
