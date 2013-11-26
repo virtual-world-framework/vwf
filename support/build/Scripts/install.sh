@@ -45,7 +45,9 @@ trap "echo Installation failed." EXIT
 TARBALL_URL="http://download.virtualworldframework.com/files/VWF_linux_stable_latest.tar.gz"
 
 INSTALL_TMPDIR="$HOME/.vwf-install-tmp"
+if [ -d "$INSTALL_TMPDIR" ];then
 rm -rf "$INSTALL_TMPDIR"
+fi
 mkdir "$INSTALL_TMPDIR"
 echo "Downloading latest VWF distribution"
 
