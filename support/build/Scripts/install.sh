@@ -40,32 +40,6 @@ fi
 PLATFORM="${UNAME}_${ARCH}"
 trap "echo Installation failed." EXIT
 
-# Starting a clean install here:
-[ -e "$HOME/.vwf" ] && rm -rf "$HOME/.vwf"
-TARBALL_URL="http://download.virtualworldframework.com/files/VWF_linux_stable_latest.tar.gz"
-
-INSTALL_TMPDIR="$HOME/.vwf-install-tmp"
-if [ -d "$INSTALL_TMPDIR" ];then
-rm -rf "$INSTALL_TMPDIR"
-fi
-mkdir "$INSTALL_TMPDIR"
-echo "Downloading latest VWF distribution"
-
-curl --progress-bar --fail "$TARBALL_URL" | tar -xzf - -C "$INSTALL_TMPDIR"
-# bomb out if it didn't work, eg no net
-test -x "${INSTALL_TMPDIR}/public"
-mv "${INSTALL_TMPDIR}" "$HOME/.vwf"
-if [ -d "$INSTALL_TMPDIR" ];then
-rmdir "${INSTALL_TMPDIR}"
-fi
-# just double-checking :)
-test -x "$HOME/.vwf"
-cd "$HOME/.vwf"
-
-echo
-echo "VWF has been installed in your home directory (~/.vwf)."
-
-
 if [ "$UNAME" = "Darwin" ] ; then
 	### OSX ###
 	echo "Script in progress."
@@ -107,7 +81,41 @@ elif [ "$UNAME" = "Linux" ] ; then
 fi
 
 
+#######################################
+## Install VWF Baseline
+#######################################
 
+
+# Starting a clean install here:
+[ -e "$HOME/.vwf" ] && rm -rf "$HOME/.vwf"
+TARBALL_URL="http://download.virtualworldframework.com/files/VWF_linux_stable_latest.tar.gz"
+
+INSTALL_TMPDIR="$HOME/.vwf-install-tmp"
+if [ -d "$INSTALL_TMPDIR" ];then
+rm -rf "$INSTALL_TMPDIR"
+fi
+mkdir "$INSTALL_TMPDIR"
+echo "Downloading latest VWF distribution"
+
+curl --progress-bar --fail "$TARBALL_URL" | tar -xzf - -C "$INSTALL_TMPDIR"
+# bomb out if it didn't work, eg no net
+test -x "${INSTALL_TMPDIR}/public"
+mv "${INSTALL_TMPDIR}" "$HOME/.vwf"
+if [ -d "$INSTALL_TMPDIR" ];then
+rmdir "${INSTALL_TMPDIR}"
+fi
+# just double-checking :)
+test -x "$HOME/.vwf"
+cd "$HOME/.vwf"
+npm install
+
+
+echo
+echo "VWF has been installed in your home directory (~/.vwf)."
+
+#######################################
+## Install VWF executable
+#######################################
 
 LAUNCHER="$HOME/.vwf/support/server/vwf"
 
