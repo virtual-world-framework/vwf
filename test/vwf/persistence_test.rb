@@ -348,6 +348,56 @@ class PersistenceTest < MiniTest::Unit::TestCase
   end
   
   
+  def test_list_instances_none
+    get "/test/index.vwf/instances"    
+    assert_cleanup last_response.ok?
+    parsed_body = JSON.parse( last_response.body )
+    assert_equal_cleanup( [ ], parsed_body )
+  end
+
+  def test_list_instances_one_with_save_only
+    create_save_path
+    create_first_save
+    get "/test/index.vwf/instances"    
+    assert_cleanup last_response.ok?
+    parsed_body = JSON.parse( last_response.body )
+    assert_equal_cleanup( [ { "instance_id" => "1234567890123456", "url" => "http://example.org/test/index.vwf/1234567890123456", "active" => false, "vwf_info" => { "public_path" => "/test", "application" => "index.vwf", "path_to_application" => "/test/index.vwf", "instance" => "1234567890123456" }, "metadata" => { } } ], parsed_body )
+    clean_directory
+  end
+  
+  def test_list_instances_one_without_metadata
+    create_instance_path
+    create_first_persistence_state
+    get "/test/index.vwf/instances"    
+    assert_cleanup last_response.ok?
+    parsed_body = JSON.parse( last_response.body )
+    assert_equal_cleanup( [ { "instance_id" => "1234567890123456", "url" => "http://example.org/test/index.vwf/1234567890123456", "active" => false, "vwf_info" => { "public_path" => "/test", "application" => "index.vwf", "path_to_application" => "/test/index.vwf", "instance" => "1234567890123456" }, "metadata" => { } } ], parsed_body )
+    clean_directory
+  end
+  
+  def test_list_instances_one_with_metadata
+    create_instance_path
+    create_first_persistence_state
+    create_first_persistence_metadata
+    get "/test/index.vwf/instances"    
+    assert_cleanup last_response.ok?
+    parsed_body = JSON.parse( last_response.body )
+    assert_equal_cleanup( [ { "instance_id" => "1234567890123456", "url" => "http://example.org/test/index.vwf/1234567890123456", "active" => false, "vwf_info" => { "public_path" => "/test", "application" => "index.vwf", "path_to_application" => "/test/index.vwf", "instance" => "1234567890123456" }, "metadata" => { "datatype" => "persistence" } } ], parsed_body )
+    clean_directory
+  end
+  
+  def test_list_instances_with_two
+    create_both_instance_paths
+    create_first_persistence_state
+    create_first_persistence_metadata
+    create_second_persistence_state
+    get "/test/index.vwf/instances"    
+    assert_cleanup last_response.ok?
+    parsed_body = JSON.parse( last_response.body )
+    assert_equal_cleanup( [ { "instance_id" => "1234567890123456", "url" => "http://example.org/test/index.vwf/1234567890123456", "active" => false, "vwf_info" => { "public_path" => "/test", "application" => "index.vwf", "path_to_application" => "/test/index.vwf", "instance" => "1234567890123456" }, "metadata" => { "datatype" => "persistence" } }, { "instance_id" => "6543210987654321", "url" => "http://example.org/test/index.vwf/6543210987654321", "active" => false, "vwf_info" => { "public_path" => "/test", "application" => "index.vwf", "path_to_application" => "/test/index.vwf", "instance" => "6543210987654321" }, "metadata" => { } } ], parsed_body )
+    clean_directory
+  end
+  
   
 
    

@@ -25,7 +25,46 @@ class VWF::Application::Persistence < Sinatra::Base
     @env = env
     @storage = VWF::Storage.new()
   end
-
+  
+  # /instances returns as JSON, an array of objects, each representing a VWF instance
+  # that is either currently running or recorded in the storage system.
+  get "/instances" do
+    content_type :json
+    result = [ ]
+    # Get the list of currently recorded instances of this application.
+    instance_id_list = @storage.list_application_instances( @env[ 'vwf.root' ], @env[ 'vwf.application' ] )
+    # Loop over currently active instances, identify any that are active instances of this application
+    # note that they are active, and add to the list of instances of this application if not already present.
+    active_instance_id_list = [ ]
+    VWF::Application::Reflector.instances( env ).map do |resource, instance|
+      resource_segments = resource.split( "/" )
+      if resource_segments.length > 3
+          active_instance_id = resource_segments.pop
+          active_instance_application = resource_segments.pop
+          active_instance_public_path = resource_segments.join( "/" )
+          if @env[ 'vwf.root' ] == active_instance_public_path and @env[ 'vwf.application' ] == active_instance_application
+            active_instance_id_list.push active_instance_id
+            unless instance_id_list.include? active_instance_id
+              instance_id_list.push active_instance_id
+            end
+          end
+      end
+    end
+    # Sort instances, then generate the hash objects containing instance data using a helper function
+    # and return the resulting array of hashes parsed into JSON as the body of this request.
+    instance_id_list.sort!
+    instance_id_list.each do | instance_id |
+      result.push generate_instance_hash( request.scheme, request.host_with_port, @env[ 'vwf.root' ], @env[ 'vwf.application' ], instance_id, active_instance_id_list.include?( instance_id ) )
+    end
+    result.to_json
+  end
+  
+  # /saves varies dependent upon context.
+  # If called with an instance as part of the URL, it returns an array of objects containing data
+  # about all saves corresponding to that instance of that application, in the form of JSON.
+  # If called without an instance as part of the URL, it returns a hash of instance ID keys
+  # paried with arrays of objects containing data about all saves regarding that key's instance
+  # for that application, again in the form of JSON.
   get "/saves" do
     content_type :json
     # List saves. First need to determine if we're running per instance or across entire application.
@@ -37,14 +76,15 @@ class VWF::Application::Persistence < Sinatra::Base
         result.push generate_save_hash( request.scheme, request.host_with_port, @env[ 'vwf.root' ], @env[ 'vwf.application' ], @env[ 'vwf.instance' ], instance_save_name )
       end
     else
-	  result = { }
+      # Listing all saves for all instances, so we should be a hash not an array.
+      result = { }
       application_save_states = @storage.list_application_save_states( @env[ 'vwf.root' ], @env[ 'vwf.application' ] )
       application_save_states.each do | instance_id, instance_save_names |
 	    instance_save_array = [ ]
         instance_save_names.each do | instance_save_name |
           instance_save_array.push generate_save_hash( request.scheme, request.host_with_port, @env[ 'vwf.root' ], @env[ 'vwf.application' ], instance_id, instance_save_name )
         end
-		result[ instance_id ] = instance_save_array
+		    result[ instance_id ] = instance_save_array
       end
     end
     result.to_json
@@ -126,7 +166,28 @@ class VWF::Application::Persistence < Sinatra::Base
 
   
   helpers do
-  
+
+    # Helper function to generate a hash object containing pertinent instance data.
+    def generate_instance_hash( scheme, host_with_port, public_path, application, instance, active )
+      result = {}
+      result[ "instance_id" ] = instance
+      result[ "url" ] = scheme + "://" + host_with_port + public_path + "/" + application + "/" + instance
+      result[ "active" ] = active
+      result[ "vwf_info" ] = {}
+      result[ "vwf_info" ][ "public_path" ] = public_path
+      result[ "vwf_info" ][ "application" ] = application
+      result[ "vwf_info" ][ "path_to_application" ] = public_path + "/" + application
+      result[ "vwf_info" ][ "instance" ] = instance
+      metadata = @storage.get_instance_metadata( public_path, application, instance )
+      if metadata.nil?
+        result[ "metadata" ] = {}
+      else
+        result[ "metadata" ] = metadata
+      end
+      result
+    end
+    
+    # Helper function to generate a hash object containing pertinent save data.
     def generate_save_hash( scheme, host_with_port, public_path, application, instance, save_name )
       result = {}
       result[ "name" ] = save_name

@@ -50,6 +50,21 @@ define( [ "rsvp" ] , function( rsvp ) {
     };    
     
     var exports = {
+        // getInstances: Returns all instances either currently running or stored in
+        // persistent storage. Implemented via a jQuery getJSON call with an interface
+        // derived from the rsvp Promise implementation.
+        getInstances: function( ) {
+            var pathInformation = getPathInformation( );
+            var promise = new require( 'rsvp' ).Promise( function( resolve, reject ) {
+                var requestURL = pathInformation[ "applicationPath" ] + "instances"
+                $.getJSON( requestURL ).done( function( data ) {
+                    resolve( data );
+                } ).fail( function( jqxhr, textStatus, error) {
+                    reject( { "error": error } );
+                } );
+            } );
+            return promise;
+        },
         // getSaveStates: Returns all save states that have been saved for this particular instance.
         // Implemented via a jQuery getJSON call with an interface derived from the rsvp Promise implementation.
         getSaveStates: function( ) {
