@@ -67,8 +67,8 @@ echo "VWF has been installed in your home directory (~/.vwf)."
 
 
 if [ "$UNAME" = "Darwin" ] ; then
-  ### OSX ###
-
+	### OSX ###
+	echo "Script in progress."
 elif [ "$UNAME" = "Linux" ] ; then
 	### Linux ###
 	ARCH=$(uname -m)
