@@ -75,8 +75,8 @@ elif [ "$UNAME" = "Linux" ] ; then
 	if type sudo >/dev/null 2>&1; then
 		echo "VWF uses Node.js as an engine. We are installing Node now."
 		echo "This may prompt for your password."
-		sudo apt-get install g++ curl libssl-dev apache2-utils
-		sudo apt-get install git-core
+		sudo apt-get -y install g++ curl libssl-dev apache2-utils
+		sudo apt-get -y install git-core
 		git clone git://github.com/ry/node.git ~/.node
 		cd ~/.node
 		./configure
