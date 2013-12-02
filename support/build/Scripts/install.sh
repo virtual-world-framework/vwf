@@ -66,7 +66,27 @@ echo
 echo "VWF has been installed in your home directory (~/.vwf)."
 
 
-# STILL NEEDS NODE.JS INSTALL HERE
+if [ "$UNAME" = "Darwin" ] ; then
+  ### OSX ###
+
+elif [ "$UNAME" = "Linux" ] ; then
+	### Linux ###
+	ARCH=$(uname -m)
+	if type sudo >/dev/null 2>&1; then
+		echo "VWF uses Node.js as an engine. We are installing Node now."
+		echo "This may prompt for your password."
+		sudo apt-get install g++ curl libssl-dev apache2-utils
+		sudo apt-get install git-core
+		git clone git://github.com/ry/node.git ~/.node
+		cd ~/.node
+		./configure
+		make
+		sudo make install
+	else
+		echo "You need sudo permission to complete Node installation. Node is a web engine that VWF uses to execute."
+		echo "Please follow the instructions for installation of Node at http://howtonode.org/how-to-install-nodejs"
+	fi
+fi
 
 
 
