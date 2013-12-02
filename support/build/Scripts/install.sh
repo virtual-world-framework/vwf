@@ -89,7 +89,7 @@ elif [ "$UNAME" = "Linux" ] ; then
 			curl --progress-bar --fail "$TARBALL_URL" | tar -xzf - -C "$INSTALL_TMPDIR"
 			# bomb out if it didn't work, eg no net
 			test -x "${INSTALL_TMPDIR}/node-v0.10.22-linux-x64"
-			mv "${INSTALL_TMPDIR}/node-v0.10.22-linux-x64/node-v0.10.22-linux-x64/" "$HOME/.node"
+			mv "${INSTALL_TMPDIR}/node-v0.10.22-linux-x64/" "$HOME/.node"
 			if [ -d "$INSTALL_TMPDIR" ];then
 			rmdir "${INSTALL_TMPDIR}"
 			fi
