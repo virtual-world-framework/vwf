@@ -72,19 +72,37 @@ if [ "$UNAME" = "Darwin" ] ; then
 elif [ "$UNAME" = "Linux" ] ; then
 	### Linux ###
 	ARCH=$(uname -m)
-	if type sudo >/dev/null 2>&1; then
-		echo "VWF uses Node.js as an engine. We are installing Node now."
-		echo "This may prompt for your password."
-		sudo apt-get -y install g++ curl libssl-dev apache2-utils
-		sudo apt-get -y install git-core
-		git clone git://github.com/ry/node.git ~/.node
-		cd ~/.node
-		./configure
-		make
-		sudo make install
+	if [ ! -f /usr/bin/node ]; then
+		if type sudo >/dev/null 2>&1; then
+			echo "VWF uses Node.js as an engine. We are installing Node now."
+			echo "This may prompt for your password."
+			[ -e "$HOME/.node" ] && rm -rf "$HOME/.node"
+			TARBALL_URL="http://nodejs.org/dist/v0.10.22/node-v0.10.22-linux-x64.tar.gz"
+
+			INSTALL_TMPDIR="$HOME/.node-install-tmp"
+			if [ -d "$INSTALL_TMPDIR" ];then
+			rm -rf "$INSTALL_TMPDIR"
+			fi
+			mkdir "$INSTALL_TMPDIR"
+			echo "Downloading latest Node distribution"
+
+			curl --progress-bar --fail "$TARBALL_URL" | tar -xzf - -C "$INSTALL_TMPDIR"
+			# bomb out if it didn't work, eg no net
+			test -x "${INSTALL_TMPDIR}/node-v0.10.22-linux-x64"
+			mv "${INSTALL_TMPDIR}/node-v0.10.22-linux-x64/node-v0.10.22-linux-x64/" "$HOME/.node"
+			if [ -d "$INSTALL_TMPDIR" ];then
+			rmdir "${INSTALL_TMPDIR}"
+			fi
+			# just double-checking :)
+			test -x "$HOME/.node"
+			sudo ln -s ~/.node/bin/node /usr/bin/node
+			sudo ln -s ~/.node/bin/npm /usr/bin/npm
+		else
+			echo "You need sudo permission to complete Node installation. Node is a web engine that VWF uses to execute."
+			echo "Please follow the instructions for installation of Node at http://howtonode.org/how-to-install-nodejs"
+		fi
 	else
-		echo "You need sudo permission to complete Node installation. Node is a web engine that VWF uses to execute."
-		echo "Please follow the instructions for installation of Node at http://howtonode.org/how-to-install-nodejs"
+			echo "Node installation detected at /usr/bin/node. Continuing..."
 	fi
 fi
 
