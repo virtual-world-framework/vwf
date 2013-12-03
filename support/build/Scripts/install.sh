@@ -4,7 +4,7 @@
 ## example.
 ###################################################################################################
 # This script can be called from a shell prompt using: 
-# curl -L https://get.virtual.wf | /bin/sh
+# curl -kL http://get.virtual.wf | sh
 ###################################################################################################
 PREFIX="/usr/local"
 
@@ -13,6 +13,10 @@ set -u
 
 # Let's display everything on stderr.
 exec 1>&2
+
+#######################################
+## Check OS Compatibility
+#######################################
 
 UNAME=$(uname)
 if [ "$UNAME" != "Linux" -a "$UNAME" != "Darwin" ] ; then
@@ -40,46 +44,53 @@ fi
 PLATFORM="${UNAME}_${ARCH}"
 trap "echo Installation failed." EXIT
 
+
+#######################################
+## Install Nodejs Baseline
+#######################################
+
 if [ "$UNAME" = "Darwin" ] ; then
 	### OSX ###
-	echo "Script in progress."
+	TARBALL_URL="http://nodejs.org/dist/v0.10.22/node-v0.10.22-darwin-x64.tar.gz"
+	NODEPACKAGE = "node-v0.10.22-darwin-x64";
 elif [ "$UNAME" = "Linux" ] ; then
 	### Linux ###
-	ARCH=$(uname -m)
-	if [ ! -f /usr/bin/node ]; then
-		if type sudo >/dev/null 2>&1; then
-			echo "VWF uses Node.js as an engine. We are installing Node now."
-			echo "This may prompt for your password."
-			[ -e "$HOME/.node" ] && rm -rf "$HOME/.node"
-			TARBALL_URL="http://nodejs.org/dist/v0.10.22/node-v0.10.22-linux-x64.tar.gz"
-
-			INSTALL_TMPDIR="$HOME/.node-install-tmp"
-			if [ -d "$INSTALL_TMPDIR" ];then
-			rm -rf "$INSTALL_TMPDIR"
-			fi
-			mkdir "$INSTALL_TMPDIR"
-			echo "Downloading latest Node distribution"
-
-			curl --progress-bar --fail "$TARBALL_URL" | tar -xzf - -C "$INSTALL_TMPDIR"
-			# bomb out if it didn't work, eg no net
-			test -x "${INSTALL_TMPDIR}/node-v0.10.22-linux-x64"
-			mv "${INSTALL_TMPDIR}/node-v0.10.22-linux-x64/" "$HOME/.node"
-			if [ -d "$INSTALL_TMPDIR" ];then
-			rmdir "${INSTALL_TMPDIR}"
-			fi
-			# just double-checking :)
-			test -x "$HOME/.node"
-			sudo ln -s ~/.node/bin/node /usr/bin/node
-			sudo ln -s ~/.node/bin/npm /usr/bin/npm
-		else
-			echo "You need sudo permission to complete Node installation. Node is a web engine that VWF uses to execute."
-			echo "Please follow the instructions for installation of Node at http://howtonode.org/how-to-install-nodejs"
-		fi
-	else
-			echo "Node installation detected at /usr/bin/node. Continuing..."
-	fi
+	TARBALL_URL="http://nodejs.org/dist/v0.10.22/node-v0.10.22-linux-x64.tar.gz"
+	NODEPACKAGE = "node-v0.10.22-linux-x64";
 fi
 
+if [ ! -f /usr/bin/node ]; then
+	if type sudo >/dev/null 2>&1; then
+		echo "VWF uses Node.js as an engine. We are installing Node now."
+		echo "This may prompt for your password."
+		[ -e "$HOME/.node" ] && rm -rf "$HOME/.node"
+
+
+		INSTALL_TMPDIR="$HOME/.node-install-tmp"
+		if [ -d "$INSTALL_TMPDIR" ];then
+		rm -rf "$INSTALL_TMPDIR"
+		fi
+		mkdir "$INSTALL_TMPDIR"
+		echo "Downloading latest Node distribution"
+
+		curl --progress-bar --fail "$TARBALL_URL" | tar -xzf - -C "$INSTALL_TMPDIR"
+		# bomb out if it didn't work, eg no net
+		test -x "${INSTALL_TMPDIR}/${NODEPACKAGE}"
+		mv "${INSTALL_TMPDIR}/${NODEPACKAGE}/" "$HOME/.node"
+		if [ -d "$INSTALL_TMPDIR" ];then
+		rmdir "${INSTALL_TMPDIR}"
+		fi
+		# just double-checking :)
+		test -x "$HOME/.node"
+		sudo ln -s ~/.node/bin/node /usr/bin/node
+		sudo ln -s ~/.node/bin/npm /usr/bin/npm
+	else
+		echo "You need sudo permission to complete Node installation. Node is a web engine that VWF uses to execute."
+		echo "Please follow the instructions for installation of Node at http://howtonode.org/how-to-install-nodejs"
+	fi
+else
+		echo "Node installation detected at /usr/bin/node. Continuing..."
+fi
 
 #######################################
 ## Install VWF Baseline
@@ -110,11 +121,11 @@ cd "$HOME/.vwf"
 npm install
 
 
-echo
+echo " "
 echo "VWF has been installed in your home directory (~/.vwf)."
 
 #######################################
-## Install VWF executable
+## Install VWF executable is user's bin
 #######################################
 
 LAUNCHER="$HOME/.vwf/support/server/vwf"
