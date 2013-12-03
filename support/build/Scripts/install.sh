@@ -48,15 +48,15 @@ trap "echo Installation failed." EXIT
 #######################################
 ## Install Nodejs Baseline
 #######################################
-
+	
 if [ "$UNAME" = "Darwin" ] ; then
 	### OSX ###
 	TARBALL_URL="http://nodejs.org/dist/v0.10.22/node-v0.10.22-darwin-x64.tar.gz"
-	NODEPACKAGE = "node-v0.10.22-darwin-x64";
+	NODEPACKAGE = "node-v0.10.22-darwin-x64"
 elif [ "$UNAME" = "Linux" ] ; then
 	### Linux ###
 	TARBALL_URL="http://nodejs.org/dist/v0.10.22/node-v0.10.22-linux-x64.tar.gz"
-	NODEPACKAGE = "node-v0.10.22-linux-x64";
+	NODEPACKAGE = "node-v0.10.22-linux-x64"
 fi
 
 if [ ! -f /usr/bin/node ]; then
