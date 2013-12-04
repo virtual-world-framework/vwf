@@ -107,7 +107,7 @@ if [ ! -f /usr/bin/node ]; then
 		rmdir "${INSTALL_TMPDIR}"
 		fi
 		# just double-checking :)
-		test -x "$HOME/.node"
+		test -x "$HOME/.vwf/.node"
 		sudo ln -s ~/.vwf/.node/bin/node /usr/bin/node
 		sudo ln -s ~/.vwf/.node/bin/npm /usr/bin/npm
 	else
