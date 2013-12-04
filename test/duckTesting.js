@@ -1,17 +1,19 @@
 // To run: casperjs test test/duckTesting.js
 
-casper.test.begin('Google search retrieves 10 or more results', 1, function suite(test) {
-    casper.start("http://virtual.wf/duck/", function() {
+casper.test.begin('Tests the duck application', 1, function suite(test) {
+    casper.start("http://localhost:3000/duck/", function() {
         test.assertTitle("VWF Duck Application", "accesses the duck application successfully");
     });
 
-    // casper.then(function() {
-    //     test.assertTitle("casperjs - Recherche Google", "google title is ok");
-    //     test.assertUrlMatch(/q=casperjs/, "search term has been submitted");
-    //     test.assertEval(function() {
-    //         return __utils__.findAll("h3.r").length >= 10;
-    //     }, "google search for \"casperjs\" retrieves 10 or more results");
-    // });
+    casper.run(function() {
+        test.done();
+    });
+});
+
+casper.test.begin('Tests the duck application config file', 1, function suite(test) {
+    casper.start("http://localhost:3000/duck/admin/config", function() {
+        test.assertHttpStatus(200, "fetches the config file");
+    });
 
     casper.run(function() {
         test.done();
