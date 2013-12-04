@@ -69,12 +69,7 @@ rmdir "${INSTALL_TMPDIR}"
 fi
 # just double-checking :)
 test -x "$HOME/.vwf"
-cd "$HOME/.vwf"
-npm install
 
-
-echo " "
-echo "VWF has been installed in your home directory (~/.vwf)."
 
 #######################################
 ## Install Nodejs Baseline
@@ -122,6 +117,17 @@ if [ ! -f /usr/bin/node ]; then
 else
 		echo "Node installation detected at /usr/bin/node. Continuing..."
 fi
+
+#######################################
+## Setup Node NPM Packages
+#######################################
+
+cd "$HOME/.vwf"
+npm install
+
+
+echo " "
+echo "VWF has been installed in your home directory (~/.vwf)."
 
 #######################################
 ## Install VWF executable is user's bin
