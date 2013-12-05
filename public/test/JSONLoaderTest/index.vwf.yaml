@@ -61,13 +61,26 @@ children:
       rotation: [ 0, 1, 1, 180 ]
       animationLoop: true
       scale: [ 0.1, 0.1, 0.1 ]
-      animationRate: 0.1
+      animationRate: 0.01
       animationType: -1
+  Horse: 
+    extends: http://vwf.example.com/node3.vwf
+    implements:
+    - http://vwf.example.com/animation.vwf
+    source: horse.js
+    type: model/x-threejs-morphanim+json
+    properties:
+      translation: [ 0, -4, 0 ]    
+      rotation: [ 0, 1, 1, 180 ]
+      animationLoop: true
+      scale: [ 0.01, 0.01, 0.01 ]
+      animationRate: 1
 scripts:
 - |
   this.initialize = function() {
     this.Monster.animationPlay();
     this.Knight.animationPlay();
+    this.Horse.animationPlay();
     this.VCTE.animationPlay();
     //this.Avatar.animationPlay();
     this.future( 0 ).initializeCamera();

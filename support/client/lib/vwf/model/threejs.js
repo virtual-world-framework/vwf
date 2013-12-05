@@ -688,21 +688,32 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
 
                     else if ( propertyName == "animationTimeUpdated" ) {
-                        if( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined ) {
-                            var fps = this.state.kernel.getProperty( nodeID, "animationFPS" ) || 30;
-                            for( var i = 0; i < node.threeObject.animatedMesh.length; i++ ) {
-                                for( var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++ ) {
-                                    node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
-                                }
-                                node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * fps) ] = 1;
-                            }
-                        }
+
+                        // Keyframe Animations
                         if ( node.threeObject.kfAnimations && node.threeObject.kfAnimations.length && propertyValue !== undefined ) {
                             for ( var i = 0; i < node.threeObject.kfAnimations.length; i++ ) {
                                 node.threeObject.kfAnimations[i].stop()
                                 node.threeObject.kfAnimations[i].play( false, 0 );
                                 node.threeObject.kfAnimations[i].update( propertyValue );
                             } 
+                        }
+                        
+                        // Skeletal Animations (takes precedence over Morph Target)
+                        if ( node.threeObject.bones && node.threeObject.bones.length > 0 ) {
+                            var animRate = this.state.kernel.getProperty( nodeID, "animationRate" ) || 0.1;
+                            THREE.AnimationHandler.update(animRate);
+                        } 
+                        // Morph Target Animations
+                        else if ( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined ) {
+                            var fps = this.state.kernel.getProperty( nodeID, "animationFPS" ) || 30;
+                            for( var i = 0; i < node.threeObject.animatedMesh.length; i++ ) {
+                                if ( node.threeObject.animatedMesh[i].morphTargetInfluences ) {
+                                    for( var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++ ) {
+                                        node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
+                                    }
+                                    node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * fps) ] = 1;
+                                }
+                            }
                         }
                     }
 
@@ -1487,7 +1498,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     else if ( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length ) {
                         var fps = this.state.kernel.getProperty( nodeID, "animationFPS") || 30;
                         for(var i=0, il = node.threeObject.animatedMesh.length; i < il; i++) {
-                            if(node.threeObject.animatedMesh[i].morphTargetInfluences.length > animationDuration) {
+                            if (node.threeObject.animatedMesh[i].bones) {
+                                
+                                // Skeletal animations take precedence over Morph Targets
+                                animationDuration = node.threeObject.animatedMesh[i].bones.length;
+                            }
+                            else if(  node.threeObject.animatedMesh[i].morphTargetInfluences.length > animationDuration ) {
+                                
                                 animationDuration = node.threeObject.animatedMesh[i].morphTargetInfluences.length;
                             }
                         }
@@ -2352,9 +2369,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if ( childType == "model/x-threejs-morphanim+json" || childType == "model/x-threejs-skinned+json" ) {
 
                 for ( var i = 0; i < materials.length; i++ ) {
+                    
                     var m = materials[ i ];
-                    m.morphTargets = true;
-                    if ( childType == "model/x-threejs-skinned+json" ) {
+                    
+                    // Do we have Morph Target animations?
+                    if ( geometry.morphTargets.length > 0 ) {
+                        m.morphTargets = true;
+                    }
+
+                    // Do we have skeletal animations?
+                    if ( geometry.animation ) {
                         m.skinning = true;
                     }
                 }
@@ -2373,15 +2397,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                 if ( childType == "model/x-threejs-morphanim+json" ) {
                     var asset = new THREE.MorphAnimMesh( geometry, meshMaterial );
+                
                 } else {  // childType == "model/x-threejs-skinned+json"
-                  // var asset = new THREE.SkinnedMesh( geometry, meshMaterial );
 
-                    var asset = new THREE.SkinnedMesh( geometry, new THREE.MeshFaceMaterial( materials ));
-                    //THREE.AnimationHandler.add( geometry.animation );   
-                    //animation = new THREE.Animation( asset, geometry.animation.name ); 
-                    //animation.JITCompile = false;
-                    //animation.interpolationType = THREE.AnimationHandler.LINEAR;
-                    //animation.play();
+                    THREE.AnimationHandler.add( geometry.animation );   
+                    var asset = new THREE.SkinnedMesh( geometry, meshMaterial );
+                    animation = new THREE.Animation( asset, geometry.animation.name ); 
+                    animation.play();
+                    //animation.play(true, 0);
                 }
 
                 asset.updateMatrix();
@@ -2411,9 +2434,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             asset.matrix = new THREE.Matrix4();
             asset.matrixAutoUpdate = false;
             
-            // Don't make a copy of the three object if there are keyframe animations associated with it
+            // Don't make a copy of the three object if there are keyframe skeletal animations associated with it
             // until we figure out a way to copy them successfully.
-            if(animations) {
+            if(animations || animation) {
                 nodeCopy.threeObject = asset;
             }
             else {
