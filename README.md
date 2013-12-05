@@ -29,16 +29,15 @@ For more complex installations, such as working on VWF core, please see our [Ins
 
 ## Quick Start for Linux/Mac OSX
 
-Navigate to the VWF directory on your computer (`~/.vwf` on a *nix machine).
+Navigate to your home directory on your computer.
 
 ```
-$ cd ~/.vwf
+$ cd ~
 ```
 
 Change directory into the public folder and create a new folder for your app. Run 'vwf' to start up the web server. 
 
 ```
-$ cd public
 $ mkdir my-app
 $ cd my-app
 $ vwf
