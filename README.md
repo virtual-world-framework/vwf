@@ -9,9 +9,9 @@ VWF applications are written in JavaScript and leverage emerging web technologie
 
 ## Installation
 
-**Install on Linux / Mac OSX**
+**Install on Linux / Mac OS X**
 
-NOTE: On Mac OSX, please make sure you have XCode, and XCode Command Line Tools installed prior to executing the script below (https://developer.apple.com/xcode/).
+NOTE: On Mac OS X, please make sure you have Xcode Command Line Tools installed prior to executing the script below (https://developer.apple.com/xcode/).
 
 ```
 $ curl http://get.virtual.wf  | sh
@@ -29,13 +29,7 @@ For more complex installations, such as working on VWF core, please see our [Ins
 
 ## Quick Start 
 
-**Quick Start - Linux/Mac OSX** 
-
-Navigate to a directory on your computer (we use the home directory as an example).
-
-```
-$ cd ~
-```
+**Quick Start - Linux/Mac OS X** 
 
 Create a new folder for your app. Run 'vwf' to start up the web server. 
 
@@ -45,7 +39,7 @@ $ cd my-app
 $ vwf
 ```
 
-The webpage will be blank at http://localhost:3000. You are now ready to get started with VWF. 
+Your application is now up and running at [http://localhost:3000/](http://localhost:3000/).
 Check out [Getting Started](http://virtual.wf/web/docs/readme.html).
 
 Go back to the root VWF directory and start the server.
