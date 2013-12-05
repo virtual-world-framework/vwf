@@ -1,4 +1,4 @@
-var libpath = require( 'path' ),
+var path = require( 'path' ),
     http = require( 'http' ),
     fs = require( 'fs' ),
     url = require( 'url' ),
@@ -6,14 +6,11 @@ var libpath = require( 'path' ),
     reflector = require( './lib/nodejs/reflector' ),
     vwf = require( './lib/nodejs/vwf' );
 
-    
-
-
 // Basic error handler.
-global.error = function ( ) {
+global.error = function () {
     var red, brown, reset;
 		red   = '\u001b[31m';
-		brown  = '\u001b[33m';
+		brown = '\u001b[33m';
 		reset = '\u001b[0m';
 
     var args = Array.prototype.slice.call( arguments );
@@ -22,8 +19,7 @@ global.error = function ( ) {
 	
     if ( !isNaN( parseInt( level ) ) ) {
         level = parseInt( level );
-    }
-    else {
+    } else {
         args.push( level )
         level = 1;
     };
@@ -34,14 +30,13 @@ global.error = function ( ) {
 };
 
 // Basic logging function.
-global.log = function ( ) {
+global.log = function () {
     var args = Array.prototype.slice.call( arguments );
     var level = args.splice( args.length - 1 )[ 0 ];
 
     if ( !isNaN( parseInt( level ) ) ) {
         level = parseInt( level );
-    }
-    else {
+    } else {
         args.push( level )
         level = 1;
     };
@@ -51,57 +46,104 @@ global.log = function ( ) {
     }
 };
 
+function consoleNotice( string ) {
+    var brown = '\u001b[33m';
+    var reset = '\u001b[0m';
+    global.log( brown + string + reset );
+}
 
+function consoleError( string ) {
+    var red   = '\u001b[31m';
+    var reset = '\u001b[0m';
+    global.log( red + string + reset );
+}
 
+// Set the root directory where applications will be served from. Default
+// to the current directory if none is specified.
+// Use --applicationPath or -a to specify an alternative path.
+function parseApplicationPath () {
+    var argv = require('optimist').argv;
 
+    if ( argv.applicationPath || argv.a ) {
 
+        var applicationPath = argv.applicationPath || argv.a;
+
+        if ( fs.existsSync( applicationPath ) && fs.statSync( applicationPath ).isDirectory() ) {
+            consoleNotice( "Serving VWF applications from " + applicationPath );
+            return applicationPath;
+        } else {
+            consoleError ( applicationPath + " is NOT a directory! Serving VWF applications from " + process.cwd() );
+            return process.cwd();
+        }
+
+    } else {
+        consoleNotice( "Serving VWF applications from " + process.cwd() );
+        return process.cwd();
+    }
+}
+
+// Set the VWF directory where VWF files will be served from. Default to
+// "$HOME/.vwf". If not found at $HOME/.vwf, try the current working
+// directory.
+function parseVWFPath () {
+    var home = ( process.env.HOME || process.env.USERPROFILE );
+    var vwfHome = path.join( home, ".vwf" );
+
+    if ( fs.existsSync( path.join( vwfHome, "support/client/lib" ) ) ) {
+        return vwfHome;
+    } else if ( fs.existsSync( path.join( process.cwd(), "support/client/lib" ) ) ) {
+        return process.cwd();
+    } else {
+        consoleError( "Could not find VWF support files." );
+        return false;
+    }
+}
 
 //Start the VWF server
-function startVWF( ) {
-    global.activeinstances = [ ];
+function startVWF() {
+    global.activeinstances = [];
+    global.vwfRoot = parseVWFPath();
+
+    if ( !global.vwfRoot ) {
+        // Need to exit out because of an error
+    }
+
     function OnRequest( request, response ) {
-        try{
+        try {
             vwf.Serve( request, response );
-        }
-        catch ( e ) {
+        } catch ( e ) {
             response.writeHead( 500, {
                 "Content-Type": "text/plain"
             } );
-            response.write( e.toString( ), "utf8" );
-            response.end( );
+            response.write( e.toString(), "utf8" );
+            response.end();
         }
     } // close onRequest
 
-
-
     //create the server
-
     var red, brown, reset;
+    brown = '\u001b[33m';
     red   = '\u001b[31m';
-    brown  = '\u001b[33m';
     reset = '\u001b[0m';
 
     //start the DAL
-    var p = process.argv.indexOf( '-p' );
-    var port = p >= 0 ? parseInt( process.argv[ p + 1 ] ) : 3000;
+    var pIndex = process.argv.indexOf( '-p' );
+    var port = ( pIndex >= 0 ? parseInt( process.argv[ pIndex + 1 ] ) : 3000 );
 		
-    p = process.argv.indexOf( '-d' );
-    var datapath = p >= 0 ? process.argv[ p + 1 ] : "C:\\VWFData";
-		
-    p = process.argv.indexOf( '-l' );
-    global.logLevel = p >= 0 ? process.argv[ p + 1 ] : 1;
+    var lIndex = process.argv.indexOf( '-l' );
+    global.logLevel = ( lIndex >= 0 ? process.argv[ lIndex + 1 ] : 1 );
     global.log( brown + 'LogLevel = ' +  global.logLevel + reset, 0 );	
-
 
     p = process.argv.indexOf( '-nocache' );
     if ( p >= 0 ) {
         FileCache.enabled = false;
-        console.log('server cache disabled');
+        console.log( 'server cache disabled' );
     }
+
+    global.applicationRoot = parseApplicationPath();
 
     var srv = http.createServer( OnRequest ).listen( port );
     global.log( brown + 'Serving on port ' + port + reset, 0 );
-
 
     //create socket server
     var socketManager = sio.listen( srv, { 
