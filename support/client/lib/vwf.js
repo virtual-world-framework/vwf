@@ -691,18 +691,15 @@
 
             // Connect to the reflector. This implementation uses the socket.io library, which
             // communicates using a channel back to the server that provided the client documents.
-
             try {
                 if ( isSocketIO07() ) {
                     var options = {
     
                         // The socket is relative to the application path.
-    
                         resource: window.location.pathname.slice( 1,
                             window.location.pathname.lastIndexOf("/") ),
     
                         // The ruby socket.io server only supports WebSockets. Don't try the others.
-    
                         transports: [
                             'websocket',
                             // 'flashsocket',
@@ -715,7 +712,6 @@
                         // Increase the timeout due to starvation while loading the scene. The server
                         // timeout must also be increased.
                         // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
-    
                         transportOptions: {
                             "websocket": { timeout: 90000 }
                             // "flashsocket": { timeout: 90000 },

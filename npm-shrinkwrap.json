@@ -102,6 +102,20 @@
           "from": "esprima@~ 1.0.2"
         }
       }
+    },
+    "optimist": {
+      "version": "0.6.0",
+      "from": "optimist@0.6.x",
+      "dependencies": {
+        "wordwrap": {
+          "version": "0.0.2",
+          "from": "wordwrap@~0.0.2"
+        },
+        "minimist": {
+          "version": "0.0.5",
+          "from": "minimist@~0.0.1"
+        }
+      }
     }
   }
 }
