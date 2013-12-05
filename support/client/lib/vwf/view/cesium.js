@@ -68,7 +68,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
                 this.window = window;
             }
 
-            this.clientControl = { 
+            this.state.clientControl = { 
                 event: undefined, // probably not needed but this will contain the 
                 controller: "",   // this is the moniker of the  
                 locked: false 
@@ -191,7 +191,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
                 ( function tick() {
 
                     if ( view.state.cameraInfo ) {
-                        if ( view.clientControl.controller == view.kernel.moniker() ) {
+                        if ( view.state.clientControl.controller == view.kernel.moniker() ) {
                             var diffs = view.state.cameraInfo.diff( camera );
                             if ( diffs !== undefined ){
                                broadcastCameraViewData.call( view, diffs );                        
@@ -319,45 +319,12 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium" ], func
 
         satProperty: function( nodeID, propertyName, propertyValue ) {
             switch ( propertyName ) {
-                case "clientControl": //
-                    // propertyValue.event is being ignored 
-                    if ( this.clientControl.locked == false ) {
 
-                        if ( this.clientControl.controller != propertyValue.controller ) {
-                            // switching controllers, disable all non-controllers
-                            if ( propertyValue.controller != this.kernel.moniker() ) {
-                                this.state.mouse.enable( false );
-                            }
-                        }
-
-                        // new client in control
-                        this.clientControl = propertyValue;
-
-                    } else if ( !propertyValue.locked ) {
-                        // leave the controller set, but update locked 
-                        // this will allow the camera to keep moving by the 
-                        // current controller
-                        if ( this.clientControl.controller == propertyValue.controller ) {
-                            this.clientControl.locked = false;
-                            this.state.mouse.enable( true );
-                        }
-                    } else {
-                        console.info( "clientControl ignoring:{ event: " + propertyValue.event + ", controller: " + propertyValue.controller + ", locked: " + propertyValue.locked + " }" );
-                    }
-
-                    break;
             }
         },
 
-        gotProperty: function( nodeID, propertyName, propertyValue ) {
-            var value = undefined;
-            switch ( propertyName ) {
-                case "clientControl":
-                    value = propertyValue = this.clientControl;
-                    break;
-            }
-            return value;
-        }
+        //gotProperty: function( nodeID, propertyName, propertyValue ) {
+        //}
             
     } );
  

@@ -26,6 +26,7 @@ sudo apt-get update
 
 # Install Java, Ruby, RubyGems, and Git 
 sudo apt-get -y install openjdk-7-jdk rubygems git
+sudo apt-get -y install libxslt-dev libxml2-dev
 sudo apt-get -y install ruby1.9.1 ruby1.9.1-dev rubygems1.9.1 irb1.9.1 ri1.9.1 rdoc1.9.1 build-essential libopenssl-ruby1.9.1 libssl-dev zlib1g-dev
 sudo update-alternatives --install /usr/bin/ruby ruby /usr/bin/ruby1.9.1 400 \
          --slave   /usr/share/man/man1/ruby.1.gz ruby.1.gz \

@@ -239,7 +239,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             } else if ( protos && isNodeDefinition.call( this, protos ) && childName !== undefined ) {
                 
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-                if ( childType == "model/vnd.collada+xml" || childType == "model/vnd.osgjs+json+compressed") {
+                if ( childType == "model/vnd.collada+xml" || 
+                    childType == "model/vnd.osgjs+json+compressed" ||
+                    childType == "model/x-threejs-morphanim+json" ) {
                     
                     // Most often this callback is used to suspend the queue until the load is complete
                     callback( false );
@@ -277,7 +279,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         threeParent.add( node.threeObject ); 
                     } 
                 } else {     
-                        
+
                     node = this.state.nodes[childID] = {
                         name: childName,  
                         threeObject: threeChild,
@@ -344,7 +346,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             // the driver properties w/ the stop-gap function below.
             // Else, it will be called at the end of the assetLoaded callback
             if ( ! ( childType == "model/vnd.collada+xml" || 
-                     childType == "model/vnd.osgjs+json+compressed") )
+                     childType == "model/vnd.osgjs+json+compressed" ||
+                     childType == "model/x-threejs-morphanim+json") )
                 notifyDriverOfPrototypeAndBehaviorProps();
 
             // Since prototypes are created before the object, it does not get "setProperty" updates for
@@ -421,27 +424,78 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- addingChild ------------------------------------------------------------------------
         
         addingChild: function( nodeID, childID, childName ) {
+
+            //console.info( "addingChild( " + nodeID+", "+childID+", "+childName + " )" );
+            //debugger;
+            var threeObjParent = getThreeObject.call( this, nodeID );
+            var threeObjChild = getThreeObject.call( this, childID ); 
             
+            if ( threeObjParent && threeObjChild ) { 
+                if ( threeObjParent instanceof THREE.Object3D ) {
+
+                    if ( !( threeObjChild instanceof THREE.Material ) ) {
+                        var childParent = threeObjChild.parent;
+                        if ( childParent !== threeObjParent ) {
+                            // what does vwf do here?  add only if parent is currently undefined
+                            if ( childParent ) {
+                                //console.info( "A     *R* removing: " + childID + " from " + childParent.name );
+                                childParent.remove( threeObjChild )   
+                            } 
+                            //console.info( "A     *R* adding: " + childID + " from " + nodeID );
+                            threeObjParent.add( threeObjChild );
+                        }
+                    } else {
+                        // TODO
+                        // this is adding of a material
+                    }
+                }
+            }
+
         },
 
         // -- movingChild ------------------------------------------------------------------------
         
         movingChild: function( nodeID, childID, childName ) {
+
+            //console.info( "movingChild( " + nodeID+", "+childID+", "+childName + " )" );
+            var threeObjParent = getThreeObject.call( this, nodeID );
+            var threeObjChild = getThreeObject.call( this, childID ); 
+            
+            if ( threeObjParent && threeObjChild && ( threeObjParent instanceof THREE.Object3D ) ){
+                var childParent = threeObjChild.parent;
+                // do we only move if there is currently a parent
+                if ( childParent && ( childParent !== threeObjParent ) ) {
+                    childParent.remove( threeObjChild );
+                    threeObjParent.add( threeObjChild );   
+                } 
+            } 
+
         },
 
         // -- removingChild ------------------------------------------------------------------------
         
         removingChild: function( nodeID, childID, childName ) {
+            
+            //console.info( "removingChild( " + nodeID+", "+childID+", "+childName + " )" );
+            var threeObjParent = getThreeObject.call( this, nodeID );
+            var threeObjChild = getThreeObject.call( this, childID );
+            if ( threeObjParent && threeObjChild && ( threeObjParent instanceof THREE.Object3D ) ){    
+
+                var childParent = threeObjChild.parent;
+                if ( childParent === threeObjParent ) {
+                    //console.info( "A     *R* removing: " + childID + " from " + nodeID );
+                    childParent.remove( threeObjChild )   
+                } 
+            } 
+            
         },
 
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
-
             if ( this.debug.properties ) {
                 this.logger.infox( "C === creatingProperty ", nodeID, propertyName, propertyValue );
             }
-
             return this.initializingProperty( nodeID, propertyName, propertyValue );
         },
 
@@ -450,7 +504,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var value = undefined;
-            //console.info( "initializingProperty( " + nodeID+", "+propertyName+", "+propertyValue + " )" );
 
             if ( this.debug.properties ) {
                 this.logger.infox( "  I === initializingProperty ", nodeID, propertyName, propertyValue );
@@ -464,6 +517,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         case "meshDefinition":
                             createMesh.call( this, node, propertyValue, true );
                             value = propertyValue; 
+                            break;
+                        case "texture":
+                            // delay the setting of the texture until the actual
+                            // settingProperty call
                             break;
                         default:
                             value = this.settingProperty( nodeID, propertyName, propertyValue );                  
@@ -683,32 +740,32 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
 
                     else if ( propertyName == "animationTimeUpdated" ) {
-                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined) {
-                            var fps = this.state.kernel.getProperty( nodeID, "animationFPS") || 30;
-                            for(var i = 0; i < node.threeObject.animatedMesh.length; i++) {
-                                for(var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++) {
+                        if( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined ) {
+                            var fps = this.state.kernel.getProperty( nodeID, "animationFPS" ) || 30;
+                            for( var i = 0; i < node.threeObject.animatedMesh.length; i++ ) {
+                                for( var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++ ) {
                                     node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
                                 }
                                 node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * fps) ] = 1;
                             }
                         }
-                        if(node.threeObject.kfAnimations && propertyValue !== undefined) {
-                            for(var i = 0; i < node.threeObject.kfAnimations.length; i++) {
+                        if ( node.threeObject.kfAnimations && node.threeObject.kfAnimations.length && propertyValue !== undefined ) {
+                            for ( var i = 0; i < node.threeObject.kfAnimations.length; i++ ) {
                                 node.threeObject.kfAnimations[i].stop()
-                                node.threeObject.kfAnimations[i].play(false, 0);
-                                node.threeObject.kfAnimations[i].update(propertyValue);
+                                node.threeObject.kfAnimations[i].play( false, 0 );
+                                node.threeObject.kfAnimations[i].update( propertyValue );
                             } 
                         }
                     }
 
-                    else if ( propertyName == "animationDuration") {
-                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations) {
+                    else if ( propertyName == "animationDuration" ) {
+                        if( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations ) {
                             value = this.gettingProperty( nodeID, "animationDuration" );
                         }
                     }
 
-                    else if ( propertyName == "animationFPS") {
-                        if(node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations) {
+                    else if ( propertyName == "animationFPS" ) {
+                        if( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length || node.threeObject.kfAnimations ) {
                             value = this.gettingProperty( nodeID, "animationFPS" );
                         }
                     }
@@ -1567,6 +1624,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     
                         
                 }
+                // these properties should possibly be three js specific
+                if( propertyName == "transparent" ) {
+                    value = threeObject.transparent;
+                    return value;
+                }
+                if( propertyName == "opacity" ) {
+                    value = threeObject.opacity;
+                    return value;
+                }                
             }
             if( threeObject instanceof THREE.Camera ) {
                 switch ( propertyName ) {
@@ -1862,7 +1928,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
         return foundNode;
     }
-
+    function isTextDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-text-vwf" );    
+            }
+        }
+        return foundNode;
+    }
     function CreateThreeJSSceneNode(parentID,thisID,extendsID)
     {
         var node = {};
@@ -1984,6 +2058,21 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
     }
 
+    function getThreeObject( ID ) {
+        var threeObject = undefined;
+        var node = this.state.nodes[ ID ]; // { name: childName, glgeObject: undefined }
+        if( node === undefined ) node = this.state.scenes[ ID ]; // { name: childName, glgeObject: undefined }
+
+        if( node ) {
+            threeObject = node.threeObject;
+            if( !threeObject )
+                threeObject = node.threeScene;
+            if ( node.threeMaterial )
+                threeObject = node.threeMaterial;
+        }
+
+        return threeObject;
+    }
     
     function findAllMeshes(threeObject,list)
     {
@@ -2200,8 +2289,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     }
     function createMesh( node, meshDef, doubleSided ) {
         if ( node.threeObject && node.threeObject instanceof THREE.Object3D ) {
-            var i, face, geo;
-            var height, width, depth, radius;
+            var i, face, geo, sides;
+            var materials = undefined;
             var vwfColor, colorValue = 0xFFFFFF;    
             if ( meshDef.color !== undefined ) {
                 vwfColor = new utility.color( meshDef.color );
@@ -2212,27 +2301,43 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var mat = new THREE.MeshLambertMaterial( { "color": colorValue, "ambient": colorValue } );
            
             if ( isCubeDefinition.call( this, node.prototypes ) ) {
-                height = meshDef.height || 1;
-                width = meshDef.width || 1;
-                depth = meshDef.depth || 1;
-                geo = new THREE.CubeGeometry( width, height, depth );
+                // materials = ??
+                sides = meshDef.sides || { px: true, nx: true, py: true, ny: true, pz: true, nz: true };
+                geo = new THREE.CubeGeometry( meshDef.width || 10, meshDef.height || 10, meshDef.depth || 10, 
+                    meshDef.segmentsWidth || 1, meshDef.segmentsHeight || 1, meshDef.segmentsDepth || 1,
+                    materials, sides );
             } else if ( isPlaneDefinition.call( this, node.prototypes ) ) {
-                height = meshDef.height || 1;
-                width = meshDef.width || 1;
-                geo = new THREE.PlaneGeometry( width, height );
+                geo = new THREE.PlaneGeometry( meshDef.width || 1, meshDef.height || 1,
+                    meshDef.segmentsWidth || 1, meshDef.segmentsHeight || 1 );
             } else if ( isCircleDefinition.call( this, node.prototypes ) ) {
-                radius = meshDef.radius || 10;
-                geo = new THREE.CircleGeometry( radius );
+                geo = new THREE.CircleGeometry( meshDef.radius || 10, 
+                    meshDef.segments || 8, meshDef.thetaStart || 0, 
+                    meshDef.thetaLength || Math.PI * 2 );
             } else if ( isSphereDefinition.call( this, node.prototypes ) ) {
-                radius = meshDef.radius || 10;
-                geo = new THREE.SphereGeometry( radius );
+                geo = new THREE.SphereGeometry( meshDef.radius || 10, meshDef.segmentsWidth || 8,
+                    meshDef.segmentsHeight || 6, meshDef.phiStart || 0,
+                    meshDef.phiLength || Math.PI * 2, meshDef.thetaStart || 0, 
+                    meshDef.thetaLength || Math.PI );
             } else if ( isCylinderDefinition.call( this, node.prototypes ) ) {
-                height = meshDef.height || 1;
-                if ( meshDef.radius !== undefined ){ 
-                    radius = meshDef.radius || 10;
-                    geo = new THREE.CylinderGeometry( radius, radius, height );
-                } else {
-                    geo = new THREE.CylinderGeometry( meshDef.radiusTop || 10, meshDef.radiusBottom || 10, height );
+                geo = new THREE.CylinderGeometry( meshDef.radiusTop || 10, meshDef.radiusBottom || 10,
+                     meshDef.height || 10, meshDef.segmentsRadius || 8, 
+                     meshDef.segmentsHeight || 1, meshDef.openEnded );
+            } else if ( isTextDefinition.call( this, node.prototypes ) ) {
+                if ( meshDef.text != "" ) {
+                    var parms = meshDef.parameters || {};
+                    geo = new THREE.TextGeometry( meshDef.text, { "size": parms.size || 100,
+                        "curveSegments": parms.curveSegments || 4, "font": parms.font || "helvetiker",
+                        "weight": parms.weight || "normal", "style": parms.style || "normal",
+                        "amount": parms.amount || 50, "height": parms.height || 50, 
+                        "bevelThickness": parms.bevelThickness || 10, "bevelSize": parms.bevelSize || 8,
+                        "bevelEnabled": Boolean( parms.bevelEnabled ),
+                    } );
+                    // geo = new THREE.TextGeometry( meshDef.text, {
+                    //     size: 80,
+                    //     height: 20,
+                    //     curveSegments: 2,
+                    //     font: "helvetiker"
+                    // } );
                 }
             } else {
                 geo = new THREE.Geometry();
@@ -2338,11 +2443,39 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var parentObject3 = parentNode.threeObject ? parentNode.threeObject : parentNode.threeScene;
         //console.info( "---- loadAsset( "+parentNode.name+", "+node.name+", "+childType+" )" );
 
-        node.assetLoaded = function( asset ) { 
+        node.assetLoaded = function( geometry , materials) { 
             //console.info( "++++ assetLoaded( "+parentNode.name+", "+node.name+", "+childType+" )" );
             sceneNode.pendingLoads--;
             var removed = false;
             
+            // THREE.morphAnimMesh JSON model
+            if ( childType == "model/x-threejs-morphanim+json" ) {
+
+                for ( var i = 0; i < materials.length; i++ ) {
+                    var m = materials[ i ];
+                    m.morphTargets = true;
+                }
+                
+                var meshMaterial;
+                if ( materials.length > 1 ) {
+
+                    // THREE.MeshFaceMaterial for meshes that have multiple materials
+                    meshMaterial = new THREE.MeshFaceMaterial( materials );    
+                
+                } else {
+
+                    // This mesh has only one material
+                    meshMaterial = materials[ 0 ];
+                }
+
+                var asset = new THREE.MorphAnimMesh( geometry, meshMaterial );
+
+                asset.updateMatrix();
+
+            } else {  // Collada model
+                var asset = geometry;
+            }
+         
             var animations, animatedMesh;
             if(asset.animations && asset.animations.length > 0) {
                 animations = asset.animations;
@@ -2382,7 +2515,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 		
             animatedMesh = [];
             walkGraph(nodeCopy.threeObject,function( node ){
-                if( node instanceof THREE.SkinnedMesh ) {
+                if( node instanceof THREE.SkinnedMesh  || node instanceof THREE.MorphAnimMesh ) {
                     animatedMesh.push( node );
                 }
             });
@@ -2562,6 +2695,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if( childType == "model/vnd.osgjs+json+compressed" ) {
                 node.loader = new UTF8JsonLoader( node,node.assetLoaded.bind( this ) );
             }
+
+            if( childType == "model/x-threejs-morphanim+json" ) {
+                node.loader = new THREE.JSONLoader()
+                node.loader.load( node.source, node.assetLoaded.bind( this ) );
+            }
         }
 
         //if the asset registry entry is not pending and it is loaded, then just grab a copy, 
@@ -2575,7 +2713,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var n = asset;
             var skins = [];
             walkGraph( n, function( node ) {
-                if( node instanceof THREE.SkinnedMesh ) {
+                if( node instanceof THREE.SkinnedMesh || node instanceof THREE.MorphAnimMesh ) {
                     skins.push( node );
                 }
             });
@@ -2613,7 +2751,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 cloneMaterials( n );
                 var skins = [];
                 walkGraph( n, function( node ) {
-                    if( node instanceof THREE.SkinnedMesh ) {
+                    if( node instanceof THREE.SkinnedMesh || node instanceof THREE.MorphAnimMesh ) {
                         skins.push( node );
                     }            
                 });

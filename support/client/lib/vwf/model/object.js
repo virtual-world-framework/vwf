@@ -77,15 +77,22 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
                         new Alea( JSON.stringify( parent.prng.state ), childID ) :  // ... the parent's prng and the child ID, or
                         new Alea( configuration.active["random-seed"], childID ),   // ... the global seed and the child ID
 
-                    // Change list for patchable objects. This field is omitted until needed.
+                    // TODO: The 'patches' object is in the process of moving to the kernel
+                    //       Those objects that are double-commented out have already moved
+                    //       Those that are single-commented out have yet to move.
+
+                    // Change list for patchable objects. This comment shows the structure of the 
+                    // object, but it is created later dynamically as needed
 
                     // patches: {
-                    //     root: true,                // node is the root of the component
-                    //     descendant: true,          // node is a descendant still within the component
+                    //     // root: true,             // node is the root of the component -- moved to kernel's node registry
+                    //     // descendant: true,       // node is a descendant still within the component -- moved to kernel's node registry
                     //     internals: true,           // random, seed, or sequence has changed
-                    //     properties: true,          // placeholder for a property change list
+                    //     // properties: true,       // placeholder for a property change list -- moved to kernel's node registry
                     //     methods: [],               // array of method names for methods that changed
                     // },
+
+                    // END TODO
 
                     initialized: false,
 
@@ -102,9 +109,9 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
                 // the root or a descendant in a component).
 
                 if ( child.uri ) {
-                    child.patches = { root: true };
+                    child.patches = { /* root: true */ };
                 } else  if ( parent && ! parent.initialized && parent.patches ) {
-                    child.patches = { descendant: true };
+                    child.patches = { /* descendant: true */  };
                 }
 
             } else if ( ! child.prototype ) {
@@ -156,13 +163,27 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
 
         // -- addingChild --------------------------------------------------------------------------
 
-        // addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
-        // },
+        addingChild: function( nodeID, childID, childName ) {  // ... doesn't validate arguments or check for moving to/from 0  // TODO: not for global anchor node 0
+
+            var object = this.objects[nodeID];
+            var child = this.objects[childID];
+
+            child.parent = object;
+            object.children.push( child );
+
+        },
 
         // -- removingChild ------------------------------------------------------------------------
 
-        // removingChild: function( nodeID, childID ) {
-        // },
+        removingChild: function( nodeID, childID ) {  // ... doesn't validate arguments or check for moving to/from 0
+
+            var object = this.objects[nodeID];
+            var child = this.objects[childID];
+
+            child.parent = undefined;
+            object.children.splice( object.children.indexOf( child ), 1 );
+
+        },
 
         // TODO: creatingProperties, initializingProperties
 
@@ -185,8 +206,6 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
                 node_properties[propertyName] = properties[propertyName];
 
             }
-
-            object.initialized && object.patches && ( object.patches.properties = true ); // placeholder for a property change list
 
             return node_properties;
         },
@@ -215,7 +234,6 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
             var object = this.objects[nodeID];
-            object.initialized && object.patches && ( object.patches.properties = true ); // placeholder for a property change list
             return object.properties[propertyName] = propertyValue;
         },
 

@@ -434,6 +434,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Note: this is a costly operation and should be optimized if possible
             if ( ( now - lastPickTime ) > self.pickInterval && !self.disableInputs )
             {
+                sceneNode.frameCount = 0;
+            
                 var newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
                 
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
@@ -714,14 +716,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 worldCamTrans.getPositionFromMatrix( camera.matrixWorld );
 
                 // Convert THREE.Vector3 to array
+                // QUESTION: Is the double use of y a bug?  I would assume so, but then why not
+                //           just use worldCamTrans as-is?
                 worldCamPos = [ worldCamTrans.x, worldCamTrans.y, worldCamTrans.z];
             }
 
             returnData.eventNodeData = { "": [ {
+                pickID: pointerPickID,
+                pointerVector: pickDirectionVector ? vec3ToArray( pickDirectionVector ) : undefined,
                 distance: pickInfo ? pickInfo.distance : undefined,
                 origin: pickInfo ? pickInfo.worldCamPos : undefined,
                 globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined,
-                globalNormal: pickInfo ? [0,0,1] : undefined,    //** not implemented by threejs
+                globalNormal: pickInfo && pickInfo.face ? [pickInfo.face.normal.x,pickInfo.face.normal.y,pickInfo.face.normal.z] : undefined,    //** not implemented by threejs
                 globalSource: worldCamPos
             } ] };
 
@@ -763,8 +769,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     }
 
                     // transform the global normal into local
-                    if ( pickInfo && pickInfo.normal ) {
-                        localNormal = goog.vec.Mat4.multVec3Projective( transform, pickInfo.normal, 
+                    if ( transform && pickInfo && pickInfo.face ) {
+                        localNormal = goog.vec.Mat4.multVec3Projective( transform, pickInfo.face.normal, 
                             goog.vec.Vec3.create() );
                     } else {
                         localNormal = undefined;  
@@ -778,12 +784,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     }
                                         
                     returnData.eventNodeData[ childID ] = [ {
+                        pickID: pointerPickID,
+                        pointerVector: pickDirectionVector ? vec3ToArray( pickDirectionVector ) : undefined,
                         position: localTrans,
                         normal: localNormal,
                         source: relativeCamPos,
                         distance: pickInfo ? pickInfo.distance : undefined,
-                        globalPosition: pickInfo ? pickInfo.coord : undefined,
-                        globalNormal: pickInfo ? pickInfo.normal : undefined,
+                        globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined,
+                        globalNormal: pickInfo && pickInfo.face ? [pickInfo.face.normal.x,pickInfo.face.normal.y,pickInfo.face.normal.z] : undefined,
                         globalSource: worldCamPos,            
                     } ];
 
@@ -802,14 +810,22 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var returnData = { eventData: undefined, eventNodeData: undefined };
 
             var mousePos = utility.coordinates.contentFromWindow( e.target, { x: e.gesture.center.pageX, y: e.gesture.center.pageY } ); // canvas coordinates from window coordinates
-            touchPick = ThreeJSTouchPick.call( self, canvas, sceneNode, false, mousePos );
+            touchPick = ThreeJSTouchPick.call( self, canvas, sceneNode, mousePos );
 
             var pickInfo = touchPick;
+
+            var gestureTouches = {};
+            for (var i = 0; i < e.gesture.touches.length; i++) {
+                gestureTouches[i] = {x: e.gesture.touches[i].clientX, y: e.gesture.touches[i].clientY};
+                gestureTouches.length = i + 1;
+            }
 
             returnData.eventData = [ {
                 gestures: touchGesture,
                 position: [ mousePos.x / sceneView.width, mousePos.y / sceneView.height ],
-                screenPosition: [ mousePos.x, mousePos.y ]
+                screenPosition: [ mousePos.x, mousePos.y ],
+                angle: e.gesture.angle,
+                touches: gestureTouches
             } ];
 
             returnData.eventNodeData = { "": [ {
@@ -1990,7 +2006,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
          
     };
 
-    function ThreeJSTouchPick ( canvas, sceneNode, debug, mousepos )
+    function ThreeJSTouchPick ( canvas, sceneNode, mousepos )
     {
         if(!this.lastEventData) return;
 
@@ -2065,16 +2081,16 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         //console.info( "mousepos = " + x + ", " + y );
         pickDirectionVector.set( x, y, 0.5 );
         
-        this.projector.unprojectVector(pickDirectionVector, threeCam);
+        this.projector.unprojectVector( pickDirectionVector, threeCam);
         var pos = new THREE.Vector3();
         pos.getPositionFromMatrix( threeCam.matrixWorld );
         pickDirectionVector.sub(pos);
         pickDirectionVector.normalize();
         
-        
-        this.raycaster.set(pos, pickDirectionVector);
+        this.raycaster.set( pos, pickDirectionVector );
         var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
-        
+        var target = undefined;
+
         // intersections are, by default, ordered by distance,
         // so we only care for the first (visible) one. The intersection
         // object holds the intersection point, the face that's
@@ -2082,12 +2098,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // face belongs. We only care for the object itself.
 
         // Cycle through the list of intersected objects and return the first visible one
-        for ( var i = 0; i < intersects.length; i++ ) {
+        for ( var i = 0; i < intersects.length && target === undefined; i++ ) {
+            if ( debug ) {
+                for ( var i = 0; i < intersects.length; i++ ) { 
+                    console.info( i + ". " + intersects[i].object.name ) 
+                }
+            }   
+
             if ( intersects[ i ].object.visible ) {
-                return intersects[ i ];
+                target = intersects[ i ];
             }
         }
-        return null;
+        return target;
     }
     function getPickObjectID(threeObject)
     {   
@@ -2097,6 +2119,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         else if(threeObject.parent)
          return getPickObjectID(threeObject.parent);
         return null;    
+    }
+
+    function vec3ToArray( vec ) {
+        return [ vec.x, vec.y, vec.z ];
     }
 
     function indentStr() {
