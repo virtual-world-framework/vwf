@@ -29,13 +29,13 @@ For more complex installations, such as working on VWF core, please see our [Ins
 
 ## Quick Start for Linux/Mac OSX
 
-Navigate to your home directory on your computer.
+Navigate to a directory on your computer (we use the home directory as an example).
 
 ```
 $ cd ~
 ```
 
-Change directory into the public folder and create a new folder for your app. Run 'vwf' to start up the web server. 
+Create a new folder for your app. Run 'vwf' to start up the web server. 
 
 ```
 $ mkdir my-app
