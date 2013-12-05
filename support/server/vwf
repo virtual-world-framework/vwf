@@ -49,4 +49,4 @@ else
 	exit 1
 fi
 
-node "$VWF_CORE_DIR/node-server.js"
+node "$VWF_CORE_DIR/node-server.js" "$@"
