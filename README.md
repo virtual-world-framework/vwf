@@ -9,7 +9,7 @@ VWF applications are written in JavaScript and leverage emerging web technologie
 
 ## Installation
 
-**Install on Mac/Linux**
+**Linux / Mac OSX**
 
 NOTE: On Mac OSX, please make sure you have XCode, and XCode Command Line Tools installed prior to executing the script below (https://developer.apple.com/xcode/).
 
@@ -27,7 +27,9 @@ This command may be re-run to upgrade the installation to the latest version of 
 
 For more complex installations, such as working on VWF core, please see our [Installation Instructions](http://www.virtual.wf/web/docs/install.html).
 
-## Quick Start for Linux/Mac OSX
+## Quick Start 
+
+**Quick Start - Linux/Mac OSX** 
 
 Navigate to a directory on your computer (we use the home directory as an example).
 
@@ -48,7 +50,7 @@ Check out [Getting Started](http://virtual.wf/web/docs/readme.html).
 
 Go back to the root VWF directory and start the server.
 
-## Quick Start for Windows
+**Quick Start - Windows** 
 
 Execute the _run.bat_ file provided at the root level of the extracted folder.
 
