@@ -9,7 +9,7 @@ VWF applications are written in JavaScript and leverage emerging web technologie
 
 ## Installation
 
-**Linux / Mac OSX**
+**Install on Linux / Mac OSX**
 
 NOTE: On Mac OSX, please make sure you have XCode, and XCode Command Line Tools installed prior to executing the script below (https://developer.apple.com/xcode/).
 
@@ -19,7 +19,7 @@ $ curl http://get.virtual.wf  | sh
 
 This command may be re-run to upgrade the installation to the latest version of VWF.
 
-**Install on Windows:**
+**Install on Windows**
 
 - Download the latest VWF Windows Build zip file from http://virtualworldframework.com/web/downloads.html.
 
