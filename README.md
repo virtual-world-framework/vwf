@@ -42,8 +42,6 @@ $ vwf
 Your application is now up and running at [http://localhost:3000/](http://localhost:3000/).
 Check out [Getting Started](http://virtual.wf/web/docs/readme.html).
 
-Go back to the root VWF directory and start the server.
-
 **Quick Start - Windows** 
 
 Execute the _run.bat_ file provided at the root level of the extracted folder.
