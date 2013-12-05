@@ -53,7 +53,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             this.pickInterval = 10;
             this.disableInputs = false;
-            this.pointerVector = undefined;
 
             // Store parameter options for persistence functionality
             this.parameters = options;
@@ -724,7 +723,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             returnData.eventNodeData = { "": [ {
                 pickID: pointerPickID,
-                pointerVector: self.pointerVector ? vec3ToArray( self.pointerVector ) : undefined,
+                pointerVector: pickDirectionVector ? vec3ToArray( pickDirectionVector ) : undefined,
                 distance: pickInfo ? pickInfo.distance : undefined,
                 origin: pickInfo ? pickInfo.worldCamPos : undefined,
                 globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined,
@@ -770,8 +769,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     }
 
                     // transform the global normal into local
-                    if ( pickInfo && pickInfo.face ) {
-                        localNormal = goog.vec.Mat4.multVec3Projective( trans, pickInfo.face.normal, 
+                    if ( transform && pickInfo && pickInfo.face ) {
+                        localNormal = goog.vec.Mat4.multVec3Projective( transform, pickInfo.face.normal, 
                             goog.vec.Vec3.create() );
                     } else {
                         localNormal = undefined;  
@@ -786,7 +785,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                         
                     returnData.eventNodeData[ childID ] = [ {
                         pickID: pointerPickID,
-                        pointerVector: self.pointerVector ? vec3ToArray( self.pointerVector ) : undefined,
+                        pointerVector: pickDirectionVector ? vec3ToArray( pickDirectionVector ) : undefined,
                         position: localTrans,
                         normal: localNormal,
                         source: relativeCamPos,
@@ -811,7 +810,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var returnData = { eventData: undefined, eventNodeData: undefined };
 
             var mousePos = utility.coordinates.contentFromWindow( e.target, { x: e.gesture.center.pageX, y: e.gesture.center.pageY } ); // canvas coordinates from window coordinates
-            touchPick = ThreeJSTouchPick.call( self, canvas, sceneNode, false, mousePos );
+            touchPick = ThreeJSTouchPick.call( self, canvas, sceneNode, mousePos );
 
             var pickInfo = touchPick;
 
@@ -2007,7 +2006,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
          
     };
 
-    function ThreeJSTouchPick ( canvas, sceneNode, debug, mousepos )
+    function ThreeJSTouchPick ( canvas, sceneNode, mousepos )
     {
         if(!this.lastEventData) return;
 
@@ -2082,14 +2081,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         //console.info( "mousepos = " + x + ", " + y );
         pickDirectionVector.set( x, y, 0.5 );
         
-        this.projector.unprojectVector(pickDirectionVector, threeCam);
+        this.projector.unprojectVector( pickDirectionVector, threeCam);
         var pos = new THREE.Vector3();
         pos.getPositionFromMatrix( threeCam.matrixWorld );
         pickDirectionVector.sub(pos);
         pickDirectionVector.normalize();
         
-        
-        this.raycaster.set(pos, pickDirectionVector);
+        this.raycaster.set( pos, pickDirectionVector );
         var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
         var target = undefined;
 
