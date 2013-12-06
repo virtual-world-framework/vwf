@@ -404,7 +404,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
 
             
-            var now = ( performance !== undefined && performance.now !== undefined ) ? performance.now() : time;
+            var now = ( self.performance !== undefined && self.performance.now !== undefined ) ? self.performance.now() : time;
             var timepassed = now - sceneNode.lastTime;
 
             if ( timepassed ) {
