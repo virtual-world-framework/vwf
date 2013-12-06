@@ -14,6 +14,7 @@
 require "rake"
 require "rake/testtask"
 require "rake/clean"
+# require "fileutils"
 
 import "support/build/utility.rake"
 
@@ -163,6 +164,94 @@ end
 
 desc "Run JavaScript client tests"
 task "client:test" => "support-client:test"
+
+desc "Run Ruby and Node server tests"
+task "server:test" => ["server:ruby:start", "server:node:start"] do
+  puts "Sleeping 1 second while thin starts"
+
+  casperjs = which_binary("casperjs", ENV['CASPERJS_BIN'])
+  next unless casperjs
+
+  system "#{casperjs} test test/serverTest.js"
+
+  puts "running tests now"
+
+  Rake::Task["server:ruby:stop"].execute
+  Rake::Task["server:node:stop"].execute
+end
+
+namespace :server do
+  namespace :node do
+    desc "Stops the daemonized Node server"
+    task :stop do
+      puts "Stopping Node server"
+
+      system "forever stopall"
+    end
+
+    desc "Starts Node server at localhost:3000"
+    task :start do
+      puts "Start Node as a daemon"
+
+      system "forever start node-server.js -a ./public/ -p 4000"
+    end
+  end
+
+  namespace :ruby do
+    desc "Stops the daemon Thin server"
+    task :stop do
+      if !File.exists?("tmp/pids/thin.pid")
+        puts "Thin server is not running"
+        next
+      end
+
+      file = File.open("tmp/pids/thin.pid", "rb")
+      process_id = file.read
+
+      puts "Stopping Thin server (process #{process_id})"
+
+      system "kill #{process_id}"
+
+      FileUtils.remove_dir("log") if File.directory? "log"
+      FileUtils.remove_dir("tmp") if File.directory? "tmp"
+    end
+
+    desc "Starts server at localhost:3000"
+    task :start do
+      if File.exists?("tmp/pids/thin.pid")
+        puts "Thin server is already running"
+        next
+      end
+
+      puts "Start Thin as a daemon"
+
+      system "thin start -d"
+    end
+  end
+end
+
+def which_binary(binary, binary_env)
+  return binary_on_path(binary) if (binary_env.nil? || binary_env.empty?)
+
+  # File expects the string to be escaped, and there's no consistent way to escape across Windows and Unix-based
+  binary_env_escaped = binary_env.gsub("\\ ", " ")
+  if File.exists?(binary_env_escaped) && File.executable?(binary_env_escaped)
+    return binary_env
+  else
+    return binary_on_path(binary)
+  end
+end
+
+def binary_on_path(binary)
+  output = %x[which #{binary}]
+  # 'which binary' on Mac/Linux returns nothing, but on Cygwin returns "which: no binary in (PATH)"
+  if output.empty? || output =~ /no #{binary} in/
+    puts "The QUnit tests require #{binary}. Please install before running."
+    return false
+  else
+    return binary
+  end
+end
 
 # Environment for running the standalone ruby.
 
