@@ -234,10 +234,27 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             // initializedProperty (if that property delegated to itself or another on replication)
             // Catch that case here and create the property
             if ( ! node.properties[ propertyName ] ) {
+
                 var property = node.properties[ propertyName ] = {
                     name: propertyName,
-                    value: propertyValue,
+                    rawValue: propertyValue,
+                    value: undefined,
+                    getValue: function() {
+                        var propertyValue;
+                        if ( this.value == undefined ) {
+                            try {
+                                propertyValue = utility.transform( this.rawValue, utility.transforms.transit );
+                                this.value = JSON.stringify( propertyValue );
+                            } catch (e) {
+                                this.logger.warnx( "satProperty", nodeID, this.propertyName, this.rawValue,
+                                    "stringify error:", e.message );
+                                this.value = this.rawValue;
+                            }
+                        }
+                        return this.value;
+                    }
                 };
+
                 node.properties.push( property );
             }
             
@@ -854,7 +871,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         $(topdownTemp).append("<div id='properties'></div>");
         var displayedProperties = {};
         for ( var i = 0; i < node.properties.length; i++ ) {
-            if ( !displayedProperties[ node.properties[i].name ] ) {
+            if ( !displayedProperties[ node.properties[i].name ] && node.properties[i].name.indexOf('$') === -1) {
                 displayedProperties[ node.properties[i].name ] = "instance";
                 var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", node.properties[i].name, true);
                 var propertyNameAlpha = $.encoder.encodeForAlphaNumeric(node.properties[i].name);
