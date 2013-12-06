@@ -14,7 +14,7 @@ VWF applications are written in JavaScript and leverage emerging web technologie
 NOTE: On Mac OS X, please make sure you have Xcode Command Line Tools installed prior to executing the script below (https://developer.apple.com/xcode/).
 
 ```
-$ curl http://get.virtual.wf  | sh
+$ curl -kL http://get.virtual.wf  | sh
 ```
 
 This command may be re-run to upgrade the installation to the latest version of VWF.
