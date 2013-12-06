@@ -5,7 +5,7 @@ var servers = {"Ruby": 3000, "Node": 4000};
 
 var loadsApplication = function() {
     casper.test.assertHttpStatus(200, 'Loads the application');
-    casper.test.assertTitle('VWF Duck Application', 'Sets the title');
+    casper.test.assertResourceExists('vwf.js', 'Loads the VWF framework');
 }
 
 var loadsComponent = function() {
@@ -44,12 +44,12 @@ Object.keys(servers).forEach(function(server) {
         //--------------//
 
         casper.thenOpen(serverAddress + '/duck/images/duckCM.png', function(response) {
-            test.assertHttpStatus(200, 'Retrieves the file');
+            test.assertHttpStatus(200, 'Retrieves a static file');
             test.assertMatch(response.headers.get('Content-Type'), /^image\/png/i, 'File is of type image/png')
         });
 
         casper.thenOpen(serverAddress + '/duck/0000000000000000/images/duckCM.png', function(response) {
-            test.assertHttpStatus(200, 'Retrieves the file');
+            test.assertHttpStatus(200, 'Retrieves a static file');
             test.assertMatch(response.headers.get('Content-Type'), /^image\/png/i, 'File is of type image/png')
         });
 
@@ -69,6 +69,10 @@ Object.keys(servers).forEach(function(server) {
         casper.thenOpen(serverAddress + '/duck/admin/config', function() {
             test.assertHttpStatus(200, 'Retrieves the config file');
             test.assertTextExists("VWF Duck Application", 'Parses the config file');
+        });
+
+        casper.thenOpen(serverAddress + '/duck/', function() {
+            test.assertTitle('VWF Duck Application', 'Sets the title from the config file');
         });
 
         //------------//
