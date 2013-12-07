@@ -1,7 +1,8 @@
-// To run: casperjs test test/duckTesting.js
+// To run: casperjs test test/serverTest.js
 
-var servers = {"Ruby": 3000, "Node": 4000};
+// var servers = {"Ruby": 3000, "Node": 4000};
 // var servers = {"Ruby": 3000}
+var servers = {"Node": 4000}
 
 var loadsApplication = function() {
     casper.test.assertHttpStatus(200, 'Loads the application');
@@ -17,7 +18,7 @@ Object.keys(servers).forEach(function(server) {
     var port = servers[server];
     var serverAddress = 'http://localhost:' + port;
 
-    casper.test.begin('Tests the duck application with the ' + server + ' server', 27, function suite(test) {
+    casper.test.begin('Testing a VWF application with the ' + server + ' server', 27, function suite(test) {
 
         //--------------//
         // Applications //
@@ -60,6 +61,11 @@ Object.keys(servers).forEach(function(server) {
         //------//
 
         casper.thenOpen(serverAddress + '/this-is-not-an-app/', function() {
+            test.assertHttpStatus(404, 'Gets a 404 error');
+            test.assertTextExists("Error 404", 'Displays the 404 page');
+        });
+
+        casper.thenOpen(serverAddress + '/', function() {
             test.assertHttpStatus(404, 'Gets a 404 error');
             test.assertTextExists("Error 404", 'Displays the 404 page');
         });
