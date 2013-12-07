@@ -1,8 +1,8 @@
 // To run: casperjs test test/serverTest.js
 
-// var servers = {"Ruby": 3000, "Node": 4000};
+var servers = {"Ruby": 3000, "Node": 4000};
 // var servers = {"Ruby": 3000}
-var servers = {"Node": 4000}
+// var servers = {"Node": 4000}
 
 var loadsApplication = function() {
     casper.test.assertHttpStatus(200, 'Loads the application');
@@ -18,7 +18,7 @@ Object.keys(servers).forEach(function(server) {
     var port = servers[server];
     var serverAddress = 'http://localhost:' + port;
 
-    casper.test.begin('Testing a VWF application with the ' + server + ' server', 27, function suite(test) {
+    casper.test.begin('Testing a VWF application with the ' + server + ' server', 31, function suite(test) {
 
         //--------------//
         // Applications //
@@ -56,6 +56,11 @@ Object.keys(servers).forEach(function(server) {
             test.assertMatch(response.headers.get('Content-Type'), /^image\/png/i, 'File is of type image/png')
         });
 
+        casper.thenOpen(serverAddress + '/', function() {
+            test.assertHttpStatus(200, 'Retrieves static html page');
+            test.assertTextExists("Virtual World Framework is minimally installed", 'Displays index.html');
+        });
+
         //------//
         // 404s //
         //------//
@@ -65,7 +70,7 @@ Object.keys(servers).forEach(function(server) {
             test.assertTextExists("Error 404", 'Displays the 404 page');
         });
 
-        casper.thenOpen(serverAddress + '/', function() {
+        casper.thenOpen(serverAddress + '/some-file-that-does-not-exist.html', function() {
             test.assertHttpStatus(404, 'Gets a 404 error');
             test.assertTextExists("Error 404", 'Displays the 404 page');
         });
