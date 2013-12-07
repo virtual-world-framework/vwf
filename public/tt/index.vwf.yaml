@@ -78,9 +78,17 @@ children:
 scripts:
 - |
     this.initialize = function(){
-      this.camera.transform = [ -1,0,0,0, 0,-1,0,0, 0,0,1,0, 0,600,0,1 ];
-      this.camera.far = this.camera.far * 4;
+
       if ( this.transformTool !== undefined ) {
         this.transformTool.testTool();
       }
+
+      // the camera creation isn't finished at this point so we need to 
+      // call the function in the future
+      this.future(0).initializeCamera();
     }
+    this.initializeCamera = function() {
+      this.camera.transform = [ -1,0,0,0, 0,-1,0,0, 0,0,1,0, 0,900,0,1 ];
+      this.camera.near = 1;
+      this.camera.far = 100000;
+    }    
