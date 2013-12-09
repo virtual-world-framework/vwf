@@ -14,7 +14,6 @@ function printGeneralHelp() {
 	console.log("Use 'vwf create <name>' to create a new VWF project.");
 	console.log("");
 	console.log("Commands:");
-	// console.log("  -V, --version            output the version number");
 	console.log("  run                      [default] Start the VWF server");
 	console.log("  create                   Create a new VWF application");
 	console.log("");
