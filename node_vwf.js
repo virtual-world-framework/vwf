@@ -105,7 +105,10 @@ function startVWF() {
     global.vwfRoot = parseVWFPath();
 
     if ( !global.vwfRoot ) {
-        // Need to exit out because of an error
+        // Should not hit this path since the VWF script checks for the existence
+        // of the VWF support files before running this script.
+        consoleError("Exiting.");
+        process.exit();
     }
 
     function OnRequest( request, response ) {
