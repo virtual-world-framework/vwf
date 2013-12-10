@@ -266,9 +266,15 @@ Node.js Server Installation / Launch / Debug
 
     $ npm start
 
-    or
+or
 
-    $ node node-server.js
+    $ node node-server.js -a ./public
+
+The `-a` or `--applicationPath` options can be used to specify where to serve
+VWF applications from. `node-server` defaults to serving applications from
+the current directory, so be sure to specify the public directory using 
+`-a` or `--applicationPath` if you want to run from the root of your VWF
+installation.
 
 *7. Connect*
 
@@ -292,11 +298,15 @@ One option for Node.js runtime debugging is the 'node-inspector' tool.  To use t
 
  *3. Run the node server with debug flag.*
 
-     $ node --debug node-server.js  
+     $ npm run debug
 
-     or
+or
 
-     $ node --debug-brk node-server.js  // to pause debugger at start    
+     $ node --debug node-server.js -a ./public
+
+or to pause the debugger at start
+
+     $ node --debug-brk node-server.js  -a ./public
 
  *4. In your browser go to [http://127.0.0.1:8080/debug?port=5858](http://127.0.0.1:8080/debug?port=5858) and use as you would with your typical browser tools.*
 
