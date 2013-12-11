@@ -711,6 +711,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             var camera = sceneView.state.cameraInUse;
             var worldCamPos, worldCamTrans, camInverse;
+            var localPickNormal, worldPickNormal, worldTransform;
             if ( camera ) { 
                 var worldCamTrans = new THREE.Vector3();
                 worldCamTrans.setFromMatrixPosition( camera.matrixWorld );
@@ -721,22 +722,36 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 worldCamPos = [ worldCamTrans.x, worldCamTrans.y, worldCamTrans.z];
             }
 
+            if ( pickInfo ) {
+                var nml;
+                if ( pickInfo.face ) {
+                    nml = pickInfo.face.normal
+                    localPickNormal = goog.vec.Vec3.createFloat32FromValues( nml.x, nml.y, nml.z );
+                } else if ( pickInfo.normal ) {
+                    nml = pickInfo.normal;
+                    localPickNormal = goog.vec.Vec3.createFloat32FromValues( nml[0], nml[1], nml[2] );
+                }
+                localPickNormal = goog.vec.Vec3.normalize( localPickNormal, goog.vec.Vec3.create() );
+                if ( sceneView.state.nodes[ pointerPickID ] ) {
+                    var pickObj = sceneView.state.nodes[ pointerPickID ];
+                    if ( pickObj.threeObject.worldMatrix ) {
+                        worldTransform = goog.vec.Mat4.createFromArray( pickObj.threeObject.worldMatrix.elements );
+                    } else {
+                        worldTransform = goog.vec.Mat4.createFromArray( getWorldTransform( pickObj ).elements );
+                    } 
+                    worldPickNormal = goog.vec.Mat4.multVec3NoTranslate( worldTransform, localPickNormal, goog.vec.Vec3.create() );    
+                }
+            }
+
             returnData.eventNodeData = { "": [ {
                 pickID: pointerPickID,
                 pointerVector: pickDirectionVector ? vec3ToArray( pickDirectionVector ) : undefined,
                 distance: pickInfo ? pickInfo.distance : undefined,
                 origin: pickInfo ? pickInfo.worldCamPos : undefined,
                 globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined,
-                globalNormal: pickInfo && pickInfo.face ? [pickInfo.face.normal.x,pickInfo.face.normal.y,pickInfo.face.normal.z] : undefined,    //** not implemented by threejs
+                globalNormal: worldPickNormal ? worldPickNormal : localPickNormal,    //** not implemented by threejs
                 globalSource: worldCamPos
             } ] };
-
-            if ( pickInfo && pickInfo.normal ) {
-                var pin = pickInfo.normal;  
-                var nml = goog.vec.Vec3.createFloat32FromValues( pin[0], pin[1], pin[2] );
-                nml = goog.vec.Vec3.normalize( nml, goog.vec.Vec3.create() );
-                returnData.eventNodeData[""][0].globalNormal = [ nml[0], nml[1], nml[2] ];
-            }
 
             if ( sceneView && sceneView.state.nodes[ pointerPickID ] ) {
                 var camera = sceneView.state.cameraInUse;
@@ -791,7 +806,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         source: relativeCamPos,
                         distance: pickInfo ? pickInfo.distance : undefined,
                         globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined,
-                        globalNormal: pickInfo && pickInfo.face ? [pickInfo.face.normal.x,pickInfo.face.normal.y,pickInfo.face.normal.z] : undefined,
+                        globalNormal: worldPickNormal ? worldPickNormal : localPickNormal,
                         globalSource: worldCamPos,            
                     } ];
 
@@ -963,7 +978,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         canvas.onmousedown = function( e ) {
             var event = getEventData( e, false );
             var shiftDown = e.shiftKey;
-            
+
             if ( shiftDown ) {
                 if ( pointerLockImplemented && ( navmode == "fly" ) ) {
                     canvas.requestPointerLock();
@@ -2264,6 +2279,30 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
     }
 
+    function getWorldTransform( node ) {
+        var parent = self.state.nodes[ node.parentID ];
+        if ( parent ) {
+            var worldTransform = new THREE.Matrix4();
+            return worldTransform.multiplyMatrices( getWorldTransform( parent ), node.transform );
+        } else {
+            return node.transform;
+        }
+    }
+
+    function setWorldTransform( node, worldTransform ) {
+        if ( node.parent ) {
+            var parentInverse = goog.vec.Mat4.create();
+            if ( goog.vec.Mat4.invert( getWorldTransform( node.parent ), parentInverse ) ) {
+                node.transform = goog.vec.Mat4.multMat( parentInverse, worldTransform, 
+                                                        goog.vec.Mat4.create() );
+            } else {
+                self.logger.errorx( "Parent world transform is not invertible - did not set world transform " +
+                                    "on node '" + node.id + "'" );
+            }
+        } else {
+            node.transform = worldTransform;
+        }
+    }
     function outputMaterial( iIndent, index ) {
         var sOut = indent.call( this, iIndent + 1 );
         consoleOut.call( this, indent.call( this, iIndent) + "material" + ( index > 0 ? index : "" ) + ":" );
