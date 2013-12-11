@@ -158,7 +158,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             
             if ( protos && isCameraDefinition.call( this, protos ) ) {
-                
+
                 var camName = childID.substring( childID.lastIndexOf( '-' ) + 1 );
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                 node = this.state.nodes[childID] = {
@@ -361,20 +361,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var protos = getPrototypes.call( this, kernel, childExtendsID );
                 protos.forEach( function( prototypeID ) {
                     for ( var propertyName in kernel.getProperties( prototypeID ) ) {
-                        //console.info( " 1    getting "+propertyName+" of: " + childExtendsID  );
                         ptPropValue = kernel.getProperty( childExtendsID, propertyName );
                         if ( ptPropValue !== undefined && ptPropValue !== null && childID !== undefined && childID !== null) {
-                            //console.info( " 1    setting "+propertyName+" of: " + nodeID + " to " + ptPropValue );
                             self.settingProperty( childID, propertyName, ptPropValue );
                         }
                     }
                 } );
                 childImplementsIDs.forEach( function( behaviorID ) {
                     for ( var propertyName in kernel.getProperties( behaviorID ) ) {
-                        //console.info( "     2    getting "+propertyName+" of: " + behaviorID  );
                         ptPropValue = kernel.getProperty( behaviorID, propertyName );
                         if ( ptPropValue !== undefined && ptPropValue !== null && childID !== undefined && childID !== null) {
-                            //console.info( "     2    setting "+propertyName+" of: " + nodeID + " to " + ptPropValue );
                             self.settingProperty( childID, propertyName, ptPropValue );
                         }
                     }
@@ -425,8 +421,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         
         addingChild: function( nodeID, childID, childName ) {
 
-            //console.info( "addingChild( " + nodeID+", "+childID+", "+childName + " )" );
-            //debugger;
             var threeObjParent = getThreeObject.call( this, nodeID );
             var threeObjChild = getThreeObject.call( this, childID ); 
             
@@ -438,10 +432,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if ( childParent !== threeObjParent ) {
                             // what does vwf do here?  add only if parent is currently undefined
                             if ( childParent ) {
-                                //console.info( "A     *R* removing: " + childID + " from " + childParent.name );
                                 childParent.remove( threeObjChild )   
                             } 
-                            //console.info( "A     *R* adding: " + childID + " from " + nodeID );
                             threeObjParent.add( threeObjChild );
                         }
                     } else {
@@ -457,7 +449,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         
         movingChild: function( nodeID, childID, childName ) {
 
-            //console.info( "movingChild( " + nodeID+", "+childID+", "+childName + " )" );
             var threeObjParent = getThreeObject.call( this, nodeID );
             var threeObjChild = getThreeObject.call( this, childID ); 
             
@@ -476,14 +467,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         
         removingChild: function( nodeID, childID, childName ) {
             
-            //console.info( "removingChild( " + nodeID+", "+childID+", "+childName + " )" );
             var threeObjParent = getThreeObject.call( this, nodeID );
             var threeObjChild = getThreeObject.call( this, childID );
             if ( threeObjParent && threeObjChild && ( threeObjParent instanceof THREE.Object3D ) ){    
 
                 var childParent = threeObjChild.parent;
                 if ( childParent === threeObjParent ) {
-                    //console.info( "A     *R* removing: " + childID + " from " + nodeID );
                     childParent.remove( threeObjChild )   
                 } 
             } 
@@ -561,8 +550,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //There is not three object for this node, so there is nothing this driver can do. return
             if(!threeObject) return value;    
           
-
-            //console.log(["       settingProperty: ",nodeID,propertyName,propertyValue]);
             if ( propertyValue !== undefined ) 
             {
                 self = this;
@@ -1465,7 +1452,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         gettingProperty: function( nodeID, propertyName ) {
 
             if ( this.debug.properties || this.debug.getting ) {
-                this.logger.infox( "   G === gettingProperty ", nodeID, propertyName, propertyValue );
+                this.logger.infox( "   G === gettingProperty ", nodeID, propertyName );
             }
 
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }

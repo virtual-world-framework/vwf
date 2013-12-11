@@ -135,7 +135,7 @@ scripts:
       var rate = this["spin-rate"];
       var axis = this["spin-axis"];
 
-      console.info( "this.parent.rotateBy( [ "+axis[0]+", "+axis[1]+", "+axis[2]+", "+(rate * value)+" ], 0 )" );
+      //console.info( "this.parent.rotateBy( [ "+axis[0]+", "+axis[1]+", "+axis[2]+", "+(rate * value)+" ], 0 )" );
       this.parent.rotateBy( [ axis[0], axis[1], axis[2], rate * value ], 0 );  
       this.valueChanged( this.rotation );
     } //@ sourceURL=spin-on-move.vwf
