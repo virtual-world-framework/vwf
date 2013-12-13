@@ -52,7 +52,7 @@ Execute the _run.bat_ file provided at the root level of the extracted folder.
 c:\vwf> vwf create my-app
 c:\vwf> cd my-app
 c:\vwf\my-app> vwf
-'``
+```
 
 Your application is now up and running at [http://localhost:3000/my-app](http://localhost:3000/my-app).
 
