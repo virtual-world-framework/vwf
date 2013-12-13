@@ -54,7 +54,7 @@ c:\vwf> cd my-app
 c:\vwf\my-app> vwf
 ```
 
-Your application is now up and running at [http://localhost:3000/my-app](http://localhost:3000/my-app).
+Your application is now up and running at [http://localhost:3000](http://localhost:3000).
 
 ## Examples
 
