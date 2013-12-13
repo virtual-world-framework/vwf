@@ -32,6 +32,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         initialize: function() {
             this.state.nodes = {}; 
+            this.state.delayProperties = {};
         },
 
 
@@ -61,8 +62,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             if ( isMorphComponent.call( this, protos ) ) {
                 node = this.state.nodes[ childID ] = createNode();
 
+                // may want to do this in initializling property for classname
                 //node.livelyObj = createLivelyMorph();
             }
+
+        },
+
+        initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childIndex, childName ) {
+
 
         },
          
@@ -102,7 +110,34 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         initializingProperty: function( nodeID, propertyName, propertyValue ) {           
 
-            return this.settingProperty( nodeID, propertyName, propertyValue );
+            var node = this.state.nodes[ nodeID ]; 
+
+            if ( node !== undefined ) {
+                switch ( propertyName ) {
+                    case "classname":
+                        node.livelyObj = createLivelyMorph.call( this, propertyValue );
+                        if ( this.state.delayProperties[ nodeID ] !== undefined ) {
+                            for ( var prop in this.state.delayProperties[ nodeID ] ) {
+                                this.settingProperty( nodeID, prop, this.state.delayProperties[ nodeID ][ prop ] );
+                            }
+                            delete this.state.delayProperties[ nodeID ];
+                        }
+                        return propertyValue;
+                        break;
+                    default:
+                        if ( node.livelyObj === undefined ) {
+                            if ( this.state.delayProperties[ nodeID ] === undefined ) {
+                                this.state.delayProperties[ nodeID ] = {};
+                            }
+                            this.state.delayProperties[ nodeID ][ propertyName ] = propertyValue;
+
+                        } else {
+                            return this.settingProperty( nodeID, propertyName, propertyValue );
+                        }
+                }
+            }
+
+            return undefined;
         
         },
 
@@ -110,32 +145,47 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
+            var value = propertyValue;
             var node = this.state.nodes[ nodeID ]; 
 
-            if ( node !== undefined ) {
+            if ( node !== undefined && node.livelyObj ) {
                 switch ( propertyName ) {
-                    case "shape":
+                    case "classname":
+                        if ( node.livelyObj.classname != propertyValue ) {
+                            // change class
+                        }
                         break;
 
-                    case "height":
+                    case "extent":
+                        node.livelyObj.setExtent( propertyValue );
                         break;
 
-                    case "width":
+                    case "fill":
+                        node.livelyObj.setFill( propertyValue );
+                        break;
+
+                    case "borderWidth":
+                        node.livelyObj.setBorderWidth( propertyValue );
+                        break;
+
+                    case "position":
+                        node.livelyObj.setPosition( propertyValue );
                         break;
 
                     case "rotation":
-                        break;
-
-                    case "translation":
+                        node.livelyObj.setRotation( propertyValue );
                         break;
 
                     case "opacity":
+                        node.livelyObj.setOpacity( propertyValue );
                         break;
 
                     default:
+                        value = undefined;
                         break;
                 }
             }
+            return value;
        
         },
 
@@ -144,33 +194,44 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var node = this.state.nodes[ nodeID ]; 
+            var value = undefined;
 
-            if ( node !== undefined ) {
+            if ( node !== undefined && node.livelyObj ) {
                 switch ( propertyName ) {
                     
-                    case "shape":
+                    case "classname":
+                        value = propertyValue = node.livelyObj.classname;
                         break;
 
-                    case "height":
+                    case "extent":
+                        value = propertyValue = node.livelyObj.getExtent();
                         break;
 
-                    case "width":
+                    case "fill":
+                        value = propertyValue = node.livelyObj.getFill();
+                        break;
+
+                    case "borderWidth":
+                        value = propertyValue = node.livelyObj.getBorderWidth();
+                        break;
+
+                    case "position":
+                        value = propertyValue = node.livelyObj.getPosition();
                         break;
 
                     case "rotation":
-                        break;
-
-                    case "translation":
+                        value = propertyValue = node.livelyObj.getRotation();
                         break;
 
                     case "opacity":
+                        value = propertyValue = node.livelyObj.getOpacity();
                         break;
 
                     default:
                         break;
                 }
             }
-
+            return value;
         },
 
 
@@ -199,6 +260,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     } );
 
     // == Private functions ==================================================================
+
+    function createLivelyMorph( classname ) {
+        var morphic = undefined;
+        switch ( classname ) {
+            case "lively.morphic.box":
+                //morphic = new lively.morphic.Box( new lively.Rectangle( 0, 0, 10, 10 ) );
+                return 
+        }
+        return morphic;
+    }
 
     function isMorphComponent( prototypes ) {
         var found = false;
