@@ -23,11 +23,14 @@
     "async": "0.2.x",
     "mime": "1.2.x",
     "js-yaml": "2.1.x",
-    "optimist": "0.6.x"
+    "optimist": "0.6.x",
+    "fs-extra": "0.8.x"
   },
   "devDependencies": {
     "node-inspector": "x.x.x",
-    "nodebug": "x.x.x"
+    "nodebug": "x.x.x",
+    "mocha": "x.x.x",
+    "should": "x.x.x"
   },
   "license": {
     "type": "Apache",
