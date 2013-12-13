@@ -25,14 +25,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     return model.load( module, {
 
-
         // == Module Definition ====================================================================
 
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function() {
+
             this.state.nodes = {}; 
             this.state.delayProperties = {};
+
         },
 
 
@@ -156,6 +157,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         }
                         break;
 
+                    case "label":
+                        node.livelyObj.setLabel( propertyValue );
+                        break;
+
                     case "extent":
                         node.livelyObj.setExtent( propertyValue );
                         break;
@@ -201,6 +206,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     
                     case "classname":
                         value = propertyValue = node.livelyObj.classname;
+                        break;
+
+                    case "label":
+                        value = propertyValue = nnode.livelyObj.getLabel();
                         break;
 
                     case "extent":
@@ -266,7 +275,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         switch ( classname ) {
             case "lively.morphic.box":
                 //morphic = new lively.morphic.Box( new lively.Rectangle( 0, 0, 10, 10 ) );
-                return 
+                break;
+            case "lively.morphic.Button":
+                break;
+
+
         }
         return morphic;
     }
