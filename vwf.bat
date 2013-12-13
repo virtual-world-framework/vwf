@@ -9,6 +9,9 @@ IF NOT EXIST "%VWF_DIR%" goto :setup
 goto :start
 
 :setup
+bitsadmin.exe /transfer "NodeJS is not installed. We are downloading NodeJS for you." http://nodejs.org/dist/v0.10.22/x64/node-v0.10.22-x64.msi C:\windows\temp\node-v0.10.22-x64.msi
+call C:\windows\temp\node-v0.10.22-x64.msi
+path=%path%;C:\Program Files (x86)\nodejs\;C:\Program Files\nodejs\
 echo "VWF_DIR" variable is not set. 
 echo This occurs the first time you execute VWF or if you have moved your VWF folder.  
 echo To complete your installation please enter your directory path for VWF. 
@@ -21,21 +24,18 @@ REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v P
 echo "VWF_DIR" is now set to !VWF_DIR!. You will need to restart your computer now.
 echo Shutting down in 30 seconds. Please type "shutdown /a" to abort.
 cmd.exe /K shutdown /f /t 30 /r
-
+endlocal
 
 
 :start
 REM Check to see if Node is installed and accessible from the Path variable
-set test=c:\program files (x86)\nodejs
+set test=C:\Program Files (x86)\nodejs\
 call:inPath test 
-
 REM  If it is, we start up the NodeJS Server. The NodeJS server accepts command line parameters.
 REM  C:\> vwf --help will display all of the currently available parameters accepted by Virtual World Framework
-
 IF NOT ERRORLEVEL 1 pushd %VWF_DIR% && cmd.exe /C npm install && popd && cmd.exe /C node "%VWF_DIR%/node-server.js" %*
-IF ERRORLEVEL 1 set test=c:\program files\nodejs & call:inPath test 
-IF ERRORLEVEL 1 bitsadmin.exe /transfer "NodeJS is not installed. We are downloading NodeJS for you." http://nodejs.org/dist/v0.10.22/x64/node-v0.10.22-x64.msi C:\windows\temp\node-v0.10.22-x64.msi & call C:\windows\temp\node-v0.10.22-x64.msi & echo Node is now installed. You will need to restart your computer and execute VWF again to start your server.
-endlocal
+IF ERRORLEVEL 1 set test=C:\Program Files\nodejs\ && call:inPath test IF ERRORLEVEL 1 goto :setup 
+
 
 :inPath pathVar
 ::
