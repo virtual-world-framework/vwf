@@ -309,6 +309,7 @@
                 { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
                 { library: "vwf/model/scenejs", active: false },
+                { library: "vwf/model/morph", active: false },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
                 { library: "vwf/kernel/view", active: true },
@@ -337,6 +338,7 @@
                     { library: "vwf/model/glge", active: false },
                     { library: "vwf/model/threejs", active: false },
                     { library: "vwf/model/cesium", active: false },
+                    { library: "vwf/model/morph", active: false },
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [

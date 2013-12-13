@@ -16,9 +16,19 @@ extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
   rotationSpeed: 10
+  backgroundColor: [0,0,0,0]
 methods:
   initializeCamera:
 children:
+  morph:
+    extends: http://vwf.example.com/morph.vwf
+    properties:
+      shape: "rectangle"
+      translation: [10,10]
+      rotation: 0
+      opacity: 1
+      height: 20
+      width: 20
   duck:
     extends: http://vwf.example.com/node3.vwf
     # # 2: Uncomment to apply the spin-on-click behavior
