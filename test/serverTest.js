@@ -1,8 +1,12 @@
-// To run: casperjs test test/serverTest.js
+// To run: 
+// npm install -g casperjs
+// bundle exec thin start
+// node node-server -a ./public/ -p 4000
+// casperjs test test/serverTest.js
 
-// var servers = {"Ruby": 3000, "Node": 4000};
+var servers = {"Ruby": 3000, "Node": 4000};
 // var servers = {"Ruby": 3000}
-var servers = {"Node": 4000}
+// var servers = {"Node": 4000}
 
 var loadsApplication = function(url) {
     casper.echo("Loading '" + url + "'", "INFO");
