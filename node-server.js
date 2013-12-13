@@ -78,7 +78,7 @@ if ( argv._[0] == 'create' && argv._.length == 1 ) {
 	console.log("VWF can't find help on that command.");
 	console.log("");
 	printGeneralHelp();
-} else if ( argv._.length == 0 ) {
+} else if ( argv._[0] == 'run' || argv._.length == 0 ) {
 	server.startVWF();
 } else {
 	console.log( "'" + argv._[0] + "' is not a VWF command. See 'vwf --help'." );
