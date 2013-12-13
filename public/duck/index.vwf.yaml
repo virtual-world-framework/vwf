@@ -23,12 +23,13 @@ children:
   morph:
     extends: http://vwf.example.com/morph.vwf
     properties:
-      shape: "rectangle"
-      translation: [10,10]
+      classname: "lively.morphic.Box"
+      position: [ 10, 10 ]
       rotation: 0
       opacity: 1
-      height: 20
-      width: 20
+      extent: [ 100, 100 ]
+      fill: [ 0, 0, 255 ]
+      borderWidth: 2
   duck:
     extends: http://vwf.example.com/node3.vwf
     # # 2: Uncomment to apply the spin-on-click behavior
