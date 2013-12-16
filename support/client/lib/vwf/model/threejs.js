@@ -2404,7 +2404,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     var asset = new THREE.SkinnedMesh( geometry, meshMaterial );
                     animation = new THREE.Animation( asset, geometry.animation.name ); 
                     animation.play();
-                    //animation.play(true, 0);
                 }
 
                 asset.updateMatrix();
@@ -2434,7 +2433,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             asset.matrix = new THREE.Matrix4();
             asset.matrixAutoUpdate = false;
             
-            // Don't make a copy of the three object if there are keyframe skeletal animations associated with it
+            // Don't make a copy of the three object if there are keyframe or skeletal animations associated with it
             // until we figure out a way to copy them successfully.
             if(animations || animation) {
                 nodeCopy.threeObject = asset;
