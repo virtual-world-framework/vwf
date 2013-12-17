@@ -691,14 +691,42 @@
 
             // Connect to the reflector. This implementation uses the socket.io library, which
             // communicates using a channel back to the server that provided the client documents.
-
             try {
                 if ( isSocketIO07() ) {
+                    var options = {
+    
+                        // The socket is relative to the application path.
+                        resource: window.location.pathname.slice( 1,
+                            window.location.pathname.lastIndexOf("/") ),
+    
+                        // The ruby socket.io server only supports WebSockets. Don't try the others.
+                        transports: [
+                            'websocket',
+                            // 'flashsocket',
+                            // 'htmlfile',
+                            // 'xhr-multipart',
+                            // 'xhr-polling',
+                            // 'jsonp-polling',
+                        ],
+    
+                        // Increase the timeout due to starvation while loading the scene. The server
+                        // timeout must also be increased.
+                        // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
+                        transportOptions: {
+                            "websocket": { timeout: 90000 }
+                            // "flashsocket": { timeout: 90000 },
+                            // "htmlfile": { timeout: 90000 },
+                            // "xhr-multipart": { timeout: 90000 },
+                            // "xhr-polling": { timeout: 90000 },
+                            // "jsonp-polling": { timeout: 90000 },
+                        }
+    
+                    };
                     if ( window.location.protocol === "https:" )
                     {
-                        socket = io.connect("wss://"+window.location.host);
+                        socket = io.connect("wss://"+window.location.host, options);
                     } else {
-                        socket = io.connect("ws://"+window.location.host); 
+                        socket = io.connect("ws://"+window.location.host, options); 
                     }
  
                 } else {  // Ruby Server
@@ -1523,6 +1551,10 @@
                 model.deletingNode && model.deletingNode( nodeID );
             } );
 
+            // Unregister the node.
+
+            nodes.delete( nodeID );
+
             // Clear the root ID if the application root node is deleted.
 
             if ( nodeID === applicationID ) {
@@ -1556,6 +1588,8 @@
                 return [ nodeID, JSON.stringify( loggableComponent( nodeComponent ) ) ];
             } );
 
+            var node = nodes.existing[nodeID];
+
             // Set the internal state.
 
             vwf.models.object.internals( nodeID, nodeComponent );
@@ -1578,7 +1612,7 @@
                 // Create a new property if the property is not defined on a prototype.
                 // Otherwise, initialize the property.
 
-                var creating = ! nodeHasProperty.call( vwf, nodeID, propertyName ); // not defined on node or prototype
+                var creating = ! node.properties.has( propertyName );  // not defined on node or prototype
 
                 // Create or initialize the property.
 
@@ -1694,6 +1728,8 @@
 
             this.logger.debuggx( "getNode", nodeID, full );
 
+            var node = nodes.existing[nodeID];
+
             // Start the descriptor.
 
             var nodeComponent = {};
@@ -1703,11 +1739,10 @@
             // since it was loaded.
 
             var patches = this.models.object.patches( nodeID ),
-                patching = !! patches,
                 patched = false;
 
-            if ( patching ) {
-                nodeComponent.patches = this.uri( nodeID ) || nodeID;
+            if ( node.patchable ) {
+                nodeComponent.patches = node.uri || nodeID;
             } else {
                 nodeComponent.id = nodeID;
             }
@@ -1715,7 +1750,7 @@
             // Intrinsic state. These don't change once created, so they can be omitted if we're
             // patching.
 
-            if ( full || ! patching ) {
+            if ( full || ! node.patchable ) {
 
                 var intrinsics = this.intrinsics( nodeID ); // source, type
 
@@ -1740,7 +1775,7 @@
 
             // Internal state.
 
-            if ( full || ! patching || patches.internals ) {
+            if ( full || ! node.patchable || patches.internals ) {
 
                 var internals = this.models.object.internals( nodeID ); // sequence and random
 
@@ -1756,7 +1791,9 @@
 
             // Properties.
 
-            if ( full || ! patching || patches.properties ) {  // TODO: properties changed only
+            if ( full || ! node.patchable ) {
+
+                // Want everything, or only want patches but the node is not patchable.
 
                 nodeComponent.properties = this.getProperties( nodeID );
 
@@ -1771,6 +1808,18 @@
                 } else {
                     patched = true;
                 }
+
+            } else if ( node.properties.changed ) {
+
+                // The node is patchable and properties have changed.
+
+                nodeComponent.properties = {};
+
+                Object.keys( node.properties.changed ).forEach( function( propertyName ) {
+                    nodeComponent.properties[propertyName] = this.getProperty( nodeID, propertyName );
+                }, this );
+
+                patched = true;
 
             }
 
@@ -1844,10 +1893,10 @@
             // Return the descriptor created, unless it was arranged as a patch and there were no
             // changes. Otherwise, return the URI if this is the root of a URI component.
 
-            if ( full || ! patching || patched ) {
+            if ( full || ! node.patchable || patched ) {
                 return nodeComponent;
-            } else if ( patches.root ) {
-                return nodeComponent.patches;
+            } else if ( node.uri ) {
+                return node.uri;
             } else {
                 return undefined;
             }
@@ -1927,7 +1976,7 @@
 
             childComponent = normalizedComponent( childComponent );
 
-            var childID, childIndex, childPrototypeID, childBehaviorIDs = [], deferredInitializations = {};
+            var child, childID, childIndex, childPrototypeID, childBehaviorIDs = [], deferredInitializations = {};
 
             // Determine if we're replicating previously-saved state, or creating a fresh object.
 
@@ -1976,6 +2025,10 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
             if ( nodeID === 0 && childName == "application" && ! applicationID ) {
                 applicationID = childID;
             }
+
+            // Register the node.
+
+            child = nodes.create( childID, childPrototypeID, childBehaviorIDs, childURI, childName, nodeID );
 
             // Register the node in vwf/model/object. Since the kernel delegates many node
             // information functions to vwf/model/object, this serves to register it with the
@@ -2107,6 +2160,10 @@ if ( ! childComponent.source ) {
 
                 function( series_callback_async /* ( err, results ) */ ) {
 
+                    // Re-register the node now that we have the prototypes and behaviors.
+
+                    child = nodes.create( childID, childPrototypeID, childBehaviorIDs, childURI, childName, nodeID );
+
                     // Re-register the node in vwf/model/object now that we have the prototypes and
                     // behaviors. vwf/model/object knows that we call it more than once and only
                     // updates the new information.
@@ -2214,7 +2271,7 @@ if ( ! childComponent.source ) {
 
                         var creating = create || // explicit create directive, or
                             get !== undefined || set !== undefined || // explicit accessor, or
-                            ! nodeHasProperty.call( vwf, childID, propertyName ); // not defined on prototype
+                            ! child.properties.has( propertyName );  // not defined on prototype
 
                         // Are we assigning the value here, or deferring assignment until the node
                         // is constructed because setters will run?
@@ -2329,11 +2386,11 @@ if ( ! childComponent.source ) {
                                 vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
                             } );
 
-// TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
+                            // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
-if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
-    vwf.tickable.nodeIDs.push( childID );
-}
+                            if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
+                                vwf.tickable.nodeIDs.push( childID );
+                            }
 
                             // Call initializingNode() on each model and initializedNode() on each view to
                             // indicate that the node is fully constructed.
@@ -2353,7 +2410,12 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                             replicating && vwf.models.kernel.enable();
 
                         }, function() {
+
+                            // Mark the node as initialized.
+                            nodes.initialize( childID );
+
                             series_callback_async( err, undefined );
+
                         } );
 
                     } );
@@ -2469,35 +2531,61 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
             this.logger.debuggx( "setProperties", nodeID, properties );
 
+            var node = nodes.existing[nodeID];
+
+            var entrants = this.setProperty.entrants;
+
             // Call settingProperties() on each model.
 
-            properties = this.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we can't go left to right and stop after the first that accepts the set since we are setting all of the properties as a batch; verify that this creates the same result as calling setProperty individually on each property and that there are no side effects from setting through a driver after the one that handles the set.
+            properties = this.models.reduceRight( function( intermediate_properties, model, index ) {  // TODO: note that we can't go left to right and stop after the first that accepts the set since we are setting all of the properties as a batch; verify that this creates the same result as calling setProperty individually on each property and that there are no side effects from setting through a driver after the one that handles the set.
 
                 var model_properties = {};
 
                 if ( model.settingProperties ) {
+
                     model_properties = model.settingProperties( nodeID, properties );
+
                 } else if ( model.settingProperty ) {
-                    for ( var propertyName in properties ) {
-                        model_properties[propertyName] =
-                            model.settingProperty( nodeID, propertyName, properties[propertyName] );
-                        if ( vwf.models.kernel.blocked() ) {
-                            model_properties[propertyName] = undefined; // ignore result from a blocked setter
+
+                    Object.keys( node.properties.existing ).forEach( function( propertyName ) {
+
+                        if ( properties[propertyName] !== undefined ) {
+
+                            var reentry = entrants[nodeID+'-'+propertyName] = { index: index }; // the active model number from this call  // TODO: need unique nodeID+propertyName hash
+
+                            model_properties[propertyName] =
+                                model.settingProperty( nodeID, propertyName, properties[propertyName] );
+                            if ( vwf.models.kernel.blocked() ) {
+                                model_properties[propertyName] = undefined; // ignore result from a blocked setter
+                            }
+
+                            delete entrants[nodeID+'-'+propertyName];
+
                         }
-                    }
+
+                    } );
+
                 }
 
-                for ( var propertyName in model_properties ) {
+                Object.keys( node.properties.existing ).forEach( function( propertyName ) {
                     if ( model_properties[propertyName] !== undefined ) { // copy values from this model
                         intermediate_properties[propertyName] = model_properties[propertyName];
                     } else if ( intermediate_properties[propertyName] === undefined ) { // as well as recording any new keys
                         intermediate_properties[propertyName] = undefined;
                     }
-                }
+                } );
 
                 return intermediate_properties;
 
             }, {} );
+
+            // Record the change.
+
+            if ( node.initialized && node.patchable ) {
+                Object.keys( properties ).forEach( function( propertyName ) {
+                    node.properties.change( propertyName );
+                } );
+            }
 
             // Call satProperties() on each view.
 
@@ -2530,31 +2618,45 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
             this.logger.debuggx( "getProperties", nodeID );
 
+            var node = nodes.existing[nodeID];
+
+            var entrants = this.getProperty.entrants;
+
             // Call gettingProperties() on each model.
 
-            var properties = this.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we can't go left to right and take the first result since we are getting all of the properties as a batch; verify that this creates the same result as calling getProperty individually on each property and that there are no side effects from getting through a driver after the one that handles the get.
+            var properties = this.models.reduceRight( function( intermediate_properties, model, index ) {  // TODO: note that we can't go left to right and take the first result since we are getting all of the properties as a batch; verify that this creates the same result as calling getProperty individually on each property and that there are no side effects from getting through a driver after the one that handles the get.
 
                 var model_properties = {};
 
                 if ( model.gettingProperties ) {
+
                     model_properties = model.gettingProperties( nodeID, properties );
+
                 } else if ( model.gettingProperty ) {
-                    for ( var propertyName in intermediate_properties ) {
+
+                    Object.keys( node.properties.existing ).forEach( function( propertyName ) {
+
+                        var reentry = entrants[nodeID+'-'+propertyName] = { index: index }; // the active model number from this call  // TODO: need unique nodeID+propertyName hash
+
                         model_properties[propertyName] =
                             model.gettingProperty( nodeID, propertyName, intermediate_properties[propertyName] );
                         if ( vwf.models.kernel.blocked() ) {
                             model_properties[propertyName] = undefined; // ignore result from a blocked getter
                         }
-                    }
+
+                        delete entrants[nodeID+'-'+propertyName];
+
+                    } );
+
                 }
 
-                for ( var propertyName in model_properties ) {
+                Object.keys( node.properties.existing ).forEach( function( propertyName ) {
                     if ( model_properties[propertyName] !== undefined ) { // copy values from this model
                         intermediate_properties[propertyName] = model_properties[propertyName];
                     } else if ( intermediate_properties[propertyName] === undefined ) { // as well as recording any new keys
                         intermediate_properties[propertyName] = undefined;
                     }
-                }
+                } );
 
                 return intermediate_properties;
 
@@ -2593,12 +2695,24 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                 return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];  // TODO: add truncated propertyGet, propertySet to log
             } );
 
+            var node = nodes.existing[nodeID];
+
+            // Register the property.
+
+            node.properties.create( propertyName );
+
             // Call creatingProperty() on each model. The property is considered created after all
             // models have run.
 
             this.models.forEach( function( model ) {
                 model.creatingProperty && model.creatingProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
             } );
+
+            // Record the change.
+
+            if ( node.initialized && node.patchable ) {
+                node.properties.change( propertyName );
+            }
 
             // Call createdProperty() on each view. The view is being notified that a property has
             // been created.
@@ -2626,20 +2740,7 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                 return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];
             } );
 
-            // Select the actual driver calls. Create the property if it doesn't exist on this node
-            // or its prototypes. Initialize it if it exists on a prototype but not on this node.
-            // Set it if it already exists on this node.
-
-            if ( ! nodeHasProperty.call( this, nodeID, propertyName ) ) {
-                var settingPropertyEtc = "creatingProperty";
-                var satPropertyEtc = "createdProperty";
-            } else if ( ! nodeHasOwnProperty.call( this, nodeID, propertyName ) ) {
-                var settingPropertyEtc = "initializingProperty";
-                var satPropertyEtc = "initializedProperty";
-            } else {
-                var settingPropertyEtc = "settingProperty";
-                var satPropertyEtc = "satProperty";
-            }
+            var node = nodes.existing[nodeID];
 
             // Record calls into this function by nodeID and propertyName so that models may call
             // back here (directly or indirectly) to delegate responses further down the chain
@@ -2650,30 +2751,75 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
             var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
             var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
 
+            // Select the actual driver calls. Create the property if it doesn't exist on this node
+            // or its prototypes. Initialize it if it exists on a prototype but not on this node.
+            // Set it if it already exists on this node.
+
+            if ( ! node.properties.has( propertyName ) || entry.creating ) {
+                reentry.creating = true;
+                var settingPropertyEtc = "creatingProperty";
+                var satPropertyEtc = "createdProperty";
+                node.properties.create( propertyName );
+            } else if ( ! node.properties.hasOwn( propertyName ) || entry.initializing ) {
+                reentry.initializing = true;
+                var settingPropertyEtc = "initializingProperty";
+                var satPropertyEtc = "initializedProperty";
+                node.properties.create( propertyName );
+            } else {
+                var settingPropertyEtc = "settingProperty";
+                var satPropertyEtc = "satProperty";
+            }
+
+            // Keep track of the number of assignments made by this `setProperty` call and others
+            // invoked indirectly by it, starting with the outermost call.
+
+            var outermost = entrants.assignments === undefined;
+
+            if ( outermost ) {
+                entrants.assignments = 0;
+            }
+
+            // Have we been called for the same property on the same node for a property still being
+            // assigned (such as when a setter function assigns the property to itself)? If so, then
+            // the inner call should skip drivers that the outer call has already invoked, and the
+            // outer call should complete without invoking drivers that the inner call will have
+            // already called.
+
+            var reentered = ( entry.index !== undefined );
+
+            // We'll need to know if the set was delegated to other properties or actually assigned
+            // here.
+
+            var delegated = false, assigned = false;
+
             // Call settingProperty() on each model. The first model to return a non-undefined value
             // has performed the set and dictates the return value. The property is considered set
             // after all models have run.
 
             this.models.some( function( model, index ) {
 
-                // Skip models up through the one making the most recent call here (if any).
+                // Skip initial models that an outer call has already invoked for this node and
+                // property (if any). If an inner call completed for this node and property, skip
+                // the remaining models.
 
-                if ( entry.index === undefined || index > entry.index ) {
+                if ( ( ! reentered || index > entry.index ) && ! reentry.completed ) {
 
                     // Record the active model number.
  
                     reentry.index = index;
 
+                    // Record the number of assignments made since the outermost call. When
+                    // `entrants.assignments` increases, a driver has called `setProperty` to make
+                    // an assignment elsewhere.
+
+                    var assignments = entrants.assignments;
+
                     // Make the call.
 
-                    var value = model[settingPropertyEtc] && model[settingPropertyEtc]( nodeID, propertyName, propertyValue );
-
-                    // Look for a return value potentially stored here by a reentrant call if the
-                    // model didn't return one explicitly (such as with a JavaScript accessor
-                    // method).
-
-                    if ( value === undefined ) {
-                        value = reentry.value;
+                    if ( ! delegated && ! assigned ) {
+                        var value = model[settingPropertyEtc] && model[settingPropertyEtc]( nodeID, propertyName, propertyValue );
+                    } else {
+                        model[settingPropertyEtc] && model[settingPropertyEtc]( nodeID, propertyName, undefined );
                     }
 
                     // Ignore the result if reentry is disabled and the driver attempted to call
@@ -2682,6 +2828,19 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                     if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
                         value = undefined;
+                    }
+
+                    // The property was delegated if the call made any assignments.
+
+                    if ( entrants.assignments !== assignments ) {
+                        delegated = true;
+                    }
+
+                    // Otherwise if the call returned a value, the property was assigned here.
+
+                    else if ( value !== undefined ) {
+                        entrants.assignments++;
+                        assigned = true;
                     }
 
                     // Record the value actually assigned. This may differ from the incoming value
@@ -2696,33 +2855,49 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                     // has been set. Don't exit early if we are creating or initializing since every
                     // model needs the opportunity to register the property.
 
-                    return settingPropertyEtc == "settingProperty" && value !== undefined;  // TODO: this stops after p: { set: "this.p = value" } or p: { set: "return value" }, but should it also stop on p: { set: "this.q = value" }?
+                    return settingPropertyEtc == "settingProperty" && ( delegated || assigned );
                 }
 
             }, this );
 
-            if ( entry.index !== undefined ) {
+            // Record the change if the property was assigned here.
 
-                // For a reentrant call, restore the previous state, move the index forward to cover
-                // the models we called, and record the current result.
+            if ( assigned && node.initialized && node.patchable ) {
+                node.properties.change( propertyName );
+            }
 
-                entrants[nodeID+'-'+propertyName] = entry;
-                entry.value = propertyValue;
+            // Call satProperty() on each view. The view is being notified that a property has
+            // been set. Only call for value properties as they are actually assigned. Don't call
+            // for accessor properties that have delegated to other properties. Notifying when
+            // setting an accessor property would be useful, but since that information is
+            // ephemeral, and views on late-joining clients would never see it, it's best to never
+            // send those notifications.
 
-            } else {
-
-                // Delete the call record if this is the first, non-reentrant call here (the normal
-                // case).
-
-                delete entrants[nodeID+'-'+propertyName];
-
-                // Call satProperty() on each view. The view is being notified that a property has
-                // been set.  TODO: only want to call when actually set and with final value
-
+            if ( assigned ) {
                 this.views.forEach( function( view ) {
-                    view[satPropertyEtc] && view[satPropertyEtc]( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
+                    view[satPropertyEtc] && view[satPropertyEtc]( nodeID, propertyName, propertyValue );
                 } );
+            }
 
+            // For a reentrant call, restore the previous state, move the index forward to cover
+            // the models we called.
+
+            if ( reentered ) {
+                entrants[nodeID+'-'+propertyName] = entry;
+                entry.completed = true;
+            }
+
+            // Delete the call record if this is the first, non-reentrant call here (the normal
+            // case).
+
+            else {
+                delete entrants[nodeID+'-'+propertyName];
+            }
+
+            // Clear the assignment counter when the outermost `setProperty` completes.
+
+            if ( outermost ) {
+                delete entrants.assignments;
             }
 
             this.logger.debugu();
@@ -2744,9 +2919,6 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
             this.logger.debuggx( "getProperty", nodeID, propertyName );
 
-            // Call gettingProperty() on each model. The first model to return a non-undefined value
-            // dictates the return value.
-
             var propertyValue = undefined;
 
             // Record calls into this function by nodeID and propertyName so that models may call
@@ -2758,31 +2930,53 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
             var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
             var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
 
+            // Keep track of the number of retrievals made by this `getProperty` call and others
+            // invoked indirectly by it, starting with the outermost call.
+
+            var outermost = entrants.retrievals === undefined;
+
+            if ( outermost ) {
+                entrants.retrievals = 0;
+            }
+
+            // Have we been called for the same property on the same node for a property still being
+            // retrieved (such as when a getter function retrieves the property from itself)? If so,
+            // then the inner call should skip drivers that the outer call has already invoked, and
+            // the outer call should complete without invoking drivers that the inner call will have
+            // already called.
+
+            var reentered = ( entry.index !== undefined );
+
+            // We'll need to know if the get was delegated to other properties or actually retrieved
+            // here.
+
+            var delegated = false, retrieved = false;
+
             // Call gettingProperty() on each model. The first model to return a non-undefined value
             // dictates the return value.
 
             this.models.some( function( model, index ) {
 
-                // Skip models up through the one making the most recent call here (if any).
+                // Skip initial models that an outer call has already invoked for this node and
+                // property (if any). If an inner call completed for this node and property, skip
+                // the remaining models.
 
-                if ( entry.index === undefined || index > entry.index ) {
+                if ( ( ! reentered || index > entry.index ) && ! reentry.completed ) {
 
                     // Record the active model number.
  
                     reentry.index = index;
 
+                    // Record the number of retrievals made since the outermost call. When
+                    // `entrants.retrievals` increases, a driver has called `getProperty` to make
+                    // a retrieval elsewhere.
+
+                    var retrievals = entrants.retrievals;
+
                     // Make the call.
 
                     var value = model.gettingProperty &&
                         model.gettingProperty( nodeID, propertyName, propertyValue );  // TODO: probably don't need propertyValue here
-
-                    // Look for a return value potentially stored here by a reentrant call if the
-                    // model didn't return one explicitly (such as with a JavaScript accessor
-                    // method).
-
-                    if ( value === undefined ) {
-                        value = reentry.value;
-                    }
 
                     // Ignore the result if reentry is disabled and the driver attempted to call
                     // back into the kernel. Kernel reentry is disabled during replication to 
@@ -2790,6 +2984,19 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                     if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
                         value = undefined;
+                    }
+
+                    // The property was delegated if the call made any retrievals.
+
+                    if ( entrants.retrievals !== retrievals ) {
+                        delegated = true;
+                    }
+
+                    // Otherwise if the call returned a value, the property was retrieved here.
+
+                    else if ( value !== undefined ) {
+                        entrants.retrievals++;
+                        retrieved = true;
                     }
 
                     // Record the value retrieved.
@@ -2800,18 +3007,18 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                     // Exit from the this.models.some() iterator once we have a return value.
 
-                    return value !== undefined;
+                    return delegated || retrieved;
                 }
 
             }, this );
 
-            if ( entry.index !== undefined ) {
+            if ( reentered ) {
 
                 // For a reentrant call, restore the previous state, move the index forward to cover
-                // the models we called, and record the current result.
+                // the models we called.
 
                 entrants[nodeID+'-'+propertyName] = entry;
-                entry.value = propertyValue;
+                entry.completed = true;
 
             } else {
 
@@ -2825,22 +3032,18 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                 if ( propertyValue === undefined && ! ignorePrototype ) {
 
-                    var behaviorIDs = this.behaviors( nodeID );
+                    this.behaviors( nodeID ).reverse().concat( this.prototype( nodeID ) ).
+                        some( function( prototypeID, prototypeIndex, prototypeArray ) {
 
-                    while ( propertyValue === undefined && behaviorIDs.length ) {
-                        var behaviorID = behaviorIDs.pop();
-                        propertyValue = this.getProperty( behaviorID, propertyName, true ); // behavior node only, not its prototypes
-                    }
+                        if ( prototypeIndex < prototypeArray.length - 1 ) {
+                            propertyValue = this.getProperty( prototypeID, propertyName, true ); // behavior node only, not its prototypes
+                        } else if ( prototypeID !== nodeTypeURI ) {
+                            propertyValue = this.getProperty( prototypeID, propertyName ); // prototype node, recursively
+                        }
 
-                }
+                        return propertyValue !== undefined;
 
-                if ( propertyValue === undefined && ! ignorePrototype ) {
-
-                    var prototypeID = this.prototype( nodeID );
-
-                    if ( prototypeID !== nodeTypeURI ) {
-                        propertyValue = this.getProperty( prototypeID, propertyName );
-                    }
+                    }, this );
 
                 }
 
@@ -2850,6 +3053,12 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                     view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
                 } );
 
+            }
+
+            // Clear the retrieval counter when the outermost `getProperty` completes.
+
+            if ( outermost ) {
+                delete entrants.retrievals;
             }
 
             this.logger.debugu();
@@ -3551,46 +3760,6 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
         };
 
-        /// Determine if a node has a property with the given name, either directly on the node or
-        /// inherited from a prototype.
-        /// 
-        /// This function must run as a method of the kernel. Invoke as: nodeHasProperty.call(
-        ///   kernel, nodeID, propertyName ).
-        /// 
-        /// @name module:vwf~nodeHasProperty
-        /// 
-        /// @param {ID} nodeID
-        /// @param {String} propertyName
-        /// 
-        /// @returns {Boolean}
-
-        var nodeHasProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-            var node = this.models.javascript.nodes[ nodeID ];
-            if ( node ) {
-                return propertyName in node.properties;
-            } else {
-                this.logger.error( "Could not find node '" + nodeID + "'" );
-            }
-        };
-
-        /// Determine if a node has a property with the given name. The node's prototypes are not
-        /// considered.
-        /// 
-        /// This function must run as a method of the kernel. Invoke as: nodeHasOwnProperty.call(
-        ///   kernel, nodeID, propertyName ).
-        /// 
-        /// @name module:vwf~nodeHasOwnProperty
-        /// 
-        /// @param {ID} nodeID
-        /// @param {String} propertyName
-        /// 
-        /// @returns {Boolean}
-
-        var nodeHasOwnProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-            var node = this.models.javascript.nodes[nodeID];
-            return node.properties.hasOwnProperty( propertyName );  // TODO: this is peeking inside of vwf-model-javascript
-        };
-
         /// Determine if a given property of a node has a setter function, either directly on the
         /// node or inherited from a prototype.
         /// 
@@ -3807,6 +3976,8 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                 "get",
                 "set",
                 "value",
+                "create",
+                "undefined",
             ];
 
             var hasAccessors = false;
@@ -4533,6 +4704,463 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
         };
 
         // == Private variables ====================================================================
+
+        // Prototype for the `properties`, `methods` and `events` collections in the `nodes`
+        // objects.
+
+        var nodeCollectionPrototype = {
+
+            /// Record that a property, method or event has been created.
+            /// 
+            /// @param {String} name
+            /// 
+            /// @returns {Boolean}
+            ///   `true` if the member was successfully added. `false` if a member by that name
+            ///   already exists.
+
+            create: function( name ) {
+
+                if ( ! this.hasOwn( name ) ) {
+
+                    // Add the member. We just record its existence. Everything else is managed by
+                    // the drivers.
+                    // 
+                    // `Object.defineProperty` is used instead of `this.existing[name] = ...` since
+                    // the prototype may be a behavior proxy, and the accessor properties would
+                    // prevent normal assignment.
+
+                    Object.defineProperty( this.existing, name, {
+                        value: undefined,
+                        configurable: true,
+                        enumerable: true,
+                        writable: true,
+                    } );
+
+                    return true;
+
+                } else {
+
+                    return false;
+
+                }
+
+            },
+
+            /// Record that a member has been deleted. Remove it from any change lists that is in.
+            /// 
+            /// @param {String} name
+            /// 
+            /// @returns {Boolean}
+            ///   `true` if the member was successfully removed. `false` if a member by that name
+            ///   does not exist.
+
+            delete: function( name ) {
+
+                if ( this.hasOwn( name ) ) {
+
+                    // Remove the member.
+
+                    delete this.existing[name];
+
+                    // Remmove the member from any change lists it's in. Completely remove lists
+                    // that become empty.
+
+                    if ( this.added ) {
+                        delete this.added[name];
+                        Object.keys( this.added ).length || delete this.added;
+                    }
+
+                    if ( this.removed ) {
+                        delete this.removed[name];
+                        Object.keys( this.removed ).length || delete this.removed;
+                    }
+
+                    if ( this.changed ) {
+                        delete this.changed[name];
+                        Object.keys( this.changed ).length || delete this.changed;
+                    }
+
+                    return true;
+
+                } else {
+
+                    return false;
+
+                }
+
+            },
+
+            /// Record that a member has changed. Create the change list if it does not exist.
+            /// 
+            /// @param {String} name
+            /// 
+            /// @returns {Boolean}
+            ///   `true` if the change was successfully recorded. `false` if a member by that name
+            ///   does not exist.
+
+            change: function( name ) {
+
+                if ( this.hasOwn( name ) ) {
+
+                    // Ensure that the change list exists and record the change.
+
+                    this.changed = this.changed || {};
+                    this.changed[name] = undefined;
+
+                    return true;
+
+                } else {
+
+                    return false;
+
+                }
+
+            },
+
+            /// Determine if a node has a member with the given name, either directly on the node or
+            /// inherited from a prototype.
+            /// 
+            /// @param {String} name
+            /// 
+            /// @returns {Boolean}
+
+            has: function( name ) {
+                return name in this.existing;
+            },
+
+            /// Determine if a node has a member with the given name. The node's prototypes are not
+            /// considered.
+            /// 
+            /// @param {String} name
+            /// 
+            /// @returns {Boolean}
+
+            // Since prototypes of the collection objects mirror the node's prototype chain,
+            // collection objects for the proto-prototype `node.vwf` intentionally don't inherit
+            // from `Object.prototype`. Otherwise the Object members `hasOwnProperty`,
+            // `isPrototypeOf`, etc. would be mistaken as members of a VWF node.
+
+            // Instead of using the simpler `this.existing.hasOwnProperty( name )`, we must reach
+            // `hasOwnProperty through `Object.prototype`.
+
+            hasOwn: function( name ) {
+                return Object.prototype.hasOwnProperty.call( this.existing, name );
+            },
+
+        };
+
+        /// The application's nodes, indexed by ID.
+        /// 
+        /// The kernel defines an application as:
+        /// 
+        ///   * A tree of nodes,
+        ///   * Extending prototypes and implementing behaviors,
+        ///   * Publishing properties, and
+        ///   * Communicating using methods and events.
+        /// 
+        /// This definition is as abstract as possible to avoid imposing unnecessary policy on the
+        /// application. The concrete realization of these concepts lives in the hearts and minds of
+        /// the drivers configured for the application. `nodes` contains the kernel's authoritative
+        /// data about this arrangement.
+        /// 
+        /// @name module:vwf~nodes
+
+        // Note: this is a first step towards moving authoritative data out of the vwf/model/object
+        // and vwf/model/javascript drivers and removing the kernel's dependency on them as special
+        // cases. Only `nodes.existing[id].properties` is currently implemented this way.
+
+        var nodes = {
+
+            /// Register a node as it is created.
+            /// 
+            /// @param {ID} nodeID
+            ///   The ID assigned to the new node. The node will be indexed in `nodes` by this ID.
+            /// @param {ID} prototypeID
+            ///   The ID of the node's prototype, or `undefined` if this is the proto-prototype,
+            ///   `node.vwf`.
+            /// @param {ID[]} behaviorIDs
+            ///   An array of IDs of the node's behaviors. `behaviorIDs` should be an empty array if
+            ///   the node doesn't have any behaviors.
+            /// @param {String} nodeURI
+            ///   The node's URI. `nodeURI` should be the component URI if this is the root node of
+            ///   a component loaded from a URI, and undefined in all other cases.
+            /// @param {String} nodeName
+            ///   The node's name.
+            /// @param {ID} parentID
+            ///   The ID of the node's parent, or `undefined` if this is the application root node
+            ///   or another global, top-level node.
+            /// 
+            /// @returns {Object} 
+            ///   The kernel `node` object if the node was successfully added. `undefined` if a node
+            ///   identified by `nodeID` already exists.
+
+            create: function( nodeID, prototypeID, behaviorIDs, nodeURI, nodeName, parentID ) {
+
+                // if ( ! this.existing[nodeID] ) {
+
+                    var self = this;
+
+                    var prototypeNode = behaviorIDs.reduce( function( prototypeNode, behaviorID ) {
+                        return self.proxy( prototypeNode, self.existing[behaviorID] );
+                    }, this.existing[prototypeID] );
+
+                    var parentNode = this.existing[parentID];
+
+                    return this.existing[nodeID] = {
+
+                        // id: ...,
+
+                        // Inheritance. -- not implemented here yet; still using vwf/model/object
+
+                        // prototype: ...,
+                        // behaviors: [],
+
+                        // Intrinsic state. -- not implemented here yet.
+
+                        // source: ...,
+                        // type: ...,
+
+                        uri: nodeURI,
+
+                        // name: ...,
+
+                        // Internal state. The change flags are omitted until needed. -- not implemented here yet; still using vwf/model/object
+
+                        // sequence: ...,
+                        // sequenceChanged: true / false,
+
+                        // prng: ...,
+                        // prngChanged: true / false,
+
+                        // Tree. -- not implemented here yet; still using vwf/model/object
+
+                        // parent: ...,
+                        // children: [],
+
+                        // Property, Method and Event members defined on the node.
+                        // 
+                        // The `existing`, `added`, `removed` and `changed` objects are sets: the
+                        // keys are the data, and only existence on the object is significant. As an
+                        // exception, the last known value for a delegating property is stored on
+                        // its `existing` entry.
+                        // 
+                        // For each collection, `existing` is the authoritative list the node's
+                        // members. Use `existing.hasOwnProperty( memberName )` to determine if the
+                        // node defines a property, method or event by that name.
+                        // 
+                        // The prototype of each `existing` object is the `existing` object of the
+                        // node's prototype (or a proxy to the top behavior for nodes with
+                        // behaviors). Use `memberName in existing` to determine if a property,
+                        // method or event is defined on the node or its prototypes.
+                        // 
+                        // For patchable nodes, `added`, `removed`, and `changed` record changes
+                        // that occurred after the node was first initialized. They are omitted
+                        // until needed. Only the change is recorded here. Values are retrieved from
+                        // the drivers when needed.
+
+                        properties: Object.create( nodeCollectionPrototype, {
+
+                            existing: {
+                                value: Object.create( prototypeNode ?
+                                    prototypeNode.properties.existing : null ),
+                            },
+
+                            // Created when needed.
+
+                            // added: {
+                            //     name: undefined
+                            // },
+
+                            // removed: {
+                            //     name: undefined
+                            // },
+
+                            // changed: {
+                            //     name: undefined
+                            // },
+
+                        } ),
+
+                        // TODO: Store nodes' methods and events here in the kernel
+
+                        // methods: Object.create( nodeCollectionPrototype, {
+
+                        //     existing: {
+                        //         value: Object.create( prototypeNode ?
+                        //             prototypeNode.methods.existing : null ),
+                        //     },
+
+                        //     // Created when needed.
+
+                        //     // added: {
+                        //     //     name: undefined
+                        //     // },
+
+                        //     // removed: {
+                        //     //     name: undefined
+                        //     // },
+
+                        //     // changed: {
+                        //     //     name: undefined
+                        //     // },
+
+                        // } ),
+
+                        // events: Object.create( nodeCollectionPrototype, {
+
+                        //     existing: {
+                        //         value: Object.create( prototypeNode ?
+                        //             prototypeNode.events.existing : null ),
+                        //     },
+
+                        //     // Created when needed.
+
+                        //     // added: {
+                        //     //     name: undefined
+                        //     // },
+
+                        //     // removed: {
+                        //     //     name: undefined
+                        //     // },
+
+                        //     // changed: {
+                        //     //     name: undefined
+                        //     // },
+
+                        // } ),
+
+                        // END TODO
+
+                        // Is this node patchable? Nodes are patchable if they were loaded from a
+                        // component.
+
+                        patchable: !! ( nodeURI ||
+                            parentNode && ! parentNode.initialized && parentNode.patchable ),
+
+                        // Has this node completed initialization? For applications, visibility to
+                        // ancestors from uninitialized nodes is blocked. Change tracking starts
+                        // after initialization.
+
+                        initialized: false,
+
+                    };
+
+                // } else {
+
+                //     return undefined;
+
+                // }
+
+            },
+
+            /// Record that a node has initialized.
+
+            initialize: function( nodeID ) {
+
+                if ( this.existing[nodeID] ) {
+
+                    this.existing[nodeID].initialized = true;
+
+                    return true;
+
+                } else {
+
+                    return false;
+
+                }
+
+            },
+
+            /// Unregister a node as it is deleted.
+
+            delete: function( nodeID ) {
+
+                if ( this.existing[nodeID] ) {
+
+                    delete this.existing[nodeID];
+
+                    return true;
+
+                } else {
+
+                    return false;
+
+                }
+
+            },
+
+            /// Create a proxy node in the form of the nodes created by `nodes.create` to represent
+            /// a behavior node in another node's prototype chain. The `existing` objects of the
+            /// proxy's collections link to the prototype collection's `existing` objects, just as
+            /// with a regular prototype. The proxy's members delegate to the corresponding members
+            /// in the behavior.
+
+            proxy: function( prototypeNode, behaviorNode ) {
+
+                return {
+
+                    properties: {
+                        existing: Object.create(
+                            prototypeNode ? prototypeNode.properties.existing : null,
+                            propertyDescriptorsFor( behaviorNode.properties.existing )
+                        ),
+                    },
+
+                    // methods: {
+                    //     existing: Object.create(
+                    //         prototypeNode ? prototypeNode.methods.existing : null,
+                    //         propertyDescriptorsFor( behaviorNode.methods.existing )
+                    //     ),
+                    // },
+
+                    // events: {
+                    //     existing: Object.create(
+                    //         prototypeNode ? prototypeNode.events.existing : null,
+                    //         propertyDescriptorsFor( behaviorNode.events.existing )
+                    //     ),
+                    // },
+
+                };
+
+                /// Return an `Object.create` properties object for a proxy object for the provided
+                /// collection's `existing` object.
+
+                function propertyDescriptorsFor( collectionExisting ) {
+
+                    return Object.keys( collectionExisting ).reduce(
+
+                        function( propertiesObject, memberName ) {
+
+                            propertiesObject[memberName] = {
+                                get: function() { return collectionExisting[memberName] },
+                                enumerable: true,
+                            };
+
+                            return propertiesObject;
+                        },
+
+                        {}
+
+                    );
+
+                }
+
+            },
+
+            /// Registry of all nodes, indexed by ID. Each is an object created by `nodes.create`.
+
+            existing: {
+
+                // id: {
+                //     id: ...,
+                //     uri: ...,
+                //     name: ...,
+                //     ...
+                // }
+
+            },
+
+        };
 
         /// Control messages from the reflector are stored here in a priority queue, ordered by
         /// execution time.

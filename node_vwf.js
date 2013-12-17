@@ -104,7 +104,19 @@ function startVWF( ) {
 
 
     //create socket server
-    var socketManager = sio.listen( srv, { log: false } );
+    var socketManager = sio.listen( srv, { 
+        log: false,
+        resource: {
+            exec: function( url ) {
+                var match = /\/1\/\?t=\d*/.exec( url ) || /\/1\/websocket/.exec( url );
+                if (match) {
+                    return [url.substring(0, url.indexOf(match[0]))];
+                } else {
+                    return null;
+                }
+            }
+        } 
+    } );
     socketManager.set( 'transports', [ 'websocket' ] );
     socketManager.sockets.on( 'connection', reflector.OnConnection );
 }

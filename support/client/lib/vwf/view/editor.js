@@ -229,9 +229,27 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         satProperty: function (nodeID, propertyName, propertyValue) {
             var node = this.nodes[ nodeID ];
             if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
-            node.properties[ propertyName ].value = undefined;
-            node.properties[ propertyName ].rawValue = propertyValue;
             
+            // It is possible for a property to have satProperty called for it without ever getting an
+            // initializedProperty (if that property delegated to itself or another on replication)
+            // Catch that case here and create the property
+            if ( ! node.properties[ propertyName ] ) {
+                var property = node.properties[ propertyName ] = {
+                    name: propertyName,
+                    value: propertyValue,
+                };
+                node.properties.push( property );
+            }
+            
+            try {
+                propertyValue = utility.transform( propertyValue, utility.transforms.transit );
+                node.properties[ propertyName ].value = JSON.stringify( propertyValue );
+            } catch (e) {
+                this.logger.warnx( "satProperty", nodeID, propertyName, propertyValue,
+                    "stringify error:", e.message );
+                node.properties[ propertyName ].value = propertyValue;
+            }
+
             if ( ( this.editorView == 1 ) && ( this.currentNodeID == nodeID ) ) {
                 var nodeIDAttribute = $.encoder.encodeForAlphaNumeric(nodeID); // $.encoder.encodeForHTMLAttribute("id", nodeID, true);
                 var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", propertyName, true);
@@ -289,18 +307,6 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         //ticked: [ /* time */ ],
         
     } );
-
-    // -- getPropertyValues -----------------------------------------------------------------
-
-    function getPropertyValues( node ) {
-        var pv = {};
-        if ( node ) {
-            for ( var i = 0; i < node.properties.length; i++ ) {
-                pv[ node.properties[i] ] = vwf.getProperty( node.ID, node.properties[i], [] );
-            }
-        }
-        return pv;
-    };
     
     // -- getChildByName --------------------------------------------------------------------
     
@@ -1012,7 +1018,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         var prototypeEvents = getEvents.call( this, this.kernel, node.extendsID );
         for ( var key in prototypeEvents ) {
             var nodeEvent = prototypeEvents[key];
-            var prototypeEventNameAlpha = $.encoder.encodeForHTMLAttribute(key);
+            var prototypeEventNameAlpha = $.encoder.encodeForAlphaNumeric(key);
             var prototypeEventNameAttribute = $.encoder.encodeForHTMLAttribute("id", key, true);
             var prototypeEventNameHTML = $.encoder.encodeForHTML(key);
             $('#prototypeEvents').append("<div id='" + prototypeEventNameAlpha + "' class='methodEntry'><table><tr><td><b>" + prototypeEventNameHTML + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + prototypeEventNameAlpha + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + prototypeEventNameAlpha + "' value='Fire' data-eventName='" + prototypeEventNameAttribute + "'><img id='arg-" + prototypeEventNameAlpha + "' data-eventName='" + prototypeEventNameAttribute + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div>");
