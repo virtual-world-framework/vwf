@@ -51,7 +51,15 @@ trap "echo Installation failed." EXIT
 
 # Starting a clean install here:
 [ -e "$HOME/.vwf" ] && rm -rf "$HOME/.vwf"
-TARBALL_URL="http://download.virtualworldframework.com/files/VWF_linux_stable_latest.tar.gz"
+if [ "$UNAME" = "Darwin" ] ; then
+	### OSX ###
+	TARBALL_URL="http://download.virtualworldframework.com/files/VWF_Mac_OS_X_latest.tar.gz"
+	NODEPACKAGE="node-v0.10.22-darwin-x64"
+elif [ "$UNAME" = "Linux" ] ; then
+	### Linux ###
+	TARBALL_URL="http://download.virtualworldframework.com/files/VWF_Linux_latest.tar.gz"
+fi
+
 
 INSTALL_TMPDIR="$HOME/.vwf-install-tmp"
 if [ -d "$INSTALL_TMPDIR" ];then
