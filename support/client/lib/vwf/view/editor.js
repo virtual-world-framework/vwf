@@ -241,15 +241,9 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 node.properties.push( property );
             }
             
-            try {
-                propertyValue = utility.transform( propertyValue, utility.transforms.transit );
-                node.properties[ propertyName ].value = JSON.stringify( propertyValue );
-            } catch (e) {
-                this.logger.warnx( "satProperty", nodeID, propertyName, propertyValue,
-                    "stringify error:", e.message );
-                node.properties[ propertyName ].value = propertyValue;
-            }
-
+            node.properties[ propertyName ].value = undefined;
+            node.properties[ propertyName ].rawValue = propertyValue;
+            
             if ( ( this.editorView == 1 ) && ( this.currentNodeID == nodeID ) ) {
                 var nodeIDAttribute = $.encoder.encodeForAlphaNumeric(nodeID); // $.encoder.encodeForHTMLAttribute("id", nodeID, true);
                 var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", propertyName, true);

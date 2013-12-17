@@ -2505,33 +2505,39 @@ if ( ! childComponent.source ) {
 
             var node = nodes.existing[nodeID];
 
-            var entrants = this.setProperty.entrants;
+            var entries = modifyProperty.entries;
 
-            // Call settingProperties() on each model.
+            // Call settingProperties() on each model driver.
 
-            properties = this.models.reduceRight( function( intermediate_properties, model, index ) {  // TODO: note that we can't go left to right and stop after the first that accepts the set since we are setting all of the properties as a batch; verify that this creates the same result as calling setProperty individually on each property and that there are no side effects from setting through a driver after the one that handles the set.
+            properties = this.models.reduceRight( function( intermediate_properties, modelDriver, 
+                                                            driverIndex ) {  // TODO: note that we can't go left to right and stop after the first that accepts the set since we are setting all of the properties as a batch; verify that this creates the same result as calling setProperty individually on each property and that there are no side effects from setting through a driver after the one that handles the set.
 
                 var model_properties = {};
 
-                if ( model.settingProperties ) {
+                if ( modelDriver.settingProperties ) {
 
-                    model_properties = model.settingProperties( nodeID, properties );
+                    model_properties = modelDriver.settingProperties( nodeID, properties );
 
-                } else if ( model.settingProperty ) {
+                } else if ( modelDriver.settingProperty ) {
 
                     Object.keys( node.properties.existing ).forEach( function( propertyName ) {
 
-                        if ( properties[propertyName] !== undefined ) {
+                        var propertyValue = properties[ propertyName ];
 
-                            var reentry = entrants[nodeID+'-'+propertyName] = { index: index }; // the active model number from this call  // TODO: need unique nodeID+propertyName hash
+                        if ( propertyValue !== undefined ) {
 
-                            model_properties[propertyName] =
-                                model.settingProperty( nodeID, propertyName, properties[propertyName] );
+                            // TODO: need unique nodeID+propertyName hash
+                            var thisProperty = nodeID + '-' + propertyName;
+
+                            entries[ thisProperty ] = { driverIndex: driverIndex }; // the active model driver number from this call
+
+                            model_properties[ propertyName ] =
+                                modelDriver.settingProperty( nodeID, propertyName, propertyValue );
                             if ( vwf.models.kernel.blocked() ) {
-                                model_properties[propertyName] = undefined; // ignore result from a blocked setter
+                                model_properties[ propertyName ] = undefined; // ignore result from a blocked setter
                             }
 
-                            delete entrants[nodeID+'-'+propertyName];
+                            delete entries[ thisProperty ];
 
                         }
 
@@ -2540,10 +2546,10 @@ if ( ! childComponent.source ) {
                 }
 
                 Object.keys( node.properties.existing ).forEach( function( propertyName ) {
-                    if ( model_properties[propertyName] !== undefined ) { // copy values from this model
-                        intermediate_properties[propertyName] = model_properties[propertyName];
-                    } else if ( intermediate_properties[propertyName] === undefined ) { // as well as recording any new keys
-                        intermediate_properties[propertyName] = undefined;
+                    if ( model_properties[ propertyName ] !== undefined ) { // copy values from this model driver
+                        intermediate_properties[ propertyName ] = model_properties[ propertyName ];
+                    } else if ( intermediate_properties[ propertyName ] === undefined ) { // as well as recording any new keys
+                        intermediate_properties[ propertyName ] = undefined;
                     }
                 } );
 
@@ -2567,7 +2573,7 @@ if ( ! childComponent.source ) {
                     view.satProperties( nodeID, properties );
                 } else if ( view.satProperty ) {
                     for ( var propertyName in properties ) {
-                        view.satProperty( nodeID, propertyName, properties[propertyName] );  // TODO: be sure this is the value actually set, not the incoming value
+                        view.satProperty( nodeID, propertyName, properties[ propertyName ] );  // TODO: be sure this is the value actually set, not the incoming value
                     }
                 }
 
@@ -2590,43 +2596,47 @@ if ( ! childComponent.source ) {
 
             this.logger.debuggx( "getProperties", nodeID );
 
-            var node = nodes.existing[nodeID];
+            var node = nodes.existing[ nodeID ];
 
-            var entrants = this.getProperty.entrants;
+            var entries = this.getProperty.entries;
 
-            // Call gettingProperties() on each model.
+            // Call gettingProperties() on each model driver.
 
-            var properties = this.models.reduceRight( function( intermediate_properties, model, index ) {  // TODO: note that we can't go left to right and take the first result since we are getting all of the properties as a batch; verify that this creates the same result as calling getProperty individually on each property and that there are no side effects from getting through a driver after the one that handles the get.
+            var properties = this.models.reduceRight( function( intermediate_properties, 
+                                                                modelDriver, driverIndex ) {  // TODO: note that we can't go left to right and take the first result since we are getting all of the properties as a batch; verify that this creates the same result as calling getProperty individually on each property and that there are no side effects from getting through a driver after the one that handles the get.
 
                 var model_properties = {};
 
-                if ( model.gettingProperties ) {
+                if ( modelDriver.gettingProperties ) {
 
-                    model_properties = model.gettingProperties( nodeID, properties );
+                    model_properties = modelDriver.gettingProperties( nodeID, properties );
 
-                } else if ( model.gettingProperty ) {
+                } else if ( modelDriver.gettingProperty ) {
 
                     Object.keys( node.properties.existing ).forEach( function( propertyName ) {
 
-                        var reentry = entrants[nodeID+'-'+propertyName] = { index: index }; // the active model number from this call  // TODO: need unique nodeID+propertyName hash
+                        // TODO: need unique nodeID+propertyName hash
+                        var thisProperty = nodeID + '-' + propertyName;
 
-                        model_properties[propertyName] =
-                            model.gettingProperty( nodeID, propertyName, intermediate_properties[propertyName] );
+                        entries[ thisProperty ] = { driverIndex: driverIndex }; // the active model driver number from this call
+
+                        model_properties[ propertyName ] =
+                            modelDriver.gettingProperty( nodeID, propertyName, intermediate_properties[ propertyName ] );
                         if ( vwf.models.kernel.blocked() ) {
-                            model_properties[propertyName] = undefined; // ignore result from a blocked getter
+                            model_properties[ propertyName ] = undefined; // ignore result from a blocked getter
                         }
 
-                        delete entrants[nodeID+'-'+propertyName];
+                        delete entries[ thisProperty ];
 
                     } );
 
                 }
 
                 Object.keys( node.properties.existing ).forEach( function( propertyName ) {
-                    if ( model_properties[propertyName] !== undefined ) { // copy values from this model
-                        intermediate_properties[propertyName] = model_properties[propertyName];
-                    } else if ( intermediate_properties[propertyName] === undefined ) { // as well as recording any new keys
-                        intermediate_properties[propertyName] = undefined;
+                    if ( model_properties[ propertyName ] !== undefined ) { // copy values from this model driver
+                        intermediate_properties[ propertyName ] = model_properties[ propertyName ];
+                    } else if ( intermediate_properties[ propertyName ] === undefined ) { // as well as recording any new keys
+                        intermediate_properties[ propertyName ] = undefined;
                     }
                 } );
 
@@ -2664,34 +2674,30 @@ if ( ! childComponent.source ) {
         this.createProperty = function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
 
             this.logger.debuggx( "createProperty", function() {
-                return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];  // TODO: add truncated propertyGet, propertySet to log
+                return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];
             } );
 
-            var node = nodes.existing[nodeID];
+            propertyValue = modifyProperty( "create", nodeID, propertyName, propertyValue, 
+                                             propertyGet, propertySet );
 
-            // Register the property.
+            this.logger.debugu();
 
-            node.properties.create( propertyName );
+            return propertyValue;
+        };
 
-            // Call creatingProperty() on each model. The property is considered created after all
-            // models have run.
+        // -- initializeProperty --------------------------------------------------------------------------
 
-            this.models.forEach( function( model ) {
-                model.creatingProperty && model.creatingProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
+        /// Initialize a property value on a node.
+        /// 
+        /// @name module:vwf.initializeProperty
+
+        this.initializeProperty = function( nodeID, propertyName, propertyValue ) {
+
+            this.logger.debuggx( "initializeProperty", function() {
+                return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];
             } );
 
-            // Record the change.
-
-            if ( node.initialized && node.patchable ) {
-                node.properties.change( propertyName );
-            }
-
-            // Call createdProperty() on each view. The view is being notified that a property has
-            // been created.
-
-            this.views.forEach( function( view ) {
-                view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
-            } );
+            propertyValue = modifyProperty( "initialize", nodeID, propertyName, propertyValue );
 
             this.logger.debugu();
 
@@ -2712,172 +2718,30 @@ if ( ! childComponent.source ) {
                 return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];
             } );
 
-            var node = nodes.existing[nodeID];
+            var node = nodes.existing[ nodeID ];
+            var entries = modifyProperty.entries;
+            var thisProperty = nodeID + '-' + propertyName;
 
-            // Record calls into this function by nodeID and propertyName so that models may call
-            // back here (directly or indirectly) to delegate responses further down the chain
-            // without causing infinite recursion.
+            // Previous entry to modifyProperty for this property on this node
+            var outerEntry = entries[ thisProperty ] || {};
 
-            var entrants = this.setProperty.entrants;
-
-            var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
-            var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
-
-            // Select the actual driver calls. Create the property if it doesn't exist on this node
-            // or its prototypes. Initialize it if it exists on a prototype but not on this node.
-            // Set it if it already exists on this node.
-
-            if ( ! node.properties.has( propertyName ) || entry.creating ) {
-                reentry.creating = true;
-                var settingPropertyEtc = "creatingProperty";
-                var satPropertyEtc = "createdProperty";
-                node.properties.create( propertyName );
-            } else if ( ! node.properties.hasOwn( propertyName ) || entry.initializing ) {
-                reentry.initializing = true;
-                var settingPropertyEtc = "initializingProperty";
-                var satPropertyEtc = "initializedProperty";
-                node.properties.create( propertyName );
+            // Determine if property needs to be created or intialized instead of just set:
+            // -Create the property if it doesn't exist on this node or its prototypes.
+            //  (or if it is a reentrant call from createProperty)
+            // -Initialize it if it exists on a prototype but not on this node.
+            //  (or if it is a reentrant call from initializeProperty)
+            if ( !node.properties.has( propertyName ) || outerEntry.creating ) {
+                propertyValue = this.createProperty( nodeID, propertyName, propertyValue );
+            } else if ( !node.properties.hasOwn( propertyName ) || outerEntry.initializing ) {
+                propertyValue = this.initializeProperty( nodeID, propertyName, propertyValue );
             } else {
-                var settingPropertyEtc = "settingProperty";
-                var satPropertyEtc = "satProperty";
-            }
-
-            // Keep track of the number of assignments made by this `setProperty` call and others
-            // invoked indirectly by it, starting with the outermost call.
-
-            var outermost = entrants.assignments === undefined;
-
-            if ( outermost ) {
-                entrants.assignments = 0;
-            }
-
-            // Have we been called for the same property on the same node for a property still being
-            // assigned (such as when a setter function assigns the property to itself)? If so, then
-            // the inner call should skip drivers that the outer call has already invoked, and the
-            // outer call should complete without invoking drivers that the inner call will have
-            // already called.
-
-            var reentered = ( entry.index !== undefined );
-
-            // We'll need to know if the set was delegated to other properties or actually assigned
-            // here.
-
-            var delegated = false, assigned = false;
-
-            // Call settingProperty() on each model. The first model to return a non-undefined value
-            // has performed the set and dictates the return value. The property is considered set
-            // after all models have run.
-
-            this.models.some( function( model, index ) {
-
-                // Skip initial models that an outer call has already invoked for this node and
-                // property (if any). If an inner call completed for this node and property, skip
-                // the remaining models.
-
-                if ( ( ! reentered || index > entry.index ) && ! reentry.completed ) {
-
-                    // Record the active model number.
- 
-                    reentry.index = index;
-
-                    // Record the number of assignments made since the outermost call. When
-                    // `entrants.assignments` increases, a driver has called `setProperty` to make
-                    // an assignment elsewhere.
-
-                    var assignments = entrants.assignments;
-
-                    // Make the call.
-
-                    if ( ! delegated && ! assigned ) {
-                        var value = model[settingPropertyEtc] && model[settingPropertyEtc]( nodeID, propertyName, propertyValue );
-                    } else {
-                        model[settingPropertyEtc] && model[settingPropertyEtc]( nodeID, propertyName, undefined );
-                    }
-
-                    // Ignore the result if reentry is disabled and the driver attempted to call
-                    // back into the kernel. Kernel reentry is disabled during replication to 
-                    // prevent coloring from accessor scripts.
-
-                    if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
-                        value = undefined;
-                    }
-
-                    // The property was delegated if the call made any assignments.
-
-                    if ( entrants.assignments !== assignments ) {
-                        delegated = true;
-                    }
-
-                    // Otherwise if the call returned a value, the property was assigned here.
-
-                    else if ( value !== undefined ) {
-                        entrants.assignments++;
-                        assigned = true;
-                    }
-
-                    // Record the value actually assigned. This may differ from the incoming value
-                    // if it was range limited, quantized, etc. by the model. This is the value
-                    // passed to the views.
-
-                    if ( value !== undefined ) {
-                        propertyValue = value;
-                    }
-
-                    // If we are setting, exit from the this.models.some() iterator once the value
-                    // has been set. Don't exit early if we are creating or initializing since every
-                    // model needs the opportunity to register the property.
-
-                    return settingPropertyEtc == "settingProperty" && ( delegated || assigned );
-                }
-
-            }, this );
-
-            // Record the change if the property was assigned here.
-
-            if ( assigned && node.initialized && node.patchable ) {
-                node.properties.change( propertyName );
-            }
-
-            // Call satProperty() on each view. The view is being notified that a property has
-            // been set. Only call for value properties as they are actually assigned. Don't call
-            // for accessor properties that have delegated to other properties. Notifying when
-            // setting an accessor property would be useful, but since that information is
-            // ephemeral, and views on late-joining clients would never see it, it's best to never
-            // send those notifications.
-
-            if ( assigned ) {
-                this.views.forEach( function( view ) {
-                    view[satPropertyEtc] && view[satPropertyEtc]( nodeID, propertyName, propertyValue );
-                } );
-            }
-
-            // For a reentrant call, restore the previous state, move the index forward to cover
-            // the models we called.
-
-            if ( reentered ) {
-                entrants[nodeID+'-'+propertyName] = entry;
-                entry.completed = true;
-            }
-
-            // Delete the call record if this is the first, non-reentrant call here (the normal
-            // case).
-
-            else {
-                delete entrants[nodeID+'-'+propertyName];
-            }
-
-            // Clear the assignment counter when the outermost `setProperty` completes.
-
-            if ( outermost ) {
-                delete entrants.assignments;
+                propertyValue = modifyProperty( "set", nodeID, propertyName, propertyValue );
             }
 
             this.logger.debugu();
 
             return propertyValue;
         };
-
-        this.setProperty.entrants = {}; // maps ( nodeID + '-' + propertyName ) => { index: i, value: v }
 
         // -- getProperty --------------------------------------------------------------------------
 
@@ -2892,112 +2756,82 @@ if ( ! childComponent.source ) {
             this.logger.debuggx( "getProperty", nodeID, propertyName );
 
             var propertyValue = undefined;
+            var entries = this.getProperty.entries;
+            var entryManager = createEntry( entries, nodeID, propertyName );
+            var thisProperty = entryManager.thisProperty;
+            var thisEntry = entryManager.thisEntry;
+            var outerEntry = entryManager.outerEntry;
+            var isOutermostEntry = entryManager.isOutermostEntry;
 
-            // Record calls into this function by nodeID and propertyName so that models may call
-            // back here (directly or indirectly) to delegate responses further down the chain
-            // without causing infinite recursion.
-
-            var entrants = this.getProperty.entrants;
-
-            var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
-            var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
-
-            // Keep track of the number of retrievals made by this `getProperty` call and others
-            // invoked indirectly by it, starting with the outermost call.
-
-            var outermost = entrants.retrievals === undefined;
-
-            if ( outermost ) {
-                entrants.retrievals = 0;
+            if ( isOutermostEntry ) {
+                // Keep track of the number of retrievals made by this `getProperty` call and others
+                // invoked indirectly by it, starting with the outermost call.
+                entries.numRetrievals = 0;
             }
 
-            // Have we been called for the same property on the same node for a property still being
-            // retrieved (such as when a getter function retrieves the property from itself)? If so,
-            // then the inner call should skip drivers that the outer call has already invoked, and
-            // the outer call should complete without invoking drivers that the inner call will have
-            // already called.
-
-            var reentered = ( entry.index !== undefined );
-
-            // We'll need to know if the get was delegated to other properties or actually retrieved
-            // here.
-
+            // We'll need to know if the get was:
+            // -delegated to other properties or
+            // -actually retrieved here
             var delegated = false, retrieved = false;
 
-            // Call gettingProperty() on each model. The first model to return a non-undefined value
-            // dictates the return value.
+            // Call gettingProperty() on each model driver.
+            // The first model driver to return a non-undefined value dictates the return value.
+            this.models.some( function( modelDriver, driverIndex ) {
 
-            this.models.some( function( model, index ) {
+                // Skip initial model drivers that a previous call has already invoked for this 
+                // node and property (if any).
+                var driverInvoked = ( !isOutermostEntry && ( driverIndex <= outerEntry.driverIndex ) );
+                if ( driverInvoked ) {
+                  return false;
+                }
 
-                // Skip initial models that an outer call has already invoked for this node and
-                // property (if any). If an inner call completed for this node and property, skip
-                // the remaining models.
+                // If a reentrant call completed for this node and property, skip the remaining
+                // model drivers.
+                if ( thisEntry.propertyRetrievedByPreviousEntry ) {
+                  return true;
+                }
 
-                if ( ( ! reentered || index > entry.index ) && ! reentry.completed ) {
+                // Record the active model driver number.
+                thisEntry.driverIndex = driverIndex;
 
-                    // Record the active model number.
- 
-                    reentry.index = index;
+                // Record the number of retrievals so we can check after the driver call to see 
+                // if it delegated to another property.
+                var numRetrievalsBeforeDriverCall = entries.numRetrievals;
 
-                    // Record the number of retrievals made since the outermost call. When
-                    // `entrants.retrievals` increases, a driver has called `getProperty` to make
-                    // a retrieval elsewhere.
+                // Make the call.
+                var value = modelDriver.gettingProperty &&
+                            modelDriver.gettingProperty( nodeID, propertyName, propertyValue );  // TODO: probably don't need propertyValue here
 
-                    var retrievals = entrants.retrievals;
+                // Ignore the result if reentry is disabled and the driver attempted to call
+                // back into the kernel. Kernel reentry is disabled during replication to 
+                // prevent coloring from accessor scripts.
+                if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
+                    value = undefined;
+                }
 
-                    // Make the call.
+                var valueExists = ( value !== undefined );
 
-                    var value = model.gettingProperty &&
-                        model.gettingProperty( nodeID, propertyName, propertyValue );  // TODO: probably don't need propertyValue here
+                // If 'entries.numRetrievals' changes during the driver call, it means that it
+                // delegated to another property.
+                delegated = ( entries.numRetrievals !== numRetrievalsBeforeDriverCall );
 
-                    // Ignore the result if reentry is disabled and the driver attempted to call
-                    // back into the kernel. Kernel reentry is disabled during replication to 
-                    // prevent coloring from accessor scripts.
-
-                    if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
-                        value = undefined;
-                    }
-
-                    // The property was delegated if the call made any retrievals.
-
-                    if ( entrants.retrievals !== retrievals ) {
-                        delegated = true;
-                    }
-
-                    // Otherwise if the call returned a value, the property was retrieved here.
-
-                    else if ( value !== undefined ) {
-                        entrants.retrievals++;
-                        retrieved = true;
-                    }
+                if ( valueExists ) {
 
                     // Record the value retrieved.
+                    propertyValue = value;
 
-                    if ( value !== undefined ) {
-                        propertyValue = value;
+                    if ( ! delegated ) {
+                        entries.numRetrievals++;
+                        retrieved = true;
                     }
-
-                    // Exit from the this.models.some() iterator once we have a return value.
-
-                    return delegated || retrieved;
                 }
+
+                // Exit from the this.models.some() iterator once we have a return value.
+                return delegated || retrieved;
 
             }, this );
 
-            if ( reentered ) {
-
-                // For a reentrant call, restore the previous state, move the index forward to cover
-                // the models we called.
-
-                entrants[nodeID+'-'+propertyName] = entry;
-                entry.completed = true;
-
-            } else {
-
-                // Delete the call record if this is the first, non-reentrant call here (the normal
-                // case).
-
-                delete entrants[nodeID+'-'+propertyName];
+            if ( isOutermostEntry ) {
 
                 // Delegate to the behaviors and prototype if we didn't get a result from the
                 // current node.
@@ -3019,18 +2853,20 @@ if ( ! childComponent.source ) {
 
                 }
 
-                // Call gotProperty() on each view.
-
+                // The first entry calls gotProperty() on each view
                 this.views.forEach( function( view ) {
                     view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
                 } );
 
-            }
+                // Clean up since we've retrieved the property
+                delete entries[ thisProperty ];
+                delete entries.retrievals;
+            } else {
 
-            // Clear the retrieval counter when the outermost `getProperty` completes.
-
-            if ( outermost ) {
-                delete entrants.retrievals;
+                // For a reentrant call, restore the previous state, move the index forward to cover
+                // the model drivers we called.
+                entries[ thisProperty ] = outerEntry;
+                outerEntry.propertyRetrievedByPreviousEntry = true;
             }
 
             this.logger.debugu();
@@ -3038,7 +2874,7 @@ if ( ! childComponent.source ) {
             return propertyValue;
         };
 
-        this.getProperty.entrants = {}; // maps ( nodeID + '-' + propertyName ) => { index: i, value: v }
+        this.getProperty.entries = {}; // maps ( nodeID + '-' + propertyName ) => { ... }
 
         // -- createMethod -------------------------------------------------------------------------
 
@@ -3050,8 +2886,8 @@ if ( ! childComponent.source ) {
 
             this.logger.debuggx( "createMethod", nodeID, methodName, methodParameters );
 
-            // Call creatingMethod() on each model. The method is considered created after all
-            // models have run.
+            // Call creatingMethod() on each model driver.
+            // The method is considered created after all model drivers have run.
 
             this.models.forEach( function( model ) {
                 model.creatingMethod && model.creatingMethod( nodeID, methodName, methodParameters, methodBody );
@@ -3079,8 +2915,8 @@ if ( ! childComponent.source ) {
                 return [ nodeID, methodName, JSON.stringify( loggableValues( methodParameters ) ) ];
             } );
 
-            // Call callingMethod() on each model. The first model to return a non-undefined value
-            // dictates the return value.
+            // Call callingMethod() on each model driver.
+            // The first model driver to return a non-undefined value dictates the return value.
 
             var methodValue = undefined;
 
@@ -3110,8 +2946,8 @@ if ( ! childComponent.source ) {
 
             this.logger.debuggx( "createEvent", nodeID, eventName, eventParameters );
 
-            // Call creatingEvent() on each model. The event is considered created after all models
-            // have run.
+            // Call creatingEvent() on each model driver.
+            // The event is considered created after all model drivers have run.
 
             this.models.forEach( function( model ) {
                 model.creatingEvent && model.creatingEvent( nodeID, eventName, eventParameters );
@@ -3139,13 +2975,13 @@ if ( ! childComponent.source ) {
                 return [ nodeID, eventName, JSON.stringify( loggableValues( eventParameters ) ) ];
             } );
 
-            // Call firingEvent() on each model.
+            // Call firingEvent() on each model driver.
 
             var handled = this.models.reduce( function( handled, model ) {
                 return model.firingEvent && model.firingEvent( nodeID, eventName, eventParameters ) || handled;
             }, false );
 
-            // Call firedEvent() on each view.
+            // Call firedEvent() on each view driver
 
             this.views.forEach( function( view ) {
                 view.firedEvent && view.firedEvent( nodeID, eventName, eventParameters );
@@ -3265,8 +3101,8 @@ if ( ! childComponent.source ) {
                 scriptType = "application/javascript";
             }
 
-            // Call executing() on each model. The script is considered executed after all models
-            // have run.
+            // Call executing() on each model driver.
+            // The script is considered executed after all model drivers have run.
 
             var scriptValue = undefined;
 
@@ -4675,7 +4511,190 @@ if ( ! childComponent.source ) {
             return prototypeDescriptor;
         };
 
+        // Contains the meat of what happens in createProperty and initializeProperty
+        var modifyProperty = function( action, nodeID, propertyName, propertyValue, 
+                                       propertyGet, propertySet ) {
+
+            var node = nodes.existing[ nodeID ];
+            var modelFunc;
+            var propertyHasBeenSet;
+            var stopAfterSet;
+            var entries = modifyProperty.entries;
+            var entryManager = createEntry( entries, nodeID, propertyName );
+            var thisProperty = entryManager.thisProperty;
+            var thisEntry = entryManager.thisEntry;
+            var outerEntry = entryManager.outerEntry;
+            var isOutermostEntry = entryManager.isOutermostEntry;
+
+            switch ( action ) {
+                case "create":
+                    node.properties.create( propertyName );
+                    modelFunc = "creatingProperty";
+                    thisEntry.creating = true;
+                    stopAfterSet = false;
+                    break;
+                case "initialize":
+                    node.properties.create( propertyName );
+                    modelFunc = "initializingProperty";
+                    thisEntry.initializing = true;
+                    stopAfterSet = false;
+                    break;
+                case "set":
+                    modelFunc = "settingProperty";
+                    stopAfterSet = true;
+                    break;
+                default:
+                    that.logger.errorx( "modifyProperty", "Cannot perform invalid action '" + 
+                                                           action + "'" );
+                    return;
+            }
+
+            if ( isOutermostEntry ) {
+                // Keep track of the number of assignments made by this call and others invoked 
+                // indirectly by it, starting with the first call.
+                entries.numAssignments = 0;
+            }
+
+            // We'll need to know if the action was:
+            // -delegated to other properties or
+            // -actually assigned here
+            var delegated = false, assigned = false;
+
+            // Call modelFunc on each model driver. The first model to return a non-undefined 
+            // value has performed the create and dictates the return value.
+            // The property is considered set after all model drivers have run.
+            that.models.some( function( modelDriver, driverIndex ) {
+
+                // Skip initial model drivers that a previous call has already invoked for this 
+                // node and property (if any).
+                var driverInvoked = ( !isOutermostEntry && ( driverIndex <= outerEntry.driverIndex ) );
+                if ( driverInvoked ) {
+                  return false;
+                }
+
+                // If a reentrant call completed for this node and property, skip the remaining
+                // model drivers.
+                if ( thisEntry.propertyAssignedByPreviousEntry ) {
+                  return true;
+                }
+
+                // Record the active model driver number.
+                thisEntry.driverIndex = driverIndex;
+
+                // Record the number of assignments so we can check after the driver call to see 
+                // if it delegated to another property.
+                var numAssignmentsBeforeDriverCall = entries.numAssignments;
+
+                // Make the call.
+                if ( !propertyHasBeenSet ) {
+                    var value = modelDriver[ modelFunc ] &&
+                                modelDriver[ modelFunc ]( nodeID, propertyName, propertyValue,
+                                                          propertyGet, propertySet );
+                } else {
+                    modelDriver[ modelFunc ] &&
+                    modelDriver[ modelFunc ]( nodeID, propertyName, undefined, propertyGet, propertySet );
+                }
+
+                // Ignore the result if reentry is disabled and the driver attempted to call
+                // back into the kernel. Kernel reentry is disabled during replication to 
+                // prevent coloring from accessor scripts.
+                if ( that.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
+                    value = undefined;
+                }
+
+                var valueExists = ( value !== undefined );
+
+                // If 'entries.numAssignments' changes during the driver call, it means that it
+                // delegated to another property.
+                var delegated = ( entries.numAssignments !== numAssignmentsBeforeDriverCall );
+
+                if ( valueExists ) {
+
+                    // Record the value actually assigned. This may differ from the incoming value
+                    // if it was range limited, quantized, etc. by the model driver. This is the value
+                    // passed to the views.
+                    propertyValue = value;
+
+                    if ( !delegated ) {
+                        entries.numAssignments++;
+                        assigned = true;
+                    }
+                }
+
+                propertyHasBeenSet = propertyHasBeenSet || assigned || delegated;
+                return propertyHasBeenSet && stopAfterSet;
+            }, this );
+
+            // Record the change if the property was assigned here.
+            if ( assigned && node.initialized && node.patchable ) {
+                node.properties.change( propertyName );
+            }
+
+            // The entry that assigns the value calls the viewFunc on each view
+            if ( assigned ) {
+                that.views.forEach( function( view ) {
+                    switch ( action ) {
+                        case "create":
+                            if ( view.createdProperty ) {
+                                view.createdProperty( nodeID, propertyName, propertyValue,
+                                              propertyGet, propertySet );
+                                break;
+                            }
+                        case "initialize":
+                            if ( view.initializedProperty ) {
+                                view.initializedProperty( nodeID, propertyName, propertyValue );
+                                break;
+                            }
+                        case "set":
+                            view.satProperty && 
+                            view.satProperty( nodeID, propertyName, propertyValue );
+                            break;
+                    }
+                } );
+            }
+
+            if ( isOutermostEntry ) {
+
+                // Clean up since we've assigned the property
+                delete entries[ thisProperty ];
+                delete entries.assignments;
+
+            } else {
+
+                // For a reentrant call, restore the previous state, move the index forward to 
+                // cover the model drivers we called.
+
+                entries[ thisProperty ] = outerEntry;
+                outerEntry.propertyAssignedByPreviousEntry = true;
+
+            }
+
+            return propertyValue;
+        }
+
+        modifyProperty.entries = {}; // maps ( nodeID + '-' + propertyName ) => { ... }
+
+        var createEntry = function( entries, nodeID, propertyName ) {
+            var entryManager = {
+                "thisProperty": nodeID + '-' + propertyName,
+                // Current function entry for this property on this node
+                "thisEntry": {}
+            };
+            
+            // Previous function entry for this property on this node
+            entryManager.outerEntry = entries[ entryManager.thisProperty ] || {};
+
+            entryManager.isOutermostEntry = ( entryManager.outerEntry.driverIndex === undefined );
+
+            // Set the current function entry in the entries object
+            entries[ entryManager.thisProperty ] = entryManager.thisEntry;
+
+            return entryManager;
+        }
+
         // == Private variables ====================================================================
+
+        var that = this;
 
         // Prototype for the `properties`, `methods` and `events` collections in the `nodes`
         // objects.
