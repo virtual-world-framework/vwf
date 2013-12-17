@@ -1276,6 +1276,7 @@
 
                 nodes: [  // TODO: all global objects
                     this.getNode( "http-vwf-example-com-clients-vwf", full ),
+                    this.getNode( "http-vwf-example-com-devices-vwf", full ),
                     this.getNode( applicationID, full ),
                 ],
 
