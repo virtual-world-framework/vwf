@@ -7,9 +7,6 @@ The Virtual World Framework (VWF) allows you to build collaborative, immersive a
 
 VWF applications are written in JavaScript and leverage emerging web technologies such as WebGL, WebRTC, and WebSockets to provide a full 3D environment that is automatically synchronized across clients.
 
-##Current Build Status
-Master Branch - [![Build Status](http://jenkins.virtualworldframework.com/job/Master/badge/icon)](http://jenkins.virtualworldframework.com/job/Master/)      Integration Branch - [![Build Status](http://jenkins.virtualworldframework.com/job/Integration/badge/icon)](http://jenkins.virtualworldframework.com/job/Integration/)      Development Branch - [![Build Status](http://jenkins.virtualworldframework.com/job/Development/badge/icon)](http://jenkins.virtualworldframework.com/job/Development/)
-
 ## Installation
 
 **Install on Linux / Mac OS X**
@@ -74,6 +71,9 @@ Our development process utilizes several branches:
 When submitting a pull request, please use the `development` branch.
 
 Also, please be sure that your pull request conforms to our [Coding Standard](http://redmine.virtualworldframework.com/projects/vwf/wiki/JavaScript_Coding_Standard).
+
+##Current Build Status
+Master Branch - [![Build Status](http://jenkins.virtualworldframework.com/job/Master/badge/icon)](http://jenkins.virtualworldframework.com/job/Master/)      Integration Branch - [![Build Status](http://jenkins.virtualworldframework.com/job/Integration/badge/icon)](http://jenkins.virtualworldframework.com/job/Integration/)      Development Branch - [![Build Status](http://jenkins.virtualworldframework.com/job/Development/badge/icon)](http://jenkins.virtualworldframework.com/job/Development/)
 
 ## Community
 
