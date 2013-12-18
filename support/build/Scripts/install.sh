@@ -116,8 +116,8 @@ if [ ! -f /usr/bin/node ]; then
 		fi
 		# just double-checking :)
 		test -x "$HOME/.vwf/.node"
-		sudo ln -s ~/.vwf/.node/bin/node /usr/bin/node
-		sudo ln -s ~/.vwf/.node/bin/npm /usr/bin/npm
+		sudo ln -sf ~/.vwf/.node/bin/node /usr/bin/node
+		sudo ln -sf ~/.vwf/.node/bin/npm /usr/bin/npm
 	else
 		echo "You need sudo permission to complete Node installation. Node is a web engine that VWF uses to execute."
 		echo "Please follow the instructions for installation of Node at http://howtonode.org/how-to-install-nodejs"
