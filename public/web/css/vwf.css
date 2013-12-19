@@ -2,7 +2,9 @@
 
 html {
   overflow-y: scroll;
+
 }
+
 
 section {
   overflow: auto;
@@ -48,6 +50,11 @@ p {
   line-height: 1.5em;
 }
 
+li .header {
+  font-size: 18px;
+  font-weight: bold;
+}
+
 /* header */
 
 #logo {
@@ -71,10 +78,10 @@ iframe {
 }
 
 .span3 {
-  width: 260px;
-  line-height: .5em;
+	width: 260px;
+	line-height: .5em;
 }
-  
+	
 /* footer */
 
 footer {
@@ -109,25 +116,25 @@ footer ul li {
 /* Glossary Page */
 
 .glossarymain{
-  width:1000px;
-  text-align:left;
-  margin-top:-45px;
+	width:1000px;
+	text-align:left;
+	margin-top:-45px;
 }
 
 
 /* Catalog Page */
 .row {
-  margin:5px;
-  text-align:center
+	margin:5px;
+	text-align:center
 }
 .row .example {
-  border:2px solid white;
-  margin:5px;
-  width:240px;
-  height:220px;
-  display:-moz-inline-stack;
-  display:inline-block;
-  *display: inline;
+	border:2px solid white;
+	margin:5px;
+	width:240px;
+	height:220px;
+	display:-moz-inline-stack;
+    display:inline-block;
+    *display: inline;
 }
 .row .example a:link {color:white;text-decoration:none;}
 .row .example a:hover {color:skyblue;text-decoration:none;}
@@ -135,81 +142,148 @@ footer ul li {
 .row .example a img { border: 0; }
 
 .app-title {
-  font-size:1.2em;
-  text-align:left;
+	font-size:1.2em;
+	text-align:left;
 }
 
 .description {
-  float:left;
-  text-align:left;
-  width:350px;
-  padding-left:20px;
-  padding-right:5px;
+	float:left;
+	text-align:left;
+	width:350;
+	padding-left:20px;
+	padding-right:5px;
 }
+
 
 /* Documentation Page */
-
 .nav-list .nav-header {
-  color: #FFFFFF;
-}
-  
+	color: #FFFFFF;
+	}
+	
 .navmenu {
-  color:#444456;
-  width:185px;
-  float:left;
-  position:relative;
-  margin-top: 45px;
+	color:#444456;
+	width:185px;
+	float:left;
+	position:fixed;
+	margin-top: 10px;
 }
 .navmenu a:visited {
-  color:#3366CC;  
+	color:#3366CC;	
 }
 .navmenu ul {
-  list-style:none;
-  font:10pt Arial;
-  text-transform:uppercase;
-  border-right: thin solid;
+	list-style:none;
+	font:10pt Arial;
+	text-transform:uppercase;
+	border-right: thin solid;
 }
 .navmenu ul li {
-  padding-bottom:5px;
+	padding-bottom:5px;
 }
 .navmenu ul li a:link {
-  color:#3366CC;
-  text-decoration:none;
+	color:#3366CC;
+	text-decoration:none;
 }
 .navmenu ul li a:hover {
-  color:#3399FF;
-}
-.navmenu ul li ul {
-  padding-top: 5px;
+	color:#3399FF;
 }
 
 .content {
-  width:800px;
-  display:inline;
-  float:right;
+	width:800px;
+	display:inline;
+	float:right;
 }
 .content iframe {
-  width:780px;
-  height:300px;
-  display:inline;
-  overflow-x:auto;
-  overflow-y:auto;
+	width:780px;
+	height:300px;
+	display:inline;
+	overflow-x:auto;
+	overflow-y:auto;
 }
 .content pre {
-  border:1px solid #AAA;
-  background:#DDD;
-  padding:10px;
-  width:760px;
-  overflow-y:scroll;
+	border:1px solid #AAA;
+	background:#DDD;
+	padding:10px;
+	width:760px;
+	overflow-y:scroll;
 }
 .content h1 {
-  font: 18pt Arial;
-  font-weight:bold;
+	font: 18pt Arial;
+	font-weight:bold;
 }
 .content h2 {
-  font: 14pt Arial;
-  font-weight:bold;
+	font: 14pt Arial;
+	font-weight:bold;
 }
+
 .contentmargin {
-  margin-top: 50px;
+margin-top: 50px;
 }
+
+
+/* 
+
+
+
+body {
+	font: 12pt Arial;
+	text-align:center;
+	overflow-y:scroll;
+	min-width:1000px;
+}
+a:link {
+	text-decoration:none;
+}
+.header {
+	font:22pt Arial;
+	font-weight:bold;
+	width:1000px;
+	margin:auto;
+	text-align:left;
+	padding:20px;
+	padding-bottom:5px;
+	border-bottom:2px solid #666678;
+}
+.header .title {
+	color:#666678;
+	padding:20px;
+	/* display:inline; */
+	/* position:relative; */
+	/* top:-30px; 
+}
+.header .menu {
+	font:10pt Arial;
+	text-transform:uppercase;
+	color:#444456;
+	width:100%;
+	text-align:right;
+	/*float:right;
+	position:relative;
+	top:-10px;
+}
+.header .menu a:link {
+	color:#444456;
+	text-decoration:none;
+}
+.header .menu a:visited {
+	color:#444456;
+}
+.header .menu a:hover {
+	color:#AAAABB;
+}
+
+.full {
+	width:800px;
+	display:inline;
+	margin:auto;
+}
+.full h1 {
+	font: 18pt Arial;
+	font-weight:bold;
+}
+.full h2 {
+	font: 14pt Arial;
+	font-weight:bold;
+}
+
+
+*/

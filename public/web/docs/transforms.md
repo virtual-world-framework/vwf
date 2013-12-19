@@ -1,5 +1,8 @@
-# Complex Transforms
+<a name="transforms" />
 
+<div class="well" markdown="1">
+Complex Transforms
+==============
 --------------
 
 Among the most common properties to set on a node within the Virtual World Framework are various transforms. The [node3](jsdoc_cmp/symbols/node3.vwf.html) component defines the basic transforms including the following:
@@ -116,4 +119,5 @@ Finally, here are few more examples to do matrix operations such as normalizatio
 
 	goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
 
+</div>
 --------------
