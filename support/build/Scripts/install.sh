@@ -112,7 +112,7 @@ if [ ! -f /usr/bin/node ]; then
 		#test -x "${INSTALL_TMPDIR}/${NODEPACKAGE}"
 		mv "${INSTALL_TMPDIR}/${NODEPACKAGE}/" "$HOME/.vwf/.node"
 		if [ -d "$INSTALL_TMPDIR" ];then
-		rmdir "${INSTALL_TMPDIR}"
+		sudo rmdir "${INSTALL_TMPDIR}"
 		fi
 		# just double-checking :)
 		#test -x "$HOME/.vwf/.node"
