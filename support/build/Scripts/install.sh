@@ -97,14 +97,14 @@ if [ ! -f /usr/bin/node ]; then
 	if type sudo >/dev/null 2>&1; then
 		echo "VWF uses Node.js as an engine. We are installing Node now."
 		echo "This may prompt for your password."
-		[ -e "$HOME/.vwf/.node" ] && rm -rf "$HOME/.vwf/.node"
+		[ -e "$HOME/.vwf/.node" ] && sudo rm -rf "$HOME/.vwf/.node"
 
 
 		INSTALL_TMPDIR="$HOME/.node-install-tmp"
 		if [ -d "$INSTALL_TMPDIR" ];then
-		rm -rf "$INSTALL_TMPDIR"
+		sudo rm -rf "$INSTALL_TMPDIR"
 		fi
-		mkdir "$INSTALL_TMPDIR"
+		sudo mkdir "$INSTALL_TMPDIR"
 		echo "Downloading latest Node distribution"
 
 		curl --progress-bar --fail "$TARBALL_URL" | tar -xzf - -C "$INSTALL_TMPDIR"
@@ -132,10 +132,10 @@ fi
 
 cd "$HOME/.vwf"
 while true; do
-    read -p "Are you behind a proxy?" yn
+    read -p "Are you behind a proxy [y/n]?" yn
     case $yn in
         [Yy]* ) echo "Please enter your proxy: "; read input_variable; echo "You entered: $input_variable"; npm config set proxy $input_variable; npm config set https-proxy $input_variable; break;;
-        [Nn]* ) exit;;
+        [Nn]* ) break;;
         * ) echo "Please answer yes or no.";;
     esac
 done
