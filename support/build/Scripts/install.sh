@@ -104,7 +104,7 @@ if [ ! -f /usr/bin/node ]; then
 		if [ -d "$INSTALL_TMPDIR" ];then
 		sudo rm -rf "$INSTALL_TMPDIR"
 		fi
-		sudo mkdir "$INSTALL_TMPDIR"
+		mkdir "$INSTALL_TMPDIR"
 		echo "Downloading latest Node distribution"
 
 		curl --progress-bar --fail "$TARBALL_URL" | tar -xzf - -C "$INSTALL_TMPDIR"
