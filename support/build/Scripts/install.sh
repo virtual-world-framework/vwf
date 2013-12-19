@@ -131,6 +131,14 @@ fi
 #######################################
 
 cd "$HOME/.vwf"
+while true; do
+    read -p "Are you behind a proxy?" yn
+    case $yn in
+        [Yy]* ) echo "Please enter your proxy: "; read input_variable; echo "You entered: $input_variable"; npm config set proxy $input_variable; npm config set https-proxy $input_variable; break;;
+        [Nn]* ) exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
 npm install
 
 
