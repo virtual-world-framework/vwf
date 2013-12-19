@@ -93,6 +93,7 @@
 									<li> <a href='transforms.html' title='Transforms'>Transforms</a> </li>
 									<li> <a href='lesson.html' title='Lesson'>Lesson</a> </li>
 									<li> <a href='logging.html' title='Logging'>Logging</a> </li>
+									<li> <a href='persistence.html' title='Persistence'>Persistence</a> </li>
 									<!-- 
 									<li> <a href='events.html' title='Events'>Events</a> </li>
 									<li> <a href='latency.html' title='Latency'>Performance</a> </li>
