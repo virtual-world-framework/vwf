@@ -35,16 +35,17 @@
     <script type="text/javascript" src="require.js"></script>
 
     <script type="text/javascript" src="jquery-1.10.2.min.js"></script>
-	<script type="text/javascript" src="bootstrap.min.js"></script>
-    <script type="text/javascript" src="jquery-ui-1.10.3.custom.min.js"></script>
-    <script type="text/javascript" src="jquery.hammer.js"></script>
+	<!--<script type="text/javascript" src="bootstrap.min.js"></script>-->
+    <!--<script type="text/javascript" src="jquery-ui-1.8.16.custom.js"></script>-->
+    <!--<script type="text/javascript" src="jquery.hammer.js"></script>-->
+
     <script type="text/javascript" src="async.js"></script>
 
     <script type="text/javascript" src="closure/base.js"></script>
     <script type="text/javascript">goog.require('goog.vec.Mat4')</script>
     <script type="text/javascript">goog.require('goog.vec.Quaternion')</script>
 
-    <script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
+    <!--<script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
 
     <script type="text/javascript" src="crypto.js"></script>
     <script type="text/javascript" src="md5.js"></script>
@@ -113,18 +114,18 @@
             }
         }
 
-        googleEarth && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")
+        // googleEarth && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")
     </script>
-    <script type="text/javascript">googleEarth && google.load( "earth", "1" )</script>
+    <!--<script type="text/javascript">googleEarth && google.load( "earth", "1" )</script>-->
     
 
     <!-- This is the common view implementation and an example view that summarizes the          -->
     <!-- simulation state in HTML on the main page.                                              -->
 
- 	<link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
-    <link rel="stylesheet" type="text/css" href="index.css" />
-    <link rel="stylesheet" type="text/css" href="vwf/view/editor/editor.css" />
-    <link rel="stylesheet" type="text/css" href="jquery-ui-1.10.3.custom.min.css" />
+ 	<!--<link rel="stylesheet" type="text/css" href="css/bootstrap.css" />-->
+    <!--<link rel="stylesheet" type="text/css" href="index.css" />-->
+    <!--<link rel="stylesheet" type="text/css" href="vwf/view/editor/editor.css" />-->
+    <!--<link rel="stylesheet" type="text/css" href="jquery-ui-1.8.16.custom.css" />-->
 
   </head>
 
@@ -136,56 +137,57 @@
 
     <!-- The main content renders to "#vwf-root", the item with the id "vwf-root".               -->
 
-    <div id="vwf-root"></div>
+    <!--<div id="vwf-root"></div>-->
 	
     <!-- Overlay div to display loading information> -->
-    <div id="loadVWFModal" class="modal">
-      <div class="modal-header">
-            <img src="images/logo.png" style="width:100%;"/>
-      </div>
-      <div class="modal-body">
-    		<div>
-    			<table style="width:100%;">
-    				<tr>
-    					<td><span id='WGL' class='req'></span></td>
-    					<td><span id='ES5' class='req'></span></td>
-    					<td><span id='WS' class='req'></span></td>
-    				</tr>
-    			</table>
-    			<div class="progress progress-striped active">
-    				<div class="bar" id="loadVWFProgressBar" style="width:100%;"></div>
-    			</div>
-    		</div>
-      </div>
-      <div class="modal-footer">
+    <!--<div id="loadVWFModal" class="modal">-->
+    <!--  <div class="modal-header">-->
+    <!--        <img src="images/logo.png" style="width:100%;"/>-->
+    <!--  </div>-->
+    <!--  <div class="modal-body">-->
+    <!--		<div>-->
+    <!--			<table style="width:100%;">-->
+    <!--				<tr>-->
+    <!--					<td><span id='WGL' class='req'></span></td>-->
+    <!--					<td><span id='ES5' class='req'></span></td>-->
+    <!--					<td><span id='WS' class='req'></span></td>-->
+    <!--				</tr>-->
+    <!--			</table>-->
+    <!--			<div class="progress progress-striped active">-->
+    <!--				<div class="bar" id="loadVWFProgressBar" style="width:100%;"></div>-->
+    <!--			</div>-->
+    <!--		</div>-->
+    <!--  </div>-->
+    <!--  <div class="modal-footer">-->
 
-    		<div id='loadText' style="font-family: 'Droid Sans',sans-serif;font-size: 14px;line-height: 20px;color: #999;text-alignment:left;width:100%"> </div>
-      </div>
-    </div>
+    <!--		<div id='loadText' style="font-family: 'Droid Sans',sans-serif;font-size: 14px;line-height: 20px;color: #999;text-alignment:left;width:100%"> </div>-->
+    <!--  </div>-->
+    <!--</div>-->
 
     <script type="text/javascript">
-        function updateOverlay(compatibility)
-        {
-            if(compatibility.compatible) {
-                setTimeout("$('#loadVWFModal').modal('hide')",2000);
-            }
-            else {
-                if(compatibility.errors["WGL"]) {
-                    $('#WGL').prepend("<img src='images/x.png' alt=' ' width='20px'/> WebGL");       
-                }
-                if(compatibility.errors["ES5"]) {
-                    $('#ES5').prepend("<img src='images/x.png' alt=' ' width='20px'/> ECMAScript5");                    
-                }
-                if(compatibility.errors["WS"]) {
-                    $('#WS').html("<img src='images/x.png' alt=' ' width='20px'/> WebSockets");
-                }
-                $('#loadText').html("This browser is not compatible. Please review <a href='/web/docs/reqs.html'>documentation</a>.");
-            }
-        }
+        // function updateOverlay(compatibility)
+        // {
+        //     if(compatibility.compatible) {
+        //         setTimeout("$('#loadVWFModal').modal('hide')",2000);
+        //     }
+        //     else {
+        //         if(compatibility.errors["WGL"]) {
+        //             $('#WGL').prepend("<img src='images/x.png' alt=' ' width='20px'/> WebGL");       
+        //         }
+        //         if(compatibility.errors["ES5"]) {
+        //             $('#ES5').prepend("<img src='images/x.png' alt=' ' width='20px'/> ECMAScript5");                    
+        //         }
+        //         if(compatibility.errors["WS"]) {
+        //             $('#WS').html("<img src='images/x.png' alt=' ' width='20px'/> WebSockets");
+        //         }
+        //         $('#loadText').html("This browser is not compatible. Please review <a href='/web/docs/reqs.html'>documentation</a>.");
+        //     }
+        // }
 
-        $("#loadVWFModal").centerInClient();
-        $('#loadVWFModal').modal('show');
-        vwf.loadConfiguration(application, userLibraries, updateOverlay);
+        // $("#loadVWFModal").centerInClient();
+        // $('#loadVWFModal').modal('show');
+        // vwf.loadConfiguration(application, userLibraries, updateOverlay);
+        vwf.loadConfiguration(application, userLibraries);
     </script>
   </body>
 
