@@ -97,7 +97,7 @@ if [ ! -f /usr/bin/node ]; then
 	if type sudo >/dev/null 2>&1; then
 		echo "VWF uses Node.js as an engine. We are installing Node now."
 		echo "This may prompt for your password."
-		[ -e "$HOME/.vwf/.node" ] && sudo rm -rf "$HOME/.vwf/.node"
+		[ -e "$HOME/.vwf/.node" ] && rm -rf "$HOME/.vwf/.node"
 
 
 		INSTALL_TMPDIR="$HOME/.node-install-tmp"
