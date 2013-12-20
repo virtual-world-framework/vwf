@@ -131,14 +131,12 @@ fi
 #######################################
 
 cd "$HOME/.vwf"
-while true; do
-    read -p "Are you behind a proxy [y/n]?" yn
-    case $yn in
-        [Yy]* ) echo "Please enter your proxy: "; read input_variable; echo "You entered: $input_variable"; npm config set proxy $input_variable; npm config set https-proxy $input_variable; break;;
-        [Nn]* ) break;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
+if [ -z "$HTTP_PROXY" ]; then
+npm config set proxy "$HTTP_PROXY"; 
+npm config set https-proxy "$HTTP_PROXY"; 
+echo "NPM proxy has been set to ${HTTP_PROXY}."
+fi
+echo "NPM proxy has not been set as HTTP_PROXY environment variable is not set. If you are behind a proxy, please make sure your HTTP_PROXY variable is set and re-execute VWF installation."
 npm install
 
 
