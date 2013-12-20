@@ -79,7 +79,7 @@ Object.keys(servers).forEach(function(server) {
         casper.thenOpen(serverAddress + '/', function() {
             casper.echo("Loading '/'", 'INFO');
             test.assertHttpStatus(200, 'Retrieves static html page');
-            test.assertTextExists("Virtual World Framework is minimally installed", 'Displays index.html');
+            test.assertTextExists('The Virtual World Framework (VWF) is a fast');
         });
 
         //------//
@@ -88,8 +88,8 @@ Object.keys(servers).forEach(function(server) {
 
         casper.thenOpen(serverAddress + '/this-is-not-an-app/', function() {
             casper.echo("Loading '/this-is-not-an-app/'", 'INFO');
-            test.assertHttpStatus(404, 'Gets a 404 error');
-            test.assertTextExists("Error 404", 'Displays the 404 page');
+            test.assertHttpStatus(404, 'Retrieves static html page');
+            test.assertTextExists('Unfortunately, your path in this virtual world hit a dead end.');
         });
 
         casper.thenOpen(serverAddress + '/some-file-that-does-not-exist.html', function() {
@@ -104,13 +104,18 @@ Object.keys(servers).forEach(function(server) {
 
         casper.thenOpen(serverAddress + '/duck/admin/config', function() {
             casper.echo("Loading '/duck/admin/config'", 'INFO');
-            test.assertHttpStatus(200, 'Retrieves the config file');
-            test.assertTextExists("VWF Duck Application", 'Parses the config file');
+            this.wait(1000, function() {
+                test.assertHttpStatus(200, 'Retrieves the config file');
+                test.assertTextExists("VWF Duck Application", 'Parses the config file');
+
+            });
         });
 
         casper.thenOpen(serverAddress + '/duck/', function() {
-            casper.echo("Loading '/duck/'", 'INFO');
-            test.assertTitle('VWF Duck Application', 'Sets the title from the config file');
+            this.wait(1000, function() {
+                casper.echo("Loading '/duck/'", 'INFO');
+                test.assertTitle('VWF Duck Application', 'Sets the title from the config file');
+            });               
         });
 
         //------------//
