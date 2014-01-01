@@ -21,17 +21,13 @@ This command may be re-run to upgrade the installation to the latest version of 
 
 **Install on Windows**
 
-- Download the latest VWF Baseline and extract the zip. (http://download.virtualworldframework.com/files/VWF_Windows_latest.zip)
-
-- Execute VWF from the root folder at a command prompt. IE.  c:\vwf-extracted-folder>vwf
-
-- Follow the instructions prompted to setup your environment.
+- Download the latest [VWF Baseline](http://download.virtualworldframework.com/files/VWF_Windows_latest.zip) and extract the zip.
+- Execute VWF from the root folder at a command prompt. (i.e., `c:\vwf-extracted-folder>vwf`)
+- Follow the instructions to setup your environment.
 
 For more complex installations, such as working on VWF core, please see our [Installation Instructions](http://www.virtual.wf/web/docs/install.html).
 
 ## Quick Start 
-
-**Mac/Linux**
 
 Create a new VWF application.
 
@@ -46,23 +42,9 @@ $ cd my-app
 $ vwf
 ```
 
-Your application is now up and running at
-[http://localhost:3000](http://localhost:3000).
-
-To get started with VWF, check out [Getting
-Started](http://virtual.wf/web/docs/readme.html).
-
-**Windows** 
-
-Execute the _run.bat_ file provided at the root level of the extracted folder.
-
-```
-c:\vwf> vwf create my-app
-c:\vwf> cd my-app
-c:\vwf\my-app> vwf
-```
-
 Your application is now up and running at [http://localhost:3000](http://localhost:3000).
+
+To get started with VWF, check out [Getting Started](http://virtual.wf/web/docs/readme.html).
 
 ## Examples
 
