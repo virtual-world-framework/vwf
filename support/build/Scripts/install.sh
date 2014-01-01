@@ -102,22 +102,22 @@ if [ ! -f /usr/bin/node ]; then
 
 		INSTALL_TMPDIR="$HOME/.node-install-tmp"
 		if [ -d "$INSTALL_TMPDIR" ];then
-		rm -rf "$INSTALL_TMPDIR"
+		sudo rm -rf "$INSTALL_TMPDIR"
 		fi
 		mkdir "$INSTALL_TMPDIR"
 		echo "Downloading latest Node distribution"
 
 		curl --progress-bar --fail "$TARBALL_URL" | tar -xzf - -C "$INSTALL_TMPDIR"
 		# bomb out if it didn't work, eg no net
-		test -x "${INSTALL_TMPDIR}/${NODEPACKAGE}"
+		#test -x "${INSTALL_TMPDIR}/${NODEPACKAGE}"
 		mv "${INSTALL_TMPDIR}/${NODEPACKAGE}/" "$HOME/.vwf/.node"
 		if [ -d "$INSTALL_TMPDIR" ];then
-		rmdir "${INSTALL_TMPDIR}"
+		sudo rmdir "${INSTALL_TMPDIR}"
 		fi
 		# just double-checking :)
-		test -x "$HOME/.vwf/.node"
-		sudo ln -s ~/.vwf/.node/bin/node /usr/bin/node
-		sudo ln -s ~/.vwf/.node/bin/npm /usr/bin/npm
+		#test -x "$HOME/.vwf/.node"
+		sudo ln -sf ~/.vwf/.node/bin/node /usr/bin/node
+		sudo ln -sf ~/.vwf/.node/bin/npm /usr/bin/npm
 	else
 		echo "You need sudo permission to complete Node installation. Node is a web engine that VWF uses to execute."
 		echo "Please follow the instructions for installation of Node at http://howtonode.org/how-to-install-nodejs"
@@ -131,6 +131,12 @@ fi
 #######################################
 
 cd "$HOME/.vwf"
+if [ -z "$HTTP_PROXY" ]; then
+npm config set proxy "$HTTP_PROXY"; 
+npm config set https-proxy "$HTTP_PROXY"; 
+echo "NPM proxy has been set to ${HTTP_PROXY}."
+fi
+echo "NPM proxy has not been set as HTTP_PROXY environment variable is not set. If you are behind a proxy, please make sure your HTTP_PROXY variable is set and re-execute VWF installation."
 npm install
 
 

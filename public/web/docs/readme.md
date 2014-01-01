@@ -6,12 +6,6 @@ Virtual World Framework (VWF) is a collaborative training platform that is scala
 
 * * *
 
-The most basic implementation of VWF is a single asset in a COLLADA format. A URL pointing directly to an asset COLLADA file (.dae) with no code will result in a scene containing the specified asset with default light, camera, and navigation.
-
-Sample URL: *http://vwf.example.com/application/hello.dae*
-
-* * *
-
 An asset can be wrapped in a VWF application by specifying the source file in the code.
 
 Code View: *index.vwf.yaml*
