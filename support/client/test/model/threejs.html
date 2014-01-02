@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <!-- For testing -->
+    <script type="text/javascript" src="../qunit.js"></script>
+
+    <!-- BEGIN VWF kernel libraries (that are not require.js modules) -->
+    <script type="text/javascript" src="../../lib/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="../../lib/async.js"></script>
+
+    <script type="text/javascript" src="../../lib/crypto.js"></script>
+    <script type="text/javascript" src="../../lib/md5.js"></script>
+
+    <script type="text/javascript" src="../../lib/alea.js"></script>
+    <script type="text/javascript" src="../../lib/mash.js"></script>
+
+    <script type="text/javascript" src="../../lib/vwf.js"></script>
+
+    <script type="text/javascript" src="../../lib/require.js"></script>
+    <!-- END VWF kernel libraries -->
+
+    <!-- The tests:
+         Run require to ensure necessary libraries are loaded
+         When the DOM is ready, initialize VWF
+         Then run the tests
+    -->
+    <script type="text/javascript">
+
+      require( {
+
+        // The path to the require.js libraries that need loading
+        baseUrl: "../../lib"
+
+      }, [
+
+        "domReady",
+        "../utility.js",
+
+        "vwf/configuration",
+        "vwf/kernel/model",
+        "vwf/model/javascript",
+        "vwf/model/threejs",
+        "vwf/model/object",
+        "vwf/model/stage/log",
+        "vwf/kernel/view",
+        "vwf/view/document",
+        "vwf/utility",
+        "logger",
+
+      ], function( ready, testUtility ) {
+
+        // Test the JavaScript node proxy and node initialization.
+
+        ready( function() {
+
+          vwf.initialize(
+            /* models */ [ "vwf/model/javascript", "vwf/model/threejs", "vwf/model/object" ],
+            /*  views */ []
+          );
+
+          var threejsDriver = vwf.models[ 1 ];
+
+          // Typical case: Create a three.js scene for the application root and create or bind the 
+          //               child to the three.js child of the same name
+          // 
+          // scene.vwf
+          //   node3.vwf
+          //
+          asyncTest( "Typical case: scene with node3 child", function() {
+            vwf.createNode( {
+              "extends": "http://vwf.example.com/scene.vwf",
+              "children": {
+                "node3d": {
+                  "extends": "http://vwf.example.com/node3.vwf"
+                }
+              }
+            }, "application", function( id ) {
+              var numThreejsNodes = Object.keys( threejsDriver.state.nodes ).length;
+              strictEqual( numThreejsNodes , 2, "Number of bound nodes" );
+              vwf.deleteNode( id );
+              start();
+            } );
+          } );
+
+          // Non 3D node: node.vwf node should not bind to a three.js node since the type doesn’t 
+          //             match. 
+          //
+          // scene.vwf
+          //   node3.vwf
+          //
+          asyncTest( "Non 3D node: child is not a 3D node", function() {
+            vwf.createNode( {
+              "extends": "http://vwf.example.com/scene.vwf",
+              "children": {
+                "non3Dnode": {
+                  "extends": "http://vwf.example.com/node.vwf"
+                }
+              }
+            }, "application", function( id ) {
+              var numThreejsNodes = Object.keys( threejsDriver.state.nodes ).length;
+              strictEqual( numThreejsNodes , 1, "Number of bound nodes" );
+              vwf.deleteNode( id );
+              start();
+            } );
+          } );
+
+          // Trivial application: The three.js driver should not activate at all—no three.js scene 
+          //                      or nodes created.
+          //
+          // node.vwf
+          //
+          asyncTest( "No three.js scene at all", function() {
+            vwf.createNode( {
+              "extends": "http://vwf.example.com/node.vwf"
+            }, "application", function( id ) {
+              var numThreejsNodes = Object.keys( threejsDriver.state.nodes ).length;
+              strictEqual( numThreejsNodes , 0, "Number of bound nodes" );
+              vwf.deleteNode( id );
+              start();
+            } );
+          } );
+
+          // 3D application without explicit scene
+          //
+          // node3.vwf
+          //
+          asyncTest( "3D node without explicit scene", function() {
+            vwf.createNode( {
+              "extends": "http://vwf.example.com/node3.vwf"
+            }, "application", function( id ) {
+              var numThreejsNodes = Object.keys( threejsDriver.state.nodes ).length;
+              strictEqual( numThreejsNodes , 1, "Number of bound nodes" );
+              vwf.deleteNode( id );
+              start();
+            } );
+          } );
+
+          // 3D scene is created somewhere other than in the application
+          asyncTest( "Typical case: scene with node3 child", function() {
+            vwf.createNode( {
+              "extends": "http://vwf.example.com/scene.vwf"
+            }, undefined, function( id ) {
+              var numThreejsNodes = Object.keys( threejsDriver.state.nodes ).length;
+              strictEqual( numThreejsNodes , 0, "Number of bound nodes" );
+              vwf.deleteNode( id );
+              start();
+            } );
+          } );
+        } );
+      } );
+
+    </script>
+
+    <!-- qunit's css for the output -->
+    <link rel="stylesheet" type="text/css" href="../qunit.css" />
+
+  </head>
+
+  <!-- The qunit html for the output -->
+
+  <body>
+
+    <h1 id="qunit-header">Virtual World Framework</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture">test markup, will be hidden</div>
+
+  </body>
+
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <!-- For testing -->
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <!-- BEGIN VWF kernel libraries (that are not require.js modules) -->
+    <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="../lib/async.js"></script>
+
+    <script type="text/javascript" src="../lib/crypto.js"></script>
+    <script type="text/javascript" src="../lib/md5.js"></script>
+
+    <script type="text/javascript" src="../lib/alea.js"></script>
+    <script type="text/javascript" src="../lib/mash.js"></script>
+
+    <script type="text/javascript" src="../lib/vwf.js"></script>
+
+    <script type="text/javascript" src="../lib/require.js"></script>
+    <!-- END VWF kernel libraries -->
+
+    <!-- The tests:
+         Run require to ensure necessary libraries are loaded
+         When the DOM is ready, initialize VWF
+         Then run the tests
+    -->
+    <script type="text/javascript">
+
+      require( {
+
+        // The path to the require.js libraries that need loading
+        baseUrl: "../lib"
+
+      }, [
+
+        "domReady",
+        "utility.js",
+
+        "vwf/configuration",
+        "vwf/kernel/model",
+        "vwf/model/javascript",
+        // Add other drivers that you need here and below in the vwf.initialize call
+        "vwf/model/object",
+        "vwf/model/stage/log",
+        "vwf/kernel/view",
+        "vwf/view/document",
+        "vwf/utility",
+        "logger",
+
+      ], function( ready, testUtility ) {
+
+        // Test the JavaScript node proxy and node initialization.
+
+        ready( function() {
+
+          vwf.initialize(
+            /* models */ [ "vwf/model/javascript",
+                           // add other drivers that you need here and above in the require array
+                           "vwf/model/object" ],
+            /*  views */ []
+          );
+
+          test( "The universe is not wonky", function() {
+
+            equal( 1, 1, "That the universe is not wonky." );
+
+          } );
+
+          asyncTest( "The universe is wonky", function() {
+
+            setTimeout( function() {
+              equal( 0, 1, "That the universe is wonky." );
+              start();
+            }, 2000 );
+            
+          } );
+
+          // Look at qunit api for all the assertions that you can make:
+          // http://api.qunitjs.com/category/assert/ 
+
+        } );
+
+      } );
+
+    </script>
+
+    <!-- qunit's css for the output -->
+    <link rel="stylesheet" type="text/css" href="qunit.css" />
+
+  </head>
+
+  <!-- The qunit html for the output -->
+
+  <body>
+
+    <h1 id="qunit-header">Virtual World Framework</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture">test markup, will be hidden</div>
+
+  </body>
+
+</html>
