@@ -1,4 +1,9 @@
-# Create a Multi-user Application
+<a name="multiuser" />
+
+<div class="well" markdown="1">
+Create a Multi-user Application
+===================
+-------------------
 
 <sup>(Note: This recipe is based on the [multiuser example app](../example/multiuser) - check it out for greater context.  You can find the source for the app in the [github repository](https://github.com/virtual-world-framework/vwf) in public/web/example/multiuser.)</sup>
 
@@ -44,7 +49,7 @@ That's all!
 - Currently these instructions work with only the three.js renderer (since the functionality is implemented in the VWF drivers for three.js).
 - Though the userObject property looks like a node description, it is only a property (later, the system will create a node for the user from this property). Therefore, one cannot manipulate userObject by calling methods for node operations (for example, we cannot call *userObject.createChild(..)*).  Once the system creates the actual node, we may call such functions on that node.
 
-## Pitfalls
+## Common Pitfalls
 
 - Do not use *this.moniker* in the model (.yaml)!
 
@@ -55,3 +60,6 @@ That's all!
 *vwf* gives a coder direct access to manipulate the model.  This may seem convenient, but it side-steps VWF's mechanisms to ensure that state stays synchronized between users.  In the future this variable will be hidden from us coders for our safety, but in the mean time, steer clear of it!
 
 - For a full list of pitfalls, see the document located [here](pitfalls.html).
+
+</div>
+-------------------

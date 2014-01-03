@@ -1,4 +1,9 @@
-# Create a Simulation
+<a name="simulation" />
+
+<div class="well" markdown="1">
+Create a Simulation
+===================
+-------------------
 
 Let's define a *simulation* as any application that models a sequence of causes and effects.  Here's how to create one:
 
@@ -114,3 +119,6 @@ Tips:
 
 - Always be on the lookout for existing components that you can use and save yourself some work
 - Consider paying it forward by sharing (or selling!) the components that you create so that others can stand on your shoulders to reach even greater heights
+
+</div>
+-------------------

@@ -1,5 +1,8 @@
-# Add Sound Effects to Your Application
+<a name="sound" />
 
+<div class="well" markdown="1">
+Add Sound Effects to Your Application
+==============
 --------------
 
 For any interactive application, you may want to add sound, either for effect or to notify all users that something has occurred (e.g. a laser was fired, a message has been sent, etc). As with much of the framework, we can accomplish simple sound effects through the use of HTML5's native features. 
@@ -43,4 +46,5 @@ In addition to defining the sound source using the HTML5 native audio tag, set u
 
 Each time the *playSound* method is called, each client will hear the *exampleAudio* sound bite.
 
+</div>
 --------------

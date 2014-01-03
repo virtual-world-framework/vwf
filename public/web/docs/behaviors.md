@@ -1,3 +1,6 @@
+<a name="behaviors" />
+
+<div class="well" markdown="1">
 Behaviors
 ===================
 -------------------
@@ -37,5 +40,6 @@ When a behavior is loaded, all behaviors, properties, methods, events, children 
 
 When <code>someMethod</code> executes, it will read the overridden value of <code>behavior-someProperty</code>, and go into the else statement.
 
+</div>
 -------------------
 

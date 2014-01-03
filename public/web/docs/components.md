@@ -1,6 +1,10 @@
+<a name="components" />
+
+<div class="well" markdown="1">
 Components
 ===================
 -------------------
+
 Components define the behavior, state and visual representation of an object, and are the basic building blocks of VWF. Components make up a hierarchical structure, with each component acting as the parent or child to another component. At the root of the structure is the application, which is also a component, and is created automatically when the application loads.
 
 -------------------
@@ -297,5 +301,6 @@ Children can also be deleted. The delete function takes the JavaScript object of
 
 	this.children.delete(this.children.component);
 
+</div>
 -------------------
 
