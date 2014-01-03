@@ -503,7 +503,9 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             createPropertyAccessor.call( this, node, propertyName );
 
-            node.private.change++; // invalidate the "future" cache
+            // Invalidate the "future" cache.
+
+            node.private.change++;
 
             return propertyValue !== undefined ?
                 this.settingProperty( nodeID, propertyName, propertyValue ) : undefined;
@@ -570,7 +572,9 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                     "exception evaluating body:", utility.exceptionMessage( e ) );
             }
         
-            node.private.change++; // invalidate the "future" cache
+            // Invalidate the "future" cache.
+
+            node.private.change++;
 
         },
 
@@ -608,7 +612,9 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             node.private.listeners[eventName] = [];
 
-            node.private.change++; // invalidate the "future" cache
+            // Invalidate the "future" cache.
+
+            node.private.change++;
 
         },
 
@@ -1044,58 +1050,100 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
         return future;
     }
 
-    // -- createPropertyAccessor -------------------------------------------------------------------
+    /// Define ...
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `createPropertyAccessor.call( driver, container, propertyName )`.
+    /// 
+    /// @param {Object} container
+    ///   The ...
+    /// @param {String} propertyName
+    ///   The ...
 
     function createPropertyAccessor( container, propertyName ) {
 
         var self = this;
 
-        Object.defineProperty( container, propertyName, {  // `this` is the container in get/set
-            get: function() { var node = this.node || this; return self.kernel.getProperty( node.id, propertyName ) },
-            set: function( value ) { var node = this.node || this; self.kernel.setProperty( node.id, propertyName, value ) },
-            enumerable: true
+        Object.defineProperty( container, propertyName, {
+
+            get: function() {  // `this` is the container
+                var node = this.node || this;  // the node via node.properties.node, or just node
+                return self.kernel.getProperty( node.id, propertyName );
+            },
+
+            set: function( value ) {  // `this` is the container
+                var node = this.node || this;  // the node via node.properties.node, or just node
+                self.kernel.setProperty( node.id, propertyName, value );
+            },
+
+            enumerable: true,
+
         } );
 
     }
 
-    // -- createMethodAccessor ---------------------------------------------------------------------
+    /// Define ...
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `createMethodAccessor.call( driver, container, methodName )`.
+    /// 
+    /// @param {Object} container
+    ///   The ...
+    /// @param {String} methodName
+    ///   The ...
 
     function createMethodAccessor( container, methodName ) {
 
         var self = this;
 
-        Object.defineProperty( container, methodName, {  // `this` is the container in get/set
-            get: function() {
+        Object.defineProperty( container, methodName, {
+
+            get: function() {  // `this` is the container
                 var node = this.node || this;  // the node via node.methods.node, or just node
                 return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
                     return self.kernel.callMethod( node.id, methodName, arguments );
                 };
             },
-            set: function( value ) {
+
+            set: function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.methods.node, or just node
                 node.methods.hasOwnProperty( methodName ) ||
                     self.kernel.createMethod( node.id, methodName );
                 node.private.bodies[methodName] = value;
             },
+
             enumerable: true,
+
         } );
 
     }
 
-    // -- createEventAccessor ----------------------------------------------------------------------
+    /// Define ...
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `createEventAccessor.call( driver, container, eventName )`.
+    /// 
+    /// @param {Object} container
+    ///   The ...
+    /// @param {String} eventName
+    ///   The ...
+    /// @param {String} eventPrefix
+    ///   The ...
 
     function createEventAccessor( container, eventName ) {
 
         var self = this;
 
-        Object.defineProperty( container, eventName, {  // `this` is the container in get/set
-            get: function() {
+        Object.defineProperty( container, eventName, {
+
+            get: function() {  // `this` is the container
                 var node = this.node || this;  // the node via node.events.node, or just node
                 return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
                     return self.kernel.fireEvent( node.id, eventName, arguments );
                 };
             },
-            set: function( value ) {
+
+            set: function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.events.node, or just node
                 var listeners = node.private.listeners[eventName] ||
                     ( node.private.listeners[eventName] = [] );  // array of { handler: function, context: node, phases: [ "phase", ... ] }
@@ -1117,7 +1165,9 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
                     } );
                 }
             },
+
             enumerable: true,
+
         } );
 
     }
