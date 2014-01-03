@@ -43,6 +43,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var userObjectRequested = false;
     // End Navigation
 
+    var Vec3 = goog.vec.Vec3;
+    var Quaternion = goog.vec.Quaternion;
     return view.load( module, {
 
         initialize: function( options ) {
@@ -81,6 +83,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             rollMatrix = new THREE.Matrix4();
             yawMatrix = new THREE.Matrix4();
             translationMatrix = new THREE.Matrix4();
+	    
+        window._dView = this;
+		this.nodes = {};
+		this.interpolateTransforms = true;
+		this.tickTime = 0;
+		this.realTickDif = 50;
+		this.lastrealTickDif = 50;
+		this.lastRealTick = performance.now();
+		this.leftover = 0;
+		
+		
+			
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -96,6 +110,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 
                 initScene.call(this,this.state.scenes[childID]);
             }
+	    
+	    this.nodes[childID] = {id:childID,extends:childExtendsID};
         },
 
         initializedNode: function( nodeID, childID ) {
@@ -123,7 +139,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
  
         // -- deletedNode ------------------------------------------------------------------------------
 
-        //deletedNode: function( nodeID ) { },
+        deletedNode: function(childID)
+	{
+		delete this.nodes[childID];
+	},
 
         // -- addedChild -------------------------------------------------------------------------------
 
@@ -169,6 +188,31 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         satProperty: function ( nodeID, propertyName, propertyValue ) { 
             
+	    
+	    if(vwf.client() && false)
+		{
+			if(propertyName == 'transform')
+			{
+				if(this.nodes[nodeID])
+				{
+					
+					this.nodes[nodeID].lastTickTransform = null;
+					this.nodes[nodeID].thisTickTransform = null;
+				
+				}
+			}
+			if(propertyName == 'animationFrame')
+			{
+				if(this.nodes[nodeID])
+				{
+					this.nodes[nodeID].lastAnimationFrame = null;
+					this.nodes[nodeID].thisAnimationFrame = null;
+				}
+			}
+		}
+	    
+	    
+	    
             // If this is this user's navObject, pay attention to changes in navmode, translationSpeed, and 
             // rotationSpeed
             if ( navObject && ( nodeID == navObject.ID ) ) {
@@ -351,10 +395,207 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 navObjectRequested = true;
                 findNavObject();
             }
-        }
+	        
+	        lerpTick();
+	    
+	    
+		
+			
+        },
+	
     } );
 
     // private ===============================================================================
+
+    function lerpTick ()
+    {
+    
+        var now = performance.now();
+        self.realTickDif = now - self.lastRealTick;
+        self.lastRealTick = now;
+        
+      
+    
+        self.tickTime = 0;
+        //reset - loading can cause us to get behind and always but up against the max prediction value
+        
+         
+        
+        
+        
+        
+        for(var i in self.nodes)
+        {
+            if(self.state.nodes[i])
+            {       
+                
+                self.nodes[i].lastTickTransform = self.nodes[i].selfTickTransform;
+                self.nodes[i].selfTickTransform = goog.vec.Mat4.clone(getTransform(i));
+                
+                
+                
+                if(self.nodes[i].selfTickTransform) self.nodes[i].selfTickTransform = goog.vec.Mat4.clone(self.nodes[i].selfTickTransform);
+                
+                
+            }
+        }
+    }
+    function lerp(a,b,l,c)
+    {
+        if(c) l = Math.min(1,Math.max(l,0));
+        return (b*l) + a*(1.0-l);
+    }
+    function matCmp (a,b,delta)
+    {
+        
+        for(var i =0; i < 16; i++)
+        {
+            if(Math.abs(a[i] - b[i]) > delta)
+                return false;
+        }
+        
+        return true;
+    }
+    
+    function rotMatFromVec(x,y,z)
+    {
+        var n = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1];
+        n[0] = x[0];n[1] = x[1];n[2] = x[2];
+        n[4] = y[0];n[5] = y[1];n[6] = y[2];
+        n[8] = z[0];n[9] = z[1];n[10] = z[2];
+        return n;
+    }
+    function matrixLerp (a,b,l)
+    {
+        var n = goog.vec.Mat4.clone(a);
+        n[12] = lerp(a[12],b[12],l);
+        n[13] = lerp(a[13],b[13],l);
+        n[14] = lerp(a[14],b[14],l);
+        
+        var x = [a[0],a[1],a[2]];
+        var xl = Vec3.magnitude(x);
+        
+        var y = [a[4],a[5],a[6]];
+        var yl = Vec3.magnitude(y);
+        
+        var z = [a[8],a[9],a[10]];
+        var zl = Vec3.magnitude(z);
+        
+        
+        var x2 = [b[0],b[1],b[2]];
+        var xl2 = Vec3.magnitude(x2);
+        
+        var y2 = [b[4],b[5],b[6]];
+        var yl2 = Vec3.magnitude(y2);
+        
+        var z2 = [b[8],b[9],b[10]];
+        var zl2 = Vec3.magnitude(z2);
+        
+        var nxl = lerp(xl,xl2,l);
+        var nyl = lerp(yl,yl2,l);
+        var nzl = lerp(zl,zl2,l);
+        
+        x = Vec3.normalize(x,[]);
+        y = Vec3.normalize(y,[]);
+        z = Vec3.normalize(z,[]);
+        
+        x2 = Vec3.normalize(x2,[]);
+        y2 = Vec3.normalize(y2,[]);
+        z2 = Vec3.normalize(z2,[]);
+        
+        var q = Quaternion.fromRotationMatrix4(rotMatFromVec(x,y,z),[]);
+        var q2 = Quaternion.fromRotationMatrix4(rotMatFromVec(x2,y2,z2),[]);
+        
+        var nq = Quaternion.slerp(q,q2,l,[]);
+        var nqm = Quaternion.toRotationMatrix4(nq,[]);
+        
+        
+        var nx = [nqm[0],nqm[1],nqm[2]];
+        var ny = [nqm[4],nqm[5],nqm[6]];
+        var nz = [nqm[8],nqm[9],nqm[10]];
+        
+        nx = Vec3.scale(nx,nxl,[]);
+        ny = Vec3.scale(ny,nyl,[]);
+        nz = Vec3.scale(nz,nzl,[]);
+        
+        
+        nqm = rotMatFromVec(nx,ny,nz);
+        
+        nqm[12] = n[12];
+        nqm[13] = n[13];
+        nqm[14] = n[14];
+        
+        return nqm;
+    }
+    function getTransform(id)
+    {
+        var interp = goog.vec.Mat4.clone(self.state.nodes[id].threeObject.matrix.elements);
+        return goog.vec.Mat4.clone(interp);
+    }
+    function setTransform(id,interp)
+    {
+        interp = goog.vec.Mat4.clone(interp)
+        self.state.nodes[id].threeObject.matrix.elements = goog.vec.Mat4.clone(interp);
+        self.state.nodes[id].threeObject.updateMatrixWorld(true);
+    }
+    function setInterpolatedTransforms(deltaTime)
+    {
+        
+        
+        var step = (self.tickTime) / (self.realTickDif);
+        step = Math.min(step,1);
+        deltaTime = Math.min(deltaTime,self.realTickDif)
+        self.tickTime += deltaTime || 0;
+
+        
+        
+        //if going slower than tick rate, don't make life harder by changing values. it would be invisible anyway
+        //if(step > 2) return;
+        
+        for(var i in self.nodes)
+        {
+                
+                var last = self.nodes[i].lastTickTransform;
+                var now = self.nodes[i].selfTickTransform;
+                if(last && now && !matCmp(last,now,.0001) )
+                {
+                    
+                    var interp = goog.vec.Mat4.clone(last);
+                   
+                    
+                    
+
+                    interp = matrixLerp(last,now,step||0);
+                    
+                    setTransform(i,interp);
+                   
+                    
+                    self.nodes[i].needTransformRestore = true;
+                }
+                
+                
+        }
+        
+    }
+    function restoreTransforms()
+    {
+        for(var i in self.nodes)
+        {
+            
+            var now = self.nodes[i].selfTickTransform;
+            
+            if(now && self.nodes[i].needTransformRestore)
+            {
+                //vwf.setProperty(i,'transform',now);
+                self.state.nodes[i].threeObject.matrix.elements = goog.vec.Mat4.clone(now);
+                self.state.nodes[i].threeObject.updateMatrixWorld(true);
+                self.nodes[i].needTransformRestore = false;
+            }
+            
+            
+            
+        }
+    }
 
     function checkCompatibility() {
         this.compatibilityStatus = { compatible:true, errors:{} }
@@ -396,6 +637,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Schedule the next render
             window.requestAnimationFrame( renderScene );
 
+	    
+	    
+	    now = ( window.performance !== undefined && window.performance.now !== undefined ) ? window.performance.now() : time;
+			
+	   timepassed = now - sceneNode.lastTime;
+			
+		
+			if(self.interpolateTransforms)
+				setInterpolatedTransforms(timepassed);
+				
+	    
+	    
             // Verify that there is a camera to render from before going any farther
             var camera = self.state.cameraInUse;
             if ( !camera ) {
@@ -468,7 +721,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
 
             renderer.render( scene, camera );
-            sceneNode.lastTime = now;
+			sceneNode.lastTime = now;
+			
+	if(self.interpolateTransforms)
+				restoreTransforms();		
         };
 
         var mycanvas = this.canvasQuery.get( 0 );
@@ -1353,7 +1609,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 return;
 
             var navThreeObject = navObject.threeObject;
-            var originalTransform = matCpy( navThreeObject.matrix.elements );
+            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
             // Compute the distance traveled in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
@@ -1487,7 +1743,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 return;
 
             var navThreeObject = navObject.threeObject;
-            var originalTransform = matCpy( navThreeObject.matrix.elements );
+            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
             // Compute the distance rotated in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
@@ -1593,7 +1849,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     if ( navObject ) {
 
                         var navThreeObject = navObject.threeObject;
-                        var originalTransform = matCpy( navThreeObject.matrix.elements );
+                        var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
                         // --------------------
                         // Calculate new pitch
@@ -1645,7 +1901,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                             var camera = sceneView.state.cameraInUse;
                             if ( camera ) {
                                 var cameraMatrix = camera.matrix;
-                                var originalCameraTransform = matCpy( cameraMatrix.elements );
+                                var originalCameraTransform = goog.vec.Mat4.clone( cameraMatrix.elements );
                                 var cameraPos = new THREE.Vector3();
                                 cameraPos.getPositionFromMatrix( cameraMatrix );
                                 cameraMatrix.multiply( pitchDeltaMatrix );
@@ -1743,7 +1999,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
 
             var navThreeObject = navObject.threeObject;
-            var originalTransform = matCpy( navThreeObject.matrix.elements );
+            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
             // wheelDelta has a value of 3 for every click
             var numClicks = Math.abs( wheelDelta / 3 );
@@ -1820,7 +2076,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     if ( navObject ) {
 
                         var navThreeObject = navObject.threeObject;
-                        var originalTransform = matCpy( navThreeObject.matrix.elements );
+                        var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
                         // --------------------
                         // Calculate new pitch
@@ -2735,7 +2991,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
     function adoptTransform ( node, transform ) {
 
-        var transformMatrix = matCpy( transform );
+        var transformMatrix = goog.vec.Mat4.clone( transform );
         var threeObject = node.threeObject;
 
         if ( threeObject instanceof THREE.Camera ) {  
@@ -2757,14 +3013,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         nodeLookAt( node );
     }
 
-    function matCpy( mat ) {
-        var ret = [];
-        if ( mat ) {
-            for ( var i =0; i < mat.length; i++ )
-                ret.push( mat[ i ] );
-        }
-        return ret;
-    }
+    
 
     function callModelTransformBy( node, originalViewTransform, goalViewTransform ) {
         var nodeID = node.ID;
@@ -2816,7 +3065,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             inverseParentWorldMatrix.getInverse( parent.matrixWorld );
             threeObject.matrix.multiplyMatrices( inverseParentWorldMatrix, threeObject.matrixWorld );
         } else {
-            threeObject.matrix.elements = matCpy( threeObject.matrixWorld.elements );
+            threeObject.matrix.elements = goog.vec.Mat4.clone( threeObject.matrixWorld.elements );
         }
         updateRenderObjectTransform( threeObject );
     }
@@ -2909,7 +3158,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         // Rotate 90 degrees around X to convert from VWF Z-up to three.js Y-up.
 
-        var newTransform = matCpy( transform );
+        var newTransform = goog.vec.Mat4.clone( transform );
 
         // Get column y and z out of the matrix
         var columny = goog.vec.Vec4.create();
@@ -2928,7 +3177,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         // Rotate -90 degrees around X to convert from three.js Y-up to VWF Z-up.
 
-        var newTransform = matCpy( transform );
+        var newTransform = goog.vec.Mat4.clone( transform );
                                     
         // Get column y and z out of the matrix
         var columny = goog.vec.Vec4.create();
@@ -2967,7 +3216,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         if ( threeObject instanceof THREE.Camera ) {
             vwfWorldTransformArray = convertCameraTransformFromThreejsToVWF( worldTransformArray );
         } else {
-            vwfWorldTransformArray = matCpy( worldTransformArray );
+            vwfWorldTransformArray = goog.vec.Mat4.clone( worldTransformArray );
         }
 
         pitchMatrix = new THREE.Matrix4();
@@ -3002,7 +3251,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( positionUnderMouseClick ) {
 
                 var navThreeObject = navObject.threeObject;
-                var originalTransform = matCpy( navThreeObject.matrix.elements );
+                var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
                 var originalPitchMatrix = pitchMatrix.clone();
 
