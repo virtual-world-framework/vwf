@@ -497,20 +497,11 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var node = this.nodes[nodeID];
-            var self = this;
 
-            Object.defineProperty( node.properties, propertyName, {  // `this` is the container in get/set
-                get: function() { var node = this.node || this; return self.kernel.getProperty( node.id, propertyName ) },
-                set: function( value ) { var node = this.node || this; self.kernel.setProperty( node.id, propertyName, value ) },
-                enumerable: true
-            } );
+            createPropertyAccessor.call( this, node.properties, propertyName );
 
 node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-            Object.defineProperty( node, propertyName, {  // `this` is the container in get/set
-                get: function() { var node = this.node || this; return self.kernel.getProperty( node.id, propertyName ) },
-                set: function( value ) { var node = this.node || this; self.kernel.setProperty( node.id, propertyName, value ) },
-                enumerable: true
-            } );
+            createPropertyAccessor.call( this, node, propertyName );
 
             node.private.change++; // invalidate the "future" cache
 
@@ -566,40 +557,11 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
 
             var node = this.nodes[nodeID];
-            var self = this;
 
-            Object.defineProperty( node.methods, methodName, {  // `this` is the container in get/set
-                get: function() {
-                    var node = this.node || this;  // the node via node.methods.node, or just node
-                    return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
-                        return self.kernel.callMethod( node.id, methodName, arguments );
-                    };
-                },
-                set: function( value ) {
-                    var node = this.node || this;  // the node via node.methods.node, or just node
-                    node.methods.hasOwnProperty( methodName ) ||
-                        self.kernel.createMethod( node.id, methodName );
-                    node.private.bodies[methodName] = value;
-                },
-                enumerable: true,
-            } );
+            createMethodAccessor.call( this, node.methods, methodName );
 
 node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-            Object.defineProperty( node, methodName, {  // `this` is the container in get/set
-                get: function() {
-                    var node = this.node || this;  // the node via node.methods.node, or just node
-                    return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
-                        return self.kernel.callMethod( node.id, methodName, arguments );
-                    };
-                },
-                set: function( value ) {
-                    var node = this.node || this;  // the node via node.methods.node, or just node
-                    node.methods.hasOwnProperty( methodName ) ||
-                        self.kernel.createMethod( node.id, methodName );
-                    node.private.bodies[methodName] = value;
-                },
-                enumerable: true,
-            } );
+            createMethodAccessor.call( this, node, methodName );
 
             try {
                 node.private.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
@@ -638,72 +600,11 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
         creatingEvent: function( nodeID, eventName, eventParameters ) {
 
             var node = this.nodes[nodeID];
-            var self = this;
 
-            Object.defineProperty( node.events, eventName, {  // `this` is the container in get/set
-                get: function() {
-                    var node = this.node || this;  // the node via node.events.node, or just node
-                    return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
-                        return self.kernel.fireEvent( node.id, eventName, arguments );
-                    };
-                },
-                set: function( value ) {
-                    var node = this.node || this;  // the node via node.events.node, or just node
-                    var listeners = node.private.listeners[eventName] ||
-                        ( node.private.listeners[eventName] = [] );  // array of { handler: function, context: node, phases: [ "phase", ... ] }
-                    if ( typeof value == "function" || value instanceof Function ) {
-                        listeners.push( { handler: value, context: node } );  // for container.*event* = function() { ... }, context is the target node
-                    } else if ( value.add ) {
-                        if ( ! value.phases || value.phases instanceof Array ) {
-                            listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
-                        } else {
-                            listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
-                        }
-                    } else if ( value.remove ) {
-                        node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                            return listener.handler !== value.handler;
-                        } );
-                    } else if ( value.flush ) {
-                        node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                            return listener.context !== value.context;
-                        } );
-                    }
-                },
-                enumerable: true,
-            } );
+            createEventAccessor.call( this, node.events, eventName );
 
 node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-            Object.defineProperty( node, eventName, {  // `this` is the container in get/set
-                get: function() {
-                    var node = this.node || this;  // the node via node.events.node, or just node
-                    return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
-                        return self.kernel.fireEvent( node.id, eventName, arguments );
-                    };
-                },
-                set: function( value ) {
-                    var node = this.node || this;  // the node via node.events.node, or just node
-                    var listeners = node.private.listeners[eventName] ||
-                        ( node.private.listeners[eventName] = [] );  // array of { handler: function, context: node, phases: [ "phase", ... ] }
-                    if ( typeof value == "function" || value instanceof Function ) {
-                        listeners.push( { handler: value, context: node } );  // for container.*event* = function() { ... }, context is the target node
-                    } else if ( value.add ) {
-                        if ( ! value.phases || value.phases instanceof Array ) {
-                            listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
-                        } else {
-                            listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
-                        }
-                    } else if ( value.remove ) {
-                        node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                            return listener.handler !== value.handler;
-                        } );
-                    } else if ( value.flush ) {
-                        node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                            return listener.context !== value.context;
-                        } );
-                    }
-                },
-                enumerable: true,
-            } );
+            createEventAccessor.call( this, node, eventName );
 
             node.private.listeners[eventName] = [];
 
@@ -1141,6 +1042,84 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
         }
 
         return future;
+    }
+
+    // -- createPropertyAccessor -------------------------------------------------------------------
+
+    function createPropertyAccessor( container, propertyName ) {
+
+        var self = this;
+
+        Object.defineProperty( container, propertyName, {  // `this` is the container in get/set
+            get: function() { var node = this.node || this; return self.kernel.getProperty( node.id, propertyName ) },
+            set: function( value ) { var node = this.node || this; self.kernel.setProperty( node.id, propertyName, value ) },
+            enumerable: true
+        } );
+
+    }
+
+    // -- createMethodAccessor ---------------------------------------------------------------------
+
+    function createMethodAccessor( container, methodName ) {
+
+        var self = this;
+
+        Object.defineProperty( container, methodName, {  // `this` is the container in get/set
+            get: function() {
+                var node = this.node || this;  // the node via node.methods.node, or just node
+                return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
+                    return self.kernel.callMethod( node.id, methodName, arguments );
+                };
+            },
+            set: function( value ) {
+                var node = this.node || this;  // the node via node.methods.node, or just node
+                node.methods.hasOwnProperty( methodName ) ||
+                    self.kernel.createMethod( node.id, methodName );
+                node.private.bodies[methodName] = value;
+            },
+            enumerable: true,
+        } );
+
+    }
+
+    // -- createEventAccessor ----------------------------------------------------------------------
+
+    function createEventAccessor( container, eventName ) {
+
+        var self = this;
+
+        Object.defineProperty( container, eventName, {  // `this` is the container in get/set
+            get: function() {
+                var node = this.node || this;  // the node via node.events.node, or just node
+                return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
+                    return self.kernel.fireEvent( node.id, eventName, arguments );
+                };
+            },
+            set: function( value ) {
+                var node = this.node || this;  // the node via node.events.node, or just node
+                var listeners = node.private.listeners[eventName] ||
+                    ( node.private.listeners[eventName] = [] );  // array of { handler: function, context: node, phases: [ "phase", ... ] }
+                if ( typeof value == "function" || value instanceof Function ) {
+                    listeners.push( { handler: value, context: node } );  // for container.*event* = function() { ... }, context is the target node
+                } else if ( value.add ) {
+                    if ( ! value.phases || value.phases instanceof Array ) {
+                        listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
+                    } else {
+                        listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
+                    }
+                } else if ( value.remove ) {
+                    node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                        return listener.handler !== value.handler;
+                    } );
+                } else if ( value.flush ) {
+                    node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                        return listener.context !== value.context;
+                    } );
+                }
+            },
+            enumerable: true,
+        } );
+
     }
 
     // -- getterScript -----------------------------------------------------------------------------
