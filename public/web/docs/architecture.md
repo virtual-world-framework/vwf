@@ -1,6 +1,10 @@
+<a name="architecture" />
+
+<div class="well" markdown="1">
 Architecture
 ===================
 -------------------
+
 The architecture behind the Virtual World Framework is by design:
 
 * Fully web-based
@@ -65,6 +69,7 @@ Model and view drivers have the same structure; however, the model driver doesn'
 
 For more detailed information regarding the drivers, please reference the [drivers](drivers.html) page.
 
+</div>
 --------------------
 
 

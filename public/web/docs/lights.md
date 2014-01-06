@@ -1,5 +1,9 @@
+<a name="lights" />
+
+<div class="well" markdown="1">
 Lights
 ==========================
+--------------------------
  
 The VWF Lights capability provides control of lighting within a VWF application. By default, VWF provides default lighting. In addition, there are three basic light types that can be created within the framework. Each light has properties associated with it that can be manipulated, including attenuation, effects, and shadows. A complete list of light properties can be found under [light](jsdoc_cmp/symbols/light.vwf.html) in the [Application API](application.html).
 
@@ -81,3 +85,6 @@ Specular reflection is the reflection of light from a surface where the ray is r
 **Diffuse Reflection**
    
 Diffuse reflection is the reflection of light from a surface where the ray is reflected at many angles.
+
+</div>
+--------------------------

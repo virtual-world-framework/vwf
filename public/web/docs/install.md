@@ -1,6 +1,13 @@
+<a name="install" />
+
+<div class="well" markdown="1">
 Installation Instructions
 ==========================
 --------------------------
+</div>
+
+--------------------------
+
 <div class="well" markdown="1">
 Source Code
 --------------------------
@@ -266,9 +273,15 @@ Node.js Server Installation / Launch / Debug
 
     $ npm start
 
-    or
+or
 
-    $ node node-server.js
+    $ node node-server.js -a ./public
+
+The `-a` or `--applicationPath` options can be used to specify where to serve
+VWF applications from. `node-server` defaults to serving applications from
+the current directory, so be sure to specify the public directory using 
+`-a` or `--applicationPath` if you want to run from the root of your VWF
+installation.
 
 *7. Connect*
 
@@ -292,11 +305,15 @@ One option for Node.js runtime debugging is the 'node-inspector' tool.  To use t
 
  *3. Run the node server with debug flag.*
 
-     $ node --debug node-server.js  
+     $ npm run debug
 
-     or
+or
 
-     $ node --debug-brk node-server.js  // to pause debugger at start    
+     $ node --debug node-server.js -a ./public
+
+or to pause the debugger at start
+
+     $ node --debug-brk node-server.js  -a ./public
 
  *4. In your browser go to [http://127.0.0.1:8080/debug?port=5858](http://127.0.0.1:8080/debug?port=5858) and use as you would with your typical browser tools.*
 
@@ -337,10 +354,10 @@ During the generation of the CSR, you will be prompted for several pieces of inf
 
     openssl req -new -key server.key -out server.csr
 
-Country Name (2 letter code) [GB]:US<br/>
-State or Province Name (full name) [Berkshire]:Florida<br/>
-Locality Name (eg, city) [Newbury]:Orlando<br/>
-Organization Name (eg, company) [My Company Ltd]:Test<br/>
+Country Name (2 letter code) \[GB\]:US<br/>
+State or Province Name (full name) \[Berkshire\]:Florida<br/>
+Locality Name (eg, city) \[Newbury\]:Orlando<br/>
+Organization Name (eg, company) \[My Company Ltd\]:Test<br/>
 Organizational Unit Name (eg, section) []:Test Technology<br/>
 Common Name (eg, your name or your server's hostname) []:public.whatever.com<br/>
 Email Address []:test@test.com<br/>

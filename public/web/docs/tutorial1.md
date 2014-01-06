@@ -1,4 +1,21 @@
-Getting Started
+<a name="tutorials" />
+
+<div class="well" markdown="1">
+Tutorials
+===================
+-------------------
+
+To get started, please view the sample step by step guides to building an application within the framework. The [first example](documentation.html#tutorial1) walks through the basic components of an application, and serves as a *Hello World* for the Virtual World Framework.
+
+The [second example](documentation.html#tutorial1) is a basic tutorial that consists of four stages, bringing the developer from the creation of a primitive scene to a simple sandtable application. 
+</div>
+
+-------------------
+
+<a name="tutorial1" />
+
+<div class="well" markdown="1">
+Hello World Tutorial 
 ===============
 * * *
 
@@ -366,13 +383,6 @@ By default, the framework will search for the index.vwf.yaml file. Thus, if the 
 
 The Virtual World Framework can be used in either single user or multi-user mode. An independent session of the application can be initialized by a URL without a session ID: *http://vwf.example.com/application/*. The URL from the initial user can be used to allow additional users to join the session, specified by the session ID. Example: *http://vwf.example.com/application/561f86e42b6763d0/*. This session ID will be pulled out of the URL, and replaced with a session variable that will still be accessible via the URL. The session can run for a given time, and as a new user joins, the content will be synched to the current state of the application.
 
-* * *
+</div>
 
-How to get started with your own instance of VWF
--------------------------------------------------
-*	Public server maintained by VWF to host applications for review
-*	Use VMware to host virtual instance of a VWF server
-*	Initialize personal server via a Linux Boot CD, where content is loaded from flash drive
-
-* * *
-
+-------------------

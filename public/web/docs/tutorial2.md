@@ -1,6 +1,10 @@
+<a name="tutorial2" />
+
+<div class="well" markdown="1">
 Sandtable Tutorial
-==========================
---------------------------
+===================
+-------------------
+
 <iframe width="560" height="315" src="http://www.youtube.com/embed/mMhgA9fwdWs" frameborder="0" allowfullscreen></iframe>
 
  
@@ -254,4 +258,6 @@ Finally, back in the HTML file, we'll need to add a few javascript functions to 
 
 Example: [HTML Overlays and Interaction](../../tutorial/03)
 
-_____________________________________________________________________________________
+</div>
+
+-------------------

@@ -1,5 +1,8 @@
-# Logging and Debugging
+<a name="logging" />
 
+<div class="well" markdown="1">
+Logging and Debugging
+==============
 --------------
 
 As you're building applications in the framework, it often helps to be familiar with the different logging and debugging tools available, both built into the browser as well as in the framwework. 
@@ -64,4 +67,5 @@ By adding "//@ sourceURL=*file reference*" to the end of scripts in the model fi
 
 <img src='images/source.png' alt='chrome' style='width:500px' />
 
+</div>
 --------------

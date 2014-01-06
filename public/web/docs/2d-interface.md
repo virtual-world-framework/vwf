@@ -1,6 +1,10 @@
-# Create a 2D Interface
+<a name="2d-interface" />
 
+<div class="well" markdown="1">
+Create a 2D Interface
+===================
 -------------------
+
 You can add two dimensional components to a user's *view* via html.  These components can interact with the *model* state (update it and be updated from it).
 
 The first step is to create an html file that matches the name of your application's vwf.yaml file.  For example, if your application is titled *application*.vwf.yaml, create a file in the same directory named *application*.vwf.html.  When your application loads, the framework automatically looks for an html file by this name.
@@ -102,4 +106,5 @@ Additionally, the favicon of an application may be set simply by dropping a *fav
 
 For an example of setting these items, visit the [duck application](../../../duck).
 
+</div>
 -------------------

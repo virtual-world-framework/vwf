@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "author": "VWF <http://virtual.wf>",
   "scripts": {
-    "start": "node ./node-server.js",
-    "debug": "node --debug ./node-server.js",
+    "start": "node ./node-server.js --applicationPath=./public",
+    "debug": "node --debug ./node-server.js --applicationPath=./public",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "directories": {
@@ -22,11 +22,15 @@
     "socket.io": "0.9.x",
     "async": "0.2.x",
     "mime": "1.2.x",
-    "js-yaml": "2.1.x"
+    "js-yaml": "2.1.x",
+    "optimist": "0.6.x",
+    "fs-extra": "0.8.x"
   },
   "devDependencies": {
     "node-inspector": "x.x.x",
-    "nodebug": "x.x.x"
+    "nodebug": "x.x.x",
+    "mocha": "x.x.x",
+    "should": "x.x.x"
   },
   "license": {
     "type": "Apache",

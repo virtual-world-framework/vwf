@@ -1,6 +1,10 @@
+<a name="html" />
+
+<div class="well" markdown="1">
 HTML Overlays
 ===================
 -------------------
+
 Two dimensional components may be added to any application via HTML. When an application loads, the framework automatically looks for an HTML file of the same name. For instance, if your application is entitled <code><i>application</i>.vwf.yaml</code>, VWF will look for a file in the same directory called <code><i>application</i>.vwf.html</code>. This HTML is of a standard format, and can, in fact, be loaded standalone in a browser. 
 
 A few additions to the file can attach the 2D content as an overlay directly over the VWF view, and scripts can be added to attach the HTML content to the application pieces itself. 
@@ -99,5 +103,6 @@ Similarly, the HTML can monitor other types of application updates as well. A fe
 
 The <code>vwf.api.view</code> in the [system API](system.html) contains a full list of view driver calls.
 
+</div>
 -------------------
 
