@@ -1030,25 +1030,25 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
     /// Define ...
     /// 
     /// This function must run as a method of the driver. Invoke it as:
-    ///   `createEventAccessor.call( driver, container, eventName )`.
+    ///   `createEventAccessor.call( driver, container, eventName [, eventNamespace ] [, unsettable ] )`.
     /// 
     /// @param {Object} container
     ///   The ...
     /// @param {String} eventName
     ///   The ...
-    /// @param {String} [eventPrefix]
+    /// @param {String} [eventNamespace]
     ///   The ...
     /// @param {Boolean} [unsettable]
     ///   The ...
 
-    function createEventAccessor( container, eventName, eventPrefix, unsettable ) {
+    function createEventAccessor( container, eventName, eventNamespace, unsettable ) {
 
         var self = this;
 
         Object.defineProperty( container, eventName, {
 
-            get: function() {  // `this` is the container
-                var node = this.node || this;  // the node via node.events.node, or just node
+            get: eventNamespace ? undefined : function() {  // `this` is the container
+                var node = this.node || this;  // the node via node.*collection*.node, or just node
                 return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
                     var argumentsKernel = parametersKernelFromJS.call( self, arguments );
                     var resultKernel = self.kernel.fireEvent( node.id, eventName, argumentsKernel,
@@ -1058,28 +1058,29 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             },
 
             set: unsettable ? undefined : function( value ) {  // `this` is the container
-                var node = this.node || this;  // the node via node.events.node, or just node
+                var node = this.node || this;  // the node via node.*collection*.node, or just node
+                var namespacedName = eventNamespace ? [ eventNamespace, eventName ] : eventName;
                 if ( typeof value == "function" || value instanceof Function ) {
-                    self.kernel.addEventListener.call( self, node.id, eventName,
+                    self.kernel.addEventListener.call( self, node.id, namespacedName,
                         value, node.id );  // for container.*event* = function() { ... }, context is the target node
                 } else if ( value.add ) {
                     if ( ! value.phases || value.phases instanceof Array ) {
-                        self.kernel.addEventListener.call( self, node.id, eventName,
+                        self.kernel.addEventListener.call( self, node.id, namespacedName,
                             value.handler, value.context && value.context.id, value.phases );
                     } else {
-                        self.kernel.addEventListener.call( self, node.id, eventName,
+                        self.kernel.addEventListener.call( self, node.id, namespacedName,
                             value.handler, value.context && value.context.id, [ value.phases ] );
                     }
                 } else if ( value.remove ) {
-                    self.kernel.removeEventListener.call( self, node.id, eventName,
+                    self.kernel.removeEventListener.call( self, node.id, namespacedName,
                         value.handler );
                 } else if ( value.flush ) {
-                    self.kernel.flushEventListeners.call( self, node.id, eventName,
+                    self.kernel.flushEventListeners.call( self, node.id, namespacedName,
                         value.context && value.context.id );
                 }
             },
 
-            enumerable: true,
+            enumerable: ! eventNamespace,
 
         } );
 
