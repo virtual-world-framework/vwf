@@ -7,26 +7,25 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 Note: (*) indicates an API change. 
 
 Server:
--NEW: Update node server docs with application path info. Add exit in case vwf support files can't be found.Closes #3011
+- NEW: Update node server docs with application path info. Add exit in case vwf support files can't be found.Closes #3011
 
 Client:
--NEW: Add proxy check for users behind corporate firewalls refs #2958
--NEW: Force the symbolic link command. Refs #2958
--NEW: Allow VWF command to be run from any folder location. Refs #2963.
--NEW: Pass command line arguments to the node server. Refs #2963
--NEW: Load the VWF support files from the right place.
--NEW: Fix NPM package call to occur after node.js is setup refs #2958
--NEW: Update node to extract under .vwf directory to contain all VWF structure in a single directory.  Refs #2958
--NEW: Add vwf script to start the vwf server from command line. Refs #2963.
--NEW: Install script for Linux/Mac for a "minimal install" version of vwf that can be executed from a command line. Refs #2958
--NEW: As a developer, I want a command-line interface for creating VWF apps. Add vwf run as a command. Fixes #2962 
--NEW: Implement `vwf create` and add mocha tests. Refs #2962
--NEW: Fix safari issue with trying to write to performance.now() Closes #2919 Closes #2802 Closes #2439 Closes #2441
+- NEW: Add proxy check for users behind corporate firewalls refs #2958
+- NEW: Force the symbolic link command. Refs #2958
+- NEW: Allow VWF command to be run from any folder location. Refs #2963.
+- NEW: Pass command line arguments to the node server. Refs #2963
+- NEW: Load the VWF support files from the right place.
+- NEW: Fix NPM package call to occur after node.js is setup refs #2958
+- NEW: Update node to extract under .vwf directory to contain all VWF structure in a single directory.  Refs #2958
+- NEW: Add vwf script to start the vwf server from command line. Refs #2963.
+- NEW: Install script for Linux/Mac for a "minimal install" version of vwf that can be executed from a command line. Refs #2958
+- NEW: As a developer, I want a command-line interface for creating VWF apps. Add vwf run as a command. Fixes #2962 
+- NEW: Implement `vwf create` and add mocha tests. Refs #2962
+- NEW: Fix safari issue with trying to write to performance.now() Closes #2919 Closes #2802 Closes #2439 Closes #2441
 
 Documentation:
--CHG: Reformat documentation to create a single searchable html file. Fixes #2923.
--NEW: Update Readme.md to add build status. Closes #2964
--NEW: Update readme.md to include new instructions for VWF 1.0 installation steps. Closes #2958
+- CHG: Reformat documentation to create a single searchable html file. Fixes #2923.-NEW: Update Readme.md to add build status. Closes #2963
+- NEW: Update readme.md to include new instructions for VWF 1.0 installation steps. Closes #2958
 
 
 ----------------------------------
