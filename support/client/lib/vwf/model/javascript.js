@@ -142,6 +142,12 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function
                 }
             } );
 
+            // Attach the property meta events to `node.properties.{created,initialized,deleted}`.
+
+            createEventAccessor.call( this, node.properties, "created", "properties" );
+            createEventAccessor.call( this, node.properties, "initialized", "properties" );
+            createEventAccessor.call( this, node.properties, "deleted", "properties" );
+
             node.private.getters = Object.create( prototype.private ?
                 prototype.private.getters : Object.prototype
             );
@@ -160,6 +166,11 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function
                 }
             } );
 
+            // Attach the method meta events to `node.methods.{created,deleted}`.
+
+            createEventAccessor.call( this, node.methods, "created", "methods" );
+            createEventAccessor.call( this, node.methods, "deleted", "methods" );
+
             node.private.bodies = Object.create( prototype.private ?
                 prototype.private.bodies : Object.prototype
             );
@@ -175,6 +186,11 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function
                     return self.kernel.createEvent( this.node.id, name, parameters );
                 }
             } );
+
+            // Attach the event meta events to `node.events.{created,deleted}`.
+
+            createEventAccessor.call( this, node.events, "created", "events" );
+            createEventAccessor.call( this, node.events, "deleted", "events" );
 
             // Provide helper functions to create the directives for adding, removing and flushing
             // event handlers.
@@ -232,6 +248,11 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function
                     return self.kernel.deleteNode( child.id );
                 }
             } );
+
+            // Attach the child meta events to `node.children.{added,removed}`.
+
+            createEventAccessor.call( this, node.children, "added", "children" );
+            createEventAccessor.call( this, node.children, "removed", "children" );
 
             // Define the "random" and "seed" functions.
 
