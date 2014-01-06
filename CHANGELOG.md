@@ -24,8 +24,7 @@ Client:
 -NEW: Fix safari issue with trying to write to performance.now() Closes #2919 Closes #2802 Closes #2439 Closes #2441
 
 Documentation:
--CHG: Reformat documentation to create a single searchable html file. Fixes #2923.
--NEW: Update Readme.md to add build status. Closes #2964
+-CHG: Reformat documentation to create a single searchable html file. Fixes #2923.-NEW: Update Readme.md to add build status. Closes #2963
 -NEW: Update readme.md to include new instructions for VWF 1.0 installation steps. Closes #2958
 
 
