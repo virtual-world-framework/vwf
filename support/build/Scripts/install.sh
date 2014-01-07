@@ -131,6 +131,14 @@ fi
 #######################################
 
 cd "$HOME/.vwf"
+if env | grep -q ^HTTP_PROXY=
+then
+  echo HTTP_PROXY exists and will be used.
+else
+  echo HTTP_PROXY does not exist on this server. We are setting it to a default null value and continuing installation.
+  export HTTP_PROXY
+fi
+
 if [ -z "$HTTP_PROXY" ]; then
 npm config set proxy "$HTTP_PROXY"; 
 npm config set https-proxy "$HTTP_PROXY"; 
