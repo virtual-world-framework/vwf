@@ -346,7 +346,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
 var scriptText = " \
     \
-    var initializers = [], node = this;\n\
+    var initializers = [], node = this, that = this;\n\
     \n\
     while ( node ) {\n\
         if ( node.hasOwnProperty( 'initialize' ) && node.initialize ) {\n\
@@ -355,10 +355,15 @@ var scriptText = " \
         node = Object.getPrototypeOf( node );\n\
     }\n\
     \n\
-    initializers.forEach( function( initialize ) {\n\
-        // this.logger.warn( 'initializing', this.id, 'from', initialize.id );\n\
-        initialize.func.call( this );\n\
-    }, this );\n\
+    callInitialize( 0 );\n\
+    \n\
+    function callInitialize( index ) {\n\
+        var initialize = initializers[ index ];\n\
+        if ( initialize ) {\n\
+            initialize.func.call( that );\n\
+            setTimeout( function() { callInitialize( index + 1 ) }, 0 );\n\
+        }\n\
+    }\n\
     \
 ";
 
