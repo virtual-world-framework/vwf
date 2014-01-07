@@ -71,17 +71,14 @@ local VWF repository.
 
 Our development process utilizes several branches:
 
-* `master`                - Stable release of VWF. Running on http://virtual.wf.
-* `integration`           - Integration testing features from development before merging into master. Running on http://integration.virtual.wf.
-* `development`           - The latest development and new features of the framework. Running on http://development.virtual.wf.
-* `branch/feature-name`   - Feature development is done on a feature branch before being merged back to development.
+* [![Build Status](http://jenkins.virtualworldframework.com/job/Master/badge/icon)](http://jenkins.virtualworldframework.com/job/Master/) **master** - Stable release of VWF. Running on http://virtual.wf.
+* [![Build Status](http://jenkins.virtualworldframework.com/job/Integration/badge/icon)](http://jenkins.virtualworldframework.com/job/Integration/) **integration** - Integration testing features from development before merging into master. Running on http://integration.virtual.wf.
+* [![Build Status](http://jenkins.virtualworldframework.com/job/Development/badge/icon)](http://jenkins.virtualworldframework.com/job/Development/) **development** - The latest development and new features of the framework. Running on http://development.virtual.wf.
+* **branch/feature-name**   - Feature development is done on a feature branch before being merged back to development.
 
 When submitting a pull request, please use the `development` branch.
 
 Also, please be sure that your pull request conforms to our [Coding Standard](http://redmine.virtualworldframework.com/projects/vwf/wiki/JavaScript_Coding_Standard).
-
-##Current Build Status
-Master Branch - [![Build Status](http://jenkins.virtualworldframework.com/job/Master/badge/icon)](http://jenkins.virtualworldframework.com/job/Master/)      Integration Branch - [![Build Status](http://jenkins.virtualworldframework.com/job/Integration/badge/icon)](http://jenkins.virtualworldframework.com/job/Integration/)      Development Branch - [![Build Status](http://jenkins.virtualworldframework.com/job/Development/badge/icon)](http://jenkins.virtualworldframework.com/job/Development/)
 
 ## Community
 
@@ -92,4 +89,4 @@ Keep track of developments and get help with VWF.
 
 ## License
 
-Copyright 2013 United States Government, as represented by the Secretary of Defense, Under Secretary of Defense (Personnel & Readiness) licensed under the [Apache 2.0 License](https://github.com/virtual-world-framework/vwf/blob/master/LICENSE).
+Copyright 2014 United States Government, as represented by the Secretary of Defense, Under Secretary of Defense (Personnel & Readiness) licensed under the [Apache 2.0 License](https://github.com/virtual-world-framework/vwf/blob/master/LICENSE).
