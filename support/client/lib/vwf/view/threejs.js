@@ -711,7 +711,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var worldCamPos, worldCamTrans, camInverse;
             if ( camera ) { 
                 var worldCamTrans = new THREE.Vector3();
-                worldCamTrans.getPositionFromMatrix( camera.matrixWorld );
+                worldCamTrans.setFromMatrixPosition( camera.matrixWorld );
 
                 // Convert THREE.Vector3 to array
                 worldCamPos = [ worldCamTrans.x, worldCamTrans.y, worldCamTrans.z];
@@ -1647,7 +1647,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                 var cameraMatrix = camera.matrix;
                                 var originalCameraTransform = matCpy( cameraMatrix.elements );
                                 var cameraPos = new THREE.Vector3();
-                                cameraPos.getPositionFromMatrix( cameraMatrix );
+                                cameraPos.setFromMatrixPosition( cameraMatrix );
                                 cameraMatrix.multiply( pitchDeltaMatrix );
 
                                 // Constrain the camera's pitch to +/- 90 degrees
@@ -2024,7 +2024,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         this.projector.unprojectVector(pickDirectionVector, threeCam);
         var pos = new THREE.Vector3();
-        pos.getPositionFromMatrix( threeCam.matrixWorld );
+        pos.setFromMatrixPosition( threeCam.matrixWorld );
         pickDirectionVector.sub(pos);
         pickDirectionVector.normalize();
                 
@@ -2075,7 +2075,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         this.projector.unprojectVector(pickDirectionVector, threeCam);
         var pos = new THREE.Vector3();
-        pos.getPositionFromMatrix( threeCam.matrixWorld );
+        pos.setFromMatrixPosition( threeCam.matrixWorld );
         pickDirectionVector.sub(pos);
         pickDirectionVector.normalize();
         
@@ -2846,7 +2846,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Get the eye position
             var eye = new THREE.Vector3();
             var threeObject = node.threeObject;
-            eye.getPositionFromMatrix( threeObject.matrixWorld );
+            eye.setFromMatrixPosition( threeObject.matrixWorld );
 
             var look = new THREE.Vector3();
             look.subVectors( targetWorldPos, eye );
@@ -2895,7 +2895,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             
             if ( lookatNode )
             {
-                targetWorldPos.getPositionFromMatrix( lookatNode.threeObject.matrixWorld );
+                targetWorldPos.setFromMatrixPosition( lookatNode.threeObject.matrixWorld );
                 lookAtWorldPosition( targetWorldPos );                         
             }
         

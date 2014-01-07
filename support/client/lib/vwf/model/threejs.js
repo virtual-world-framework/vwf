@@ -527,7 +527,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             // Get the eye position
                             var eye = new THREE.Vector3();
                             var worldTransform = getWorldTransform( node );
-                            eye.getPositionFromMatrix( worldTransform );
+                            eye.setFromMatrixPosition( worldTransform );
 
                             var look = new THREE.Vector3();
                             look.subVectors( targetWorldPos, eye );
@@ -581,7 +581,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 {
                                     node.lookatval = lookAtValue;
                                     var targetWorldTransform = getWorldTransform( lookatNode );
-                                    targetWorldPos.getPositionFromMatrix( targetWorldTransform );
+                                    targetWorldPos.setFromMatrixPosition( targetWorldTransform );
                                     lookAtWorldPosition( targetWorldPos );                         
                                 } else {
                                     self.logger.errorx( "Lookat node does not exist: '" + lookAtValue + "'" );
