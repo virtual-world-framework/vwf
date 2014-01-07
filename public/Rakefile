@@ -78,6 +78,7 @@ task :web => "web/catalog.html"  do
                 kramdown 'web/docs/transforms.md' ; 
                 kramdown 'web/docs/lesson.md' ; 
                 kramdown 'web/docs/logging.md' ; 
+                kramdown 'web/docs/persistence.md' ; 
                 kramdown 'web/docs/testing.md' ; 
                 kramdown 'web/docs/pitfalls.md' ; 
                 kramdown 'web/docs/application.md' ; 
