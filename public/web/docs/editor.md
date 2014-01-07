@@ -1,6 +1,10 @@
+<a name="editor" />
+
+<div class="well" markdown="1">
 Editor
 ===================
 -------------------
+
 The editor capability of the Virtual World Framework allows for the application to be edited in a live environment. It provides full control to the user and has the ability to navigate through the current state of the application, consisting of its various nodes and properties. The editor allows changes to be made to the shared simulation by setting properties, calling methods, and firing events. 
 
 -------------------
@@ -122,5 +126,6 @@ The About tab displays the current version of the Virtual World Framework used i
 
 <div style='width:100%;text-align:center'><img src='images/editor_about.png' alt='about' /></div>
 
+</div>
 -------------------
 

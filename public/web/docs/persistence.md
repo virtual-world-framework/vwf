@@ -1,3 +1,6 @@
+<a name="persistence" />
+
+<div class="well" markdown="1">
 Persistence
 ===================
 -------------------
@@ -17,5 +20,5 @@ To open a previously saved application:
 
 Note: Persistence functionality is only enabled in development mode on the server. 
 
+</div>
 -------------------
-
