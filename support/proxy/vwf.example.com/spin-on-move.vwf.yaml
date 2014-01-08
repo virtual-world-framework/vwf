@@ -112,7 +112,7 @@ scripts:
       if ( !this.input ) this.init();
 
       this.input.pointerDown.pointerInfo = pointerInfo;
-      this.input.pointerDown.pointerInfo = pickInfo;
+      this.input.pointerDown.pickInfo = pickInfo;
       this.input.clear();
     }
     this.pointerUp = function( pointerInfo, pickInfo ) {
