@@ -1,0 +1,2 @@
+Parser = objectThatDelegatesTo(OMeta, {
+})

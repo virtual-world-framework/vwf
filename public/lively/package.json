@@ -1,0 +1,26 @@
+{
+  "author": "The Lively Kernel Team <team@lively-web.org>",
+  "name": "livelykernel",
+  "description": "The Lively Kernel core system",
+  "version": "2.2.0",
+  "homepage": "http://lively-web.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LivelyKernel/LivelyKernel.git"
+  },
+  "main": "core/lively/bootstrap.js",
+  "dependencies": {
+    "life_star": "~0.4",
+    "async": "~0.2",
+    "shelljs": "~0.2",
+    "optparse": "~1.0",
+    "colorize": "~0.1",
+    "websocket": "1.0.8"
+  },
+  "scripts": {
+    "test": "node bin/lk-test.js",
+    "start": "node bin/lk-server.js"
+  },
+  "devDependencies": {},
+  "optionalDependencies": {}
+}

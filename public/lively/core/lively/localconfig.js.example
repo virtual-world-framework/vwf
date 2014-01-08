@@ -1,0 +1,11 @@
+/*
+ * This file can be used to customize Config options for your lively
+ * installation. To do that, rename that file to localconfig.js and
+ * change the statements below to fit your needs.
+ */
+ 
+lively.Config.set('proxyURL', protocol + '//' + host + '/my-proxy');
+
+lively.Config.set('verboseLogging', false);
+
+Config.addOption('myOption', true, 'your own config setting');
