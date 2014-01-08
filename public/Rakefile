@@ -83,9 +83,15 @@ task :web => "web/catalog.html"  do
                 kramdown 'web/docs/application.md' ; 
                 kramdown 'web/docs/system.md' ; 
                 cat web/format/docs.postamble ; cat web/format/postamble ) > 'web/documentation.html'"
-        else # web/forum.md, web/unsupported.md
+        else # web/forum.md, web/downloads.md, web/unsupported.md
             sh "( cat web/format/preamble ; kramdown '#{md}' ; cat web/format/postamble ) > '#{ md.ext ".html" }'"
         end
+    end
+
+    # Render the gallery page (web/gallery.htm)
+
+    FileList[ "web/gallery.htm" ].each do |htm|
+        sh "( cat web/format/preamble ; cat '#{htm}' ; cat web/format/postamble ) > '#{ htm.ext ".html" }'"
     end
 
     # Restore the path.
