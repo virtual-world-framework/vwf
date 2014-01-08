@@ -1,10 +1,12 @@
 var path = require( 'path' ),
     http = require( 'http' ),
+    https = require( 'https' ),
     fs = require( 'fs' ),
     url = require( 'url' ),
     sio = require( 'socket.io' ),
     reflector = require( './lib/nodejs/reflector' ),
-    vwf = require( './lib/nodejs/vwf' );
+    vwf = require( './lib/nodejs/vwf' ),
+    argv = require('optimist').argv;
 
 // Basic error handler.
 global.error = function () {
@@ -62,7 +64,6 @@ function consoleError( string ) {
 // to the current directory if none is specified.
 // Use --applicationPath or -a to specify an alternative path.
 function parseApplicationPath () {
-    var argv = require('optimist').argv;
 
     if ( argv.applicationPath || argv.a ) {
 
@@ -130,22 +131,24 @@ function startVWF() {
     reset = '\u001b[0m';
 
     //start the DAL
-    var pIndex = process.argv.indexOf( '-p' );
-    var port = ( pIndex >= 0 ? parseInt( process.argv[ pIndex + 1 ] ) : 3000 );
+    var port = ( argv.p ? parseInt( argv.p ) : 3000 );
 		
-    var lIndex = process.argv.indexOf( '-l' );
-    global.logLevel = ( lIndex >= 0 ? process.argv[ lIndex + 1 ] : 1 );
+    global.logLevel = ( argv.l ? argv.l : 1 );
     global.log( brown + 'LogLevel = ' +  global.logLevel + reset, 0 );	
 
-    p = process.argv.indexOf( '-nocache' );
-    if ( p >= 0 ) {
+    if ( argv.nocache ) {
         FileCache.enabled = false;
         console.log( 'server cache disabled' );
     }
 
     global.applicationRoot = parseApplicationPath();
 
-    var srv = http.createServer( OnRequest ).listen( port );
+    var sslOptions = {
+        key: argv.key ? fs.readFileSync( argv.key ) : undefined,
+        cert: argv.cert ? fs.readFileSync( argv.cert ) : undefined
+    };
+
+    var srv = argv.ssl ? https.createServer( sslOptions, OnRequest ).listen( port ) : http.createServer( OnRequest ).listen( port );
     global.log( brown + 'Serving on port ' + port + reset, 0 );
 
     //create socket server
