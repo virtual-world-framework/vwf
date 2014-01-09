@@ -506,7 +506,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( this.state.enabled ) {
 
                         if ( when === undefined ) {
-                            return this.kernel[kernelFunctionName]( nodeID, scriptText, scriptType );
+                            return this.kernel[kernelFunctionName]( nodeID, scriptText, scriptType,
+                                                                    callback );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, undefined,
                                 [ scriptText, scriptType ], when, callback /* result */ );  // TODO: { text: scriptText, type: scriptType } ? -- vwf.receive() needs to parse

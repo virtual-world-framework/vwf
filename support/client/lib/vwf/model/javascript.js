@@ -339,41 +339,50 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName ) {
 
+            var that = this;
+
             var node = this.nodes[nodeID];
             var child = this.nodes[childID];
 
-            var scriptText = "this.initialize && this.initialize()";
+            var initializers = [];
+            var tempNode = child;
+            var stepsUpProtoChain = 0;
 
-var scriptText = " \
-    \
-    var initializers = [], node = this, that = this;\n\
-    \n\
-    while ( node ) {\n\
-        if ( node.hasOwnProperty( 'initialize' ) && node.initialize ) {\n\
-            initializers.unshift( { func: node.initialize, id: node.id } );\n\
-        }\n\
-        node = Object.getPrototypeOf( node );\n\
-    }\n\
-    \n\
-    callInitialize( 0 );\n\
-    \n\
-    function callInitialize( index ) {\n\
-        var initialize = initializers[ index ];\n\
-        if ( initialize ) {\n\
-            initialize.func.call( that );\n\
-            setTimeout( function() { callInitialize( index + 1 ) }, 0 );\n\
-        }\n\
-    }\n\
-    \
-";
+            // Create array specifying which initializers exist
+            // (starting at the farthest end of the prototype chain)
+            while ( tempNode ) {
+                var initializingExists = tempNode.hasOwnProperty( 'initialize' );
+                var initializingIsAFunc = ( typeof tempNode.initialize === "function" || 
+                                            tempNode.initialize instanceof Function )
+                if ( initializingExists && initializingIsAFunc ) {
+                    initializers.unshift( stepsUpProtoChain );
+                }
+                stepsUpProtoChain++;
+                tempNode = Object.getPrototypeOf( tempNode );
+            }
 
-            // Call the initializer.
+            // callback( false );
+            callInitialize();
 
-            try {
-                ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
-            } catch ( e ) {
-                this.logger.warnx( "initializingNode", childID,
-                    "exception in initialize:", utility.exceptionMessage( e ) );
+            function callInitialize() {
+                if ( initializers.length ) {
+                    var prototypeNum = initializers.shift();
+                    that.kernel.execute( childID, generateScriptText( prototypeNum ),
+                                         "application/javascript", undefined, function() { 
+                                            callInitialize();
+                                         } );
+                } else {
+                    // callback( true );
+                }
+
+                function generateScriptText( prototypeNum ) {
+                    return " \
+                        var node = this;\n\
+                        for ( var i = 0; i < " + prototypeNum + "; i++ ) {\n\
+                            node = Object.getPrototypeOf( node );\n\
+                        }\n\
+                        node.initialize.call( this );"
+                }
             }
 
             // Link to the parent.
