@@ -129,6 +129,9 @@ scripts:
         case "y":
           this.spin( -diff[1] );
           break;
+        default:
+          this.spin( Math.sqrt( ( diff[0] * diff[0] ) + ( diff[1] * diff[1] ) ) );
+          break;
       }
     }
     this.spin = function( value ){
