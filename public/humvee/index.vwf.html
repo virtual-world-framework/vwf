@@ -41,9 +41,11 @@
             $("#interior").button("refresh");
             break;
           case "honkHorn":
+            $('#honk')[0].load();
             $('#honk')[0].play();
             break;
           case "startEngine":
+            $('#ignition')[0].load();
             $('#ignition')[0].play();
             break;
         }

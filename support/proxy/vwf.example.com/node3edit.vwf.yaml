@@ -140,8 +140,8 @@ scripts:
         pointChange: function() {
           var ret = [ 0, 0, 0 ];
           if ( this.pickInfo && this.previous.pickInfo ) {
-            var oldPt = this.previous.pickInfo.globalPosition;
-            var newPt = this.pickInfo.globalPosition;
+            var oldPt = this.previous.pickInfo.globalSource;
+            var newPt = this.pickInfo.globalSource;
             ret[0] = newPt[0] - oldPt[0];
             ret[1] = newPt[1] - oldPt[1];
             ret[2] = newPt[2] - oldPt[2];

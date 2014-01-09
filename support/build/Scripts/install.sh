@@ -131,15 +131,16 @@ fi
 #######################################
 
 cd "$HOME/.vwf"
-if [ -z "$HTTP_PROXY" ]; then
-npm config set proxy "$HTTP_PROXY"; 
-npm config set https-proxy "$HTTP_PROXY"; 
-echo "NPM proxy has been set to ${HTTP_PROXY}."
+if env | grep -q ^HTTP_PROXY=
+then
+  npm config set proxy "$HTTP_PROXY"; 
+  npm config set https-proxy "$HTTP_PROXY"; 
+  echo "NPM proxy has been set to ${HTTP_PROXY}."
+else
+  echo "NPM proxy has not been set as HTTP_PROXY environment variable is not set. If you are behind a proxy, please make sure your HTTP_PROXY variable is set and re-execute VWF installation."
 fi
-echo "NPM proxy has not been set as HTTP_PROXY environment variable is not set. If you are behind a proxy, please make sure your HTTP_PROXY variable is set and re-execute VWF installation."
+
 npm install
-
-
 echo " "
 echo "VWF has been installed in your home directory (~/.vwf)."
 
