@@ -92,6 +92,8 @@ scripts:
     this.pointerDown = function( pointerInfo, pickInfo ) {
       if ( !this.input ) this.init();
 
+      this.input.clear();
+
       this.input.pointerDown.pointerInfo = pointerInfo;
       this.input.pointerDown.pickInfo = pickInfo;
 
@@ -115,8 +117,13 @@ scripts:
 
       this.lastAngle = Math.acos( goog.vec.Vec3.dot( this.objectVec3OnDown, this.pointerVec3OnDown ) ) * (180 / Math.PI);
 
-      console.info( "this.lastAngle = " + this.lastAngle );
-      this.input.clear();
+      // if listAngle is very small then need to modify the 
+      // scale rate, given this approach
+
+      // also the distance to the object should be taken into consideration
+      // the further away the object is, then the change in the angle
+      // from the center doesn't change much when trying to decrease the scale
+      
     }
 
     this.pointerUp = function( pointerInfo, pickInfo ) {
@@ -131,22 +138,14 @@ scripts:
 
     this.updateScale = function(){
       var currentScale = this.parent.scale; 
-      console.info( "======= mouseMove ========" );   
-
-      console.info( "pointerVector = " + this.input.pickInfo.pointerVector );
-
       var currentPointer = goog.vec.Vec3.createFromArray( this.input.pickInfo.pointerVector );
       goog.vec.Vec3.normalize( currentPointer, currentPointer );
 
-      console.info( "currentPointer = " + Array.prototype.slice.call( currentPointer ) );
-      console.info( "objectVec3OnDown = " + Array.prototype.slice.call( this.objectVec3OnDown ) );
-
       var currentAngle = Math.acos( goog.vec.Vec3.dot( this.objectVec3OnDown, currentPointer ) ) * (180 / Math.PI);
 
-      console.info( "this.lastAngle = " + this.lastAngle );
-      console.info( "currentAngle   = " + currentAngle );
-
       if ( currentAngle > this.lastAngle ) {
+       
+        // moving away from the center 
         this.parent.scale = goog.vec.Vec3.add( currentScale, 
           goog.vec.Vec3.scale( 
             goog.vec.Vec3.createFromValues( 1, 1, 1 ), 
@@ -157,14 +156,18 @@ scripts:
         this.valueChanged( this.parent.scale );
         this.lastAngle = currentAngle;
       } else if ( currentAngle < this.lastAngle ){
+
+        // moving towards from the center
         var newScale = goog.vec.Vec3.subtract( currentScale, 
           goog.vec.Vec3.scale( 
             goog.vec.Vec3.createFromValues( 1, 1, 1 ), 
-            ( this.lastAngle - this.lastAngle ) * this[ "scale-rate" ], 
+            ( this.lastAngle - currentAngle ) * this[ "scale-rate" ], 
             goog.vec.Vec3.create()
           ),          
         goog.vec.Vec3.create() );
         
+        // this needs to decrease more as the user 
+
         if ( goog.vec.Vec3.magnitude( newScale ) > 0 ) {
           this.parent.scale = newScale;
           this.valueChanged( this.parent.scale );
