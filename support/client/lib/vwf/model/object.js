@@ -324,16 +324,17 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
             var object = this.objects[ nodeID ];
 
             if ( object ) {
-                return ( !initializedOnly || object.initialized ) ?
+                return ( ! initializedOnly || object.initialized ) ?
                     ( object.parent && object.parent.id || 0 ) : undefined;
             } else {
                 this.logger.error( "Cannot find node: '" + nodeID + "'" );
             }
+
         },
 
         // -- children -----------------------------------------------------------------------------
 
-        children: function( nodeID ) {
+        children: function( nodeID, initializedOnly ) {
 
             if ( nodeID === undefined ) {
                 this.logger.errorx( "children", "cannot retrieve children of nonexistent node");
@@ -342,12 +343,14 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
             var node = this.objects[ nodeID ];
 
-            if ( node )
+            if ( node ) {
                 return node.children.map( function( child ) {
-                    return child.id;
+                    return ( ! initializedOnly || child.initialized ) ?
+                        child.id : undefined;
                 } );
-            else
+            } else {
                 this.logger.error( "Cannot find node: " + nodeID );
+            }
 
         },
 
