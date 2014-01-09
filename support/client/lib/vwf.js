@@ -4970,11 +4970,27 @@ if ( ! childComponent.source ) {
 
                     break;
 
+                // Attribute test.
+
                 case "attribute":
 
                     resultIDs = resultIDs.filter( function( resultID ) {
                         return resultID[0] == "@" && xpathPropertyMatchesStep.call( this, resultID.slice( 1 ), step.name );  // TODO: @?
                     }, this );
+
+                    break;
+
+                // The `doc()` function for referencing globals outside the current tree.
+                // http://www.w3.org/TR/xpath-functions/#func-doc.
+
+                case "doc":
+
+                    if ( this.root( contextID, initializedOnly ) ) {
+                        var globalID = this.global( step.name, initializedOnly );
+                        resultIDs = globalID ? [ globalID ] : [];
+                    } else {
+                        resultIDs = [];
+                    }
 
                     break;
 
