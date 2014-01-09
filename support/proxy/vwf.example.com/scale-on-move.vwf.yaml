@@ -117,9 +117,11 @@ scripts:
 
       this.lastAngle = Math.acos( goog.vec.Vec3.dot( this.objectVec3OnDown, this.pointerVec3OnDown ) ) * (180 / Math.PI);
 
+      // TO DO
       // if listAngle is very small then need to modify the 
       // scale rate, given this approach
 
+      // TO DO      
       // also the distance to the object should be taken into consideration
       // the further away the object is, then the change in the angle
       // from the center doesn't change much when trying to decrease the scale
