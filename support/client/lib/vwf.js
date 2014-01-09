@@ -1399,17 +1399,18 @@
                 nodeComponent = nodeComponent.patches;  // TODO: possible sync errors if the patched node is a URI component and the kernel state (time, random) is different from when the node was created on the originating client
             }
 
-            // nodeComponent may be a URI, a descriptor, or an ID, and while being created will
+            // nodeComponent may be a URI, a descriptor, or an ID. While being created, it will
             // transform from a URI to a descriptor to an ID (depending on its starting state).
-            // nodeURI, nodeDescriptor, and nodeID capture the applicable intermediate states.
+            // nodeURI, nodeDescriptor, and nodeID capture the intermediate states.
 
             var nodeURI, nodeDescriptor, nodeID;
 
             async.series( [
 
-                // If nodeComponent is a URI, load the descriptor.
+                // If `nodeComponent` is a URI, load the descriptor. `nodeComponent` may be a URI, a
+                // descriptor or an ID here.
 
-                function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is a URI, a descriptor, or an ID
+                function( series_callback_async /* ( err, results ) */ ) {
 
                     if ( componentIsURI( nodeComponent ) ) { // URI  // TODO: allow non-vwf URIs (models, images, etc.) to pass through to stage 2 and pass directly to createChild()
 
@@ -1486,9 +1487,10 @@
 
                 },
 
-                // If nodeComponent is a descriptor, construct and get the ID.
+                // If `nodeComponent` is a descriptor, construct and get the ID. `nodeComponent` may
+                // be a descriptor or an ID here.
 
-                function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is a descriptor or an ID
+                function( series_callback_async /* ( err, results ) */ ) {
 
                     if ( componentIsDescriptor( nodeComponent ) ) { // descriptor  // TODO: allow non-vwf URIs (models, images, etc.) to pass through to stage 2 and pass directly to createChild()
 
@@ -1507,9 +1509,9 @@
 
                 },
 
-                // nodeComponent is the ID.
+                // nodeComponent is an ID here.
 
-                function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is an ID
+                function( series_callback_async /* ( err, results ) */ ) {
 
                     if ( componentIsID( nodeComponent ) ) {  // ID
 
