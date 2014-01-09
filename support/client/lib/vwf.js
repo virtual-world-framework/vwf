@@ -214,12 +214,6 @@
 
         this.private = {}; // for debugging
 
-        /// The application root ID.
-        /// 
-        /// @name module:vwf~applicationID
-
-        var applicationID = undefined;
-
         /// Components describe the objects that make up the simulation. They may also serve as
         /// prototype objects for further derived components. External components are identified by
         /// URIs. Once loaded, we save a mapping here from its URI to the node ID of its prototype so
@@ -1287,7 +1281,7 @@
 
                 nodes: [  // TODO: all global objects
                     this.getNode( "http-vwf-example-com-clients-vwf", full ),
-                    this.getNode( applicationID, full ),
+                    this.getNode( this.application(), full ),
                 ],
 
                 // `createNode` annotations, keyed by `nodes` indexes.
@@ -1610,12 +1604,6 @@
             // Unregister the node.
 
             nodes.delete( nodeID );
-
-            // Clear the root ID if the application root node is deleted.
-
-            if ( nodeID === applicationID ) {
-                applicationID = undefined;
-            }
 
             // Call deletedNode() on each view. The view is being notified that a node has been
             // deleted.
@@ -2071,7 +2059,7 @@ var useLegacyID = nodeID === 0 && childURI &&
     childURI != "http://vwf.example.com/node.vwf";
     
 useLegacyID = useLegacyID ||
-    nodeID == applicationID && childName == "camera"; // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
+    childName == "camera" && nodeID == this.application(); // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 childID = childComponent.id;
@@ -2094,13 +2082,6 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                     ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
                 childIndex = this.children( nodeID ).length;
 }
-            }
-
-            // Record the application root ID. The application is the first global node annotated as
-            // "application".
-
-            if ( nodeID === 0 && childName == "application" && ! applicationID ) {
-                applicationID = childID;
             }
 
             // Register the node.
@@ -3673,8 +3654,17 @@ if ( ! childComponent.source ) {
         /// @see {@link module:vwf/api/kernel.application}
 
         this.application = function( initializedOnly ) {
-            return applicationID && ( ! initializedOnly || this.models.object.initialized( applicationID ) ) ?
-                applicationID : undefined;
+
+            var applicationID;
+
+            Object.keys( nodes.globals ).forEach( function( globalID ) {
+                var global = nodes.existing[globalID];
+                if ( ( ! initializedOnly || global.initialized ) && global.name == "application" ) {
+                    applicationID = globalID;
+                }
+            }, this );
+
+            return applicationID;
         };
 
         // -- intrinsics ---------------------------------------------------------------------------
