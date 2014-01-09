@@ -3758,6 +3758,67 @@ if ( ! childComponent.source ) {
             return this.models.object.behaviors( nodeID );
         };
 
+        // -- globals ------------------------------------------------------------------------------
+
+        /// @name module:vwf.globals
+
+        this.globals = function( initializedOnly ) {
+
+            var globals = {};
+
+            Object.keys( nodes.globals ).forEach( function( globalID ) {
+                if ( ! initializedOnly || nodes.existing[globalID].initialized ) {
+                    globals[globalID] = undefined;
+                }
+            }, this );
+
+            return globals;
+        };
+
+        // -- global -------------------------------------------------------------------------------
+
+        /// @name module:vwf.global
+
+        this.global = function( globalReference, initializedOnly ) {
+
+            var globals = this.globals( initializedOnly );
+
+            return matches( "uri" ) || matches( "name" );
+
+
+            function matches( field ) {
+
+                var matchingID;
+
+                Object.keys( globals ).some( function( globalID ) {
+                    if ( nodes.existing[globalID][field] === globalReference ) {
+                        return matchingID = /* assignment! */ globalID;
+                    }
+                } );
+
+                return matchingID;
+            }
+
+        };
+
+        // -- root ---------------------------------------------------------------------------------
+
+        /// @name module:vwf.root
+
+        this.root = function( nodeID, initializedOnly ) {
+
+            var rootID = nodeID;
+
+            nodeID = this.parent( nodeID, initializedOnly );
+
+            while ( nodeID ) {
+                rootID = nodeID;
+                nodeID = this.parent( nodeID, initializedOnly );
+            }
+
+            return nodeID === undefined ? undefined : rootID;
+        };
+
         // -- ancestors ----------------------------------------------------------------------------
 
         /// @name module:vwf.ancestors
@@ -3770,7 +3831,7 @@ if ( ! childComponent.source ) {
 
             nodeID = this.parent( nodeID, initializedOnly );
 
-            while ( nodeID && nodeID !== 0 ) {
+            while ( nodeID ) {
                 ancestors.push( nodeID );
                 nodeID = this.parent( nodeID, initializedOnly );
             }
