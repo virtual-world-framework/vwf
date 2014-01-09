@@ -21,6 +21,7 @@ methods:
 properties:
   spin-axis: [ 0, 1, 0 ]
   spin-rate: 100
+  spin-inputDim: "xy"
 scripts:
 - |
   this.initialize = function() {
