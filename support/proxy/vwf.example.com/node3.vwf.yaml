@@ -19,7 +19,6 @@
 ---
 extends: http://vwf.example.com/node.vwf
 implements:
-- http://vwf.example.com/animation.vwf
 - http://vwf.example.com/node3/animation.vwf
 
 properties:
