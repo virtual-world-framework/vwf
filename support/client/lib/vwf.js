@@ -724,6 +724,7 @@
                     };
                     if ( window.location.protocol === "https:" )
                     {
+                        options.secure = true;
                         socket = io.connect("wss://"+window.location.host, options);
                     } else {
                         socket = io.connect("ws://"+window.location.host, options); 
