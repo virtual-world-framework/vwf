@@ -3191,7 +3191,7 @@ if ( ! childComponent.source ) {
 
         // -- createEvent --------------------------------------------------------------------------
 
-        /// @name module:vwf.creatEvent
+        /// @name module:vwf.createEvent
         /// 
         /// @see {@link module:vwf/api/kernel.createEvent}
 
@@ -3211,6 +3211,89 @@ if ( ! childComponent.source ) {
 
             this.views.forEach( function( view ) {
                 view.createdEvent && view.createdEvent( nodeID, eventName, eventParameters );
+            } );
+
+            this.logger.debugu();
+        };
+
+        // -- addEventListener --------------------------------------------------------------------------
+
+        /// @name module:vwf.addEventListener
+        /// 
+        /// @see {@link module:vwf/api/kernel.addEventListener}
+
+        this.addEventListener = function( nodeID, eventName, eventHandler,
+                eventContextID, eventPhases ) {
+
+            this.logger.debuggx( "addEventListener", function() {
+                return [ nodeID, eventName, loggableScript( eventHandler ),
+                    eventContextID, eventPhases ];
+            } );
+
+            // Call addingEventListener() on each model.
+
+            this.models.forEach( function( model ) {
+                model.addingEventListener && model.addingEventListener( nodeID, eventName, eventHandler,
+                    eventContextID, eventPhases );
+            } );
+
+            // Call addedEventListener() on each view.
+
+            this.views.forEach( function( view ) {
+                view.addedEventListener && view.addedEventListener( nodeID, eventName, eventHandler,
+                    eventContextID, eventPhases );
+            } );
+
+            this.logger.debugu();
+        };
+
+        // -- removeEventListener --------------------------------------------------------------------------
+
+        /// @name module:vwf.removeEventListener
+        /// 
+        /// @see {@link module:vwf/api/kernel.removeEventListener}
+
+        this.removeEventListener = function( nodeID, eventName, eventHandler ) {
+
+            this.logger.debuggx( "removeEventListener", function() {
+                return [ nodeID, eventName, loggableScript( eventHandler ) ];
+            } );
+
+            // Call removingEventListener() on each model.
+
+            this.models.forEach( function( model ) {
+                model.removingEventListener && model.removingEventListener( nodeID, eventName, eventHandler );
+            } );
+
+            // Call removedEventListener() on each view.
+
+            this.views.forEach( function( view ) {
+                view.removedEventListener && view.removedEventListener( nodeID, eventName, eventHandler );
+            } );
+
+            this.logger.debugu();
+        };
+
+        // -- flushEventListeners --------------------------------------------------------------------------
+
+        /// @name module:vwf.flushEventListeners
+        /// 
+        /// @see {@link module:vwf/api/kernel.flushEventListeners}
+
+        this.flushEventListeners = function( nodeID, eventName, eventContextID ) {
+
+            this.logger.debuggx( "flushEventListeners", nodeID, eventName, eventContextID );
+
+            // Call flushingEventListeners() on each model.
+
+            this.models.forEach( function( model ) {
+                model.flushingEventListeners && model.flushingEventListeners( nodeID, eventName, eventContextID );
+            } );
+
+            // Call flushedEventListeners() on each view.
+
+            this.views.forEach( function( view ) {
+                view.flushedEventListeners && view.flushedEventListeners( nodeID, eventName, eventContextID );
             } );
 
             this.logger.debugu();
