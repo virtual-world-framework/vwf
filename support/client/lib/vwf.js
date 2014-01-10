@@ -2424,7 +2424,7 @@ if ( ! childComponent.source ) {
                                             queue.suspend( "while executing script in initializingNode" ); // suspend the queue
                                             callNextIterationWithoutWaiting = false;
                                         } else if ( ! callNextIterationWithoutWaiting && ready ) {
-                                            each_callback_async( undefined ); // resume createChild()
+                                            each_callback_async( undefined );
                                             queue.resume( "after executing script in initializingNode" ); // resume the queue; may invoke dispatch(), so call last before returning to the host
                                         }
                                     } );

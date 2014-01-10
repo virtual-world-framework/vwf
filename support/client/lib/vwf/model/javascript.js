@@ -361,6 +361,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 tempNode = Object.getPrototypeOf( tempNode );
             }
 
+            // Let the kernel know that it shouldn't call initializingNode on other drivers until
+            // we're done with our potentially blocking calls to the prototype chain of initialize
+            // functions
             callback( false );
             callInitialize();
 
@@ -372,6 +375,36 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                             callInitialize();
                                          } );
                 } else {
+
+                    // The node is fully initialized at this point
+
+                    // Link to the parent.
+                    // 
+                    // The parent reference is only defined once the node is fully initialized.
+                    // It is not defined earlier since components should be able to stand alone 
+                    // without depending on external nodes.
+                    // 
+                    // Additionally, since parts of the application may become ready in a different
+                    // order on other clients, referring to properties in other parts of the 
+                    // application may lead to consistency errors.
+
+                    child.parent = node;
+
+                    if ( node ) {
+
+                        node.children[childIndex] = child;
+
+                        if ( parseInt( childName ).toString() !== childName ) {
+                            node.children[childName] = child;
+                        }
+node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+                        ( node[childName] = child );
+
+                    }
+
+                    // Let the kernel know that we are done calling the prototype chain of 
+                    // initialize functions, and it can resume calling initializeNode on other 
+                    // drivers
                     callback( true );
                 }
 
@@ -383,30 +416,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         }\n\
                         node.initialize.call( this );"
                 }
-            }
-
-            // Link to the parent.
-            // 
-            // The parent reference is only defined once the node is fully initialized. It is not
-            // defined earlier since components should be able to stand alone without depending on
-            // external nodes.
-            // 
-            // Additionally, since parts of the application may become ready in a different order on
-            // other clients, referring to properties in other parts of the application may lead to
-            // consistency errors.
-
-            child.parent = node;
-
-            if ( node ) {
-
-                node.children[childIndex] = child;
-
-                if ( parseInt( childName ).toString() !== childName ) {
-                    node.children[childName] = child;
-                }
-node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                ( node[childName] = child );
-
             }
 
             return undefined;
