@@ -2393,34 +2393,60 @@ if ( ! childComponent.source ) {
                                 vwf.tickable.nodeIDs.push( childID );
                             }
 
-                            // Call initializingNode() on each model and initializedNode() on each view to
-                            // indicate that the node is fully constructed.
-
-                            vwf.models.forEach( function( model ) {
-                                model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                    childComponent.source, childComponent.type, childIndex, childName );
-                            } );
-
-                            vwf.views.forEach( function( view ) {
-                                view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                    childComponent.source, childComponent.type, childIndex, childName );
-                            } );
-
-                            // Restore kernel reentry.
-
+                            // Restore kernel reentry
                             replicating && vwf.models.kernel.enable();
 
                         }, function() {
 
-                            // Mark the node as initialized.
-                            nodes.initialize( childID );
+                            // This function is called when all asynchronous calls from the
+                            // previous function have returned
 
-                            series_callback_async( err, undefined );
+                            // Call initializingNode() on each model and initializedNode() on each view to
+                            // indicate that the node is fully constructed.
+                            async.forEachSeries( vwf.models, 
+                                                 function( model, 
+                                                           each_callback_async /* ( err ) */ ) {
+                                var callNextIterationWithoutWaiting = true;
 
+                                // Suppress kernel reentry so that initialization functions
+                                // don't  make any changes during replication.
+                                replicating && vwf.models.kernel.disable();
+
+                                model.initializingNode &&
+                                    model.initializingNode( nodeID, childID, childPrototypeID, 
+                                                            childBehaviorIDs,
+                                                            childComponent.source, 
+                                                            childComponent.type, childIndex, 
+                                                            childName, 
+                                                            function( ready ) /* async */ {
+
+                                        if ( callNextIterationWithoutWaiting && ! ready ) {
+                                            queue.suspend( "while executing script in initializingNode" ); // suspend the queue
+                                            callNextIterationWithoutWaiting = false;
+                                        } else if ( ! callNextIterationWithoutWaiting && ready ) {
+                                            each_callback_async( undefined ); // resume createChild()
+                                            queue.resume( "after executing script in initializingNode" ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                                        }
+                                    } );
+
+                                // Restore kernel reentry
+                                replicating && vwf.models.kernel.enable();
+
+                                callNextIterationWithoutWaiting && each_callback_async( undefined );
+
+                            }, function( err ) /* async */ {
+                                vwf.views.forEach( function( view ) {
+                                    view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                        childComponent.source, childComponent.type, childIndex, childName );
+                                } );
+
+                                // Mark the node as initialized.
+                                nodes.initialize( childID );
+
+                                series_callback_async( err, undefined );
+                            } );
                         } );
-
                     } );
-
                 },
 
             ], function( err, results ) /* async */ {
@@ -3284,6 +3310,8 @@ if ( ! childComponent.source ) {
 
         this.execute = function( nodeID, scriptText, scriptType, callback_async ) {
 
+            var that = this;
+
             this.logger.debuggx( "execute", function() {
                 return [ nodeID, ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType ];  // TODO: loggableScript()
             } );
@@ -3299,21 +3327,25 @@ if ( ! childComponent.source ) {
 
             var scriptValue = undefined;
 
-            this.models.some( function( model ) {
-                scriptValue = model.executing && model.executing( nodeID, scriptText, scriptType );
-                return scriptValue !== undefined;
+            // Watch for any async kernel calls generated as we execute the scriptText
+            // and wait for them to complete before calling the callback
+            vwf.models.kernel.capturingAsyncs( function() {
+                that.models.some( function( model ) {
+                    scriptValue = model.executing &&
+                                  model.executing( nodeID, scriptText, scriptType );
+                    return scriptValue !== undefined;
+                } );
+            }, function() {
+
+                // Call executed() on each view to notify view that a script has been executed.
+                that.views.forEach( function( view ) {
+                    view.executed && view.executed( nodeID, scriptText, scriptType );
+                } );
+
+                that.logger.debugu();
+
+                callback_async && callback_async();
             } );
-
-            // Call executed() on each view. The view is being notified that a script has been
-            // executed.
-
-            this.views.forEach( function( view ) {
-                view.executed && view.executed( nodeID, scriptText, scriptType );
-            } );
-
-            this.logger.debugu();
-
-            callback_async && setTimeout( callback_async, 0 );
 
             return scriptValue;
         };

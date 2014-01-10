@@ -337,7 +337,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // Invoke an initialize() function if one exists.
 
         initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childIndex, childName ) {
+            childSource, childType, childIndex, childName, callback ) {
 
             var that = this;
 
@@ -361,7 +361,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 tempNode = Object.getPrototypeOf( tempNode );
             }
 
-            // callback( false );
+            callback( false );
             callInitialize();
 
             function callInitialize() {
@@ -372,7 +372,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                             callInitialize();
                                          } );
                 } else {
-                    // callback( true );
+                    callback( true );
                 }
 
                 function generateScriptText( prototypeNum ) {

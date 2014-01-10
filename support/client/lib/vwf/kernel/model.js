@@ -506,8 +506,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( this.state.enabled ) {
 
                         if ( when === undefined ) {
-                            return this.kernel[kernelFunctionName]( nodeID, scriptText, scriptType,
-                                                                    callback );
+                            if ( this.state.asyncs ) {
+                                callback = this.state.asyncs.defer( callback /* nodeID */ );
+                            }
+                            return this.kernel[ kernelFunctionName ]( nodeID, scriptText, 
+                                                                      scriptType,
+                                                                      function( nodeID ) {
+                                callback && callback( nodeID );
+                            } );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, undefined,
                                 [ scriptText, scriptType ], when, callback /* result */ );  // TODO: { text: scriptText, type: scriptType } ? -- vwf.receive() needs to parse
@@ -516,7 +522,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     } else {
                         this.state.blocked = true;
                     }
-
                 };
 
             case "random":
