@@ -337,7 +337,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // Invoke an initialize() function if one exists.
 
         initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childIndex, childName, callback ) {
+            childSource, childType, childIndex, childName, notifyCallerReadyToContinue ) {
 
             var that = this;
 
@@ -364,7 +364,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             // Let the kernel know that it shouldn't call initializingNode on other drivers until
             // we're done with our potentially blocking calls to the prototype chain of initialize
             // functions
-            callback( false );
+            notifyCallerReadyToContinue( false );
             callInitialize();
 
             function callInitialize() {
@@ -405,7 +405,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
                     // Let the kernel know that we are done calling the prototype chain of 
                     // initialize functions, and it can resume calling initializeNode on other 
                     // drivers
-                    callback( true );
+                    notifyCallerReadyToContinue( true );
                 }
 
                 function generateScriptText( prototypeNum ) {
