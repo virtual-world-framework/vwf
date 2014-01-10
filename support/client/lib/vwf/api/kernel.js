@@ -289,18 +289,21 @@ define( function() {
         dispatchEvent: [ /* nodeID, eventName, eventParameters, eventNodeParameters */ ],
 
         /// It will call executing() on each model. The script is considered executed after each model
-        /// has run.  It will also call executed() on each view. The view is being notified that a 
-        /// script has been executed.
+        /// has run and all asynchronous calls made inside them have returned.
+        /// It will then call executed() on each view to notify it that a script has been executed.
+        /// It will then call the caller-provided callback_async to notify the caller that the
+        /// script has been fully executed and all asynchronous kernel calls have completed.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
         /// @param {String} scriptText
         /// @param {String} scriptType
+        /// @param {Function} callback_async
         /// 
         /// @returns {Value} returnValue
 
-        execute: [ /* nodeID, scriptText, scriptType */ ],
+        execute: [ /* nodeID, scriptText, scriptType, callback_async */ ],
 
         /// @function
         /// 
