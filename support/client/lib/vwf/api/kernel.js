@@ -261,6 +261,44 @@ define( function() {
 
         // TODO: deleteEvent
 
+        /// addEventListener.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {Script} eventHandler
+        /// @param {ID} [eventContextID]
+        /// @param {String[]} [eventPhases]
+        /// 
+        /// @returns {}
+
+        addEventListener: [ /* nodeID, eventName, eventHandler, eventContextID, eventPhases */ ],
+
+        /// removeEventListener.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {Script} eventHandler
+        /// 
+        /// @returns {}
+
+        removeEventListener: [ /* nodeID, eventName, eventHandler */ ],
+
+        /// flushEventListeners.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ID} eventContextID
+        /// 
+        /// @returns {}
+
+        flushEventListeners: [ /* nodeID, eventName, eventContextID */ ],
+
         /// It will call firingEvent() on each model and firedEvent() on each view.
         /// 
         /// @function

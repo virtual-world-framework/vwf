@@ -461,6 +461,63 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             // TODO: deleteEvent
 
+            case "addEventListener":
+
+                return function( nodeID, eventName, eventHandler, eventContextID, eventPhases, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, eventName, eventHandler, eventContextID, eventPhases );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, eventName,
+                                [ eventHandler, eventContextID, eventPhases ], when, callback /* result */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
+            case "removeEventListener":
+
+                return function( nodeID, eventName, eventHandler, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, eventName, eventHandler );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, eventName,
+                                [ eventHandler ], when, callback /* result */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
+            case "flushEventListeners":
+
+                return function( nodeID, eventName, eventContextID, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, eventName, eventContextID );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, eventName,
+                                [ eventContextID ], when, callback /* result */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
             case "fireEvent":
 
                 return function( nodeID, eventName, eventParameters, when, callback ) {
