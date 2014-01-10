@@ -1,3 +1,6 @@
+<a name="animations" />
+
+<div class="well" markdown="1">
 Animations
 ===================
 -------------------
@@ -62,9 +65,5 @@ Future calls may also be used for property assignment or to fire an event at a g
 
 <!-- Coming soon! Relative vs. Absolute future calls: this.in() and this.at() -->
 
+</div>
 -------------------
-
-
-
-
-

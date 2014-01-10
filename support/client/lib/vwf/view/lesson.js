@@ -184,13 +184,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     $('#nextButton').css('display', 'inline-block');
                     $('a').css('color', 'white');
                     if($('#accordion').html() == '') updateLessonInstructions.call(self, this.lessonSteps);
-                    $( $( $("#accordion").children('div')[0] ).children('h2')[0] ).trigger('click');
                     break;
                   case "completed":
                     $('#lessonProgressBar').css('width', '100%');
                     $('#nextButton').css('display', 'none');
                     $('#completeButton').css('display', 'inline-block');
-                    $("#accordion").accordion("activate", false);
+                    $("#accordion").accordion("option", "active", false);
                     break;
                   case "exiting":
                     $('#lessonProgressBar').css('display', 'none');
@@ -220,7 +219,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     break;
                   case "exiting":
                     var accordionName = '#accordion--' + nodeId.replace(/\:/g, "_").replace(/\./g, "-");
-                    if($(accordionName).length) $(accordionName).accordion("activate", false);
+                    if($(accordionName).length) $(accordionName).accordion("option", "active", false);
                     break;
                 }
             }

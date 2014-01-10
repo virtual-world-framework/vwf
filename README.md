@@ -9,7 +9,7 @@ VWF applications are written in JavaScript and leverage emerging web technologie
 
 ## Installation
 
-**Install on Linux / Mac OS X**
+**Install on Mac/Linux**
 
 NOTE: On Mac OS X, please make sure you have Xcode Command Line Tools installed prior to executing the script below (https://developer.apple.com/xcode/).
 
@@ -29,20 +29,28 @@ For more complex installations, such as working on VWF core, please see our [Ins
 
 ## Quick Start 
 
-**Quick Start - Linux/Mac OS X** 
+**Mac/Linux**
 
-Create a new folder for your app. Run 'vwf' to start up the web server. 
+Create a new VWF application.
 
 ```
-$ mkdir my-app
+$ vwf create my-app
+```
+
+Change directory into that app and run the application.
+
+```
 $ cd my-app
 $ vwf
 ```
 
-Your application is now up and running at [http://localhost:3000/](http://localhost:3000/).
-Check out [Getting Started](http://virtual.wf/web/docs/readme.html).
+Your application is now up and running at
+[http://localhost:3000](http://localhost:3000).
 
-**Quick Start - Windows** 
+To get started with VWF, check out [Getting
+Started](http://virtual.wf/web/docs/readme.html).
+
+**Windows** 
 
 Execute the _run.bat_ file provided at the root level of the extracted folder.
 
@@ -63,10 +71,10 @@ local VWF repository.
 
 Our development process utilizes several branches:
 
-* `master`                - Stable release of VWF. Running on http://virtual.wf.
-* `integration`           - Integration testing features from development before merging into master. Running on http://integration.virtual.wf.
-* `development`           - The latest development and new features of the framework. Running on http://development.virtual.wf.
-* `branch/feature-name`   - Feature development is done on a feature branch before being merged back to development.
+* [![Build Status](http://jenkins.virtualworldframework.com/job/Master/badge/icon)](http://jenkins.virtualworldframework.com/job/Master/) **master** - Stable release of VWF. Running on http://virtual.wf.
+* [![Build Status](http://jenkins.virtualworldframework.com/job/Integration/badge/icon)](http://jenkins.virtualworldframework.com/job/Integration/) **integration** - Integration testing features from development before merging into master. Running on http://integration.virtual.wf.
+* [![Build Status](http://jenkins.virtualworldframework.com/job/Development/badge/icon)](http://jenkins.virtualworldframework.com/job/Development/) **development** - The latest development and new features of the framework. Running on http://development.virtual.wf.
+* **branch/feature-name**   - Feature development is done on a feature branch before being merged back to development.
 
 When submitting a pull request, please use the `development` branch.
 
@@ -81,4 +89,4 @@ Keep track of developments and get help with VWF.
 
 ## License
 
-Copyright 2013 United States Government, as represented by the Secretary of Defense, Under Secretary of Defense (Personnel & Readiness) licensed under the [Apache 2.0 License](https://github.com/virtual-world-framework/vwf/blob/master/LICENSE).
+Copyright 2014 United States Government, as represented by the Secretary of Defense, Under Secretary of Defense (Personnel & Readiness) licensed under the [Apache 2.0 License](https://github.com/virtual-world-framework/vwf/blob/master/LICENSE).

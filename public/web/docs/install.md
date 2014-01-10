@@ -1,6 +1,13 @@
+<a name="install" />
+
+<div class="well" markdown="1">
 Installation Instructions
 ==========================
 --------------------------
+</div>
+
+--------------------------
+
 <div class="well" markdown="1">
 Source Code
 --------------------------
@@ -347,10 +354,10 @@ During the generation of the CSR, you will be prompted for several pieces of inf
 
     openssl req -new -key server.key -out server.csr
 
-Country Name (2 letter code) [GB]:US<br/>
-State or Province Name (full name) [Berkshire]:Florida<br/>
-Locality Name (eg, city) [Newbury]:Orlando<br/>
-Organization Name (eg, company) [My Company Ltd]:Test<br/>
+Country Name (2 letter code) \[GB\]:US<br/>
+State or Province Name (full name) \[Berkshire\]:Florida<br/>
+Locality Name (eg, city) \[Newbury\]:Orlando<br/>
+Organization Name (eg, company) \[My Company Ltd\]:Test<br/>
 Organizational Unit Name (eg, section) []:Test Technology<br/>
 Common Name (eg, your name or your server's hostname) []:public.whatever.com<br/>
 Email Address []:test@test.com<br/>

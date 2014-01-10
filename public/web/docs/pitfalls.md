@@ -1,4 +1,9 @@
-# Pitfalls
+<a name="pitfalls" />
+
+<div class="well" markdown="1">
+Pitfalls
+==============
+--------------
 
 When you begin programming with VWF, it can be easy to wander off the well-worn path that keeps your apps synchronized across users.  Here are a mix of best practices and the most common pitfalls to avoid:
 
@@ -62,3 +67,6 @@ VWF will try to call *method* from node1, not node2.  Instead, set the event han
 	node1.event = function() {
 	  node2.method();
 	}
+
+</div>
+--------------

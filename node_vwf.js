@@ -11,14 +11,14 @@ var path = require( 'path' ),
 // Basic error handler.
 global.error = function () {
     var red, brown, reset;
-		red   = '\u001b[31m';
-		brown = '\u001b[33m';
-		reset = '\u001b[0m';
+        red   = '\u001b[31m';
+        brown = '\u001b[33m';
+        reset = '\u001b[0m';
 
     var args = Array.prototype.slice.call( arguments );
     args[ 0 ] = red + args[ 0 ] + reset;
     var level = args.splice( args.length - 1 )[ 0 ];
-	
+    
     if ( !isNaN( parseInt( level ) ) ) {
         level = parseInt( level );
     } else {
@@ -132,9 +132,9 @@ function startVWF() {
 
     //start the DAL
     var port = ( argv.p ? parseInt( argv.p ) : 3000 );
-		
+        
     global.logLevel = ( argv.l ? argv.l : 1 );
-    global.log( brown + 'LogLevel = ' +  global.logLevel + reset, 0 );	
+    global.log( brown + 'LogLevel = ' +  global.logLevel + reset, 0 );  
 
     if ( argv.nocache ) {
         FileCache.enabled = false;

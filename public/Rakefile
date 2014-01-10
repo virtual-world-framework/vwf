@@ -50,21 +50,44 @@ task :web => "web/catalog.html"  do
     FileList[ "web/*.md" ].each do |md|
         if md == "web/about.md"
             sh "( cat web/format/preamble ; kramdown 'web/format/carousel.md' ;  kramdown 'web/about.md' ; cat web/format/postamble ) > 'web/about.html'"
-        elsif md == "web/glossary.md"
-            sh "( cat web/format/preamble ; kramdown 'web/format/glossarypre.md' ;  kramdown 'web/glossary.md' ; cat web/format/postamble ) > 'web/glossary.html'"
-        else
+        elsif md == "web/documentation.md"
+            sh "( cat web/format/preamble ; cat web/format/docs.preamble ; 
+                kramdown 'web/documentation.md' ; 
+                kramdown 'web/docs/install.md' ; 
+                kramdown 'web/docs/tutorial1.md' ; 
+                kramdown 'web/docs/tutorial2.md' ; 
+                kramdown 'web/docs/devguide.md' ; 
+                kramdown 'web/docs/architecture.md' ; 
+                kramdown 'web/docs/components.md' ; 
+                kramdown 'web/docs/cameras.md' ; 
+                kramdown 'web/docs/lights.md' ; 
+                kramdown 'web/docs/prototypes.md' ; 
+                kramdown 'web/docs/behaviors.md' ; 
+                kramdown 'web/docs/animations.md' ; 
+                kramdown 'web/docs/html.md' ; 
+                kramdown 'web/docs/drivers.md' ; 
+                kramdown 'web/docs/editor.md' ; 
+                kramdown 'web/docs/query.md' ; 
+                kramdown 'web/docs/cookbook.md' ; 
+                kramdown 'web/docs/multiuser.md' ; 
+                kramdown 'web/docs/simulation.md' ; 
+                kramdown 'web/docs/2d-interface.md' ; 
+                kramdown 'web/docs/materials.md' ; 
+                kramdown 'web/docs/chat.md' ; 
+                kramdown 'web/docs/sound.md' ; 
+                kramdown 'web/docs/transforms.md' ; 
+                kramdown 'web/docs/lesson.md' ; 
+                kramdown 'web/docs/logging.md' ; 
+                kramdown 'web/docs/persistence.md' ; 
+                kramdown 'web/docs/testing.md' ; 
+                kramdown 'web/docs/pitfalls.md' ; 
+                kramdown 'web/docs/application.md' ; 
+                kramdown 'web/docs/system.md' ; 
+                cat web/format/docs.postamble ; cat web/format/postamble ) > 'web/documentation.html'"
+        else # web/forum.md, web/unsupported.md
             sh "( cat web/format/preamble ; kramdown '#{md}' ; cat web/format/postamble ) > '#{ md.ext ".html" }'"
         end
     end
-
-    FileList[ "web/docs/**/*.md" ].each do |md|
-        sh "( cat web/docs/format/preamble ; kramdown '#{md}' ; cat web/docs/format/postamble ) > '#{ md.ext ".html" }'"
-    end
-
-    # Generate the Rocco annotated source.
-
-    sh "rocco web/docs/application/*.vwf.yaml"
-    sh "rocco web/docs/application/example.js"
 
     # Restore the path.
 
