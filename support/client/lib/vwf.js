@@ -2406,7 +2406,8 @@ if ( ! childComponent.source ) {
                             async.forEachSeries( vwf.models, 
                                                  function( model, 
                                                            each_callback_async /* ( err ) */ ) {
-                                var callNextIterationWithoutWaiting = true;
+                                var callNextIterWithoutWaiting = true;
+                                var nextIterAlreadyCalled = false;
 
                                 // Suppress kernel reentry so that initialization functions
                                 // don't  make any changes during replication.
@@ -2420,19 +2421,21 @@ if ( ! childComponent.source ) {
                                                             childName, 
                                                             function( ready ) /* async */ {
 
-                                        if ( callNextIterationWithoutWaiting && ! ready ) {
+                                        if ( callNextIterWithoutWaiting && !ready ) {
                                             queue.suspend( "while executing script in initializingNode" ); // suspend the queue
-                                            callNextIterationWithoutWaiting = false;
-                                        } else if ( ! callNextIterationWithoutWaiting && ready ) {
+                                            callNextIterWithoutWaiting = false;
+                                        } else if ( !callNextIterWithoutWaiting && 
+                                                    !nextIterAlreadyCalled && ready ) {
                                             each_callback_async( undefined );
                                             queue.resume( "after executing script in initializingNode" ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                                            nextIterAlreadyCalled = true;
                                         }
                                     } );
 
                                 // Restore kernel reentry
                                 replicating && vwf.models.kernel.enable();
 
-                                callNextIterationWithoutWaiting && each_callback_async( undefined );
+                                callNextIterWithoutWaiting && each_callback_async( undefined );
 
                             }, function( err ) /* async */ {
                                 vwf.views.forEach( function( view ) {
