@@ -17,8 +17,6 @@ children:
       translation: [ 5, 0, 0 ]
   Monster:
     extends: http://vwf.example.com/node3.vwf
-    implements:
-    - http://vwf.example.com/animation.vwf
     source: monster.js
     type: model/x-threejs-morphanim+json
     properties:
@@ -28,8 +26,6 @@ children:
       animationRate: 1
   Avatar: 
     extends: http://vwf.example.com/node3.vwf
-    implements:
-    - http://vwf.example.com/animation.vwf
     source: JumpSuitMale_wLadder.js
     type: model/x-threejs-morphanim+json
     properties:
@@ -39,8 +35,6 @@ children:
       animationType: -1
   VCTE: 
     extends: http://vwf.example.com/node3.vwf
-    implements:
-    - http://vwf.example.com/animation.vwf
     source: AirForceAll.dae
     type: model/vnd.collada+xml
     properties:
@@ -52,8 +46,6 @@ children:
       animationType: -1
   Knight: 
     extends: http://vwf.example.com/node3.vwf
-    implements:
-    - http://vwf.example.com/animation.vwf
     source: knight.js
     type: model/x-threejs-skinned+json
     properties:
@@ -65,8 +57,6 @@ children:
       animationType: -1
   Horse: 
     extends: http://vwf.example.com/node3.vwf
-    implements:
-    - http://vwf.example.com/animation.vwf
     source: horse.js
     type: model/x-threejs-morphanim+json
     properties:

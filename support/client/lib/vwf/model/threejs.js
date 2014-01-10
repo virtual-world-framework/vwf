@@ -698,9 +698,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             } 
                         }
                         
+                        // Both JSON and Collada models can be skinned mesh animations, but the Collada loader does not support bones
+                        // therefore Collada models will fall in the Morph Target conditional if applicable.
+
                         // Skeletal Animations (takes precedence over Morph Target)
                         if ( node.threeObject.bones && node.threeObject.bones.length > 0 ) {
-                            var animRate = this.state.kernel.getProperty( nodeID, "animationRate" ) || 0.1;
+                            var animRate = this.state.kernel.getProperty( nodeID, "animationRate" ) || 1;
                             THREE.AnimationHandler.update(animRate);
                         } 
                         // Morph Target Animations
@@ -2365,7 +2368,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             sceneNode.pendingLoads--;
             var removed = false;
             
-            // THREE.morphAnimMesh JSON model
+            // THREE JSON model
             if ( childType == "model/x-threejs-morphanim+json" || childType == "model/x-threejs-skinned+json" ) {
 
                 for ( var i = 0; i < materials.length; i++ ) {
@@ -2402,8 +2405,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                     THREE.AnimationHandler.add( geometry.animation );   
                     var asset = new THREE.SkinnedMesh( geometry, meshMaterial );
-                    animation = new THREE.Animation( asset, geometry.animation.name ); 
-                    animation.play();
+                    var skinnedAnimation = new THREE.Animation( asset, geometry.animation.name ); 
+                    skinnedAnimation.play();
                 }
 
                 asset.updateMatrix();
@@ -2412,9 +2415,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var asset = geometry;
             }
          
-            var animations, animatedMesh;
+            var keyframeAnimations, animatedMesh;
             if(asset.animations && asset.animations.length > 0) {
-                animations = asset.animations;
+                keyframeAnimations = asset.animations;
             }
 
             if(asset.scene)
@@ -2435,7 +2438,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             // Don't make a copy of the three object if there are keyframe or skeletal animations associated with it
             // until we figure out a way to copy them successfully.
-            if(animations || animation) {
+            if(keyframeAnimations || skinnedAnimation) {
                 nodeCopy.threeObject = asset;
             }
             else {
@@ -2465,14 +2468,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             nodeCopy.threeObject.vwfID = nodeID;
             nodeCopy.threeObject.matrixAutoUpdate = false;
 
-            if( animations ) {
+            if( keyframeAnimations ) {
                 var animHandler = THREE.AnimationHandler;
                 nodeCopy.threeObject.kfAnimations = [];
-                nodeCopy.threeObject.animations = animations;
+                nodeCopy.threeObject.animations = keyframeAnimations;
 
                 // Initialize the key frame animations
-                for(var i = 0; i < animations.length; i++) {
-                    var animation = animations[i];
+                for(var i = 0; i < keyframeAnimations.length; i++) {
+                    var animation = keyframeAnimations[i];
 
                     // Save references to the animations on the node that is animated, so that it can play separately
                     if( animation.node.animations == undefined ) {
@@ -2566,7 +2569,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             // If there are animations, set loaded to false and don't store the asset
             // in the registry, since the animations don't work with the copy process
-            if(animations) {
+            if(keyframeAnimations) {
                 reg.pending = false;
                 reg.loaded = false;
             }
@@ -2632,7 +2635,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 node.loader = new UTF8JsonLoader( node,node.assetLoaded.bind( this ) );
             }
 
-            if( childType == "model/x-threejs-morphanim+json" || "model/x-threejs-skinned+json" ) {
+            if( childType == "model/x-threejs-morphanim+json" || childType == "model/x-threejs-skinned+json" ) {
                 node.loader = new THREE.JSONLoader()
                 node.loader.load( node.source, node.assetLoaded.bind( this ) );
             }
