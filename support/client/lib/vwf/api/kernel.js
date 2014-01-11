@@ -252,12 +252,13 @@ define( function() {
         /// @function
         /// 
         /// @param {ID} nodeID
+        /// @param {String[]} [eventNamespace]
         /// @param {String} eventName
         /// @param {String[]} eventParameters
         /// 
         /// @returns {}
 
-        createEvent: [ /* nodeID, eventName, eventParameters */ ],
+        createEvent: [ /* nodeID, eventNamespace, eventName, eventParameters */ ],
 
         // TODO: deleteEvent
 
@@ -266,6 +267,7 @@ define( function() {
         /// @function
         /// 
         /// @param {ID} nodeID
+        /// @param {String[]} [eventNamespace]
         /// @param {String} eventName
         /// @param {Script} eventHandler
         /// @param {ID} [eventContextID]
@@ -273,43 +275,46 @@ define( function() {
         /// 
         /// @returns {}
 
-        addEventListener: [ /* nodeID, eventName, eventHandler, eventContextID, eventPhases */ ],
+        addEventListener: [ /* nodeID, eventNamespace, eventName, eventHandler, eventContextID, eventPhases */ ],
 
         /// removeEventListener.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
+        /// @param {String[]} [eventNamespace]
         /// @param {String} eventName
         /// @param {Script} eventHandler
         /// 
         /// @returns {}
 
-        removeEventListener: [ /* nodeID, eventName, eventHandler */ ],
+        removeEventListener: [ /* nodeID, eventNamespace, eventName, eventHandler */ ],
 
         /// flushEventListeners.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
+        /// @param {String[]} [eventNamespace]
         /// @param {String} eventName
         /// @param {ID} eventContextID
         /// 
         /// @returns {}
 
-        flushEventListeners: [ /* nodeID, eventName, eventContextID */ ],
+        flushEventListeners: [ /* nodeID, eventNamespace, eventName, eventContextID */ ],
 
         /// It will call firingEvent() on each model and firedEvent() on each view.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
+        /// @param {String[]} [eventNamespace]
         /// @param {String} eventName
         /// @param {Value[]} eventParameters
         /// 
         /// @returns {}
 
-        fireEvent: [ /* nodeID, eventName, eventParameters */ ],
+        fireEvent: [ /* nodeID, eventNamespace, eventName, eventParameters */ ],
 
         /// Dispatch an event toward a node. Using fireEvent(), capture (down) and bubble (up) along
         /// the path from the global root to the node. Cancel when one of the handlers returns a
@@ -318,13 +323,14 @@ define( function() {
         /// @function
         /// 
         /// @param {ID} nodeID
+        /// @param {String[]} [eventNamespace]
         /// @param {String} eventName
         /// @param {Value[]} eventParameters
         /// @param {Object} eventNodeParameters
         /// 
         /// @returns {}
 
-        dispatchEvent: [ /* nodeID, eventName, eventParameters, eventNodeParameters */ ],
+        dispatchEvent: [ /* nodeID, eventNamespace, eventName, eventParameters, eventNodeParameters */ ],
 
         /// It will call executing() on each model. The script is considered executed after each model
         /// has run and all asynchronous calls made inside them have returned.

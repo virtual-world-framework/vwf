@@ -3195,22 +3195,36 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.createEvent}
 
-        this.createEvent = function( nodeID, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)  // TODO: allow a handler body here and treat as this.*event* = function() {} (a self-targeted handler); will help with ui event handlers
+        this.createEvent = function( nodeID, eventNamespace, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)  // TODO: allow a handler body here and treat as this.*event* = function() {} (a self-targeted handler); will help with ui event handlers
 
-            this.logger.debuggx( "createEvent", nodeID, eventName, eventParameters );
+            // Interpret `createEvent( nodeID, eventName, ... )` as
+            // `createEvent( nodeID, undefined, eventName, ... )`. (`eventNamespace` was added in
+            // 0.6.21.)
+
+            if ( ( typeof eventNamespace !== "object" || ! ( eventNamespace instanceof Array ) ) && eventNamespace !== undefined ) {
+                eventParameters = eventName;
+                eventName = eventNamespace;
+                eventNamespace = undefined;
+            }
+
+            this.logger.debuggx( "createEvent", nodeID, eventNamespace, eventName, eventParameters );
+
+            // Encode the namespace into the name.
+
+            var namespacedName = namespacedEventName( eventNamespace, eventName );
 
             // Call creatingEvent() on each model. The event is considered created after all models
             // have run.
 
             this.models.forEach( function( model ) {
-                model.creatingEvent && model.creatingEvent( nodeID, eventName, eventParameters );
+                model.creatingEvent && model.creatingEvent( nodeID, namespacedName, eventParameters );
             } );
 
             // Call createdEvent() on each view. The view is being notified that a event has been
             // created.
 
             this.views.forEach( function( view ) {
-                view.createdEvent && view.createdEvent( nodeID, eventName, eventParameters );
+                view.createdEvent && view.createdEvent( nodeID, namespacedName, eventParameters );
             } );
 
             this.logger.debugu();
@@ -3222,25 +3236,39 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.addEventListener}
 
-        this.addEventListener = function( nodeID, eventName, eventHandler,
-                eventContextID, eventPhases ) {
+        this.addEventListener = function( nodeID, eventNamespace, eventName, eventHandler, eventContextID, eventPhases ) {
+
+            // Interpret `addEventListener( nodeID, eventName, ... )` as
+            // `addEventListener( nodeID, undefined, eventName, ... )`.
+
+            if ( ( typeof eventNamespace !== "object" || ! ( eventNamespace instanceof Array ) ) && eventNamespace !== undefined ) {
+                eventPhases = eventContextID;
+                eventContextID = eventHandler;
+                eventHandler = eventName;
+                eventName = eventNamespace;
+                eventNamespace = undefined;
+            }
 
             this.logger.debuggx( "addEventListener", function() {
-                return [ nodeID, eventName, loggableScript( eventHandler ),
+                return [ nodeID, eventNamespace, eventName, loggableScript( eventHandler ),
                     eventContextID, eventPhases ];
             } );
+
+            // Encode the namespace into the name.
+
+            var namespacedName = namespacedEventName( eventNamespace, eventName );
 
             // Call addingEventListener() on each model.
 
             this.models.forEach( function( model ) {
-                model.addingEventListener && model.addingEventListener( nodeID, eventName, eventHandler,
+                model.addingEventListener && model.addingEventListener( nodeID, namespacedName, eventHandler,
                     eventContextID, eventPhases );
             } );
 
             // Call addedEventListener() on each view.
 
             this.views.forEach( function( view ) {
-                view.addedEventListener && view.addedEventListener( nodeID, eventName, eventHandler,
+                view.addedEventListener && view.addedEventListener( nodeID, namespacedName, eventHandler,
                     eventContextID, eventPhases );
             } );
 
@@ -3253,22 +3281,35 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.removeEventListener}
 
-        this.removeEventListener = function( nodeID, eventName, eventHandler ) {
+        this.removeEventListener = function( nodeID, eventNamespace, eventName, eventHandler ) {
+
+            // Interpret `removeEventListener( nodeID, eventName, ... )` as
+            // `removeEventListener( nodeID, undefined, eventName, ... )`.
+
+            if ( ( typeof eventNamespace !== "object" || ! ( eventNamespace instanceof Array ) ) && eventNamespace !== undefined ) {
+                eventHandler = eventName;
+                eventName = eventNamespace;
+                eventNamespace = undefined;
+            }
 
             this.logger.debuggx( "removeEventListener", function() {
-                return [ nodeID, eventName, loggableScript( eventHandler ) ];
+                return [ nodeID, eventNamespace, eventName, loggableScript( eventHandler ) ];
             } );
+
+            // Encode the namespace into the name.
+
+            var namespacedName = namespacedEventName( eventNamespace, eventName );
 
             // Call removingEventListener() on each model.
 
             this.models.forEach( function( model ) {
-                model.removingEventListener && model.removingEventListener( nodeID, eventName, eventHandler );
+                model.removingEventListener && model.removingEventListener( nodeID, namespacedName, eventHandler );
             } );
 
             // Call removedEventListener() on each view.
 
             this.views.forEach( function( view ) {
-                view.removedEventListener && view.removedEventListener( nodeID, eventName, eventHandler );
+                view.removedEventListener && view.removedEventListener( nodeID, namespacedName, eventHandler );
             } );
 
             this.logger.debugu();
@@ -3280,20 +3321,33 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.flushEventListeners}
 
-        this.flushEventListeners = function( nodeID, eventName, eventContextID ) {
+        this.flushEventListeners = function( nodeID, eventNamespace, eventName, eventContextID ) {
 
-            this.logger.debuggx( "flushEventListeners", nodeID, eventName, eventContextID );
+            // Interpret `flushEventListeners( nodeID, eventName, ... )` as
+            // `flushEventListeners( nodeID, undefined, eventName, ... )`.
+
+            if ( ( typeof eventNamespace !== "object" || ! ( eventNamespace instanceof Array ) ) && eventNamespace !== undefined ) {
+                eventContextID = eventName;
+                eventName = eventNamespace;
+                eventNamespace = undefined;
+            }
+
+            this.logger.debuggx( "flushEventListeners", nodeID, eventNamespace, eventName, eventContextID );
+
+            // Encode the namespace into the name.
+
+            var namespacedName = namespacedEventName( eventNamespace, eventName );
 
             // Call flushingEventListeners() on each model.
 
             this.models.forEach( function( model ) {
-                model.flushingEventListeners && model.flushingEventListeners( nodeID, eventName, eventContextID );
+                model.flushingEventListeners && model.flushingEventListeners( nodeID, namespacedName, eventContextID );
             } );
 
             // Call flushedEventListeners() on each view.
 
             this.views.forEach( function( view ) {
-                view.flushedEventListeners && view.flushedEventListeners( nodeID, eventName, eventContextID );
+                view.flushedEventListeners && view.flushedEventListeners( nodeID, namespacedName, eventContextID );
             } );
 
             this.logger.debugu();
@@ -3305,22 +3359,36 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.fireEvent}
 
-        this.fireEvent = function( nodeID, eventName, eventParameters ) {
+        this.fireEvent = function( nodeID, eventNamespace, eventName, eventParameters ) {
+
+            // Interpret `fireEvent( nodeID, eventName, ... )` as
+            // `fireEvent( nodeID, undefined, eventName, ... )`. (`eventNamespace` was added in
+            // 0.6.21.)
+
+            if ( ( typeof eventNamespace !== "object" || ! ( eventNamespace instanceof Array ) ) && eventNamespace !== undefined ) {
+                eventParameters = eventName;
+                eventName = eventNamespace;
+                eventNamespace = undefined;
+            }
 
             this.logger.debuggx( "fireEvent", function() {
-                return [ nodeID, eventName, JSON.stringify( loggableValues( eventParameters ) ) ];
+                return [ nodeID, eventNamespace, eventName, JSON.stringify( loggableValues( eventParameters ) ) ];
             } );
+
+            // Encode the namespace into the name.
+
+            var namespacedName = namespacedEventName( eventNamespace, eventName );
 
             // Call firingEvent() on each model.
 
             var handled = this.models.reduce( function( handled, model ) {
-                return model.firingEvent && model.firingEvent( nodeID, eventName, eventParameters ) || handled;
+                return model.firingEvent && model.firingEvent( nodeID, namespacedName, eventParameters ) || handled;
             }, false );
 
             // Call firedEvent() on each view.
 
             this.views.forEach( function( view ) {
-                view.firedEvent && view.firedEvent( nodeID, eventName, eventParameters );
+                view.firedEvent && view.firedEvent( nodeID, namespacedName, eventParameters );
             } );
 
             this.logger.debugu();
@@ -3338,10 +3406,21 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.dispatchEvent}
 
-        this.dispatchEvent = function( nodeID, eventName, eventParameters, eventNodeParameters ) {
+        this.dispatchEvent = function( nodeID, eventNamespace, eventName, eventParameters, eventNodeParameters ) {
+
+            // Interpret `dispatchEvent( nodeID, eventName, ... )` as
+            // `dispatchEvent( nodeID, undefined, eventName, ... )`. (`eventNamespace` was added in
+            // 0.6.21.)
+
+            if ( ( typeof eventNamespace !== "object" || ! ( eventNamespace instanceof Array ) ) && eventNamespace !== undefined ) {
+                eventNodeParameters = eventParameters;
+                eventParameters = eventName;
+                eventName = eventNamespace;
+                eventNamespace = undefined;
+            }
 
             this.logger.debuggx( "dispatchEvent", function() {
-                return [ nodeID, eventName, JSON.stringify( loggableValues( eventParameters ) ),
+                return [ nodeID, eventNamespace, eventName, JSON.stringify( loggableValues( eventParameters ) ),
                     JSON.stringify( loggableIndexedValues( eventNodeParameters ) ) ];
             } );
 
@@ -3387,7 +3466,7 @@ if ( ! childComponent.source ) {
                 
                 targetEventParameters.phase = phase; // smuggle the phase across on the parameters array  // TODO: add "phase" as a fireEvent() parameter? it isn't currently needed in the kernel public API (not queueable, not called by the drivers), so avoid if possible
 
-                return this.fireEvent( ancestorID, eventName, targetEventParameters );
+                return this.fireEvent( ancestorID, eventNamespace, eventName, targetEventParameters );
 
             }, this );
 
@@ -3401,7 +3480,7 @@ if ( ! childComponent.source ) {
             targetEventParameters =
                 eventParameters.concat( cascadedEventNodeParameters[nodeID], phase );
 
-            handled = handled || this.fireEvent( nodeID, eventName, targetEventParameters );
+            handled = handled || this.fireEvent( nodeID, eventNamespace, eventName, targetEventParameters );
 
             // Bubbling phase.
 
@@ -3412,7 +3491,7 @@ if ( ! childComponent.source ) {
                 targetEventParameters =
                     eventParameters.concat( cascadedEventNodeParameters[ancestorID], phase );
 
-                return this.fireEvent( ancestorID, eventName, targetEventParameters );
+                return this.fireEvent( ancestorID, eventNamespace, eventName, targetEventParameters );
 
             }, this );
 
@@ -4203,6 +4282,25 @@ if ( ! childComponent.source ) {
             }
             
             return hasType; 
+        };
+
+        /// ...
+        /// 
+        /// @name module:vwf~namespacedEventName
+        /// 
+        /// @param {String[]|undefined} eventNamespace
+        /// @param {String} eventName
+        /// 
+        /// @returns {Boolean}
+
+        var namespacedEventName = function( eventNamespace, eventName ) {
+
+            if ( eventNamespace && eventNamespace.length ) {
+                return ( "vwf$" + eventNamespace.join( "$" ) + "$" ) + eventName;
+            } else {
+                return eventName;
+            }
+
         };
 
         /// Convert a (potentially-abbreviated) component specification to a descriptor parsable by

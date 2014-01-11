@@ -156,8 +156,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     
             case "createEvent":
 
-                return function( nodeID, eventName, eventParameters, when, callback ) {
-                    this.kernel.send( nodeID, kernelFunctionName, eventName,
+                return function( nodeID, eventNamespace, eventName, eventParameters, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, eventNamespace, eventName,
                         [ eventParameters ], when || 0, callback /* result */ );
                 };
 
@@ -165,36 +165,36 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             case "addEventListener":
 
-                return function( nodeID, eventName, eventHandler, eventContextID, eventPhases, when, callback ) {
-                    this.kernel.send( nodeID, kernelFunctionName, eventName,
+                return function( nodeID, eventNamespace, eventName, eventHandler, eventContextID, eventPhases, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, eventNamespace, eventName,
                         [ eventHandler, eventContextID, eventPhases ], when || 0, callback /* result */ );
                 };
 
             case "removeEventListener":
 
-                return function( nodeID, eventName, eventHandler, when, callback ) {
-                    this.kernel.send( nodeID, kernelFunctionName, eventName,
+                return function( nodeID, eventNamespace, eventName, eventHandler, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, eventNamespace, eventName,
                         [ eventHandler ], when || 0, callback /* result */ );
                 };
 
             case "flushEventListeners":
 
-                return function( nodeID, eventName, eventContextID, when, callback ) {
-                    this.kernel.send( nodeID, kernelFunctionName, eventName,
+                return function( nodeID, eventNamespace, eventName, eventContextID, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, eventNamespace, eventName,
                         [ eventContextID ], when || 0, callback /* result */ );
                 };
 
             case "fireEvent":
 
-                return function( nodeID, eventName, eventParameters, when, callback ) {
-                    this.kernel.send( nodeID, kernelFunctionName, eventName,
+                return function( nodeID, eventNamespace, eventName, eventParameters, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, eventNamespace, eventName,
                         [ eventParameters ], when || 0, callback /* result */ );
                 };
     
             case "dispatchEvent":
 
-                return function( nodeID, eventName, eventParameters, eventNodeParameters, when, callback ) {
-                    this.kernel.send( nodeID, kernelFunctionName, eventName,
+                return function( nodeID, eventNamespace, eventName, eventParameters, eventNodeParameters, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, eventNamespace, eventName,
                         [ eventParameters, eventNodeParameters ], when || 0, callback /* result */ );
                 };
     
