@@ -3739,6 +3739,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var parent = self.state.nodes[ node.parentID ];
         if ( parent ) {
             var worldTransform = new THREE.Matrix4();
+            if ( node.transform === undefined ) {
+                node.transform = new THREE.Matrix4();    
+            }
             return worldTransform.multiplyMatrices( getWorldTransform( parent ), node.transform );
         } else {
             return node.transform;
