@@ -155,7 +155,7 @@ properties:
     value: "PCFSoft"
 
 methods:
-  initializeCamera:
+  initializeActiveCamera:
   getActiveCameraComp:
   getChild:
   getActiveCamera:
@@ -169,19 +169,18 @@ scripts:
 
     this.initialize = function() {
       if ( this.usersShareView ) {
-        this.children.create( "camera", this.userObject, function( child ) {
-          scene.activeCamera = child.id;
-          scene.lastActiveCamera = scene.activeCamera;
 
-          // tried to call the overridden function in
-          // extending component, but can't get that working
-          //scene.initializeCamera();
+        this.children.create( "camera", this.userObject, function( child ) {
+          scene.initializeActiveCamera( child.id );
         } );
+
       }
     }
 
-    this.initializeCamera = function() {
+    this.initializeActiveCamera = function( id ) {
       // override if the camera needs custimization
+      //scene.activeCamera = id;
+      scene.lastActiveCamera = scene.activeCamera;
     }
 
     this.getActiveCameraComp = function() {
