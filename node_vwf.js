@@ -104,6 +104,7 @@ function parseVWFPath () {
 function startVWF() {
     global.activeinstances = [];
     global.vwfRoot = parseVWFPath();
+    global.instances = {};
 
     if ( !global.vwfRoot ) {
         // Should not hit this path since the VWF script checks for the existence
