@@ -775,6 +775,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
                 if(threeObject instanceof THREE.ParticleSystem)
                 {
+                    // TODO Refactor this so that only the properties relevant to particle systems are set into the threejs object. 
+                    // See redmine #3100
+                    if( propertyName == 'rotation' || propertyName == 'quaternion' ) {
+                        return;
+                    }
                     var ps = threeObject;
                     var particles = ps.geometry;
                     ps[propertyName] = propertyValue;
