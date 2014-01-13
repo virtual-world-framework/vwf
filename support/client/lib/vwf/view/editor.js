@@ -189,27 +189,10 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         initializedProperty: function (nodeID, propertyName, propertyValue) {
    
             var node = this.nodes[ nodeID ];
+
             if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
 
-            var property = node.properties[ propertyName ] = {
-                name: propertyName,
-                rawValue: propertyValue,
-                value: undefined,
-                getValue: function() {
-                    var propertyValue;
-                    if ( this.value == undefined ) {
-                        try {
-                            propertyValue = utility.transform( this.rawValue, utility.transforms.transit );
-                            this.value = JSON.stringify( propertyValue );
-                        } catch (e) {
-                            this.logger.warnx( "createdProperty", nodeID, this.propertyName, this.rawValue,
-                                "stringify error:", e.message );
-                            this.value = this.rawValue;
-                        }
-                    }
-                    return this.value;
-                }
-            };
+            var property = node.properties[ propertyName ] = createProperty.call( this, node, propertyName, propertyValue );
             
             node.properties.push( property );
         },
@@ -228,6 +211,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         satProperty: function (nodeID, propertyName, propertyValue) {
             var node = this.nodes[ nodeID ];
+
             if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
             
             // It is possible for a property to have satProperty called for it without ever getting an
@@ -235,25 +219,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             // Catch that case here and create the property
             if ( ! node.properties[ propertyName ] ) {
 
-                var property = node.properties[ propertyName ] = {
-                    name: propertyName,
-                    rawValue: propertyValue,
-                    value: undefined,
-                    getValue: function() {
-                        var propertyValue;
-                        if ( this.value == undefined ) {
-                            try {
-                                propertyValue = utility.transform( this.rawValue, utility.transforms.transit );
-                                this.value = JSON.stringify( propertyValue );
-                            } catch (e) {
-                                this.logger.warnx( "satProperty", nodeID, this.propertyName, this.rawValue,
-                                    "stringify error:", e.message );
-                                this.value = this.rawValue;
-                            }
-                        }
-                        return this.value;
-                    }
-                };
+                var property = node.properties[ propertyName ] = createProperty.call( this, node, propertyName, propertyValue );
 
                 node.properties.push( property );
             }
@@ -1360,6 +1326,31 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 
         return prototypes;
     }
+
+    function createProperty( node, propertyName, propertyValue ) {
+        var property = {
+            name: propertyName,
+            rawValue: propertyValue,
+            value: undefined,
+            getValue: function() {
+                var propertyValue;
+                if ( this.value == undefined ) {
+                    try {
+                        propertyValue = utility.transform( this.rawValue, utility.transforms.transit );
+                        this.value = JSON.stringify( propertyValue );
+                    } catch (e) {
+                        this.logger.warnx( "createdProperty", nodeID, this.propertyName, this.rawValue,
+                            "stringify error:", e.message );
+                        this.value = this.rawValue;
+                    }
+                }
+                return this.value;
+            }
+        };
+
+        return property;
+    }
+
 
     function getProperties( kernel, extendsID ) {
         var pTypes = getPrototypes( kernel, extendsID );
