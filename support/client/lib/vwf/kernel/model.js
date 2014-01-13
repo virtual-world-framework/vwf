@@ -442,14 +442,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     
             case "createEvent":
 
-                return function( nodeID, eventNamespace, eventName, eventParameters, when, callback ) {
+                return function( nodeID, eventName, eventParameters, when, callback ) {
 
                     if ( this.state.enabled ) {
 
                         if ( when === undefined ) {
-                            return this.kernel[kernelFunctionName]( nodeID, eventNamespace, eventName, eventParameters );
+                            return this.kernel[kernelFunctionName]( nodeID, eventName, eventParameters );
                         } else {
-                            this.kernel.plan( nodeID, kernelFunctionName, eventNamespace, eventName,
+                            this.kernel.plan( nodeID, kernelFunctionName, eventName,
                                 [ eventParameters ], when, callback /* result */ );
                         }
 
@@ -463,14 +463,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             case "addEventListener":
 
-                return function( nodeID, eventNamespace, eventName, eventHandler, eventContextID, eventPhases, when, callback ) {
+                return function( nodeID, eventName, eventHandler, eventContextID, eventPhases, when, callback ) {
 
                     if ( this.state.enabled ) {
 
                         if ( when === undefined ) {
-                            return this.kernel[kernelFunctionName]( nodeID, eventNamespace, eventName, eventHandler, eventContextID, eventPhases );
+                            return this.kernel[kernelFunctionName]( nodeID, eventName, eventHandler, eventContextID, eventPhases );
                         } else {
-                            this.kernel.plan( nodeID, kernelFunctionName, eventNamespace, eventName,
+                            this.kernel.plan( nodeID, kernelFunctionName, eventName,
                                 [ eventHandler, eventContextID, eventPhases ], when, callback /* result */ );
                         }
 
@@ -482,14 +482,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             case "removeEventListener":
 
-                return function( nodeID, eventNamespace, eventName, eventHandler, when, callback ) {
+                return function( nodeID, eventName, eventHandler, when, callback ) {
 
                     if ( this.state.enabled ) {
 
                         if ( when === undefined ) {
-                            return this.kernel[kernelFunctionName]( nodeID, eventNamespace, eventName, eventHandler );
+                            return this.kernel[kernelFunctionName]( nodeID, eventName, eventHandler );
                         } else {
-                            this.kernel.plan( nodeID, kernelFunctionName, eventNamespace, eventName,
+                            this.kernel.plan( nodeID, kernelFunctionName, eventName,
                                 [ eventHandler ], when, callback /* result */ );
                         }
 
@@ -501,14 +501,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             case "flushEventListeners":
 
-                return function( nodeID, eventNamespace, eventName, eventContextID, when, callback ) {
+                return function( nodeID, eventName, eventContextID, when, callback ) {
 
                     if ( this.state.enabled ) {
 
                         if ( when === undefined ) {
-                            return this.kernel[kernelFunctionName]( nodeID, eventNamespace, eventName, eventContextID );
+                            return this.kernel[kernelFunctionName]( nodeID, eventName, eventContextID );
                         } else {
-                            this.kernel.plan( nodeID, kernelFunctionName, eventNamespace, eventName,
+                            this.kernel.plan( nodeID, kernelFunctionName, eventName,
                                 [ eventContextID ], when, callback /* result */ );
                         }
 
@@ -520,14 +520,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             case "fireEvent":
 
-                return function( nodeID, eventNamespace, eventName, eventParameters, when, callback ) {
+                return function( nodeID, eventName, eventParameters, when, callback ) {
 
                     if ( this.state.enabled ) {
 
                         if ( when === undefined ) {
-                            return this.kernel[kernelFunctionName]( nodeID, eventNamespace, eventName, eventParameters );
+                            return this.kernel[kernelFunctionName]( nodeID, eventName, eventParameters );
                         } else {
-                            this.kernel.plan( nodeID, kernelFunctionName, eventNamespace, eventName,
+                            this.kernel.plan( nodeID, kernelFunctionName, eventName,
                                 [ eventParameters ], when, callback /* result */ );
                         }
 
@@ -539,14 +539,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     
             case "dispatchEvent":
 
-                return function( nodeID, eventNamespace, eventName, eventParameters, eventNodeParameters, when, callback ) {
+                return function( nodeID, eventName, eventParameters, eventNodeParameters, when, callback ) {
 
                     if ( this.state.enabled ) {
 
                         if ( when === undefined ) {
-                            return this.kernel[kernelFunctionName]( nodeID, eventNamespace, eventName, eventParameters, eventNodeParameters );
+                            return this.kernel[kernelFunctionName]( nodeID, eventName, eventParameters, eventNodeParameters );
                         } else {
-                            this.kernel.plan( nodeID, kernelFunctionName, eventNamespace, eventName,
+                            this.kernel.plan( nodeID, kernelFunctionName, eventName,
                                 [ eventParameters, eventNodeParameters ], when, callback /* result */ );
                         }
 
