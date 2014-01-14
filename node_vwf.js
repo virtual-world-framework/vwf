@@ -102,7 +102,6 @@ function parseVWFPath () {
 
 //Start the VWF server
 function startVWF() {
-    global.activeinstances = [];
     global.vwfRoot = parseVWFPath();
     global.instances = {};
 
