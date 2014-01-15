@@ -235,7 +235,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
             if ( ( this.editorView == 1 ) && ( this.currentNodeID == nodeID ) ) {
                 var nodeIDAttribute = $.encoder.encodeForAlphaNumeric(nodeID); // $.encoder.encodeForHTMLAttribute("id", nodeID, true);
-                var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", propertyName, true);
+                var propertyNameAttribute = $.encoder.encodeForAlphaNumeric("id", propertyName, true);
             
                 // No need to escape propertyValue, because .val does its own escaping
                 $( '#input-' + nodeIDAttribute + '-' + propertyNameAttribute ).val( node.properties[ propertyName ].getValue() );
