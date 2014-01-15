@@ -67,35 +67,6 @@ scripts:
     newCollisionInfo[ 'axes' ] = this.parent.parent.generateAxesForCorners( newBox );
     return newCollisionInfo;
   };
-  var explosion = {
-    extends: "http://vwf.example.com/particlesystem.vwf",
-    properties: {
-      numberParticles: 100,
-      maxLifeTime: 1000,
-      minLifeTime: 1000,
-      startSize: 400,
-      endSize: 400,
-      loop: false,
-      image: "images/explode.png",
-      maxEndAcceleration: [ 0.006, 0.006, 0.006 ],
-      minEndAcceleration: [ -0.006, -0.006, -0.006 ],
-      minVelocity: [ -0.2, -0.2, -0.2 ],
-      maxVelocity: [ 0.2, 0.2, 0.2 ],
-      translation: [],
-      sizeRange: 0,
-      startColor: [ 1, 1, 1, 1],
-      endColor: [ 1, 1, 1, 1],
-      colorRange: [ .2, .1, .1, 0],
-      additive: false,
-      depthTest: true,
-      depthWrite: false,
-      maxOrientation: 0,
-      minOrientation: 0,
-      emitterSize: [ 500 , 0 , 500.0 ],
-      emitterType: "point",
-      textureTiles: 1,
-    }
-  }
   this.initialize = function() {
     //this.lastUpdateTime = this.time;
     if ( this.enabled ) {

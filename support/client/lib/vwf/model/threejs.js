@@ -775,205 +775,184 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
                 if(threeObject instanceof THREE.ParticleSystem)
                 {
-                    // TODO Refactor this so that only the properties relevant to particle systems are set into the threejs object. 
-                    // See redmine #3100
-                    if( propertyName == 'rotation' || propertyName == 'quaternion' ) {
-                        return;
-                    }
                     var ps = threeObject;
                     var particles = ps.geometry;
-                    ps[propertyName] = propertyValue;
-                    
-                    
-                    if(propertyName == 'maxVelocity'||
-                        propertyName == 'minVelocity'||
-                        propertyName == 'maxAcceleration'||
-                        propertyName == 'minAcceleration'||
-                        propertyName == 'emitterType'
-                    )
-                    {
-                        if(ps.material == ps.shaderMaterial_analytic)
-                        {
-                            ps.rebuildParticles();
-                        }
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-                    
-                    if(propertyName == 'size')
-                    {
-                        //ps.material.size = propertyValue;
-                        
-                        for(var i = 0; i < ps.material.attributes.size.value.length; i++)
-                        {
-                            ps.material.attributes.size.value[i] = propertyValue;
-                        }
-                        ps.material.attributes.size.needsUpdate = true;
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-                    if(propertyName == 'particleCount')
-                    {
-                        ps.setParticleCount(propertyValue);
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-                    if(propertyName == 'startSize')
-                    {
-                        ps.shaderMaterial_analytic.uniforms.startSize.value = propertyValue;
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-                    if(propertyName == 'endSize')
-                    {
-                        ps.shaderMaterial_analytic.uniforms.endSize.value = propertyValue;
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-					if(propertyName == 'sizeRange')
-                    {
-                        ps.shaderMaterial_analytic.uniforms.sizeRange.value = propertyValue;
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-                    if(propertyName == 'maxSpin')
-                    {
-                        ps.shaderMaterial_analytic.uniforms.maxSpin.value = propertyValue;
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-					if(propertyName == 'textureTiles')
-                    {
-                        ps.shaderMaterial_analytic.uniforms.textureTiles.value = propertyValue;
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-                    if(propertyName == 'minSpin')
-                    {
-                        ps.shaderMaterial_analytic.uniforms.minSpin.value = propertyValue;
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-					if(propertyName == 'maxOrientation')
-                    {
-                        ps.shaderMaterial_analytic.uniforms.maxOrientation.value = propertyValue;
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-                    if(propertyName == 'minOrientation')
-                    {
-                        ps.shaderMaterial_analytic.uniforms.minOrientation.value = propertyValue;
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-					if(propertyName == 'colorRange')
-                    {
-                        ps.shaderMaterial_analytic.uniforms.colorRange.value.x = propertyValue[0];
-                        ps.shaderMaterial_analytic.uniforms.colorRange.value.y = propertyValue[1];
-                        ps.shaderMaterial_analytic.uniforms.colorRange.value.z = propertyValue[2];
-                        ps.shaderMaterial_analytic.uniforms.colorRange.value.w = propertyValue[3];
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-					
-					
-                    if(propertyName == 'startColor')
-                    {
-                        ps.shaderMaterial_analytic.uniforms.startColor.value.x = propertyValue[0];
-                        ps.shaderMaterial_analytic.uniforms.startColor.value.y = propertyValue[1];
-                        ps.shaderMaterial_analytic.uniforms.startColor.value.z = propertyValue[2];
-                        ps.shaderMaterial_analytic.uniforms.startColor.value.w = propertyValue[3];
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-                    if(propertyName == 'endColor')
-                    {
-                        ps.shaderMaterial_analytic.uniforms.endColor.value.x = propertyValue[0];
-                        ps.shaderMaterial_analytic.uniforms.endColor.value.y = propertyValue[1];
-                        ps.shaderMaterial_analytic.uniforms.endColor.value.z = propertyValue[2];
-                        ps.shaderMaterial_analytic.uniforms.endColor.value.w = propertyValue[3];
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-                    
-            
-                    if(propertyName == 'solver')
-                    {
-                        ps.setSolverType(propertyValue);
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-                    if(propertyName == 'image')
-                    {
-                        ps.shaderMaterial_default.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
-                        ps.shaderMaterial_default.uniforms.useTexture.value = 1.0;
-                        ps.shaderMaterial_analytic.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
-                        ps.shaderMaterial_analytic.uniforms.useTexture.value = 1.0;
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-					
-                    }
-                    if(propertyName == 'additive')
-                    {
-                        //value = Boolean( propertyValue );
-                        //if( value )
-                        if ( Boolean( propertyValue ) )
-                        {
-                            ps.shaderMaterial_default.blending = THREE.AdditiveBlending;
-                            ps.shaderMaterial_default.transparent = true;
-                            ps.shaderMaterial_analytic.blending = THREE.AdditiveBlending;
-                            ps.shaderMaterial_analytic.transparent = true;
-							ps.shaderMaterial_interpolate.blending = THREE.AdditiveBlending;
-                            ps.shaderMaterial_interpolate.transparent = true;
-                        }
-                        else
-                        {
-                            ps.shaderMaterial_default.blending = THREE.NormalBlending;  
-                            ps.shaderMaterial_default.transparent = true;
-                            ps.shaderMaterial_analytic.blending = THREE.NormalBlending; 
-                            ps.shaderMaterial_analytic.transparent = true;
-						    ps.shaderMaterial_interpolate.blending = THREE.NormalBlending; 
-                            ps.shaderMaterial_interpolate.transparent = true;
-                        }
 
-                        ps.shaderMaterial_default.needsUpdate = true;   
-                        ps.shaderMaterial_analytic.needsUpdate = true;   
-						ps.shaderMaterial_interpolate.needsUpdate = true;  						
+                    switch( propertyName ) {
+                        case 'maxVelocity':
+                        case 'minVelocity':
+                        case 'maxAcceleration':
+                        case 'minAcceleration':
+                        case 'emitterSize':
+                        case 'emitterType':
+                        case 'gravity':
+                        case 'gravityCenter':
+                        case 'velocityMode':
+                        case 'damping':
+                        case 'maxRate':
+                            ps[propertyName] = propertyValue;
+                            if( ps.material == ps.shaderMaterial_analytic ) {
+                                ps.rebuildParticles();
+                            }
+                            break;
+                        case 'size':
+                            ps[propertyName] = propertyValue;
+                            for( var i = 0; i < ps.material.attributes.size.value.length; i++ ) {
+                                ps.material.attributes.size.value[i] = propertyValue;
+                            }
+                            ps.material.attributes.size.needsUpdate = true;
+                            break;
+                        case 'particleCount':
+                            ps.setParticleCount(propertyValue);
+                            break;
+                        case 'startSize':
+                            ps[propertyName] = propertyValue;
+                            ps.shaderMaterial_analytic.uniforms.startSize.value = propertyValue;
+                            // ps.material.uniforms.startSize.value = propertyValue;
+                            break;
+                        case 'endSize':
+                            ps[propertyName] = propertyValue;
+                            ps.shaderMaterial_analytic.uniforms.endSize.value = propertyValue;
+                            // ps.material.uniforms.endSize.value = propertyValue;
+                            break;
+                        case 'sizeRange':
+                            ps[propertyName] = propertyValue;
+                            ps.shaderMaterial_analytic.uniforms.sizeRange.value = propertyValue;
+                            // ps.material.uniforms.sizeRange.value = propertyValue;
+                            break;
+                        case 'maxSpin':
+                            ps[propertyName] = propertyValue;
+                            ps.shaderMaterial_analytic.uniforms.maxSpin.value = propertyValue;
+                            // ps.material.uniforms.maxSpin.value = propertyValue;
+                            break;
+                        case 'minSpin':
+                            ps[propertyName] = propertyValue;
+                            ps.shaderMaterial_analytic.uniforms.minSpin.value = propertyValue;
+                            // ps.material.uniforms.minSpin.value = propertyValue;
+                            break;
+                        case 'textureTiles':
+                            ps[propertyName] = propertyValue;
+                            ps.shaderMaterial_analytic.uniforms.textureTiles.value = propertyValue;
+                            // ps.material.uniforms.textureTiles.value = propertyValue;
+                            break;
+                        case 'maxOrientation':
+                            ps[propertyName] = propertyValue;
+                            ps.shaderMaterial_analytic.uniforms.maxOrientation.value = propertyValue;
+                            // ps.material.uniforms.maxOrientation.value = propertyValue;
+                            break;
+                        case 'minOrientation':
+                            ps[propertyName] = propertyValue;
+                            ps.shaderMaterial_analytic.uniforms.minOrientation.value = propertyValue;
+                            // ps.material.uniforms.minOrientation.value = propertyValue;
+                            break;
+                        case 'colorRange':
+                            ps[propertyName] = propertyValue;
+                            ps.shaderMaterial_analytic.uniforms.colorRange.value.x = propertyValue[0];
+                            ps.shaderMaterial_analytic.uniforms.colorRange.value.y = propertyValue[1];
+                            ps.shaderMaterial_analytic.uniforms.colorRange.value.z = propertyValue[2];
+                            ps.shaderMaterial_analytic.uniforms.colorRange.value.w = propertyValue[3];
+                            break;
+                        case 'startColor':
+                            ps[propertyName] = propertyValue;
+                            ps.shaderMaterial_analytic.uniforms.startColor.value.x = propertyValue[0];
+                            ps.shaderMaterial_analytic.uniforms.startColor.value.y = propertyValue[1];
+                            ps.shaderMaterial_analytic.uniforms.startColor.value.z = propertyValue[2];
+                            ps.shaderMaterial_analytic.uniforms.startColor.value.w = propertyValue[3];
+                            break;
+                        case 'endColor':
+                            ps[propertyName] = propertyValue;
+                            ps.shaderMaterial_analytic.uniforms.endColor.value.x = propertyValue[0];
+                            ps.shaderMaterial_analytic.uniforms.endColor.value.y = propertyValue[1];
+                            ps.shaderMaterial_analytic.uniforms.endColor.value.z = propertyValue[2];
+                            ps.shaderMaterial_analytic.uniforms.endColor.value.w = propertyValue[3];
+                            break;
+                        case 'solver':
+                            ps[propertyName] = propertyValue;
+                            ps.setSolverType(propertyValue);
+                            break;
+                        case 'image':
+                            ps[propertyName] = propertyValue;
+                            ps.shaderMaterial_default.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
+                            ps.shaderMaterial_default.uniforms.useTexture.value = 1.0;
+                            ps.shaderMaterial_analytic.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
+                            ps.shaderMaterial_analytic.uniforms.useTexture.value = 1.0;
+                            break;
+                        case 'additive':
+                            ps[propertyName] = propertyValue;
+                            if ( Boolean( propertyValue ) )
+                            {
+                                ps.shaderMaterial_default.blending = THREE.AdditiveBlending;
+                                ps.shaderMaterial_default.transparent = true;
+                                ps.shaderMaterial_analytic.blending = THREE.AdditiveBlending;
+                                ps.shaderMaterial_analytic.transparent = true;
+                                ps.shaderMaterial_interpolate.blending = THREE.AdditiveBlending;
+                                ps.shaderMaterial_interpolate.transparent = true;
+                            }
+                            else
+                            {
+                                ps.shaderMaterial_default.blending = THREE.NormalBlending;  
+                                ps.shaderMaterial_default.transparent = true;
+                                ps.shaderMaterial_analytic.blending = THREE.NormalBlending; 
+                                ps.shaderMaterial_analytic.transparent = true;
+                                ps.shaderMaterial_interpolate.blending = THREE.NormalBlending; 
+                                ps.shaderMaterial_interpolate.transparent = true;
+                            }
+
+                            ps.shaderMaterial_default.needsUpdate = true;   
+                            ps.shaderMaterial_analytic.needsUpdate = true;   
+                            ps.shaderMaterial_interpolate.needsUpdate = true; 
+                            break;
+                        case 'depthTest':
+                            ps[propertyName] = propertyValue;
+                            ps.shaderMaterial_default.depthTest = propertyValue;
+                            ps.shaderMaterial_analytic.depthTest = propertyValue;   
+                            ps.shaderMaterial_interpolate.depthTest = propertyValue;
+                            break;
+                        case 'depthWrite':
+                            ps[propertyName] = propertyValue;
+                            ps.shaderMaterial_default.depthWrite = propertyValue;
+                            ps.shaderMaterial_analytic.depthWrite = propertyValue;
+                            ps.shaderMaterial_interpolate.depthWrite = propertyValue;
+                            break;
+                        case 'minAcceleration':
+                        case 'maxAcceleration':
+                            ps[propertyName] = propertyValue;
+                            if(!ps.minAcceleration) ps.minAcceleration = [0,0,0];
+                            if(!ps.maxAcceleration) ps.maxAcceleration = [0,0,0];
+                            
+                            for(var i = 0; i < particles.vertices.length; i++)
+                            {
+                                particles.vertices[i].acceleration.x = ps.minAcceleration[0] + (ps.maxAcceleration[0] - ps.minAcceleration[0]) * Math.random();
+                                particles.vertices[i].acceleration.y = ps.minAcceleration[1] + (ps.maxAcceleration[1] - ps.minAcceleration[1]) * Math.random();
+                                particles.vertices[i].acceleration.z = ps.minAcceleration[2] + (ps.maxAcceleration[2] - ps.minAcceleration[2]) * Math.random();
+                            }
+                            break;
+                        case 'minVelocity':
+                        case 'maxVelocity':
+                            ps[propertyName] = propertyValue;
+                            if(!ps.minVelocity) ps.minVelocity = [0,0,0];
+                            if(!ps.maxVelocity) ps.maxVelocity = [0,0,0];
+                            
+                            for(var i = 0; i < particles.vertices.length; i++)
+                            {
+                                particles.vertices[i].velocity.x = ps.minVelocity[0] + (ps.maxVelocity[0] - ps.minVelocity[0]) * Math.random();
+                                particles.vertices[i].velocity.y = ps.minVelocity[1] + (ps.maxVelocity[1] - ps.minVelocity[1]) * Math.random();
+                                particles.vertices[i].velocity.z = ps.minVelocity[2] + (ps.maxVelocity[2] - ps.minVelocity[2]) * Math.random();
+                            }
+                            break;
+                        case 'minLifeTime':
+                        case 'maxLifeTime':
+                            ps[propertyName] = propertyValue;
+                            if(ps.minLifeTime === undefined) ps.minLifeTime = 0;
+                            if(ps.maxLifeTime === undefined) ps.maxLifeTime = 1;
+                            
+                            for(var i = 0; i < particles.vertices.length; i++)
+                            {   
+                                particles.vertices[i].lifespan = ps.minLifeTime + (ps.maxLifeTime - ps.minLifeTime) * Math.random();
+                            }
+                            break;
                     }
-                    if(propertyName == 'depthTest')
-                    {
-                        ps.shaderMaterial_default.depthTest = propertyValue;
-                        ps.shaderMaterial_analytic.depthTest = propertyValue;   
-						ps.shaderMaterial_interpolate.depthTest = propertyValue;
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-                    if(propertyName == "depthWrite")
-                    {
-                        ps.shaderMaterial_default.depthWrite = propertyValue;
-                        ps.shaderMaterial_analytic.depthWrite = propertyValue;
-                        ps.shaderMaterial_interpolate.depthWrite = propertyValue;
-                    }
-                    if(propertyName == "minAcceleration" || propertyName == "maxAcceleration")
-                    {
-                        if(!ps.minAcceleration) ps.minAcceleration = [0,0,0];
-                        if(!ps.maxAcceleration) ps.maxAcceleration = [0,0,0];
-                        
-                        for(var i = 0; i < particles.vertices.length; i++)
-                        {
-                            particles.vertices[i].acceleration.x = ps.minAcceleration[0] + (ps.maxAcceleration[0] - ps.minAcceleration[0]) * Math.random();
-                            particles.vertices[i].acceleration.y = ps.minAcceleration[1] + (ps.maxAcceleration[1] - ps.minAcceleration[1]) * Math.random();
-                            particles.vertices[i].acceleration.z = ps.minAcceleration[2] + (ps.maxAcceleration[2] - ps.minAcceleration[2]) * Math.random();
-                        }
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-                    if(propertyName == "minVelocity" || propertyName == "maxVelocity")
-                    {
-                        if(!ps.minVelocity) ps.minVelocity = [0,0,0];
-                        if(!ps.maxVelocity) ps.maxVelocity = [0,0,0];
-                        
-                        for(var i = 0; i < particles.vertices.length; i++)
-                        {
-                            particles.vertices[i].velocity.x = ps.minVelocity[0] + (ps.maxVelocity[0] - ps.minVelocity[0]) * Math.random();
-                            particles.vertices[i].velocity.y = ps.minVelocity[1] + (ps.maxVelocity[1] - ps.minVelocity[1]) * Math.random();
-                            particles.vertices[i].velocity.z = ps.minVelocity[2] + (ps.maxVelocity[2] - ps.minVelocity[2]) * Math.random();
-                        }
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
-                    if(propertyName == "minLifeTime" || propertyName == "maxLifeTime")
-                    {
-                        if(ps.minLifeTime === undefined) ps.minLifeTime = 0;
-                        if(ps.maxLifeTime === undefined) ps.maxLifeTime = 1;
-                        
-                        for(var i = 0; i < particles.vertices.length; i++)
-                        {   
-                            particles.vertices[i].lifespan = ps.minLifeTime + (ps.maxLifeTime - ps.minLifeTime) * Math.random();
-                        }
-                        //value = propertyValue;  // no gettingProperty support so let the object model record
-                    }
+
                 }
                 if(threeObject instanceof THREE.Camera)
                 {
