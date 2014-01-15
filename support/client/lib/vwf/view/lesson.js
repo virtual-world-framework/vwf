@@ -189,7 +189,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     $('#lessonProgressBar').css('width', '100%');
                     $('#nextButton').css('display', 'none');
                     $('#completeButton').css('display', 'inline-block');
-                    $("#accordion").accordion("option", "active", false);
                     break;
                   case "exiting":
                     $('#lessonProgressBar').css('display', 'none');
