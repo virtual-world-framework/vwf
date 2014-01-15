@@ -6,7 +6,7 @@ Introduction
 -------------------
 The Virtual World Framework (VWF) provides a synchronized collaborative 3D environment for the web browser. VWF allows for easy application creation, and provides a simple interface to allow multiple users to interact with the state of the application that is synchronized across clients. 
 
-VWF leverages existing web-based standards, infrastructure, and emerging technologies with the intent of establishing a powerful yet simple to use platform that is built on top of the next generation of web browsers. The same concepts will get you this shared 3D environment. VWF applications run directly in browser with no additional plugins.
+VWF leverages existing web-based standards, infrastructure, and emerging technologies with the intent of establishing a powerful yet simple-to-use platform that is built on top of the next generation of web browsers. VWF applications run directly in-browser with no additional plugins.
 </div>
 
 -------------------
