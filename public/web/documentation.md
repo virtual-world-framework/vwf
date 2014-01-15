@@ -79,26 +79,6 @@ The Virtual World Framework is a server package and zero-install client. Demo ap
 
 -------------------
 
-<a name="compliance" />
-
-<div class="well" markdown="1">
-What it Means to Use the Virtual World Framework
-===================
--------------------
-
-**The following are the basic tasks required to successfully run a genuine VWF application:**
-
-![VWF Checkbox](images/check.png) Download and run the VWF reflector server to provide built-in client synchronization.
-
-![VWF Checkbox](images/check.png) Create a VWF model to maintain the replicated state of the application.
-
-![VWF Checkbox](images/check.png) Include in the model any properties, nodes, methods, and events that should be replicated for all users.
-
-![VWF Checkbox](images/check.png) Run the application in a compatible browser by connecting to the VWF server through the appropriate application URL.
-</div>
-
--------------------
-
 <a name="requirements" />
 
 <div class="well" markdown="1">
