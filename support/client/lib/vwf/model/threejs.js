@@ -241,7 +241,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                 if ( childType == "model/vnd.collada+xml" || 
                     childType == "model/vnd.osgjs+json+compressed" ||
-                    childType == "model/x-threejs-morphanim+json" ) {
+                    childType == "model/x-threejs-morphanim+json" ||
+                    childType == "model/x-threejs-skinned+json" ) {
                     
                     // Most often this callback is used to suspend the queue until the load is complete
                     callback( false );
@@ -347,7 +348,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             // Else, it will be called at the end of the assetLoaded callback
             if ( ! ( childType == "model/vnd.collada+xml" || 
                      childType == "model/vnd.osgjs+json+compressed" ||
-                     childType == "model/x-threejs-morphanim+json") )
+                     childType == "model/x-threejs-morphanim+json" ||
+                     childType == "model/x-threejs-skinned+json" ) )
                 notifyDriverOfPrototypeAndBehaviorProps();
 
             // Since prototypes are created before the object, it does not get "setProperty" updates for
@@ -727,21 +729,35 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
 
                     else if ( propertyName == "animationTimeUpdated" ) {
-                        if( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined ) {
-                            var fps = this.state.kernel.getProperty( nodeID, "animationFPS" ) || 30;
-                            for( var i = 0; i < node.threeObject.animatedMesh.length; i++ ) {
-                                for( var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++ ) {
-                                    node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
-                                }
-                                node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * fps) ] = 1;
-                            }
-                        }
+
+                        // Keyframe Animations
                         if ( node.threeObject.kfAnimations && node.threeObject.kfAnimations.length && propertyValue !== undefined ) {
                             for ( var i = 0; i < node.threeObject.kfAnimations.length; i++ ) {
                                 node.threeObject.kfAnimations[i].stop()
                                 node.threeObject.kfAnimations[i].play( false, 0 );
                                 node.threeObject.kfAnimations[i].update( propertyValue );
                             } 
+                        }
+                        
+                        // Both JSON and Collada models can be skinned mesh animations, but the Collada loader does not support bones
+                        // therefore Collada models will fall in the Morph Target conditional if applicable.
+
+                        // Skeletal Animations (takes precedence over Morph Target)
+                        if ( node.threeObject.bones && node.threeObject.bones.length > 0 ) {
+                            var animRate = this.state.kernel.getProperty( nodeID, "animationRate" ) || 1;
+                            THREE.AnimationHandler.update(animRate);
+                        } 
+                        // Morph Target Animations
+                        else if ( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined ) {
+                            var fps = this.state.kernel.getProperty( nodeID, "animationFPS" ) || 30;
+                            for( var i = 0; i < node.threeObject.animatedMesh.length; i++ ) {
+                                if ( node.threeObject.animatedMesh[i].morphTargetInfluences ) {
+                                    for( var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++ ) {
+                                        node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
+                                    }
+                                    node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * fps) ] = 1;
+                                }
+                            }
                         }
                     }
 
@@ -759,6 +775,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
                 if(threeObject instanceof THREE.ParticleSystem)
                 {
+                    // TODO Refactor this so that only the properties relevant to particle systems are set into the threejs object. 
+                    // See redmine #3100
+                    if( propertyName == 'rotation' || propertyName == 'quaternion' ) {
+                        return;
+                    }
                     var ps = threeObject;
                     var particles = ps.geometry;
                     ps[propertyName] = propertyValue;
@@ -1526,7 +1547,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     else if ( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length ) {
                         var fps = this.state.kernel.getProperty( nodeID, "animationFPS") || 30;
                         for(var i=0, il = node.threeObject.animatedMesh.length; i < il; i++) {
-                            if(node.threeObject.animatedMesh[i].morphTargetInfluences.length > animationDuration) {
+                            if (node.threeObject.animatedMesh[i].bones) {
+                                
+                                // Skeletal animations take precedence over Morph Targets
+                                animationDuration = node.threeObject.animatedMesh[i].bones.length;
+                            }
+                            else if(  node.threeObject.animatedMesh[i].morphTargetInfluences.length > animationDuration ) {
+                                
                                 animationDuration = node.threeObject.animatedMesh[i].morphTargetInfluences.length;
                             }
                         }
@@ -2422,27 +2449,46 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             sceneNode.pendingLoads--;
             var removed = false;
             
-            // THREE.morphAnimMesh JSON model
-            if ( childType == "model/x-threejs-morphanim+json" ) {
+            // THREE JSON model
+            if ( childType == "model/x-threejs-morphanim+json" || childType == "model/x-threejs-skinned+json" ) {
 
                 for ( var i = 0; i < materials.length; i++ ) {
+                    
                     var m = materials[ i ];
-                    m.morphTargets = true;
+                    
+                    // Do we have Morph Target animations?
+                    if ( geometry.morphTargets.length > 0 ) {
+                        m.morphTargets = true;
+                    }
+
+                    // Do we have skeletal animations?
+                    if ( geometry.animation ) {
+                        m.skinning = true;
+                    }
                 }
                 
                 var meshMaterial;
                 if ( materials.length > 1 ) {
 
                     // THREE.MeshFaceMaterial for meshes that have multiple materials
-                    meshMaterial = new THREE.MeshFaceMaterial( materials );    
-                
+                    meshMaterial = new THREE.MeshFaceMaterial( materials );
+
                 } else {
 
                     // This mesh has only one material
                     meshMaterial = materials[ 0 ];
                 }
 
-                var asset = new THREE.MorphAnimMesh( geometry, meshMaterial );
+                if ( childType == "model/x-threejs-morphanim+json" ) {
+                    var asset = new THREE.MorphAnimMesh( geometry, meshMaterial );
+                
+                } else {  // childType == "model/x-threejs-skinned+json"
+
+                    THREE.AnimationHandler.add( geometry.animation );   
+                    var asset = new THREE.SkinnedMesh( geometry, meshMaterial );
+                    var skinnedAnimation = new THREE.Animation( asset, geometry.animation.name ); 
+                    skinnedAnimation.play();
+                }
 
                 asset.updateMatrix();
 
@@ -2450,9 +2496,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var asset = geometry;
             }
          
-            var animations, animatedMesh;
+            var keyframeAnimations, animatedMesh;
             if(asset.animations && asset.animations.length > 0) {
-                animations = asset.animations;
+                keyframeAnimations = asset.animations;
             }
 
             if(asset.scene)
@@ -2471,9 +2517,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             asset.matrix = new THREE.Matrix4();
             asset.matrixAutoUpdate = false;
             
-            // Don't make a copy of the three object if there are keyframe animations associated with it
+            // Don't make a copy of the three object if there are keyframe or skeletal animations associated with it
             // until we figure out a way to copy them successfully.
-            if(animations) {
+            if(keyframeAnimations || skinnedAnimation) {
                 nodeCopy.threeObject = asset;
             }
             else {
@@ -2503,14 +2549,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             nodeCopy.threeObject.vwfID = nodeID;
             nodeCopy.threeObject.matrixAutoUpdate = false;
 
-            if( animations ) {
+            if( keyframeAnimations ) {
                 var animHandler = THREE.AnimationHandler;
                 nodeCopy.threeObject.kfAnimations = [];
-                nodeCopy.threeObject.animations = animations;
+                nodeCopy.threeObject.animations = keyframeAnimations;
 
                 // Initialize the key frame animations
-                for(var i = 0; i < animations.length; i++) {
-                    var animation = animations[i];
+                for(var i = 0; i < keyframeAnimations.length; i++) {
+                    var animation = keyframeAnimations[i];
 
                     // Save references to the animations on the node that is animated, so that it can play separately
                     if( animation.node.animations == undefined ) {
@@ -2604,7 +2650,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             // If there are animations, set loaded to false and don't store the asset
             // in the registry, since the animations don't work with the copy process
-            if(animations) {
+            if(keyframeAnimations) {
                 reg.pending = false;
                 reg.loaded = false;
             }
@@ -2670,7 +2716,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 node.loader = new UTF8JsonLoader( node,node.assetLoaded.bind( this ) );
             }
 
-            if( childType == "model/x-threejs-morphanim+json" ) {
+            if( childType == "model/x-threejs-morphanim+json" || childType == "model/x-threejs-skinned+json" ) {
                 node.loader = new THREE.JSONLoader()
                 node.loader.load( node.source, node.assetLoaded.bind( this ) );
             }
@@ -3698,6 +3744,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var parent = self.state.nodes[ node.parentID ];
         if ( parent ) {
             var worldTransform = new THREE.Matrix4();
+            if ( node.transform === undefined ) {
+                node.transform = new THREE.Matrix4();    
+            }
             return worldTransform.multiplyMatrices( getWorldTransform( parent ), node.transform );
         } else {
             return node.transform;

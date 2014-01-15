@@ -2283,6 +2283,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var parent = self.state.nodes[ node.parentID ];
         if ( parent ) {
             var worldTransform = new THREE.Matrix4();
+            if ( node.transform === undefined ) {
+                node.transform = new THREE.Matrix4();    
+            }
             return worldTransform.multiplyMatrices( getWorldTransform( parent ), node.transform );
         } else {
             return node.transform;
@@ -2293,6 +2296,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         if ( node.parent ) {
             var parentInverse = goog.vec.Mat4.create();
             if ( goog.vec.Mat4.invert( getWorldTransform( node.parent ), parentInverse ) ) {
+                
                 node.transform = goog.vec.Mat4.multMat( parentInverse, worldTransform, 
                                                         goog.vec.Mat4.create() );
             } else {
