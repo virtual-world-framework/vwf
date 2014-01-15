@@ -1,10 +1,17 @@
 /*global define*/
-define([
-        '../Core/defaultValue',
-        '../Core/defined'],
-function(
+define(['../Core/defaultValue',
+        '../Core/defined',
+        '../Core/defineProperties',
+        '../Core/DeveloperError',
+        '../Core/Event',
+        './createDynamicPropertyDescriptor'
+    ], function(
         defaultValue,
-        defined) {
+        defined,
+        defineProperties,
+        DeveloperError,
+        Event,
+        createDynamicPropertyDescriptor) {
     "use strict";
 
     /**
@@ -13,64 +20,78 @@ function(
      * @constructor
      */
     var DynamicPolyline = function() {
+        this._show = undefined;
+        this._material = undefined;
+        this._width = undefined;
+        this._propertyChanged = new Event();
+    };
+
+    defineProperties(DynamicPolyline.prototype, {
         /**
-         * Gets or sets the {@link Color} {@link Property} specifying the the line's color.
-         * @type {Property}
+         * Gets the event that is raised whenever a new property is assigned.
+         * @memberof DynamicPolyline.prototype
+         * @type {Event}
          */
-        this.color = undefined;
-        /**
-         * Gets or sets the {@link Color} {@link Property} specifying the the line's outline color.
-         * @type {Property}
-         */
-        this.outlineColor = undefined;
-        /**
-         * Gets or sets the numeric {@link Property} specifying the the line's outline width.
-         * @type {Property}
-         */
-        this.outlineWidth = undefined;
+        propertyChanged : {
+            get : function() {
+                return this._propertyChanged;
+            }
+        },
+
         /**
          * Gets or sets the boolean {@link Property} specifying the line's visibility.
+         * @memberof DynamicPolyline.prototype
          * @type {Property}
          */
-        this.show = undefined;
+        show : createDynamicPropertyDescriptor('show', '_show'),
+
+        /**
+         * Gets or sets the {@link MaterialProperty} specifying the appearance of the polyline.
+         * @memberof DynamicPolyline.prototype
+         * @type {MaterialProperty}
+         */
+        material : createDynamicPropertyDescriptor('material', '_material'),
+
         /**
          * Gets or sets the numeric {@link Property} specifying the the line's width.
+         * @memberof DynamicPolyline.prototype
          * @type {Property}
          */
-        this.width = undefined;
-    };
+        width : createDynamicPropertyDescriptor('width', '_width')
+    });
 
     /**
-     * Given two DynamicObjects, takes the polyline properties from the second
-     * and assigns them to the first, assuming such a property did not already exist.
+     * Duplicates a DynamicPolyline instance.
+     * @memberof DynamicPolyline
      *
-     * @param {DynamicObject} targetObject The DynamicObject which will have properties merged onto it.
-     * @param {DynamicObject} objectToMerge The DynamicObject containing properties to be merged.
+     * @param {DynamicPolyline} [result] The object onto which to store the result.
+     * @returns {DynamicPolyline} The modified result parameter or a new instance if one was not provided.
      */
-    DynamicPolyline.mergeProperties = function(targetObject, objectToMerge) {
-        var polylineToMerge = objectToMerge.polyline;
-        if (defined(polylineToMerge)) {
-
-            var targetPolyline = targetObject.polyline;
-            if (!defined(targetPolyline)) {
-                targetObject.polyline = targetPolyline = new DynamicPolyline();
-            }
-
-            targetPolyline.color = defaultValue(targetPolyline.color, polylineToMerge.color);
-            targetPolyline.width = defaultValue(targetPolyline.width, polylineToMerge.width);
-            targetPolyline.outlineColor = defaultValue(targetPolyline.outlineColor, polylineToMerge.outlineColor);
-            targetPolyline.outlineWidth = defaultValue(targetPolyline.outlineWidth, polylineToMerge.outlineWidth);
-            targetPolyline.show = defaultValue(targetPolyline.show, polylineToMerge.show);
+    DynamicPolyline.prototype.clone = function(result) {
+        if (!defined(result)) {
+            result = new DynamicPolyline();
         }
+        result.show = this.show;
+        result.material = this.material;
+        result.width = this.width;
+        return result;
     };
 
     /**
-     * Given a DynamicObject, undefines the polyline associated with it.
+     * Assigns each unassigned property on this object to the value
+     * of the same property on the provided source object.
+     * @memberof DynamicPolyline
      *
-     * @param {DynamicObject} dynamicObject The DynamicObject to remove the polyline from.
+     * @param {DynamicPolyline} source The object to be merged into this object.
+     * @exception {DeveloperError} source is required.
      */
-    DynamicPolyline.undefineProperties = function(dynamicObject) {
-        dynamicObject.polyline = undefined;
+    DynamicPolyline.prototype.merge = function(source) {
+        if (!defined(source)) {
+            throw new DeveloperError('source is required.');
+        }
+        this.show = defaultValue(this.show, source.show);
+        this.material = defaultValue(this.material, source.material);
+        this.width = defaultValue(this.width, source.width);
     };
 
     return DynamicPolyline;

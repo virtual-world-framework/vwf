@@ -12,8 +12,8 @@ define([
     function resolve(referenceProperty) {
         var targetProperty = referenceProperty._targetProperty;
         if (!defined(targetProperty)) {
-            var resolveBuffer = defaultValue(referenceProperty._dynamicObjectCollection.compositeCollection, referenceProperty._dynamicObjectCollection);
-            var targetObject = resolveBuffer.getObject(referenceProperty._targetObjectId);
+            var resolveBuffer = referenceProperty._dynamicObjectCollection;
+            var targetObject = resolveBuffer.getById(referenceProperty._targetObjectId);
             if (defined(targetObject)) {
                 targetProperty = targetObject[referenceProperty._targetPropertyName];
                 referenceProperty._targetProperty = targetProperty;
@@ -104,6 +104,21 @@ define([
 
         var targetProperty = resolve(this);
         return defined(targetProperty) && this._targetObject.isAvailable(time) ? targetProperty.getValue(time, result) : undefined;
+    };
+
+    /**
+     * Compares this property to the provided property and returns
+     * <code>true</code> if they are equal, <code>false</code> otherwise.
+     * @memberof ReferenceProperty
+     *
+     * @param {Property} [other] The other property.
+     * @returns {Boolean} <code>true</code> if left and right are equal, <code>false</code> otherwise.
+     */
+    ReferenceProperty.prototype.equals = function(other) {
+        return this === other || //
+               (this._dynamicObjectCollection === other._dynamicObjectCollection && //
+                this._targetObjectId === other._targetObjectId && //
+                this._targetPropertyName === other._targetPropertyName);
     };
 
     return ReferenceProperty;

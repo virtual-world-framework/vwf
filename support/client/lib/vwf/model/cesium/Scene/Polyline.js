@@ -27,30 +27,32 @@ define([
      * @alias Polyline
      * @internalConstructor
      *
-     * @demo <a href="http://cesium.agi.com/Cesium/Apps/Sandcastle/index.html?src=Polylines.html">Cesium Sandcastle Polyline Demo</a>
+     * @demo <a href="http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Polylines.html">Cesium Sandcastle Polyline Demo</a>
      */
-    var Polyline = function(description, polylineCollection) {
-        description = defaultValue(description, EMPTY_OBJECT);
+    var Polyline = function(options, polylineCollection) {
+        options = defaultValue(options, EMPTY_OBJECT);
 
-        this._show = defaultValue(description.show, true);
-        this._width = defaultValue(description.width, 1.0);
+        this._show = defaultValue(options.show, true);
+        this._width = defaultValue(options.width, 1.0);
 
-        this._material = description.material;
+        this._material = options.material;
         if (!defined(this._material)) {
-            this._material = Material.fromType(undefined, Material.ColorType);
+            this._material = Material.fromType(Material.ColorType);
             this._material.uniforms.color = new Color(1.0, 1.0, 1.0, 1.0);
         }
 
-        var positions = description.positions;
+        var positions = options.positions;
         if (!defined(positions)) {
             positions = [];
         }
 
         this._positions = positions;
+        this._length = positions.length;
+        this._id = options.id;
 
         var modelMatrix;
-        if (defined(this._polylineCollection)) {
-            modelMatrix = Matrix4.clone(this._polylineCollection.modelMatrix);
+        if (defined(polylineCollection)) {
+            modelMatrix = Matrix4.clone(polylineCollection.modelMatrix);
         }
 
         this._modelMatrix = modelMatrix;
@@ -62,8 +64,9 @@ define([
         this._polylineCollection = polylineCollection;
         this._dirty = false;
         this._pickId = undefined;
-        this._pickIdThis = description._pickIdThis;
+        this._pickIdThis = options._pickIdThis;
         this._boundingVolume = BoundingSphere.fromPoints(this._positions);
+        this._boundingVolumeWC = BoundingSphere.transform(this._boundingVolume, this._modelMatrix);
         this._boundingVolume2D = new BoundingSphere(); // modified in PolylineCollection
     };
 
@@ -158,12 +161,14 @@ define([
             throw new DeveloperError('value is required.');
         }
 
-        if (this._positions.length !== value.length) {
+        if (this._positions.length !== value.length || this._positions.length !== this._length) {
             makeDirty(this, POSITION_SIZE_INDEX);
         }
 
         this._positions = value;
+        this._length = value.length;
         this._boundingVolume = BoundingSphere.fromPoints(this._positions, this._boundingVolume);
+        this._boundingVolumeWC = BoundingSphere.transform(this._boundingVolume, this._modelMatrix, this._boundingVolumeWC);
         makeDirty(this, POSITION_INDEX);
 
         this.update();
@@ -182,8 +187,9 @@ define([
         var segmentLengths = this._segments.lengths;
 
         var positionsChanged = this._propertiesChanged[POSITION_INDEX] > 0 || this._propertiesChanged[POSITION_SIZE_INDEX] > 0;
-        if (!modelMatrix.equals(this._modelMatrix) || positionsChanged) {
+        if (!Matrix4.equals(modelMatrix, this._modelMatrix) || positionsChanged) {
             this._segments = PolylinePipeline.wrapLongitude(this._positions, modelMatrix);
+            this._boundingVolumeWC = BoundingSphere.transform(this._boundingVolume, modelMatrix, this._boundingVolumeWC);
         }
 
         this._modelMatrix = modelMatrix;
@@ -231,9 +237,10 @@ define([
         if (!defined(material)) {
             throw new DeveloperError('material is required.');
         }
-
-        this._material = material;
-        makeDirty(this, MATERIAL_INDEX);
+        if (this._material !== material) {
+            this._material = material;
+            makeDirty(this, MATERIAL_INDEX);
+        }
     };
 
     /**
@@ -280,9 +287,26 @@ define([
         }
     };
 
+    /**
+     * Returns the user-defined object returned when the polyline is picked.
+     *
+     * @memberof Polyline
+     *
+     * @returns {Object} The user-defined object returned when the polyline is picked.
+     */
+    Polyline.prototype.getId = function() {
+        return this._id;
+    };
+
+    /**
+     * @private
+     */
     Polyline.prototype.getPickId = function(context) {
         if (!defined(this._pickId)) {
-            this._pickId = context.createPickId(defaultValue(this._pickIdThis, this));
+            this._pickId = context.createPickId({
+                primitive : defaultValue(this._pickIdThis, this),
+                id : this._id
+            });
         }
         return this._pickId;
     };

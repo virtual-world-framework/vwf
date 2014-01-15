@@ -11,7 +11,7 @@ define(['./defaultValue'], function(defaultValue) {
      * into the vertex buffer for better rendering performance.
      * </p>
      *
-     * @alias VertexFormat
+     * @alias GeometryAttributes
      * @constructor
      */
     var GeometryAttributes = function(options) {
@@ -76,6 +76,18 @@ define(['./defaultValue'], function(defaultValue) {
          * @default undefined
          */
         this.tangent = options.tangent;
+
+        /**
+         * The color attribute.
+         * <p>
+         * 8-bit unsigned integer. 4 components per attribute.
+         * </p>
+         *
+         * @type GeometryAttribute
+         *
+         * @default undefined
+         */
+        this.color = options.color;
     };
 
     return GeometryAttributes;

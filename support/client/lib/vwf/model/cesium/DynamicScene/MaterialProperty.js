@@ -51,15 +51,27 @@ define([
     MaterialProperty.prototype.getValue = throwInstantiationError;
 
     /**
+     * Compares this property to the provided property and returns
+     * <code>true</code> if they are equal, <code>false</code> otherwise.
+     * @memberof MaterialProperty
+     *
+     * @param {Property} [other] The other property.
+     * @returns {Boolean} <code>true</code> if left and right are equal, <code>false</code> otherwise.
+     */
+    MaterialProperty.prototype.equals = throwInstantiationError;
+
+    /**
      * @private
      */
-    MaterialProperty.getValue = function(time, context, materialProperty, material) {
+    MaterialProperty.getValue = function(time, materialProperty, material) {
         if (defined(materialProperty)) {
             var type = materialProperty.getType(time);
-            if (!defined(material) || (material.type !== type)) {
-                material = Material.fromType(context, type);
+            if (defined(type)) {
+                if (!defined(material) || (material.type !== type)) {
+                    material = Material.fromType(type);
+                }
+                materialProperty.getValue(time, material.uniforms);
             }
-            materialProperty.getValue(time, material.uniforms);
         }
         return material;
     };

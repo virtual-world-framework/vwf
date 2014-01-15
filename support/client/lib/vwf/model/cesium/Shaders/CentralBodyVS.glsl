@@ -72,7 +72,7 @@ vec4 getPositionColumbusViewMode(vec3 position3DWC)
 vec4 getPositionMorphingMode(vec3 position3DWC)
 {
     // We do not do RTC while morphing, so there is potential for jitter.
-    // This is unlikely to be noticable, though.
+    // This is unlikely to be noticeable, though.
     float yPositionFraction = get2DYPositionFraction();
     vec4 position2DWC = vec4(0.0, mix(u_tileExtent.st, u_tileExtent.pq, vec2(textureCoordinates.x, yPositionFraction)), 1.0);
     vec4 morphPosition = czm_columbusViewMorph(position2DWC, vec4(position3DWC, 1.0), czm_morphTime);
@@ -84,8 +84,8 @@ void main()
     vec3 position3DWC = position3DAndHeight.xyz + u_center3D;
 
     gl_Position = getPosition(position3DWC);
-    
-#ifdef SHOW_REFLECTIVE_OCEAN
+
+#if defined(SHOW_REFLECTIVE_OCEAN) || defined(ENABLE_LIGHTING)
     v_positionEC = (czm_modelView3D * vec4(position3DWC, 1.0)).xyz;
     v_positionMC = position3DWC;                                 // position in model coordinates
 #endif

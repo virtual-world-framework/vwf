@@ -1,8 +1,8 @@
 /*global define*/
 define([
         '../Core/defined',
+        '../Core/defineProperties',
         '../Core/DeveloperError',
-        '../Core/destroyObject',
         '../Core/Cartesian2',
         '../Core/Cartesian3',
         '../Core/Cartesian4',
@@ -10,8 +10,8 @@ define([
         '../Scene/CullingVolume'
     ], function(
         defined,
+        defineProperties,
         DeveloperError,
-        destroyObject,
         Cartesian2,
         Cartesian3,
         Cartesian4,
@@ -92,18 +92,6 @@ define([
         this._orthographicMatrix = undefined;
     };
 
-    /**
-     * Returns the orthographic projection matrix computed from the view frustum.
-     *
-     * @memberof OrthographicFrustum
-     *
-     * @returns {Matrix4} The orthographic projection matrix.
-     */
-    OrthographicFrustum.prototype.getProjectionMatrix = function() {
-        update(this);
-        return this._orthographicMatrix;
-    };
-
     function update(frustum) {
         if (!defined(frustum.right) || !defined(frustum.left) ||
             !defined(frustum.top) || !defined(frustum.bottom) ||
@@ -133,13 +121,29 @@ define([
             frustum._bottom = frustum.bottom;
             frustum._near = frustum.near;
             frustum._far = frustum.far;
-            frustum._orthographicMatrix = Matrix4.computeOrthographicOffCenter(frustum.left, frustum.right, frustum.bottom, frustum.top, frustum.near, frustum.far);
+            frustum._orthographicMatrix = Matrix4.computeOrthographicOffCenter(frustum.left, frustum.right, frustum.bottom, frustum.top, frustum.near, frustum.far, frustum._orthographicMatrix);
         }
     }
+
+    defineProperties(OrthographicFrustum.prototype, {
+        /**
+         * The orthographic projection matrix computed from the view frustum.
+         * @memberof OrthographicFrustum
+         * @type {Matrix4}
+         */
+        projectionMatrix : {
+            get : function() {
+                update(this);
+                return this._orthographicMatrix;
+            }
+        }
+    });
 
     var getPlanesRight = new Cartesian3();
     var getPlanesNearCenter = new Cartesian3();
     var getPlanesPoint = new Cartesian3();
+    var negateScratch = new Cartesian3();
+
     /**
      * Creates a culling volume for this frustum.
      *
@@ -214,7 +218,7 @@ define([
         plane.x = -right.x;
         plane.y = -right.y;
         plane.z = -right.z;
-        plane.w = -Cartesian3.dot(right.negate(), point);
+        plane.w = -Cartesian3.dot(Cartesian3.negate(right, negateScratch), point);
 
         // Bottom plane
         Cartesian3.multiplyByScalar(up, b, point);
@@ -240,7 +244,7 @@ define([
         plane.x = -up.x;
         plane.y = -up.y;
         plane.z = -up.z;
-        plane.w = -Cartesian3.dot(up.negate(), point);
+        plane.w = -Cartesian3.dot(Cartesian3.negate(up, negateScratch), point);
 
         // Near plane
         plane = planes[4];
@@ -263,7 +267,7 @@ define([
         plane.x = -direction.x;
         plane.y = -direction.y;
         plane.z = -direction.z;
-        plane.w = -Cartesian3.dot(direction.negate(), point);
+        plane.w = -Cartesian3.dot(Cartesian3.negate(direction, negateScratch), point);
 
         return this._cullingVolume;
     };
@@ -273,35 +277,36 @@ define([
      *
      * @memberof OrthographicFrustum
      *
-     * @param {Cartesian2} canvasDimensions A {@link Cartesian2} with width and height in the x and y properties, respectively.
+     * @param {Cartesian2} drawingBufferDimensions A {@link Cartesian2} with width and height in the x and y properties, respectively.
+     * @param {Number} [distance=near plane distance] The distance to the near plane in meters.
+     * @param {Cartesian2} [result] The object onto which to store the result.
+     * @returns {Cartesian2} The modified result parameter or a new instance of {@link Cartesian2} with the pixel's width and height in the x and y properties, respectively.
      *
-     * @exception {DeveloperError} canvasDimensions is required.
-     * @exception {DeveloperError} canvasDimensions.x must be greater than zero.
-     * @exception {DeveloperError} canvasDimensione.y must be greater than zero.
-     *
-     * @returns {Cartesian2} A {@link Cartesian2} with the pixel's width and height in the x and y properties, respectively.
+     * @exception {DeveloperError} drawingBufferDimensions is required.
+     * @exception {DeveloperError} drawingBufferDimensions.x must be greater than zero.
+     * @exception {DeveloperError} drawingBufferDimensions.y must be greater than zero.
      *
      * @example
      * // Example 1
      * // Get the width and height of a pixel.
      * var pixelSize = camera.frustum.getPixelSize(new Cartesian2(canvas.clientWidth, canvas.clientHeight));
      */
-    OrthographicFrustum.prototype.getPixelSize = function(canvasDimensions) {
+    OrthographicFrustum.prototype.getPixelSize = function(drawingBufferDimensions, distance, result) {
         update(this);
 
-        if (!defined(canvasDimensions)) {
-            throw new DeveloperError('canvasDimensions is required.');
+        if (!defined(drawingBufferDimensions)) {
+            throw new DeveloperError('drawingBufferDimensions is required.');
         }
 
-        var width = canvasDimensions.x;
-        var height = canvasDimensions.y;
+        var width = drawingBufferDimensions.x;
+        var height = drawingBufferDimensions.y;
 
         if (width <= 0) {
-            throw new DeveloperError('canvasDimensions.x must be greater than zero.');
+            throw new DeveloperError('drawingBufferDimensions.x must be greater than zero.');
         }
 
         if (height <= 0) {
-            throw new DeveloperError('canvasDimensions.y must be greater than zero.');
+            throw new DeveloperError('drawingBufferDimensions.y must be greater than zero.');
         }
 
         var frustumWidth = this.right - this.left;
@@ -309,25 +314,43 @@ define([
         var pixelWidth = frustumWidth / width;
         var pixelHeight = frustumHeight / height;
 
-        return new Cartesian2(pixelWidth, pixelHeight);
+        if (!defined(result)) {
+            return new Cartesian2(pixelWidth, pixelHeight);
+        }
+
+        result.x = pixelWidth;
+        result.y = pixelHeight;
+        return result;
     };
 
     /**
      * Returns a duplicate of a OrthographicFrustum instance.
-     *
      * @memberof OrthographicFrustum
      *
-     * @returns {OrthographicFrustum} A new copy of the OrthographicFrustum instance.
+     * @param {OrthographicFrustum} [result] The object onto which to store the result.
+     * @returns {OrthographicFrustum} The modified result parameter or a new PerspectiveFrustum instance if one was not provided.
      */
-    OrthographicFrustum.prototype.clone = function() {
-        var frustum = new OrthographicFrustum();
-        frustum.left = this.left;
-        frustum.right = this.right;
-        frustum.top = this.top;
-        frustum.bottom = this.bottom;
-        frustum.near = this.near;
-        frustum.far = this.far;
-        return frustum;
+    OrthographicFrustum.prototype.clone = function(result) {
+        if (!defined(result)) {
+            result = new OrthographicFrustum();
+        }
+
+        result.left = this.left;
+        result.right = this.right;
+        result.top = this.top;
+        result.bottom = this.bottom;
+        result.near = this.near;
+        result.far = this.far;
+
+        // force update of clone to compute matrices
+        result._left = undefined;
+        result._right = undefined;
+        result._top = undefined;
+        result._bottom = undefined;
+        result._near = undefined;
+        result._far = undefined;
+
+        return result;
     };
 
     /**

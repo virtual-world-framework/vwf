@@ -26,19 +26,16 @@ define([
         '../Core/Transforms',
         '../Renderer/BufferUsage',
         '../Renderer/ClearCommand',
-        '../Renderer/CommandLists',
         '../Renderer/DepthFunction',
         '../Renderer/DrawCommand',
         '../Renderer/createShaderSource',
+        '../Renderer/Pass',
         './CentralBodySurface',
         './CentralBodySurfaceShaderSet',
-        './CreditDisplay',
         './EllipsoidTerrainProvider',
         './ImageryLayerCollection',
-        './Material',
         './SceneMode',
         './TerrainProvider',
-        './ViewportQuad',
         '../Shaders/CentralBodyFS',
         '../Shaders/CentralBodyFSDepth',
         '../Shaders/CentralBodyFSPole',
@@ -73,19 +70,16 @@ define([
         Transforms,
         BufferUsage,
         ClearCommand,
-        CommandLists,
         DepthFunction,
         DrawCommand,
         createShaderSource,
+        Pass,
         CentralBodySurface,
         CentralBodySurfaceShaderSet,
-        CreditDisplay,
         EllipsoidTerrainProvider,
         ImageryLayerCollection,
-        Material,
         SceneMode,
         TerrainProvider,
-        ViewportQuad,
         CentralBodyFS,
         CentralBodyFSDepth,
         CentralBodyFSPole,
@@ -138,19 +132,20 @@ define([
         this._depthCommand = new DrawCommand();
         this._depthCommand.primitiveType = PrimitiveType.TRIANGLES;
         this._depthCommand.boundingVolume = new BoundingSphere(Cartesian3.ZERO, ellipsoid.getMaximumRadius());
+        this._depthCommand.pass = Pass.OPAQUE;
         this._depthCommand.owner = this;
 
         this._northPoleCommand = new DrawCommand();
         this._northPoleCommand.primitiveType = PrimitiveType.TRIANGLE_FAN;
+        this._northPoleCommand.pass = Pass.OPAQUE;
         this._northPoleCommand.owner = this;
         this._southPoleCommand = new DrawCommand();
         this._southPoleCommand.primitiveType = PrimitiveType.TRIANGLE_FAN;
+        this._southPoleCommand.pass = Pass.OPAQUE;
         this._southPoleCommand.owner = this;
 
         this._drawNorthPole = false;
         this._drawSouthPole = false;
-
-        this._commandLists = new CommandLists();
 
         /**
          * Determines the color of the north pole. If the day tile provider imagery does not
@@ -203,6 +198,15 @@ define([
         this.depthTestAgainstTerrain = false;
 
         /**
+         * The maximum screen-space error used to drive level-of-detail refinement.  Higher
+         * values will provide better performance but lower visual quality.
+         *
+         * @type {Number}
+         * @default 2
+         */
+        this.maximumScreenSpaceError = 2;
+
+        /**
          * The size of the terrain tile cache, expressed as a number of tiles.  Any additional
          * tiles beyond this number will be freed, as long as they aren't needed for rendering
          * this frame.  A larger number will consume more memory but will show detail faster
@@ -213,11 +217,39 @@ define([
          */
         this.tileCacheSize = 100;
 
+        /**
+         * Enable lighting the globe with the sun as a light source.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        this.enableLighting = false;
+        this._enableLighting = false;
+
+        /**
+         * The distance where everything becomes lit. This only takes effect
+         * when <code>enableLighting</code> is <code>true</code>.
+         *
+         * @type {Number}
+         * @default 6500000.0
+         */
+        this.lightingFadeOutDistance = 6500000.0;
+
+        /**
+         * The distance where lighting resumes. This only takes effect
+         * when <code>enableLighting</code> is <code>true</code>.
+         *
+         * @type {Number}
+         * @default 9000000.0
+         */
+        this.lightingFadeInDistance = 9000000.0;
+
         this._lastOceanNormalMapUrl = undefined;
         this._oceanNormalMap = undefined;
         this._zoomedOutOceanSpecularIntensity = 0.5;
         this._showingPrettyOcean = false;
         this._hasWaterMask = false;
+        this._lightingFadeDistance = new Cartesian2(this.lightingFadeOutDistance, this.lightingFadeInDistance);
 
         var that = this;
 
@@ -227,6 +259,9 @@ define([
             },
             u_oceanNormalMap : function() {
                 return that._oceanNormalMap;
+            },
+            u_lightingFadeDistance : function() {
+                return that._lightingFadeDistance;
             }
         };
     };
@@ -254,74 +289,81 @@ define([
     };
 
     var depthQuadScratch = FeatureDetection.supportsTypedArrays() ? new Float32Array(12) : [];
+    var scratchCartesian1 = new Cartesian3();
+    var scratchCartesian2 = new Cartesian3();
+    var scratchCartesian3 = new Cartesian3();
+    var scratchCartesian4 = new Cartesian3();
 
     function computeDepthQuad(centralBody, frameState) {
         var radii = centralBody._ellipsoid.getRadii();
-        var p = frameState.camera.getPositionWC();
+        var p = frameState.camera.positionWC;
 
         // Find the corresponding position in the scaled space of the ellipsoid.
-        var q = centralBody._ellipsoid.getOneOverRadii().multiplyComponents(p);
+        var q = Cartesian3.multiplyComponents(centralBody._ellipsoid.getOneOverRadii(), p, scratchCartesian1);
 
-        var qMagnitude = q.magnitude();
-        var qUnit = q.normalize();
+        var qMagnitude = Cartesian3.magnitude(q);
+        var qUnit = Cartesian3.normalize(q, scratchCartesian2);
 
         // Determine the east and north directions at q.
-        var eUnit = Cartesian3.UNIT_Z.cross(q).normalize();
-        var nUnit = qUnit.cross(eUnit).normalize();
+        var eUnit = Cartesian3.normalize(Cartesian3.cross(Cartesian3.UNIT_Z, q, scratchCartesian3), scratchCartesian3);
+        var nUnit = Cartesian3.normalize(Cartesian3.cross(qUnit, eUnit, scratchCartesian4), scratchCartesian4);
 
         // Determine the radius of the 'limb' of the ellipsoid.
-        var wMagnitude = Math.sqrt(q.magnitudeSquared() - 1.0);
+        var wMagnitude = Math.sqrt(Cartesian3.magnitudeSquared(q) - 1.0);
 
         // Compute the center and offsets.
-        var center = qUnit.multiplyByScalar(1.0 / qMagnitude);
+        var center = Cartesian3.multiplyByScalar(qUnit, 1.0 / qMagnitude, scratchCartesian1);
         var scalar = wMagnitude / qMagnitude;
-        var eastOffset = eUnit.multiplyByScalar(scalar);
-        var northOffset = nUnit.multiplyByScalar(scalar);
+        var eastOffset = Cartesian3.multiplyByScalar(eUnit, scalar, scratchCartesian2);
+        var northOffset = Cartesian3.multiplyByScalar(nUnit, scalar, scratchCartesian3);
 
         // A conservative measure for the longitudes would be to use the min/max longitudes of the bounding frustum.
-        var upperLeft = radii.multiplyComponents(center.add(northOffset).subtract(eastOffset));
-        var upperRight = radii.multiplyComponents(center.add(northOffset).add(eastOffset));
-        var lowerLeft = radii.multiplyComponents(center.subtract(northOffset).subtract(eastOffset));
-        var lowerRight = radii.multiplyComponents(center.subtract(northOffset).add(eastOffset));
+        var upperLeft = Cartesian3.add(center, northOffset, scratchCartesian4);
+        Cartesian3.subtract(upperLeft, eastOffset, upperLeft);
+        Cartesian3.multiplyComponents(radii, upperLeft, upperLeft);
+        Cartesian3.pack(upperLeft, depthQuadScratch, 0);
 
-        depthQuadScratch[0] = upperLeft.x;
-        depthQuadScratch[1] = upperLeft.y;
-        depthQuadScratch[2] = upperLeft.z;
-        depthQuadScratch[3] = lowerLeft.x;
-        depthQuadScratch[4] = lowerLeft.y;
-        depthQuadScratch[5] = lowerLeft.z;
-        depthQuadScratch[6] = upperRight.x;
-        depthQuadScratch[7] = upperRight.y;
-        depthQuadScratch[8] = upperRight.z;
-        depthQuadScratch[9] = lowerRight.x;
-        depthQuadScratch[10] = lowerRight.y;
-        depthQuadScratch[11] = lowerRight.z;
+        var lowerLeft = Cartesian3.subtract(center, northOffset, scratchCartesian4);
+        Cartesian3.subtract(lowerLeft, eastOffset, lowerLeft);
+        Cartesian3.multiplyComponents(radii, lowerLeft, lowerLeft);
+        Cartesian3.pack(lowerLeft, depthQuadScratch, 3);
+
+        var upperRight = Cartesian3.add(center, northOffset, scratchCartesian4);
+        Cartesian3.add(upperRight, eastOffset, upperRight);
+        Cartesian3.multiplyComponents(radii, upperRight, upperRight);
+        Cartesian3.pack(upperRight, depthQuadScratch, 6);
+
+        var lowerRight = Cartesian3.subtract(center, northOffset, scratchCartesian4);
+        Cartesian3.add(lowerRight, eastOffset, lowerRight);
+        Cartesian3.multiplyComponents(radii, lowerRight, lowerRight);
+        Cartesian3.pack(lowerRight, depthQuadScratch, 9);
+
         return depthQuadScratch;
     }
 
     function computePoleQuad(centralBody, frameState, maxLat, maxGivenLat, viewProjMatrix, viewportTransformation) {
         var pt1 = centralBody._ellipsoid.cartographicToCartesian(new Cartographic(0.0, maxGivenLat));
         var pt2 = centralBody._ellipsoid.cartographicToCartesian(new Cartographic(Math.PI, maxGivenLat));
-        var radius = pt1.subtract(pt2).magnitude() * 0.5;
+        var radius = Cartesian3.magnitude(Cartesian3.subtract(pt1, pt2)) * 0.5;
 
         var center = centralBody._ellipsoid.cartographicToCartesian(new Cartographic(0.0, maxLat));
 
         var right;
         var dir = frameState.camera.direction;
-        if (1.0 - Cartesian3.UNIT_Z.negate().dot(dir) < CesiumMath.EPSILON6) {
+        if (1.0 - Cartesian3.dot(Cartesian3.negate(Cartesian3.UNIT_Z), dir) < CesiumMath.EPSILON6) {
             right = Cartesian3.UNIT_X;
         } else {
-            right = dir.cross(Cartesian3.UNIT_Z).normalize();
+            right = Cartesian3.normalize(Cartesian3.cross(dir, Cartesian3.UNIT_Z));
         }
 
-        var screenRight = center.add(right.multiplyByScalar(radius));
-        var screenUp = center.add(Cartesian3.UNIT_Z.cross(right).normalize().multiplyByScalar(radius));
+        var screenRight = Cartesian3.add(center, Cartesian3.multiplyByScalar(right, radius));
+        var screenUp = Cartesian3.add(center, Cartesian3.multiplyByScalar(Cartesian3.normalize(Cartesian3.cross(Cartesian3.UNIT_Z, right)), radius));
 
         Transforms.pointToWindowCoordinates(viewProjMatrix, viewportTransformation, center, center);
         Transforms.pointToWindowCoordinates(viewProjMatrix, viewportTransformation, screenRight, screenRight);
         Transforms.pointToWindowCoordinates(viewProjMatrix, viewportTransformation, screenUp, screenUp);
 
-        var halfWidth = Math.floor(Math.max(screenUp.subtract(center).magnitude(), screenRight.subtract(center).magnitude()));
+        var halfWidth = Math.floor(Math.max(Cartesian3.distance(screenUp, center), Cartesian3.distance(screenRight, center)));
         var halfHeight = halfWidth;
 
         return new BoundingRectangle(
@@ -348,8 +390,8 @@ define([
 
         var viewProjMatrix = context.getUniformState().getViewProjection();
         var viewport = viewportScratch;
-        viewport.width = context.getCanvas().clientWidth;
-        viewport.height = context.getCanvas().clientHeight;
+        viewport.width = context.getDrawingBufferWidth();
+        viewport.height = context.getDrawingBufferHeight();
         var viewportTransformation = Matrix4.computeViewportTransformation(viewport, 0.0, 1.0, vpTransformScratch);
         var latitudeExtension = 0.05;
 
@@ -500,8 +542,8 @@ define([
             return;
         }
 
-        var width = context.getCanvas().clientWidth;
-        var height = context.getCanvas().clientHeight;
+        var width = context.getDrawingBufferWidth();
+        var height = context.getDrawingBufferHeight();
 
         if (width === 0 || height === 0) {
             return;
@@ -619,6 +661,7 @@ define([
         var projectionChanged = this._projection !== projection;
         var hasWaterMask = this._surface._terrainProvider.hasWaterMask();
         var hasWaterMaskChanged = this._hasWaterMask !== hasWaterMask;
+        var hasEnableLightingChanged = this._enableLighting !== this.enableLighting;
 
         if (!defined(this._surfaceShaderSet) ||
             !defined(this._northPoleCommand.shaderProgram) ||
@@ -626,6 +669,7 @@ define([
             modeChanged ||
             projectionChanged ||
             hasWaterMaskChanged ||
+            hasEnableLightingChanged ||
             (defined(this._oceanNormalMap)) !== this._showingPrettyOcean) {
 
             var getPosition3DMode = 'vec4 getPosition(vec3 position3DWC) { return getPosition3DMode(position3DWC); }';
@@ -662,7 +706,10 @@ define([
             }
 
             this._surfaceShaderSet.baseVertexShaderString = createShaderSource({
-                defines : [hasWaterMask ? 'SHOW_REFLECTIVE_OCEAN' : ''],
+                defines : [
+                    (hasWaterMask ? 'SHOW_REFLECTIVE_OCEAN' : ''),
+                    (this.enableLighting ? 'ENABLE_LIGHTING' : '')
+                ],
                 sources : [CentralBodyVS, getPositionMode, get2DYPositionFraction]
             });
 
@@ -671,7 +718,8 @@ define([
             this._surfaceShaderSet.baseFragmentShaderString = createShaderSource({
                 defines : [
                     (hasWaterMask ? 'SHOW_REFLECTIVE_OCEAN' : ''),
-                    (showPrettyOcean ? 'SHOW_OCEAN_WAVES' : '')
+                    (showPrettyOcean ? 'SHOW_OCEAN_WAVES' : ''),
+                    (this.enableLighting ? 'ENABLE_LIGHTING' : '')
                 ],
                 sources : [CentralBodyFS]
             });
@@ -685,9 +733,10 @@ define([
 
             this._showingPrettyOcean = defined(this._oceanNormalMap);
             this._hasWaterMask = hasWaterMask;
+            this._enableLighting = this.enableLighting;
         }
 
-        var cameraPosition = frameState.camera.getPositionWC();
+        var cameraPosition = frameState.camera.positionWC;
 
         this._occluder.setCameraPosition(cameraPosition);
 
@@ -697,20 +746,15 @@ define([
         this._projection = projection;
 
         var pass = frameState.passes;
-        var commandLists = this._commandLists;
-        commandLists.removeAll();
-
-        if (pass.color) {
-            var colorCommandList = commandLists.colorList;
-
+        if (pass.render) {
             // render quads to fill the poles
             if (mode === SceneMode.SCENE3D) {
                 if (this._drawNorthPole) {
-                    colorCommandList.push(this._northPoleCommand);
+                    commandList.push(this._northPoleCommand);
                 }
 
                 if (this._drawSouthPole) {
-                    colorCommandList.push(this._southPoleCommand);
+                    commandList.push(this._southPoleCommand);
                 }
             }
 
@@ -721,11 +765,15 @@ define([
                 this._zoomedOutOceanSpecularIntensity = 0.0;
             }
 
+            this._lightingFadeDistance.x = this.lightingFadeOutDistance;
+            this._lightingFadeDistance.y = this.lightingFadeInDistance;
+
+            this._surface._maximumScreenSpaceError = this.maximumScreenSpaceError;
             this._surface._tileCacheSize = this.tileCacheSize;
             this._surface.setTerrainProvider(this.terrainProvider);
             this._surface.update(context,
                     frameState,
-                    colorCommandList,
+                    commandList,
                     this._drawUniforms,
                     this._surfaceShaderSet,
                     this._rsColor,
@@ -736,9 +784,9 @@ define([
             // render depth plane
             if (mode === SceneMode.SCENE3D || mode === SceneMode.COLUMBUS_VIEW) {
                 if (!this.depthTestAgainstTerrain) {
-                    colorCommandList.push(this._clearDepthCommand);
+                    commandList.push(this._clearDepthCommand);
                     if (mode === SceneMode.SCENE3D) {
-                        colorCommandList.push(this._depthCommand);
+                        commandList.push(this._depthCommand);
                     }
                 }
             }
@@ -747,11 +795,7 @@ define([
         if (pass.pick) {
             // Not actually pickable, but render depth-only so primitives on the backface
             // of the globe are not picked.
-            commandLists.pickList.push(this._depthCommand);
-        }
-
-        if (!commandLists.empty()) {
-            commandList.push(commandLists);
+            commandList.push(this._depthCommand);
         }
     };
 

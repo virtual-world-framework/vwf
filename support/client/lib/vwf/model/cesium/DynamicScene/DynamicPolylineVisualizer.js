@@ -4,7 +4,7 @@ define([
         '../Core/defined',
         '../Core/destroyObject',
         '../Core/Cartesian3',
-        '../Core/Color',
+        './MaterialProperty',
         '../Scene/Material',
         '../Scene/PolylineCollection'
        ], function(
@@ -12,7 +12,7 @@ define([
          defined,
          destroyObject,
          Cartesian3,
-         Color,
+         MaterialProperty,
          Material,
          PolylineCollection) {
     "use strict";
@@ -83,12 +83,12 @@ define([
         var oldCollection = this._dynamicObjectCollection;
         if (oldCollection !== dynamicObjectCollection) {
             if (defined(oldCollection)) {
-                oldCollection.objectsRemoved.removeEventListener(DynamicPolylineVisualizer.prototype._onObjectsRemoved, this);
+                oldCollection.collectionChanged.removeEventListener(DynamicPolylineVisualizer.prototype._onObjectsRemoved, this);
                 this.removeAllPrimitives();
             }
             this._dynamicObjectCollection = dynamicObjectCollection;
             if (defined(dynamicObjectCollection)) {
-                dynamicObjectCollection.objectsRemoved.addEventListener(DynamicPolylineVisualizer.prototype._onObjectsRemoved, this);
+                dynamicObjectCollection.collectionChanged.addEventListener(DynamicPolylineVisualizer.prototype._onObjectsRemoved, this);
             }
         }
     };
@@ -173,18 +173,19 @@ define([
 
     var cachedPosition = new Cartesian3();
     function updateObject(dynamicPolylineVisualizer, time, dynamicObject) {
-        var dynamicPolyline = dynamicObject.polyline;
+        var dynamicPolyline = dynamicObject._polyline;
         if (!defined(dynamicPolyline)) {
             return;
         }
 
         var polyline;
-        var showProperty = dynamicPolyline.show;
-        var ellipseProperty = dynamicObject.ellipse;
-        var positionProperty = dynamicObject.position;
-        var vertexPositionsProperty = dynamicObject.vertexPositions;
+        var showProperty = dynamicPolyline._show;
+        var ellipseProperty = dynamicObject._ellipse;
+        var positionProperty = dynamicObject._position;
+        var vertexPositionsProperty = dynamicObject._vertexPositions;
         var polylineVisualizerIndex = dynamicObject._polylineVisualizerIndex;
         var show = dynamicObject.isAvailable(time) && (!defined(showProperty) || showProperty.getValue(time));
+        var context = dynamicPolylineVisualizer._scene.getContext();
 
         if (!show || //
            (!defined(vertexPositionsProperty) && //
@@ -199,7 +200,6 @@ define([
             return;
         }
 
-        var uniforms;
         if (!defined(polylineVisualizerIndex)) {
             var unusedIndexes = dynamicPolylineVisualizer._unusedIndexes;
             var length = unusedIndexes.length;
@@ -217,16 +217,11 @@ define([
             polyline.setWidth(1);
             var material = polyline.getMaterial();
             if (!defined(material) || (material.type !== Material.PolylineOutlineType)) {
-                material = Material.fromType(dynamicPolylineVisualizer._scene.getContext(), Material.PolylineOutlineType);
+                material = Material.fromType(Material.PolylineOutlineType);
                 polyline.setMaterial(material);
             }
-            uniforms = material.uniforms;
-            Color.clone(Color.WHITE, uniforms.color);
-            Color.clone(Color.BLACK, uniforms.outlineColor);
-            uniforms.outlineWidth = 0;
         } else {
             polyline = dynamicPolylineVisualizer._polylineCollection.get(polylineVisualizerIndex);
-            uniforms = polyline.getMaterial().uniforms;
         }
 
         polyline.setShow(true);
@@ -243,22 +238,12 @@ define([
             polyline._visualizerPositions = vertexPositions;
         }
 
-        var property = dynamicPolyline.color;
+        var property = dynamicPolyline._material;
         if (defined(property)) {
-            uniforms.color = property.getValue(time, uniforms.color);
+            polyline.setMaterial(MaterialProperty.getValue(time, property, polyline.getMaterial()));
         }
 
-        property = dynamicPolyline.outlineColor;
-        if (defined(property)) {
-            uniforms.outlineColor = property.getValue(time, uniforms.outlineColor);
-        }
-
-        property = dynamicPolyline.outlineWidth;
-        if (defined(property)) {
-            uniforms.outlineWidth = property.getValue(time);
-        }
-
-        property = dynamicPolyline.width;
+        property = dynamicPolyline._width;
         if (defined(property)) {
             var width = property.getValue(time);
             if (defined(width)) {
@@ -267,7 +252,7 @@ define([
         }
     }
 
-    DynamicPolylineVisualizer.prototype._onObjectsRemoved = function(dynamicObjectCollection, dynamicObjects) {
+    DynamicPolylineVisualizer.prototype._onObjectsRemoved = function(dynamicObjectCollection, added, dynamicObjects) {
         var thisPolylineCollection = this._polylineCollection;
         var thisUnusedIndexes = this._unusedIndexes;
         for ( var i = dynamicObjects.length - 1; i > -1; i--) {

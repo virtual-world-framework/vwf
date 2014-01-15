@@ -160,6 +160,7 @@ define([
         var projection = parameters.projection;
         var uintIndexSupport = parameters.elementIndexUintSupported;
         var allow3DOnly = parameters.allow3DOnly;
+        var allowPicking = parameters.allowPicking;
         var vertexCacheOptimize = parameters.vertexCacheOptimize;
         var modelMatrix = parameters.modelMatrix;
 
@@ -167,7 +168,7 @@ define([
         var length = instances.length;
         var primitiveType = instances[0].geometry.primitiveType;
         for (i = 1; i < length; ++i) {
-            if (instances[i].geometry.primitiveType.value !== primitiveType.value) {
+            if (instances[i].geometry.primitiveType !== primitiveType) {
                 throw new DeveloperError('All instance geometries must have the same primitiveType.');
             }
         }
@@ -183,7 +184,9 @@ define([
         }
 
         // Add pickColor attribute for picking individual instances
-        addPickColorAttribute(instances, pickIds);
+        if (allowPicking) {
+            addPickColorAttribute(instances, pickIds);
+        }
 
         // add attributes to the geometry for each per-instance attribute
         var perInstanceAttributeNames = getCommonPerInstanceAttributeNames(instances);
@@ -201,14 +204,27 @@ define([
         var geometry = GeometryPipeline.combine(instances);
 
         // Split positions for GPU RTE
+        var attributes = geometry.attributes;
+        var name;
         if (!allow3DOnly) {
-            // Compute 2D positions
-            GeometryPipeline.projectTo2D(geometry, projection);
+            for (name in attributes) {
+                if (attributes.hasOwnProperty(name) && attributes[name].componentDatatype.value === ComponentDatatype.DOUBLE.value) {
+                    var name3D = name + '3D';
+                    var name2D = name + '2D';
 
-            GeometryPipeline.encodeAttribute(geometry, 'position3D', 'position3DHigh', 'position3DLow');
-            GeometryPipeline.encodeAttribute(geometry, 'position2D', 'position2DHigh', 'position2DLow');
+                    // Compute 2D positions
+                    GeometryPipeline.projectTo2D(geometry, name, name3D, name2D, projection);
+
+                    GeometryPipeline.encodeAttribute(geometry, name3D, name3D + 'High', name3D + 'Low');
+                    GeometryPipeline.encodeAttribute(geometry, name2D, name2D + 'High', name2D + 'Low');
+                }
+            }
         } else {
-            GeometryPipeline.encodeAttribute(geometry, 'position', 'position3DHigh', 'position3DLow');
+            for (name in attributes) {
+                if (attributes.hasOwnProperty(name) && attributes[name].componentDatatype.value === ComponentDatatype.DOUBLE.value) {
+                    GeometryPipeline.encodeAttribute(geometry, name, name + '3DHigh', name + '3DLow');
+                }
+            }
         }
 
         if (!uintIndexSupport) {
@@ -339,6 +355,7 @@ define([
             projection : parameters.projection,
             elementIndexUintSupported : parameters.elementIndexUintSupported,
             allow3DOnly : parameters.allow3DOnly,
+            allowPicking : parameters.allowPicking,
             vertexCacheOptimize : parameters.vertexCacheOptimize,
             modelMatrix : Matrix4.clone(parameters.modelMatrix)
         };

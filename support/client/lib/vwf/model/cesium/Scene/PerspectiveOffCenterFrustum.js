@@ -3,7 +3,7 @@ define([
         '../Core/DeveloperError',
         '../Core/defaultValue',
         '../Core/defined',
-        '../Core/destroyObject',
+        '../Core/defineProperties',
         '../Core/Cartesian2',
         '../Core/Cartesian3',
         '../Core/Cartesian4',
@@ -13,7 +13,7 @@ define([
         DeveloperError,
         defaultValue,
         defined,
-        destroyObject,
+        defineProperties,
         Cartesian2,
         Cartesian3,
         Cartesian4,
@@ -95,40 +95,14 @@ define([
         this._infinitePerspective = undefined;
     };
 
-    /**
-     * Returns the perspective projection matrix computed from the view frustum.
-     *
-     * @memberof PerspectiveOffCenterFrustum
-     *
-     * @returns {Matrix4} The perspective projection matrix.
-     *
-     * @see PerspectiveOffCenterFrustum#getInfiniteProjectionMatrix
-     */
-    PerspectiveOffCenterFrustum.prototype.getProjectionMatrix = function() {
-        update(this);
-        return this._perspectiveMatrix;
-    };
-
-    /**
-     * Returns the perspective projection matrix computed from the view frustum with an infinite far plane.
-     *
-     * @memberof PerspectiveOffCenterFrustum
-     *
-     * @returns {Matrix4} The infinite perspective projection matrix.
-     *
-     * @see PerspectiveOffCenterFrustum#getProjectionMatrix
-     */
-    PerspectiveOffCenterFrustum.prototype.getInfiniteProjectionMatrix = function() {
-        update(this);
-        return this._infinitePerspective;
-    };
-
     function update(frustum) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(frustum.right) || !defined(frustum.left) ||
             !defined(frustum.top) || !defined(frustum.bottom) ||
             !defined(frustum.near) || !defined(frustum.far)) {
             throw new DeveloperError('right, left, top, bottom, near, or far parameters are not set.');
         }
+        //>>includeEnd('debug');
 
         var t = frustum.top;
         var b = frustum.bottom;
@@ -141,9 +115,11 @@ define([
             l !== frustum._left || r !== frustum._right ||
             n !== frustum._near || f !== frustum._far) {
 
+            //>>includeStart('debug', pragmas.debug);
             if (frustum.near <= 0 || frustum.near > frustum.far) {
                 throw new DeveloperError('near must be greater than zero and less than far.');
             }
+            //>>includeEnd('debug');
 
             frustum._left = l;
             frustum._right = r;
@@ -151,10 +127,40 @@ define([
             frustum._bottom = b;
             frustum._near = n;
             frustum._far = f;
-            frustum._perspectiveMatrix = Matrix4.computePerspectiveOffCenter(l, r, b, t, n, f);
-            frustum._infinitePerspective = Matrix4.computeInfinitePerspectiveOffCenter(l, r, b, t, n);
+            frustum._perspectiveMatrix = Matrix4.computePerspectiveOffCenter(l, r, b, t, n, f, frustum._perspectiveMatrix);
+            frustum._infinitePerspective = Matrix4.computeInfinitePerspectiveOffCenter(l, r, b, t, n, frustum._infinitePerspective);
         }
     }
+
+    defineProperties(PerspectiveOffCenterFrustum.prototype, {
+        /**
+         * The perspective projection matrix computed from the view frustum.
+         * @memberof PerspectiveOffCenterFrustum
+         * @type {Matrix4}
+         *
+         * @see PerspectiveOffCenterFrustum#infiniteProjectionMatrix
+         */
+        projectionMatrix : {
+            get : function() {
+                update(this);
+                return this._perspectiveMatrix;
+            }
+        },
+
+        /**
+         * The perspective projection matrix computed from the view frustum with an infinite far plane.
+         * @memberof PerspectiveOffCenterFrustum
+         * @type {Matrix4}
+         *
+         * @see PerspectiveOffCenterFrustum#projectionMatrix
+         */
+        infiniteProjectionMatrix : {
+            get : function() {
+                update(this);
+                return this._infinitePerspective;
+            }
+        }
+    });
 
     var getPlanesRight = new Cartesian3();
     var getPlanesNearCenter = new Cartesian3();
@@ -181,6 +187,7 @@ define([
      * var intersect = cullingVolume.getVisibility(boundingVolume);
      */
     PerspectiveOffCenterFrustum.prototype.computeCullingVolume = function(position, direction, up) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(position)) {
             throw new DeveloperError('position is required.');
         }
@@ -192,6 +199,7 @@ define([
         if (!defined(up)) {
             throw new DeveloperError('up is required.');
         }
+        //>>includeEnd('debug');
 
         var planes = this._cullingVolume.planes;
 
@@ -308,14 +316,14 @@ define([
      *
      * @memberof PerspectiveOffCenterFrustum
      *
-     * @param {Cartesian2} canvasDimensions A {@link Cartesian2} with width and height in the x and y properties, respectively.
+     * @param {Cartesian2} drawingBufferDimensions A {@link Cartesian2} with width and height in the x and y properties, respectively.
      * @param {Number} [distance=near plane distance] The distance to the near plane in meters.
+     * @param {Cartesian2} [result] The object onto which to store the result.
+     * @returns {Cartesian2} The modified result parameter or a new instance of {@link Cartesian2} with the pixel's width and height in the x and y properties, respectively.
      *
-     * @exception {DeveloperError} canvasDimensions is required.
-     * @exception {DeveloperError} canvasDimensions.x must be greater than zero.
-     * @exception {DeveloperError} canvasDimensione.y must be greater than zero.
-     *
-     * @returns {Cartesian2} A {@link Cartesian2} with the pixel's width and height in the x and y properties, respectively.
+     * @exception {DeveloperError} drawingBufferDimensions is required.
+     * @exception {DeveloperError} drawingBufferDimensions.x must be greater than zero.
+     * @exception {DeveloperError} drawingBufferDimensions.y must be greater than zero.
      *
      * @example
      * // Example 1
@@ -327,28 +335,32 @@ define([
      * // For example, get the size of a pixel of an image on a billboard.
      * var position = camera.position;
      * var direction = camera.direction;
-     * var toCenter = primitive.boundingVolume.center.subtract(position);      // vector from camera to a primitive
-     * var toCenterProj = direction.multiplyByScalar(direction.dot(toCenter)); // project vector onto camera direction vector
-     * var distance = toCenterProj.magnitude();
+     * var toCenter = Cartesian3.subtract(primitive.boundingVolume.center, position);      // vector from camera to a primitive
+     * var toCenterProj = Cartesian3.multiplyByScalar(direction, Cartesian3.dot(direction, toCenter)); // project vector onto camera direction vector
+     * var distance = Cartesian3.magnitude(toCenterProj);
      * var pixelSize = camera.frustum.getPixelSize(new Cartesian2(canvas.clientWidth, canvas.clientHeight), distance);
      */
-    PerspectiveOffCenterFrustum.prototype.getPixelSize = function(canvasDimensions, distance) {
+    PerspectiveOffCenterFrustum.prototype.getPixelSize = function(drawingBufferDimensions, distance, result) {
         update(this);
 
-        if (!defined(canvasDimensions)) {
-            throw new DeveloperError('canvasDimensions is required.');
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(drawingBufferDimensions)) {
+            throw new DeveloperError('drawingBufferDimensions is required.');
         }
+        //>>includeEnd('debug');
 
-        var width = canvasDimensions.x;
-        var height = canvasDimensions.y;
+        var width = drawingBufferDimensions.x;
+        var height = drawingBufferDimensions.y;
 
+        //>>includeStart('debug', pragmas.debug);
         if (width <= 0) {
-            throw new DeveloperError('canvasDimensions.x must be greater than zero.');
+            throw new DeveloperError('drawingBufferDimensions.x must be greater than zero.');
         }
 
         if (height <= 0) {
-            throw new DeveloperError('canvasDimensions.y must be greater than zero.');
+            throw new DeveloperError('drawingBufferDimensions.y must be greater than zero.');
         }
+        //>>includeEnd('debug');
 
         distance = defaultValue(distance, this.near);
 
@@ -358,25 +370,43 @@ define([
         tanTheta = this.right * inverseNear;
         var pixelWidth = 2.0 * distance * tanTheta / width;
 
-        return new Cartesian2(pixelWidth, pixelHeight);
+        if (!defined(result)) {
+            return new Cartesian2(pixelWidth, pixelHeight);
+        }
+
+        result.x = pixelWidth;
+        result.y = pixelHeight;
+        return result;
     };
 
     /**
      * Returns a duplicate of a PerspectiveOffCenterFrustum instance.
-     *
      * @memberof PerspectiveOffCenterFrustum
      *
-     * @returns {PerspectiveOffCenterFrustum} A new copy of the PerspectiveOffCenterFrustum instance.
+     * @param {PerspectiveOffCenterFrustum} [result] The object onto which to store the result.
+     * @returns {PerspectiveOffCenterFrustum} The modified result parameter or a new PerspectiveFrustum instance if one was not provided.
      */
-    PerspectiveOffCenterFrustum.prototype.clone = function() {
-        var frustum = new PerspectiveOffCenterFrustum();
-        frustum.right = this.right;
-        frustum.left = this.left;
-        frustum.top = this.top;
-        frustum.bottom = this.bottom;
-        frustum.near = this.near;
-        frustum.far = this.far;
-        return frustum;
+    PerspectiveOffCenterFrustum.prototype.clone = function(result) {
+        if (!defined(result)) {
+            result = new PerspectiveOffCenterFrustum();
+        }
+
+        result.right = this.right;
+        result.left = this.left;
+        result.top = this.top;
+        result.bottom = this.bottom;
+        result.near = this.near;
+        result.far = this.far;
+
+        // force update of clone to compute matrices
+        result._left = undefined;
+        result._right = undefined;
+        result._top = undefined;
+        result._bottom = undefined;
+        result._near = undefined;
+        result._far = undefined;
+
+        return result;
     };
 
     /**

@@ -7,9 +7,9 @@ define([
         '../Core/Cartesian2',
         '../Core/Cartesian3',
         '../Core/Cartesian4',
+        '../Core/Cartographic',
         '../Core/FeatureDetection',
         '../Core/DeveloperError',
-        '../Core/Ellipsoid',
         '../Core/EllipsoidalOccluder',
         '../Core/Intersect',
         '../Core/Matrix4',
@@ -17,6 +17,7 @@ define([
         '../Core/Queue',
         '../Core/WebMercatorProjection',
         '../Renderer/DrawCommand',
+        '../Renderer/Pass',
         './ImageryLayer',
         './ImageryState',
         './SceneMode',
@@ -32,9 +33,9 @@ define([
         Cartesian2,
         Cartesian3,
         Cartesian4,
+        Cartographic,
         FeatureDetection,
         DeveloperError,
-        Ellipsoid,
         EllipsoidalOccluder,
         Intersect,
         Matrix4,
@@ -42,6 +43,7 @@ define([
         Queue,
         WebMercatorProjection,
         DrawCommand,
+        Pass,
         ImageryLayer,
         ImageryState,
         SceneMode,
@@ -60,17 +62,16 @@ define([
      * @constructor
      * @private
      */
-    var CentralBodySurface = function(description) {
-        if (!defined(description.terrainProvider)) {
-            throw new DeveloperError('description.terrainProvider is required.');
+    var CentralBodySurface = function(options) {
+        if (!defined(options.terrainProvider)) {
+            throw new DeveloperError('options.terrainProvider is required.');
         }
-        if (!defined(description.imageryLayerCollection)) {
-            throw new DeveloperError('description.imageryLayerCollection is required.');
+        if (!defined(options.imageryLayerCollection)) {
+            throw new DeveloperError('options.imageryLayerCollection is required.');
         }
 
-        this._terrainProvider = description.terrainProvider;
-        this._imageryLayerCollection = description.imageryLayerCollection;
-        this._maxScreenSpaceError = defaultValue(description.maxScreenSpaceError, 2);
+        this._terrainProvider = options.terrainProvider;
+        this._imageryLayerCollection = options.imageryLayerCollection;
 
         this._imageryLayerCollection.layerAdded.addEventListener(CentralBodySurface.prototype._onLayerAdded, this);
         this._imageryLayerCollection.layerRemoved.addEventListener(CentralBodySurface.prototype._onLayerRemoved, this);
@@ -88,6 +89,7 @@ define([
         this._tileTraversalQueue = new Queue();
         this._tileLoadQueue = [];
         this._tileReplacementQueue = new TileReplacementQueue();
+        this._maximumScreenSpaceError = 2;
         this._tileCacheSize = 100;
 
         // The number of milliseconds each frame to allow for processing the tile load queue.
@@ -121,11 +123,11 @@ define([
         };
     };
 
-    CentralBodySurface.prototype.update = function(context, frameState, colorCommandList, centralBodyUniformMap, shaderSet, renderState, projection) {
+    CentralBodySurface.prototype.update = function(context, frameState, commandList, centralBodyUniformMap, shaderSet, renderState, projection) {
         updateLayers(this);
         selectTilesForRendering(this, context, frameState);
         processTileLoadQueue(this, context, frameState);
-        createRenderCommandsForSelectedTiles(this, context, frameState, shaderSet, projection, centralBodyUniformMap, colorCommandList, renderState);
+        createRenderCommandsForSelectedTiles(this, context, frameState, shaderSet, projection, centralBodyUniformMap, commandList, renderState);
     };
 
     CentralBodySurface.prototype.getTerrainProvider = function() {
@@ -316,6 +318,8 @@ define([
         }
     }
 
+    var scratchCamera = new Cartographic();
+
     function selectTilesForRendering(surface, context, frameState) {
         var debug = surface._debug;
 
@@ -358,10 +362,10 @@ define([
             }
         }
 
-        var cameraPosition = frameState.camera.getPositionWC();
+        var cameraPosition = frameState.camera.positionWC;
 
         var ellipsoid = surface._terrainProvider.getTilingScheme().getEllipsoid();
-        var cameraPositionCartographic = ellipsoid.cartesianToCartographic(cameraPosition);
+        var cameraPositionCartographic = ellipsoid.cartesianToCartographic(cameraPosition, scratchCamera);
 
         surface._ellipsoidalOccluder.setCameraPosition(cameraPosition);
 
@@ -402,7 +406,7 @@ define([
             // This one doesn't load children unless we refine to them.
             // We may want to revisit this in the future.
 
-            if (screenSpaceError(surface, context, frameState, cameraPosition, cameraPositionCartographic, tile) < surface._maxScreenSpaceError) {
+            if (screenSpaceError(surface, context, frameState, cameraPosition, cameraPositionCartographic, tile) < surface._maximumScreenSpaceError) {
                 // This tile meets SSE requirements, so render it.
                 addTileToRenderList(surface, tile);
             } else if (queueChildrenLoadAndDetermineIfChildrenAreAllRenderable(surface, frameState, tile)) {
@@ -471,8 +475,7 @@ define([
         var distance = Math.sqrt(distanceSquaredToTile(frameState, cameraPosition, cameraPositionCartographic, tile));
         tile.distance = distance;
 
-        var canvas = context.getCanvas();
-        var height = canvas.clientHeight;
+        var height = context.getDrawingBufferHeight();
 
         var camera = frameState.camera;
         var frustum = camera.frustum;
@@ -485,9 +488,8 @@ define([
     function screenSpaceError2D(surface, context, frameState, cameraPosition, cameraPositionCartographic, tile) {
         var camera = frameState.camera;
         var frustum = camera.frustum;
-        var canvas = context.getCanvas();
-        var width = canvas.clientWidth;
-        var height = canvas.clientHeight;
+        var width = context.getDrawingBufferWidth();
+        var height = context.getDrawingBufferHeight();
 
         var maxGeometricError = surface._terrainProvider.getLevelMaximumGeometricError(tile.level);
         var pixelSize = Math.max(frustum.top - frustum.bottom, frustum.right - frustum.left) / Math.max(width, height);
@@ -527,7 +529,7 @@ define([
         if (frameState.mode !== SceneMode.SCENE3D) {
             boundingVolume = boundingSphereScratch;
             BoundingSphere.fromExtentWithHeights2D(tile.extent, frameState.scene2D.projection, tile.minimumHeight, tile.maximumHeight, boundingVolume);
-            boundingVolume.center = new Cartesian3(boundingVolume.center.z, boundingVolume.center.x, boundingVolume.center.y);
+            Cartesian3.fromElements(boundingVolume.center.z, boundingVolume.center.x, boundingVolume.center.y, boundingVolume.center);
 
             if (frameState.mode === SceneMode.MORPHING) {
                 boundingVolume = BoundingSphere.union(tile.boundingSphere3D, boundingVolume, boundingVolume);
@@ -552,8 +554,8 @@ define([
 
     var southwestCornerScratch = new Cartesian3();
     var northeastCornerScratch = new Cartesian3();
-    var negativeUnitY = Cartesian3.UNIT_Y.negate();
-    var negativeUnitZ = Cartesian3.UNIT_Z.negate();
+    var negativeUnitY = Cartesian3.negate(Cartesian3.UNIT_Y);
+    var negativeUnitZ = Cartesian3.negate(Cartesian3.UNIT_Z);
     var vectorScratch = new Cartesian3();
 
     function distanceSquaredToTile(frameState, cameraCartesianPosition, cameraCartographicPosition, tile) {
@@ -581,13 +583,13 @@ define([
             maximumHeight = 0.0;
         }
 
-        var vectorFromSouthwestCorner = cameraCartesianPosition.subtract(southwestCornerCartesian, vectorScratch);
-        var distanceToWestPlane = vectorFromSouthwestCorner.dot(westNormal);
-        var distanceToSouthPlane = vectorFromSouthwestCorner.dot(southNormal);
+        var vectorFromSouthwestCorner = Cartesian3.subtract(cameraCartesianPosition, southwestCornerCartesian, vectorScratch);
+        var distanceToWestPlane = Cartesian3.dot(vectorFromSouthwestCorner, westNormal);
+        var distanceToSouthPlane = Cartesian3.dot(vectorFromSouthwestCorner, southNormal);
 
-        var vectorFromNortheastCorner = cameraCartesianPosition.subtract(northeastCornerCartesian, vectorScratch);
-        var distanceToEastPlane = vectorFromNortheastCorner.dot(eastNormal);
-        var distanceToNorthPlane = vectorFromNortheastCorner.dot(northNormal);
+        var vectorFromNortheastCorner = Cartesian3.subtract(cameraCartesianPosition, northeastCornerCartesian, vectorScratch);
+        var distanceToEastPlane = Cartesian3.dot(vectorFromNortheastCorner, eastNormal);
+        var distanceToNorthPlane = Cartesian3.dot(vectorFromNortheastCorner, northNormal);
 
         var cameraHeight;
         if (frameState.mode === SceneMode.SCENE3D) {
@@ -691,7 +693,7 @@ define([
         }
 
         if (defined(result)) {
-            console.log('x: ' + result.x + ' y: ' + result.y + ' level: ' + result.level + ' radius: ' + result.boundingSphere3D.radius + ' center magnitude: ' + result.boundingSphere3D.center.magnitude());
+            console.log('x: ' + result.x + ' y: ' + result.y + ' level: ' + result.level + ' radius: ' + result.boundingSphere3D.radius + ' center magnitude: ' + Cartesian3.magnitude(result.boundingSphere3D.center));
         }
 
         this._debug.boundingSphereTile = result;
@@ -705,8 +707,16 @@ define([
         return a.distance - b.distance;
     }
 
-    function createTileUniformMap() {
-        return {
+    function mergeUniformMap(target, source) {
+        for (var property in source) {
+            if (source.hasOwnProperty(property)) {
+                target[property] = source[property];
+            }
+        }
+    }
+
+    function createTileUniformMap(centralBodyUniformMap) {
+        var uniformMap = {
             u_center3D : function() {
                 return this.center3D;
             },
@@ -780,14 +790,10 @@ define([
             waterMask : undefined,
             waterMaskTranslationAndScale : new Cartesian4()
         };
-    }
 
-    function mergeUniformMap(target, source) {
-        for (var property in source) {
-            if (source.hasOwnProperty(property)) {
-                target[property] = source[property];
-            }
-        }
+        mergeUniformMap(uniformMap, centralBodyUniformMap);
+
+        return uniformMap;
     }
 
     var float32ArrayScratch = FeatureDetection.supportsTypedArrays() ? new Float32Array(1) : undefined;
@@ -795,9 +801,11 @@ define([
     var tileExtentScratch = new Cartesian4();
     var rtcScratch = new Cartesian3();
     var centerEyeScratch = new Cartesian4();
+    var southwestScratch = new Cartesian3();
+    var northeastScratch = new Cartesian3();
 
-    function createRenderCommandsForSelectedTiles(surface, context, frameState, shaderSet, projection, centralBodyUniformMap, colorCommandList, renderState) {
-        var viewMatrix = frameState.camera.getViewMatrix();
+    function createRenderCommandsForSelectedTiles(surface, context, frameState, shaderSet, projection, centralBodyUniformMap, commandList, renderState) {
+        var viewMatrix = frameState.camera.viewMatrix;
 
         var maxTextures = context.getMaximumTextureImageUnits();
 
@@ -830,8 +838,8 @@ define([
                 var oneOverMercatorHeight = 0.0;
 
                 if (frameState.mode !== SceneMode.SCENE3D) {
-                    var southwest = projection.project(tile.extent.getSouthwest());
-                    var northeast = projection.project(tile.extent.getNortheast());
+                    var southwest = projection.project(tile.extent.getSouthwest(), southwestScratch);
+                    var northeast = projection.project(tile.extent.getNortheast(), northeastScratch);
 
                     tileExtent.x = southwest.x;
                     tileExtent.y = southwest.y;
@@ -872,7 +880,7 @@ define([
                 centerEye.w = 1.0;
 
                 Matrix4.multiplyByVector(viewMatrix, centerEye, centerEye);
-                viewMatrix.setColumn(3, centerEye, modifiedModelViewScratch);
+                Matrix4.setColumn(viewMatrix, 3, centerEye, modifiedModelViewScratch);
 
                 var tileImageryCollection = tile.imagery;
                 var imageryIndex = 0;
@@ -887,15 +895,15 @@ define([
                         command = new DrawCommand();
                         command.owner = tile;
                         command.cull = false;
+                        command.boundingVolume = new BoundingSphere();
                         tileCommands[tileCommandIndex] = command;
-                        tileCommandUniformMaps[tileCommandIndex] = createTileUniformMap();
+                        tileCommandUniformMaps[tileCommandIndex] = createTileUniformMap(centralBodyUniformMap);
                     }
                     command.owner = tile;
 
                     command.debugShowBoundingVolume = (tile === surface._debug.boundingSphereTile);
 
                     var uniformMap = tileCommandUniformMaps[tileCommandIndex];
-                    mergeUniformMap(uniformMap, centralBodyUniformMap);
 
                     uniformMap.center3D = tile.center;
 
@@ -984,13 +992,14 @@ define([
                     uniformMap.waterMask = tile.waterMaskTexture;
                     Cartesian4.clone(tile.waterMaskTranslationAndScale, uniformMap.waterMaskTranslationAndScale);
 
-                    colorCommandList.push(command);
+                    commandList.push(command);
 
                     command.shaderProgram = shaderSet.getShaderProgram(context, tileSetIndex, applyBrightness, applyContrast, applyHue, applySaturation, applyGamma, applyAlpha);
                     command.renderState = renderState;
                     command.primitiveType = PrimitiveType.TRIANGLES;
                     command.vertexArray = tile.vertexArray;
                     command.uniformMap = uniformMap;
+                    command.pass = Pass.OPAQUE;
 
                     if (surface._debug.wireframe) {
                         createWireframeVertexArrayIfNecessary(context, surface, tile);
@@ -1000,18 +1009,18 @@ define([
                         }
                     }
 
-                    var boundingVolume = tile.boundingSphere3D;
+                    var boundingVolume = command.boundingVolume;
 
                     if (frameState.mode !== SceneMode.SCENE3D) {
-                        boundingVolume = BoundingSphere.fromExtentWithHeights2D(tile.extent, frameState.scene2D.projection, tile.minimumHeight, tile.maximumHeight);
-                        boundingVolume.center = new Cartesian3(boundingVolume.center.z, boundingVolume.center.x, boundingVolume.center.y);
+                        BoundingSphere.fromExtentWithHeights2D(tile.extent, frameState.scene2D.projection, tile.minimumHeight, tile.maximumHeight, boundingVolume);
+                        Cartesian3.fromElements(boundingVolume.center.z, boundingVolume.center.x, boundingVolume.center.y, boundingVolume.center);
 
                         if (frameState.mode === SceneMode.MORPHING) {
                             boundingVolume = BoundingSphere.union(tile.boundingSphere3D, boundingVolume, boundingVolume);
                         }
+                    } else {
+                        BoundingSphere.clone(tile.boundingSphere3D, boundingVolume);
                     }
-
-                    command.boundingVolume = boundingVolume;
 
                 } while (imageryIndex < imageryLen);
             }

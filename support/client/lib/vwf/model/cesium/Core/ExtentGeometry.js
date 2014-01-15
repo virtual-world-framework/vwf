@@ -181,7 +181,7 @@ define([
                     Cartesian3.normalize(tangent, tangent);
 
                     if (vertexFormat.binormal) {
-                        Cartesian3.cross(normal, tangent, binormal).normalize(binormal);
+                        Cartesian3.normalize(Cartesian3.cross(normal, tangent, binormal), binormal);
                     }
                 }
 
@@ -250,20 +250,20 @@ define([
                 var p1 = Cartesian3.fromArray(positions, i + 3, v1Scratch);
                 if (recomputeNormal) {
                     var p2 = Cartesian3.fromArray(positions, i + bottomOffset, v2Scratch);
-                    p1 = p1.subtract(p, p1);
-                    p2 = p2.subtract(p, p2);
-                    normal = p2.cross(p1, normal).normalize(normal);
+                    Cartesian3.subtract(p1, p, p1);
+                    Cartesian3.subtract(p2, p, p2);
+                    normal = Cartesian3.normalize(Cartesian3.cross(p2, p1, normal), normal);
                     recomputeNormal = false;
                 }
 
-                if (p1.equalsEpsilon(p, CesiumMath.EPSILON10)) { // if we've reached a corner
+                if (Cartesian3.equalsEpsilon(p1, p, CesiumMath.EPSILON10)) { // if we've reached a corner
                     recomputeNormal = true;
                 }
 
                 if (vertexFormat.tangent || vertexFormat.binormal) {
                     binormal = ellipsoid.geodeticSurfaceNormal(p, binormal);
                     if (vertexFormat.tangent) {
-                        tangent = Cartesian3.cross(binormal, normal, tangent).normalize(tangent);
+                        tangent = Cartesian3.normalize(Cartesian3.cross(binormal, normal, tangent), tangent);
                     }
                 }
 
@@ -497,7 +497,7 @@ define([
             upperRight = upperLeft + 1;
             var p1 = Cartesian3.fromArray(wallPositions, upperLeft * 3, v1Scratch);
             var p2 = Cartesian3.fromArray(wallPositions, upperRight * 3, v2Scratch);
-            if (p1.equalsEpsilon(p2, CesiumMath.EPSILON10)) {
+            if (Cartesian3.equalsEpsilon(p1, p2, CesiumMath.EPSILON10)) {
                 continue;
             }
             lowerLeft = upperLeft + length;
@@ -637,8 +637,8 @@ define([
      * @exception {DeveloperError} <code>options.extent.south</code> must be in the interval [<code>-Pi/2</code>, <code>Pi/2</code>].
      * @exception {DeveloperError} <code>options.extent.east</code> must be in the interval [<code>-Pi</code>, <code>Pi</code>].
      * @exception {DeveloperError} <code>options.extent.west</code> must be in the interval [<code>-Pi</code>, <code>Pi</code>].
-     * @exception {DeveloperError} <code>options.extent.north</code> must be greater than <code>extent.south</code>.
-     * @exception {DeveloperError} <code>options.extent.east</code> must be greater than <code>extent.west</code>.
+     * @exception {DeveloperError} <code>options.extent.north</code> must be greater than <code>options.extent.south</code>.
+     * @exception {DeveloperError} <code>options.extent.east</code> must be greater than <code>options.extent.west</code>.
      *
      * @see ExtentGeometry#createGeometry
      *
@@ -677,6 +677,13 @@ define([
         }
 
         extent.validate();
+        if (extent.east < extent.west) {
+            throw new DeveloperError('options.extent.east must be greater than options.extent.west');
+        }
+
+        if (extent.north < extent.south) {
+            throw new DeveloperError('options.extent.north must be greater than options.extent.south');
+        }
 
         this._extent = extent;
         this._granularity = granularity;
@@ -740,10 +747,10 @@ define([
             proj.project(nwCartographic, nw);
             proj.project(centerCartographic, center);
 
-            nw.subtract(center, nw);
+            Cartesian3.subtract(nw, center, nw);
             Matrix2.fromRotation(rotation, rotationMatrix);
-            rotationMatrix.multiplyByVector(nw, nw);
-            nw.add(center, nw);
+            Matrix2.multiplyByVector(rotationMatrix, nw, nw);
+            Cartesian3.add(nw, center, nw);
             proj.unproject(nw, nwCartographic);
 
             var latitude = nwCartographic.latitude;

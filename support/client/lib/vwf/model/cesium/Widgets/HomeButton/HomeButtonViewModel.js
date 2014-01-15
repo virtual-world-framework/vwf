@@ -1,35 +1,33 @@
 /*global define*/
 define([
         '../../Core/Cartesian3',
+        '../../Core/Matrix3',
         '../../Core/defaultValue',
         '../../Core/defined',
         '../../Core/defineProperties',
         '../../Core/DeveloperError',
         '../../Core/Ellipsoid',
         '../../Core/Extent',
-        '../../Core/Math',
         '../../Core/Matrix4',
         '../../Scene/Camera',
         '../../Scene/CameraColumbusViewMode',
         '../../Scene/CameraFlightPath',
-        '../../Scene/PerspectiveFrustum',
         '../../Scene/SceneMode',
         '../createCommand',
         '../../ThirdParty/knockout'
     ], function(
         Cartesian3,
+        Matrix3,
         defaultValue,
         defined,
         defineProperties,
         DeveloperError,
         Ellipsoid,
         Extent,
-        CesiumMath,
         Matrix4,
         Camera,
         CameraColumbusViewMode,
         CameraFlightPath,
-        PerspectiveFrustum,
         SceneMode,
         createCommand,
         knockout) {
@@ -46,7 +44,7 @@ define([
         controller.setEllipsoid(ellipsoid);
         controller.columbusViewMode = CameraColumbusViewMode.FREE;
 
-        var canvas = scene.getCanvas();
+        var context = scene.getContext();
         if (defined(transitioner) && mode === SceneMode.MORPHING) {
             transitioner.completeMorph();
         }
@@ -67,11 +65,11 @@ define([
         } else if (mode === SceneMode.SCENE3D) {
             Cartesian3.add(camera.position, Matrix4.getTranslation(camera.transform), camera.position);
             var rotation = Matrix4.getRotation(camera.transform);
-            rotation.multiplyByVector(camera.direction, camera.direction);
-            rotation.multiplyByVector(camera.up, camera.up);
-            rotation.multiplyByVector(camera.right, camera.right);
-            camera.transform = Matrix4.IDENTITY.clone();
-            var defaultCamera = new Camera(canvas);
+            Matrix3.multiplyByVector(rotation, camera.direction, camera.direction);
+            Matrix3.multiplyByVector(rotation, camera.up, camera.up);
+            Matrix3.multiplyByVector(rotation, camera.right, camera.right);
+            camera.transform = Matrix4.clone(Matrix4.IDENTITY);
+            var defaultCamera = new Camera(context);
             description = {
                 destination : defaultCamera.position,
                 duration : flightDuration,
@@ -86,10 +84,10 @@ define([
                                            0.0, 1.0, 0.0, 0.0,
                                            0.0, 0.0, 0.0, 1.0);
             var maxRadii = ellipsoid.getMaximumRadius();
-            var position = new Cartesian3(0.0, -1.0, 1.0).normalize().multiplyByScalar(5.0 * maxRadii);
-            var direction = Cartesian3.ZERO.subtract(position).normalize();
-            var right = direction.cross(Cartesian3.UNIT_Z);
-            var up = right.cross(direction);
+            var position = Cartesian3.multiplyByScalar(Cartesian3.normalize(new Cartesian3(0.0, -1.0, 1.0)), 5.0 * maxRadii);
+            var direction = Cartesian3.normalize(Cartesian3.subtract(Cartesian3.ZERO, position));
+            var right = Cartesian3.cross(direction, Cartesian3.UNIT_Z);
+            var up = Cartesian3.cross(right, direction);
 
             description = {
                 destination : position,
@@ -111,7 +109,7 @@ define([
      * @param {Scene} scene The scene instance to use.
      * @param {SceneTransitioner} [transitioner] The scene transitioner instance to use.
      * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid to be viewed when in home position.
-     * @param {Number} [flightDuration] The duration of the camera flight in milliseconds
+     * @param {Number} [flightDuration=1500] The duration of the camera flight in milliseconds
      *
      * @exception {DeveloperError} scene is required.
      */

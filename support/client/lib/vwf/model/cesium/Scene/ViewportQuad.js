@@ -1,9 +1,7 @@
 /*global define*/
 define([
         '../Core/Color',
-        '../Core/combine',
         '../Core/destroyObject',
-        '../Core/defaultValue',
         '../Core/defined',
         '../Core/DeveloperError',
         '../Core/BoundingRectangle',
@@ -14,16 +12,14 @@ define([
         './Material',
         '../Renderer/BufferUsage',
         '../Renderer/BlendingState',
-        '../Renderer/CommandLists',
         '../Renderer/DrawCommand',
         '../Renderer/createShaderSource',
+        '../Renderer/Pass',
         '../Shaders/ViewportQuadVS',
         '../Shaders/ViewportQuadFS'
     ], function(
         Color,
-        combine,
         destroyObject,
-        defaultValue,
         defined,
         DeveloperError,
         BoundingRectangle,
@@ -34,9 +30,9 @@ define([
         Material,
         BufferUsage,
         BlendingState,
-        CommandLists,
         DrawCommand,
         createShaderSource,
+        Pass,
         ViewportQuadVS,
         ViewportQuadFS) {
     "use strict";
@@ -59,9 +55,8 @@ define([
         this._va = undefined;
         this._overlayCommand = new DrawCommand();
         this._overlayCommand.primitiveType = PrimitiveType.TRIANGLE_FAN;
+        this._overlayCommand.pass = Pass.OVERLAY;
         this._overlayCommand.owner = this;
-        this._commandLists = new CommandLists();
-        this._commandLists.overlayList.push(this._overlayCommand);
 
         /**
          * Determines if the viewport quad primitive will be shown.
@@ -86,7 +81,7 @@ define([
         this.rectangle = BoundingRectangle.clone(rectangle);
 
         if (!defined(material)) {
-            material = Material.fromType(undefined, Material.ColorType);
+            material = Material.fromType(Material.ColorType);
             material.uniforms.color = new Color(1.0, 1.0, 1.0, 1.0);
         }
 
@@ -104,7 +99,7 @@ define([
          * viewportQuad.material.uniforms.color = new Color(1.0, 1.0, 0.0, 1.0);
          *
          * // 2. Change material to horizontal stripes
-         * viewportQuad.material = Material.fromType(scene.getContext(), Material.StripeType);
+         * viewportQuad.material = Material.fromType(Material.StripeType);
          *
          * @see <a href='https://github.com/AnalyticalGraphicsInc/cesium/wiki/Fabric'>Fabric</a>
          */
@@ -198,7 +193,7 @@ define([
         }
 
         var pass = frameState.passes;
-        if (pass.overlay) {
+        if (pass.render) {
             if (this._material !== this.material) {
                 // Recompile shader when material changes
                 this._material = this.material;
@@ -208,8 +203,10 @@ define([
                     this._overlayCommand.shaderProgram, ViewportQuadVS, fsSource, attributeIndices);
             }
 
+            this._material.update(context);
+
             this._overlayCommand.uniformMap = this._material._uniforms;
-            commandList.push(this._commandLists);
+            commandList.push(this._overlayCommand);
         }
     };
 
@@ -250,7 +247,6 @@ define([
      */
     ViewportQuad.prototype.destroy = function() {
         this._overlayCommand.shaderProgram = this._overlayCommand.shaderProgram && this._overlayCommand.shaderProgram.release();
-
         return destroyObject(this);
     };
 
