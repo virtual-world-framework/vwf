@@ -177,16 +177,3 @@ The following resources may be helpful for troubleshooting any issues that arise
 
 -------------------
 
-<div class="well" markdown="1">
-Additional Resources
-===================
--------------------
-
-Additional information can be found on the [VWF website](http://virtualworldframework.com) and on [wikipedia](http://en.wikipedia.org/wiki/Virtual_world_framework). 
-
-Download the source on [github](https://github.com/virtual-world-framework/vwf). Fork the project and submit pull requests to add new features back to the project.
-</div>
-
--------------------
-
-
