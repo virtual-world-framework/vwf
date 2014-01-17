@@ -11,26 +11,8 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
---- 
-extends: http://vwf.example.com/cesium.vwf
-properties:
-  backgroundColor:
-  renderStyle: "3D"
-  imageryProvider: "bingAerial"
-children:
-  camera:
-    extends: http://vwf.example.com/cesium/camera.vwf
-  earth:
-    extends: http://vwf.example.com/cesium/centralBody.vwf 
-  atmosphere: 
-    extends: http://vwf.example.com/cesium/atmosphere.vwf 
-  skybox: 
-    extends: http://vwf.example.com/cesium/skybox.vwf 
-  box:
-    extends: http://vwf.example.com/cesium/boxGeometry.vwf
-    properties:
-      color: [ 255, 0, 0, 0.5 ] 
-      position: [ -105.0, 45.0 ]
-      dimensions: [ 400000.0, 300000.0, 500000.0 ]
-
-  
+---
+model:
+  vwf/model/cesium:
+view:
+  vwf/view/cesium: { cesium: 'widget' }
