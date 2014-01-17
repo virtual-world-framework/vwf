@@ -40,12 +40,12 @@ define( [ "module", "vwf/model", "vwf/utility",
 
             // turns on logger debugger console messages 
             this.debug = {
-                "creation": false,
-                "initializing": false,
+                "creation": true,
+                "initializing": true,
                 "parenting": false,
                 "deleting": false,
-                "properties": false,
-                "setting": false,
+                "properties": true,
+                "setting": true,
                 "getting": false,
                 "prototypes": false
             };
@@ -270,12 +270,13 @@ define( [ "module", "vwf/model", "vwf/utility",
                 }
                 node.scene = sceneNode.scene;  
             
-            } else if ( isGeometry.call( this, protos ) ) { 
+
+            } else if ( isBoxGeometry.call( this, protos ) ) { 
 
                 this.state.nodes[ childID ] = node = createNode();
                 sceneNode = findSceneNode.call( this, node );
 
-                node.geometryType = childExtendsID;
+                node.geometryType = 'box';
                 node.properties = {};
 
                 node.geometry = undefined;
@@ -466,7 +467,16 @@ define( [ "module", "vwf/model", "vwf/utility",
 
             if ( this.debug.initializing ) {
                 this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
-            } 
+            }
+
+            if ( this.state.nodes[ childID ] ) {
+                var node = this.state.nodes[ childID ];
+
+                if ( node.geometryType !== undefined ) {
+                    createGeometry.call( this, node );
+                }
+
+            }
         },
          
         // -- deletingNode -------------------------------------------------------------------------
@@ -606,7 +616,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
             if ( node ) {
 
-                if ( node.cesiumObj !== undefined && utility.validPropertyValue.call( this, propertyValue ) ) {
+                if ( /*node.cesiumObj !== undefined &&*/ validPropertyValue.call( this, propertyValue ) ) {
 
                     switch ( propertyName ) {
 
@@ -619,16 +629,28 @@ define( [ "module", "vwf/model", "vwf/utility",
                             break;
 
                         case "position":
-                            //console.info( "dist = " + ( Math.sqrt( (propertyValue[0] * propertyValue[0]) + (propertyValue[1] * propertyValue[1]) + (propertyValue[2] * propertyValue[2]) )  ) )
-                            if ( node.cesiumObj.hasOwnProperty( propertyName ) ) {
-                                node.cesiumObj.position = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );                                
-                                if ( node.cesiumObj instanceof Cesium.Camera ) {
-                                    this.state.cameraInfo.position = node.cesiumObj.position;
+                            if ( node.cesiumObj === undefined ) {
+                                
+                                if ( node.geometryType !== undefined ) {
+                                    if ( node.properties !== undefined ) {
+                                        node.properties[ propertyName ] = propertyValue;
+                                    } else {
+                                        // already created need to modify the existing object
+                                    }
                                 }
-                            } else if ( node.cesiumObj.setPosition ) {
-                                var pos = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
-                                node.cesiumObj.setPosition( pos );
-                                this.state.cameraInfo.isInitialized();
+                            } else {
+
+                                //console.info( "dist = " + ( Math.sqrt( (propertyValue[0] * propertyValue[0]) + (propertyValue[1] * propertyValue[1]) + (propertyValue[2] * propertyValue[2]) )  ) )
+                                if ( node.cesiumObj.hasOwnProperty( propertyName ) ) {
+                                    node.cesiumObj.position = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );                                
+                                    if ( node.cesiumObj instanceof Cesium.Camera ) {
+                                        this.state.cameraInfo.position = node.cesiumObj.position;
+                                    }
+                                } else if ( node.cesiumObj.setPosition ) {
+                                    var pos = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
+                                    node.cesiumObj.setPosition( pos );
+                                    this.state.cameraInfo.isInitialized();
+                                }
                             }
                             break;
                        
@@ -647,6 +669,19 @@ define( [ "module", "vwf/model", "vwf/utility",
                                 }
 
                             }
+                            break;
+
+                        case "dimensions":
+                            if ( node.cesiumObj === undefined ) {
+                                
+                                if ( node.properties !== undefined ) {
+                                    node.properties[ propertyName ] = propertyValue;
+                                } else {
+                                    // already created need to modify the existing object
+                                }
+
+                            }
+
                             break;
 
                         case "pixelOffset":
@@ -701,14 +736,32 @@ define( [ "module", "vwf/model", "vwf/utility",
                             if ( propertyValue instanceof String ) {
                                 propertyValue = propertyValue.replace( /\s/g, '' );
                             }
+
                             var vwfColor = new utility.color( propertyValue );
-                            if ( vwfColor ) {                            
-                                node.cesiumObj.setColor( { 
-                                    red: vwfColor.red() / 255, 
-                                    green: vwfColor.green() / 255, 
-                                    blue: vwfColor.blue() / 255, 
-                                    alpha: vwfColor.alpha() 
-                                } );
+                            if ( vwfColor ) {
+                                if ( node.cesiumObj !== undefined ) {                            
+                                    node.cesiumObj.setColor( { 
+                                        red: vwfColor.red() / 255, 
+                                        green: vwfColor.green() / 255, 
+                                        blue: vwfColor.blue() / 255, 
+                                        alpha: vwfColor.alpha() 
+                                    } );
+                                } else if ( node.geometryType !== undefined ) {
+
+                                    if ( node.properties !== undefined ) {
+                                        node.properties[ propertyName ] = propertyValue;
+                                    } else {
+                                        // already created need to modify the existing object
+                                    }
+
+                                    
+                                    //if ( node.geometryInstance === undefined ) {
+                                    //    node.properties[ propertyName ] = propertyValue;
+                                    //} else {
+                                    //    var cColor = cesuimColor.call( this, propertyValue );
+                                    //    // set the property in the geometrylistance.attributes
+                                    //}
+                                }
                             } 
                             break;
 
@@ -831,6 +884,8 @@ define( [ "module", "vwf/model", "vwf/utility",
                         case "modelMatrix":
                             if ( node.cesiumObj instanceof Cesium.PolylineCollection ) {
                                 node.cesiumObj.modelMatrix = arrayToMatrix.call( this, propertyValue );
+                            } else if ( node.geometryInstance !== undefined ) {
+                                node.geometryInstance.modelMatrix = arrayToMatrix.call( this, propertyValue );
                             }
                             break;
 
@@ -1791,13 +1846,14 @@ define( [ "module", "vwf/model", "vwf/utility",
                 case "transform":
                     if ( node.cesiumObj instanceof Cesium.Camera ) {
                         value = matrixToArray.call( this, node.cesiumObj.transform );
-                    }
-
+                    } 
                     break;
                     
                 case "modelMatrix":
                     if ( node.cesiumObj instanceof Cesium.PolylineCollection ) {
                         value = matrixToArray.call( this, node.cesiumObj.modelMatrix );
+                    } else if ( node.geometryInstance !== undefined ) {
+                        node.geometryInstance.modelMatrix = arrayToMatrix.call( this, propertyValue );
                     }
                     break;
 
@@ -2172,12 +2228,13 @@ define( [ "module", "vwf/model", "vwf/utility",
         return foundCesium;
     }     
 
-    function isGeometry( prototypes ) {
-        var foundCesium = false
+
+    function isBoxGeometry( prototypes ) {
+        var foundCesium = false;
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-geometry-vwf" );   
+                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-boxGeometry-vwf" );   
             }
         }
 
@@ -2258,15 +2315,6 @@ define( [ "module", "vwf/model", "vwf/utility",
         return new Cesium.Color( 1.0, 1.0, 1.0, 1.0 );       
     }
 
-    function arrayToCesiumCartographic( node, propertyName ) {
-        var arr = [];
-        var pv = node.properties[ propertyName ] || [];
-        for ( var i = 0; i < pv.length; i++ ) {
-            arr.push( Cesium.Cartographic.fromDegrees( pv[i][0], pv[i][1] ) )
-        }
-        return arr;        
-    }
-
     function matrixToArray( mat ) {
         return [ mat['0'], mat['1'], mat['2'], mat['3'], mat['4'], mat['5'], mat['6'], mat['7'], mat['8'], mat['9'], mat['10'], mat['11'], mat['12'], mat['13'], mat['14'], mat['15'] ];
     }
@@ -2302,198 +2350,25 @@ define( [ "module", "vwf/model", "vwf/utility",
             return;
         }
 
-        var scene = sceneNode.scene;
-        var primitives = scene.getPrimitives();
+        var primitives = sceneNode.scene.getPrimitives();
         var ellipsoid = centralBody.getEllipsoid();
 
-        var dimensions, radius;
+        var dimensions;
         var modelMatrix;
         var posOnEllipsoid;
-        var vec, radii, val, pv;
+        var dim = node.properties[ 'dimensions' ];
         var pos = node.properties[ 'position' ];
         var color = node.properties[ 'color' ] !== undefined ? cesuimColor.call( this, node.properties[ 'color' ] ) : new Cesium.Color( 1.0, 1.0, 1.0, 1.0 );
 
-        var lineAppearance = function( scene, min ) {
-            return {
-                flat : true,
-                renderState : {
-                    depthTest : {
-                        enabled : true
-                    },
-                    lineWidth : Math.min( min || 1.0, scene.getContext().getMaximumAliasedLineWidth() )
-                }
-            };
-        }  
+        dimensions = new Cesium.Cartesian3( dim[0], dim[1], dim[2] );
+        posOnEllipsoid = ellipsoid.cartographicToCartesian( Cesium.Cartographic.fromDegrees( pos[0], pos[1] ) );
+        modelMatrix = Cesium.Matrix4.multiplyByTranslation(
+            Cesium.Transforms.eastNorthUpToFixedFrame( posOnEllipsoid ),
+            new Cesium.Cartesian3( 0.0, 0.0, dimensions.z * 0.5 ) );
 
-        var fillAppearance = function( closed, translucent ) {
-            var obj = { 
-                "closed": closed !== undefined ? closed : false,   
-            };
-
-            if ( translucent !== undefined ) {
-                obj[ "translucent" ] = translucent;
-            }
-
-            return obj
-        }
 
         switch ( node.geometryType ) {
-
-            case "http-vwf-example-com-cesium-geometry-ellisoid-vwf":
-                vec = node.properties[ 'radius' ];
-                radii = new Cesium.Cartesian3( vec[0], vec[1], vec[2] );
-                posOnEllipsoid = ellipsoid.cartographicToCartesian( Cesium.Cartographic.fromDegrees( pos[0], pos[1] ));
-                modelMatrix = Cesium.Matrix4.multiplyByTranslation(
-                    Cesium.Transforms.eastNorthUpToFixedFrame( posOnEllipsoid ),
-                    new Cesium.Cartesian3( 0.0, 0.0, radii.z )
-                );
-
-                node.geometry = new Cesium.EllipsoidGeometry({
-                    vertexFormat : Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
-                    radii : radii
-                });
-                node.geometryInstance = new Cesium.GeometryInstance({
-                    geometry : node.geometry,
-                    modelMatrix : modelMatrix,
-                    attributes : {
-                        color : Cesium.ColorGeometryInstanceAttribute.fromColor( color )
-                    }
-                });
-                
-                node.primitive = new Cesium.Primitive({
-                    geometryInstances : node.geometryInstance,
-                    appearance : new Cesium.PerInstanceColorAppearance( fillAppearance( true, false ) )
-                })
-
-                primitives.add( node.primitive );
-
-                break;
-
-            case "http-vwf-example-com-cesium-geometry-cylinder-vwf":
-                vec = node.properties[ 'length' ];
-                posOnEllipsoid = ellipsoid.cartographicToCartesian( Cesium.Cartographic.fromDegrees( pos[0], pos[1] ));
-                modelMatrix = Cesium.Matrix4.multiplyByTranslation(
-                    Cesium.Transforms.eastNorthUpToFixedFrame( posOnEllipsoid ),
-                    new Cesium.Cartesian3( 0.0, 0.0, vec * 0.5 )
-                );
-                
-                node.geometry = new Cesium.CylinderGeometry({
-                    length : vec,
-                    topRadius : node.properties[ 'topRadius' ],
-                    bottomRadius : node.properties[ 'bottomRadius' ],
-                    vertexFormat : Cesium.PerInstanceColorAppearance.VERTEX_FORMAT
-                });
-                
-                node.geometryInstance = new Cesium.GeometryInstance({
-                    geometry : node.geometry,
-                    modelMatrix : modelMatrix,
-                    attributes : {
-                        color : Cesium.ColorGeometryInstanceAttribute.fromColor( color )
-                    }
-                });
-
-                node.primitive = new Cesium.Primitive({
-                    geometryInstances : node.geometryInstance,
-                    appearance : new Cesium.PerInstanceColorAppearance( fillAppearance( true, false ) )
-                });
-
-                primitives.add( node.primitive );
-                break;
-
-            case "http-vwf-example-com-cesium-geometry-sphere-vwf":
-                val = node.properties[ 'radius' ];
-                posOnEllipsoid = ellipsoid.cartographicToCartesian( Cesium.Cartographic.fromDegrees( pos[0], pos[1] ));
-                modelMatrix = Cesium.Matrix4.multiplyByTranslation(
-                    Cesium.Transforms.eastNorthUpToFixedFrame( posOnEllipsoid ),
-                    new Cesium.Cartesian3( 0.0, 0.0, val )
-                );
-
-                node.geometry = new Cesium.SphereGeometry({
-                    vertexFormat : Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
-                    radius : val
-                });
-
-                node.geometryInstance = new Cesium.GeometryInstance({
-                    geometry : node.geometry,
-                    modelMatrix : modelMatrix,
-                    attributes : {
-                        color : Cesium.ColorGeometryInstanceAttribute.fromColor( color )
-                    }
-                });
-                
-                // Add sphere instance to primitives 
-                node.primitive = new Cesium.Primitive({
-                    geometryInstances : node.geometryInstance,
-                    appearance : new Cesium.PerInstanceColorAppearance( fillAppearance( true, false ) )
-                });
-
-                primitives.add( node.primitive );
-
-                break;
-
-            case "http-vwf-example-com-cesium-geometry-polygon-vwf":
-                // polygon 
-                val = arrayToCesiumCartographic.call( this, node, "positions" );
-
-                var positions = ellipsoid.cartographicArrayToCartesianArray( val );
-                var geoDef = {
-                    geometry : Cesium.PolygonGeometry.fromPositions({
-                        positions : positions,
-                        vertexFormat : Cesium.PerInstanceColorAppearance.VERTEX_FORMAT
-                    }),
-                    attributes : {
-                        color : Cesium.ColorGeometryInstanceAttribute.fromColor( color )
-                    }
-                }
-                if ( node.properties.height !== undefined ) {
-                    geoDef.geomerty.extrudedHeight = parseFloat( node.properties.height );
-                }
-
-                node.geometryInstance = new Cesium.GeometryInstance( geoDef );
-
-                node.primitive = new Cesium.Primitive( {
-                    "geometryInstances" : node.geometryInstance,
-                    "appearance" : new Cesium.PerInstanceColorAppearance( fillAppearance( true ) )
-                } );
-                primitives.add( node.primitive );
-                break;
-
-            case "http-vwf-example-com-cesium-geometry-polygonOutline-vwf":
-                // polygon outline
-                val = arrayToCesiumCartographic.call( this, node, "positions" );
-
-                var positions = ellipsoid.cartographicArrayToCartesianArray( val );
-                var geoDef = {
-                    "geometry" : Cesium.PolygonOutlineGeometry.fromPositions({
-                        "positions" : positions
-                    }),
-                    "attributes" : {
-                        "color" : Cesium.ColorGeometryInstanceAttribute.fromColor( color )
-                    }
-                };
-
-                if ( node.properties.height !== undefined ) {
-                    geoDef.geomerty.extrudedHeight = parseFloat( node.properties.height );
-                }
-
-                node.geometryInstance = new Cesium.GeometryInstance( geoDef );
-
-                node.primitive = new Cesium.Primitive({
-                    geometryInstances : node.geometryInstance,
-                    appearance : new Cesium.PerInstanceColorAppearance( lineAppearance( scene, 1.0 ) )
-                });
-                primitives.add( node.primitive );  
-                break;
-
-            case "http-vwf-example-com-cesium-geometry-box-vwf":
-            default:
-                vec = node.properties[ 'dimensions' ];
-                dimensions = new Cesium.Cartesian3( vec[0], vec[1], vec[2] );
-                posOnEllipsoid = ellipsoid.cartographicToCartesian( Cesium.Cartographic.fromDegrees( pos[0], pos[1] ) );
-                modelMatrix = Cesium.Matrix4.multiplyByTranslation(
-                    Cesium.Transforms.eastNorthUpToFixedFrame( posOnEllipsoid ),
-                    new Cesium.Cartesian3( 0.0, 0.0, dimensions.z * 0.5 ) );
-
+            case "box":
                 node.geometry = Cesium.BoxGeometry.fromDimensions( {
                     "vertexFormat" : Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
                     "dimensions" : dimensions
@@ -2509,7 +2384,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                 node.primitive = new Cesium.Primitive( {
                     "geometryInstances" : node.geometryInstance,
-                    "appearance" : new Cesium.PerInstanceColorAppearance( fillAppearance( true ) )
+                    "appearance" : new Cesium.PerInstanceColorAppearance( { "closed": true } )
                 } );
                 primitives.add( node.primitive );            
                 break;
