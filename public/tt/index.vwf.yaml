@@ -85,9 +85,9 @@ scripts:
 
       // the camera creation isn't finished at this point so we need to 
       // call the function in the future
-      this.future(0).initializeCamera();
+      this.future(0).initializeActiveCamera();
     }
-    this.initializeCamera = function() {
+    this.initializeActiveCamera = function() {
       this.camera.transform = [ -1,0,0,0, 0,-1,0,0, 0,0,1,0, 0,900,0,1 ];
       this.camera.near = 1;
       this.camera.far = 100000;
