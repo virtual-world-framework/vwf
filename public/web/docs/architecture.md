@@ -41,6 +41,26 @@ The architecture separates external input from internal input. All external inpu
 
 -------------------
 
+**Parts of VWF**
+
+<div style='width:100%;text-align:center'><img src='images/vwf-onion.png' alt='arch' width='512' />
+</div>
+
+<p></p>
+VWF consists of two pieces:
+
+1. Core: consists of the server and part of the client and ensures synchronization between the model state on every client.
+2. Drivers: Add functionality to VWF by providing access to 3rd party libraries (like three.js for graphics)
+
+VWF enables one to create:
+
+1. Components: A meaningful unit of functionality. Components are the building blocks of VWF applications.  A component might contain a 3D model and/or it might contain some functionality.
+2. Applications: This is a full VWF ... well ... application.  It's something that a user can sit down and use.
+
+Then outside of that is what we call the VWF ecosystem.
+
+-------------------
+
 **Component Structure**
 
 A VWF application is made up of components. Each component in the system is built up from smaller components (i.e. children) or through inheritance (i.e. prototypes) within the user's programming space. 
