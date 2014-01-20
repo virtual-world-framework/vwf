@@ -73,7 +73,7 @@ Additionally, components may extend prototype components, and will inherit their
 
 <div style='width:100%;text-align:center'><img src='images/arch6.png' alt='arch' width='600' /></div>
 
-The [components](components.html) section provides further detail about creating application components, and the [prototypes](prototypes.html) page describes the VWF base types. 
+The [components](#components) section provides further detail about creating application components, and the [prototypes](#prototypes) page describes the VWF base types. 
 
 -------------------
 
@@ -87,7 +87,7 @@ For example, the GLGE driver is responsible for any manipulation on the node tha
 
 Model and view drivers have the same structure; however, the model driver doesn't reach out, and a view driver does not have direct control. 
 
-For more detailed information regarding the drivers, please reference the [drivers](drivers.html) page.
+For more detailed information regarding the drivers, please reference the [drivers](#drivers) page.
 
 </div>
 --------------------
