@@ -779,10 +779,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     var particles = ps.geometry;
 
                     switch( propertyName ) {
-                        case 'maxVelocity':
-                        case 'minVelocity':
-                        case 'maxAcceleration':
-                        case 'minAcceleration':
                         case 'emitterSize':
                         case 'emitterType':
                         case 'gravity':
