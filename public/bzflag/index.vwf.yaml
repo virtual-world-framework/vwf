@@ -137,7 +137,7 @@ scripts:
       laserParticle: { 
         extends: "http://vwf.example.com/particlesystem.vwf",
         properties: {
-          numberParticles: 1,
+          particleCount: 1,
           maxLifeTime: 210000,
           minLifeTime: 170000,
           startSize: 400,
@@ -167,15 +167,13 @@ scripts:
       explosion: {
         extends: "http://vwf.example.com/particlesystem.vwf",
         properties: {
-          numberParticles: 100,
+          particleCount: 100,
           maxLifeTime: 1000,
           minLifeTime: 1000,
           startSize: 400,
           endSize: 400,
           loop: false,
           image: "images/explode.png",
-          maxEndAcceleration: [ 0.006, 0.006, 0.006 ],
-          minEndAcceleration: [ -0.006, -0.006, -0.006 ],
           minVelocity: [ -0.2, -0.2, -0.2 ],
           maxVelocity: [ 0.2, 0.2, 0.2 ],
           translation: [],
