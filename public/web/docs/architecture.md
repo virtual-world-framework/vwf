@@ -41,6 +41,26 @@ The architecture separates external input from internal input. All external inpu
 
 -------------------
 
+**Parts of VWF**
+
+<div style='width:100%;text-align:center'><img src='images/vwf-onion.png' alt='arch' width='512' />
+</div>
+
+<p></p>
+VWF consists of two pieces:
+
+1. Core: consists of the server and part of the client and ensures synchronization between the model state on every client.
+2. Drivers: Add functionality to VWF by providing access to 3rd party libraries (like three.js for graphics)
+
+VWF enables one to create:
+
+1. Components: A meaningful unit of functionality. Components are the building blocks of VWF applications.  A component might contain a 3D model and/or it might contain some functionality.
+2. Applications: This is a full VWF ... well ... application.  It's something that a user can sit down and use.
+
+Then outside of that is what we call the VWF ecosystem.
+
+-------------------
+
 **Component Structure**
 
 A VWF application is made up of components. Each component in the system is built up from smaller components (i.e. children) or through inheritance (i.e. prototypes) within the user's programming space. 
@@ -53,7 +73,7 @@ Additionally, components may extend prototype components, and will inherit their
 
 <div style='width:100%;text-align:center'><img src='images/arch6.png' alt='arch' width='600' /></div>
 
-The [components](components.html) section provides further detail about creating application components, and the [prototypes](prototypes.html) page describes the VWF base types. 
+The [components](#components) section provides further detail about creating application components, and the [prototypes](#prototypes) page describes the VWF base types. 
 
 -------------------
 
@@ -61,13 +81,13 @@ The [components](components.html) section provides further detail about creating
 
 We've discussed how to write an application using the framework. The next section describes how the system works, and how to reconfigure the system to accomplish more complex tasks. The drivers of the system are the things that connect components to the 3D visualization and the user interaction that you see. 
 
-The drivers define the autonomic actions that happen within a system, dividing responsibility and delegating work for each action of the system. These actions include things such as creating or deleting a node, getting or setting a property, calling methods, and firing events. Please reference the [API](system.html) for a complete list. The drivers stand side by side without direct interaction between them. Rather, they interact by autonomic actions that the kernel manages. 
+The drivers define the autonomic actions that happen within a system, dividing responsibility and delegating work for each action of the system. These actions include things such as creating or deleting a node, getting or setting a property, calling methods, and firing events. The drivers stand side by side without direct interaction between them. Rather, they interact by autonomic actions that the kernel manages. 
 
 For example, the GLGE driver is responsible for any manipulation on the node that's part of the scene, like setting the translation of a node. This information may be ignored by the rest of the drivers if it is not needed. 
 
 Model and view drivers have the same structure; however, the model driver doesn't reach out, and a view driver does not have direct control. 
 
-For more detailed information regarding the drivers, please reference the [drivers](drivers.html) page.
+For more detailed information regarding the drivers, please reference the [drivers](#drivers) page.
 
 </div>
 --------------------
