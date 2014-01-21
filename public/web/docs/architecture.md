@@ -57,7 +57,7 @@ VWF enables one to create:
 1. Components: A meaningful unit of functionality. Components are the building blocks of VWF applications.  A component might contain a 3D model and/or it might contain some functionality.
 2. Applications: This is a full VWF ... well ... application.  It's something that a user can sit down and use.
 
-Then outside of that is what we call the VWF ecosystem.
+The VWF ecosystem is everything that exists to help developers create components and applications.  Many of the items listed in the *Ecosystem* circle are works in progress.
 
 -------------------
 
