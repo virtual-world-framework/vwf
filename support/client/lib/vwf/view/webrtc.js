@@ -33,7 +33,9 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             this.local = {
                 "ID": undefined,
                 "url": undefined,
+                "desktopUrl": undefined,
                 "stream": undefined,
+                "desktopStream": undefined,
                 "sharing": { audio: true, video: true } 
             };
 
@@ -328,6 +330,12 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                         methodValue = setMute.call( this, methodParameters );
                     }
                     break;
+
+                case "shareDesktop":
+                    if ( this.kernel.moniker() == this.kernel.client() ) {
+                        capture.call( this, { "screen": true } );
+                    }
+                    break;
             }
         },       
 
@@ -446,11 +454,24 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
     function capture( media ) {
 
+        var self = this;
+
         if ( this.local.stream === undefined && ( media.video || media.audio ) ) {
-            var self = this;
+            
+            var videoConstraints = {
+                "mandatory": {
+                    "minWidth": 640,
+                    "minHeight": 360,
+                    "maxWidth": 1920,
+                    "maxHeight": 1080,
+                    "minAspectRatio": 1.77
+                },
+                "optional": []
+            };
+
             var constraints = { 
                 "audio": media.audio, 
-                "video": media.video ? { "mandatory": {}, "optional": [] } : false, 
+                "video": media.video ? videoConstraints : false, 
             };
             
             var successCallback = function( stream ) {
@@ -473,6 +494,53 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             } catch (e) { 
                 console.log("getUserMedia: error " + e ); 
             };
+        } else if ( this.local.desktopStream === undefined && media.screen ) {
+
+            var screenConstraints = {
+                "audio": false,
+                "video": {
+                    "mandatory": {
+                        "chromeMediaSource": "screen",
+                        "minWidth": 640,
+                        "minHeight": 360,
+                        "maxWidth": 1920,
+                        "maxHeight": 1080,
+                        "minAspectRatio": 1.77
+                    },
+                    "optional": []
+                }
+            };
+
+            var consts = {
+                "video": {
+                    "mandatory": {
+                        "chromeMediaSource": 'screen'
+                    }
+                }
+            };
+
+
+            var successCallback = function( stream ) {
+                self.local.desktopUrl = URL.createObjectURL( stream );
+                self.local.desktopStream = stream;
+
+                console.info( "screen capture url: " + self.local.desktopUrl );
+                self.kernel.setProperty( self.local.ID, "localDesktopUrl", self.local.url );
+
+                var localNode = self.state.clients[ self.local.ID ];
+                displayLocal.call( self, stream, localNode.displayName, localNode.color );
+                //sendOffers.call( self );
+            };
+
+            var errorCallback = function( error ) { 
+                console.log("failed to capture screen image: " + error); 
+            };
+
+            try { getUserMedia( screenConstraints, successCallback, errorCallback ); } 
+            catch (e) { 
+                console.log("getUserMedia: error " + e ); 
+            };                
+
         }
     }  
 
