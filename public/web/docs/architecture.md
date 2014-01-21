@@ -49,7 +49,7 @@ The architecture separates external input from internal input. All external inpu
 <p></p>
 VWF consists of two pieces:
 
-1. Core: consists of the server and part of the client and ensures synchronization between the model state on every client.
+1. Core: Consists of the server and part of the client and ensures synchronization between the model state on every client.
 2. Drivers: Add functionality to VWF by providing access to 3rd party libraries (like three.js for graphics)
 
 VWF enables one to create:
