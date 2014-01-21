@@ -1,6 +1,9 @@
-# Add Training Instruction
+<a name="lesson" />
 
---------------
+<div class="well" markdown="1">
+# Add Training Instruction
+===================
+-------------------
 
 One purpose of using VWF is to create a lesson application, with the intent of teaching a user how to accomplish a series of tasks, or steps in a process. 
 
@@ -179,6 +182,7 @@ By activating the lesson driver, the application's user interface will automatic
 
 Visit the [humvee lesson](../../../humvee-lesson) or the [duck lesson](../../../lesson) to view the final result.
 
+</div>
 --------------
 
 <!-- **Note: need to update build to include subfolders** 

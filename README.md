@@ -9,62 +9,53 @@ VWF applications are written in JavaScript and leverage emerging web technologie
 
 ## Installation
 
-**Install on Mac:**
+**Install on Mac/Linux**
 
-NOTE: Please make sure you have XCode, and XCode Command Line Tools installed prior to executing the script below (https://developer.apple.com/xcode/).
+NOTE: On Mac OS X, please make sure you have Xcode Command Line Tools installed prior to executing the script below (https://developer.apple.com/xcode/).
 
 ```
-$ sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_osx.sh  | bash
+$ curl -kL http://get.virtual.wf  | sh
 ```
 
 This command may be re-run to upgrade the installation to the latest version of VWF.
 
-**Install on Windows:**
+**Install on Windows**
 
 - Download the latest VWF Windows Build zip file from http://virtualworldframework.com/web/downloads.html.
 
 - Execute the _run.bat_ file provided at the root level of the extracted folder.
 
-**Install on Ubuntu/Debian:**
-
-```
-$ sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_debian.sh  | bash
-```
-
-This command may be re-run to upgrade the installation to the latest version of VWF.
-
-**Install on Red Hat:**
-
-```
-$ sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_redhat.sh  | bash
-```
-
-This command may be re-run to upgrade the installation to the latest version of VWF.
-
 For more complex installations, such as working on VWF core, please see our [Installation Instructions](http://www.virtual.wf/web/docs/install.html).
 
-## Quick Start
+## Quick Start 
 
-Navigate to the VWF directory on your computer (`/var/www/vwf` on a *nix machine).
+**Mac/Linux**
 
-```
-$ cd /var/www/vwf
-```
-
-Change directory into the public folder and create a new folder for your app.
+Create a new VWF application.
 
 ```
-$ cd public
-$ mkdir my-app
+$ vwf create my-app
 ```
 
-To get started with VWF, check out [Getting Started](http://virtual.wf/web/docs/readme.html).
-
-Go back to the root VWF directory and start the server.
+Change directory into that app and run the application.
 
 ```
-$ cd /var/www/vwf
-$ bundle exec thin start
+$ cd my-app
+$ vwf
+```
+
+Your application is now up and running at
+[http://localhost:3000](http://localhost:3000).
+
+To get started with VWF, check out [Getting
+Started](http://virtual.wf/web/docs/readme.html).
+
+**Windows** 
+
+Execute the _run.bat_ file provided at the root level of the extracted folder.
+
+```
+c:\vwf> run
 ```
 
 Your application is now up and running at [http://localhost:3000/my-app](http://localhost:3000/my-app).
@@ -88,6 +79,9 @@ Our development process utilizes several branches:
 When submitting a pull request, please use the `development` branch.
 
 Also, please be sure that your pull request conforms to our [Coding Standard](http://redmine.virtualworldframework.com/projects/vwf/wiki/JavaScript_Coding_Standard).
+
+##Current Build Status
+Master Branch - [![Build Status](http://jenkins.virtualworldframework.com/job/Master/badge/icon)](http://jenkins.virtualworldframework.com/job/Master/)      Integration Branch - [![Build Status](http://jenkins.virtualworldframework.com/job/Integration/badge/icon)](http://jenkins.virtualworldframework.com/job/Integration/)      Development Branch - [![Build Status](http://jenkins.virtualworldframework.com/job/Development/badge/icon)](http://jenkins.virtualworldframework.com/job/Development/)
 
 ## Community
 

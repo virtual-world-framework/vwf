@@ -1,4 +1,9 @@
-# Switch Materials on an Object
+<a name="materials" />
+
+<div class="well" markdown="1">
+Switch Materials on an Object
+===================
+-------------------
 
 Imagine you have a simple scene (a cube) and you would like to programatically change the material on the cube.  (Note: it is important that the collada file for the 3D object have properly mapped texture coordinates)
 
@@ -53,3 +58,6 @@ Sometimes it may be desirable to switch out the entire material - if for example
 	}
 
 You can read about the parameters of the create function on the API page for [node.children](jsdoc_cmp/symbols/node.vwf.html#children).
+
+</div>
+-------------------

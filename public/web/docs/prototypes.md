@@ -1,6 +1,10 @@
+<a name="prototypes" />
+
+<div class="well" markdown="1">
 Prototypes
 ===================
 -------------------
+
 Prototypes are the base component types for inheritance in the Virtual World Framework. A prototype has the same structure as a VWF [component](components.html), and contains common properties, methods, and events. 
 
 A component can inherit from a prototype by using the <code>extends</code> keyword and specifying the URI of the prototype component. All behaviors, properties, methods, events, children and scripts are inherited by the component. 
@@ -24,5 +28,5 @@ Prototypes can be housed on any server, and any URI passed to the extends keywor
 
 The [Application API](application.html) covers the complete list of VWF prototypes and their property, method, and event definitions.
 
+</div>
 -------------------
-

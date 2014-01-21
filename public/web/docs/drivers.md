@@ -1,5 +1,8 @@
-# Drivers
+<a name="drivers" />
 
+<div class="well" markdown="1">
+Drivers
+===================
 -------------------
 
 ### Configuring Drivers for an Application
@@ -79,6 +82,7 @@ Parameters may also be passed in via the URL. The following example passes in pa
 
 *Note*: The URL takes precedence and will override anything defined via the configuration file.
 
+</div>
 -------------------
 
 <!-- **How Drivers Connect to the Kernel** -->

@@ -1,3 +1,6 @@
+<a name="testing" />
+
+<div class="well" markdown="1">
 Running Tests
 ===================
 -------------------
@@ -72,4 +75,5 @@ and escape it with a "\", like so.
 PHANTOMJS_BIN="/space\ path/path/to/phantomjs.exe rake client:test
 ~~~
 
+</div>
 -------------------
