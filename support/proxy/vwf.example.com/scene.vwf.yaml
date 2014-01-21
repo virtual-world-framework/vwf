@@ -160,6 +160,8 @@ methods:
   getChild:
   getActiveCamera:
   lastActiveCameraID:
+  findByID:
+  isChildOf:
 scripts:
 - |
     var scene = this;
@@ -167,14 +169,18 @@ scripts:
 
     this.initialize = function() {
       if ( this.usersShareView ) {
-        this.children.create( "camera", this.userObject );
-        this.future( 0 ).initializeActiveCamera();
+
+        this.children.create( "camera", this.userObject, function( child ) {
+          scene.initializeActiveCamera( child.id );
+        } );
+
       }
     }
 
-    this.initializeActiveCamera = function() {
-      this.activeCamera = this.camera.id;
-      this.lastActiveCamera = this.activeCamera;
+    this.initializeActiveCamera = function( id ) {
+      // override if the camera needs custimization
+      //scene.activeCamera = id;
+      scene.lastActiveCamera = scene.activeCamera;
     }
 
     this.getActiveCameraComp = function() {
@@ -200,6 +206,33 @@ scripts:
       }
       //console.info( "WARNING: SCENE.getChild   CHILD NOT FOUND: " + childName );
       return undefined;
+    }
+
+    this.findByID = function( node, id ) {
+      var idNode = undefined;
+      //console.info( "findByID( "+node.id+", "+id+" )" );
+      if ( node ) {
+        if ( node.id == id ) return node;
+        for ( var i = 0; i < node.children.length && idNode === undefined; i++ ) {
+          idNode = this.findByID( node.children[i], id );
+        }
+      }
+      return idNode;
+    }  
+    this.isChildOf = function( node, parent ) {
+      var nodeToCheck = node.parent;
+      var isParent = false;
+      while ( !isParent && nodeToCheck !== undefined ) {
+        isParent = ( nodeToCheck === parent );
+        nodeToCheck = nodeToCheck.parent;
+      }
+      return isParent;
+    }   
+    this.getActiveCameraComp = function() {
+      return this.activeCameraComp;
+    }
+    this.lastActiveCameraID = function() {
+      return this.lastActiveCamera;
     }
 
     this.getActiveCamera = function() {

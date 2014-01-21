@@ -158,7 +158,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             
             if ( protos && isCameraDefinition.call( this, protos ) ) {
-                
+
                 var camName = childID.substring( childID.lastIndexOf( '-' ) + 1 );
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                 node = this.state.nodes[childID] = {
@@ -241,7 +241,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                 if ( childType == "model/vnd.collada+xml" || 
                     childType == "model/vnd.osgjs+json+compressed" ||
-                    childType == "model/x-threejs-morphanim+json" ) {
+                    childType == "model/x-threejs-morphanim+json" ||
+                    childType == "model/x-threejs-skinned+json" ) {
                     
                     // Most often this callback is used to suspend the queue until the load is complete
                     callback( false );
@@ -279,7 +280,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         threeParent.add( node.threeObject ); 
                     } 
                 } else {     
-                        
+
                     node = this.state.nodes[childID] = {
                         name: childName,  
                         threeObject: threeChild,
@@ -347,7 +348,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             // Else, it will be called at the end of the assetLoaded callback
             if ( ! ( childType == "model/vnd.collada+xml" || 
                      childType == "model/vnd.osgjs+json+compressed" ||
-                     childType == "model/x-threejs-morphanim+json") )
+                     childType == "model/x-threejs-morphanim+json" ||
+                     childType == "model/x-threejs-skinned+json" ) )
                 notifyDriverOfPrototypeAndBehaviorProps();
 
             // Since prototypes are created before the object, it does not get "setProperty" updates for
@@ -361,20 +363,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var protos = getPrototypes.call( this, kernel, childExtendsID );
                 protos.forEach( function( prototypeID ) {
                     for ( var propertyName in kernel.getProperties( prototypeID ) ) {
-                        //console.info( " 1    getting "+propertyName+" of: " + childExtendsID  );
                         ptPropValue = kernel.getProperty( childExtendsID, propertyName );
                         if ( ptPropValue !== undefined && ptPropValue !== null && childID !== undefined && childID !== null) {
-                            //console.info( " 1    setting "+propertyName+" of: " + nodeID + " to " + ptPropValue );
                             self.settingProperty( childID, propertyName, ptPropValue );
                         }
                     }
                 } );
                 childImplementsIDs.forEach( function( behaviorID ) {
                     for ( var propertyName in kernel.getProperties( behaviorID ) ) {
-                        //console.info( "     2    getting "+propertyName+" of: " + behaviorID  );
                         ptPropValue = kernel.getProperty( behaviorID, propertyName );
                         if ( ptPropValue !== undefined && ptPropValue !== null && childID !== undefined && childID !== null) {
-                            //console.info( "     2    setting "+propertyName+" of: " + nodeID + " to " + ptPropValue );
                             self.settingProperty( childID, propertyName, ptPropValue );
                         }
                     }
@@ -424,27 +422,71 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- addingChild ------------------------------------------------------------------------
         
         addingChild: function( nodeID, childID, childName ) {
+
+            var threeObjParent = getThreeObject.call( this, nodeID );
+            var threeObjChild = getThreeObject.call( this, childID ); 
             
+            if ( threeObjParent && threeObjChild ) { 
+                if ( threeObjParent instanceof THREE.Object3D ) {
+
+                    if ( !( threeObjChild instanceof THREE.Material ) ) {
+                        var childParent = threeObjChild.parent;
+                        if ( childParent !== threeObjParent ) {
+                            // what does vwf do here?  add only if parent is currently undefined
+                            if ( childParent ) {
+                                childParent.remove( threeObjChild )   
+                            } 
+                            threeObjParent.add( threeObjChild );
+                        }
+                    } else {
+                        // TODO
+                        // this is adding of a material
+                    }
+                }
+            }
+
         },
 
         // -- movingChild ------------------------------------------------------------------------
         
         movingChild: function( nodeID, childID, childName ) {
+
+            var threeObjParent = getThreeObject.call( this, nodeID );
+            var threeObjChild = getThreeObject.call( this, childID ); 
+            
+            if ( threeObjParent && threeObjChild && ( threeObjParent instanceof THREE.Object3D ) ){
+                var childParent = threeObjChild.parent;
+                // do we only move if there is currently a parent
+                if ( childParent && ( childParent !== threeObjParent ) ) {
+                    childParent.remove( threeObjChild );
+                    threeObjParent.add( threeObjChild );   
+                } 
+            } 
+
         },
 
         // -- removingChild ------------------------------------------------------------------------
         
         removingChild: function( nodeID, childID, childName ) {
+            
+            var threeObjParent = getThreeObject.call( this, nodeID );
+            var threeObjChild = getThreeObject.call( this, childID );
+            if ( threeObjParent && threeObjChild && ( threeObjParent instanceof THREE.Object3D ) ){    
+
+                var childParent = threeObjChild.parent;
+                if ( childParent === threeObjParent ) {
+                    childParent.remove( threeObjChild )   
+                } 
+            } 
+            
         },
 
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
-
             if ( this.debug.properties ) {
                 this.logger.infox( "C === creatingProperty ", nodeID, propertyName, propertyValue );
             }
-
             return this.initializingProperty( nodeID, propertyName, propertyValue );
         },
 
@@ -453,7 +495,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var value = undefined;
-            //console.info( "initializingProperty( " + nodeID+", "+propertyName+", "+propertyValue + " )" );
 
             if ( this.debug.properties ) {
                 this.logger.infox( "  I === initializingProperty ", nodeID, propertyName, propertyValue );
@@ -467,6 +508,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         case "meshDefinition":
                             createMesh.call( this, node, propertyValue, true );
                             value = propertyValue; 
+                            break;
+                        case "texture":
+                            // delay the setting of the texture until the actual
+                            // settingProperty call
                             break;
                         default:
                             value = this.settingProperty( nodeID, propertyName, propertyValue );                  
@@ -507,8 +552,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //There is not three object for this node, so there is nothing this driver can do. return
             if(!threeObject) return value;    
           
-
-            //console.log(["       settingProperty: ",nodeID,propertyName,propertyValue]);
             if ( propertyValue !== undefined ) 
             {
                 self = this;
@@ -527,7 +570,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             // Get the eye position
                             var eye = new THREE.Vector3();
                             var worldTransform = getWorldTransform( node );
-                            eye.getPositionFromMatrix( worldTransform );
+                            eye.setFromMatrixPosition( worldTransform );
 
                             var look = new THREE.Vector3();
                             look.subVectors( targetWorldPos, eye );
@@ -581,7 +624,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 {
                                     node.lookatval = lookAtValue;
                                     var targetWorldTransform = getWorldTransform( lookatNode );
-                                    targetWorldPos.getPositionFromMatrix( targetWorldTransform );
+                                    targetWorldPos.setFromMatrixPosition( targetWorldTransform );
                                     lookAtWorldPosition( targetWorldPos );                         
                                 } else {
                                     self.logger.errorx( "Lookat node does not exist: '" + lookAtValue + "'" );
@@ -686,21 +729,35 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
 
                     else if ( propertyName == "animationTimeUpdated" ) {
-                        if( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined ) {
-                            var fps = this.state.kernel.getProperty( nodeID, "animationFPS" ) || 30;
-                            for( var i = 0; i < node.threeObject.animatedMesh.length; i++ ) {
-                                for( var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++ ) {
-                                    node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
-                                }
-                                node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * fps) ] = 1;
-                            }
-                        }
+
+                        // Keyframe Animations
                         if ( node.threeObject.kfAnimations && node.threeObject.kfAnimations.length && propertyValue !== undefined ) {
                             for ( var i = 0; i < node.threeObject.kfAnimations.length; i++ ) {
                                 node.threeObject.kfAnimations[i].stop()
                                 node.threeObject.kfAnimations[i].play( false, 0 );
                                 node.threeObject.kfAnimations[i].update( propertyValue );
                             } 
+                        }
+                        
+                        // Both JSON and Collada models can be skinned mesh animations, but the Collada loader does not support bones
+                        // therefore Collada models will fall in the Morph Target conditional if applicable.
+
+                        // Skeletal Animations (takes precedence over Morph Target)
+                        if ( node.threeObject.bones && node.threeObject.bones.length > 0 ) {
+                            var animRate = this.state.kernel.getProperty( nodeID, "animationRate" ) || 1;
+                            THREE.AnimationHandler.update(animRate);
+                        } 
+                        // Morph Target Animations
+                        else if ( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined ) {
+                            var fps = this.state.kernel.getProperty( nodeID, "animationFPS" ) || 30;
+                            for( var i = 0; i < node.threeObject.animatedMesh.length; i++ ) {
+                                if ( node.threeObject.animatedMesh[i].morphTargetInfluences ) {
+                                    for( var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++ ) {
+                                        node.threeObject.animatedMesh[i].morphTargetInfluences[j] = 0;
+                                    }
+                                    node.threeObject.animatedMesh[i].morphTargetInfluences[ Math.floor(propertyValue * fps) ] = 1;
+                                }
+                            }
                         }
                     }
 
@@ -718,6 +775,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
                 if(threeObject instanceof THREE.ParticleSystem)
                 {
+                    // TODO Refactor this so that only the properties relevant to particle systems are set into the threejs object. 
+                    // See redmine #3100
+                    if( propertyName == 'rotation' || propertyName == 'quaternion' ) {
+                        return;
+                    }
                     var ps = threeObject;
                     var particles = ps.geometry;
                     ps[propertyName] = propertyValue;
@@ -1411,7 +1473,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         gettingProperty: function( nodeID, propertyName ) {
 
             if ( this.debug.properties || this.debug.getting ) {
-                this.logger.infox( "   G === gettingProperty ", nodeID, propertyName, propertyValue );
+                this.logger.infox( "   G === gettingProperty ", nodeID, propertyName );
             }
 
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
@@ -1485,7 +1547,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     else if ( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length ) {
                         var fps = this.state.kernel.getProperty( nodeID, "animationFPS") || 30;
                         for(var i=0, il = node.threeObject.animatedMesh.length; i < il; i++) {
-                            if(node.threeObject.animatedMesh[i].morphTargetInfluences.length > animationDuration) {
+                            if (node.threeObject.animatedMesh[i].bones) {
+                                
+                                // Skeletal animations take precedence over Morph Targets
+                                animationDuration = node.threeObject.animatedMesh[i].bones.length;
+                            }
+                            else if(  node.threeObject.animatedMesh[i].morphTargetInfluences.length > animationDuration ) {
+                                
                                 animationDuration = node.threeObject.animatedMesh[i].morphTargetInfluences.length;
                             }
                         }
@@ -1565,10 +1633,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 if ( propertyName == "opacity" ) {
                     value = threeObject.opacity;
                     return value;
-                }
-                if(propertyName == "diffuse") {
-                    
-                        
                 }
             }
             if( threeObject instanceof THREE.Camera ) {
@@ -1865,7 +1929,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
         return foundNode;
     }
-
+    function isTextDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-text-vwf" );    
+            }
+        }
+        return foundNode;
+    }
     function CreateThreeJSSceneNode(parentID,thisID,extendsID)
     {
         var node = {};
@@ -1987,6 +2059,21 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
     }
 
+    function getThreeObject( ID ) {
+        var threeObject = undefined;
+        var node = this.state.nodes[ ID ]; // { name: childName, glgeObject: undefined }
+        if( node === undefined ) node = this.state.scenes[ ID ]; // { name: childName, glgeObject: undefined }
+
+        if( node ) {
+            threeObject = node.threeObject;
+            if( !threeObject )
+                threeObject = node.threeScene;
+            if ( node.threeMaterial )
+                threeObject = node.threeMaterial;
+        }
+
+        return threeObject;
+    }
     
     function findAllMeshes(threeObject,list)
     {
@@ -2203,8 +2290,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     }
     function createMesh( node, meshDef, doubleSided ) {
         if ( node.threeObject && node.threeObject instanceof THREE.Object3D ) {
-            var i, face, geo;
-            var height, width, depth, radius;
+            var i, face, geo, sides;
+            var materials = undefined;
             var vwfColor, colorValue = 0xFFFFFF;    
             if ( meshDef.color !== undefined ) {
                 vwfColor = new utility.color( meshDef.color );
@@ -2215,27 +2302,43 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var mat = new THREE.MeshLambertMaterial( { "color": colorValue, "ambient": colorValue } );
            
             if ( isCubeDefinition.call( this, node.prototypes ) ) {
-                height = meshDef.height || 1;
-                width = meshDef.width || 1;
-                depth = meshDef.depth || 1;
-                geo = new THREE.CubeGeometry( width, height, depth );
+                // materials = ??
+                sides = meshDef.sides || { px: true, nx: true, py: true, ny: true, pz: true, nz: true };
+                geo = new THREE.CubeGeometry( meshDef.width || 10, meshDef.height || 10, meshDef.depth || 10, 
+                    meshDef.segmentsWidth || 1, meshDef.segmentsHeight || 1, meshDef.segmentsDepth || 1,
+                    materials, sides );
             } else if ( isPlaneDefinition.call( this, node.prototypes ) ) {
-                height = meshDef.height || 1;
-                width = meshDef.width || 1;
-                geo = new THREE.PlaneGeometry( width, height );
+                geo = new THREE.PlaneGeometry( meshDef.width || 1, meshDef.height || 1,
+                    meshDef.segmentsWidth || 1, meshDef.segmentsHeight || 1 );
             } else if ( isCircleDefinition.call( this, node.prototypes ) ) {
-                radius = meshDef.radius || 10;
-                geo = new THREE.CircleGeometry( radius );
+                geo = new THREE.CircleGeometry( meshDef.radius || 10, 
+                    meshDef.segments || 8, meshDef.thetaStart || 0, 
+                    meshDef.thetaLength || Math.PI * 2 );
             } else if ( isSphereDefinition.call( this, node.prototypes ) ) {
-                radius = meshDef.radius || 10;
-                geo = new THREE.SphereGeometry( radius );
+                geo = new THREE.SphereGeometry( meshDef.radius || 10, meshDef.segmentsWidth || 8,
+                    meshDef.segmentsHeight || 6, meshDef.phiStart || 0,
+                    meshDef.phiLength || Math.PI * 2, meshDef.thetaStart || 0, 
+                    meshDef.thetaLength || Math.PI );
             } else if ( isCylinderDefinition.call( this, node.prototypes ) ) {
-                height = meshDef.height || 1;
-                if ( meshDef.radius !== undefined ){ 
-                    radius = meshDef.radius || 10;
-                    geo = new THREE.CylinderGeometry( radius, radius, height );
-                } else {
-                    geo = new THREE.CylinderGeometry( meshDef.radiusTop || 10, meshDef.radiusBottom || 10, height );
+                geo = new THREE.CylinderGeometry( meshDef.radiusTop || 10, meshDef.radiusBottom || 10,
+                     meshDef.height || 10, meshDef.segmentsRadius || 8, 
+                     meshDef.segmentsHeight || 1, meshDef.openEnded );
+            } else if ( isTextDefinition.call( this, node.prototypes ) ) {
+                if ( meshDef.text != "" ) {
+                    var parms = meshDef.parameters || {};
+                    geo = new THREE.TextGeometry( meshDef.text, { "size": parms.size || 100,
+                        "curveSegments": parms.curveSegments || 4, "font": parms.font || "helvetiker",
+                        "weight": parms.weight || "normal", "style": parms.style || "normal",
+                        "amount": parms.amount || 50, "height": parms.height || 50, 
+                        "bevelThickness": parms.bevelThickness || 10, "bevelSize": parms.bevelSize || 8,
+                        "bevelEnabled": Boolean( parms.bevelEnabled ),
+                    } );
+                    // geo = new THREE.TextGeometry( meshDef.text, {
+                    //     size: 80,
+                    //     height: 20,
+                    //     curveSegments: 2,
+                    //     font: "helvetiker"
+                    // } );
                 }
             } else {
                 geo = new THREE.Geometry();
@@ -2346,27 +2449,46 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             sceneNode.pendingLoads--;
             var removed = false;
             
-            // THREE.morphAnimMesh JSON model
-            if ( childType == "model/x-threejs-morphanim+json" ) {
+            // THREE JSON model
+            if ( childType == "model/x-threejs-morphanim+json" || childType == "model/x-threejs-skinned+json" ) {
 
                 for ( var i = 0; i < materials.length; i++ ) {
+                    
                     var m = materials[ i ];
-                    m.morphTargets = true;
+                    
+                    // Do we have Morph Target animations?
+                    if ( geometry.morphTargets.length > 0 ) {
+                        m.morphTargets = true;
+                    }
+
+                    // Do we have skeletal animations?
+                    if ( geometry.animation ) {
+                        m.skinning = true;
+                    }
                 }
                 
                 var meshMaterial;
                 if ( materials.length > 1 ) {
 
                     // THREE.MeshFaceMaterial for meshes that have multiple materials
-                    meshMaterial = new THREE.MeshFaceMaterial( materials );    
-                
+                    meshMaterial = new THREE.MeshFaceMaterial( materials );
+
                 } else {
 
                     // This mesh has only one material
                     meshMaterial = materials[ 0 ];
                 }
 
-                var asset = new THREE.MorphAnimMesh( geometry, meshMaterial );
+                if ( childType == "model/x-threejs-morphanim+json" ) {
+                    var asset = new THREE.MorphAnimMesh( geometry, meshMaterial );
+                
+                } else {  // childType == "model/x-threejs-skinned+json"
+
+                    THREE.AnimationHandler.add( geometry.animation );   
+                    var asset = new THREE.SkinnedMesh( geometry, meshMaterial );
+                    var skinnedAnimation = new THREE.Animation( asset, geometry.animation.name ); 
+                    skinnedAnimation.play();
+                }
 
                 asset.updateMatrix();
 
@@ -2374,9 +2496,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var asset = geometry;
             }
          
-            var animations, animatedMesh;
+            var keyframeAnimations, animatedMesh;
             if(asset.animations && asset.animations.length > 0) {
-                animations = asset.animations;
+                keyframeAnimations = asset.animations;
             }
 
             if(asset.scene)
@@ -2395,9 +2517,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             asset.matrix = new THREE.Matrix4();
             asset.matrixAutoUpdate = false;
             
-            // Don't make a copy of the three object if there are keyframe animations associated with it
+            // Don't make a copy of the three object if there are keyframe or skeletal animations associated with it
             // until we figure out a way to copy them successfully.
-            if(animations) {
+            if(keyframeAnimations || skinnedAnimation) {
                 nodeCopy.threeObject = asset;
             }
             else {
@@ -2427,14 +2549,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             nodeCopy.threeObject.vwfID = nodeID;
             nodeCopy.threeObject.matrixAutoUpdate = false;
 
-            if( animations ) {
+            if( keyframeAnimations ) {
                 var animHandler = THREE.AnimationHandler;
                 nodeCopy.threeObject.kfAnimations = [];
-                nodeCopy.threeObject.animations = animations;
+                nodeCopy.threeObject.animations = keyframeAnimations;
 
                 // Initialize the key frame animations
-                for(var i = 0; i < animations.length; i++) {
-                    var animation = animations[i];
+                for(var i = 0; i < keyframeAnimations.length; i++) {
+                    var animation = keyframeAnimations[i];
 
                     // Save references to the animations on the node that is animated, so that it can play separately
                     if( animation.node.animations == undefined ) {
@@ -2528,7 +2650,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             // If there are animations, set loaded to false and don't store the asset
             // in the registry, since the animations don't work with the copy process
-            if(animations) {
+            if(keyframeAnimations) {
                 reg.pending = false;
                 reg.loaded = false;
             }
@@ -2594,7 +2716,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 node.loader = new UTF8JsonLoader( node,node.assetLoaded.bind( this ) );
             }
 
-            if( childType == "model/x-threejs-morphanim+json" ) {
+            if( childType == "model/x-threejs-morphanim+json" || childType == "model/x-threejs-skinned+json" ) {
                 node.loader = new THREE.JSONLoader()
                 node.loader.load( node.source, node.assetLoaded.bind( this ) );
             }
@@ -3622,6 +3744,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var parent = self.state.nodes[ node.parentID ];
         if ( parent ) {
             var worldTransform = new THREE.Matrix4();
+            if ( node.transform === undefined ) {
+                node.transform = new THREE.Matrix4();    
+            }
             return worldTransform.multiplyMatrices( getWorldTransform( parent ), node.transform );
         } else {
             return node.transform;

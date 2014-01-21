@@ -412,18 +412,55 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         // -- addingChild ------------------------------------------------------------------------
         
-//        addingChild: function( nodeID, childID, childName ) {
-//        },
+        addingChild: function( nodeID, childID, childName ) {
+            
+            var parentGlgeObj = getGlgeObject.call( this, nodeID );
+            var childGlgeObj = getGlgeObject.call( this, childID );
+
+            if ( parentGlgeObj && childGlgeObj && parentGlgeObj instanceof GLGE.Group ) {
+
+                var childParent = childGlgeObj.parent;
+                // what does vwf do here?  add only if parent is currently undefined
+                if ( childParent ) {
+                    childParent.remove( childGlgeObj )   
+                } 
+                parentGlgeObj.add( childGlgeObj );   
+            }
+        },
 
         // -- movingChild ------------------------------------------------------------------------
         
-//        movingChild: function( nodeID, childID, childName ) {
-//        },
+        movingChild: function( nodeID, childID, childName ) {
+            var parentGlgeObj = getGlgeObject.call( this, nodeID );
+            var childGlgeObj = getGlgeObject.call( this, childID );
+
+            if ( parentGlgeObj && childGlgeObj && parentGlgeObj instanceof GLGE.Group ) {
+
+                var childParent = childGlgeObj.parent;
+                
+                if ( childParent ) {
+                    childParent.remove( childGlgeObj ); 
+                    parentGlgeObj.add( childGlgeObj );   
+                } 
+                  
+            }
+        },
 
         // -- removingChild ------------------------------------------------------------------------
         
-//        removingChild: function( nodeID, childID, childName ) {
-//        },
+        removingChild: function( nodeID, childID, childName ) {
+            var parentGlgeObj = getGlgeObject.call( this, nodeID );
+            var childGlgeObj = getGlgeObject.call( this, childID );
+
+            if ( parentGlgeObj && childGlgeObj && parentGlgeObj instanceof GLGE.Group ) {
+
+                var childParent = childGlgeObj.parent;
+                if ( childParent === parentGlgeObj ) {
+                    parentGlgeObj.remove( childGlgeObj )   
+                } 
+                  
+            }
+        },
 
         // -- creatingProperty ---------------------------------------------------------------------
 
@@ -1445,7 +1482,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     function getSceneProperty( nodeID, propertyName, propertyValue ) {
 
-        var color = undefined;
+        var color = undefined, tempClr;
         var sceneNode = this.state.scenes[nodeID] // { name: childName, glgeObject: undefined }
         var value = undefined;
         switch ( propertyName ) {
@@ -1460,8 +1497,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 break;
 
             case "backgroundColor":
-                color = vwfColor.call( this, sceneNode.glgeScene.getBackgroundColor() );
-                value = color.toString();
+                tempClr = sceneNode.glgeScene.getBackgroundColor();
+                if ( tempClr ) {
+                    if ( tempClr.r && isNaN( tempClr.r ) ) tempClr.r = 0;
+                    if ( tempClr.g && isNaN( tempClr.g ) ) tempClr.g = 0;
+                    if ( tempClr.b && isNaN( tempClr.b ) ) tempClr.b = 0;
+                    if ( tempClr.a && isNaN( tempClr.a ) ) tempClr.a = 0;
+                    color = vwfColor.call( this, tempClr );
+                    value = color.toString();
+                }
                 break;
             
             default:
@@ -2124,6 +2168,23 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
         return meshes;
 
+    }
+
+   // -- getGlgeObject ------------------------------------------------------------------------------
+
+    function getGlgeObject( id ) {
+        var glgeObj = undefined;
+        var node = this.state.nodes[ id ];
+        if ( !node && this.state.scenes[ id ] ) {
+            node = this.state.scenes[ id ];
+        }
+        if ( node ) {
+            glgeObj = node.glgeObject;
+            if ( !glgeObj && node.glgeScene ) {
+                glgeObj = node.glgeScene;
+            }
+        }
+        return glgeObj;
     }
 
    // -- getObjectID ------------------------------------------------------------------------------

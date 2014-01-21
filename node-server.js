@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var server = require( './node_vwf' ),
+    path   = require( 'path' ),
     fs 	   = require( 'fs' ),
     cli    = require( './lib/nodejs/vwfCli.js' );
 
@@ -23,6 +24,9 @@ function printGeneralHelp() {
 	console.log("  -p                       Port to start server on. Default: 3000");
 	console.log("  -l                       Log level for server. Default: 1");
 	console.log("  -h, --help               Output usage information");
+	console.log("  --ssl                    Enables SSL");
+	console.log("  --key                    Path to private key");
+	console.log("  --cert                   Path to certificate");
 }
 
 function printCreateHelp() {
@@ -34,6 +38,24 @@ function printCreateHelp() {
 	console.log("Example:");
 	console.log("  vwf create ~/code/my-new-app");
 }
+
+// Set the VWF directory where VWF files will be served from. Default to
+// "$HOME/.vwf". If not found at $HOME/.vwf, try the current working
+// directory.
+function parseVWFPath () {
+    var home = ( process.env.HOME || process.env.USERPROFILE );
+    var vwfHome = path.join( home, ".vwf" );
+
+    if ( fs.existsSync( path.join( vwfHome, "support/client/lib" ) ) ) {
+        return vwfHome;
+    } else if ( fs.existsSync( path.join( process.cwd(), "support/client/lib" ) ) ) {
+        return process.cwd();
+    } else {
+        consoleError( "Could not find VWF support files." );
+        return false;
+    }
+}
+global.vwfRoot = parseVWFPath();
 
 if ( argv._[0] == 'create' && argv._.length == 1 ) {
 	console.log("'create' requires a PATH to create the new VWF application.");
@@ -74,6 +96,9 @@ if ( argv._[0] == 'create' && argv._.length == 1 ) {
 	console.log("  -p                       Port to start server on. Default: 3000");
 	console.log("  -l                       Log level for server. Default: 1");
 	console.log("  -h, --help               Output usage information");
+	console.log("  --ssl                    Enables SSL");
+	console.log("  --key                    Path to private key");
+	console.log("  --cert                   Path to certificate");
 } else if ( argv._[0] == 'help' ) {
 	console.log("VWF can't find help on that command.");
 	console.log("");
