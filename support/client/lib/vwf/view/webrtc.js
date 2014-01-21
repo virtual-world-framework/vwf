@@ -33,9 +33,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             this.local = {
                 "ID": undefined,
                 "url": undefined,
-                "desktopUrl": undefined,
                 "stream": undefined,
-                "desktopStream": undefined,
                 "sharing": { audio: true, video: true } 
             };
 
@@ -56,6 +54,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             this.stereo = options.stereo !== undefined  ? options.stereo : false;
             this.videoElementsDiv = options.videoElementsDiv !== undefined  ? options.videoElementsDiv : 'videoSurfaces';
             this.videoProperties = options.videoProperties !== undefined  ? options.videoProperties : {};
+            this.bandwidth = options.bandwidth;
+            this.iceServers = options.iceServers !== undefined  ? options.iceServers : [ { "url": "stun:stun.l.google.com:19302" } ];
             this.debug = options.debug !== undefined ? options.debug : false;
 
             this.videosAdded = 0;
@@ -330,12 +330,6 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                         methodValue = setMute.call( this, methodParameters );
                     }
                     break;
-
-                case "shareDesktop":
-                    if ( this.kernel.moniker() == this.kernel.client() ) {
-                        capture.call( this, { "screen": true } );
-                    }
-                    break;
             }
         },       
 
@@ -366,6 +360,31 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
         }
         return clientNode;
     }
+
+    function setBandwidth(sdp) {
+
+        // apparently this only works in chrome
+        if ( this.bandwidth === undefined || moz ) {
+            return sdp;
+        }
+
+        // remove existing bandwidth lines
+        sdp = sdp.replace(/b=AS([^\r\n]+\r\n)/g, '');
+        
+        if ( this.bandwidth.audio ) {
+            sdp = sdp.replace(/a=mid:audio\r\n/g, 'a=mid:audio\r\nb=AS:' + this.bandwidth.audio + '\r\n');
+        }
+
+        if ( this.bandwidth.video ) {
+            sdp = sdp.replace(/a=mid:video\r\n/g, 'a=mid:video\r\nb=AS:' + this.bandwidth.video + '\r\n');
+        }
+
+        if ( this.bandwidth.data /*&& !options.preferSCTP */ ) {
+            sdp = sdp.replace(/a=mid:data\r\n/g, 'a=mid:data\r\nb=AS:' + this.bandwidth.data + '\r\n');
+        }
+        return sdp;
+    }
+
 
     function displayLocal( stream, name, color ) {
         var id = this.kernel.moniker();
@@ -454,24 +473,11 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
     function capture( media ) {
 
-        var self = this;
-
         if ( this.local.stream === undefined && ( media.video || media.audio ) ) {
-            
-            var videoConstraints = {
-                "mandatory": {
-                    "minWidth": 640,
-                    "minHeight": 360,
-                    "maxWidth": 1920,
-                    "maxHeight": 1080,
-                    "minAspectRatio": 1.77
-                },
-                "optional": []
-            };
-
+            var self = this;
             var constraints = { 
                 "audio": media.audio, 
-                "video": media.video ? videoConstraints : false, 
+                "video": media.video ? { "mandatory": {}, "optional": [] } : false, 
             };
             
             var successCallback = function( stream ) {
@@ -494,53 +500,6 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             } catch (e) { 
                 console.log("getUserMedia: error " + e ); 
             };
-        } else if ( this.local.desktopStream === undefined && media.screen ) {
-
-            var screenConstraints = {
-                "audio": false,
-                "video": {
-                    "mandatory": {
-                        "chromeMediaSource": "screen",
-                        "minWidth": 640,
-                        "minHeight": 360,
-                        "maxWidth": 1920,
-                        "maxHeight": 1080,
-                        "minAspectRatio": 1.77
-                    },
-                    "optional": []
-                }
-            };
-
-            var consts = {
-                "video": {
-                    "mandatory": {
-                        "chromeMediaSource": 'screen'
-                    }
-                }
-            };
-
-
-            var successCallback = function( stream ) {
-                self.local.desktopUrl = URL.createObjectURL( stream );
-                self.local.desktopStream = stream;
-
-                console.info( "screen capture url: " + self.local.desktopUrl );
-                self.kernel.setProperty( self.local.ID, "localDesktopUrl", self.local.url );
-
-                var localNode = self.state.clients[ self.local.ID ];
-                displayLocal.call( self, stream, localNode.displayName, localNode.color );
-                //sendOffers.call( self );
-            };
-
-            var errorCallback = function( error ) { 
-                console.log("failed to capture screen image: " + error); 
-            };
-
-            try { getUserMedia( screenConstraints, successCallback, errorCallback ); } 
-            catch (e) { 
-                console.log("getUserMedia: error " + e ); 
-            };                
-
         }
     }  
 
@@ -618,6 +577,10 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             if ( peerNode.connection === undefined ) {
                 peerNode.connection = new mediaConnection( this, peerNode );
                 peerNode.connection.connect( this.local.stream, sendOffer );
+
+                //if ( this.bandwidth !== undefined ) {
+                //    debugger;
+                //}
             }
         }
     }
@@ -693,7 +656,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
         this.state = "created";
 
         // webrtc peerConnection parameters
-        this.pc_config = { "iceServers": [ { "url": "stun:stun.l.google.com:19302" } ] };
+        this.pc_config = { "iceServers": this.view.iceServers };
         this.pc_constraints = { "optional": [ { "DtlsSrtpKeyAgreement": true } ] };
         // Set up audio and video regardless of what devices are present.
         this.sdpConstraints = { 'mandatory': {
@@ -845,6 +808,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             var answerer = function( sessionDescription ) {
                 // Set Opus as the preferred codec in SDP if Opus is present.
                 sessionDescription.sdp = self.preferOpus( sessionDescription.sdp );
+                sessionDescription.sdp = self.setBandwidth( sessionDescription.sdp );
+
                 self.pc.setLocalDescription( sessionDescription );
 
                 self.view.kernel.setProperty( self.peerNode.ID, self.view.kernel.moniker(), sessionDescription );
@@ -875,6 +840,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
             var offerer = function( sessionDescription ) {
                 // Set Opus as the preferred codec in SDP if Opus is present.
                 sessionDescription.sdp = self.preferOpus( sessionDescription.sdp );
+
+                sessionDescription.sdp = self.setBandwidth( sessionDescription.sdp );
                 self.pc.setLocalDescription( sessionDescription );
                 
                 //sendSignalMessage.call( sessionDescription, self.peerID );
