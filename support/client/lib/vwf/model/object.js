@@ -19,7 +19,7 @@
 /// @requires vwf/model
 /// @requires vwf/configuration
 
-define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model, configuration ) {
+define( [ "module", "vwf/model", "vwf/configuration", "jquery" ], function( module, model, configuration, jQuery ) {
 
     return model.load( module, {
 

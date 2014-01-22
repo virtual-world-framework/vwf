@@ -30,7 +30,7 @@
 /// @module vwf/view/document
 /// @requires vwf/view
 
-define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
+define( [ "module", "vwf/view", "vwf/utility", "jquery" ], function( module, view, utility, jQuery ) {
 
     return view.load( module, {
 
