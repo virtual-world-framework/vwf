@@ -8,7 +8,6 @@
 
     <script type="text/javascript" src="qunit.js"></script>
 
-    <script type="text/javascript" src="../lib/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="../lib/async.js"></script>
 
     <script type="text/javascript" src="../lib/alea.js"></script>
@@ -23,7 +22,10 @@
 
       require( {
 
-        baseUrl: "../lib"
+        baseUrl: "../lib",
+        paths: {
+          jquery: "jquery-1.10.2.min",
+        },
 
       }, [
 
@@ -33,6 +35,7 @@
         // This is the common model implementation and an example model that connects the
         // simulation to a WebGL scene manager.
 
+        "jquery",
         "vwf/configuration",
         "vwf/kernel/model", // explicitly loaded until vwf can load its dependencies
         "vwf/model/glge",
