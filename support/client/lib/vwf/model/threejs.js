@@ -922,6 +922,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 particles.vertices[i].acceleration.y = ps.minAcceleration[1] + (ps.maxAcceleration[1] - ps.minAcceleration[1]) * Math.random();
                                 particles.vertices[i].acceleration.z = ps.minAcceleration[2] + (ps.maxAcceleration[2] - ps.minAcceleration[2]) * Math.random();
                             }
+                            if( ps.material == ps.shaderMaterial_analytic ) {
+                                ps.rebuildParticles();
+                            }
                             break;
                         case 'minVelocity':
                         case 'maxVelocity':
@@ -934,6 +937,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 particles.vertices[i].velocity.x = ps.minVelocity[0] + (ps.maxVelocity[0] - ps.minVelocity[0]) * Math.random();
                                 particles.vertices[i].velocity.y = ps.minVelocity[1] + (ps.maxVelocity[1] - ps.minVelocity[1]) * Math.random();
                                 particles.vertices[i].velocity.z = ps.minVelocity[2] + (ps.maxVelocity[2] - ps.minVelocity[2]) * Math.random();
+                            }
+                            if( ps.material == ps.shaderMaterial_analytic ) {
+                                ps.rebuildParticles();
                             }
                             break;
                         case 'minLifeTime':
