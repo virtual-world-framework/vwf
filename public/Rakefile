@@ -39,7 +39,7 @@ end
 
 desc "Build the web site."
 
-task :web => "web/catalog.html"  do
+task :web do
 
     # Add the build tools to the path.
     original_path = ENV["PATH"]
@@ -88,9 +88,9 @@ task :web => "web/catalog.html"  do
         end
     end
 
-    # Render the gallery page (web/gallery.htm)
+    # Render the demo and gallery page (web/catalog.htm & web/gallery.htm)
 
-    FileList[ "web/gallery.htm" ].each do |htm|
+    FileList[ "web/*.htm" ].each do |htm|
         sh "( cat web/format/preamble ; cat '#{htm}' ; cat web/format/postamble ) > '#{ htm.ext ".html" }'"
     end
 
@@ -99,52 +99,3 @@ task :web => "web/catalog.html"  do
     ENV["PATH"] = original_path
 
 end
-
-desc "Generate the catalog."
-
-file "web/catalog.html" => "web/catalog.html.erb" do |task|
-
-    component_types = [ :json, :yaml ]
-    image_types = [ :png, :jpg, :gif ]
-
-    patterns = component_types.map { |type| "**/*.vwf.#{type}" }
-
-    applications = FileList.new( patterns ).sort.map do |file|
-
-        path, name = File.split file
-
-        ext = File.extname name
-        base = File.basename name, ext
-
-        type = image_types.find do |type|
-            File.exist? "#{path}/#{base}.catalog.#{type}"
-        end
-
-        descr = ""
-        begin
-            descrFile = YAML.load( File.read( "#{path}/#{base}.catalog.yaml" ) )
-            descr = descrFile["description"]
-        rescue => err
-            err
-        end
-
-        [
-            ( base == "index.vwf" ? path : file ),
-            type && "#{path}/#{base}.catalog.#{type}",
-            path, 
-            descr
-        ]
-
-    end .select do |application, image, name, description|
-
-        image
-
-    end
-
-    File.open( task.name, "w" ) do |io|
-        io.write Tilt.new( task.prerequisites.first ).
-            render Object.new, :applications => applications
-    end
-
-end
-
