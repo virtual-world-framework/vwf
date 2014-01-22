@@ -20,7 +20,7 @@
 /// @requires vwf/view
 /// @requires vwf/utility
 
-define( [ "module", "version", "vwf/view", "vwf/utility", "jquery", "jquery-encoder-0.1.0" ], function( module, version, view, utility, $, encoder ) {
+define( [ "module", "version", "vwf/view", "vwf/utility", "jquery-ui", "jquery-encoder-0.1.0" ], function( module, version, view, utility, $, encoder ) {
 
     return view.load( module, {
 
