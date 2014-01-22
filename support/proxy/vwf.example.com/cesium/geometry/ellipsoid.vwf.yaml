@@ -17,9 +17,6 @@
 ## @namespace
 
 --- 
-extends: http://vwf.example.com/cesium/node3.vwf
+extends: http://vwf.example.com/cesium/geometry.vwf
 properties:
-  dimensions: [ 10000, 10000, 10000 ]
-  position: [ 0, 0 ]
-  color: [ 255, 255, 255, 1 ] 
-  modelMatrix:
+  radius: [ 10000, 10000, 10000 ]
