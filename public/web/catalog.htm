@@ -1,3 +1,46 @@
+    <!-- CURRENT SESSION UPDATE SCRIPT -->
+    <script type='text/javascript'>
+      function showInfo(app, query) {
+        function update(app) {
+          var instances$ = $('.'+ app.replace(/\//g,'') + 'instances');
+          var match;
+          jQuery.getJSON( "../" + app + "/admin/instances", function( data ) {
+            instances$.empty();
+            instances$.html("<p><b>Current Sessions</b></p>");
+            jQuery.each( 
+              data, function( key, value ) {
+                if ( match = /* assignment! */ key.match( RegExp( "/([^/]*)$" ) ) ) { 
+                  var instanceHTML = htmlEscape( match[1] );
+                  var size = Object.size(value.clients); 
+                  instances$.append("<table style='width:75%;'><tr><td style='width:10%;'><span class='badge badge-success'>" + size + "</span>"+"</td><td style='width:60%;'>Name: " + instanceHTML + "</td><td style='text-align:right;width:30%;'><a class='btn btn-success btn-small' target='_blank' href='../" + app + "/" + instanceHTML + ( query || "" ) + "'>Join Session</a>" + "</td></tr></table>" );
+                }
+              } );
+            setTimeout(update, 60000, app);
+          } );    
+        }
+        update(app);
+      }
+
+      // From http://stackoverflow.com/a/7124052
+      function htmlEscape( string ) {
+        return String( string ).
+          replace( /&/g, "&amp;" ).
+          replace( /"/g, "&quot;" ).
+          replace( /'/g, "&#39;" ).
+          replace( /</g, "&lt;" ).
+          replace( />/g, "&gt;" );
+      }
+
+      Object.size = function(obj) { 
+        var size = 0, key; 
+        for (key in obj) { 
+          if (obj.hasOwnProperty(key)) size++; 
+        } 
+        return size; 
+      }; 
+    </script>
+    <!-- END CURRENT SESSION UPDATE SCRIPT -->
+
     <h1>Demos</h1>
     <hr class="section-title"/>
 
