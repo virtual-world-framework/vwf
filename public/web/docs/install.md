@@ -30,6 +30,29 @@ The VWF source code may be forked from [github](https://github.com/virtual-world
 
 --------------------------
 <div class="well" markdown="1">
+### Windows Installation
+
+Please make sure you have the following software packages installed on your Windows machine in order to compile and update Virtual World Framework core source code:
+
+Prerequisites:
+
+1. [Ruby 1.9.3](http://dl.bintray.com/oneclick/rubyinstaller/rubyinstaller-1.9.3-p484.exe?direct)
+2. [Ruby DevKit 4.5.2](https://github.com/downloads/oneclick/rubyinstaller/DevKit-tdm-32-4.5.2-20111229-1559-sfx.exe)
+2a. Download it, run it to extract it somewhere (permanent). Then cd to it, run “ruby dk.rb init” and “ruby dk.rb install” to bind it to ruby installations in your path.
+3. [RubyGems](http://rubygems.org/pages/download#formats)
+4. [Git Client For Windows](http://git-scm.com/download/win) or [TortoiseGit](https://code.google.com/p/tortoisegit/) 
+
+Once your Ruby and Git environments are set up for Windows, the easiest way to start developing is to:
+
+1. [Fork the VWF repo from the Development Branch](https://github.com/virtual-world-framework/vwf/tree/development)
+2. Download a copy to your local machine from your new forked repo on GitHub.
+3. Run *bundle install* to install your local gems.
+3. Make your code modifications.
+4. Compile the code using *bundle exec rake windows* from the command prompt in your VWF folder.
+5. Submit a Pull Request after you complete your updates and testing back to the Virtual World Framework Team's VWF repo.
+
+</div>
+<div class="well" markdown="1">
 ### Ubuntu/Debian Automatic Installation
 
 Perform the following shell command at a user shell prompt:
