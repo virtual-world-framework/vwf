@@ -88,7 +88,7 @@ task :web do
         end
     end
 
-    # Render the demo and gallery page (web/catalog.htm & web/gallery.htm)
+    # Render the demo page (web/catalog.htm)
 
     FileList[ "web/*.htm" ].each do |htm|
         sh "( cat web/format/preamble ; cat '#{htm}' ; cat web/format/postamble ) > '#{ htm.ext ".html" }'"
