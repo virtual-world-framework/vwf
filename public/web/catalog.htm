@@ -25,6 +25,30 @@
     </div>
     <!-- End ADL Sandbox -->
 
+    <!--  Direct link to Kimray Valve -->
+    <div class="span12">
+      <div style="padding-top: 15px;">
+        <table class="table table-striped">
+          <tr>
+            <td style="width:25%">
+              <a href="https://ec2-54-226-9-164.compute-1.amazonaws.com/kimray/" target="_blank">
+                <img src="images/gallery.kimray.png" alt="KimRayValve" / style="vertical-align:middle;">            
+              </a>
+            </td>
+            <td style="width:75%">
+              <h3 style="float:left;vertical-align:middle;">kimray</h3> 
+              <a style="float:right;vertical-align:middle;" class="btn btn-info btn-small" target="_blank" href="https://ec2-54-226-9-164.compute-1.amazonaws.com/kimray/">Launch New Session</a>
+              <br/>
+              <hr>
+              <p style="font-size:13px;">The Kimray valve application, built for the <a target="_blank" href="http://www.nmjc.edu/">New Mexico Junior College</a>, is a live 3D Immersive Maintenance Demonstration built on top of Virtual World Framework to demonstrate the capabilities of Remote Subject Matter Experts interacting with a student using a shared real time lesson workspace. This application utilizes WebRTC to deliver real time video and voice over IP without any browser plugins. </p>
+              <br/>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <!-- End Kimray Valve -->
+
     <!--  bzflag -->
     <div class="span12">
       <div style="padding-top: 15px;">
@@ -58,40 +82,6 @@
       </div>
     </div>
     <!-- END bzflag -->
-
-    <!-- cesium -->
-    <div class="span12">
-      <div style="padding-top: 15px;">
-        <table class="table table-striped">
-          <tr>
-            <td style="width:25%">
-              <a href="../agi/cesium#!cesium" target="_blank">
-                <img src="images/gallery.cesium.png" alt="agi/cesium" / style="vertical-align:middle;">            
-              </a>
-            </td>
-            <td style="width:75%">
-                <h3 style="float:left;vertical-align:middle;">cesium</h3> 
-                <a style="float:right;vertical-align:middle;" class="btn btn-info btn-small" target="_blank" href="../agi/cesium#!cesium">Launch New Session</a>
-                <br/>
-                <hr>
-                <p style="font-size:13px;"><a target="_blank" href="http://www.agi.com/">Analytical Graphics, Inc's (AGI)</a> Cesium is a web-based globe and map engine for visualizing dynamic data. This demo application allows a user to have synchronized camera views across multiple clients. Pressing the "R" key will reset the synchronized views across all instances.</p>
-                <br/>
-                <div id='agi/cesium-content' class='overlayContent'>
-                  <div class="overlay">
-                    <div class='agicesiuminstances'>
-                    <p><b>Current Sessions</b></p>
-                  </div>
-                  <script type="text/javascript">
-                  $(document.getElementById('agicesiuminstances')).ready(showInfo('agi/cesium', '#!cesium'));             
-                  </script>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
-    </div>
-    <!-- END cesium -->
 
     <!-- humvee-lesson -->
     <div class="span12">
@@ -127,29 +117,73 @@
     </div>
     <!-- END humvee-lesson -->
 
-    <!--  Direct link to Kimray Valve -->
+    <!-- radio-lesson -->
     <div class="span12">
       <div style="padding-top: 15px;">
         <table class="table table-striped">
           <tr>
             <td style="width:25%">
-              <a href="https://ec2-54-226-9-164.compute-1.amazonaws.com/kimray/" target="_blank">
-                <img src="images/gallery.kimray.png" alt="KimRayValve" / style="vertical-align:middle;">            
+              <a href="../radio-lesson" target="_blank">
+                <img src="../radio-lesson/index.vwf.catalog.png" alt="radio-lesson" / style="vertical-align:middle;">
               </a>
             </td>
             <td style="width:75%">
-              <h3 style="float:left;vertical-align:middle;">kimray</h3> 
-              <a style="float:right;vertical-align:middle;" class="btn btn-info btn-small" target="_blank" href="https://ec2-54-226-9-164.compute-1.amazonaws.com/kimray/">Launch New Session</a>
+              <h3 style="float:left;vertical-align:middle;">radio-lesson</h3> 
+              <a style="float:right;vertical-align:middle;" class="btn btn-info btn-small" target="_blank" href="../radio-lesson">Launch New Session</a>
               <br/>
               <hr>
-              <p style="font-size:13px;">The Kimray valve application, built for the <a target="_blank" href="http://www.nmjc.edu/">New Mexico Junior College</a>, is a live 3D Immersive Maintenance Demonstration built on top of Virtual World Framework to demonstrate the capabilities of Remote Subject Matter Experts interacting with a student using a shared real time lesson workspace. This application utilizes WebRTC to deliver real time video and voice over IP without any browser plugins. </p>
+              <p style="font-size:13px;">The radio lesson application walks a user through turning the radio on and its basic operations using the VWF lesson interface.</p>
               <br/>
+              <div id='radio-lesson-content' class='overlayContent'>
+                <div class="overlay">
+                  <div class='radio-lessoninstances'>
+                    <p><b>Current Sessions</b></p>
+                  </div>
+                  <script type="text/javascript">
+                    $(document.getElementById('radio-lessoninstances')).ready(showInfo('radio-lesson', ''));              
+                  </script>
+                </div>
+              </div>
             </td>
           </tr>
         </table>
       </div>
     </div>
-    <!-- End Kimray Valve -->
+    <!-- END radio-lesson -->
+
+    <!-- cesium -->
+    <div class="span12">
+      <div style="padding-top: 15px;">
+        <table class="table table-striped">
+          <tr>
+            <td style="width:25%">
+              <a href="../agi/cesium#!cesium" target="_blank">
+                <img src="images/gallery.cesium.png" alt="agi/cesium" / style="vertical-align:middle;">            
+              </a>
+            </td>
+            <td style="width:75%">
+                <h3 style="float:left;vertical-align:middle;">cesium</h3> 
+                <a style="float:right;vertical-align:middle;" class="btn btn-info btn-small" target="_blank" href="../agi/cesium#!cesium">Launch New Session</a>
+                <br/>
+                <hr>
+                <p style="font-size:13px;"><a target="_blank" href="http://www.agi.com/">Analytical Graphics, Inc's (AGI)</a> Cesium is a web-based globe and map engine for visualizing dynamic data. This demo application allows a user to have synchronized camera views across multiple clients. Pressing the "R" key will reset the synchronized views across all instances.</p>
+                <br/>
+                <div id='agi/cesium-content' class='overlayContent'>
+                  <div class="overlay">
+                    <div class='agicesiuminstances'>
+                    <p><b>Current Sessions</b></p>
+                  </div>
+                  <script type="text/javascript">
+                  $(document.getElementById('agicesiuminstances')).ready(showInfo('agi/cesium', '#!cesium'));             
+                  </script>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <!-- END cesium -->
 
     <!-- minesweeper -->
     <div class="span12">
@@ -184,40 +218,6 @@
       </div>
     </div>
 		<!-- END minesweeper -->
-
-    <!-- radio-lesson -->
-    <div class="span12">
-      <div style="padding-top: 15px;">
-        <table class="table table-striped">
-          <tr>
-            <td style="width:25%">
-              <a href="../radio-lesson" target="_blank">
-                <img src="../radio-lesson/index.vwf.catalog.png" alt="radio-lesson" / style="vertical-align:middle;">
-              </a>
-            </td>
-            <td style="width:75%">
-              <h3 style="float:left;vertical-align:middle;">radio-lesson</h3> 
-              <a style="float:right;vertical-align:middle;" class="btn btn-info btn-small" target="_blank" href="../radio-lesson">Launch New Session</a>
-              <br/>
-              <hr>
-              <p style="font-size:13px;">The radio lesson application walks a user through turning the radio on and its basic operations using the VWF lesson interface.</p>
-              <br/>
-              <div id='radio-lesson-content' class='overlayContent'>
-                <div class="overlay">
-                  <div class='radio-lessoninstances'>
-                    <p><b>Current Sessions</b></p>
-                  </div>
-                  <script type="text/javascript">
-                    $(document.getElementById('radio-lessoninstances')).ready(showInfo('radio-lesson', ''));							
-                  </script>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
-    </div>
-    <!-- END radio-lesson -->
 
     <!-- tile-puzzle-2D -->
     <div class="span12">
