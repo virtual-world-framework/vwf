@@ -193,7 +193,7 @@ define([
             }
 
             that._imageUrlTemplate = that._imageUrlTemplate.replace('{request}', that._requestType)
-              .replace('{channel}', that._channel).replace('{version}', that._version);
+              .replace('{channel}', that._channel).replace('{version}', that._version).replace('http:', '');;
 
             that._ready = true;
             TileProviderError.handleSuccess(metadataError);

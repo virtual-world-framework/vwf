@@ -134,7 +134,7 @@ define([
             that._tileHeight = resource.imageHeight;
             that._maximumLevel = resource.zoomMax - 1;
             that._imageUrlSubdomains = resource.imageUrlSubdomains;
-            that._imageUrlTemplate = resource.imageUrl.replace('{culture}', '');
+            that._imageUrlTemplate = resource.imageUrl.replace('{culture}', '').replace('http:', '');
 
             // Install the default tile discard policy if none has been supplied.
             if (!defined(that._tileDiscardPolicy)) {
