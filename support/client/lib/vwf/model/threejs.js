@@ -209,17 +209,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                 node = this.state.nodes[childID] = {
                     name: childName,
-                    threeObject: parentNode.threeObject,
+                    threeObject: GetMaterial(parentNode.threeObject, childName),
                     ID: childID,
                     parentID: nodeID,
                     type: childExtendsID,
                     sourceType: childType,
                 };
-                node.threeMaterial = GetMaterial(node.threeObject, childName);
-                if(!node.threeMaterial)
+                if ( !node.threeObject )
                 {   
-                    node.threeMaterial = new THREE.MeshPhongMaterial();
-                    SetMaterial(node.threeObject,node.threeMaterial,childName)
+                    node.threeObject = new THREE.MeshPhongMaterial();
+                    SetMaterial( parentNode.threeObject, node.threeObject, childName );
                 }
             } else if ( protos && isParticleDefinition.call( this, protos ) ) {
                 
@@ -317,7 +316,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             }
 
-            if ( node && node.threeObject ) {
+            if ( node && ( node.threeObject instanceof THREE.Object3D ) ) {
                 // Add a local model-side transform that can stay pure even if the view changes the
                 // transform on the threeObject - objects that don't yet have a threeObject because
                 // a file needs to load create this transform in assetLoaded
@@ -384,12 +383,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName ) {
             var myNode = this.state.nodes[childID];
-            if ( myNode ) {
-              if ( myNode.threeObject ) {
-                if ( ! ( myNode.threeMaterial ) ) {
-                  generateNodeMaterial.call( this, childID, myNode );//Potential node, need to do node things!
-                }
-              }
+            if ( myNode && !( myNode.threeObject instanceof THREE.Material ) ) {
+                generateNodeMaterial.call( this, childID, myNode );//Potential node, need to do node things!
             }
             if ( this.debug.initializing ) {
                 this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
@@ -542,12 +537,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var threeObject = node.threeObject;
             if ( !threeObject )
                 threeObject = node.threeScene;
-
-            //if it's a material node, we'll work with the threeMaterial
-            //might be more elegant to simply make the node.threeObject the material, but keeping it seperate
-            //in case we later need access to the object the material is on.
-            if(node.threeMaterial)
-            threeObject = node.threeMaterial;
 
             //There is not three object for this node, so there is nothing this driver can do. return
             if(!threeObject) return value;    
@@ -1468,12 +1457,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if( !threeObject )
             threeObject = node.threeScene;
 
-            //if it's a material node, we'll work with the threeMaterial
-            //might be more elegant to simply make the node.threeObject the material, but keeping it seperate
-            //in case we later need access to the object the material is on.
-            if( node.threeMaterial )
-            threeObject = node.threeMaterial;
-
             //There is not three object for this node, so there is nothing this driver can do. return
             if(!threeObject) return value;    
           
@@ -2049,8 +2032,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             threeObject = node.threeObject;
             if( !threeObject )
                 threeObject = node.threeScene;
-            if ( node.threeMaterial )
-                threeObject = node.threeMaterial;
         }
 
         return threeObject;
@@ -4212,10 +4193,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var result = [];
         for ( var index = 0; index < nodeIDs.length; index++ ) {
             var node = this.state.nodes[ nodeIDs[ index ] ];
-            if ( node ) {
-                if ( node.threeMaterial ) {
-                    result.push( node.threeMaterial );
-                }
+            if ( node && ( node.threeObject instanceof THREE.Material ) ) {
+                result.push( node.threeObject );
             }
         }
         return result;
