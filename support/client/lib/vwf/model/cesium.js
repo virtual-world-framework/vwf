@@ -867,7 +867,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                             if ( node.cesiumObj instanceof Cesium.Material ) {
                                 
                                 // the uniforms properties are based upon the material type
-                                // check the Material spec at http://cesium.agi.com/refdoc.html
+                                // check the Material spec at //cesium.agi.com/refdoc.html
                                 // for more information
                                 var uni = node.cesiumObj.uniforms;
                                 if ( uni ) {
@@ -1064,7 +1064,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                                     case "cesium":
                                         node.terrainProvider = propertyValue;
                                         terrainProvider = new Cesium.CesiumTerrainProvider({
-                                            url : 'http://cesium.agi.com/smallterrain',
+                                            url : '//cesium.agi.com/smallterrain',
                                             credit : 'Terrain data courtesy Analytical Graphics, Inc.'
                                         });  
                                         node.cesiumObj.depthTestAgainstTerrain = true;                                  
@@ -1072,7 +1072,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                                     case "vr":
                                         node.terrainProvider = propertyValue;
                                         terrainProvider = new Cesium.VRTheWorldTerrainProvider({
-                                            url : 'http://www.vr-theworld.com/vr-theworld/tiles1.0.0/73/',
+                                            url : '//www.vr-theworld.com/vr-theworld/tiles1.0.0/73/',
                                             credit : 'Terrain data courtesy VT MÄK'
                                         }); 
                                         node.cesiumObj.depthTestAgainstTerrain = true;                                   
@@ -1155,7 +1155,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                             switch ( propertyValue ) {
                                 case "bingAerial":
                                     imageProvider = new Cesium.BingMapsImageryProvider({
-                                        url : 'http://dev.virtualearth.net',
+                                        url : '//dev.virtualearth.net',
                                         mapStyle : Cesium.BingMapsStyle.AERIAL,
                                         // Some versions of Safari support WebGL, but don't correctly implement
                                         // cross-origin image loading, so we need to load Bing imagery using a proxy.
@@ -1165,7 +1165,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                                 case "bingAerialLabel":
                                     imageProvider = new Cesium.BingMapsImageryProvider({
-                                        url : 'http://dev.virtualearth.net',
+                                        url : '//dev.virtualearth.net',
                                         mapStyle : Cesium.BingMapsStyle.AERIAL_WITH_LABELS,
                                         proxy : proxyIfNeeded
                                     });
@@ -1173,7 +1173,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                                 case "bingRoad":
                                     imageProvider = new Cesium.BingMapsImageryProvider( {
-                                        url: 'http://dev.virtualearth.net',
+                                        url: '//dev.virtualearth.net',
                                         mapStyle: Cesium.BingMapsStyle.ROAD,
                                         // Some versions of Safari support WebGL, but don't correctly implement
                                         // cross-origin image loading, so we need to load Bing imagery using a proxy.
@@ -1183,42 +1183,42 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                                 case "esriWorld":
                                     imageProvider = new Cesium.ArcGisMapServerImageryProvider({
-                                        url : 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
+                                        url : '//services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
                                         proxy : proxy
                                     });                      
                                     break;
 
                                 case "esriStreet":
                                     imageProvider = new Cesium.ArcGisMapServerImageryProvider({
-                                        url : 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer',
+                                        url : '//server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer',
                                         proxy: new Cesium.DefaultProxy('/proxy/')
                                     } );                       
                                     break;
 
                                 case "esriGeo":
                                     imageProvider = new Cesium.ArcGisMapServerImageryProvider({
-                                        url : 'http://services.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/',
+                                        url : '//services.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/',
                                         proxy : proxy
                                     });                      
                                     break;
 
                                 case "openStreet":
                                     imageProvider = new Cesium.OpenStreetMapImageryProvider({
-                                        url : 'http://tile.openstreetmap.org/',
+                                        url : '//tile.openstreetmap.org/',
                                         proxy : proxyIfNeeded
                                     });
                                     break;
 
                                 case "mapQuestStreet":
                                     imageProvider = new Cesium.OpenStreetMapImageryProvider({
-                                        url: 'http://otile1.mqcdn.com/tiles/1.0.0/osm/',
+                                        url: '//otile1.mqcdn.com/tiles/1.0.0/osm/',
                                         proxy: proxy
                                     });
                                     break;
 
                                 case "stamen":
                                     imageProvider = new Cesium.OpenStreetMapImageryProvider({
-                                        url: 'http://tile.stamen.com/watercolor/',
+                                        url: '//tile.stamen.com/watercolor/',
                                         fileExtension: 'jpg',
                                         proxy: proxy,
                                         credit: 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.'
@@ -1227,7 +1227,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                                 case "stamenToner":
                                     imageProvider = new Cesium.OpenStreetMapImageryProvider({
-                                        url : 'http://tile.stamen.com/toner/',
+                                        url : '//tile.stamen.com/toner/',
                                         credit : 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.',
                                         proxy : proxyIfNeeded
                                     });
@@ -1235,7 +1235,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                                 case "blackMarble":
                                     imageProvider = new Cesium.TileMapServiceImageryProvider({
-                                        url : 'http://cesium.agi.com/blackmarble',
+                                        url : '//cesium.agi.com/blackmarble',
                                         maximumLevel : 8,
                                         credit : 'Black Marble imagery courtesy NASA Earth Observatory',
                                         proxy : proxyIfNeeded
@@ -1251,7 +1251,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                                 case "usInfrared":
                                     imageProvider =  new Cesium.WebMapServiceImageryProvider({
-                                        url : 'http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_ir.cgi?',
+                                        url : '//mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_ir.cgi?',
                                         layers : 'goes_conus_ir',
                                         credit : 'Infrared data courtesy Iowa Environmental Mesonet',
                                         parameters : {
@@ -1264,7 +1264,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                                 case "usWeather":
                                     imageProvider = new Cesium.WebMapServiceImageryProvider({
-                                        url : 'http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?',
+                                        url : '//mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?',
                                         layers : 'nexrad-n0r',
                                         credit : 'Radar data courtesy Iowa Environmental Mesonet',
                                         parameters : {
@@ -1640,7 +1640,8 @@ define( [ "module", "vwf/model", "vwf/utility",
                 case "logoOffset":
                     if ( node.cesiumObj instanceof Cesium.Globe ) {
                         var pos = node.cesiumObj.logoOffset;
-                        value = [ pos.x, pos.y ];
+                        
+                        value = pos !== undefined ? [ pos.x, pos.y ] : undefined;
                     }
                     break;
 
