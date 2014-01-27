@@ -46,10 +46,10 @@ function parseVWFPath () {
     var home = ( process.env.HOME || process.env.USERPROFILE );
     var vwfHome = path.join( home, ".vwf" );
 
-    if ( fs.existsSync( path.join( vwfHome, "support/client/lib" ) ) ) {
-        return vwfHome;
-    } else if ( fs.existsSync( path.join( process.cwd(), "support/client/lib" ) ) ) {
+    if ( fs.existsSync( path.join( process.cwd(), "support/client/lib" ) ) ) {
         return process.cwd();
+    } else if ( fs.existsSync( path.join( vwfHome, "support/client/lib" ) ) ) {
+        return vwfHome;
     } else {
         consoleError( "Could not find VWF support files." );
         return false;
