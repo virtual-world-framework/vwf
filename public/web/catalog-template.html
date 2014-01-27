@@ -6,7 +6,9 @@
           var match;
           jQuery.getJSON( "../" + app + "/admin/instances", function( data ) {
             instances$.empty();
-            instances$.html("<p><b>Current Sessions</b></p>");
+            if ( Object.keys(data).length != 0 ) {
+              instances$.html("<p><b>Current Sessions</b></p>");
+            }
             jQuery.each( 
               data, function( key, value ) {
                 if ( match = /* assignment! */ key.match( RegExp( "/([^/]*)$" ) ) ) { 
