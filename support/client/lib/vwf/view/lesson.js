@@ -18,7 +18,7 @@
 /// @module vwf/view/lesson
 /// @requires vwf/view
 
-define( [ "module", "vwf/view" ], function( module, view ) {
+define( [ "module", "vwf/view", "jquery-ui" ], function( module, view, $ ) {
 
     return view.load( module, {
 
@@ -34,6 +34,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             // Add CSS files
             var lessonCss = document.createElement('link');
+            lessonCss.rel = 'stylesheet';
+            lessonCss.type = 'text/css';
+            lessonCss.href = 'vwf/view/lesson/jquery-ui-1.10.4.custom.min.css';
+            $('head').append(lessonCss);
+            lessonCss = document.createElement('link');
             lessonCss.rel = 'stylesheet';
             lessonCss.type = 'text/css';
             lessonCss.href = 'vwf/view/lesson/lesson.css';
@@ -52,10 +57,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             progressDiv.id = 'progress';
 
             var innerProgressDiv = document.createElement('div');
-            innerProgressDiv.className = 'progress';
+            innerProgressDiv.className = 'lesson progress';
 
             var innerProgressBarDiv = document.createElement('div');
-            innerProgressBarDiv.className = 'bar';
+            innerProgressBarDiv.className = 'lesson bar';
             innerProgressBarDiv.id = 'lessonProgressBar';
 
             $(innerProgressDiv).append(innerProgressBarDiv);
@@ -71,7 +76,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             messageListItem.id = 'message';
 
             var messageListItemLabel = document.createElement('label');
-            messageListItemLabel.className = 'buttonLabel';
+            messageListItemLabel.className = 'lesson buttonLabel';
 
             $(messageListItem).append(messageListItemLabel);
 
@@ -80,13 +85,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             var startButtonItemButton = document.createElement('button');
             startButtonItemButton.type = 'button';
-            startButtonItemButton.className = 'btn btn-info';
+            startButtonItemButton.className = 'lesson btn btn-info';
             startButtonItemButton.onclick = function () {
                 startLesson.call(self);
             };
 
             var startButtonItemLabel = document.createElement('label');
-            startButtonItemLabel.className = 'buttonLabel';
+            startButtonItemLabel.className = 'lesson buttonLabel';
             startButtonItemLabel.innerHTML = 'Start';
 
             $(startButtonItemButton).append(startButtonItemLabel);
@@ -115,13 +120,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             var nextButtonItemButton = document.createElement('button');
             nextButtonItemButton.type = 'button';
-            nextButtonItemButton.className = 'btn btn-info';
+            nextButtonItemButton.className = 'lesson btn btn-info';
             nextButtonItemButton.onclick = function () {
                 nextTask.call(self);
             };
 
             var nextButtonItemLabel = document.createElement('label');
-            nextButtonItemLabel.className = 'buttonLabel';
+            nextButtonItemLabel.className = 'lesson buttonLabel';
             nextButtonItemLabel.innerHTML = 'Next';
 
             $(nextButtonItemButton).append(nextButtonItemLabel);
@@ -132,13 +137,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             var completeButtonItemButton = document.createElement('button');
             completeButtonItemButton.type = 'button';
-            completeButtonItemButton.className = 'btn btn-info';
+            completeButtonItemButton.className = 'lesson btn btn-info';
             completeButtonItemButton.onclick = function () {
                 completeLesson.call(self);
             };
 
             var completeButtonItemLabel = document.createElement('label');
-            completeButtonItemLabel.className = 'buttonLabel';
+            completeButtonItemLabel.className = 'lesson buttonLabel';
             completeButtonItemLabel.innerHTML = 'Complete';
 
             $(completeButtonItemButton).append(completeButtonItemLabel);
@@ -255,7 +260,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 var subAccordionDiv = document.createElement('div');
                 subAccordionDiv.id = 'accordion--' + step.replace(/\:/g, "_").replace(/\./g, "-");
 
-                $('#accordion').append("<p class='taskTitle'>" + stepText + "</p>");
+                $('#accordion').append("<p class='lesson taskTitle'>" + stepText + "</p>");
                 $('#accordion').append(subAccordionDiv);
                 $('#accordion').append("<br />");
             }
