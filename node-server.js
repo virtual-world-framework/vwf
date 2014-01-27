@@ -24,6 +24,9 @@ function printGeneralHelp() {
 	console.log("  -p                       Port to start server on. Default: 3000");
 	console.log("  -l                       Log level for server. Default: 1");
 	console.log("  -h, --help               Output usage information");
+	console.log("  --ssl                    Enables SSL");
+	console.log("  --key                    Path to private key");
+	console.log("  --cert                   Path to certificate");
 }
 
 function printCreateHelp() {
@@ -93,6 +96,9 @@ if ( argv._[0] == 'create' && argv._.length == 1 ) {
 	console.log("  -p                       Port to start server on. Default: 3000");
 	console.log("  -l                       Log level for server. Default: 1");
 	console.log("  -h, --help               Output usage information");
+	console.log("  --ssl                    Enables SSL");
+	console.log("  --key                    Path to private key");
+	console.log("  --cert                   Path to certificate");
 } else if ( argv._[0] == 'help' ) {
 	console.log("VWF can't find help on that command.");
 	console.log("");
@@ -102,5 +108,3 @@ if ( argv._[0] == 'create' && argv._.length == 1 ) {
 } else {
 	console.log( "'" + argv._[0] + "' is not a VWF command. See 'vwf --help'." );
 }
-
-

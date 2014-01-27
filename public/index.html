@@ -20,7 +20,7 @@
 		<script type="text/javascript">
 				function UrlExists(){
 				var http = new XMLHttpRequest();
-				http.open('HEAD', 'web/about.html', false);
+				http.open('GET', 'web/about.html', false);
 				http.send();
 				if(http.status!=404){window.location.href = "web/about.html"; };
 				if(http.status==404){var body=document.getElementsByTagName('body')[0];body.style.display="block";};

@@ -386,6 +386,7 @@ At this point you will need to generate a self-signed certificate because you ei
 To generate a temporary certificate which is good for 365 days, issue the following command:
 
     openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+
 Signature ok<br/>
 subject=/C=CH/ST=Test/L=TestName/O=Test Co/OU=Test Technology/CN=public.whatever.com/Email=test@test.com<br/>
 Getting Private key<br/>

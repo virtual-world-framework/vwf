@@ -19,9 +19,11 @@
       vwf_view.calledMethod = function (nodeId, methodName, methodParameters, methodValue) {
         switch(methodName) {
           case "honkHorn":
+            $('#honk')[0].load();
             $('#honk')[0].play();
             break;
           case "startEngine":
+            $('#ignition')[0].load();
             $('#ignition')[0].play();
             break;
         }

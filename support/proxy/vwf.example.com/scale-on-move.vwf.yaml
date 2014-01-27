@@ -1,0 +1,181 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+## The component representation of a scale behavior (on move)
+## 
+## @name scale-on-click.vwf
+## @namespace
+
+--- 
+extends:
+  http://vwf.example.com/node3.vwf
+properties:
+  
+  ## Scale rate
+  ## 
+  ## @name scale-on-move.vwf#scale-rate
+  ## @property
+
+  scale-rate: 0.14
+
+
+events:
+  valueChanged:
+
+methods:
+
+  ## Scale function. Updates component scale
+  ## 
+  ## @name scale-on-move.vwf#updateScale
+  ## @function
+  ##
+  ## @returns undefined
+
+  updateScale:
+
+  ## Initialization function
+  ## 
+  ## @name scale-on-move.vwf#init
+  ## @function
+  ##
+  ## @returns undefined
+
+  init:
+
+scripts:
+- |
+    this.init = function() {
+      this.input = {
+        "pointerInfo": undefined,
+        "pickInfo": undefined,
+        "previous": {
+          "pointerInfo": undefined,
+          "pickInfo": undefined,        
+        },
+        "pointerDown": {
+          "pointerInfo": undefined,
+          "pickInfo": undefined,        
+        },
+        "update": function( pointerInfo, pickInfo ){
+          this.previous.pointerInfo = this.pointerInfo;
+          this.previous.pickInfo = this.pickInfo;
+          this.pointerInfo = pointerInfo;
+          this.pickInfo = pickInfo;
+        }, 
+        "clear": function(){
+          this.previous.pointerInfo = undefined;
+          this.previous.pickInfo = undefined;
+          this.pointerInfo = undefined;
+          this.pickInfo = undefined;        
+        },
+        "change": function() {
+          var ret = [ 0, 0 ]
+          if ( this.pointerInfo && this.previous.pointerInfo ) {
+            ret[0] = this.pointerInfo.position[0] - this.previous.pointerInfo.position[0];
+            ret[1] = this.pointerInfo.position[1] - this.previous.pointerInfo.position[1];          
+          }
+          return ret;
+        }
+      };
+
+    }
+    this.pointerDown = function( pointerInfo, pickInfo ) {
+      if ( !this.input ) this.init();
+
+      this.input.clear();
+
+      this.input.pointerDown.pointerInfo = pointerInfo;
+      this.input.pointerDown.pickInfo = pickInfo;
+
+      this.worldTransOnDown = goog.vec.Mat4.createFromArray( this.parent.worldTransform );
+      this.scaleOnDown = goog.vec.Vec3.createFromArray( this.parent.scale );
+      this.mouseDownPos = goog.vec.Vec3.createFromArray( pickInfo.globalPosition );
+      
+      this.objectPos = goog.vec.Vec3.createFromValues( this.worldTransOnDown[12], this.worldTransOnDown[13], this.worldTransOnDown[14] );
+      this.cameraPos = goog.vec.Vec3.createFromValues( pickInfo.globalSource[0], pickInfo.globalSource[1], pickInfo.globalSource[2] );
+
+      // backwards?
+      //this.objectVec3OnDown = goog.vec.Vec3.subtract( this.cameraPos, this.objectPos, goog.vec.Vec3.create() );
+      //this.pointerVec3OnDown = goog.vec.Vec3.subtract( this.cameraPos, this.mouseDownPos, goog.vec.Vec3.create() );
+
+      this.objectVec3OnDown = goog.vec.Vec3.subtract( this.objectPos, this.cameraPos, goog.vec.Vec3.create() );
+      this.pointerVec3OnDown = goog.vec.Vec3.subtract( this.mouseDownPos, this.cameraPos, goog.vec.Vec3.create() );
+
+
+      goog.vec.Vec3.normalize( this.objectVec3OnDown, this.objectVec3OnDown );
+      goog.vec.Vec3.normalize( this.pointerVec3OnDown, this.pointerVec3OnDown );
+
+      this.lastAngle = Math.acos( goog.vec.Vec3.dot( this.objectVec3OnDown, this.pointerVec3OnDown ) ) * (180 / Math.PI);
+
+      // TO DO
+      // if listAngle is very small then need to modify the 
+      // scale rate, given this approach
+
+      // TO DO      
+      // also the distance to the object should be taken into consideration
+      // the further away the object is, then the change in the angle
+      // from the center doesn't change much when trying to decrease the scale
+      
+    }
+
+    this.pointerUp = function( pointerInfo, pickInfo ) {
+      if ( !this.input ) this.init();
+      this.input.clear();
+    }
+
+    this.pointerMove = function( pointerInfo, pickInfo ) {
+      this.input.update( pointerInfo, pickInfo );
+      this.updateScale();
+    }
+
+    this.updateScale = function(){
+      var currentScale = this.parent.scale; 
+      var currentPointer = goog.vec.Vec3.createFromArray( this.input.pickInfo.pointerVector );
+      goog.vec.Vec3.normalize( currentPointer, currentPointer );
+
+      var currentAngle = Math.acos( goog.vec.Vec3.dot( this.objectVec3OnDown, currentPointer ) ) * (180 / Math.PI);
+
+      if ( currentAngle > this.lastAngle ) {
+       
+        // moving away from the center 
+        this.parent.scale = goog.vec.Vec3.add( currentScale, 
+          goog.vec.Vec3.scale( 
+            goog.vec.Vec3.createFromValues( 1, 1, 1 ), 
+            ( currentAngle - this.lastAngle ) * this[ "scale-rate" ], 
+            goog.vec.Vec3.create()
+          ),          
+        goog.vec.Vec3.create() );
+        this.valueChanged( this.parent.scale );
+        this.lastAngle = currentAngle;
+      } else if ( currentAngle < this.lastAngle ){
+
+        // moving towards from the center
+        var newScale = goog.vec.Vec3.subtract( currentScale, 
+          goog.vec.Vec3.scale( 
+            goog.vec.Vec3.createFromValues( 1, 1, 1 ), 
+            ( this.lastAngle - currentAngle ) * this[ "scale-rate" ], 
+            goog.vec.Vec3.create()
+          ),          
+        goog.vec.Vec3.create() );
+        
+        // this needs to decrease more as the user 
+
+        if ( goog.vec.Vec3.magnitude( newScale ) > 0 ) {
+          this.parent.scale = newScale;
+          this.valueChanged( this.parent.scale );
+          this.lastAngle = currentAngle;
+        }
+      } 
+
+    } //@ sourceURL=scale-on-move.vwf
+

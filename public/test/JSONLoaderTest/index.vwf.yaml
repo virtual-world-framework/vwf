@@ -17,8 +17,6 @@ children:
       translation: [ 5, 0, 0 ]
   Monster:
     extends: http://vwf.example.com/node3.vwf
-    implements:
-    - http://vwf.example.com/animation.vwf
     source: monster.js
     type: model/x-threejs-morphanim+json
     properties:
@@ -28,8 +26,6 @@ children:
       animationRate: 1
   Avatar: 
     extends: http://vwf.example.com/node3.vwf
-    implements:
-    - http://vwf.example.com/animation.vwf
     source: JumpSuitMale_wLadder.js
     type: model/x-threejs-morphanim+json
     properties:
@@ -37,10 +33,45 @@ children:
       rotation: [ 0, 1, 1, 180 ]
       animationRate: 1
       animationType: -1
+  VCTE: 
+    extends: http://vwf.example.com/node3.vwf
+    source: AirForceAll.dae
+    type: model/vnd.collada+xml
+    properties:
+      translation: [ 0, -1, 0 ]    
+      rotation: [ 0, 1, 1, 90 ]
+      animationLoop: true
+      scale: [ 0.01, 0.01, 0.01 ]
+      animationRate: 1
+      animationType: -1
+  Knight: 
+    extends: http://vwf.example.com/node3.vwf
+    source: knight.js
+    type: model/x-threejs-skinned+json
+    properties:
+      translation: [ 0, -2, 0 ]    
+      rotation: [ 0, 1, 1, 180 ]
+      animationLoop: true
+      scale: [ 0.1, 0.1, 0.1 ]
+      animationRate: 0.01
+      animationType: -1
+  Horse: 
+    extends: http://vwf.example.com/node3.vwf
+    source: horse.js
+    type: model/x-threejs-morphanim+json
+    properties:
+      translation: [ 0, -4, 0 ]    
+      rotation: [ 0, 1, 1, 180 ]
+      animationLoop: true
+      scale: [ 0.01, 0.01, 0.01 ]
+      animationRate: 1
 scripts:
 - |
   this.initialize = function() {
     this.Monster.animationPlay();
+    this.Knight.animationPlay();
+    this.Horse.animationPlay();
+    this.VCTE.animationPlay();
     //this.Avatar.animationPlay();
     this.future( 0 ).initializeCamera();
   }
@@ -62,7 +93,7 @@ scripts:
   }  
   this.initializeCamera = function() {
     //this.camera.near = 1;
-    this.camera.translation = [5.593170642852783,-0.050479382276535034,0]; 
-    this.camera.rotation = [0,0,1,90.53998565673828];
+    this.camera.translation = [10.48534870147705,1.0754132270812988,0]; 
+    this.camera.rotation = [0,0,1,103.94998168945312];
   }//@ sourceURL=index.vwf
 

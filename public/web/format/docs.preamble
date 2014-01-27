@@ -38,6 +38,7 @@
 									<li><a href='documentation.html#transforms' title='Transforms'>Transforms</a></li>
 									<li><a href='documentation.html#lesson' title='Lesson'>Lesson</a></li>
 									<li><a href='documentation.html#logging' title='Logging'>Logging</a></li>
+									<li><a href='documentation.html#persistence' title='Persistence'>Persistence</a></li>
 									<li><a href='documentation.html#testing' title='Testing'>Testing</a></li>
 									<li><a href='documentation.html#pitfalls' title='Pitfalls'>Pitfalls</a></li>
 									<br />
