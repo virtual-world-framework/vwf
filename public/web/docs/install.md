@@ -1,38 +1,36 @@
 <div id="install" class="well" markdown="1">
-User and App Developer Installation Instructions
+App Developer Installation 
 ==========================
 --------------------------
 
-### Windows Installation
+### Windows 
 
-To install the windows version of Virtual World Framework, please download the [Latest VWF Installation Package for Windows](http://download.virtualworldframework.com/files/VWF_Windows_Install.exe) and execute the installation file.
+To install the windows version of Virtual World Framework,Download and run the [Windows Installer](http://download.virtualworldframework.com/files/VWF_Windows_Install.exe) and execute the installation file.
 
 --------------------------
 
-### Mac OS X / Linux Installation
+### Mac OS X / Linux 
 
 NOTE: On Mac OS X, please make sure you have [Xcode Command Line Tools](https://developer.apple.com/xcode/) installed prior to executing the script.
 
-To install the Mac/Linux version of Virtual World Framework, please execute the following command at your terminal/shell prompt:
+Execute the following command at your terminal/shell prompt:
 
     $ curl -kL http://get.virtual.wf  | sh
 
 </div>
 
 <div id="advancedInstall" class="well" markdown="1">
-Core Developer Installation Instructions
+Core Developer Installation 
 ==========================
 --------------------------
 
-These instructions are only required if you are going to be developing VWF core functionality.  If you are going to be developing VWF Applications on top of the framework, please follow the instructions above.
-
-The VWF source code may be forked from [github](https://github.com/virtual-world-framework/vwf) at any time.
+Note: You need only follow these instructions if you plan on developing VWF core functionality (for example, writing or modifying a driver). If instead, you wish to develop VWF Applications on top of the framework, please follow the instructions above.
 
 --------------------------
 <div class="well" markdown="1">
-### Windows Installation
+### Windows 
 
-Please make sure you have the following software packages installed on your Windows machine in order to compile and update Virtual World Framework core source code:
+Please make sure you have the following software packages installed:
 
 Prerequisites:
 
@@ -45,15 +43,16 @@ Prerequisites:
 Once your Ruby and Git environments are set up for Windows, the easiest way to start developing is to:
 
 1. [Fork the VWF repo from the Development Branch](https://github.com/virtual-world-framework/vwf/tree/development)
-2. Download a copy to your local machine from your new forked repo on GitHub.
+2. Clone your newly forked VWF repo to your local machine.
 3. Run *bundle install* to install your local gems.
 3. Make your code modifications.
 4. Compile the code using *bundle exec rake windows* from the command prompt in your VWF folder.
+5. Start your server using *bundle exec thin start* from the command prompt in your VWF folder to test your changes.
 5. Submit a Pull Request after you complete your updates and testing back to the Virtual World Framework Team's VWF repo.
 
 </div>
 <div class="well" markdown="1">
-### Ubuntu/Debian Automatic Installation
+### Ubuntu/Debian Package  
 
 Perform the following shell command at a user shell prompt:
 
@@ -67,7 +66,7 @@ Perform the following shell command at a user shell prompt:
 	sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_redhat.sh | bash -x
 </div>
 <div class="well" markdown="1">
-### Manual Installation on Linux
+### Linux / Mac OS X
  
  
 ### RubyGems
@@ -160,10 +159,8 @@ NodeJS Core Developer Installation
 ==========================
 --------------------------
 
-Virtual World Framework is capable of running on top of NodeJS as an alternative to Ruby Thin server (NodeJS will be our default supported server framework in the near future).  The following steps will allow you to install NodeJS web server if you would like to utilize this server framework now as a VWF core developer.
+As an alternative to the ruby version of the VWF server, there also exists a node.js version (which will soon become the primary supported server). To be on the bleeding edge and use the node.js version of the server now:
 
-
-### Installation Steps
 1. Install Node.js for your specific environment [http://www.nodejs.org](http://www.nodejs.org).
 
 2. You should already have a baseline on your local machine by following the [Core Developer Installation Instructions](http://localhost:3000/web/documentation.html#advancedInstall)
