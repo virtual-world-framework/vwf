@@ -46,14 +46,17 @@ define( [ "module", "vwf/view", "jquery-ui" ], function( module, view, $ ) {
 
             // Create instruction panel
             var instructionPanelDiv = document.createElement('div');
+            instructionPanelDiv.className = 'lesson';
             instructionPanelDiv.id = 'instructionPanel';
 
             // Create instruction accordion
             var accordionDiv = document.createElement('div');
+            accordionDiv.className = 'lesson';
             accordionDiv.id = 'accordion';
 
             // Create lesson progress bar
             var progressDiv = document.createElement('div');
+            progressDiv.className = 'lesson';
             progressDiv.id = 'progress';
 
             var innerProgressDiv = document.createElement('div');
@@ -68,11 +71,14 @@ define( [ "module", "vwf/view", "jquery-ui" ], function( module, view, $ ) {
 
             // Create navigation buttons
             var navigationDiv = document.createElement('div');
+            navigationDiv.className = 'lesson';
             navigationDiv.id = 'navigation';
 
             var buttonList = document.createElement('ul');
+            buttonList.className = 'lesson';
 
             var messageListItem = document.createElement('li');
+            messageListItem.className = 'lesson';
             messageListItem.id = 'message';
 
             var messageListItemLabel = document.createElement('label');
@@ -81,6 +87,7 @@ define( [ "module", "vwf/view", "jquery-ui" ], function( module, view, $ ) {
             $(messageListItem).append(messageListItemLabel);
 
             var startButtonListItem = document.createElement('li');
+            startButtonListItem.className = 'lesson';
             startButtonListItem.id = 'startButton';
 
             var startButtonItemButton = document.createElement('button');
@@ -116,6 +123,7 @@ define( [ "module", "vwf/view", "jquery-ui" ], function( module, view, $ ) {
             // $(previousButtonListItem).append(previousButtonItemButton);
 
             var nextButtonListItem = document.createElement('li');
+            nextButtonListItem.className = 'lesson';
             nextButtonListItem.id = 'nextButton';
 
             var nextButtonItemButton = document.createElement('button');
@@ -133,6 +141,7 @@ define( [ "module", "vwf/view", "jquery-ui" ], function( module, view, $ ) {
             $(nextButtonListItem).append(nextButtonItemButton);
 
             var completeButtonListItem = document.createElement('li');
+            completeButtonListItem.className = 'lesson';
             completeButtonListItem.id = 'completeButton';
 
             var completeButtonItemButton = document.createElement('button');
