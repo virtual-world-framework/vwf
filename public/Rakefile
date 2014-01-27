@@ -88,10 +88,10 @@ task :web do
         end
     end
 
-    # Render the demo page (web/catalog.htm)
+    # Render the demo page (web/catalog.html)
 
-    FileList[ "web/*.htm" ].each do |htm|
-        sh "( cat web/format/preamble ; cat '#{htm}' ; cat web/format/postamble ) > '#{ htm.ext ".html" }'"
+    FileList[ "web/catalog-template.html" ].each do |catalog|
+        sh "( cat web/format/preamble ; cat '#{catalog}' ; cat web/format/postamble ) > 'web/catalog.html'"
     end
 
     # Restore the path.
