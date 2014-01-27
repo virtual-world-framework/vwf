@@ -62,7 +62,7 @@ SectionEnd
 ; Script for VWF installation creation
 
 !define PRODUCT_NAME "Virtual World Framework"
-!define PRODUCT_VERSION "1.0"
+!define PRODUCT_VERSION "0.6"
 !define PRODUCT_PUBLISHER "Lockheed Martin"
 !define PRODUCT_WEB_SITE "http://www.virtualworldframework.com"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
