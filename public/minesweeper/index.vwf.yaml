@@ -607,13 +607,13 @@ scripts:
 
     this.shuffle = function() {
       var tmp, current, top = this.tileMap.length;
-
       if(top) while(--top) {
         current = Math.floor(this.random() * (top + 1));
         tmp = this.tileMap[current];
         this.tileMap[current] = this.tileMap[top];
         this.tileMap[top] = tmp;
       }
+      this.tileMap = this.tileMap;
     }
     
     this.setupGame = function() { 
