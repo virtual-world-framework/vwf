@@ -18,11 +18,12 @@
 		<title>Minesweeper</title>
 		<link href="minesweeper.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript">
-			$(function() {
-				var gameInProgress = vwf.getProperty(vwf.find("", "/")[0], 'gameInProgress');
-				$("a", ".toolstyle").button();
-				$("a", ".toolstyle").button("option", "disabled", gameInProgress);
-			});
+			vwf_view.satProperty = function (nodeID, propertyName, propertyValue) {
+				if(propertyName=="gameInProgress") {
+					$("a", ".toolstyle").button();
+					$("a", ".toolstyle").button("option", "disabled", propertyValue);
+				}
+			};
 			
 			function startGame() {
 				vwf_view.kernel.callMethod(vwf.find("", "/")[0], "startGame");
@@ -45,6 +46,8 @@
 		</div>
 		<script type="text/javascript">
 			$('#wrapper').appendTo('#vwf-root');
+			$("a", ".toolstyle").button();
+			$("a", ".toolstyle").button("option", "disabled", false);
 		</script>
 	</body>
 </html>
