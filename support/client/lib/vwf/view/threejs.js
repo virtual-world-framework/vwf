@@ -19,7 +19,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
     var self;
 
     // Navigation: Private global variables for navigation
-    var appInitialized;
     var navObjectRequested;
     var navObjectName;
     var navmode;
@@ -53,6 +52,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
             self = this;
 
             checkCompatibility.call(this);
+
+            this.state.appInitialized = false;
 
             this.pickInterval = 10;
             this.disableInputs = false;
@@ -122,7 +123,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
             // If the node that was initialized is the application node, find the user's navigation object
             var appID = this.kernel.application();
             if ( childID == appID ) {
-                appInitialized = true;
+                this.state.appInitialized = true;
             } else {
 
                 //TODO: This is a temporary workaround until the callback functionality is implemented for 
@@ -375,7 +376,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
             // We want to only search for the navigation object if we haven't before (!navObjectRequested),
             // and we want to make sure that the app has been initialized, and where not at the brief period of
             // ticking before the app starts loading (appInitialized)
-            if ( !navObjectRequested && appInitialized ) {
+            if ( !navObjectRequested && this.state.appInitialized ) {
                 navObjectRequested = true;
                 findNavObject();
             }
@@ -785,7 +786,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
         var sceneView = this;
         var appID = sceneView.kernel.application( true );
         if ( appID ) {
-            appInitialized = true;
+            this.state.appInitialized = true;
         }
     } // initScene
 
