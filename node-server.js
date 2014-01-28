@@ -21,6 +21,7 @@ function printGeneralHelp() {
 	console.log("");
 	console.log("Options:");
 	console.log("  -a, --applicationPath    Path to VWF application. Default: current directory.");
+	console.log("  -v, --vwfPath            Path to VWF support files. Default: current directory, then \"$HOME/.vwf\".");
 	console.log("  -p                       Port to start server on. Default: 3000");
 	console.log("  -l                       Log level for server. Default: 1");
 	console.log("  -h, --help               Output usage information");
@@ -39,23 +40,6 @@ function printCreateHelp() {
 	console.log("  vwf create ~/code/my-new-app");
 }
 
-// Set the VWF directory where VWF files will be served from. Default to
-// "$HOME/.vwf". If not found at $HOME/.vwf, try the current working
-// directory.
-function parseVWFPath () {
-    var home = ( process.env.HOME || process.env.USERPROFILE );
-    var vwfHome = path.join( home, ".vwf" );
-
-    if ( fs.existsSync( path.join( process.cwd(), "support/client/lib" ) ) ) {
-        return process.cwd();
-    } else if ( fs.existsSync( path.join( vwfHome, "support/client/lib" ) ) ) {
-        return vwfHome;
-    } else {
-        consoleError( "Could not find VWF support files." );
-        return false;
-    }
-}
-global.vwfRoot = parseVWFPath();
 
 if ( argv._[0] == 'create' && argv._.length == 1 ) {
 	console.log("'create' requires a PATH to create the new VWF application.");
