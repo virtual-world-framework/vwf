@@ -81,24 +81,7 @@ if ( argv._[0] == 'create' && argv._.length == 1 ) {
 } else if ( argv._[0] == 'help' && argv._[1] == 'create' ) {
 	printCreateHelp();
 } else if ( argv._[0] == 'help' && argv._[1] == 'run' ) {
-	console.log("Usage:");
-	console.log("  vwf [options]");
-	console.log("  vwf [options] run");
-	console.log("");
-	console.log("The `vwf run` command runs the application in the current directory");
-	console.log("in local development mode.");
-	console.log("");
-	console.log("Example:");
-	console.log("  vwf run -a ~/code/my-new-app -p 5000");
-	console.log("");
-	console.log("Options:");
-	console.log("  -a, --applicationPath    Path to VWF application. Default: current directory.");
-	console.log("  -p                       Port to start server on. Default: 3000");
-	console.log("  -l                       Log level for server. Default: 1");
-	console.log("  -h, --help               Output usage information");
-	console.log("  --ssl                    Enables SSL");
-	console.log("  --key                    Path to private key");
-	console.log("  --cert                   Path to certificate");
+	printGeneralHelp();
 } else if ( argv._[0] == 'help' ) {
 	console.log("VWF can't find help on that command.");
 	console.log("");
