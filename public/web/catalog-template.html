@@ -166,7 +166,7 @@
           innerSessionDivElement.className = 'overlay';
 
           var instancesDivElement = document.createElement('div');
-          instancesDivElement.id = name + 'instances';
+          instancesDivElement.id = name.replace(/\//g,'') + 'instances';
 
           var scriptElement = document.createElement('script');
           scriptElement.type = 'text/javascript';
