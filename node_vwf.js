@@ -121,7 +121,8 @@ function startVWF() {
     }
 
     global.applicationRoot = parseApplicationPath();
-
+debugger;
+    var ssl = ( argv.s  || argv.ssl );
     var sslOptions = {
         key: argv.key ? fs.readFileSync( argv.key ) : undefined,
         cert: argv.cert ? fs.readFileSync( argv.cert ) : undefined
@@ -129,7 +130,7 @@ function startVWF() {
 
     //create the server
     var port = ( argv.p ? parseInt( argv.p ) : 3000 );
-    var srv = argv.ssl ? https.createServer( sslOptions, OnRequest ).listen( port ) : http.createServer( OnRequest ).listen( port );
+    var srv = ssl ? https.createServer( sslOptions, OnRequest ).listen( port ) : http.createServer( OnRequest ).listen( port );
     consoleNotice( 'Serving on port ' + port );
 
     //create socket server

@@ -25,7 +25,7 @@ function printGeneralHelp() {
 	console.log("  -p                       Port to start server on. Default: 3000");
 	console.log("  -l                       Log level for server. Default: 1");
 	console.log("  -h, --help               Output usage information");
-	console.log("  --ssl                    Enables SSL");
+	console.log("  -s, --ssl                Enables SSL");
 	console.log("  --key                    Path to private key");
 	console.log("  --cert                   Path to certificate");
 }
