@@ -24,7 +24,7 @@ Object.keys(servers).forEach(function(server) {
     var port = servers[server];
     var serverAddress = 'http://localhost:' + port;
 
-    casper.test.begin('Testing a VWF application with the ' + server + ' server', 31, function suite(test) {
+    casper.test.begin('Testing a VWF application with the ' + server + ' server', 43, function suite(test) {
 
         //--------------//
         // Applications //
@@ -104,18 +104,13 @@ Object.keys(servers).forEach(function(server) {
 
         casper.thenOpen(serverAddress + '/duck/admin/config', function() {
             casper.echo("Loading '/duck/admin/config'", 'INFO');
-            this.wait(1000, function() {
-                test.assertHttpStatus(200, 'Retrieves the config file');
-                test.assertTextExists("VWF Duck Application", 'Parses the config file');
-
-            });
+            test.assertHttpStatus(200, 'Retrieves the config file');
+            test.assertTextExists("VWF Duck Application", 'Parses the config file');
         });
 
         casper.thenOpen(serverAddress + '/duck/', function() {
-            this.wait(1000, function() {
-                casper.echo("Loading '/duck/'", 'INFO');
-                test.assertTitle('VWF Duck Application', 'Sets the title from the config file');
-            });               
+            casper.echo("Loading '/duck/'", 'INFO');
+            test.assertTitle('VWF Duck Application', 'Sets the title from the config file');               
         });
 
         //------------//
@@ -136,6 +131,44 @@ Object.keys(servers).forEach(function(server) {
 
         // TODO: Not sure why, but this test fails. Fails to load vwf.js.
         // casper.thenOpen(serverAddress + '/test/component.vwf/0000000000000000/', loadsComponent);
+
+        //--------------------------------//
+        // Driver specific url parameters //
+        //--------------------------------//
+
+        casper.thenOpen(serverAddress + '/duck?threejs#!threejs', function() {
+            loadsApplication('/duck?threejs#!threejs');
+        });
+
+        casper.thenOpen(serverAddress + '/duck/?threejs#!threejs', function() {
+            loadsApplication('/duck/?threejs#!threejs');
+        });
+
+        casper.thenOpen(serverAddress + '/duck/0000000000000000?threejs#!threejs', function() {
+            loadsApplication('/duck/0000000000000000?threejs#!threejs');
+        });
+
+        // TODO: Not sure why, but this test fails. Fails to load vwf.js.
+        // casper.thenOpen(serverAddress + '/duck/0000000000000000/', loadsApplication);
+
+        casper.thenOpen(serverAddress + '/duck/index.vwf?threejs#!threejs', function() {
+            loadsApplication('/duck/index.vwf?threejs#!threejs');
+        });
+
+        casper.thenOpen(serverAddress + '/duck/index.vwf/?threejs#!threejs', function() {
+            loadsApplication('/duck/index.vwf/?threejs#!threejs');
+        });
+
+        casper.thenOpen(serverAddress + '/duck/index.vwf/0000000000000000?threejs#!threejs', function() {
+            loadsApplication('/duck/index.vwf/0000000000000000?threejs#!threejs');
+        });
+
+
+
+
+
+
+
 
         casper.run(function() {
             casper.echo('Finished testing the ' + server + ' server.\n', "INFO");
