@@ -734,8 +734,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 localPickNormal = goog.vec.Vec3.normalize( localPickNormal, goog.vec.Vec3.create() );
                 if ( sceneView.state.nodes[ pointerPickID ] ) {
                     var pickObj = sceneView.state.nodes[ pointerPickID ];
-                    if ( pickObj.threeObject.worldMatrix ) {
-                        worldTransform = goog.vec.Mat4.createFromArray( pickObj.threeObject.worldMatrix.elements );
+                    if ( pickObj.threeObject.matrixWorld ) {
+                        worldTransform = goog.vec.Mat4.createFromArray( pickObj.threeObject.matrixWorld.elements );
                     } else {
                         worldTransform = goog.vec.Mat4.createFromArray( getWorldTransform( pickObj ).elements );
                     } 
