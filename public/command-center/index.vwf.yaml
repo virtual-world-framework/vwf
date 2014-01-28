@@ -1,9 +1,16 @@
 # Copyright 2012 United States Government, as represented by Joint Staff – J7
 
 --- 
-extends: http://vwf.example.com/navscene.vwf
+extends: http://vwf.example.com/scene.vwf
 properties:
   ambientColor: [ 250, 250, 250 ]
+  usersShareView: false
+  userObject:
+    extends: http://vwf.example.com/node3.vwf
+    implements: [ "http://vwf.example.com/navigable.vwf" ]
+    children:     
+      camera:
+        extends: http://vwf.example.com/camera.vwf
 methods:
   initializeCamera:
 children:
@@ -441,6 +448,6 @@ scripts:
 
   this.initializeCamera = function() {
     this.camera.near = 1;
-    this.camera.translation = [ -296.55, -118.78, 70.80 ]; 
-    this.camera.rotation = [0,0,-1,19.261152267456055];
+    this.camera.translation = [ -300, -120, 70 ]; 
+    this.camera.rotation = [ 0, 0, -1, 20 ];
   }//@ sourceURL=index.vwf
