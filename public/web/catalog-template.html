@@ -1,0 +1,300 @@
+    <!-- CURRENT SESSION UPDATE SCRIPT -->
+    <script type='text/javascript'>
+      function showInfo(app, query) {
+        function update(app) {
+          var instances$ = $('#'+ app.replace(/\//g,'') + 'instances');
+          var match;
+          jQuery.getJSON( "../" + app + "/admin/instances", function( data ) {
+            instances$.empty();
+            if ( Object.keys(data).length != 0 ) {
+              instances$.html("<p><b>Current Sessions</b></p>");
+            }
+            jQuery.each( 
+              data, function( key, value ) {
+                if ( match = /* assignment! */ key.match( RegExp( "/([^/]*)$" ) ) ) { 
+                  var instanceHTML = htmlEscape( match[1] );
+                  var size = Object.size(value.clients); 
+                  instances$.append("<table style='width:75%;'><tr><td style='width:10%;'><span class='badge badge-success'>" + size + "</span>"+"</td><td style='width:60%;'>Name: " + instanceHTML + "</td><td style='text-align:right;width:30%;'><a class='btn btn-success btn-small' target='_blank' href='../" + app + "/" + instanceHTML + ( query || "" ) + "'>Join Session</a>" + "</td></tr></table>" );
+                }
+              } );
+            setTimeout(update, 60000, app);
+          } );    
+        }
+        update(app);
+      }
+
+      // From http://stackoverflow.com/a/7124052
+      function htmlEscape( string ) {
+        return String( string ).
+          replace( /&/g, "&amp;" ).
+          replace( /"/g, "&quot;" ).
+          replace( /'/g, "&#39;" ).
+          replace( /</g, "&lt;" ).
+          replace( />/g, "&gt;" );
+      }
+
+      Object.size = function(obj) { 
+        var size = 0, key; 
+        for (key in obj) { 
+          if (obj.hasOwnProperty(key)) size++; 
+        } 
+        return size; 
+      }; 
+    </script>
+    <!-- END CURRENT SESSION UPDATE SCRIPT -->
+
+    <h1>Demos</h1>
+    <hr class="section-title"/>
+
+    <div id="demoDiv"></div>
+
+    <script type='text/javascript'>
+      var demos = [
+        {
+          name: 'sandbox',
+          description: '<a target="_blank" href="http://www.adlnet.gov/">Advanced Distributed Learning\'s (ADL)</a> sandbox app allows the user to create and edit their own environment. Be sure to check out some of the demo environments - you can reach them from the "Visit an Existing World" button.', 
+          hyperlink: 'http://vwf.adlnet.gov/adl/sandbox/',
+          logo: 'images/gallery.sandbox.png',
+          core: false
+        },
+        {
+          name: 'kimray',
+          description: 'The Kimray valve app, built for the <a target="_blank" href="http://www.nmjc.edu/">New Mexico Junior College</a>, is a live 3D Immersive Maintenance Demonstration built on top of VWF to demonstrate the capabilities of Remote Subject Matter Experts interacting with a student using a shared real-time lesson workspace. This app uses WebRTC to deliver real-time video and voice over IP without any browser plugins. ', 
+          hyperlink: 'https://ec2-54-226-9-164.compute-1.amazonaws.com/kimray/',
+          logo: 'images/gallery.kimray.png',
+          core: false
+        },
+        {
+          name: 'bzflag',
+          description: 'The bzflag app is VWF\'s version of the classic arcade game. Use the WASD keys to move and the Enter key to fire your laser cannon. Use the chat feature to communicate and taunt your opponents, but most of all look out for opposing tanks!', 
+          hyperlink: '../bzflag',
+          logo: '../bzflag/index.vwf.catalog.png',
+          core: true
+        },
+        {
+          name: 'humvee-lesson',
+          description: 'Using the VWF lesson configuration and interface, the humvee lesson app walks the user through the process of starting and driving the humvee.', 
+          hyperlink: '../humvee-lesson',
+          logo: '../humvee-lesson/index.vwf.catalog.png',
+          core: true
+        },
+        {
+          name: 'radio-lesson',
+          description: 'The radio lesson app uses VWF\'s lesson interface to walk a user through the basic operations of the radio.', 
+          hyperlink: '../radio-lesson',
+          logo: '../radio-lesson/index.vwf.catalog.png',
+          core: true
+        },
+        {
+          name: 'agi/cesium',
+          description: '<a target="_blank" href="http://www.agi.com/">Analytical Graphics, Inc\'s (AGI)</a> Cesium is a web-based globe and map engine for visualizing dynamic data. This demo app allows a user to have synchronized camera views across multiple clients. Pressing the "R" key will reset the synchronized views across all instances.', 
+          hyperlink: '../agi/cesium#!cesium',
+          logo: '../agi/cesium/index.vwf.catalog.jpg',
+          core: true
+        },
+        {
+          name: 'minesweeper',
+          description: 'VWF\'s take on the classic Minesweeper game. Click tiles to turn them over and see the number of neighboring mines. Unveiling all numbers wins the game - select the wrong tile and it\'s game over.', 
+          hyperlink: '../minesweeper',
+          logo: '../minesweeper/index.vwf.catalog.png',
+          core: true
+        },
+        {
+          name: 'tile-puzzle-2D',
+          description: 'Apps don\'t have to be 3D! The 2D tile puzzle is an example of a VWF app that does not use 3D graphics or models. Play by clicking on a tile to move it to the open space.', 
+          hyperlink: '../tile-puzzle-2D',
+          logo: '../tile-puzzle-2D/index.vwf.catalog.png',
+          core: true
+        }
+      ];
+
+      for ( var i = 0; i < demos.length; i++ ) {
+        addDemoEntry( demos[i].name, demos[i].description, demos[i].hyperlink, demos[i].logo, demos[i].core );
+      }
+
+      function addDemoEntry( name, description, hyperlink, logo, partOfCore ) {
+        var demoDivElement = document.createElement('div');
+        demoDivElement.className = 'demo-entry';
+
+        var tableElement = document.createElement('table');
+        tableElement.className = 'table table-striped';
+
+        var trElement = document.createElement('tr');
+
+        var col1Element = document.createElement('td');
+        col1Element.className = 'demo-entry-col1';
+
+        var linkElement = document.createElement('a');
+        linkElement.href = hyperlink;
+        linkElement.target = '_blank';
+
+        var logoElement = document.createElement('img');
+        logoElement.src = logo;
+        logoElement.alt = name;
+
+        $(linkElement).append(logoElement);
+        $(col1Element).append(linkElement);
+
+        var col2Element = document.createElement('td');
+        col2Element.className = 'demo-entry-col2';
+
+        var nameElement = document.createElement('h3');
+        nameElement.innerHTML = name;
+
+        var launchElement = document.createElement('a');
+        launchElement.className = 'session-btn btn btn-info btn-small';
+        launchElement.target = '_blank';
+        launchElement.href = hyperlink;
+        launchElement.innerHTML = 'Launch New Session';
+
+        $(col2Element).append(nameElement);
+        $(col2Element).append(launchElement);
+        $(col2Element).append(document.createElement('br'));
+        $(col2Element).append(document.createElement('hr'));
+
+        var descElement = document.createElement('p');
+        descElement.innerHTML = description;
+        $(col2Element).append(descElement);
+        $(col2Element).append(document.createElement('br'));
+
+        if ( partOfCore ) {
+          var currentSessionDivElement = document.createElement('div');
+          currentSessionDivElement.id = name + '-content';
+          currentSessionDivElement.className = 'overlayContent';
+
+          var innerSessionDivElement = document.createElement('div');
+          innerSessionDivElement.className = 'overlay';
+
+          var instancesDivElement = document.createElement('div');
+          instancesDivElement.id = name.replace(/\//g,'') + 'instances';
+
+          var scriptElement = document.createElement('script');
+          scriptElement.type = 'text/javascript';
+          scriptElement.innerHTML = "$(document.getElementById('" + name + "instances')).ready(showInfo('" + name + "', ''));";
+
+          $(innerSessionDivElement).append(instancesDivElement);
+          $(innerSessionDivElement).append(scriptElement);
+          $(currentSessionDivElement).append(innerSessionDivElement);
+          $(col2Element).append(currentSessionDivElement);
+        }
+
+        $(trElement).append(col1Element);
+        $(trElement).append(col2Element);
+        $(tableElement).append(trElement);
+        $(demoDivElement).append(tableElement);
+        $('#demoDiv').append(demoDivElement);
+      }
+    </script>
+
+
+
+    <!-- BEGIN WHO'S USING VWF SECTION -->
+
+    <hr class="section-title"/>
+    <h1>Who's Using VWF</h1>
+    <hr class="section-title"/>
+
+    <div id="organizationDiv"></div>
+
+    <script type='text/javascript'>
+      // Awaiting approval for CESI, Lively, and ZShift. Uncomment when permission obtained.
+      var organizations = [
+        {
+          name: 'Advanced Distributed Learning',
+          description: '<a target="_blank" href="http://www.adlnet.gov/">Advanced Distributed Learning (ADL)</a> has utilized VWF to create a sandbox app that allows the user to create a world directly in the browser. The ADL server allows for persistent worlds that can be shared with others over time. Check out their sandbox app above.', 
+          hyperlink: 'http://www.adlnet.gov/',
+          logo: 'images/gallery.adl.png'
+        },
+        {
+          name: 'Analytical Graphics, Inc.',
+          description: '<a target="_blank" href="http://www.agi.com/">Analytical Graphics, Inc. (AGI)</a> provides COTS software to national security and space professionals for integrated analysis and visualization of land, sea, air, and space assets. AGI has integrated Cesium, their WebGL-based virtual globe, with the framework. Check out their cesium app above.', 
+          hyperlink: 'http://www.agi.com/',
+          logo: 'images/gallery.agi.jpg'
+        },
+        // {
+        //   name: 'Cole Engineering Services, Inc.',
+        //   description: '<a target="_blank" href="http://www.coleengineering.com/">Cole Engineering Services, Inc. (CESI)</a> has integrated VWF with JBUS and the EDGE platform. ', 
+        //   hyperlink: 'http://www.coleengineering.com/',
+        //   logo: 'images/gallery.cesi.png'
+        // },
+        {
+          name: 'Joint Staff J7',
+          description: 'The <a target="_blank" href="http://www.jcs.mil/page.aspx?id=22">Joint Staff J7 (JS J7)</a> supports the joint warfighter through Joint Force Development in order to advance the operational effectiveness of the current and future joint force. JS J7 is using VWF to create a virtual joint operations center to support their traditional joint collective training responsibilities and improve learning and execution across the broader training spectrum - to include enhancing individual joint training and infusing unit home-station training with joint and coalition context.', 
+          hyperlink: 'http://www.jcs.mil/page.aspx?id=22',
+          logo: 'images/gallery.j7.png'
+        },
+        // {
+        //   name: 'Lively Kernel',
+        //   description: '<a target="_blank" href="http://lively-kernel.org/">Lively Kernel</a>, a new approach to web programming, provides a complete platform for web apps, including dynamic graphics, network access, and development tools. Lively and VWF have teamed up to explore integration between the two architectures. Current exploration and further information can be found on <a target="_blank" href="https://github.com/virtual-world-framework/vwf/tree/branch/morph">GitHub</a>. ', 
+        //   hyperlink: 'http://lively-kernel.org/',
+        //   logo: 'images/gallery.lively.png'
+        // },
+        {
+          name: 'Lockheed Martin',
+          description: '<a target="_blank" href="http://www.lockheedmartin.com/">Lockheed Martin</a> is developing VWF apps for maintenance and task training in domains such as Defense, Marine, and Energy. ', 
+          hyperlink: 'http://www.lockheedmartin.com/',
+          logo: 'images/gallery.lockheed.png'
+        },
+        {
+          name: 'New Mexico Junior College',
+          description: '<a target="_blank" href="http://www.nmjc.edu/">New Mexico Junior College (NMJC)</a> is leveraging the remote collaboration nature of the framework, creating maintenance training apps that support real time interactions with instructors. Check out their Kimray Valve app above.  ', 
+          hyperlink: 'http://www.nmjc.edu/',
+          logo: 'images/gallery.nmjc.png'
+        },
+        // {
+        //   name: 'Z Shift',
+        //   description: '<a target="_blank" href="http://www.zshiftgroup.com/">Z Shift</a> is developing VWF apps for a virtual command center in correlation with JS J7. ', 
+        //   hyperlink: 'http://www.zshiftgroup.com/',
+        //   logo: 'images/gallery.zshift.png'
+        // }
+      ];
+
+      for ( var i = 0; i < organizations.length; i++ ) {
+        addOrganizationEntry( organizations[i].name, organizations[i].description, organizations[i].hyperlink, organizations[i].logo );
+      }
+
+      function addOrganizationEntry( name, description, hyperlink, logo ) {
+        var orgDivElement = document.createElement('div');
+        orgDivElement.className = 'demo-entry';
+
+        var tableElement = document.createElement('table');
+        tableElement.className = 'table table-striped';
+
+        var trElement = document.createElement('tr');
+
+        var col1Element = document.createElement('td');
+        col1Element.className = 'demo-entry-col1';
+
+        var linkElement = document.createElement('a');
+        linkElement.href = hyperlink;
+        linkElement.target = '_blank';
+
+        var logoElement = document.createElement('img');
+        logoElement.src = logo;
+        logoElement.alt = name;
+
+        $(linkElement).append(logoElement);
+        $(col1Element).append(linkElement);
+
+        var col2Element = document.createElement('td');
+        col2Element.className = 'demo-entry-col2';
+
+        var nameElement = document.createElement('h3');
+        nameElement.innerHTML = name;
+
+        $(col2Element).append(nameElement);
+        $(col2Element).append(document.createElement('br'));
+        $(col2Element).append(document.createElement('hr'));
+
+        var descElement = document.createElement('p');
+        descElement.innerHTML = description;
+        $(col2Element).append(descElement);
+        $(col2Element).append(document.createElement('br'));
+
+        $(trElement).append(col1Element);
+        $(trElement).append(col2Element);
+        $(tableElement).append(trElement);
+        $(orgDivElement).append(tableElement);
+        $('#organizationDiv').append(orgDivElement);
+      }
+    </script>
