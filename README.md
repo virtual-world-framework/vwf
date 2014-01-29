@@ -21,7 +21,7 @@ This command may be re-run to upgrade the installation to the latest version of 
 
 **Install on Windows**
 
-- Download and run the [VWF Windows Installer](http://download.virtualworldframework.com/files/VWF_Windows_Install.exe) and run the executable.
+- Download and run the [VWF Windows Installer](http://download.virtualworldframework.com/files/VWF_Windows_Install.exe).
 
 For more complex installations, such as working on VWF core, please see our [Installation Instructions](http://www.virtual.wf/web/docs/install.html).
 
