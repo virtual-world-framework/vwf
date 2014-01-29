@@ -120,8 +120,8 @@ function startVWF() {
         consoleNotice( 'server cache disabled' );
     }
 
-    global.applicationRoot = parseApplicationPath();
-debugger;
+    global.applicationRoot = parseApplicationPath( );
+
     var ssl = ( argv.s  || argv.ssl );
     var sslOptions = {
         key: argv.key ? fs.readFileSync( argv.key ) : undefined,
