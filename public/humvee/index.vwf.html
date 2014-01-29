@@ -18,16 +18,20 @@
     <link href="humvee.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript">
 
-      $(function() {
-        var camera = vwf.getProperty(vwf.find("", "/")[0], "activeCamera");
-        if(camera == vwf.find("", "/camera")[0]) {
-          $("#exterior").attr("checked", true);
+    vwf_view.initializedProperty = function (nodeID, propertyName, propertyValue) {
+        vwf_view.satProperty(nodeID, propertyName, propertyValue);
+      };
+
+    vwf_view.satProperty = function (nodeID, propertyName, propertyValue) {
+        if(propertyName == "activeCamera") {
+          if(propertyValue == vwf.find("", "/camera")[0]) {
+            $("#exterior").prop("checked", true).button("refresh");
+          }
+          else {
+            $("#interior").prop("checked", true).button("refresh");
+          }
         }
-        else {
-          $("#interior").attr("checked", true);
-        }
-        $("#toolbar").buttonset();
-      });
+      };
 
       function changeCameraLocation(location) {
         vwf_view.kernel.callMethod(vwf.find("", "/")[0], "switchCameraView", [location]);
@@ -35,11 +39,6 @@
 
       vwf_view.calledMethod = function (nodeId, methodName, methodParameters, methodValue) {
         switch(methodName) {
-          case "switchCameraView":
-            $("#" + methodParameters[0]).attr("checked", true);
-            $("#exterior").button("refresh");
-            $("#interior").button("refresh");
-            break;
           case "honkHorn":
             $('#honk')[0].load();
             $('#honk')[0].play();
@@ -56,7 +55,7 @@
   <body>
     <div id='wrapper' style='width:99%;position:absolute;bottom:30px;pointer-events:none'>
       <div id="toolbar" class="toolstyle">
-        <input type="radio" id="exterior" name="cameraSetting" checked="checked" onclick="changeCameraLocation('exterior')" /><label for="exterior">Exterior</label>
+        <input type="radio" id="exterior" name="cameraSetting" onclick="changeCameraLocation('exterior')" /><label for="exterior">Exterior</label>
         <input type="radio" id="interior" name="cameraSetting" onclick="changeCameraLocation('interior')"/><label for="interior">Interior</label>
       </div>
     </div>
@@ -68,6 +67,8 @@
     </audio>
     <script type="text/javascript">
       $('#wrapper').appendTo('#vwf-root');
+      $("#toolbar").buttonset();
+      $("#exterior").prop("checked", true).button("refresh");
     </script>
   </body>
 </html>

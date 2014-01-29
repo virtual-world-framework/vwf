@@ -140,27 +140,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // -- initializedProperty ----------------------------------------------------------------------
 
         initializedProperty: function ( nodeID, propertyName, propertyValue ) { 
-            if ( propertyName == "transform" ) {
-                receiveModelTransformChanges( nodeID, propertyValue );
-            } else if ( propertyName == "lookAt") {
-
-                var node = this.state.nodes[ nodeID ];
-
-                // If the state knows about the node, it is in the scene and should be updated
-                // Otherwise, it is a prototype and can be ignored
-                if ( node ) {
-                    nodeLookAt( node );
-                }
-            } else if ( ( nodeID == this.kernel.application() ) && 
-                        ( propertyName == "makeOwnAvatarVisible" ) ) {
-                makeOwnAvatarVisible = propertyValue;
-                if ( navObject ) {
-                    setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
-                }
-            } else if ( ( nodeID == this.kernel.application() ) &&
-                        ( propertyName == "boundingBox" ) ) {
-                boundingBox = propertyValue;
-            }
+            this.satProperty(nodeID, propertyName, propertyValue);
         },
 
         // TODO: deletedProperty
@@ -168,7 +148,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // -- satProperty ------------------------------------------------------------------------------
 
         satProperty: function ( nodeID, propertyName, propertyValue ) { 
-            
             // If this is this user's navObject, pay attention to changes in navmode, translationSpeed, and 
             // rotationSpeed
             if ( navObject && ( nodeID == navObject.ID ) ) {
@@ -191,6 +170,19 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             } else if ( ( nodeID == this.kernel.application() ) &&
                         ( propertyName == "boundingBox" ) ) {
                 boundingBox = propertyValue;
+            } else if ( ( nodeID == this.kernel.application() ) &&
+                        ( propertyName == "activeCamera" ) ) {
+                if( this.state.scenes[this.state.sceneRootID].camera.threeJScameras[propertyValue] )
+                {
+                    // If the view is currently using the model's activeCamera, update it to the new activeCamera
+                    var sceneRootID = this.state.sceneRootID;
+                    var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
+                    if ( !this.state.cameraInUse || this.state.cameraInUse == modelCameraInfo.threeJScameras[ modelCameraInfo.ID ] )
+                        this.state.cameraInUse = modelCameraInfo.threeJScameras[ propertyValue ];
+                    
+                    // Update the model's activeCamera
+                    this.state.scenes[ sceneRootID ].camera.ID = propertyValue;
+                }
             }
 
             // Pay attention to these properties for all nodes
@@ -2713,16 +2705,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             setVisibleRecursively( navObject.threeObject, false );
         }
 
-        // Search for a camera in the navigation object and if it exists, make it active
-        var cameraIds = self.kernel.find( navObject.ID, 
-                                          "descendant-or-self::element(*,'http://vwf.example.com/camera.vwf')" );
-        if ( cameraIds.length ) {
+        if(!self.state.cameraInUse) {
+            // Search for a camera in the navigation object and if it exists, make it active
+            var cameraIds = self.kernel.find( navObject.ID, 
+                                              "descendant-or-self::element(*,'http://vwf.example.com/camera.vwf')" );
+            if ( cameraIds.length ) {
 
-            // Set the view's active camera
-            var rendererState = self.state;
-            var cameraId = cameraIds[ 0 ];
-            cameraNode = rendererState.nodes[ cameraId ];
-            rendererState.cameraInUse = cameraNode.threeObject;
+                // Set the view's active camera
+                var rendererState = self.state;
+                var cameraId = cameraIds[ 0 ];
+                cameraNode = rendererState.nodes[ cameraId ];
+                rendererState.cameraInUse = cameraNode.threeObject;
+            }
         }
 
         // Pull the initial pitch, yaw, and translation out of the navObject's transform
