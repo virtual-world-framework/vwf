@@ -501,18 +501,16 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     
             case "execute":
 
-                return function( nodeID, scriptText, scriptType, when, callback ) {
+                return function( nodeID, scriptText, scriptType, when, callback /* result */ ) {
 
                     if ( this.state.enabled ) {
 
                         if ( when === undefined ) {
                             if ( this.state.asyncs ) {
-                                callback = this.state.asyncs.defer( callback /* nodeID */ );
+                                callback = this.state.asyncs.defer( callback /* result */ );
                             }
-                            return this.kernel[ kernelFunctionName ]( nodeID, scriptText, 
-                                                                      scriptType,
-                                                                      function( nodeID ) {
-                                callback && callback( nodeID );
+                            return this.kernel[kernelFunctionName]( nodeID, scriptText, scriptType, function( result ) {
+                                callback && callback( result );
                             } );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, undefined,

@@ -3311,7 +3311,7 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.execute}
 
-        this.execute = function( nodeID, scriptText, scriptType, callback_async ) {
+        this.execute = function( nodeID, scriptText, scriptType, callback_async /* result */ ) {
 
             this.logger.debuggx( "execute", function() {
                 return [ nodeID, ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType ];  // TODO: loggableScript()
@@ -3345,7 +3345,7 @@ if ( ! childComponent.source ) {
                 } );
 
             }, function() {
-                callback_async && callback_async();
+                callback_async && callback_async( scriptValue );
             } );
 
             vwf.logger.debugu();

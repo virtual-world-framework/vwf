@@ -64,11 +64,12 @@ define( function() {
         ///   Nodes won't necessarily arrive in numerical order since varying dependencies cause
         ///   nodes to become ready at indeterminate times.
         /// @param {String} childName
+        /// @param {module:vwf/api/model~readyCallback} callback
         /// 
         /// @returns {}
 
         initializingNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType,
-            childIndex, childName */ ],
+            childIndex, childName, callback( ready ) */ ],
 
         /// Description.
         /// 
