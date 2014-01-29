@@ -5,7 +5,7 @@ App Developer Installation
 
 ### Windows 
 
-To install the windows version of Virtual World Framework,Download and run the [Windows Installer](http://download.virtualworldframework.com/files/VWF_Windows_Install.exe) and execute the installation file.
+Download and run the [VWF Windows Installer](http://download.virtualworldframework.com/files/VWF_Windows_Install.exe).
 
 Launch a command prompt window and create a new VWF application folder:
 
