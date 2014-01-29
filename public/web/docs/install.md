@@ -11,10 +11,10 @@ Launch a command prompt window and create a new VWF application folder:
 
     c:\> vwf create MyApp
 
-Change into your new application folder, and start the Node JS server.
+Change into your new application folder and start the  server.
 
     c:\> cd MyApp
-	c:\MyApp> vwf
+    c:\MyApp> vwf
 
 --------------------------
 
@@ -30,10 +30,10 @@ Launch a command prompt window and create a new VWF application folder:
 
     /home/user# vwf create MyApp
 
-Change into your new application folder, and start the Node JS server.
+Change into your new application folder, and start the server.
 
     /home/user# cd MyApp
-	/home/user/MyApp# vwf
+    /home/user/MyApp# vwf
 
 </div>
 
