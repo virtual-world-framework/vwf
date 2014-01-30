@@ -361,31 +361,6 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
         return clientNode;
     }
 
-    function setBandwidth(sdp) {
-
-        // apparently this only works in chrome
-        if ( this.bandwidth === undefined || moz ) {
-            return sdp;
-        }
-
-        // remove existing bandwidth lines
-        sdp = sdp.replace(/b=AS([^\r\n]+\r\n)/g, '');
-        
-        if ( this.bandwidth.audio ) {
-            sdp = sdp.replace(/a=mid:audio\r\n/g, 'a=mid:audio\r\nb=AS:' + this.bandwidth.audio + '\r\n');
-        }
-
-        if ( this.bandwidth.video ) {
-            sdp = sdp.replace(/a=mid:video\r\n/g, 'a=mid:video\r\nb=AS:' + this.bandwidth.video + '\r\n');
-        }
-
-        if ( this.bandwidth.data /*&& !options.preferSCTP */ ) {
-            sdp = sdp.replace(/a=mid:data\r\n/g, 'a=mid:data\r\nb=AS:' + this.bandwidth.data + '\r\n');
-        }
-        return sdp;
-    }
-
-
     function displayLocal( stream, name, color ) {
         var id = this.kernel.moniker();
         return displayVideo.call( this, id, stream, this.local.url, name, id, true, color );
@@ -850,6 +825,30 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
             this.pc.createOffer( offerer, null, constraints );
         };
+
+        this.setBandwidth = function( sdp ) {
+
+            // apparently this only works in chrome
+            if ( this.bandwidth === undefined || moz ) {
+                return sdp;
+            }
+
+            // remove existing bandwidth lines
+            sdp = sdp.replace(/b=AS([^\r\n]+\r\n)/g, '');
+            
+            if ( this.bandwidth.audio ) {
+                sdp = sdp.replace(/a=mid:audio\r\n/g, 'a=mid:audio\r\nb=AS:' + this.bandwidth.audio + '\r\n');
+            }
+
+            if ( this.bandwidth.video ) {
+                sdp = sdp.replace(/a=mid:video\r\n/g, 'a=mid:video\r\nb=AS:' + this.bandwidth.video + '\r\n');
+            }
+
+            if ( this.bandwidth.data /*&& !options.preferSCTP */ ) {
+                sdp = sdp.replace(/a=mid:data\r\n/g, 'a=mid:data\r\nb=AS:' + this.bandwidth.data + '\r\n');
+            }
+            return sdp;
+        }
 
         this.getStats = function(){
           if ( this.pc && this.pc.getStats ) {
