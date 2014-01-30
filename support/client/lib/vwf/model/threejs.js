@@ -1740,9 +1740,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
         ticking: function( vwfTime ) {
             if ( this.state.appInitialized && checkLights ) {
-                if ( lightCount.call( this ) == 0 ) {
-                    createDefaultLighting.call( this );
+                
+                var lightsInScene;
+                // temp code for testing
+                if ( this.state.scenes[ this.kernel.application() ] ) {
+                    var scene = this.state.scenes[ this.kernel.application() ];
+                    if ( scene.threeScene ) {
+                        lightsInScene = sceneLights.call( this, scene.threeScene );
+                    }
                 }
+
+                createDefaultLighting.call( this, lightsInScene );
                 checkLights = false;    
             }
         }
@@ -2052,6 +2060,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         }
         return list;    
     }
+
+    function findAllLights( threeObject, list ) {
+        
+        if(!threeObject) return;
+        if(!list) list = [];
+        if ( threeObject instanceof THREE.DirectionalLight ||
+             threeObject instanceof THREE.SpotLight ||
+             threeObject instanceof THREE.PointLight ||
+             threeObject instanceof THREE.AmbientLight ) {
+            list.push( threeObject );
+        }
+        if( threeObject.children ) {
+            for ( var i = 0; i < threeObject.children.length; i++) {
+                findAllLights( threeObject.children[ i ], list );
+            }
+        }
+        return list;    
+    }    
     
     function getMeshVertexIndices(mesh)
     {
@@ -2503,7 +2529,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             nodeCopy.threeObject.animatedMesh = animatedMesh;
             nodeCopy.threeObject.updateMatrixWorld();
             
-            removeAmbientLights.call(this, nodeCopy.threeObject);
+            removeAmbientLights.call( this, nodeCopy.threeObject );
 
             parentObject3.add( nodeCopy.threeObject );
             nodeCopy.threeObject.name = childName;
@@ -2818,7 +2844,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
     }
     function createLight( nodeID, childID, childName ) {
 
-        //debugger;
         var child = this.state.nodes[childID];
         if ( child ) {
             child.threeObject = new THREE.DirectionalLight('FFFFFF',1,0);
@@ -3691,42 +3716,76 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         return ret;
     }
 
-    function lightCount() {
-        var count = 0;
-        for ( var id in this.state.lights ) {
-            count++;
-        }
-        return count;
+    function sceneLights( scene ) {
+       var lights = {   "ambientLights": [], 
+                        "directionalLights": [],
+                        "spotLights": [],
+                        "pointLights": []
+                     }; 
+
+        if ( scene ) {
+            var lightList = [];
+            lightList = findAllLights( scene, lightList );
+            for ( var i = 0; i < lightList.length; i++ ) {
+                if ( lightList[ i ] instanceof THREE.AmbientLight ) {
+                    lights.ambientLights.push( lightList[ i ] );
+                } else if ( lightList[ i ] instanceof THREE.DirectionalLight ) {
+                    lights.directionalLights.push( lightList[ i ] );
+                } else if ( lightList[ i ] instanceof THREE.SpotLight ) {
+                    lights.spotLights.push( lightList[ i ] );
+                } else if ( lightList[ i ] instanceof THREE.PointLight ) {
+                    lights.pointLights.push( lightList[ i ] );
+                }
+            }
+
+        } 
+        return lights;        
     }
-    function createDefaultLighting() {
+
+    function createDefaultLighting( lights ) {
         var sceneID = this.kernel.application();
-        var light1 = {
-            "extends": "http://vwf.example.com/light.vwf",
-            "properties": {
-              "lightType": "point",
-              "enable": true,
-              "distance": 2000,
-              "intensity": 2,
-              "color": [ 128, 128, 128 ],
-              "translation": [ -400, 400, -900 ]
-            }
-        }
-        this.kernel.createChild( sceneID, "DirectionalLight1", light1 );
+        var ambientCount = lights.ambientLights.length;
+        var lightCount = lights.spotLights.length + lights.directionalLights.length + lights.pointLights.length;
+        
+        //console.info( "ambientCount = " + ambientCount + "      lightCount = " + lightCount );
 
-        var light2 = {
-            "extends": "http://vwf.example.com/light.vwf",
-            "properties": {
-              "lightType": "point",
-              "enable": true,
-              "distance": 2000,
-              "intensity": 2,
-              "color": [ 128, 128, 128 ],
-              "translation": [ 400, 400, 900 ]
-            }
-        }
-        this.kernel.createChild( sceneID, "DirectionalLight2", light2 );
+        if ( lightCount == 0 ) {
 
-        this.kernel.setProperty( sceneID, "ambientColor", [ 50, 50, 50 ] );
+            //console.info( " ++ creating directional lights"  );
+            
+            var light1 = {
+                "extends": "http://vwf.example.com/light.vwf",
+                "properties": {
+                  "lightType": "point",
+                  "enable": true,
+                  "distance": 2000,
+                  "intensity": 2,
+                  "color": [ 128, 128, 128 ],
+                  "translation": [ -400, 400, -900 ]
+                }
+            }
+            this.kernel.createChild( sceneID, "directionalLight1", light1 );
+
+            var light2 = {
+                "extends": "http://vwf.example.com/light.vwf",
+                "properties": {
+                  "lightType": "point",
+                  "enable": true,
+                  "distance": 2000,
+                  "intensity": 2,
+                  "color": [ 128, 128, 128 ],
+                  "translation": [ 400, 400, 900 ]
+                }
+            }
+            this.kernel.createChild( sceneID, "directionalLight2", light2 );
+        }
+
+        if ( ambientCount == 0 ) {
+
+            //console.info( " ++ creating ambient lights"  );
+
+            this.kernel.setProperty( sceneID, "ambientColor", [ 50, 50, 50 ] );
+        }
     }
 
     function SetVisible(node,state) 
