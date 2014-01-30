@@ -72,7 +72,7 @@ SectionEnd
 
 ; MUI Settings
 !define MUI_ABORTWARNING
-!define MUI_ICON "c:\Users\Administrator\Desktop\876fede2976334ba33c3ce6004e8be7a_normal.ico"
+!define MUI_ICON "Users\Administrator\Desktop\876fede2976334ba33c3ce6004e8be7a_normal.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 
 
@@ -124,7 +124,7 @@ ${Else}
     File /oname=$INSTDIR\.node\node.exe c:\vwf\.node\32\node.exe
     ${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR\.node"  ; Append the new path
 ${EndIf}
-ExecShell "" "iexplore.exe" "$INSTDIR\README.md"
+ExecShell "" "iexplore.exe" "https://github.com/virtual-world-framework/vwf/blob/development/README.md"
 SectionEnd
 
 Function un.onUninstSuccess
