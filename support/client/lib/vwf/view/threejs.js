@@ -407,11 +407,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
     // private ===============================================================================
 
+    var navObject = undefined;
+    var cameraNode = undefined;
+
     function lerpTick ()
     {
     
         var now = performance.now();
         self.realTickDif = now - self.lastRealTick;
+
         self.lastRealTick = now;
         
       
@@ -426,7 +430,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         for(var i in self.nodes)
         {
-            if(self.state.nodes[i])
+            if(self.state.nodes[i] && (!navObject || self.nodes[i].id != navObject.ID))
             {       
                 
                 self.nodes[i].lastTickTransform = self.nodes[i].selfTickTransform;
@@ -537,6 +541,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         interp = goog.vec.Mat4.clone(interp)
         self.state.nodes[id].threeObject.matrix.elements = goog.vec.Mat4.clone(interp);
         self.state.nodes[id].threeObject.updateMatrixWorld(true);
+
     }
     function setInterpolatedTransforms(deltaTime)
     {
@@ -567,10 +572,19 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                     interp = matrixLerp(last,now,step||0);
                     
-                    setTransform(i,interp);
+                    if(self.nodes[i].id != navObject.ID)
+                    {
+
+                        setTransform(i,interp);    
+                        self.nodes[i].needTransformRestore = true;
+                    }else
+                    {
+                        console.log('here')
+                    }
+
                    
                     
-                    self.nodes[i].needTransformRestore = true;
+                    
                 }
                 
                 
@@ -584,7 +598,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             
             var now = self.nodes[i].selfTickTransform;
             
-            if(now && self.nodes[i].needTransformRestore)
+            if(self.node != navObject &&  now && self.nodes[i].needTransformRestore)
             {
                 //vwf.setProperty(i,'transform',now);
                 self.state.nodes[i].threeObject.matrix.elements = goog.vec.Mat4.clone(now);
@@ -641,7 +655,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 	    
 	    now = ( window.performance !== undefined && window.performance.now !== undefined ) ? window.performance.now() : time;
 			
-	   timepassed = now - sceneNode.lastTime;
+	     timepassed = now - sceneNode.lastTime;
 			
 		
 			if(self.interpolateTransforms)
@@ -1753,6 +1767,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         this.rotateNavObjectByKey = function( msSinceLastFrame ) {
 
+
             var direction = 0;
 
             // Calculate movement increment
@@ -1844,6 +1859,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         }
 
         var handleMouseNavigation = function( mouseEventData ) {
+
 
             var deltaX = 0;
             var deltaY = 0;
@@ -2946,8 +2962,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         return key;
     }
 
-    var navObject = undefined;
-    var cameraNode = undefined;
+
 
     function controlNavObject( node ) {
       
@@ -3023,6 +3038,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     // 1.2 Else Interpolate to the model’s transform (conflict b/w own view and external sourced model changes)
 
     function receiveModelTransformChanges( nodeID, transformMatrix ) {
+
 
         var node = self.state.nodes[ nodeID ];
 
