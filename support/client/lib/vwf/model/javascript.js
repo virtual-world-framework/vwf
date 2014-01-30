@@ -368,16 +368,24 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             // we're done with our potentially blocking calls to the prototype chain of initialize
             // functions
             readyCallback( false );
-            callInitialize();
 
-            function callInitialize() {
+            // Call the intializer functions.
+
+            callInitializers();
+
+            // Call the remaining initializer functions. Use `kernel.execute` to call the next one,
+            // then when it completes, call back here to call the remaining ones. The last iteration
+            // calls the kernel callback to resume execution.
+
+            function callInitializers() {
+
                 if ( initializers.length ) {
 
                     var prototypeDepth = initializers.shift();
 
-                    self.kernel.execute( childID, generateScriptText( prototypeDepth ),
+                    self.kernel.execute( childID, initializerScript( prototypeDepth ),
                                          "application/javascript", undefined, function() {
-                                            callInitialize();
+                                            callInitializers();
                                          } );
                 } else {
 
@@ -413,7 +421,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
                     readyCallback( true );
                 }
 
-                function generateScriptText( prototypeDepth ) {
+                function initializerScript( prototypeDepth ) {
                     return " \
                         var node = this;\n\
                         for ( var i = 0; i < " + prototypeDepth + "; i++ ) {\n\
