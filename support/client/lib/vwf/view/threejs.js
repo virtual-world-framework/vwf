@@ -174,8 +174,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
                     if( modelCameraInfo.threeJScameras[propertyValue] )
                     {
+                        var usersShareView = this.state.kernel.getProperty( sceneRootID, "usersShareView" );
                         // If the view is currently using the model's activeCamera, update it to the new activeCamera
-                        if ( !this.state.cameraInUse || this.state.cameraInUse != modelCameraInfo.threeJScameras[ modelCameraInfo.ID ] )
+                        if ( usersShareView )
                             this.state.cameraInUse = modelCameraInfo.threeJScameras[ propertyValue ];
                     }
                 }
