@@ -2702,6 +2702,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             setVisibleRecursively( navObject.threeObject, false );
         }
 
+        // TODO: This will prevent applications that don't share the camera view from changing navObjects, because the camera
+        // will never be set to the new navObjects camera. The full solution will be for the model to track of a shared 
+        // navObject, not just the shared camera that it tracks now. See Redmine #3145.
         if(!self.state.cameraInUse) {
             // Search for a camera in the navigation object and if it exists, make it active
             var cameraIds = self.kernel.find( navObject.ID, 
