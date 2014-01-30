@@ -124,6 +124,7 @@ ${Else}
     File /oname=$INSTDIR\.node\node.exe c:\vwf\.node\32\node.exe
     ${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR\.node"  ; Append the new path
 ${EndIf}
+ExecShell "" "iexplore.exe" "https://github.com/virtual-world-framework/vwf/blob/development/README.md"
 SectionEnd
 
 Function un.onUninstSuccess
