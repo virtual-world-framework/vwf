@@ -3313,8 +3313,6 @@ if ( ! childComponent.source ) {
 
         this.execute = function( nodeID, scriptText, scriptType, callback_async ) {
 
-            var that = this;
-
             this.logger.debuggx( "execute", function() {
                 return [ nodeID, ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType ];  // TODO: loggableScript()
             } );
@@ -3330,25 +3328,27 @@ if ( ! childComponent.source ) {
 
             var scriptValue = undefined;
 
-            // Watch for any async kernel calls generated as we execute the scriptText
-            // and wait for them to complete before calling the callback
+            // Watch for any async kernel calls generated as we execute the scriptText and wait for
+            // them to complete before calling the callback.
+
             vwf.models.kernel.capturingAsyncs( function() {
-                that.models.some( function( model ) {
+                vwf.models.some( function( model ) {
                     scriptValue = model.executing &&
                                   model.executing( nodeID, scriptText, scriptType );
                     return scriptValue !== undefined;
                 } );
-            }, function() {
 
                 // Call executed() on each view to notify view that a script has been executed.
-                that.views.forEach( function( view ) {
+
+                vwf.views.forEach( function( view ) {
                     view.executed && view.executed( nodeID, scriptText, scriptType );
                 } );
 
-                that.logger.debugu();
-
+            }, function() {
                 callback_async && callback_async();
             } );
+
+            vwf.logger.debugu();
 
             return scriptValue;
         };
