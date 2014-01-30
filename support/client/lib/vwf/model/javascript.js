@@ -346,18 +346,21 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             var initializers = [];
             var tempNode = child;
-            var stepsUpProtoChain = 0;
+            var prototypeDepth = 0;
 
-            // Create array specifying which initializers exist
-            // (starting at the farthest end of the prototype chain)
+            // Create a list of the child and its prototypes that contain an `initialize` function.
+            // Nodes are represented as the number of prototypes below the child with `0`
+            // representing the child. The list is in order of the deepest prototype up to the child.
+
             while ( tempNode ) {
                 var initializingExists = tempNode.hasOwnProperty( 'initialize' );
                 var initializingIsAFunc = ( typeof tempNode.initialize === "function" || 
                                             tempNode.initialize instanceof Function )
                 if ( initializingExists && initializingIsAFunc ) {
-                    initializers.unshift( stepsUpProtoChain );
+                    initializers.unshift( prototypeDepth );
                 }
-                stepsUpProtoChain++;
+
+                prototypeDepth++;
                 tempNode = Object.getPrototypeOf( tempNode );
             }
 
@@ -369,9 +372,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             function callInitialize() {
                 if ( initializers.length ) {
-                    var prototypeNum = initializers.shift();
-                    that.kernel.execute( childID, generateScriptText( prototypeNum ),
-                                         "application/javascript", undefined, function() { 
+
+                    var prototypeDepth = initializers.shift();
+
+                    self.kernel.execute( childID, generateScriptText( prototypeDepth ),
+                                         "application/javascript", undefined, function() {
                                             callInitialize();
                                          } );
                 } else {
@@ -408,14 +413,15 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
                     readyCallback( true );
                 }
 
-                function generateScriptText( prototypeNum ) {
+                function generateScriptText( prototypeDepth ) {
                     return " \
                         var node = this;\n\
-                        for ( var i = 0; i < " + prototypeNum + "; i++ ) {\n\
+                        for ( var i = 0; i < " + prototypeDepth + "; i++ ) {\n\
                             node = Object.getPrototypeOf( node );\n\
                         }\n\
                         node.initialize.call( this );"
                 }
+
             }
 
             return undefined;
