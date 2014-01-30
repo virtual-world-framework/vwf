@@ -24,7 +24,7 @@
 
     vwf_view.satProperty = function (nodeID, propertyName, propertyValue) {
         if(propertyName == "activeCamera") {
-          if(propertyValue == vwf.find("", "/camera")[0]) {
+          if(propertyValue == vwf_view.kernel.find("", "/camera")[0]) {
             $("#exterior").prop("checked", true).button("refresh");
           }
           else {
@@ -34,7 +34,7 @@
       };
 
       function changeCameraLocation(location) {
-        vwf_view.kernel.callMethod(vwf.find("", "/")[0], "switchCameraView", [location]);
+        vwf_view.kernel.callMethod(vwf_view.kernel.find("", "/")[0], "switchCameraView", [location]);
       }
 
       vwf_view.calledMethod = function (nodeId, methodName, methodParameters, methodValue) {
@@ -50,6 +50,8 @@
         }
       }
 
+      $("#toolbar").buttonset();
+      $("#exterior").prop("checked", true).button("refresh");
     </script>
   </head>
   <body>
@@ -65,10 +67,5 @@
     <audio id='ignition'>
       <source src="ignition.wav"></source>
     </audio>
-    <script type="text/javascript">
-      $('#wrapper').appendTo('#vwf-root');
-      $("#toolbar").buttonset();
-      $("#exterior").prop("checked", true).button("refresh");
-    </script>
   </body>
 </html>

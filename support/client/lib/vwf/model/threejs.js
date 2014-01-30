@@ -1153,7 +1153,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 {
                     if(propertyName == 'activeCamera')
                     {
-                        value = propertyValue;
+                        if( this.state.scenes[this.state.sceneRootID].camera.threeJScameras[propertyValue] )
+                        {
+                            // Update the model's activeCamera
+                            this.state.scenes[ this.state.sceneRootID ].camera.ID = propertyValue;
+                            value = propertyValue;
+                        }
                     }
                     if( propertyName == 'ambientColor' )
                     {

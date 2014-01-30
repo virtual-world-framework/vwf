@@ -161,29 +161,25 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 } else if ( propertyName == "rotationSpeed" ) {
                     rotationSpeed = propertyValue;
                 }
-            } else if ( ( nodeID == this.kernel.application() ) && 
-                        ( propertyName == "makeOwnAvatarVisible" ) ) {
-                makeOwnAvatarVisible = propertyValue;
-                if ( navObject ) {
-                    setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
-                }
-            } else if ( ( nodeID == this.kernel.application() ) &&
-                        ( propertyName == "boundingBox" ) ) {
-                boundingBox = propertyValue;
-            } else if ( ( nodeID == this.kernel.application() ) &&
-                        ( propertyName == "activeCamera" ) ) {
-                if( this.state.scenes[this.state.sceneRootID].camera.threeJScameras[propertyValue] )
-                {
-                    // If the view is currently using the model's activeCamera, update it to the new activeCamera
+            } else if ( nodeID == this.kernel.application() ) {
+                if ( propertyName == "makeOwnAvatarVisible" ) {
+                    makeOwnAvatarVisible = propertyValue;
+                    if ( navObject ) {
+                        setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
+                    }
+                } else if ( propertyName == "boundingBox" ) {
+                    boundingBox = propertyValue;
+                } else if ( propertyName == "activeCamera" ) {
                     var sceneRootID = this.state.sceneRootID;
                     var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
-                    if ( !this.state.cameraInUse || this.state.cameraInUse == modelCameraInfo.threeJScameras[ modelCameraInfo.ID ] )
-                        this.state.cameraInUse = modelCameraInfo.threeJScameras[ propertyValue ];
-                    
-                    // Update the model's activeCamera
-                    this.state.scenes[ sceneRootID ].camera.ID = propertyValue;
+                    if( modelCameraInfo.threeJScameras[propertyValue] )
+                    {
+                        // If the view is currently using the model's activeCamera, update it to the new activeCamera
+                        if ( !this.state.cameraInUse || this.state.cameraInUse != modelCameraInfo.threeJScameras[ modelCameraInfo.ID ] )
+                            this.state.cameraInUse = modelCameraInfo.threeJScameras[ propertyValue ];
+                    }
                 }
-            }
+            } 
 
             // Pay attention to these properties for all nodes
             if ( propertyName == "transform" ) {
