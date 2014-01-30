@@ -93,7 +93,7 @@ SectionEnd
 
 ; MUI end ------
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "VWF_Windows_latest.exe"
+OutFile "VWF_Windows_Install.exe"
 InstallDir "$PROGRAMFILES\Virtual World Framework"
 ShowInstDetails show
 ShowUnInstDetails show
@@ -108,10 +108,8 @@ Section
         WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
         WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
         WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
-        CreateDirectory "$SMPROGRAMS\Virtual World Framework"
-        CreateShortCut "$SMPROGRAMS\Virtual World Framework\Virtual World Framework.lnk" "$INSTDIR\vwf.bat"
-        CreateShortCut "$DESKTOP\Virtual World Framework.lnk" "$INSTDIR\vwf.bat"
         ${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR"  ; Append the new path
+        ${EnvVarUpdate} $0 "VWF_DIR" "A" "HKLM" "$INSTDIR"  ; Append the new path
 SectionEnd
 
 Section -AdditionalIcons
@@ -120,15 +118,11 @@ SectionEnd
 
 Section -Prerequisites
 ${If} ${RunningX64}
-  MessageBox MB_YESNO "Install Prerequisite Node JS Server?" /SD IDYES IDNO endNodeJS64
-    ExecWait '"msiexec" /i "$INSTDIR\node\node-v0.10.24-x64.msi"'
-    Goto endNodeJS64
-  endNodeJS64:
+    File /oname=$INSTDIR\.node\node.exe c:\vwf\.node\64\node.exe
+    ${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR\.node"  ; Append the new path
 ${Else}
-  MessageBox MB_YESNO "Install Prerequisite Node JS Server?" /SD IDYES IDNO endNodeJS32
-    ExecWait '"msiexec" /i "$INSTDIR\node\node-v0.10.24-x86.msi"'
-    Goto endNodeJS32
-  endNodeJS32:
+    File /oname=$INSTDIR\.node\node.exe c:\vwf\.node\32\node.exe
+    ${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR\.node"  ; Append the new path
 ${EndIf}
 SectionEnd
 
@@ -146,13 +140,11 @@ Section uninstall
         !Include "${FILELIST}uns"
         !DelFile "${FILELIST}uns"
         Delete "$instdir\uninst.exe"
-        Delete "$SMPROGRAMS\Virtual World Framework\Uninstall.lnk"
-        Delete "$DESKTOP\Virtual World Framework.lnk"
-        Delete "$SMPROGRAMS\Virtual World Framework\Virtual World Framework.lnk"
-        RMDir "$SMPROGRAMS\Virtual World Framework"
         RMDir "$instdir"
         DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
         ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR"  ; Append the new path
+        ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\.node"  ; Append the new path
+        ${un.EnvVarUpdate} $0 "VWF_DIR" "R" "HKLM" "$INSTDIR"  ; Append the new path
         SetAutoClose true
 SectionEnd
 !endif
