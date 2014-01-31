@@ -86,7 +86,7 @@ function parseVWFPath () {
 //Start the VWF server
 function startVWF() {
 
-    global.logLevel = ( argv.l ? argv.l : 1 );
+    global.logLevel = ( ( argv.l || argv.log ) ? ( argv.l || argv.log ) : 1 );
 
     global.vwfRoot = parseVWFPath();
 
@@ -124,12 +124,13 @@ function startVWF() {
 
     var ssl = ( argv.s  || argv.ssl );
     var sslOptions = {
-        key: argv.key ? fs.readFileSync( argv.key ) : undefined,
-        cert: argv.cert ? fs.readFileSync( argv.cert ) : undefined
+        key: ( ( argv.k || argv.key ) ? fs.readFileSync( argv.k || argv.key ) : undefined ),
+        cert: ( ( argv.c || argv.cert ) ? fs.readFileSync( argv.c || argv.cert ) : undefined )
     };
 
     //create the server
-    var port = ( argv.p ? parseInt( argv.p ) : 3000 );
+    var port = ( ( argv.p || argv.port ) ? ( argv.p || argv.port ) : 3000 );
+
     var srv = ssl ? https.createServer( sslOptions, OnRequest ).listen( port ) : http.createServer( OnRequest ).listen( port );
     consoleNotice( 'Serving on port ' + port );
 

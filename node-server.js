@@ -22,12 +22,12 @@ function printGeneralHelp() {
 	console.log("Options:");
 	console.log("  -a, --applicationPath    Path to VWF application. Default: current directory.");
 	console.log("  -v, --vwfPath            Path to VWF support files. Default: current directory, then \"$HOME/.vwf\".");
-	console.log("  -p                       Port to start server on. Default: 3000");
-	console.log("  -l                       Log level for server. Default: 1");
+	console.log("  -p, --port               Port to start server on. Default: 3000");
+	console.log("  -l, --log                Log level for server. Default: 1");
 	console.log("  -h, --help               Output usage information");
 	console.log("  -s, --ssl                Enables SSL");
-	console.log("  --key                    Path to private key");
-	console.log("  --cert                   Path to certificate");
+	console.log("  -k, --key                Path to private key");
+	console.log("  -c, --cert               Path to certificate");
 }
 
 function printCreateHelp() {
