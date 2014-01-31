@@ -43,6 +43,24 @@ children:
     extends: http://vwf.example.com/node3.vwf
     properties:
       translation: [ 0, 0, 0 ]
+  point1:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "point"
+      enable: true
+      distance: 2000
+      intensity: 2
+      color: [ 128, 128, 128 ]
+      translation: [ -400, 400, -900 ]
+  point2:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "point"
+      enable: true
+      distance: 2000
+      intensity: 2
+      color: [ 128, 128, 128 ]
+      translation: [ 400, 400, 900 ]
 scripts:
 - |
     this.initialize = function(){
