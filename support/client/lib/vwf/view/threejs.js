@@ -87,7 +87,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName, callback /* ( ready ) */) {
             
-            
             //the created node is a scene, and has already been added to the state by the model.
             //how/when does the model set the state object? 
             if ( this.state.scenes[ childID ] )
@@ -96,6 +95,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 ).children(":last");
                 
                 initScene.call(this,this.state.scenes[childID]);
+            }
+            else if (this.state.scenes[ this.kernel.application() ] && this.state.scenes[ this.kernel.application() ].camera.ID == childID) {
+                setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
             }
         },
 
@@ -171,14 +173,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 } else if ( propertyName == "boundingBox" ) {
                     boundingBox = propertyValue;
                 } else if ( propertyName == "activeCamera" ) {
-                    var sceneRootID = this.state.sceneRootID;
-                    var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
-                    if( modelCameraInfo.threeJScameras[propertyValue] )
-                    {
-                        // If the view is currently using the model's activeCamera, update it to the new activeCamera
-                        if ( usersShareView )
-                            this.state.cameraInUse = modelCameraInfo.threeJScameras[ propertyValue ];
-                    }
+                    setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
                 } else if ( propertyName == "usersShareView" ) {
                     usersShareView = propertyValue;
                 }
@@ -3192,6 +3187,17 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
         } else {
             self.logger.warnx( "orbit: There is no navigation object to move" );
+        }
+    }
+
+    function setActiveCamera(cameraID) {
+        var sceneRootID = this.state.sceneRootID;
+        var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
+        if( modelCameraInfo.threeJScameras[cameraID] )
+        {
+            // If the view is currently using the model's activeCamera, update it to the new activeCamera
+            if ( usersShareView )
+                this.state.cameraInUse = modelCameraInfo.threeJScameras[ cameraID ];
         }
     }
 });
