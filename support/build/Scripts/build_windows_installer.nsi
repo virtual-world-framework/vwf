@@ -72,7 +72,7 @@ SectionEnd
 
 ; MUI Settings
 !define MUI_ABORTWARNING
-!define MUI_ICON "Users\Administrator\Desktop\876fede2976334ba33c3ce6004e8be7a_normal.ico"
+!define MUI_ICON "c:\Users\Administrator\Desktop\876fede2976334ba33c3ce6004e8be7a_normal.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 
 
