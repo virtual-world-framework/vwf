@@ -181,8 +181,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if ( childID == sceneNode.camera.defaultCamID ) {
                         if ( !sceneNode.camera.threeJScameras[ childID ] ) {
                             var cam = CreateThreeCamera();
-                            sceneNode.camera.threeJScameras[ childID ] = cam;                            
+                            sceneNode.camera.threeJScameras[ childID ] = cam;                      
                         }
+                        sceneNode.camera.ID = childID;
                         node.name = camName;
                         node.threeObject = sceneNode.camera.threeJScameras[ childID ];
                   
@@ -1152,22 +1153,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 {
                     if(propertyName == 'activeCamera')
                     {
-
-                        // TODO: This should probably happen in the view driver since it is altering the
-                        //       view-side cameraInUse property
-
                         if( this.state.scenes[this.state.sceneRootID].camera.threeJScameras[propertyValue] )
                         {
-                            // If the view is currently using the model's activeCamera, update it to the new activeCamera
-                            var sceneRootID = this.state.sceneRootID;
-                            var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
-                            if ( this.state.cameraInUse == modelCameraInfo.threeJScameras[ modelCameraInfo.ID ] )
-                                this.state.cameraInUse = modelCameraInfo.threeJScameras[ propertyValue ];
-                            
                             // Update the model's activeCamera
-                            this.state.scenes[ sceneRootID ].camera.ID = propertyValue;
-
-                            // Prepare the return value
+                            this.state.scenes[ this.state.sceneRootID ].camera.ID = propertyValue;
                             value = propertyValue;
                         }
                     }
