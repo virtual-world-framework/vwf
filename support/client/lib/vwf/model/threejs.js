@@ -505,10 +505,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             createMesh.call( this, node, propertyValue, true );
                             value = propertyValue; 
                             break;
-                        case "texture":
-                            // delay the setting of the texture until the actual
-                            // settingProperty call
-                            break;
                         default:
                             value = this.settingProperty( nodeID, propertyName, propertyValue );                  
                             break;
