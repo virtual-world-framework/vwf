@@ -411,7 +411,7 @@
                         });
                     });
                 }
-            }).complete(function(jqXHR, textStatus) { 
+            }).always(function(jqXHR, textStatus) { 
 
                 Object.keys(userLibraries).forEach(function(libraryType) {
                     if(initializers[libraryType]) {
