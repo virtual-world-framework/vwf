@@ -26,7 +26,9 @@
 			};
 			
 			function startGame() {
-				vwf_view.kernel.callMethod(vwf.find("", "/")[0], "startGame");
+				if(!$("#startButton").button("option", "disabled")) {
+					vwf_view.kernel.callMethod(vwf.find("", "/")[0], "startGame");
+				}
 			}
 		</script>
 	</head>
