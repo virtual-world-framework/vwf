@@ -11,7 +11,7 @@ Launch a command prompt window and create a new VWF application:
 
     c:\> vwf create MyApp
 
-Change into your new application and start the  server.
+Change into your new application folder and start the  server.
 
     c:\> cd MyApp
     c:\MyApp> vwf
@@ -30,7 +30,7 @@ Launch a command prompt window and create a new VWF application:
 
     /home/user# vwf create MyApp
 
-Change into your new application, and start the server.
+Change into your new folder application, and start the server.
 
     /home/user# cd MyApp
     /home/user/MyApp# vwf
