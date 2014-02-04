@@ -7,11 +7,11 @@ App Developer Installation
 
 Download and run the [VWF Windows Installer](http://download.virtualworldframework.com/files/VWF_Windows_Install.exe).
 
-Launch a command prompt window and create a new VWF application folder:
+Launch a command prompt window and create a new VWF application:
 
     c:\> vwf create MyApp
 
-Change into your new application folder and start the  server.
+Change into your new application and start the  server.
 
     c:\> cd MyApp
     c:\MyApp> vwf
@@ -26,11 +26,11 @@ Execute the following command at your terminal/shell prompt:
 
     /home/user# curl -kL http://get.virtual.wf  | sh
 	
-Launch a command prompt window and create a new VWF application folder:
+Launch a command prompt window and create a new VWF application:
 
     /home/user# vwf create MyApp
 
-Change into your new application folder, and start the server.
+Change into your new application, and start the server.
 
     /home/user# cd MyApp
     /home/user/MyApp# vwf
