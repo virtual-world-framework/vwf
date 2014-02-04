@@ -74,6 +74,8 @@ function parseVWFPath () {
         return vwfPath;
     } else if ( fs.existsSync( path.join( process.cwd(), "support/client/lib" ) ) ) {
         return process.cwd();
+    } else if ( fs.existsSync( path.join( process.env.VWF_DIR, "support/client/lib" ) ) ) {
+        return process.env.VWF_DIR;
     } else if ( fs.existsSync( path.join( vwfHome, "support/client/lib" ) ) ) {
         return vwfHome;
     } else {
