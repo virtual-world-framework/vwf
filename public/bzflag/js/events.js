@@ -53,6 +53,7 @@ vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplements
     childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
     if(childName == "navobj_" + vwf.moniker()) {
         playerNode = childID;
+        $('#createUser').dialog("open");
     }
     if ( nodeID == vwf_view.kernel.findClients( "", "/" ) ) {
         var player_nodes = vwf_view.kernel.find( "/", "/navobj_" + childName );
@@ -65,7 +66,7 @@ vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplements
 vwf_view.deletedNode = function ( nodeID ) { 
     if (nodeID.length > 50 ) {
         if ( nodeID.slice(0, 33) == "http-vwf-example-com-clients-vwf:" ) {
-            var player_nodes = vwf_view.kernel.find( "/", "/navobj_" + nodeID.slice( nodeID.length - 16 ) );
+            var player_nodes = vwf_view.kernel.find( "/", "/navobj_" + nodeID.slice( nodeID.length - 20 ) );
             if ( player_nodes.length > 0 ) {
                 vwf_view.kernel.setProperty( player_nodes[ 0 ], "playerConnected", false );
             }

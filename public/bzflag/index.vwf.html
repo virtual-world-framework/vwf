@@ -69,13 +69,14 @@
           if ( buttonEnabled && ( $( '#selectPlayerInput' ).val( ) != 'createNew' ) ){
             $('.ui-button').focus();
             playerName = $("#selectPlayerInput option[value='" + $('#selectPlayerInput').val() + "']").text();
-			  		vwf_view.kernel.callMethod(vwf.find("","/")[0], "rejoinPlayer", [playerName, vwf.moniker()]);
+			vwf_view.kernel.callMethod(vwf.find("","/")[0], "rejoinPlayer", [playerName, vwf.moniker()]);
             $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
             $('#userNameInput').attr('disabled', true);
           }
         }
       });
 			$('#createUser').dialog( {
+				autoOpen: false,
 				height: 'auto',
 				width: 820,
 				modal: true,
@@ -88,8 +89,8 @@
 							if($('#userNameInput').val().length > 0) {
 								playerName = $('#userNameInput').val();
 								vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [$('#userNameInput').val(), vwf.moniker()]);
-                $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
-                $('#userNameInput').attr('disabled', true);
+				                $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
+				                $('#userNameInput').attr('disabled', true);
 							}
 						}
 						else
@@ -98,9 +99,9 @@
 							vwf_view.kernel.callMethod(vwf.find("","/")[0], "rejoinPlayer", [playerName, vwf.moniker()]);
 							$('#userName').html(playerName + ":&nbsp;");
 							preloadImages();
-              $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
-              $('#userNameInput').attr('disabled', true);
-            }
+			              	$(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
+			              	$('#userNameInput').attr('disabled', true);
+			            }
 					}
 				},
 				open: function() {
