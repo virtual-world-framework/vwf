@@ -1,0 +1,91 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+## The component representation of a control behavior
+## 
+## @name control.vwf
+## @namespace
+
+---
+properties:
+  transformTool-enabled:
+    set: |
+      this["transformTool-enabled"] = Boolean( value );
+    value: true
+events:
+  pointerClick:
+methods:
+  select:
+  createTool:
+scripts:
+- |
+  this.initialize = function() {
+    this.tt = undefined;
+    this.clickedID = undefined;
+    this.selectedObject = undefined;
+    this.previousParent = undefined;
+  }
+  this.pointerClick = function( pointerInfo, pickInfo ) {
+    this.clickedID = pickInfo.pickID;
+    if ( this["transformTool-enabled"] ) {
+      this.select( pickInfo.pickID );
+    }
+  } 
+  this.select = function( id ) {
+
+    //console.info( "this.select( "+id+" )" );
+    if ( this["transformTool-enabled"] && id ) {
+
+      if ( this.transformTool === undefined ) {
+        this.createTool();
+      } else {
+        var clickedNode = this.findByID( this, id );
+        if ( clickedNode ) {
+          //console.info( "      valid clickedNode: " + clickedNode.id );
+          var self = this;
+          var selectNode = function() {
+            //console.info( "       selectNode: " + clickedNode.id );
+            var wt;
+            if ( self.selectedObject !== undefined ) {
+              wt = self.transformTool.worldTransform; 
+              self.selectedObject.parent_ = self.previousParent;
+              self.selectedObject.worldTransform = wt;
+              //self.transformTool.removeChildren();
+              self.transformTool.deleteGeometry();
+            }
+            self.selectedObject = clickedNode;
+            self.previousParent = clickedNode.parent;
+            wt = self.selectedObject.worldTransform;
+            clickedNode.parent_ = self.transformTool;
+            self.transformTool.worldTransform = wt;
+            self.selectedObject.transform = [ 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 ];
+            
+            //console.info( "       tt calling to select to generate tool: " );
+            self.transformTool.objectSelected( self.selectedObject );          
+          };        
+
+          if ( !this.isChildOf( clickedNode, this.transformTool ) ) {
+            selectNode();
+          }
+        }
+      }
+    }
+
+  }
+  this.createTool = function() {
+    var self = this;
+    var tt = { "includes": "http://vwf.example.com/tools/transform/transformTool.vwf" }
+    this.children.create( "transformTool", tt, function( child ) {
+      self.select( self.clickedID );
+    } );
+  } //@ sourceURL=transformToolManager.vwf

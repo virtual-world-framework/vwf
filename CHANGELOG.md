@@ -2,6 +2,88 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.6.21
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change. 
+
+- NEW: Update vwf.bat based on new installation package for Windows. Refs #2962
+- NEW: Simplify README quick start instructions. Refs #2962
+- NEW: Add vwf-pong temporarily for demo purposes
+- NEW: Add JSON skeletal & morph target animations (interim)  Refs #2981
+- NEW: Initial test for JSON skinnedmesh animations  Refs #2981
+- NEW: Three.js JSON Model loader and animations, Refs #2891
+- NEW: Clean up the Three.js JSON model testcase.  Refs #2981
+- NEW: Update to three.js r64
+- CHG: Reorder client disconnect code in Node server.  Refs #2978
+- CHG: Update shrinkwrap with the new modules.
+- CHG: Update node server docs with application path info. Closes #3011
+- CHG: Update readme.md to include new instructions for VWF 1.0 installation steps. Closes #2959
+- CHG: Refactored script to put all setup in one step #2959
+- CHG: Fix formatting issue with SSL documentation. Refs #3013
+- CHG: Fix remaining jquery issues  closes #2972
+- CHG: Fix event default propagation calls. Refs #2972
+- CHG: Remove unnecessary call to close the accordion after the lesson is completed. Refs #2995, #2996
+- CHG: Branch/nodejs 500 error Fixes #2886
+- CHG: Make the vwf root path available to the CLI. Make blank app the default VWF application.
+- CHG: Fixes the setting of the active Camera during initialization of the scene
+- CHG: Fix particle system error from the latest threejs version. Refs #2947
+- CHG: Sets the transform to the identity matrix, if the transform is undefined
+- CHG: Cleans up some code that was repeated in two places.  Fixes 2987
+- CHG: Editor fix for animations.  Handles node properties with '$' identifier.
+- CHG: Remove unused global.activeinstances variable. Refs #2886
+- CHG: Move global.instances creation to node_vwf.js, so that it is available as soon as the server starts. Refs #2886
+- CHG: Fix node server infinite redirect bug. Fixes #2994, #2992, #3034, #3013, #3000, #3014
+- CHG: Add Persistence Documentation. Fixes #2946.
+- CHG: Branch/transform tool. Fixes #3010, #3066
+- CHG: Branch/transform tool Uses the new rotate in x and/or y for the rotation handles
+- CHG: Branch/transform tool Implements a default case that will listen to changes in x and/or y to rotate the object
+- CHG: Branch/transform tool Removes the reference to the 'text' primitive type that was never completed
+- CHG: Branch/transform tool Removes some properties that were being handled twice
+- CHG: Branch/transform tool Removes the references to the old navtouch scene extension
+- CHG: Branch/transform tool Adds a couple 'to do' comments to comments that discuss possible issues given some rare circumstance that might occur
+- CHG: Branch/transform tool Fixes the decreasing scale issue as the user moves towards the center of the object
+- CHG: Branch/transform tool Adds and implements the scale behavior for the transformTool.vwf.yaml
+- CHG: Branch/transform tool Adds the scale-on-move behavior
+- CHG: Branch/transform tool Calculates the world normal and uses that for the mouse data instead of the local normal
+- CHG: Branch/transform tool Cleans up some debugging console output that was no longer needed
+- CHG: Branch/transform tool Fixes the initial camera positions
+- CHG: Branch/transform tool Finalizes the updates required to get branch/transformTool working.  Example application and usage example: public/tt Task 3001 and Rebase 2998
+- CHG: Branch/transform tool Improved the look and colors of the transformTool
+- CHG: Branch/transform tool Using the pointer vector from the mouse pick
+- CHG: Branch/transform tool Normalize the calculated view vector
+- CHG: Branch/transform tool Added the pointer vector of the camera that is calculated for the pick to the pickInfo
+- CHG: Branch/transform tool Added a couple of objects to the transformTool test
+- CHG: Branch/transform tool Additional changes for the 'parent_' temporary fix
+- CHG: Branch/transform tool Fix for GLGE incorrectly returning a bad color value
+- CHG: Branch/transform tool Transformtool now working in threejs
+- CHG: Branch/transform tool Added transparent and opacity to Material
+- CHG: Branch/transform tool Added the other primitives to the cube demo
+- CHG: Branch/transform tool Added application as a test case for the issues I ran into with 'includes'
+- CHG: Branch/transform tool Added nodes to test the new threejs primitives
+- CHG: Branch/transform tool Updated the type for the mesh definition
+- CHG: Branch/transform tool Added primitive components for threejs
+- CHG: Branch/transform tool Added double sided to the createMesh in the threejs driver
+- CHG: Branch/transform tool Fixed the scale corners of the transform tool
+- CHG: Branch/transform tool Added the scaling component for the transform tool
+- CHG: Branch/transform tool added the test application for transformTool
+- CHG: Branch/transform tool Added the rotation handles
+- CHG: Branch/transform tool Component files for the transformTool
+- CHG: Update accordion calls to match the API for JQuery 1.10
+- CHG: Update accordion calls to match the API for JQuery 1.10 Fixes #2995, #2996
+- CHG: Fix Humvee-Lesson sounds only play the first time.  Fixes #3069
+- CHG: Fix for the `vwf create` command
+- CHG: Make blank app the default VWF application.
+- CHG: Update getPositionFromMatrix calls to setFromMatrixPosition to match latest revision Copied from https://github.com/virtual-world-framework/three.js.git Revision 46afb9d4f8499d78c7996f6427420221e4b60556
+- CHG: Move build status inline with the branch listing.
+- CHG: Fix Humvee app sound issue where horn & ignition only play once in Chrome.  Fixes #2993
+- CHG: Change name of nodejs log directory.  Refs #2828
+- CHG: Check and set a non-set HTTP_PROXY variable. Closes #3063
+- CHG: Add information on how to programmatically save and load states.
+- CHG: Add persistence.md to Rakefile. Fix "Troubleshooting" typo in Testing section.
+- CHG: Make the vwf root path available to the CLI.
+
+
+----------------------------------
 0.6.20
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change. 

@@ -22,6 +22,7 @@ children:
     type: model/vnd.collada+xml
     properties:
       rotation: [ 0, 0, 1, 0]
+      counter: 0
     children:
       material:
         extends: http://vwf.example.com/material.vwf
@@ -33,33 +34,28 @@ children:
     - |
        this.initialize = function()
        {
-          this.counter = 0;
           this.future(0.1).update();
        }
        this.update = function()   
        {
-          console.info( "this = " + this );
-          console.info( "this.id = " + this.id );
-          console.info( "this.duck = " + this.duck );
-          console.info( "this.children['duck'] = " + this.children['duck'] );
           this.counter++;
           if(this.counter == 10)
             this.material.color = [ 0, 255, 0 ];
-          if(this.counter == 20)   
+          else if(this.counter == 20)   
             this.material.color = [ 255, 0, 0 ];
-          if(this.counter == 30)  
+          else if(this.counter == 30)  
             this.material.color = 'blue';
-          if(this.counter == 40)  
+          else if(this.counter == 40)  
             this.material.color = 'purple';
-          if(this.counter == 50)  
+          else if(this.counter == 50)  
             this.material.color = 'orange';
-          if(this.counter == 60)  
+          else if(this.counter == 60)  
             this.material.color = 'gray';                
-          if(this.counter == 70)  
+          else if(this.counter == 70)  
             this.material.color = 'lightyellow';
-          if(this.counter == 80)  
+          else if(this.counter == 80)  
             this.material.color = [ 255, 255, 255 ];
-          if(this.counter == 90) 
+          else if(this.counter == 90) 
           {            
               this.counter = 0;
               this.material.color = [ 0, 0, 0 ];        
@@ -68,17 +64,12 @@ children:
        } //@ sourceURL=index.duck.vwf
   dir1:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
       enable: true
       distance: 2000
       intensity: 1.4
       color: [ 255, 255, 255 ]
-      glge-constantAttenuation: 0.3
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 scripts:

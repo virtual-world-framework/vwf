@@ -41,6 +41,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var positionUnderMouseClick;
     var boundingBox = undefined;
     var userObjectRequested = false;
+    var usersShareView = true;
     // End Navigation
 
     return view.load( module, {
@@ -86,7 +87,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName, callback /* ( ready ) */) {
             
-            
             //the created node is a scene, and has already been added to the state by the model.
             //how/when does the model set the state object? 
             if ( this.state.scenes[ childID ] )
@@ -95,6 +95,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 ).children(":last");
                 
                 initScene.call(this,this.state.scenes[childID]);
+            }
+            else if (this.state.scenes[ this.kernel.application() ] && this.state.scenes[ this.kernel.application() ].camera.ID == childID) {
+                setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
             }
         },
 
@@ -140,27 +143,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // -- initializedProperty ----------------------------------------------------------------------
 
         initializedProperty: function ( nodeID, propertyName, propertyValue ) { 
-            if ( propertyName == "transform" ) {
-                receiveModelTransformChanges( nodeID, propertyValue );
-            } else if ( propertyName == "lookAt") {
-
-                var node = this.state.nodes[ nodeID ];
-
-                // If the state knows about the node, it is in the scene and should be updated
-                // Otherwise, it is a prototype and can be ignored
-                if ( node ) {
-                    nodeLookAt( node );
-                }
-            } else if ( ( nodeID == this.kernel.application() ) && 
-                        ( propertyName == "makeOwnAvatarVisible" ) ) {
-                makeOwnAvatarVisible = propertyValue;
-                if ( navObject ) {
-                    setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
-                }
-            } else if ( ( nodeID == this.kernel.application() ) &&
-                        ( propertyName == "boundingBox" ) ) {
-                boundingBox = propertyValue;
-            }
+            this.satProperty(nodeID, propertyName, propertyValue);
         },
 
         // TODO: deletedProperty
@@ -168,7 +151,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // -- satProperty ------------------------------------------------------------------------------
 
         satProperty: function ( nodeID, propertyName, propertyValue ) { 
-            
             // If this is this user's navObject, pay attention to changes in navmode, translationSpeed, and 
             // rotationSpeed
             if ( navObject && ( nodeID == navObject.ID ) ) {
@@ -182,16 +164,20 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 } else if ( propertyName == "rotationSpeed" ) {
                     rotationSpeed = propertyValue;
                 }
-            } else if ( ( nodeID == this.kernel.application() ) && 
-                        ( propertyName == "makeOwnAvatarVisible" ) ) {
-                makeOwnAvatarVisible = propertyValue;
-                if ( navObject ) {
-                    setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
+            } else if ( nodeID == this.kernel.application() ) {
+                if ( propertyName == "makeOwnAvatarVisible" ) {
+                    makeOwnAvatarVisible = propertyValue;
+                    if ( navObject ) {
+                        setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
+                    }
+                } else if ( propertyName == "boundingBox" ) {
+                    boundingBox = propertyValue;
+                } else if ( propertyName == "activeCamera" ) {
+                    setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
+                } else if ( propertyName == "usersShareView" ) {
+                    usersShareView = propertyValue;
                 }
-            } else if ( ( nodeID == this.kernel.application() ) &&
-                        ( propertyName == "boundingBox" ) ) {
-                boundingBox = propertyValue;
-            }
+            } 
 
             // Pay attention to these properties for all nodes
             if ( propertyName == "transform" ) {
@@ -434,6 +420,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Note: this is a costly operation and should be optimized if possible
             if ( ( now - lastPickTime ) > self.pickInterval && !self.disableInputs )
             {
+                sceneNode.frameCount = 0;
+            
                 var newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
                 
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
@@ -709,28 +697,47 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             var camera = sceneView.state.cameraInUse;
             var worldCamPos, worldCamTrans, camInverse;
+            var localPickNormal, worldPickNormal, worldTransform;
             if ( camera ) { 
                 var worldCamTrans = new THREE.Vector3();
-                worldCamTrans.getPositionFromMatrix( camera.matrixWorld );
+                worldCamTrans.setFromMatrixPosition( camera.matrixWorld );
 
                 // Convert THREE.Vector3 to array
+                // QUESTION: Is the double use of y a bug?  I would assume so, but then why not
+                //           just use worldCamTrans as-is?
                 worldCamPos = [ worldCamTrans.x, worldCamTrans.y, worldCamTrans.z];
             }
 
+            if ( pickInfo ) {
+                var nml;
+                if ( pickInfo.face ) {
+                    nml = pickInfo.face.normal
+                    localPickNormal = goog.vec.Vec3.createFloat32FromValues( nml.x, nml.y, nml.z );
+                } else if ( pickInfo.normal ) {
+                    nml = pickInfo.normal;
+                    localPickNormal = goog.vec.Vec3.createFloat32FromValues( nml[0], nml[1], nml[2] );
+                }
+                localPickNormal = goog.vec.Vec3.normalize( localPickNormal, goog.vec.Vec3.create() );
+                if ( sceneView.state.nodes[ pointerPickID ] ) {
+                    var pickObj = sceneView.state.nodes[ pointerPickID ];
+                    if ( pickObj.threeObject.matrixWorld ) {
+                        worldTransform = goog.vec.Mat4.createFromArray( pickObj.threeObject.matrixWorld.elements );
+                    } else {
+                        worldTransform = goog.vec.Mat4.createFromArray( getWorldTransform( pickObj ).elements );
+                    } 
+                    worldPickNormal = goog.vec.Mat4.multVec3NoTranslate( worldTransform, localPickNormal, goog.vec.Vec3.create() );    
+                }
+            }
+
             returnData.eventNodeData = { "": [ {
+                pickID: pointerPickID,
+                pointerVector: pickDirectionVector ? vec3ToArray( pickDirectionVector ) : undefined,
                 distance: pickInfo ? pickInfo.distance : undefined,
                 origin: pickInfo ? pickInfo.worldCamPos : undefined,
                 globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined,
-                globalNormal: pickInfo ? [0,0,1] : undefined,    //** not implemented by threejs
+                globalNormal: worldPickNormal ? worldPickNormal : localPickNormal,    //** not implemented by threejs
                 globalSource: worldCamPos
             } ] };
-
-            if ( pickInfo && pickInfo.normal ) {
-                var pin = pickInfo.normal;  
-                var nml = goog.vec.Vec3.createFloat32FromValues( pin[0], pin[1], pin[2] );
-                nml = goog.vec.Vec3.normalize( nml, goog.vec.Vec3.create() );
-                returnData.eventNodeData[""][0].globalNormal = [ nml[0], nml[1], nml[2] ];
-            }
 
             if ( sceneView && sceneView.state.nodes[ pointerPickID ] ) {
                 var camera = sceneView.state.cameraInUse;
@@ -763,8 +770,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     }
 
                     // transform the global normal into local
-                    if ( pickInfo && pickInfo.normal ) {
-                        localNormal = goog.vec.Mat4.multVec3Projective( transform, pickInfo.normal, 
+                    if ( transform && pickInfo && pickInfo.face ) {
+                        localNormal = goog.vec.Mat4.multVec3Projective( transform, pickInfo.face.normal, 
                             goog.vec.Vec3.create() );
                     } else {
                         localNormal = undefined;  
@@ -778,12 +785,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     }
                                         
                     returnData.eventNodeData[ childID ] = [ {
+                        pickID: pointerPickID,
+                        pointerVector: pickDirectionVector ? vec3ToArray( pickDirectionVector ) : undefined,
                         position: localTrans,
                         normal: localNormal,
                         source: relativeCamPos,
                         distance: pickInfo ? pickInfo.distance : undefined,
-                        globalPosition: pickInfo ? pickInfo.coord : undefined,
-                        globalNormal: pickInfo ? pickInfo.normal : undefined,
+                        globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined,
+                        globalNormal: worldPickNormal ? worldPickNormal : localPickNormal,
                         globalSource: worldCamPos,            
                     } ];
 
@@ -802,7 +811,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var returnData = { eventData: undefined, eventNodeData: undefined };
 
             var mousePos = utility.coordinates.contentFromWindow( e.target, { x: e.gesture.center.pageX, y: e.gesture.center.pageY } ); // canvas coordinates from window coordinates
-            touchPick = ThreeJSTouchPick.call( self, canvas, sceneNode, false, mousePos );
+            touchPick = ThreeJSTouchPick.call( self, canvas, sceneNode, mousePos );
 
             var pickInfo = touchPick;
 
@@ -955,7 +964,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         canvas.onmousedown = function( e ) {
             var event = getEventData( e, false );
             var shiftDown = e.shiftKey;
-            
+
             if ( shiftDown ) {
                 if ( pointerLockImplemented && ( navmode == "fly" ) ) {
                     canvas.requestPointerLock();
@@ -1647,7 +1656,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                 var cameraMatrix = camera.matrix;
                                 var originalCameraTransform = matCpy( cameraMatrix.elements );
                                 var cameraPos = new THREE.Vector3();
-                                cameraPos.getPositionFromMatrix( cameraMatrix );
+                                cameraPos.setFromMatrixPosition( cameraMatrix );
                                 cameraMatrix.multiply( pitchDeltaMatrix );
 
                                 // Constrain the camera's pitch to +/- 90 degrees
@@ -1998,7 +2007,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
          
     };
 
-    function ThreeJSTouchPick ( canvas, sceneNode, debug, mousepos )
+    function ThreeJSTouchPick ( canvas, sceneNode, mousepos )
     {
         if(!this.lastEventData) return;
 
@@ -2024,7 +2033,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         this.projector.unprojectVector(pickDirectionVector, threeCam);
         var pos = new THREE.Vector3();
-        pos.getPositionFromMatrix( threeCam.matrixWorld );
+        pos.setFromMatrixPosition( threeCam.matrixWorld );
         pickDirectionVector.sub(pos);
         pickDirectionVector.normalize();
                 
@@ -2073,16 +2082,16 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         //console.info( "mousepos = " + x + ", " + y );
         pickDirectionVector.set( x, y, 0.5 );
         
-        this.projector.unprojectVector(pickDirectionVector, threeCam);
+        this.projector.unprojectVector( pickDirectionVector, threeCam);
         var pos = new THREE.Vector3();
-        pos.getPositionFromMatrix( threeCam.matrixWorld );
+        pos.setFromMatrixPosition( threeCam.matrixWorld );
         pickDirectionVector.sub(pos);
         pickDirectionVector.normalize();
         
-        
-        this.raycaster.set(pos, pickDirectionVector);
+        this.raycaster.set( pos, pickDirectionVector );
         var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
-        
+        var target = undefined;
+
         // intersections are, by default, ordered by distance,
         // so we only care for the first (visible) one. The intersection
         // object holds the intersection point, the face that's
@@ -2090,12 +2099,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // face belongs. We only care for the object itself.
 
         // Cycle through the list of intersected objects and return the first visible one
-        for ( var i = 0; i < intersects.length; i++ ) {
+        for ( var i = 0; i < intersects.length && target === undefined; i++ ) {
+            if ( debug ) {
+                for ( var i = 0; i < intersects.length; i++ ) { 
+                    console.info( i + ". " + intersects[i].object.name ) 
+                }
+            }   
+
             if ( intersects[ i ].object.visible ) {
-                return intersects[ i ];
+                target = intersects[ i ];
             }
         }
-        return null;
+        return target;
     }
     function getPickObjectID(threeObject)
     {   
@@ -2105,6 +2120,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         else if(threeObject.parent)
          return getPickObjectID(threeObject.parent);
         return null;    
+    }
+
+    function vec3ToArray( vec ) {
+        return [ vec.x, vec.y, vec.z ];
     }
 
     function indentStr() {
@@ -2246,6 +2265,34 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
     }
 
+    function getWorldTransform( node ) {
+        var parent = self.state.nodes[ node.parentID ];
+        if ( parent ) {
+            var worldTransform = new THREE.Matrix4();
+            if ( node.transform === undefined ) {
+                node.transform = new THREE.Matrix4();    
+            }
+            return worldTransform.multiplyMatrices( getWorldTransform( parent ), node.transform );
+        } else {
+            return node.transform;
+        }
+    }
+
+    function setWorldTransform( node, worldTransform ) {
+        if ( node.parent ) {
+            var parentInverse = goog.vec.Mat4.create();
+            if ( goog.vec.Mat4.invert( getWorldTransform( node.parent ), parentInverse ) ) {
+                
+                node.transform = goog.vec.Mat4.multMat( parentInverse, worldTransform, 
+                                                        goog.vec.Mat4.create() );
+            } else {
+                self.logger.errorx( "Parent world transform is not invertible - did not set world transform " +
+                                    "on node '" + node.id + "'" );
+            }
+        } else {
+            node.transform = worldTransform;
+        }
+    }
     function outputMaterial( iIndent, index ) {
         var sOut = indent.call( this, iIndent + 1 );
         consoleOut.call( this, indent.call( this, iIndent) + "material" + ( index > 0 ? index : "" ) + ":" );
@@ -2652,16 +2699,19 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             setVisibleRecursively( navObject.threeObject, false );
         }
 
-        // Search for a camera in the navigation object and if it exists, make it active
-        var cameraIds = self.kernel.find( navObject.ID, 
-                                          "descendant-or-self::element(*,'http://vwf.example.com/camera.vwf')" );
-        if ( cameraIds.length ) {
+        // TODO: The model should keep track of a shared navObject, not just the shared camera that it tracks now. See Redmine #3145.
+        if( !usersShareView ) {
+            // Search for a camera in the navigation object and if it exists, make it active
+            var cameraIds = self.kernel.find( navObject.ID, 
+                                              "descendant-or-self::element(*,'http://vwf.example.com/camera.vwf')" );
+            if ( cameraIds.length ) {
 
-            // Set the view's active camera
-            var rendererState = self.state;
-            var cameraId = cameraIds[ 0 ];
-            cameraNode = rendererState.nodes[ cameraId ];
-            rendererState.cameraInUse = cameraNode.threeObject;
+                // Set the view's active camera
+                var rendererState = self.state;
+                var cameraId = cameraIds[ 0 ];
+                cameraNode = rendererState.nodes[ cameraId ];
+                rendererState.cameraInUse = cameraNode.threeObject;
+            }
         }
 
         // Pull the initial pitch, yaw, and translation out of the navObject's transform
@@ -2846,7 +2896,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Get the eye position
             var eye = new THREE.Vector3();
             var threeObject = node.threeObject;
-            eye.getPositionFromMatrix( threeObject.matrixWorld );
+            eye.setFromMatrixPosition( threeObject.matrixWorld );
 
             var look = new THREE.Vector3();
             look.subVectors( targetWorldPos, eye );
@@ -2895,7 +2945,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             
             if ( lookatNode )
             {
-                targetWorldPos.getPositionFromMatrix( lookatNode.threeObject.matrixWorld );
+                targetWorldPos.setFromMatrixPosition( lookatNode.threeObject.matrixWorld );
                 lookAtWorldPosition( targetWorldPos );                         
             }
         
@@ -3137,6 +3187,17 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
         } else {
             self.logger.warnx( "orbit: There is no navigation object to move" );
+        }
+    }
+
+    function setActiveCamera(cameraID) {
+        var sceneRootID = this.state.sceneRootID;
+        var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
+        if( modelCameraInfo.threeJScameras[cameraID] )
+        {
+            // If the view is currently using the model's activeCamera, update it to the new activeCamera
+            if ( usersShareView )
+                this.state.cameraInUse = modelCameraInfo.threeJScameras[ cameraID ];
         }
     }
 });

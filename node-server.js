@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var server = require( './node_vwf' ),
+    path   = require( 'path' ),
     fs 	   = require( 'fs' ),
     cli    = require( './lib/nodejs/vwfCli.js' );
 
@@ -20,9 +21,13 @@ function printGeneralHelp() {
 	console.log("");
 	console.log("Options:");
 	console.log("  -a, --applicationPath    Path to VWF application. Default: current directory.");
-	console.log("  -p                       Port to start server on. Default: 3000");
-	console.log("  -l                       Log level for server. Default: 1");
+	console.log("  -v, --vwfPath            Path to VWF support files. Default: current directory, then \"$HOME/.vwf\".");
+	console.log("  -p, --port               Port to start server on. Default: 3000");
+	console.log("  -l, --log                Log level for server. Default: 1");
 	console.log("  -h, --help               Output usage information");
+	console.log("  -s, --ssl                Enables SSL");
+	console.log("  -k, --key                Path to private key");
+	console.log("  -c, --cert               Path to certificate");
 }
 
 function printCreateHelp() {
@@ -34,6 +39,7 @@ function printCreateHelp() {
 	console.log("Example:");
 	console.log("  vwf create ~/code/my-new-app");
 }
+
 
 if ( argv._[0] == 'create' && argv._.length == 1 ) {
 	console.log("'create' requires a PATH to create the new VWF application.");
@@ -59,21 +65,7 @@ if ( argv._[0] == 'create' && argv._.length == 1 ) {
 } else if ( argv._[0] == 'help' && argv._[1] == 'create' ) {
 	printCreateHelp();
 } else if ( argv._[0] == 'help' && argv._[1] == 'run' ) {
-	console.log("Usage:");
-	console.log("  vwf [options]");
-	console.log("  vwf [options] run");
-	console.log("");
-	console.log("The `vwf run` command runs the application in the current directory");
-	console.log("in local development mode.");
-	console.log("");
-	console.log("Example:");
-	console.log("  vwf run -a ~/code/my-new-app -p 5000");
-	console.log("");
-	console.log("Options:");
-	console.log("  -a, --applicationPath    Path to VWF application. Default: current directory.");
-	console.log("  -p                       Port to start server on. Default: 3000");
-	console.log("  -l                       Log level for server. Default: 1");
-	console.log("  -h, --help               Output usage information");
+	printGeneralHelp();
 } else if ( argv._[0] == 'help' ) {
 	console.log("VWF can't find help on that command.");
 	console.log("");

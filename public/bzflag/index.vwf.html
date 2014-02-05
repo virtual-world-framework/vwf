@@ -54,10 +54,10 @@
       });
 
       $( '#selectPlayerInput' ).keydown( function(e) {
-        e.stopPropogation();
+        e.stopPropagation();
       });
       $( '#selectPlayerInput' ).keyup( function(e) {
-       e.stopPropogation();
+       e.stopPropagation();
         var code = ( e.keyCode ? e.keyCode : e.which );
         if ( ( code == 13 ) && ( sanitizedUsername.length > 0 ) ) {
           var buttonEnabled = true;

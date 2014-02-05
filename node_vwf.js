@@ -1,33 +1,13 @@
 var path = require( 'path' ),
     http = require( 'http' ),
+    https = require( 'https' ),
     fs = require( 'fs' ),
     url = require( 'url' ),
     sio = require( 'socket.io' ),
     reflector = require( './lib/nodejs/reflector' ),
-    vwf = require( './lib/nodejs/vwf' );
+    vwf = require( './lib/nodejs/vwf' ),
+    argv = require('optimist').argv;
 
-// Basic error handler.
-global.error = function () {
-    var red, brown, reset;
-		red   = '\u001b[31m';
-		brown = '\u001b[33m';
-		reset = '\u001b[0m';
-
-    var args = Array.prototype.slice.call( arguments );
-    args[ 0 ] = red + args[ 0 ] + reset;
-    var level = args.splice( args.length - 1 )[ 0 ];
-	
-    if ( !isNaN( parseInt( level ) ) ) {
-        level = parseInt( level );
-    } else {
-        args.push( level )
-        level = 1;
-    };
-
-    if ( level <= global.logLevel ) {
-        console.log.apply( this, args );
-    }
-};
 
 // Basic logging function.
 global.log = function () {
@@ -62,7 +42,6 @@ function consoleError( string ) {
 // to the current directory if none is specified.
 // Use --applicationPath or -a to specify an alternative path.
 function parseApplicationPath () {
-    var argv = require('optimist').argv;
 
     if ( argv.applicationPath || argv.a ) {
 
@@ -72,7 +51,7 @@ function parseApplicationPath () {
             consoleNotice( "Serving VWF applications from " + applicationPath );
             return applicationPath;
         } else {
-            consoleError ( applicationPath + " is NOT a directory! Serving VWF applications from " + process.cwd() );
+            consoleError( applicationPath + " is NOT a directory! Serving VWF applications from " + process.cwd() );
             return process.cwd();
         }
 
@@ -83,26 +62,37 @@ function parseApplicationPath () {
 }
 
 // Set the VWF directory where VWF files will be served from. Default to
-// "$HOME/.vwf". If not found at $HOME/.vwf, try the current working
-// directory.
+// user specified directory if defined by the command line "-v" or "--vwfPath"
+// options, then current working directory, and finally if not found at either,
+// try the "$HOME/.vwf" directory.
 function parseVWFPath () {
     var home = ( process.env.HOME || process.env.USERPROFILE );
     var vwfHome = path.join( home, ".vwf" );
-
-    if ( fs.existsSync( path.join( vwfHome, "support/client/lib" ) ) ) {
-        return vwfHome;
+    var vwfPath = ( argv.v  || argv.vwfPath );
+     
+    if ( vwfPath != undefined && fs.existsSync( path.join( vwfPath, "support/client/lib" ) ) ) {
+        return vwfPath;
     } else if ( fs.existsSync( path.join( process.cwd(), "support/client/lib" ) ) ) {
         return process.cwd();
+    } else if ( fs.existsSync( path.join( process.env.VWF_DIR, "support/client/lib" ) ) ) {
+        return process.env.VWF_DIR;
+    } else if ( fs.existsSync( path.join( vwfHome, "support/client/lib" ) ) ) {
+        return vwfHome;
     } else {
         consoleError( "Could not find VWF support files." );
         return false;
     }
 }
 
+
 //Start the VWF server
 function startVWF() {
-    global.activeinstances = [];
+
+    global.logLevel = ( ( argv.l || argv.log ) ? ( argv.l || argv.log ) : 1 );
+
     global.vwfRoot = parseVWFPath();
+
+    global.instances = {};
 
     if ( !global.vwfRoot ) {
         // Should not hit this path since the VWF script checks for the existence
@@ -123,30 +113,28 @@ function startVWF() {
         }
     } // close onRequest
 
-    //create the server
-    var red, brown, reset;
-    brown = '\u001b[33m';
-    red   = '\u001b[31m';
-    reset = '\u001b[0m';
+    consoleNotice( 'LogLevel = ' +  global.logLevel );  
 
-    //start the DAL
-    var pIndex = process.argv.indexOf( '-p' );
-    var port = ( pIndex >= 0 ? parseInt( process.argv[ pIndex + 1 ] ) : 3000 );
-		
-    var lIndex = process.argv.indexOf( '-l' );
-    global.logLevel = ( lIndex >= 0 ? process.argv[ lIndex + 1 ] : 1 );
-    global.log( brown + 'LogLevel = ' +  global.logLevel + reset, 0 );	
+    consoleNotice( 'Serving VWF support files from ' + global.vwfRoot );
 
-    p = process.argv.indexOf( '-nocache' );
-    if ( p >= 0 ) {
+    if ( argv.nocache ) {
         FileCache.enabled = false;
-        console.log( 'server cache disabled' );
+        consoleNotice( 'server cache disabled' );
     }
 
-    global.applicationRoot = parseApplicationPath();
+    global.applicationRoot = parseApplicationPath( );
 
-    var srv = http.createServer( OnRequest ).listen( port );
-    global.log( brown + 'Serving on port ' + port + reset, 0 );
+    var ssl = ( argv.s  || argv.ssl );
+    var sslOptions = {
+        key: ( ( argv.k || argv.key ) ? fs.readFileSync( argv.k || argv.key ) : undefined ),
+        cert: ( ( argv.c || argv.cert ) ? fs.readFileSync( argv.c || argv.cert ) : undefined )
+    };
+
+    //create the server
+    var port = ( ( argv.p || argv.port ) ? ( argv.p || argv.port ) : 3000 );
+
+    var srv = ssl ? https.createServer( sslOptions, OnRequest ).listen( port ) : http.createServer( OnRequest ).listen( port );
+    consoleNotice( 'Serving on port ' + port );
 
     //create socket server
     var socketManager = sio.listen( srv, { 
