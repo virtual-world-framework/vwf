@@ -1,328 +1,201 @@
-<a name="install" />
-
-<div class="well" markdown="1">
-Installation Instructions
+<div id="install" class="well" markdown="1">
+App Developer Installation 
 ==========================
 --------------------------
+
+### Windows 
+
+Download and run the [VWF Windows Installer](http://download.virtualworldframework.com/files/VWF_Windows_Install.exe).
+
+Launch a command prompt window and create a new VWF application:
+
+    c:\> vwf create MyApp
+
+Change into your new application folder and start the  server.
+
+    c:\> cd MyApp
+    c:\MyApp> vwf
+
+--------------------------
+
+### Mac OS X / Linux 
+
+NOTE: On Mac OS X, please make sure you have [Xcode Command Line Tools](https://developer.apple.com/xcode/) installed prior to executing the script.
+
+Execute the following command at your terminal/shell prompt:
+
+    /home/user# curl -kL http://get.virtual.wf  | sh
+	
+Launch a command prompt window and create a new VWF application:
+
+    /home/user# vwf create MyApp
+
+Change into your new folder application, and start the server.
+
+    /home/user# cd MyApp
+    /home/user/MyApp# vwf
+
 </div>
 
+<div id="advancedInstall" class="well" markdown="1">
+Core Developer Installation 
+==========================
 --------------------------
 
+Note: You need only follow these instructions if you plan on developing VWF core functionality (for example, writing or modifying a driver). If instead, you wish to develop VWF Applications on top of the framework, please follow the instructions above.
+
+--------------------------
 <div class="well" markdown="1">
-Source Code
---------------------------
---------------------------
+### Windows 
 
-The VWF source can be downloaded from [github](https://github.com/virtual-world-framework/vwf) for both Windows and Linux.
+Please make sure you have the following software packages installed:
+
+Prerequisites:
+
+1. [Ruby 1.9.3](http://dl.bintray.com/oneclick/rubyinstaller/rubyinstaller-1.9.3-p484.exe?direct)
+2. [Ruby DevKit 4.5.2](https://github.com/downloads/oneclick/rubyinstaller/DevKit-tdm-32-4.5.2-20111229-1559-sfx.exe)
+2a. Download it, run it to extract it somewhere (permanent). Then cd to it, run “ruby dk.rb init” and “ruby dk.rb install” to bind it to ruby installations in your path.
+3. [RubyGems](http://rubygems.org/pages/download#formats)
+4. [Git Client For Windows](http://git-scm.com/download/win) or [TortoiseGit](https://code.google.com/p/tortoisegit/) 
+
+Once your Ruby and Git environments are set up for Windows, the easiest way to start developing is to:
+
+1. [Fork the VWF repo from the Development Branch](https://github.com/virtual-world-framework/vwf/tree/development)
+2. Clone your newly forked VWF repo to your local machine.
+3. Run *bundle install* to install your local gems.
+3. Make your code modifications.
+4. Compile the code using *bundle exec rake windows* from the command prompt in your VWF folder.
+5. Start your server using *bundle exec thin start* from the command prompt in your VWF folder to test your changes.
+5. Submit a Pull Request after you complete your updates and testing back to the Virtual World Framework Team's VWF repo.
+
 </div>
-
---------------------------
 <div class="well" markdown="1">
-Windows Installation
---------------------------
---------------------------
-
-**1. Install Cygwin**
-
-Download and run setup.exe from [Cygwin](http://www.cygwin.com/install.html).
-
-Accept the default settings, except for:
-
-*   Set **Root Directory** to C:\Cygwin (with a capital C).
-*	Consider changing **Local Package Directory** to your browser downloads folder to avoid cluttering your desktop.
-
-Select a download site from the list. Choose one that seems close and reliable.
-
-At **Select Packages**, click the *View* button once to choose the *Full* view, which is a straight list and is easier to navigate than the default nested category view.
-
-Select the following packages for installation. Use the search box or scroll down the list to find each one. In the table, find the *New* column.  In this column, you will see packages listed typically with the word *Skip*.  Click on the word *Skip* in the *New* column will change the word to *Install*.  If the word is *Keep*, you already have the package needed installed.  We will want to change the following packages to *Install* by clicking on the word *Skip* to change the word.  Once the following listed packages are all marked for *Install* or *Keep* in the New column of the table, you may continue.
-
-*   curl
-*   gcc-g++
-* 	git
-*   make
-*   ruby
-*   openssl
-*   perl
-*   python
-*   p7zip
-*   libxml2
-*   libxml2-devel
-*   libxslt
-*   libxslt-devel
-
-Click through to *Finish* to close Cygwin setup. Save setup.exe for later since you may need it to add or update packages.
-
---------------------------
-
-**2. Install Java**
-
-Please make sure your computer has the latest version of Java installed.  You may install java from [Java's Website](http://www.java.com)
-
---------------------------
-
-**Option A: Automatic Windows Installation**
-
-*A.1 Shell Command*
-
-Please make sure your HTTP_PROXY and HTTPS_PROXY environment variable are set in cygwin. Please make sure your git http proxy are also set (ie. git config --global http.proxy http://yourproxy.com)
-
-Perform the following shell command at a user shell prompt within Cygwin:
-
-	curl -k https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_windows.sh | bash -x
-
---------------------------
-
-**Option B: Manual Windows Installation**
-
-*B.1 Install RubyGems*
-
-Cygwin's ruby installs without the library manager, so we have to install it from source: [http://rubygems.org/pages/download](http://rubygems.org/pages/download)
-Open a new Cygwin terminal session.
-Unpack into a directory and cd there
-Install with command: ruby setup.rb
-
-*B.2 Extract VWF from ZIP File*
-
-[Download](../downloads.html) the latest release and unzip to your user directory (for example, "C:\Users\YOU\pathto\VirtualWorldFramework") to ensure that you have full directory permissions.
-
-**Note:** Windows' built-in zip utility may report path length errors when unzipping.  We recommend [7-Zip](http://www.7-zip.org/) (free), [WinRAR](http://www.rarlab.com/) (not free), or [WinZip](http://www.winzip.com/win/en/index.htm) (not free) to unzip the file.
-
-*B.3 Install the Gems*
-
-Use the previous Cygwin terminal window or launch a new one and cd to your VWF development directory:
-
-	cd "C:\Users\YOU\pathto\VirtualWorldFramework"
-	
-The easiest way is to type c-d-space as above, drag a VWF directory icon from Windows Explorer, drop it onto the Cygwin terminal, then hit return.
-
-Then enter these commands:
-
-	gem install bundler
-
-	bundle install
-	
-	bundle exec rake 
-	
-Ignore the warning about sudo not found for bundle install. If you get linker relocation errors, you probably need to tell Cygwin to rebaseall. See [Cygwin rebaseall](http://www.heikkitoivonen.net/blog/2008/11/26/cygwin-upgrades-and-rebaseall) for details. The required rebase and dash packages should already be installed.
-
-*B.4 Launch the Server*
-
-Enter the following command:
-
-	bundle exec thin start 
-
-*B.5 Connect*
-
-The server runs on port 3000 in development mode by default. Use Google Chrome to connect to [http://localhost:3000/duck](http://localhost:3000/duck) and [http://localhost:3000/plane](http://localhost:3000/plane). View the excellent duck and the fascinating plane. Other applications may be available at other paths.
-</div>
---------------------------
-<div class="well" markdown="1">
-Linux Installations
---------------------------
---------------------------
-
-**1. Ubuntu/Debian Automatic Installation**
+### Ubuntu/Debian Package  
 
 Perform the following shell command at a user shell prompt:
 
 	sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_debian.sh | bash -x
-
---------------------------
-
-**2. Red Hat Enterprise Linux Automatic Installation**
+</div>
+<div class="well" markdown="1">
+### Red Hat Enterprise Linux Automatic Installation
 
 Perform the following shell command at a user shell prompt:
 
 	sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_redhat.sh | bash -x
-
---------------------------
-
-**3. Manual Installation on Linux**
-
-*3.1 RubyGems*
+</div>
+<div class="well" markdown="1">
+### Linux / Mac OS X
+ 
+ 
+### RubyGems
 
 Ensure RubyGems is installed (for Debian/Ubuntu). 
 
-	# sudo apt-get update
-	# sudo apt-get install ruby1.9.1 ruby1.9.1-dev \ rubygems1.9.1 irb1.9.1 ri1.9.1 rdoc1.9.1 \ build-essential libopenssl-ruby1.9.1 libssl-dev zlib1g-dev
-	# sudo update-alternatives --install /usr/bin/ruby ruby /usr/bin/ruby1.9.1 400 \
+	sudo apt-get update
+	sudo apt-get install ruby1.9.1 ruby1.9.1-dev \ rubygems1.9.1 irb1.9.1 ri1.9.1 rdoc1.9.1 \ build-essential libopenssl-ruby1.9.1 libssl-dev zlib1g-dev
+	sudo update-alternatives --install /usr/bin/ruby ruby /usr/bin/ruby1.9.1 400 \
          --slave   /usr/share/man/man1/ruby.1.gz ruby.1.gz \
                         /usr/share/man/man1/ruby1.9.1.1.gz \
         --slave   /usr/bin/ri ri /usr/bin/ri1.9.1 \
         --slave   /usr/bin/irb irb /usr/bin/irb1.9.1 \
         --slave   /usr/bin/rdoc rdoc /usr/bin/rdoc1.9.1
-	# sudo update-alternatives --config ruby
-	# sudo update-alternatives --config gem	
+	sudo update-alternatives --config ruby
+	sudo update-alternatives --config gem	
 
 Now try 
-	# ruby --version
+
+	ruby --version
 
 and you should get the 1.9.# baseline for ruby reported back.	
 	
 Or (for Red Hat/Fedora)
 
-	# yum install ruby rubygems
+	yum install ruby rubygems
 
 Or (for OSX with Homebrew)
 
-	Make sure you have the [Command Line Tools for XCode](https://developer.apple.com/downloads/index.action) installed.
+Make sure you have the [Command Line Tools for XCode](https://developer.apple.com/downloads/index.action) installed.
 	
-	# ruby -e "$(curl -fsSkL raw.github.com/mxcl/homebrew/go)"
-	# brew install automake
-	The script explains what it will do and then pauses before it does it
+	ruby -e "$(curl -fsSkL raw.github.com/mxcl/homebrew/go)"
+	brew install automake
+
+The script explains what it will do and then pauses before it does it
 	
-	# \curl -L https://get.rvm.io | bash -s stable --ruby
-	# source ~/.rvm/scripts/rvm
-	This installs RVM which is a version manager for Ruby.
+	\curl -L https://get.rvm.io | bash -s stable --ruby
+	source ~/.rvm/scripts/rvm
+
+This installs RVM which is a version manager for Ruby.
 	
-	# rvm install 1.9.3-head
-	# rvm use ruby-1.9.3-head
-	# rvm rubygems current
+	rvm install 1.9.3-head
+	rvm use ruby-1.9.3-head
+	rvm rubygems current
 	This adds Ruby 1.9.3 to your machine and sets 1.9.3 as the default Ruby version.
 
-	# brew install git
+	brew install git
 	This installs git if you do not have it already on your machine.
 
-*3.2 Extract VWF from TAR File*
+### Download Virtual World Framework
 
 Download the contents of the GitHub Master VWF Baseline to your local directory:
 
-	$ sudo git clone http://www.github.com/virtual-world-framework/vwf --recursive
+	sudo git clone http://www.github.com/virtual-world-framework/vwf --recursive
 
-*3.3 Install the Gems*
+### Install the Gems
 
 Launch a terminal window and cd to your VWF development directory:
 
-	$ cd vwf/
+	cd vwf/
 
 Then enter these commands:
 
-	# sudo gem install rubygems-update
-	# sudo update_rubygems 
-	# sudo gem install bundler
-
-On Debian-based systems, RubyGems is not automatically added to the path. Find the following lines in bash:
-
-	if [ "`id -u`" -eq 0 ]; then
-	  PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-	else
-	  PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
-	fi
-	export PATH
-
-And update them to:
-
-	if [ "`id -u`" -eq 0 ]; then
-	  PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/var/lib/gems/1.8/bin/"
-	else
-	  PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/var/lib/gems/1.8/bin/"
-	fi
-	export PATH
+	sudo gem install rubygems-update
+	sudo update_rubygems 
+	sudo gem install bundler
 
 Now you can install the RubyGems to the system (as root):
 
-	# sudo bundle install
+	sudo bundle install
 
-*3.4 Build the Server*
+### Build the Server
+This command will compile and setup the server baseline.
 
-    # sudo bundle exec rake 
+    sudo bundle exec rake 
 
-*3.5 Launch the Server*
+### Launch the Server
+This command launches Ruby's Thin web server to start serving your VWF applications.
 
-	# sudo bundle exec thin start
+	sudo bundle exec thin start
 
-*3.6 Connect*
+### Connect
 
-The server runs on port 3000 in development mode by default. Use Google Chrome to connect to [http://localhost:3000/duck](http://localhost:3000/duck) and [http://localhost:3000/plane](http://localhost:3000/plane). 
+The server runs on port 3000 in development mode by default. Use Google Chrome to view the website.
 </div>
---------------------------
+</div>
 
 <div class="well" markdown="1">
-Node.js Server Installation / Launch / Debug
---------------------------
---------------------------
-
-**Installation**
-
+NodeJS Core Developer Installation
+==========================
 --------------------------
 
-*1. Install Node.js for your specific environment [http://www.nodejs.org](http://www.nodejs.org).  At the time of this update the current version was v0.10.20.*  
+As an alternative to the ruby version of the VWF server, there also exists a node.js version (which will soon become the primary supported server). To be on the bleeding edge and use the node.js version of the server now:
 
-*2.	Download the VWF source from [github](https://github.com/virtual-world-framework/vwf).*
+1. Install Node.js for your specific environment [http://www.nodejs.org](http://www.nodejs.org).
 
-*3.	Launch a terminal window and cd to your VWF root directory.  For windows a ‘node.js command prompt’ was provided with the node.js windows install.  Cygwin may also be used assuming the Cygwin Windows Installation instructions have been successfully completed.  Caveat, there are known issues using Node.js with Cygwin.*
+2. You should already have a baseline on your local machine by following the [Core Developer Installation Instructions](http://localhost:3000/web/documentation.html#advancedInstall)
 
-    $ cd "//path/to/VirtualWorldFramework"
+3. Launch a terminal/command prompt window and cd to your VWF application directory.
 
-*4.	Run the Node Package Manager (npm) to install the correct version of the node module dependencies.  npm is included with your Node.js install.  This will construct the node_modules directory at the top level VWF.*
+    cd Path\To\YourApp
 
-    $ npm install
+4. Run the vwf command to start the Node JS server.
 
-*5.	(Optional) Check to see that all packages were successful installed.*
-
-    $ npm ls 
-
---------------------------
-
-**Launch Node Server**
-
---------------------------
-
-*6.	Launch the node server.*
-
-    $ npm start
-
-or
-
-    $ node node-server.js -a ./public
-
-The `-a` or `--applicationPath` options can be used to specify where to serve
-VWF applications from. `node-server` defaults to serving applications from
-the current directory, so be sure to specify the public directory using 
-`-a` or `--applicationPath` if you want to run from the root of your VWF
-installation.
-
-*7. Connect*
-
-The server runs on port 3000 in development mode by default. Use your browser to connect to [http://localhost:3000/duck](http://localhost:3000/duck) and [http://localhost:3000/plane](http://localhost:3000/plane). 
-
---------------------------
-
-**Node.js Debugging Tool**
-
---------------------------
-
-One option for Node.js runtime debugging is the 'node-inspector' tool.  To use the tool do the following:
-
-*1. Install the node-inspector (from root VWF directory).*
-    
-    $ npm install -g node-inspector   //global install
-
-*2. Run node-inspector from your terminal.*
-    
-    $ node-inspector &
-
- *3. Run the node server with debug flag.*
-
-     $ npm run debug
-
-or
-
-     $ node --debug node-server.js -a ./public
-
-or to pause the debugger at start
-
-     $ node --debug-brk node-server.js  -a ./public
-
- *4. In your browser go to [http://127.0.0.1:8080/debug?port=5858](http://127.0.0.1:8080/debug?port=5858) and use as you would with your typical browser tools.*
-
- Additional configuration options can be found at [https://github.com/node-inspector/node-inspector](https://github.com/node-inspector/node-inspector)
+    vwf
 
 </div>
+
 <div class="well" markdown="1">
 Configuring HTTPS/SSL Traffic
---------------------------
+==========================
 --------------------------
 
 The Virtual World Framework is able to work over an HTTPS/SSL configuration.  Below we outline how to setup a Linux environment running Thin web server with SSL as this is our preferred operational environment for the VWF server; however you may use SSL for any combination of operating system, and we ask that if you do configure and run SSL installations on other platforms that you please generate a Pull Request on GitHub and update this page with instructions on your preferred platform. Thank you in advance!
