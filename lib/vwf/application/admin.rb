@@ -97,6 +97,16 @@ class VWF::Application::Admin < Sinatra::Base
 
   end
 
+  get "/instances/jsonp" do
+
+    "jsonCallback( " + Hash[ *
+      VWF::Application::Reflector.instances( env ).map do |resource, instance|
+        [ resource, Hash[ :clients => Hash[ * instance[:clients].map { |client| [ client.id, nil ] } .flatten( 1 ) ] ] ]
+      end .flatten( 1 )
+    ] .to_json + " )"
+
+  end
+
   get "/models" do
     directory = Rack::Directory.new('public')
     directory._call({'SCRIPT_NAME'=>request.scheme+'://'+request.host_with_port, 'PATH_INFO'=>'models'})
