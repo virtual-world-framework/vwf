@@ -21,15 +21,13 @@ This command may be re-run to upgrade the installation to the latest version of 
 
 **Install on Windows**
 
-- Download the latest [VWF Baseline](http://download.virtualworldframework.com/files/VWF_Windows_latest.zip) and extract the zip.
-- Execute VWF from the root folder at a command prompt. (i.e., `c:\vwf-extracted-folder>vwf`)
-- Follow the instructions to setup your environment.
+- Download and run the [VWF Windows Installer](http://download.virtualworldframework.com/files/VWF_Windows_Install.exe).
 
 For more complex installations, such as working on VWF core, please see our [Installation Instructions](http://www.virtual.wf/web/docs/install.html).
 
 ## Quick Start 
 
-Create a new VWF application.
+Create a new VWF application from command prompt/terminal/shell:
 
 ```
 $ vwf create my-app
