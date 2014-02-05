@@ -1,9 +1,22 @@
 # Copyright 2012 United States Government, as represented by Joint Staff – J7
 
 --- 
-extends: http://vwf.example.com/navscene.vwf
+extends: http://vwf.example.com/scene.vwf
 properties:
   ambientColor: [ 250, 250, 250 ]
+  boundingBox: [ [ -390, 650 ], [ -180, 450 ], [ 70, 70 ] ]
+  usersShareView: false
+  userObject:
+    extends: http://vwf.example.com/node3.vwf
+    implements: [ "http://vwf.example.com/navigable.vwf" ]
+    properties:
+      translation: [ -300, -120, 70 ]
+      rotation: [ 0, 0, -1, 20 ]
+    children:     
+      camera:
+        extends: http://vwf.example.com/camera.vwf
+        properties:
+          near: 1
 methods:
   initializeCamera:
 children:
@@ -431,16 +444,3 @@ children:
     extends: http://vwf.example.com/node3.vwf
     source: joc/tv_screens.DAE
     type: model/vnd.collada+xml
-scripts:
-- |
-  this.initialize = function() {
-    this.translationSpeed = 5;
-    this.rotationSpeed = 0.333;
-    this.future( 0 ).initializeCamera();
-  } 
-
-  this.initializeCamera = function() {
-    this.camera.near = 1;
-    this.camera.translation = [ -296.55, -118.78, 70.80 ]; 
-    this.camera.rotation = [0,0,-1,19.261152267456055];
-  }//@ sourceURL=index.vwf

@@ -8,28 +8,6 @@ var path = require( 'path' ),
     vwf = require( './lib/nodejs/vwf' ),
     argv = require('optimist').argv;
 
-// Basic error handler.
-global.error = function () {
-    var red, brown, reset;
-        red   = '\u001b[31m';
-        brown = '\u001b[33m';
-        reset = '\u001b[0m';
-
-    var args = Array.prototype.slice.call( arguments );
-    args[ 0 ] = red + args[ 0 ] + reset;
-    var level = args.splice( args.length - 1 )[ 0 ];
-    
-    if ( !isNaN( parseInt( level ) ) ) {
-        level = parseInt( level );
-    } else {
-        args.push( level )
-        level = 1;
-    };
-
-    if ( level <= global.logLevel ) {
-        console.log.apply( this, args );
-    }
-};
 
 // Basic logging function.
 global.log = function () {
@@ -73,7 +51,7 @@ function parseApplicationPath () {
             consoleNotice( "Serving VWF applications from " + applicationPath );
             return applicationPath;
         } else {
-            consoleError ( applicationPath + " is NOT a directory! Serving VWF applications from " + process.cwd() );
+            consoleError( applicationPath + " is NOT a directory! Serving VWF applications from " + process.cwd() );
             return process.cwd();
         }
 
@@ -83,8 +61,37 @@ function parseApplicationPath () {
     }
 }
 
+// Set the VWF directory where VWF files will be served from. Default to
+// user specified directory if defined by the command line "-v" or "--vwfPath"
+// options, then current working directory, and finally if not found at either,
+// try the "$HOME/.vwf" directory.
+function parseVWFPath () {
+    var home = ( process.env.HOME || process.env.USERPROFILE );
+    var vwfHome = path.join( home, ".vwf" );
+    var vwfPath = ( argv.v  || argv.vwfPath );
+     
+    if ( vwfPath != undefined && fs.existsSync( path.join( vwfPath, "support/client/lib" ) ) ) {
+        return vwfPath;
+    } else if ( fs.existsSync( path.join( process.cwd(), "support/client/lib" ) ) ) {
+        return process.cwd();
+    } else if ( fs.existsSync( path.join( process.env.VWF_DIR, "support/client/lib" ) ) ) {
+        return process.env.VWF_DIR;
+    } else if ( fs.existsSync( path.join( vwfHome, "support/client/lib" ) ) ) {
+        return vwfHome;
+    } else {
+        consoleError( "Could not find VWF support files." );
+        return false;
+    }
+}
+
+
 //Start the VWF server
 function startVWF() {
+
+    global.logLevel = ( ( argv.l || argv.log ) ? ( argv.l || argv.log ) : 1 );
+
+    global.vwfRoot = parseVWFPath();
+
     global.instances = {};
 
     if ( !global.vwfRoot ) {
@@ -106,32 +113,28 @@ function startVWF() {
         }
     } // close onRequest
 
-    //create the server
-    var red, brown, reset;
-    brown = '\u001b[33m';
-    red   = '\u001b[31m';
-    reset = '\u001b[0m';
+    consoleNotice( 'LogLevel = ' +  global.logLevel );  
 
-    //start the DAL
-    var port = ( argv.p ? parseInt( argv.p ) : 3000 );
-        
-    global.logLevel = ( argv.l ? argv.l : 1 );
-    global.log( brown + 'LogLevel = ' +  global.logLevel + reset, 0 );  
+    consoleNotice( 'Serving VWF support files from ' + global.vwfRoot );
 
     if ( argv.nocache ) {
         FileCache.enabled = false;
-        console.log( 'server cache disabled' );
+        consoleNotice( 'server cache disabled' );
     }
 
-    global.applicationRoot = parseApplicationPath();
+    global.applicationRoot = parseApplicationPath( );
 
+    var ssl = ( argv.s  || argv.ssl );
     var sslOptions = {
-        key: argv.key ? fs.readFileSync( argv.key ) : undefined,
-        cert: argv.cert ? fs.readFileSync( argv.cert ) : undefined
+        key: ( ( argv.k || argv.key ) ? fs.readFileSync( argv.k || argv.key ) : undefined ),
+        cert: ( ( argv.c || argv.cert ) ? fs.readFileSync( argv.c || argv.cert ) : undefined )
     };
 
-    var srv = argv.ssl ? https.createServer( sslOptions, OnRequest ).listen( port ) : http.createServer( OnRequest ).listen( port );
-    global.log( brown + 'Serving on port ' + port + reset, 0 );
+    //create the server
+    var port = ( ( argv.p || argv.port ) ? ( argv.p || argv.port ) : 3000 );
+
+    var srv = ssl ? https.createServer( sslOptions, OnRequest ).listen( port ) : http.createServer( OnRequest ).listen( port );
+    consoleNotice( 'Serving on port ' + port );
 
     //create socket server
     var socketManager = sio.listen( srv, { 
