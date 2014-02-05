@@ -14,6 +14,7 @@ Note: (*) indicates an API change.
 - NEW: Three.js JSON Model loader and animations, Refs #2891
 - NEW: Clean up the Three.js JSON model testcase.  Refs #2981
 - NEW: Update to three.js r64
+- CHG: Reorder client disconnect code in Node server.  Refs #2978
 - CHG: Update shrinkwrap with the new modules.
 - CHG: Update node server docs with application path info. Closes #3011
 - CHG: Update readme.md to include new instructions for VWF 1.0 installation steps. Closes #2959
