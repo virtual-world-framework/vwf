@@ -1,3 +1,48 @@
+Function openLinkNewWindow
+  Push $3
+  Exch
+  Push $2
+  Exch
+  Push $1
+  Exch
+  Push $0
+  Exch
+
+  ReadRegStr $0 HKCR "http\shell\open\command" ""
+# Get browser path
+    DetailPrint $0
+  StrCpy $2 '"'
+  StrCpy $1 $0 1
+  StrCmp $1 $2 +2 # if path is not enclosed in " look for space as final char
+    StrCpy $2 ' '
+  StrCpy $3 1
+  loop:
+    StrCpy $1 $0 1 $3
+    DetailPrint $1
+    StrCmp $1 $2 found
+    StrCmp $1 "" found
+    IntOp $3 $3 + 1
+    Goto loop
+
+  found:
+    StrCpy $1 $0 $3
+    StrCmp $2 " " +2
+      StrCpy $1 '$1"'
+
+  Pop $0
+  Exec '$1 $0'
+  Pop $0
+  Pop $1
+  Pop $2
+  Pop $3
+FunctionEnd
+
+!macro _OpenURL URL
+Push "${URL}"
+Call openLinkNewWindow
+!macroend
+
+!define OpenURL '!insertmacro "_OpenURL"'
 !include EnvVarUpdate.nsh
 !include "x64.nsh"
 ; MUI 1.67 compatible ------
@@ -53,7 +98,7 @@ Section
 SectionEnd
 !else
 !TempFile FILELIST
-!System '"${NSISDIR}\makensis" -NOCD "-DGENFILELIST=${FILELIST}" "-DSRCDIR=.\vwf_temp" "${__FILE__}"' = 0
+!System '"${NSISDIR}\makensis" -NOCD "-DGENFILELIST=${FILELIST}" "-DSRCDIR=c:\vwf_temp" "${__FILE__}"' = 0
 !System '"${FILELIST}.exe"' = 0
 !DelFile "${FILELIST}"
 !DelFile "${FILELIST}.exe"
@@ -93,7 +138,7 @@ SectionEnd
 
 ; MUI end ------
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "VWF_Windows_Install.exe"
+OutFile "c:\VWF_Windows_Install.exe"
 InstallDir "$PROGRAMFILES\Virtual World Framework"
 ShowInstDetails show
 ShowUnInstDetails show
@@ -109,22 +154,9 @@ Section
         WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
         WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
         ${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR"  ; Append the new path
+        ${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR\node"  ; Append the new path
         ${EnvVarUpdate} $0 "VWF_DIR" "A" "HKLM" "$INSTDIR"  ; Append the new path
-SectionEnd
-
-Section -AdditionalIcons
-  CreateShortCut "$SMPROGRAMS\Virtual World Framework\Uninstall.lnk" "$INSTDIR\uninst.exe"
-SectionEnd
-
-Section -Prerequisites
-${If} ${RunningX64}
-    File /oname=$INSTDIR\.node\node.exe c:\vwf\.node\64\node.exe
-    ${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR\.node"  ; Append the new path
-${Else}
-    File /oname=$INSTDIR\.node\node.exe c:\vwf\.node\32\node.exe
-    ${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR\.node"  ; Append the new path
-${EndIf}
-ExecShell "" "iexplore.exe" "$INSTDIR\README.md"
+        ${OpenURL} "https://github.com/virtual-world-framework/vwf/blob/development/README.md"
 SectionEnd
 
 Function un.onUninstSuccess
@@ -144,8 +176,8 @@ Section uninstall
         RMDir "$instdir"
         DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
         ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR"  ; Append the new path
-        ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\.node"  ; Append the new path
         ${un.EnvVarUpdate} $0 "VWF_DIR" "R" "HKLM" "$INSTDIR"  ; Append the new path
+        ${un.EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR\node"  ; Append the new path
         SetAutoClose true
 SectionEnd
 !endif
