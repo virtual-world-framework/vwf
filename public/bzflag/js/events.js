@@ -64,11 +64,22 @@ vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplements
 };
 
 vwf_view.deletedNode = function ( nodeID ) { 
-    if (nodeID.length > 50 ) {
-        if ( nodeID.slice(0, 33) == "http-vwf-example-com-clients-vwf:" ) {
-            var player_nodes = vwf_view.kernel.find( "/", "/navobj_" + nodeID.slice( nodeID.length - 20 ) );
-            if ( player_nodes.length > 0 ) {
-                vwf_view.kernel.setProperty( player_nodes[ 0 ], "playerConnected", false );
+    if ( nodeID.slice(0, 33) == "http-vwf-example-com-clients-vwf:" ) {
+        // There is currently no way to match the deleted client to its associated navigation object
+        // so loop over all the navobjects and set the one without a client to disconnected
+        var players = vwf_view.kernel.find(vwf_view.kernel.find("","/")[0], "./element(*,'http://vwf.example.com/navigable.vwf')");
+        var clients = vwf_view.kernel.findClients("", "/*");
+
+        for(var i = 0; i < players.length; i++) {
+            var clientFound = false;
+            for (var j = 0; j < clients.length; j++) {
+                if(vwf_view.kernel.name(players[i]).indexOf(vwf_view.kernel.name(clients[j])) >= 0) {
+                    clientFound = true;
+                    break;
+                }
+            }
+            if(!clientFound) {
+                vwf_view.kernel.setProperty( players[ i ], "playerConnected", false );
             }
         }
     }
