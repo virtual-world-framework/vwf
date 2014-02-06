@@ -660,7 +660,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         //need to walk the tree and hide all sub nodes as well
                         value = Boolean( propertyValue );
-                        SetVisible( threeObject, value );
+                        threeObject.visible = value;
                     }
                     else if ( propertyName == 'castShadows' )
                     {
@@ -1524,6 +1524,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                         value = Math.floor(animationFrameCount / animationDuration);
                     }
+                    return value;
+                }
+
+                if(propertyName == "visible") {
+                    value = node.threeObject.visible;
                     return value;
                 }
                 
@@ -3672,16 +3677,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 ret = child;
         }       
         return ret;
-    }
-    function SetVisible(node,state) 
-    {
-        if(node)
-            node.visible = state;
-        if(node && node.children)
-        {
-           for(var i in node.children)
-            SetVisible(node.children[i],state);
-        }
     }
 
     function getWorldTransform( node ) {
