@@ -88,22 +88,18 @@ class VWF::Application::Admin < Sinatra::Base
   # details (none currently).
 
   get "/instances" do
+    
+    jsonInstances = Hash[ *
+        VWF::Application::Reflector.instances( env ).map do |resource, instance|
+          [ resource, Hash[ :clients => Hash[ * instance[:clients].map { |client| [ client.id, nil ] } .flatten( 1 ) ] ] ]
+        end .flatten( 1 )
+      ] .to_json
 
-    Hash[ *
-      VWF::Application::Reflector.instances( env ).map do |resource, instance|
-        [ resource, Hash[ :clients => Hash[ * instance[:clients].map { |client| [ client.id, nil ] } .flatten( 1 ) ] ] ]
-      end .flatten( 1 )
-    ] .to_json
-
-  end
-
-  get "/instances/jsonp" do
-
-    "jsonCallback( " + Hash[ *
-      VWF::Application::Reflector.instances( env ).map do |resource, instance|
-        [ resource, Hash[ :clients => Hash[ * instance[:clients].map { |client| [ client.id, nil ] } .flatten( 1 ) ] ] ]
-      end .flatten( 1 )
-    ] .to_json + " )"
+    if params["callback"]
+      params["callback"].to_s + "( " + jsonInstances + " )"
+    else
+      jsonInstances
+    end
 
   end
 
