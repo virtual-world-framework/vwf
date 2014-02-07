@@ -562,7 +562,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 
                 var last = self.nodes[i].lastTickTransform;
                 var now = self.nodes[i].selfTickTransform;
-                if(last && now && !matCmp(last,now,.0001) )
+                if(last && now  )
                 {
                     
                     var interp = goog.vec.Mat4.clone(last);
@@ -577,11 +577,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                         setTransform(i,interp);    
                         self.nodes[i].needTransformRestore = true;
-                    }else
-                    {
-                        console.log('here')
                     }
-
                    
                     
                     
