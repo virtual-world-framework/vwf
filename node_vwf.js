@@ -74,10 +74,10 @@ function parseVWFPath () {
         return vwfPath;
     } else if ( fs.existsSync( path.join( process.cwd(), "support/client/lib" ) ) ) {
         return process.cwd();
-    } else if ( fs.existsSync( path.join( process.env.VWF_DIR, "support/client/lib" ) ) ) {
-        return process.env.VWF_DIR;
     } else if ( fs.existsSync( path.join( vwfHome, "support/client/lib" ) ) ) {
         return vwfHome;
+    } else if ( process.env.VWF_DIR && fs.existsSync( path.join( process.env.VWF_DIR, "support/client/lib" ) ) ) {
+        return process.env.VWF_DIR;
     } else {
         consoleError( "Could not find VWF support files." );
         return false;
