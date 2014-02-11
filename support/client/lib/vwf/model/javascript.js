@@ -840,28 +840,9 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
                 if ( node.properties.hasOwnProperty( propertyName ) ) {
 
                     ( function( propertyName ) {
-
-                        Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
-                            get: function() { return self.kernel.getProperty( this.node.id,
-                                propertyName, this.node.private.when, this.node.private.callback
-                            ) },
-                            set: function( value ) { self.kernel.setProperty( this.node.id,
-                                propertyName, value, this.node.private.when, this.node.private.callback
-                            ) },
-                            enumerable: true
-                        } );
-
+                        createPropertyAccessor.call( self, future.properties, propertyName );
 future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
-                        Object.defineProperty( future, propertyName, { // "this" is future in get/set
-                            get: function() { return self.kernel.getProperty( this.id,
-                                propertyName, this.private.when, this.private.callback
-                            ) },
-                            set: function( value ) { self.kernel.setProperty( this.id,
-                                propertyName, value, this.private.when, this.private.callback
-                            ) },
-                            enumerable: true
-                        } );
-
+                        createPropertyAccessor.call( self, future, propertyName );
                     } )( propertyName );
                 
                 }
@@ -877,30 +858,9 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
                 if ( node.methods.hasOwnProperty( methodName ) ) {
 
                     ( function( methodName ) {
-
-                        Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
-                            get: function() {
-                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future.methods
-                                    return self.kernel.callMethod( this.node.id,
-                                        methodName, arguments, this.node.private.when, this.node.private.callback
-                                    );
-                                }
-                            },
-                            enumerable: true
-                        } );
-
+                        createMethodAccessor.call( self, future.methods, methodName, true );
 future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
-                        Object.defineProperty( future, methodName, { // "this" is future in get/set
-                            get: function() {
-                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future
-                                    return self.kernel.callMethod( this.id,
-                                        methodName, arguments, this.private.when, this.private.callback
-                                    );
-                                }
-                            },
-                            enumerable: true
-                        } );
-
+                        createMethodAccessor.call( self, future, methodName, true );
                     } )( methodName );
 
                 }
@@ -916,30 +876,9 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
                 if ( node.events.hasOwnProperty( eventName ) ) {
 
                     ( function( eventName ) {
-
-                        Object.defineProperty( future.events, eventName, { // "this" is future.events in get/set
-                            get: function() {
-                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
-                                    return self.kernel.fireEvent( this.node.id,
-                                        eventName, arguments, this.node.private.when, this.node.private.callback
-                                    );
-                                };
-                            },
-                            enumerable: true,
-                        } );
-
+                        createEventAccessor.call( self, future.events, eventName, undefined, true );
 future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
-                        Object.defineProperty( future, eventName, { // "this" is future in get/set
-                            get: function() {
-                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future
-                                    return self.kernel.fireEvent( this.id,
-                                        eventName, arguments, this.private.when, this.private.callback
-                                    );
-                                };
-                            },
-                            enumerable: true,
-                        } );
-
+                        createEventAccessor.call( self, future, eventName, undefined, true );
                     } )( eventName );
 
                 }
@@ -971,12 +910,14 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
             get: function() {  // `this` is the container
                 var node = this.node || this;  // the node via node.properties.node, or just node
-                return self.kernel.getProperty( node.id, propertyName );
+                return self.kernel.getProperty( node.id, propertyName,
+                    node.private.when, node.private.callback );
             },
 
             set: function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.properties.node, or just node
-                self.kernel.setProperty( node.id, propertyName, value );
+                self.kernel.setProperty( node.id, propertyName, value,
+                    node.private.when, node.private.callback );
             },
 
             enumerable: true,
@@ -994,8 +935,10 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
     ///   The ...
     /// @param {String} methodName
     ///   The ...
+    /// @param {Boolean} [unsettable]
+    ///   The ...
 
-    function createMethodAccessor( container, methodName ) {
+    function createMethodAccessor( container, methodName, unsettable ) {
 
         var self = this;
 
@@ -1004,11 +947,12 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             get: function() {  // `this` is the container
                 var node = this.node || this;  // the node via node.methods.node, or just node
                 return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
-                    return self.kernel.callMethod( node.id, methodName, arguments );
+                    return self.kernel.callMethod( node.id, methodName, arguments,
+                        node.private.when, node.private.callback );
                 };
             },
 
-            set: function( value ) {  // `this` is the container
+            set: unsettable ? undefined : function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.methods.node, or just node
                 node.methods.hasOwnProperty( methodName ) ||
                     self.kernel.createMethod( node.id, methodName );
@@ -1030,10 +974,12 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
     ///   The ...
     /// @param {String} eventName
     ///   The ...
-    /// @param {String} eventPrefix
+    /// @param {String} [eventPrefix]
+    ///   The ...
+    /// @param {Boolean} [unsettable]
     ///   The ...
 
-    function createEventAccessor( container, eventName ) {
+    function createEventAccessor( container, eventName, eventPrefix, unsettable ) {
 
         var self = this;
 
@@ -1042,11 +988,12 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             get: function() {  // `this` is the container
                 var node = this.node || this;  // the node via node.events.node, or just node
                 return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
-                    return self.kernel.fireEvent( node.id, eventName, arguments );
+                    return self.kernel.fireEvent( node.id, eventName, arguments,
+                        node.private.when, node.private.callback );
                 };
             },
 
-            set: function( value ) {  // `this` is the container
+            set: unsettable ? undefined : function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.events.node, or just node
                 var listeners = node.private.listeners[eventName] ||
                     ( node.private.listeners[eventName] = [] );  // array of { handler: function, context: node, phases: [ "phase", ... ] }
