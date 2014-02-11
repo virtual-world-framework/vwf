@@ -1,3 +1,5 @@
+# Code Section comes from NSIS Wiki: http://nsis.sourceforge.net/Open_link_in_new_browser_window
+
 Function openLinkNewWindow
   Push $3
   Exch
