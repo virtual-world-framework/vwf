@@ -18,9 +18,10 @@
 /// 
 /// @module vwf/model/javascript
 /// @requires vwf/model
+/// @requires vwf/kernel/utility
 /// @requires vwf/utility
 
-define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
+define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function( module, model, kutility, utility ) {
 
     return model.load( module, {
 
@@ -525,7 +526,9 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
             if ( setter && setter !== true ) { // is there is a setter (and not just a guard value)
                 try {
-                    return setter.call( node, propertyValue );
+                    var valueJS = valueJSFromKernel.call( this, propertyValue );
+                    var resultJS = setter.call( node, valueJS );
+                    return valueKernelFromJS.call( this, resultJS );
                 } catch ( e ) {
                     this.logger.warnx( "settingProperty", nodeID, propertyName, propertyValue,
                         "exception in setter:", utility.exceptionMessage( e ) );
@@ -544,7 +547,8 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
             if ( getter && getter !== true ) { // is there is a getter (and not just a guard value)
                 try {
-                    return getter.call( node );
+                    var resultJS = getter.call( node );
+                    return valueKernelFromJS.call( this, resultJS );
                 } catch ( e ) {
                     this.logger.warnx( "gettingProperty", nodeID, propertyName, propertyValue,
                         "exception in getter:", utility.exceptionMessage( e ) );
@@ -589,7 +593,12 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
             if ( body ) {
                 try {
-                    return body.apply( node, methodParameters );
+                    var parametersJS = ! ( methodParameters && methodParameters.length ) ? methodParameters :
+                        Array.prototype.slice.call( methodParameters ).map( function( value ) {  // ... best for [], arguments, Array ...
+                            return valueJSFromKernel.call( this, value );
+                        }, this );
+                    var resultJS = body.apply( node, parametersJS );
+                    return valueKernelFromJS.call( this, resultJS );
                 } catch ( e ) {
                     this.logger.warnx( "callingMethod", nodeID, methodName, methodParameters, methodValue, // TODO: limit methodParameters for log
                         "exception:", utility.exceptionMessage( e ) );
@@ -675,6 +684,11 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             var node = this.nodes[nodeID];
             var listeners = findListeners( node, eventName );
 
+            var parametersJS = ! ( eventParameters && eventParameters.length ) ? eventParameters :
+                Array.prototype.slice.call( eventParameters ).map( function( value ) {  // ... best for [], arguments, Array ...
+                    return valueJSFromKernel.call( this, value );
+                }, this );
+
             var self = this;
 
             // Call the handlers registered for the event, and calculate the logical OR of each
@@ -689,7 +703,8 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
                 try {
                     if ( ! phase || listener.phases && listener.phases.indexOf( phase ) >= 0 ) {
-                        var result = listener.handler.apply( listener.context || self.nodes[0], eventParameters ); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
+                        var resultJS = listener.handler.apply( listener.context || self.nodes[0], parametersJS ); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
+                        var result = valueKernelFromJS.call( self, resultJS );
                         return handled || result || result === undefined; // interpret no return as "return true"
                     }
                 } catch ( e ) {
@@ -712,7 +727,8 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             if ( scriptType == "application/javascript" ) {
                 try {
-                    return ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText || "" );
+                    var resultJS = ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText || "" );
+                    return valueKernelFromJS.call( this, resultJS );
                 } catch ( e ) {
                     this.logger.warnx( "executing", nodeID,
                         ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", utility.exceptionMessage( e ) );
@@ -958,13 +974,15 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
             get: function() {  // `this` is the container
                 var node = this.node || this;  // the node via node.properties.node, or just node
-                return self.kernel.getProperty( node.id, propertyName,
+                var resultKernel = self.kernel.getProperty( node.id, propertyName,
                     node.private.when, node.private.callback );
+                return valueJSFromKernel.call( self, resultKernel );
             },
 
             set: function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.properties.node, or just node
-                self.kernel.setProperty( node.id, propertyName, value,
+                var valueKernel = valueKernelFromJS.call( self, value );
+                self.kernel.setProperty( node.id, propertyName, valueKernel,
                     node.private.when, node.private.callback );
             },
 
@@ -995,8 +1013,13 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             get: function() {  // `this` is the container
                 var node = this.node || this;  // the node via node.methods.node, or just node
                 return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
-                    return self.kernel.callMethod( node.id, methodName, arguments,
+                    var argumentsKernel = ! arguments.length ? arguments :
+                        Array.prototype.slice.call( arguments ).map( function( value ) {
+                            return valueKernelFromJS.call( self, value );
+                        } );
+                    var resultKernel = self.kernel.callMethod( node.id, methodName, argumentsKernel,
                         node.private.when, node.private.callback );
+                    return valueJSFromKernel.call( self, resultKernel );
                 };
             },
 
@@ -1036,8 +1059,13 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             get: function() {  // `this` is the container
                 var node = this.node || this;  // the node via node.events.node, or just node
                 return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
-                    return self.kernel.fireEvent( node.id, eventName, arguments,
+                    var argumentsKernel = ! arguments.length ? arguments :
+                        Array.prototype.slice.call( arguments ).map( function( value ) {
+                            return valueKernelFromJS.call( self, value );
+                        } );
+                    var resultKernel = self.kernel.fireEvent( node.id, eventName, argumentsKernel,
                         node.private.when, node.private.callback );
+                    return valueJSFromKernel.call( self, resultKernel );
                 };
             },
 
@@ -1120,6 +1148,67 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             return prototypeListeners.map( function( listener ) { // remap the prototype listeners to target the node
                 return { handler: listener.handler, context: node, phases: listener.phases };
             } ).concat( nodeListeners );
+        }
+
+    }
+
+    /// Convert node references into special values that can pass through the kernel. These values
+    /// are wrapped in such a way that they won't be confused with any other application value, and
+    /// they will be replicated correctly by the kernel.
+    /// 
+    /// Other values are returned unchanged. Use `valueJSFromKernel` to retrieve the original.
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `valueKernelFromJS.call( driver, value )`.
+    /// 
+    /// @param {Object} value
+    /// 
+    /// @returns {Object}
+
+    function valueKernelFromJS( value ) {
+
+        if ( typeof value === "object" ) {
+
+            var nodeNode = this.nodes[ kutility.nodeTypeURI ];  // our proxy for the node.vwf prototype
+
+            if ( nodeNode && ( nodeNode.isPrototypeOf( value ) || value === nodeNode ) ) {
+                return kutility.nodeReference( value.id );
+            } else {
+                return value;
+            }
+
+        } else {
+
+            return value;
+
+        }
+
+    }
+
+    /// Convert values wrapped by `valueKernelFromJS` into their original form for use in the
+    /// JavaScript driver's execution environment.
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `valueJSFromKernel.call( driver, value )`.
+    /// 
+    /// @param {Object} value
+    /// 
+    /// @returns {Object}
+
+    function valueJSFromKernel( value ) {
+
+        if ( typeof value === "object" ) {
+
+            if ( kutility.valueIsNodeReference( value ) ) {
+                return this.nodes[ value.id ];
+            } else {
+                return value;
+            }
+
+        } else {
+
+            return value;
+
         }
 
     }

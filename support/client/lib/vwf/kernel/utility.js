@@ -40,7 +40,46 @@ define( [ "module" ], function( module ) {
 
         nodeTypeDescriptor: { extends: null },  // TODO: detect nodeTypeDescriptor in createChild() a different way and remove this explicit null prototype
 
+        /// Wrap `nodeID` in an object in such a way that it can stand in for a node reference
+        /// without being confused with any other application value. The returned object will
+        /// contain `nodeID` in the `id` field. `valueIsNodeReference` may be used to determine if
+        /// an arbitrary value is such a node reference.
+        /// 
+        /// @param {ID} nodeID
+        /// 
+        /// @returns {Object}
+
+        nodeReference: function( nodeID ) {
+            return Object.create( nodeReferencePrototype, {
+                id: { value: nodeID }  // TODO: same wrapper for same id so that === works
+            } );
+        },
+
+        /// Determine if a value is a node reference. If it is, it will contain the `nodeID` in the
+        /// `id` field.
+        /// 
+        /// @param {Object} value
+        /// 
+        /// @returns {Boolean}
+
+        valueIsNodeReference: function( value ) {
+            return nodeReferencePrototype.isPrototypeOf( value );
+        },
+
     };
+
+    /// The key prototype for application values that reference nodes.
+    /// 
+    /// Application values that reference VWF nodes are objects of the form `{ id: id }` that also
+    /// extend this object. Application values include property values, method parameters and
+    /// results, and event listener parameters.
+    /// 
+    /// `nodeReferencePrototype` serves as a key to distinguish real node references from other
+    /// arbitrary values.
+    /// 
+    /// @field
+
+    var nodeReferencePrototype = {};
 
     // Return the module.
 
