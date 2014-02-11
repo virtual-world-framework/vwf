@@ -723,20 +723,9 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             if ( behavior.properties.hasOwnProperty( propertyName ) ) {
 
                 ( function( propertyName ) {
-
-                    Object.defineProperty( proxy.properties, propertyName, { // "this" is proxy.properties in get/set
-                        get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
-                        set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
-                        enumerable: true
-                    } );
-
+                    createPropertyAccessor.call( self, proxy.properties, propertyName );
 proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                    Object.defineProperty( proxy, propertyName, { // "this" is proxy in get/set
-                        get: function() { return self.kernel.getProperty( this.id, propertyName ) },
-                        set: function( value ) { self.kernel.setProperty( this.id, propertyName, value ) },
-                        enumerable: true
-                    } );
-
+                    createPropertyAccessor.call( self, proxy, propertyName );
                 } )( propertyName );
             
                 if ( behavior.private.getters.hasOwnProperty( propertyName ) ) {
@@ -764,36 +753,9 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
             if ( behavior.methods.hasOwnProperty( methodName ) ) {
 
                 ( function( methodName ) {
-
-                    Object.defineProperty( proxy.methods, methodName, { // "this" is proxy.methods in get/set
-                        get: function() {
-                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.methods
-                                return self.kernel.callMethod( this.node.id, methodName, arguments );
-                            };
-                        },
-                        set: function( value ) {
-                            this.node.methods.hasOwnProperty( methodName ) ||
-                                self.kernel.createMethod( this.node.id, methodName );
-                            this.node.private.bodies[methodName] = value;
-                        },
-                        enumerable: true,
-                    } );
-
+                    createMethodAccessor.call( self, proxy.methods, methodName );
 proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                    Object.defineProperty( proxy, methodName, { // "this" is proxy in get/set
-                        get: function() {
-                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy
-                                return self.kernel.callMethod( this.id, methodName, arguments );
-                            };
-                        },
-                        set: function( value ) {
-                            this.methods.hasOwnProperty( methodName ) ||
-                                self.kernel.createMethod( this.id, methodName );
-                            this.private.bodies[methodName] = value;
-                        },
-                        enumerable: true,
-                    } );
-
+                    createMethodAccessor.call( self, proxy, methodName );
                 } )( methodName );
             
                 if ( behavior.private.bodies.hasOwnProperty( methodName ) ) {
@@ -815,68 +777,9 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
             if ( behavior.events.hasOwnProperty( eventName ) ) {
 
                 ( function( eventName ) {
-
-                    Object.defineProperty( proxy.events, eventName, { // "this" is proxy.events in get/set
-                        get: function() {
-                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.events
-                                return self.kernel.fireEvent( this.node.id, eventName, arguments );
-                            };
-                        },
-                        set: function( value ) {
-                            var listeners = this.node.private.listeners[eventName] ||
-                                ( this.node.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
-                            if ( typeof value == "function" || value instanceof Function ) {
-                                listeners.push( { handler: value, context: this.node } ); // for node.events.*event* = function() { ... }, context is the target node
-                            } else if ( value.add ) {
-                                if ( ! value.phases || value.phases instanceof Array ) {
-                                    listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
-                                } else {
-                                    listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
-                                }
-                            } else if ( value.remove ) {
-                                this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                                    return listener.handler !== value.handler;
-                                } );
-                            } else if ( value.flush ) {
-                                this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                                    return listener.context !== value.context;
-                                } );
-                            }
-                        },
-                        enumerable: true,
-                    } );
-
+                    createEventAccessor.call( self, proxy.events, eventName );
 proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                    Object.defineProperty( proxy, eventName, { // "this" is proxy in get/set
-                        get: function() {
-                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy
-                                return self.kernel.fireEvent( this.id, eventName, arguments );
-                            };
-                        },
-                        set: function( value ) {
-                            var listeners = this.private.listeners[eventName] ||
-                                ( this.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
-                            if ( typeof value == "function" || value instanceof Function ) {
-                                listeners.push( { handler: value, context: this } ); // for node.*event* = function() { ... }, context is the target node
-                            } else if ( value.add ) {
-                                if ( ! value.phases || value.phases instanceof Array ) {
-                                    listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
-                                } else {
-                                    listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
-                                }
-                            } else if ( value.remove ) {
-                                this.private.listeners[eventName] = listeners.filter( function( listener ) {
-                                    return listener.handler !== value.handler;
-                                } );
-                            } else if ( value.flush ) {
-                                this.private.listeners[eventName] = listeners.filter( function( listener ) {
-                                    return listener.context !== value.context;
-                                } );
-                            }
-                        },
-                        enumerable: true,
-                    } );
-
+                    createEventAccessor.call( self, proxy, eventName );
                 } )( eventName );
 
             }
