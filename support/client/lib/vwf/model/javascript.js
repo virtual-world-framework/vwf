@@ -832,7 +832,7 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
             } );
 
             future.properties = Object.create( Object.getPrototypeOf( future ).properties || Object.prototype, {
-                future: { value: future } // for future.properties accessors (non-enumerable)  // TODO: hide this better
+                node: { value: future } // for future.properties accessors (non-enumerable)  // TODO: hide this better
             } );
 
             for ( var propertyName in node.properties ) {
@@ -842,11 +842,11 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
                     ( function( propertyName ) {
 
                         Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
-                            get: function() { return self.kernel.getProperty( this.future.id,
-                                propertyName, this.future.private.when, this.future.private.callback
+                            get: function() { return self.kernel.getProperty( this.node.id,
+                                propertyName, this.node.private.when, this.node.private.callback
                             ) },
-                            set: function( value ) { self.kernel.setProperty( this.future.id,
-                                propertyName, value, this.future.private.when, this.future.private.callback
+                            set: function( value ) { self.kernel.setProperty( this.node.id,
+                                propertyName, value, this.node.private.when, this.node.private.callback
                             ) },
                             enumerable: true
                         } );
@@ -869,7 +869,7 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
             }
 
             future.methods = Object.create( Object.getPrototypeOf( future ).methods || Object.prototype, {
-                future: { value: future } // for future.methods accessors (non-enumerable)  // TODO: hide this better
+                node: { value: future } // for future.methods accessors (non-enumerable)  // TODO: hide this better
             } );
 
             for ( var methodName in node.methods ) {
@@ -881,8 +881,8 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
                         Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
                             get: function() {
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future.methods
-                                    return self.kernel.callMethod( this.future.id,
-                                        methodName, arguments, this.future.private.when, this.future.private.callback
+                                    return self.kernel.callMethod( this.node.id,
+                                        methodName, arguments, this.node.private.when, this.node.private.callback
                                     );
                                 }
                             },
@@ -908,7 +908,7 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
             }
 
             future.events = Object.create( Object.getPrototypeOf( future ).events || Object.prototype, {
-                future: { value: future } // for future.events accessors (non-enumerable)  // TODO: hide this better
+                node: { value: future } // for future.events accessors (non-enumerable)  // TODO: hide this better
             } );
 
             for ( var eventName in node.events ) {
@@ -920,8 +920,8 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
                         Object.defineProperty( future.events, eventName, { // "this" is future.events in get/set
                             get: function() {
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
-                                    return self.kernel.fireEvent( this.future.id,
-                                        eventName, arguments, this.future.private.when, this.future.private.callback
+                                    return self.kernel.fireEvent( this.node.id,
+                                        eventName, arguments, this.node.private.when, this.node.private.callback
                                     );
                                 };
                             },
