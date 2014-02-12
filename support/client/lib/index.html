@@ -48,6 +48,8 @@
 
     <script type="text/javascript" src="Class.create.js"></script>
     <script type="text/javascript" src="rAF.js"></script>
+ 
+	<script type="text/javascript" src="pace.min.js" data-pace-options='{ "elements": { "selectors": [img] }'></script>
 
     <!-- This is the main client library. vwf.js creates a framework manager and attaches it to  -->
     <!-- the global window object as window.vwf. All access to the framework is through that     -->
@@ -128,7 +130,7 @@
 
   </head>
 
-  <body>
+  <body onLoad="Pace.start()">
 
     <!-- Generic clients may have nearly empty pages, but pages for custom clients may be laid   -->
     <!-- out in any manner desired. Any view and models that render to the page should be        -->
