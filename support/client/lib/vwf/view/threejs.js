@@ -41,6 +41,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     var positionUnderMouseClick;
     var boundingBox = undefined;
     var userObjectRequested = false;
+    var usersShareView = true;
     // End Navigation
 
     var Vec3 = goog.vec.Vec3;
@@ -100,7 +101,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName, callback /* ( ready ) */) {
             
-            
             //the created node is a scene, and has already been added to the state by the model.
             //how/when does the model set the state object? 
             if ( this.state.scenes[ childID ] )
@@ -109,6 +109,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 ).children(":last");
                 
                 initScene.call(this,this.state.scenes[childID]);
+            }
+            else if (this.state.scenes[ this.kernel.application() ] && this.state.scenes[ this.kernel.application() ].camera.ID == childID) {
+                setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
             }
 	    
 	    this.nodes[childID] = {id:childID,extends:childExtendsID};
@@ -159,27 +162,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // -- initializedProperty ----------------------------------------------------------------------
 
         initializedProperty: function ( nodeID, propertyName, propertyValue ) { 
-            if ( propertyName == "transform" ) {
-                receiveModelTransformChanges( nodeID, propertyValue );
-            } else if ( propertyName == "lookAt") {
-
-                var node = this.state.nodes[ nodeID ];
-
-                // If the state knows about the node, it is in the scene and should be updated
-                // Otherwise, it is a prototype and can be ignored
-                if ( node ) {
-                    nodeLookAt( node );
-                }
-            } else if ( ( nodeID == this.kernel.application() ) && 
-                        ( propertyName == "makeOwnAvatarVisible" ) ) {
-                makeOwnAvatarVisible = propertyValue;
-                if ( navObject ) {
-                    setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
-                }
-            } else if ( ( nodeID == this.kernel.application() ) &&
-                        ( propertyName == "boundingBox" ) ) {
-                boundingBox = propertyValue;
-            }
+            this.satProperty(nodeID, propertyName, propertyValue);
         },
 
         // TODO: deletedProperty
@@ -187,7 +170,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // -- satProperty ------------------------------------------------------------------------------
 
         satProperty: function ( nodeID, propertyName, propertyValue ) { 
-            
 	    
 	    if(vwf.client() && false)
 		{
@@ -226,16 +208,20 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 } else if ( propertyName == "rotationSpeed" ) {
                     rotationSpeed = propertyValue;
                 }
-            } else if ( ( nodeID == this.kernel.application() ) && 
-                        ( propertyName == "makeOwnAvatarVisible" ) ) {
+            } else if ( nodeID == this.kernel.application() ) {
+                if ( propertyName == "makeOwnAvatarVisible" ) {
                 makeOwnAvatarVisible = propertyValue;
                 if ( navObject ) {
                     setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
                 }
-            } else if ( ( nodeID == this.kernel.application() ) &&
-                        ( propertyName == "boundingBox" ) ) {
+                } else if ( propertyName == "boundingBox" ) {
                 boundingBox = propertyValue;
+                } else if ( propertyName == "activeCamera" ) {
+                    setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
+                } else if ( propertyName == "usersShareView" ) {
+                    usersShareView = propertyValue;
             }
+            } 
 
             // Pay attention to these properties for all nodes
             if ( propertyName == "transform" ) {
@@ -1004,8 +990,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 localPickNormal = goog.vec.Vec3.normalize( localPickNormal, goog.vec.Vec3.create() );
                 if ( sceneView.state.nodes[ pointerPickID ] ) {
                     var pickObj = sceneView.state.nodes[ pointerPickID ];
-                    if ( pickObj.threeObject.worldMatrix ) {
-                        worldTransform = goog.vec.Mat4.createFromArray( pickObj.threeObject.worldMatrix.elements );
+                    if ( pickObj.threeObject.matrixWorld ) {
+                        worldTransform = goog.vec.Mat4.createFromArray( pickObj.threeObject.matrixWorld.elements );
                     } else {
                         worldTransform = goog.vec.Mat4.createFromArray( getWorldTransform( pickObj ).elements );
                     } 
@@ -2984,6 +2970,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             setVisibleRecursively( navObject.threeObject, false );
         }
 
+        // TODO: The model should keep track of a shared navObject, not just the shared camera that it tracks now. See Redmine #3145.
+        if( !usersShareView ) {
         // Search for a camera in the navigation object and if it exists, make it active
         var cameraIds = self.kernel.find( navObject.ID, 
                                           "descendant-or-self::element(*,'http://vwf.example.com/camera.vwf')" );
@@ -2994,6 +2982,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var cameraId = cameraIds[ 0 ];
             cameraNode = rendererState.nodes[ cameraId ];
             rendererState.cameraInUse = cameraNode.threeObject;
+        }
         }
 
         // Pull the initial pitch, yaw, and translation out of the navObject's transform
@@ -3463,6 +3452,17 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
         } else {
             self.logger.warnx( "orbit: There is no navigation object to move" );
+        }
+    }
+
+    function setActiveCamera(cameraID) {
+        var sceneRootID = this.state.sceneRootID;
+        var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
+        if( modelCameraInfo.threeJScameras[cameraID] )
+        {
+            // If the view is currently using the model's activeCamera, update it to the new activeCamera
+            if ( usersShareView )
+                this.state.cameraInUse = modelCameraInfo.threeJScameras[ cameraID ];
         }
     }
 });

@@ -318,7 +318,15 @@ properties:
   ## @name node3.vwf#visible
   ## @property
 
-  visible: true
+  visible: 
+    set: |
+      this.visible = value;
+      if(this.children) {
+        for(var i in this.children) {
+          this.children[i].visible = value;
+        }
+      }
+    value: true
 
 events:
 

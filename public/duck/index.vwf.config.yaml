@@ -14,3 +14,11 @@
 ---
 info:
   title: "VWF Duck Application"
+# Turn on Editor Interface
+# Note: The threejs model and view driver must be added with the editor view driver. Adding just 
+# the editor will override the threejs default. 
+model:
+  vwf/model/threejs:
+view:
+  vwf/view/threejs: "#vwf-root"
+  vwf/view/editor: 

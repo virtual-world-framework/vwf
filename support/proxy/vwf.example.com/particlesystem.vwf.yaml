@@ -19,13 +19,6 @@
 --- 
 extends: http://vwf.example.com/node3.vwf
 properties:
-  
-  ## Number of particles
-  ## 
-  ## @name particlesystem.vwf#numberParticles
-  ## @property
-
-  numberParticles:
 
   ## Maximum lifetime of particle
   ## 
@@ -33,7 +26,7 @@ properties:
   ## @property
 
   maxLifeTime:
-  
+
   ## Minimum lifetime of particle
   ## 
   ## @name particlesystem.vwf#minLifeTime
@@ -111,75 +104,76 @@ properties:
 
   image:
 
-  ## World bounding box of the camera. Overrides inherited property to return null, since a camera has no dimensions
-  ##
-  ## @name camera.vwf#worldBoundingBox
-  ## @property
-
   ## true for additive blending, false for normal blending
   ##
   ## @name particlesystem.vwf#additive
   ## @property
-  
+
   additive:
-  
+
   ## alpha value for particles
   ##
   ## @name particlesystem.vwf#opacity
   ## @property
-  
+
   opacity:
-  
+
   ## depthTest value for particles
   ##
   ## @name particlesystem.vwf#depthTest
   ## @property
-  
+
   depthTest:
+
+  ## depthWrite value for particles
+  ##
+  ## @name particlesystem.vwf#depthWrite
+  ## @property
+
+  depthWrite:
 
   ## emitterType value for particles
   ## 'point','sphere','box'
-  ## @name particlesystem.vwf#depthTest
+  ## @name particlesystem.vwf#emitterType
   ## @property
-  
+
   emitterType:
-  
+
   ## emitterSize value for particles
   ## ignored by point emitter, emitterSize[0] is radius for sphere, emitterSize[x,y,z] is bounds for box emitter
-  ## @name particlesystem.vwf#depthTest
+  ## @name particlesystem.vwf#emitterSize
   ## @property
-  
+
   emitterSize:
-  
+
   ## the maximum number of particles that will be regenerated per frame. Useful to distrubte particles over time, and avoid
   ## issues where min and max life are the same
-  ## @name particlesystem.vwf#depthTest
+  ## @name particlesystem.vwf#maxRate
   ## @property
-  
+
   maxRate:
-  
+
   ## The total number of particles in the system
-  ## @name particlesystem.vwf#depthTest
+  ## @name particlesystem.vwf#particleCount
   ## @property
-  
+
   particleCount:
-  
-  ## The total number of particles in the system
-  ## @name particlesystem.vwf#depthTest
+
+  ## The drag on velocity of the particles
+  ## @name particlesystem.vwf#damping
   ## @property
-  
+
   damping:
-  
+
   ## 'cartesian' or 'spherical' in cartesian, velocity min and max are box coords, as in min and max local space vectors. 
   ## in spherical, they are treated as roe theta and magnitude for vectors, still in local space. in this mode, the range for the first two 
   ## components is 0 - 1
   ## this helps set the direction to be random, but the magnitute can be constant
-  ## @name particlesystem.vwf#depthTest
+  ## @name particlesystem.vwf#velocityMode
   ## @property
-  
+
   velocityMode:
-  
-  
+
   ## solver - the system used to update the position of the particles. 
   ## 'Euler' solver can take into account emitter motion, damping and gravity. Runs at 10 ticks per second with linear interpolation
   ## 'Analytic' - runs in realtime, but requires more bandwidth on the GPU bus. Cannot take into account complex forces like damping or gravity
@@ -187,63 +181,75 @@ properties:
   ## also, because it cannot branch based on previous states, it does not support maxRate. Instead, it offsets all particles randomly in time to distribute them
   ## @name particlesystem.vwf#solver
   ## @property
-  
+
   solver:
-  
+
   ## Split the particle texture by the value. 2 would be a 2x2 tiled texture, 3 is 3x3.
   ## @name particlesystem.vwf#textureTiles
   ## @property
-  
+
   textureTiles:
-  
+
   ## the particles spin over time
   ## @name particlesystem.vwf#maxSpin
   ## @property
-  
+
   maxSpin:
-  
+
   ## the particles spin over time
   ## @name particlesystem.vwf#minSpin
   ## @property
-  
+
   minSpin:
-  
+
   ## the particles orientation
-  ## @name particlesystem.vwf#minSpin
+  ## @name particlesystem.vwf#minOrientation
   ## @property
-  
+
   minOrientation:
-  
+
   ## the particles orientation
-  ## @name particlesystem.vwf#minSpin
+  ## @name particlesystem.vwf#maxOrientation
   ## @property
-  
+
   maxOrientation:
-  
+
+  ## the particle size
+  ## @name particlesystem.vwf#sizeRange
+  ## @property
+
+  size:
+
   ## the variation offset from the start and end size
   ## @name particlesystem.vwf#sizeRange
   ## @property
-  
+
   sizeRange:
-  
+
   ## the variation offset from the start and end color
   ## @name particlesystem.vwf#colorRange
   ## @property
-  
+
   colorRange:
-  
+
   ## gravatational force toward gravityCenter
   ## @name particlesystem.vwf#gravity
   ## @property
-  
+
   gravity:
-  
+
   ## the point in worldspace that the gravity force pulls toward
   ## @name particlesystem.vwf#gravity
   ## @property
-  
+
   gravityCenter:
-  
+
+
+  ## World bounding box of the camera. Overrides inherited property to return null, since a camera has no dimensions
+  ##
+  ## @name camera.vwf#worldBoundingBox
+  ## @property
+
   worldBoundingBox:
     get: |
       return null;

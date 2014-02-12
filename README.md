@@ -21,17 +21,13 @@ This command may be re-run to upgrade the installation to the latest version of 
 
 **Install on Windows**
 
-- Download the latest VWF Windows Build zip file from http://virtualworldframework.com/web/downloads.html.
-
-- Execute the _run.bat_ file provided at the root level of the extracted folder.
+- Download and run the [VWF Windows Installer](http://download.virtualworldframework.com/files/VWF_Windows_Install.exe).
 
 For more complex installations, such as working on VWF core, please see our [Installation Instructions](http://www.virtual.wf/web/docs/install.html).
 
 ## Quick Start 
 
-**Mac/Linux**
-
-Create a new VWF application.
+Create a new VWF application from command prompt/terminal/shell:
 
 ```
 $ vwf create my-app
@@ -44,21 +40,9 @@ $ cd my-app
 $ vwf
 ```
 
-Your application is now up and running at
-[http://localhost:3000](http://localhost:3000).
+Your application is now up and running at [http://localhost:3000](http://localhost:3000).
 
-To get started with VWF, check out [Getting
-Started](http://virtual.wf/web/docs/readme.html).
-
-**Windows** 
-
-Execute the _run.bat_ file provided at the root level of the extracted folder.
-
-```
-c:\vwf> run
-```
-
-Your application is now up and running at [http://localhost:3000/my-app](http://localhost:3000/my-app).
+To get started with VWF, check out [Getting Started](http://virtual.wf/web/docs/readme.html).
 
 ## Examples
 
