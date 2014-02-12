@@ -114,7 +114,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
             }
 	    
-	    this.nodes[childID] = {id:childID,extends:childExtendsID};
+            if(this.state.nodes[childID] && this.state.nodes[childID].threeObject instanceof THREE.Object3D) {
+    	        this.nodes[childID] = {id:childID,extends:childExtendsID};
+            }
         },
 
         initializedNode: function( nodeID, childID ) {
@@ -403,17 +405,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         self.realTickDif = now - self.lastRealTick;
 
         self.lastRealTick = now;
-        
-      
-    
+ 
         self.tickTime = 0;
         //reset - loading can cause us to get behind and always but up against the max prediction value
-        
-         
-        
-        
-        
-        
+
         for(var i in self.nodes)
         {
             if(self.state.nodes[i] && (!navObject || self.nodes[i].id != navObject.ID))
@@ -422,10 +417,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 self.nodes[i].lastTickTransform = self.nodes[i].selfTickTransform;
                 self.nodes[i].selfTickTransform = goog.vec.Mat4.clone(getTransform(i));
                 
-                
-                
                 if(self.nodes[i].selfTickTransform) self.nodes[i].selfTickTransform = goog.vec.Mat4.clone(self.nodes[i].selfTickTransform);
-                
                 
             }
         }
