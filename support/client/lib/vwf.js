@@ -838,7 +838,7 @@
                         // advance the queue's record of the current time. Messages in the queue are
                         // ordered by time, then by order of arrival.
 
-                        queue.insert( fields, fields.action == 'tick' ); // may invoke dispatch(), so call last before returning to the host
+                        queue.insert( fields, !fields.action ); // may invoke dispatch(), so call last before returning to the host
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -1073,7 +1073,6 @@
                     this.sequence_ = undefined; // clear after the previous action
                     this.client_ = undefined;   // clear after the previous action
                     this.now = fields.time;
-                    //this.tick();    //remove this - only fire the tick when the server sents a tick event!
                 }
 
                 // Perform the action.
@@ -1082,6 +1081,9 @@
                     this.sequence_ = fields.sequence; // note the message's queue sequence number for the duration of the action
                     this.client_ = fields.client;     // ... and note the originating client
                     this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, fields.origin );
+                }
+                else {
+                    this.tick();
                 }
 
             }
@@ -1093,10 +1095,6 @@
                 this.sequence_ = undefined; // clear after the previous action
                 this.client_ = undefined;   // clear after the previous action
                 this.now = queue.time;
-		
-		//this tick seems to  be unnecessary... causes ticks like 100ms 1ms 100ms 1ms 100ms .....   
-		//cant do animation smoothing with that...
-                //this.tick();
             }
             
         };

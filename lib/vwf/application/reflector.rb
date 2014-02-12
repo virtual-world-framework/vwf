@@ -465,7 +465,7 @@ private
     transport = session[:transport] = Transport.new
 
     session[:timer] = EventMachine::PeriodicTimer.new( 0.05 ) do  # TODO: configuration parameter for update rate
-      transport.playing and broadcast( { "time" => transport.time, "action" => "tick" }, false )
+      transport.playing and broadcast( { "time" => transport.time }, false )
     end
 
     transport.time = initial_time
