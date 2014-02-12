@@ -145,9 +145,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // -- deletedNode ------------------------------------------------------------------------------
 
         deletedNode: function(childID)
-	{
-		delete this.nodes[childID];
-	},
+    	{
+    		delete this.nodes[childID];
+    	},
 
         // -- addedChild -------------------------------------------------------------------------------
 
@@ -349,6 +349,29 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
         },
 
+        // -- calledMethod -----------------------------------------------------------------------------
+
+        calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+            switch(methodName) {
+                case "translateBy":
+                case "translateTo":
+                // No need for rotateBy or rotateTo because they call the quaternion methods
+                case "quaterniateBy":
+                case "quaterniateTo":
+                case "scaleBy":
+                case "scaleTo":
+                // No need for transformBy or worldTransformBy because they call transformTo and worldTransformTo
+                case "transformTo":
+                case "worldTransformTo":
+                    // If the duration of the transform is 0, set the transforms to their final value so it doesn't interpolate
+                    if(methodParameters.length < 2 || methodParameters[1] == 0) {
+                        this.nodes[nodeID].lastTickTransform = goog.vec.Mat4.clone(getTransform(nodeID));
+                        this.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(getTransform(nodeID));
+                    }
+                    break;
+            }
+        },
+
         // -- firedEvent -----------------------------------------------------------------------------
 
         firedEvent: function( nodeID, eventName ) {
@@ -524,13 +547,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     function setInterpolatedTransforms(deltaTime)
     {
         
-        
         var step = (self.tickTime) / (self.realTickDif);
         step = Math.min(step,1);
         deltaTime = Math.min(deltaTime,self.realTickDif)
         self.tickTime += deltaTime || 0;
-
-        
         
         //if going slower than tick rate, don't make life harder by changing values. it would be invisible anyway
         //if(step > 2) return;
@@ -538,33 +558,22 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         for(var i in self.nodes)
         {
                 
-                var last = self.nodes[i].lastTickTransform;
-                var now = self.nodes[i].selfTickTransform;
-                if(last && now && !matCmp(last,now,.0001) )
-                {
-                    
-                    var interp = goog.vec.Mat4.clone(last);
-                   
-                    
-                    
-
-                    interp = matrixLerp(last,now,step||0);
-                    
-                    if(self.nodes[i].id != navObject.ID)
-                    {
-
-                        setTransform(i,interp);    
-                        self.nodes[i].needTransformRestore = true;
-                    }else
-                    {
-                        console.log('here')
-                    }
-
-                   
-                    
-                    
+            var last = self.nodes[i].lastTickTransform;
+            var now = self.nodes[i].selfTickTransform;
+            if(last && now && !matCmp(last,now,.0001) )
+            {
+                
+                var interp = goog.vec.Mat4.clone(last);
+             
+                interp = matrixLerp(last,now,step||0);
+                
+                if(!navObject || self.nodes[i].id != navObject.ID)
+                {             
+                    setTransform(i,interp);    
+                    self.nodes[i].needTransformRestore = true;
                 }
                 
+            }
                 
         }
         
@@ -583,8 +592,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 self.state.nodes[i].threeObject.updateMatrixWorld(true);
                 self.nodes[i].needTransformRestore = false;
             }
-            
-            
             
         }
     }
