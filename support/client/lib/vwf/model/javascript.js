@@ -337,99 +337,76 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // Invoke an initialize() function if one exists.
 
         initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childIndex, childName, readyCallback /* ( ready ) */ ) {
+            childSource, childType, childIndex, childName ) {
 
             var node = this.nodes[nodeID];
             var child = this.nodes[childID];
 
-            var self = this;
+            var scriptText =
+                "this.hasOwnProperty( 'initialize' ) && " +
+                "( typeof this.initialize === 'function' || this.initialize instanceof Function ) && " +
+                "this.initialize()";
 
-            var initializers = [];
-            var tempNode = child;
-            var prototypeDepth = 0;
+            // Call the child's initializer.
 
-            // Create a list of the child and its prototypes that contain an `initialize` function.
-            // Nodes are represented as the number of prototypes below the child with `0`
-            // representing the child. The list is in order of the deepest prototype up to the child.
-
-            while ( tempNode ) {
-                var initializingExists = tempNode.hasOwnProperty( 'initialize' );
-                var initializingIsAFunc = ( typeof tempNode.initialize === "function" || 
-                                            tempNode.initialize instanceof Function )
-                if ( initializingExists && initializingIsAFunc ) {
-                    initializers.unshift( prototypeDepth );
-                }
-
-                prototypeDepth++;
-                tempNode = Object.getPrototypeOf( tempNode );
+            try {
+                ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
+            } catch ( e ) {
+                this.logger.warnx( "initializingNode", childID,
+                    "exception in initialize:", utility.exceptionMessage( e ) );
             }
 
-            // Let the kernel know that it shouldn't call initializingNode on other drivers until
-            // we're done with our potentially blocking calls to the prototype chain of initialize
-            // functions
-            readyCallback( false );
+            // The node is fully initialized at this point
 
-            // Call the intializer functions.
+            // Link to the parent.
+            // 
+            // The parent reference is only defined once the node is fully initialized.
+            // It is not defined earlier since components should be able to stand alone 
+            // without depending on external nodes.
+            // 
+            // Additionally, since parts of the application may become ready in a different
+            // order on other clients, referring to properties in other parts of the 
+            // application may lead to consistency errors.
 
-            callInitializers();
+            child.parent = node;
 
-            // Call the remaining initializer functions. Use `kernel.execute` to call the next one,
-            // then when it completes, call back here to call the remaining ones. The last iteration
-            // calls the kernel callback to resume execution.
+            if ( node ) {
 
-            function callInitializers() {
+                node.children[childIndex] = child;
 
-                if ( initializers.length ) {
-
-                    var prototypeDepth = initializers.shift();
-
-                    self.kernel.execute( childID, initializerScript( prototypeDepth ),
-                                         "application/javascript", undefined, function() {
-                                            callInitializers();
-                                         } );
-                } else {
-
-                    // The node is fully initialized at this point
-
-                    // Link to the parent.
-                    // 
-                    // The parent reference is only defined once the node is fully initialized.
-                    // It is not defined earlier since components should be able to stand alone 
-                    // without depending on external nodes.
-                    // 
-                    // Additionally, since parts of the application may become ready in a different
-                    // order on other clients, referring to properties in other parts of the 
-                    // application may lead to consistency errors.
-
-                    child.parent = node;
-
-                    if ( node ) {
-
-                        node.children[childIndex] = child;
-
-                        if ( parseInt( childName ).toString() !== childName ) {
-                            node.children[childName] = child;
-                        }
+                if ( parseInt( childName ).toString() !== childName ) {
+                    node.children[childName] = child;
+                }
 node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                        ( node[childName] = child );
+                ( node[childName] = child );
 
-                    }
+            }
 
-                    // Let the kernel know that we are done calling the prototype chain of 
-                    // initialize functions, and it can resume calling initializeNode on other 
-                    // drivers
-                    readyCallback( true );
-                }
+            return undefined;
+        },
 
-                function initializerScript( prototypeDepth ) {
-                    return " \
-                        var node = this;\n\
-                        for ( var i = 0; i < " + prototypeDepth + "; i++ ) {\n\
-                            node = Object.getPrototypeOf( node );\n\
-                        }\n\
-                        node.initialize.call( this );"
-                }
+        // -- initializingNode ---------------------------------------------------------------------
 
+        // Invoke an initialize() function from `childInitializingNodeID` on `childID` if one exists.
+
+        initializingNodeFromPrototype: function( nodeID, childID, childInitializingNodeID ) {
+
+            var child = this.nodes[childID];
+            var initializer = this.nodes[childInitializingNodeID];
+
+            var scriptText =
+                "initializer.hasOwnProperty( 'initialize' ) && " +
+                "( typeof initializer.initialize === 'function' || initializer.initialize instanceof Function ) && " +
+                "initializer.initialize.call( this )";
+
+            // Call the prototype's initializer on the child.
+
+            try {
+                ( function( scriptText, initializer ) { return eval( scriptText ) } ).
+                    call( child, scriptText, initializer );
+            } catch ( e ) {
+                this.logger.warnx( "initializingNodeFromPrototype", childID,
+                    "exception in initialize:", utility.exceptionMessage( e ) );
             }
 
             return undefined;

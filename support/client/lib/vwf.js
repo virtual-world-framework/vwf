@@ -2364,13 +2364,13 @@ if ( ! childComponent.source ) {
 
                     }, function( err, scripts ) /* async */ {
 
-                        // Watch for any async kernel calls generated as we run the scripts and wait for
-                        // them complete before completing the node.
+                        // Watch for any async kernel calls generated as we run the scripts and wait
+                        // for them complete before completing the node.
 
                         vwf.models.kernel.capturingAsyncs( function() {
 
-                            // Suppress kernel reentry so that initialization functions don't make any
-                            // changes during replication.
+                            // Suppress kernel reentry so that initialization functions don't make
+                            // any changes during replication.
 
                             replicating && vwf.models.kernel.disable();
 
@@ -2380,8 +2380,8 @@ if ( ! childComponent.source ) {
                                 vwf.execute( childID, script.text, script.type ); // TODO: callback
                             } );
 
-                            // Perform initializations for properties with setter functions. These are
-                            // assigned here so that the setters run on a fully-constructed node.
+                            // Perform initializations for properties with setter functions. These
+                            // are assigned here so that the setters run on a fully-constructed node.
 
                             Object.keys( deferredInitializations ).forEach( function( propertyName ) {
                                 vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
@@ -2393,51 +2393,68 @@ if ( ! childComponent.source ) {
                                 vwf.tickable.nodeIDs.push( childID );
                             }
 
-                            // Restore kernel reentry
+                            // Restore kernel reentry.
                             replicating && vwf.models.kernel.enable();
 
                         }, function() {
 
-                            // This function is called when all asynchronous calls from the
-                            // previous function have returned
+                            // This function is called when all asynchronous calls from the previous
+                            // function have returned.
 
-                            // Call initializingNode() on each model and initializedNode() on each view to
-                            // indicate that the node is fully constructed.
-                            async.forEachSeries( vwf.models, 
-                                                 function( model, 
-                                                           each_callback_async /* ( err ) */ ) {
-                                var callNextIterWithoutWaiting = true;
-                                var nextIterAlreadyCalled = false;
+                            // Call initializingNode() on each model and initializedNode() on each
+                            // view to indicate that the node is fully constructed.
 
-                                // Suppress kernel reentry so that initialization functions
-                                // don't  make any changes during replication.
-                                replicating && vwf.models.kernel.disable();
+                            // Since nodes don't (currently) inherit their prototypes' children,
+                            // for each prototype also call initializingNodeFromPrototype() to allow
+                            // model drivers to apply the prototypes' initializers to the node.
 
-                                model.initializingNode &&
-                                    model.initializingNode( nodeID, childID, childPrototypeID, 
-                                                            childBehaviorIDs,
-                                                            childComponent.source, 
-                                                            childComponent.type, childIndex, 
-                                                            childName, 
-                                                            function( ready ) /* async */ {
+                            async.forEachSeries( vwf.prototypes( childID, true ).reverse().concat( childID ),
+                                    function( childInitializingNodeID, each_callback_async /* err */ ) {
 
-                                        if ( callNextIterWithoutWaiting && !ready ) {
-                                            queue.suspend( "while executing script in initializingNode" ); // suspend the queue
-                                            callNextIterWithoutWaiting = false;
-                                        } else if ( !callNextIterWithoutWaiting && 
-                                                    !nextIterAlreadyCalled && ready ) {
-                                            each_callback_async( undefined );
-                                            queue.resume( "after executing script in initializingNode" ); // resume the queue; may invoke dispatch(), so call last before returning to the host
-                                            nextIterAlreadyCalled = true;
+                                // Call initializingNode() on each model.
+
+                                vwf.models.kernel.capturingAsyncs( function() {
+
+                                    vwf.models.forEach( function( model ) {
+
+                                        // Suppress kernel reentry so that initialization functions
+                                        // don't make any changes during replication.
+                                        replicating && vwf.models.kernel.disable();
+
+                                        // For a prototype, call `initializingNodeFromPrototype` to
+                                        // run the prototype's initializer on the node. For the
+                                        // node, call `initializingNode` to run its own initializer.
+                                        // 
+                                        // `initializingNodeFromPrototype` is separate from
+                                        // `initializingNode` so that `initializingNode` remains a
+                                        // single call that indicates that the node is fully
+                                        // constructed. Existing drivers, and any drivers that don't
+                                        // care about prototype initializers will by default ignore
+                                        // the intermediate initializations.
+                                        // (`initializingNodeFromPrototype` was added in 0.6.23.)
+
+                                        if ( childInitializingNodeID !== childID ) {
+                                            model.initializingNodeFromPrototype &&
+                                                model.initializingNodeFromPrototype( nodeID, childID, childInitializingNodeID );
+                                        } else {
+                                            model.initializingNode &&
+                                                model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                                    childComponent.source, childComponent.type, childIndex, childName );
                                         }
+
+                                        // Restore kernel reentry.
+                                        replicating && vwf.models.kernel.enable();
+
                                     } );
 
-                                // Restore kernel reentry
-                                replicating && vwf.models.kernel.enable();
-
-                                callNextIterWithoutWaiting && each_callback_async( undefined );
+                                }, function() {
+                                    each_callback_async( undefined );
+                                } );
 
                             }, function( err ) /* async */ {
+
+                                // Call initializedNode() on each view.
+
                                 vwf.views.forEach( function( view ) {
                                     view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
                                         childComponent.source, childComponent.type, childIndex, childName );
@@ -3348,7 +3365,7 @@ if ( ! childComponent.source ) {
                 callback_async && callback_async( scriptValue );
             } );
 
-            vwf.logger.debugu();
+            this.logger.debugu();
 
             return scriptValue;
         };
