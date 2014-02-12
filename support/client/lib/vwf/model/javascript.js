@@ -385,7 +385,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
             return undefined;
         },
 
-        // -- initializingNode ---------------------------------------------------------------------
+        // -- initializingNodeFromPrototype --------------------------------------------------------
 
         // Invoke an initialize() function from `childInitializingNodeID` on `childID` if one exists.
 
