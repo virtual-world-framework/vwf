@@ -834,9 +834,8 @@
 
                         fields.origin = "reflector";
 
-                        // Update the queue. Insert the message (unless it is only a time tick), and
-                        // advance the queue's record of the current time. Messages in the queue are
-                        // ordered by time, then by order of arrival.
+                        // Update the queue.  Messages in the queue are ordered by time, then by order of arrival.
+                        // Time is only advanced if the message has no action, meaning it is a tick.
 
                         queue.insert( fields, !fields.action ); // may invoke dispatch(), so call last before returning to the host
 

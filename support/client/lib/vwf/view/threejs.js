@@ -84,18 +84,16 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             rollMatrix = new THREE.Matrix4();
             yawMatrix = new THREE.Matrix4();
             translationMatrix = new THREE.Matrix4();
-	    
-        window._dView = this;
-		this.nodes = {};
-		this.interpolateTransforms = true;
-		this.tickTime = 0;
-		this.realTickDif = 50;
-		this.lastrealTickDif = 50;
-		this.lastRealTick = performance.now();
-		this.leftover = 0;
-		
-		
-			
+        
+            window._dView = this;
+            this.nodes = {};
+            this.interpolateTransforms = true;
+            this.tickTime = 0;
+            this.realTickDif = 50;
+            this.lastrealTickDif = 50;
+            this.lastRealTick = performance.now();
+            this.leftover = 0;
+            
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -113,9 +111,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             else if (this.state.scenes[ this.kernel.application() ] && this.state.scenes[ this.kernel.application() ].camera.ID == childID) {
                 setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
             }
-	    
+        
             if(this.state.nodes[childID] && this.state.nodes[childID].threeObject instanceof THREE.Object3D) {
-    	        this.nodes[childID] = {id:childID,extends:childExtendsID};
+                this.nodes[childID] = {id:childID,extends:childExtendsID};
             }
         },
 
@@ -145,9 +143,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         // -- deletedNode ------------------------------------------------------------------------------
 
         deletedNode: function(childID)
-    	{
-    		delete this.nodes[childID];
-    	},
+        {
+            delete this.nodes[childID];
+        },
 
         // -- addedChild -------------------------------------------------------------------------------
 
@@ -171,32 +169,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         // -- satProperty ------------------------------------------------------------------------------
 
-        satProperty: function ( nodeID, propertyName, propertyValue ) { 
-	    
-	    if(vwf.client() && false)
-		{
-			if(propertyName == 'transform')
-			{
-				if(this.nodes[nodeID])
-				{
-					
-					this.nodes[nodeID].lastTickTransform = null;
-					this.nodes[nodeID].thisTickTransform = null;
-				
-				}
-			}
-			if(propertyName == 'animationFrame')
-			{
-				if(this.nodes[nodeID])
-				{
-					this.nodes[nodeID].lastAnimationFrame = null;
-					this.nodes[nodeID].thisAnimationFrame = null;
-				}
-			}
-		}
-	    
-	    
-	    
+        satProperty: function ( nodeID, propertyName, propertyValue ) {         
             // If this is this user's navObject, pay attention to changes in navmode, translationSpeed, and 
             // rotationSpeed
             if ( navObject && ( nodeID == navObject.ID ) ) {
@@ -212,17 +185,17 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
             } else if ( nodeID == this.kernel.application() ) {
                 if ( propertyName == "makeOwnAvatarVisible" ) {
-                makeOwnAvatarVisible = propertyValue;
-                if ( navObject ) {
-                    setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
-                }
+                    makeOwnAvatarVisible = propertyValue;
+                    if ( navObject ) {
+                        setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
+                    }
                 } else if ( propertyName == "boundingBox" ) {
-                boundingBox = propertyValue;
+                    boundingBox = propertyValue;
                 } else if ( propertyName == "activeCamera" ) {
                     setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
                 } else if ( propertyName == "usersShareView" ) {
                     usersShareView = propertyValue;
-            }
+                }
             } 
 
             // Pay attention to these properties for all nodes
@@ -366,7 +339,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     // If the duration of the transform is 0, set the transforms to their final value so it doesn't interpolate
                     if(methodParameters.length < 2 || methodParameters[1] == 0) {
                         this.nodes[nodeID].lastTickTransform = goog.vec.Mat4.clone(getTransform(nodeID));
-                        this.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(getTransform(nodeID));
+                        this.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(this.nodes[nodeID].lastTickTransform);
                     }
                     break;
             }
@@ -406,55 +379,42 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 navObjectRequested = true;
                 findNavObject();
             }
-	        
-	        lerpTick();
-	    
-	    
-		
-			
+            
+            lerpTick();      
         },
-	
+    
     } );
 
     // private ===============================================================================
 
     var navObject = undefined;
     var cameraNode = undefined;
-
-    function lerpTick ()
-    {
-    
+    function lerpTick () {
         var now = performance.now();
         self.realTickDif = now - self.lastRealTick;
 
         self.lastRealTick = now;
  
-        self.tickTime = 0;
         //reset - loading can cause us to get behind and always but up against the max prediction value
+        self.tickTime = 0;
 
-        for(var i in self.nodes)
-        {
-            if(self.state.nodes[i] && (!navObject || self.nodes[i].id != navObject.ID))
-            {       
+        for(var nodeID in self.nodes) {
+            if(self.state.nodes[nodeID] && (!navObject || nodeID != navObject.ID)) {       
+                self.nodes[nodeID].lastTickTransform = self.nodes[nodeID].selfTickTransform;
+                self.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(getTransform(nodeID));
                 
-                self.nodes[i].lastTickTransform = self.nodes[i].selfTickTransform;
-                self.nodes[i].selfTickTransform = goog.vec.Mat4.clone(getTransform(i));
-                
-                if(self.nodes[i].selfTickTransform) self.nodes[i].selfTickTransform = goog.vec.Mat4.clone(self.nodes[i].selfTickTransform);
-                
+                if(self.nodes[nodeID].selfTickTransform) {
+                    self.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(self.nodes[nodeID].selfTickTransform);
+                }
             }
         }
     }
-    function lerp(a,b,l,c)
-    {
+    function lerp(a,b,l,c) {
         if(c) l = Math.min(1,Math.max(l,0));
         return (b*l) + a*(1.0-l);
     }
-    function matCmp (a,b,delta)
-    {
-        
-        for(var i =0; i < 16; i++)
-        {
+    function matCmp (a,b,delta) {
+        for(var i =0; i < 16; i++) {
             if(Math.abs(a[i] - b[i]) > delta)
                 return false;
         }
@@ -462,16 +422,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         return true;
     }
     
-    function rotMatFromVec(x,y,z)
-    {
+    function rotMatFromVec(x,y,z) {
         var n = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1];
         n[0] = x[0];n[1] = x[1];n[2] = x[2];
         n[4] = y[0];n[5] = y[1];n[6] = y[2];
         n[8] = z[0];n[9] = z[1];n[10] = z[2];
         return n;
     }
-    function matrixLerp (a,b,l)
-    {
+    function matrixLerp (a,b,l) {
         var n = goog.vec.Mat4.clone(a);
         n[12] = lerp(a[12],b[12],l);
         n[13] = lerp(a[13],b[13],l);
@@ -532,67 +490,43 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         return nqm;
     }
-    function getTransform(id)
-    {
+    function getTransform(id) {
         var interp = goog.vec.Mat4.clone(self.state.nodes[id].threeObject.matrix.elements);
-        return goog.vec.Mat4.clone(interp);
+        return interp;
     }
-    function setTransform(id,interp)
-    {
+    function setTransform(id,interp) {
         interp = goog.vec.Mat4.clone(interp)
-        self.state.nodes[id].threeObject.matrix.elements = goog.vec.Mat4.clone(interp);
+        self.state.nodes[id].threeObject.matrix.elements = interp;
         self.state.nodes[id].threeObject.updateMatrixWorld(true);
-
     }
-    function setInterpolatedTransforms(deltaTime)
-    {
-        
+    function setInterpolatedTransforms(deltaTime) {
         var step = (self.tickTime) / (self.realTickDif);
         step = Math.min(step,1);
-        deltaTime = Math.min(deltaTime,self.realTickDif)
+        deltaTime = Math.min(deltaTime, self.realTickDif)
         self.tickTime += deltaTime || 0;
         
-        //if going slower than tick rate, don't make life harder by changing values. it would be invisible anyway
-        //if(step > 2) return;
-        
-        for(var i in self.nodes)
-        {
+        for(var nodeID in self.nodes) {
+            var last = self.nodes[nodeID].lastTickTransform;
+            var now = self.nodes[nodeID].selfTickTransform;
+            if(last && now && !matCmp(last,now,.0001) ) {             
+                var interp = matrixLerp(last, now, step || 0);
                 
-            var last = self.nodes[i].lastTickTransform;
-            var now = self.nodes[i].selfTickTransform;
-            if(last && now && !matCmp(last,now,.0001) )
-            {
-                
-                var interp = goog.vec.Mat4.clone(last);
-             
-                interp = matrixLerp(last,now,step||0);
-                
-                if(!navObject || self.nodes[i].id != navObject.ID)
-                {             
-                    setTransform(i,interp);    
-                    self.nodes[i].needTransformRestore = true;
+                if(!navObject || nodeID != navObject.ID) {             
+                    setTransform(nodeID, interp);    
+                    self.nodes[nodeID].needTransformRestore = true;
                 }
-                
             }
-                
         }
-        
     }
-    function restoreTransforms()
-    {
-        for(var i in self.nodes)
-        {
+    function restoreTransforms() {
+        for(var nodeID in self.nodes) {
+            var now = self.nodes[nodeID].selfTickTransform;
             
-            var now = self.nodes[i].selfTickTransform;
-            
-            if(self.node != navObject &&  now && self.nodes[i].needTransformRestore)
-            {
-                //vwf.setProperty(i,'transform',now);
-                self.state.nodes[i].threeObject.matrix.elements = goog.vec.Mat4.clone(now);
-                self.state.nodes[i].threeObject.updateMatrixWorld(true);
-                self.nodes[i].needTransformRestore = false;
+            if(self.node != navObject &&  now && self.nodes[nodeID].needTransformRestore) {
+                self.state.nodes[nodeID].threeObject.matrix.elements = goog.vec.Mat4.clone(now);
+                self.state.nodes[nodeID].threeObject.updateMatrixWorld(true);
+                self.nodes[nodeID].needTransformRestore = false;
             }
-            
         }
     }
 
@@ -636,18 +570,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // Schedule the next render
             window.requestAnimationFrame( renderScene );
 
-	    
-	    
-	    now = ( window.performance !== undefined && window.performance.now !== undefined ) ? window.performance.now() : time;
-			
-	     timepassed = now - sceneNode.lastTime;
-			
-		
-			if(self.interpolateTransforms)
-				setInterpolatedTransforms(timepassed);
-				
-	    
-	    
+        
+        
+        now = ( window.performance !== undefined && window.performance.now !== undefined ) ? window.performance.now() : time;
+            
+         timepassed = now - sceneNode.lastTime;
+            
+        
+            if(self.interpolateTransforms)
+                setInterpolatedTransforms(timepassed);
+                
+        
+        
             // Verify that there is a camera to render from before going any farther
             var camera = self.state.cameraInUse;
             if ( !camera ) {
@@ -722,10 +656,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
 
             renderer.render( scene, camera );
-			sceneNode.lastTime = now;
-			
-	if(self.interpolateTransforms)
-				restoreTransforms();		
+            sceneNode.lastTime = now;
+            
+            if(self.interpolateTransforms) {
+                restoreTransforms();        
+            }
         };
 
         var mycanvas = this.canvasQuery.get( 0 );
@@ -1751,8 +1686,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         }
 
         this.rotateNavObjectByKey = function( msSinceLastFrame ) {
-
-
             var direction = 0;
 
             // Calculate movement increment
@@ -1844,8 +1777,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         }
 
         var handleMouseNavigation = function( mouseEventData ) {
-
-
             var deltaX = 0;
             var deltaY = 0;
 
@@ -2947,10 +2878,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         return key;
     }
 
-
-
-    function controlNavObject( node ) {
-      
+    function controlNavObject( node ) {      
         if ( !node ) {
             self.logger.error( "Attempted to control non-existent navigation object" );
             return;
@@ -2971,17 +2899,17 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         // TODO: The model should keep track of a shared navObject, not just the shared camera that it tracks now. See Redmine #3145.
         if( !usersShareView ) {
-        // Search for a camera in the navigation object and if it exists, make it active
-        var cameraIds = self.kernel.find( navObject.ID, 
-                                          "descendant-or-self::element(*,'http://vwf.example.com/camera.vwf')" );
-        if ( cameraIds.length ) {
+            // Search for a camera in the navigation object and if it exists, make it active
+            var cameraIds = self.kernel.find( navObject.ID, 
+                                              "descendant-or-self::element(*,'http://vwf.example.com/camera.vwf')" );
+            if ( cameraIds.length ) {
 
-            // Set the view's active camera
-            var rendererState = self.state;
-            var cameraId = cameraIds[ 0 ];
-            cameraNode = rendererState.nodes[ cameraId ];
-            rendererState.cameraInUse = cameraNode.threeObject;
-        }
+                // Set the view's active camera
+                var rendererState = self.state;
+                var cameraId = cameraIds[ 0 ];
+                cameraNode = rendererState.nodes[ cameraId ];
+                rendererState.cameraInUse = cameraNode.threeObject;
+            }
         }
 
         // Pull the initial pitch, yaw, and translation out of the navObject's transform
@@ -2995,7 +2923,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     }
 
     function findNavObject() {
-
         // Find the navigable objects in the scene
         var sceneRootID = self.state.sceneRootID;
         var navObjectIds = self.kernel.find( sceneRootID,
@@ -3026,8 +2953,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     // 1.2 Else Interpolate to the model’s transform (conflict b/w own view and external sourced model changes)
 
     function receiveModelTransformChanges( nodeID, transformMatrix ) {
-
-
         var node = self.state.nodes[ nodeID ];
 
         // If the node does not exist in the state's list of nodes, then this update is from a prototype and we
@@ -3055,14 +2980,12 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     }
 
     function adoptTransform ( node, transform ) {
-
         var transformMatrix = goog.vec.Mat4.clone( transform );
         var threeObject = node.threeObject;
 
         if ( threeObject instanceof THREE.Camera ) {  
             transformMatrix = convertCameraTransformFromVWFtoThreejs( transformMatrix );
         } else if( threeObject instanceof THREE.ParticleSystem ) {
-
             // I don't see where this function is defined. Maybe a copy-paste bug from
             // GLGE driver? - Eric (5/13/13)
             threeObject.updateTransform( transformMatrix );
@@ -3077,8 +3000,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         
         nodeLookAt( node );
     }
-
-    
 
     function callModelTransformBy( node, originalViewTransform, goalViewTransform ) {
         var nodeID = node.ID;
@@ -3118,7 +3039,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     }
 
     function setTransformFromWorldTransform( threeObject ) {
-        
         if ( !threeObject ) {
             self.logger.warnx( "setTransformFromWorldTransform: There is no threeObject to update" );
             return;
@@ -3136,7 +3056,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     }
 
     function updateRenderObjectTransform( threeObject ) {
-        
         // Tell three.js not to update the transform matrix from position and rotation values (which are older)
         threeObject.matrixAutoUpdate = false;
 
@@ -3268,7 +3187,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     }
 
     function extractRotationAndTranslation( threeObject ) {
-
         // Pull the pitch, yaw, and translation out of the transform
 
         var worldTransformArray = threeObject.matrixWorld.elements;

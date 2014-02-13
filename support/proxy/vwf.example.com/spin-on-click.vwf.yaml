@@ -61,13 +61,9 @@ methods:
 
   spin: |
     if ( this["spin-spinning"] ) {  // if enabled
-      if(!this.time) this.timeer = performance.now();
-      var now = performance.now() ;
-      //console.log(now - this.timeer);
-      this.timeer = now;
       var axis = this["spin-axis"];
       this.rotateBy( [ axis[0], axis[1], axis[2], this["spin-rate"], 0 ] );
-      this.future( 0.044 ).spin();  // schedule the next step
+      this.future( 0.05 ).spin();  // schedule the next step
     }
 
 scripts:
