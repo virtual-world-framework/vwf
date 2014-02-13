@@ -568,30 +568,21 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         function renderScene(time) {
 
             // Schedule the next render
-            window.requestAnimationFrame( renderScene );
+            window.requestAnimationFrame( renderScene ); 
 
-        
-        
-        now = ( window.performance !== undefined && window.performance.now !== undefined ) ? window.performance.now() : time;
-            
-         timepassed = now - sceneNode.lastTime;
-            
-        
-            if(self.interpolateTransforms)
-                setInterpolatedTransforms(timepassed);
-                
-        
-        
             // Verify that there is a camera to render from before going any farther
             var camera = self.state.cameraInUse;
             if ( !camera ) {
                 self.logger.debugx( "Cannot render because there is no valid camera" );
                 return;
             }
-
             
-            var now = ( self.performance !== undefined && self.performance.now !== undefined ) ? self.performance.now() : time;
+            var now = performance.now();
             var timepassed = now - sceneNode.lastTime;
+        
+            if(self.interpolateTransforms) {
+                setInterpolatedTransforms(timepassed);
+            }
 
             if ( timepassed ) {
 
