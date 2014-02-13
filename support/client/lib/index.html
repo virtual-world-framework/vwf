@@ -27,7 +27,7 @@
 
     <meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
 
-    <!-- The Virtual World Framework makes use of the jQuery library.                            -->
+    <script type="text/javascript" src="compatibilitycheck.js"></script>
 
     <script type="text/javascript" src="socket.io.js"></script>
     <script type="text/javascript" src="socket.io-sessionid-patch.js"></script>
@@ -151,10 +151,15 @@
 
     <!-- The main content renders to "#vwf-root", the item with the id "vwf-root".               -->
 
+    <div id="incompatibleBrowser">
+        <div>
+            <span style="color:#3090C7;"><br/><br/>Your browser does not support Virtual World Framework. Please review our <a href='http://www.virtual.wf/documentation.html#requirements'>requirements</a> for supported browser versions.</span>
+        </div>
+    </div>
     <div id="vwf-root"></div>
 
     <script type="text/javascript">
-        vwf.loadConfiguration(application, userLibraries);
+        vwf.loadConfiguration(application, userLibraries, compatibilityCheck);
     </script>
   </body>
 
