@@ -834,11 +834,10 @@
 
                         fields.origin = "reflector";
 
-                        // Update the queue. Insert the message (unless it is only a time tick), and
-                        // advance the queue's record of the current time. Messages in the queue are
-                        // ordered by time, then by order of arrival.
+                        // Update the queue.  Messages in the queue are ordered by time, then by order of arrival.
+                        // Time is only advanced if the message has no action, meaning it is a tick.
 
-                        queue.insert( fields, true ); // may invoke dispatch(), so call last before returning to the host
+                        queue.insert( fields, !fields.action ); // may invoke dispatch(), so call last before returning to the host
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -1073,7 +1072,6 @@
                     this.sequence_ = undefined; // clear after the previous action
                     this.client_ = undefined;   // clear after the previous action
                     this.now = fields.time;
-                    this.tick();
                 }
 
                 // Perform the action.
@@ -1082,6 +1080,9 @@
                     this.sequence_ = fields.sequence; // note the message's queue sequence number for the duration of the action
                     this.client_ = fields.client;     // ... and note the originating client
                     this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, fields.origin );
+                }
+                else {
+                    this.tick();
                 }
 
             }
@@ -1093,7 +1094,6 @@
                 this.sequence_ = undefined; // clear after the previous action
                 this.client_ = undefined;   // clear after the previous action
                 this.now = queue.time;
-                this.tick();
             }
             
         };
