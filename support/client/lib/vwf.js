@@ -850,11 +850,10 @@
 
                         fields.origin = "reflector";
 
-                        // Update the queue. Insert the message (unless it is only a time tick), and
-                        // advance the queue's record of the current time. Messages in the queue are
-                        // ordered by time, then by order of arrival.
+                        // Update the queue.  Messages in the queue are ordered by time, then by order of arrival.
+                        // Time is only advanced if the message has no action, meaning it is a tick.
 
-                        queue.insert( fields, true ); // may invoke dispatch(), so call last before returning to the host
+                        queue.insert( fields, !fields.action ); // may invoke dispatch(), so call last before returning to the host
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -1089,7 +1088,6 @@
                     this.sequence_ = undefined; // clear after the previous action
                     this.client_ = undefined;   // clear after the previous action
                     this.now = fields.time;
-                    this.tick();
                 }
 
                 // Perform the action.
@@ -1098,6 +1096,9 @@
                     this.sequence_ = fields.sequence; // note the message's queue sequence number for the duration of the action
                     this.client_ = fields.client;     // ... and note the originating client
                     this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, fields.origin );
+                }
+                else {
+                    this.tick();
                 }
 
             }
@@ -1109,7 +1110,6 @@
                 this.sequence_ = undefined; // clear after the previous action
                 this.client_ = undefined;   // clear after the previous action
                 this.now = queue.time;
-                this.tick();
             }
             
         };
@@ -2380,13 +2380,13 @@ if ( ! childComponent.source ) {
 
                     }, function( err, scripts ) /* async */ {
 
-                        // Watch for any async kernel calls generated as we run the scripts and wait for
-                        // them complete before completing the node.
+                        // Watch for any async kernel calls generated as we run the scripts and wait
+                        // for them complete before completing the node.
 
                         vwf.models.kernel.capturingAsyncs( function() {
 
-                            // Suppress kernel reentry so that initialization functions don't make any
-                            // changes during replication.
+                            // Suppress kernel reentry so that initialization functions don't make
+                            // any changes during replication.
 
                             replicating && vwf.models.kernel.disable();
 
@@ -2396,8 +2396,8 @@ if ( ! childComponent.source ) {
                                 vwf.execute( childID, script.text, script.type ); // TODO: callback
                             } );
 
-                            // Perform initializations for properties with setter functions. These are
-                            // assigned here so that the setters run on a fully-constructed node.
+                            // Perform initializations for properties with setter functions. These
+                            // are assigned here so that the setters run on a fully-constructed node.
 
                             Object.keys( deferredInitializations ).forEach( function( propertyName ) {
                                 vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
@@ -2409,34 +2409,80 @@ if ( ! childComponent.source ) {
                                 vwf.tickable.nodeIDs.push( childID );
                             }
 
-                            // Call initializingNode() on each model and initializedNode() on each view to
-                            // indicate that the node is fully constructed.
-
-                            vwf.models.forEach( function( model ) {
-                                model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                    childComponent.source, childComponent.type, childIndex, childName );
-                            } );
-
-                            vwf.views.forEach( function( view ) {
-                                view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                    childComponent.source, childComponent.type, childIndex, childName );
-                            } );
-
                             // Restore kernel reentry.
-
                             replicating && vwf.models.kernel.enable();
 
                         }, function() {
 
-                            // Mark the node as initialized.
-                            nodes.initialize( childID );
+                            // This function is called when all asynchronous calls from the previous
+                            // function have returned.
 
-                            series_callback_async( err, undefined );
+                            // Call initializingNode() on each model and initializedNode() on each
+                            // view to indicate that the node is fully constructed.
 
+                            // Since nodes don't (currently) inherit their prototypes' children,
+                            // for each prototype also call initializingNodeFromPrototype() to allow
+                            // model drivers to apply the prototypes' initializers to the node.
+
+                            async.forEachSeries( vwf.prototypes( childID, true ).reverse().concat( childID ),
+                                    function( childInitializingNodeID, each_callback_async /* err */ ) {
+
+                                // Call initializingNode() on each model.
+
+                                vwf.models.kernel.capturingAsyncs( function() {
+
+                                    vwf.models.forEach( function( model ) {
+
+                                        // Suppress kernel reentry so that initialization functions
+                                        // don't make any changes during replication.
+                                        replicating && vwf.models.kernel.disable();
+
+                                        // For a prototype, call `initializingNodeFromPrototype` to
+                                        // run the prototype's initializer on the node. For the
+                                        // node, call `initializingNode` to run its own initializer.
+                                        // 
+                                        // `initializingNodeFromPrototype` is separate from
+                                        // `initializingNode` so that `initializingNode` remains a
+                                        // single call that indicates that the node is fully
+                                        // constructed. Existing drivers, and any drivers that don't
+                                        // care about prototype initializers will by default ignore
+                                        // the intermediate initializations.
+                                        // (`initializingNodeFromPrototype` was added in 0.6.23.)
+
+                                        if ( childInitializingNodeID !== childID ) {
+                                            model.initializingNodeFromPrototype &&
+                                                model.initializingNodeFromPrototype( nodeID, childID, childInitializingNodeID );
+                                        } else {
+                                            model.initializingNode &&
+                                                model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                                    childComponent.source, childComponent.type, childIndex, childName );
+                                        }
+
+                                        // Restore kernel reentry.
+                                        replicating && vwf.models.kernel.enable();
+
+                                    } );
+
+                                }, function() {
+                                    each_callback_async( undefined );
+                                } );
+
+                            }, function( err ) /* async */ {
+
+                                // Call initializedNode() on each view.
+
+                                vwf.views.forEach( function( view ) {
+                                    view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                        childComponent.source, childComponent.type, childIndex, childName );
+                                } );
+
+                                // Mark the node as initialized.
+                                nodes.initialize( childID );
+
+                                series_callback_async( err, undefined );
+                            } );
                         } );
-
                     } );
-
                 },
 
             ], function( err, results ) /* async */ {
@@ -3298,7 +3344,7 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.execute}
 
-        this.execute = function( nodeID, scriptText, scriptType ) {
+        this.execute = function( nodeID, scriptText, scriptType, callback_async /* result */ ) {
 
             this.logger.debuggx( "execute", function() {
                 return [ nodeID, ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType ];  // TODO: loggableScript()
@@ -3315,16 +3361,24 @@ if ( ! childComponent.source ) {
 
             var scriptValue = undefined;
 
-            this.models.some( function( model ) {
-                scriptValue = model.executing && model.executing( nodeID, scriptText, scriptType );
-                return scriptValue !== undefined;
-            } );
+            // Watch for any async kernel calls generated as we execute the scriptText and wait for
+            // them to complete before calling the callback.
 
-            // Call executed() on each view. The view is being notified that a script has been
-            // executed.
+            vwf.models.kernel.capturingAsyncs( function() {
+                vwf.models.some( function( model ) {
+                    scriptValue = model.executing &&
+                                  model.executing( nodeID, scriptText, scriptType );
+                    return scriptValue !== undefined;
+                } );
 
-            this.views.forEach( function( view ) {
-                view.executed && view.executed( nodeID, scriptText, scriptType );
+                // Call executed() on each view to notify view that a script has been executed.
+
+                vwf.views.forEach( function( view ) {
+                    view.executed && view.executed( nodeID, scriptText, scriptType );
+                } );
+
+            }, function() {
+                callback_async && callback_async( scriptValue );
             } );
 
             this.logger.debugu();

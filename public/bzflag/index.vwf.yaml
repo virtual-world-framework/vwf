@@ -335,8 +335,10 @@ scripts:
         var oldBolt = this.findUnusedLaser( );
         if ( oldBolt ) {
           oldBolt.enabled = true;
-          oldBolt.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
-          oldBolt.laserParticle.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
+          var worldTransform = player.worldTransform;
+          worldTransform[14] = worldTransform[14] + 100;
+          oldBolt.worldTransform = worldTransform;
+          oldBolt.laserParticle.worldTransform = worldTransform;
           oldBolt.laserParticle.image = player.laserMaterial;
           oldBolt.laserDirection = goog.vec.Mat4.multVec3(player.rotationMatrix, [0,1,0], goog.vec.Vec3.create());
           oldBolt.parentTank = player.id;
@@ -346,8 +348,10 @@ scripts:
         }
         else {
           var newBolt = $.extend(true, {}, bolt);
-          newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
-          newBolt.children.laserParticle.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
+          var worldTransform = player.worldTransform;
+          worldTransform[14] = worldTransform[14] + 100;
+          newBolt.worldTransform = worldTransform;
+          newBolt.laserParticle.worldTransform = worldTransform;
           newBolt.children.laserParticle.properties.image = player.laserMaterial;
           newBolt.properties.laserDirection = goog.vec.Mat4.multVec3(player.rotationMatrix, [0,1,0], goog.vec.Vec3.create());
           newBolt.properties.parentTank = player.id;

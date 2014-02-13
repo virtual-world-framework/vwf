@@ -75,6 +75,18 @@ define( function() {
         /// @function
         /// 
         /// @param {ID} nodeID
+        /// @param {ID} childID
+        /// @param {ID} childInitializingNodeID
+        /// 
+        /// @returns {}
+
+        initializingNodeFromPrototype: [ /* nodeID, childID, childInitializingNodeID */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
         /// 
         /// @returns {}
 
