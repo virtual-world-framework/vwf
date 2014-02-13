@@ -3496,12 +3496,17 @@ if ( ! childComponent.source ) {
             nodeID = this.prototype( nodeID );
 
             while ( nodeID ) {
+                
+                // Add the current node in the prototype chain
+                prototypes.push( nodeID );
+
+                // Add the current node's behaviors
                 if ( includeBehaviors ) {
                     var b = [].concat( this.behaviors( nodeID ) );
                     Array.prototype.push.apply( prototypes, b.reverse() );
                 }
 
-                prototypes.push( nodeID );
+                // Get the next node in the prototype chain
                 nodeID = this.prototype( nodeID );
             }
 
