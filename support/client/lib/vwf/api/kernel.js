@@ -289,18 +289,21 @@ define( function() {
         dispatchEvent: [ /* nodeID, eventName, eventParameters, eventNodeParameters */ ],
 
         /// It will call executing() on each model. The script is considered executed after each model
-        /// has run.  It will also call executed() on each view. The view is being notified that a 
-        /// script has been executed.
+        /// has run and all asynchronous calls made inside them have returned.
+        /// It will then call executed() on each view to notify it that a script has been executed.
+        /// It will then call the caller-provided callback to notify the caller that the
+        /// script has been fully executed and all asynchronous actions have completed.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
         /// @param {String} scriptText
         /// @param {String} scriptType
+        /// @param {module:vwf/api/kernel~valueCallback} [callback]
         /// 
         /// @returns {Value} returnValue
 
-        execute: [ /* nodeID, scriptText, scriptType */ ],
+        execute: [ /* nodeID, scriptText, scriptType, callback( returnValue ) */ ],
 
         /// @function
         /// 
@@ -615,6 +618,12 @@ define( function() {
         /// @callback module:vwf/api/kernel~nodeCallback
         /// 
         /// @param {ID} nodeID
+
+        /// Description.
+        /// 
+        /// @callback module:vwf/api/kernel~valueCallback
+        /// 
+        /// @param {Value} returnValue
 
     };
 
