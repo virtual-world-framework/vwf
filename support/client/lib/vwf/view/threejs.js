@@ -3198,7 +3198,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             // If the view is currently using the model's activeCamera, update it to the new activeCamera
             if ( usersShareView ) {
                 cameraNode = this.state.nodes[cameraID];
-                this.state.cameraInUse = modelCameraInfo.threeJScameras[ cameraID ];
+                this.state.cameraInUse = cameraNode.threeObject;
             }
         }
     }
