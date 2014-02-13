@@ -181,8 +181,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if ( childID == sceneNode.camera.defaultCamID ) {
                         if ( !sceneNode.camera.threeJScameras[ childID ] ) {
                             var cam = CreateThreeCamera();
-                            sceneNode.camera.threeJScameras[ childID ] = cam;                            
+                            sceneNode.camera.threeJScameras[ childID ] = cam;                      
                         }
+                        sceneNode.camera.ID = childID;
                         node.name = camName;
                         node.threeObject = sceneNode.camera.threeJScameras[ childID ];
                   
@@ -504,10 +505,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             createMesh.call( this, node, propertyValue, true );
                             value = propertyValue; 
                             break;
-                        case "texture":
-                            // delay the setting of the texture until the actual
-                            // settingProperty call
-                            break;
                         default:
                             value = this.settingProperty( nodeID, propertyName, propertyValue );                  
                             break;
@@ -663,7 +660,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         //need to walk the tree and hide all sub nodes as well
                         value = Boolean( propertyValue );
-                        SetVisible( threeObject, value );
+                        threeObject.visible = value;
                     }
                     else if ( propertyName == 'castShadows' )
                     {
@@ -1152,24 +1149,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 {
                     if(propertyName == 'activeCamera')
                     {
-
-                        // TODO: This should probably happen in the view driver since it is altering the
-                        //       view-side cameraInUse property
-
-                        if( this.state.scenes[this.state.sceneRootID].camera.threeJScameras[propertyValue] )
-                        {
-                            // If the view is currently using the model's activeCamera, update it to the new activeCamera
-                            var sceneRootID = this.state.sceneRootID;
-                            var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
-                            if ( this.state.cameraInUse == modelCameraInfo.threeJScameras[ modelCameraInfo.ID ] )
-                                this.state.cameraInUse = modelCameraInfo.threeJScameras[ propertyValue ];
-                            
-                            // Update the model's activeCamera
-                            this.state.scenes[ sceneRootID ].camera.ID = propertyValue;
-
-                            // Prepare the return value
-                            value = propertyValue;
-                        }
+                        // Update the model's activeCamera
+                        this.state.scenes[ this.state.sceneRootID ].camera.ID = propertyValue;
+                        value = propertyValue;
                     }
                     if( propertyName == 'ambientColor' )
                     {
@@ -1542,6 +1524,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                         value = Math.floor(animationFrameCount / animationDuration);
                     }
+                    return value;
+                }
+
+                if(propertyName == "visible") {
+                    value = node.threeObject.visible;
                     return value;
                 }
                 
@@ -3690,16 +3677,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 ret = child;
         }       
         return ret;
-    }
-    function SetVisible(node,state) 
-    {
-        if(node)
-            node.visible = state;
-        if(node && node.children)
-        {
-           for(var i in node.children)
-            SetVisible(node.children[i],state);
-        }
     }
 
     function getWorldTransform( node ) {

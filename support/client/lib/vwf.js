@@ -313,7 +313,7 @@
                 { library: "vwf/model/stage/log", active: true },
                 { library: "vwf/kernel/view", active: true },
                 { library: "vwf/view/document", active: true },
-                { library: "vwf/view/editor", active: true },
+                { library: "vwf/view/editor", active: false },
                 { library: "vwf/view/glge", disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
                 { library: "vwf/view/lesson", active: false},
                 { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
@@ -343,7 +343,7 @@
                     { library: "vwf/view/glge", parameters: {"application-root":"#vwf-root"}, active: false },
                     { library: "vwf/view/threejs", parameters: {"application-root":"#vwf-root"}, active: false },
                     { library: "vwf/view/document", active: true },
-                    { library: "vwf/view/editor", active: true },
+                    { library: "vwf/view/editor", active: false },
                     { library: "vwf/view/lesson", active: false},
                     { library: "vwf/view/google-earth", active: false },
                     { library: "vwf/view/cesium", active: false },
@@ -411,7 +411,7 @@
                         });
                     });
                 }
-            }).complete(function(jqXHR, textStatus) { 
+            }).always(function(jqXHR, textStatus) { 
 
                 Object.keys(userLibraries).forEach(function(libraryType) {
                     if(initializers[libraryType]) {
