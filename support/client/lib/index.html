@@ -54,7 +54,9 @@
             pace.start({
                 ajax: false, // disabled
                 document: false, // disabled
-                eventLag: false, // disabled
+                eventLag: {
+                    minSamples: 50
+                },
                 elements: {
                     selectors: ['#image']
                 }
