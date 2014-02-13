@@ -3496,15 +3496,13 @@ if ( ! childComponent.source ) {
             nodeID = this.prototype( nodeID );
 
             while ( nodeID ) {
-
-                prototypes.push( nodeID );
-                nodeID = this.prototype( nodeID );
-
-                if ( nodeID && includeBehaviors ) {
+                if ( includeBehaviors ) {
                     var b = [].concat( this.behaviors( nodeID ) );
                     Array.prototype.push.apply( prototypes, b.reverse() );
                 }
 
+                prototypes.push( nodeID );
+                nodeID = this.prototype( nodeID );
             }
 
             return prototypes;
