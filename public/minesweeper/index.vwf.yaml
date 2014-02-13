@@ -12,8 +12,9 @@
 # the License.
 
 ---
-extends: appscene.vwf
+extends: http://vwf.example.com/scene.vwf
 properties:
+  navmode: none
   ambientColor: [ 183, 183, 183 ]
   tilePosition1: [  16.5, -33, 0 ]
   tilePosition2: [   5.5, -33, 0 ]
@@ -606,13 +607,13 @@ scripts:
 
     this.shuffle = function() {
       var tmp, current, top = this.tileMap.length;
-
       if(top) while(--top) {
         current = Math.floor(this.random() * (top + 1));
         tmp = this.tileMap[current];
         this.tileMap[current] = this.tileMap[top];
         this.tileMap[top] = tmp;
       }
+      this.tileMap = this.tileMap;
     }
     
     this.setupGame = function() { 

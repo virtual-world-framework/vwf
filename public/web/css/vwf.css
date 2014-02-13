@@ -152,6 +152,41 @@ footer ul li {
   padding-right:5px;
 }
 
+.section-title {
+  margin:18px 0 18px 0;
+  border-bottom:1px solid #1C1E22;
+}
+
+.demo-entry {
+  padding-top: 15px;
+}
+
+.demo-entry-col1 {
+  width:25%;
+}
+
+.demo-entry-col1 img {
+  vertical-align:middle;
+}
+
+.demo-entry-col2 {
+  width:75%;
+}
+
+.demo-entry-col2 h3 {
+  float:left;
+  vertical-align:middle;
+}
+
+.session-btn {
+  float:right;
+  vertical-align:middle;
+}
+
+.demo-entry-col2 p {
+  font-size:13px;
+}
+
 /* Documentation Page */
 .nav-list .nav-header {
   color: #FFFFFF;
