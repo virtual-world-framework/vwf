@@ -394,16 +394,14 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
             var child = this.nodes[childID];
             var initializer = this.nodes[childInitializingNodeID];
 
-            var scriptText =
-                "initializer.hasOwnProperty( 'initialize' ) && " +
-                "( typeof initializer.initialize === 'function' || initializer.initialize instanceof Function ) && " +
-                "initializer.initialize.call( this )";
-
             // Call the prototype's initializer on the child.
-
             try {
-                ( function( scriptText, initializer ) { return eval( scriptText ) } ).
-                    call( child, scriptText, initializer );
+                var prototypeHasInitialize = ( initializer.hasOwnProperty( 'initialize' ) && 
+                    ( typeof initializer.initialize === 'function' || 
+                      initializer.initialize instanceof Function ) );
+                if ( prototypeHasInitialize ) {
+                    return initializer.initialize.call( child ); 
+                }
             } catch ( e ) {
                 this.logger.warnx( "initializingNodeFromPrototype", childID,
                     "exception in initialize:", utility.exceptionMessage( e ) );
