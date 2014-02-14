@@ -271,8 +271,8 @@ children:
                 var activeMotion = false;
                 var intervalId;
                 function moveHumvee() {
-                  app.camera.translation = [ app.camera.translation[0] - 10, app.camera.translation[1], app.camera.translation[2] ];
-                  app.humvee.translation = [ app.humvee.translation[0] - 10, app.humvee.translation[1], app.humvee.translation[2] ];
+                  app.camera.translateTo( [ app.camera.translation[0] - 10, app.camera.translation[1], app.camera.translation[2] ] );
+                  app.humvee.translateTo( [ app.humvee.translation[0] - 10, app.humvee.translation[1], app.humvee.translation[2] ] );
                 }
                 app.keyDown = this.events.add( function(e) {
                   var kd = $.extend(true, {}, e.keysDown);
