@@ -292,7 +292,6 @@
                     jquery: "jquery-1.10.2.min",
                     "jquery-ui": "jquery-ui-1.10.3.custom.min",
                     hammer: "jquery.hammer",
-                    bootstrap: "bootstrap.min"
                 },
                 shim: {
                     "jquery-ui": {
@@ -301,7 +300,6 @@
                     },
                     "jquery-encoder-0.1.0": ["jquery"],
                     "require-hammer": ["hammer", "jquery"],
-                    "bootstrap": ["jquery"],
                     "vwf/model/threejs/three": {
                         exports: "THREE",
                     },
