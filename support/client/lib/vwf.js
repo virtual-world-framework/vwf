@@ -3488,27 +3488,23 @@ if ( ! childComponent.source ) {
 
             var prototypes = [];
 
-            if ( includeBehaviors ) {
-                var b = [].concat( this.behaviors( nodeID ) );
-                Array.prototype.push.apply( prototypes, b.reverse() );
-            }
+            do {
 
-            nodeID = this.prototype( nodeID );
-
-            while ( nodeID ) {
-                
-                // Add the current node in the prototype chain
-                prototypes.push( nodeID );
-
-                // Add the current node's behaviors
+                // Add the current node's behaviors.
                 if ( includeBehaviors ) {
                     var b = [].concat( this.behaviors( nodeID ) );
                     Array.prototype.push.apply( prototypes, b.reverse() );
                 }
 
-                // Get the next node in the prototype chain
+                // Get the next prototype.
                 nodeID = this.prototype( nodeID );
-            }
+
+                // Add the prototype.
+                if ( nodeID ) {
+                    prototypes.push( nodeID );
+                }
+
+            } while ( nodeID );
 
             return prototypes;
         };
