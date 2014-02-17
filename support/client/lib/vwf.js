@@ -257,6 +257,9 @@
 
         var vwf = this;
 
+        // Store the jQuery module for reuse
+        var jQuery;
+
         // == Public functions =====================================================================
 
         // -- loadConfiguration ---------------------------------------------------------------------------
@@ -367,6 +370,8 @@
                 mapLibraryName(initializers["model"]);
                 mapLibraryName(initializers["view"]);
 
+                jQuery = require("jquery");
+
                 function mapLibraryName(array) {
                     for(var i=0;i<array.length;i++) {
                         array[array[i].library] = array[i];
@@ -390,16 +395,18 @@
                     return activeLibraryList;
                 }
 
-                require("jquery").getJSON("admin/config", function(configLibraries) {
+                jQuery.getJSON("admin/config", function(configLibraries) {
                     if(configLibraries && typeof configLibraries == "object") {
                         Object.keys(configLibraries).forEach(function(libraryType) {
                             if(libraryType == 'info' && configLibraries[libraryType]["title"])
                             {
-                                require("jquery")('title').html(configLibraries[libraryType]["title"]);
+                                jQuery('title').html(configLibraries[libraryType]["title"]);
                             }
                             if(!userLibraries[libraryType]) {
                                 userLibraries[libraryType] = {};
                             }
+                            // Merge libraries from config file and URL together. Check for incompatible
+                            // libraries, and disable them.
                             Object.keys(configLibraries[libraryType]).forEach(function(libraryName) {
                                 var disabled = false;
                                 if(requireArray[libraryName] && requireArray[libraryName].disabledBy) {
@@ -418,7 +425,7 @@
                                         userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];
                                     }
                                     else if(typeof userLibraries[libraryType][libraryName] == "object" && typeof configLibraries[libraryType][libraryName] == "object") {
-                                        userLibraries[libraryType][libraryName] = require("jquery").extend({}, configLibraries[libraryType][libraryName], userLibraries[libraryType][libraryName]);
+                                        userLibraries[libraryType][libraryName] = jQuery.extend({}, configLibraries[libraryType][libraryName], userLibraries[libraryType][libraryName]);
                                     }
                                 }
                             });
@@ -434,7 +441,7 @@
                                     initializers[libraryType][libraryName].active = true;
                                     if(userLibraries[libraryType][libraryName] && userLibraries[libraryType][libraryName] != "") {
                                         if(typeof initializers[libraryType][libraryName].parameters == "object") {
-                                            initializers[libraryType][libraryName].parameters = require("jquery").extend({}, initializers[libraryType][libraryName].parameters,
+                                            initializers[libraryType][libraryName].parameters = jQuery.extend({}, initializers[libraryType][libraryName].parameters,
                                                 userLibraries[libraryType][libraryName]);
                                         }
                                         else {
@@ -592,7 +599,7 @@
                         if(model.model.compatibilityStatus) {
                             if(!model.model.compatibilityStatus.compatible) {
                                 compatibilityStatus.compatible = false;
-                                require("jquery").extend(compatibilityStatus.errors, model.model.compatibilityStatus.errors);
+                                jQuery.extend(compatibilityStatus.errors, model.model.compatibilityStatus.errors);
                             }
                         }
                     }
@@ -640,7 +647,7 @@
                             if(view.compatibilityStatus) {
                                 if(!view.compatibilityStatus.compatible) {
                                     compatibilityStatus.compatible = false;
-                                    require("jquery").extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
+                                    jQuery.extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
                                 }
                             }
                         }
@@ -663,7 +670,7 @@
                             if(view.compatibilityStatus) {
                                 if(!view.compatibilityStatus.compatible) {
                                     compatibilityStatus.compatible = false;
-                                    require("jquery").extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
+                                    jQuery.extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
                                 }
                             }
                         }
@@ -677,14 +684,14 @@
             // Test for ECMAScript 5
             if(!(function() { return !this })()) {
                 compatibilityStatus.compatible = false;
-                require("jquery").extend(compatibilityStatus.errors, {"ES5": "This browser is not compatible. VWF requires ECMAScript 5."});
+                jQuery.extend(compatibilityStatus.errors, {"ES5": "This browser is not compatible. VWF requires ECMAScript 5."});
             }
 
             // Test for WebSockets
             if( window.io && !io.Transport.websocket.check() )
             {
                 compatibilityStatus.compatible = false;
-                require("jquery").extend(compatibilityStatus.errors, {"WS": "This browser is not compatible. VWF requires WebSockets."});
+                jQuery.extend(compatibilityStatus.errors, {"WS": "This browser is not compatible. VWF requires WebSockets."});
             }
 
             if(callback) {
@@ -1619,7 +1626,7 @@
 
             // delegates to the models and views as above.
 
-            nodeComponent.properties && require("jquery").each( nodeComponent.properties, function( propertyName, propertyValue ) {  // TODO: setProperties should be adapted like this to be used here
+            nodeComponent.properties && jQuery.each( nodeComponent.properties, function( propertyName, propertyValue ) {  // TODO: setProperties should be adapted like this to be used here
 
                 // Is the property specification directing us to create a new property, or
                 // initialize a property already defined on a prototype?
@@ -2265,7 +2272,7 @@ if ( ! childComponent.source ) {
                     // createProperty(), createMethod(), or createEvent() to create the field. Each
                     // delegates to the models and views as above.
 
-                    childComponent.properties && require("jquery").each( childComponent.properties, function( propertyName, propertyValue ) {
+                    childComponent.properties && jQuery.each( childComponent.properties, function( propertyName, propertyValue ) {
 
                         var value = propertyValue, get, set, create;
 
@@ -2310,7 +2317,7 @@ if ( ! childComponent.source ) {
 
                     } );
 
-                    childComponent.methods && require("jquery").each( childComponent.methods, function( methodName, methodValue ) {
+                    childComponent.methods && jQuery.each( childComponent.methods, function( methodName, methodValue ) {
 
                         if ( valueHasBody( methodValue ) ) {
                             vwf.createMethod( childID, methodName, methodValue.parameters, methodValue.body );
@@ -2320,7 +2327,7 @@ if ( ! childComponent.source ) {
 
                     } );
 
-                    childComponent.events && require("jquery").each( childComponent.events, function( eventName, eventValue ) {
+                    childComponent.events && jQuery.each( childComponent.events, function( eventName, eventValue ) {
 
                         if ( valueHasBody( eventValue ) ) {
                             vwf.createEvent( childID, eventName, eventValue.parameters );
@@ -3783,7 +3790,7 @@ if ( ! childComponent.source ) {
 
                 queue.suspend( "while loading " + nodeURI ); // suspend the queue
 
-                require("jquery").ajax( {
+                jQuery.ajax( {
 
                     url: remappedURI( nodeURI ),
                     dataType: "jsonp",
@@ -3820,7 +3827,7 @@ if ( ! childComponent.source ) {
 
                 queue.suspend( "while loading " + scriptURI ); // suspend the queue
 
-                require("jquery").get( remappedURI( scriptURI ), function( scriptText ) /* async */ {
+                jQuery.get( remappedURI( scriptURI ), function( scriptText ) /* async */ {
                     callback_async( scriptText );
                     queue.resume( "after loading " + scriptURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
                 }, "text" );
