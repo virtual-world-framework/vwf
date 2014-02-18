@@ -56,8 +56,9 @@
 
           asyncTest( "No behaviors", function() {  // Base
 
-            createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
-                derivedBehaviorID, baseBehaviorID, otherBehaviorID, cleanup ) {
+            createFixture( function( doubleDerivedOtherBehaviorDerivedBaseBehaviorID,
+                derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID,
+                baseID, derivedBehaviorID, baseBehaviorID, otherBehaviorID, cleanup ) {
 
               equal( vwf.execute( baseID, "this.base" ), "base", "base property visible on base" );
               equal( vwf.execute( baseID, "this.baseAccessor" ), "BASE", "base property visible on base through accessor" );
@@ -71,8 +72,9 @@
 
           asyncTest( "Inheritance with no behaviors", function() {  // Derived extends Base
 
-            createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
-                derivedBehaviorID, baseBehaviorID, otherBehaviorID, cleanup ) {
+            createFixture( function( doubleDerivedOtherBehaviorDerivedBaseBehaviorID,
+                derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID,
+                baseID, derivedBehaviorID, baseBehaviorID, otherBehaviorID, cleanup ) {
 
               equal( vwf.execute( derivedID, "this.derived" ), "derived", "derived property visible on derived" );
               equal( vwf.execute( derivedID, "this.base" ), "base", "base property visible on derived" );
@@ -89,8 +91,9 @@
 
           asyncTest( "Inheritance through behavior", function() {  // DerivedBaseBehavior implements BaseBehavior extends Base
 
-            createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
-                derivedBehaviorID, baseBehaviorID, otherBehaviorID, cleanup ) {
+            createFixture( function( doubleDerivedOtherBehaviorDerivedBaseBehaviorID,
+                derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID,
+                baseID, derivedBehaviorID, baseBehaviorID, otherBehaviorID, cleanup ) {
 
               equal( vwf.execute( derivedBaseBehaviorID, "this.derivedBaseBehavior" ), "derivedBaseBehavior", "derived property visible on derived with base behavior" );
               equal( vwf.execute( derivedBaseBehaviorID, "this.baseBehavior" ), "baseBehavior", "base behavior property visible on derived with base behavior" );
@@ -121,8 +124,9 @@
 
           asyncTest( "Inheritance through two behaviors", function() {  // DerivedBaseBehaviorOtherBehavior implements BaseBehavior, OtherBehavior extends Base
 
-            createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
-                derivedBehaviorID, baseBehaviorID, otherBehaviorID, cleanup ) {
+            createFixture( function( doubleDerivedOtherBehaviorDerivedBaseBehaviorID,
+                derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID,
+                baseID, derivedBehaviorID, baseBehaviorID, otherBehaviorID, cleanup ) {
 
               equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.derivedBaseBehaviorOtherBehavior" ), "derivedBaseBehaviorOtherBehavior", "derived property visible on derived with base and other behaviors" );
               equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseBehavior" ), "baseBehavior", "base behavior property visible on derived with base and other behaviors" );
@@ -158,8 +162,9 @@
 
           asyncTest( "Inheritance through behavior with own inheritance", function() {  // DerivedDerivedBehavior implements DerivedBehavior extends Base; DerivedBehavior extends BaseBehavior
 
-            createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
-                derivedBehaviorID, baseBehaviorID, otherBehaviorID, cleanup ) {
+            createFixture( function( doubleDerivedOtherBehaviorDerivedBaseBehaviorID,
+                derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID,
+                baseID, derivedBehaviorID, baseBehaviorID, otherBehaviorID, cleanup ) {
 
               equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehavior" ), "derivedDerivedBehavior", "derived property visible on derived with derived behavior" );
               equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedBehavior" ), "derivedBehavior", "derived behavior property visible on derived with derived behavior" );
@@ -199,8 +204,9 @@
 
           asyncTest( "Multiple behavior inheritance order", function() {  // DerivedBaseBehaviorOtherBehavior implements BaseBehavior, OtherBehavior extends Base
 
-            createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
-                derivedBehaviorID, baseBehaviorID, otherBehaviorID, cleanup ) {
+            createFixture( function( doubleDerivedOtherBehaviorDerivedBaseBehaviorID,
+                derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID,
+                baseID, derivedBehaviorID, baseBehaviorID, otherBehaviorID, cleanup ) {
 
               vwf.createProperty( derivedBaseBehaviorOtherBehaviorID, "a", "derivedBaseBehaviorOtherBehavior" );
 
@@ -220,6 +226,60 @@
               equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.b" ), "baseBehavior", "second behavior property visible above first behavior and prototype" );
               equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.c" ), "otherBehavior", "first behavior property visible above prototype" );
               equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.d" ), "base", "prototype property visible" );
+
+              cleanup();
+              start();
+
+            } );
+
+          } );
+
+          asyncTest( "Inheritance queries", function() {
+
+            createFixture( function( doubleDerivedOtherBehaviorDerivedBaseBehaviorID,
+                derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID,
+                baseID, derivedBehaviorID, baseBehaviorID, otherBehaviorID, cleanup ) {
+
+              var nodeTypeURI = "http://vwf.example.com/node.vwf";  // TODO: get from kernel/utility.js once it's available
+
+              // Base node.
+
+              equal( vwf.prototype( baseID ), nodeTypeURI, "base prototype" );
+              deepEqual( vwf.behaviors( baseID ), [], "base behaviors" );
+              deepEqual( vwf.prototypes( baseID ), [ nodeTypeURI ], "base prototypes" );
+              deepEqual( vwf.prototypes( baseID, true ), [ nodeTypeURI ], "base prototypes with behaviors" );
+
+              // Derived node without behaviors.
+
+              equal( vwf.prototype( derivedID ), baseID, "derived prototype" );
+              deepEqual( vwf.behaviors( derivedID ), [], "derived behaviors" );
+              deepEqual( vwf.prototypes( derivedID ), [ baseID, nodeTypeURI ], "derived prototypes" );
+              deepEqual( vwf.prototypes( derivedID, true ), [ baseID, nodeTypeURI ], "derived prototypes with behaviors" );
+
+              // Derived node with two behaviors. A node's behaviors should be inserted before its
+              // prototype, and the behaviors should be in descending order of inheritance.
+
+              equal( vwf.prototype( derivedBaseBehaviorOtherBehaviorID ),
+                baseID, "derived-with-behaviors prototype" );
+              deepEqual( vwf.behaviors( derivedBaseBehaviorOtherBehaviorID ),
+                [ otherBehaviorID, baseBehaviorID ], "derived-with-behaviors behaviors" );
+              deepEqual( vwf.prototypes( derivedBaseBehaviorOtherBehaviorID ),
+                [ baseID, nodeTypeURI ], "derived-with-behaviors prototypes" );
+              deepEqual( vwf.prototypes( derivedBaseBehaviorOtherBehaviorID, true ),
+                [ baseBehaviorID, otherBehaviorID, baseID, nodeTypeURI ], "derived-with-behaviors prototypes with behaviors" );
+
+              // Node with a behavior derived from a derived node with a behavior. Each node's
+              // behaviors should be inserted before their prototypes.
+
+              equal( vwf.prototype( doubleDerivedOtherBehaviorDerivedBaseBehaviorID ),
+                derivedBaseBehaviorID, "double-derived prototype" );
+              deepEqual( vwf.behaviors( doubleDerivedOtherBehaviorDerivedBaseBehaviorID ),
+                [ otherBehaviorID ], "double-derived behaviors" );
+              deepEqual( vwf.prototypes( doubleDerivedOtherBehaviorDerivedBaseBehaviorID ),
+                [ derivedBaseBehaviorID, baseID, nodeTypeURI ], "double-derived prototypes" );
+              deepEqual( vwf.prototypes( doubleDerivedOtherBehaviorDerivedBaseBehaviorID, true ),
+                [ otherBehaviorID, derivedBaseBehaviorID, baseBehaviorID, baseID, nodeTypeURI ],
+                "double-derived prototypes with behaviors" );
 
               cleanup();
               start();
@@ -301,6 +361,9 @@
 
           // Create nodes in this arrangement:
           // 
+          //   DoubleDerivedOtherBehaviorDerivedBaseBehavior implements OtherBehavior extends DerivedBaseBehavior
+          //     (=> implements BaseBehavior extends Base)
+          //   
           //   DerivedBaseBehavior implements BaseBehavior extends Base
           //   DerivedBaseBehaviorOtherBehavior implements BaseBehavior, OtherBehavior extends Base
           //   DerivedDerivedBehavior implements DerivedBehavior extends Base
@@ -323,14 +386,17 @@
                       createNode( "derivedBaseBehavior", [ baseBehaviorID ], baseID, function( derivedBaseBehaviorID ) {
                         createNode( "derivedBaseBehaviorOtherBehavior", [ otherBehaviorID, baseBehaviorID ], baseID, function( derivedBaseBehaviorOtherBehaviorID ) {
                           createNode( "derivedDerivedBehavior", [ derivedBehaviorID ], baseID, function( derivedDerivedBehaviorID ) {
+                            createNode( "doubleDerivedOtherBehaviorDerivedBaseBehavior", [ otherBehaviorID ], derivedBaseBehaviorID, function( doubleDerivedOtherBehaviorDerivedBaseBehaviorID ) {
 
-                            var nodes = [ derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
-                              derivedBehaviorID, baseBehaviorID, otherBehaviorID ];
+                              var nodes = [ doubleDerivedOtherBehaviorDerivedBaseBehaviorID,
+                                derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID,
+                                baseID, derivedBehaviorID, baseBehaviorID, otherBehaviorID ];
 
-                            callback.apply( undefined, nodes.concat( function() {
-                              nodes.forEach( function( nodeID ) { vwf.deleteNode( nodeID ) } );
-                            } ) );
+                              callback.apply( undefined, nodes.concat( function() {
+                                nodes.forEach( function( nodeID ) { vwf.deleteNode( nodeID ) } );
+                              } ) );
 
+                            } );
                           } );
                         } );
                       } );
