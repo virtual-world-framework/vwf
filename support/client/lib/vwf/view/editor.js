@@ -20,7 +20,7 @@
 /// @requires vwf/view
 /// @requires vwf/utility
 
-define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, version, view, utility ) {
+define( [ "module", "version", "vwf/view", "vwf/utility", "jquery-ui", "jquery-encoder-0.1.0" ], function( module, version, view, utility, $ ) {
 
     return view.load( module, {
 
@@ -58,7 +58,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             this.highlightedChild = '';
             this.intervalTimer = 0;
             
-            jQuery('body').append(
+            $('body').append(
                 "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Application.png' alt='application' /><img id='userlist' src='images/tab_Users.png' alt='users' /><img id='timeline' src='images/tab_Time.png' alt='time' /><img id='models' src='images/tab_Models.png' alt='models' /><img id='about' src='images/tab_About.png' alt='about' /></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div>" + 
@@ -71,39 +71,39 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             
             $('#tabs').stop().animate({ opacity:0.0 }, 0);
             
-            jQuery('#tabs').mouseenter( function(evt) { 
+            $('#tabs').mouseenter( function(evt) { 
                 evt.stopPropagation();
                 $('#tabs').stop().animate({ opacity:1.0 }, 175);
                 return false; 
             });
             
-            jQuery('#tabs').mouseleave( function(evt) { 
+            $('#tabs').mouseleave( function(evt) { 
                 evt.stopPropagation(); 
                 $('#tabs').stop().animate({ opacity:0.0 }, 175);
                 return false; 
             });
             
-            jQuery('#hierarchy').click ( function(evt) {
+            $('#hierarchy').click ( function(evt) {
                 openEditor.call(self, 1);
             });
 
-            jQuery('#userlist').click ( function(evt) {
+            $('#userlist').click ( function(evt) {
                 openEditor.call(self, 2);
             });
 
-            jQuery('#timeline').click ( function(evt) {
+            $('#timeline').click ( function(evt) {
                 openEditor.call(self, 3);
             });
 
-            jQuery('#about').click ( function(evt) {
+            $('#about').click ( function(evt) {
                 openEditor.call(self, 4);
             });
 
-            jQuery('#models').click ( function(evt) {
+            $('#models').click ( function(evt) {
                 openEditor.call(self, 5);
             });
 
-            jQuery('#x').click ( function(evt) {
+            $('#x').click ( function(evt) {
                 closeEditor.call(self);
             });
 
@@ -699,7 +699,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         var node = this.nodes[ clientID ];
 
         clients$.html("<div class='header'><img src='images/back.png' id='back' alt='back'/> " + $.encoder.encodeForHTML(node.name) + "</div>");
-        jQuery('#back').click ( function(evt) {
+        $('#back').click ( function(evt) {
             viewClients.call( self );
         });
 
@@ -796,7 +796,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         else
         {
             $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + nodeIDAlpha + "-back' alt='back'/> " + $.encoder.encodeForHTML(node.name) + "</div>");
-            jQuery('#' + nodeIDAlpha + '-back').click ( function(evt) {
+            $('#' + nodeIDAlpha + '-back').click ( function(evt) {
                 drillUp.call(self, drillBackID);
             });
         }
@@ -1115,7 +1115,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         var nodeIDAlpha = $.encoder.encodeForAlphaNumeric(nodeID);
         
         $(topdownTemp).html("<div class='header'><img src='images/back.png' id='script-" + nodeIDAlpha + "-back' alt='back'/> script</div>");
-        jQuery('#script-' + nodeIDAlpha + '-back').click ( function(evt) {
+        $('#script-' + nodeIDAlpha + '-back').click ( function(evt) {
             self.editingScript = false;
             drillBack.call(self, nodeID);
 
@@ -1128,13 +1128,13 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         $("#create-" + nodeIDAlpha).click ( function(evt) {
             self.kernel.execute( nodeID, $("#newScriptArea").val() );
         });
-        jQuery('#newScriptArea').focus( function(evt) { 
+        $('#newScriptArea').focus( function(evt) { 
             // Expand the script editor
             self.editingScript = true;
             $('#editor').animate({ 'left' : "-500px" }, 175);
             $('.vwf-tree').animate({ 'width' : "500px" }, 175);
         });
-        jQuery('#newScriptArea').keydown( function(evt) { 
+        $('#newScriptArea').keydown( function(evt) { 
             evt.stopPropagation();
         });
 
@@ -1157,7 +1157,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         var nodeIDAlpha = $.encoder.encodeForAlphaNumeric(nodeID);
         
         $(topdownTemp).html("<div class='header'><img src='images/back.png' id='script-" + nodeIDAlpha + "-back' alt='back'/> script</div>");
-        jQuery('#script-' + nodeIDAlpha + '-back').click ( function(evt) {
+        $('#script-' + nodeIDAlpha + '-back').click ( function(evt) {
             self.editingScript = false;
             drillBack.call(self, nodeID);
 
@@ -1180,13 +1180,13 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 self.allScripts[nodeID][s_id].text = undefined;
                 self.kernel.execute( nodeID, $("#scriptTextArea").val() );
             });
-            jQuery('#scriptTextArea').focus( function(evt) { 
+            $('#scriptTextArea').focus( function(evt) { 
                 // Expand the script editor
                 self.editingScript = true;
                 $('#editor').animate({ 'left' : "-500px" }, 175);
                 $('.vwf-tree').animate({ 'width' : "500px" }, 175);
             });
-            jQuery('#scriptTextArea').keydown( function(evt) { 
+            $('#scriptTextArea').keydown( function(evt) { 
                 evt.stopPropagation();
             });
         }
@@ -1210,7 +1210,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         var methodNameHTML = $.encoder.encodeForHTML(methodName);
      
         $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + methodNameAlpha + "-back' alt='back'/> " + methodNameHTML + "<input type='button' class='input_button_call' id='call' value='Call' style='float:right;position:relative;top:5px;right:33px'></input></div>");
-        jQuery('#' + methodNameAlpha + '-back').click ( function(evt) {
+        $('#' + methodNameAlpha + '-back').click ( function(evt) {
             
             drillUp.call(self, nodeID);
         });
@@ -1268,7 +1268,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         var eventNameHTML = $.encoder.encodeForHTML(eventName);
      
         $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + eventNameAlpha + "-back' alt='back'/> " + eventNameHTML + "<input type='button' class='input_button_call' id='fire' value='Fire' style='float:right;position:relative;top:5px;right:33px'></input></div>");
-        jQuery('#' + eventNameAlpha + '-back').click ( function(evt) {
+        $('#' + eventNameAlpha + '-back').click ( function(evt) {
             drillUp.call(self, nodeID);
         });
 
@@ -1439,7 +1439,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         if(!this.timelineInit)
         {
-            jQuery('#time_control').append("<div class='header'>Timeline</div>" + 
+            $('#time_control').append("<div class='header'>Timeline</div>" + 
                 "<div style='text-align:center;padding-top:10px'><span><button id='play'></button><button id='stop'></button></span>" +
                 "<span><span class='rate slider'></span>&nbsp;" + 
                 "<span class='rate vwf-label' style='display: inline-block; width:8ex'></span></span></div>");
@@ -1454,16 +1454,16 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
             var state = {};
 
-            jQuery.get(
+            $.get(
                 "admin/state", 
                 undefined, 
                 function( data ) {
                     state = data;
 
-                    jQuery( "button#play" ).button( "option", state.playing ? options.pause : options.play );
-                    jQuery( "button#stop" ).button( "option", "disabled", state.stopped );
+                    $( "button#play" ).button( "option", state.playing ? options.pause : options.play );
+                    $( "button#stop" ).button( "option", "disabled", state.stopped );
 
-                    jQuery( ".rate.slider" ).slider( "value", Math.log( state.rate ) / Math.LN10 );
+                    $( ".rate.slider" ).slider( "value", Math.log( state.rate ) / Math.LN10 );
 
                     if ( state.rate < 1.0 ) {
                         var label_rate = 1.0 / state.rate;
@@ -1480,48 +1480,48 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                         label = label + " &times;";
                     }
 
-                    jQuery( ".rate.vwf-label" ).html( label );
+                    $( ".rate.vwf-label" ).html( label );
                 }, 
                 "json" 
             );
 
-            jQuery( "button#play" ).button(
+            $( "button#play" ).button(
                 options.pause
             ). click( function() {
-                jQuery.post(
+                $.post(
                     state.playing ? "admin/pause" : "admin/play", 
                     undefined, 
                     function( data ) {
                         state = data;
 
-                        jQuery( "button#play" ).button( "option", state.playing ? options.pause : options.play );
-                        jQuery( "button#stop" ).button( "option", "disabled", state.stopped );
+                        $( "button#play" ).button( "option", state.playing ? options.pause : options.play );
+                        $( "button#stop" ).button( "option", "disabled", state.stopped );
                     },
                     "json" 
                 );
             } );
 
 
-            jQuery( "button#stop" ).button(
+            $( "button#stop" ).button(
                 options.stop
             ). click( function() {
-                jQuery.post(
+                $.post(
                     "admin/stop", 
                     undefined, 
                     function( data ) {
                         state = data;
 
-                        jQuery( "button#play" ).button( "option", state.playing ? options.pause : options.play );
-                        jQuery( "button#stop" ).button( "option", "disabled", state.stopped );
+                        $( "button#play" ).button( "option", state.playing ? options.pause : options.play );
+                        $( "button#stop" ).button( "option", "disabled", state.stopped );
                     }, 
                     "json" 
                 );
             } );
 
-            jQuery( ".rate.slider" ).slider(
+            $( ".rate.slider" ).slider(
                 options.rate
             ) .bind( "slide", function( event, ui ) {
-                jQuery.get( 
+                $.get( 
                     "admin/state", 
 
                     { "rate": Math.pow( 10, Number(ui.value) ) }, 
@@ -1529,7 +1529,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                     function( data ) {
                         state = data;
 
-                        jQuery( ".rate.slider" ).slider( "value", Math.log( state.rate ) / Math.LN10 );
+                        $( ".rate.slider" ).slider( "value", Math.log( state.rate ) / Math.LN10 );
 
                         if ( state.rate < 1.0 ) {
                             var label_rate = 1.0 / state.rate;
@@ -1546,7 +1546,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                             label = label + " &times;";
                         }
 
-                        jQuery( ".rate.vwf-label" ).html( label );
+                        $( ".rate.vwf-label" ).html( label );
                     }, 
                     "json"
                 );
@@ -1573,7 +1573,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         if(!this.aboutInit)
         {
-            jQuery('#about_tab').append("<div class='header'>About</div>" + 
+            $('#about_tab').append("<div class='header'>About</div>" + 
                 "<div class='about'><p style='font:bold 12pt Arial'>Virtual World Framework</p>" +
                 "<p><b>Version: </b>" + version.join(".") + "</p>" +
                 "<p><b>Site: </b><a href='http://virtualworldframework.com' target='_blank'>http://virtualworldframework.com</a></p>" +

@@ -21,6 +21,12 @@
 
     modules: [<% modules.each do |path| %>
         { name: "<%= path %>" },<% end %>
-    ]
+    ],
+
+    paths: {
+        jquery: "jquery-1.10.2.min",
+        "jquery-ui": "jquery-ui-1.10.3.custom.min",
+        hammer: "jquery.hammer"
+    }
 
 } )

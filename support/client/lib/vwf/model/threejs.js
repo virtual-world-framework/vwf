@@ -47,7 +47,7 @@
     }
     
     
-define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function( module, model, utility, Color ) {
+define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ], function( module, model, utility, Color, $ ) {
 
     var self;
 
@@ -2776,7 +2776,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if ( debug ) {
                 this.logger.info("====>>>  vwf.model-glge.mousePick: searching for: " + path(objectToLookFor) );
             }
-            jQuery.each( this.state.nodes, function (nodeID, node) {
+            $.each( this.state.nodes, function (nodeID, node) {
                 if ( node.threeObject == objectToLookFor && !node.glgeMaterial ) {
                     if ( debug ) { this.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
                     objectIDFound = nodeID;
@@ -3923,7 +3923,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             //vertex data
             if (node.attributes) {
-                jQuery.each(node.attributes, function(key, element) {
+                $.each(node.attributes, function(key, element) {
                     debugarraytype = key;
                     var attributeArray = node.attributes[key];
                     node.attributes[key] = DecodeArray(attributeArray,key);

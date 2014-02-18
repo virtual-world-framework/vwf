@@ -14,7 +14,7 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
+define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], function( module, view, utility, Hammer, $ ) {
 
     var self;
 
@@ -103,7 +103,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             //how/when does the model set the state object? 
             if ( this.state.scenes[ childID ] )
             {                
-                this.canvasQuery = jQuery(this.rootSelector).append("<canvas id='" + this.state.sceneRootID + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
+                this.canvasQuery = $(this.rootSelector).append("<canvas id='" + this.state.sceneRootID + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
                 ).children(":last");
                 
                 initScene.call(this,this.state.scenes[childID]);

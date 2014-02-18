@@ -257,6 +257,9 @@
 
         var vwf = this;
 
+        // Store the jQuery module for reuse
+        var jQuery;
+
         // == Public functions =====================================================================
 
         // -- loadConfiguration ---------------------------------------------------------------------------
@@ -299,6 +302,8 @@
                 }
             };
 
+            jQuery = require("jquery");
+
             var requireArray = [
                 { library: "domReady", active: true },
                 { library: "vwf/configuration", active: true },
@@ -313,7 +318,7 @@
                 { library: "vwf/model/stage/log", active: true },
                 { library: "vwf/kernel/view", active: true },
                 { library: "vwf/view/document", active: true },
-                { library: "vwf/view/editor", active: false },
+            	{ library: "vwf/view/editor", active: false },
                 { library: "vwf/view/glge", disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
                 { library: "vwf/view/lesson", active: false},
                 { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
@@ -343,7 +348,7 @@
                     { library: "vwf/view/glge", parameters: {"application-root":"#vwf-root"}, active: false },
                     { library: "vwf/view/threejs", parameters: {"application-root":"#vwf-root"}, active: false },
                     { library: "vwf/view/document", active: true },
-                    { library: "vwf/view/editor", active: false },
+                	{ library: "vwf/view/editor", active: false },
                     { library: "vwf/view/lesson", active: false},
                     { library: "vwf/view/google-earth", active: false },
                     { library: "vwf/view/cesium", active: false },
@@ -377,16 +382,18 @@
                 return activeLibraryList;
             }
 
-            $.getJSON("admin/config", function(configLibraries) {
+            jQuery.getJSON("admin/config", function(configLibraries) {
                 if(configLibraries && typeof configLibraries == "object") {
                     Object.keys(configLibraries).forEach(function(libraryType) {
                         if(libraryType == 'info' && configLibraries[libraryType]["title"])
                         {
-                            $('title').html(configLibraries[libraryType]["title"]);
+                            jQuery('title').html(configLibraries[libraryType]["title"]);
                         }
                         if(!userLibraries[libraryType]) {
                             userLibraries[libraryType] = {};
                         }
+                        // Merge libraries from config file and URL together. Check for incompatible
+                        // libraries, and disable them.
                         Object.keys(configLibraries[libraryType]).forEach(function(libraryName) {
                             var disabled = false;
                             if(requireArray[libraryName] && requireArray[libraryName].disabledBy) {
@@ -405,7 +412,7 @@
                                     userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];
                                 }
                                 else if(typeof userLibraries[libraryType][libraryName] == "object" && typeof configLibraries[libraryType][libraryName] == "object") {
-                                    userLibraries[libraryType][libraryName] = $.extend({}, configLibraries[libraryType][libraryName], userLibraries[libraryType][libraryName]);
+                                    userLibraries[libraryType][libraryName] = jQuery.extend({}, configLibraries[libraryType][libraryName], userLibraries[libraryType][libraryName]);
                                 }
                             }
                         });
@@ -421,7 +428,7 @@
                                 initializers[libraryType][libraryName].active = true;
                                 if(userLibraries[libraryType][libraryName] && userLibraries[libraryType][libraryName] != "") {
                                     if(typeof initializers[libraryType][libraryName].parameters == "object") {
-                                        initializers[libraryType][libraryName].parameters = $.extend({}, initializers[libraryType][libraryName].parameters,
+                                        initializers[libraryType][libraryName].parameters = jQuery.extend({}, initializers[libraryType][libraryName].parameters,
                                             userLibraries[libraryType][libraryName]);
                                     }
                                     else {
@@ -578,7 +585,7 @@
                         if(model.model.compatibilityStatus) {
                             if(!model.model.compatibilityStatus.compatible) {
                                 compatibilityStatus.compatible = false;
-                                $.extend(compatibilityStatus.errors, model.model.compatibilityStatus.errors);
+                                jQuery.extend(compatibilityStatus.errors, model.model.compatibilityStatus.errors);
                             }
                         }
                     }
@@ -626,7 +633,7 @@
                             if(view.compatibilityStatus) {
                                 if(!view.compatibilityStatus.compatible) {
                                     compatibilityStatus.compatible = false;
-                                    $.extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
+                                    jQuery.extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
                                 }
                             }
                         }
@@ -649,7 +656,7 @@
                             if(view.compatibilityStatus) {
                                 if(!view.compatibilityStatus.compatible) {
                                     compatibilityStatus.compatible = false;
-                                    $.extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
+                                    jQuery.extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
                                 }
                             }
                         }
@@ -663,14 +670,14 @@
             // Test for ECMAScript 5
             if(!(function() { return !this })()) {
                 compatibilityStatus.compatible = false;
-                $.extend(compatibilityStatus.errors, {"ES5": "This browser is not compatible. VWF requires ECMAScript 5."});
+                jQuery.extend(compatibilityStatus.errors, {"ES5": "This browser is not compatible. VWF requires ECMAScript 5."});
             }
 
             // Test for WebSockets
             if( window.io && !io.Transport.websocket.check() )
             {
                 compatibilityStatus.compatible = false;
-                $.extend(compatibilityStatus.errors, {"WS": "This browser is not compatible. VWF requires WebSockets."});
+                jQuery.extend(compatibilityStatus.errors, {"WS": "This browser is not compatible. VWF requires WebSockets."});
             }
 
             if(callback) {

@@ -1,9 +1,9 @@
 ﻿<div id="wrapper" style="height:100%;width:100%;z-index:2;position:absolute;top:0px;left:0px;pointer-events:none;">
     <!-- JAVASCRIPT -->
 
+    <script src="js/jquery-1.10.2.min.js" type="text/javascript"></script>
     <script src="js/jquery-ui-1.10.3.custom.min.js" type="text/javascript"></script>
     <script src="js/events.js" type="text/javascript"></script>
-
 
     <script type="text/javascript">
         $(function(){
@@ -15,66 +15,66 @@
             }).keyup(function(e) {
                 e.stopPropagation();
             });
-      
-      var sanitizeUsername = function( userName ) {
-        userName = userName.replace( / /g, "_" );
-        userName = userName.replace( /([^0-9A-Za-z\-\_])/g, "" );
-        return userName;
-      };
-      
-      $( "#userNameInput" ).keydown( function(e) {
-        e.stopPropagation();
-        var sanitizedUsername = sanitizeUsername( $( '#userNameInput' ).val( ) );
-        if ( sanitizedUsername != $( '#userNameInput' ).val( ) ) {
-          $( '#userNameInput' ).val( sanitizedUsername );
-        }
-      });
-      $( "#userNameInput" ).keyup( function(e) {
-        e.stopPropagation();
-        var sanitizedUsername = sanitizeUsername( $( '#userNameInput' ).val( ) );
-        if ( sanitizedUsername != $( '#userNameInput' ).val( ) ) {
-          $( '#userNameInput' ).val( sanitizedUsername );
-        }
-        var code = ( e.keyCode ? e.keyCode : e.which );
-        if ( ( code == 13 ) && ( sanitizedUsername.length > 0 ) ) {
-          var buttonEnabled = true;
-          if ( $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled') ) {
-            if ( $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled') == true ) {
-              buttonEnabled = false;
-            }
-          }
-          if ( buttonEnabled ) {
-            $('.ui-button').focus();
-            playerName = $('#userNameInput').val( );
-            vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [$('#userNameInput').val(), vwf.moniker()]);
-            $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
-            $('#userNameInput').attr('disabled', true);
-          }
-        }
-      });
+          
+            var sanitizeUsername = function( userName ) {
+            userName = userName.replace( / /g, "_" );
+            userName = userName.replace( /([^0-9A-Za-z\-\_])/g, "" );
+            return userName;
+            };
 
-      $( '#selectPlayerInput' ).keydown( function(e) {
-        e.stopPropagation();
-      });
-      $( '#selectPlayerInput' ).keyup( function(e) {
-       e.stopPropagation();
-        var code = ( e.keyCode ? e.keyCode : e.which );
-        if ( ( code == 13 ) && ( sanitizedUsername.length > 0 ) ) {
-          var buttonEnabled = true;
-          if ( $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled') ) {
-            if ( $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled') == true ) {
-              buttonEnabled = false;
-            }
-          }
-          if ( buttonEnabled && ( $( '#selectPlayerInput' ).val( ) != 'createNew' ) ){
-            $('.ui-button').focus();
-            playerName = $("#selectPlayerInput option[value='" + $('#selectPlayerInput').val() + "']").text();
-            vwf_view.kernel.callMethod(vwf.find("","/")[0], "rejoinPlayer", [playerName, vwf.moniker()]);
-            $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
-            $('#userNameInput').attr('disabled', true);
-          }
-        }
-      });
+            $( "#userNameInput" ).keydown( function(e) {
+                e.stopPropagation();
+                var sanitizedUsername = sanitizeUsername( $( '#userNameInput' ).val( ) );
+                if ( sanitizedUsername != $( '#userNameInput' ).val( ) ) {
+                  $( '#userNameInput' ).val( sanitizedUsername );
+                }
+            });
+            $( "#userNameInput" ).keyup( function(e) {
+                e.stopPropagation();
+                var sanitizedUsername = sanitizeUsername( $( '#userNameInput' ).val( ) );
+                if ( sanitizedUsername != $( '#userNameInput' ).val( ) ) {
+                  $( '#userNameInput' ).val( sanitizedUsername );
+                }
+                var code = ( e.keyCode ? e.keyCode : e.which );
+                if ( ( code == 13 ) && ( sanitizedUsername.length > 0 ) ) {
+                  var buttonEnabled = true;
+                  if ( $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled') ) {
+                    if ( $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled') == true ) {
+                      buttonEnabled = false;
+                    }
+                  }
+                  if ( buttonEnabled ) {
+                    $('.ui-button').focus();
+                    playerName = $('#userNameInput').val( );
+                    vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [$('#userNameInput').val(), vwf.moniker()]);
+                    $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
+                    $('#userNameInput').attr('disabled', true);
+                  }
+                }
+            });
+
+            $( '#selectPlayerInput' ).keydown( function(e) {
+                e.stopPropagation();
+            });
+            $( '#selectPlayerInput' ).keyup( function(e) {
+                e.stopPropagation();
+                var code = ( e.keyCode ? e.keyCode : e.which );
+                if ( ( code == 13 ) && ( sanitizedUsername.length > 0 ) ) {
+                  var buttonEnabled = true;
+                  if ( $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled') ) {
+                    if ( $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled') == true ) {
+                      buttonEnabled = false;
+                    }
+                  }
+                  if ( buttonEnabled && ( $( '#selectPlayerInput' ).val( ) != 'createNew' ) ){
+                    $('.ui-button').focus();
+                    playerName = $("#selectPlayerInput option[value='" + $('#selectPlayerInput').val() + "']").text();
+                            vwf_view.kernel.callMethod(vwf.find("","/")[0], "rejoinPlayer", [playerName, vwf.moniker()]);
+                    $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
+                    $('#userNameInput').attr('disabled', true);
+                  }
+                }
+            });
             $('#createUser').dialog( {
                 autoOpen: false,
                 height: 'auto',
@@ -99,8 +99,8 @@
                             vwf_view.kernel.callMethod(vwf.find("","/")[0], "rejoinPlayer", [playerName, vwf.moniker()]);
                             $('#userName').html(playerName + ":&nbsp;");
                             preloadImages();
-                            $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
-                            $('#userNameInput').attr('disabled', true);
+                          $(".ui-dialog-buttonpane button:contains('Create')").attr('disabled', true);
+                          $('#userNameInput').attr('disabled', true);
                         }
                     }
                 },
