@@ -91,10 +91,17 @@
 
         var requireConfig = {
             paths: {
-                jquery: "jquery-1.10.2.min"
+                jquery: "jquery-1.10.2.min",
+                "jquery-ui": "jquery-ui-1.10.3.custom.min",
+                hammer: "jquery.hammer",
             },
-            shim: {
+            shim: {                
+                "jquery-ui": {
+                    deps: ["jquery"],
+                    exports: "$"
+                },
                 "jquery-encoder-0.1.0": ["jquery"],
+                "require-hammer": ["hammer", "jquery"],
             }
         };
         require(requireConfig, ["jquery", "jquery-encoder-0.1.0"], function($) {
@@ -130,6 +137,8 @@
             }
 
             googleEarth && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>");
+
+            vwf.loadConfiguration(application, userLibraries, compatibilityCheck);
         });
     </script>
     <script type="text/javascript">googleEarth && google.load( "earth", "1" )</script>
@@ -157,10 +166,6 @@
         </div>
     </div>
     <div id="vwf-root"></div>
-
-    <script type="text/javascript">
-        vwf.loadConfiguration(application, userLibraries, compatibilityCheck);
-    </script>
   </body>
 
 </html>

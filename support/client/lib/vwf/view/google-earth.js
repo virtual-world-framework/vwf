@@ -16,7 +16,7 @@
 /// @module vwf/view/googleEarth
 /// @requires vwf/view
 
-define( [ "module", "vwf/view" ], function( module, view ) {
+define( [ "module", "vwf/view", "jquery" ], function( module, view, jQuery ) {
     var myOptions = undefined;
     return view.load( module, {
 

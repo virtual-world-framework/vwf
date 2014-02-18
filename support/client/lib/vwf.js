@@ -291,18 +291,7 @@
             var callback = args.shift();
 
             var requireConfig = {
-                paths: {
-                    jquery: "jquery-1.10.2.min",
-                    "jquery-ui": "jquery-ui-1.10.3.custom.min",
-                    hammer: "jquery.hammer",
-                },
                 shim: {
-                    "jquery-ui": {
-                        deps: ["jquery"],
-                        exports: "$"
-                    },
-                    "jquery-encoder-0.1.0": ["jquery"],
-                    "require-hammer": ["hammer", "jquery"],
                     "vwf/model/threejs/three": {
                         exports: "THREE",
                     },
@@ -313,176 +302,173 @@
                 }
             };
 
-            require(requireConfig, ["jquery"], function() {
+            jQuery = require("jquery");
 
-                var requireArray = [
-                    { library: "domReady", active: true },
-                    { library: "vwf/configuration", active: true },
-                    { library: "vwf/kernel/model", active: true },
+            var requireArray = [
+                { library: "domReady", active: true },
+                { library: "vwf/configuration", active: true },
+                { library: "vwf/kernel/model", active: true },
+                { library: "vwf/model/javascript", active: true },
+                { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], active: false },
+                { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
+                { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
+                { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
+                { library: "vwf/model/scenejs", active: false },
+                { library: "vwf/model/object", active: true },
+                { library: "vwf/model/stage/log", active: true },
+                { library: "vwf/kernel/view", active: true },
+                { library: "vwf/view/document", active: true },
+            	{ library: "vwf/view/editor", active: false },
+                { library: "vwf/view/glge", disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
+                { library: "vwf/view/lesson", active: false},
+                { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
+                { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
+                { library: "vwf/view/cesium", active: false },
+                { library: "vwf/utility", active: true },
+                { library: "vwf/model/glge/glge-compiled", active: false },
+                { library: "vwf/model/threejs/three", active: false },
+                { library: "vwf/model/threejs/js/loaders/ColladaLoader", active: false },
+                { library: "vwf/model/jiglib/jiglib", active: false },
+                { library: "vwf/view/webrtc/adapter", active: false },
+                { library: "vwf/view/google-earth", active: false },
+                { library: "vwf/model/cesium/Cesium", active: false },
+                { library: "vwf/admin", active: true }
+            ];
+
+            var initializers = {
+                model: [
                     { library: "vwf/model/javascript", active: true },
-                    { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], active: false },
-                    { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
-                    { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
-                    { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
-                    { library: "vwf/model/scenejs", active: false },
-                    { library: "vwf/model/object", active: true },
-                    { library: "vwf/model/stage/log", active: true },
-                    { library: "vwf/kernel/view", active: true },
+                    { library: "vwf/model/jiglib", active: false },
+                    { library: "vwf/model/glge", active: false },
+                    { library: "vwf/model/threejs", active: false },
+                    { library: "vwf/model/cesium", active: false },
+                    { library: "vwf/model/object", active: true }
+                ],
+                view: [
+                    { library: "vwf/view/glge", parameters: {"application-root":"#vwf-root"}, active: false },
+                    { library: "vwf/view/threejs", parameters: {"application-root":"#vwf-root"}, active: false },
                     { library: "vwf/view/document", active: true },
                 	{ library: "vwf/view/editor", active: false },
-                    { library: "vwf/view/glge", disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
                     { library: "vwf/view/lesson", active: false},
-                    { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
-                    { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
-                    { library: "vwf/view/cesium", active: false },
-                    { library: "vwf/utility", active: true },
-                    { library: "vwf/model/glge/glge-compiled", active: false },
-                    { library: "vwf/model/threejs/three", active: false },
-                    { library: "vwf/model/threejs/js/loaders/ColladaLoader", active: false },
-                    { library: "vwf/model/jiglib/jiglib", active: false },
-                    { library: "vwf/view/webrtc/adapter", active: false },
                     { library: "vwf/view/google-earth", active: false },
-                    { library: "vwf/model/cesium/Cesium", active: false },
-                    { library: "vwf/admin", active: true }
-                ];
+                    { library: "vwf/view/cesium", active: false },
+                    { library: "vwf/view/webrtc", active: false}
+                ]
+            };
+            mapLibraryName(requireArray);
+            mapLibraryName(initializers["model"]);
+            mapLibraryName(initializers["view"]);
 
-                var initializers = {
-                    model: [
-                        { library: "vwf/model/javascript", active: true },
-                        { library: "vwf/model/jiglib", active: false },
-                        { library: "vwf/model/glge", active: false },
-                        { library: "vwf/model/threejs", active: false },
-                        { library: "vwf/model/cesium", active: false },
-                        { library: "vwf/model/object", active: true }
-                    ],
-                    view: [
-                        { library: "vwf/view/glge", parameters: {"application-root":"#vwf-root"}, active: false },
-                        { library: "vwf/view/threejs", parameters: {"application-root":"#vwf-root"}, active: false },
-                        { library: "vwf/view/document", active: true },
-                    	{ library: "vwf/view/editor", active: false },
-                        { library: "vwf/view/lesson", active: false},
-                        { library: "vwf/view/google-earth", active: false },
-                        { library: "vwf/view/cesium", active: false },
-                        { library: "vwf/view/webrtc", active: false}
-                    ]
-                };
-                mapLibraryName(requireArray);
-                mapLibraryName(initializers["model"]);
-                mapLibraryName(initializers["view"]);
-
-                jQuery = require("jquery");
-
-                function mapLibraryName(array) {
-                    for(var i=0;i<array.length;i++) {
-                        array[array[i].library] = array[i];
-                    }
+            function mapLibraryName(array) {
+                for(var i=0;i<array.length;i++) {
+                    array[array[i].library] = array[i];
                 }
+            }
 
-                function getActiveLibraries(libraryList, includeParameters) {
-                    var activeLibraryList = [];
-                    for(var i=0; i<libraryList.length; i++) {
-                        if(libraryList[i].active) {
-                            if(includeParameters) {
-                                var activeLibrary = {};
-                                activeLibrary[libraryList[i].library] = libraryList[i].parameters;
-                                activeLibraryList.push(activeLibrary);
-                            }
-                            else {
-                                activeLibraryList.push(libraryList[i].library);
-                            }
+            function getActiveLibraries(libraryList, includeParameters) {
+                var activeLibraryList = [];
+                for(var i=0; i<libraryList.length; i++) {
+                    if(libraryList[i].active) {
+                        if(includeParameters) {
+                            var activeLibrary = {};
+                            activeLibrary[libraryList[i].library] = libraryList[i].parameters;
+                            activeLibraryList.push(activeLibrary);
+                        }
+                        else {
+                            activeLibraryList.push(libraryList[i].library);
                         }
                     }
-                    return activeLibraryList;
                 }
+                return activeLibraryList;
+            }
 
-                jQuery.getJSON("admin/config", function(configLibraries) {
-                    if(configLibraries && typeof configLibraries == "object") {
-                        Object.keys(configLibraries).forEach(function(libraryType) {
-                            if(libraryType == 'info' && configLibraries[libraryType]["title"])
-                            {
-                                jQuery('title').html(configLibraries[libraryType]["title"]);
-                            }
-                            if(!userLibraries[libraryType]) {
-                                userLibraries[libraryType] = {};
-                            }
-                            // Merge libraries from config file and URL together. Check for incompatible
-                            // libraries, and disable them.
-                            Object.keys(configLibraries[libraryType]).forEach(function(libraryName) {
-                                var disabled = false;
-                                if(requireArray[libraryName] && requireArray[libraryName].disabledBy) {
-                                    for(var i=0; i<requireArray[libraryName].disabledBy.length; i++) {
-                                        Object.keys(userLibraries).forEach(function(userLibraryType) {
-                                            Object.keys(userLibraries[userLibraryType]).forEach(function(userLibraryName) {
-                                                if(requireArray[libraryName].disabledBy[i] == userLibraryName) {
-                                                    disabled = true;
-                                                }
-                                            })
+            jQuery.getJSON("admin/config", function(configLibraries) {
+                if(configLibraries && typeof configLibraries == "object") {
+                    Object.keys(configLibraries).forEach(function(libraryType) {
+                        if(libraryType == 'info' && configLibraries[libraryType]["title"])
+                        {
+                            jQuery('title').html(configLibraries[libraryType]["title"]);
+                        }
+                        if(!userLibraries[libraryType]) {
+                            userLibraries[libraryType] = {};
+                        }
+                        // Merge libraries from config file and URL together. Check for incompatible
+                        // libraries, and disable them.
+                        Object.keys(configLibraries[libraryType]).forEach(function(libraryName) {
+                            var disabled = false;
+                            if(requireArray[libraryName] && requireArray[libraryName].disabledBy) {
+                                for(var i=0; i<requireArray[libraryName].disabledBy.length; i++) {
+                                    Object.keys(userLibraries).forEach(function(userLibraryType) {
+                                        Object.keys(userLibraries[userLibraryType]).forEach(function(userLibraryName) {
+                                            if(requireArray[libraryName].disabledBy[i] == userLibraryName) {
+                                                disabled = true;
+                                            }
                                         })
-                                    }
+                                    })
                                 }
-                                if(!disabled) {
-                                    if(userLibraries[libraryType][libraryName] == undefined) {
-                                        userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];
-                                    }
-                                    else if(typeof userLibraries[libraryType][libraryName] == "object" && typeof configLibraries[libraryType][libraryName] == "object") {
-                                        userLibraries[libraryType][libraryName] = jQuery.extend({}, configLibraries[libraryType][libraryName], userLibraries[libraryType][libraryName]);
-                                    }
+                            }
+                            if(!disabled) {
+                                if(userLibraries[libraryType][libraryName] == undefined) {
+                                    userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];
                                 }
-                            });
+                                else if(typeof userLibraries[libraryType][libraryName] == "object" && typeof configLibraries[libraryType][libraryName] == "object") {
+                                    userLibraries[libraryType][libraryName] = jQuery.extend({}, configLibraries[libraryType][libraryName], userLibraries[libraryType][libraryName]);
+                                }
+                            }
                         });
-                    }
+                    });
+                }
             }).always(function(jqXHR, textStatus) { 
 
-                    Object.keys(userLibraries).forEach(function(libraryType) {
-                        if(initializers[libraryType]) {
-                            Object.keys(userLibraries[libraryType]).forEach(function(libraryName) {
-                                if(requireArray[libraryName]) {
-                                    requireArray[libraryName].active = true;
-                                    initializers[libraryType][libraryName].active = true;
-                                    if(userLibraries[libraryType][libraryName] && userLibraries[libraryType][libraryName] != "") {
-                                        if(typeof initializers[libraryType][libraryName].parameters == "object") {
-                                            initializers[libraryType][libraryName].parameters = jQuery.extend({}, initializers[libraryType][libraryName].parameters,
-                                                userLibraries[libraryType][libraryName]);
-                                        }
-                                        else {
-                                            initializers[libraryType][libraryName].parameters = userLibraries[libraryType][libraryName];
-                                        }
+                Object.keys(userLibraries).forEach(function(libraryType) {
+                    if(initializers[libraryType]) {
+                        Object.keys(userLibraries[libraryType]).forEach(function(libraryName) {
+                            if(requireArray[libraryName]) {
+                                requireArray[libraryName].active = true;
+                                initializers[libraryType][libraryName].active = true;
+                                if(userLibraries[libraryType][libraryName] && userLibraries[libraryType][libraryName] != "") {
+                                    if(typeof initializers[libraryType][libraryName].parameters == "object") {
+                                        initializers[libraryType][libraryName].parameters = jQuery.extend({}, initializers[libraryType][libraryName].parameters,
+                                            userLibraries[libraryType][libraryName]);
                                     }
-                                    if(requireArray[libraryName].linkedLibraries) {
-                                        for(var i=0; i<requireArray[libraryName].linkedLibraries.length; i++) {
-                                            requireArray[requireArray[libraryName].linkedLibraries[i]].active = true;
-                                        }
+                                    else {
+                                        initializers[libraryType][libraryName].parameters = userLibraries[libraryType][libraryName];
                                     }
                                 }
-                            });
-                        }
-                    });
-
-                    // Load default renderer if no other librarys specified
-                    if(Object.keys(userLibraries["model"]).length == 0 && Object.keys(userLibraries["view"]).length == 0) {
-                        requireArray["vwf/model/threejs"].active = true;
-                        requireArray["vwf/view/threejs"].active = true;
-                        requireArray["vwf/model/threejs/three"].active = true;
-                        requireArray["vwf/model/threejs/js/loaders/ColladaLoader"].active = true;
-                        initializers["model"]["vwf/model/threejs"].active = true;
-                        initializers["view"]["vwf/view/threejs"].active = true;
+                                if(requireArray[libraryName].linkedLibraries) {
+                                    for(var i=0; i<requireArray[libraryName].linkedLibraries.length; i++) {
+                                        requireArray[requireArray[libraryName].linkedLibraries[i]].active = true;
+                                    }
+                                }
+                            }
+                        });
                     }
+                });
 
-                    require( requireConfig, getActiveLibraries(requireArray, false), function( ready ) {
+                // Load default renderer if no other librarys specified
+                if(Object.keys(userLibraries["model"]).length == 0 && Object.keys(userLibraries["view"]).length == 0) {
+                    requireArray["vwf/model/threejs"].active = true;
+                    requireArray["vwf/view/threejs"].active = true;
+                    requireArray["vwf/model/threejs/three"].active = true;
+                    requireArray["vwf/model/threejs/js/loaders/ColladaLoader"].active = true;
+                    initializers["model"]["vwf/model/threejs"].active = true;
+                    initializers["view"]["vwf/view/threejs"].active = true;
+                }
 
-                        ready( function() {
+                require( requireConfig, getActiveLibraries(requireArray, false), function( ready ) {
 
-                            // With the scripts loaded, we must initialize the framework. vwf.initialize()
-                            // accepts three parameters: a world specification, model configuration parameters,
-                            // and view configuration parameters.
+                    ready( function() {
 
-                            vwf.initialize(application, getActiveLibraries(initializers["model"], true), getActiveLibraries(initializers["view"], true), callback);
+                        // With the scripts loaded, we must initialize the framework. vwf.initialize()
+                        // accepts three parameters: a world specification, model configuration parameters,
+                        // and view configuration parameters.
 
-                        } );
+                        vwf.initialize(application, getActiveLibraries(initializers["model"], true), getActiveLibraries(initializers["view"], true), callback);
 
                     } );
-                });
-            } );
+
+                } );
+            });
         }
 
         // -- initialize ---------------------------------------------------------------------------
