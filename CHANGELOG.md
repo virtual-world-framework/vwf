@@ -2,6 +2,33 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.6.22
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change. 
+
+- CHG: Update build_windows_installer.nsi
+- CHG: Relative path changed to absolute for source control version of NSIS script.
+- CHG: Start a webpage with the local README loaded after install.
+- CHG: Create does not take vwfPath argument.
+- CHG: Update vwfCli.js to support multiple possible locations for VWF support files.
+- CHG: Update spacing in node_vwf.js
+- CHG: Combine nested-if into && conditional operator in node_vwf.js.
+- CHG: Add check for VWF_DIR truthy values.
+- CHG: Fix path checking order to fix Mac/Linux path lookup.
+- CHG: Wordsmith installation instructions
+- CHG: Removed the word folder in install documentation.
+- CHG: Update installation notes to tighten up wording.
+- CHG: Update installation page to match README.
+- CHG: Update readme.md to remove extra wording.
+- CHG: Add instructions on how to use vwf create / vwf to start node server.
+- CHG: Update Readme.md to fix wording.
+- CHG: Update to point to development as fork repo for VWF Core Developers.
+- CHG: Update readme.md to include new instructions for VWF 1.0 Windows install. Closes #3039
+- CHG: Added Core Developer instructions for Windows installation. Closes #3039
+- CHG: Update to installation procedures to break into user/app developer installation and core developer installation. Refs #3039
+
+
+----------------------------------
 0.6.21
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change. 
