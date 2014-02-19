@@ -386,8 +386,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
         // -- render -----------------------------------------------------------------------------------
 
         render: function() {
-            var renderer = this.state.scenes["index-vwf"].renderer;
-            var scene = this.state.scenes["index-vwf"].threeScene;
+            var renderer = this.state.scenes[this.kernel.application()].renderer;
+            var scene = this.state.scenes[this.kernel.application()].threeScene;
             var camera = this.state.cameraInUse;
             renderer.render(scene, camera);
         },
