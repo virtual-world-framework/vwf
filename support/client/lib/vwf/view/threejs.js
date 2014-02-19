@@ -382,6 +382,15 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
             
             lerpTick();      
         },
+
+        // -- render -----------------------------------------------------------------------------------
+
+        render: function() {
+            var renderer = this.state.scenes["index-vwf"].renderer;
+            var scene = this.state.scenes["index-vwf"].threeScene;
+            var camera = this.state.cameraInUse;
+            renderer.render(scene, camera);
+        },
     
     } );
 
@@ -641,12 +650,12 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
                     hovering = true;
                 }
                 
-                self.lastPickId = newPickId
+                self.lastPickId = newPickId;
                 self.lastPick = newPick;
                 lastPickTime = now;
             }
 
-            renderer.render( scene, camera );
+            self.render();
             sceneNode.lastTime = now;
             
             if(self.interpolateTransforms) {
