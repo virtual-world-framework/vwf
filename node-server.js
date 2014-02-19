@@ -56,7 +56,7 @@ if ( argv._[0] == 'create' && argv._.length == 1 ) {
 		console.log("  $ vwf");
 		console.log("");
 		console.log("See the Getting Started documentation at: ");
-		console.log("http://www.virtual.wf/web/docs/readme.html");
+		console.log("https://virtual.wf/getting_started.html");
 	} else {
 		console.log("VWF application could not be created at '" + applicationPath + "'");
 	}
