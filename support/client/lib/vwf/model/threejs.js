@@ -47,7 +47,7 @@
     }
     
     
-define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function( module, model, utility, Color ) {
+define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ], function( module, model, utility, Color, $ ) {
 
     var self;
 
@@ -505,10 +505,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             createMesh.call( this, node, propertyValue, true );
                             value = propertyValue; 
                             break;
-                        case "texture":
-                            // delay the setting of the texture until the actual
-                            // settingProperty call
-                            break;
                         default:
                             value = this.settingProperty( nodeID, propertyName, propertyValue );                  
                             break;
@@ -664,7 +660,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         //need to walk the tree and hide all sub nodes as well
                         value = Boolean( propertyValue );
-                        SetVisible( threeObject, value );
+                        threeObject.visible = value;
                     }
                     else if ( propertyName == 'castShadows' )
                     {
@@ -1528,6 +1524,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                         value = Math.floor(animationFrameCount / animationDuration);
                     }
+                    return value;
+                }
+
+                if(propertyName == "visible") {
+                    value = node.threeObject.visible;
                     return value;
                 }
                 
@@ -2775,7 +2776,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if ( debug ) {
                 this.logger.info("====>>>  vwf.model-glge.mousePick: searching for: " + path(objectToLookFor) );
             }
-            jQuery.each( this.state.nodes, function (nodeID, node) {
+            $.each( this.state.nodes, function (nodeID, node) {
                 if ( node.threeObject == objectToLookFor && !node.glgeMaterial ) {
                     if ( debug ) { this.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
                     objectIDFound = nodeID;
@@ -3677,16 +3678,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }       
         return ret;
     }
-    function SetVisible(node,state) 
-    {
-        if(node)
-            node.visible = state;
-        if(node && node.children)
-        {
-           for(var i in node.children)
-            SetVisible(node.children[i],state);
-        }
-    }
 
     function getWorldTransform( node ) {
         var parent = self.state.nodes[ node.parentID ];
@@ -3932,7 +3923,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             //vertex data
             if (node.attributes) {
-                jQuery.each(node.attributes, function(key, element) {
+                $.each(node.attributes, function(key, element) {
                     debugarraytype = key;
                     var attributeArray = node.attributes[key];
                     node.attributes[key] = DecodeArray(attributeArray,key);

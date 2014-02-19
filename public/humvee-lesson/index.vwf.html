@@ -15,7 +15,8 @@
 
 <html>
   <head>
-  	<script type="text/javascript">
+    <script src="js/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
       vwf_view.calledMethod = function (nodeId, methodName, methodParameters, methodValue) {
         switch(methodName) {
           case "honkHorn":
@@ -31,7 +32,7 @@
     </script>
   </head>
   <body>
-  	<audio id='honk'>
+    <audio id='honk'>
       <source src="honk.wav"></source>
     </audio>
     <audio id='ignition'>

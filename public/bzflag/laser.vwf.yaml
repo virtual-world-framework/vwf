@@ -33,7 +33,7 @@ scripts:
     this.laserModel.visible = true;
     this.laserParticle.visible = true;
     this.explosion.visible = false;
-    this.processFire(0.05);
+    this.processFire();
   };
   this.calculateCollisionInfo = function(translateDelta, checkBefore) {
     var newCollisionInfo = {};

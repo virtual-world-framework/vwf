@@ -175,7 +175,8 @@ Section uninstall
         !Include "${FILELIST}uns"
         !DelFile "${FILELIST}uns"
         Delete "$instdir\uninst.exe"
-        RMDir "$instdir"
+        
+        RMDir /r "$instdir"
         DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
         ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR"  ; Append the new path
         ${un.EnvVarUpdate} $0 "VWF_DIR" "R" "HKLM" "$INSTDIR"  ; Append the new path

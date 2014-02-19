@@ -18,7 +18,7 @@
 /// 
 /// @module vwf/configuration
 
-define( function() {
+define( ["jquery"], function( jQuery ) {
 
     var exports = Object.create( Object.prototype, {
 
