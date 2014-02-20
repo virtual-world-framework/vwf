@@ -33,7 +33,9 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
             this.local = {
                 "ID": undefined,
                 "url": undefined,
+                "desktopUrl": undefined,
                 "stream": undefined,
+                "desktopStream": undefined,
                 "sharing": { audio: true, video: true } 
             };
 
@@ -154,6 +156,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
                     // local client object
                     // grab access to the webcam 
                     capture.call( this, this.local.sharing );
+                    //capture.call( this, { "screen": true } );
                    
                     var remoteClient = undefined;
                     // existing clients
@@ -189,7 +192,6 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
             if ( this.debugVwf.deleting ) {
                 this.kernel.logger.infox( "deletedNode", nodeID );
             }
-            // debugger;
 
             if ( nodeID.indexOf( "-clients-vwf" ) != -1 ) {
                 var moniker = nodeID.substr( nodeID.lastIndexOf('-')+1, 16 );
@@ -330,6 +332,12 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
                         methodValue = setMute.call( this, methodParameters );
                     }
                     break;
+
+                case "shareDesktop":
+                    if ( this.kernel.moniker() == this.kernel.client() ) {
+                        capture.call( this, { "screen": true } );
+                    }
+                    break;
             }
         },       
 
@@ -448,16 +456,31 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
 
     function capture( media ) {
 
+        var self = this;
+
         if ( this.local.stream === undefined && ( media.video || media.audio ) ) {
-            var self = this;
-            var constraints = { 
-                "audio": media.audio, 
-                "video": media.video ? { "mandatory": {}, "optional": [] } : false, 
-            };
             
+            var videoConstraints = {
+                "mandatory": {
+                    "minWidth": 640,
+                    "minHeight": 360,
+                    "maxWidth": 1920,
+                    "maxHeight": 1080,
+                    "minAspectRatio": 1.77
+                },
+                "optional": []
+            };
+
+            var constraints = {
+                "audio": media.audio,
+                "video": media.video ? videoConstraints : false, 
+            }; 
+
             var successCallback = function( stream ) {
                 self.local.url = URL.createObjectURL( stream );
                 self.local.stream = stream;
+
+                console.info( "video url         : " + self.local.url );
 
                 self.kernel.setProperty( self.local.ID, "localUrl", self.local.url );
 
@@ -475,6 +498,53 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
             } catch (e) { 
                 console.log("getUserMedia: error " + e ); 
             };
+        } else if ( this.local.desktopStream === undefined && media.screen ) {
+
+            var screenConstraints = {
+                "audio": false,
+                "video": {
+                    "mandatory": {
+                        "chromeMediaSource": "screen",
+                        "minWidth": 640,
+                        "minHeight": 360,
+                        "maxWidth": 1920,
+                        "maxHeight": 1080,
+                        "minAspectRatio": 1.77
+                    },
+                    "optional": []
+                }
+            };
+
+            var consts = {
+                "video": {
+                    "mandatory": {
+                        "chromeMediaSource": 'screen'
+                    }
+                }
+            };
+
+
+            var successCallback = function( stream ) {
+                self.local.desktopUrl = URL.createObjectURL( stream );
+                self.local.desktopStream = stream;
+
+                console.info( "screen capture url: " + self.local.desktopUrl );
+                self.kernel.setProperty( self.local.ID, "localDesktopUrl", self.local.url );
+
+                var localNode = self.state.clients[ self.local.ID ];
+                displayLocal.call( self, stream, localNode.displayName, localNode.color );
+                //sendOffers.call( self );
+            };
+
+            var errorCallback = function( error ) { 
+                console.log("failed to capture screen image: " + error); 
+            };
+
+            try { getUserMedia( screenConstraints, successCallback, errorCallback ); } 
+            catch (e) { 
+                console.log("getUserMedia: error " + e ); 
+            };                
+
         }
     }  
 
@@ -677,7 +747,6 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
                 } 
 
                 this.pc.onnegotiationeeded = function( event ) {
-                    //debugger;
                     //console.info( "onnegotiationeeded." );
                 }
 

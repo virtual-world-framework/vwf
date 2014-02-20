@@ -323,6 +323,7 @@
                 { library: "vwf/view/lesson", active: false},
                 { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
+                { library: "vwf/view/rtcMulti", linkedLibraries: ["vwf/view/rtcMulti/RTCMultiConnection-v1.4"],  active: false },
                 { library: "vwf/view/cesium", active: false },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
@@ -330,6 +331,7 @@
                 { library: "vwf/model/threejs/js/loaders/ColladaLoader", active: false },
                 { library: "vwf/model/jiglib/jiglib", active: false },
                 { library: "vwf/view/webrtc/adapter", active: false },
+                { library: "vwf/view/rtcMulti/RTCMultiConnection-v1.4", active: false },
                 { library: "vwf/view/google-earth", active: false },
                 { library: "vwf/model/cesium/Cesium", active: false },
                 { library: "vwf/admin", active: true }
@@ -352,7 +354,8 @@
                     { library: "vwf/view/lesson", active: false},
                     { library: "vwf/view/google-earth", active: false },
                     { library: "vwf/view/cesium", active: false },
-                    { library: "vwf/view/webrtc", active: false}
+                    { library: "vwf/view/webrtc", active: false},
+                    { library: "vwf/view/rtcMulti", active: false}
                 ]
             };
             mapLibraryName(requireArray);
