@@ -385,10 +385,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
 
         // -- render -----------------------------------------------------------------------------------
 
-        render: function() {
-            var renderer = this.state.scenes[this.kernel.application()].renderer;
-            var scene = this.state.scenes[this.kernel.application()].threeScene;
-            var camera = this.state.cameraInUse;
+        render: function(renderer, scene, camera) {
             renderer.render(scene, camera);
         },
     
@@ -655,7 +652,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
                 lastPickTime = now;
             }
 
-            self.render();
+            self.render(renderer, scene, camera);
             sceneNode.lastTime = now;
             
             if(self.interpolateTransforms) {
