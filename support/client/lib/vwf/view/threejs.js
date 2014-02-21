@@ -382,6 +382,12 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
             
             lerpTick();      
         },
+
+        // -- render -----------------------------------------------------------------------------------
+
+        render: function(renderer, scene, camera) {
+            renderer.render(scene, camera);
+        },
     
     } );
 
@@ -641,12 +647,12 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
                     hovering = true;
                 }
                 
-                self.lastPickId = newPickId
+                self.lastPickId = newPickId;
                 self.lastPick = newPick;
                 lastPickTime = now;
             }
 
-            renderer.render( scene, camera );
+            self.render(renderer, scene, camera);
             sceneNode.lastTime = now;
             
             if(self.interpolateTransforms) {
