@@ -1741,8 +1741,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             
             if ( this.state.appInitialized && checkLights ) {
                 
-                var lightsInScene = sceneLights.call( this, getThreeScene.call( this ) );
+                var lightsInScene = sceneLights.call( this );
 
+                debugger;
                 createDefaultLighting.call( this, lightsInScene );
                 checkLights = false;    
             }
@@ -2064,22 +2065,35 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         return list;    
     }
 
-    function findAllLights( threeObject, list ) {
+    function createLightContainer() {
+        return { 
+                    "ambientLights": [], 
+                    "directionalLights": [],
+                    "spotLights": [],
+                    "pointLights": []
+                }; 
+    }
+
+    function findAllLights( threeObject, lights ) {
         
-        if(!threeObject) return;
-        if(!list) list = [];
-        if ( threeObject instanceof THREE.DirectionalLight ||
-             threeObject instanceof THREE.SpotLight ||
-             threeObject instanceof THREE.PointLight ||
-             threeObject instanceof THREE.AmbientLight ) {
-            list.push( threeObject );
-        }
+        if( !threeObject ) 
+            return;
+
+        if ( threeObject instanceof THREE.DirectionalLight )
+            lights.directionalLights.push( threeObject );
+        else if ( threeObject instanceof THREE.SpotLight )
+            lights.spotLights.push( threeObject );
+        else if ( threeObject instanceof THREE.PointLight ) 
+            lights.pointLights.push( threeObject );
+        else if ( threeObject instanceof THREE.AmbientLight ) 
+            lights.ambientLights.push( threeObject );
+
         if( threeObject.children ) {
             for ( var i = 0; i < threeObject.children.length; i++) {
-                findAllLights( threeObject.children[ i ], list );
+                findAllLights( threeObject.children[ i ], lights );
             }
         }
-        return list;    
+        return lights;    
     }    
     
     function getMeshVertexIndices(mesh)
@@ -3719,101 +3733,41 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         return ret;
     }
 
-    function sceneLights( scene ) {
-       var lights = {   "ambientLights": [], 
-                        "directionalLights": [],
-                        "spotLights": [],
-                        "pointLights": []
-                     }; 
-
+    function sceneLights() {
+        var scene = getThreeScene.call( this );
+        var lightList = createLightContainer.call( this );
         if ( scene ) {
-            var lightList = [];
             lightList = findAllLights( scene, lightList );
-            for ( var i = 0; i < lightList.length; i++ ) {
-                if ( lightList[ i ] instanceof THREE.AmbientLight ) {
-                    lights.ambientLights.push( lightList[ i ] );
-                } else if ( lightList[ i ] instanceof THREE.DirectionalLight ) {
-                    lights.directionalLights.push( lightList[ i ] );
-                } else if ( lightList[ i ] instanceof THREE.SpotLight ) {
-                    lights.spotLights.push( lightList[ i ] );
-                } else if ( lightList[ i ] instanceof THREE.PointLight ) {
-                    lights.pointLights.push( lightList[ i ] );
-                }
-            }
-
         } 
-        return lights;        
+        return lightList;        
     }
 
     function createDefaultLighting( lights ) {
-        var createComponents = false;
         var sceneID = this.kernel.application();
         var ambientCount = lights.ambientLights.length;
         var lightCount = lights.spotLights.length + lights.directionalLights.length + lights.pointLights.length;
         
-        console.info( "ambientCount = " + ambientCount + "      lightCount = " + lightCount );
+        //console.info( "ambientCount = " + ambientCount + "      lightCount = " + lightCount );
+          
+        var scene = getThreeScene.call( this );
 
-        if ( createComponents ) {
-
-            if ( lightCount == 0 ) {
-
-                //console.info( " ++ creating directional lights"  );
-                
-                var light1 = {
-                    "extends": "http://vwf.example.com/light.vwf",
-                    "properties": {
-                      "lightType": "directional",
-                      "enable": true,
-                      "distance": 2000,
-                      "intensity": 2,
-                      "color": [ 128, 128, 128 ],
-                      "rotation": [ 0, 1, 0, 225 ]
-                    }
-                }
-                this.kernel.createChild( sceneID, "directionalLight1", light1 );
-
-                var light2 = {
-                    "extends": "http://vwf.example.com/light.vwf",
-                    "properties": {
-                      "lightType": "directional",
-                      "enable": true,
-                      "distance": 2000,
-                      "intensity": 2,
-                      "color": [ 128, 128, 128 ],
-                      "rotation": [ 0, 1, 0, 45 ]
-                    }
-                }
-                this.kernel.createChild( sceneID, "directionalLight2", light2 );
-            }
-
-            if ( ambientCount == 0 ) {
-
-                this.kernel.setProperty( sceneID, "ambientColor", [ 50, 50, 50 ] );
-
-            }
-
-        } else {
+        if ( lightCount == 0 ) {
             
-            var scene = getThreeScene.call( this );
+            var light1 = new THREE.DirectionalLight( '808080', 2 );
+            var light2 = new THREE.DirectionalLight( '808080', 2 );
 
-            if ( lightCount == 0 ) {
-                
-                var light1 = new THREE.DirectionalLight( '808080', 2 );
-                var light2 = new THREE.DirectionalLight( '808080', 2 );
+            light1.distance = light2.distance = 2000;
 
-                light1.distance = light2.distance = 2000;
+            scene.add( light1 );
+            scene.add( light2 );
 
-                scene.add( light1 );
-                scene.add( light2 );
-
-                light1.rotation.setFromQuaternion( new THREE.Quaternion( 0, 1, 0, 225 ) );
-                light2.rotation.setFromQuaternion( new THREE.Quaternion( 0, 1, 0, 45 ) );
-            }
-
-            if ( ambientCount == 0 ) {
-                createAmbientLight.call( this, scene, [ 0.20, 0.20, 0.20 ] );
-            }            
+            light1.rotation.setFromQuaternion( new THREE.Quaternion( 0, 1, 0, 225 ) );
+            light2.rotation.setFromQuaternion( new THREE.Quaternion( 0, 1, 0, 45 ) );
         }
+
+        if ( ambientCount == 0 ) {
+            createAmbientLight.call( this, scene, [ 0.20, 0.20, 0.20 ] );
+        }            
     }
 
     function SetVisible(node,state) 
