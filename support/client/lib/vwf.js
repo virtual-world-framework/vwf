@@ -1652,6 +1652,13 @@
 
                 var creating = ! node.properties.has( propertyName );  // not defined on node or prototype
 
+                // Translate node references in the descriptor's form `{ node: nodeID }` into kernel
+                // node references.
+
+                if ( valueHasAccessors( propertyValue ) && propertyValue.node !== undefined ) {
+                    propertyValue = vwf.kutility.nodeReference( propertyValue.node );
+                }
+
                 // Create or initialize the property.
 
                 if ( creating ) {
@@ -1836,9 +1843,15 @@
                 nodeComponent.properties = this.getProperties( nodeID );
 
                 for ( var propertyName in nodeComponent.properties ) {  // TODO: distinguish add, change, remove
-                    if ( nodeComponent.properties[propertyName] === undefined ) {
+                    var propertyValue = nodeComponent.properties[propertyName];
+
+                    if ( propertyValue === undefined ) {
                         delete nodeComponent.properties[propertyName];
+                    } else if ( this.kutility.valueIsNodeReference( propertyValue ) ) {
+                        // Translate kernel node references into descriptor node references.
+                        nodeComponent.properties[propertyName] = { node: propertyValue.id };
                     }
+
                 }
 
                 if ( Object.keys( nodeComponent.properties ).length == 0 ) { 
@@ -1854,7 +1867,15 @@
                 nodeComponent.properties = {};
 
                 Object.keys( node.properties.changed ).forEach( function( propertyName ) {
-                    nodeComponent.properties[propertyName] = this.getProperty( nodeID, propertyName );
+                    var propertyValue = this.getProperty( nodeID, propertyName );
+
+                    if ( this.kutility.valueIsNodeReference( propertyValue ) ) {
+                        // Translate kernel node references into descriptor node references.
+                        nodeComponent.properties[propertyName] = { node: propertyValue.id };
+                    } else {
+                        nodeComponent.properties[propertyName] = propertyValue;
+                    }
+
                 }, this );
 
                 patched = true;
@@ -4176,6 +4197,7 @@ if ( ! childComponent.source ) {
                 "get",
                 "set",
                 "value",
+                "node",
                 "create",
                 "undefined",
             ];
