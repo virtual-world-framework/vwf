@@ -398,11 +398,9 @@
 
                 }, undefined, function( childID ) {
 
-                  var nodes = [ parentID, childID, baseID ];
-
                   callback( parentID, childID, baseID, function() {
-                    vwf.deleteNode( parentID );
                     vwf.deleteNode( childID );
+                    vwf.deleteNode( parentID );
                     vwf.deleteNode( baseID );
                   } );
 

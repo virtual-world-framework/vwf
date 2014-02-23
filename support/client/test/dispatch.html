@@ -481,11 +481,12 @@
 
                   }, undefined, function( bottomID ) {
 
-                    var nodes = [ topID, middleID, bottomID, baseID ];
-
-                    callback.apply( undefined, nodes.concat( function() {
-                      nodes.forEach( function( nodeID ) { vwf.deleteNode( nodeID ) } );
-                    } ) );
+                    callback( topID, middleID, bottomID, baseID, function() {
+                      vwf.deleteNode( bottomID );
+                      vwf.deleteNode( middleID );
+                      vwf.deleteNode( topID );
+                      vwf.deleteNode( baseID );
+                    } );
 
                   } );
 
