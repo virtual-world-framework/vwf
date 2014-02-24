@@ -687,9 +687,15 @@ define( function() {
         ///   is ignored for absolute patterns.
         /// @param {String} matchPattern
         ///   The search pattern.
-        /// @param {Function} [callback]
+        /// @param {module:vwf/api/kernel~nodeCallback} [callback]
         ///   A callback to receive the search results. If callback is provided, find invokes
         ///   callback( matchID ) for each match. Otherwise the result is returned as an array.
+        /// 
+        /// @returns {ID[]|undefined}
+        ///   If callback is provided, undefined; otherwise an array of the node ids of the result.
+        /// 
+        /// @deprecated in version 0.6.21. Instead of `kernel.findClients( reference, "/pattern" )`,
+        ///   use `kernel.find( reference, "doc('http://vwf.example.com/clients.vwf')/pattern" )`.
 
         findClients: [ /* nodeID, matchPattern, callback( matchID ) */ ],
 

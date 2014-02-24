@@ -3991,24 +3991,17 @@ if ( ! childComponent.source ) {
         /// @returns {ID[]|undefined}
         ///   If callback is provided, undefined; otherwise an array of the node ids of the result.
         /// 
-        /// @see {@link module:vwf/api/kernel.clients}
+        /// @deprecated in version 0.6.21. Instead of `kernel.findClients( reference, "/pattern" )`,
+        ///   use `kernel.find( reference, "doc('http://vwf.example.com/clients.vwf')/pattern" )`.
+        /// 
+        /// @see {@link module:vwf/api/kernel.findClients}
 
         this.findClients = function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
-                "http-vwf-example-com-clients-vwf", nodeID, xpathResolver, this );
+            var clientsMatchPattern = "doc('http://vwf.example.com/clients.vwf')" +
+                ( matchPattern[0] === "/" ? "" : "/" ) + matchPattern;
 
-            if ( callback ) {
-
-                matchIDs.forEach( function( matchID ) {
-                    callback( matchID );
-                } );
-
-            } else { 
-
-                return matchIDs;
-            }
-
+            return this.find( nodeID || this.application(), clientsMatchPattern, callback );
         };
 
         /// Test a node against a search pattern. See vwf.api.kernel#test for details.
