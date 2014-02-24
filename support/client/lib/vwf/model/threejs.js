@@ -1743,7 +1743,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 
                 var lightsInScene = sceneLights.call( this );
 
-                debugger;
                 createDefaultLighting.call( this, lightsInScene );
                 checkLights = false;    
             }
