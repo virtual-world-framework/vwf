@@ -1,36 +1,21 @@
-<!DOCTYPE html>
+ <html xmlns="http://www.w3.org/1999/xhtml">    
+  <head>      
+    <title>Virtual World Framework</title>      
+  	<noscript> 
+      <meta http-equiv="refresh" content="3;url=https://virtual.wf" /> 
+    </noscript>
 
-<!-- Copyright 2012 United States Government, as represented by the Secretary of Defense, Under  -->
-<!-- Secretary of Defense (Personnel & Readiness).                                               -->
-<!--                                                                                             -->
-<!-- Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file   -->
-<!-- except in compliance with the License. You may obtain a copy of the License at              -->
-<!--                                                                                             -->
-<!--   http://www.apache.org/licenses/LICENSE-2.0                                                -->
-<!--                                                                                             -->
-<!-- Unless required by applicable law or agreed to in writing, software distributed under the   -->
-<!-- License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,   -->
-<!-- either express or implied. See the License for the specific language governing permissions  -->
-<!-- and limitations under the License.                                                          -->
+    <script type="text/javascript">
+      window.location.replace("https://virtual.wf");
+    </script>
+  </head>    
+  <body> 
+    <p>
+      This page is being served up by the Virtual World Framework server.
+    </p>
+    <p>
+      Check out the <a href="https://virtual.wf">Virtual World Framework website</a> for more information.
+    </p> 
+  </body>  
+</html>     
 
-<html>
-	<head>
-		<title>Virtual World Framework</title>
-		
-		<script type="text/javascript">
-				function UrlExists(){
-				var http = new XMLHttpRequest();
-				http.open('GET', 'web/about.html', false);
-				http.send();
-				if(http.status!=404){window.location.href = "web/about.html"; };
-				if(http.status==404){var body=document.getElementsByTagName('body')[0];body.style.display="block";};
-				}
-		</script>	
-  	</head>
-	
-	<body onload="UrlExists();" style="display:none;background-color:#757C82;color:#ffffff;">
-	<h2>Virtual World Framework</h2><br/><br/>
-	Virtual World Framework is minimally installed and running at this point. Please return to your command line and run "bundle exec rake build" to compile the VWF Framework and then execute run.bat (Windows), or restart your Thin Server (Linux).
-
-	</body>
-</html>
