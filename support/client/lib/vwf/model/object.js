@@ -89,7 +89,7 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
                     //     // descendant: true,       // node is a descendant still within the component -- moved to kernel's node registry
                     //     internals: true,           // random, seed, or sequence has changed
                     //     // properties: true,       // placeholder for a property change list -- moved to kernel's node registry
-                    //     methods: [],               // array of method names for methods that changed
+                    //     // methods: [],            // array of method names for methods that changed -- moved to kernel's node registry
                     // },
 
                     // END TODO

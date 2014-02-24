@@ -3240,6 +3240,12 @@ if ( ! childComponent.source ) {
                 return [ nodeID, methodName, methodParameters, loggableScript( methodBody ) ];
             } );
 
+            var node = nodes.existing[nodeID];
+
+            // Register the method.
+
+            node.methods.create( methodName );
+
             // Call creatingMethod() on each model. The method is considered created after all
             // models have run.
 
@@ -3247,6 +3253,12 @@ if ( ! childComponent.source ) {
                 model.creatingMethod && model.creatingMethod( nodeID, methodName, methodParameters,
                     methodBody );
             } );
+
+            // Record the change.
+
+            if ( node.initialized && node.patchable ) {
+                node.methods.change( methodName );
+            }
 
             // Call createdMethod() on each view. The view is being notified that a method has been
             // created.
@@ -5482,30 +5494,30 @@ if ( ! childComponent.source ) {
 
                         } ),
 
-                        // TODO: Store nodes' methods and events here in the kernel
+                        methods: Object.create( nodeCollectionPrototype, {
 
-                        // methods: Object.create( nodeCollectionPrototype, {
+                            existing: {
+                                value: Object.create( prototypeNode ?
+                                    prototypeNode.methods.existing : null ),
+                            },
 
-                        //     existing: {
-                        //         value: Object.create( prototypeNode ?
-                        //             prototypeNode.methods.existing : null ),
-                        //     },
+                            // Created when needed.
 
-                        //     // Created when needed.
+                            // added: {
+                            //     name: undefined
+                            // },
 
-                        //     // added: {
-                        //     //     name: undefined
-                        //     // },
+                            // removed: {
+                            //     name: undefined
+                            // },
 
-                        //     // removed: {
-                        //     //     name: undefined
-                        //     // },
+                            // changed: {
+                            //     name: undefined
+                            // },
 
-                        //     // changed: {
-                        //     //     name: undefined
-                        //     // },
+                        } ),
 
-                        // } ),
+                        // TODO: Store nodes' events here in the kernel
 
                         // events: Object.create( nodeCollectionPrototype, {
 
@@ -5608,12 +5620,12 @@ if ( ! childComponent.source ) {
                         ),
                     },
 
-                    // methods: {
-                    //     existing: Object.create(
-                    //         prototypeNode ? prototypeNode.methods.existing : null,
-                    //         propertyDescriptorsFor( behaviorNode.methods.existing )
-                    //     ),
-                    // },
+                    methods: {
+                        existing: Object.create(
+                            prototypeNode ? prototypeNode.methods.existing : null,
+                            propertyDescriptorsFor( behaviorNode.methods.existing )
+                        ),
+                    },
 
                     // events: {
                     //     existing: Object.create(
