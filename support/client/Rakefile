@@ -65,7 +65,7 @@ task :compile => "build.js" do |task|
     #         org.mozilla.javascript.tools.shell.Main bin/r.js -o build.js
     # SH
 
-    # Simply copy the files to the destination until we 
+    # Simply copy the files to the destination until we find a solution for our optimizer
 
     cp_r SOURCE + "/.", DESTINATION + "/"
 
