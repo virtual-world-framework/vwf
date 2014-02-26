@@ -18,7 +18,7 @@
 /// @module vwf/view/lesson
 /// @requires vwf/view
 
-define( [ "module", "vwf/view", "jquery-ui" ], function( module, view, $ ) {
+define( [ "module", "vwf/view", "jquery", "jquery-ui" ], function( module, view, $ ) {
 
     return view.load( module, {
 
