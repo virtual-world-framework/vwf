@@ -436,7 +436,44 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
         n[8] = z[0];n[9] = z[1];n[10] = z[2];
         return n;
     }
+	function testForMirroredMatrix(elements)
+	{
+		
+		if(!elements)
+			throw new Error('matrix was null');
+
+		var xAxis = new THREE.Vector3(elements[0],elements[4],elements[8]);
+		var yAxis = new THREE.Vector3(elements[1],elements[5],elements[9]);
+		var zAxis = new THREE.Vector3(elements[2],elements[6],elements[10]);
+
+		xAxis.normalize();
+		yAxis.normalize();
+		zAxis.normalize();
+
+		var xDot = xAxis.clone().cross(yAxis).dot(zAxis);
+		var yDot = yAxis.clone().cross(zAxis).dot(xAxis);
+		var zDot = zAxis.clone().cross(xAxis).dot(yAxis);
+
+		if(xDot * yDot * zDot < 0) 
+		{
+			
+			return true;
+		}
+		return false;
+	}
     function matrixLerp (a,b,l) {
+		
+		if(testForMirroredMatrix(a) || testForMirroredMatrix(b))
+		{
+			var ret = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+			//this is really wrong,should be using a quat slerp
+			for(var i=0; i < 16; i++)
+			{
+				ret[i] = lerp(a[i],b[i],l);
+			}
+			return ret;
+		}
+	
         var n = goog.vec.Mat4.clone(a);
         n[12] = lerp(a[12],b[12],l);
         n[13] = lerp(a[13],b[13],l);
