@@ -438,28 +438,27 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
     }
 	function testForMirroredMatrix(elements)
 	{
-		
-		if(!elements)
+		if ( !elements ) {
 			throw new Error('matrix was null');
+        }
 
-		var xAxis = new THREE.Vector3(elements[0],elements[4],elements[8]);
-		var yAxis = new THREE.Vector3(elements[1],elements[5],elements[9]);
-		var zAxis = new THREE.Vector3(elements[2],elements[6],elements[10]);
+		var xAxis = new THREE.Vector3(elements[0],elements[1],elements[2]);
+		var yAxis = new THREE.Vector3(elements[4],elements[5],elements[6]);
+		var zAxis = new THREE.Vector3(elements[8],elements[9],elements[10]);
 
 		xAxis.normalize();
 		yAxis.normalize();
 		zAxis.normalize();
 
 		var xDot = xAxis.clone().cross(yAxis).dot(zAxis);
-		var yDot = yAxis.clone().cross(zAxis).dot(xAxis);
-		var zDot = zAxis.clone().cross(xAxis).dot(yAxis);
+		// var yDot = yAxis.clone().cross(zAxis).dot(xAxis);
+		// var zDot = zAxis.clone().cross(xAxis).dot(yAxis);
 
-		if(xDot * yDot * zDot < 0) 
-		{
-			
+		if( xDot < 0.999999 ) {
 			return true;
-		}
-		return false;
+		} else {
+            return false;
+        }
 	}
     function matrixLerp (a,b,l) {
 		
