@@ -31,7 +31,7 @@ chdir SOURCE do
 end
 
 CLEAN.include "build.js", "#{DESTINATION}/**/*.js.z", "#{DESTINATION}/build.txt"
-CLOBBER.include "#{DESTINATION}", "#{DOCUMENTATION}"
+CLOBBER.include DESTINATION, DOCUMENTATION
 
 
 desc "Run the RequireJS optimizer."
@@ -58,12 +58,16 @@ desc "Compile."
 
 task :compile => "build.js" do |task|
 
-    separator = RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/ ? "\\;" : ":"
+    # separator = RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/ ? "\\;" : ":"
 
-    sh <<-SH.strip.gsub %r{ +}, " "
-        java -classpath bin/js.jar#{separator}bin/compiler.jar \
-            org.mozilla.javascript.tools.shell.Main bin/r.js -o build.js
-    SH
+    # sh <<-SH.strip.gsub %r{ +}, " "
+    #     java -classpath bin/js.jar#{separator}bin/compiler.jar \
+    #         org.mozilla.javascript.tools.shell.Main bin/r.js -o build.js
+    # SH
+
+    # Simply copy the files to the destination until we 
+
+    cp_r SOURCE + "/.", DESTINATION + "/"
 
 end
 
