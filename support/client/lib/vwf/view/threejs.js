@@ -436,43 +436,37 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
         n[8] = z[0];n[9] = z[1];n[10] = z[2];
         return n;
     }
-	function testForMirroredMatrix(elements)
-	{
-		if ( !elements ) {
-			throw new Error('matrix was null');
+
+    function isLeftHandedOrthogonalMatrix( elements ) {
+        if ( !elements ) {
+            throw new Error('matrix was null');
         }
 
-		var xAxis = new THREE.Vector3(elements[0],elements[1],elements[2]);
-		var yAxis = new THREE.Vector3(elements[4],elements[5],elements[6]);
-		var zAxis = new THREE.Vector3(elements[8],elements[9],elements[10]);
+        var xAxis = new THREE.Vector3(elements[0],elements[1],elements[2]);
+        var yAxis = new THREE.Vector3(elements[4],elements[5],elements[6]);
+        var zAxis = new THREE.Vector3(elements[8],elements[9],elements[10]);
 
-		xAxis.normalize();
-		yAxis.normalize();
-		zAxis.normalize();
+        xAxis.normalize();
+        yAxis.normalize();
+        zAxis.normalize();
 
-		var xDot = xAxis.clone().cross(yAxis).dot(zAxis);
-		// var yDot = yAxis.clone().cross(zAxis).dot(xAxis);
-		// var zDot = zAxis.clone().cross(xAxis).dot(yAxis);
+        var xDot = xAxis.clone().cross(yAxis).dot(zAxis);
 
-		if( xDot < 0.999999 ) {
-			return true;
-		} else {
+        if( xDot > 0.999999 ) {
+            return true;
+        } else {
             return false;
         }
-	}
-    function matrixLerp (a,b,l) {
-		
-		if(testForMirroredMatrix(a) || testForMirroredMatrix(b))
-		{
-			var ret = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-			//this is really wrong,should be using a quat slerp
-			for(var i=0; i < 16; i++)
-			{
-				ret[i] = lerp(a[i],b[i],l);
-			}
-			return ret;
-		}
-	
+    }
+
+    function matrixLerp( a, b, l ) {
+        
+        // If either of the matrices is not left-handed or not orthogonal, interpolation won't work
+        // Just return the second matrix
+        if ( !( isLeftHandedOrthogonalMatrix( a ) && isLeftHandedOrthogonalMatrix( b ) ) ) {
+            return b;
+        }
+    
         var n = goog.vec.Mat4.clone(a);
         n[12] = lerp(a[12],b[12],l);
         n[13] = lerp(a[13],b[13],l);
