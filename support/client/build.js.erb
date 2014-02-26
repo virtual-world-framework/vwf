@@ -12,13 +12,6 @@
 
     optimize: "none", // "closure",
 
-    closure: {
-        CompilerOptions: {
-            "languageIn": java.lang.Class.forName( "com.google.javascript.jscomp.CompilerOptions$LanguageMode" ).
-                getEnumConstants()[2], // ECMASCRIPT5_STRICT
-        },
-    },
-
     modules: [<% modules.each do |path| %>
         { name: "<%= path %>" },<% end %>
     ],
