@@ -450,9 +450,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
         yAxis.normalize();
         zAxis.normalize();
 
-        var xDot = xAxis.clone().cross(yAxis).dot(zAxis);
+        var XYdotZ = xAxis.cross( yAxis ).dot( zAxis );
 
-        if( xDot > 0.999999 ) {
+        if( XYdotZ > 0.999999 ) {
             return true;
         } else {
             return false;
