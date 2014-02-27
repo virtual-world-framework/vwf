@@ -106,5 +106,5 @@ define( [ "hammer", "jquery"], function ( Hammer, $ ) {
       }
     });
   };
-	return $.noConflict( true );
+	return $;
 });
