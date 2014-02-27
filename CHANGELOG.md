@@ -6,6 +6,7 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change. 
 
+- NEW: Pull out three.js render into an overridable function so application can replace with its own (to work with shaders, multiple viewports, etc)
 - NEW: Notify user if websocket connection is blocked
 - NEW: Add polyfill for performance.now. Refs #3046
 - NEW: `kernel.{prototype,behaviors,prototypes,prototypes(...,true)}` tests.
@@ -41,6 +42,7 @@ Note: (*) indicates an API change.
 	References #2417.
 
 - NEW: Make jQuery and bootstrap load as RequireJS modules to remove them from the global namespace. Refs #3108, #3109
+- CHG: New loader screen!
 - CHG: Turn eval script into regular code so optimizer doesn't break it
 - CHG: Change humvee-lesson driving to use translateTo, so it's not interpolated. Refs #3046
 - CHG: Refactor `kernel.prototypes` slightly to remove duplicated code.
@@ -79,6 +81,9 @@ Note: (*) indicates an API change.
 - CHG: Update readme.md to include new instructions for VWF 1.0 Windows install. Closes #3039
 - CHG: Added Core Developer instructions for Windows installation. Closes #3039
 - CHG: Update to installation procedures to break into user/app developer installation and core developer installation. Refs #3039
+- CHG: Remove VWF website from main VWF repository
+- CHG: No longer create default lights in every app - only if app doesn't create any itself (the create two directional lights and one ambient)
+- CHG: Remove/encapsulate external dependencies so they don't conflict with app dependencies
 
 
 ----------------------------------
