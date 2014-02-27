@@ -59,8 +59,8 @@ properties:
   ## @name scene.vwf#ambientColor
   ## @property
 
-  ambientColor: [ 50, 50, 50 ]
-
+  ambientColor: 
+  
   ## Back ground color
   ## 
   ## @name scene.vwf#backgroundColor

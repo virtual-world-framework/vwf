@@ -19,7 +19,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
     var self;
 
     // Navigation: Private global variables for navigation
-    var appInitialized;
     var navObjectRequested;
     var navObjectName;
     var navmode;
@@ -53,6 +52,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
             self = this;
 
             checkCompatibility.call(this);
+
+            this.state.appInitialized = false;
 
             this.pickInterval = 10;
             this.disableInputs = false;
@@ -122,7 +123,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
             // If the node that was initialized is the application node, find the user's navigation object
             var appID = this.kernel.application();
             if ( childID == appID ) {
-                appInitialized = true;
+                this.state.appInitialized = true;
             } else {
 
                 //TODO: This is a temporary workaround until the callback functionality is implemented for 
@@ -375,12 +376,18 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
             // We want to only search for the navigation object if we haven't before (!navObjectRequested),
             // and we want to make sure that the app has been initialized, and where not at the brief period of
             // ticking before the app starts loading (appInitialized)
-            if ( !navObjectRequested && appInitialized ) {
+            if ( !navObjectRequested && this.state.appInitialized ) {
                 navObjectRequested = true;
                 findNavObject();
             }
             
             lerpTick();      
+        },
+
+        // -- render -----------------------------------------------------------------------------------
+
+        render: function(renderer, scene, camera) {
+            renderer.render(scene, camera);
         },
     
     } );
@@ -429,7 +436,37 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
         n[8] = z[0];n[9] = z[1];n[10] = z[2];
         return n;
     }
-    function matrixLerp (a,b,l) {
+
+    function isLeftHandedOrthogonalMatrix( elements ) {
+        if ( !elements ) {
+            throw new Error('matrix was null');
+        }
+
+        var xAxis = new THREE.Vector3(elements[0],elements[1],elements[2]);
+        var yAxis = new THREE.Vector3(elements[4],elements[5],elements[6]);
+        var zAxis = new THREE.Vector3(elements[8],elements[9],elements[10]);
+
+        xAxis.normalize();
+        yAxis.normalize();
+        zAxis.normalize();
+
+        var XYdotZ = xAxis.cross( yAxis ).dot( zAxis );
+
+        if( XYdotZ > 0.999999 ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function matrixLerp( a, b, l ) {
+        
+        // If either of the matrices is not left-handed or not orthogonal, interpolation won't work
+        // Just return the second matrix
+        if ( !( isLeftHandedOrthogonalMatrix( a ) && isLeftHandedOrthogonalMatrix( b ) ) ) {
+            return b;
+        }
+    
         var n = goog.vec.Mat4.clone(a);
         n[12] = lerp(a[12],b[12],l);
         n[13] = lerp(a[13],b[13],l);
@@ -641,12 +678,12 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
                     hovering = true;
                 }
                 
-                self.lastPickId = newPickId
+                self.lastPickId = newPickId;
                 self.lastPick = newPick;
                 lastPickTime = now;
             }
 
-            renderer.render( scene, camera );
+            self.render(renderer, scene, camera);
             sceneNode.lastTime = now;
             
             if(self.interpolateTransforms) {
@@ -779,7 +816,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], fun
         var sceneView = this;
         var appID = sceneView.kernel.application( true );
         if ( appID ) {
-            appInitialized = true;
+            this.state.appInitialized = true;
         }
     } // initScene
 

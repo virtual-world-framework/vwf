@@ -19,10 +19,7 @@ properties:
   navmode: walk
   rotationSpeed: 2
   translationSpeed: 10
-  #ambientColor: [ 255, 255, 255 ]
 children:
-  #transformTool:
-  #  includes: http://vwf.example.com/tools/transform/transformTool.vwf
   cubeTest1:
     extends: http://vwf.example.com/threejs/cube.vwf
     properties:
@@ -47,7 +44,7 @@ children:
     extends: http://vwf.example.com/node3.vwf
     properties:
       translation: [ 0, 0, 0 ]
-  dir1:
+  point1:
     extends: http://vwf.example.com/light.vwf
     implements:
     - http://vwf.example.com/glgeLight.vwf
@@ -61,7 +58,7 @@ children:
       glge-linearAttenuation: 0.00000001
       glge-quadraticAttenuation: 0.0000001  
       translation: [ -400, 400, -900 ]
-  dir2:
+  point2:
     extends: http://vwf.example.com/light.vwf
     implements:
     - http://vwf.example.com/glgeLight.vwf
