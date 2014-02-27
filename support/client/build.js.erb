@@ -28,7 +28,10 @@
             exports: "$"
         },
         "jquery-encoder-0.1.0": ["jquery"],
-        "require-hammer": ["hammer", "jquery"],
+        "hammer": {
+            deps: ["jquery"],
+            exports: "Hammer"
+        }
     }
 
 } )
