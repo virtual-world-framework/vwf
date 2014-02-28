@@ -14,7 +14,7 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/view", "vwf/utility", "hammer", "require-hammer" ], function( module, view, utility, Hammer, $ ) {
+define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( module, view, utility, Hammer, $ ) {
 
     var self;
 
