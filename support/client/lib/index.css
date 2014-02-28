@@ -8,27 +8,6 @@ body {
   margin: 0px;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: Verdana, Arial, Helvetica, sans-serif;
-}
-
-table {
-  font-family: Verdana, Arial, Helvetica, sans-serif;
-}
-
-form {
-    margin: 2em;
-}
-
-label {
-  font-size: 18px;
-}
-
-input {
-  font-size: 18px;
-  padding: 5px;
-}
-
 .vwf-properties {
   background-color: #DCC;
 }
@@ -264,11 +243,6 @@ input {
   font-size:14px;
   position:relative;
   left:20px;
-}
-
-
-h1, h2, h3, h4, h5, h6, body, legend, label {
-text-shadow: 0px 0px 0 rgba(0, 0, 0, 0.3);
 }
 
 .pace {
