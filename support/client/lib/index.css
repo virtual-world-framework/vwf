@@ -316,12 +316,18 @@ body {
 }
 
 #incompatibleBrowser {
-    visibility: hidden;
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    width:100%;
-    height:100%;
-    text-align:center;
-    z-index: 1000;
+  visibility: hidden;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width:100%;
+  height:100%;
+  text-align:center;
+  z-index: 1000;
  }
+
+#incompatibleBrowser .warning {
+  color:#3090C7;
+  padding-top: 20px;
+  display: inline-block;
+}
