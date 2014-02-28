@@ -342,27 +342,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             var node = this.nodes[nodeID];
             var child = this.nodes[childID];
 
-            var scriptText = "this.initialize && this.initialize()";
+            var scriptText =
+                "this.hasOwnProperty( 'initialize' ) && " +
+                "( typeof this.initialize === 'function' || this.initialize instanceof Function ) && " +
+                "this.initialize()";
 
-var scriptText = " \
-    \
-    var initializers = [], node = this;\n\
-    \n\
-    while ( node ) {\n\
-        if ( node.hasOwnProperty( 'initialize' ) && node.initialize ) {\n\
-            initializers.unshift( { func: node.initialize, id: node.id } );\n\
-        }\n\
-        node = Object.getPrototypeOf( node );\n\
-    }\n\
-    \n\
-    initializers.forEach( function( initialize ) {\n\
-        // this.logger.warn( 'initializing', this.id, 'from', initialize.id );\n\
-        initialize.func.call( this );\n\
-    }, this );\n\
-    \
-";
-
-            // Call the initializer.
+            // Call the child's initializer.
 
             try {
                 ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
@@ -371,15 +356,17 @@ var scriptText = " \
                     "exception in initialize:", utility.exceptionMessage( e ) );
             }
 
+            // The node is fully initialized at this point
+
             // Link to the parent.
             // 
-            // The parent reference is only defined once the node is fully initialized. It is not
-            // defined earlier since components should be able to stand alone without depending on
-            // external nodes.
+            // The parent reference is only defined once the node is fully initialized.
+            // It is not defined earlier since components should be able to stand alone 
+            // without depending on external nodes.
             // 
-            // Additionally, since parts of the application may become ready in a different order on
-            // other clients, referring to properties in other parts of the application may lead to
-            // consistency errors.
+            // Additionally, since parts of the application may become ready in a different
+            // order on other clients, referring to properties in other parts of the 
+            // application may lead to consistency errors.
 
             child.parent = node;
 
@@ -393,6 +380,31 @@ var scriptText = " \
 node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
                 ( node[childName] = child );
 
+            }
+
+            return undefined;
+        },
+
+        // -- initializingNodeFromPrototype --------------------------------------------------------
+
+        // Invoke an initialize() function from `childInitializingNodeID` on `childID` if one exists.
+
+        initializingNodeFromPrototype: function( nodeID, childID, childInitializingNodeID ) {
+
+            var child = this.nodes[childID];
+            var initializer = this.nodes[childInitializingNodeID];
+
+            // Call the prototype's initializer on the child.
+            try {
+                var prototypeHasInitialize = ( initializer.hasOwnProperty( 'initialize' ) && 
+                    ( typeof initializer.initialize === 'function' || 
+                      initializer.initialize instanceof Function ) );
+                if ( prototypeHasInitialize ) {
+                    return initializer.initialize.call( child ); 
+                }
+            } catch ( e ) {
+                this.logger.warnx( "initializingNodeFromPrototype", childID,
+                    "exception in initialize:", utility.exceptionMessage( e ) );
             }
 
             return undefined;

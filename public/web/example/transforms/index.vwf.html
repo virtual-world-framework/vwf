@@ -116,13 +116,15 @@
   //  The actual updates will be dealt with in the gotProperty callback.
   function requestLoadEditorFromNode( ) {
     var nodeId = getSelectedNodeId( );
-    requestedUpdate = [ true, true, true, true, true, true ];
-    vwf_view.kernel.getProperty( nodeId, "worldTransform" );
-    vwf_view.kernel.getProperty( nodeId, "transform" );
-    vwf_view.kernel.getProperty( nodeId, "scale" );
-    vwf_view.kernel.getProperty( nodeId, "quaternion" );
-    vwf_view.kernel.getProperty( nodeId, "rotation" );
-    vwf_view.kernel.getProperty( nodeId, "translation" );
+    if(nodeId) {
+      requestedUpdate = [ true, true, true, true, true, true ];
+      vwf_view.kernel.getProperty( nodeId, "worldTransform" );
+      vwf_view.kernel.getProperty( nodeId, "transform" );
+      vwf_view.kernel.getProperty( nodeId, "scale" );
+      vwf_view.kernel.getProperty( nodeId, "quaternion" );
+      vwf_view.kernel.getProperty( nodeId, "rotation" );
+      vwf_view.kernel.getProperty( nodeId, "translation" );
+    }
   };
 
   //  requestLoadEditorFromNode is called initially so that the editors will be loaded with the

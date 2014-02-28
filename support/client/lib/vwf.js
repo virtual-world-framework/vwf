@@ -257,6 +257,9 @@
 
         var vwf = this;
 
+        // Store the jQuery module for reuse
+        var jQuery;
+
         // == Public functions =====================================================================
 
         // -- loadConfiguration ---------------------------------------------------------------------------
@@ -299,6 +302,8 @@
                 }
             };
 
+            jQuery = require("jquery");
+
             var requireArray = [
                 { library: "domReady", active: true },
                 { library: "vwf/configuration", active: true },
@@ -313,7 +318,7 @@
                 { library: "vwf/model/stage/log", active: true },
                 { library: "vwf/kernel/view", active: true },
                 { library: "vwf/view/document", active: true },
-                { library: "vwf/view/editor", active: true },
+            	{ library: "vwf/view/editor", active: false },
                 { library: "vwf/view/glge", disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
                 { library: "vwf/view/lesson", active: false},
                 { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
@@ -343,7 +348,7 @@
                     { library: "vwf/view/glge", parameters: {"application-root":"#vwf-root"}, active: false },
                     { library: "vwf/view/threejs", parameters: {"application-root":"#vwf-root"}, active: false },
                     { library: "vwf/view/document", active: true },
-                    { library: "vwf/view/editor", active: true },
+                	{ library: "vwf/view/editor", active: false },
                     { library: "vwf/view/lesson", active: false},
                     { library: "vwf/view/google-earth", active: false },
                     { library: "vwf/view/cesium", active: false },
@@ -377,16 +382,18 @@
                 return activeLibraryList;
             }
 
-            $.getJSON("admin/config", function(configLibraries) {
+            jQuery.getJSON("admin/config", function(configLibraries) {
                 if(configLibraries && typeof configLibraries == "object") {
                     Object.keys(configLibraries).forEach(function(libraryType) {
                         if(libraryType == 'info' && configLibraries[libraryType]["title"])
                         {
-                            $('title').html(configLibraries[libraryType]["title"]);
+                            jQuery('title').html(configLibraries[libraryType]["title"]);
                         }
                         if(!userLibraries[libraryType]) {
                             userLibraries[libraryType] = {};
                         }
+                        // Merge libraries from config file and URL together. Check for incompatible
+                        // libraries, and disable them.
                         Object.keys(configLibraries[libraryType]).forEach(function(libraryName) {
                             var disabled = false;
                             if(requireArray[libraryName] && requireArray[libraryName].disabledBy) {
@@ -405,7 +412,7 @@
                                     userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];
                                 }
                                 else if(typeof userLibraries[libraryType][libraryName] == "object" && typeof configLibraries[libraryType][libraryName] == "object") {
-                                    userLibraries[libraryType][libraryName] = $.extend({}, configLibraries[libraryType][libraryName], userLibraries[libraryType][libraryName]);
+                                    userLibraries[libraryType][libraryName] = jQuery.extend({}, configLibraries[libraryType][libraryName], userLibraries[libraryType][libraryName]);
                                 }
                             }
                         });
@@ -421,7 +428,7 @@
                                 initializers[libraryType][libraryName].active = true;
                                 if(userLibraries[libraryType][libraryName] && userLibraries[libraryType][libraryName] != "") {
                                     if(typeof initializers[libraryType][libraryName].parameters == "object") {
-                                        initializers[libraryType][libraryName].parameters = $.extend({}, initializers[libraryType][libraryName].parameters,
+                                        initializers[libraryType][libraryName].parameters = jQuery.extend({}, initializers[libraryType][libraryName].parameters,
                                             userLibraries[libraryType][libraryName]);
                                     }
                                     else {
@@ -578,7 +585,7 @@
                         if(model.model.compatibilityStatus) {
                             if(!model.model.compatibilityStatus.compatible) {
                                 compatibilityStatus.compatible = false;
-                                $.extend(compatibilityStatus.errors, model.model.compatibilityStatus.errors);
+                                jQuery.extend(compatibilityStatus.errors, model.model.compatibilityStatus.errors);
                             }
                         }
                     }
@@ -626,7 +633,7 @@
                             if(view.compatibilityStatus) {
                                 if(!view.compatibilityStatus.compatible) {
                                     compatibilityStatus.compatible = false;
-                                    $.extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
+                                    jQuery.extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
                                 }
                             }
                         }
@@ -649,7 +656,7 @@
                             if(view.compatibilityStatus) {
                                 if(!view.compatibilityStatus.compatible) {
                                     compatibilityStatus.compatible = false;
-                                    $.extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
+                                    jQuery.extend(compatibilityStatus.errors, view.compatibilityStatus.errors);
                                 }
                             }
                         }
@@ -663,14 +670,14 @@
             // Test for ECMAScript 5
             if(!(function() { return !this })()) {
                 compatibilityStatus.compatible = false;
-                $.extend(compatibilityStatus.errors, {"ES5": "This browser is not compatible. VWF requires ECMAScript 5."});
+                jQuery.extend(compatibilityStatus.errors, {"ES5": "This browser is not compatible. VWF requires ECMAScript 5."});
             }
 
             // Test for WebSockets
             if( window.io && !io.Transport.websocket.check() )
             {
                 compatibilityStatus.compatible = false;
-                $.extend(compatibilityStatus.errors, {"WS": "This browser is not compatible. VWF requires WebSockets."});
+                jQuery.extend(compatibilityStatus.errors, {"WS": "This browser is not compatible. VWF requires WebSockets."});
             }
 
             if(callback) {
@@ -834,11 +841,10 @@
 
                         fields.origin = "reflector";
 
-                        // Update the queue. Insert the message (unless it is only a time tick), and
-                        // advance the queue's record of the current time. Messages in the queue are
-                        // ordered by time, then by order of arrival.
+                        // Update the queue.  Messages in the queue are ordered by time, then by order of arrival.
+                        // Time is only advanced if the message has no action, meaning it is a tick.
 
-                        queue.insert( fields, true ); // may invoke dispatch(), so call last before returning to the host
+                        queue.insert( fields, !fields.action ); // may invoke dispatch(), so call last before returning to the host
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -866,7 +872,7 @@
                 socket.on( "error", function() { 
 
                     //Overcome by compatibility.js websockets check
-                    //jQuery('body').html("<div class='vwf-err'>WebSockets connections are currently being blocked. Please check your proxy server settings.</div>"); 
+                    jQuery('body').html("<div class='vwf-err'>WebSockets connections are currently being blocked. Please check your proxy server settings.</div>"); 
 
                 } );
 
@@ -1073,7 +1079,6 @@
                     this.sequence_ = undefined; // clear after the previous action
                     this.client_ = undefined;   // clear after the previous action
                     this.now = fields.time;
-                    this.tick();
                 }
 
                 // Perform the action.
@@ -1082,6 +1087,9 @@
                     this.sequence_ = fields.sequence; // note the message's queue sequence number for the duration of the action
                     this.client_ = fields.client;     // ... and note the originating client
                     this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, fields.origin );
+                }
+                else {
+                    this.tick();
                 }
 
             }
@@ -1093,7 +1101,6 @@
                 this.sequence_ = undefined; // clear after the previous action
                 this.client_ = undefined;   // clear after the previous action
                 this.now = queue.time;
-                this.tick();
             }
             
         };
@@ -2364,13 +2371,13 @@ if ( ! childComponent.source ) {
 
                     }, function( err, scripts ) /* async */ {
 
-                        // Watch for any async kernel calls generated as we run the scripts and wait for
-                        // them complete before completing the node.
+                        // Watch for any async kernel calls generated as we run the scripts and wait
+                        // for them complete before completing the node.
 
                         vwf.models.kernel.capturingAsyncs( function() {
 
-                            // Suppress kernel reentry so that initialization functions don't make any
-                            // changes during replication.
+                            // Suppress kernel reentry so that initialization functions don't make
+                            // any changes during replication.
 
                             replicating && vwf.models.kernel.disable();
 
@@ -2380,8 +2387,8 @@ if ( ! childComponent.source ) {
                                 vwf.execute( childID, script.text, script.type ); // TODO: callback
                             } );
 
-                            // Perform initializations for properties with setter functions. These are
-                            // assigned here so that the setters run on a fully-constructed node.
+                            // Perform initializations for properties with setter functions. These
+                            // are assigned here so that the setters run on a fully-constructed node.
 
                             Object.keys( deferredInitializations ).forEach( function( propertyName ) {
                                 vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
@@ -2393,34 +2400,80 @@ if ( ! childComponent.source ) {
                                 vwf.tickable.nodeIDs.push( childID );
                             }
 
-                            // Call initializingNode() on each model and initializedNode() on each view to
-                            // indicate that the node is fully constructed.
-
-                            vwf.models.forEach( function( model ) {
-                                model.initializingNode && model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                    childComponent.source, childComponent.type, childIndex, childName );
-                            } );
-
-                            vwf.views.forEach( function( view ) {
-                                view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                    childComponent.source, childComponent.type, childIndex, childName );
-                            } );
-
                             // Restore kernel reentry.
-
                             replicating && vwf.models.kernel.enable();
 
                         }, function() {
 
-                            // Mark the node as initialized.
-                            nodes.initialize( childID );
+                            // This function is called when all asynchronous calls from the previous
+                            // function have returned.
 
-                            series_callback_async( err, undefined );
+                            // Call initializingNode() on each model and initializedNode() on each
+                            // view to indicate that the node is fully constructed.
 
+                            // Since nodes don't (currently) inherit their prototypes' children,
+                            // for each prototype also call initializingNodeFromPrototype() to allow
+                            // model drivers to apply the prototypes' initializers to the node.
+
+                            async.forEachSeries( vwf.prototypes( childID, true ).reverse().concat( childID ),
+                                    function( childInitializingNodeID, each_callback_async /* err */ ) {
+
+                                // Call initializingNode() on each model.
+
+                                vwf.models.kernel.capturingAsyncs( function() {
+
+                                    vwf.models.forEach( function( model ) {
+
+                                        // Suppress kernel reentry so that initialization functions
+                                        // don't make any changes during replication.
+                                        replicating && vwf.models.kernel.disable();
+
+                                        // For a prototype, call `initializingNodeFromPrototype` to
+                                        // run the prototype's initializer on the node. For the
+                                        // node, call `initializingNode` to run its own initializer.
+                                        // 
+                                        // `initializingNodeFromPrototype` is separate from
+                                        // `initializingNode` so that `initializingNode` remains a
+                                        // single call that indicates that the node is fully
+                                        // constructed. Existing drivers, and any drivers that don't
+                                        // care about prototype initializers will by default ignore
+                                        // the intermediate initializations.
+                                        // (`initializingNodeFromPrototype` was added in 0.6.23.)
+
+                                        if ( childInitializingNodeID !== childID ) {
+                                            model.initializingNodeFromPrototype &&
+                                                model.initializingNodeFromPrototype( nodeID, childID, childInitializingNodeID );
+                                        } else {
+                                            model.initializingNode &&
+                                                model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                                    childComponent.source, childComponent.type, childIndex, childName );
+                                        }
+
+                                        // Restore kernel reentry.
+                                        replicating && vwf.models.kernel.enable();
+
+                                    } );
+
+                                }, function() {
+                                    each_callback_async( undefined );
+                                } );
+
+                            }, function( err ) /* async */ {
+
+                                // Call initializedNode() on each view.
+
+                                vwf.views.forEach( function( view ) {
+                                    view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                        childComponent.source, childComponent.type, childIndex, childName );
+                                } );
+
+                                // Mark the node as initialized.
+                                nodes.initialize( childID );
+
+                                series_callback_async( err, undefined );
+                            } );
                         } );
-
                     } );
-
                 },
 
             ], function( err, results ) /* async */ {
@@ -3282,7 +3335,7 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.execute}
 
-        this.execute = function( nodeID, scriptText, scriptType ) {
+        this.execute = function( nodeID, scriptText, scriptType, callback_async /* result */ ) {
 
             this.logger.debuggx( "execute", function() {
                 return [ nodeID, ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType ];  // TODO: loggableScript()
@@ -3299,16 +3352,24 @@ if ( ! childComponent.source ) {
 
             var scriptValue = undefined;
 
-            this.models.some( function( model ) {
-                scriptValue = model.executing && model.executing( nodeID, scriptText, scriptType );
-                return scriptValue !== undefined;
-            } );
+            // Watch for any async kernel calls generated as we execute the scriptText and wait for
+            // them to complete before calling the callback.
 
-            // Call executed() on each view. The view is being notified that a script has been
-            // executed.
+            vwf.models.kernel.capturingAsyncs( function() {
+                vwf.models.some( function( model ) {
+                    scriptValue = model.executing &&
+                                  model.executing( nodeID, scriptText, scriptType );
+                    return scriptValue !== undefined;
+                } );
 
-            this.views.forEach( function( view ) {
-                view.executed && view.executed( nodeID, scriptText, scriptType );
+                // Call executed() on each view to notify view that a script has been executed.
+
+                vwf.views.forEach( function( view ) {
+                    view.executed && view.executed( nodeID, scriptText, scriptType );
+                } );
+
+            }, function() {
+                callback_async && callback_async( scriptValue );
             } );
 
             this.logger.debugu();
@@ -3434,24 +3495,23 @@ if ( ! childComponent.source ) {
 
             var prototypes = [];
 
-            if ( includeBehaviors ) {
-                var b = [].concat( this.behaviors( nodeID ) );
-                Array.prototype.push.apply( prototypes, b.reverse() );
-            }
+            do {
 
-            nodeID = this.prototype( nodeID );
-
-            while ( nodeID ) {
-
-                prototypes.push( nodeID );
-                nodeID = this.prototype( nodeID );
-
-                if ( nodeID && includeBehaviors ) {
+                // Add the current node's behaviors.
+                if ( includeBehaviors ) {
                     var b = [].concat( this.behaviors( nodeID ) );
                     Array.prototype.push.apply( prototypes, b.reverse() );
                 }
 
-            }
+                // Get the next prototype.
+                nodeID = this.prototype( nodeID );
+
+                // Add the prototype.
+                if ( nodeID ) {
+                    prototypes.push( nodeID );
+                }
+
+            } while ( nodeID );
 
             return prototypes;
         };

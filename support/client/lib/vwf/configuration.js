@@ -39,7 +39,7 @@ define( function() {
         factory: {
 
             get: function() {
-                return jQuery.extend( true, {}, factory );
+                return merge( {}, factory );
             }
 
         },
@@ -136,7 +136,7 @@ define( function() {
 
         // Merge the factory defaults and the instance settings into the active configuration.
 
-        jQuery.extend( true, active, factory.default, factory[environment] || {}, instance );
+        merge( active, factory.default, factory[environment] || {}, instance );
 
         // Call the notification callbacks.
 
@@ -144,6 +144,21 @@ define( function() {
             callback.callback.call( callback.context, active );
         }, this );
 
+    }
+
+    /// Merge fields from the `source` objects into `target`.
+
+    function merge( target /* [, source1 [, source2 ... ] ] */ ) {
+
+        for ( var index = 1; index < arguments.length; index++ ) {
+            var source = arguments[index];
+
+            Object.keys( source ).forEach( function( key ) {
+                target[key] = source[key];
+            } );
+        }
+
+        return target;
     }
 
     // -- factory ----------------------------------------------------------------------------------

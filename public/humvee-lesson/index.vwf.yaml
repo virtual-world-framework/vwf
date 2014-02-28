@@ -12,11 +12,12 @@
 # the License.
 
 ---
-extends: http://vwf.example.com/navscene.vwf
+extends: http://vwf.example.com/scene.vwf
 properties:
   backgroundColor: [ 83, 157, 194 ]
-  navmode: "walk"
-  translationSpeed: 10.0
+  navmode: walk
+  translationSpeed: 10
+  rotationSpeed: 10
 methods:
   initializeCamera:
 children:

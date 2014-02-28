@@ -12,15 +12,26 @@
 
     optimize: "none", // "closure",
 
-    closure: {
-        CompilerOptions: {
-            "languageIn": java.lang.Class.forName( "com.google.javascript.jscomp.CompilerOptions$LanguageMode" ).
-                getEnumConstants()[2], // ECMASCRIPT5_STRICT
-        },
-    },
-
     modules: [<% modules.each do |path| %>
         { name: "<%= path %>" },<% end %>
-    ]
+    ],
+
+    paths: {
+        jquery: "jquery-1.10.2.min",
+        "jquery-ui": "jquery-ui-1.10.3.custom.min",
+        hammer: "jquery.hammer",
+    },
+
+    shim: {
+        "jquery-ui": {
+            deps: ["jquery"],
+            exports: "$"
+        },
+        "jquery-encoder-0.1.0": ["jquery"],
+        "hammer": {
+            deps: ["jquery"],
+            exports: "Hammer"
+        }
+    }
 
 } )

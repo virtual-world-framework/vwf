@@ -47,9 +47,11 @@
     }
     
     
-define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function( module, model, utility, Color ) {
+define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ], function( module, model, utility, Color, $ ) {
 
     var self;
+
+    var checkLights = true;
 
     return model.load( module, {
 
@@ -66,7 +68,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
             this.state.prototypes = {}; 
-            this.state.kernel = this.kernel.kernel.kernel;            
+            this.state.kernel = this.kernel.kernel.kernel; 
+            this.state.lights = {};           
  
             // turns on logger debugger console messages 
             this.debug = {
@@ -79,7 +82,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 "getting": false,
                 "prototypes": false
             };
-
         },
 
 
@@ -193,7 +195,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }               
             } else if(protos && isLightDefinition.call(this,protos)) {
-                node = this.state.nodes[childID] = {
+                node = this.state.nodes[ childID ] = this.state.lights[ childID ] = {
                     name: childName,
                     threeObject: threeChild,
                     ID: childID,
@@ -201,7 +203,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     type: childExtendsID,
                     sourceType: childType,
                 };
-                if(!node.threeObject)
+                if( !node.threeObject )
                 {
                     createLight.call(this,nodeID,childID,childName);
                 }
@@ -384,12 +386,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName ) {
             var myNode = this.state.nodes[childID];
-            if ( myNode && !( myNode.threeObject instanceof THREE.Material ) ) {
-                generateNodeMaterial.call( this, childID, myNode );//Potential node, need to do node things!
-            }
+            
             if ( this.debug.initializing ) {
                 this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             } 
+
+            if ( myNode && !( myNode.threeObject instanceof THREE.Material ) ) {
+                generateNodeMaterial.call( this, childID, myNode );//Potential node, need to do node things!
+            }
         },
          
         // -- deletingNode -------------------------------------------------------------------------
@@ -504,10 +508,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         case "meshDefinition":
                             createMesh.call( this, node, propertyValue, true );
                             value = propertyValue; 
-                            break;
-                        case "texture":
-                            // delay the setting of the texture until the actual
-                            // settingProperty call
                             break;
                         default:
                             value = this.settingProperty( nodeID, propertyName, propertyValue );                  
@@ -664,7 +664,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         //need to walk the tree and hide all sub nodes as well
                         value = Boolean( propertyValue );
-                        SetVisible( threeObject, value );
+                        threeObject.visible = value;
                     }
                     else if ( propertyName == 'castShadows' )
                     {
@@ -1178,9 +1178,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             }
 
                             if ( lightsFound == 0 ) {
-                                var ambientlight = new THREE.AmbientLight( '#000000' );
-                                ambientlight.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
-                                node.threeScene.add( ambientlight );
+                                node.ambientlight = new THREE.AmbientLight( '#000000' );
+                                node.ambientlight.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
+                                node.threeScene.add( node.ambientlight );
+                                this.state.lights[ node.nodeID ] = node.ambientlight;
                             }
                             value = vwfColor.toString();
                         }
@@ -1530,6 +1531,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     return value;
                 }
+
+                if(propertyName == "visible") {
+                    value = node.threeObject.visible;
+                    return value;
+                }
                 
             }
             if(threeObject instanceof THREE.Material)
@@ -1732,6 +1738,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // == ticking =============================================================================
 
         ticking: function( vwfTime ) {
+            
+            if ( this.state.appInitialized && checkLights ) {
+                
+                var lightsInScene = sceneLights.call( this );
+
+                createDefaultLighting.call( this, lightsInScene );
+                checkLights = false;    
+            }
         }
 
     } );
@@ -1777,6 +1791,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
                 return ptID;
             } 
+        }
+        return undefined;
+    }
+
+    function getThreeScene( id ) {
+        if ( id === undefined ) {
+            id = this.kernel.application();
+        }
+        if ( this.state.scenes[ id ] ) {
+            return this.state.scenes[ id ].threeScene;
         }
         return undefined;
     }
@@ -2039,6 +2063,37 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
         return list;    
     }
+
+    function createLightContainer() {
+        return { 
+                    "ambientLights": [], 
+                    "directionalLights": [],
+                    "spotLights": [],
+                    "pointLights": []
+                }; 
+    }
+
+    function findAllLights( threeObject, lights ) {
+        
+        if( !threeObject ) 
+            return;
+
+        if ( threeObject instanceof THREE.DirectionalLight )
+            lights.directionalLights.push( threeObject );
+        else if ( threeObject instanceof THREE.SpotLight )
+            lights.spotLights.push( threeObject );
+        else if ( threeObject instanceof THREE.PointLight ) 
+            lights.pointLights.push( threeObject );
+        else if ( threeObject instanceof THREE.AmbientLight ) 
+            lights.ambientLights.push( threeObject );
+
+        if( threeObject.children ) {
+            for ( var i = 0; i < threeObject.children.length; i++) {
+                findAllLights( threeObject.children[ i ], lights );
+            }
+        }
+        return lights;    
+    }    
     
     function getMeshVertexIndices(mesh)
     {
@@ -2490,7 +2545,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             nodeCopy.threeObject.animatedMesh = animatedMesh;
             nodeCopy.threeObject.updateMatrixWorld();
             
-            removeAmbientLights.call(this, nodeCopy.threeObject);
+            removeAmbientLights.call( this, nodeCopy.threeObject );
 
             parentObject3.add( nodeCopy.threeObject );
             nodeCopy.threeObject.name = childName;
@@ -2775,7 +2830,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if ( debug ) {
                 this.logger.info("====>>>  vwf.model-glge.mousePick: searching for: " + path(objectToLookFor) );
             }
-            jQuery.each( this.state.nodes, function (nodeID, node) {
+            $.each( this.state.nodes, function (nodeID, node) {
                 if ( node.threeObject == objectToLookFor && !node.glgeMaterial ) {
                     if ( debug ) { this.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
                     objectIDFound = nodeID;
@@ -2805,7 +2860,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     }
     function createLight( nodeID, childID, childName ) {
 
-        //debugger;
         var child = this.state.nodes[childID];
         if ( child ) {
             child.threeObject = new THREE.DirectionalLight('FFFFFF',1,0);
@@ -3677,6 +3731,44 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }       
         return ret;
     }
+
+    function sceneLights() {
+        var scene = getThreeScene.call( this );
+        var lightList = createLightContainer.call( this );
+        if ( scene ) {
+            lightList = findAllLights( scene, lightList );
+        } 
+        return lightList;        
+    }
+
+    function createDefaultLighting( lights ) {
+        var sceneID = this.kernel.application();
+        var ambientCount = lights.ambientLights.length;
+        var lightCount = lights.spotLights.length + lights.directionalLights.length + lights.pointLights.length;
+        
+        //console.info( "ambientCount = " + ambientCount + "      lightCount = " + lightCount );
+          
+        var scene = getThreeScene.call( this );
+
+        if ( lightCount == 0 ) {
+            
+            var light1 = new THREE.DirectionalLight( '808080', 2 );
+            var light2 = new THREE.DirectionalLight( '808080', 2 );
+
+            light1.distance = light2.distance = 2000;
+
+            scene.add( light1 );
+            scene.add( light2 );
+
+            light1.rotation.setFromQuaternion( new THREE.Quaternion( 0, 1, 0, 225 ) );
+            light2.rotation.setFromQuaternion( new THREE.Quaternion( 0, 1, 0, 45 ) );
+        }
+
+        if ( ambientCount == 0 ) {
+            createAmbientLight.call( this, scene, [ 0.20, 0.20, 0.20 ] );
+        }            
+    }
+
     function SetVisible(node,state) 
     {
         if(node)
@@ -3932,7 +4024,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             //vertex data
             if (node.attributes) {
-                jQuery.each(node.attributes, function(key, element) {
+                $.each(node.attributes, function(key, element) {
                     debugarraytype = key;
                     var attributeArray = node.attributes[key];
                     node.attributes[key] = DecodeArray(attributeArray,key);

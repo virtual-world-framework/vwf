@@ -27,24 +27,18 @@
 
     <meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
 
-    <!-- The Virtual World Framework makes use of the jQuery library.                            -->
+    <script type="text/javascript" src="compatibilitycheck.js"></script>
 
     <script type="text/javascript" src="socket.io.js"></script>
     <script type="text/javascript" src="socket.io-sessionid-patch.js"></script>
 
     <script type="text/javascript" src="require.js"></script>
 
-    <script type="text/javascript" src="jquery-1.10.2.min.js"></script>
-	<script type="text/javascript" src="bootstrap.min.js"></script>
-    <script type="text/javascript" src="jquery-ui-1.10.3.custom.min.js"></script>
-    <script type="text/javascript" src="jquery.hammer.js"></script>
     <script type="text/javascript" src="async.js"></script>
 
     <script type="text/javascript" src="closure/base.js"></script>
     <script type="text/javascript">goog.require('goog.vec.Mat4')</script>
     <script type="text/javascript">goog.require('goog.vec.Quaternion')</script>
-
-    <script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
 
     <script type="text/javascript" src="crypto.js"></script>
     <script type="text/javascript" src="md5.js"></script>
@@ -53,9 +47,23 @@
     <script type="text/javascript" src="mash.js"></script>
 
     <script type="text/javascript" src="Class.create.js"></script>
-    <script type="text/javascript" src="jquery-encoder-0.1.0.js"></script>
     <script type="text/javascript" src="rAF.js"></script>
-    <script type="text/javascript" src="centerinclient.js"></script>
+    <script type="text/javascript" src="performance.now-polyfill.js"></script>
+ 
+	<script type="text/javascript">
+        require(['pace.min'], function(pace){
+            pace.start({
+                ajax: false, // disabled
+                document: false, // disabled
+                eventLag: {
+                    minSamples: 50
+                },
+                elements: {
+                    selectors: ['#image']
+                }
+            });
+        });
+	</script>
 
     <!-- This is the main client library. vwf.js creates a framework manager and attaches it to  -->
     <!-- the global window object as window.vwf. All access to the framework is through that     -->
@@ -82,38 +90,60 @@
         var application;
         var regex = /([^&=]+)=?([^&]*)/g;
 
-        while(match = regex.exec(queryString)) {
-            var key = $.encoder.canonicalize(match[1]);
-            var parameters = $.encoder.canonicalize(match[2]);
-            if(key == "application") {
-                // Get the application specification if one is provided in the query string.
-                application = parameters;
+        var requireConfig = {
+            paths: {
+                jquery: "jquery-1.10.2.min",
+                "jquery-ui": "jquery-ui-1.10.3.custom.min",
+                hammer: "jquery.hammer",
+            },
+            shim: {                
+                "jquery-ui": {
+                    deps: ["jquery"],
+                    exports: "$"
+                },
+                "jquery-encoder-0.1.0": ["jquery"],
+                "hammer": {
+                    deps: ["jquery"],
+                    exports: "Hammer"
+                }
             }
-            else {
+        };
+        require(requireConfig, ["jquery", "jquery-encoder-0.1.0"], function($) {
+            while(match = regex.exec(queryString)) {
+                var key = $.encoder.canonicalize(match[1]);
+                var parameters = $.encoder.canonicalize(match[2]);
+                if(key == "application") {
+                    // Get the application specification if one is provided in the query string.
+                    application = parameters;
+                }
+                else {
+                    try {
+                        parameters = JSON.parse(parameters);
+                    }
+                    catch(e) {
+                    }
+                    userLibraries["model"]["vwf/model/" + key] = (parameters && parameters != "") ? parameters : undefined;
+                }
+            }
+
+            while(match = regex.exec(hashString)) {
+                var key = $.encoder.canonicalize(match[1]);
+                var parameters = $.encoder.canonicalize(match[2]);
                 try {
                     parameters = JSON.parse(parameters);
                 }
                 catch(e) {
                 }
-                userLibraries["model"]["vwf/model/" + key] = (parameters && parameters != "") ? parameters : undefined;
+                userLibraries["view"]["vwf/view/" + key] = (parameters && parameters != "") ? parameters : undefined;
+                if(key == "google-earth") {
+                    googleEarth = true;
+                }
             }
-        }
 
-        while(match = regex.exec(hashString)) {
-            var key = $.encoder.canonicalize(match[1]);
-            var parameters = $.encoder.canonicalize(match[2]);
-            try {
-                parameters = JSON.parse(parameters);
-            }
-            catch(e) {
-            }
-            userLibraries["view"]["vwf/view/" + key] = (parameters && parameters != "") ? parameters : undefined;
-            if(key == "google-earth") {
-                googleEarth = true;
-            }
-        }
+            googleEarth && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>");
 
-        googleEarth && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")
+            vwf.loadConfiguration(application, userLibraries, compatibilityCheck);
+        });
     </script>
     <script type="text/javascript">googleEarth && google.load( "earth", "1" )</script>
     
@@ -121,10 +151,8 @@
     <!-- This is the common view implementation and an example view that summarizes the          -->
     <!-- simulation state in HTML on the main page.                                              -->
 
- 	<link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
     <link rel="stylesheet" type="text/css" href="index.css" />
     <link rel="stylesheet" type="text/css" href="vwf/view/editor/editor.css" />
-    <link rel="stylesheet" type="text/css" href="jquery-ui-1.10.3.custom.min.css" />
 
   </head>
 
@@ -136,57 +164,12 @@
 
     <!-- The main content renders to "#vwf-root", the item with the id "vwf-root".               -->
 
-    <div id="vwf-root"></div>
-	
-    <!-- Overlay div to display loading information> -->
-    <div id="loadVWFModal" class="modal">
-      <div class="modal-header">
-            <img src="images/logo.png" style="width:100%;"/>
-      </div>
-      <div class="modal-body">
-    		<div>
-    			<table style="width:100%;">
-    				<tr>
-    					<td><span id='WGL' class='req'></span></td>
-    					<td><span id='ES5' class='req'></span></td>
-    					<td><span id='WS' class='req'></span></td>
-    				</tr>
-    			</table>
-    			<div class="progress progress-striped active">
-    				<div class="bar" id="loadVWFProgressBar" style="width:100%;"></div>
-    			</div>
-    		</div>
-      </div>
-      <div class="modal-footer">
-
-    		<div id='loadText' style="font-family: 'Droid Sans',sans-serif;font-size: 14px;line-height: 20px;color: #999;text-alignment:left;width:100%"> </div>
-      </div>
+    <div id="incompatibleBrowser">
+        <div>
+            <span style="color:#3090C7;"><br/><br/>Your browser does not support Virtual World Framework. Please review our <a href='http://www.virtual.wf/documentation.html#requirements'>requirements</a> for supported browser versions.</span>
+        </div>
     </div>
-
-    <script type="text/javascript">
-        function updateOverlay(compatibility)
-        {
-            if(compatibility.compatible) {
-                setTimeout("$('#loadVWFModal').modal('hide')",2000);
-            }
-            else {
-                if(compatibility.errors["WGL"]) {
-                    $('#WGL').prepend("<img src='images/x.png' alt=' ' width='20px'/> WebGL");       
-                }
-                if(compatibility.errors["ES5"]) {
-                    $('#ES5').prepend("<img src='images/x.png' alt=' ' width='20px'/> ECMAScript5");                    
-                }
-                if(compatibility.errors["WS"]) {
-                    $('#WS').html("<img src='images/x.png' alt=' ' width='20px'/> WebSockets");
-                }
-                $('#loadText').html("This browser is not compatible. Please review <a href='/web/docs/reqs.html'>documentation</a>.");
-            }
-        }
-
-        $("#loadVWFModal").centerInClient();
-        $('#loadVWFModal').modal('show');
-        vwf.loadConfiguration(application, userLibraries, updateOverlay);
-    </script>
+    <div id="vwf-root"></div>
   </body>
 
 </html>

@@ -2,6 +2,91 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.6.22
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change. 
+
+- NEW: Pull out three.js render into an overridable function so application can replace with its own (to work with shaders, multiple viewports, etc)
+- NEW: Notify user if websocket connection is blocked
+- NEW: Add polyfill for performance.now. Refs #3046
+- NEW: `kernel.{prototype,behaviors,prototypes,prototypes(...,true)}` tests.
+- NEW: Add calledMethod handler to the view to prevent interpolation when animation functions are called with a duration of 0. Refs #3046
+- NEW: Add Pace.min.js loading bar to VWF startup window.
+- NEW: Interpolate between transforms on frames between ticks.
+- NEW: Move per-prototype `initialize` from `model/javascript` to the kernel.
+
+	In order for the javascript driver to create an async break between
+	calls to a node's prototype `initialize` functions, it needs to call
+	back into `kernel.execute` and iterate using the `execute` callback. But
+	kernel reentry is during replication. The driver can't make the extra
+	hop through the kernel to execute its script. It needs to execute it
+	directly.
+
+	This commit makes the kernel responsible for applying the prototypes'
+	initializers to the node. Using the new `initializingNodeFromPrototype`
+	handler, the kernel directs drivers to run the relevant prototype
+	initializers on the node. The kernel provides an async break between
+	initializations when needed.
+
+	Drivers only need to apply one initializer at a time. They no longer
+	need to search through the prototype chain and don't need to be
+	concerned about waiting for async operations from a prototype's
+	initializer to complete before calling a derived node's initializer.
+
+	An added benefit is that multiple drivers can perform partial
+	initialization correctly (such as if two scripting systems are active).
+	Previously, one driver would execute initialization for the entire
+	prototype chain without allowing the next driver to interleave its
+	initialization for the same nodes.
+
+	References #2417.
+
+- NEW: Make jQuery and bootstrap load as RequireJS modules to remove them from the global namespace. Refs #3108, #3109
+- CHG: New loader screen!
+- CHG: Turn eval script into regular code so optimizer doesn't break it
+- CHG: Change humvee-lesson driving to use translateTo, so it's not interpolated. Refs #3046
+- CHG: Refactor `kernel.prototypes` slightly to remove duplicated code.
+- CHG: Rearrange order of prototype array so nodes come before their behaviors
+- CHG: Fix prototypes function so that it doesn't skip the behaviors of the first level prototype. Refs #2417
+- CHG: Adding compatibility checking back into index.html for older browsers.
+- CHG: Adjust EventLag minimum sampling to account for event lag of Three.JS
+- CHG: Clean up duplicate code in renderScene. Refs #3046
+- CHG: Fix mouse navigation. Refs #2417
+- CHG: Only save nodes that are 3D objects for interpolation
+- CHG: Fix example/transforms so that it doesn't throw errors before the app is fully loaded. Refs #3046
+- CHG: In the nodejs reflector, store the time a new client connects to use for the time in the setState message.
+- CHG: Change tick messages so they don't have an action. Refs #3046
+- CHG: Add /r flag to RMDir to fully remove node-modules folder
+- CHG: Only move queue forward on ticks
+- CHG: Moved some functions private, eliminate matCpy for goog.vev.mat4.clone, avoid kernel access.
+- CHG: Fix applications that depend on jQuery or bootstrap. Refs #3120
+- CHG: Remove old websocket check
+- CHG: Update build_windows_installer.nsi
+- CHG: Relative path changed to absolute for source control version of NSIS script.
+- CHG: Start a webpage with the local README loaded after install.
+- CHG: Create does not take vwfPath argument.
+- CHG: Update vwfCli.js to support multiple possible locations for VWF support files.
+- CHG: Update spacing in node_vwf.js
+- CHG: Combine nested-if into && conditional operator in node_vwf.js.
+- CHG: Add check for VWF_DIR truthy values.
+- CHG: Fix path checking order to fix Mac/Linux path lookup.
+- CHG: Wordsmith installation instructions
+- CHG: Removed the word folder in install documentation.
+- CHG: Update installation notes to tighten up wording.
+- CHG: Update installation page to match README.
+- CHG: Update readme.md to remove extra wording.
+- CHG: Add instructions on how to use vwf create / vwf to start node server.
+- CHG: Update Readme.md to fix wording.
+- CHG: Update to point to development as fork repo for VWF Core Developers.
+- CHG: Update readme.md to include new instructions for VWF 1.0 Windows install. Closes #3039
+- CHG: Added Core Developer instructions for Windows installation. Closes #3039
+- CHG: Update to installation procedures to break into user/app developer installation and core developer installation. Refs #3039
+- CHG: Remove VWF website from main VWF repository
+- CHG: No longer create default lights in every app - only if app doesn't create any itself (the create two directional lights and one ambient)
+- CHG: Remove/encapsulate external dependencies so they don't conflict with app dependencies
+
+
+----------------------------------
 0.6.21
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change. 

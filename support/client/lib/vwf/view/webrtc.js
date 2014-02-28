@@ -16,7 +16,7 @@
 /// @module vwf/view/webrtc
 /// @requires vwf/view
 
-define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( module, view, utility, Color ) {
+define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], function( module, view, utility, Color, $ ) {
 
     return view.load( module, {
 
@@ -127,7 +127,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
                     this.local.ID = childID;
                     
                     if ( this.videoElementsDiv ) {
-                        jQuery('body').append(
+                        $('body').append(
                             "<div id='"+self.videoElementsDiv+"'></div>"
                         );                   
                     }

@@ -21,15 +21,13 @@ This command may be re-run to upgrade the installation to the latest version of 
 
 **Install on Windows**
 
-- Download the latest [VWF Baseline](http://download.virtualworldframework.com/files/VWF_Windows_latest.zip) and extract the zip.
-- Execute VWF from the root folder at a command prompt. (i.e., `c:\vwf-extracted-folder>vwf`)
-- Follow the instructions to setup your environment.
+- Download and run the [VWF Windows Installer](http://download.virtualworldframework.com/files/VWF_Windows_Install.exe).
 
-For more complex installations, such as working on VWF core, please see our [Installation Instructions](http://www.virtual.wf/web/docs/install.html).
+For more complex installations, such as working on VWF core, please see our [Installation Instructions](http://virtual.wf/documentation.html#install).
 
 ## Quick Start 
 
-Create a new VWF application.
+Create a new VWF application from the command line.
 
 ```
 $ vwf create my-app
@@ -44,20 +42,19 @@ $ vwf
 
 Your application is now up and running at [http://localhost:3000](http://localhost:3000).
 
-To get started with VWF, check out [Getting Started](http://virtual.wf/web/docs/readme.html).
+To get started with VWF, check out [Getting Started](http://virtual.wf/getting_started.html).
 
 ## Examples
 
-For examples, check out our [demos](http://www.virtual.wf/web/catalog.html).
+For examples, check out our [demos](http://virtual.wf/demos.html).
 
-Also, browse through other example applications in the `public` folder of your
-local VWF repository.
+Also, browse through other example applications in the [public](https://github.com/virtual-world-framework/vwf/tree/master/public) directory.
 
 ## Contributing
 
 Our development process utilizes several branches:
 
-* [![Build Status](http://jenkins.virtualworldframework.com/job/Master/badge/icon)](http://jenkins.virtualworldframework.com/job/Master/) **master** - Stable release of VWF. Running on http://virtual.wf.
+* [![Build Status](http://jenkins.virtualworldframework.com/job/Master/badge/icon)](http://jenkins.virtualworldframework.com/job/Master/) **master** - Stable release of VWF. Running on http://demo.virtual.wf.
 * [![Build Status](http://jenkins.virtualworldframework.com/job/Integration/badge/icon)](http://jenkins.virtualworldframework.com/job/Integration/) **integration** - Integration testing features from development before merging into master. Running on http://integration.virtual.wf.
 * [![Build Status](http://jenkins.virtualworldframework.com/job/Development/badge/icon)](http://jenkins.virtualworldframework.com/job/Development/) **development** - The latest development and new features of the framework. Running on http://development.virtual.wf.
 * **branch/feature-name**   - Feature development is done on a feature branch before being merged back to development.
@@ -71,7 +68,6 @@ Also, please be sure that your pull request conforms to our [Coding Standard](ht
 Keep track of developments and get help with VWF.
 
 - Discover an issue? Head over to [Issues](https://github.com/virtual-world-framework/vwf/issues) and report it.
-- Have a question about VWF? Ask away on [our forum](http://www.virtual.wf/web/forum.html).
 
 ## License
 

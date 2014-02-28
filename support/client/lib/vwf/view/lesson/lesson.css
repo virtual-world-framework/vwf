@@ -98,7 +98,7 @@ p {
 
 
 /* FROM BOOTSTRAP CSS - FOR NAVIATION BUTTONS */
-.btn {
+.lesson .btn {
   display: inline-block;
   *display: inline;
   /* IE7 inline-block hack */
@@ -139,20 +139,20 @@ p {
   -moz-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
 }
-.btn:hover,
-.btn:active,
-.btn.active,
-.btn.disabled,
-.btn[disabled] {
+.lesson .btn:hover,
+.lesson .btn:active,
+.lesson .btn.active,
+.lesson .btn.disabled,
+.lesson .btn[disabled] {
   color: #3a3f44;
   background-color: #e6e6e6;
   *background-color: #d9d9d9;
 }
-.btn:active,
-.btn.active {
+.lesson .btn:active,
+.lesson .btn.active {
   background-color: #cccccc \9;
 }
-.btn:hover {
+.lesson .btn:hover {
   color: #3a3f44;
   text-decoration: none;
   background-color: #e6e6e6;
@@ -165,13 +165,13 @@ p {
   -o-transition: background-position 0.1s linear;
   transition: background-position 0.1s linear;
 }
-.btn:focus {
+.lesson .btn:focus {
   outline: thin dotted #333;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
-.btn.active,
-.btn:active {
+.lesson .btn.active,
+.lesson .btn:active {
   background-color: #e6e6e6;
   background-color: #d9d9d9 \9;
   background-image: none;
@@ -180,11 +180,11 @@ p {
   -moz-box-shadow: inset 0 2px 4px rgba(0,0,0,.15), 0 1px 2px rgba(0,0,0,.05);
   box-shadow: inset 0 2px 4px rgba(0,0,0,.15), 0 1px 2px rgba(0,0,0,.05);
 }
-.btn {
+.lesson .btn {
   border-color: #c5c5c5;
   border-color: rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.25);
 }
-.btn-info {
+.lesson .btn-info {
   color: #ffffff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
   background-color: #49afcd;
@@ -202,17 +202,17 @@ p {
 
   filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }
-.btn-info:hover,
-.btn-info:active,
-.btn-info.active,
-.btn-info.disabled,
-.btn-info[disabled] {
+.lesson .btn-info:hover,
+.lesson .btn-info:active,
+.lesson .btn-info.active,
+.lesson .btn-info.disabled,
+.lesson .btn-info[disabled] {
   color: #ffffff;
   background-color: #2f96b4;
   *background-color: #2a85a0;
 }
-.btn-info:active,
-.btn-info.active {
+.lesson .btn-info:active,
+.lesson .btn-info.active {
   background-color: #24748c \9;
 }
 
@@ -231,45 +231,45 @@ p {
 
 /* Component containers
 ----------------------------------*/
-.ui-widget { font-family: Verdana, Arial, sans-serif; font-size: 1.1em; }
-.ui-widget .ui-widget { font-size: 1em; }
-.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button { font-family: Verdana, Arial, sans-serif; font-size: 1em; }
-.ui-widget-content { border: 1px solid #555555; background: #000000 50% 50% repeat; color: #ffffff; }
-.ui-widget-content a { color: #ffffff; }
-.ui-widget-header { border: 1px solid #333333; background: #444444 50% 50% repeat-x; color: #ffffff; font-weight: bold; }
-.ui-widget-header a { color: #ffffff; }
+.lesson .ui-widget { font-family: Verdana, Arial, sans-serif; font-size: 1.1em; }
+.lesson .ui-widget .ui-widget { font-size: 1em; }
+.lesson .ui-widget input, .lesson .ui-widget select, .lesson .ui-widget textarea, .lesson .ui-widget button { font-family: Verdana, Arial, sans-serif; font-size: 1em; }
+.lesson .ui-widget-content { border: 1px solid #555555; background: #000000 50% 50% repeat; color: #ffffff; }
+.lesson .ui-widget-content a { color: #ffffff; }
+.lesson .ui-widget-header { border: 1px solid #333333; background: #444444 50% 50% repeat-x; color: #ffffff; font-weight: bold; }
+.lesson .ui-widget-header a { color: #ffffff; }
 
 /* Interaction states
 ----------------------------------*/
-.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #444444; background: #222222 50% 50% repeat-x; font-weight: normal; color: #eeeeee; }
-.ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited { color: #eeeeee; text-decoration: none; }
-.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus { border: 1px solid #0b93d5; background: #003147 50% 50% repeat-x; font-weight: normal; color: #ffffff; }
-.ui-state-hover a, .ui-state-hover a:hover { color: #ffffff; text-decoration: none; }
-.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { border: 1px solid #26b3f7; background: #0972a5 50% 50% repeat-x; font-weight: normal; color: #ffffff; }
-.ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited { color: #ffffff; text-decoration: none; }
-.ui-widget :active { outline: none; }
+.lesson .ui-state-default, .lesson .ui-widget-content .ui-state-default, .lesson .ui-widget-header .ui-state-default { border: 1px solid #444444; background: #222222 50% 50% repeat-x; font-weight: normal; color: #eeeeee; }
+.lesson .ui-state-default a, .lesson .ui-state-default a:link, .lesson .ui-state-default a:visited { color: #eeeeee; text-decoration: none; }
+.lesson .ui-state-hover, .lesson .ui-widget-content .ui-state-hover, .lesson .ui-widget-header .ui-state-hover, .lesson .ui-state-focus, .lesson .ui-widget-content .ui-state-focus, .lesson .ui-widget-header .ui-state-focus { border: 1px solid #0b93d5; background: #003147 50% 50% repeat-x; font-weight: normal; color: #ffffff; }
+.lesson .ui-state-hover a, .lesson .ui-state-hover a:hover { color: #ffffff; text-decoration: none; }
+.lesson .ui-state-active, .lesson .ui-widget-content .ui-state-active, .lesson .ui-widget-header .ui-state-active { border: 1px solid #26b3f7; background: #0972a5 50% 50% repeat-x; font-weight: normal; color: #ffffff; }
+.lesson .ui-state-active a, .lesson .ui-state-active a:link, .lesson .ui-state-active a:visited { color: #ffffff; text-decoration: none; }
+.lesson .ui-widget :active { outline: none; }
 
 /* Interaction Cues
 ----------------------------------*/
-.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight  {border: 1px solid #cccccc; background: #eeeeee 50% top repeat-x; color: #2e7db2; }
-.ui-state-highlight a, .ui-widget-content .ui-state-highlight a,.ui-widget-header .ui-state-highlight a { color: #2e7db2; }
-.ui-state-error, .ui-widget-content .ui-state-error, .ui-widget-header .ui-state-error {border: 1px solid #ffb73d; background: #ffc73d  50% 50% repeat-x; color: #111111; }
-.ui-state-error a, .ui-widget-content .ui-state-error a, .ui-widget-header .ui-state-error a { color: #111111; }
-.ui-state-error-text, .ui-widget-content .ui-state-error-text, .ui-widget-header .ui-state-error-text { color: #111111; }
-.ui-priority-primary, .ui-widget-content .ui-priority-primary, .ui-widget-header .ui-priority-primary { font-weight: bold; }
-.ui-priority-secondary, .ui-widget-content .ui-priority-secondary,  .ui-widget-header .ui-priority-secondary { opacity: .7; filter:Alpha(Opacity=70); font-weight: normal; }
-.ui-state-disabled, .ui-widget-content .ui-state-disabled, .ui-widget-header .ui-state-disabled { opacity: .35; filter:Alpha(Opacity=35); background-image: none; }
+.lesson .ui-state-highlight, .lesson .ui-widget-content .ui-state-highlight, .lesson .ui-widget-header .ui-state-highlight  {border: 1px solid #cccccc; background: #eeeeee 50% top repeat-x; color: #2e7db2; }
+.lesson .ui-state-highlight a, .lesson .ui-widget-content .ui-state-highlight a,.lesson .ui-widget-header .ui-state-highlight a { color: #2e7db2; }
+.lesson .ui-state-error, .lesson .ui-widget-content .ui-state-error, .lesson .ui-widget-header .ui-state-error {border: 1px solid #ffb73d; background: #ffc73d  50% 50% repeat-x; color: #111111; }
+.lesson .ui-state-error a, .lesson .ui-widget-content .ui-state-error a, .lesson .ui-widget-header .ui-state-error a { color: #111111; }
+.lesson .ui-state-error-text, .lesson .ui-widget-content .ui-state-error-text, .lesson .ui-widget-header .ui-state-error-text { color: #111111; }
+.lesson .ui-priority-primary, .lesson .ui-widget-content .ui-priority-primary, .lesson .ui-widget-header .ui-priority-primary { font-weight: bold; }
+.lesson .ui-priority-secondary, .lesson .ui-widget-content .ui-priority-secondary,  .lesson .ui-widget-header .ui-priority-secondary { opacity: .7; filter:Alpha(Opacity=70); font-weight: normal; }
+.lesson .ui-state-disabled, .lesson .ui-widget-content .ui-state-disabled, .lesson .ui-widget-header .ui-state-disabled { opacity: .35; filter:Alpha(Opacity=35); background-image: none; }
 
 /* Icons
 ----------------------------------*/
-.ui-icon { width: 16px; height: 16px;}
-.ui-widget-content .ui-icon {background-image: none; }
-.ui-widget-header .ui-icon {background-image: none; }
-.ui-state-default .ui-icon { background-image: none; }
-.ui-state-hover .ui-icon, .ui-state-focus .ui-icon {background-image: none; }
-.ui-state-active .ui-icon {background-image: none; }
-.ui-state-highlight .ui-icon {background-image: none; }
-.ui-state-error .ui-icon, .ui-state-error-text .ui-icon {background-image: none; }
+.lesson .ui-icon { width: 16px; height: 16px;}
+.lesson .ui-widget-content .ui-icon {background-image: none; }
+.lesson .ui-widget-header .ui-icon {background-image: none; }
+.lesson .ui-state-default .ui-icon { background-image: none; }
+.lesson .ui-state-hover .ui-icon, .lesson .ui-state-focus .ui-icon {background-image: none; }
+.lesson .ui-state-active .ui-icon {background-image: none; }
+.lesson .ui-state-highlight .ui-icon {background-image: none; }
+.lesson .ui-state-error .ui-icon, .lesson .ui-state-error-text .ui-icon {background-image: none; }
 /*!
  * jQuery UI Accordion 1.8.20
  *
@@ -280,12 +280,12 @@ p {
  * http://docs.jquery.com/UI/Accordion#theming
  */
 /* IE/Win - Fix animation bug - #4615 */
-.ui-accordion { width: 100%; }
-.ui-accordion .ui-accordion-header { cursor: pointer; position: relative; margin-top: 1px; zoom: 1; }
-.ui-accordion .ui-accordion-li-fix { display: inline; }
-.ui-accordion .ui-accordion-header-active { border-bottom: 0 !important; }
-.ui-accordion .ui-accordion-header a { display: block; font-size: 1em; padding: .5em .5em .5em .7em; }
-.ui-accordion-icons .ui-accordion-header a { padding-left: 2.2em; }
-.ui-accordion .ui-accordion-header .ui-icon { position: absolute; left: .5em; top: 50%; margin-top: -8px; }
-.ui-accordion .ui-accordion-content { padding: 1em 2.2em; border-top: 0; margin-top: -2px; position: relative; top: 1px; margin-bottom: 2px; overflow: auto; display: none; zoom: 1; }
-.ui-accordion .ui-accordion-content-active { display: block; }
+.lesson .ui-accordion { width: 100%; }
+.lesson .ui-accordion .ui-accordion-header { cursor: pointer; position: relative; margin-top: 1px; zoom: 1; }
+.lesson .ui-accordion .ui-accordion-li-fix { display: inline; }
+.lesson .ui-accordion .ui-accordion-header-active { border-bottom: 0 !important; }
+.lesson .ui-accordion .ui-accordion-header a { display: block; font-size: 1em; padding: .5em .5em .5em .7em; }
+.lesson .ui-accordion-icons .ui-accordion-header a { padding-left: 2.2em; }
+.lesson .ui-accordion .ui-accordion-header .ui-icon { position: absolute; left: .5em; top: 50%; margin-top: -8px; }
+.lesson .ui-accordion .ui-accordion-content { padding: 1em 2.2em; border-top: 0; margin-top: -2px; position: relative; top: 1px; margin-bottom: 2px; overflow: auto; display: none; zoom: 1; }
+.lesson .ui-accordion .ui-accordion-content-active { display: block; }

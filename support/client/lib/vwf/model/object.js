@@ -375,7 +375,7 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
             if ( internals ) { // set
                 object.sequence = internals.sequence !== undefined ? internals.sequence : object.sequence;
-                jQuery.extend( object.prng.state, internals.random || {} );
+                merge( object.prng.state, internals.random || {} );
             } else { // get
                 internals = {};
                 internals.sequence = object.sequence;
@@ -412,5 +412,20 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
         },
 
     } );
+
+    /// Merge fields from the `source` objects into `target`.
+
+    function merge( target /* [, source1 [, source2 ... ] ] */ ) {
+
+        for ( var index = 1; index < arguments.length; index++ ) {
+            var source = arguments[index];
+
+            Object.keys( source ).forEach( function( key ) {
+                target[key] = source[key];
+            } );
+        }
+
+        return target;
+    }
 
 } );
