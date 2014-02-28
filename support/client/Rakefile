@@ -36,7 +36,7 @@ CLOBBER.include DESTINATION, DOCUMENTATION
 
 desc "Run the RequireJS optimizer."
 
-task :build => [ :clean, :compile, :compress, :documentation ]
+task :build => [ :clean, :compile, :compress ]
 
 desc "Generate the compilation script."
 
