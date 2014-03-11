@@ -165,23 +165,23 @@ methods:
   isChildOf:
 scripts:
 - |
-    var scene = this;
     this.activeCameraComp = undefined;
 
     this.initialize = function() {
       if ( this.usersShareView ) {
-
+        var scene = this;
         this.children.create( this.userObject.properties.name, this.userObject, function( child ) {
-          scene.initializeActiveCamera( child.id );
+          scene.initializeActiveCamera( child );
         } );
-
       }
     }
 
-    this.initializeActiveCamera = function( id ) {
-      // override if the camera needs custimization
-      //scene.activeCamera = id;
-      scene.lastActiveCamera = scene.activeCamera;
+    this.initializeActiveCamera = function( userObjectWithCamera ) {
+      var cameras = userObjectWithCamera.find( "descendant-or-self::element(*,'http://vwf.example.com/camera.vwf')" );
+      if ( cameras.length ) {
+        this.lastActiveCamera = this.activeCamera;
+        this.activeCamera = cameras[ 0 ].id;
+      }
     }
 
     this.getActiveCameraComp = function() {
