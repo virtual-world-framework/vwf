@@ -548,7 +548,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             if(last && now && !matCmp(last,now,.0001) ) {             
                 var interp = matrixLerp(last, now, step || 0);
                 
-                if(!navObject || nodeID != navObject.ID) {             
+                var objectIsControlledByUser = ( ( navObject && ( nodeID === navObject.ID ) ) || 
+                                                 ( cameraNode && ( nodeID === cameraNode.ID ) ) );
+                if ( !objectIsControlledByUser ) {             
                     setTransform(nodeID, interp);    
                     self.nodes[nodeID].needTransformRestore = true;
                 }
