@@ -88,6 +88,7 @@ properties:
     extends: http://vwf.example.com/camera.vwf
     implements: [ "http://vwf.example.com/navigable.vwf" ]
     properties:
+      name: camera
       navmode: fly
 
   ## Boolean determines whether the users own avatars should be visible to themselves
@@ -170,7 +171,7 @@ scripts:
     this.initialize = function() {
       if ( this.usersShareView ) {
 
-        this.children.create( "camera", this.userObject, function( child ) {
+        this.children.create( this.userObject.properties.name, this.userObject, function( child ) {
           scene.initializeActiveCamera( child.id );
         } );
 
