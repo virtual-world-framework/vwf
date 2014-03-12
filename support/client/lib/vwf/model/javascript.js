@@ -506,7 +506,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
              
                 var val = self.kernel.getProperty( this.id, propertyName );
-                if(!val) return val;
+                
                 //return val;
                 return watchable.createWatchable(val,propertyName,this.id,undefined,this.id+"-"+propertyName) 
     
@@ -514,8 +514,8 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
              },
                 set: function( value ) {
 
-
-                   
+                    
+                  
                     watchable.setWatchableValue( this.id, propertyName, watchable.watchableToObject(value) , this.id+"-"+propertyName);
 
                 },
@@ -528,7 +528,7 @@ node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, meth
                    
               
                  var val = self.kernel.getProperty( this.id, propertyName );
-                if(!val) return val;
+                
              //   return val;
                  return watchable.createWatchable(val,propertyName,this.id,undefined,this.id+"-"+propertyName)  },
                 set: function( value ) { 
