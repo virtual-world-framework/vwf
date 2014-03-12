@@ -20,7 +20,7 @@
 /// @requires vwf/model
 /// @requires vwf/utility
 
-define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
+define( [ "module", "vwf/model", "vwf/utility","vwf/model/javascript/watchable" ], function( module, model, utility,watchable ) {
 
     return model.load( module, {
 
@@ -47,6 +47,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function() {
+
+            watchable.kernel = this.kernel.kernel;
             this.nodes = {}; // maps id => new type()
             this.creatingNode( undefined, 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
         },
@@ -500,15 +502,39 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
             var self = this;
 
             Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
-                get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
-                set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
+                get: function() {
+
+             
+                var val = self.kernel.getProperty( this.id, propertyName );
+                
+                //return val;
+                return watchable.createWatchable(val,propertyName,this.id,undefined,this.id+"-"+propertyName) 
+    
+
+             },
+                set: function( value ) {
+
+                    
+                  
+                    watchable.setWatchableValue( this.id, propertyName, watchable.watchableToObject(value) , this.id+"-"+propertyName);
+
+                },
                 enumerable: true
             } );
 
 node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             Object.defineProperty( node, propertyName, { // "this" is node in get/set
-                get: function() { return self.kernel.getProperty( this.id, propertyName ) },
-                set: function( value ) { self.kernel.setProperty( this.id, propertyName, value ) },
+                get: function() {
+                   
+              
+                 var val = self.kernel.getProperty( this.id, propertyName );
+                
+             //   return val;
+                 return watchable.createWatchable(val,propertyName,this.id,undefined,this.id+"-"+propertyName)  },
+                set: function( value ) { 
+                    
+                    
+                    watchable.setWatchableValue( this.id, propertyName, watchable.watchableToObject(value) , this.id+"-"+propertyName); },
                 enumerable: true
             } );
 
@@ -538,6 +564,27 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                         "exception in setter:", utility.exceptionMessage( e ) );
                 }
             }
+
+            if(watchable.__WatchableSetting === 0)
+            {
+            
+            var keys = Object.keys(watchable.__WatchableCache);
+            var dels = [];
+            for(var i = 0; i < keys.length; i++)
+            {
+                if(keys[i].indexOf(nodeID+'-'+propertyName) == 0)
+                {
+                    
+                    dels.push(keys[i]);
+                }
+            }
+            for(var i = 0; i < dels.length; i++)
+            {
+                delete watchable.__WatchableCache[dels[i]];
+            }
+            delete watchable.__WatchableCache[nodeID+'-'+propertyName];
+            }
+
 
             return undefined;
         },

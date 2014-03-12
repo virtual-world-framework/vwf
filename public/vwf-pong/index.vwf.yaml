@@ -114,9 +114,11 @@ scripts:
     }
     this.update = function() {
       if ( this.keyPressInfo ) {
+         console.log(this.keyPressInfo);
         for ( var keyPress in this.keyPressInfo.keysDown ) {
           switch( keyPress ) {
             case 'R':
+             
               this.movePlayer( this.playerOne, +1 );
               break;
             case 'F':
@@ -138,7 +140,11 @@ scripts:
 
       this.future( 1.0/60.0 ).update();  // schedule the next step
     }
-    this.keyDown = this.keyUp = function( input ) {
+    this.keyDown = function( input ) {
+      this.keyPressInfo = input;
+    }
+    this.keyUp = function( input ) {
+     
       this.keyPressInfo = input;
     }
     this.movePlayer = function( player, direction ) {
@@ -147,6 +153,7 @@ scripts:
         player.translateTo( [ player.translation[ 0 ], 120 * direction, 0 ] );
         return;
       } else {
+
         player.translateBy( [ 0, direction * this.paddleSpeed, 0 ] );
       }
     }
