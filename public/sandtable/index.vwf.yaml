@@ -323,7 +323,8 @@ scripts:
         var newLine = $.extend(true, {}, line);
         newLine.properties.meshDefinition.positions = pos;
         newLine.properties.meshDefinition.faces = faces;
-        newLine.properties.meshDefinition.color = this.lineColor;
+        
+        newLine.properties.meshDefinition.color = this.lineColor.internal_val;
         
         this.children.create( "line"+this.lineIndex, newLine, function( newObj ) {
           this.nodesCreated.push( newObj.id );
