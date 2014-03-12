@@ -400,7 +400,7 @@ children:
         - |
           this.animationUpdate = function(time, duration) {
             if(!this.initialTransform) {
-              this.initialTransform = this.transform;
+              this.initialTransform = this.transform.internal_val;
             }
             this.transform = this.initialTransform;
             this.rotateBy([0, 1, 0, (time * 300)], 0, "rotated");
@@ -433,7 +433,7 @@ children:
         - |
           this.animationUpdate = function(time, duration) {
             if(!this.initialTransform) {
-              this.initialTransform = this.transform;
+              this.initialTransform = this.transform.internal_val;
             }
             this.transform = this.initialTransform;
             this.translateBy([0.04 * time, 0, 0], 0);
@@ -472,7 +472,7 @@ children:
         - |
           this.animationUpdate = function(time, duration) {
             if(!this.initialTransform) {
-              this.initialTransform = this.transform;
+              this.initialTransform = this.transform.internal_val;
             }
             this.transform = this.initialTransform;
             this.translateBy([0, 0, 0.03 * time], 0);
@@ -506,7 +506,7 @@ children:
         - |
           this.animationUpdate = function(time, duration) {
             if(!this.initialTransform) {
-              this.initialTransform = this.transform;
+              this.initialTransform = this.transform.internal_val;
             }
             this.transform = this.initialTransform;
             this.translateBy([0, 0, 0.03 * time], 0);
@@ -540,7 +540,7 @@ children:
         - |
           this.animationUpdate = function(time, duration) {
             if(!this.initialTransform) {
-              this.initialTransform = this.transform;
+              this.initialTransform = this.transform.internal_val;
             }
             this.transform = this.initialTransform;
             this.translateBy([0, 0, 0.03 * time], 0);
@@ -574,7 +574,7 @@ children:
         - |
           this.animationUpdate = function(time, duration) {
             if(!this.initialTransform) {
-              this.initialTransform = this.transform;
+              this.initialTransform = this.transform.internal_val;
             }
             this.transform = this.initialTransform;
             this.translateBy([0, 0, 0.03 * time], 0);
@@ -608,7 +608,7 @@ children:
         - |
           this.animationUpdate = function(time, duration) {
             if(!this.initialTransform) {
-              this.initialTransform = this.transform;
+              this.initialTransform = this.transform.internal_val;
             }
             this.transform = this.initialTransform;
             this.translateBy([0.04 * time, 0, 0], 0);
@@ -642,7 +642,7 @@ children:
         - |
           this.animationUpdate = function(time, duration) {
             if(!this.initialTransform) {
-              this.initialTransform = this.transform;
+              this.initialTransform = this.transform.internal_val;
             }
             this.transform = this.initialTransform;
             this.translateBy([0, 0.02 * time, 0], 0);
@@ -676,7 +676,7 @@ children:
         - |
           this.animationUpdate = function(time, duration) {
             if(!this.initialTransform) {
-              this.initialTransform = this.transform;
+              this.initialTransform = this.transform.internal_val;
             }
             this.transform = this.initialTransform;
             this.translateBy([0.04 * time, 0, 0], 0);
@@ -712,7 +712,7 @@ children:
         - | 
           this.animationUpdate = function(time, duration) {
             if(!this.initialTransform) {
-              this.initialTransform = this.transform;
+              this.initialTransform = this.transform.internal_val;
             }
             this.transform = this.initialTransform;
             this.rotateBy([0, 1, 0, (time * 300)], 0, "rotated");
