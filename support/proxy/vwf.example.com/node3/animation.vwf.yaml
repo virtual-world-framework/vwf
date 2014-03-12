@@ -36,7 +36,8 @@ methods:
       - translation
       - duration
     body: |
-      var startTranslation = this.translation || goog.vec.Vec3.create();
+     
+      var startTranslation = this.unwrap(this.translation) || goog.vec.Vec3.create();
       var deltaTranslation = this.translationFromValue( translation );
       var stopTranslation = goog.vec.Vec3.add(
         startTranslation,
@@ -72,7 +73,7 @@ methods:
       - translation
       - duration
     body: |
-      var startTranslation = this.translation || goog.vec.Vec3.create();
+      var startTranslation = this.unwrap(this.translation) || goog.vec.Vec3.create();
       var stopTranslation = this.translationFromValue( translation );
       if(duration > 0) {
         this.animationDuration = duration;
@@ -151,7 +152,7 @@ methods:
       - duration
       - frame
     body: |
-      var startQuaternion = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
+      var startQuaternion = this.unwrap(this.quaternion) || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
       var deltaQuaternion = this.quaternionFromValue( quaternion );
       if ( ! frame || frame == "rotated" ) {
         var stopQuaternion = goog.vec.Quaternion.concat(
@@ -195,7 +196,7 @@ methods:
       - quaternion
       - duration
     body: |
-      var startQuaternion = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
+      var startQuaternion = this.unwrap(this.quaternion) || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
       var stopQuaternion = this.quaternionFromValue( quaternion );
       if(duration > 0) {
         this.animationDuration = duration;
@@ -226,7 +227,7 @@ methods:
       - scale
       - duration
     body: |
-      var startScale = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
+      var startScale = this.unwrap(this.scale) || goog.vec.Vec3.createFromValues( 1, 1, 1 );
       var deltaScale = this.scaleFromValue( scale );
       var stopScale = goog.vec.Vec3.createFromValues(
         startScale[0] * deltaScale[0],
@@ -262,7 +263,7 @@ methods:
       - scale
       - duration
     body: |
-      var startScale = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
+      var startScale = this.unwrap(this.scale) || goog.vec.Vec3.createFromValues( 1, 1, 1 );
       var stopScale = this.scaleFromValue( scale );
       if(duration > 0) {
         this.animationDuration = duration;
@@ -293,7 +294,7 @@ methods:
       - transform
       - duration
     body: |
-      var startTransform = this.transform || goog.vec.Vec3.create();
+      var startTransform = this.unwrap(this.transform) || goog.vec.Vec3.create();
       var deltaTransform = this.transformFromValue( transform );
       // Left multiply by the delta
       var stopTransform = goog.vec.Mat4.multMat( deltaTransform, startTransform, goog.vec.Mat4.createFloat32() );
@@ -318,13 +319,13 @@ methods:
       if ( duration > 0 ) {
 
         // Calculate the start and stop translations
-        var startTranslation = this.translation || goog.vec.Vec3.create();
+        var startTranslation = this.unwrap(this.translation) || goog.vec.Vec3.create();
         var stopTranslation = goog.vec.Vec3.create();
         goog.vec.Mat4.getColumn( stopTransform, 3, stopTranslation );
         // Calculate the start and stop quaternion and scale
-        var startScale = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
+        var startScale = this.unwrap(this.scale) || goog.vec.Vec3.createFromValues( 1, 1, 1 );
         var stopScale = goog.vec.Vec3.create();
-        var startQuaternion = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
+        var startQuaternion = this.unwrap(this.quaternion) || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
         var stopQuaternion = goog.vec.Quaternion.fromRotationMatrix4(
           this.unscaledTransform( stopTransform || goog.vec.Mat4.createIdentity(), stopScale, goog.vec.Mat4.create() ),
           goog.vec.Quaternion.create()
@@ -369,7 +370,7 @@ methods:
       - transform
       - duration
     body: |
-      var startWorldTransform = this.worldTransform || goog.vec.Vec3.create();
+      var startWorldTransform = this.unwrap(this.worldTransform) || goog.vec.Vec3.create();
       var deltaTransform = this.transformFromValue( transform );
       // Left multiply by the delta
       var stopWorldTransform = goog.vec.Mat4.multMat( deltaTransform, startWorldTransform, 
@@ -392,7 +393,7 @@ methods:
     body: |
       var stopWorldTransform = this.transformFromValue( transform );
       var stopTransform;
-      if ( this.parent && this.parent.worldTransform ) {
+      if ( this.parent && this.unwrap(this.parent.worldTransform) ) {
         // We need to find the local transform that will bring about the desired world transform
         // The math for this looks like -
         // (new worldTransform) = (parentWorldTransform) * (transform)
@@ -400,7 +401,7 @@ methods:
         // inv(parentWorldTransform) * (new worldTransform) = (transform)
         // Find the inverse parent worldTransform
         var inverseParentWorldTransform = goog.vec.Mat4.createFloat32();
-        if ( goog.vec.Mat4.invert( this.parent.worldTransform, inverseParentWorldTransform ) ) {
+        if ( goog.vec.Mat4.invert( this.unwrap(this.parent.worldTransform), inverseParentWorldTransform ) ) {
           // Left multiply the new worldTransform by the inverse parent worldTransform
           stopTransform = goog.vec.Mat4.multMat( inverseParentWorldTransform, stopWorldTransform,
                                                  goog.vec.Mat4.createFloat32() );
@@ -408,7 +409,7 @@ methods:
         else {
           stopTransform = goog.vec.Mat4.createIdentity();
           this.logger.error( "Parent '" + this.parent.id + "' transform matrix is not invertible: " + 
-                             this.parent.transform );
+                             this.unwrap(this.parent.transform) );
         }
       }
       else {
@@ -418,3 +419,11 @@ methods:
 
 event: 
   changingTransformFromView:
+scripts: |
+  this.unwrap = function(val)
+  {
+    if(val.internal_val) return val.internal_val;
+    return val;
+
+  }
+

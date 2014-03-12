@@ -171,11 +171,23 @@ define([],function(){
 				this.setValueByDotNotation(this.__WatchableCache[masterid], "masterval%" + dotNotation.substr(masterid.length), value);
 				this.setValueByDotNotation(this.__WatchableCache[masterid], "internal_val%" + dotNotation.substr(masterid.length), value);
 				this.__WatchableSetting ++;
+				;
 				
 					
 				self.kernel.setProperty(id,propertyName,this.__WatchableCache[masterid].masterval);
+
+				//because we've set the value of the root watchable, we need to invalidate the cache of all child watchables
+				for(var i in this.__WatchableCache)
+				{
+					//all child watchable keys start with the master watchable key
+					if(i.indexOf(dotNotation) == 0 && i.length > dotNotation.length)
+					{
+						delete this.__WatchableCache[i]; 
+					}
+				}
 				
 				this.__WatchableSetting --;
+				
 				
 			}else
 			{	this.__WatchableSetting ++;
