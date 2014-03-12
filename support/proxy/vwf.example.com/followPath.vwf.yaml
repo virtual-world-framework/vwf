@@ -30,7 +30,7 @@ properties:
     set: |
       if ( value && ! this["followPath-following"] ) {  // starting
         if ( this["followPath-path"] ) {
-          if ( this["followPath-path"] instanceof Array ) {
+          if ( this["followPath-path"].internal_val instanceof Array ) {
             if ( this["followPath-path"].length > 1 ) {
               this["followPath-following"] = true;  // set the internal value
               this.future(this["followPath-tickRate"]).followPath();  // run the first step and schedule the next one
