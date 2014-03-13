@@ -23,7 +23,7 @@ This command may be re-run to upgrade the installation to the latest version of 
 
 <!-- - Download and run the [VWF Windows Installer](http://download.virtualworldframework.com/files/VWF_Windows_Install.exe). -->
 
-- The Windows Installer has temporarily been taken down for maintenance.  In the mean time, to install on Windows, do what the next sentence says:
+- The Windows Installer has temporarily been taken down for maintenance.  In the mean time, follow our [Installation Instructions](http://virtual.wf/documentation.html#install).
 
 For more complex installations, such as working on VWF core, please see our [Installation Instructions](http://virtual.wf/documentation.html#install).
 
