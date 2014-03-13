@@ -106,7 +106,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         // -- render -----------------------------------------------------------------------------------
 
         render: function(renderer, scene, camera) {
-        },
+        }
 
     } );
 
