@@ -86,7 +86,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     source: childSource, 
                     type: childType,
                     uri: childURI,
-                    name: childName,
+                    name: childName
                 };
                 return;                
             }
@@ -172,7 +172,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             var value = undefined;
 
             //this driver has no representation of this node, so there is nothing to do.
-            if( node === undefined ) return;
+            if( node === undefined ) { return value; }
 
             return value;
         },
@@ -189,7 +189,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             var value = undefined;
 
             //this driver has no representation of this node, so there is nothing to do.
-            if( node === undefined ) return;
+            if( node === undefined ) { return value; }
 
 
             return value;
@@ -236,9 +236,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
     }
 
     function ifPrototypeGetId( nodeID, childID ) {
-        var ptID;
-        if ( ( nodeID == 0 && childID != this.kernel.application() ) || this.state.prototypes[ nodeID ] !== undefined ) {
-            if ( nodeID != 0 || childID != this.kernel.application() ) {
+        var ptID = undefined;
+        if ( ( nodeID === 0 && childID != this.kernel.application() ) || this.state.prototypes[ nodeID ] !== undefined ) {
+            if ( nodeID !== 0 || childID != this.kernel.application() ) {
                 ptID = nodeID ? nodeID : childID;
                 if ( this.state.prototypes[ ptID ] !== undefined ) {
                     ptID = childID;
