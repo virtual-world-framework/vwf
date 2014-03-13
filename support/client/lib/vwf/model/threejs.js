@@ -1270,7 +1270,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         }
                     }
                 }   
-                if(threeObject instanceof THREE.PointLight || threeObject instanceof THREE.DirectionalLight || threeObject instanceof THREE.SpotLight )
+                if(threeObject instanceof THREE.PointLight || threeObject instanceof THREE.DirectionalLight 
+                    || threeObject instanceof THREE.SpotLight || threeObject instanceof THREE.HemisphereLight )
                 {
                     if(propertyName == 'lightType')
                     {
@@ -1280,6 +1281,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                             "name": threeObject.name,
                             "distance": threeObject.distance,
                             "color":  threeObject.color,
+                            "groundColor": threeObject.groundColor,
                             "intensity": threeObject.intensity,
                             "castShadow": threeObject.castShadow,
                             "shadowCameraLeft": threeObject.shadowCameraLeft,
@@ -1291,11 +1293,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                             "shadowDarkness": threeObject.shadowDarkness,
                             "shadowMapHeight": threeObject.shadowMapHeight,
                             "shadowMapWidth": threeObject.shadowMapWidth,
+                            "shadowBias": threeObject.shadowBias,
                             "clone": function( newObj ) {
                                 newObj.name = this.name;
                                 newObj.distance = this.distance;
                                 //console.info( "light.clone.color = " + JSON.stringify( this.color ) )
                                 newObj.color.setRGB( this.color.r, this.color.g, this.color.b );
+                                if (this.groundColor !== undefined) {
+                                    newObj.groundColor = new THREE.Color().setRGB( this.groundColor.r, this.groundColor.g, this.groundColor.b );
+                                }
                                 newObj.intensity = this.intensity;
                                 newObj.castShadow = this.castShadow;
                                 newObj.shadowCameraLeft = this.shadowCameraLeft;
@@ -1307,6 +1313,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                                 newObj.shadowDarkness = this.shadowDarkness;
                                 newObj.shadowMapHeight = this.shadowMapHeight;
                                 newObj.shadowMapWidth = this.shadowMapWidth;
+                                newObj.shadowBias = this.shadowBias;
                             }
                         };
 
@@ -1340,8 +1347,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                             node.threeObject = newlight;
                             rebuildAllMaterials.call(this);
                         }
+                        if(propertyValue == 'hemisphere' && !(threeObject instanceof THREE.HemisphereLight))
+                        {
+                            newlight = new THREE.HemisphereLight('FFFFFF','FFFFFF',1);
+                            currProps.clone( newlight );                            
+                            newlight.matrixAutoUpdate = false;
+                            parent.remove( node.threeObject );
+                            parent.add( newlight );
+                            node.threeObject = newlight;
+                            rebuildAllMaterials.call(this);
+                        }
 
-                        if ( propertyValue == 'point' || propertyValue == 'directional' || propertyValue == 'spot' ) {
+                        if ( propertyValue == 'point' || propertyValue == 'directional' || propertyValue == 'spot' || propertyValue == 'hemisphere' ) {
                             value = propertyValue;                        
                         }
                     }
@@ -1360,6 +1377,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         var vwfColor = new utility.color( propertyValue );
                         if ( vwfColor ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
+                        }
+                        value = vwfColor.toString();
+                    }
+                    else if ( propertyName == 'groundColor' ) {
+                        if ( propertyValue instanceof String ) {
+                            propertyValue = propertyValue.replace( /\s/g, '' );
+                        }
+                        var vwfColor = new utility.color( propertyValue );
+                        if ( vwfColor ) {
+                            threeObject.groundColor = new THREE.Color().setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                         }
                         value = vwfColor.toString();
                     }
@@ -1418,6 +1445,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         if(threeObject.shadowMap) {
                             threeObject.shadowMap.width = value;
                         }
+                    }
+                    else if ( propertyName == 'shadowBias' ) {
+                        value = Number ( propertyValue );
+                        threeObject.shadowBias = value;
                     }
 
                 }
@@ -1666,9 +1697,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         if ( threeObject instanceof THREE.DirectionalLight ){
                             value = 'directional';
                         } else if ( threeObject instanceof THREE.SpotLight ) {
-                            value = 'spot'; 
+                            value = 'spot';
+                        } else if ( threeObject instanceof THREE.HemisphereLight ) {
+                            value = 'hemisphere';
                         } else {
-                            value = 'point';                            
+                            value = 'point';
                         }
                         break;
                     case "distance":
@@ -1677,6 +1710,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     case "color":
                         var clr = new utility.color( [ threeObject.color.r * 255, threeObject.color.g * 255, 
                                                        threeObject.color.b * 255 ] ) 
+                        value = clr.toString();
+                        break;
+                    case "groundColor":
+                        var clr = new utility.color( [ threeObject.groundColor.r * 255, threeObject.groundColor.g * 255, 
+                                                       threeObject.groundColor.b * 255 ] ) 
                         value = clr.toString();
                         break;
                     case "intensity":
@@ -1711,6 +1749,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         break;
                     case "shadowMapWidth":
                         value = threeObject.shadowMapWidth;
+                        break;
+                    case "shadowBias":
+                        value = threeObject.shadowBias;
                         break;
                 }
             }
