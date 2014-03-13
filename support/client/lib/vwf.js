@@ -314,6 +314,7 @@
                 { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
                 { library: "vwf/model/scenejs", active: false },
+                { library: "vwf/model/blockly", linkedLibraries: [ "vwf/model/blockly/blockly_compressed.js", "vwf/model/blockly/blocks_compressed.js", "vwf/model/blockly/msg/js/en.js"], active: false },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
                 { library: "vwf/kernel/view", active: true },
@@ -323,6 +324,7 @@
                 { library: "vwf/view/lesson", active: false},
                 { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
+                { library: "vwf/view/blockly", active: false },
                 { library: "vwf/view/cesium", active: false },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
@@ -331,6 +333,9 @@
                 { library: "vwf/model/jiglib/jiglib", active: false },
                 { library: "vwf/view/webrtc/adapter", active: false },
                 { library: "vwf/view/google-earth", active: false },
+                { library: "vwf/model/blockly/blockly_compressed.js", active: false },
+                { library: "vwf/model/blockly/blocks_compressed.js", active: false },
+                { library: "vwf/model/blockly/msg/js/en.js", active: false },
                 { library: "vwf/model/cesium/Cesium", active: false },
                 { library: "vwf/admin", active: true }
             ];
@@ -342,6 +347,7 @@
                     { library: "vwf/model/glge", active: false },
                     { library: "vwf/model/threejs", active: false },
                     { library: "vwf/model/cesium", active: false },
+                    { library: "vwf/model/blockly", active: false },
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [
@@ -352,6 +358,7 @@
                     { library: "vwf/view/lesson", active: false},
                     { library: "vwf/view/google-earth", active: false },
                     { library: "vwf/view/cesium", active: false },
+                    { library: "vwf/view/blockly", active: false },
                     { library: "vwf/view/webrtc", active: false}
                 ]
             };
