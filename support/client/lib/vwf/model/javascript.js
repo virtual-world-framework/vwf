@@ -233,12 +233,16 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function
 
             Object.defineProperty( node.children, "create", {
                 value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
+                    if ( typeof component === "function" || component instanceof Function ) {
+                        callback = component;
+                        component = undefined;
+                    }
                     if ( callback ) {
-                        self.kernel.createChild( this.node.id, name, componentKernelFromJS.call( self, component ), undefined, undefined, function( childID ) {
+                        self.kernel.createChild( this.node.id, name, componentKernelFromJS.call( self, component || {} ), undefined, undefined, function( childID ) {
                             callback.call( node, self.nodes[childID] );
                         } );
                     } else { 
-                        return self.kernel.createChild( this.node.id, name, componentKernelFromJS.call( self, component ) );
+                        return self.kernel.createChild( this.node.id, name, componentKernelFromJS.call( self, component || {} ) );
                     }
                 }
             } );
