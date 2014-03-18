@@ -249,6 +249,9 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function
 
             Object.defineProperty( node.children, "delete", {
                 value: function( child ) {
+                    if ( typeof child === "string" ) {
+                        child = this.node.children[ child ];
+                    }
                     return self.kernel.deleteNode( child.id );
                 }
             } );
