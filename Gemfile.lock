@@ -13,7 +13,7 @@ GEM
     kramdown (1.0.1)
     minitest (4.7.0)
     mustache (0.99.4)
-    rack (1.4.5)
+    rack (1.5.2)
     rack-google-analytics (0.11.0)
     rack-protection (1.5.0)
       rack
@@ -37,7 +37,7 @@ GEM
       tilt (~> 1.3)
     sinatra-reloader (1.0)
       sinatra-contrib
-    thin (1.5.1)
+    thin (1.6.1)
       daemons (>= 1.0.9)
       eventmachine (>= 0.12.6)
       rack (>= 1.0.0)
@@ -57,7 +57,7 @@ DEPENDENCIES
   json
   kramdown
   minitest
-  rack (= 1.4.5)
+  rack (= 1.5.2)
   rack-google-analytics
   rack-test
   rake
