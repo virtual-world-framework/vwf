@@ -1,0 +1,88 @@
+/*!CK:3539840714!*//*1393242596,178174743*/
+
+@-webkit-keyframes show{0%{opacity:0}
+100%{opacity:1}
+}
+div.pluginAdUnit{width:244px}
+div.pluginAdUnitNoHeader div.ego_section{margin-bottom:0}
+div.pluginAdUnit .sponsoredFooter{float:right}
+.pluginBoxDivider{border-top:1px solid #d8dfea}
+.pluginBoxDividerGray{border-top-color:#ccc}
+.pluginButtonSpacer{padding-left:4px}
+.pluginButton{background:#4c69ba;background:-webkit-gradient(linear, center top, center bottom, from(#4c69ba), to(#3b55a0));background:-webkit-linear-gradient(#4c69ba, #3b55a0);border:none;-webkit-border-radius:2px;color:#fff;cursor:pointer;font-weight:bold;height:20px;line-height:20px;padding:0;text-shadow:0 -1px 0 #354c8c;white-space:nowrap}
+.pluginButtonInline{display:inline-block}
+.pluginButtonX{cursor:default}
+.pluginButton button{background:transparent;border:0;color:inherit;cursor:pointer;font:inherit;font-weight:bold;margin:-1px;outline:none;padding:0;text-shadow:0 -1px 0 #354c8c}
+.pluginButtonIcon{height:14px;left:0;margin:0 4px 0 4px;position:relative;top:3px;vertical-align:top;width:14px}
+.pluginButtonImage{display:inline-block}
+.pluginButtonContainer{-webkit-font-smoothing:antialiased}
+.pluginButtonIconPlaceholder{display:block;height:14px;width:7px}
+.pluginButton .pluginButtonLabel{padding:0 5px 0 0;position:relative;vertical-align:top}
+.android .pluginButton .pluginButtonLabel{top:1px}
+.pluginButton:hover{background:#5b7bd5;background:-webkit-gradient(linear, center top, center bottom, from(#5b7bd5), to(#4864b1));background:-webkit-linear-gradient(#5b7bd5, #4864b1);border-color:#5874c3 #4961a8 #41599f;-webkit-box-shadow:inset 0 0 1px #607fd6}
+.pluginButtonPressed, .pluginButtonPressed:hover{background:#31498c;background:-webkit-gradient(linear, center top, center bottom, from(#415ca9), to(#4c69ba));background:-webkit-linear-gradient(#415ca9, #4c69ba);border-color:#374f92 #ddd #374f92;-webkit-box-shadow:inset 0 0 1px #3e58a3;opacity:.7}
+.pluginButtonErrorLink{color:#a00;font-weight:bold}
+.pluginButtonX .pluginButtonXOff, .pluginButtonX button:hover .pluginButtonXOn, .pluginButtonX button:focus .pluginButtonXOn{display:inline-block}
+.pluginButtonX .pluginButtonXOn, .pluginButtonX button:hover .pluginButtonXOff, .pluginButtonX button:focus .pluginButtonXOff{display:none}
+.pluginButton .pluginButtonThrobber, form.async_saving .pluginButtonIconWithThrobber{display:none}
+form.async_saving .pluginButtonThrobber{display:inline-block;margin-top:2px;margin-bottom:1px;max-width:14px}
+.pluginConnectTextDark a{color:#fff}
+.pluginConnectTextDark{color:gray}
+.pluginCountButton{background:white;border:1px solid #898f9c;-webkit-border-radius:2px;color:#6a7180;display:inline-block;font-size:11px;height:auto;line-height:18px;margin-left:6px;min-width:15px;padding:0 3px;text-align:center;white-space:nowrap}
+.pluginCountButtonNub{height:0;left:2px;position:relative;top:-15px;width:5px;z-index:2}
+.pluginCountButtonNub s, .pluginCountButtonNub i{border-color:transparent #898f9c;border-style:solid;border-width:4px 5px 4px 0;display:block;position:relative;top:1px}
+.pluginCountButtonNub i{border-right-color:#fff;left:2px;top:-7px}
+.pluginCountTextConnected,
+.pluginCountConnected .pluginCountTextDisconnected{display:none}
+.pluginCountConnected .pluginCountTextConnected{display:inline}
+.pluginErrorLink{color:#f03d25}
+.pluginFacepileConnectLast, .pluginFacepileConnectConnected .pluginFacepileConnectFirst{-webkit-animation:show .4s;display:inline-block !important}
+.pluginFacepileConnectFirst, .pluginFacepileConnectConnected .pluginFacepileConnectLast{display:none !important}
+.pluginFontArial, .pluginFontArial button, .pluginFontArial input, .pluginFontArial label, .pluginFontArial select, .pluginFontArial td, .pluginFontArial textarea{font-family:"arial", sans-serif}
+.pluginFontLucida, .pluginFontLucida button, .pluginFontLucida input, .pluginFontLucida label, .pluginFontLucida select, .pluginFontLucida td, .pluginFontLucida textarea{font-family:"lucida grande", sans-serif}
+.pluginFontSegoe, .pluginFontSegoe button, .pluginFontSegoe input, .pluginFontSegoe label, .pluginFontSegoe select, .pluginFontSegoe td, .pluginFontSegoe textarea{font-family:"segoe ui", sans-serif}
+.pluginFontTahoma, .pluginFontTahoma button, .pluginFontTahoma input, .pluginFontTahoma label, .pluginFontTahoma select, .pluginFontTahoma td, .pluginFontTahoma textarea{font-family:"tahoma", sans-serif}
+.pluginFontTrebuchet, .pluginFontTrebuchet button, .pluginFontTrebuchet input, .pluginFontTrebuchet label, .pluginFontTrebuchet select, .pluginFontTrebuchet td, .pluginFontTrebuchet textarea{font-family:"trebuchet ms", sans-serif}
+.pluginFontVerdana, .pluginFontVerdana button, .pluginFontVerdana input, .pluginFontVerdana label, .pluginFontVerdana select, .pluginFontVerdana td, .pluginFontVerdana textarea{font-family:"verdana", sans-serif}
+.pluginFontHelvetica, .pluginFontHelvetica button, .pluginFontHelvetica input, .pluginFontHelvetica label, .pluginFontHelvetica select, .pluginFontHelvetica td, .pluginFontHelvetica textarea{font-family:'Helvetica Neue', Helvetica, Arial, 'lucida grande',tahoma,verdana,arial,sans-serif}
+.pluginLikeboxStream{overflow-x:hidden;overflow-y:auto}
+.pluginSkinDark #pluginLikeboxMoreStories a{color:#555}
+
+body.plugin{background:transparent;overflow:hidden;-webkit-text-size-adjust:none}
+._4s7c{border:1px solid #aaa;border-top-color:#315c99}
+._4-nd{float:right}
+._558f{bottom:4px;position:fixed;right:4px}
+
+.pluginSkinDark,
+.pluginSkinDark .fcb{color:gray}
+.pluginSkinDark a.uiLinkSubtle,
+.pluginSkinDark .fcg{color:#555}
+.pluginSkinDark a,
+.pluginSkinDark .uiHeader h3{color:#fff}
+.sp_6lt5t8{background-image:url(/rsrc.php/v2/y3/r/t_KUFQ1650z.png);background-size:auto;background-repeat:no-repeat;display:inline-block;height:14px;width:14px}
+.sx_d2362d{background-position:0 0}
+.sx_c3e8eb{background-position:0 -15px}
+.sx_e2959e{background-position:0 -30px}
+.sx_177c72{background-position:0 -45px}
+.sp_favicon{background-image:url(/rsrc.php/v2/yB/r/Xo2O9__RZZk.png);background-size:auto;background-repeat:no-repeat;display:inline-block;height:14px;width:14px}
+.sx_favicon_fav{background-position:0 0}
+.sx_favicon_favgrey{background-position:0 -15px}
+.sp_plugin-button-1_5x{background-image:url(/rsrc.php/v2/y7/r/al1fSMClgQI.png);background-size:32px 76px;background-repeat:no-repeat;display:inline-block;height:14px;width:14px}
+.sx_plugin-button-1_5x_fav{background-position:0 -60px}
+.sx_plugin-button-1_5x_favgrey{background-position:-16px -60px}
+.sx_plugin-button-1_5x_favblue{background-position:0 -44px}
+.sx_plugin-button-1_5x_chblue{background-position:0 -28px}
+.sx_plugin-button-1_5x_xblue{background-position:-16px -28px}
+.sx_plugin-button-1_5x_thumb{background-position:-16px -44px}
+.sx_plugin-button-1_5x_bigthumb{width:30px;height:26px;background-position:0 0}
+.sp_plugin-button{background-image:url(/rsrc.php/v2/y1/r/LVx-xkvaJ0b.png);background-size:auto;background-repeat:no-repeat;display:inline-block;height:14px;width:14px}
+.sx_plugin-button_fav{background-position:-15px -42px}
+.sx_plugin-button_favgrey{background-position:0 -57px}
+.sx_plugin-button_favblue{background-position:0 -42px}
+.sx_plugin-button_chblue{background-position:0 -27px}
+.sx_plugin-button_xblue{background-position:-15px -27px}
+.sx_plugin-button_thumb{width:13px;height:13px;background-position:-15px -57px}
+.sx_plugin-button_bigthumb{width:29px;height:26px;background-position:0 0}
+
+#bootloader_0__6D { height: 42px; }
+.bootloader_0__6D { display:block !important; }

@@ -1,0 +1,345 @@
+/*!CK:4157269032!*//*1394416569,178134551*/
+
+._2vh ._2vi, ._2vj{display:block}
+._2vh ._2vj, ._2vi{display:none}
+.async_throbber .async_saving{background:url(/rsrc.php/v2/yb/r/GsNJNwuI-UM.gif) no-repeat right;padding-right:20px}
+.async_throbber_left .async_saving{background:url(/rsrc.php/v2/yb/r/GsNJNwuI-UM.gif) no-repeat left;padding-left:20px}
+.fbChatSidebar{-webkit-background-clip:padding-box;background-color:#f2f4f8;border-left:1px solid rgba(0, 0, 0, .4);-webkit-box-shadow:inset 2px 0 2px -2px #b2b9c9;display:none;height:100%;position:fixed;right:0;top:0;width:205px;z-index:300}
+.sidebarMode .fbChatSidebar{display:block}
+.fbChatSidebar .fbChatSidebarBody{overflow:hidden;position:relative}
+.fbChatSidebar .scrollableOrderedList{height:100%;width:100% !important}
+.fbChatSidebar .scrollableOrderedList .uiScrollableAreaTrack{top:10px}
+.fbChatSidebar .fbChatOrderedList, .fbChatSidebar .fbChatTypeaheadView{padding-top:8px}
+.fbChatSidebar .fbChatSidebarMessage{background-color:#fff;border-top:1px solid #ccd0db;-webkit-box-shadow:inset 0 1px #fafafa;display:none;padding:8px}
+.fbChatSidebar.notice .fbChatSidebarMessage, .fbChatSidebar.error .fbChatSidebarMessage, .fbChatSidebar.offline .fbChatSidebarMessage, .fbChatSidebar.blackbird .fbChatSidebarMessage, .fbChatSidebar.upsell .fbChatSidebarMessage{display:block}
+.fbChatSidebar.blackbird .fbChatSidebarMessage .message, .fbChatSidebar.upsell .fbChatSidebarMessage .message{color:#333}
+.fbChatSidebar .fbChatSidebarMessage .img{float:left;margin-top:3px}
+.fbChatSidebar.notice .fbChatSidebarMessage .img{display:none}
+.fbChatSidebar.error .fbChatSidebarMessage .img{margin-top:7px}
+.fbChatSidebar.offline .fbChatSidebarMessage .img{background-image:url(/rsrc.php/v2/yz/r/KJjJRC51dWY.png);background-repeat:no-repeat;background-size:auto;background-position:-204px -312px;height:10px;width:16px}
+.fbChatSidebar.error .fbChatSidebarMessage .img{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-209px -122px;height:13px;width:14px}
+.fbChatSidebar.offline .fbChatSidebarMessage .message, .fbChatSidebar.error .fbChatSidebarMessage .message{margin-left:24px}
+.fbChatSidebar .fbChatSidebarMessage .message .fbChatReconnectLink{white-space:nowrap}
+._5qqe{height:37px}
+.hasSmurfbar ._5qqe{height:42px}
+.hasVoiceBar.hasSmurfbar ._5qqe{height:70px}
+div._5qth ._5vmb{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:0 -154px;height:24px;width:26px}
+._5qth ._5vmb:focus{outline:none}
+.highContrast div._5qth ._5vmb{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.highContrast div._5qth ._5vmb::before{content:attr(title)}
+div._5qth ._5vmb:hover{background-color:#fff}
+div._5qth .openToggler ._5vmb{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-200px -40px;border-left:1px solid #3b5998 !important;border-right:1px solid #3b5998 !important;margin:0 -1px}
+._5vm9 ._54nh{white-space:normal;width:120px}
+._5vm9 ._54nd ._54nc{font-weight:normal}
+._5vmd ._5vme{display:none}
+._5vma ._5vmf, .upsell ._5vmf, ._5vmg{display:block}
+._5vma ._5vmg, .upsell ._5vmg, ._5vmf{display:none}
+._5pr2.fbChatSidebar div._5qth ._5vmb{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-3px -125px;background-color:transparent;border-left-color:transparent !important;border-right-color:transparent !important;height:26px}
+._5pr2 div._5qth ._5vmb:hover, ._5pr2 div._5qth .openToggler ._5vmb, ._5pr2 div._5qth ._5vmb:active{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-35px -125px}
+._5468.fbChatSidebar div._5qth ._5vmb, ._4g5r ._56h3 div._5qth ._5vmb{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-64px -122px;background-color:transparent;height:32px;width:24px}
+._5468.fbChatSidebar ._5qth ._5vmb:hover, ._4g5r ._56h3 ._5qth ._5vmb:hover{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-112px -122px}
+._5468.fbChatSidebar ._5qth .openToggler ._5vmb, ._5468.fbChatSidebar ._5qth ._5vmb:active, ._4g5r ._56h3 ._5qth .openToggler ._5vmb, ._4g5r ._56h3 ._5qth ._5vmb:active{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-88px -122px;background-color:#333741;border-left-color:transparent !important;border-right-color:transparent !important}
+._5bcj.fbChatSidebar ._5qth{float:right}
+._5bcj.fbChatSidebar div._5qth ._5vmb{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-137px -124px;height:27px;width:21px}
+._5bcj.fbChatSidebar ._5qth ._5vmb:hover, ._5bcj.fbChatSidebar ._5qth .openToggler ._5vmb, ._5bcj.fbChatSidebar ._5qth ._5vmb:active{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-163px -124px;background-color:transparent}
+.fbChatSidebar .fbChatTypeahead, .fbChatSidebar .fbChatTypeahead .wrap{border:0}
+.highContrast .fbChatSidebar .fbChatTypeahead{border:1px solid}
+.fbChatSidebar .fbChatTypeahead .textInput{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:left -8px;background-color:#f4f6f9;-webkit-box-shadow:inset 2px 0 0 -1px #e0e2e9, inset 0 1px #fff;-webkit-box-sizing:border-box;color:#555;height:24px;padding-left:20px;padding-right:25px}
+.fbChatTypeahead .textInput::-ms-clear{height:0;width:0}
+.fbChatSidebar .fbChatTypeahead .textInput:focus{background-color:#fff;color:#000}
+._4kdq ._504q .fbChatSidebar ._504r{background-image:url(/rsrc.php/v2/yz/r/KJjJRC51dWY.png);background-repeat:no-repeat;background-size:auto;background-position:-148px -290px;cursor:pointer;display:block;height:32px;width:54px}
+._4kdq ._504q .fbChatSidebar ._504r:focus, ._4kdq ._504q .fbChatSidebar ._504r:hover{background-image:url(/rsrc.php/v2/yz/r/KJjJRC51dWY.png);background-repeat:no-repeat;background-size:auto;background-position:-92px -290px;background-color:#1f2228;outline:none}
+._4kdq ._504q .fbChatSidebar .fbChatTypeahead .textInput{display:none}
+.fbChatSidebar .fbChatTypeaheadView{bottom:0;position:absolute;top:auto;width:100%}
+.fbSidebarGripper{border-bottom:1px solid #e9eaee;border-top:1px solid #cad0db;cursor:ns-resize;width:100%}
+.fbSidebarGripper div{background:#e4e7f0;border-bottom:1px solid #bdc5d2;border-top:1px solid #f0f1f6;height:4px;position:relative}
+.fbSidebarGripper div span{background:#f0f1f6;border-top:1px solid #cad0db;display:block;height:1px;left:50%;margin-left:-6px;margin-top:1px;position:absolute;width:12px}
+div.fbSidebarGripper.disabledGrip{border-color:#ccc;border-style:solid;border-width:1px 0 0;cursor:auto;height:0;margin:0;overflow:hidden;padding:0;position:static;width:auto}
+.fbSidebarGripper.disabledGrip div, .fbSidebarGripper.disabledGrip:before{display:none}
+._4mq3{height:25px;min-width:201px}
+.presence_error ._4mq3, .sidebarMode ._4mq3{display:none}
+._4kdq ._4mq3{display:block}
+._4mq3.openToggler{z-index:99}
+._4mq3.openToggler .fbNubButton{display:none}
+._4mq3 .fbNubButton .icon{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-181px -96px;float:left;height:10px;margin:3px 4px 0 0;width:16px}
+.offline ._4mq3 .fbNubButton .icon, .offline.error ._4mq3 .fbNubButton .icon{background-image:url(/rsrc.php/v2/yz/r/KJjJRC51dWY.png);background-repeat:no-repeat;background-size:auto;background-position:-204px -312px;height:10px;margin:3px 4px 0 0;width:16px}
+.error ._4mq3 .fbNubButton .icon{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-209px -122px;height:13px;margin-top:1px;width:14px}
+._4mq3 .fbNubButton .label{line-height:15px;margin-right:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+._4mq3 .fbNubButton .label .count{color:#333}
+._4mq3 .fbNubFlyout{bottom:0;min-height:280px;width:100%}
+._5q5b ._4mq3 .fbNubFlyout{bottom:-3px}
+._4mq3 .fbNubFlyoutInner{border-bottom:0}
+._4mq3 .fbNubFlyoutTitlebar .titlebarLabel{padding:0}
+._4mq3 .fbNubFlyoutTitlebar .titlebarTextWrapper{margin:3px 3px 3px 5px}
+._4mq3 .fbChatOrderedList, ._4mq3 .fbChatTypeaheadView{padding:5px 0}
+._4mq3 .fbChatTypeahead, ._4mq3 .fbChatTypeahead .wrap{border-style:none}
+._4mq3 .fbChatTypeahead{border-top:1px solid #dadfea}
+._4mq3 .fbChatTypeahead input{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:left -42px;-webkit-box-sizing:border-box;height:24px;padding-left:20px;padding-right:25px}
+._4mq3 div._5qth ._5vmb{background-image:url(/rsrc.php/v2/yN/r/i5aUpfgksu-.png);background-repeat:no-repeat;background-size:auto;background-position:-65px -405px;border:0 !important;-webkit-box-shadow:none;height:24px;width:22px}
+._4mq3 div._5qth ._5vmb:active, ._4mq3 div._5qth ._5vmb:focus, ._4mq3 div._5qth ._5vmb:hover, ._4mq3 div._5qth .openToggler ._5vmb, ._4mq3 div._5qth .openToggler ._5vmb:active, ._4mq3 div._5qth .openToggler ._5vmb:focus, ._4mq3 div._5qth .openToggler ._5vmb:hover{background-image:url(/rsrc.php/v2/yN/r/i5aUpfgksu-.png);background-repeat:no-repeat;background-size:auto;background-position:-42px -405px;background-color:#4a66a0;margin:0}
+._4mq3 ._4mq7{background-color:#fff;border-top:1px solid #ccd0db;display:none;padding:6px}
+.error ._4mq3 ._4mq7{display:block}
+.error ._4mq3 ._4mq7 .img{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-209px -122px;float:left;height:13px;margin-top:7px;width:14px}
+._4mq3 ._4mq1{margin-left:24px}
+.rogerMarketingCallout .learnMoreLink{margin-left:7px}
+._50--{bottom:0;direction:ltr;height:25px;left:0;position:fixed;right:0;z-index:300}
+._5l9_ ._50--{-webkit-backface-visibility:hidden}
+._5q5b._50--{height:28px}
+html ._6nw ._50--{right:0}
+.sidebarMode ._50--, .sidebarMode ._5bci ._50--, .sidebarMode ._5ap2 ._50--{right:205px}
+.sidebarMode .hasPagesManagerNavbar._6nw ._50--{right:205px}
+html ._4kdq ._50--{right:0}
+.fbDockWrapperLeft{right:auto}
+.fbDockWrapperRight{left:auto}
+.fbDock{margin:0 15px 0 0}
+.fbDock .lNubContainer{float:left}
+.fbDock .rNubContainer{float:right}
+.sidebarMode .tickerStoryContent{max-width:158px}
+.fbChatSidebar .tickerHeader{display:none}
+.fbChatSidebar .ticker_container{border:0 !important;height:100% !important;width:205px !important}
+.fbChatSidebar .scrollTopPrompt{width:205px !important}
+.fbChatSidebar .fbFeedTicker{height:100% !important;width:100%}
+.fbChatSidebar .uiSideHeader{background-color:#d8dfea !important;border-bottom:1px solid #ccd4e2 !important;border-top:0 !important;margin-bottom:0}
+.fbChatSidebar .tickerStoryBlock{margin-left:0 !important}
+.fbChatSidebar .fbFeedTicker .fbFeedTickerStory{background-color:transparent;border-bottom-color:transparent;border-top-color:#d8dfea;line-height:15px;padding-right:5px}
+.fbChatSidebar .fbFeedTicker .tickerStoryClickable:hover{border-bottom-color:transparent !important;-webkit-box-shadow:inset 2px 0 2px -2px #b2b9c9}
+.fbChatSidebar .fbFeedTicker .tickerStoryHidden, .fbChatSidebar .fbFeedTicker .tickerStoryHidden:hover{background-color:transparent !important;border-bottom-color:transparent !important;border-top-color:#d8dfea !important}
+.fbChatSidebar #pagelet_ticker{height:50%;overflow:hidden;position:relative}
+.fbChatSidebar #pagelet_canvas_nav_content{overflow:hidden;position:relative}
+.fbChatSidebar .tickerStoryImage{height:28px !important;margin-left:3px !important;width:28px !important}
+.fbChatSidebar .fbFeedTicker .tickerStorySelected, .fbChatSidebar .fbFeedTicker .tickerStorySelected:hover{background-position:11px 15px;border-bottom-color:#a8b2ce !important;-webkit-box-shadow:inset 2px 0 2px -2px #b2b9c9}
+.fbChatSidebar .fbFeedTicker .tickerStorySelected.tickerStoryRtl, .fbChatSidebar .fbFeedTicker .tickerStorySelected.tickerStoryRtl:hover{background-position:178px 15px}
+.fbChatSidebar .fbFeedTicker .fbFeedTickerStory.tickerNuxStory{background-color:#fff;border-bottom:1px solid #b0b0b0;border-top:1px solid #fff;padding:8px 8px 9px 10px;width:190px;z-index:10}
+.fbChatSidebar .sidebarWithFavorites .scrollableOrderedList .uiScrollableAreaTrack{top:25px}
+._5383, ._50nn, ._50nm, ._4kdq ._4-q5{display:none}
+.fbChatSidebar ._4-q5{background:#31353e;border-bottom:1px solid #292b34;border-top:1px solid #383c45}
+.fbChatSidebar ._4-q5:hover{border-bottom-color:#17191e;border-top-color:#2a2d33}
+._4-q8{display:inline-block;height:50px;vertical-align:middle}
+._511a{overflow:hidden}
+.fbChatSidebar ._4-qd.fbFeedTicker .fbFeedTickerStory{display:none;max-height:50px;padding:5px 8px !important;vertical-align:middle;white-space:initial}
+._4-qd .tickerMorePager{display:none}
+.fbChatSidebar ._4-qd.fbFeedTicker ._4-q6{display:block}
+._4-qd .tickerStoryBlock{display:inline-block;max-height:50px;position:relative;vertical-align:middle}
+._4-qd .tickerStoryContent{overflow:hidden}
+._511b{float:right;height:50px;line-height:50px;padding:0 3px 0 5px}
+._4-q9{display:inline-block;vertical-align:middle}
+._4-qb{background-image:url(/rsrc.php/v2/yz/r/KJjJRC51dWY.png);background-repeat:no-repeat;background-size:auto;background-position:-142px -369px;height:9px;width:9px}
+._4-qa{background-image:url(/rsrc.php/v2/yz/r/KJjJRC51dWY.png);background-repeat:no-repeat;background-size:auto;background-position:-304px -212px;height:11px;margin-right:1px;width:7px}
+._50d1{-webkit-border-radius:4px;bottom:30px;left:30px;list-style:none;margin:0;opacity:.96;position:fixed;width:245px;z-index:401}
+._6nw ._50d1{font-family:'Helvetica Neue', Helvetica, Arial, 'lucida grande',tahoma,verdana,arial,sans-serif;width:320px}
+._50d1 ._a_g{background-color:#fff;border:1px solid #ccc;-webkit-border-radius:5px 5px 0 0;bottom:-31px;cursor:pointer;font-size:9px;font-weight:bold;padding:3px 5px;position:absolute;text-align:center;width:60px}
+._50d1 ._a_g:hover{background-color:#fff9d7;border-color:#eed111}
+._3sod{background-color:#e1e6ee;border:1px solid #99a8c7;-webkit-border-radius:3px;font-size:11px;margin-top:3px;opacity:0;position:relative;top:-30px;-webkit-transition:top .2s ease-in-out,
+opacity .3s ease-in-out}
+._5p3y ._3sod{font-size:12px}
+._5vb_ ._3sod, ._6nw ._3sod{background-color:#fff;border:1px solid #ccc;-webkit-border-radius:4px;-webkit-box-shadow:0 0 4px rgba(0, 0, 0, .2);font-size:12px;margin-top:4px;-webkit-transition:top .2s ease-in-out,
+opacity .3s ease-in-out,
+-webkit-box-shadow .2s ease-in-out}
+._3soe{opacity:1;top:0}
+._3sof{display:none}
+._3sod:hover{background-color:#cad1de}
+._5vb_ ._3sod:hover, ._6nw ._3sod:hover{background-color:#fff;border:1px solid #bbb;-webkit-box-shadow:0 0 6px rgba(0, 0, 0, .4)}
+._3sod ._3sok{display:block;height:28px;margin-right:8px;width:28px}
+._3sod ._3soi, ._3sod ._3soi:hover{color:#333;text-decoration:none}
+._3sod ._3soj{padding:10px}
+._3sod ._3sol{margin-top:-2px;word-wrap:break-word}
+._3sod ._3soc{float:right;margin:8px 8px 7px 7px}
+._3sod ._1x8t{height:16px;width:16px}
+._3sod ._3som{color:#777;margin-top:5px}
+.fbHubsTypeaheadThrobber{display:none;position:absolute;right:6px;top:5px}
+.typeaheadLoading .fbHubsTypeaheadThrobber{display:block}
+._5snm{height:26px;position:absolute;width:54px;z-index:1}
+._5snm .image{position:absolute}
+._5snm .location_canvas.image{height:21px;left:-4px;top:-50px;width:39px}
+._5snm .location_hovercard.image, ._5snm .location_appcenter.image, ._5snm .location_canvas_hovercard.image, ._5snm .location_curated_small.image{height:26px;left:-5px;top:3px;width:54px}
+._5snm .location_appcenter_game_card.image, ._5snm .location_curated_large.image{height:26px;left:-5px;top:-150px;width:54px}
+._2hcm{position:absolute;right:-2px;text-align:right;top:-3px}
+._2hcl.uiSideNavCount.uiSideNavCountRed{background-color:#f03d25}
+._2hcl.uiSideNavCount{-webkit-box-shadow:0 1px 0 rgba(0, 0, 0, .5);color:#fff;padding-bottom:1px;z-index:1}
+._56vv{display:inline-block;position:relative}
+._56vw{position:absolute}
+._56vw ._56vx{width:244px}
+._56vy{height:65px}
+._56vv ._56v-{display:inline;position:absolute;top:0;z-index:4}
+._56vv ._56v_{left:0}
+._56vv ._56w0{right:0}
+._2xo._56v-{display:none}
+._5wvl ._56vw ._56vx, ._5mt2 ._56vw ._56vx{width:205px}
+._5mt2 ._56vv ._56w0{right:0}
+._5mt2 .uiHeader.uiSideHeader{background-color:#e7ebf2 !important;border-bottom:0 !important;border-top:1px solid #ccd4e2 !important}
+._5wvl ._6wd{height:85px}
+._5wvl ._5pxg{background:transparent;border:0;margin-top:0;padding-left:2px;padding-right:2px}
+._5wvl ._6we{background:transparent;font-size:11px;font-weight:bold}
+._5wvl ._56vy{height:60px}
+._5wvl ._5wvm{background:#e0e0e1;height:1px;margin-left:8px;width:189px}
+._5wvl ._56vv ._56v-{display:none;margin-top:-2px}
+._5wvl ._56vv:hover ._56v-{display:inline}
+._5wvl ._56vv:hover ._2xo._56v-{display:none}
+._4woj{height:185px}
+._5pxg{background-image:-webkit-gradient(linear, center bottom, center top, from(#f0f4f9), to(#f4f6f9));background-image:-webkit-linear-gradient(bottom, #f0f4f9, #f4f6f9);display:block;height:23px;line-height:12px}
+.sp_bos5gc{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-size:auto;background-repeat:no-repeat;display:inline-block;height:12px;width:12px}
+.sx_f8fbd2{width:11px;height:11px;background-position:-4px -48px}
+.sx_025e86{width:26px;height:24px;background-position:-200px -40px}
+.sx_ab4aa8{width:26px;height:24px;background-position:0 -154px}
+.sx_d9fec1{width:20px;height:24px;background-position:0 -8px}
+.sx_9e8031{width:14px;height:13px;background-position:-209px -122px}
+.sx_c62f24{width:18px;height:18px;background-position:-143px -96px}
+.sx_7624f9{width:18px;height:18px;background-position:-162px -96px}
+.sx_fb3118{width:16px;height:10px;background-position:-181px -96px}
+.sx_63e593{width:8px;height:8px;background-position:-198px -96px}
+.sx_ce8f6b{background-position:-192px -130px}
+.sx_703017{background-position:-143px -131px}
+.sx_d36ac8{background-position:-169px -131px}
+.sx_6c34da{height:13px;background-position:-70px -132px}
+.sx_a1b6ec{height:13px;background-position:-94px -132px}
+.sx_992134{height:13px;background-position:-118px -132px}
+.sx_064b6a{background-position:-10px -132px}
+.sx_2c598b{background-position:-42px -132px}
+.sx_543cf1{width:78px;height:28px;background-position:0 -67px}
+.sx_7a652c{width:63px;height:23px;background-position:-158px -67px}
+.sx_369adb{width:78px;height:28px;background-position:-79px -67px}
+.sx_8602bf{width:63px;height:20px;background-position:-79px -96px}
+.sx_3efe53{width:78px;height:25px;background-position:0 -96px}
+.uiStream .uiStreamMessage{color:#000;font-size:11px;font-weight:normal;margin:0 0 5px 0}
+.uiStream .uiStreamHeadline{margin-bottom:0;outline:none}
+.uiStreamHeadline .uiLikePage{float:right;margin:0 -15px 0 15px}
+.uiStreamHeadline .uiJoinGroupButton{margin:-5px 30px 0 0}
+.uiLikePage.newChevronButton{margin-right:-10px}
+.uiStreamHeadlineWithLikeButton{min-height:31px}
+.uiStream .uiStreamPassive{margin-bottom:5px}
+.Locale_zh_CN .uiStream .uiStreamMessage, .Locale_zh_TW .uiStream .uiStreamMessage, .Locale_zh_HK .uiStream .uiStreamMessage{font-size:13px}
+.Locale_ja_JP .uiStream .uiStreamMessage{font-size:12px}
+.uiStreamMessage, .uiAttachmentTitle, .uiAttachmentDesc{word-break:break-word;word-wrap:break-word}
+.uiStreamMessage .actorDescription{margin-bottom:3px}
+.uiStreamMessage .suggestionBio .actorDescription{padding-bottom:0}
+.uiStreamMessage .suggestionBio{width:410px}
+div.uiAttachmentTitle{color:#333}
+.permalink_stream{position:relative}
+.uiStreamStory .mainWrapper{margin:0 35px 14px 0;padding-top:14px}
+.uiStreamStory .actorPhoto{margin-bottom:14px;margin-top:14px}
+.uiStreamStory .storyContent .storyInnerContent{margin-left:60px}
+.uiStreamStory .uiStreamSubstory .storyInnerContentSmallPic{margin-left:40px}
+.uiStream .uiStreamHide{margin-top:18px;position:absolute;right:0;top:0}
+.uiStream .substoryHideSelector{float:right;margin:-2px 0 0 0}
+.holdoutAdStory{display:none}
+.holdoutAdStory:first-child + .uiStreamStory{border-top:none}
+.uiStreamStory{padding:0;position:static}
+.homeWiderContent .uiStreamStory{margin-left:-18px;padding-left:18px}
+.uiStream .uiStreamHide .uiSelectorButton, .uiStream a.uiCloseButton.uiStreamHide, .uiStream .uiStreamStory:hover .uiStreamSubstory .uiStreamHide .uiSelectorButton{left:-9999px;position:absolute}
+.uiStream .uiStreamStory:hover .uiStreamHide .uiSelectorButton, .uiStream .uiStreamStory:hover a.uiCloseButton.uiStreamHide, .uiStream .uiStreamStory .uiStreamSubstory:hover .uiStreamHide .uiSelectorButton, .uiStream .uiStreamStory .uiStreamHide .openToggler .uiSelectorButton, .uiStream .uiStreamStory:hover .uiStreamSubstory .uiStreamHide .openToggler .uiSelectorButton{left:auto}
+.uiStream a.uiCloseButton.uiStreamHide.alwaysShowHideButton, .uiStream .uiSelectorButton:focus{left:auto !important}
+.uiStream a.uiCloseButton.uiStreamHide.alwaysShowHideButton.xButtonInTab{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-143px -96px;height:19px;margin-top:-1px;width:18px}
+.uiStream a.uiCloseButton.uiStreamHide.alwaysShowHideButton.xButtonInTab:hover{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-162px -96px}
+.uiStreamStory:first-child a.uiCloseButton.uiStreamHide.alwaysShowHideButton.xButtonInTab, .uiStreamStory:first-child a.uiCloseButton.uiStreamHide.alwaysShowHideButton.xButtonInTab:hover{margin-top:0}
+.uiStreamHide .uiStreamContextButton, .uiStreamStory:hover .uiStreamSubstory .uiStreamHide .uiStreamContextButton{left:-9999px;position:absolute}
+.uiStreamStory:hover .uiStreamHide .uiStreamContextButton, .uiStreamStory .uiStreamSubstory:hover .uiStreamHide .uiStreamContextButton, .uiStreamStory .uiStreamHide.openToggler .uiStreamContextButton, .uiStreamStory:hover .uiStreamSubstory .uiStreamHide.openToggler .uiStreamContextButton{left:auto}
+.uiStreamStory .uiStreamContextButton:focus{left:auto !important}
+.uiStream .uiAttachmentDesc, .uiStream .uiStreamPassive, .uiStream .uiStreamRobotextBeforeMessage, .uiStream .uiAdminAttribution{color:gray}
+.uiStream .tagIcon{vertical-align:bottom}
+.uiStream .text_exposed_link{display:block;font-size:11px;padding-left:0;padding-top:4px}
+.storyContent{padding-bottom:2px;position:relative}
+.uiStream .uiStreamStoryHide .storyContent{display:none}
+.uiStream .uiStreamStoryHidden{display:none}
+.uiStreamAttachments .external.photoLink{overflow:hidden;position:relative}
+.uiStreamAttachments .external .linkOverlay{background:url(/rsrc.php/v2/yj/r/QijIVO3ZIrO.png) repeat-x 0 0;bottom:0;color:#fff;height:36px;left:0;position:absolute;right:0}
+.uiStreamAttachments .external .shareIcon{bottom:5px;height:16px;position:absolute;right:5px;width:16px}
+.uiStreamAttachments .profilePhotoAttachment, .uiStreamAttachments .external img{max-height:90px;max-width:90px}
+.uiStreamAttachments.streamAttachmentWidePhoto .external img{max-height:210px;max-width:210px}
+.uiStream .uiAttachmentDetails{color:#333}
+.uiAttachmentInline .uiAttachmentTitle, .uiAttachmentInline .uiAttachmentDesc{display:inline}
+.uiStreamMessage .actorName, .uiStreamMessage .passiveName{font-weight:bold}
+.uiStreamMessage .wallArrowIcon{background-image:url(/rsrc.php/v2/yl/r/fOmykaaPmAb.png);background-repeat:no-repeat;background-size:auto;background-position:0 -472px;height:9px;margin:0 5px;width:11px}
+.uiAttachmentNoMedia{border-left:2px solid #ccc}
+.uiAttachmentMedia{float:left}
+.uiAttachmentMediaFiles{outline:none;width:100%}
+.uiStreamAttachments .text_exposed .truncatedMediaInfo{clear:both;display:block;padding-left:0;width:auto}
+.uiStreamAttachments .truncatedMediaItem{display:none}
+.uiStreamAttachments .text_exposed .truncatedMediaItem{display:block}
+.uiStreamAttachments .truncatedMediaInfo{display:table;zoom:1}
+.uiStreamCollapsed{border-top:1px solid #eee}
+.uiStreamSubstories li.showAll{line-height:15px;padding:0}
+.uiStreamSubstories li.showAll a{color:#6d84b4;display:block;padding:8px 0 0}
+.uiStreamSubstories .uiUfi{width:350px}
+.uiStream .uiStreamSeparator{background-color:#e9e9e9;border:0;height:7px;margin:6px 0;padding:0;text-align:center}
+.uiStream .uiStreamSeparatorText{background-color:#fff;padding:0 5px;position:relative;top:-4px}
+.uiStream .suppressBorder{border-top:0}
+.uiStreamEdgeStoryLineTx{background-color:#fff;color:gray;left:32px;padding:0 8px;position:relative;top:-20px}
+.uiStreamEdgeStoryLine hr{background:#e5e5e5;margin:8px 0 10px 0}
+.uiStreamEdgeStoryLineWithLabel{height:23px;padding-top:1px}
+.uiStreamFooter, .uiStreamSource, .uiStreamSource a, .uiStreamFooter .uiStreamSource a, .uiStreamAdditionalLogging, .uiStreamSponsoredLink, .uiStreamPrivacyContainer{color:#999}
+.uiStreamNub{border-bottom:1px solid #c2cbe1;margin-top:2px}
+html .uiStreamFooter{display:table-cell}
+.uiStreamFooter{width:10000px}
+.uiStreamHomepage .uiStreamStory:first-child{margin-top:-6px}
+.uiStreamHomepage .uiStreamStory:first-child .actorPhoto{margin-top:18px}
+.uiStreamHomepage .uiStreamStory:first-child .mainWrapper{padding-top:18px}
+.uiStreamActionFooter .UIActionLinks_bottom a{color:#3b5998}
+.uiStream .uiStreamStory .highlightSelector{margin:-2px 10px 0 0}
+.uiStream .uiStreamStory .substoryHideSelector{margin:-2px 0 0}
+.permalink_stream .highlightSelector .uiSelectorMenuWrapper, .uiStream .uiStreamStory .highlightSelector .uiSelectorMenuWrapper{margin:-3px 1px 0 0}
+.permalink_stream .fbStreamPermalinkHeader .highlightSelector{float:right;margin-right:0;margin-top:0}
+.permalink_stream .highlightSelector .highlightSelectorButton{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-79px -96px;border:0;-webkit-box-shadow:none;display:inline-block;height:21px;line-height:21px;overflow:hidden;padding:0;text-indent:50px;width:21px}
+.permalink_stream .bigHideButton .highlightSelectorButton{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:0 -96px}
+.uiStream .uiStreamStory .highlightSelector .uiSelectorButton, .uiStream .highlightSelector .highlightSelectorButton{background-image:url(/rsrc.php/v2/yj/r/nmFtIb0G2fC.png);background-repeat:no-repeat;background-size:auto;background-position:0 -268px}
+.uiStream .bigHideButton .highlightSelectorButton{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:0 -67px}
+.highlightEditSelectorButton{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-158px -67px}
+.bigHideButton .highlightEditSelectorButton{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-79px -67px}
+.uiStream .uiStreamStory .highlightSelector .uiSelectorButton, .uiStream .highlightSelector .highlightSelectorButton, .highlightEditSelectorButton{border:0;-webkit-box-shadow:none;display:inline-block;height:24px;line-height:24px;overflow:hidden;padding:0;text-indent:50px;width:21px}
+.permalink_stream .highlightSelector .highlightSelectorButton, .permalink_stream .highlightSelector .highlightSelectorButton:active, .permalink_stream .highlightSelector .highlightSelectorButton:focus, .permalink_stream .highlightSelector .highlightSelectorButton:hover{background-color:transparent;border:0;height:21px;padding:0;width:21px}
+.permalink_stream .bigHideButton .highlightSelectorButton, .permalink_stream .bigHideButton .highlightSelectorButton:active, .permalink_stream .bigHideButton .highlightSelectorButton:focus, .permalink_stream .bigHideButton .highlightSelectorButton:hover{height:25px;width:26px}
+.uiStream .uiStreamStory .highlightSelector .uiSelectorButton, .uiStream .uiStreamStory .highlightSelector .uiSelectorButton:active, .uiStream .uiStreamStory .highlightSelector .uiSelectorButton:focus, .uiStream .uiStreamStory .highlightSelector .uiSelectorButton:hover, .uiStream .highlightSelector .highlightSelectorButton, .uiStream .highlightSelector .highlightSelectorButton:active, .uiStream .highlightSelector .highlightSelectorButton:focus, .uiStream .highlightSelector .highlightSelectorButton:hover, .highlightSelector .highlightEditSelectorButton{background-color:transparent;border:0;height:24px;padding:0;width:21px}
+.uiStream .uiStreamStory .bigHideButton .uiSelectorButton, .uiStream .uiStreamStory .bigHideButton .uiSelectorButton:active, .uiStream .uiStreamStory .bigHideButton .uiSelectorButton:focus, .uiStream .uiStreamStory .bigHideButton .uiSelectorButton:hover, .uiStream .bigHideButton .highlightSelectorButton, .uiStream .bigHideButton .highlightSelectorButton:active, .uiStream .bigHideButton .highlightSelectorButton:focus, .uiStream .bigHideButton .highlightSelectorButton:hover, .bigHideButton .highlightEditSelectorButton{height:28px;width:26px}
+.permalink_stream .highlightSelector .highlightSelectorButton:hover{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-100px -96px;border:0;padding:0}
+.permalink_stream .bigHideButton .highlightSelectorButton:hover{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-26px -96px}
+.uiStream .uiStreamStory .highlightSelector .uiSelectorButton:hover, .highlightSelector .highlightSelectorButton:hover{background-image:url(/rsrc.php/v2/yj/r/nmFtIb0G2fC.png);background-repeat:no-repeat;background-size:auto;background-position:-21px -268px;border:0;padding:0}
+.uiStream .uiStreamStory .bigHideButton .uiSelectorButton:hover, .bigHideButton .highlightSelectorButton:hover{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-26px -67px}
+.highlightSelector .highlightEditSelectorButton:hover{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-179px -67px;border:0;padding:0}
+.bigHideButton .highlightEditSelectorButton:hover{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-105px -67px}
+.permalink_stream .highlightSelector .openToggler .highlightSelectorButton, .permalink_stream .highlightSelector.openToggler .highlightSelectorButton, .permalink_stream .highlightSelector .openToggler .highlightSelectorButton:hover{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-121px -96px;background-color:transparent;border:0;height:21px;padding:0;width:21px}
+.permalink_stream .bigHideButton .openToggler .highlightSelectorButton, .permalink_stream .bigHideButton.openToggler .highlightSelectorButton, .permalink_stream .bigHideButton .openToggler .highlightSelectorButton:hover{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-52px -96px;height:25px;width:26px}
+.uiStream .uiStreamStory .highlightSelector .openToggler .uiSelectorButton, .uiStream .uiStreamStory .highlightSelector .openToggler .uiSelectorButton:hover, .highlightSelector .openToggler .highlightSelectorButton, .highlightSelector.openToggler .highlightSelectorButton, .permalink_stream .highlightSelector .openToggler .highlightEditSelectorButton:hover, .highlightSelector .openToggler .highlightEditSelectorButton, .highlightSelector.openToggler .highlightEditSelectorButton{background-image:url(/rsrc.php/v2/yj/r/nmFtIb0G2fC.png);background-repeat:no-repeat;background-size:auto;background-position:-42px -268px;background-color:transparent;border:0;height:24px;padding:0;width:21px}
+.uiStream .uiStreamStory .bigHideButton .openToggler .uiSelectorButton, .uiStream .uiStreamStory .bigHideButton .openToggler .uiSelectorButton:hover, .bigHideButton .openToggler .highlightSelectorButton, .bigHideButton.openToggler .highlightSelectorButton, .permalink_stream .bigHideButton .openToggler .highlightEditSelectorButton:hover, .bigHideButton .openToggler .highlightEditSelectorButton, .openToggler.bigHideButton .highlightEditSelectorButton{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-52px -67px;height:28px;width:26px}
+.highlightSelector .openToggler .highlightEditSelectorButton, .highlightSelector.openToggler .highlightEditSelectorButton, .permalink_stream .highlightSelector .openToggler .highlightEditSelectorButton:hover{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-200px -67px}
+.bigHideButton .openToggler .highlightEditSelectorButton, .bigHideButton.openToggler .highlightEditSelectorButton, .permalink_stream .bigHideButton .openToggler .highlightEditSelectorButton:hover{background-image:url(/rsrc.php/v2/yV/r/Md2Dra9psQP.png);background-repeat:no-repeat;background-size:auto;background-position:-131px -67px}
+.uiStreamBoulderThemeAgg .substoryActorPic img, .uiStreamBoulderThemeAgg .uiStreamInlineAction .inlineActionInputPic{height:32px;width:32px}
+.uiStreamBoulderThemeAgg .storyContent{padding-bottom:2px}
+.uiStreamBoulderThemeAgg .uiStreamSubstory{margin:0;padding:5px 0}
+.uiStreamSubstories .uiStreamSubstory div.storyContent{padding-bottom:2px}
+.uiStreamBoulderThemeAgg .uiStreamSubstories > li:first-child .uiStreamSubstory{padding-top:0}
+.uiStreamStory .uiStreamSubstory .storyContent{padding:0}
+.uiStreamLoader{text-align:center}
+.uiStreamBoulderThemeAgg .uiStreamSubstories{margin-top:0;padding-top:0}
+.uiStreamBoulderThemeAgg .uiStreamSubstories .uiStreamShowAll{border-bottom:0;text-align:left}
+.uiStreamBoulderThemeAgg .uiStreamSubstories .uiStreamShowAll span{font-weight:normal}
+.uiStreamBoulderThemeAgg .inlineSubstory .uiStreamSubstory{border-bottom:1px solid #e5e5e5;padding-bottom:10px}
+.uiStreamBoulderThemeAgg .uiStreamAttachments .external{display:block;margin:0;padding-bottom:5px;padding-right:10px}
+.uiStreamBoulderThemeAgg .uiStreamAttachments .external img{max-height:100px;max-width:120px}
+.uiStreamInlineTextarea{display:block;height:19px;width:100%}
+.uiStreamShareLikePageBox{border-top:1px solid #e9e9e9;padding-top:10px}
+.uiStreamShareLikePageBox .uiPageLikeButton{margin-top:4px}
+.uiStreamSubstory .storyInnerContent .rfloat.PageLikeButton, .uiStreamSubstory .storyInnerContent .rfloat .PageLikeButton{margin-right:25px}
+.uiStreamSubstory .uiStreamHide.substoryHideSelector{margin:-12px 10px 0}
+.uiHelpLink{background:url(/rsrc.php/v2/yt/r/7rpZ7CHyvX7.gif) no-repeat 0 center;display:inline-block;height:9px;width:12px}
+.uiHelpLink .right{left:auto;right:-4px}
+.uiMoreLinkCaret{margin-left:2px;padding-bottom:2px}
+.objectListItem{padding-bottom:8px;padding-top:8px}
+.passive .objectListItem{color:gray}
+.objectListItem .auxiliary{text-align:right}
+._2xq{height:100%;position:relative}
+._2xr, ._2xs{float:left}
+._2xt._2xs{margin:0}
+._2xo{display:none}
+._2xu{height:100%;overflow:hidden;position:relative}
+._2xv ._2xn._2xr{visibility:visible}
+._2xv ._2xr{visibility:hidden;position:absolute}
+.uiClearableTypeahead .selected .clear{display:block}
+.uiClearableTypeahead .clear, .uiTypeaheadDisabled .selected .clear{display:none;margin-top:-6px;position:absolute;right:3px;top:50%}
+.uiClearableTypeahead .selected{padding-right:16px}
+.uiTypeaheadDisabled .selected{padding-right:0}
+.photoTypeahead .photo{display:none;height:16px;left:3px;position:absolute;top:2px;width:16px}
+.photoTypeahead .selected .photo{display:block}
+.photoTypeahead .selected .textInput{padding-left:23px}
+.photoTypeahead.uiTypeaheadDisabled .selected .photo{opacity:.30}
+
+#bootloader_Y6L9z { height: 42px; }
+.bootloader_Y6L9z { display:block !important; }

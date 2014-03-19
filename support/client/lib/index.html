@@ -86,6 +86,7 @@
         var hashString = window.location.hash.substring(2);
         var userLibraries = {model:{}, view:{}};
         var googleEarth = false;
+        var blockly = false;
         var match;
         var application;
         var regex = /([^&=]+)=?([^&]*)/g;
@@ -138,9 +139,16 @@
                 if(key == "google-earth") {
                     googleEarth = true;
                 }
+                if(key == "blockly") {
+                    blockly = true;
+                }
             }
 
             googleEarth && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>");
+
+            blockly && document.write( "<scr" + "ipt type='text/javascript' src='blockly/blockly_compressed.js'></scr" + "ipt>");
+            blockly && document.write( "<scr" + "ipt type='text/javascript' src='blockly/blocks_compressed.js'></scr" + "ipt>");
+            blockly && document.write( "<scr" + "ipt type='text/javascript' src='blockly/msg/js/en.js'></scr" + "ipt>");
 
             vwf.loadConfiguration(application, userLibraries, compatibilityCheck);
         });
