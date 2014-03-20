@@ -218,11 +218,11 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function
             Object.defineProperty( node.children, "create", {
                 value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
                     if ( callback ) {
-                        self.kernel.createChild( this.node.id, name, component, undefined, undefined, function( childID ) {
+                        self.kernel.createChild( this.node.id, name, componentKernelFromJS.call( self, component ), undefined, undefined, function( childID ) {
                             callback.call( node, self.nodes[childID] );
                         } );
                     } else { 
-                        return self.kernel.createChild( this.node.id, name, component );
+                        return self.kernel.createChild( this.node.id, name, componentKernelFromJS.call( self, component ) );
                     }
                 }
             } );
@@ -1152,6 +1152,30 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     }
 
+    /// Transform node references in a component descriptor into kernel-style node references. The
+    /// resulting object will be suitable for passing to `kernel.createNode`.
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `componentKernelFromJS.call( driver, component )`.
+    /// 
+    /// @param {String|Object} component
+    ///   A component URI or descriptor. A URI will pass through unchanged (as will all descriptor
+    ///   fields that aren't node references.)
+    /// 
+    /// @returns {String|Object}
+    ///   `component` with node references replaced with kernel-style node references.
+
+    function componentKernelFromJS( component ) {
+
+        var self = this;
+
+        return utility.transform( component, function( object, names ) {
+            return names[1] === "properties" ?
+                valueKernelFromJS.call( self, object ) : object;
+        } );
+
+    }
+
     /// Convert node references into special values that can pass through the kernel. These values
     /// are wrapped in such a way that they won't be confused with any other application value, and
     /// they will be replicated correctly by the kernel.
@@ -1167,7 +1191,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     function valueKernelFromJS( value ) {
 
-        if ( typeof value === "object" ) {
+        if ( typeof value === "object" && value !== null ) {
 
             var nodeNode = this.nodes[ kutility.nodeTypeURI ];  // our proxy for the node.vwf prototype
 
