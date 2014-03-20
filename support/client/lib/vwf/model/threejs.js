@@ -422,7 +422,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             }
 
             if ( myNode && myNode.terrain) {
-                debugger; 
+               
                 myNode.terrain.initializingNode();
             }
         },

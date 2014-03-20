@@ -16,6 +16,7 @@ extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
   rotationSpeed: 10
+  translationSpeed: .001
 methods:
   initializeCamera:
 children:
@@ -37,12 +38,12 @@ children:
       type: "Terrain"
       url: "./terrain/11743-hm.jpg"
       diffuseUrl: "./terrain/deathvallydiffuse.jpeg"
-      worldLength: 2000
-      worldWidth: 2000
-      Extents: 2048
-      minTileSize: 16
+      worldLength: 20000
+      worldWidth: 20000
+      Extents: 20480
+      minTileSize: 64
       tileRes: 16
-      maxTileSize: 2048
+      maxTileSize: 8192
       terrainParams:
         DisplayName: "terrain1"
         addNoise: true
@@ -56,9 +57,10 @@ children:
         texture: "checker.jpg"
         type: "Terrain"
         url: "./terrain/11743-hm.jpg"
-        worldLength: 2000
-        worldWidth: 2000
+        worldLength: 20000
+        worldWidth: 20000
         diffuseUrl: "./terrain/deathvallydiffuse.jpeg"
+        heightScale: 10
   point2:
     extends: http://vwf.example.com/light.vwf
     properties:
@@ -70,8 +72,13 @@ children:
       translation: [ 400, 400, 90 ]
 scripts: 
 - |
-    this.camera.translation = [0,0,1000]
-    this.camera.near = 1;
-    this.camera.far = 10000; 
-    this.camera.fov = 70;                           
+    this.initialize = function()
+    {
+    this.camera.translation = [0,0,1500]
+    this.ambientColor = [75,75,75];
+    this.translationSpeed = .001;
+    this.camera.far = 20000; 
+    this.camera.near = 1; 
+    this.camera.fov = 70;             
+    }
     
