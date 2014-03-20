@@ -1,0 +1,77 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: http://vwf.example.com/scene.vwf
+properties:
+  navmode: none
+  rotationSpeed: 10
+methods:
+  initializeCamera:
+children:
+  duck:
+    extends: http://vwf.example.com/terrain.vwf
+    # # 2: Uncomment to apply the spin-on-click behavior
+    # # ... located in public/types/spin-on-click.vwf.yaml
+    properties:
+      DisplayName: "terrain1"
+      addNoise: true
+      bUrl: "./terrain/snow.jpg"
+      baseUrl: "./terrain/dirt.JPG"
+      cubic: true
+      gUrl: "./terrain/ground.jpg"
+      mixUrl: "./terrain/mixmap.png"
+      rUrl: "./terrain/cliff.jpg"
+      terrainType: "heightmapTerrainAlgorithm"
+      texture: "checker.jpg"
+      type: "Terrain"
+      url: "./terrain/11743-hm.jpg"
+      diffuseUrl: "./terrain/deathvallydiffuse.jpeg"
+      worldLength: 2000
+      worldWidth: 2000
+      Extents: 2048
+      minTileSize: 16
+      tileRes: 16
+      maxTileSize: 2048
+      terrainParams:
+        DisplayName: "terrain1"
+        addNoise: true
+        bUrl: "./terrain/snow.jpg"
+        baseUrl: "./terrain/dirt.JPG"
+        cubic: true
+        gUrl: "./terrain/ground.jpg"
+        mixUrl: "./terrain/mixmap.png"
+        rUrl: "./terrain/cliff.jpg"
+        terrainType: "heightmapTerrainAlgorithm"
+        texture: "checker.jpg"
+        type: "Terrain"
+        url: "./terrain/11743-hm.jpg"
+        worldLength: 2000
+        worldWidth: 2000
+        diffuseUrl: "./terrain/deathvallydiffuse.jpeg"
+  point2:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      enable: true
+      distance: 2000
+      intensity: 2
+      color: [ 128, 128, 128 ]
+      translation: [ 400, 400, 90 ]
+scripts: 
+- |
+    this.camera.translation = [0,0,1000]
+    this.camera.near = 1;
+    this.camera.far = 10000; 
+    this.camera.fov = 70;                           
+    
