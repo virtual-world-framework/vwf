@@ -3121,6 +3121,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             var terrain = new factory(childID, null, childName);
             child.terrain = terrain;
             child.threeObject = terrain.getRoot();
+             child.threeObject.vwfID = childID;
         }
 
          child.threeObject.name = childName;

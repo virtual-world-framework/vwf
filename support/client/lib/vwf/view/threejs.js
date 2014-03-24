@@ -677,6 +677,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                     hovering = false;
                 }
                 else if(self.lastEventData && self.mouseOverCanvas && !hovering && newPick) {
+                    
                     view.kernel.dispatchEvent( newPickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                     hovering = true;
                 }

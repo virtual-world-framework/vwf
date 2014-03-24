@@ -213,7 +213,7 @@ function TileCache()
 						
 						"   gl_FragColor = ambient * diffuse + diffuse * vec4(light.xyz,1.0);\n"+
 						"gl_FragColor.a = 1.0;\n"+
-						"#ifdef USE_FOG\n"+
+		//				"#ifdef USE_FOG\n"+
 
 							
 
@@ -221,7 +221,7 @@ function TileCache()
 							
 							//"gl_FragColor.xyz = nn;\n"+
 							"gl_FragColor.xyz = aerialPerspective(gl_FragColor.xyz, distance(vFogPosition,cameraPosition),cameraPosition.xzy, normalize(vFogPosition-cameraPosition).xzy);\n"+
-						"#endif\n"+
+		//				"#endif\n"+
 						//"gl_FragColor = vec4(nn.rgb,1.0);\n"+
 						"}\n";
 						
@@ -270,6 +270,13 @@ function TileCache()
 							spotLightAngleCos:   { type: "fv1", value: [] },
 							spotLightExponent:   { type: "fv1", value: [] },
 
+							//amosphere settings
+							vAtmosphereColor:  { type: "c", value: new THREE.Color(0x9999CC) },
+							vHorizonColor:  { type: "c", value: new THREE.Color(0x9999CC) },
+							vApexColor:  { type: "c", value: new THREE.Color(0x9999CC) },
+							vFalloffStart : { type: "f", value: 0.00000 },
+							vAtmosphereDensity : { type: "f", value: 0.001 },
+
 							hemisphereLightSkyColor:   { type: "fv", value: [] },
 							hemisphereLightGroundColor:   { type: "fv", value: [] },
 							hemisphereLightDirection:   { type: "fv", value: [] },
@@ -301,8 +308,13 @@ function TileCache()
 						});
 						mat.lights = true;
 						mat.fog = true;
+					
+						mat.uniforms.fogDensity.value = .001;
+						mat.uniforms.fogColor.value = new THREE.Color('#EEEEFF');
 						
 						
+					
+
 						uniforms_default.noiseSampler.value.wrapS = uniforms_default.noiseSampler.value.wrapT = THREE.RepeatWrapping;
 						//mat.wireframe = true;
 						
