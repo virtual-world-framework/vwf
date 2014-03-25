@@ -38,6 +38,7 @@ properties:
         case "point":
         case "directional":
         case "spot":
+        case "hemisphere":
           this.lightType = value;
           break;
       }
@@ -56,6 +57,13 @@ properties:
   ## @property
 
   color: [ 255, 255, 255 ]
+
+  ## Sets the ground color of the light
+  ## 
+  ## @name light.vwf#groundColor
+  ## @property
+
+  groundColor: [ 255, 255, 255 ]
 
   ## Distance value
   ## 
@@ -131,3 +139,9 @@ properties:
   ## @name light.vwf#shadowMapWidth
   ## @property
   shadowMapWidth: 512
+
+  ## The shadow bias of the shadow
+  ##
+  ## @name light.vwf#shadowBias
+  ## @property
+  shadowBias: 0
