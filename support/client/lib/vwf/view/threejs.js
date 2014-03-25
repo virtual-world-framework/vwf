@@ -77,8 +77,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             this.height = 600;
             this.width = 800;
             this.canvasQuery = null;
-            if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
-            if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
+            if ( window && window.innerHeight ) this.height = window.innerHeight;
+            if ( window && window.innerWidth ) this.width = window.innerWidth;
             this.keyStates = { keysDown: {}, mods: {}, keysUp: {} };
 
             pitchMatrix = new THREE.Matrix4();
@@ -748,8 +748,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             window.onresize = function () {
                 var origWidth = self.width;
                 var origHeight = self.height;
-                if ( window && window.innerHeight ) self.height = window.innerHeight - 20;
-                if ( window && window.innerWidth ) self.width = window.innerWidth - 20;
+                if ( window && window.innerHeight ) self.height = window.innerHeight;
+                if ( window && window.innerWidth ) self.width = window.innerWidth;
 
                 if ( ( origWidth != self.width ) || ( origHeight != self.height ) ) {
                     mycanvas.height = self.height;
