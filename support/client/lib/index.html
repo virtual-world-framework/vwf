@@ -40,6 +40,17 @@
     <script type="text/javascript">goog.require('goog.vec.Mat4')</script>
     <script type="text/javascript">goog.require('goog.vec.Quaternion')</script>
 
+    <!-- script type="text/javascript">goog.require('Blockly')</script>
+    <script type="text/javascript">goog.require('Blockly.Msg.en')</script>
+    <script type="text/javascript">goog.require('Blockly.Blocks.logic')</script>
+    <script type="text/javascript">goog.require('Blockly.JavaScript.logic')</script>    
+    <script type="text/javascript">goog.require('Blockly.Blocks.loops')</script>
+    <script type="text/javascript">goog.require('Blockly.JavaScript.loops')</script -->
+
+    <script type='text/javascript' src='blockly/blockly_compressed.js'></script>
+    <script type='text/javascript' src='blockly/blocks_compressed.js'></script>
+    <script type='text/javascript' src='blockly/msg/js/en.js'></script>
+
     <script type="text/javascript" src="crypto.js"></script>
     <script type="text/javascript" src="md5.js"></script>
 
@@ -146,9 +157,9 @@
 
             googleEarth && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>");
 
-            blockly && document.write( "<scr" + "ipt type='text/javascript' src='blockly/blockly_compressed.js'></scr" + "ipt>");
-            blockly && document.write( "<scr" + "ipt type='text/javascript' src='blockly/blocks_compressed.js'></scr" + "ipt>");
-            blockly && document.write( "<scr" + "ipt type='text/javascript' src='blockly/msg/js/en.js'></scr" + "ipt>");
+            //blockly && document.write( "<scr" + "ipt type='text/javascript' src='blockly/blockly_compressed.js'></scr" + "ipt>");
+            //blockly && document.write( "<scr" + "ipt type='text/javascript' src='blockly/blocks_compressed.js'></scr" + "ipt>");
+            //blockly && document.write( "<scr" + "ipt type='text/javascript' src='blockly/msg/js/en.js'></scr" + "ipt>");
 
             vwf.loadConfiguration(application, userLibraries, compatibilityCheck);
         });
@@ -178,6 +189,19 @@
         </div>
     </div>
     <div id="vwf-root"></div>
+    <div id="blocklyDiv" style="height: 480px; width: 600px;"></div>
+    <xml id="toolbox" style="display: none">
+        <block type="controls_if"></block>
+        <block type="controls_repeat_ext"></block>
+        <block type="logic_compare"></block>
+        <block type="math_number"></block>
+        <block type="math_arithmetic"></block>
+        <block type="text"></block>
+        <block type="text_print"></block>
+    </xml>
+    <script type="text/javascript">
+        Blockly.inject( document.getElementById( 'blocklyDiv' ), { path: './blockly/', toolbox: document.getElementById( 'toolbox' ) } );
+    </script>    
   </body>
 
 </html>

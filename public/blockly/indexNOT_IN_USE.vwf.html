@@ -11,17 +11,16 @@
 <!-- either express or implied. See the License for the specific language governing permissions  -->
 <!-- and limitations under the License.                                                          -->
 
-<!-- script type="text/javascript" src="blockly/blockly_compressed.js"></script>
-<script type="text/javascript" src="blockly/blocks_compressed.js"></script>
-<script type="text/javascript" src="blockly/msg/js/en.js"></script -->
-
-
-<!-- script type="text/javascript">
-    if ( Blockly !== undefined ) {
-      Blockly.inject( document.getElementById( 'blocklyDiv' ),
-          { path: './toolbox.xml', toolbox: document.getElementById('toolbox') } );
-    }
-</script -->
-
-<!-- The input field for the login dialog above -->
-<div id="blocklyDiv" style="height: 480px; width: 600px;"></div>
+    <div id="blocklyDiv" style="height: 480px; width: 600px;"></div>
+    <xml id="toolbox" style="display: none">
+        <block type="controls_if"></block>
+        <block type="controls_repeat_ext"></block>
+        <block type="logic_compare"></block>
+        <block type="math_number"></block>
+        <block type="math_arithmetic"></block>
+        <block type="text"></block>
+        <block type="text_print"></block>
+    </xml>
+    <script type="text/javascript">
+        Blockly.inject( document.getElementById( 'blocklyDiv' ), { path: './blockly', toolbox: document.getElementById( 'toolbox' ) } );
+    </script>  
