@@ -72,7 +72,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             //debugger;
             // If the node being created is a prototype, construct it and add it to the array of prototypes,
             // and then return
-            var prototypeID = ifPrototypeGetId.call( this, nodeID, childID );
+            var prototypeID = ifPrototypeGetId( nodeID, childID );
             if ( prototypeID !== undefined ) {
                 
                 if ( this.debug.prototypes ) {
@@ -263,7 +263,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
         while ( id !== undefined ) {
             prototypes.push( id );
-            id = this.kernel.prototype( id );
+            id = self.kernel.prototype( id );
         }
                 
         return prototypes;
@@ -271,10 +271,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
     function ifPrototypeGetId( nodeID, childID ) {
         var ptID = undefined;
-        if ( ( nodeID === 0 && childID != this.kernel.application() ) || this.state.prototypes[ nodeID ] !== undefined ) {
-            if ( nodeID !== 0 || childID != this.kernel.application() ) {
+        if ( ( nodeID === 0 && childID != self.kernel.application() ) || self.state.prototypes[ nodeID ] !== undefined ) {
+            if ( nodeID !== 0 || childID != self.kernel.application() ) {
                 ptID = nodeID ? nodeID : childID;
-                if ( this.state.prototypes[ ptID ] !== undefined ) {
+                if ( self.state.prototypes[ ptID ] !== undefined ) {
                     ptID = childID;
                 }
                 return ptID;
