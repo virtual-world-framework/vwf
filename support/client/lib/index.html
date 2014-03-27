@@ -49,7 +49,9 @@
 
     <script type='text/javascript' src='blockly/blockly_compressed.js'></script>
     <script type='text/javascript' src='blockly/blocks_compressed.js'></script>
+    <script type="text/javascript" src="blockly/javascript_compressed.js"></script>
     <script type='text/javascript' src='blockly/msg/js/en.js'></script>
+    <script type='text/javascript' src='blocks.js'></script>
 
     <script type="text/javascript" src="crypto.js"></script>
     <script type="text/javascript" src="md5.js"></script>
@@ -190,14 +192,10 @@
     </div>
     <div id="vwf-root"></div>
     <div id="blocklyDiv" style="height: 480px; width: 600px;"></div>
-    <xml id="toolbox" style="display: none">
-        <block type="controls_if"></block>
-        <block type="controls_repeat_ext"></block>
-        <block type="logic_compare"></block>
-        <block type="math_number"></block>
-        <block type="math_arithmetic"></block>
-        <block type="text"></block>
-        <block type="text_print"></block>
+    <xml id="toolbox" style="display: none;">
+      <block type="maze_moveForward"></block>
+      <block type="maze_turn"><field name="DIR">turnLeft</field></block>
+      <block type="maze_turn"><field name="DIR">turnRight</field></block>
     </xml>
     <script type="text/javascript">
         Blockly.inject( document.getElementById( 'blocklyDiv' ), { path: './blockly/', toolbox: document.getElementById( 'toolbox' ) } );

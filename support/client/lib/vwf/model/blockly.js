@@ -69,6 +69,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             }
 
+            //debugger;
             // If the node being created is a prototype, construct it and add it to the array of prototypes,
             // and then return
             var prototypeID = ifPrototypeGetId.call( this, nodeID, childID );
@@ -89,6 +90,25 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     name: childName
                 };
                 return;                
+            }
+
+            var protos = getPrototypes.call( this, childExtendsID );
+            var createNode = function() {
+                return {
+                    parentID: nodeID,
+                    ID: childID,
+                    extendsID: childExtendsID,
+                    implementsIDs: childImplementsIDs,
+                    source: childSource,
+                    type: childType,
+                    name: childName,
+                    loadComplete: callback,
+                    prototypes: protos
+                };
+            }; 
+
+            if ( isBlockly3Node.call( this, childExtendsID ) ) {
+                this.state.nodes[ childID ] = node = createNode();
             }
 
         },
@@ -129,10 +149,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
+
+            var value = undefined;
+
             if ( this.debug.properties ) {
                 this.logger.infox( "C === creatingProperty ", nodeID, propertyName, propertyValue );
             }
-            return this.initializingProperty( nodeID, propertyName, propertyValue );
+
+            var node = this.state.nodes[ nodeID ];
+            if ( node !== undefined ) {
+                value = this.settingProperty( nodeID, propertyName, propertyValue );                  
+            }
+
+            return value;
         },
 
         // -- initializingProperty -----------------------------------------------------------------
@@ -145,15 +174,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 this.logger.infox( "  I === initializingProperty ", nodeID, propertyName, propertyValue );
             }
 
-            if ( propertyValue !== undefined ) {
-                var node = this.state.nodes[ nodeID ];
-                if ( node !== undefined ) {
-                    switch ( propertyName ) {
-                        default:
-                            value = this.settingProperty( nodeID, propertyName, propertyValue );                  
-                            break;
-                    }
-                }
+            var node = this.state.nodes[ nodeID ];
+            if ( node !== undefined ) {
+                value = this.settingProperty( nodeID, propertyName, propertyValue );                  
             }
 
             return value;
@@ -173,6 +196,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
             //this driver has no representation of this node, so there is nothing to do.
             if( node === undefined ) { return value; }
+
+            if ( self.validPropertyValue( propertyValue ) ) {
+                switch ( propertyName ) {
+                    case "":
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
 
             return value;
         },
@@ -223,13 +257,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
     } );
 
-    function getPrototypes( kernel, extendsID ) {
+    function getPrototypes( extendsID ) {
         var prototypes = [];
         var id = extendsID;
 
         while ( id !== undefined ) {
             prototypes.push( id );
-            id = kernel.prototype( id );
+            id = this.kernel.prototype( id );
         }
                 
         return prototypes;
@@ -247,6 +281,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             } 
         }
         return undefined;
+    }
+
+    function isBlockly3Node( prototypes ) {
+        var found = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !found; i++ ) {
+                found = ( prototypes[i] == "http-vwf-example-com-blockly-blockly3-vwf" );    
+            }
+        }
+
+        return found;
+    }
+
+    function validPropertyValue( obj ) {
+        var objType = ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
+        return ( objType != 'null' && objType != 'undefined' );
     }
 
 } );
