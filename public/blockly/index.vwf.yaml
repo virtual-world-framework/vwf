@@ -15,7 +15,7 @@ properties:
       translationSpeed: 1000
     children:
       robot:
-        extends: http://vwf.example.com/node3.vwf
+        extends: http://vwf.example.com/blockly/blockly3.vwf
         source: assets/3d/robot.dae
         type: model/vnd.collada+xml
         properties:
