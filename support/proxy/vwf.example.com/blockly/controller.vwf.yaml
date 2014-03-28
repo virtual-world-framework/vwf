@@ -19,34 +19,58 @@
 --- 
 extends:
   http://vwf.example.com/node3.vwf
+properties:
+  forwardSpeed: 400
+  rotateSpeed: 30
+  animationTime: 1
 methods:
+  getWorldXYVector:
   executeBlocklyCmd:
 scripts:
 - |
     this.initialize = function() {
-        console.info( "initialize ==> blockly-controller.vwf" )
+      //console.info( "initialize ==> blockly-controller.vwf" )
+    }
+
+    this.getWorldXYVector = function( x, y ) {
+
+      var dir = goog.vec.Vec3.create();
+      var moveVectorInCameraFrame = goog.vec.Vec4.createFromValues( x, y, 0, 1 );
+      var camWorldRotMat = goog.vec.Mat4.createFromArray( this.worldTransform );
+      camWorldRotMat[ 12 ] = 0;
+      camWorldRotMat[ 13 ] = 0;
+      camWorldRotMat[ 14 ] = 0;
+
+      dir = goog.vec.Mat4.multVec4( camWorldRotMat, moveVectorInCameraFrame, dir );
+      dir[ 2 ] = 0;
+
+      goog.vec.Vec3.normalize( dir, dir ); 
+      return dir;
+
     }
 
     this.executeBlocklyCmd = function( cmd ) {
 
-    	console.info( "executeBlocklyCmd( "+cmd+" )" );
-    	
-    	switch( cmd ) {
+      console.info( "executeBlocklyCmd( "+cmd+" )" );
+      var dir = undefined;
 
-    		case "moveForward":
-    			this.translateBy( [ 0, -300, 0 ], 1 );
-    			break;
+      switch( cmd ) {
 
-    		case "turnRight":
-    			this.rotateBy( [ 0, 0, 1, -30 ], 1 );
-    			break;
+        case "moveForward":
+          dir = this.getWorldXYVector( 0, -1 );
+          this.translateBy( [ dir[ 0 ] * this.forwardSpeed, dir[ 1 ] * this.forwardSpeed, 0 ], this.animationTime );
+          break;
 
-    		case "turnLeft":
-    			this.rotateBy( [ 0, 0, 1, 30 ], 1 );
-    			break;
- 
-    		default:
-    			break;
-    	}
+        case "turnRight":
+          this.rotateBy( [ 0, 0, 1, -this.rotateSpeed ], this.animationTime );
+          break;
+
+        case "turnLeft":
+          this.rotateBy( [ 0, 0, 1, this.rotateSpeed ], this.animationTime );
+          break;
+
+        default:
+          break;
+      }
 
     }  //@ sourceURL=blockly-controller.vwf
