@@ -37,7 +37,14 @@ Blockly.Blocks['maze_moveForward'] = {
     this.setHelpUrl('http://code.google.com/p/blockly/wiki/Move');
     this.setColour(290);
     this.appendDummyInput()
-        .appendField( 'moveForward' );
+        .appendField( 'forward' );
+    this.appendValueInput("DISTANCE")
+        .setCheck("Number")
+        .appendField("dist");
+    this.appendValueInput("TIME")
+        .setCheck("Number")
+        .appendField("time");
+    this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip(BlocklyApps.getMsg('Moves the rover on the screen representing the player forward one square on the maze board'));
@@ -46,7 +53,9 @@ Blockly.Blocks['maze_moveForward'] = {
 
 Blockly.JavaScript['maze_moveForward'] = function(block) {
   var id = Blockly.Blocks.vwfNodes[ "player" ];
-  return "vwf.callMethod('"+id+"','executeBlocklyCmd',['moveForward']);\n";
+  var dist = Blockly.JavaScript.valueToCode(block, 'DISTANCE', Blockly.JavaScript.ORDER_NONE) || '0';
+  var t = Blockly.JavaScript.valueToCode(block, 'TIME', Blockly.JavaScript.ORDER_NONE) || '0';
+  return "vwf.callMethod('"+id+"','executeBlocklyCmd',['moveForward','"+dist+"','"+t+"']);\n";
 };
 
 Blockly.Blocks['maze_turn'] = {
@@ -59,6 +68,13 @@ Blockly.Blocks['maze_turn'] = {
     this.setColour(290);
     this.appendDummyInput()
         .appendField(new Blockly.FieldDropdown(DIRECTIONS), 'DIR');
+    this.appendValueInput("ANGLE")
+        .setCheck("Number")
+        .appendField("angle");
+    this.appendValueInput("TIME")
+        .setCheck("Number")
+        .appendField("time");
+    this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip(BlocklyApps.getMsg('Turns the rover on the screen representing the player 90 degrees counter-clockwise (left) or clockwise (right)'));
@@ -69,7 +85,9 @@ Blockly.JavaScript['maze_turn'] = function(block) {
   // Generate JavaScript for turning left or right.
   var dir = block.getFieldValue('DIR');
   var id = Blockly.Blocks.vwfNodes[ "player" ];
-  return "vwf.callMethod('"+id+"','executeBlocklyCmd',['"+dir+"']);\n";
+  var angle = Blockly.JavaScript.valueToCode(block, 'ANGLE', Blockly.JavaScript.ORDER_NONE) || '0';
+  var t = Blockly.JavaScript.valueToCode(block, 'TIME', Blockly.JavaScript.ORDER_NONE) || '0';
+  return "vwf.callMethod('"+id+"','executeBlocklyCmd',['"+dir+"','"+angle+"','"+t+"']);\n";
 };
 
 Blockly.Blocks['maze_if'] = {
