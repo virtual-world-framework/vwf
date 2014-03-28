@@ -2,20 +2,25 @@
 --- 
 extends: http://vwf.example.com/scene.vwf
 properties:
+  executing: false
   enableShadows: true
   backgroundColor: [ 0, 0, 5 ]
   ambientColor: [ 150, 100, 100 ]
   userObject:
-    extends: http://vwf.example.com/node3.vwf
-    implements: [ "http://vwf.example.com/navigable.vwf" ]
+    extends: http://vwf.example.com/blockly/blockly3.vwf
+    implements:
+    - http://vwf.example.com/navigable.vwf
+    - http://vwf.example.com/animation.vwf
+    - http://vwf.example.com/node3/animation.vwf
+    - http://vwf.example.com/blockly/controller.vwf
     properties:
       name: player
       translation: [ 0, 500, -100 ]
       navmode: walk
       translationSpeed: 1000
     children:
-      robot:
-        extends: http://vwf.example.com/blockly/blockly3.vwf
+      rover:
+        extends: http://vwf.example.com/node3.vwf
         source: assets/3d/robot.dae
         type: model/vnd.collada+xml
         properties:

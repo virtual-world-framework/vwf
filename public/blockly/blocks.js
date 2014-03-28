@@ -45,8 +45,8 @@ Blockly.Blocks['maze_moveForward'] = {
 };
 
 Blockly.JavaScript['maze_moveForward'] = function(block) {
-  // Generate JavaScript for moving forward.
-  return 'Maze.moveForward(\'block_id_' + block.id + '\');\n';
+  var id = Blockly.Blocks.vwfNodes[ "player" ];
+  return "vwf.callMethod('"+id+"','executeBlocklyCmd',['moveForward']);\n";
 };
 
 Blockly.Blocks['maze_turn'] = {
@@ -68,7 +68,8 @@ Blockly.Blocks['maze_turn'] = {
 Blockly.JavaScript['maze_turn'] = function(block) {
   // Generate JavaScript for turning left or right.
   var dir = block.getFieldValue('DIR');
-  return 'Maze.' + dir + '(\'block_id_' + block.id + '\');\n';
+  var id = Blockly.Blocks.vwfNodes[ "player" ];
+  return "vwf.callMethod('"+id+"','executeBlocklyCmd',['"+dir+"']);\n";
 };
 
 Blockly.Blocks['maze_if'] = {

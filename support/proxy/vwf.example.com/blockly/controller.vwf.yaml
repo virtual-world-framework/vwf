@@ -13,9 +13,40 @@
 
 ## The component representation of a scale behavior (on move)
 ## 
-## @name scale-on-click.vwf
+## @name blockly/controller.vwf
 ## @namespace
 
 --- 
 extends:
   http://vwf.example.com/node3.vwf
+methods:
+  executeBlocklyCmd:
+scripts:
+- |
+    this.initialize = function() {
+        console.info( "initialize ==> blockly-controller.vwf" )
+    }
+
+    this.executeBlocklyCmd = function( cmd ) {
+
+    	console.info( "executeBlocklyCmd( "+cmd+" )" );
+    	
+    	switch( cmd ) {
+
+    		case "moveForward":
+    			this.translateBy( [ 0, -300, 0 ], 1 );
+    			break;
+
+    		case "turnRight":
+    			this.rotateBy( [ 0, 0, 1, -30 ], 1 );
+    			break;
+
+    		case "turnLeft":
+    			this.rotateBy( [ 0, 0, 1, 30 ], 1 );
+    			break;
+ 
+    		default:
+    			break;
+    	}
+
+    }  //@ sourceURL=blockly-controller.vwf
