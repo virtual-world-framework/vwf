@@ -44,6 +44,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 this.state.prototypes = {};
             }
 
+            this.state.executingBlocks = false;
+
             // turns on logger debugger console messages 
             this.debug = {
                 "creation": false,
@@ -69,7 +71,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             }
 
-            //debugger;
+            //if ( childName == "robot" ) {
+            //    debugger;
+            //}
             // If the node being created is a prototype, construct it and add it to the array of prototypes,
             // and then return
             var prototypeID = ifPrototypeGetId( nodeID, childID );
@@ -92,7 +96,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 return;                
             }
 
-            var protos = getPrototypes.call( this, childExtendsID );
+            var protos = getPrototypes( childExtendsID );
             var createNode = function() {
                 return {
                     parentID: nodeID,
@@ -107,8 +111,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 };
             }; 
 
-            if ( isBlockly3Node.call( this, childExtendsID ) ) {
+            if ( isBlockly3Node( protos ) ) {
+                
                 this.state.nodes[ childID ] = node = createNode();
+                
+                // hack for the demo, 
+                if ( Blockly.Blocks.vwfNodes === undefined ) {
+                    Blockly.Blocks.vwfNodes = {};
+                }
+                Blockly.Blocks.vwfNodes[ childName ] = childID;
             }
 
         },
@@ -195,9 +206,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             var value = undefined;
 
             //this driver has no representation of this node, so there is nothing to do.
-            if( node === undefined ) { return value; }
+            if ( node === undefined ) { 
+                if ( nodeID == this.kernel.application() ) {
+                    if ( propertyName == "executing" ) {
+                        if ( this.state.executingBlocks != Boolean( propertyValue ) ) {
+                            value = this.state.executingBlocks = Boolean( propertyValue ); 
+                        }
+                    }
+                }
+                return value; 
+            }
 
-            if ( self.validPropertyValue( propertyValue ) ) {
+            if ( validPropertyValue( propertyValue ) ) {
                 switch ( propertyName ) {
                     case "":
                         break;
@@ -223,7 +243,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             var value = undefined;
 
             //this driver has no representation of this node, so there is nothing to do.
-            if( node === undefined ) { return value; }
+            if ( node === undefined ) { 
+                if ( nodeID == this.kernel.application() ) {
+                    if ( propertyName == "executing" ) {
+                        value = this.state.executingBlocks; 
+                    }
+                }                
+
+                return value; 
+            }
 
 
             return value;
@@ -250,7 +278,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         // == ticking =============================================================================
 
         ticking: function( vwfTime ) {
-            
         }
 
 
@@ -287,7 +314,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-blockly-blockly3-vwf" );    
+                found = ( prototypes[i] == "http-vwf-example-com-blockly-blockly3-vwf" ); 
             }
         }
 

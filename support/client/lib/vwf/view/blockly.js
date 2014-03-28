@@ -18,6 +18,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     var self;
 
+    var blockCode = undefined;
+    var codeLine = -1;
+    var lastLineExeTime = undefined;
+    var timeBetweenLines = 1;
+
     return view.load( module, {
 
         // == Module Definition ====================================================================
@@ -100,7 +105,41 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
         // -- ticked -----------------------------------------------------------------------------------
 
-        ticked: function() {
+        ticked: function( vwfTime ) {
+            if ( this.state.executingBlocks ) {
+                var executeNextLine = false;
+
+                if ( codeLine == -1 ) {
+                    blockCode = Blockly.JavaScript.workspaceToCode().split( '\n' );
+                    codeLine = 0;
+                    lastLineExeTime = vwfTime;
+                    executeNextLine = true;
+                } else {
+                    var elaspedTime = vwfTime - lastLineExeTime;
+                    if ( elaspedTime >= timeBetweenLines ) {
+                        executeNextLine = true;
+                        lastLineExeTime = vwfTime;
+                    } 
+                }
+
+                if ( executeNextLine ) {
+                    if ( blockCode && codeLine < blockCode.length ) {
+                        try { 
+                            eval( blockCode[ codeLine ] ) 
+                        } catch ( e ) {
+                            this.state.executingBlocks = false
+                        }
+                        codeLine++;
+                    } else {
+                        this.state.executingBlocks = false
+                    }
+                }
+            } else {
+                blockCode = undefined;
+                codeLine = -1;
+                lastLineExeTime = undefined;
+            }
+
         },
 
         // -- render -----------------------------------------------------------------------------------

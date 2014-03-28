@@ -166,6 +166,7 @@ input {
 #vwf-root {
   position:absolute;
   left:10px;
+  z-index:-1;
 }
 
 #vwf-root > .vwf-label > .vwf-attribute {

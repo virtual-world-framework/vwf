@@ -18,5 +18,3 @@
 
 ---
 extends: http://vwf.example.com/node3.vwf
-implements:
-- http://vwf.example.com/blockly/controller.vwf
