@@ -11,7 +11,7 @@
 <!-- either express or implied. See the License for the specific language governing permissions  -->
 <!-- and limitations under the License.                                                          -->
 
-<div id="blocklyDiv" style="height: 320px; width: 360px; opacity: 0.6;"></div>
+<div id="blocklyDiv" style="height: 400px; width: 560px; opacity: 0.6;"></div>
 <table width="200">
   <tr>
     <td>
@@ -23,6 +23,7 @@
   <block type="maze_moveForward"></block>
   <block type="maze_turn"><field name="DIR">turnLeft</field></block>
   <block type="maze_turn"><field name="DIR">turnRight</field></block>
+  <block type="math_number"></block>
 </xml>
 <script type="text/javascript">
     Blockly.inject( document.getElementById( 'blocklyDiv' ), { 
