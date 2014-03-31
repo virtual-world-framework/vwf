@@ -2554,12 +2554,21 @@ if ( ! childComponent.source ) {
                                 // Mark the node as initialized.
                                 nodes.initialize( childID );
 
+                                // Suppress kernel reentry so that meta event handlers don't make
+                                // any changes during replication.
+
+                                replicating && vwf.models.kernel.disable();
+
                                 // Send the meta event into the application.
 
                                 if ( nodeID !== 0 ) {
                                     vwf.fireEvent( nodeID, [ "children", "added" ],
                                         [ childIndex, vwf.kutility.nodeReference( childID ) ] );
                                 }
+
+                                // Restore kernel reentry.
+
+                                replicating && vwf.models.kernel.enable();
 
                                 series_callback_async( err, undefined );
                             } );
