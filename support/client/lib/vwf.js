@@ -4652,7 +4652,7 @@ if ( ! childComponent.source ) {
                 // reinserted.
 
                 return object.filter( function( fields ) {
-                    return ! fields.respond && fields.action;  // TODO: fields.action is here to filter out tick messages  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
+                    return ! ( fields.origin === "reflector" && fields.sequence > vwf.sequence_ ) && fields.action;  // TODO: fields.action is here to filter out tick messages  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
                 } ).sort( function( fieldsA, fieldsB ) {
                     return fieldsA.sequence - fieldsB.sequence;
                 } );
