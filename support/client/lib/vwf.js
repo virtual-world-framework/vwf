@@ -1655,7 +1655,7 @@
                 // Translate node references in the descriptor's form `{ node: nodeID }` into kernel
                 // node references.
 
-                if ( valueHasAccessors( propertyValue ) && propertyValue.node !== undefined ) {
+                if ( valueHasAccessors( propertyValue ) && propertyValue.node ) {
                     propertyValue = vwf.kutility.nodeReference( propertyValue.node );
                 }
 
@@ -2314,7 +2314,7 @@ if ( ! childComponent.source ) {
                         var value = propertyValue, get, set, create;
 
                         if ( valueHasAccessors( propertyValue ) ) {
-                            value = propertyValue.value;
+                            value = propertyValue.node ? vwf.kutility.nodeReference( propertyValue.node ) : propertyValue.value;
                             get = propertyValue.get;
                             set = propertyValue.set;
                             create = propertyValue.create;
