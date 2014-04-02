@@ -168,7 +168,7 @@ scripts:
     this.activeCameraComp = undefined;
 
     this.initialize = function() {
-      if ( this.usersShareView ) {
+      if ( this.usersShareView && this.userObject ) {
         var scene = this;
         this.children.create( this.userObject.properties.name, this.userObject, function( child ) {
           scene.initializeActiveCamera( child );
