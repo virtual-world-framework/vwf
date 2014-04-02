@@ -71,6 +71,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             this.state.kernel = this.kernel.kernel.kernel; 
             this.state.lights = {};           
  
+            this.state.setMeshPropertyRecursively = function( threeObject, propertyName, value ) {
+                if ( !threeObject ) {
+                    return;
+                }
+                threeObject[ propertyName ] = value;
+                var meshes = findAllMeshes( threeObject );
+                for ( var i = 0; i < meshes.length; i++ ) {
+                    meshes[ i ][ propertyName ] = value;
+                }
+            }
+
             // turns on logger debugger console messages 
             this.debug = {
                 "creation": false,
@@ -662,13 +673,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     }
                     else if ( propertyName == 'visible' )
                     {
-                        //need to walk the tree and hide all sub nodes as well
                         value = Boolean( propertyValue );
-                        threeObject.visible = value;
+                        self.state.setMeshPropertyRecursively( threeObject, "visible", value );
                     }
                     else if ( propertyName == 'castShadows' )
                     {
                         value = Boolean( propertyValue );
+
+                        // TODO: We should call setMeshPropertyRecursively here instead of repeating code
                         threeObject.castShadow = value;
                         var meshes = findAllMeshes.call( this, threeObject );
                         for(var i = 0, il = meshes.length; i < il; i++) {
@@ -678,6 +690,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     else if ( propertyName == 'receiveShadows' )
                     {
                         value = Boolean( propertyValue );
+
+                        // TODO: We should call setMeshPropertyRecursively here instead of repeating code
                         threeObject.receiveShadow = value;
                         var meshes = findAllMeshes.call( this, threeObject );
                         for(var i = 0, il = meshes.length; i < il; i++) {
@@ -1790,8 +1804,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         }
 
     } );
+
     // == PRIVATE  ========================================================================================
-    
+
     function checkCompatibility() {
         this.compatibilityStatus = { compatible:true, errors:{} }
         var contextNames = ["webgl","experimental-webgl","moz-webgl","webkit-3d"];
@@ -3810,17 +3825,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         }            
     }
 
-    function SetVisible(node,state) 
-    {
-        if(node)
-            node.visible = state;
-        if(node && node.children)
-        {
-           for(var i in node.children)
-            SetVisible(node.children[i],state);
-        }
-    }
-
     function getWorldTransform( node ) {
         var parent = self.state.nodes[ node.parentID ];
         if ( parent ) {
@@ -4376,7 +4380,4 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         data = decompressJsonStrings(data);
         return data;
     }
-
-
-
 });
