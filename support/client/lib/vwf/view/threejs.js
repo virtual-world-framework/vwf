@@ -3206,6 +3206,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         return newTransform;
     }
 
+    // TODO: This should be replaced with self.state.setMeshPropertyRecursively
     function setVisibleRecursively( threeObject, visible ) {
         if ( !threeObject ) {
             return;
