@@ -71,6 +71,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             this.state.kernel = this.kernel.kernel.kernel; 
             this.state.lights = {};           
  
+            this.state.setMeshPropertyRecursively = function( threeObject, propertyName, value ) {
+                if ( !threeObject ) {
+                    return;
+                }
+                threeObject[ propertyName ] = value;
+                var meshes = findAllMeshes( threeObject );
+                for ( var i = 0; i < meshes.length; i++ ) {
+                    meshes[ i ][ propertyName ] = value;
+                }
+            }
+
             // turns on logger debugger console messages 
             this.debug = {
                 "creation": false,
@@ -663,7 +674,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     else if ( propertyName == 'visible' )
                     {
                         value = Boolean( propertyValue );
-                        setMeshPropertyRecursively( threeObject, "visible", value );
+                        self.state.setMeshPropertyRecursively( threeObject, "visible", value );
                     }
                     else if ( propertyName == 'castShadows' )
                     {
@@ -1793,8 +1804,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         }
 
     } );
+
     // == PRIVATE  ========================================================================================
-    
+
     function checkCompatibility() {
         this.compatibilityStatus = { compatible:true, errors:{} }
         var contextNames = ["webgl","experimental-webgl","moz-webgl","webkit-3d"];
@@ -3811,17 +3823,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         if ( ambientCount == 0 ) {
             createAmbientLight.call( this, scene, [ 0.20, 0.20, 0.20 ] );
         }            
-    }
-
-    function setMeshPropertyRecursively( threeObject, propertyName, value ) {
-        if ( !threeObject ) {
-            return;
-        }
-        threeObject[ propertyName ] = value;
-        var meshes = findAllMeshes( threeObject );
-        for ( var i = 0; i < meshes.length; i++ ) {
-            meshes[ i ][ propertyName ] = value;
-        }
     }
 
     function getWorldTransform( node ) {
