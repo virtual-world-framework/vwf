@@ -1,0 +1,74 @@
+<!-- Copyright 2012 United States Government, as represented by the Secretary of Defense, Under  -->
+<!-- Secretary of Defense (Personnel & Readiness).                                               -->
+<!--                                                                                             -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file   -->
+<!-- except in compliance with the License. You may obtain a copy of the License at              -->
+<!--                                                                                             -->
+<!--   http://www.apache.org/licenses/LICENSE-2.0                                                -->
+<!--                                                                                             -->
+<!-- Unless required by applicable law or agreed to in writing, software distributed under the   -->
+<!-- License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,   -->
+<!-- either express or implied. See the License for the specific language governing permissions  -->
+<!-- and limitations under the License.                                                          -->
+
+<div id="blocklyDiv" style="height: 400px; width: 560px; opacity: 0.6;"></div>
+<table width="200">
+  <tr>
+    <td>
+      <button id="runButton" onclick="onRun()">Run</button>
+    </td>
+  </tr>
+</table>
+<xml id="toolbox" style="display: none;">
+  <category name="Node3">
+    <block type="node3_castShadows"></block>
+    <block type="node3_receiveShadows"></block>
+    <block type="node3_worldTransform"></block>
+    <block type="node3_transform"></block>
+    <block type="node3_translation"></block>
+    <block type="node3_rotation"></block>
+    <block type="node3_scale"></block>
+    <block type="node3_quaternion"></block>
+    <block type="node3_enabled"></block>
+    <block type="node3_visible"></block>
+    <block type="node3_playing"></block>
+    <block type="node3_looping"></block>
+    <block type="node3_speed"></block>
+    <block type="node3_lookAt"></block>
+    <category name="Animation">
+      <block type="node3_animation_translateBy"></block>
+      <block type="node3_animation_translateTo"></block>
+      <block type="node3_animation_rotateBy"></block>
+      <block type="node3_animation_rotateTo"></block>
+      <block type="node3_animation_quaterniateBy"></block>
+      <block type="node3_animation_quaterniateTo"></block>
+      <block type="node3_animation_transformBy"></block>
+      <block type="node3_animation_transformTo"></block>
+      <block type="node3_animation_worldTransformTo"></block>
+      <block type="node3_animation_worldTransformBy"></block>
+    </category>
+  </category>
+  <category name="Type">
+    <block type="math_number"></block>
+    <block type="type_vector3"></block>
+    <block type="type_vector4"></block>
+  </category>
+</xml>
+<script type="text/javascript">
+    Blockly.inject( document.getElementById( 'blocklyDiv' ), { 
+      path: './blockly/', 
+      toolbox: document.getElementById( 'toolbox' ) 
+    } );
+
+    function onRun() {
+      console.info( "========= onRun =========" );
+      var appId = vwf_view.kernel.find( "", "/" )[ 0 ];
+
+      vwf_view.kernel.setProperty( appId, "executing", true );
+    }
+
+    vwf_view.satProperty = function( nodeID, propertyName, propertyValue ) {
+
+    }
+
+</script>  

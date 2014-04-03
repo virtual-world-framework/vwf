@@ -1,0 +1,64 @@
+# The Mars educational game created for ADL's True Game-based learning project
+--- 
+extends: http://vwf.example.com/scene.vwf
+properties:
+  executing: false
+  enableShadows: true
+  backgroundColor: [ 0, 0, 5 ]
+  ambientColor: [ 150, 100, 100 ]
+  userObject:
+    extends: http://vwf.example.com/blockly/blockly3.vwf
+    implements:
+    - http://vwf.example.com/navigable.vwf
+    - http://vwf.example.com/animation.vwf
+    - http://vwf.example.com/node3/animation.vwf
+    - http://vwf.example.com/blockly/controller.vwf
+    properties:
+      name: player
+      translation: [ 0, 500, -100 ]
+      navmode: walk
+      translationSpeed: 1000
+    children:
+      rover:
+        extends: http://vwf.example.com/node3.vwf
+        source: assets/3d/robot.dae
+        type: model/vnd.collada+xml
+        properties:
+          scale: 1
+          castShadows: true
+          receiveShadows: true
+      camera:
+        extends: http://vwf.example.com/camera.vwf
+        properties:
+          translation: [ 0, 1000, 200 ]
+          rotation: [ 0, 0, 1, 180 ]
+          far: 100000
+  makeOwnAvatarVisible: true
+children:
+  environment:
+    extends: http://vwf.example.com/node3.vwf
+    source: assets/3d/mars_terrain.DAE
+    type: model/vnd.collada+xml
+    properties:
+      translation: [ 0, 500, -100 ]
+      scale: 1
+      castShadows: true
+      receiveShadows: true
+  sunLight:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      color: [ 255, 225, 200 ]
+      translation: [ 1500, 0, 5000 ]
+      rotation: [ -0.8206275701522827, -0.3142601549625397, 0.4772954285144806, 77.48947143554688 ]
+      intensity: 0.4
+      castShadows: true
+      shadowDarkness: 0.75
+      shadowCameraBottom: -5000
+      shadowCameraTop: 5000
+      shadowCameraLeft: -5000
+      shadowCameraRight: 5000
+      shadowCameraFar: 10000
+      shadowMapWidth: 2048
+      shadowMapHeight: 2048
+      shadowBias: 0.0001
