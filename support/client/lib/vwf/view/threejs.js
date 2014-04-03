@@ -405,12 +405,12 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         //reset - loading can cause us to get behind and always but up against the max prediction value
         self.tickTime = 0;
 
-        for(var nodeID in self.nodes) {
-            if(self.state.nodes[nodeID] && (!navObject || nodeID != navObject.ID)) {       
+        for ( var nodeID in self.nodes ) {
+            if ( self.state.nodes[nodeID] ) {       
                 self.nodes[nodeID].lastTickTransform = self.nodes[nodeID].selfTickTransform;
                 self.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(getTransform(nodeID));
                 
-                if(self.nodes[nodeID].selfTickTransform) {
+                if ( self.nodes[nodeID].selfTickTransform ) {
                     self.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(self.nodes[nodeID].selfTickTransform);
                 }
             }
@@ -548,8 +548,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             if(last && now && !matCmp(last,now,.0001) ) {             
                 var interp = matrixLerp(last, now, step || 0);
                 
-                var objectIsControlledByUser = ( ( navObject && ( nodeID === navObject.ID ) ) || 
-                                                 ( cameraNode && ( nodeID === cameraNode.ID ) ) );
+                var objectIsControlledByUser = ( ( navmode !== "none" ) &&
+                                                 ( ( navObject && ( nodeID === navObject.ID ) ) || 
+                                                   ( cameraNode && ( nodeID === cameraNode.ID ) ) ) );
                 if ( !objectIsControlledByUser ) {             
                     setTransform(nodeID, interp);    
                     self.nodes[nodeID].needTransformRestore = true;
