@@ -40,21 +40,6 @@
     <script type="text/javascript">goog.require('goog.vec.Mat4')</script>
     <script type="text/javascript">goog.require('goog.vec.Quaternion')</script>
 
-    <!-- script type="text/javascript">goog.require('Blockly')</script>
-    <script type="text/javascript">goog.require('Blockly.Msg.en')</script>
-    <script type="text/javascript">goog.require('Blockly.Blocks.logic')</script>
-    <script type="text/javascript">goog.require('Blockly.JavaScript.logic')</script>    
-    <script type="text/javascript">goog.require('Blockly.Blocks.loops')</script>
-    <script type="text/javascript">goog.require('Blockly.JavaScript.loops')</script -->
-
-    <script type='text/javascript' src='blockly/blockly_compressed.js'></script>
-    <script type='text/javascript' src='blockly/blocks_compressed.js'></script>
-    <script type="text/javascript" src="blockly/javascript_compressed.js"></script>
-    <script type='text/javascript' src='blockly/msg/js/en.js'></script>
-    <script type='text/javascript' src='blocks.js'></script>
-    <script type='text/javascript' src='blocks_math3.js'></script>
-    <script type='text/javascript' src='blocks_node3.js'></script>
-
     <script type="text/javascript" src="crypto.js"></script>
     <script type="text/javascript" src="md5.js"></script>
 
@@ -101,7 +86,6 @@
         var hashString = window.location.hash.substring(2);
         var userLibraries = {model:{}, view:{}};
         var googleEarth = false;
-        var blockly = false;
         var match;
         var application;
         var regex = /([^&=]+)=?([^&]*)/g;
@@ -154,16 +138,9 @@
                 if(key == "google-earth") {
                     googleEarth = true;
                 }
-                if(key == "blockly") {
-                    blockly = true;
-                }
             }
 
             googleEarth && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>");
-
-            //blockly && document.write( "<scr" + "ipt type='text/javascript' src='blockly/blockly_compressed.js'></scr" + "ipt>");
-            //blockly && document.write( "<scr" + "ipt type='text/javascript' src='blockly/blocks_compressed.js'></scr" + "ipt>");
-            //blockly && document.write( "<scr" + "ipt type='text/javascript' src='blockly/msg/js/en.js'></scr" + "ipt>");
 
             vwf.loadConfiguration(application, userLibraries, compatibilityCheck);
         });

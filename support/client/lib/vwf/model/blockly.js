@@ -16,7 +16,11 @@
 /// @module vwf/model/test
 /// @requires vwf/model
 
-define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ], function( module, model, utility, Color, $ ) {
+
+
+
+
+define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery", "vwf/model/blockly/blockly_compressed", "vwf/model/blockly/blocks_compressed" ], function( module, model, utility, Color, $, Blockly ) {
 
     var self;
 
