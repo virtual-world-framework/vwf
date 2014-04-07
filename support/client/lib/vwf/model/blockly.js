@@ -11,14 +11,10 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-/// vwf/model/test.js is a dummy driver used for tests.
+/// vwf/model/blockly.js is the driver for the Google blockly visual programming language.
 /// 
-/// @module vwf/model/test
-/// @requires vwf/model
-
-
-
-
+/// @module vwf/model/blockly
+/// @requires vwf/model ... and others
 
 define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery", "vwf/model/blockly/blockly_compressed", "vwf/model/blockly/blocks_compressed" ], function( module, model, utility, Color, $, Blockly ) {
 
