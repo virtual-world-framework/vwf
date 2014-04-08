@@ -339,8 +339,7 @@ Blockly.Blocks['node3_animation_translateBy'] = {
     this.appendDummyInput()
         .appendField( 'translateBy' );
     this.appendValueInput("TRANSLATION")
-        .setCheck("Vector3")
-        .appendField("translation");
+        .setCheck("Vector3");
     this.appendValueInput("DURATION")
         .setCheck("Number")
         .appendField("duration");

@@ -12,20 +12,57 @@
 <!-- and limitations under the License.                                                          -->
 
 <link rel="stylesheet" href="index.vwf.css"></link>
+
+<script type="text/javascript" src="blocks_object.js"></script>
+<script type="text/javascript" src="blocks_node3.js"></script>
+<script type="text/javascript" src="blocks_math3.js"></script>
+
 <div id="blocklyDiv"></div>
 <div><button id="runButton" onclick="onRun()">Run</button></div>
-<xml id="toolbox">
-  <block type="maze_moveForward"></block>
-  <block type="maze_turn"><field name="DIR">turnLeft</field></block>
-  <block type="maze_turn"><field name="DIR">turnRight</field></block>
-  <block type="math_number"></block>
+
+<xml id="toolbox" style="display: none;">
+  <category name="Objects">
+    <block type="node3_objects"></block>
+  </category>
+  <category name="Node3">
+    <block type="node3_castShadows"></block>
+    <block type="node3_receiveShadows"></block>
+    <block type="node3_worldTransform"></block>
+    <block type="node3_transform"></block>
+    <block type="node3_translation"></block>
+    <block type="node3_rotation"></block>
+    <block type="node3_scale"></block>
+    <block type="node3_quaternion"></block>
+    <block type="node3_enabled"></block>
+    <block type="node3_visible"></block>
+    <block type="node3_playing"></block>
+    <block type="node3_looping"></block>
+    <block type="node3_speed"></block>
+    <block type="node3_lookAt"></block>
+    <category name="Animation">
+      <block type="node3_animation_translateBy"></block>
+      <block type="node3_animation_translateTo"></block>
+      <block type="node3_animation_rotateBy"></block>
+      <block type="node3_animation_rotateTo"></block>
+      <block type="node3_animation_quaterniateBy"></block>
+      <block type="node3_animation_quaterniateTo"></block>
+      <block type="node3_animation_transformBy"></block>
+      <block type="node3_animation_transformTo"></block>
+      <block type="node3_animation_worldTransformTo"></block>
+      <block type="node3_animation_worldTransformBy"></block>
+    </category>
+  </category>
+  <category name="Type">
+    <block type="math_number"></block>
+    <block type="type_vector3"></block>
+    <block type="type_vector4"></block>
+  </category>
 </xml>
-<script type="text/javascript" src="blockly/javascript_compressed.js"></script>
-<script type="text/javascript" src="blocks.js"></script>
+
 <script type="text/javascript">
     Blockly.inject( document.getElementById( 'blocklyDiv' ), { 
-    	path: './blockly/', 
-    	toolbox: document.getElementById( 'toolbox' ) 
+      path: './blockly/', 
+      toolbox: document.getElementById( 'toolbox' ) 
     } );
 
     function onRun() {
@@ -38,4 +75,6 @@
     vwf_view.satProperty = function( nodeID, propertyName, propertyValue ) {
 
     }
+
 </script>  
+

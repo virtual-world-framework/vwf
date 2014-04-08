@@ -4,7 +4,6 @@
 
 
 Blockly.Blocks['type_vector3'] = {
-  valueType: 'Vector3',
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(210);
@@ -18,7 +17,7 @@ Blockly.Blocks['type_vector3'] = {
         .setCheck("Number")
         .appendField("z");
     this.setInputsInline(true);
-    this.setOutput(true, 'Type');
+    this.setOutput(true, 'Vector3');
     this.setTooltip('');
   }
 };
@@ -37,7 +36,6 @@ Blockly.Blocks['type_vector3'] = {
 
 
 Blockly.Blocks['type_vector4'] = {
-  valueType: 'Vector4',
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(210);
@@ -54,7 +52,7 @@ Blockly.Blocks['type_vector4'] = {
         .setCheck("Number")
         .appendField("w");
     this.setInputsInline(true);
-    this.setOutput(true, 'Type');
+    this.setOutput(true, 'Vector4');
     this.setTooltip('');
   }
 };
