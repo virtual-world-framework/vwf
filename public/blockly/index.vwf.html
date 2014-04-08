@@ -11,20 +11,17 @@
 <!-- either express or implied. See the License for the specific language governing permissions  -->
 <!-- and limitations under the License.                                                          -->
 
-<div id="blocklyDiv" style="height: 400px; width: 560px; opacity: 0.6;"></div>
-<table width="200">
-  <tr>
-    <td>
-      <button id="runButton" onclick="onRun()">Run</button>
-    </td>
-  </tr>
-</table>
-<xml id="toolbox" style="display: none;">
+<link rel="stylesheet" href="index.vwf.css"></link>
+<div id="blocklyDiv"></div>
+<div><button id="runButton" onclick="onRun()">Run</button></div>
+<xml id="toolbox">
   <block type="maze_moveForward"></block>
   <block type="maze_turn"><field name="DIR">turnLeft</field></block>
   <block type="maze_turn"><field name="DIR">turnRight</field></block>
   <block type="math_number"></block>
 </xml>
+<script type="text/javascript" src="blockly/javascript_compressed.js"></script>
+<script type="text/javascript" src="blocks.js"></script>
 <script type="text/javascript">
     Blockly.inject( document.getElementById( 'blocklyDiv' ), { 
     	path: './blockly/', 
@@ -41,5 +38,4 @@
     vwf_view.satProperty = function( nodeID, propertyName, propertyValue ) {
 
     }
-
 </script>  
