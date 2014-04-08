@@ -17,8 +17,9 @@
 /// @requires vwf/model ... and others
 
 define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery", 
-          "vwf/model/blockly/blockly_compressed", "vwf/model/blockly/blocks_compressed" ],
-            function( module, model, utility, Color, $, Blockly ) {
+          "vwf/model/blockly/blockly_compressed", "vwf/model/blockly/blocks_compressed", 
+          "vwf/model/blockly/javascript_compressed", "vwf/model/blockly/msg/js/en" ], 
+        function( module, model, utility, Color, $, Blockly ) {
 
     var self;
 

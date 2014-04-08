@@ -305,6 +305,12 @@
                     "vwf/model/blockly/blocks_compressed": {
                         deps: [ "vwf/model/blockly/blockly_compressed" ]
                     },
+                    "vwf/model/blockly/javascript_compressed": {
+                        deps: [ "vwf/model/blockly/blockly_compressed" ]
+                    },
+                    "vwf/model/blockly/msg/js/en": {
+                        deps: [ "vwf/model/blockly/blockly_compressed" ]
+                    },
                 }
             };
 
