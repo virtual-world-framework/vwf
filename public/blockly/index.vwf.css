@@ -1,0 +1,17 @@
+#blocklyDiv {
+	height: 400px;
+	width: 560px;
+	overflow: hidden;
+	margin: 10px;
+	border-radius: 10px;
+	opacity: 0.9;
+}
+
+#runButton {
+	margin-left: 10px;
+	border-radius: 5px;
+}
+
+#toolbox {
+	display: none;
+}

@@ -1,0 +1,83 @@
+# The Mars educational game created for ADL's True Game-based learning project
+--- 
+extends: http://vwf.example.com/scene.vwf
+properties:
+  executing: false
+  enableShadows: true
+  backgroundColor: [ 0, 0, 5 ]
+  ambientColor: [ 150, 100, 100 ]
+  userObject:
+    extends: http://vwf.example.com/blockly/blockly3.vwf
+    implements:
+    - http://vwf.example.com/navigable.vwf
+    - http://vwf.example.com/animation.vwf
+    - http://vwf.example.com/node3/animation.vwf
+    - http://vwf.example.com/blockly/controller.vwf
+    properties:
+      name: player
+      translation: [ 0, 500, -100 ]
+      navmode: walk
+      translationSpeed: 1000
+    children:
+      camera:
+        extends: http://vwf.example.com/camera.vwf
+        properties:
+          translation: [ 0, 1000, 200 ]
+          rotation: [ 0, 0, 1, 180 ]
+          far: 100000
+  makeOwnAvatarVisible: true
+children:
+  redCube:
+    extends: http://vwf.example.com/threejs/cube.vwf
+    implements:
+    - http://vwf.example.com/animation.vwf
+    - http://vwf.example.com/node3/animation.vwf
+    - http://vwf.example.com/blockly/controller.vwf
+    properties:
+      meshDefinition: { "width": 100, "height": 100, "depth": 100, "color": "red" }
+      translation: [ -200, 0, 0 ]
+  greenSphere:
+    extends: http://vwf.example.com/threejs/sphere.vwf
+    implements:
+    - http://vwf.example.com/animation.vwf
+    - http://vwf.example.com/node3/animation.vwf
+    - http://vwf.example.com/blockly/controller.vwf
+    properties:
+      meshDefinition: { "radius": 50, "color": "green", "segmentsWidth": 16, "segmentsHeight": 16 }
+      translation: [ 200, 0, 0 ]
+  blueCube:
+    extends: http://vwf.example.com/threejs/cube.vwf
+    implements:
+    - http://vwf.example.com/animation.vwf
+    - http://vwf.example.com/node3/animation.vwf
+    - http://vwf.example.com/blockly/controller.vwf
+    properties:
+      meshDefinition: { "width": 100, "height": 100, "depth": 100, "color": "lightblue" }
+      translation: [ -100, -100, 0 ]
+  blueSphere:
+    extends: http://vwf.example.com/threejs/sphere.vwf
+    implements:
+    - http://vwf.example.com/animation.vwf
+    - http://vwf.example.com/node3/animation.vwf
+    - http://vwf.example.com/blockly/controller.vwf
+    properties:
+      meshDefinition: { "radius": 50, "color": "blue", "segmentsWidth": 16, "segmentsHeight": 16 }
+      translation: [ 100, 100, 0 ]
+  sunLight:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      color: [ 255, 225, 200 ]
+      translation: [ 1500, 0, 5000 ]
+      rotation: [ -0.8206275701522827, -0.3142601549625397, 0.4772954285144806, 77.48947143554688 ]
+      intensity: 0.4
+      castShadows: true
+      shadowDarkness: 0.75
+      shadowCameraBottom: -5000
+      shadowCameraTop: 5000
+      shadowCameraLeft: -5000
+      shadowCameraRight: 5000
+      shadowCameraFar: 10000
+      shadowMapWidth: 2048
+      shadowMapHeight: 2048
+      shadowBias: 0.0001
