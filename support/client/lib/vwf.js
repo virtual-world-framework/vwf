@@ -471,8 +471,6 @@
                     initializers["view"]["vwf/view/threejs"].active = true;
                 }
 
-                //debugger;
-
                 require( requireConfig, getActiveLibraries(requireArray, false), function( ready ) {
 
                     ready( function() {
