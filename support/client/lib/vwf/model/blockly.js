@@ -74,9 +74,6 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                 this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             }
 
-            //if ( childName == "robot" ) {
-            //    debugger;
-            //}
             // If the node being created is a prototype, construct it and add it to the array of prototypes,
             // and then return
             var prototypeID = ifPrototypeGetId( nodeID, childID );
