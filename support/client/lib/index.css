@@ -165,7 +165,8 @@ input {
 
 #vwf-root {
   position:absolute;
-  left:10px;
+  top: 0px;
+  left: 0px;
   z-index:-1;
 }
 
