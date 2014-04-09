@@ -11,7 +11,7 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-/// @module vwf/view/test
+/// @module vwf/view/blockly
 /// @requires vwf/view
 
 define( [ "module", "vwf/view" ], function( module, view ) {
