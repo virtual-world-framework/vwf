@@ -30,7 +30,7 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
 
         initialize: function( options ) {
             
-        	self = this;
+            self = this;
 
             this.arguments = Array.prototype.slice.call( arguments );
 
