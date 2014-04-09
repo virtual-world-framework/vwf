@@ -68,8 +68,25 @@ Blockly.Blocks['type_vector4'] = {
 //   return [code, Blockly.JavaScript.ORDER_NONE];
 // };
 
+Blockly.Blocks['type_boolean'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(230);
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([["true", "BOOLEAN_TRUE"], ["false", "BOOLEAN_FALSE"]]), "BOOLEAN");
+    this.setInputsInline(true);
+    this.setOutput(true, "Boolean");
+    this.setTooltip('');
+  }
+};
 
-
+Blockly.JavaScript['type_boolean'] = function(block) {
+  var dropdown_boolean = block.getFieldValue('BOOLEAN');
+  // TODO: Assemble JavaScript into code variable.
+  var code = '...';
+  // TODO: Change ORDER_NONE to the correct strength.
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
 
 
 
