@@ -34,8 +34,9 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
 
             this.arguments = Array.prototype.slice.call( arguments );
 
-            if ( options === undefined ) { options = {}; }
-
+            if ( options === undefined ) { 
+                options = {}; 
+            }
             if ( this.state === undefined ) {   
                 this.state = {};
             }
