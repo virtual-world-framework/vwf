@@ -115,11 +115,6 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                 
                 this.state.nodes[ childID ] = node = createNode();
                 
-                // hack for the demo, 
-                if ( Blockly.Blocks.vwfNodes === undefined ) {
-                    Blockly.Blocks.vwfNodes = {};
-                }
-                Blockly.Blocks.vwfNodes[ childName ] = childID;
             }
 
         },
