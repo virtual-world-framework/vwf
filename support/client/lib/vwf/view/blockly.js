@@ -125,13 +125,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 if ( executeNextLine ) {
                     if ( blockCode && codeLine < blockCode.length ) {
                         try { 
-                            eval( blockCode[ codeLine ] ) 
+                            eval( blockCode[ codeLine ] ) ;
                         } catch ( e ) {
-                            this.state.executingBlocks = false
+                            this.state.executingBlocks = false;
                         }
                         codeLine++;
                     } else {
-                        this.state.executingBlocks = false
+                        this.state.executingBlocks = false;
                     }
                 }
             } else {
