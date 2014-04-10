@@ -1,0 +1,84 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+## The component representation of a scale behavior (on move)
+## 
+## @name blockly/controller.vwf
+## @namespace
+
+--- 
+extends:
+  http://vwf.example.com/node3.vwf
+properties:
+  forwardSpeed: 400
+  rotateSpeed: 30
+  animationTime: 1
+methods:
+  getWorldXYVector:
+  executeBlocklyCmd:
+scripts:
+- |
+    this.initialize = function() {
+      //console.info( "initialize ==> blockly-controller.vwf" )
+    }
+
+    this.getWorldXYVector = function( x, y ) {
+
+      var dir = goog.vec.Vec3.create();
+      var moveVectorInCameraFrame = goog.vec.Vec4.createFromValues( x, y, 0, 1 );
+      var camWorldRotMat = goog.vec.Mat4.createFromArray( this.worldTransform );
+      camWorldRotMat[ 12 ] = 0;
+      camWorldRotMat[ 13 ] = 0;
+      camWorldRotMat[ 14 ] = 0;
+
+      dir = goog.vec.Mat4.multVec4( camWorldRotMat, moveVectorInCameraFrame, dir );
+      dir[ 2 ] = 0;
+
+      goog.vec.Vec3.normalize( dir, dir ); 
+      return dir;
+
+    }
+
+    this.executeBlocklyCmd = function( cmd, magnitude, time ) {
+
+      console.info( "executeBlocklyCmd( "+cmd+", "+magnitude+", "+time+" )" );
+      var dir = undefined;
+      var speed, angle, t;
+
+      switch( cmd ) {
+
+        case "moveForward":
+          dir = this.getWorldXYVector( 0, -1 );
+          speed = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.forwardSpeed;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          this.translateBy( [ dir[ 0 ] * speed, dir[ 1 ] * speed, 0 ], t );
+          break;
+
+        case "turnRight":
+          angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          this.rotateBy( [ 0, 0, 1, -angle ], t );
+          break;
+
+        case "turnLeft":
+          angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          this.rotateBy( [ 0, 0, 1, angle ], t );
+          break;
+
+        default:
+          break;
+      }
+
+    }  //@ sourceURL=blockly-controller.vwf
+    
