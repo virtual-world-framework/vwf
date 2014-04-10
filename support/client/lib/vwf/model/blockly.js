@@ -226,20 +226,14 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                 this.logger.infox( "   G === gettingProperty ", nodeID, propertyName );
             }
 
-            var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
+            var node = this.state.nodes[ nodeID ];
             var value = undefined;
 
-            //this driver has no representation of this node, so there is nothing to do.
-            if ( node === undefined ) { 
-                if ( nodeID == this.kernel.application() ) {
-                    if ( propertyName == "executing" ) {
-                        value = this.state.executingBlocks; 
-                    }
-                }                
-
-                return value; 
-            }
-
+            if ( nodeID == this.kernel.application() ) {
+                if ( propertyName == "executing" ) {
+                    value = this.state.executingBlocks; 
+                }
+            }                
 
             return value;
         },
