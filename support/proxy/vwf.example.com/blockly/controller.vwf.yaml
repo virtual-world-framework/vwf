@@ -18,7 +18,7 @@
 
 --- 
 extends:
-  http://vwf.example.com/node3.vwf
+  http://vwf.example.com/node3/animation.vwf
 properties:
   forwardSpeed: 400
   rotateSpeed: 30
@@ -26,12 +26,33 @@ properties:
 methods:
   getWorldXYVector:
   executeBlocklyCmd:
+  createBlocklyButton:
+  toggleBlockly: 
 scripts:
 - |
     this.initialize = function() {
-      //console.info( "initialize ==> blockly-controller.vwf" )
+      this.future(1).createBlocklyButton();
+    }
+    this.createBlocklyButton = function() {
+      var buttonDef = { 
+        "extends": "http://vwf.example.com/threejs/cube.vwf",
+        "properties": {
+          "meshDefinition": { 
+            "width": 20, 
+            "height": 10, 
+            "depth": 10, 
+            "color": "blue"
+          },
+          "translation": [0,0,70]
+        },
+        scripts: [ "this.pointerClick=function(pointerInfo,pickInfo){this.parent.toggleBlockly();}" ]
+      }
+      this.children.create( this.moniker+"Blockly", buttonDef );      
     }
 
+    this.toggleBlockly = function() {
+    }
+    
     this.getWorldXYVector = function( x, y ) {
 
       var dir = goog.vec.Vec3.create();

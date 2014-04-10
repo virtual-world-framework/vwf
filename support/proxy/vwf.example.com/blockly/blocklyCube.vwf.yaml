@@ -17,4 +17,4 @@
 ## @namespace
 
 ---
-extends: http://vwf.example.com/blockly/cube.vwf
+extends: http://vwf.example.com/threejs/cube.vwf

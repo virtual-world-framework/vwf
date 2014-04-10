@@ -28,7 +28,7 @@ properties:
   makeOwnAvatarVisible: true
 children:
   redCube:
-    extends: http://vwf.example.com/threejs/cube.vwf
+    extends: http://vwf.example.com/blockly/blocklyCube.vwf
     implements:
     - http://vwf.example.com/animation.vwf
     - http://vwf.example.com/node3/animation.vwf
@@ -37,7 +37,7 @@ children:
       meshDefinition: { "width": 100, "height": 100, "depth": 100, "color": "red" }
       translation: [ -200, 0, 0 ]
   greenSphere:
-    extends: http://vwf.example.com/threejs/sphere.vwf
+    extends: http://vwf.example.com/blockly/blocklySphere.vwf
     implements:
     - http://vwf.example.com/animation.vwf
     - http://vwf.example.com/node3/animation.vwf
@@ -46,7 +46,7 @@ children:
       meshDefinition: { "radius": 50, "color": "green", "segmentsWidth": 16, "segmentsHeight": 16 }
       translation: [ 200, 0, 0 ]
   blueCube:
-    extends: http://vwf.example.com/threejs/cube.vwf
+    extends: http://vwf.example.com/blockly/blocklyCube.vwf
     implements:
     - http://vwf.example.com/animation.vwf
     - http://vwf.example.com/node3/animation.vwf
@@ -55,7 +55,7 @@ children:
       meshDefinition: { "width": 100, "height": 100, "depth": 100, "color": "lightblue" }
       translation: [ -100, -100, 0 ]
   blueSphere:
-    extends: http://vwf.example.com/threejs/sphere.vwf
+    extends: http://vwf.example.com/blockly/blocklySphere.vwf
     implements:
     - http://vwf.example.com/animation.vwf
     - http://vwf.example.com/node3/animation.vwf
