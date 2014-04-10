@@ -49,9 +49,9 @@ scripts:
 
     }
 
-    this.executeBlocklyCmd = function( cmd, mag, time ) {
+    this.executeBlocklyCmd = function( cmd, magnitude, time ) {
 
-      console.info( "executeBlocklyCmd( "+cmd+", "+mag+", "+time+" )" );
+      console.info( "executeBlocklyCmd( "+cmd+", "+magnitude+", "+time+" )" );
       var dir = undefined;
       var speed, angle, t;
 
@@ -59,19 +59,19 @@ scripts:
 
         case "moveForward":
           dir = this.getWorldXYVector( 0, -1 );
-          speed = ( mag && Number( mag ) ) ? Number( mag ) : this.forwardSpeed;
+          speed = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.forwardSpeed;
           t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
           this.translateBy( [ dir[ 0 ] * speed, dir[ 1 ] * speed, 0 ], t );
           break;
 
         case "turnRight":
-          angle = ( mag && Number( mag ) ) ? Number( mag ) : this.rotateSpeed;
+          angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
           t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
           this.rotateBy( [ 0, 0, 1, -angle ], t );
           break;
 
         case "turnLeft":
-          angle = ( mag && Number( mag ) ) ? Number( mag ) : this.rotateSpeed;
+          angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
           t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
           this.rotateBy( [ 0, 0, 1, angle ], t );
           break;
