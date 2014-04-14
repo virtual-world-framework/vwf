@@ -113,7 +113,7 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
 
             if ( isBlockly3Node( protos ) ) {
                 
-                this.state.nodes[ childID ] = node = createNode();
+                this.state.nodes[ childID ] = createNode();
                 
             }
 
