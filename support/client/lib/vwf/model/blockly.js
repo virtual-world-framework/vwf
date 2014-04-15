@@ -107,14 +107,13 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                     type: childType,
                     name: childName,
                     loadComplete: callback,
-                    prototypes: protos
+                    prototypes: protos,
+                    blocks: "<xml></xml>"
                 };
             }; 
 
             if ( isBlockly3Node( protos ) ) {
-                
                 this.state.nodes[ childID ] = createNode();
-                
             }
 
         },

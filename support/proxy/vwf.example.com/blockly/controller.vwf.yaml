@@ -23,11 +23,12 @@ properties:
   forwardSpeed: 400
   rotateSpeed: 30
   animationTime: 1
+events:
+  toggleBlocklyUI:
 methods:
   getWorldXYVector:
   executeBlocklyCmd:
   createBlocklyButton:
-  toggleBlockly: 
 scripts:
 - |
     this.initialize = function() {
@@ -35,24 +36,18 @@ scripts:
     }
     this.createBlocklyButton = function() {
       var buttonDef = { 
-        "extends": "http://vwf.example.com/threejs/cube.vwf",
+        "extends": "http://vwf.example.com/node3.vwf",
+        "source": "assets/3d/Blockly.DAE",
+        "type": "model/vnd.collada+xml",
         "properties": {
-          "meshDefinition": { 
-            "width": 20, 
-            "height": 10, 
-            "depth": 10, 
-            "color": "blue"
-          },
-          "translation": [0,0,70]
+          "translation": [0,0,70],
+          "scale": [12,12,12]
         },
-        scripts: [ "this.pointerClick=function(pointerInfo,pickInfo){this.parent.toggleBlockly();}" ]
+        scripts: [ "this.pointerClick=function(pointerInfo,pickInfo){this.parent.toggleBlocklyUI();}" ]
       }
       this.children.create( this.moniker+"Blockly", buttonDef );      
     }
 
-    this.toggleBlockly = function() {
-    }
-    
     this.getWorldXYVector = function( x, y ) {
 
       var dir = goog.vec.Vec3.create();

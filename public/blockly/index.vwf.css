@@ -5,6 +5,7 @@
 	margin: 10px;
 	border-radius: 10px;
 	opacity: 0.9;
+	visibility: hidden;
 }
 
 #runButton {
