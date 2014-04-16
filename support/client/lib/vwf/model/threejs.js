@@ -1781,63 +1781,95 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
             if ( methodName === "raycast" ) {
 
-                var origin, direction, near, far, recursive, objects;
+                var origin, direction, near, far, recursive, objectIDs;
 
                 if ( parameters ) {
 
-                    origin = new THREE.Vector3();
-                    for ( var i = 0; i < parameters[0].length; i++ ) {
-                        origin.setComponent( i, parameters[0][i] );
-                    }
+                    if ( parameters[0] instanceof THREE.Vector3 ) {
 
-                    direction = new THREE.Vector3();
-                    for ( var i = 0; i < parameters[1].length; i++ ) {
-                        direction.setComponent( i, parameters[1][i] );
-                    }
+                        origin = parameters[0];
 
-                    near = parameters[2] || 0;
-                    far = parameters[3] || Infinity;
-                    recursive = Boolean( parameters[4] );
+                    } else if ( parameters[0] instanceof Array && parameters[0].length === 3 ) {
 
-                    objects = new Array();
-                    if ( !( parameters[5] instanceof Array ) ) {
-
-                        if ( this.state.nodes.hasOwnProperty( parameters[5] ) ) {
-
-                            objects.push( this.state.nodes[ parameters[5] ].threeObject );
-
-                        } else {
-
-                            objects = this.state.scenes[ this.state.sceneRootID ].threeScene.children;
-
-                        }
+                        var x, y, z;
+                        x = isNaN( parameters[0][0] ) ? 0 : parameters[0][0];
+                        y = isNaN( parameters[0][1] ) ? 0 : parameters[0][1];
+                        z = isNaN( parameters[0][2] ) ? 0 : parameters[0][2];
+                        origin = new THREE.Vector3( x, y, z );
 
                     } else {
 
-                        var sceneNodes = this.state.nodes;
+                        origin = new THRE.Vector3();
 
-                        for ( var i = 0; i < parameters[5].length; i++ ) {
+                    }
 
-                            if ( sceneNodes.hasOwnProperty( parameters[5][i] ) ) {
+                    if ( parameters[1] instanceof THREE.Vector3 ) {
 
-                                var object = sceneNodes[ parameters[5][i] ].threeObject;
-                                objects.push( object );
-                            }
+                        direction = parameters[1];
 
-                        }
+                    } else if ( parameters[1] instanceof Array && parameters[1].length === 3 ) {
+
+                        var x, y, z;
+                        x = isNaN( parameters[1][0] ) ? 0 : parameters[1][0];
+                        y = isNaN( parameters[1][1] ) ? 0 : parameters[1][1];
+                        z = isNaN( parameters[1][2] ) ? 0 : parameters[1][2];
+                        direction = new THREE.Vector3( x, y, z );
+
+                    } else {
+
+                        direction = new THRE.Vector3();
+                        
+                    }
+
+                    near = isNaN( parameters[2] ) ? 0 : parameters[2];
+                    far = isNaN( parameters[3] ) ? Infinity : parameters[3];
+                    recursive = typeof parameters[4] === "boolean" ? parameters[4] : false;
+
+                    if ( parameters[5] instanceof Array ) {
+
+                        objectIDs = parameters[5];
+
+                    } else if ( typeof parameters[5] === "string" ) {
+
+                        objectIDs = new Array();
+                        objectIDs.push( parameters[5] );
+
+                    } else {
+
+                        objectIDs = null;
                     }
 
                 } else {
 
                     origin = new THREE.Vector3();
-                    direction = new THREE.Vector3( 0, 1, 0 );
+                    direction = new THREE.Vector3();
                     near = 0;
                     far = Infinity;
                     recursive = false;
-                    objects = new Array();
+                    objectIDs = null;
+
+                }
+
+                var objects = new Array();
+
+                if ( objectIDs !== null ) {
+
+                    for ( var i = 0; i < objectIDs.length; i++ ) {
+
+                        if ( this.state.nodes.hasOwnProperty( objectIDs[i] ) ) {
+
+                            var object = this.state.nodes[ objectIDs[i] ].threeObject;
+                            objects.push( object );
+                        }
+
+                    }
+
+                } else {
 
                     for ( nodeID in this.state.nodes ) {
+
                         objects.push( this.state.nodes[ nodeID ].threeObject );
+
                     }
 
                 }
@@ -1845,6 +1877,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 var raycaster = new THREE.Raycaster( origin, direction, near, far );
                 var intersects = raycaster.intersectObjects( objects, recursive );
                 return intersects;
+
             }
 
             return undefined;

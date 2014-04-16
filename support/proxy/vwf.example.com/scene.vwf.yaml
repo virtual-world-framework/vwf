@@ -170,7 +170,7 @@ methods:
       - near
       - far
       - recursive
-      - objects
+      - objectIDs
 scripts:
 - |
     this.activeCameraComp = undefined;
