@@ -112,8 +112,9 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                 };
             }; 
 
-            if ( isBlockly3Node( protos ) ) {
-                this.state.nodes[ childID ] = createNode();
+            var node;
+            if ( isBlockly3Node( childImplementsIDs ) ) {
+                this.state.nodes[ childID ] = node = createNode();
             }
 
         },
@@ -124,7 +125,6 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
             if ( this.debug.initializing ) {
                 this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             } 
-
         },
 
         deletingNode: function( nodeID ) {
@@ -290,13 +290,11 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
         return undefined;
     }
 
-    function isBlockly3Node( prototypes ) {
+    function isBlockly3Node( implementsIDs ) {
         var found = false;
-        if ( prototypes ) {
-            for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-blockly-blockly3-vwf" ||
-                          prototypes[i] == "http-vwf-example-com-blockly-blocklyCube-vwf" ||
-                          prototypes[i] == "http-vwf-example-com-blockly-blocklySphere-vwf" ); 
+        if ( implementsIDs ) {
+            for ( var i = 0; i < implementsIDs.length && !found; i++ ) {
+                found = ( implementsIDs[i] == "http-vwf-example-com-blockly-controller-vwf" ); 
             }
         }
 

@@ -22,6 +22,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
     var codeLine = -1;
     var lastLineExeTime = undefined;
     var timeBetweenLines = 1;
+    var createBlocklyDivs = true;
 
     return view.load( module, {
 
@@ -49,15 +50,43 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                 };
             }
 
-            this.xml = new XMLSerializer();
+            this.options = ( options !== undefined ? options : {} );
+
+            this.options.wrapperName = options.wrapperName ? options.wrapperName : 'blocklyWrapper';
+            this.options.divName = options.divName ? options.divName : 'blocklyDiv'; 
+            this.options.createButton = options.createButton !== undefined ? options.createButton : true;
+
+
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName, callback /* ( ready ) */) {
+
+            if ( createBlocklyDivs && childID == this.kernel.application() ) {
+                this.logger.infox( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+                
+                if ( this.options.createButton ) {
+                    $( 'body' ).append( 
+                        "<div id='"+ self.options.wrapperName +"'>" +
+                            "<div id='" + self.options.divName + "'/>" + 
+                            "<div><button id='runButton' onclick='onRun()'>Run</button></div>" +
+                        "</div>" ).children(":last");
+                } else {
+                    $( 'body' ).append( 
+                        "<div id='"+ self.options.wrapperName +"'>" +
+                            "<div id='" + self.options.divName + "'/>" + 
+                        "</div>" ).children(":last");
+                }
+                createBlocklyDivs = false;
+            }            
             
         },
 
-        initializedNode: function( nodeID, childID ) {
+        initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName ) {
+            
+            if ( childID == this.kernel.application() ) {
+                //this.logger.infox( "initializedNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            }
 
         },
  
@@ -191,8 +220,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
             xmlDom = Blockly.Xml.textToDom( xmlText );
         } catch (e) {
             var q = window.confirm( "XML is invalid" );
-            if (!q) {
-                // Leave the user on the XML tab.
+            if ( !q ) {
                 return;
             }
         }
@@ -211,16 +239,24 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
     }
 
     function hideBlocklyUI( node ) {
-        var div = document.getElementById( 'blocklyDiv' );
+        var div = document.getElementById( self.options.divName );
         if ( div ) {
             div.style.visibility = 'hidden';
         }
+        var button = document.getElementById( 'runButton' );
+        if ( button ) {
+            button.style.visibility = 'hidden';
+        }        
     }
 
     function showBlocklyUI( node ) {
-        var div = document.getElementById( 'blocklyDiv' ); {
+        var div = document.getElementById( self.options.divName ); {
             div.style.visibility = 'visible';
         }
+        var button = document.getElementById( 'runButton' );
+        if ( button ) {
+            button.style.visibility = 'visible';
+        } 
     }
 
 } );

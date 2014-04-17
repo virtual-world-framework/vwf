@@ -23,6 +23,13 @@ properties:
   forwardSpeed: 400
   rotateSpeed: 30
   animationTime: 1
+  showButton: 
+    set: |
+      this.showButton = value;
+      if ( this.children[ this.moniker+"Blockly" ] ) {
+        this.children[ this.moniker+"Blockly" ].visible = value;
+      } 
+    value: true
 events:
   toggleBlocklyUI:
 methods:
@@ -32,7 +39,9 @@ methods:
 scripts:
 - |
     this.initialize = function() {
-      this.future(1).createBlocklyButton();
+      //if ( this.showButton ) { 
+      this.createBlocklyButton();
+      //}
     }
     this.createBlocklyButton = function() {
       var buttonDef = { 
@@ -45,7 +54,9 @@ scripts:
         },
         scripts: [ "this.pointerClick=function(pointerInfo,pickInfo){this.parent.toggleBlocklyUI();}" ]
       }
-      this.children.create( this.moniker+"Blockly", buttonDef );      
+      this.children.create( this.moniker+"Blockly", buttonDef, function( child ) {
+        child.visible = this.showButton; 
+      } );      
     }
 
     this.getWorldXYVector = function( x, y ) {
