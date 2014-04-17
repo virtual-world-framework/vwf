@@ -53,7 +53,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
             this.options = ( options !== undefined ? options : {} );
 
             this.options.blocklyPath = options.blocklyPath ? options.blocklyPath : './blockly/';
-            this.options.wrapperName = options.wrapperName ? options.wrapperName : 'blocklyWrapper';
+            this.options.divParent = options.divParent ? options.divParent : 'blocklyWrapper';
             this.options.divName = options.divName ? options.divName : 'blocklyDiv'; 
             this.options.toolbox = options.toolbox ? options.toolbox : 'toolbox'; 
             this.options.createButton = options.createButton !== undefined ? options.createButton : true;
@@ -69,13 +69,13 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                 
                 if ( this.options.createButton ) {
                     $( 'body' ).append( 
-                        "<div id='"+ self.options.wrapperName +"'>" +
+                        "<div id='"+ self.options.divParent +"'>" +
                             "<div id='" + self.options.divName + "'/>" + 
                             "<div><button id='runButton' onclick='onRun()'>Run</button></div>" +
                         "</div>" ).children(":last");
                 } else {
                     $( 'body' ).append( 
-                        "<div id='"+ self.options.wrapperName +"'>" +
+                        "<div id='"+ self.options.divParent +"'>" +
                             "<div id='" + self.options.divName + "'/>" + 
                         "</div>" ).children(":last");
                 }
@@ -245,24 +245,16 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
     }
 
     function hideBlocklyUI( node ) {
-        var div = document.getElementById( self.options.divName );
+        var div = document.getElementById( self.options.divParent );
         if ( div ) {
             div.style.visibility = 'hidden';
-        }
-        var button = document.getElementById( 'runButton' );
-        if ( button ) {
-            button.style.visibility = 'hidden';
-        }        
+        }       
     }
 
     function showBlocklyUI( node ) {
-        var div = document.getElementById( self.options.divName ); {
+        var div = document.getElementById( self.options.divParent ); {
             div.style.visibility = 'visible';
         }
-        var button = document.getElementById( 'runButton' );
-        if ( button ) {
-            button.style.visibility = 'visible';
-        } 
     }
 
 } );

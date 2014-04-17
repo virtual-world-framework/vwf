@@ -30,6 +30,13 @@ properties:
         this.children[ this.moniker+"Blockly" ].visible = value;
       } 
     value: true
+  buttonTransform:
+    set: |
+      this.buttonTransform = value;
+      if ( this.children[ this.moniker+"Blockly" ] ) {
+        this.children[ this.moniker+"Blockly" ].transform = value;
+      }
+    value: [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]     
 events:
   toggleBlocklyUI:
 methods:
@@ -49,8 +56,7 @@ scripts:
         "source": "assets/3d/Blockly.DAE",
         "type": "model/vnd.collada+xml",
         "properties": {
-          "translation": [0,0,70],
-          "scale": [12,12,12]
+          "transform": this.buttonTransform
         },
         scripts: [ "this.pointerClick=function(pointerInfo,pickInfo){this.parent.toggleBlocklyUI();}" ]
       }
