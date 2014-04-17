@@ -52,6 +52,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
 
             this.options = ( options !== undefined ? options : {} );
 
+            this.options.blocklyPath = options.blocklyPath ? options.blocklyPath : './blockly/';
             this.options.wrapperName = options.wrapperName ? options.wrapperName : 'blocklyWrapper';
             this.options.divName = options.divName ? options.divName : 'blocklyDiv'; 
             this.options.toolbox = options.toolbox ? options.toolbox : 'toolbox'; 
@@ -88,7 +89,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
             if ( childID == this.kernel.application() ) {
                 
                 Blockly.inject( document.getElementById( self.options.divName ), { 
-                    path: './source/blockly/', 
+                    path: this.options.blocklyPath,
                     toolbox: document.getElementById( self.options.toolbox ) 
                 } );            
             }
