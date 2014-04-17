@@ -164,9 +164,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                         } 
                         if ( show ) {
                             this.state.blockly.node = node;
-                            if ( node.blocks && node.blocks != "" ) {
-                                setBlockXML( node.blocks );
-                            } 
+                            setBlockXML( node.blocks );
                             showBlocklyUI( node );
                         }
                         break;
