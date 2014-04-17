@@ -54,6 +54,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
 
             this.options.wrapperName = options.wrapperName ? options.wrapperName : 'blocklyWrapper';
             this.options.divName = options.divName ? options.divName : 'blocklyDiv'; 
+            this.options.toolbox = options.toolbox ? options.toolbox : 'toolbox'; 
             this.options.createButton = options.createButton !== undefined ? options.createButton : true;
 
 
@@ -85,7 +86,11 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
         initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName ) {
             
             if ( childID == this.kernel.application() ) {
-                //this.logger.infox( "initializedNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+                
+                Blockly.inject( document.getElementById( self.options.divName ), { 
+                    path: './source/blockly/', 
+                    toolbox: document.getElementById( self.options.toolbox ) 
+                } );            
             }
 
         },
