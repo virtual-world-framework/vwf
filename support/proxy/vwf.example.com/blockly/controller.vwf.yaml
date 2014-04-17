@@ -18,18 +18,45 @@
 
 --- 
 extends:
-  http://vwf.example.com/node3.vwf
+  http://vwf.example.com/node3/animation.vwf
 properties:
   forwardSpeed: 400
   rotateSpeed: 30
   animationTime: 1
+  showButton: 
+    set: |
+      this.showButton = value;
+      if ( this.children[ this.moniker+"Blockly" ] ) {
+        this.children[ this.moniker+"Blockly" ].visible = value;
+      } 
+    value: true
+events:
+  toggleBlocklyUI:
 methods:
   getWorldXYVector:
   executeBlocklyCmd:
+  createBlocklyButton:
 scripts:
 - |
     this.initialize = function() {
-      //console.info( "initialize ==> blockly-controller.vwf" )
+      //if ( this.showButton ) { 
+      this.createBlocklyButton();
+      //}
+    }
+    this.createBlocklyButton = function() {
+      var buttonDef = { 
+        "extends": "http://vwf.example.com/node3.vwf",
+        "source": "assets/3d/Blockly.DAE",
+        "type": "model/vnd.collada+xml",
+        "properties": {
+          "translation": [0,0,70],
+          "scale": [12,12,12]
+        },
+        scripts: [ "this.pointerClick=function(pointerInfo,pickInfo){this.parent.toggleBlocklyUI();}" ]
+      }
+      this.children.create( this.moniker+"Blockly", buttonDef, function( child ) {
+        child.visible = this.showButton; 
+      } );      
     }
 
     this.getWorldXYVector = function( x, y ) {
