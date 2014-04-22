@@ -1856,7 +1856,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
                     for ( var i = 0; i < objectIDs.length; i++ ) {
 
-                        if ( this.state.nodes.hasOwnProperty( objectIDs[i] ) ) {
+                        if ( this.state.nodes[ objectIDs[i] ] ) {
 
                             var object = this.state.nodes[ objectIDs[i] ].threeObject;
                             objects.push( object );
