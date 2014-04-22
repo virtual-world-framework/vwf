@@ -163,6 +163,14 @@ methods:
   lastActiveCameraID:
   findByID:
   isChildOf:
+  raycast:
+    parameters:
+      - origin
+      - direction
+      - near
+      - far
+      - recursive
+      - objectIDs
 scripts:
 - |
     this.activeCameraComp = undefined;

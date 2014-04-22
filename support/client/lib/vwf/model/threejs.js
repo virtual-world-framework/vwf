@@ -1777,7 +1777,117 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
         // -- callingMethod --------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        callingMethod: function( nodeID, methodName, parameters /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+
+            if ( methodName === "raycast" ) {
+
+                var origin, direction, near, far, recursive, objectIDs;
+
+                if ( parameters ) {
+
+                    if ( parameters[0] instanceof THREE.Vector3 ) {
+
+                        origin = parameters[0];
+
+                    } else if ( parameters[0] instanceof Array && parameters[0].length === 3 ) {
+
+                        var x, y, z;
+                        x = isNaN( parameters[0][0] ) ? 0 : parameters[0][0];
+                        y = isNaN( parameters[0][1] ) ? 0 : parameters[0][1];
+                        z = isNaN( parameters[0][2] ) ? 0 : parameters[0][2];
+                        origin = new THREE.Vector3( x, y, z );
+
+                    } else {
+
+                        origin = new THREE.Vector3();
+
+                    }
+
+                    if ( parameters[1] instanceof THREE.Vector3 ) {
+
+                        direction = parameters[1];
+
+                    } else if ( parameters[1] instanceof Array && parameters[1].length === 3 ) {
+
+                        var x, y, z;
+                        x = isNaN( parameters[1][0] ) ? 0 : parameters[1][0];
+                        y = isNaN( parameters[1][1] ) ? 0 : parameters[1][1];
+                        z = isNaN( parameters[1][2] ) ? 0 : parameters[1][2];
+                        direction = new THREE.Vector3( x, y, z );
+
+                    } else {
+
+                        direction = new THREE.Vector3();
+                        
+                    }
+
+                    near = isNaN( parameters[2] ) ? 0 : parameters[2];
+                    far = isNaN( parameters[3] ) ? Infinity : parameters[3];
+                    recursive = typeof parameters[4] === "boolean" ? parameters[4] : false;
+
+                    if ( parameters[5] instanceof Array ) {
+
+                        objectIDs = parameters[5];
+
+                    } else if ( typeof parameters[5] === "string" ) {
+
+                        objectIDs = new Array();
+                        objectIDs.push( parameters[5] );
+
+                    } else {
+
+                        objectIDs = null;
+                    }
+
+                } else {
+
+                    origin = new THREE.Vector3();
+                    direction = new THREE.Vector3();
+                    near = 0;
+                    far = Infinity;
+                    recursive = false;
+                    objectIDs = null;
+
+                }
+
+                var objects = new Array();
+
+                if ( objectIDs !== null ) {
+
+                    for ( var i = 0; i < objectIDs.length; i++ ) {
+
+                        var object = this.state.nodes[ objectIDs[i] ];
+
+                        if ( object !== undefined && object.threeObject !== undefined ) {
+
+                            objects.push( object.threeObject );
+
+                        }
+
+                    }
+
+                } else {
+
+                    for ( nodeID in this.state.nodes ) {
+
+                        var object = this.state.nodes[ nodeID ];
+
+                        if ( object.threeObject !== undefined ) {
+
+                            objects.push( object.threeObject );
+
+                        }
+
+                    }
+
+                }
+
+                var raycaster = new THREE.Raycaster( origin, direction, near, far );
+                var intersects = raycaster.intersectObjects( objects, recursive );
+                return intersects;
+
+            }
+
             return undefined;
         },
 
