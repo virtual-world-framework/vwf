@@ -1856,10 +1856,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
                     for ( var i = 0; i < objectIDs.length; i++ ) {
 
-                        if ( this.state.nodes[ objectIDs[i] ] ) {
+                        var object = this.state.nodes[ objectIDs[i] ];
 
-                            var object = this.state.nodes[ objectIDs[i] ].threeObject;
-                            objects.push( object );
+                        if ( object !== undefined && object.threeObject !== undefined ) {
+
+                            objects.push( object.threeObject );
+
                         }
 
                     }
@@ -1868,7 +1870,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
                     for ( nodeID in this.state.nodes ) {
 
-                        objects.push( this.state.nodes[ nodeID ].threeObject );
+                        var object = this.state.nodes[ nodeID ];
+
+                        if ( object.threeObject !== undefined ) {
+
+                            objects.push( object.threeObject );
+
+                        }
 
                     }
 
