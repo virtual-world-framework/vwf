@@ -1799,7 +1799,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
                     } else {
 
-                        origin = new THRE.Vector3();
+                        origin = new THREE.Vector3();
 
                     }
 
@@ -1817,7 +1817,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
                     } else {
 
-                        direction = new THRE.Vector3();
+                        direction = new THREE.Vector3();
                         
                     }
 
