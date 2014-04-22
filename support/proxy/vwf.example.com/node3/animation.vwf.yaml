@@ -369,7 +369,7 @@ methods:
       - transform
       - duration
     body: |
-      var startWorldTransform = this.worldTransform || goog.vec.Vec3.create();
+      var startWorldTransform = this.worldTransform || goog.vec.Mat4.create();
       var deltaTransform = this.transformFromValue( transform );
       // Left multiply by the delta
       var stopWorldTransform = goog.vec.Mat4.multMat( deltaTransform, startWorldTransform, 
