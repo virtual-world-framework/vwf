@@ -108,7 +108,9 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                     name: childName,
                     loadComplete: callback,
                     prototypes: protos,
-                    blocks: "<xml></xml>"
+                    blocks: "<xml></xml>",
+                    code: undefined
+
                 };
             }; 
 

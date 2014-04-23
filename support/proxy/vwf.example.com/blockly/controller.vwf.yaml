@@ -43,6 +43,7 @@ methods:
   getWorldXYVector:
   executeBlocklyCmd:
   createBlocklyButton:
+  blockContentChanged:
 scripts:
 - |
     this.initialize = function() {
@@ -65,6 +66,10 @@ scripts:
       } );      
     }
 
+    this.blockContentChanged = function( blockCount ) {
+      console.info( "blockly.controller - blockContentChanged( "+blockCount+" )" );
+    }
+
     this.getWorldXYVector = function( x, y ) {
 
       var dir = goog.vec.Vec3.create();
@@ -84,26 +89,20 @@ scripts:
 
     this.executeBlocklyCmd = function( cmd, magnitude, time ) {
 
-      console.info( "executeBlocklyCmd( "+cmd+", "+magnitude+", "+time+" )" );
+      console.info( "blockly.controller - executeBlocklyCmd( "+cmd+", "+magnitude+", "+time+" )" );
       var dir = undefined;
       var speed, angle, t;
 
       switch( cmd ) {
 
-        case "moveForward":
+        case "translateBy":
           dir = this.getWorldXYVector( 0, -1 );
           speed = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.forwardSpeed;
           t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
           this.translateBy( [ dir[ 0 ] * speed, dir[ 1 ] * speed, 0 ], t );
           break;
 
-        case "turnRight":
-          angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
-          this.rotateBy( [ 0, 0, 1, -angle ], t );
-          break;
-
-        case "turnLeft":
+        case "rotateBy":
           angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
           t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
           this.rotateBy( [ 0, 0, 1, angle ], t );
