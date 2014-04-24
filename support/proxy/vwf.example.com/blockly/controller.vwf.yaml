@@ -45,12 +45,12 @@ properties:
       }
     value: 0
   allowedBlocks: 20   
-events:
-  toggleBlocklyUI:
 methods:
   getWorldXYVector:
   executeBlocklyCmd:
   createBlocklyButton:
+events:
+  toggleBlocklyUI:
   blockCountChanged:
 scripts:
 - |
@@ -72,10 +72,6 @@ scripts:
       this.children.create( this.moniker+"Blockly", buttonDef, function( child ) {
         child.visible = this.showButton; 
       } );      
-    }
-
-    this.blockCountChanged = function( bc ) {
-      //console.info( "blockly.controller - blockCountChanged( "+bc+" )" );
     }
 
     this.getWorldXYVector = function( x, y ) {
