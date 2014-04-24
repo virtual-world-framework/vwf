@@ -95,25 +95,57 @@ scripts:
 
     }
 
-    this.executeBlocklyCmd = function( cmd, magnitude, time ) {
+    this.executeBlocklyCmd = function( cmd, value, time ) {
 
-      //console.info( "blockly.controller - executeBlocklyCmd( "+cmd+", "+magnitude+", "+time+" )" );
       var dir = undefined;
       var speed, angle, t;
 
       switch( cmd ) {
 
         case "translateBy":
-          dir = this.getWorldXYVector( 0, -1 );
-          speed = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.forwardSpeed;
+          //dir = this.getWorldXYVector( 0, -1 );
+          //speed = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.forwardSpeed;
           t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
-          this.translateBy( [ dir[ 0 ] * speed, dir[ 1 ] * speed, 0 ], t );
+          //this.translateBy( [ dir[ 0 ] * speed, dir[ 1 ] * speed, 0 ], t );
+          this.translateBy( value, t );
+          break;
+
+        case "translateTo":
+          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          this.translateBy( value, t );
           break;
 
         case "rotateBy":
-          angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
+          //angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
           t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
-          this.rotateBy( [ 0, 0, 1, angle ], t );
+          this.rotateBy( value, t );
+          break;
+
+        case "rotateTo":
+          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          this.rotateTo( value, t );
+          break;
+
+        case "quaterniateBy":
+          //angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          this.quaterniateBy( value, t );
+          break;
+
+        case "quaterniateTo":
+          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          this.quaterniateTo( value, t );
+          break;
+
+        case "scaleBy":
+          //angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          this.scaleBy( value, t );
+          break;
+
+        case "scaleTo":
+          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          this.scaleTo( value, t );
           break;
 
         default:
