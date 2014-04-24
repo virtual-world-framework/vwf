@@ -36,13 +36,22 @@ properties:
       if ( this.children[ this.moniker+"Blockly" ] ) {
         this.children[ this.moniker+"Blockly" ].transform = value;
       }
-    value: [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]     
-events:
-  toggleBlocklyUI:
+    value: [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
+  blockCount:
+    set: |
+      if ( this.blockCount != value ) {
+        this.blockCount = value;
+        this.blockCountChanged( value );
+      }
+    value: 0
+  allowedBlocks: 20   
 methods:
   getWorldXYVector:
   executeBlocklyCmd:
   createBlocklyButton:
+events:
+  toggleBlocklyUI:
+  blockCountChanged:
 scripts:
 - |
     this.initialize = function() {
@@ -82,31 +91,57 @@ scripts:
 
     }
 
-    this.executeBlocklyCmd = function( cmd, magnitude, time ) {
+    this.executeBlocklyCmd = function( cmd, value, time ) {
 
-      console.info( "executeBlocklyCmd( "+cmd+", "+magnitude+", "+time+" )" );
       var dir = undefined;
       var speed, angle, t;
 
       switch( cmd ) {
 
-        case "moveForward":
-          dir = this.getWorldXYVector( 0, -1 );
-          speed = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.forwardSpeed;
+        case "translateBy":
+          //dir = this.getWorldXYVector( 0, -1 );
+          //speed = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.forwardSpeed;
           t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
-          this.translateBy( [ dir[ 0 ] * speed, dir[ 1 ] * speed, 0 ], t );
+          //this.translateBy( [ dir[ 0 ] * speed, dir[ 1 ] * speed, 0 ], t );
+          this.translateBy( value, t );
           break;
 
-        case "turnRight":
-          angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
+        case "translateTo":
           t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
-          this.rotateBy( [ 0, 0, 1, -angle ], t );
+          this.translateBy( value, t );
           break;
 
-        case "turnLeft":
-          angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
+        case "rotateBy":
+          //angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
           t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
-          this.rotateBy( [ 0, 0, 1, angle ], t );
+          this.rotateBy( value, t );
+          break;
+
+        case "rotateTo":
+          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          this.rotateTo( value, t );
+          break;
+
+        case "quaterniateBy":
+          //angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          this.quaterniateBy( value, t );
+          break;
+
+        case "quaterniateTo":
+          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          this.quaterniateTo( value, t );
+          break;
+
+        case "scaleBy":
+          //angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          this.scaleBy( value, t );
+          break;
+
+        case "scaleTo":
+          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          this.scaleTo( value, t );
           break;
 
         default:

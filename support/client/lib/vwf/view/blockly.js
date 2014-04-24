@@ -86,12 +86,21 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
 
         initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName ) {
             
+            self = this;
+
             if ( childID == this.kernel.application() ) {
                 
                 Blockly.inject( document.getElementById( self.options.divName ), { 
                     path: this.options.blocklyPath,
                     toolbox: document.getElementById( self.options.toolbox ) 
-                } );            
+                } ); 
+
+                Blockly.addChangeListener( function() {
+                    if ( self.state.blockly.node !== undefined ) {
+                        var blockCount = Blockly.mainWorkspace.getAllBlocks().length;
+                        self.kernel.setProperty( self.state.blockly.node.ID, "blockCount", blockCount );
+                    }
+                });           
             }
 
         },
@@ -129,6 +138,18 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
 
         satProperty: function ( nodeID, propertyName, propertyValue ) {
             var node = this.state.nodes[ nodeID ];
+
+            //this.logger.infox( "S === satProperty ", nodeID, propertyName, propertyValue );
+
+            // hack to set the initial blockly node for the UI
+            if ( nodeID == this.kernel.application() ) {
+                if ( propertyName == "blocklyUiNodeID" ) {
+                    if ( this.state.nodes[ propertyValue ] !== undefined ) {
+                        this.state.blockly.node = this.state.nodes[ propertyValue ];
+                    }
+                }
+            } 
+
             if ( node ) {
 
             }         
@@ -179,6 +200,9 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                 var executeNextLine = false;
 
                 if ( codeLine == -1 ) {
+                    //if ( Blockly.JavaScript.vwfID === undefined ) {
+                    Blockly.JavaScript.vwfID = this.state.blockly.node ? this.state.blockly.node.ID : this.kernel.application();    
+                    //}
                     blockCode = Blockly.JavaScript.workspaceToCode().split( '\n' );
                     codeLine = 0;
                     lastLineExeTime = vwfTime;
@@ -239,6 +263,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
         if ( xml ) { 
             node.blocks = Blockly.Xml.domToText( xml );
         }
+        node.code = Blockly.JavaScript.workspaceToCode();
         Blockly.mainWorkspace.clear();
     }
 
