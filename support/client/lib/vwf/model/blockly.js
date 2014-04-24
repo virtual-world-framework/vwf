@@ -47,6 +47,10 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                 this.state.prototypes = {};
             }
 
+            if ( this.state.blockly === undefined ) {
+                this.state.blockly = { "node": undefined };
+            }  
+
             this.state.executingBlocks = false;
 
             // turns on logger debugger console messages 
@@ -117,6 +121,8 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
             var node;
             if ( isBlockly3Node( childImplementsIDs ) ) {
                 this.state.nodes[ childID ] = node = createNode();
+
+                this.state.blockly.node = node;              
             }
 
         },

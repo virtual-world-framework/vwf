@@ -86,6 +86,8 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
 
         initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName ) {
             
+            self = this;
+
             if ( childID == this.kernel.application() ) {
                 
                 Blockly.inject( document.getElementById( self.options.divName ), { 
@@ -93,18 +95,11 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                     toolbox: document.getElementById( self.options.toolbox ) 
                 } ); 
 
-
-                // generic event thrown for a change in the current blocks
-                // may want to implement this on the view side as well
                 Blockly.addChangeListener( function() {
-                    // figure out the active ID and get the current block total
-                    // set the RAM property
                     if ( self.state.blockly.node !== undefined ) {
-                        // get a block count
-                        var currentBlockCount = Blockly.mainWorkspace.getAllBlocks();
-                        self.kernel.callMethod( self.state.blockly.node.ID, "blockContentChanged", [ currentBlockCount ] );
+                        var blockCount = Blockly.mainWorkspace.getAllBlocks().length;
+                        self.kernel.setProperty( self.state.blockly.node.ID, "blockCount", blockCount );
                     }
-
                 });           
             }
 
@@ -143,7 +138,9 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
 
         satProperty: function ( nodeID, propertyName, propertyValue ) {
             var node = this.state.nodes[ nodeID ];
-            
+
+            //this.logger.infox( "S === satProperty ", nodeID, propertyName, propertyValue );
+
             // hack to set the initial blockly node for the UI
             if ( nodeID == this.kernel.application() ) {
                 if ( propertyName == "blocklyUiNodeID" ) {
@@ -203,6 +200,9 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                 var executeNextLine = false;
 
                 if ( codeLine == -1 ) {
+                    //if ( Blockly.JavaScript.vwfID === undefined ) {
+                    Blockly.JavaScript.vwfID = this.state.blockly.node ? this.state.blockly.node.ID : this.kernel.application();    
+                    //}
                     blockCode = Blockly.JavaScript.workspaceToCode().split( '\n' );
                     codeLine = 0;
                     lastLineExeTime = vwfTime;
