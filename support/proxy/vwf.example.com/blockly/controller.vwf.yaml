@@ -50,7 +50,6 @@ methods:
   executeBlocklyCmd:
   createBlocklyButton:
 events:
-  toggleBlocklyUI:
   blockCountChanged:
 scripts:
 - |
@@ -67,7 +66,7 @@ scripts:
         "properties": {
           "transform": this.buttonTransform
         },
-        scripts: [ "this.pointerClick=function(pointerInfo,pickInfo){this.parent.toggleBlocklyUI();}" ]
+        scripts: [ "this.pointerClick=function(pointerInfo,pickInfo){var scene=this.find('/')[0];if(scene){scene.blocklyUiNodeID=this.parent.id;} }" ]
       }
       this.children.create( this.moniker+"Blockly", buttonDef, function( child ) {
         child.visible = this.showButton; 

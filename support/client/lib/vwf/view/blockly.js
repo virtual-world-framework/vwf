@@ -137,22 +137,38 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
         // -- satProperty ------------------------------------------------------------------------------
 
         satProperty: function ( nodeID, propertyName, propertyValue ) {
+            
             var node = this.state.nodes[ nodeID ];
 
             //this.logger.infox( "S === satProperty ", nodeID, propertyName, propertyValue );
-
-            // hack to set the initial blockly node for the UI
-            if ( nodeID == this.kernel.application() ) {
-                if ( propertyName == "blocklyUiNodeID" ) {
-                    if ( this.state.nodes[ propertyValue ] !== undefined ) {
-                        this.state.blockly.node = this.state.nodes[ propertyValue ];
-                    }
-                }
-            } 
-
             if ( node ) {
 
-            }         
+            } 
+
+            if ( nodeID == this.kernel.application() ) {
+                
+                if ( propertyName == "blocklyUiNodeID" ) {
+                    if ( propertyValue !== undefined && this.state.nodes[ propertyValue ] !== undefined ) {
+                        node = this.state.nodes[ propertyValue ];
+                        if ( this.state.blockly.node !== undefined ) {
+                            getBlockXML( this.state.blockly.node );
+                            hideBlocklyUI( this.state.blockly.node );                            
+                        } 
+                        this.state.blockly.node = node;
+                        setBlockXML( node.blocks );
+                        showBlocklyUI( node );                        
+                    } else {
+                        if ( this.state.blockly.node !==undefined ) {
+                            getBlockXML( this.state.blockly.node );
+                            hideBlocklyUI( this.state.blockly.node );
+                            this.state.blockly.node = undefined;                            
+                        } 
+                    }
+                }
+
+            } 
+
+        
         },
 
         // -- gotProperty ------------------------------------------------------------------------------
@@ -171,29 +187,29 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
             
             //console.info( "firedEvent( "+nodeID+", "+eventName+", "+parameters+" )" );
 
-            var node = this.state.nodes[ nodeID ];
-            var show = true;
+            // var node = this.state.nodes[ nodeID ];
+            // var show = true;
 
-            switch ( eventName ) {
-                case "toggleBlocklyUI":
-                    if ( node === undefined ) {
-                        node = this.state.nodes[ parameters[0] ];
-                    }
-                    if ( node !== undefined ) {
-                        if ( this.state.blockly.node !== undefined ) {
-                            show = ( this.state.blockly.node !== node );
-                            getBlockXML( node );
-                            hideBlocklyUI( this.state.blockly.node );
-                            this.state.blockly.node = undefined;
-                        } 
-                        if ( show ) {
-                            this.state.blockly.node = node;
-                            setBlockXML( node.blocks );
-                            showBlocklyUI( node );
-                        }
-                    }
-                    break;
-            }  
+            // switch ( eventName ) {
+            //     case "toggleBlocklyUI":
+            //         if ( node === undefined ) {
+            //             node = this.state.nodes[ parameters[0] ];
+            //         }
+            //         if ( node !== undefined ) {
+            //             if ( this.state.blockly.node !== undefined ) {
+            //                 show = ( this.state.blockly.node !== node );
+            //                 getBlockXML( node );
+            //                 hideBlocklyUI( this.state.blockly.node );
+            //                 this.state.blockly.node = undefined;
+            //             } 
+            //             if ( show ) {
+            //                 this.state.blockly.node = node;
+            //                 setBlockXML( node.blocks );
+            //                 showBlocklyUI( node );
+            //             }
+            //         }
+            //         break;
+            // }  
         },
 
         // -- ticked -----------------------------------------------------------------------------------
@@ -203,9 +219,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                 var executeNextLine = false;
 
                 if ( codeLine == -1 ) {
-                    //if ( Blockly.JavaScript.vwfID === undefined ) {
                     Blockly.JavaScript.vwfID = this.state.blockly.node ? this.state.blockly.node.ID : this.kernel.application();    
-                    //}
                     blockCode = Blockly.JavaScript.workspaceToCode().split( '\n' );
                     codeLine = 0;
                     lastLineExeTime = vwfTime;
