@@ -174,9 +174,12 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
             var node = this.state.nodes[ nodeID ];
             var show = true;
 
-            if ( node !== undefined ) {
-                switch ( eventName ) {
-                    case "toggleBlocklyUI":
+            switch ( eventName ) {
+                case "toggleBlocklyUI":
+                    if ( node === undefined ) {
+                        node = this.state.nodes[ parameters[0] ];
+                    }
+                    if ( node !== undefined ) {
                         if ( this.state.blockly.node !== undefined ) {
                             show = ( this.state.blockly.node !== node );
                             getBlockXML( node );
@@ -188,9 +191,9 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                             setBlockXML( node.blocks );
                             showBlocklyUI( node );
                         }
-                        break;
-                }  
-            }
+                    }
+                    break;
+            }  
         },
 
         // -- ticked -----------------------------------------------------------------------------------
