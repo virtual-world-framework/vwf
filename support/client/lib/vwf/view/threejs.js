@@ -50,7 +50,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         initialize: function( options ) {
             
             self = this;
-
+            this.events = {};
             checkCompatibility.call(this);
 
             this.state.appInitialized = false;
@@ -389,7 +389,52 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         render: function(renderer, scene, camera) {
             renderer.render(scene, camera);
         },
-    
+        trigger: function(name,args)
+        {
+            if(!this.args)
+            this.args = [null];
+            for(var i = 0; i < args.length; i++)
+                this.args[i+1] = args[i];
+
+            var queue = this.events[name];
+            if(!queue) return;
+            for(var i = 0; i < queue.length; i++)
+            {
+                this.events[name][i].apply(this,this.args);
+            }
+
+        },
+        bind:function (name,func)
+        {
+
+            if(!this.events)
+                this.events = {};
+            if(!this.events[name])
+                this.events[name] = [];
+            this.events[name].push(func);
+            return this.events[name].length -1;
+        },
+        unbind:function (name,func)
+        {
+            
+            var queue = this.events[name];
+            if(!queue) return;
+
+            if(func instanceof Number)
+                queue.splice(func,1);
+            else
+            {
+                func = queue.indexOf(func);
+                if(func != -1)
+                    queue.splice(func,1);
+            }
+        },
+        getCamera: function()
+        {
+            if( !this.activeCamera)
+                return this.state.scenes['index-vwf'].camera.threeJScameras[this.state.scenes['index-vwf'].camera.ID];
+            return this.activeCamera;   
+        },
     } );
 
     // private ===============================================================================
@@ -609,7 +654,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
             // Schedule the next render
             window.requestAnimationFrame( renderScene ); 
-
+            _dView.trigger('prerender',[]);
             // Verify that there is a camera to render from before going any farther
             var camera = self.state.cameraInUse;
             if ( !camera ) {
@@ -946,7 +991,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             if ( pickInfo ) {
                 var nml;
                 if ( pickInfo.face ) {
-                    nml = pickInfo.face.normal
+                    nml = pickInfo.face.norm;
                     localPickNormal = goog.vec.Vec3.createFloat32FromValues( nml.x, nml.y, nml.z );
                 } else if ( pickInfo.normal ) {
                     nml = pickInfo.normal;
@@ -1006,7 +1051,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
                     // transform the global normal into local
                     if ( transform && pickInfo && pickInfo.face ) {
-                        localNormal = goog.vec.Mat4.multVec3Projective( transform, pickInfo.face.normal, 
+                        localNormal = goog.vec.Mat4.multVec3Projective( transform, pickInfo.face.norm, 
                             goog.vec.Vec3.create() );
                     } else {
                         localNormal = undefined;  
@@ -2290,60 +2335,80 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
     function ThreeJSPick( canvas, sceneNode, debug )
     {
-        if(!this.lastEventData) return;
-
-        var threeCam = this.state.cameraInUse;
-        if ( !threeCam ) {
-            this.logger.errorx( "Cannot perform pick because there is no camera to pick from" );
-            return;
-        }
-
-        if(!this.raycaster) this.raycaster = new THREE.Raycaster();
+       if(!this.lastEventData) return;
+        
+        if(!this.pickOptionsAvatar) this.pickOptionsAvatar = {filter:function(o){return !(o.isAvatar === true)}};
+        if(!this.pickOptions) this.pickOptions = {};
+        
+        var threeCam = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
+        if(!this.ray) this.ray = new THREE.Ray();
         if(!this.projector) this.projector = new THREE.Projector();
+        if(!this.directionVector) this.directionVector = new THREE.Vector3();
         
-        var SCREEN_HEIGHT = window.innerHeight;
-        var SCREEN_WIDTH = window.innerWidth;
-
-        var mousepos = { x: this.lastEventData.eventData[0].position[0], y: this.lastEventData.eventData[0].position[1] }; // window coordinates
-        //mousepos = utility.coordinates.contentFromWindow( canvas, mousepos ); // canvas coordinates
-
-        var x = ( mousepos.x ) * 2 - 1;
-        var y = -( mousepos.y ) * 2 + 1;
-
-        pickDirectionVector = new THREE.Vector3();
         
-        //console.info( "mousepos = " + x + ", " + y );
-        pickDirectionVector.set( x, y, 0.5 );
+        var x = ( this.lastEventData.eventData[0].screenPosition[0] / $('#index-vwf').width() ) * 2 - 1;
+        var y = -( this.lastEventData.eventData[0].screenPosition[1] / $('#index-vwf').height() ) * 2 + 1;
+      
         
-        this.projector.unprojectVector( pickDirectionVector, threeCam);
+        this.directionVector.set(x, y, .5);
+        
+        this.projector.unprojectVector(this.directionVector, threeCam);
         var pos = new THREE.Vector3();
-        pos.setFromMatrixPosition( threeCam.matrixWorld );
-        pickDirectionVector.sub(pos);
-        pickDirectionVector.normalize();
+        var pos2 = new THREE.Vector3();
+        pos2.x = threeCam.matrixWorld.elements[12];
+        pos2.y = threeCam.matrixWorld.elements[13];
+        pos2.z = threeCam.matrixWorld.elements[14];
+        pos.copy(pos2);
+        this.directionVector.sub(pos);
+        this.directionVector.normalize();
         
-        this.raycaster.set( pos, pickDirectionVector );
-        var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
-        var target = undefined;
-
-        // intersections are, by default, ordered by distance,
-        // so we only care for the first (visible) one. The intersection
-        // object holds the intersection point, the face that's
-        // been "hit" by the ray, and the object to which that
-        // face belongs. We only care for the object itself.
-
-        // Cycle through the list of intersected objects and return the first visible one
-        for ( var i = 0; i < intersects.length && target === undefined; i++ ) {
-            if ( debug ) {
-                for ( var i = 0; i < intersects.length; i++ ) { 
-                    console.info( i + ". " + intersects[i].object.name ) 
+        
+        
+        var intersects;
+        if(!sceneNode.threeScene.CPUPick || !_SceneManager)
+        {
+            this.ray.set(pos, this.directionVector);
+            var caster = new THREE.Raycaster(pos,directionVector);
+            intersects = caster.intersectObjects(sceneNode.threeScene.children, true);
+            if (intersects.length) {
+            // intersections are, by default, ordered by distance,
+            // so we only care for the first one. The intersection
+            // object holds the intersection point, the face that's
+            // been "hit" by the ray, and the object to which that
+            // face belongs. We only care for the object itself.
+            var target = intersects[0].object;
+            
+            var ID = getPickObjectID.call(this,target);
+            
+            var found =  intersects[0];
+            var priority = -1;
+            var dist = 0;
+            
+            for(var i =0; i < intersects.length; i++)
+            {
+                if(intersects[i].object.visible == true)
+                {
+                    if(intersects[i].object.PickPriority === undefined)
+                        intersects[i].object.PickPriority = 0;
+                    if(intersects[i].object.PickPriority > priority)
+                    {
+                        found = intersects[i];
+                        priority = intersects[i].object.PickPriority;
+                    }
                 }
-            }   
-
-            if ( intersects[ i ].object.visible ) {
-                target = intersects[ i ];
             }
+            return found;
+            
+            
+            }
+    
+        }else
+        {
+        
+                intersects = _SceneManager.CPUPick([pos.x,pos.y,pos.z],[this.directionVector.x,this.directionVector.y,this.directionVector.z],this.pickOptions);
+
+            return intersects;
         }
-        return target;
     }
     function getPickObjectID(threeObject)
     {   

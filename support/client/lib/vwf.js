@@ -346,7 +346,8 @@
                 { library: "vwf/view/webrtc/adapter", active: false },
                 { library: "vwf/view/google-earth", active: false },
                 { library: "vwf/model/cesium/Cesium", active: false },
-                { library: "vwf/admin", active: true }
+                { library: "vwf/admin", active: true },
+                { library: "vwf/view/sandbox", active: false }
             ];
 
             var initializers = {
@@ -368,7 +369,8 @@
                     { library: "vwf/view/google-earth", active: false },
                     { library: "vwf/view/cesium", active: false },
                     { library: "vwf/view/blockly", active: false },
-                    { library: "vwf/view/webrtc", active: false}
+                    { library: "vwf/view/webrtc", active: false},
+                    { library: "vwf/view/sandbox", active: false }
                 ]
             };
             mapLibraryName(requireArray);

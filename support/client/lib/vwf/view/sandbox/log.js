@@ -1,0 +1,7 @@
+define({
+	initialize:function(div)
+	{
+		
+		
+	}
+});

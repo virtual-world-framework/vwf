@@ -61,6 +61,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
         initialize: function() {
             
+            $(document.head).append('<script type="text/javascript" src="vwf/model/threejs/MATH.js"></script>');
+            $(document.head).append('<script type="text/javascript" src="vwf/model/threejs/_THREERayTracer.js"></script>');
+            $(document.head).append('<script type="text/javascript" src="vwf/model/threejs/scenemanager.js"></script>');
+
             self = this;
 
             checkCompatibility.call(this);
@@ -2092,6 +2096,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         node.viewInited = false;
         node.modelInited = false;
         node.threeScene = new THREE.Scene();
+        _SceneManager.initialize();
         node.threeScene.name = "scene";
         node.pendingLoads = 0;
         node.srcAssetObjects = [];

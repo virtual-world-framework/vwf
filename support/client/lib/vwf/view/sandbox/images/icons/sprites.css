@@ -1,0 +1,317 @@
+.axis, .camera, .cameraIcon, .chat, .cone, .copy, .cube, .cylinder, .delete, .down, .duplicate, .firstperson, .folder, .free, .grid, .grid_icon, .hierarchy, .icon_belts_axis, .inventory, .left, .light_icon, .link, .localspace, .login, .logout, .material, .models, .move, .navigate, .ParticleIcon, .paste, .pick, .plane, .properties, .pyramid, .right, .rotate, .save, .scale, .scene, .script, .selectnone, .sphere, .target, .unlink, .up, .up_folder, .up2, .user, .users, .window, .worldspace{
+background-image: url(sprites.png) !important;
+background-origin: content-box !important;
+}
+
+.axis{
+	background-position: -185px -62px ;
+	width: 25px;
+	height: 25px;
+}
+
+.camera{
+	background-position: -156px -62px ;
+	width: 25px;
+	height: 25px;
+}
+
+.cameraIcon{
+	background-position: -126px -61px ;
+	width: 25px;
+	height: 25px;
+}
+
+.chat{
+	background-position: -94px -59px ;
+	width: 25px;
+	height: 25px;
+}
+
+.cone{
+	background-position: -61px -59px ;
+	width: 25px;
+	height: 25px;
+}
+
+.copy{
+	background-position: -30px -60px ;
+	width: 25px;
+	height: 25px;
+}
+
+.cube{
+	background-position: 0 -59px ;
+	width: 25px;
+	height: 25px;
+}
+
+.cylinder{
+	background-position: -609px -28px ;
+	width: 25px;
+	height: 25px;
+}
+
+.delete{
+	background-position: -579px -25px ;
+	width: 25px;
+	height: 25px;
+}
+
+.down{
+	background-position: -552px -26px ;
+	width: 25px;
+	height: 25px;
+}
+
+.duplicate{
+	background-position: -520px -28px ;
+	width: 25px;
+	height: 25px;
+}
+
+.firstperson{
+	background-position: -489px -28px ;
+	width: 25px;
+	height: 25px;
+}
+
+.folder{
+	background-position: -460px -29px ;
+	width: 25px;
+	height: 25px;
+}
+
+.free{
+	background-position: -430px -29px ;
+	width: 25px;
+	height: 25px;
+}
+
+.grid{
+	background-position: -401px -29px ;
+	width: 25px;
+	height: 25px;
+}
+
+.grid_icon{
+	background-position: -369px -29px ;
+	width: 25px;
+	height: 25px;
+}
+
+.hierarchy{
+	background-position: -339px -28px ;
+	width: 25px;
+	height: 25px;
+}
+
+.icon_belts_axis{
+	background-position: -312px -28px ;
+	width: 25px;
+	height: 25px;
+}
+
+.inventory{
+	background-position: -282px -29px ;
+	width: 25px;
+	height: 25px;
+}
+
+.left{
+	background-position: -254px -29px ;
+	width: 25px;
+	height: 25px;
+}
+
+.light_icon{
+	background-position: -230px -26px ;
+	width: 25px;
+	height: 25px;
+}
+
+.link{
+	background-position: -201px -30px ;
+	width: 25px;
+	height: 25px;
+}
+
+.localspace{
+	background-position: -174px -30px ;
+	width: 25px;
+	height: 25px;
+}
+
+.login{
+	background-position: -145px -29px ;
+	width: 25px;
+	height: 25px;
+}
+
+.logout{
+	background-position: -117px -29px ;
+	width: 25px;
+	height: 25px;
+}
+
+.material{
+	background-position: -87px -30px ;
+	width: 25px;
+	height: 25px;
+}
+
+.models{
+	background-position: -59px -27px ;
+	width: 25px;
+	height: 25px;
+}
+
+.move{
+	background-position: -29px -26px ;
+	width: 25px;
+	height: 25px;
+}
+
+.navigate{
+	background-position: 0 -28px ;
+	width: 25px;
+	height: 25px;
+}
+
+.ParticleIcon{
+	background-position: -605px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.paste{
+	background-position: -579px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.pick{
+	background-position: -548px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.plane{
+	background-position: -518px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.properties{
+	background-position: -488px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.pyramid{
+	background-position: -462px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.right{
+	background-position: -441px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.rotate{
+	background-position: -416px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.save{
+	background-position: -388px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.scale{
+	background-position: -360px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.scene{
+	background-position: -332px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.script{
+	background-position: -305px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.selectnone{
+	background-position: -276px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.sphere{
+	background-position: -248px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.target{
+	background-position: -219px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.unlink{
+	background-position: -194px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.up{
+	background-position: -166px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.up_folder{
+	background-position: -139px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.up2{
+	background-position: -111px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.user{
+	background-position: -87px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.users{
+	background-position: -58px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.window{
+	background-position: -27px 0;
+	width: 25px;
+	height: 25px;
+}
+
+.worldspace{
+	background-position: 0 0;
+	width: 25px;
+	height: 25px;
+}
+
