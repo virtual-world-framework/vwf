@@ -77,6 +77,20 @@ methods:
 
   # previous:
 
+  # ## Method that contains the success criteria to be checked when a listened-for event occurs
+  # ## 
+  # ## @name lesson.task.vwf#checkForSuccess
+  # ## @function  
+
+  checkForSuccess:
+
+  # ## Method that contains the failure criteria to be checked when a listened-for event occurs
+  # ## 
+  # ## @name lesson.task.vwf#checkForFailure
+  # ## @function  
+
+  checkForFailure:
+
 events:
 
   ## Event fired on the task to let itself and others know that it is beginning
@@ -92,6 +106,13 @@ events:
   ## @event
 
   completed:
+
+  ## Event fired by the task to signify that the user failed at the task
+  ## 
+  ## @name lesson.task.vwf#failed
+  ## @event
+
+  failed:
 
   ## Event fired on the task to let it and others know that it is ending
   ## 
