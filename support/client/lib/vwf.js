@@ -1062,7 +1062,7 @@
             // Note that the message should be validated before looking up and invoking an arbitrary
             // handler.
 
-            var args = [];
+            var args = [], result;
 
             if ( nodeID || nodeID === 0 ) args.push( nodeID );
             if ( memberName ) args.push( memberName );
@@ -1070,7 +1070,12 @@
 
             // Invoke the action.
 
-            var result = this[actionName] && this[actionName].apply( this, args );
+            if ( origin !== "reflector" || ! nodeID || nodes.existing[ nodeID ] ) {
+                result = this[ actionName ] && this[ actionName ].apply( this, args );
+            } else {
+                this.logger.debugx( "receive", "ignoring reflector action on non-existent node", nodeID );
+                result = undefined;
+            }
 
             // Return the result.
 
