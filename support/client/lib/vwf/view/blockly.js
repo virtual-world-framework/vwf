@@ -141,9 +141,6 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
             var node = this.state.nodes[ nodeID ];
 
             //this.logger.infox( "S === satProperty ", nodeID, propertyName, propertyValue );
-            if ( node ) {
-
-            } 
 
             if ( nodeID == this.kernel.application() ) {
                 
@@ -154,19 +151,19 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                         node = this.state.nodes[ propertyValue ];
                         if ( this.state.blockly.node !== undefined ) {
                             getBlockXML( this.state.blockly.node );
-                            showBlocklyUI( this.state.blockly.node, false ); 
+                            setBlocklyUIVisibility( this.state.blockly.node, false ); 
                             show = ( this.state.blockly.node.ID !== propertyValue );
                             this.state.blockly.node = undefined;                           
                         } 
                         if ( show ) {
                             this.state.blockly.node = node;
                             setBlockXML( node.blocks );
-                            showBlocklyUI( node, true );
+                            setBlocklyUIVisibility( node, true );
                         }                        
                     } else {
                         if ( this.state.blockly.node !== undefined ) {
                             getBlockXML( this.state.blockly.node );
-                            showBlocklyUI( this.state.blockly.node, false );
+                            setBlocklyUIVisibility( this.state.blockly.node, false );
                             this.state.blockly.node = undefined;                            
                         } 
                     }
@@ -265,7 +262,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
     }
 
 
-    function showBlocklyUI( node, show ) {
+    function setBlocklyUIVisibility( node, show ) {
         var div = document.getElementById( self.options.divParent ); {
             div.style.visibility = show ? 'visible' : 'hidden';
         }
