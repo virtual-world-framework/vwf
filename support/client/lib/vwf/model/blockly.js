@@ -122,7 +122,7 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
             if ( isBlockly3Node( childImplementsIDs ) ) {
                 this.state.nodes[ childID ] = node = createNode();
 
-                this.state.blockly.node = node;              
+                //this.state.blockly.node = node;              
             }
 
         },

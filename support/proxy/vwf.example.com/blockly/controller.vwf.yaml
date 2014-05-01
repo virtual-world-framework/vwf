@@ -51,6 +51,7 @@ methods:
   createBlocklyButton:
 events:
   blockCountChanged:
+  blocklyVisibleChanged:
 scripts:
 - |
     this.initialize = function() {
@@ -59,6 +60,14 @@ scripts:
       //}
     }
     this.createBlocklyButton = function() {
+      
+      var script = "this.pointerClick = function( pointerInfo, pickInfo ) {"+
+        "var scene = this.find( '/' )[ 0 ];"+
+        "if ( scene ) {"+
+          "scene.blocklyUiNodeID = this.parent.id;"+
+        "}"+
+      "}";
+
       var buttonDef = { 
         "extends": "http://vwf.example.com/node3.vwf",
         "source": "assets/3d/Blockly.DAE",
@@ -66,7 +75,7 @@ scripts:
         "properties": {
           "transform": this.buttonTransform
         },
-        scripts: [ "this.pointerClick=function(pointerInfo,pickInfo){var scene=this.find('/')[0];if(scene){scene.blocklyUiNodeID=this.parent.id;} }" ]
+        scripts: [ script ]
       }
       this.children.create( this.moniker+"Blockly", buttonDef, function( child ) {
         child.visible = this.showButton; 
