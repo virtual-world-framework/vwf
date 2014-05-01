@@ -51,7 +51,6 @@ properties:
 methods:
   getWorldXYVector:
   executeBlocklyCmd:
-  createBlocklyButton:
 events:
   blockCountChanged:
   blocklyVisibleChanged:
