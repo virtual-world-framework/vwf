@@ -37,6 +37,9 @@ properties:
         this.children[ this.moniker+"Blockly" ].transform = value;
       }
     value: [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
+  # needs to be moved from index.vwf.yaml, but will require additional changes
+  # will do in another branch, when this one is merged back to master
+  #executing: false
   blockCount:
     set: |
       if ( this.blockCount != value ) {
@@ -48,32 +51,11 @@ properties:
 methods:
   getWorldXYVector:
   executeBlocklyCmd:
-  createBlocklyButton:
 events:
-  toggleBlocklyUI:
   blockCountChanged:
+  blocklyVisibleChanged:
 scripts:
 - |
-    this.initialize = function() {
-      //if ( this.showButton ) { 
-      this.createBlocklyButton();
-      //}
-    }
-    this.createBlocklyButton = function() {
-      var buttonDef = { 
-        "extends": "http://vwf.example.com/node3.vwf",
-        "source": "assets/3d/Blockly.DAE",
-        "type": "model/vnd.collada+xml",
-        "properties": {
-          "transform": this.buttonTransform
-        },
-        scripts: [ "this.pointerClick=function(pointerInfo,pickInfo){this.parent.toggleBlocklyUI();}" ]
-      }
-      this.children.create( this.moniker+"Blockly", buttonDef, function( child ) {
-        child.visible = this.showButton; 
-      } );      
-    }
-
     this.getWorldXYVector = function( x, y ) {
 
       var dir = goog.vec.Vec3.create();

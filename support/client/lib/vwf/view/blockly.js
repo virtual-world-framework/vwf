@@ -137,61 +137,57 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
         // -- satProperty ------------------------------------------------------------------------------
 
         satProperty: function ( nodeID, propertyName, propertyValue ) {
+            
             var node = this.state.nodes[ nodeID ];
 
             //this.logger.infox( "S === satProperty ", nodeID, propertyName, propertyValue );
 
-            // hack to set the initial blockly node for the UI
             if ( nodeID == this.kernel.application() ) {
+                
                 if ( propertyName == "blocklyUiNodeID" ) {
-                    if ( this.state.nodes[ propertyValue ] !== undefined ) {
-                        this.state.blockly.node = this.state.nodes[ propertyValue ];
-                    }
-                }
-            } 
-
-            if ( node ) {
-
-            }         
-        },
-
-        // -- gotProperty ------------------------------------------------------------------------------
-
-        gotProperty: function ( nodeID, propertyName, propertyValue ) { 
-        },
-
-        // -- calledMethod -----------------------------------------------------------------------------
-
-        calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
-        },
-
-        // -- firedEvent -----------------------------------------------------------------------------
-
-        firedEvent: function( nodeID, eventName, parameters ) {
-            
-            //console.info( "firedEvent( "+nodeID+", "+eventName+", "+parameters+" )" );
-
-            var node = this.state.nodes[ nodeID ];
-            var show = true;
-
-            if ( node !== undefined ) {
-                switch ( eventName ) {
-                    case "toggleBlocklyUI":
+                    
+                    if ( propertyValue !== undefined && this.state.nodes[ propertyValue ] !== undefined ) {
+                        var show = true;
+                        node = this.state.nodes[ propertyValue ];
                         if ( this.state.blockly.node !== undefined ) {
-                            show = ( this.state.blockly.node !== node );
-                            getBlockXML( node );
-                            hideBlocklyUI( this.state.blockly.node );
-                            this.state.blockly.node = undefined;
+                            getBlockXML( this.state.blockly.node );
+                            setBlocklyUIVisibility( this.state.blockly.node, false ); 
+                            show = ( this.state.blockly.node.ID !== propertyValue );
+                            this.state.blockly.node = undefined;                           
                         } 
                         if ( show ) {
                             this.state.blockly.node = node;
                             setBlockXML( node.blocks );
-                            showBlocklyUI( node );
-                        }
-                        break;
-                }  
-            }
+                            setBlocklyUIVisibility( node, true );
+                        }                        
+                    } else {
+                        if ( this.state.blockly.node !== undefined ) {
+                            getBlockXML( this.state.blockly.node );
+                            setBlocklyUIVisibility( this.state.blockly.node, false );
+                            this.state.blockly.node = undefined;                            
+                        } 
+                    }
+                }
+
+            } 
+
+        
         },
+
+        // -- gotProperty ------------------------------------------------------------------------------
+
+        // gotProperty: function ( nodeID, propertyName, propertyValue ) { 
+        // },
+
+        // -- calledMethod -----------------------------------------------------------------------------
+
+        // calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+        // },
+
+        // -- firedEvent -----------------------------------------------------------------------------
+
+        // firedEvent: function( nodeID, eventName, parameters ) {
+        // },
 
         // -- ticked -----------------------------------------------------------------------------------
 
@@ -200,9 +196,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                 var executeNextLine = false;
 
                 if ( codeLine == -1 ) {
-                    //if ( Blockly.JavaScript.vwfID === undefined ) {
                     Blockly.JavaScript.vwfID = this.state.blockly.node ? this.state.blockly.node.ID : this.kernel.application();    
-                    //}
                     blockCode = Blockly.JavaScript.workspaceToCode().split( '\n' );
                     codeLine = 0;
                     lastLineExeTime = vwfTime;
@@ -267,17 +261,12 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
         Blockly.mainWorkspace.clear();
     }
 
-    function hideBlocklyUI( node ) {
-        var div = document.getElementById( self.options.divParent );
-        if ( div ) {
-            div.style.visibility = 'hidden';
-        }       
-    }
 
-    function showBlocklyUI( node ) {
+    function setBlocklyUIVisibility( node, show ) {
         var div = document.getElementById( self.options.divParent ); {
-            div.style.visibility = 'visible';
+            div.style.visibility = show ? 'visible' : 'hidden';
         }
+        self.kernel.fireEvent( node.ID, "blocklyVisibleChanged", [ show ] );
     }
 
 } );
