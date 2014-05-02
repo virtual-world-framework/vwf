@@ -23,20 +23,6 @@ properties:
   forwardSpeed: 400
   rotateSpeed: 30
   animationTime: 1
-  showButton: 
-    set: |
-      this.showButton = value;
-      if ( this.children[ this.moniker+"Blockly" ] ) {
-        this.children[ this.moniker+"Blockly" ].visible = value;
-      } 
-    value: true
-  buttonTransform:
-    set: |
-      this.buttonTransform = value;
-      if ( this.children[ this.moniker+"Blockly" ] ) {
-        this.children[ this.moniker+"Blockly" ].transform = value;
-      }
-    value: [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
   # needs to be moved from index.vwf.yaml, but will require additional changes
   # will do in another branch, when this one is merged back to master
   #executing: false
