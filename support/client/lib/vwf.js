@@ -346,6 +346,7 @@
                 { library: "vwf/view/webrtc/adapter", active: false },
                 { library: "vwf/view/google-earth", active: false },
                 { library: "vwf/model/cesium/Cesium", active: false },
+                { library: "vwf/model/terrain", active: false },
                 { library: "vwf/admin", active: true }
             ];
 
@@ -357,7 +358,8 @@
                     { library: "vwf/model/threejs", active: false },
                     { library: "vwf/model/cesium", active: false },
                     { library: "vwf/model/blockly", active: false },
-                    { library: "vwf/model/object", active: true }
+                    { library: "vwf/model/object", active: true },
+                    { library: "vwf/model/terrain", active: false }
                 ],
                 view: [
                     { library: "vwf/view/glge", parameters: {"application-root":"#vwf-root"}, active: false },
