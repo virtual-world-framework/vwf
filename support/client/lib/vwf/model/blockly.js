@@ -103,18 +103,20 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
             var protos = getPrototypes( childExtendsID );
             var createNode = function() {
                 return {
-                    parentID: nodeID,
-                    ID: childID,
-                    extendsID: childExtendsID,
-                    implementsIDs: childImplementsIDs,
-                    source: childSource,
-                    type: childType,
-                    name: childName,
-                    loadComplete: callback,
-                    prototypes: protos,
-                    blocks: "<xml></xml>",
-                    code: undefined
-
+                    "parentID": nodeID,
+                    "ID": childID,
+                    "extendsID": childExtendsID,
+                    "implementsIDs": childImplementsIDs,
+                    "source": childSource,
+                    "type": childType,
+                    "name": childName,
+                    "loadComplete": callback,
+                    "prototypes": protos,
+                    "blocks": "<xml></xml>",
+                    "code": undefined,
+                    "codeLine": -1,
+                    "lastLineExeTime": undefined,
+                    "timeBetweenLines": 1
                 };
             }; 
 
@@ -205,12 +207,13 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
-            var executableNode = function( blocklyNode ) {
-                "codeLine": -1,
-                "lastLineExeTime": undefined,
-                "timeBetweenLines": 1,
-                "code": blocklyNode.code.split( '\n' );                
-            }
+            var getJavaScript = function( node ) {
+                var xml = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
+                if ( xml ) { 
+                    node.blocks = Blockly.Xml.domToText( xml );
+                }
+                node.code = Blockly.JavaScript.workspaceToCode();
+            };
 
             if ( nodeID == this.kernel.application() ) {
                 if ( propertyName == "executingAll" ) {
@@ -219,7 +222,10 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                         if ( this.state.executingBlocks === undefined ) {
                             this.state.executingBlocks = {};
                             for ( var id in this.state.nodes ) {
-                                this.state.executingBlocks[ id ] = executableNode( node );    
+                                if ( this.state.blockly.node && id == this.state.blockly.node.id ) {
+                                    getJavaScript( node );
+                                }
+                                this.state.executingBlocks[ id ] = node;    
                             }    
                         }
                     } else {
@@ -236,8 +242,11 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                                 if ( this.state.executingBlocks === undefined ) {
                                     this.state.executingBlocks = {};
                                 }
+                                if ( this.state.blockly.node && nodeID == this.state.blockly.node.id ) {
+                                    getJavaScript( node );
+                                }
                                 if ( this.state.executingBlocks[ nodeID ] === undefined ) {
-                                    this.state.executingBlocks[ nodeID ] = executableNode( node );
+                                    this.state.executingBlocks[ nodeID ] = node;
                                 }
                             } else {
                                 delete this.state.executingBlocks[ nodeID ];
@@ -271,7 +280,7 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
 
             if ( nodeID == this.kernel.application() ) {
                 if ( propertyName == "executing" ) {
-                    value = this.state.executingBlocks; 
+                    value = ( this.state.executingBlocks !== undefined ); 
                 }
             }                
 
