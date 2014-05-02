@@ -51,7 +51,7 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                 this.state.blockly = { "node": undefined };
             }  
 
-            this.state.executingBlocks = {};
+            this.state.executingBlocks = undefined;
 
             // turns on logger debugger console messages 
             this.debug = {
@@ -205,26 +205,25 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
-            var exeNode = function() {
-                "blockCode": undefined,
+            var executableNode = function( blocklyNode ) {
                 "codeLine": -1,
                 "lastLineExeTime": undefined,
-                "timeBetweenLines": 1                 
+                "timeBetweenLines": 1,
+                "code": blocklyNode.code.split( '\n' );                
             }
 
             if ( nodeID == this.kernel.application() ) {
                 if ( propertyName == "executingAll" ) {
                     var exe = Boolean( propertyValue );
                     if ( exe ) {
-                        var count = 0;
-                        for ( var id in this.state.executingBlocks ) { count++ };
-                        if ( count === 0 ) {
+                        if ( this.state.executingBlocks === undefined ) {
+                            this.state.executingBlocks = {};
                             for ( var id in this.state.nodes ) {
-                                this.state.executingBlocks[ id ] = exeNode();    
-                           }    
+                                this.state.executingBlocks[ id ] = executableNode( node );    
+                            }    
                         }
                     } else {
-                        this.state.executingBlocks = {};    
+                        this.state.executingBlocks = undefined;    
                     }
                 }
             } else if ( ( node !== undefined ) && ( validPropertyValue( propertyValue ) ) ) {
@@ -234,11 +233,19 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                         case "executing":
                             var exe = Boolean( propertyValue );
                             if ( exe ) {
+                                if ( this.state.executingBlocks === undefined ) {
+                                    this.state.executingBlocks = {};
+                                }
                                 if ( this.state.executingBlocks[ nodeID ] === undefined ) {
-                                    this.state.executingBlocks[ nodeID ] = exeNode();
+                                    this.state.executingBlocks[ nodeID ] = executableNode( node );
                                 }
                             } else {
                                 delete this.state.executingBlocks[ nodeID ];
+                                var count = 0;
+                                for ( var id in this.state.executingBlocks ) { count++; }
+                                if ( count === 0 ) {
+                                    this.state.executingBlocks = undefined;    
+                                }
                             }
                             break;
 

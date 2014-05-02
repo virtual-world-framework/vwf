@@ -188,47 +188,49 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
         // -- ticked -----------------------------------------------------------------------------------
 
         ticked: function( vwfTime ) {
-            if ( this.state.executingBlocks ) {
-                var executeNextLine = false;
+            
+            if ( this.state.executingBlocks !== undefined ) {
+                var blocklyNode = undefined;
+                var executeNextLine;
 
-                if ( codeLine == -1 ) {
-                    Blockly.JavaScript.vwfID = this.state.blockly.node ? this.state.blockly.node.ID : this.kernel.application();    
-                    blockCode = Blockly.JavaScript.workspaceToCode().split( '\n' );
-                    codeLine = 0;
-                    lastLineExeTime = vwfTime;
-                    executeNextLine = true;
-                } else {
-                    var elaspedTime = vwfTime - lastLineExeTime;
-                    if ( elaspedTime >= timeBetweenLines ) {
+                for ( var nodeID in this.state.executingBlocks ) {
+
+                    blocklyNode = this.state.executingBlocks[ nodeID ];
+                    executeNextLine = false;
+
+                    if ( blocklyNode.codeLine == -1 ) {
+                        blocklyNode.codeLine = 0;
+                        blocklyNode.lastLineExeTime = vwfTime;
                         executeNextLine = true;
-                        lastLineExeTime = vwfTime;
-                    } 
-                }
-
-                if ( executeNextLine ) {
-                    if ( blockCode && codeLine < blockCode.length ) {
-                        try { 
-                            eval( blockCode[ codeLine ] ) ;
-                        } catch ( e ) {
-                            this.state.executingBlocks = false;
-                        }
-                        codeLine++;
                     } else {
-                        this.state.executingBlocks = false;
+                        var elaspedTime = vwfTime - blocklyNode.lastLineExeTime;
+                        if ( elaspedTime >= blocklyNode.timeBetweenLines ) {
+                            executeNextLine = true;
+                            blocklyNode.lastLineExeTime = vwfTime;
+                        } 
                     }
-                }
-            } else {
-                blockCode = undefined;
-                codeLine = -1;
-                lastLineExeTime = undefined;
+
+                    if ( executeNextLine ) {
+                        if ( blocklyNode.code && codeLine < blocklyNode.code.length ) {
+                            try { 
+                                eval( blocklyNode.code[ blocklyNode.codeLine ] ) ;
+                            } catch ( e ) {
+                                this.kernel.setProperty( nodeID, "executing", false );
+                            }
+                            blocklyNode.codeLine++;
+                        } else {
+                            this.kernel.setProperty( nodeID, "executing", false );
+                        }
+                    }
+                } 
             }
 
         },
 
         // -- render -----------------------------------------------------------------------------------
 
-        render: function(renderer, scene, camera) {
-        }
+        //render: function(renderer, scene, camera) {
+        //}
 
     } );
 
