@@ -18,10 +18,6 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
 
     var self;
 
-    var blockCode = undefined;
-    var codeLine = -1;
-    var lastLineExeTime = undefined;
-    var timeBetweenLines = 1;
     var createBlocklyDivs = true;
 
     return view.load( module, {

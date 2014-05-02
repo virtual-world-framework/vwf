@@ -51,7 +51,7 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                 this.state.blockly = { "node": undefined };
             }  
 
-            this.state.executingBlocks = false;
+            this.state.executingBlocks = {};
 
             // turns on logger debugger console messages 
             this.debug = {
@@ -205,18 +205,46 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
+            var exeNode = function() {
+                "blockCode": undefined,
+                "codeLine": -1,
+                "lastLineExeTime": undefined,
+                "timeBetweenLines": 1                 
+            }
+
             if ( nodeID == this.kernel.application() ) {
-                if ( propertyName == "executing" ) {
-                    if ( this.state.executingBlocks != Boolean( propertyValue ) ) {
-                        value = this.state.executingBlocks = Boolean( propertyValue ); 
+                if ( propertyName == "executingAll" ) {
+                    var exe = Boolean( propertyValue );
+                    if ( exe ) {
+                        var count = 0;
+                        for ( var id in this.state.executingBlocks ) { count++ };
+                        if ( count === 0 ) {
+                            for ( var id in this.state.nodes ) {
+                                this.state.executingBlocks[ id ] = exeNode();    
+                           }    
+                        }
+                    } else {
+                        this.state.executingBlocks = {};    
                     }
                 }
             } else if ( ( node !== undefined ) && ( validPropertyValue( propertyValue ) ) ) {
-                switch ( propertyName ) {
-                    case "":
-                        break;
-                    default:
-                        break;
+                if ( node !== undefined ) {
+
+                    switch ( propertyName ) {
+                        case "executing":
+                            var exe = Boolean( propertyValue );
+                            if ( exe ) {
+                                if ( this.state.executingBlocks[ nodeID ] === undefined ) {
+                                    this.state.executingBlocks[ nodeID ] = exeNode();
+                                }
+                            } else {
+                                delete this.state.executingBlocks[ nodeID ];
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
                 }
             }
 
