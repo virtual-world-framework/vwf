@@ -234,21 +234,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     node.threeObject = new THREE.MeshPhongMaterial();
                     SetMaterial( parentNode.threeObject, node.threeObject, childName );
                 }
-            } else if ( protos && isTerrainDefinition.call( this, protos ) ) {
-                
-                node = this.state.nodes[childID] = {
-                    name: childName,
-                    threeObject: null,
-                    ID: childID,
-                    parentID: nodeID,
-                    type: childExtendsID,
-                    sourceType: childType,
-                };
-                
-                if(!node.threeObject)
-                {   
-                    CreateTerrain.call(this,nodeID,childID,childName);
-                }
             } else if ( protos && isParticleDefinition.call( this, protos ) ) {
                 
                 node = this.state.nodes[childID] = {
@@ -421,10 +406,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 generateNodeMaterial.call( this, childID, myNode );//Potential node, need to do node things!
             }
 
-            if ( myNode && myNode.terrain) {
-               
-                myNode.terrain.initializingNode();
-            }
         },
          
         // -- deletingNode -------------------------------------------------------------------------
@@ -433,11 +414,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
             if ( this.debug.deleting ) {
                 this.logger.infox( "deletingNode", nodeID );
-            }
-
-            if ( myNode && myNode.terrain) {
-                debugger; 
-                myNode.terrain.deletingNode();
             }
 
             if(nodeID)
@@ -581,10 +557,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             if ( propertyValue !== undefined ) 
             {
                 self = this;
-                if ( node && node.terrain) {
-                  
-                    node.terrain.settingProperty(propertyName, propertyValue );
-                }
 
 
                 if ( threeObject instanceof THREE.Object3D )
@@ -1521,12 +1493,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             threeObject = node.threeScene;
 
             //There is not three object for this node, so there is nothing this driver can do. return
-            if(!threeObject) return value;    
-          
-            if ( node && node.terrain) {
-                debugger; 
-                return node.terrain.gettingProperty(propertyName);
-            }
+            if(!threeObject) return value;
 
             if(threeObject instanceof THREE.Object3D)
             {
@@ -2046,16 +2013,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         }
 
         return foundSystem;
-    }
-    function isTerrainDefinition( prototypes ) {
-        var foundTerrain = false;
-        if ( prototypes ) {
-            for ( var i = 0; i < prototypes.length && !foundTerrain; i++ ) {
-                foundTerrain = ( prototypes[i] == "http-vwf-example-com-terrain-vwf" );    
-            }
-        }
-
-        return foundTerrain;
     }
     function isNodeDefinition( prototypes ) {
         var foundNode = false;
@@ -3104,30 +3061,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         return vwfColor;        
     }
 
-    function loadScript (url)
-    {
-        
-        var xhr = $.ajax(url,{async:false});
-        return eval(xhr.responseText);
-
-    }
-
-    function CreateTerrain(nodeID, childID, childName )
-    {
-        var child = this.state.nodes[childID];
-        if ( child ) 
-        { 
-            var factory = loadScript(   "vwf/model/threejs/terrain/terrain.js");
-            var terrain = new factory(childID, null, childName);
-            child.terrain = terrain;
-            child.threeObject = terrain.getRoot();
-             child.threeObject.vwfID = childID;
-        }
-
-         child.threeObject.name = childName;
-         child.name = childName;
-         addThreeChild.call( this, nodeID, childID );
-    }
     function CreateParticleSystem(nodeID, childID, childName )
     {
         
