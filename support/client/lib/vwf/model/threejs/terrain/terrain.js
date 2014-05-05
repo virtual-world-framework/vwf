@@ -324,7 +324,7 @@
 				this.counter = 0;
 				var now = performance.now();
 				var campos = new THREE.Vector3();
-				campos.setFromMatrixPosition(vwf.models[1].model.state.nodes['http-vwf-example-com-camera-vwf-camera'].threeObject.matrixWorld);
+				campos.setFromMatrixPosition(vwf.models[1].model.state.cameraInUse.matrixWorld);
 				//this.decorationManager.update(campos);
 				var x = campos.x;
 				var y = campos.y;
