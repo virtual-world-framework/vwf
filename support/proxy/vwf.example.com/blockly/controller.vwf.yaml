@@ -24,6 +24,8 @@ properties:
   rotateSpeed: 30
   animationTime: 1
   executing: false
+  blockXml: "<xml></xml>"
+  blockCode:
   blockCount:
     set: |
       if ( this.blockCount != value ) {

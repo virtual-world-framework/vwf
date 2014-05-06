@@ -209,10 +209,13 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
 
             var getJavaScript = function( node ) {
                 var xml = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
+                
+                Blockly.JavaScript.vwfID = node.ID;
+
                 if ( xml ) { 
                     node.blocks = Blockly.Xml.domToText( xml );
                 }
-                node.code = Blockly.JavaScript.workspaceToCode();
+                node.code = Blockly.JavaScript.workspaceToCode().split( '\n' );
             };
 
             if ( nodeID == this.kernel.application() ) {
@@ -222,7 +225,7 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                         if ( this.state.executingBlocks === undefined ) {
                             this.state.executingBlocks = {};
                             for ( var id in this.state.nodes ) {
-                                if ( this.state.blockly.node && id == this.state.blockly.node.id ) {
+                                if ( this.state.blockly.node && id == this.state.blockly.node.ID ) {
                                     getJavaScript( node );
                                 }
                                 this.state.executingBlocks[ id ] = node;    
@@ -233,34 +236,41 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                     }
                 }
             } else if ( ( node !== undefined ) && ( validPropertyValue( propertyValue ) ) ) {
-                if ( node !== undefined ) {
 
-                    switch ( propertyName ) {
-                        case "executing":
-                            var exe = Boolean( propertyValue );
-                            if ( exe ) {
-                                if ( this.state.executingBlocks === undefined ) {
-                                    this.state.executingBlocks = {};
-                                }
-                                if ( this.state.blockly.node && nodeID == this.state.blockly.node.id ) {
-                                    getJavaScript( node );
-                                }
-                                if ( this.state.executingBlocks[ nodeID ] === undefined ) {
-                                    this.state.executingBlocks[ nodeID ] = node;
-                                }
-                            } else {
-                                delete this.state.executingBlocks[ nodeID ];
-                                var count = 0;
-                                for ( var id in this.state.executingBlocks ) { count++; }
-                                if ( count === 0 ) {
-                                    this.state.executingBlocks = undefined;    
-                                }
+                switch ( propertyName ) {
+                    
+                    case  "blockCode":
+                        value = node.code = propertyValue;
+                        break;
+                    
+                    case "blockXml":
+                        value = node.blocks = propertyValue;
+                        break;
+
+                    case "executing":
+                        var exe = Boolean( propertyValue );
+                        if ( exe ) {
+                            if ( this.state.executingBlocks === undefined ) {
+                                this.state.executingBlocks = {};
                             }
-                            break;
+                            if ( this.state.blockly.node && nodeID == this.state.blockly.node.ID ) {
+                                getJavaScript( node );
+                            }
+                            if ( this.state.executingBlocks[ nodeID ] === undefined ) {
+                                this.state.executingBlocks[ nodeID ] = node;
+                            }
+                        } else {
+                            delete this.state.executingBlocks[ nodeID ];
+                            var count = 0;
+                            for ( var id in this.state.executingBlocks ) { count++; }
+                            if ( count === 0 ) {
+                                this.state.executingBlocks = undefined;    
+                            }
+                        }
+                        break;
 
-                        default:
-                            break;
-                    }
+                    default:
+                        break;
                 }
             }
 
@@ -279,10 +289,30 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
             var value = undefined;
 
             if ( nodeID == this.kernel.application() ) {
-                if ( propertyName == "executing" ) {
+                
+                // this is not quite right, need to check to see if 
+                // all of the blocks are executing here
+                if ( propertyName == "executingAll" ) {
                     value = ( this.state.executingBlocks !== undefined ); 
                 }
-            }                
+
+            } else if ( node !== undefined ){
+                switch ( propertyName ) {
+                    
+                    case "executing":
+                        value = ( this.state.executingBlocks && this.state.executingBlocks[ nodeID ] !== undefined );
+                        break;
+                    
+                    case "blockCode":
+                        value = node.code;
+                        break;
+                    
+                    case "blockXml":
+                        value = node.blocks;
+                        break;
+
+                }
+            }               
 
             return value;
         },
@@ -292,23 +322,23 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
 
         // -- callingMethod --------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
-            return undefined;
-        },
+        //callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        //    return undefined;
+        //},
 
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
 
         // -- executing ------------------------------------------------------------------------------
 
-        executing: function( nodeID, scriptText, scriptType ) {
-            return undefined;
-        },
+        //executing: function( nodeID, scriptText, scriptType ) {
+        //    return undefined;
+        //},
 
         // == ticking =============================================================================
 
-        ticking: function( vwfTime ) {
-        }
+        //ticking: function( vwfTime ) {
+        //}
 
 
 

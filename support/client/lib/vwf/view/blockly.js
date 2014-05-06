@@ -92,10 +92,22 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                 } ); 
 
                 Blockly.addChangeListener( function() {
+                    
                     if ( self.state.blockly.node !== undefined ) {
                         var blockCount = Blockly.mainWorkspace.getAllBlocks().length;
                         self.kernel.setProperty( self.state.blockly.node.ID, "blockCount", blockCount );
+
+                        // the following code could be used to 
+                        // replicate the blockly blocks in the current UI
+
+                        //var xml = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
+                        //if ( xml ) { 
+                        //    self.kernel.setProperty( self.state.blockly.node.ID, "blockXml", Blockly.Xml.domToText( xml ) );
+                        //}
+                        //self.kernel.setProperty( self.state.blockly.node.ID, "blockCode", Blockly.JavaScript.workspaceToCode() );
+ 
                     }
+
                 });           
             }
 
@@ -211,7 +223,8 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                     }
 
                     if ( executeNextLine ) {
-                        if ( blocklyNode.code && codeLine < blocklyNode.code.length ) {
+
+                        if ( blocklyNode.code && blocklyNode.codeLine < blocklyNode.code.length-1 ) {
                             try { 
                                 eval( blocklyNode.code[ blocklyNode.codeLine ] ) ;
                             } catch ( e ) {
