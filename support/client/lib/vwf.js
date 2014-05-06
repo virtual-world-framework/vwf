@@ -358,8 +358,8 @@
                     { library: "vwf/model/threejs", active: false },
                     { library: "vwf/model/cesium", active: false },
                     { library: "vwf/model/blockly", active: false },
-                    { library: "vwf/model/object", active: true },
-                    { library: "vwf/model/terrain", active: false }
+                    { library: "vwf/model/terrain", active: false },
+                    { library: "vwf/model/object", active: true }
                 ],
                 view: [
                     { library: "vwf/view/glge", parameters: {"application-root":"#vwf-root"}, active: false },
