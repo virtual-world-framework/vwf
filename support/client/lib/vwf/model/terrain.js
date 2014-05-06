@@ -22,7 +22,6 @@ define( [ "module", "vwf/model", "jquery" ], function( module, model, $ ) {
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function() {
-            this.state.scenes = {};
             this.state.nodes = {};
             this.state.kernel = this.kernel.kernel.kernel;
         },
@@ -35,7 +34,7 @@ define( [ "module", "vwf/model", "jquery" ], function( module, model, $ ) {
             childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
 
             var node = undefined;
-            var kernel = this.kernel.kernel.kernel;
+            var kernel = this.state.kernel;
             var protos = getPrototypes.call( this, kernel, childExtendsID );
 
             if ( protos && isTerrainDefinition.call( this, protos ) ) {
@@ -115,7 +114,6 @@ define( [ "module", "vwf/model", "jquery" ], function( module, model, $ ) {
 
             if ( propertyValue !== undefined ) {
                 var node = this.state.nodes[ nodeID ];
-                if ( node === undefined ) node = this.state.scenes[ nodeID ];
                 if ( node !== undefined ) {
                     switch ( propertyName ) {
                         case "meshDefinition":
