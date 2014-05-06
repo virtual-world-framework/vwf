@@ -19,8 +19,8 @@
 
 		}
 		
-		loadScript(   "vwf/model/threejs/terrain/terrainTileCache.js");
-		loadScript(   "vwf/model/threejs/terrain/terrainQuadtree.js");
+		loadScript(   "vwf/model/terrain/terrainTileCache.js");
+		loadScript(   "vwf/model/terrain/terrainQuadtree.js");
 
 		
 		
@@ -39,7 +39,7 @@
 			
 			
 			
-			this.terrainGenerator = loadScript("vwf/model/threejs/terrain/terrainGenerator.js");
+			this.terrainGenerator = loadScript("vwf/model/terrain/terrainGenerator.js");
 			
 			/*
 
@@ -174,7 +174,7 @@
 		this.setTerrainAlgorithm = function(algo,params)
 		{
 			try{
-				loadScript('vwf/model/threejs/terrain/' + algo + '.js');
+				loadScript('vwf/model/terrain/' + algo + '.js');
 				this.terrainType = algo;
 				this.terrainParams = params;
 				if(!this.init) return;

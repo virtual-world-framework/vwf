@@ -215,11 +215,11 @@ new (function(){
 		this.currentState = [];
 		
 		try{
-		loadScript('vwf/model/threejs/terrain/' + type + '.js');
+		loadScript('vwf/model/terrain/' + type + '.js');
 		}catch(e)
 		{
 			type = 'NoiseTerrainAlgorithm';
-			loadScript('vwf/model/threejs/terrain/' + type + '.js');
+			loadScript('vwf/model/terrain/' + type + '.js');
 		}
 		this.terrainAlgorithm = new (eval(type))();
 		
@@ -228,7 +228,7 @@ new (function(){
 		this.terrainAlgorithm.importScript = function(url)
 		{
 			
-			var xhr = $.ajax("vwf/model/threejs/" + url,{async:false});
+			var xhr = $.ajax("vwf/model/" + url,{async:false});
 			return eval(xhr.responseText);
 			
 		
@@ -251,7 +251,7 @@ new (function(){
 
 			for(var i = 0; i < MAXWORKERS; i++)
 			{
-				this.worker[i] = new Worker("vwf/model/threejs/terrain/terrainGeneratorThread.js");
+				this.worker[i] = new Worker("vwf/model/terrain/terrainGeneratorThread.js");
 				this.worker[i].addEventListener('message',this.message.bind(this));
 				this.worker[i].postMessage({command:'init',data:{type:type,params:(params)}});
 				this.worker[i].postMessage({command:'threadInit',data:psd});

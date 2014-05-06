@@ -4,7 +4,7 @@ self.init = function(data)
   if(!self.THREE)
   {
   	
-	importScripts('../three.js');
+	importScripts('../threejs/three.js');
   }
   importScripts(generateType + '.js');
 

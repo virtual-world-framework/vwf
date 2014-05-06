@@ -219,7 +219,7 @@ define( [ "module", "vwf/model", "jquery" ], function( module, model, $ ) {
         var child = this.state.nodes[childID];
         if ( child ) 
         { 
-            var factory = loadScript(   "vwf/model/threejs/terrain/terrain.js");
+            var factory = loadScript(   "vwf/model/terrain/terrain.js");
             var terrain = new factory(childID, null, childName);
             child.terrain = terrain;
             child.threeObject = terrain.getRoot();
