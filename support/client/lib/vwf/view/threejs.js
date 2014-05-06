@@ -1284,7 +1284,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
                     // TODO: hierarchy output, helpful for setting up applications
                     var objNode = sceneView.state.nodes[mouseUpObjectID];
-                    var obj3js = objNode.threeObject;
+                    var obj3js = objNode !== undefined ? objNode.threeObject : undefined;
                     if ( obj3js ) {
                         if ( atlDown && !ctrlDown ) {
                             var colladaParent = obj3js;

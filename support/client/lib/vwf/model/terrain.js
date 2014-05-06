@@ -22,9 +22,8 @@ define( [ "module", "vwf/model", "jquery" ], function( module, model, $ ) {
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function() {
-            var threejs = getThreeJSModel();
-            this.state.scenes = threejs.state.scenes;
-            this.state.nodes = threejs.state.nodes;
+            this.state.scenes = {};
+            this.state.nodes = {};
             this.state.kernel = this.kernel.kernel.kernel;
         },
 
@@ -236,10 +235,11 @@ define( [ "module", "vwf/model", "jquery" ], function( module, model, $ ) {
 
     function addThreeChild( parentID, childID ) {
         
+        var threejs = getThreeJSModel();
         var threeParent;
-        var parent = this.state.nodes[ parentID ];
-        if ( !parent && this.state.scenes[ parentID ] ) {
-            parent = this.state.scenes[ parentID ];
+        var parent = threejs.state.nodes[ parentID ];
+        if ( !parent && threejs.state.scenes[ parentID ] ) {
+            parent = threejs.state.scenes[ parentID ];
             threeParent = parent.threeScene;
         } else {
             threeParent = parent.threeObject;
