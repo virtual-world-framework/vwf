@@ -200,7 +200,7 @@ properties:
           this.logger.debug( "scheduling animationTick" );
           this.animationTick();
         }
-      }
+      } //@ sourceURL=animation.animationPlaying.set.vwf
 
     get: |
       return this.animationStart$ != null && this.animationPause$ == null;
