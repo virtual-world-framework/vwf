@@ -103,7 +103,7 @@ properties:
         this.animationTimeUpdated = value;
         this.animationUpdate( value, this.animationDuration );
         this.animationTimeChanged( value );
-      }
+      } //@ sourceURL=animation.animationTime.set.vwf
 
     get: |
       // Save copies to avoid repeated reads.
