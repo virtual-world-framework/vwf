@@ -219,7 +219,7 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
             };
 
             if ( nodeID == this.kernel.application() ) {
-                if ( propertyName == "executingAll" ) {
+                if ( propertyName === "executingAll" ) {
                     var exe = Boolean( propertyValue );
                     if ( exe ) {
                         if ( this.state.executingBlocks === undefined ) {
@@ -228,7 +228,8 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                                 if ( this.state.blockly.node && id == this.state.blockly.node.ID ) {
                                     getJavaScript( node );
                                 }
-                                this.state.executingBlocks[ id ] = node;    
+                                this.state.executingBlocks[ id ] = node; 
+                                node.codeLine = -1;   
                             }    
                         }
                     } else {
@@ -258,11 +259,11 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                             }
                             if ( this.state.executingBlocks[ nodeID ] === undefined ) {
                                 this.state.executingBlocks[ nodeID ] = node;
+                                node.codeLine = -1;
                             }
                         } else {
                             delete this.state.executingBlocks[ nodeID ];
-                            var count = 0;
-                            for ( var id in this.state.executingBlocks ) { count++; }
+                            var count = Object.keys( this.state.executingBlocks ).length;
                             if ( count === 0 ) {
                                 this.state.executingBlocks = undefined;    
                             }
@@ -292,7 +293,7 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                 
                 // this is not quite right, need to check to see if 
                 // all of the blocks are executing here
-                if ( propertyName == "executingAll" ) {
+                if ( propertyName === "executingAll" ) {
                     value = ( this.state.executingBlocks !== undefined ); 
                 }
 

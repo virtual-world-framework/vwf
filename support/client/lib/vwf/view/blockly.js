@@ -152,7 +152,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
 
             if ( nodeID == this.kernel.application() ) {
                 
-                if ( propertyName == "blocklyUiNodeID" ) {
+                if ( propertyName === "blocklyUiNodeID" ) {
                     
                     if ( propertyValue !== undefined && this.state.nodes[ propertyValue ] !== undefined ) {
                         var show = true;
@@ -210,7 +210,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                     blocklyNode = this.state.executingBlocks[ nodeID ];
                     executeNextLine = false;
 
-                    if ( blocklyNode.codeLine == -1 ) {
+                    if ( blocklyNode.codeLine === -1 ) {
                         blocklyNode.codeLine = 0;
                         blocklyNode.lastLineExeTime = vwfTime;
                         executeNextLine = true;
@@ -228,6 +228,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                             try { 
                                 eval( blocklyNode.code[ blocklyNode.codeLine ] ) ;
                             } catch ( e ) {
+                                this.logger.warnx( "Object: " + blocklyNode.ID + " had an error executing line#" + blocklyNode.codeLine + " code: " + blocklyNode.code[ blocklyNode.codeLine ] );
                                 this.kernel.setProperty( nodeID, "executing", false );
                             }
                             blocklyNode.codeLine++;
