@@ -83,7 +83,8 @@ function TileCache()
 						"#if MAX_DIR_LIGHTS > 0\n"+
 
 						
-						
+						//"#define USE_FOG" : "",
+						//"#define FOG_EXP2" : "",
 					
 						"uniform vec3 directionalLightColor[ MAX_DIR_LIGHTS ];\n"+
 						"uniform vec3 directionalLightDirection[ MAX_DIR_LIGHTS ];\n"+
@@ -98,21 +99,65 @@ function TileCache()
 						"uniform float fogFar;"+	
 						"uniform float vFalloff;"+	
 						"uniform float vFalloffStart;"+	
-						"uniform vec3 vAtmosphereColor;\n" + 
-						"uniform vec3 vHorizonColor;\n" + 
-						"uniform vec3 vApexColor;\n" + 
-						"uniform float vAtmosphereDensity;\n" + 
+						"uniform vec3 vAtmosphereColor;\n" + //vec3(0.0, 0.02, 0.04);
+						"uniform vec3 vHorizonColor;\n" + //vec3(0.88, 0.94, 0.999);
+						"uniform vec3 vApexColor;\n" + //vec3(0.78, 0.82, 0.999)
+						"uniform float vAtmosphereDensity;\n" + //.0005
 						
 						
 						"uniform float coordA;\n" + 
 						"uniform float coordB;\n" + 
 						
+						//"horizonColor = fogColor;\n"+
+						//"zenithColor = vec3(0.78, 0.82, 0.999);\n"+
+						//"gl_FragColor.xyz = aerialPerspective(gl_FragColor.xyz, distance(pos,cameraPosition),cameraPosition.xzy, normalize(pos-cameraPosition).xzy);\n"+
 						"vec3 horizonColor = vHorizonColor;\n"+
 						"vec3 zenithColor = vApexColor;\n"+
 						
+						"vec3 atmosphereColor(vec3 rayDirection){\n"+
+						"    float a = max(0.0, dot(rayDirection, vec3(0.0, 1.0, 0.0)));\n"+
+						"    vec3 skyColor = mix(horizonColor, zenithColor, a);\n"+
+						"    float sunTheta = max( dot(rayDirection, directionalLightDirection[0].xzy), 0.0 );\n"+
+						"    return skyColor+directionalLightColor[0]*4.0*pow(sunTheta, 16.0)*0.5;\n"+
+						"}\n"+
 
+						"vec3 applyFog(vec3 albedo, float dist, vec3 rayOrigin, vec3 rayDirection){\n"+
+						"    float fogDensityA = fogDensity ;\n"+ 
+						"    float fog = exp((-rayOrigin.y*vFalloff)*fogDensityA) * (1.0-exp(-dist*rayDirection.y*vFalloff*fogDensityA))/(rayDirection.y*vFalloff);\n"+
+						"    return mix(albedo, fogColor, clamp(fog, 0.0, 1.0));\n"+
+						"}\n"+
+
+						"vec3 aerialPerspective(vec3 albedo, float dist, vec3 rayOrigin, vec3 rayDirection){\n"+
+						" rayOrigin.y += vFalloffStart;\n" +
+						"    vec3 atmosphere = atmosphereColor(rayDirection)+vAtmosphereColor; \n"+
+						"    atmosphere = mix( atmosphere, atmosphere*.75, clamp(1.0-exp(-dist*vAtmosphereDensity), 0.0, 1.0));\n"+
+						"    vec3 color = mix( applyFog(albedo, dist, rayOrigin, rayDirection), atmosphere, clamp(1.0-exp(-dist*vAtmosphereDensity), 0.0, 1.0));\n"+
+						"    return color;\n"+
+						"}						\n"+
+						
+						
+						
 						"#endif\n"+
 						
+
+
+						(["const float C1 = 0.429043;",
+		"const float C2 = 0.511664;",
+		"const float C3 = 0.743125;",
+		"const float C4 = 0.886227;",
+		"const float C5 = 0.247708;",
+
+		// Constants for Old Town Square lighting
+		"const vec3 L00  = vec3( 0.871297,  0.875222,  0.864470);",
+		"const vec3 L1m1 = vec3( 0.175058,  0.245335,  0.312891);",
+		"const vec3 L10  = vec3( 0.034675,  0.036107,  0.037362);",
+		"const vec3 L11  = vec3(-0.004629, -0.029448, -0.048028);",
+		"const vec3 L2m2 = vec3(-0.120535, -0.121160, -0.117507);",
+		"const vec3 L2m1 = vec3( 0.003242,  0.003624,  0.007511);",
+		"const vec3 L20  = vec3(-0.028667, -0.024926, -0.020998);",
+		"const vec3 L21  = vec3(-0.077539, -0.086325, -0.091591);",
+		"const vec3 L22  = vec3(-0.161784, -0.191783, -0.219152);"].join('\n'))+
+
 						"varying vec4 mvPosition;\n"+
 						"varying vec3 debug;\n"+
 						"varying vec3 vFogPosition;"+
@@ -124,7 +169,6 @@ function TileCache()
 						"varying vec3 coordsScaleB;"+
 						"varying vec3 coordsScaleA;";
 						
-
 						var fragShader_default_end = 
 						
 						"vec4 packFloatVec4(const in float depth)\n"+
@@ -144,7 +188,16 @@ function TileCache()
 						"   nn = getNormal(npos,nn,opos.xy/100.0 + 0.5,wN);\n"+
 						"	vec3 light = vec3(0.0,0.0,0.0);\n"+
 						"vec3 tnorm = ( vec4(nn,0.0) * viewMatrix).xyz;\n"+
-						"vec3 shAmbient =  ambientLightColor.xyz;"+
+						"vec3 shAmbient =  C1 * L22 * (tnorm.x * tnorm.x - tnorm.y * tnorm.y) +"+
+        "            C3 * L20 * tnorm.z * tnorm.z +"+
+        "            C4 * L00 -"+
+        "            C5 * L20 +"+
+         "           2.0 * C1 * L2m2 * tnorm.x * tnorm.y +"+
+         "           2.0 * C1 * L21  * tnorm.x * tnorm.z +"+
+         "           2.0 * C1 * L2m1 * tnorm.y * tnorm.z +"+
+          "          2.0 * C2 * L11  * tnorm.x +"+
+          "          2.0 * C2 * L1m1 * tnorm.y + "+  
+          "          2.0 * C2 * L10  * tnorm.z;"+
 
 						"	vec4 ambient = vec4(shAmbient * length(ambientLightColor) * .5 ,1.0);\n"+
 						
@@ -158,12 +211,19 @@ function TileCache()
 						"	#endif\n"+
 						
 						
-						"gl_FragColor = ambient * diffuse + diffuse * vec4(light.xyz,1.0);\n"+
+						"   gl_FragColor = ambient * diffuse + diffuse * vec4(light.xyz,1.0);\n"+
 						"gl_FragColor.a = 1.0;\n"+
-						
-						THREE.ShaderChunk.fog_fragment + 
-						
-						"\n}\n";
+		//				"#ifdef USE_FOG\n"+
+
+							
+
+							//"gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );\n"+
+							
+							//"gl_FragColor.xyz = nn;\n"+
+							"gl_FragColor.xyz = aerialPerspective(gl_FragColor.xyz, distance(vFogPosition,cameraPosition),cameraPosition.xzy, normalize(vFogPosition-cameraPosition).xzy);\n"+
+		//				"#endif\n"+
+						//"gl_FragColor = vec4(nn.rgb,1.0);\n"+
+						"}\n";
 						
 						//the default shader - the one used by the analytic solver, just has some simple stuff
 						//note that this could be changed to do just life and lifespan, and calculate the 
