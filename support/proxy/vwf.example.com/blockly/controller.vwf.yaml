@@ -48,7 +48,7 @@ events:
   blocklyStarted:
   blocklyExecuted:
   blocklyErrored:
-  blocklyEnded:
+  blocklyStopped:
   blockCountChanged:
   topBlockCountChanged:
   blocklyVisibleChanged:
