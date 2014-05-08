@@ -26,6 +26,13 @@ properties:
   executing: false
   blockXml: "<xml></xml>"
   blockCode:
+  topBlockCount:
+    set: |
+      if ( this.topBlockCount != value ) {
+        this.topBlockCount = value;
+        this.topBlockCountChanged( value );
+      }
+    value: 0
   blockCount:
     set: |
       if ( this.blockCount != value ) {
@@ -39,6 +46,7 @@ methods:
   executeBlocklyCmd:
 events:
   blockCountChanged:
+  topBlockCountChanged:
   blocklyVisibleChanged:
 scripts:
 - |
