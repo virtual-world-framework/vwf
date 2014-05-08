@@ -91,15 +91,17 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                     toolbox: document.getElementById( self.options.toolbox ) 
                 } ); 
 
-                Blockly.addChangeListener( function() {
+                Blockly.addChangeListener( function( event ) {
                     
                     if ( self.state.blockly.node !== undefined ) {
                         var blockCount = Blockly.mainWorkspace.getAllBlocks().length;
+                        var topBlockCount = Blockly.mainWorkspace.topBlocks_.length;
+                        
                         self.kernel.setProperty( self.state.blockly.node.ID, "blockCount", blockCount );
+                        self.kernel.setProperty( self.state.blockly.node.ID, "topBlockCount", topBlockCount );
 
                         // the following code could be used to 
                         // replicate the blockly blocks in the current UI
-
                         //var xml = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
                         //if ( xml ) { 
                         //    self.kernel.setProperty( self.state.blockly.node.ID, "blockXml", Blockly.Xml.domToText( xml ) );
@@ -165,7 +167,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                         } 
                         if ( show ) {
                             this.state.blockly.node = node;
-                            setBlockXML( node.blocks );
+                            setBlockXML( node );
                             setBlocklyUIVisibility( node, true );
                         }                        
                     } else {
@@ -248,7 +250,8 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
 
     } );
 
-    function setBlockXML( xmlText ) {
+    function setBlockXML( node ) {
+        var xmlText = node.blocks;
         var xmlDom = null;
         try {
             xmlDom = Blockly.Xml.textToDom( xmlText );
@@ -261,7 +264,12 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
         if ( xmlDom ) {
             Blockly.mainWorkspace.clear();
             Blockly.Xml.domToWorkspace( Blockly.mainWorkspace, xmlDom );
-        }        
+        } 
+        var blockCount = Blockly.mainWorkspace.getAllBlocks().length;
+        var topBlockCount = Blockly.mainWorkspace.topBlocks_.length;
+        
+        self.kernel.setProperty( node.ID, "blockCount", blockCount );
+        self.kernel.setProperty( node.ID, "topBlockCount", topBlockCount );      
     }
 
     function getBlockXML( node ) {
