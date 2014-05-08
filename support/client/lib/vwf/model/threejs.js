@@ -71,6 +71,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             this.state.kernel = this.kernel.kernel.kernel; 
             this.state.lights = {};           
  
+            this.state.setMeshPropertyRecursively = function( threeObject, propertyName, value ) {
+                if ( !threeObject ) {
+                    return;
+                }
+                threeObject[ propertyName ] = value;
+                var meshes = findAllMeshes( threeObject );
+                for ( var i = 0; i < meshes.length; i++ ) {
+                    meshes[ i ][ propertyName ] = value;
+                }
+            }
+
             // turns on logger debugger console messages 
             this.debug = {
                 "creation": false,
@@ -662,13 +673,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     }
                     else if ( propertyName == 'visible' )
                     {
-                        //need to walk the tree and hide all sub nodes as well
                         value = Boolean( propertyValue );
-                        threeObject.visible = value;
+                        self.state.setMeshPropertyRecursively( threeObject, "visible", value );
                     }
                     else if ( propertyName == 'castShadows' )
                     {
                         value = Boolean( propertyValue );
+
+                        // TODO: We should call setMeshPropertyRecursively here instead of repeating code
                         threeObject.castShadow = value;
                         var meshes = findAllMeshes.call( this, threeObject );
                         for(var i = 0, il = meshes.length; i < il; i++) {
@@ -678,6 +690,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     else if ( propertyName == 'receiveShadows' )
                     {
                         value = Boolean( propertyValue );
+
+                        // TODO: We should call setMeshPropertyRecursively here instead of repeating code
                         threeObject.receiveShadow = value;
                         var meshes = findAllMeshes.call( this, threeObject );
                         for(var i = 0, il = meshes.length; i < il; i++) {
@@ -1270,7 +1284,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         }
                     }
                 }   
-                if(threeObject instanceof THREE.PointLight || threeObject instanceof THREE.DirectionalLight || threeObject instanceof THREE.SpotLight )
+                if(threeObject instanceof THREE.PointLight || threeObject instanceof THREE.DirectionalLight 
+                    || threeObject instanceof THREE.SpotLight || threeObject instanceof THREE.HemisphereLight )
                 {
                     if(propertyName == 'lightType')
                     {
@@ -1280,6 +1295,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                             "name": threeObject.name,
                             "distance": threeObject.distance,
                             "color":  threeObject.color,
+                            "groundColor": threeObject.groundColor,
                             "intensity": threeObject.intensity,
                             "castShadow": threeObject.castShadow,
                             "shadowCameraLeft": threeObject.shadowCameraLeft,
@@ -1291,11 +1307,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                             "shadowDarkness": threeObject.shadowDarkness,
                             "shadowMapHeight": threeObject.shadowMapHeight,
                             "shadowMapWidth": threeObject.shadowMapWidth,
+                            "shadowBias": threeObject.shadowBias,
                             "clone": function( newObj ) {
                                 newObj.name = this.name;
                                 newObj.distance = this.distance;
                                 //console.info( "light.clone.color = " + JSON.stringify( this.color ) )
                                 newObj.color.setRGB( this.color.r, this.color.g, this.color.b );
+                                if (this.groundColor !== undefined) {
+                                    newObj.groundColor = new THREE.Color().setRGB( this.groundColor.r, this.groundColor.g, this.groundColor.b );
+                                }
                                 newObj.intensity = this.intensity;
                                 newObj.castShadow = this.castShadow;
                                 newObj.shadowCameraLeft = this.shadowCameraLeft;
@@ -1307,6 +1327,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                                 newObj.shadowDarkness = this.shadowDarkness;
                                 newObj.shadowMapHeight = this.shadowMapHeight;
                                 newObj.shadowMapWidth = this.shadowMapWidth;
+                                newObj.shadowBias = this.shadowBias;
                             }
                         };
 
@@ -1340,8 +1361,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                             node.threeObject = newlight;
                             rebuildAllMaterials.call(this);
                         }
+                        if(propertyValue == 'hemisphere' && !(threeObject instanceof THREE.HemisphereLight))
+                        {
+                            newlight = new THREE.HemisphereLight('FFFFFF','FFFFFF',1);
+                            currProps.clone( newlight );                            
+                            newlight.matrixAutoUpdate = false;
+                            parent.remove( node.threeObject );
+                            parent.add( newlight );
+                            node.threeObject = newlight;
+                            rebuildAllMaterials.call(this);
+                        }
 
-                        if ( propertyValue == 'point' || propertyValue == 'directional' || propertyValue == 'spot' ) {
+                        if ( propertyValue == 'point' || propertyValue == 'directional' || propertyValue == 'spot' || propertyValue == 'hemisphere' ) {
                             value = propertyValue;                        
                         }
                     }
@@ -1360,6 +1391,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         var vwfColor = new utility.color( propertyValue );
                         if ( vwfColor ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
+                        }
+                        value = vwfColor.toString();
+                    }
+                    else if ( propertyName == 'groundColor' ) {
+                        if ( propertyValue instanceof String ) {
+                            propertyValue = propertyValue.replace( /\s/g, '' );
+                        }
+                        var vwfColor = new utility.color( propertyValue );
+                        if ( vwfColor ) {
+                            threeObject.groundColor = new THREE.Color().setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                         }
                         value = vwfColor.toString();
                     }
@@ -1418,6 +1459,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         if(threeObject.shadowMap) {
                             threeObject.shadowMap.width = value;
                         }
+                    }
+                    else if ( propertyName == 'shadowBias' ) {
+                        value = Number ( propertyValue );
+                        threeObject.shadowBias = value;
                     }
 
                 }
@@ -1666,9 +1711,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         if ( threeObject instanceof THREE.DirectionalLight ){
                             value = 'directional';
                         } else if ( threeObject instanceof THREE.SpotLight ) {
-                            value = 'spot'; 
+                            value = 'spot';
+                        } else if ( threeObject instanceof THREE.HemisphereLight ) {
+                            value = 'hemisphere';
                         } else {
-                            value = 'point';                            
+                            value = 'point';
                         }
                         break;
                     case "distance":
@@ -1677,6 +1724,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     case "color":
                         var clr = new utility.color( [ threeObject.color.r * 255, threeObject.color.g * 255, 
                                                        threeObject.color.b * 255 ] ) 
+                        value = clr.toString();
+                        break;
+                    case "groundColor":
+                        var clr = new utility.color( [ threeObject.groundColor.r * 255, threeObject.groundColor.g * 255, 
+                                                       threeObject.groundColor.b * 255 ] ) 
                         value = clr.toString();
                         break;
                     case "intensity":
@@ -1712,6 +1764,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     case "shadowMapWidth":
                         value = threeObject.shadowMapWidth;
                         break;
+                    case "shadowBias":
+                        value = threeObject.shadowBias;
+                        break;
                 }
             }
             return value;
@@ -1722,7 +1777,117 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
         // -- callingMethod --------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        callingMethod: function( nodeID, methodName, parameters /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+
+            if ( methodName === "raycast" ) {
+
+                var origin, direction, near, far, recursive, objectIDs;
+
+                if ( parameters ) {
+
+                    if ( parameters[0] instanceof THREE.Vector3 ) {
+
+                        origin = parameters[0];
+
+                    } else if ( parameters[0] instanceof Array && parameters[0].length === 3 ) {
+
+                        var x, y, z;
+                        x = isNaN( parameters[0][0] ) ? 0 : parameters[0][0];
+                        y = isNaN( parameters[0][1] ) ? 0 : parameters[0][1];
+                        z = isNaN( parameters[0][2] ) ? 0 : parameters[0][2];
+                        origin = new THREE.Vector3( x, y, z );
+
+                    } else {
+
+                        origin = new THREE.Vector3();
+
+                    }
+
+                    if ( parameters[1] instanceof THREE.Vector3 ) {
+
+                        direction = parameters[1];
+
+                    } else if ( parameters[1] instanceof Array && parameters[1].length === 3 ) {
+
+                        var x, y, z;
+                        x = isNaN( parameters[1][0] ) ? 0 : parameters[1][0];
+                        y = isNaN( parameters[1][1] ) ? 0 : parameters[1][1];
+                        z = isNaN( parameters[1][2] ) ? 0 : parameters[1][2];
+                        direction = new THREE.Vector3( x, y, z );
+
+                    } else {
+
+                        direction = new THREE.Vector3();
+                        
+                    }
+
+                    near = isNaN( parameters[2] ) ? 0 : parameters[2];
+                    far = isNaN( parameters[3] ) ? Infinity : parameters[3];
+                    recursive = typeof parameters[4] === "boolean" ? parameters[4] : false;
+
+                    if ( parameters[5] instanceof Array ) {
+
+                        objectIDs = parameters[5];
+
+                    } else if ( typeof parameters[5] === "string" ) {
+
+                        objectIDs = new Array();
+                        objectIDs.push( parameters[5] );
+
+                    } else {
+
+                        objectIDs = null;
+                    }
+
+                } else {
+
+                    origin = new THREE.Vector3();
+                    direction = new THREE.Vector3();
+                    near = 0;
+                    far = Infinity;
+                    recursive = false;
+                    objectIDs = null;
+
+                }
+
+                var objects = new Array();
+
+                if ( objectIDs !== null ) {
+
+                    for ( var i = 0; i < objectIDs.length; i++ ) {
+
+                        var object = this.state.nodes[ objectIDs[i] ];
+
+                        if ( object !== undefined && object.threeObject !== undefined ) {
+
+                            objects.push( object.threeObject );
+
+                        }
+
+                    }
+
+                } else {
+
+                    for ( nodeID in this.state.nodes ) {
+
+                        var object = this.state.nodes[ nodeID ];
+
+                        if ( object.threeObject !== undefined ) {
+
+                            objects.push( object.threeObject );
+
+                        }
+
+                    }
+
+                }
+
+                var raycaster = new THREE.Raycaster( origin, direction, near, far );
+                var intersects = raycaster.intersectObjects( objects, recursive );
+                return intersects;
+
+            }
+
             return undefined;
         },
 
@@ -1749,8 +1914,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         }
 
     } );
+
     // == PRIVATE  ========================================================================================
-    
+
     function checkCompatibility() {
         this.compatibilityStatus = { compatible:true, errors:{} }
         var contextNames = ["webgl","experimental-webgl","moz-webgl","webkit-3d"];
@@ -3769,17 +3935,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         }            
     }
 
-    function SetVisible(node,state) 
-    {
-        if(node)
-            node.visible = state;
-        if(node && node.children)
-        {
-           for(var i in node.children)
-            SetVisible(node.children[i],state);
-        }
-    }
-
     function getWorldTransform( node ) {
         var parent = self.state.nodes[ node.parentID ];
         if ( parent ) {
@@ -4335,7 +4490,4 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         data = decompressJsonStrings(data);
         return data;
     }
-
-
-
 });

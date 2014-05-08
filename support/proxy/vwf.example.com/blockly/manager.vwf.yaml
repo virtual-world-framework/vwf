@@ -11,8 +11,15 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-require File.expand_path File.join File.dirname( __FILE__ ), "init"
+## The component representation of a scale behavior (on move)
+## 
+## @name blockly/controller.vwf
+## @namespace
 
-map "/" do
-  run VWF
-end
+--- 
+extends:
+  http://vwf.example.com/node.vwf
+properties:
+  blocklyUiNodeID:
+  executingAll: false
+  
