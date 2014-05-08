@@ -23,9 +23,9 @@ properties:
   forwardSpeed: 400
   rotateSpeed: 30
   animationTime: 1
-  # needs to be moved from index.vwf.yaml, but will require additional changes
-  # will do in another branch, when this one is merged back to master
-  #executing: false
+  executing: false
+  blockXml: "<xml></xml>"
+  blockCode:
   blockCount:
     set: |
       if ( this.blockCount != value ) {

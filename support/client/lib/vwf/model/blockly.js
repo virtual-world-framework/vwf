@@ -51,7 +51,7 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                 this.state.blockly = { "node": undefined };
             }  
 
-            this.state.executingBlocks = false;
+            this.state.executingBlocks = undefined;
 
             // turns on logger debugger console messages 
             this.debug = {
@@ -103,18 +103,20 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
             var protos = getPrototypes( childExtendsID );
             var createNode = function() {
                 return {
-                    parentID: nodeID,
-                    ID: childID,
-                    extendsID: childExtendsID,
-                    implementsIDs: childImplementsIDs,
-                    source: childSource,
-                    type: childType,
-                    name: childName,
-                    loadComplete: callback,
-                    prototypes: protos,
-                    blocks: "<xml></xml>",
-                    code: undefined
-
+                    "parentID": nodeID,
+                    "ID": childID,
+                    "extendsID": childExtendsID,
+                    "implementsIDs": childImplementsIDs,
+                    "source": childSource,
+                    "type": childType,
+                    "name": childName,
+                    "loadComplete": callback,
+                    "prototypes": protos,
+                    "blocks": "<xml></xml>",
+                    "code": undefined,
+                    "codeLine": -1,
+                    "lastLineExeTime": undefined,
+                    "timeBetweenLines": 1
                 };
             }; 
 
@@ -205,16 +207,69 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
+            var getJavaScript = function( node ) {
+                var xml = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
+                
+                Blockly.JavaScript.vwfID = node.ID;
+
+                if ( xml ) { 
+                    node.blocks = Blockly.Xml.domToText( xml );
+                }
+                node.code = Blockly.JavaScript.workspaceToCode().split( '\n' );
+            };
+
             if ( nodeID == this.kernel.application() ) {
-                if ( propertyName == "executing" ) {
-                    if ( this.state.executingBlocks != Boolean( propertyValue ) ) {
-                        value = this.state.executingBlocks = Boolean( propertyValue ); 
+                if ( propertyName === "executingAll" ) {
+                    var exe = Boolean( propertyValue );
+                    if ( exe ) {
+                        if ( this.state.executingBlocks === undefined ) {
+                            this.state.executingBlocks = {};
+                            for ( var id in this.state.nodes ) {
+                                if ( this.state.blockly.node && id == this.state.blockly.node.ID ) {
+                                    getJavaScript( node );
+                                }
+                                this.state.executingBlocks[ id ] = node; 
+                                node.codeLine = -1;   
+                            }    
+                        }
+                    } else {
+                        this.state.executingBlocks = undefined;    
                     }
                 }
             } else if ( ( node !== undefined ) && ( validPropertyValue( propertyValue ) ) ) {
+
                 switch ( propertyName ) {
-                    case "":
+                    
+                    case  "blockCode":
+                        value = node.code = propertyValue;
                         break;
+                    
+                    case "blockXml":
+                        value = node.blocks = propertyValue;
+                        break;
+
+                    case "executing":
+                        var exe = Boolean( propertyValue );
+                        if ( exe ) {
+                            if ( this.state.executingBlocks === undefined ) {
+                                this.state.executingBlocks = {};
+                            }
+                            if ( this.state.blockly.node && nodeID == this.state.blockly.node.ID ) {
+                                getJavaScript( node );
+                            }
+                            if ( this.state.executingBlocks[ nodeID ] === undefined ) {
+                                this.state.executingBlocks[ nodeID ] = node;
+                                node.codeLine = -1;
+                            }
+                        } else {
+                            delete this.state.executingBlocks[ nodeID ];
+                            var count = Object.keys( this.state.executingBlocks ).length;
+                            if ( count === 0 ) {
+                                this.state.executingBlocks = undefined;    
+                            }
+                        }
+                        break;
+
                     default:
                         break;
                 }
@@ -235,10 +290,30 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
             var value = undefined;
 
             if ( nodeID == this.kernel.application() ) {
-                if ( propertyName == "executing" ) {
-                    value = this.state.executingBlocks; 
+                
+                // this is not quite right, need to check to see if 
+                // all of the blocks are executing here
+                if ( propertyName === "executingAll" ) {
+                    value = ( this.state.executingBlocks !== undefined ); 
                 }
-            }                
+
+            } else if ( node !== undefined ){
+                switch ( propertyName ) {
+                    
+                    case "executing":
+                        value = ( this.state.executingBlocks && this.state.executingBlocks[ nodeID ] !== undefined );
+                        break;
+                    
+                    case "blockCode":
+                        value = node.code;
+                        break;
+                    
+                    case "blockXml":
+                        value = node.blocks;
+                        break;
+
+                }
+            }               
 
             return value;
         },
@@ -248,23 +323,23 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
 
         // -- callingMethod --------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
-            return undefined;
-        },
+        //callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        //    return undefined;
+        //},
 
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
 
         // -- executing ------------------------------------------------------------------------------
 
-        executing: function( nodeID, scriptText, scriptType ) {
-            return undefined;
-        },
+        //executing: function( nodeID, scriptText, scriptType ) {
+        //    return undefined;
+        //},
 
         // == ticking =============================================================================
 
-        ticking: function( vwfTime ) {
-        }
+        //ticking: function( vwfTime ) {
+        //}
 
 
 
