@@ -45,6 +45,10 @@ methods:
   getWorldXYVector:
   executeBlocklyCmd:
 events:
+  blocklyStarted:
+  blocklyExecuted:
+  blocklyErrored:
+  blocklyEnded:
   blockCountChanged:
   topBlockCountChanged:
   blocklyVisibleChanged:

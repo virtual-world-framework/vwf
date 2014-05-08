@@ -227,15 +227,22 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                     if ( executeNextLine ) {
 
                         if ( blocklyNode.code && blocklyNode.codeLine < blocklyNode.code.length-1 ) {
+                            if ( blocklyNode.codeLine === 0 ) {
+                                this.kernel.fireEvent( nodeID, "blocklyStarted", [ blocklyNode.codeLine ] );    
+                            }
                             try { 
                                 eval( blocklyNode.code[ blocklyNode.codeLine ] ) ;
                             } catch ( e ) {
                                 this.logger.warnx( "Object: " + blocklyNode.ID + " had an error executing line#" + blocklyNode.codeLine + " code: " + blocklyNode.code[ blocklyNode.codeLine ] );
                                 this.kernel.setProperty( nodeID, "executing", false );
+                                this.kernel.fireEvent( nodeID, "blocklyErrored", [ blocklyNode.codeLine ] );
+
                             }
+                            this.kernel.fireEvent( nodeID, "blocklyExecuted", [ blocklyNode.codeLine ] ); 
                             blocklyNode.codeLine++;
                         } else {
                             this.kernel.setProperty( nodeID, "executing", false );
+                            this.kernel.fireEvent( nodeID, "blocklyStopped", [ blocklyNode.codeLine ] );
                         }
                     }
                 } 
