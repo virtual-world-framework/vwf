@@ -22,7 +22,6 @@ extends:
 properties:
   forwardSpeed: 400
   rotateSpeed: 30
-  animationTime: 1
   executing: false
   blockXml: "<xml></xml>"
   blockCode:
@@ -42,6 +41,8 @@ events:
   blocklyVisibleChanged:
 scripts:
 - |
+    var defaultAnimationDuration = 1;
+    
     this.getWorldXYVector = function( x, y ) {
 
       var dir = goog.vec.Vec3.create();
@@ -69,46 +70,46 @@ scripts:
         case "translateBy":
           //dir = this.getWorldXYVector( 0, -1 );
           //speed = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.forwardSpeed;
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : defaultAnimationDuration;
           //this.translateBy( [ dir[ 0 ] * speed, dir[ 1 ] * speed, 0 ], t );
           this.translateBy( value, t );
           break;
 
         case "translateTo":
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : defaultAnimationDuration;
           this.translateBy( value, t );
           break;
 
         case "rotateBy":
           //angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : defaultAnimationDuration;
           this.rotateBy( value, t );
           break;
 
         case "rotateTo":
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : defaultAnimationDuration;
           this.rotateTo( value, t );
           break;
 
         case "quaterniateBy":
           //angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : defaultAnimationDuration;
           this.quaterniateBy( value, t );
           break;
 
         case "quaterniateTo":
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : defaultAnimationDuration;
           this.quaterniateTo( value, t );
           break;
 
         case "scaleBy":
           //angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : defaultAnimationDuration;
           this.scaleBy( value, t );
           break;
 
         case "scaleTo":
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.animationTime;
+          t = ( time && time !== "0" ) ? parseFloat( time ) : defaultAnimationDuration;
           this.scaleTo( value, t );
           break;
 
