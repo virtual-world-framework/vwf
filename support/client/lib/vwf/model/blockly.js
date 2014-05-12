@@ -121,7 +121,7 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
             }; 
 
             var node;
-            if ( isBlockly3Node( childImplementsIDs ) ) {
+            if ( isBlockly3Node( childID ) ) {
                 this.state.nodes[ childID ] = node = createNode();
             }
 
@@ -371,15 +371,10 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
         return undefined;
     }
 
-    function isBlockly3Node( implementsIDs ) {
-        var found = false;
-        if ( implementsIDs ) {
-            for ( var i = 0; i < implementsIDs.length && !found; i++ ) {
-                found = ( implementsIDs[i] == "http-vwf-example-com-blockly-controller-vwf" ); 
-            }
-        }
-
-        return found;
+    function isBlockly3Node( nodeID ) {
+        return self.kernel.test( nodeID,
+            "self::element(*,'http://vwf.example.com/blockly/controller.vwf')",
+            nodeID );
     }
 
     function validPropertyValue( obj ) {
