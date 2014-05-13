@@ -323,9 +323,19 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
 
         // -- callingMethod --------------------------------------------------------------------------
 
-        //callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
-        //    return undefined;
-        //},
+        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+            var node = this.state.nodes[ nodeID ];
+
+            if ( nodeID == this.kernel.application() ) {
+                switch ( methodName ) {
+                    case "stopAllExecution":
+                        for ( var id in this.state.executingBlocks ) {
+                            this.settingProperty( id, 'executing', false );
+                        }
+                        break;
+                }
+            } 
+        },
 
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
