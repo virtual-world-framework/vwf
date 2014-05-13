@@ -952,7 +952,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                     nml = pickInfo.normal;
                     localPickNormal = goog.vec.Vec3.createFloat32FromValues( nml[0], nml[1], nml[2] );
                 }
-                localPickNormal = goog.vec.Vec3.normalize( localPickNormal, goog.vec.Vec3.create() );
+                if ( localPickNormal ) {
+                    localPickNormal = goog.vec.Vec3.normalize( localPickNormal, goog.vec.Vec3.create() );
+                }
                 if ( sceneView.state.nodes[ pointerPickID ] ) {
                     var pickObj = sceneView.state.nodes[ pointerPickID ];
                     if ( pickObj.threeObject.matrixWorld ) {
