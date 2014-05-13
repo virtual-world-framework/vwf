@@ -2289,7 +2289,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         // Cycle through the list of intersected objects and return the first visible one
         for ( var i = 0; i < intersects.length; i++ ) {
             if ( intersects[ i ].object.visible ) {
-                return intersects[ i ];
+                if ( getPickObjectID.call( view, intersects[ i ].object ) !== null ) {
+                    return intersects[ i ];
+                }
             }
         }
         return null;
@@ -2347,7 +2349,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }   
 
             if ( intersects[ i ].object.visible ) {
-                target = intersects[ i ];
+                if ( getPickObjectID.call( view, intersects[ i ].object ) !== null ) {
+                    target = intersects[ i ];
+                }
             }
         }
         return target;
