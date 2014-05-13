@@ -657,10 +657,13 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
 
-                // newPickId will be null if an object exists in
-                // threejs, but not in vwf and not having a vwfID.
-                // Set newPickId to sceneRootID if null
-                newPickId = newPickId === null ? view.state.sceneRootID : newPickId;
+                if ( newPickId === null ) {
+                    // Placed this error here instead of in getPickObjectID because
+                    // ThreeKSPick is now calling it, causing it to flood the console
+                    self.logger.errorx("renderScene", "No vwfID was found by getPickObjectID.");
+                    newPick = undefined;
+                    newPickId = view.state.sceneRootID;
+                }
 
                 if ( self.lastPickId != newPickId && self.lastEventData )
                 {
