@@ -56,6 +56,8 @@ define( [ "module", "vwf/model",
 
             this.state.executingBlocks = undefined;
 
+            this.state.haltExecution = false;
+
             // turns on logger debugger console messages 
             this.debug = {
                 "creation": false,
@@ -382,11 +384,8 @@ define( [ "module", "vwf/model",
 
                     if ( executeNextLine ) {
 
-                        if ( blocklyNode.interpreterStatus === "created" ) {
-                            this.kernel.fireEvent( nodeID, "blocklyStarted", [ true ] );
-                            blocklyNode.interpreterStatus = "started";
-                        }
-
+                        self.state.haltExecution = false;
+                        
                         nextStep( blocklyNode );
 
                         this.kernel.fireEvent( nodeID, "blocklyExecuted", [ blocklyNode.interpreter.value ] ); 
@@ -440,8 +439,25 @@ define( [ "module", "vwf/model",
     }
 
     function nextStep( node ) {
+        //var finishedProgram
         if ( node.interpreter !== undefined ) {
-            if ( node.interpreter.step() ) {
+            var stepType = node.interpreter.step();
+            
+            switch ( stepType ) {
+                
+                case "stepProgram":
+                    if ( node.interpreterStatus === "created" ) {
+                        this.kernel.fireEvent( node.ID, "blocklyStarted", [ true ] );
+                        blocklyNode.interpreterStatus = "started";                        
+                    } else if ( node.interpreterStatus === "started" ) {
+                        this.kernel.setProperty( node.ID, "executing", false );
+                        this.kernel.fireEvent( node.ID, "blocklyStopped", [ blocklyNode.codeLine ] );
+                        blocklyNode.interpreterStatus = "finished";
+                    }
+                    break;
+            }
+
+            if ( stepType && !self.state.haltExecution ) {
                 // I'm not sure I understand the use setTimeout here??
                 // anyone have an idea of why this would be better?
                 window.setTimeout( nextStep( node ), 0 );
@@ -463,6 +479,8 @@ define( [ "module", "vwf/model",
                         for ( var j = 0; j < arguments.length; j++) {
                             arguments[ j ] = arguments[ j ].toString();
                         }
+                        console.info( "interpreter.createPrimitive( nativeFunc.apply( vwf, arguments ));" )
+                        self.state.haltExecution = true;
                         return interpreter.createPrimitive( nativeFunc.apply( vwf, arguments ));
                     };
                 })( vwf[ numFunctions[ i ] ]);
