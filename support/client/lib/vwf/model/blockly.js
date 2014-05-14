@@ -16,9 +16,12 @@
 /// @module vwf/model/blockly
 /// @requires vwf/model ... and others
 
-define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/model/blockly/blocks_compressed", 
-          "vwf/model/blockly/javascript_compressed", "vwf/model/blockly/msg/js/en" ], 
-        function( module, model, Blockly ) {
+define( [ "module", "vwf/model", 
+          "vwf/model/blockly/JS-Interpreter/acorn", 
+          "vwf/model/blockly/blockly_compressed", "vwf/model/blockly/blocks_compressed", 
+          "vwf/model/blockly/javascript_compressed", "vwf/model/blockly/msg/js/en"
+        ], 
+        function( module, model, acorn, Blockly ) {
 
     var self;
 
@@ -29,7 +32,7 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function( options ) {
-            
+
             self = this;
 
             this.arguments = Array.prototype.slice.call( arguments );
@@ -64,6 +67,9 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                 "getting": false,
                 "prototypes": false
             };
+
+            // interpreter documentation
+            // https://neil.fraser.name/software/JS-Interpreter/docs.html
 
         },
 
@@ -116,7 +122,9 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                     "code": undefined,
                     "codeLine": -1,
                     "lastLineExeTime": undefined,
-                    "timeBetweenLines": 1
+                    "timeBetweenLines": 1,
+                    "interpreter": undefined,
+                    "interpreterStatus": ""
                 };
             }; 
 
@@ -215,7 +223,8 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
                 if ( xml ) { 
                     node.blocks = Blockly.Xml.domToText( xml );
                 }
-                node.code = Blockly.JavaScript.workspaceToCode().split( '\n' );
+                //node.code = Blockly.JavaScript.workspaceToCode().split( '\n' );
+            node.code = Blockly.JavaScript.workspaceToCode();
             };
 
             if ( nodeID == this.kernel.application() ) {
@@ -348,10 +357,48 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
 
         // == ticking =============================================================================
 
-        //ticking: function( vwfTime ) {
-        //}
+        ticking: function( vwfTime ) {
+            
+            if ( this.state.executingBlocks !== undefined ) {
+                var blocklyNode = undefined;
 
+                for ( var nodeID in this.state.executingBlocks ) {
 
+                    blocklyNode = this.state.executingBlocks[ nodeID ];
+                    executeNextLine = false;
+
+                    if ( blocklyNode.interpreter === undefined ) {
+                        blocklyNode.interpreter = createInterpreter( acorn, blocklyNode.code );
+                        blocklyNode.interpreterStatus == "created";
+                        blocklyNode.lastLineExeTime = vwfTime;
+                        executeNextLine = true;
+                    } else {
+                        var elaspedTime = vwfTime - blocklyNode.lastLineExeTime;
+                        if ( elaspedTime >= blocklyNode.timeBetweenLines ) {
+                            executeNextLine = true;
+                            blocklyNode.lastLineExeTime = vwfTime;
+                        } 
+                    }
+
+                    if ( executeNextLine ) {
+
+                        if ( blocklyNode.interpreterStatus === "created" ) {
+                            this.kernel.fireEvent( nodeID, "blocklyStarted", [ true ] );
+                            blocklyNode.interpreterStatus = "started";
+                        }
+
+                        nextStep( blocklyNode );
+
+                        this.kernel.fireEvent( nodeID, "blocklyExecuted", [ blocklyNode.interpreter.value ] ); 
+
+                        //    this.kernel.setProperty( nodeID, "executing", false );
+                        //    this.kernel.fireEvent( nodeID, "blocklyStopped", [ blocklyNode.codeLine ] );
+
+                    }
+                } 
+            }
+
+        }        
 
     } );
 
@@ -391,5 +438,40 @@ define( [ "module", "vwf/model", "vwf/model/blockly/blockly_compressed", "vwf/mo
         var objType = ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
         return ( objType != 'null' && objType != 'undefined' );
     }
+
+    function nextStep( node ) {
+        if ( node.interpreter !== undefined ) {
+            if ( node.interpreter.step() ) {
+                // I'm not sure I understand the use setTimeout here??
+                // anyone have an idea of why this would be better?
+                window.setTimeout( nextStep( node ), 0 );
+            }
+        }
+    }
+
+    function createInterpreter( acorn, code ) {
+        
+        var initFunc = function( interpreter, scope ) {
+            
+            var myVwf = interpreter.createObject( interpreter.OBJECT );
+            interpreter.setProperty( scope, 'vwf', myVwf );
+
+            var numFunctions = [ 'callMethod', 'setProperty', 'getProperty', 'fireEvent' ];
+            for ( var i = 0; i < numFunctions.length; i++ ) {
+                var wrapper = ( function( nativeFunc ) {
+                    return function() {
+                        for ( var j = 0; j < arguments.length; j++) {
+                            arguments[ j ] = arguments[ j ].toString();
+                        }
+                        return interpreter.createPrimitive( nativeFunc.apply( vwf, arguments ));
+                    };
+                })( vwf[ numFunctions[ i ] ]);
+                interpreter.setProperty( myVwf, numFunctions[ i ], interpreter.createNativeFunction( wrapper ) );
+            }
+
+        };
+        return new Interpreter( acorn, code, initFunc );
+    }
+
 
 } );
