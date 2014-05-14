@@ -326,7 +326,7 @@
                 { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
                 { library: "vwf/model/scenejs", active: false },
-                { library: "vwf/model/blockly", active: false },
+                { library: "vwf/model/blockly", linkedLibraries: [ "vwf/model/blockly/JS-Interpreter/interpreter.js" ],  active: false },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
                 { library: "vwf/kernel/view", active: true },
@@ -346,6 +346,7 @@
                 { library: "vwf/view/webrtc/adapter", active: false },
                 { library: "vwf/view/google-earth", active: false },
                 { library: "vwf/model/cesium/Cesium", active: false },
+                { library: "vwf/model/blockly/JS-Interpreter/interpreter.js", active: false },
                 { library: "vwf/admin", active: true }
             ];
 
@@ -3172,6 +3173,10 @@ if ( ! childComponent.source ) {
         /// @see {@link module:vwf/api/kernel.callMethod}
 
         this.callMethod = function( nodeID, methodName, methodParameters ) {
+
+            if ( nodeID.indexOf( 'rover' ) !== -1 && methodName === "moveForward" ) {
+                console.info( "callMethod( "+nodeID+", "+methodName+", "+methodParameters+" )" );
+            }
 
             this.logger.debuggx( "callMethod", function() {
                 return [ nodeID, methodName, JSON.stringify( loggableValues( methodParameters ) ) ];

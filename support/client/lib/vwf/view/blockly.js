@@ -201,54 +201,8 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
 
         // -- ticked -----------------------------------------------------------------------------------
 
-        ticked: function( vwfTime ) {
-            
-            if ( this.state.executingBlocks !== undefined ) {
-                var blocklyNode = undefined;
-                var executeNextLine;
-
-                for ( var nodeID in this.state.executingBlocks ) {
-
-                    blocklyNode = this.state.executingBlocks[ nodeID ];
-                    executeNextLine = false;
-
-                    if ( blocklyNode.codeLine === -1 ) {
-                        blocklyNode.codeLine = 0;
-                        blocklyNode.lastLineExeTime = vwfTime;
-                        executeNextLine = true;
-                    } else {
-                        var elaspedTime = vwfTime - blocklyNode.lastLineExeTime;
-                        if ( elaspedTime >= blocklyNode.timeBetweenLines ) {
-                            executeNextLine = true;
-                            blocklyNode.lastLineExeTime = vwfTime;
-                        } 
-                    }
-
-                    if ( executeNextLine ) {
-
-                        if ( blocklyNode.code && blocklyNode.codeLine < blocklyNode.code.length-1 ) {
-                            if ( blocklyNode.codeLine === 0 ) {
-                                this.kernel.fireEvent( nodeID, "blocklyStarted", [ blocklyNode.codeLine ] );    
-                            }
-                            try { 
-                                eval( blocklyNode.code[ blocklyNode.codeLine ] ) ;
-                            } catch ( e ) {
-                                this.logger.warnx( "Object: " + blocklyNode.ID + " had an error executing line#" + blocklyNode.codeLine + " code: " + blocklyNode.code[ blocklyNode.codeLine ] );
-                                this.kernel.setProperty( nodeID, "executing", false );
-                                this.kernel.fireEvent( nodeID, "blocklyErrored", [ blocklyNode.codeLine ] );
-
-                            }
-                            this.kernel.fireEvent( nodeID, "blocklyExecuted", [ blocklyNode.codeLine ] ); 
-                            blocklyNode.codeLine++;
-                        } else {
-                            this.kernel.setProperty( nodeID, "executing", false );
-                            this.kernel.fireEvent( nodeID, "blocklyStopped", [ blocklyNode.codeLine ] );
-                        }
-                    }
-                } 
-            }
-
-        },
+        //ticked: function( vwfTime ) {
+        //},
 
         // -- render -----------------------------------------------------------------------------------
 
