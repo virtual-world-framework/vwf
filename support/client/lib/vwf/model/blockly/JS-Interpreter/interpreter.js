@@ -49,9 +49,13 @@ Interpreter.prototype.step = function() {
   if (this.stateStack.length == 0) {
     return false;
   }
-  var state = this.stateStack[0];
-  this['step' + state.node.type]();
-  return true;
+  var state = this.stateStack[ 0 ];
+  var nodeStepType = "step"+state.node.type;
+  
+  //console.info( nodeStepType );
+  
+  this[ nodeStepType ]();
+  return nodeStepType;
 };
 
 /**
