@@ -944,23 +944,29 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }
 
             if ( pickInfo ) {
-                var nml;
-                if ( pickInfo.face ) {
-                    nml = pickInfo.face.normal
-                    localPickNormal = goog.vec.Vec3.createFloat32FromValues( nml.x, nml.y, nml.z );
-                } else if ( pickInfo.normal ) {
-                    nml = pickInfo.normal;
-                    localPickNormal = goog.vec.Vec3.createFloat32FromValues( nml[0], nml[1], nml[2] );
-                }
-                localPickNormal = goog.vec.Vec3.normalize( localPickNormal, goog.vec.Vec3.create() );
                 if ( sceneView.state.nodes[ pointerPickID ] ) {
+
                     var pickObj = sceneView.state.nodes[ pointerPickID ];
+                    var nml;
+
                     if ( pickObj.threeObject.matrixWorld ) {
                         worldTransform = goog.vec.Mat4.createFromArray( pickObj.threeObject.matrixWorld.elements );
                     } else {
                         worldTransform = goog.vec.Mat4.createFromArray( getWorldTransform( pickObj ).elements );
-                    } 
-                    worldPickNormal = goog.vec.Mat4.multVec3NoTranslate( worldTransform, localPickNormal, goog.vec.Vec3.create() );    
+                    }
+
+                    if ( pickInfo.face ) {
+                        nml = pickInfo.face.normal
+                        localPickNormal = goog.vec.Vec3.createFloat32FromValues( nml.x, nml.y, nml.z );
+                    } else if ( pickInfo.normal ) {
+                        nml = pickInfo.normal;
+                        localPickNormal = goog.vec.Vec3.createFloat32FromValues( nml[0], nml[1], nml[2] );
+                    }
+                    
+                    if ( localPickNormal !== undefined ) {
+                        localPickNormal = goog.vec.Vec3.normalize( localPickNormal, goog.vec.Vec3.create() );
+                        worldPickNormal = goog.vec.Mat4.multVec3NoTranslate( worldTransform, localPickNormal, goog.vec.Vec3.create() );    
+                    }
                 }
             }
 
@@ -2282,7 +2288,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         // Cycle through the list of intersected objects and return the first visible one
         for ( var i = 0; i < intersects.length; i++ ) {
             if ( intersects[ i ].object.visible ) {
-                return intersects[ i ];
+                if ( getPickObjectID( intersects[ i ].object ) !== null ) {
+                    return intersects[ i ];
+                }
             }
         }
         return null;
@@ -2340,7 +2348,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }   
 
             if ( intersects[ i ].object.visible ) {
-                target = intersects[ i ];
+                if ( getPickObjectID( intersects[ i ].object ) !== null ) {
+                    target = intersects[ i ];
+                }
             }
         }
         return target;
