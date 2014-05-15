@@ -130,7 +130,6 @@ define( [ "module", "vwf/model",
                     "name": childName,
                     "blocks": "<xml></xml>",
                     "code": undefined,
-                    "codeLine": -1,
                     "lastLineExeTime": undefined,
                     "timeBetweenLines": 1,
                     "interpreter": undefined,
@@ -214,37 +213,7 @@ define( [ "module", "vwf/model",
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
-            var getJavaScript = function( node ) {
-                var xml = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
-                
-                Blockly.JavaScript.vwfID = node.ID;
-
-                if ( xml ) { 
-                    node.blocks = Blockly.Xml.domToText( xml );
-                }
-                //node.code = Blockly.JavaScript.workspaceToCode().split( '\n' );
-            node.code = Blockly.JavaScript.workspaceToCode();
-            };
-
-            if ( nodeID == this.kernel.application() ) {
-                if ( propertyName === "executingAll" ) {
-                    var exe = Boolean( propertyValue );
-                    if ( exe ) {
-                        if ( this.state.executingBlocks === undefined ) {
-                            this.state.executingBlocks = {};
-                            for ( var id in this.state.nodes ) {
-                                if ( this.state.blockly.node && id == this.state.blockly.node.ID ) {
-                                    getJavaScript( node );
-                                }
-                                this.state.executingBlocks[ id ] = node; 
-                                node.codeLine = -1;   
-                            }    
-                        }
-                    } else {
-                        this.state.executingBlocks = undefined;    
-                    }
-                }
-            } else if ( ( node !== undefined ) && ( validPropertyValue( propertyValue ) ) ) {
+            if ( ( node !== undefined ) && ( validPropertyValue( propertyValue ) ) ) {
 
                 switch ( propertyName ) {
                     
@@ -262,12 +231,9 @@ define( [ "module", "vwf/model",
                             if ( this.state.executingBlocks === undefined ) {
                                 this.state.executingBlocks = {};
                             }
-                            if ( this.state.blockly.node && nodeID == this.state.blockly.node.ID ) {
-                                getJavaScript( node );
-                            }
                             if ( this.state.executingBlocks[ nodeID ] === undefined ) {
+                                getJavaScript( node );
                                 this.state.executingBlocks[ nodeID ] = node;
-                                node.codeLine = -1;
                             }
                         } else {
                             delete this.state.executingBlocks[ nodeID ];
@@ -297,15 +263,7 @@ define( [ "module", "vwf/model",
             var node = this.state.nodes[ nodeID ];
             var value = undefined;
 
-            if ( nodeID == this.kernel.application() ) {
-                
-                // this is not quite right, need to check to see if 
-                // all of the blocks are blockly_executing here
-                if ( propertyName === "executingAll" ) {
-                    value = ( this.state.executingBlocks !== undefined ); 
-                }
-
-            } else if ( node !== undefined ){
+            if ( node !== undefined ) {
                 switch ( propertyName ) {
                     
                     case "blockly_executing":
@@ -336,11 +294,20 @@ define( [ "module", "vwf/model",
 
             if ( nodeID == this.kernel.application() ) {
                 switch ( methodName ) {
+                    
                     case "stopAllExecution":
                         for ( var id in this.state.executingBlocks ) {
                             this.settingProperty( id, 'blockly_executing', false );
                         }
                         break;
+
+                    case "startAllExecution":
+                        for ( var id in this.state.nodes ) {
+                            this.settingProperty( id, 'blockly_executing', true );
+                        }  
+                        break;
+
+
                 }
             } 
         },
@@ -431,8 +398,19 @@ define( [ "module", "vwf/model",
         return ( objType != 'null' && objType != 'undefined' );
     }
 
+    function getJavaScript( node ) {
+        var xml = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
+        
+        Blockly.JavaScript.vwfID = node.ID;
+
+        if ( xml ) { 
+            node.blocks = Blockly.Xml.domToText( xml );
+        }
+        node.code = Blockly.JavaScript.workspaceToCode();
+    }
+
     function nextStep( node ) {
-        //var finishedProgram
+
         if ( node.interpreter !== undefined ) {
             var stepType = node.interpreter.step();
             
