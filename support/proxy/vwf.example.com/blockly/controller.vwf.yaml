@@ -20,41 +20,50 @@
 extends:
   http://vwf.example.com/node3/animation.vwf
 properties:
-  forwardSpeed: 400
-  rotateSpeed: 30
-  executing: false
-  blockXml: "<xml></xml>"
-  blockCode:
-  topBlockCount:
+  blockly_executing: false
+  blockly_xml: "<xml></xml>"
+  blockly_code:
     set: |
-      if ( this.topBlockCount != value ) {
-        this.topBlockCount = value;
+      if ( this.blockly_code != value ) {
+        this.blockly_code = value;
+        this.blocklyCodeChanged( value );
+      }
+    value: 0
+  blockly_topBlockCount:
+    set: |
+      if ( this.blockly_topBlockCount != value ) {
+        this.blockly_topBlockCount = value;
         this.topBlockCountChanged( value );
       }
     value: 0
-  blockCount:
+  blockly_blockCount:
     set: |
-      if ( this.blockCount != value ) {
-        this.blockCount = value;
+      if ( this.blockly_blockCount != value ) {
+        this.blockly_blockCount = value;
         this.blockCountChanged( value );
       }
     value: 0
-  allowedBlocks: 20   
+  blockly_allowedBlocks:   
+    set: |
+      if ( this.blockly_allowedBlocks != value ) {
+        this.blockly_allowedBlocks = value;
+        this.allowedBlocksChanged( value );
+      }
+    value: 20
 methods:
   getWorldXYVector:
-  executeBlocklyCmd:
 events:
   blocklyStarted:
   blocklyExecuted:
   blocklyErrored:
   blocklyStopped:
-  blockCountChanged:
+  blocklyCodeChanged:
   topBlockCountChanged:
+  blockCountChanged:
+  allowedBlocksChanged:
   blocklyVisibleChanged:
 scripts:
 - |
-    this.defaultAnimationDuration = 1;
-    
     this.getWorldXYVector = function( x, y ) {
 
       var dir = goog.vec.Vec3.create();
@@ -70,64 +79,5 @@ scripts:
       goog.vec.Vec3.normalize( dir, dir ); 
       return dir;
 
-    }
-
-    this.executeBlocklyCmd = function( cmd, value, time ) {
-
-      var dir = undefined;
-      var speed, angle, t;
-
-      switch( cmd ) {
-
-        case "translateBy":
-          //dir = this.getWorldXYVector( 0, -1 );
-          //speed = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.forwardSpeed;
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.defaultAnimationDuration;
-          //this.translateBy( [ dir[ 0 ] * speed, dir[ 1 ] * speed, 0 ], t );
-          this.translateBy( value, t );
-          break;
-
-        case "translateTo":
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.defaultAnimationDuration;
-          this.translateBy( value, t );
-          break;
-
-        case "rotateBy":
-          //angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.defaultAnimationDuration;
-          this.rotateBy( value, t );
-          break;
-
-        case "rotateTo":
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.defaultAnimationDuration;
-          this.rotateTo( value, t );
-          break;
-
-        case "quaterniateBy":
-          //angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.defaultAnimationDuration;
-          this.quaterniateBy( value, t );
-          break;
-
-        case "quaterniateTo":
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.defaultAnimationDuration;
-          this.quaterniateTo( value, t );
-          break;
-
-        case "scaleBy":
-          //angle = ( magnitude && Number( magnitude ) ) ? Number( magnitude ) : this.rotateSpeed;
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.defaultAnimationDuration;
-          this.scaleBy( value, t );
-          break;
-
-        case "scaleTo":
-          t = ( time && time !== "0" ) ? parseFloat( time ) : this.defaultAnimationDuration;
-          this.scaleTo( value, t );
-          break;
-
-        default:
-          break;
-      }
-
-    }  //@ sourceURL=blockly-controller.vwf
+    } //@ sourceURL=blockly-controller.vwf
     
