@@ -3174,10 +3174,6 @@ if ( ! childComponent.source ) {
 
         this.callMethod = function( nodeID, methodName, methodParameters ) {
 
-            if ( nodeID.indexOf( 'rover' ) !== -1 && methodName === "moveForward" ) {
-                console.info( "callMethod( "+nodeID+", "+methodName+", "+methodParameters+" )" );
-            }
-
             this.logger.debuggx( "callMethod", function() {
                 return [ nodeID, methodName, JSON.stringify( loggableValues( methodParameters ) ) ];
             } );

@@ -473,7 +473,6 @@ define( [ "module", "vwf/model",
                         for ( var j = 0; j < arguments.length; j++) {
                             arguments[ j ] = arguments[ j ].toString();
                         }
-                        console.info( "interpreter.createPrimitive( nativeFunc.apply( vwf, arguments ));" )
                         self.state.haltExecution = true;
                         return interpreter.createPrimitive( nativeFunc.apply( vwf, arguments ));
                     };
