@@ -1,0 +1,9 @@
+---
+extends: http://vwf.example.com/node3.vwf
+properties:
+  lineFunction: undefined
+  startValue: undefined
+  endValue: undefined
+  pointCount: undefined
+  color: undefined
+  lineThickness: undefined

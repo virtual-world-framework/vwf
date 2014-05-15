@@ -1,0 +1,21 @@
+--- 
+extends: http://vwf.example.com/scene.vwf
+properties:
+  backgroundColor: [ 10, 20, 30 ]
+children:
+  graph:
+    extends: http://vwf.example.com/graph.vwf
+    children:
+      line:
+        extends: http://vwf.example.com/graphline.vwf
+        properties:
+          lineFunction: "y = Math.sin(0.5*x) * 5"
+          startValue: -50
+          endValue: 50
+          pointCount: 500
+          color: [ 0, 255, 255 ]
+          lineThickness: 1
+scripts: |
+  this.initialize = function() {
+    this.camera.transform = [0.6751879453659058,0.737642765045166,1.1025696267097373e-7,0,-0.6750107407569885,0.6178589463233948,-0.40327033400535583,0,-0.2974701225757599,0.27228376269340515,0.9150904417037964,0,64.02111053466797,-64.43307495117188,41.36255645751953,1];
+  }

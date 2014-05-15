@@ -327,6 +327,7 @@
                 { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
                 { library: "vwf/model/scenejs", active: false },
                 { library: "vwf/model/blockly", linkedLibraries: [ "vwf/model/blockly/JS-Interpreter/interpreter.js" ],  active: false },
+                { library: "vwf/model/graphtool", active: true },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
                 { library: "vwf/kernel/view", active: true },
@@ -358,6 +359,7 @@
                     { library: "vwf/model/threejs", active: false },
                     { library: "vwf/model/cesium", active: false },
                     { library: "vwf/model/blockly", active: false },
+                    { library: "vwf/model/graphtool", active: true },
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [
