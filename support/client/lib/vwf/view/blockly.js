@@ -97,16 +97,16 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                         var blockCount = Blockly.mainWorkspace.getAllBlocks().length;
                         var topBlockCount = Blockly.mainWorkspace.topBlocks_.length;
                         
-                        self.kernel.setProperty( self.state.blockly.node.ID, "blockCount", blockCount );
-                        self.kernel.setProperty( self.state.blockly.node.ID, "topBlockCount", topBlockCount );
+                        self.kernel.setProperty( self.state.blockly.node.ID, "blockly_blockCount", blockCount );
+                        self.kernel.setProperty( self.state.blockly.node.ID, "blockly_topBlockCount", topBlockCount );
 
                         // the following code could be used to 
                         // replicate the blockly blocks in the current UI
                         //var xml = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
                         //if ( xml ) { 
-                        //    self.kernel.setProperty( self.state.blockly.node.ID, "blockXml", Blockly.Xml.domToText( xml ) );
+                        //    self.kernel.setProperty( self.state.blockly.node.ID, "blockly_xml", Blockly.Xml.domToText( xml ) );
                         //}
-                        //self.kernel.setProperty( self.state.blockly.node.ID, "blockCode", Blockly.JavaScript.workspaceToCode() );
+                        //self.kernel.setProperty( self.state.blockly.node.ID, "blockly_code", Blockly.JavaScript.workspaceToCode() );
  
                     }
 
@@ -229,8 +229,8 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
         var blockCount = Blockly.mainWorkspace.getAllBlocks().length;
         var topBlockCount = Blockly.mainWorkspace.topBlocks_.length;
         
-        self.kernel.setProperty( node.ID, "blockCount", blockCount );
-        self.kernel.setProperty( node.ID, "topBlockCount", topBlockCount );      
+        self.kernel.setProperty( node.ID, "blockly_blockCount", blockCount );
+        self.kernel.setProperty( node.ID, "blockly_topBlockCount", topBlockCount );      
     }
 
     function getBlockXML( node ) {
