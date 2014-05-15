@@ -440,15 +440,43 @@ define( [ "module", "vwf/model",
         
         var initFunc = function( interpreter, scope ) {
             
+            var numFunctions, i;
             var myVwf = interpreter.createObject( interpreter.OBJECT );
             interpreter.setProperty( scope, 'vwf', myVwf );
 
-            var numFunctions = [ 'callMethod', 'setProperty', 'getProperty', 'fireEvent' ];
-            for ( var i = 0; i < numFunctions.length; i++ ) {
+
+            numFunctions = [ 'setProperty', 'getProperty' ];
+            for ( i = 0; i < numFunctions.length; i++ ) {
                 var wrapper = ( function( nativeFunc ) {
                     return function() {
                         for ( var j = 0; j < arguments.length; j++) {
                             arguments[ j ] = arguments[ j ].toString();
+                        }
+                        self.state.haltExecution = true;
+                        return interpreter.createPrimitive( nativeFunc.apply( vwf, arguments ));
+                    };
+                })( vwf[ numFunctions[ i ] ]);
+                interpreter.setProperty( myVwf, numFunctions[ i ], interpreter.createNativeFunction( wrapper ) );
+            }
+
+            numFunctions = [ 'callMethod', 'fireEvent' ];
+            for ( var i = 0; i < numFunctions.length; i++ ) {
+                var wrapper = ( function( nativeFunc ) {
+                    return function() {
+                        for ( var j = 0; j < arguments.length; j++) {
+                            if ( j >= 2 ) {
+                                if ( arguments[ j ].type === 'object' ) {
+                                    var temp = [];
+                                    for ( var k = 0; k <= arguments[ j ].properties.length; k++ ) {
+                                        temp.push( arguments[ j ].properties[k].toString() )
+                                    }
+                                    arguments[ j ] = temp;
+                                } else {
+                                    arguments[ j ] = [ arguments[ j ].toString() ];
+                                }
+                            } else {
+                                arguments[ j ] = arguments[ j ].toString();
+                            }
                         }
                         self.state.haltExecution = true;
                         return interpreter.createPrimitive( nativeFunc.apply( vwf, arguments ));
