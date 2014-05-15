@@ -365,7 +365,7 @@ define( [ "module", "vwf/model",
                 for ( var nodeID in this.state.executingBlocks ) {
 
                     blocklyNode = this.state.executingBlocks[ nodeID ];
-                    executeNextLine = false;
+                    var executeNextLine = false;
 
                     if ( blocklyNode.interpreter === undefined ) {
                         blocklyNode.interpreter = createInterpreter( acorn, blocklyNode.code );
