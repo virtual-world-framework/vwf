@@ -5,6 +5,14 @@ properties:
 children:
   graph:
     extends: http://vwf.example.com/graph.vwf
+    properties:
+      gridInterval: 1
+      gridLineInterval: 10
+      gridLength: 100
+      xAxisVisible: true
+      yAxisVisible: true
+      zAxisVisible: true
+      gridVisible: true
     children:
       parabola:
         extends: http://vwf.example.com/graphline.vwf
@@ -35,5 +43,5 @@ children:
           lineThickness: 0.25
 scripts: |
   this.initialize = function() {
-    this.camera.transform = [-0.7082633972167969,0.7059476375579834,-1.947667271906539e-8,0,-0.5642957091331482,-0.5661444664001465,-0.60087651014328,0,-0.42418745160102844,-0.42557740211486816,0.7993432879447937,0,100.00007629394531,99.99981689453125,100.00003814697266,1];
+    this.camera.transform = [-0.6877578496932983,0.7259325385093689,2.705990027607186e-7,0,-0.6843284964561462,-0.6483430862426758,-0.3336801826953888,0,-0.24222907423973083,-0.2294914275407791,0.9426885843276978,0,100,100.00012969970703,50.0000114440918,1];
   }

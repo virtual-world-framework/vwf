@@ -1,2 +1,12 @@
 ---
 extends: http://vwf.example.com/node3.vwf
+properties:
+  gridInterval: undefined
+  gridLineInterval: undefined
+  gridLength: undefined
+  xAxisVisible: undefined
+  yAxisVisible: undefined
+  zAxisVisible: undefined
+  gridVisible: undefined
+methods:
+  graphFunction:

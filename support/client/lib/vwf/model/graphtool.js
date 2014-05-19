@@ -27,6 +27,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                 node = this.state.graphs[ childID ] = getThreeJSModel().state.nodes[ childID ];
 
+                node.graphProperties = {
+                    gridInterval: 1,
+                    gridLineInterval: 10,
+                    gridLength: 100,
+                    xAxisVisible: true,
+                    yAxisVisible: true,
+                    zAxisVisible: true,
+                    gridVisible: true
+                }
+
             } else if ( protos && isGraphLineDefinition.call( this, protos ) ) {
 
                 node = this.state.lines[ childID ] = getThreeJSModel().state.nodes[ childID ];
@@ -67,11 +77,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         deletingNode: function( nodeID ) {
 
-            var node = this.state.lines[ childID ];
-
-            if ( node ) {
-            }
-
             if( nodeID ) {
                 var childNode = this.state.lines[ nodeID ];
                 if( childNode ) {
@@ -81,8 +86,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         threeObject.parent.remove( threeObject );
                     }
                     delete this.state.lines[ childNode ];
-                }               
+                }
             }
+
         },
 
         // -- addingChild --------------------------------------------------------------------------
@@ -107,7 +113,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             var value = undefined;
 
             if ( propertyValue !== undefined ) {
-                var node = this.state.lines[ nodeID ];
+                var node = this.state.lines[ nodeID ] || this.state.graphs[ nodeID ] ;
                 if ( node !== undefined ) {
                     switch ( propertyName ) {
                         default:
@@ -125,15 +131,28 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // -- settingProperty ----------------------------------------------------------------------
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
-            var node = this.state.lines[ nodeID ];
+            var node;
 
-            if ( node ) {
+            if ( this.state.graphs[ nodeID ] ) {
+
+                node = this.state.graphs[ nodeID ];
+
+                if ( node.graphProperties.hasOwnProperty( propertyName ) ) {
+
+                    node.graphProperties[ propertyName ] = propertyValue;
+
+                }
+
+            } else if ( this.state.lines[ nodeID ] ) {
+
+                node = this.state.lines[ nodeID ];
 
                 if ( node.lineProperties.hasOwnProperty( propertyName ) ) {
 
                     node.lineProperties[ propertyName ] = propertyValue;
 
                 }
+
             }
         },
 
@@ -254,41 +273,42 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         var xAxis, yAxis, zAxis, grid;
         var opacity = 1;
+        var props = node.graphProperties;
 
         // Create axis lines
         xAxis = new THREE.Geometry();
-        xAxis.vertices.push( new THREE.Vector3( 100, 0, 0 ) );
-        xAxis.vertices.push( new THREE.Vector3( -100, 0, 0 ) );
-        node.threeObject.add( new THREE.Line( xAxis, new THREE.LineBasicMaterial( { color: 0xFF0000 } ) ) );
+        xAxis.vertices.push( new THREE.Vector3( props.gridLength, 0, 0 ) );
+        xAxis.vertices.push( new THREE.Vector3( -props.gridLength, 0, 0 ) );
+        node.threeObject.add( new THREE.Line( xAxis, new THREE.LineBasicMaterial( { color: 0xFF0000, visible: props.xAxisVisible } ) ) );
 
         yAxis = new THREE.Geometry();
-        yAxis.vertices.push( new THREE.Vector3( 0, 100, 0 ) );
-        yAxis.vertices.push( new THREE.Vector3( 0, -100, 0 ) );
-        node.threeObject.add( new THREE.Line( yAxis, new THREE.LineBasicMaterial( { color: 0x0000FF } ) ) );
+        yAxis.vertices.push( new THREE.Vector3( 0, props.gridLength, 0 ) );
+        yAxis.vertices.push( new THREE.Vector3( 0, -props.gridLength, 0 ) );
+        node.threeObject.add( new THREE.Line( yAxis, new THREE.LineBasicMaterial( { color: 0x0000FF, visible: props.yAxisVisible } ) ) );
 
         zAxis = new THREE.Geometry();
-        zAxis.vertices.push( new THREE.Vector3( 0, 0, 100 ) );
-        zAxis.vertices.push( new THREE.Vector3( 0, 0, -100 ) );
-        node.threeObject.add( new THREE.Line( zAxis, new THREE.LineBasicMaterial( { color: 0x00FF00 } ) ) );
+        zAxis.vertices.push( new THREE.Vector3( 0, 0, props.gridLength ) );
+        zAxis.vertices.push( new THREE.Vector3( 0, 0, -props.gridLength ) );
+        node.threeObject.add( new THREE.Line( zAxis, new THREE.LineBasicMaterial( { color: 0x00FF00, visible: props.zAxisVisible } ) ) );
 
-        for ( var i = -100; i <= 100; i++ ) {
+        for ( var i = -props.gridLength; i <= props.gridLength; i += props.gridInterval ) {
             if ( i === 0 ) {
                 continue;
-            } else if ( i % 10 === 0 ) {
+            } else if ( i % props.gridLineInterval === 0 ) {
                 opacity = 0.2;
             } else {
                 opacity = 0.1;
             }
 
             grid = new THREE.Geometry();
-            grid.vertices.push( new THREE.Vector3( 100, i, 0 ) );
-            grid.vertices.push( new THREE.Vector3( -100, i, 0 ) );
-            node.threeObject.add( new THREE.Line( grid, new THREE.LineBasicMaterial( { color: 0xFFFFFF, transparent: true, "opacity": opacity } ) ) );
+            grid.vertices.push( new THREE.Vector3( props.gridLength, i, 0 ) );
+            grid.vertices.push( new THREE.Vector3( -props.gridLength, i, 0 ) );
+            node.threeObject.add( new THREE.Line( grid, new THREE.LineBasicMaterial( { color: 0xFFFFFF, transparent: true, "opacity": opacity, visible: props.gridVisible } ) ) );
 
             grid = new THREE.Geometry();
-            grid.vertices.push( new THREE.Vector3( i, 100, 0 ) );
-            grid.vertices.push( new THREE.Vector3( i, -100, 0 ) );
-            node.threeObject.add( new THREE.Line( grid, new THREE.LineBasicMaterial( { color: 0xFFFFFF, transparent: true, "opacity": opacity } ) ) );
+            grid.vertices.push( new THREE.Vector3( i, props.gridLength, 0 ) );
+            grid.vertices.push( new THREE.Vector3( i, -props.gridLength, 0 ) );
+            node.threeObject.add( new THREE.Line( grid, new THREE.LineBasicMaterial( { color: 0xFFFFFF, transparent: true, "opacity": opacity, visible: props.gridVisible } ) ) );
 
         }
 
@@ -451,7 +471,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         );
 
         return mat;
-        
+
     }
 
 } );
