@@ -6,16 +6,34 @@ children:
   graph:
     extends: http://vwf.example.com/graph.vwf
     children:
-      line:
+      parabola:
         extends: http://vwf.example.com/graphline.vwf
         properties:
-          lineFunction: "y = Math.sin(0.5*x) * 5"
-          startValue: -50
-          endValue: 50
-          pointCount: 500
+          lineFunction: "y = Math.pow( x, 2 )"
+          startValue: -10
+          endValue: 10
+          pointCount: 100
           color: [ 0, 255, 255 ]
-          lineThickness: 1
+          lineThickness: 0.25
+      tangent:
+        extends: http://vwf.example.com/graphline.vwf
+        properties:
+          lineFunction: "z = Math.tan(x); y = -30"
+          startValue: -25
+          endValue: 25
+          pointCount: 250
+          color: [ 255, 0, 255 ]
+          lineThickness: 0.25
+      helix:
+        extends: http://vwf.example.com/graphline.vwf
+        properties:
+          lineFunction: "y = ( Math.sin( 0.5 * x ) * 5 ) - 10; z = Math.cos( 0.5 * x ) * 5"
+          startValue: -25
+          endValue: 25
+          pointCount: 250
+          color: [ 255, 255, 0 ]
+          lineThickness: 0.25
 scripts: |
   this.initialize = function() {
-    this.camera.transform = [0.6751879453659058,0.737642765045166,1.1025696267097373e-7,0,-0.6750107407569885,0.6178589463233948,-0.40327033400535583,0,-0.2974701225757599,0.27228376269340515,0.9150904417037964,0,64.02111053466797,-64.43307495117188,41.36255645751953,1];
+    this.camera.transform = [-0.7082633972167969,0.7059476375579834,-1.947667271906539e-8,0,-0.5642957091331482,-0.5661444664001465,-0.60087651014328,0,-0.42418745160102844,-0.42557740211486816,0.7993432879447937,0,100.00007629394531,99.99981689453125,100.00003814697266,1];
   }

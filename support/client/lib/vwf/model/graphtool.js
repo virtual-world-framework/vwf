@@ -326,17 +326,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         startValue = startValue || 0;
         pointCount = pointCount || 10;
         increment = Math.abs( endValue - startValue ) / pointCount;
-        for ( var i = startValue; i <= endValue; i += increment ) {
+
+        // Check for endvalue + ( increment / 2 ) to account for approximation errors
+        for ( var i = startValue; i <= endValue + ( increment / 2 ); i += increment ) {
             point = func( i );
             direction = func( i + increment );
             direction.sub( func( i - increment ) );
             direction.normalize();
-            direction.multiplyScalar( thickness / 2 );
             if ( !isNaN( point.x ) && !isNaN( point.y ) && !isNaN( point.z ) ) {
-                points.push( new THREE.Vector3( point.x, point.y, point.z + thickness / 2 ) );
-                points.push( new THREE.Vector3( point.x - direction.y, point.y + direction.x, point.z ) );
-                points.push( new THREE.Vector3( point.x, point.y, point.z - thickness / 2 ) );
-                points.push( new THREE.Vector3( point.x + direction.y, point.y - direction.x, point.z ) );
+                var planePoints = getPlaneVertices( direction, point, thickness / 2 );
+                for ( var j = 0; j < planePoints.length; j++ ) {
+                    points.push( planePoints[j] );
+                }
             }
         }
 
@@ -361,6 +362,96 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var mesh = new THREE.Mesh( graphGeometry, meshMaterial );
 
         return mesh;
+
+    }
+
+    function getPlaneVertices( normal, origin, distance ) {
+
+        var vertices = new Array();
+        var up = new THREE.Vector3();
+        var left = new THREE.Vector3();
+
+        var rotAxis = new THREE.Vector3( 0, 0, 1 );
+        var rotAngle, rotMat;
+
+        if ( Math.abs( normal.z ) === 1 ) {
+            rotAxis.x += 0.1;
+            rotAxis.normalize();
+        }
+
+        rotAxis.crossVectors( normal, rotAxis );
+        rotAxis.normalize();
+        rotAngle = Math.acos( normal.dot( rotAxis ) );
+        rotMat = createRotationMatrix( rotAxis, rotAngle );
+
+        up.copy( normal );
+        up.applyMatrix3( rotMat );
+        up.normalize();
+        left.crossVectors( up, normal );
+        left.normalize();
+
+        vertices.push( 
+            new THREE.Vector3( 
+                origin.x + ( up.x * distance ),
+                origin.y + ( up.y * distance ),
+                origin.z + ( up.z * distance )
+            ) 
+        );
+
+        vertices.push( 
+            new THREE.Vector3( 
+                origin.x + ( left.x * distance ),
+                origin.y + ( left.y * distance ),
+                origin.z + ( left.z * distance )
+            ) 
+        );
+
+        up.negate();
+        left.negate();
+
+        vertices.push( 
+            new THREE.Vector3( 
+                origin.x + ( up.x * distance ),
+                origin.y + ( up.y * distance ),
+                origin.z + ( up.z * distance )
+            ) 
+        );
+
+        vertices.push( 
+            new THREE.Vector3( 
+                origin.x + ( left.x * distance ),
+                origin.y + ( left.y * distance ),
+                origin.z + ( left.z * distance )
+            ) 
+        );
+
+        return vertices;
+
+    }
+
+    function createRotationMatrix( axis, angle ) {
+
+        var mat;
+        var c = Math.cos( angle );
+        var d = 1 - c;
+        var s = Math.sin( angle );
+
+        mat = new THREE.Matrix3(
+            axis.x * axis.x * d + c,
+            axis.x * axis.y * d + axis.z * s,
+            axis.x * axis.z * d - axis.y * s,
+
+            axis.x * axis.y * d - axis.z * s,
+            axis.y * axis.y * d + c,
+            axis.y * axis.z * d + axis.x * s,
+
+            axis.x * axis.z * d + axis.y * s,
+            axis.y * axis.z * d - axis.x * s,
+            axis.z * axis.z * d + c
+        );
+
+        return mat;
+        
     }
 
 } );
