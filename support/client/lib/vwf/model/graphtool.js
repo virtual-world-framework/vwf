@@ -28,14 +28,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 node = this.state.graphs[ childID ] = getThreeJSModel().state.nodes[ childID ];
 
                 node.graphProperties = {
-                    gridInterval: 1,
-                    gridLineInterval: 10,
-                    gridLength: 100,
-                    xAxisVisible: true,
-                    yAxisVisible: true,
-                    zAxisVisible: true,
-                    gridVisible: true
-                }
+                    gridInterval: undefined,
+                    gridLineInterval: undefined,
+                    gridLength: undefined,
+                    xAxisVisible: undefined,
+                    yAxisVisible: undefined,
+                    zAxisVisible: undefined,
+                    gridVisible: undefined
+                };
+
+                node.initialized = false;
 
             } else if ( protos && isGraphLineDefinition.call( this, protos ) ) {
 
@@ -47,8 +49,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     endValue: undefined,
                     pointCount: undefined,
                     color: undefined,
-                    lineThickness: undefined,
+                    lineThickness: undefined
                 };
+
+                node.initialized = false;
 
             }
         },
@@ -64,11 +68,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                 node = this.state.graphs[ childID ];
                 createGraph( node );
+                node.initialized = true;
 
             } else if ( this.state.lines[ childID ] ) {
 
                 node = this.state.lines[ childID ];
                 createLine( node );
+                node.initialized = true;
 
             }
         },
@@ -149,7 +155,17 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                 if ( node.lineProperties.hasOwnProperty( propertyName ) ) {
 
-                    node.lineProperties[ propertyName ] = propertyValue;
+                    if ( node.initialized ) {
+
+                        node.lineProperties[ propertyName ] = propertyValue;
+                        node.threeObject.remove( node.threeObject.children[0] );
+                        createLine( node );
+
+                    } else {
+
+                        node.lineProperties[ propertyName ] = propertyValue;
+
+                    }
 
                 }
 
@@ -232,27 +248,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
 
         return foundGraph;
-    }
-
-    function addThreeChild( parentID, childID ) {
-        
-        var threejs = getThreeJSModel();
-        var threeParent;
-        var parent = threejs.state.nodes[ parentID ];
-        if ( !parent && threejs.state.scenes[ parentID ] ) {
-            parent = threejs.state.scenes[ parentID ];
-            threeParent = parent.threeScene;
-        } else {
-            threeParent = parent.threeObject;
-        }
-            
-        if ( threeParent && this.state.lines[ childID ]) {
-            var child = this.state.lines[ childID ];
-
-            if ( child.threeObject ) {
-                threeParent.add( child.threeObject );
-            }
-        }
     }
 
     function getThreeJSModel() {
