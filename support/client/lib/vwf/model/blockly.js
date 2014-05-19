@@ -128,7 +128,6 @@ define( [ "module", "vwf/model",
                     "source": childSource,
                     "type": childType,
                     "name": childName,
-                    
                     "blocks": "<xml></xml>",
                     "code": undefined,
                     "codeLine": -1,
@@ -369,7 +368,7 @@ define( [ "module", "vwf/model",
 
                     if ( blocklyNode.interpreter === undefined ) {
                         blocklyNode.interpreter = createInterpreter( acorn, blocklyNode.code );
-                        blocklyNode.interpreterStatus == "created";
+                        blocklyNode.interpreterStatus = "created";
                         blocklyNode.lastLineExeTime = vwfTime;
                         executeNextLine = true;
                     } else {
@@ -441,12 +440,12 @@ define( [ "module", "vwf/model",
                 
                 case "stepProgram":
                     if ( node.interpreterStatus === "created" ) {
-                        this.kernel.fireEvent( node.ID, "blocklyStarted", [ true ] );
-                        blocklyNode.interpreterStatus = "started";                        
+                        self.kernel.fireEvent( node.ID, "blocklyStarted", [ true ] );
+                        node.interpreterStatus = "started";                        
                     } else if ( node.interpreterStatus === "started" ) {
-                        this.kernel.setProperty( node.ID, "blockly_executing", false );
-                        this.kernel.fireEvent( node.ID, "blocklyStopped", [ blocklyNode.codeLine ] );
-                        blocklyNode.interpreterStatus = "finished";
+                        self.kernel.setProperty( node.ID, "blockly_executing", false );
+                        self.kernel.fireEvent( node.ID, "blocklyStopped", [ node.codeLine ] );
+                        node.interpreterStatus = "created";
                     }
                     break;
             }
