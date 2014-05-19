@@ -77,8 +77,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             this.height = 600;
             this.width = 800;
             this.canvasQuery = null;
-            if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
-            if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
+            if ( window && window.innerHeight ) this.height = window.innerHeight;
+            if ( window && window.innerWidth ) this.width = window.innerWidth;
             this.keyStates = { keysDown: {}, mods: {}, keysUp: {} };
 
             pitchMatrix = new THREE.Matrix4();
@@ -405,12 +405,12 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         //reset - loading can cause us to get behind and always but up against the max prediction value
         self.tickTime = 0;
 
-        for(var nodeID in self.nodes) {
-            if(self.state.nodes[nodeID] && (!navObject || nodeID != navObject.ID)) {       
+        for ( var nodeID in self.nodes ) {
+            if ( self.state.nodes[nodeID] ) {       
                 self.nodes[nodeID].lastTickTransform = self.nodes[nodeID].selfTickTransform;
                 self.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(getTransform(nodeID));
                 
-                if(self.nodes[nodeID].selfTickTransform) {
+                if ( self.nodes[nodeID].selfTickTransform ) {
                     self.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(self.nodes[nodeID].selfTickTransform);
                 }
             }
@@ -548,7 +548,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             if(last && now && !matCmp(last,now,.0001) ) {             
                 var interp = matrixLerp(last, now, step || 0);
                 
-                if(!navObject || nodeID != navObject.ID) {             
+                var objectIsControlledByUser = ( ( navmode !== "none" ) &&
+                                                 ( ( navObject && ( nodeID === navObject.ID ) ) || 
+                                                   ( cameraNode && ( nodeID === cameraNode.ID ) ) ) );
+                if ( !objectIsControlledByUser ) {             
                     setTransform(nodeID, interp);    
                     self.nodes[nodeID].needTransformRestore = true;
                 }
@@ -746,8 +749,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             window.onresize = function () {
                 var origWidth = self.width;
                 var origHeight = self.height;
-                if ( window && window.innerHeight ) self.height = window.innerHeight - 20;
-                if ( window && window.innerWidth ) self.width = window.innerWidth - 20;
+                if ( window && window.innerHeight ) self.height = window.innerHeight;
+                if ( window && window.innerWidth ) self.width = window.innerWidth;
 
                 if ( ( origWidth != self.width ) || ( origHeight != self.height ) ) {
                     mycanvas.height = self.height;
@@ -3204,6 +3207,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         return newTransform;
     }
 
+    // TODO: This should be replaced with self.state.setMeshPropertyRecursively
     function setVisibleRecursively( threeObject, visible ) {
         if ( !threeObject ) {
             return;
