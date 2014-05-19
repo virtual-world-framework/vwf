@@ -1,0 +1,47 @@
+--- 
+extends: http://vwf.example.com/scene.vwf
+properties:
+  backgroundColor: [ 10, 20, 30 ]
+children:
+  graph:
+    extends: http://vwf.example.com/graph.vwf
+    properties:
+      gridInterval: 1
+      gridLineInterval: 10
+      gridLength: 100
+      xAxisVisible: true
+      yAxisVisible: true
+      zAxisVisible: true
+      gridVisible: true
+    children:
+      parabola:
+        extends: http://vwf.example.com/graphline.vwf
+        properties:
+          lineFunction: "y = Math.pow( x, 2 )"
+          startValue: -10
+          endValue: 10
+          pointCount: 100
+          color: [ 0, 255, 255 ]
+          lineThickness: 0.25
+      tangent:
+        extends: http://vwf.example.com/graphline.vwf
+        properties:
+          lineFunction: "z = Math.tan(x); y = -30"
+          startValue: -25
+          endValue: 25
+          pointCount: 250
+          color: [ 255, 0, 255 ]
+          lineThickness: 0.25
+      helix:
+        extends: http://vwf.example.com/graphline.vwf
+        properties:
+          lineFunction: "y = ( Math.sin( 0.5 * x ) * 5 ) - 10; z = Math.cos( 0.5 * x ) * 5"
+          startValue: -25
+          endValue: 25
+          pointCount: 250
+          color: [ 255, 255, 0 ]
+          lineThickness: 0.25
+scripts: |
+  this.initialize = function() {
+    this.camera.transform = [-0.6877578496932983,0.7259325385093689,2.705990027607186e-7,0,-0.6843284964561462,-0.6483430862426758,-0.3336801826953888,0,-0.24222907423973083,-0.2294914275407791,0.9426885843276978,0,100,100.00012969970703,50.0000114440918,1];
+  }
