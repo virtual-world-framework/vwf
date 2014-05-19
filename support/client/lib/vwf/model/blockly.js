@@ -56,7 +56,7 @@ define( [ "module", "vwf/model",
 
             this.state.executingBlocks = undefined;
 
-            this.state.haltExecution = false;
+            this.state.executionHalted = false;
 
             // turns on logger debugger console messages 
             this.debug = {
@@ -348,7 +348,7 @@ define( [ "module", "vwf/model",
 
                     if ( executeNextLine ) {
 
-                        self.state.haltExecution = false;
+                        self.state.executionHalted = false;
                         
                         nextStep( blocklyNode );
 
@@ -428,7 +428,7 @@ define( [ "module", "vwf/model",
                     break;
             }
 
-            if ( stepType && !self.state.haltExecution ) {
+            if ( stepType && !self.state.executionHalted ) {
                 // I'm not sure I understand the use setTimeout here??
                 // anyone have an idea of why this would be better?
                 window.setTimeout( nextStep( node ), 0 );
@@ -440,21 +440,53 @@ define( [ "module", "vwf/model",
         
         var initFunc = function( interpreter, scope ) {
             
+            var vwfKernelFunctions, i;
             var myVwf = interpreter.createObject( interpreter.OBJECT );
             interpreter.setProperty( scope, 'vwf', myVwf );
 
-            var numFunctions = [ 'callMethod', 'setProperty', 'getProperty', 'fireEvent' ];
-            for ( var i = 0; i < numFunctions.length; i++ ) {
+
+            vwfKernelFunctions = [ 'setProperty', 'getProperty' ];
+            for ( i = 0; i < vwfKernelFunctions.length; i++ ) {
                 var wrapper = ( function( nativeFunc ) {
                     return function() {
+                        var parms = [];
                         for ( var j = 0; j < arguments.length; j++) {
-                            arguments[ j ] = arguments[ j ].toString();
+                            parms.push( arguments[ j ].toString() );
                         }
-                        self.state.haltExecution = true;
-                        return interpreter.createPrimitive( nativeFunc.apply( vwf, arguments ));
+                        self.state.executionHalted = true;
+                        return interpreter.createPrimitive( nativeFunc.apply( vwf, parms ) );
                     };
-                })( vwf[ numFunctions[ i ] ]);
-                interpreter.setProperty( myVwf, numFunctions[ i ], interpreter.createNativeFunction( wrapper ) );
+                } )( vwf[ vwfKernelFunctions[ i ] ] );
+                interpreter.setProperty( myVwf, vwfKernelFunctions[ i ], interpreter.createNativeFunction( wrapper ) );
+            }
+
+            vwfKernelFunctions = [ 'callMethod', 'fireEvent' ];
+            for ( i = 0; i < vwfKernelFunctions.length; i++ ) {
+                var wrapper = ( function( nativeFunc ) {
+                    return function() {
+                        var parms = [];
+                        for ( var j = 0; j < arguments.length; j++) {
+                            if ( j >= 2 ) {
+                                if ( arguments[ j ].type === 'object' ) {
+                                    var temp = [];
+                                    if ( arguments[ j ].properties !== undefined ) {
+                                        for ( var k = 0; k <= arguments[ j ].properties.length; k++ ) {
+                                            temp.push( arguments[ j ].properties[ k ].toString() )
+                                        }
+                                    }
+                                    parms.push( temp );
+                                } else {
+                                    parms.push( arguments[ j ].toString() );
+                                }
+                            } else {
+                                parms.push( arguments[ j ].toString() );
+                            }
+                        }
+                        self.state.executionHalted = true;
+                        return interpreter.createPrimitive( nativeFunc.apply( vwf, parms ) );
+                    };
+                } )( vwf[ vwfKernelFunctions[ i ] ] );
+                interpreter.setProperty( myVwf, vwfKernelFunctions[ i ], interpreter.createNativeFunction( wrapper ) );
             }
 
         };
