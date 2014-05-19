@@ -10,3 +10,25 @@ properties:
   gridVisible: undefined
 methods:
   graphFunction:
+    parameters:
+      - lineFunction
+      - startValue
+      - endValue
+      - pointCount
+      - color
+      - lineThickness
+    body: |
+      var lineDef = {
+        "extends": "http://vwf.example.com/graphline.vwf",
+        "properties": {
+          "lineFunction": lineFunction,
+          "startValue": startValue,
+          "endValue": endValue,
+          "pointCount": pointCount,
+          "color": color,
+          "lineThickness": lineThickness
+        }
+      }
+      this.children.create( "line" + this.lineCount++, lineDef );
+scripts: |
+  this.lineCount = 0;
