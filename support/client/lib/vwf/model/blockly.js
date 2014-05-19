@@ -422,7 +422,7 @@ define( [ "module", "vwf/model",
                         node.interpreterStatus = "started";                        
                     } else if ( node.interpreterStatus === "started" ) {
                         self.kernel.setProperty( node.ID, "blockly_executing", false );
-                        self.kernel.fireEvent( node.ID, "blocklyStopped", [ node.codeLine ] );
+                        self.kernel.fireEvent( node.ID, "blocklyStopped", [ true ] );
                         node.interpreterStatus = "created";
                     }
                     break;
