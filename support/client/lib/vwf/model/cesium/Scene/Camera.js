@@ -1,6 +1,7 @@
 /*global define*/
 define([
         '../Core/defined',
+        '../Core/defineProperties',
         '../Core/DeveloperError',
         '../Core/Math',
         '../Core/Ellipsoid',
@@ -11,6 +12,7 @@ define([
         './PerspectiveFrustum'
     ], function(
         defined,
+        defineProperties,
         DeveloperError,
         CesiumMath,
         Ellipsoid,
@@ -33,27 +35,27 @@ define([
      *
      * @alias Camera
      *
-     * @exception {DeveloperError} canvas is required.
+     * @exception {DeveloperError} context is required.
      *
      * @constructor
      *
      * @example
      * // Create a camera looking down the negative z-axis, positioned at the origin,
      * // with a field of view of 60 degrees, and 1:1 aspect ratio.
-     * var camera = new Camera(canvas);
+     * var camera = new Camera(context);
      * camera.position = new Cartesian3();
-     * camera.direction = Cartesian3.UNIT_Z.negate();
-     * camera.up = Cartesian3.UNIT_Y;
+     * camera.direction = Cartesian3.negate(Cartesian3.UNIT_Z);
+     * camera.up = Cartesian3.clone(Cartesian3.UNIT_Y);
      * camera.frustum.fovy = CesiumMath.PI_OVER_THREE;
      * camera.frustum.near = 1.0;
      * camera.frustum.far = 2.0;
      *
-     * @demo <a href="http://cesium.agi.com/Cesium/Apps/Sandcastle/index.html?src=Camera.html">Cesium Sandcastle Camera Demo</a>
-     * @demo <a href="http://cesium.agi.com/Cesium/Apps/Sandcastle/index.html?src=Camera.html">Sandcastle Example</a> from the <a href="http://cesium.agi.com/2013/02/13/Cesium-Camera-Tutorial/">Camera Tutorial</a>
+     * @demo <a href="http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Camera.html">Cesium Sandcastle Camera Demo</a>
+     * @demo <a href="http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Camera.html">Sandcastle Example</a> from the <a href="http://cesiumjs.org/2013/02/13/Cesium-Camera-Tutorial/">Camera Tutorial</a>
      */
-    var Camera = function(canvas) {
-        if (!defined(canvas)) {
-            throw new DeveloperError('canvas is required.');
+    var Camera = function(context) {
+        if (!defined(context)) {
+            throw new DeveloperError('context is required.');
         }
 
         /**
@@ -63,56 +65,57 @@ define([
          * @default {@link Matrix4.IDENTITY}
          *
          * @see Transforms
+         * @see Camera#inverseTransform
          */
-        this.transform = Matrix4.IDENTITY.clone();
-        this._transform = this.transform.clone();
-        this._invTransform = Matrix4.IDENTITY.clone();
+        this.transform = Matrix4.clone(Matrix4.IDENTITY);
+        this._transform = Matrix4.clone(Matrix4.IDENTITY);
+        this._invTransform = Matrix4.clone(Matrix4.IDENTITY);
 
         var maxRadii = Ellipsoid.WGS84.getMaximumRadius();
-        var position = new Cartesian3(0.0, -2.0, 1.0).normalize().multiplyByScalar(2.5 * maxRadii);
+        var position = Cartesian3.multiplyByScalar(Cartesian3.normalize(new Cartesian3(0.0, -2.0, 1.0)), 2.5 * maxRadii);
 
         /**
          * The position of the camera.
          *
          * @type {Cartesian3}
          */
-        this.position = position.clone();
-        this._position = position;
-        this._positionWC = position;
+        this.position = position;
+        this._position = Cartesian3.clone(position);
+        this._positionWC = Cartesian3.clone(position);
 
-        var direction = Cartesian3.ZERO.subtract(position).normalize();
+        var direction = Cartesian3.normalize(Cartesian3.negate(position));
 
         /**
          * The view direction of the camera.
          *
          * @type {Cartesian3}
          */
-        this.direction = direction.clone();
-        this._direction = direction;
-        this._directionWC = direction;
+        this.direction = direction;
+        this._direction = Cartesian3.clone(direction);
+        this._directionWC = Cartesian3.clone(direction);
 
-        var right = direction.cross(Cartesian3.UNIT_Z).normalize();
-        var up = right.cross(direction);
+        var right = Cartesian3.normalize(Cartesian3.cross(direction, Cartesian3.UNIT_Z));
+        var up = Cartesian3.cross(right, direction);
 
         /**
          * The up direction of the camera.
          *
          * @type {Cartesian3}
          */
-        this.up = up.clone();
-        this._up = up;
-        this._upWC = up;
+        this.up = up;
+        this._up = Cartesian3.clone(up);
+        this._upWC = Cartesian3.clone(up);
 
-        right = direction.cross(up);
+        right = Cartesian3.cross(direction, up);
 
         /**
          * The right direction of the camera.
          *
          * @type {Cartesian3}
          */
-        this.right = right.clone();
-        this._right = right;
-        this._rightWC = right;
+        this.right = right;
+        this._right = Cartesian3.clone(right);
+        this._rightWC = Cartesian3.clone(right);
 
         /**
          * The region of space in view.
@@ -126,7 +129,7 @@ define([
          */
         this.frustum = new PerspectiveFrustum();
         this.frustum.fovy = CesiumMath.toRadians(60.0);
-        this.frustum.aspectRatio = canvas.clientWidth / canvas.clientHeight;
+        this.frustum.aspectRatio = context.getDrawingBufferWidth() / context.getDrawingBufferHeight();
 
         /**
          * Defines camera behavior. The controller can be used to perform common camera manipulations.
@@ -136,11 +139,11 @@ define([
          */
         this.controller = new CameraController(this);
 
-        this._viewMatrix = undefined;
-        this._invViewMatrix = undefined;
+        this._viewMatrix = new Matrix4();
+        this._invViewMatrix = new Matrix4();
         updateViewMatrix(this);
 
-        this._canvas = canvas;
+        this._context = context;
     };
 
     function updateViewMatrix(camera) {
@@ -149,79 +152,94 @@ define([
         var d = camera._direction;
         var e = camera._position;
 
-        var viewMatrix = new Matrix4( r.x,  r.y,  r.z, -r.dot(e),
-                                      u.x,  u.y,  u.z, -u.dot(e),
-                                     -d.x, -d.y, -d.z,  d.dot(e),
-                                      0.0,  0.0,  0.0,      1.0);
-        camera._viewMatrix = viewMatrix.multiply(camera._invTransform);
-        camera._invViewMatrix = camera._viewMatrix.inverseTransformation();
+        var viewMatrix = camera._viewMatrix;
+        viewMatrix[0] = r.x;
+        viewMatrix[1] = u.x;
+        viewMatrix[2] = -d.x;
+        viewMatrix[3] = 0.0;
+        viewMatrix[4] = r.y;
+        viewMatrix[5] = u.y;
+        viewMatrix[6] = -d.y;
+        viewMatrix[7] = 0.0;
+        viewMatrix[8] = r.z;
+        viewMatrix[9] = u.z;
+        viewMatrix[10] = -d.z;
+        viewMatrix[11] = 0.0;
+        viewMatrix[12] = -Cartesian3.dot(r, e);
+        viewMatrix[13] = -Cartesian3.dot(u, e);
+        viewMatrix[14] = Cartesian3.dot(d, e);
+        viewMatrix[15] = 1.0;
+
+        Matrix4.multiply(viewMatrix, camera._invTransform, camera._viewMatrix);
+        Matrix4.inverseTransformation(camera._viewMatrix, camera._invViewMatrix);
     }
+
+    var scratchCartesian = new Cartesian3();
 
     function update(camera) {
         var position = camera._position;
-        var positionChanged = !position.equals(camera.position);
+        var positionChanged = !Cartesian3.equals(position, camera.position);
         if (positionChanged) {
-            position = camera._position = camera.position.clone();
+            position = Cartesian3.clone(camera.position, camera._position);
         }
 
         var direction = camera._direction;
-        var directionChanged = !direction.equals(camera.direction);
+        var directionChanged = !Cartesian3.equals(direction, camera.direction);
         if (directionChanged) {
-            direction = camera._direction = camera.direction.clone();
+            direction = Cartesian3.clone(camera.direction, camera._direction);
         }
 
         var up = camera._up;
-        var upChanged = !up.equals(camera.up);
+        var upChanged = !Cartesian3.equals(up, camera.up);
         if (upChanged) {
-            up = camera._up = camera.up.clone();
+            up = Cartesian3.clone(camera.up, camera._up);
         }
 
         var right = camera._right;
-        var rightChanged = !right.equals(camera.right);
+        var rightChanged = !Cartesian3.equals(right, camera.right);
         if (rightChanged) {
-            right = camera._right = camera.right.clone();
+            right = Cartesian3.clone(camera.right, camera._right);
         }
 
         var transform = camera._transform;
-        var transformChanged = !transform.equals(camera.transform);
+        var transformChanged = !Matrix4.equals(transform, camera.transform);
         if (transformChanged) {
-            transform = camera._transform = camera.transform.clone();
-
-            camera._invTransform = camera._transform.inverseTransformation();
+            transform = Matrix4.clone(camera.transform, camera._transform);
+            Matrix4.inverseTransformation(camera._transform, camera._invTransform);
         }
 
         if (positionChanged || transformChanged) {
-            camera._positionWC = Cartesian3.fromCartesian4(transform.multiplyByPoint(position));
+            camera._positionWC = Matrix4.multiplyByPoint(transform, position, camera._positionWC);
         }
 
         if (directionChanged || upChanged || rightChanged) {
-            var det = direction.dot(up.cross(right));
+            var det = Cartesian3.dot(direction, Cartesian3.cross(up, right, scratchCartesian));
             if (Math.abs(1.0 - det) > CesiumMath.EPSILON2) {
                 //orthonormalize axes
-                direction = camera._direction = direction.normalize();
-                camera.direction = direction.clone();
+                direction = Cartesian3.normalize(direction, camera._direction);
+                Cartesian3.clone(direction, camera.direction);
 
-                var invUpMag = 1.0 / up.magnitudeSquared();
-                var scalar = up.dot(direction) * invUpMag;
-                var w0 = direction.multiplyByScalar(scalar);
-                up = camera._up = up.subtract(w0).normalize();
-                camera.up = up.clone();
+                var invUpMag = 1.0 / Cartesian3.magnitudeSquared(up);
+                var scalar = Cartesian3.dot(up, direction) * invUpMag;
+                var w0 = Cartesian3.multiplyByScalar(direction, scalar, scratchCartesian);
+                up = Cartesian3.normalize(Cartesian3.subtract(up, w0, camera._up), camera._up);
+                Cartesian3.clone(up, camera.up);
 
-                right = camera._right = direction.cross(up);
-                camera.right = right.clone();
+                right = Cartesian3.cross(direction, up, camera._right);
+                Cartesian3.clone(right, camera.right);
             }
         }
 
         if (directionChanged || transformChanged) {
-            camera._directionWC = Cartesian3.fromCartesian4(transform.multiplyByVector(new Cartesian4(direction.x, direction.y, direction.z, 0.0)));
+            camera._directionWC = Matrix4.multiplyByPointAsVector(transform, direction, camera._directionWC);
         }
 
         if (upChanged || transformChanged) {
-            camera._upWC = Cartesian3.fromCartesian4(transform.multiplyByVector(new Cartesian4(up.x, up.y, up.z, 0.0)));
+            camera._upWC = Matrix4.multiplyByPointAsVector(transform, up, camera._upWC);
         }
 
         if (rightChanged || transformChanged) {
-            camera._rightWC = Cartesian3.fromCartesian4(transform.multiplyByVector(new Cartesian4(right.x, right.y, right.z, 0.0)));
+            camera._rightWC = Matrix4.multiplyByPointAsVector(transform, right, camera._rightWC);
         }
 
         if (positionChanged || directionChanged || upChanged || rightChanged || transformChanged) {
@@ -229,82 +247,109 @@ define([
         }
     }
 
-    /**
-     * DOC_TBA
-     *
-     * @memberof Camera
-     *
-     * @returns {Matrix4} DOC_TBA
-     */
-    Camera.prototype.getInverseTransform = function() {
-        update(this);
-        return this._invTransform;
-    };
+    defineProperties(Camera.prototype, {
+        /**
+         * Gets the inverse camera transform.
+         *
+         * @memberof Camera
+         * @type {Matrix4}
+         * @default {@link Matrix4.IDENTITY}
+         *
+         * @see Camera#transform
+         */
+        inverseTransform : {
+            get : function () {
+                update(this);
+                return this._invTransform;
+            }
+        },
 
-    /**
-     * Returns the view matrix.
-     *
-     * @memberof Camera
-     *
-     * @returns {Matrix4} The view matrix.
-     *
-     * @see UniformState#getView
-     * @see UniformState#setView
-     * @see czm_view
-     */
-    Camera.prototype.getViewMatrix = function() {
-        update(this);
-        return this._viewMatrix;
-    };
+        /**
+         * The view matrix.
+         *
+         * @memberof Camera
+         * @type {Matrix4}
+         *
+         * @see UniformState#getView
+         * @see czm_view
+         * @see Camera#inverseViewMatrix
+         */
+        viewMatrix : {
+            get : function () {
+                update(this);
+                return this._viewMatrix;
+            }
+        },
 
-    /**
-     * DOC_TBA
-     * @memberof Camera
-     */
-    Camera.prototype.getInverseViewMatrix = function() {
-        update(this);
-        return this._invViewMatrix;
-    };
+        /**
+         * The inverse view matrix.
+         *
+         * @memberof Camera
+         * @type {Matrix4}
+         *
+         * @see UniformState#getInverseView
+         * @see czm_inverseView
+         * @see Camera#viewMatrix
+         */
+        inverseViewMatrix : {
+            get : function () {
+                update(this);
+                return this._invViewMatrix;
+            }
+        },
 
-    /**
-     * The position of the camera in world coordinates.
-     *
-     * @type {Cartesian3}
-     */
-    Camera.prototype.getPositionWC = function() {
-        update(this);
-        return this._positionWC;
-    };
+        /**
+         * The position of the camera in world coordinates.
+         *
+         * @memberof Camera
+         * @type {Cartesian3}
+         */
+        positionWC : {
+            get : function() {
+                update(this);
+                return this._positionWC;
+            }
+        },
 
-    /**
-     * The view direction of the camera in world coordinates.
-     *
-     * @type {Cartesian3}
-     */
-    Camera.prototype.getDirectionWC = function() {
-        update(this);
-        return this._directionWC;
-    };
+        /**
+         * The view direction of the camera in world coordinates.
+         *
+         * @memberof Camera
+         * @type {Cartesian3}
+         */
+        directionWC : {
+            get : function() {
+                update(this);
+                return this._directionWC;
+            }
+        },
 
-    /**
-     * The up direction of the camera in world coordinates.
-     *
-     * @type {Cartesian3}
-     */
-    Camera.prototype.getUpWC = function() {
-        update(this);
-        return this._upWC;
-    };
+        /**
+         * The up direction of the camera in world coordinates.
+         *
+         * @memberof Camera
+         * @type {Cartesian3}
+         */
+        upWC : {
+            get : function() {
+                update(this);
+                return this._upWC;
+            }
+        },
 
-    /**
-     * The right direction of the camera in world coordinates.
-     *
-     * @type {Cartesian3}
-     */
-    Camera.prototype.getRightWC = function() {
-        update(this);
-        return this._rightWC;
-    };
+        /**
+         * The right direction of the camera in world coordinates.
+         *
+         * @memberof Camera
+         * @type {Cartesian3}
+         */
+        rightWC : {
+            get : function() {
+                update(this);
+                return this._rightWC;
+            }
+        }
+    });
 
     /**
      * Returns a duplicate of a Camera instance.
@@ -314,12 +359,12 @@ define([
      * @returns {Camera} A new copy of the Camera instance.
      */
     Camera.prototype.clone = function() {
-        var camera = new Camera(this._canvas);
-        camera.position = this.position.clone();
-        camera.direction = this.direction.clone();
-        camera.up = this.up.clone();
-        camera.right = this.right.clone();
-        camera.transform = this.transform.clone();
+        var camera = new Camera(this._context);
+        camera.position = Cartesian3.clone(this.position);
+        camera.direction = Cartesian3.clone(this.direction);
+        camera.up = Cartesian3.clone(this.up);
+        camera.right = Cartesian3.clone(this.right);
+        camera.transform = Matrix4.clone(this.transform);
         camera.frustum = this.frustum.clone();
         return camera;
     };
@@ -339,7 +384,7 @@ define([
         if (!defined(cartesian)) {
             throw new DeveloperError('cartesian is required.');
         }
-        return Matrix4.multiplyByVector(this.getInverseTransform(), cartesian, result);
+        return Matrix4.multiplyByVector(this.inverseTransform, cartesian, result);
     };
 
     /**

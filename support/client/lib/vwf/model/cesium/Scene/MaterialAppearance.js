@@ -53,7 +53,7 @@ define([
      *     })
      *   }),
      *   appearance : new MaterialAppearance({
-     *     material : Material.fromType(scene.getContext(), 'Color'),
+     *     material : Material.fromType('Color'),
      *     faceForward : true
      *   })
      * });
@@ -77,7 +77,7 @@ define([
          *
          * @see <a href='https://github.com/AnalyticalGraphicsInc/cesium/wiki/Fabric'>Fabric</a>
          */
-        this.material = (defined(options.material)) ? options.material : Material.fromType(undefined, Material.ColorType);
+        this.material = (defined(options.material)) ? options.material : Material.fromType(Material.ColorType);
 
         /**
          * The GLSL source code for the vertex shader.
@@ -193,6 +193,26 @@ define([
      * @returns String The full GLSL fragment shader source.
      */
     MaterialAppearance.prototype.getFragmentShaderSource = Appearance.prototype.getFragmentShaderSource;
+
+    /**
+     * Determines if the geometry is translucent based on {@link MaterialAppearance#translucent} and {@link Material#isTranslucent}.
+     *
+     * @memberof MaterialAppearance
+     *
+     * @returns {Boolean} <code>true</code> if the appearance is translucent.
+     */
+    MaterialAppearance.prototype.isTranslucent = Appearance.prototype.isTranslucent;
+
+    /**
+     * Creates a render state.  This is not the final {@link RenderState} instance; instead,
+     * it can contain a subset of render state properties identical to <code>renderState</code>
+     * passed to {@link Context#createRenderState}.
+     *
+     * @memberof MaterialAppearance
+     *
+     * @returns {Object} The render state.
+     */
+    MaterialAppearance.prototype.getRenderState = Appearance.prototype.getRenderState;
 
     /**
      * Determines the type of {@link Material} that is supported by a

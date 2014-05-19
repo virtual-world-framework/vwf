@@ -43,7 +43,9 @@ define([
      *         Cartographic.fromDegrees(5.0, 0.0)
      *       ])
      *     }),
-     *     color : new Color(1.0, 1.0, 1.0, 1.0)
+     *     attributes : {
+     *       color : Cesium.ColorGeometryInstanceAttribute.fromColor(new Color(1.0, 1.0, 1.0, 1.0))
+     *     }
      *   }),
      *   appearance : new PerInstanceColorAppearance({
      *     flat : true,
@@ -217,6 +219,26 @@ define([
      * @returns String The full GLSL fragment shader source.
      */
     PerInstanceColorAppearance.prototype.getFragmentShaderSource = Appearance.prototype.getFragmentShaderSource;
+
+    /**
+     * Determines if the geometry is translucent based on {@link PerInstanceColorAppearance#translucent}.
+     *
+     * @memberof PerInstanceColorAppearance
+     *
+     * @returns {Boolean} <code>true</code> if the appearance is translucent.
+     */
+    PerInstanceColorAppearance.prototype.isTranslucent = Appearance.prototype.isTranslucent;
+
+    /**
+     * Creates a render state.  This is not the final {@link RenderState} instance; instead,
+     * it can contain a subset of render state properties identical to <code>renderState</code>
+     * passed to {@link Context#createRenderState}.
+     *
+     * @memberof PerInstanceColorAppearance
+     *
+     * @returns {Object} The render state.
+     */
+    PerInstanceColorAppearance.prototype.getRenderState = Appearance.prototype.getRenderState;
 
     return PerInstanceColorAppearance;
 });

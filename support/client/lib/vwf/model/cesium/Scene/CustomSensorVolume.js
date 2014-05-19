@@ -14,10 +14,10 @@ define([
         '../Core/BoundingSphere',
         '../Renderer/BufferUsage',
         '../Renderer/BlendingState',
-        '../Renderer/CommandLists',
         '../Renderer/DrawCommand',
         '../Renderer/createShaderSource',
         '../Renderer/CullFace',
+        '../Renderer/Pass',
         './Material',
         '../Shaders/SensorVolume',
         '../Shaders/CustomSensorVolumeVS',
@@ -38,10 +38,10 @@ define([
         BoundingSphere,
         BufferUsage,
         BlendingState,
-        CommandLists,
         DrawCommand,
         createShaderSource,
         CullFace,
+        Pass,
         Material,
         ShadersSensorVolume,
         CustomSensorVolumeVS,
@@ -71,10 +71,12 @@ define([
         this._frontFaceColorCommand = new DrawCommand();
         this._backFaceColorCommand = new DrawCommand();
         this._pickCommand = new DrawCommand();
-        this._commandLists = new CommandLists();
+
+        this._boundingSphere = new BoundingSphere();
+        this._boundingSphereWC = new BoundingSphere();
 
         this._frontFaceColorCommand.primitiveType = PrimitiveType.TRIANGLES;
-        this._frontFaceColorCommand.boundingVolume = new BoundingSphere();
+        this._frontFaceColorCommand.boundingVolume = this._boundingSphereWC;
         this._frontFaceColorCommand.owner = this;
 
         this._backFaceColorCommand.primitiveType = this._frontFaceColorCommand.primitiveType;
@@ -141,6 +143,7 @@ define([
          * sensor.modelMatrix = Transforms.eastNorthUpToFixedFrame(center);
          */
         this.modelMatrix = Matrix4.clone(defaultValue(options.modelMatrix, Matrix4.IDENTITY));
+        this._modelMatrix = new Matrix4();
 
         /**
          * DOC_TBA
@@ -171,19 +174,20 @@ define([
          * </p>
          *
          * @type {Material}
-         * @default Material.fromType(undefined, Material.ColorType)
+         * @default Material.fromType(Material.ColorType)
          *
          * @example
          * // 1. Change the color of the default material to yellow
          * sensor.material.uniforms.color = new Color(1.0, 1.0, 0.0, 1.0);
          *
          * // 2. Change material to horizontal stripes
-         * sensor.material = Material.fromType(scene.getContext(), Material.StripeType);
+         * sensor.material = Material.fromType(Material.StripeType);
          *
          * @see <a href='https://github.com/AnalyticalGraphicsInc/cesium/wiki/Fabric'>Fabric</a>
          */
-        this.material = defined(options.material) ? options.material : Material.fromType(undefined, Material.ColorType);
+        this.material = defined(options.material) ? options.material : Material.fromType(Material.ColorType);
         this._material = undefined;
+        this._translucent = undefined;
 
         /**
          * The color of the polyline where the sensor outline intersects the central body.  The default is {@link Color.WHITE}.
@@ -204,6 +208,18 @@ define([
          * @see CustomSensorVolume#showIntersection
          */
         this.intersectionWidth = defaultValue(options.intersectionWidth, 5.0);
+
+        /**
+         * User-defined object returned when the sensors is picked.
+         *
+         * @type Object
+         *
+         * @default undefined
+         *
+         * @see Scene#pick
+         */
+        this.id = options.id;
+        this._id = undefined;
 
         var that = this;
         this._uniforms = {
@@ -270,16 +286,16 @@ define([
             // Extend position so the volume encompasses the sensor's radius.
             var theta = Math.max(Cartesian3.angleBetween(n0, n1), Cartesian3.angleBetween(n1, n2));
             var distance = r / Math.cos(theta * 0.5);
-            var p = n1.multiplyByScalar(distance);
+            var p = Cartesian3.multiplyByScalar(n1, distance);
 
-            positions[(j * 3) + 0] = p.x;
+            positions[(j * 3)] = p.x;
             positions[(j * 3) + 1] = p.y;
             positions[(j * 3) + 2] = p.z;
 
             boundingVolumePositions.push(p);
         }
 
-        BoundingSphere.fromPoints(boundingVolumePositions, customSensorVolume._frontFaceColorCommand.boundingVolume);
+        BoundingSphere.fromPoints(boundingVolumePositions, customSensorVolume._boundingSphere);
 
         return positions;
     }
@@ -292,9 +308,9 @@ define([
 
         var k = 0;
         for ( var i = length - 1, j = 0; j < length; i = j++) {
-            var p0 = new Cartesian3(positions[(i * 3) + 0], positions[(i * 3) + 1], positions[(i * 3) + 2]);
-            var p1 = new Cartesian3(positions[(j * 3) + 0], positions[(j * 3) + 1], positions[(j * 3) + 2]);
-            var n = p1.cross(p0).normalize(); // Per-face normals
+            var p0 = new Cartesian3(positions[(i * 3)], positions[(i * 3) + 1], positions[(i * 3) + 2]);
+            var p1 = new Cartesian3(positions[(j * 3)], positions[(j * 3) + 1], positions[(j * 3) + 2]);
+            var n = Cartesian3.normalize(Cartesian3.cross(p1, p0)); // Per-face normals
 
             vertices[k++] = 0.0; // Sensor vertex
             vertices[k++] = 0.0;
@@ -362,59 +378,83 @@ define([
             throw new DeveloperError('this.material must be defined.');
         }
 
+        var translucent = this.material.isTranslucent();
+
         // Initial render state creation
-        if ((this._showThroughEllipsoid !== this.showThroughEllipsoid) || (!defined(this._frontFaceColorCommand.renderState))) {
+        if ((this._showThroughEllipsoid !== this.showThroughEllipsoid) ||
+                (!defined(this._frontFaceColorCommand.renderState)) ||
+                (this._translucent !== translucent)) {
+
             this._showThroughEllipsoid = this.showThroughEllipsoid;
+            this._translucent = translucent;
 
-            var rs = context.createRenderState({
-                depthTest : {
-                    // This would be better served by depth testing with a depth buffer that does not
-                    // include the ellipsoid depth - or a g-buffer containing an ellipsoid mask
-                    // so we can selectively depth test.
-                    enabled : !this.showThroughEllipsoid
-                },
-                depthMask : false,
-                blending : BlendingState.ALPHA_BLEND,
-                cull : {
-                    enabled : true,
-                    face : CullFace.BACK
-                }
-            });
+            var rs;
 
-            this._frontFaceColorCommand.renderState = rs;
+            if (translucent) {
+                rs = context.createRenderState({
+                    depthTest : {
+                        // This would be better served by depth testing with a depth buffer that does not
+                        // include the ellipsoid depth - or a g-buffer containing an ellipsoid mask
+                        // so we can selectively depth test.
+                        enabled : !this.showThroughEllipsoid
+                    },
+                    depthMask : false,
+                    blending : BlendingState.ALPHA_BLEND,
+                    cull : {
+                        enabled : true,
+                        face : CullFace.BACK
+                    }
+                });
 
-            rs = context.createRenderState({
-                depthTest : {
-                    // This would be better served by depth testing with a depth buffer that does not
-                    // include the ellipsoid depth - or a g-buffer containing an ellipsoid mask
-                    // so we can selectively depth test.
-                    enabled : !this.showThroughEllipsoid
-                },
-                depthMask : false,
-                blending : BlendingState.ALPHA_BLEND,
-                cull : {
-                    enabled : true,
-                    face : CullFace.FRONT
-                }
-            });
+                this._frontFaceColorCommand.renderState = rs;
+                this._frontFaceColorCommand.pass = Pass.TRANSLUCENT;
 
-            this._backFaceColorCommand.renderState = rs;
+                rs = context.createRenderState({
+                    depthTest : {
+                        enabled : !this.showThroughEllipsoid
+                    },
+                    depthMask : false,
+                    blending : BlendingState.ALPHA_BLEND,
+                    cull : {
+                        enabled : true,
+                        face : CullFace.FRONT
+                    }
+                });
 
-            rs = context.createRenderState({
-                depthTest : {
-                    // This would be better served by depth testing with a depth buffer that does not
-                    // include the ellipsoid depth - or a g-buffer containing an ellipsoid mask
-                    // so we can selectively depth test.
-                    enabled : !this.showThroughEllipsoid
-                },
-                depthMask : false,
-                blending : BlendingState.ALPHA_BLEND
-            });
-            this._pickCommand.renderState = rs;
+                this._backFaceColorCommand.renderState = rs;
+                this._backFaceColorCommand.pass = Pass.TRANSLUCENT;
+
+                rs = context.createRenderState({
+                    depthTest : {
+                        enabled : !this.showThroughEllipsoid
+                    },
+                    depthMask : false,
+                    blending : BlendingState.ALPHA_BLEND
+                });
+                this._pickCommand.renderState = rs;
+            } else {
+                rs = context.createRenderState({
+                    depthTest : {
+                        enabled : true
+                    },
+                    depthMask : true
+                });
+                this._frontFaceColorCommand.renderState = rs;
+                this._frontFaceColorCommand.pass = Pass.OPAQUE;
+
+                rs = context.createRenderState({
+                    depthTest : {
+                        enabled : true
+                    },
+                    depthMask : true
+                });
+                this._pickCommand.renderState = rs;
+            }
         }
 
         // Recreate vertex buffer when directions change
-        if ((this._directionsDirty) || (this._bufferUsage !== this.bufferUsage)) {
+        var directionsChanged = this._directionsDirty || (this._bufferUsage !== this.bufferUsage);
+        if (directionsChanged) {
             this._directionsDirty = false;
             this._bufferUsage = this.bufferUsage;
             this._va = this._va && this._va.destroy();
@@ -432,7 +472,15 @@ define([
         }
 
         var pass = frameState.passes;
-        this._commandLists.removeAll();
+
+        var modelMatrixChanged = !Matrix4.equals(this.modelMatrix, this._modelMatrix);
+        if (modelMatrixChanged) {
+            Matrix4.clone(this.modelMatrix, this._modelMatrix);
+        }
+
+        if (directionsChanged || modelMatrixChanged) {
+            BoundingSphere.transform(this._boundingSphere, this.modelMatrix, this._boundingSphereWC);
+        }
 
         this._frontFaceColorCommand.modelMatrix = this.modelMatrix;
         this._backFaceColorCommand.modelMatrix = this._frontFaceColorCommand.modelMatrix;
@@ -440,8 +488,9 @@ define([
 
         var materialChanged = this._material !== this.material;
         this._material = this.material;
+        this._material.update(context);
 
-        if (pass.color) {
+        if (pass.render) {
             var frontFaceColorCommand = this._frontFaceColorCommand;
             var backFaceColorCommand = this._backFaceColorCommand;
 
@@ -460,15 +509,23 @@ define([
                 };
             }
 
-            this._commandLists.colorList.push(backFaceColorCommand);
-            this._commandLists.colorList.push(frontFaceColorCommand);
+            if (translucent) {
+                commandList.push(this._backFaceColorCommand, this._frontFaceColorCommand);
+            } else {
+                commandList.push(this._frontFaceColorCommand);
+            }
         }
 
         if (pass.pick) {
             var pickCommand = this._pickCommand;
 
-            if (!defined(this._pickId)) {
-                this._pickId = context.createPickId(this._pickIdThis);
+            if (!defined(this._pickId) || (this._id !== this.id)) {
+                this._id = this.id;
+                this._pickId = this._pickId && this._pickId.destroy();
+                this._pickId = context.createPickId({
+                    primitive : this._pickIdThis,
+                    id : this.id
+                });
             }
 
             // Recompile shader when material changes
@@ -489,11 +546,8 @@ define([
                 }], false, false);
             }
 
-            this._commandLists.pickList.push(pickCommand);
-        }
-
-        if (!this._commandLists.empty()) {
-            commandList.push(this._commandLists);
+            pickCommand.pass = translucent ? Pass.TRANSLUCENT : Pass.OPAQUE;
+            commandList.push(pickCommand);
         }
     };
 

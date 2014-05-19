@@ -3,10 +3,12 @@ attribute vec3 positionLow;
 attribute vec2 direction;                       // in screen space
 attribute vec4 textureCoordinatesAndImageSize;  // size in normalized texture coordinates
 attribute vec3 originAndShow;                   // show is 0.0 (false) or 1.0 (true)
-attribute vec2 pixelOffset;
+attribute vec4 pixelOffsetAndTranslate;         // x,y, translateX, translateY
 attribute vec4 eyeOffsetAndScale;               // eye offset in meters
 attribute vec4 rotationAndAlignedAxis;
 attribute vec4 scaleByDistance;                 // near, nearScale, far, farScale
+attribute vec4 translucencyByDistance;          // near, nearTrans, far, farTrans
+attribute vec4 pixelOffsetScaleByDistance;      // near, nearScale, far, farScale
 
 #ifdef RENDER_FOR_PICK
 attribute vec4 pickColor;
@@ -24,6 +26,23 @@ varying vec4 v_pickColor;
 varying vec4 v_color;
 #endif
 
+float getNearFarScalar(vec4 nearFarScalar, float cameraDistSq)
+{
+    float valueAtMin = nearFarScalar.y;
+    float valueAtMax = nearFarScalar.w;
+    float nearDistanceSq = nearFarScalar.x * nearFarScalar.x;
+    float farDistanceSq = nearFarScalar.z * nearFarScalar.z;
+
+    // ensure that t will fall within the range of [0.0, 1.0]
+    cameraDistSq = clamp(cameraDistSq, nearDistanceSq, farDistanceSq);
+
+    float t = (cameraDistSq - nearDistanceSq) / (farDistanceSq - nearDistanceSq);
+
+    t = pow(t, 0.15);
+
+    return mix(valueAtMin, valueAtMax, t);
+}
+
 void main() 
 {
     // Modifying this shader may also require modifications to Billboard.computeScreenSpacePosition
@@ -35,6 +54,8 @@ void main()
     vec2 imageSize = textureCoordinatesAndImageSize.zw;
     vec2 origin = originAndShow.xy;
     float show = originAndShow.z;
+    vec2 pixelOffset = pixelOffsetAndTranslate.xy;
+    vec2 translate = pixelOffsetAndTranslate.zw;
     
     ///////////////////////////////////////////////////////////////////////////
     
@@ -44,8 +65,8 @@ void main()
     positionEC.xyz *= show;
     
     ///////////////////////////////////////////////////////////////////////////     
-    
-#ifdef EYE_DISTANCE_SCALING  // scale based on eye distance
+
+#if defined(EYE_DISTANCE_SCALING) || defined(EYE_DISTANCE_TRANSLUCENCY) || defined(EYE_DISTANCE_PIXEL_OFFSET)
     float lengthSq;
     if (czm_sceneMode == czm_sceneMode2D)
     {
@@ -57,20 +78,30 @@ void main()
     {
         lengthSq = dot(positionEC.xyz, positionEC.xyz);
     }
+#endif
 
-    float scaleAtMin = scaleByDistance.y;
-    float scaleAtMax = scaleByDistance.w;
-    float nearDistanceSq = scaleByDistance.x * scaleByDistance.x;
-    float farDistanceSq = scaleByDistance.z * scaleByDistance.z;
+#ifdef EYE_DISTANCE_SCALING
+    scale *= getNearFarScalar(scaleByDistance, lengthSq);
+    // push vertex behind near plane for clipping
+    if (scale == 0.0)
+    {
+        positionEC.xyz = vec3(0.0);
+    }
+#endif
 
-    // ensure that t will fall within the range of [0.0, 1.0]
-    lengthSq = clamp(lengthSq, nearDistanceSq, farDistanceSq);
+    float translucency = 1.0;
+#ifdef EYE_DISTANCE_TRANSLUCENCY
+    translucency = getNearFarScalar(translucencyByDistance, lengthSq);
+    // push vertex behind near plane for clipping
+    if (translucency == 0.0)
+    {
+        positionEC.xyz = vec3(0.0);
+    }
+#endif
 
-    float t = (lengthSq - nearDistanceSq) / (farDistanceSq - nearDistanceSq);
-
-    t = pow(t, 0.15);
-
-    scale *= mix(scaleAtMin, scaleAtMax, t);
+#ifdef EYE_DISTANCE_PIXEL_OFFSET
+    float pixelOffsetScale = getNearFarScalar(pixelOffsetScaleByDistance, lengthSq);
+    pixelOffset *= pixelOffsetScale;
 #endif
 
     vec4 positionWC = czm_eyeToWindowCoordinates(positionEC);
@@ -104,6 +135,7 @@ void main()
 #endif
     
     positionWC.xy += halfSize;
+    positionWC.xy += translate;
     positionWC.xy += (pixelOffset * czm_highResolutionSnapScale);
 
     gl_Position = czm_viewportOrthographic * vec4(positionWC.xy, -positionWC.z, 1.0);
@@ -113,5 +145,6 @@ void main()
     v_pickColor = pickColor;
 #else
     v_color = color;
+    v_color.a *= translucency;
 #endif
 }

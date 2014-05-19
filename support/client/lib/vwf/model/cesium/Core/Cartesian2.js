@@ -40,48 +40,6 @@ define([
     };
 
     /**
-     * Creates a Cartesian2 from two consecutive elements in an array.
-     * @memberof Cartesian2
-     *
-     * @param {Array} values The array whose two consecutive elements correspond to the x and y components, respectively.
-     * @param {Number} [offset=0] The offset into the array of the first element, which corresponds to the x component.
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     *
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     *
-     * @exception {DeveloperError} values is required.
-     * @exception {DeveloperError} offset + 2 is greater than the length of the array.
-     *
-     * @example
-     * // Create a Cartesian2 with (1.0, 2.0)
-     * var v = [1.0, 2.0];
-     * var p = Cartesian2.fromArray(v);
-     *
-     * // Create a Cartesian2 with (1.0, 2.0) using an offset into an array
-     * var v2 = [0.0, 0.0, 1.0, 2.0];
-     * var p2 = Cartesian2.fromArray(v2, 2);
-     */
-    Cartesian2.fromArray = function(values, offset, result) {
-        if (!defined(values)) {
-            throw new DeveloperError('values is required.');
-        }
-
-        if (offset + 2 > values.length) {
-            throw new DeveloperError('offset + 2 is greater than the length of the array.');
-        }
-
-        offset = defaultValue(offset, 0);
-
-        if (!defined(result)) {
-            result = new Cartesian2();
-        }
-
-        result.x = values[offset + 0];
-        result.y = values[offset + 1];
-        return result;
-    };
-
-    /**
      * Creates a Cartesian2 instance from x and y coordinates.
      * @memberof Cartesian2
      *
@@ -167,6 +125,7 @@ define([
      * @exception {DeveloperError} array is required.
      */
     Cartesian2.pack = function(value, array, startingIndex) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(value)) {
             throw new DeveloperError('value is required');
         }
@@ -174,6 +133,7 @@ define([
         if (!defined(array)) {
             throw new DeveloperError('array is required');
         }
+        //>>includeEnd('debug');
 
         startingIndex = defaultValue(startingIndex, 0);
 
@@ -192,9 +152,11 @@ define([
      * @exception {DeveloperError} array is required.
      */
     Cartesian2.unpack = function(array, startingIndex, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(array)) {
             throw new DeveloperError('array is required');
         }
+        //>>includeEnd('debug');
 
         startingIndex = defaultValue(startingIndex, 0);
 
@@ -207,6 +169,29 @@ define([
     };
 
     /**
+     * Creates a Cartesian2 from two consecutive elements in an array.
+     * @memberof Cartesian2
+     *
+     * @param {Array} array The array whose two consecutive elements correspond to the x and y components, respectively.
+     * @param {Number} [startingIndex=0] The offset into the array of the first element, which corresponds to the x component.
+     * @param {Cartesian2} [result] The object onto which to store the result.
+     *
+     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
+     *
+     * @exception {DeveloperError} array is required.
+     *
+     * @example
+     * // Create a Cartesian2 with (1.0, 2.0)
+     * var v = [1.0, 2.0];
+     * var p = Cartesian2.fromArray(v);
+     *
+     * // Create a Cartesian2 with (1.0, 2.0) using an offset into an array
+     * var v2 = [0.0, 0.0, 1.0, 2.0];
+     * var p2 = Cartesian2.fromArray(v2, 2);
+     */
+    Cartesian2.fromArray = Cartesian2.unpack;
+
+    /**
      * Computes the value of the maximum component for the supplied Cartesian.
      * @memberof Cartesian2
      *
@@ -216,9 +201,12 @@ define([
      * @exception {DeveloperError} cartesian is required.
      */
     Cartesian2.getMaximumComponent = function(cartesian) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(cartesian)) {
             throw new DeveloperError('cartesian is required');
         }
+        //>>includeEnd('debug');
+
         return Math.max(cartesian.x, cartesian.y);
     };
 
@@ -232,10 +220,76 @@ define([
      * @exception {DeveloperError} cartesian is required.
      */
     Cartesian2.getMinimumComponent = function(cartesian) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(cartesian)) {
             throw new DeveloperError('cartesian is required');
         }
+        //>>includeEnd('debug');
+
         return Math.min(cartesian.x, cartesian.y);
+    };
+
+    /**
+     * Compares two Cartesians and computes a Cartesian which contains the minimum components of the supplied Cartesians.
+     * @memberof Cartesian2
+     *
+     * @param {Cartesian2} first A cartesian to compare.
+     * @param {Cartesian2} second A cartesian to compare.
+     * @param {Cartesian2} [result] The object into which to store the result.
+     * @returns {Cartesian2} A cartesian with the minimum components.
+     *
+     * @exception {DeveloperError} first is required.
+     * @exception {DeveloperError} second is required.
+     */
+    Cartesian2.getMinimumByComponent = function(first, second, result) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(first)) {
+            throw new DeveloperError('first is required.');
+        }
+        if (!defined(second)) {
+            throw new DeveloperError('second is required.');
+        }
+        //>>includeEnd('debug');
+
+        if (!defined(result)) {
+            result = new Cartesian2();
+        }
+
+        result.x = Math.min(first.x, second.x);
+        result.y = Math.min(first.y, second.y);
+
+        return result;
+    };
+
+    /**
+     * Compares two Cartesians and computes a Cartesian which contains the maximum components of the supplied Cartesians.
+     * @memberof Cartesian2
+     *
+     * @param {Cartesian2} first A cartesian to compare.
+     * @param {Cartesian2} second A cartesian to compare.
+     * @param {Cartesian2} [result] The object into which to store the result.
+     * @returns {Cartesian2} A cartesian with the maximum components.
+     *
+     * @exception {DeveloperError} first is required.
+     * @exception {DeveloperError} second is required.
+     */
+    Cartesian2.getMaximumByComponent = function(first, second, result) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(first)) {
+            throw new DeveloperError('first is required.');
+        }
+        if (!defined(second)) {
+            throw new DeveloperError('second is required.');
+        }
+        //>>includeEnd('debug');
+
+        if (!defined(result)) {
+            result = new Cartesian2();
+        }
+
+        result.x = Math.max(first.x, second.x);
+        result.y = Math.max(first.y, second.y);
+        return result;
     };
 
     /**
@@ -248,9 +302,12 @@ define([
      * @exception {DeveloperError} cartesian is required.
      */
     Cartesian2.magnitudeSquared = function(cartesian) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(cartesian)) {
             throw new DeveloperError('cartesian is required');
         }
+        //>>includeEnd('debug');
+
         return cartesian.x * cartesian.x + cartesian.y * cartesian.y;
     };
 
@@ -285,9 +342,11 @@ define([
      * var d = Cartesian2.distance(new Cartesian2(1.0, 0.0), new Cartesian2(2.0, 0.0));
      */
     Cartesian2.distance = function(left, right) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(left) || !defined(right)) {
             throw new DeveloperError('left and right are required.');
         }
+        //>>includeEnd('debug');
 
         Cartesian2.subtract(left, right, distanceScratch);
         return Cartesian2.magnitude(distanceScratch);
@@ -304,9 +363,12 @@ define([
      * @exception {DeveloperError} cartesian is required.
      */
     Cartesian2.normalize = function(cartesian, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(cartesian)) {
             throw new DeveloperError('cartesian is required');
         }
+        //>>includeEnd('debug');
+
         var magnitude = Cartesian2.magnitude(cartesian);
         if (!defined(result)) {
             return new Cartesian2(cartesian.x / magnitude, cartesian.y / magnitude);
@@ -328,12 +390,15 @@ define([
      * @exception {DeveloperError} right is required.
      */
     Cartesian2.dot = function(left, right) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(left)) {
             throw new DeveloperError('left is required');
         }
         if (!defined(right)) {
             throw new DeveloperError('right is required');
         }
+        //>>includeEnd('debug');
+
         return left.x * right.x + left.y * right.y;
     };
 
@@ -350,12 +415,15 @@ define([
      * @exception {DeveloperError} right is required.
      */
     Cartesian2.multiplyComponents = function(left, right, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(left)) {
             throw new DeveloperError('left is required');
         }
         if (!defined(right)) {
             throw new DeveloperError('right is required');
         }
+        //>>includeEnd('debug');
+
         if (!defined(result)) {
             return new Cartesian2(left.x * right.x, left.y * right.y);
         }
@@ -377,12 +445,15 @@ define([
      * @exception {DeveloperError} right is required.
      */
     Cartesian2.add = function(left, right, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(left)) {
             throw new DeveloperError('left is required');
         }
         if (!defined(right)) {
             throw new DeveloperError('right is required');
         }
+        //>>includeEnd('debug');
+
         if (!defined(result)) {
             return new Cartesian2(left.x + right.x, left.y + right.y);
         }
@@ -404,12 +475,15 @@ define([
      * @exception {DeveloperError} right is required.
      */
     Cartesian2.subtract = function(left, right, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(left)) {
             throw new DeveloperError('left is required');
         }
         if (!defined(right)) {
             throw new DeveloperError('right is required');
         }
+        //>>includeEnd('debug');
+
         if (!defined(result)) {
             return new Cartesian2(left.x - right.x, left.y - right.y);
         }
@@ -431,12 +505,15 @@ define([
      * @exception {DeveloperError} scalar is required and must be a number.
      */
     Cartesian2.multiplyByScalar = function(cartesian, scalar, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(cartesian)) {
             throw new DeveloperError('cartesian is required');
         }
         if (typeof scalar !== 'number') {
             throw new DeveloperError('scalar is required and must be a number.');
         }
+        //>>includeEnd('debug');
+
         if (!defined(result)) {
             return new Cartesian2(cartesian.x * scalar, cartesian.y * scalar);
         }
@@ -458,12 +535,15 @@ define([
      * @exception {DeveloperError} scalar is required and must be a number.
      */
     Cartesian2.divideByScalar = function(cartesian, scalar, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(cartesian)) {
             throw new DeveloperError('cartesian is required');
         }
         if (typeof scalar !== 'number') {
             throw new DeveloperError('scalar is required and must be a number.');
         }
+        //>>includeEnd('debug');
+
         if (!defined(result)) {
             return new Cartesian2(cartesian.x / scalar, cartesian.y / scalar);
         }
@@ -483,9 +563,12 @@ define([
      * @exception {DeveloperError} cartesian is required.
      */
     Cartesian2.negate = function(cartesian, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(cartesian)) {
             throw new DeveloperError('cartesian is required');
         }
+        //>>includeEnd('debug');
+
         if (!defined(result)) {
             return new Cartesian2(-cartesian.x, -cartesian.y);
         }
@@ -505,9 +588,12 @@ define([
      * @exception {DeveloperError} cartesian is required.
      */
     Cartesian2.abs = function(cartesian, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(cartesian)) {
             throw new DeveloperError('cartesian is required');
         }
+        //>>includeEnd('debug');
+
         if (!defined(result)) {
             return new Cartesian2(Math.abs(cartesian.x), Math.abs(cartesian.y));
         }
@@ -532,6 +618,7 @@ define([
      * @exception {DeveloperError} t is required and must be a number.
      */
     Cartesian2.lerp = function(start, end, t, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(start)) {
             throw new DeveloperError('start is required.');
         }
@@ -541,6 +628,8 @@ define([
         if (typeof t !== 'number') {
             throw new DeveloperError('t is required and must be a number.');
         }
+        //>>includeEnd('debug');
+
         Cartesian2.multiplyByScalar(end, t, lerpScratch);
         result = Cartesian2.multiplyByScalar(start, 1.0 - t, result);
         return Cartesian2.add(lerpScratch, result, result);
@@ -560,12 +649,15 @@ define([
      * @exception {DeveloperError} right is required.
      */
     Cartesian2.angleBetween = function(left, right) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(left)) {
             throw new DeveloperError('left is required');
         }
         if (!defined(right)) {
             throw new DeveloperError('right is required');
         }
+        //>>includeEnd('debug');
+
         Cartesian2.normalize(left, angleBetweenScratch);
         Cartesian2.normalize(right, angleBetweenScratch2);
         return Math.acos(Cartesian2.dot(angleBetweenScratch, angleBetweenScratch2));
@@ -583,9 +675,11 @@ define([
      * @exception {DeveloperError} cartesian is required.
      */
     Cartesian2.mostOrthogonalAxis = function(cartesian, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(cartesian)) {
             throw new DeveloperError('cartesian is required.');
         }
+        //>>includeEnd('debug');
 
         var f = Cartesian2.normalize(cartesian, mostOrthogonalAxisScratch);
         Cartesian2.abs(f, f);
@@ -630,9 +724,12 @@ define([
      * @exception {DeveloperError} epsilon is required and must be a number.
      */
     Cartesian2.equalsEpsilon = function(left, right, epsilon) {
+        //>>includeStart('debug', pragmas.debug);
         if (typeof epsilon !== 'number') {
             throw new DeveloperError('epsilon is required and must be a number.');
         }
+        //>>includeEnd('debug');
+
         return (left === right) ||
                ((defined(left)) &&
                 (defined(right)) &&
@@ -659,26 +756,6 @@ define([
     Cartesian2.UNIT_Y = freezeObject(new Cartesian2(0.0, 1.0));
 
     /**
-     * Computes the value of the maximum component for this Cartesian.
-     * @memberof Cartesian2
-     *
-     * @returns {Number} The value of the maximum component.
-     */
-    Cartesian2.prototype.getMaximumComponent = function() {
-        return Cartesian2.getMaximumComponent(this);
-    };
-
-    /**
-     * Computes the value of the minimum component for this Cartesian.
-     * @memberof Cartesian2
-     *
-     * @returns {Number} The value of the minimum component.
-     */
-    Cartesian2.prototype.getMinimumComponent = function() {
-        return Cartesian2.getMinimumComponent(this);
-    };
-
-    /**
      * Duplicates this Cartesian2 instance.
      * @memberof Cartesian2
      *
@@ -687,184 +764,6 @@ define([
      */
     Cartesian2.prototype.clone = function(result) {
         return Cartesian2.clone(this, result);
-    };
-
-    /**
-     * Computes this Cartesian's squared magnitude.
-     * @memberof Cartesian2
-     *
-     * @returns {Number} The squared magnitude.
-     */
-    Cartesian2.prototype.magnitudeSquared = function() {
-        return Cartesian2.magnitudeSquared(this);
-    };
-
-    /**
-     * Computes this Cartesian's magnitude (length).
-     * @memberof Cartesian2
-     *
-     * @returns {Number} The magnitude.
-     */
-    Cartesian2.prototype.magnitude = function() {
-        return Cartesian2.magnitude(this);
-    };
-
-    /**
-     * Computes the normalized form of this Cartesian.
-     * @memberof Cartesian2
-     *
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     */
-    Cartesian2.prototype.normalize = function(result) {
-        return Cartesian2.normalize(this, result);
-    };
-
-    /**
-     * Computes the dot (scalar) product of this Cartesian and a supplied cartesian.
-     * @memberof Cartesian2
-     *
-     * @param {Cartesian2} right The right hand side Cartesian.
-     * @returns {Number} The dot product.
-     *
-     * @exception {DeveloperError} right is required.
-     */
-    Cartesian2.prototype.dot = function(right) {
-        return Cartesian2.dot(this, right);
-    };
-
-    /**
-     * Computes the componentwise product of this Cartesian and the provided Cartesian.
-     * @memberof Cartesian2
-     *
-     * @param {Cartesian2} right The right hand side Cartesian.
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     *
-     * @exception {DeveloperError} right is required.
-     */
-    Cartesian2.prototype.multiplyComponents = function(right, result) {
-        return Cartesian2.multiplyComponents(this, right, result);
-    };
-
-    /**
-     * Computes the componentwise sum of this Cartesian and the provided Cartesian.
-     * @memberof Cartesian2
-     *
-     * @param {Cartesian2} right The right hand side Cartesian.
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     *
-     * @exception {DeveloperError} right is required.
-     */
-    Cartesian2.prototype.add = function(right, result) {
-        return Cartesian2.add(this, right, result);
-    };
-
-    /**
-     * Computes the componentwise difference of this Cartesian and the provided Cartesian.
-     * @memberof Cartesian2
-     *
-     * @param {Cartesian2} right The right hand side Cartesian.
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     *
-     * @exception {DeveloperError} right is required.
-     */
-    Cartesian2.prototype.subtract = function(right, result) {
-        return Cartesian2.subtract(this, right, result);
-    };
-
-    /**
-     * Multiplies this Cartesian componentwise by the provided scalar.
-     * @memberof Cartesian2
-     *
-     * @param {Number} scalar The scalar to multiply with.
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     *
-     * @exception {DeveloperError} scalar is required and must be a number.
-     */
-    Cartesian2.prototype.multiplyByScalar = function(scalar, result) {
-        return Cartesian2.multiplyByScalar(this, scalar, result);
-    };
-
-    /**
-     * Divides this Cartesian componentwise by the provided scalar.
-     * @memberof Cartesian2
-     *
-     * @param {Number} scalar The scalar to divide by.
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     *
-     * @exception {DeveloperError} scalar is required and must be a number.
-     */
-    Cartesian2.prototype.divideByScalar = function(scalar, result) {
-        return Cartesian2.divideByScalar(this, scalar, result);
-    };
-
-    /**
-     * Negates this Cartesian.
-     * @memberof Cartesian2
-     *
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     */
-    Cartesian2.prototype.negate = function(result) {
-        return Cartesian2.negate(this, result);
-    };
-
-    /**
-     * Computes the absolute value of this Cartesian.
-     * @memberof Cartesian2
-     *
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     */
-    Cartesian2.prototype.abs = function(result) {
-        return Cartesian2.abs(this, result);
-    };
-
-    /**
-     * Computes the linear interpolation or extrapolation at t using this Cartesian
-     * and the provided cartesian.  This cartesian is assumed to be t at 0.0.
-     * @memberof Cartesian2
-     *
-     * @param end The value corresponding to t at 1.0.
-     * @param t The point along t at which to interpolate.
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The modified result parameter or a new Cartesian2 instance if one was not provided.
-     *
-     * @exception {DeveloperError} end is required.
-     * @exception {DeveloperError} t is required and must be a number.
-     */
-    Cartesian2.prototype.lerp = function(end, t, result) {
-        return Cartesian2.lerp(this, end, t, result);
-    };
-
-    /**
-     * Returns the angle, in radians, between this Cartesian and the provided Cartesian.
-     * @memberof Cartesian2
-     *
-     * @param {Cartesian2} right The right hand side Cartesian.
-     * @returns {Number} The angle between the Cartesians.
-     *
-     * @exception {DeveloperError} left is required.
-     * @exception {DeveloperError} right is required.
-     */
-    Cartesian2.prototype.angleBetween = function(right) {
-        return Cartesian2.angleBetween(this, right);
-    };
-
-    /**
-     * Returns the axis that is most orthogonal to the this Cartesian.
-     * @memberof Cartesian2
-     *
-     * @param {Cartesian2} [result] The object onto which to store the result.
-     * @returns {Cartesian2} The most orthogonal axis.
-     */
-    Cartesian2.prototype.mostOrthogonalAxis = function(result) {
-        return Cartesian2.mostOrthogonalAxis(this, result);
     };
 
     /**

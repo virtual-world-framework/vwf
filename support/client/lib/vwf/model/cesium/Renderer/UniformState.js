@@ -39,20 +39,20 @@ define([
     var UniformState = function() {
         this._viewport = new BoundingRectangle();
         this._viewportDirty = false;
-        this._viewportOrthographicMatrix = Matrix4.IDENTITY.clone();
-        this._viewportTransformation = Matrix4.IDENTITY.clone();
+        this._viewportOrthographicMatrix = Matrix4.clone(Matrix4.IDENTITY);
+        this._viewportTransformation = Matrix4.clone(Matrix4.IDENTITY);
 
-        this._model = Matrix4.IDENTITY.clone();
-        this._view = Matrix4.IDENTITY.clone();
-        this._inverseView = Matrix4.IDENTITY.clone();
-        this._projection = Matrix4.IDENTITY.clone();
-        this._infiniteProjection = Matrix4.IDENTITY.clone();
+        this._model = Matrix4.clone(Matrix4.IDENTITY);
+        this._view = Matrix4.clone(Matrix4.IDENTITY);
+        this._inverseView = Matrix4.clone(Matrix4.IDENTITY);
+        this._projection = Matrix4.clone(Matrix4.IDENTITY);
+        this._infiniteProjection = Matrix4.clone(Matrix4.IDENTITY);
         this._entireFrustum = new Cartesian2();
         this._currentFrustum = new Cartesian2();
         this._pixelSize = 0.0;
 
         this._frameState = undefined;
-        this._temeToPseudoFixed = Matrix3.IDENTITY.clone();
+        this._temeToPseudoFixed = Matrix3.clone(Matrix4.IDENTITY);
 
         // Derived members
         this._view3DDirty = true;
@@ -173,10 +173,10 @@ define([
     }
 
     function setCamera(uniformState, camera) {
-        Cartesian3.clone(camera.getPositionWC(), uniformState._cameraPosition);
-        Cartesian3.clone(camera.getDirectionWC(), uniformState._cameraDirection);
-        Cartesian3.clone(camera.getRightWC(), uniformState._cameraRight);
-        Cartesian3.clone(camera.getUpWC(), uniformState._cameraUp);
+        Cartesian3.clone(camera.positionWC, uniformState._cameraPosition);
+        Cartesian3.clone(camera.directionWC, uniformState._cameraDirection);
+        Cartesian3.clone(camera.rightWC, uniformState._cameraRight);
+        Cartesian3.clone(camera.upWC, uniformState._cameraUp);
         uniformState._encodedCameraPositionMCDirty = true;
     }
 
@@ -216,13 +216,16 @@ define([
      * @param {Object} frustum The frustum to synchronize with.
      */
     UniformState.prototype.updateFrustum = function(frustum) {
-        setProjection(this, frustum.getProjectionMatrix());
-        if (defined(frustum.getInfiniteProjectionMatrix)) {
-            setInfiniteProjection(this, frustum.getInfiniteProjectionMatrix());
+        setProjection(this, frustum.projectionMatrix);
+        if (defined(frustum.infiniteProjectionMatrix)) {
+            setInfiniteProjection(this, frustum.infiniteProjectionMatrix);
         }
         this._currentFrustum.x = frustum.near;
         this._currentFrustum.y = frustum.far;
     };
+
+    var scratchDrawingBufferDimensions = new Cartesian2();
+    var scratchPixelSize = new Cartesian2();
 
     /**
      * Synchronizes frame state with the uniform state.  This is called
@@ -233,14 +236,14 @@ define([
      *
      * @param {FrameState} frameState The frameState to synchronize with.
      */
-    UniformState.prototype.update = function(frameState) {
+    UniformState.prototype.update = function(context, frameState) {
         this._mode = frameState.mode;
         this._mapProjection = frameState.scene2D.projection;
 
         var camera = frameState.camera;
 
-        setView(this, camera.getViewMatrix());
-        setInverseView(this, camera.getInverseViewMatrix());
+        setView(this, camera.viewMatrix);
+        setInverseView(this, camera.inverseViewMatrix);
         setCamera(this, camera);
 
         if (frameState.mode === SceneMode.SCENE2D) {
@@ -255,7 +258,9 @@ define([
 
         setSunAndMoonDirections(this, frameState);
 
-        var pixelSize = camera.frustum.getPixelSize(frameState.canvasDimensions);
+        scratchDrawingBufferDimensions.x = context.getDrawingBufferWidth();
+        scratchDrawingBufferDimensions.y = context.getDrawingBufferHeight();
+        var pixelSize = camera.frustum.getPixelSize(scratchDrawingBufferDimensions, undefined, scratchPixelSize);
         this._pixelSize = Math.max(pixelSize.x, pixelSize.y);
 
         this._entireFrustum.x = camera.frustum.near;
@@ -263,7 +268,7 @@ define([
         this.updateFrustum(camera.frustum);
 
         this._frameState = frameState;
-        this._temeToPseudoFixed = Transforms.computeTemeToPseudoFixedMatrix(frameState.time);
+        this._temeToPseudoFixed = Transforms.computeTemeToPseudoFixedMatrix(frameState.time, this._temeToPseudoFixed);
     };
 
     /**
@@ -388,7 +393,7 @@ define([
         if (this._inverseModelDirty) {
             this._inverseModelDirty = false;
 
-            this._model.inverse(this._inverseModel);
+            Matrix4.inverse(this._model, this._inverseModel);
         }
 
         return this._inverseModel;
@@ -578,7 +583,7 @@ define([
         if (uniformState._modelViewDirty) {
             uniformState._modelViewDirty = false;
 
-            Matrix4.multiply(uniformState._view, uniformState._model, uniformState._modelView);
+            Matrix4.multiplyTransformation(uniformState._view, uniformState._model, uniformState._modelView);
         }
     }
 
@@ -600,7 +605,7 @@ define([
         if (uniformState._modelView3DDirty) {
             uniformState._modelView3DDirty = false;
 
-            Matrix4.multiply(uniformState.getView3D(), uniformState._model, uniformState._modelView3D);
+            Matrix4.multiplyTransformation(uniformState.getView3D(), uniformState._model, uniformState._modelView3D);
         }
     }
 
@@ -1025,7 +1030,7 @@ define([
         if (uniformState._encodedCameraPositionMCDirty) {
             uniformState._encodedCameraPositionMCDirty = false;
 
-            uniformState.getInverseModel().multiplyByPoint(uniformState._cameraPosition, cameraPositionMC);
+            Matrix4.multiplyByPoint(uniformState.getInverseModel(), uniformState._cameraPosition, cameraPositionMC);
             EncodedCartesian3.fromCartesian(cameraPositionMC, uniformState._encodedCameraPositionMC);
         }
     }
@@ -1090,9 +1095,9 @@ define([
     };
 
     var view2Dto3DPScratch = new Cartesian3();
-    var view2Dto3DRScratch = new Cartesian4();
-    var view2Dto3DUScratch = new Cartesian4();
-    var view2Dto3DDScratch = new Cartesian4();
+    var view2Dto3DRScratch = new Cartesian3();
+    var view2Dto3DUScratch = new Cartesian3();
+    var view2Dto3DDScratch = new Cartesian3();
     var view2Dto3DCartographicScratch = new Cartographic();
     var view2Dto3DCartesian3Scratch = new Cartesian3();
     var view2Dto3DMatrix4Scratch = new Matrix4();
@@ -1141,9 +1146,9 @@ define([
         var enuToFixed = Transforms.eastNorthUpToFixedFrame(position3D, ellipsoid, view2Dto3DMatrix4Scratch);
 
         // Transform each camera direction to the fixed axes.
-        enuToFixed.multiplyByVector(r, r);
-        enuToFixed.multiplyByVector(u, u);
-        enuToFixed.multiplyByVector(d, d);
+        Matrix4.multiplyByPointAsVector(enuToFixed, r, r);
+        Matrix4.multiplyByPointAsVector(enuToFixed, u, u);
+        Matrix4.multiplyByPointAsVector(enuToFixed, d, d);
 
         // Compute the view matrix based on the new fixed-frame camera position and directions.
         if (!defined(result)) {

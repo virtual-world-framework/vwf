@@ -43,6 +43,9 @@ define([
      * @param {Number} [options.textureRotationAngle=0.0] The rotation of the texture coordinates, in radians. A positive rotation is counter-clockwise.
      * @param {Boolean} [options.show=true] Determines if this primitive will be shown.
      * @param {Material} [options.material=undefined] The surface appearance of the primitive.
+     * @param {Object} [options.id=undefined] A user-defined object to return when the instance is picked with {@link Scene#pick}
+     * @param {Boolean} [options.asynchronous=true] Determines if the extent will be created asynchronously or block until ready.
+     * @param {Boolean} [options.debugShowBoundingVolume=false] For debugging only. Determines if the primitive's commands' bounding spheres are shown.
      *
      * @example
      * var extentPrimitive = new ExtentPrimitive({
@@ -126,7 +129,7 @@ define([
          */
         this.show = defaultValue(options.show, true);
 
-        var material = Material.fromType(undefined, Material.ColorType);
+        var material = Material.fromType(Material.ColorType);
         material.uniforms.color = new Color(1.0, 1.0, 0.0, 0.5);
 
         /**
@@ -143,11 +146,23 @@ define([
          * extent.material.uniforms.color = new Color(1.0, 1.0, 0.0, 1.0);
          *
          * // 2. Change material to horizontal stripes
-         * extent.material = Material.fromType(scene.getContext(), Material.StripeType);
+         * extent.material = Material.fromType(Material.StripeType);
          *
          * @see <a href='https://github.com/AnalyticalGraphicsInc/cesium/wiki/Fabric'>Fabric</a>
          */
         this.material = defaultValue(options.material, material);
+
+        /**
+         * User-defined object returned when the extent is picked.
+         *
+         * @type Object
+         *
+         * @default undefined
+         *
+         * @see Scene#pick
+         */
+        this.id = options.id;
+        this._id = undefined;
 
         /**
          * Determines if the geometry instances will be created and batched on
@@ -156,10 +171,20 @@ define([
          * @type Boolean
          *
          * @default true
-         *
-         * @private
          */
         this.asynchronous = defaultValue(options.asynchronous, true);
+
+        /**
+         * This property is for debugging only; it is not for production use nor is it optimized.
+         * <p>
+         * Draws the bounding sphere for each {@see DrawCommand} in the primitive.
+         * </p>
+         *
+         * @type {Boolean}
+         *
+         * @default false
+         */
+        this.debugShowBoundingVolume = defaultValue(options.debugShowBoundingVolume, false);
 
         this._primitive = undefined;
     };
@@ -189,7 +214,8 @@ define([
             (this._granularity !== this.granularity) ||
             (this._height !== this.height) ||
             (this._rotation !== this.rotation) ||
-            (this._textureRotationAngle !== this.textureRotationAngle)) {
+            (this._textureRotationAngle !== this.textureRotationAngle) ||
+            (this._id !== this.id)) {
 
             this._extent = Extent.clone(this.extent, this._extent);
             this._ellipsoid = this.ellipsoid;
@@ -197,6 +223,7 @@ define([
             this._height = this.height;
             this._rotation = this.rotation;
             this._textureRotationAngle = this.textureRotationAngle;
+            this._id = this.id;
 
             var instance = new GeometryInstance({
                 geometry : new ExtentGeometry({
@@ -208,7 +235,8 @@ define([
                     rotation : this.rotation,
                     stRotation : this.textureRotationAngle
                 }),
-                id : this
+                id : this.id,
+                pickPrimitive : this
             });
 
             if (defined(this._primitive)) {
@@ -224,8 +252,10 @@ define([
             });
         }
 
-        this._primitive.appearance.material = this.material;
-        this._primitive.update(context, frameState, commandList);
+        var primitive = this._primitive;
+        primitive.appearance.material = this.material;
+        primitive.debugShowBoundingVolume = this.debugShowBoundingVolume;
+        primitive.update(context, frameState, commandList);
     };
 
     /**

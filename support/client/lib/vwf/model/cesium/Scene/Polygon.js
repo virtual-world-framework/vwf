@@ -9,8 +9,6 @@ define([
         '../Core/Ellipsoid',
         '../Core/GeometryInstance',
         '../Core/PolygonGeometry',
-        '../Core/PolygonPipeline',
-        '../Core/Queue',
         './EllipsoidSurfaceAppearance',
         './Primitive',
         './Material'
@@ -24,8 +22,6 @@ define([
         Ellipsoid,
         GeometryInstance,
         PolygonGeometry,
-        PolygonPipeline,
-        Queue,
         EllipsoidSurfaceAppearance,
         Primitive,
         Material) {
@@ -37,7 +33,32 @@ define([
      * @alias Polygon
      * @constructor
      *
+     * @param {Ellipsoid} [options.ellipsoid=Ellipsoid.WGS84] The ellipsoid that the polygon is drawn on.
+     * @param {Array} [options.positions=undefined] The cartesian positions of the polygon.
+     * @param {Object} [options.polygonHierarchy=undefined] An object defining the vertex positions of each nested polygon as defined in {@link Polygon#configureFromPolygonHierarchy}.
+     * @param {Number} [options.granularity=CesiumMath.RADIANS_PER_DEGREE] The distance, in radians, between each latitude and longitude in the underlying geometry.
+     * @param {Number} [options.height=0.0] The height, in meters, that the extent is raised above the {@link ExtentPrimitive#ellipsoid}.
+     * @param {Number} [options.textureRotationAngle=0.0] The rotation of the texture coordinates, in radians. A positive rotation is counter-clockwise.
+     * @param {Boolean} [options.show=true] Determines if this primitive will be shown.
+     * @param {Material} [options.material=undefined] The surface appearance of the primitive.
+     * @param {Object} [options.id=undefined] A user-defined object to return when the instance is picked with {@link Scene#pick}
+     * @param {Boolean} [options.asynchronous=true] Determines if the primitive will be created asynchronously or block until ready.
+     * @param {Boolean} [options.debugShowBoundingVolume=false] For debugging only. Determines if the primitive's commands' bounding spheres are shown.
+     *
+     * @exception {DeveloperError} Either options.positions or options.polygonHierarchy can be provided, but not both.
+     * @exception {DeveloperError} When options.positions is provided, at least three positions are required.
+     *
      * @example
+     * // Example 1
+     * var polygon = new Polygon({
+     *   positions : [
+     *     ellipsoid.cartographicToCartesian(new Cartographic(...)),
+     *     ellipsoid.cartographicToCartesian(new Cartographic(...)),
+     *     ellipsoid.cartographicToCartesian(new Cartographic(...))
+     *   ]
+     * });
+     *
+     * // Example 2
      * var polygon = new Polygon();
      * polygon.material.uniforms.color = {
      *   red   : 1.0,
@@ -51,7 +72,7 @@ define([
      *   ellipsoid.cartographicToCartesian(new Cartographic(...))
      * ]);
      *
-     * @demo <a href="http://cesium.agi.com/Cesium/Apps/Sandcastle/index.html?src=Polygons.html">Cesium Sandcastle Polygons Demo</a>
+     * @demo <a href="http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Polygons.html">Cesium Sandcastle Polygons Demo</a>
      */
     var Polygon = function(options) {
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
@@ -107,7 +128,7 @@ define([
          */
         this.show = defaultValue(options.show, true);
 
-        var material = Material.fromType(undefined, Material.ColorType);
+        var material = Material.fromType(Material.ColorType);
         material.uniforms.color = new Color(1.0, 1.0, 0.0, 0.5);
 
         /**
@@ -118,18 +139,30 @@ define([
          * </p>
          *
          * @type {Material}
-         * @default Material.fromType(undefined, Material.ColorType)
+         * @default Material.fromType(Material.ColorType)
          *
          * @example
          * // 1. Change the color of the default material to yellow
          * polygon.material.uniforms.color = new Color(1.0, 1.0, 0.0, 1.0);
          *
          * // 2. Change material to horizontal stripes
-         * polygon.material = Material.fromType(scene.getContext(), Material.StripeType);
+         * polygon.material = Material.fromType( Material.StripeType);
          *
          * @see <a href='https://github.com/AnalyticalGraphicsInc/cesium/wiki/Fabric'>Fabric</a>
          */
         this.material = defaultValue(options.material, material);
+
+        /**
+         * User-defined object returned when the polygon is picked.
+         *
+         * @type Object
+         *
+         * @default undefined
+         *
+         * @see Scene#pick
+         */
+        this.id = options.id;
+        this._id = undefined;
 
         /**
          * Determines if the geometry instances will be created and batched on
@@ -138,16 +171,33 @@ define([
          * @type Boolean
          *
          * @default true
-         *
-         * @private
          */
         this.asynchronous = defaultValue(options.asynchronous, true);
 
-        this._positions = options.positions;
-        this._polygonHierarchy = options.polygonHierarchy;
-        this._createPrimitive = false;
+        /**
+         * This property is for debugging only; it is not for production use nor is it optimized.
+         * <p>
+         * Draws the bounding sphere for each {@see DrawCommand} in the primitive.
+         * </p>
+         *
+         * @type {Boolean}
+         *
+         * @default false
+         */
+        this.debugShowBoundingVolume = defaultValue(options.debugShowBoundingVolume, false);
 
+        this._positions = undefined;
+        this._polygonHierarchy = undefined;
+        this._createPrimitive = false;
         this._primitive = undefined;
+
+        if (defined(options.positions) && defined(options.polygonHierarchy)) {
+            throw new DeveloperError('Either options.positions or options.polygonHierarchy can be provided, but not both.');
+        } else if (defined(options.positions)) {
+            this.setPositions(options.positions);
+        } else if (defined(options.polygonHierarchy)) {
+            this.configureFromPolygonHierarchy(options.polygonHierarchy);
+        }
     };
 
     /**
@@ -276,13 +326,15 @@ define([
             (this._ellipsoid !== this.ellipsoid) ||
             (this._granularity !== this.granularity) ||
             (this._height !== this.height) ||
-            (this._textureRotationAngle !== this.textureRotationAngle)) {
+            (this._textureRotationAngle !== this.textureRotationAngle) ||
+            (this._id !== this.id)) {
 
             this._createPrimitive = false;
             this._ellipsoid = this.ellipsoid;
             this._granularity = this.granularity;
             this._height = this.height;
             this._textureRotationAngle = this.textureRotationAngle;
+            this._id = this.id;
 
             this._primitive = this._primitive && this._primitive.destroy();
 
@@ -301,7 +353,8 @@ define([
                         ellipsoid : this.ellipsoid,
                         granularity : this.granularity
                     }),
-                    id : this
+                    id : this.id,
+                    pickPrimitive : this
                 });
             } else {
                 instance = new GeometryInstance({
@@ -313,7 +366,8 @@ define([
                         ellipsoid : this.ellipsoid,
                         granularity : this.granularity
                     }),
-                    id : this
+                    id : this.id,
+                    pickPrimitive : this
                 });
             }
 
@@ -326,8 +380,10 @@ define([
             });
         }
 
-        this._primitive.appearance.material = this.material;
-        this._primitive.update(context, frameState, commandList);
+        var primitive = this._primitive;
+        primitive.debugShowBoundingVolume = this.debugShowBoundingVolume;
+        primitive.appearance.material = this.material;
+        primitive.update(context, frameState, commandList);
     };
 
     /**

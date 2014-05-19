@@ -1,5 +1,6 @@
 /*global define*/
 define([
+        '../Core/defaultValue',
         '../Core/DeveloperError',
         '../Core/defined',
         '../Core/destroyObject',
@@ -12,6 +13,7 @@ define([
         './HorizontalOrigin',
         './VerticalOrigin'
     ], function(
+        defaultValue,
         DeveloperError,
         defined,
         destroyObject,
@@ -76,6 +78,8 @@ define([
         if (defined(billboard)) {
             billboard.setShow(false);
             billboard.setImageIndex(-1);
+            // Destroy pickId to allow setting _pickIdThis and _id when the billboard is reused.
+            billboard._pickId = billboard._pickId && billboard._pickId.destroy();
             labelCollection._spareBillboards.push(billboard);
             glyph.billboard = undefined;
         }
@@ -174,13 +178,17 @@ define([
                     billboard.setShow(label._show);
                     billboard.setPosition(label._position);
                     billboard.setEyeOffset(label._eyeOffset);
+                    billboard.setPixelOffset(label._pixelOffset);
                     billboard.setHorizontalOrigin(HorizontalOrigin.LEFT);
                     billboard.setVerticalOrigin(label._verticalOrigin);
                     billboard.setScale(label._scale);
                     billboard._pickIdThis = label;
+                    billboard._id = label._id;
                 }
 
                 glyph.billboard.setImageIndex(glyphTextureInfo.index);
+                glyph.billboard.setTranslucencyByDistance(label._translucencyByDistance);
+                glyph.billboard.setPixelOffsetScaleByDistance(label._pixelOffsetScaleByDistance);
             }
         }
 
@@ -217,9 +225,7 @@ define([
             widthOffset -= totalWidth * scale;
         }
 
-        var pixelOffset = label._pixelOffset;
-
-        glyphPixelOffset.x = pixelOffset.x + widthOffset;
+        glyphPixelOffset.x = widthOffset;
         glyphPixelOffset.y = 0;
 
         var verticalOrigin = label._verticalOrigin;
@@ -228,15 +234,15 @@ define([
             dimensions = glyph.dimensions;
 
             if (verticalOrigin === VerticalOrigin.BOTTOM || dimensions.height === maxHeight) {
-                glyphPixelOffset.y = pixelOffset.y - dimensions.descent * scale;
+                glyphPixelOffset.y = -dimensions.descent * scale;
             } else if (verticalOrigin === VerticalOrigin.TOP) {
-                glyphPixelOffset.y = pixelOffset.y - (maxHeight - dimensions.height) * scale - dimensions.descent * scale;
+                glyphPixelOffset.y = -(maxHeight - dimensions.height) * scale - dimensions.descent * scale;
             } else if (verticalOrigin === VerticalOrigin.CENTER) {
-                glyphPixelOffset.y = pixelOffset.y - (maxHeight - dimensions.height) / 2 * scale - dimensions.descent * scale;
+                glyphPixelOffset.y = -(maxHeight - dimensions.height) / 2 * scale - dimensions.descent * scale;
             }
 
             if (defined(glyph.billboard)) {
-                glyph.billboard.setPixelOffset(glyphPixelOffset);
+                glyph.billboard._setTranslate(glyphPixelOffset);
             }
 
             glyphPixelOffset.x += dimensions.width * scale;
@@ -267,6 +273,9 @@ define([
      * @alias LabelCollection
      * @constructor
      *
+     * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] The 4x4 transformation matrix that transforms each label from model to world coordinates.
+     * @param {Boolean} [options.debugShowBoundingVolume=false] For debugging only. Determines if this primitive's commands' bounding spheres are shown.
+     *
      * @performance For best performance, prefer a few collections, each with many labels, to
      * many collections with only a few labels each.  Avoid having collections where some
      * labels change every frame and others do not; instead, create one or more collections
@@ -289,9 +298,11 @@ define([
      *   text : 'Another label'
      * });
      *
-     * @demo <a href="http://cesium.agi.com/Cesium/Apps/Sandcastle/index.html?src=Labels.html">Cesium Sandcastle Labels Demo</a>
+     * @demo <a href="http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Labels.html">Cesium Sandcastle Labels Demo</a>
      */
-    var LabelCollection = function() {
+    var LabelCollection = function(options) {
+        options = defaultValue(options, defaultValue.EMPTY_OBJECT);
+
         this._textureAtlas = undefined;
 
         this._billboardCollection = new BillboardCollection();
@@ -336,7 +347,19 @@ define([
          *   text     : 'Up'
          * });
          */
-        this.modelMatrix = Matrix4.IDENTITY.clone();
+        this.modelMatrix = Matrix4.clone(defaultValue(options.modelMatrix, Matrix4.IDENTITY));
+
+        /**
+         * This property is for debugging only; it is not for production use nor is it optimized.
+         * <p>
+         * Draws the bounding sphere for each {@see DrawCommand} in the primitive.
+         * </p>
+         *
+         * @type {Boolean}
+         *
+         * @default false
+         */
+        this.debugShowBoundingVolume = defaultValue(options.debugShowBoundingVolume, false);
     };
 
     /**
@@ -375,7 +398,7 @@ define([
      *   eyeOffset : Cartesian3.ZERO,
      *   horizontalOrigin : HorizontalOrigin.LEFT,
      *   verticalOrigin : VerticalOrigin.BOTTOM,
-     *   scale : 1.0,
+     *   scale : 1.0
      * });
      *
      * // Example 2:  Specify only the label's cartographic position,
@@ -552,6 +575,7 @@ define([
         var billboardCollection = this._billboardCollection;
 
         billboardCollection.modelMatrix = this.modelMatrix;
+        billboardCollection.debugShowBoundingVolume = this.debugShowBoundingVolume;
 
         if (!defined(this._textureAtlas)) {
             this._textureAtlas = context.createTextureAtlas();
@@ -582,7 +606,7 @@ define([
         }
         labelsToUpdate.length = 0;
 
-        this._billboardCollection.update(context, frameState, commandList);
+        billboardCollection.update(context, frameState, commandList);
     };
 
     /**
