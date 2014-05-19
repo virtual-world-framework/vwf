@@ -145,7 +145,17 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                 if ( node.graphProperties.hasOwnProperty( propertyName ) ) {
 
-                    node.graphProperties[ propertyName ] = propertyValue;
+                    if ( node.initialized ) {
+
+                        node.graphProperties[ propertyName ] = propertyValue;
+                        node.threeObject.remove( node.threeObject.getObjectByName( "grid" ) );
+                        createGraph( node );
+
+                    } else {
+
+                        node.graphProperties[ propertyName ] = propertyValue;
+
+                    }
 
                 }
 
