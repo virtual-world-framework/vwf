@@ -17,6 +17,7 @@ methods:
       - pointCount
       - color
       - lineThickness
+      - lineName
     body: |
       var lineDef = {
         "extends": "http://vwf.example.com/graphline.vwf",
@@ -29,6 +30,7 @@ methods:
           "lineThickness": lineThickness
         }
       }
-      this.children.create( "line" + this.lineCount++, lineDef );
+      lineName = lineName || "line" + this.lineCount++;
+      this.children.create( lineName , lineDef );
 scripts: |
   this.lineCount = 0;

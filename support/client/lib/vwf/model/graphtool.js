@@ -287,6 +287,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 props.gridVisible
             );
 
+        graph.visible = node.threeObject.visible;
         node.threeObject.add( graph );
 
     }
@@ -349,6 +350,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 props.lineThickness 
             );
 
+        line.visible = node.threeObject.visible;
         node.threeObject.add( line );
 
     }
