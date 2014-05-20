@@ -1,3 +1,5 @@
+"use strict";
+
 define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
 
     return model.load( module, {
@@ -147,6 +149,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                     node.graphProperties[ propertyName ] = propertyValue;
 
+                    if ( node.initialized ) {
+
+                        node.threeObject.remove( node.threeObject.getObjectByName( "grid" ) );
+                        createGraph( node );
+
+                    }
+
                 }
 
             } else if ( this.state.lines[ nodeID ] ) {
@@ -155,15 +164,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                 if ( node.lineProperties.hasOwnProperty( propertyName ) ) {
 
+                    node.lineProperties[ propertyName ] = propertyValue;
+
                     if ( node.initialized ) {
 
-                        node.lineProperties[ propertyName ] = propertyValue;
                         node.threeObject.remove( node.threeObject.children[0] );
                         createLine( node );
-
-                    } else {
-
-                        node.lineProperties[ propertyName ] = propertyValue;
 
                     }
 
@@ -277,6 +283,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 props.gridVisible
             );
 
+        graph.visible = node.threeObject.visible;
         node.threeObject.add( graph );
 
     }
@@ -339,6 +346,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 props.lineThickness 
             );
 
+        line.visible = node.threeObject.visible;
         node.threeObject.add( line );
 
     }
@@ -351,7 +359,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var faces;
         var increment;
         var func = function( x, y, z ) {
-            eval( functionString );
+            var fn = "var x = " + x + ", y = " + y + ", z = " + z + ";\n" 
+                    + functionString + ";\n" 
+                    + "[ x, y, z ];";
+            var ar = eval( fn );
+            x = ar[0];
+            y = ar[1];
+            z = ar[2];
             return new THREE.Vector3( x || 0, y || 0, z || 0 );
         }
 
