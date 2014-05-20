@@ -67,6 +67,7 @@ define( [ "module", "vwf/model",
                 "properties": false,
                 "setting": false,
                 "getting": false,
+                "methods": false,
                 "prototypes": false
             };
 
@@ -292,7 +293,12 @@ define( [ "module", "vwf/model",
         callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
             var node = this.state.nodes[ nodeID ];
 
+            if ( this.debug.methods ) {
+                this.logger.infox( "   M === callingMethod ", nodeID, methodName );
+            }
+
             if ( nodeID == this.kernel.application() ) {
+                
                 switch ( methodName ) {
                     
                     case "stopAllExecution":
@@ -413,19 +419,18 @@ define( [ "module", "vwf/model",
 
         if ( node.interpreter !== undefined ) {
             var stepType = node.interpreter.step();
-            
-            switch ( stepType ) {
-                
-                case "stepProgram":
-                    if ( node.interpreterStatus === "created" ) {
-                        self.kernel.fireEvent( node.ID, "blocklyStarted", [ true ] );
-                        node.interpreterStatus = "started";                        
-                    } else if ( node.interpreterStatus === "started" ) {
-                        self.kernel.setProperty( node.ID, "blockly_executing", false );
-                        self.kernel.fireEvent( node.ID, "blocklyStopped", [ true ] );
-                        node.interpreterStatus = "created";
-                    }
-                    break;
+
+            if ( stepType === "stepProgram" ) {
+                if ( node.interpreterStatus === "created" ) {
+                    self.kernel.fireEvent( node.ID, "blocklyStarted", [ true ] );
+                    node.interpreterStatus = "started";                        
+                }
+            } else if ( stepType === false ) {
+                if ( node.interpreterStatus === "started" ) {
+                    self.kernel.setProperty( node.ID, "blockly_executing", false );
+                    self.kernel.fireEvent( node.ID, "blocklyStopped", [ true ] );
+                    node.interpreterStatus = "created"; 
+                }               
             }
 
             if ( stepType && !self.state.executionHalted ) {
