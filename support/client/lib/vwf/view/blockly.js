@@ -14,7 +14,7 @@
 /// @module vwf/view/blockly
 /// @requires vwf/view
 
-define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
+define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acorn" ], function( module, view, $, acorn ) {
 
     var self;
 
@@ -97,6 +97,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
                         var blockCount = Blockly.mainWorkspace.getAllBlocks().length;
                         var topBlockCount = Blockly.mainWorkspace.topBlocks_.length;
                         
+                        self.kernel.fireEvent( self.kernel.application(), "blocklyContentChanged", [ true ] );
                         self.kernel.setProperty( self.state.blockly.node.ID, "blockly_blockCount", blockCount );
                         self.kernel.setProperty( self.state.blockly.node.ID, "blockly_topBlockCount", topBlockCount );
 
@@ -249,5 +250,8 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, $ ) {
         }
         self.kernel.fireEvent( node.ID, "blocklyVisibleChanged", [ show ] );
     }
+
+
+
 
 } );

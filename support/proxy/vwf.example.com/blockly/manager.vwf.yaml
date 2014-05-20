@@ -24,4 +24,6 @@ properties:
 methods:
   startAllExecution:
   stopAllExecution:
+events:
+  blocklyContentChanged:
   
