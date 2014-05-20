@@ -1,3 +1,5 @@
+"use strict";
+
 define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
 
     return model.load( module, {
@@ -363,7 +365,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var faces;
         var increment;
         var func = function( x, y, z ) {
-            eval( functionString );
+            var ar = eval( 
+                    "var x = " + x + ", y = " + y + ", z = " + z + ";" 
+                    + functionString + ";"
+                    + " [ x, y, z ];"
+                );
+            x = ar[0];
+            y = ar[1];
+            z = ar[2];
             return new THREE.Vector3( x || 0, y || 0, z || 0 );
         }
 
