@@ -365,11 +365,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var faces;
         var increment;
         var func = function( x, y, z ) {
-            var ar = eval( 
-                    "var x = " + x + ", y = " + y + ", z = " + z + ";" 
-                    + functionString + ";"
-                    + " [ x, y, z ];"
-                );
+            var fn = "var x = " + x + ", y = " + y + ", z = " + z + ";\n" 
+                    + functionString + ";\n" 
+                    + "[ x, y, z ];";
+            var ar = eval( fn );
             x = ar[0];
             y = ar[1];
             z = ar[2];
