@@ -3464,29 +3464,38 @@ THREE.ColladaLoader = function () {
 
 		var transparent = false;
 
-		if (this['transparency'] !== undefined && this['transparent'] !== undefined) {
+		if ( this[ 'transparency' ] !== undefined && this[ 'transparent' ] !== undefined ) {
 			// convert transparent color RBG to average value
-			var transparentColor = this['transparent'];
+			var transparentColor = this[ 'transparent' ];
 			var transparencyLevel = 0;
-			
+
 			// Support both transparent modes
-			if(transparentColor.opaque == "A_ONE") {
-				transparencyLevel = (3 - this.transparent.color.r -
-					this.transparent.color.g - 
-					this.transparent.color.b) / 
-					3 * this.transparency;
+			if( transparentColor.opaque == "A_ONE" ) {
+				// From Collada docs:
+				// Takes the transparency information from the color’s alpha channel, where the value 1.0 is opaque (default).
+				transparencyLevel = 1 - this.transparent.color.a;
 			}
-			else if(transparentColor.opaque == "RGB_ZERO") {
-				transparencyLevel = (this.transparent.color.r +
+			else if( transparentColor.opaque == "RGB_ZERO" ) {
+				// From Collada docs:
+				// Takes the transparency information from the color’s red, green, and blue channels, where the value 0.0 is opaque, with each channel modulated independently.
+				// TODO: Based on the docs, this should not be converted to a single transparency value. This should set the alpha of each color independently.
+				transparencyLevel = ( this.transparent.color.r +
 					this.transparent.color.g + 
-					this.transparent.color.b) / 
+					this.transparent.color.b ) / 
 					3 * this.transparency;
 			}
-			
-			if (transparencyLevel > 0) {
+
+			// Set transparent to true for textures with alpha to display properly with opacity 1
+			if ( this[ 'transparency' ] !== 0 ) {
+
 				transparent = true;
 				props[ 'transparent' ] = true;
-				props[ 'opacity' ] = 1 - transparencyLevel;
+
+				if ( transparencyLevel > 0 ) {
+					
+					props[ 'opacity' ] = 1 - transparencyLevel;
+
+				}
 
 			}
 
