@@ -3459,39 +3459,46 @@ THREE.ColladaLoader = function () {
 	};
 
 	Shader.prototype.create = function() {
-
+		
 		var props = {};
-
-		var transparent = false;
 
 		if (this['transparency'] !== undefined && this['transparent'] !== undefined) {
 			// convert transparent color RBG to average value
 			var transparentColor = this['transparent'];
 			var transparencyLevel = 0;
 			
-			// Support both transparent modes
-			if(transparentColor.opaque == "A_ONE") {
-				transparencyLevel = (3 - this.transparent.color.r -
-					this.transparent.color.g - 
-					this.transparent.color.b) / 
-					3 * this.transparency;
-			}
-			else if(transparentColor.opaque == "RGB_ZERO") {
-				transparencyLevel = (this.transparent.color.r +
-					this.transparent.color.g + 
-					this.transparent.color.b) / 
-					3 * this.transparency;
-			}
-			
-			if (transparencyLevel > 0) {
-				transparent = true;
-				props[ 'transparent' ] = true;
-				props[ 'opacity' ] = 1 - transparencyLevel;
+			if ( this.transparency !== 0 ) {
 
+				// Determine transparency level based on opaque mode
+				if (transparentColor.opaque == "RGB_ONE") {
+					transparencyLevel = (3 - this.transparent.color.r -
+						this.transparent.color.g - 
+						this.transparent.color.b) / 
+						3;
+				} else if (transparentColor.opaque == "RGB_ZERO") {
+					transparencyLevel = (this.transparent.color.r +
+						this.transparent.color.g + 
+						this.transparent.color.b) / 
+						3;
+				} else if (transparentColor.opaque == "A_ONE") {
+					transparencyLevel = 1 - this.transparent.color.a;
+				} else { // A_ZERO (default in collada 1.5.0) - http://www.khronos.org/files/collada_1_5_release_notes.pdf (pg 16)
+					transparencyLevel = this.transparent.color.a;
+				}
+				
+				// Assumes all texures in the 'transparent' field will have an alpha channel
+				if ( transparentColor.isTexture() || transparencyLevel > 0 ) {
+					props[ 'transparent' ] = true;
+				} else {
+					props[ 'transparent' ] = false;
+				}
+				
+			} else {
+				props[ 'transparent' ] = false;
 			}
-
+			props[ 'opacity' ] = 1 - transparencyLevel;
 		}
-		
+
 		var keys = {
 			'diffuse':'map', 
 			'ambient':'lightMap' ,
@@ -3545,7 +3552,7 @@ THREE.ColladaLoader = function () {
 
 							}
 
-						} else if ( prop === 'diffuse' || !transparent ) {
+						} else {
 
 							if ( prop === 'emission' ) {
 
