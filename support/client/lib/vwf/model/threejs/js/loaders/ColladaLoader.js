@@ -992,7 +992,7 @@ THREE.ColladaLoader = function () {
 
 						}
 
-						material3js.opacity = !material3js.opacity ? 1 : material3js.opacity;
+						material3js.opacity = ( material3js.opacity === undefined ) ? 1 : material3js.opacity;
 						used_materials[ instance_material.symbol ] = num_materials;
 						used_materials_array.push( material3js );
 						first_material = material3js;
