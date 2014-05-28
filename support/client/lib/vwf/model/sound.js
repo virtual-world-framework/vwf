@@ -16,10 +16,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     // TODO: should these be stored in this.state so that the view can access them?
     var context;
     var soundData = {};
+    var logger;
 
-    return model.load( module, {
+    var driver = model.load( module, {
 
         initialize: function() {
+            // In case somebody tries to reference it before we get a chance to create it.
+            // (it's created in the view)
+            this.state.soundManager = {};
+
+            logger = this.logger;
+
             try {
                 // I quote: "For WebKit- and Blink-based browsers, you 
                 // currently need to use the webkit prefix, i.e. 
@@ -32,7 +39,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
             catch( e ) {
                 // alert( 'Web Audio API is not supported in this browser' );
-                this.logger.warnx( "initialize", "Web Audio API is not supported in this browser." );
+                logger.warnx( "initialize", "Web Audio API is not supported in this browser." );
             }
         },
 
@@ -45,31 +52,39 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 return undefined;
             }
 
+            // variables that we'll need in the switch statement below.  These all have function
+            // scope, might as well declare them here.
+            var soundDefinition, successCallback, failureCallback;
+            var soundName, soundNames, soundDatum, soundDefinition;
+            var instanceIDs, i;
+
             switch( methodName ) {
-                // arguments: soundName, soundDefinition, successCallback, failureCallback
+                // arguments: soundDefinition, successCallback, failureCallback
                 case "loadSound":
-                    if ( !params || ( params.length < 2 ) ) {
-                        this.logger.errorx( "loadSound", "The 'loadSound' method requires " +
-                                            "at least a name and definition for the sound." );
+                    soundDefinition = params[ 0 ];
+                    successCallback = params[ 1 ];
+                    failureCallback = params[ 2 ];
+
+                    if ( soundDefinition === undefined ) {
+                        logger.errorx( "loadSound", "The 'loadSound' method requires " +
+                                       "a definition for the sound." );
                         return undefined;
-                    } else if ( !soundDefinition.soundURL ) {
-                        this.logger.errorx( "loadSound", "The sound definition must have a " +
-                                            "'soundURL' property." );
-                        return undefined;
-                    } else if ( params.length > 4 ) {
-                        this.logger.warnx( "loadSound", "The 'loadSound' method takes at " +
-                                           "most 4 arguments." );
                     }
 
-                    var soundName = params[ 0 ];
-                    var soundDefinition = params[ 1 ];
-                    var successCallback = params[ 2 ];
-                    var failureCallback = params[ 3 ];
+                    soundName = soundDefinition.soundName;
+                    if ( soundName === undefined ) {
+                        logger.errorx( "loadSound", "The sound definition must contain soundName." );
+                        return undefined;
+                    }
 
-                    // check if we already have a sound with this name
                     if ( soundData[ soundName ] != undefined ) {
-                        this.logger.errorx( "loadSound", "Duplicate sound named '" + soundName + 
-                                            "'." );
+                        logger.errorx( "loadSound", "Duplicate sound named '" + soundName + "'." );
+                        return undefined;
+                    }
+
+                    if ( soundDefinition.soundURL === undefined ) {
+                        logger.errorx( "loadSound", "The sound definition for '" + soundName +
+                                       "' must contain soundURL." );
                         return undefined;
                     }
 
@@ -77,16 +92,16 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     // NOTE: the sound file is loaded into a buffer asynchronously, so the
                     // sound will not be ready to play immediately.  That's why we have the
                     // callbacks.
-                    soundData[ soundName ] = new SoundDatum( soundName, soundDefinition,
-                                                             successCallback, failureCallback );
+                    soundData[ soundName ] = new SoundDatum( soundDefinition, successCallback, 
+                                                             failureCallback );
 
                     return;
 
                 // arguments: <none>
                 case "clearAllSounds":
-                    var soundNames = Object.keys( soundData );
-                    for (var i = 0; i < soundNames.length; ++i ) {
-                        var soundName = soundNames[ i ];
+                    soundNames = Object.keys( soundData );
+                    for (i = 0; i < soundNames.length; ++i ) {
+                        soundName = soundNames[ i ];
                         this.state.soundManager.stopAllSoundInstances( soundName );
                         delete soundData[ soundName ];
                     }
@@ -95,30 +110,30 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 // arguments: soundName 
                 // returns: true if sound is done loading and is playable
                 case "isReady":
-                    var soundDatum = getSoundDatum( params );
+                    soundDatum = getSoundDatum( params[ 0 ] );
                     return soundDatum !== undefined ? soundDatum.isReady : false;
 
                 // arguments: soundName 
                 // returns: soundInstanceID, or -1 on failure
                 case "playSound":
-                    var soundDatum = getSoundDatum( params );
+                    soundDatum = getSoundDatum( params[ 0 ] );
                     return soundDatum ? soundDatum.playSound() 
                                       : { soundName: params[ 0 ], instanceID: -1 };
 
                 // arguments: soundName
                 // returns: true if sound is currently playing
                 case "isSoundPlaying":
-                    var soundDatum = getSoundDatum( params );
+                    soundDatum = getSoundDatum( params[ 0 ] );
                     return soundDatum ? soundDatum.playingInstances.length > 0 : false;
 
                 // arguments: soundInstanceID
                 // returns: true if sound is currently playing
                 case "isInstancePlaying":
-                    return getSoundInstance( params ) !== undefined;
+                    return getSoundInstance( params[ 0 ] ) !== undefined;
 
                 // arguments: soundInstanceID, volume, fadeTime, fadeMethod
                 case "setVolume":
-                    var soundInstance = getSoundInstance( params );
+                    soundInstance = getSoundInstance( params[ 0 ] );
                     if ( soundInstance ) {
                         volume = params[ 1 ];
                         fadeTime = params[ 2 ];
@@ -130,7 +145,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 // arguments: soundInstanceID
                 case "stopSoundInstance":
-                    var soundInstance = getSoundInstance( params );
+                    soundInstance = getSoundInstance( params[ 0 ] );
                     if (soundInstance) {
                         soundInstance.soundDatum.stopInstance( params[ 0 ].instanceID );
                     }
@@ -138,10 +153,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 // arguments: soundName
                 case "stopAllSoundInstances":
-                    var soundDatum = getSoundDatum( params );
+                    soundDatum = getSoundDatum( params[ 0 ] );
                     if ( soundDatum ) {
-                        var instanceIDs = Object.keys( soundDatum.playingInstances );
-                        for ( var i = 0; i < instanceIDs.length; ++i ) {
+                        instanceIDs = Object.keys( soundDatum.playingInstances );
+                        for ( i = 0; i < instanceIDs.length; ++i ) {
                             soundDatum.stopInstance( instanceIDs[ i ] );
                         }
                     }
@@ -154,8 +169,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     } );
 
-    SoundDatum = function( soundName, soundDefinition, successCallback, failureCallback ) {
-        this.initialize( soundName, soundDefinition, successCallback, failureCallback );
+    function SoundDatum( soundDefinition, successCallback, failureCallback ) {
+        this.initialize( soundDefinition, successCallback, failureCallback );
         return this;
     }
 
@@ -163,10 +178,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         constructor: SoundDatum,
 
         // the name
-        name: undefined,
+        name: "",
 
         // the actual sound
-        buffer: undefined,
+        buffer: null,
 
         // a hashtable of sound instances
         playingInstances: null,
@@ -180,41 +195,45 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // a counter for creating instance IDs
         instanceIDCounter: 0,
 
-        initialize = function( soundName, soundDefinition, successCallback, failureCallback ) {
-            this.name = soundName;
+        initialize: function( soundDefinition, successCallback, failureCallback ) {
+            this.name = soundDefinition.soundName;
             this.playingInstances = {};
 
             // yeah, yeah, this is redundant.  So sue me.  I'm paranoid.
             this.isLoaded = false;
 
-            if (soundDefinition.isLooping !== undefined) {
+            if ( soundDefinition.isLooping !== undefined ) {
                 this.isLooping = soundDefinition.isLooping;
             }
 
-            if (soundDefinition.allowMultiplay !== undefined) {
+            if ( soundDefinition.allowMultiplay !== undefined ) {
                 this.allowMultiplay = soundDefinition.allowMultiplay;
             }
 
-            if (soundDefinition.volumeAdjustment !== undefined) {
+            if ( soundDefinition.volumeAdjustment !== undefined ) {
                 this.volumeAdjustment = soundDefinition.volumeAdjustment;
             }
-
 
             // Create & send the request to load the sound asynchronously
             var request = new XMLHttpRequest();
             request.open( 'GET', soundDefinition.soundURL, true );
             request.responseType = 'arraybuffer';
+            self = this;
             request.onload = function() {
                 context.decodeAudioData(
                     request.response, 
                     function( buffer ) {
-                        soundData[ soundName ].buffer = buffer;
-                        soundData[ soundName ].isLoaded = true;
+                        self.buffer = buffer;
+                        self.isLoaded = true;
 
                         successCallback && successCallback();
                     }, 
                     function() {
-                        delete soundData[ soundName ];
+                        logger.warnx( "initialize", "Failed to load sound: '" + 
+                                      name + "." );
+
+                        delete soundData[ self.name ];
+
                         failureCallback && failureCallback();
                     }
                 );
@@ -222,24 +241,30 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             request.send();
         },
 
-        playSound = function() {
-            if ( !allowMultiplay && ( playingInstances.length > 0 ) ) {
-                this.logger.warnx( "playSound", "Sound '" + name "'is already " +
-                                   "playing, and doesn't allow multiplay." );
+        playSound: function() {
+            if ( !this.isLoaded || !this.buffer ) {
+                logger.errorx( "playSound", "Sound '" + name + "' hasn't finished " +
+                               "loading, or loaded improperly." );
+                return { soundName: this.name, instanceID: -1 };
+            }
+            
+            if ( !this.allowMultiplay && ( this.playingInstances.length > 0 ) ) {
+                logger.warnx( "playSound", "Sound '" + name + "'is already " +
+                              "playing, and doesn't allow multiplay." );
                 return { soundName: this.name, instanceID: -1 };
             }
 
             var id = this.instanceIDCounter;
             ++this.instanceIDCounter;
 
-            this.playingInstances[ id ] = new PlayingInstance( this, function() {
-                delete playingInstances[ instanceID ];
-            } );
+
+
+            this.playingInstances[ id ] = new PlayingInstance( this, id );
 
             return { soundName: this.name, instanceID: id };
         },
 
-        stopInstance = function( instanceID ) {
+        stopInstance: function( instanceID ) {
             var soundInstance = this.playingInstances[ instanceID ];
             if ( soundInstance ) {
                 soundInstance.sourceNode.stop();
@@ -248,8 +273,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         },
     }
 
-    PlayingInstance = function( soundDatum, whenDoneCallback ) {
-        this.initialize( soundDatum, whenDoneCallback );
+    function PlayingInstance( soundDatum, id ) {
+        this.initialize( soundDatum, id );
         return this;
     }
 
@@ -263,7 +288,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         sourceNode: undefined,
         gainNode: undefined,
 
-        initialize: function( soundDatum, whenDoneCallback ) {
+        initialize: function( soundDatum, id ) {
             // NOTE: from http://www.html5rocks.com/en/tutorials/webaudio/intro/:
             //
             // An important point to note is that on iOS, Apple currently mutes all sound 
@@ -283,21 +308,21 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.gainNode = context.createGain();
             this.gainNode.gain.value = this.soundDatum.volumeAdjustment;
 
-            this.sourceNode.connect( gainNode );
+            this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );
 
             this.sourceNode.start( 0 );
 
-            // TODO: setup the callback for when we're done
+            var soundDatum = this.soundDatum;
             this.sourceNode.onended = function() {
-                whenDoneCallback && whenDoneCallback();
+                delete soundDatum.playingInstances[ id ];
             }
         },
 
         setVolume: function( volume, fadeTime, fadeMethod ) {
             if ( !volume ) {
-                this.logger.errorx( "setVolume", "The 'setVolume' method " +
-                                    "requires a volume." );
+                logger.errorx( "setVolume", "The 'setVolume' method " +
+                               "requires a volume." );
                 return;
             }
 
@@ -312,49 +337,55 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 switch( fadeMethod ) {
                     case "linear":
-                        gainNode.linearRampToValueAtTime( targetVolume, endTime );
+                        gainNode.gain.linearRampToValueAtTime( targetVolume, endTime );
                         break;
                     case "exponential":
                         gainNode.gain.exponentialRampToValueAtTime( targetVolume, endTime );
                         break;
                     default:
-                        this.logger.errorx( "setVolume", "Unknonwn fade method: '" +
-                                            fadeMethod + "'.  Using a linear fade.");
-                        gainNode.linearRampToValueAtTime( targetVolume, endTime );
+                        logger.errorx( "setVolume", "Unknonwn fade method: '" +
+                                       fadeMethod + "'.  Using a linear fade.");
+                        gainNode.gain.linearRampToValueAtTime( targetVolume, endTime );
                 }
             }
         },
     }
 
-    function getSoundDatum( params ) {
-        if ( !params || params.length < 1 ) {
-            this.logger.errorx( "getSoundDatum", "The 'getSoundDatum' method " +
-                                "requires the sound name." );
+    function getSoundDatum( soundName ) {
+        if ( soundName === undefined ) {
+            logger.errorx( "getSoundDatum", "The 'getSoundDatum' method " +
+                           "requires the sound name." );
             return undefined;
         }
 
-        return soundData[ params[ 0 ] ];
+        var soundDatum = soundData[ soundName ];
+        if ( soundDatum === undefined ) {
+            logger.errorx( "getSoundDatum", "Sound '" + soundName + "' not found.");
+            return undefined;
+        }
+
+        return soundDatum;
     }
 
-    function GetSoundInstance( params ) {
-        if ( !params || params.length < 1 ) {
-            this.logger.errorx( "GetSoundInstance", "The 'GetSoundInstance' method " +
-                                "requires the instance ID." );
+    function getSoundInstance( instanceID ) {
+        if ( instanceID === undefined ) {
+            logger.errorx( "GetSoundInstance", "The 'GetSoundInstance' method " +
+                           "requires the instance ID." );
             return undefined;
         }
 
-        var instanceID = params[ 0 ];
-
-        if ( ( instanceID.soundName == undefined ) || 
-             ( instanceID.instanceID == undefined ) ) {
-            this.logger.errorx( "GetSoundInstance", "The instance id must contain " +
-                                "soundName and the instanceID values");
+        if ( ( instanceID.soundName === undefined ) || 
+             ( instanceID.instanceID === undefined ) ) {
+            logger.errorx( "GetSoundInstance", "The instance id must contain " +
+                           "soundName and the instanceID values");
             return undefined;
         }
 
-        var soundDatum = soundData[ instanceID.soundName ];
+        var soundDatum = getSoundDatum( instanceID.soundName );
         return soundDatum ? soundDatum.playingInstances[ instanceID.instanceID ] : undefined;
     }
+
+    return driver;
 
 } );
 
