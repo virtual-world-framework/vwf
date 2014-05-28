@@ -339,7 +339,8 @@ define( [ "module", "vwf/model",
                     blocklyNode = this.state.executingBlocks[ nodeID ];
                     var executeNextLine = false;
 
-                    if ( blocklyNode.interpreter === undefined ) {
+                    if ( blocklyNode.interpreter === undefined ||
+                         blocklyNode.interpreterStatus === "completed" ) {
                         blocklyNode.interpreter = createInterpreter( acorn, blocklyNode.code );
                         blocklyNode.interpreterStatus = "created";
                         blocklyNode.lastLineExeTime = vwfTime;
@@ -429,7 +430,7 @@ define( [ "module", "vwf/model",
                 if ( node.interpreterStatus === "started" ) {
                     self.kernel.setProperty( node.ID, "blockly_executing", false );
                     self.kernel.fireEvent( node.ID, "blocklyStopped", [ true ] );
-                    node.interpreterStatus = "created"; 
+                    node.interpreterStatus = "completed"; 
                 }               
             }
 
