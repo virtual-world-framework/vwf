@@ -204,6 +204,15 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                             this.logger.warnx( "Blockly not initilized unable to set the toolbox: " + propertyValue );
                         }
                         break;
+
+                    case "defaultXml":
+                        if ( Blockly && Blockly.mainWorkspace ) {
+                            BlocklyApps.loadBlocks( propertyValue );
+                        } else {
+                            this.logger.warnx( "Blockly not initilized unable to load default xml: " + propertyValue );
+                        }
+                        break;
+
                 }
 
             } 

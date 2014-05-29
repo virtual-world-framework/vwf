@@ -22,6 +22,7 @@ extends:
 properties:
   blocklyUiNodeID:
   toolbox:
+  defaultXml:
 methods:
   startAllExecution:
   stopAllExecution:
