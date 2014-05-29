@@ -152,36 +152,56 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             var node = this.state.nodes[ nodeID ];
 
             //this.logger.infox( "S === satProperty ", nodeID, propertyName, propertyValue );
+            if ( propertyValue === undefined ) {
+                return;
+            }
 
             if ( nodeID == this.kernel.application() ) {
                 
-                if ( propertyName === "blocklyUiNodeID" ) {
-                    
-                    if ( propertyValue !== undefined && this.state.nodes[ propertyValue ] !== undefined ) {
-                        var show = true;
-                        node = this.state.nodes[ propertyValue ];
-                        if ( this.state.blockly.node !== undefined ) {
-                            getBlockXML( this.state.blockly.node );
-                            setBlocklyUIVisibility( this.state.blockly.node, false ); 
-                            show = ( this.state.blockly.node.ID !== propertyValue );
-                            this.state.blockly.node = undefined;                           
-                        } 
-                        if ( show ) {
-                            this.state.blockly.node = node;
-                            setBlockXML( node );
-                            setBlocklyUIVisibility( node, true );
-                        }                        
-                    } else {
-                        if ( this.state.blockly.node !== undefined ) {
-                            getBlockXML( this.state.blockly.node );
-                            setBlocklyUIVisibility( this.state.blockly.node, false );
-                            this.state.blockly.node = undefined;                            
-                        } 
-                    }
+                switch ( propertyName ) {
+                    case "blocklyUiNodeID":
+                        if ( this.state.nodes[ propertyValue ] !== undefined ) {
+                            var show = true;
+                            node = this.state.nodes[ propertyValue ];
+                            if ( this.state.blockly.node !== undefined ) {
+                                getBlockXML( this.state.blockly.node );
+                                setBlocklyUIVisibility( this.state.blockly.node, false ); 
+                                show = ( this.state.blockly.node.ID !== propertyValue );
+                                this.state.blockly.node = undefined;                           
+                            } 
+                            if ( show ) {
+                                this.state.blockly.node = node;
+                                setBlockXML( node );
+                                setBlocklyUIVisibility( node, true );
+                            }                        
+                        } else {
+                            if ( this.state.blockly.node !== undefined ) {
+                                getBlockXML( this.state.blockly.node );
+                                setBlocklyUIVisibility( this.state.blockly.node, false );
+                                this.state.blockly.node = undefined;                            
+                            } 
+                        }
+                        break;
+
+                    case "toolbox":
+                        // check the 'Changing the Toolbox' section at
+                        // https://code.google.com/p/blockly/wiki/Toolbox 
+                        // for more information on this function call
+                        debugger;
+                        if ( propertyValue.indexOf( '<xml' ) !== -1 ){
+                            Blockly.updateToolbox( propertyValue );
+                        } else {
+                            var element = document.getElementById( propertyValue );
+                            if ( element ) {
+                                Blockly.updateToolbox( element );    
+                            } else {
+                                this.logger.warnx( "Unable to load Blockly toolbox: " + propertyValue );
+                            }
+                        }
+                        break;
                 }
 
             } 
-
         
         },
 
