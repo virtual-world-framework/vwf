@@ -86,10 +86,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
             if ( childID == this.kernel.application() ) {
                 
+                self.kernel.setProperty( childID, "toolbox", self.options.toolbox );
                 Blockly.inject( document.getElementById( self.options.divName ), { 
                     path: this.options.blocklyPath,
                     toolbox: document.getElementById( self.options.toolbox ) 
                 } ); 
+
 
                 Blockly.addChangeListener( function( event ) {
                     
@@ -187,16 +189,19 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         // check the 'Changing the Toolbox' section at
                         // https://code.google.com/p/blockly/wiki/Toolbox 
                         // for more information on this function call
-                        debugger;
-                        if ( propertyValue.indexOf( '<xml' ) !== -1 ){
-                            Blockly.updateToolbox( propertyValue );
-                        } else {
-                            var element = document.getElementById( propertyValue );
-                            if ( element ) {
-                                Blockly.updateToolbox( element );    
+                        if ( Blockly && Blockly.mainWorkspace ) {
+                            if ( propertyValue.indexOf( '<xml' ) !== -1 ){
+                                Blockly.updateToolbox( propertyValue );
                             } else {
-                                this.logger.warnx( "Unable to load Blockly toolbox: " + propertyValue );
+                                var element = document.getElementById( propertyValue );
+                                if ( element ) {
+                                    Blockly.updateToolbox( element );    
+                                } else {
+                                    this.logger.warnx( "Unable to load Blockly toolbox: " + propertyValue );
+                                }
                             }
+                        } else {
+                            this.logger.warnx( "Blockly not initilized unable to set the toolbox: " + propertyValue );
                         }
                         break;
                 }
