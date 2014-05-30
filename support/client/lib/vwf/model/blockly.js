@@ -236,13 +236,13 @@ define( [ "module", "vwf/model",
                                 getJavaScript( node );
                                 this.state.executingBlocks[ nodeID ] = node;
                             }
-                            setToolboxEnable( false );
+                            setFlyoutEnable( false );
                         } else {
                             delete this.state.executingBlocks[ nodeID ];
                             var count = Object.keys( this.state.executingBlocks ).length;
                             if ( count === 0 ) {
                                 this.state.executingBlocks = undefined;
-                                setToolboxEnable( true );    
+                                setFlyoutEnable( true );    
                             }
                         }
                         break;
@@ -418,7 +418,7 @@ define( [ "module", "vwf/model",
         node.code = Blockly.JavaScript.workspaceToCode();
     }
 
-    function setToolboxEnable( enable ) {
+    function setFlyoutEnable( enable ) {
         debugger;
         var blocks = Blockly.Toolbox.flyout_.workspace_.getTopBlocks( false );
         for ( var i = 0, block; block = blocks[ i ]; i++ ) {
