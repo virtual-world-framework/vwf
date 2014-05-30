@@ -213,6 +213,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         }
                         break;
 
+                    case "autoClose":
+                        if ( Blockly && Blockly.Flyout ){
+                            Blockly.Flyout.autoClose = Boolean( propertyValue );                       
+                        }
+                        break;
+
                 }
 
             } 

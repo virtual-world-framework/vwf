@@ -23,6 +23,7 @@ properties:
   blocklyUiNodeID:
   toolbox:
   defaultXml:
+  autoClose:
 methods:
   startAllExecution:
   stopAllExecution:
