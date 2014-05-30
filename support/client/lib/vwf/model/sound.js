@@ -100,7 +100,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 // arguments: <none>
                 case "clearAllSounds":
                     soundNames = Object.keys( soundData );
-                    for (i = 0; i < soundNames.length; ++i ) {
+                    for ( i = 0; i < soundNames.length; ++i ) {
                         soundName = soundNames[ i ];
                         this.state.soundManager.stopAllSoundInstances( soundName );
                         delete soundData[ soundName ];
@@ -111,7 +111,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 // returns: true if sound is done loading and is playable
                 case "isReady":
                     soundDatum = getSoundDatum( params[ 0 ] );
-                    return soundDatum !== undefined ? soundDatum.isReady : false;
+                    return soundDatum !== undefined ? !!soundDatum.buffer : false;
 
                 // arguments: soundName, exitCallback (which is called when the sound stops) 
                 // returns: an instance handle, which is an object: 
@@ -149,8 +149,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 // arguments: instanceHandle
                 case "stopSoundInstance":
                     soundInstance = getSoundInstance( params[ 0 ] );
-                    if (soundInstance) {
-                        soundInstance.soundDatum.stopInstance( params[ 0 ].instanceID );
+                    if ( soundInstance ) {
+                        soundInstance.soundDatum.stopInstance( soundInstance.instanceID );
                     }
                     return;
 
@@ -190,7 +190,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         playingInstances: null,
 
         // control parameters
-        isLoaded: false,
         isLooping: false,
         allowMultiplay: false,
         volumeAdjustment: 1.0,
@@ -201,9 +200,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         initialize: function( soundDefinition, successCallback, failureCallback ) {
             this.name = soundDefinition.soundName;
             this.playingInstances = {};
-
-            // yeah, yeah, this is redundant.  So sue me.  I'm paranoid.
-            this.isLoaded = false;
 
             if ( soundDefinition.isLooping !== undefined ) {
                 this.isLooping = soundDefinition.isLooping;
@@ -227,7 +223,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     request.response, 
                     function( buffer ) {
                         self.buffer = buffer;
-                        self.isLoaded = true;
 
                         successCallback && successCallback();
                     }, 
@@ -245,7 +240,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         },
 
         playSound: function( exitCallback ) {
-            if ( !this.isLoaded || !this.buffer ) {
+            if ( !this.buffer ) {
                 logger.errorx( "playSound", "Sound '" + name + "' hasn't finished " +
                                "loading, or loaded improperly." );
                 return { soundName: this.name, instanceID: -1 };
