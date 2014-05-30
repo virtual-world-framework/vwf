@@ -11,7 +11,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                    childID ) ) {
 
                 // If this is the prototype, exit early - we want to register the actual sound manager.
-                if (nodeID == 0 && ( childID != this.kernel.application() ) ) {
+                if (nodeID === 0 && ( childID !== this.kernel.application() ) ) {
                     return undefined;
                 }
 

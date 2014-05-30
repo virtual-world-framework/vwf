@@ -54,8 +54,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             // variables that we'll need in the switch statement below.  These all have function
             // scope, might as well declare them here.
-            var soundDefinition, successCallback, failureCallback;
-            var soundName, soundNames, soundDatum, soundDefinition;
+            var soundDefinition, successCallback, failureCallback, exitCallback;
+            var soundName, soundNames, soundDatum, soundDefinition, soundInstance;
             var instanceIDs, i;
 
             switch( methodName ) {
@@ -113,11 +113,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     soundDatum = getSoundDatum( params[ 0 ] );
                     return soundDatum !== undefined ? soundDatum.isReady : false;
 
-                // arguments: soundName 
-                // returns: soundInstanceID, or -1 on failure
+                // arguments: soundName, exitCallback (which is called when the sound stops) 
+                // returns: an instance handle, which is an object: 
+                //   { soundName: value, instanceID: value }
+                //   instanceID is -1 on failure  
                 case "playSound":
                     soundDatum = getSoundDatum( params[ 0 ] );
-                    return soundDatum ? soundDatum.playSound() 
+                    exitCallback = params[ 1 ];
+                    return soundDatum ? soundDatum.playSound( exitCallback ) 
                                       : { soundName: params[ 0 ], instanceID: -1 };
 
                 // arguments: soundName
@@ -126,12 +129,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     soundDatum = getSoundDatum( params[ 0 ] );
                     return soundDatum ? soundDatum.playingInstances.length > 0 : false;
 
-                // arguments: soundInstanceID
+                // arguments: instanceHandle
                 // returns: true if sound is currently playing
                 case "isInstancePlaying":
                     return getSoundInstance( params[ 0 ] ) !== undefined;
 
-                // arguments: soundInstanceID, volume, fadeTime, fadeMethod
+                // arguments: instanceHandle, volume, fadeTime, fadeMethod
                 case "setVolume":
                     soundInstance = getSoundInstance( params[ 0 ] );
                     if ( soundInstance ) {
@@ -143,7 +146,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     }
                     return;
 
-                // arguments: soundInstanceID
+                // arguments: instanceHandle
                 case "stopSoundInstance":
                     soundInstance = getSoundInstance( params[ 0 ] );
                     if (soundInstance) {
@@ -241,13 +244,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             request.send();
         },
 
-        playSound: function() {
+        playSound: function( exitCallback ) {
             if ( !this.isLoaded || !this.buffer ) {
                 logger.errorx( "playSound", "Sound '" + name + "' hasn't finished " +
                                "loading, or loaded improperly." );
                 return { soundName: this.name, instanceID: -1 };
             }
-            
+
             if ( !this.allowMultiplay && ( this.playingInstances.length > 0 ) ) {
                 logger.warnx( "playSound", "Sound '" + name + "'is already " +
                               "playing, and doesn't allow multiplay." );
@@ -257,9 +260,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var id = this.instanceIDCounter;
             ++this.instanceIDCounter;
 
-
-
-            this.playingInstances[ id ] = new PlayingInstance( this, id );
+            this.playingInstances[ id ] = new PlayingInstance( this, id, exitCallback );
 
             return { soundName: this.name, instanceID: id };
         },
@@ -268,13 +269,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var soundInstance = this.playingInstances[ instanceID ];
             if ( soundInstance ) {
                 soundInstance.sourceNode.stop();
-                delete playingInstances[ instanceID ];
             }
         },
     }
 
-    function PlayingInstance( soundDatum, id ) {
-        this.initialize( soundDatum, id );
+    function PlayingInstance( soundDatum, id, exitCallback ) {
+        this.initialize( soundDatum, id, exitCallback );
         return this;
     }
 
@@ -288,7 +288,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         sourceNode: undefined,
         gainNode: undefined,
 
-        initialize: function( soundDatum, id ) {
+        initialize: function( soundDatum, id, exitCallback ) {
             // NOTE: from http://www.html5rocks.com/en/tutorials/webaudio/intro/:
             //
             // An important point to note is that on iOS, Apple currently mutes all sound 
@@ -316,6 +316,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var soundDatum = this.soundDatum;
             this.sourceNode.onended = function() {
                 delete soundDatum.playingInstances[ id ];
+                exitCallback && exitCallback();
             }
         },
 
@@ -367,22 +368,22 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         return soundDatum;
     }
 
-    function getSoundInstance( instanceID ) {
-        if ( instanceID === undefined ) {
+    function getSoundInstance( instanceHandle ) {
+        if ( instanceHandle === undefined ) {
             logger.errorx( "GetSoundInstance", "The 'GetSoundInstance' method " +
                            "requires the instance ID." );
             return undefined;
         }
 
-        if ( ( instanceID.soundName === undefined ) || 
-             ( instanceID.instanceID === undefined ) ) {
-            logger.errorx( "GetSoundInstance", "The instance id must contain " +
+        if ( ( instanceHandle.soundName === undefined ) || 
+             ( instanceHandle.instanceID === undefined ) ) {
+            logger.errorx( "GetSoundInstance", "The instance handle must contain " +
                            "soundName and the instanceID values");
             return undefined;
         }
 
-        var soundDatum = getSoundDatum( instanceID.soundName );
-        return soundDatum ? soundDatum.playingInstances[ instanceID.instanceID ] : undefined;
+        var soundDatum = getSoundDatum( instanceHandle.soundName );
+        return soundDatum ? soundDatum.playingInstances[ instanceHandle.instanceID ] : undefined;
     }
 
     return driver;
