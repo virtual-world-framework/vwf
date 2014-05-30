@@ -56,7 +56,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             // scope, might as well declare them here.
             var soundDefinition, successCallback, failureCallback, exitCallback;
             var soundName, soundNames, soundDatum, soundDefinition, soundInstance;
-            var instanceIDs, i;
+            var instanceIDs, i, volume, fadeTime, fadeMethod;
 
             switch( methodName ) {
                 // arguments: soundDefinition, successCallback, failureCallback
@@ -370,14 +370,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function getSoundInstance( instanceHandle ) {
         if ( instanceHandle === undefined ) {
-            logger.errorx( "GetSoundInstance", "The 'GetSoundInstance' method " +
+            logger.errorx( "getSoundInstance", "The 'GetSoundInstance' method " +
                            "requires the instance ID." );
             return undefined;
         }
 
         if ( ( instanceHandle.soundName === undefined ) || 
              ( instanceHandle.instanceID === undefined ) ) {
-            logger.errorx( "GetSoundInstance", "The instance handle must contain " +
+            logger.errorx( "getSoundInstance", "The instance handle must contain " +
                            "soundName and the instanceID values");
             return undefined;
         }
