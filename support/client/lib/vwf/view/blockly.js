@@ -161,7 +161,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             if ( nodeID == this.kernel.application() ) {
                 
                 switch ( propertyName ) {
-                    case "blocklyUiNodeID":
+                    case "blockly_activeNodeID":
                         if ( this.state.nodes[ propertyValue ] !== undefined ) {
                             var show = true;
                             node = this.state.nodes[ propertyValue ];
@@ -185,7 +185,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         }
                         break;
 
-                    case "toolbox":
+                    case "blockly_toolbox":
                         // check the 'Changing the Toolbox' section at
                         // https://code.google.com/p/blockly/wiki/Toolbox 
                         // for more information on this function call
@@ -205,7 +205,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         }
                         break;
 
-                    case "defaultXml":
+                    case "blockly_defaultXml":
                         if ( Blockly && Blockly.mainWorkspace ) {
                             BlocklyApps.loadBlocks( propertyValue );
                         } else {
@@ -213,7 +213,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         }
                         break;
 
-                    case "autoClose":
+                    case "blockly_autoClose":
                         if ( Blockly && Blockly.Flyout ){
                             Blockly.Flyout.autoClose = Boolean( propertyValue );                       
                         }
