@@ -328,6 +328,7 @@
                 { library: "vwf/model/scenejs", active: false },
                 { library: "vwf/model/blockly", linkedLibraries: [ "vwf/model/blockly/JS-Interpreter/interpreter.js" ],  active: false },
                 { library: "vwf/model/graphtool", active: true },
+                { library: "vwf/model/sound", active: false },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
                 { library: "vwf/kernel/view", active: true },
@@ -338,6 +339,7 @@
                 { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
                 { library: "vwf/view/blockly", active: false },
+                { library: "vwf/view/sound", active: false },
                 { library: "vwf/view/cesium", active: false },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
@@ -360,6 +362,7 @@
                     { library: "vwf/model/cesium", active: false },
                     { library: "vwf/model/blockly", active: false },
                     { library: "vwf/model/graphtool", active: true },
+                    { library: "vwf/model/sound", active: false },
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [
@@ -371,6 +374,7 @@
                     { library: "vwf/view/google-earth", active: false },
                     { library: "vwf/view/cesium", active: false },
                     { library: "vwf/view/blockly", active: false },
+                    { library: "vwf/view/sound", active: false },
                     { library: "vwf/view/webrtc", active: false}
                 ]
             };

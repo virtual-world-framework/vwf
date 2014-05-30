@@ -1,0 +1,13 @@
+--- 
+extends: http://vwf.example.com/node.vwf
+methods:
+  loadSound:
+  clearAllSounds:
+  isReady:
+  playSound:
+  isSoundPlaying:
+  isInstancePlaying:
+  setVolume:
+  stopSoundInstance:
+  stopAllSoundInstances:
+
