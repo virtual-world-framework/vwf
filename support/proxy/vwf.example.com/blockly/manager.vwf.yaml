@@ -20,8 +20,10 @@
 extends:
   http://vwf.example.com/node.vwf
 properties:
-  blocklyUiNodeID:
-  toolbox:
+  blockly_activeNodeID:
+  blockly_toolbox:
+  blockly_defaultXml:
+  blockly_autoClose:
 methods:
   startAllExecution:
   stopAllExecution:
