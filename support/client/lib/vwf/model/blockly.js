@@ -419,11 +419,12 @@ define( [ "module", "vwf/model",
     }
 
     function setFlyoutEnable( enable ) {
-        debugger;
         var blocks = Blockly.Toolbox.flyout_.workspace_.getTopBlocks( false );
-        for ( var i = 0, block; block = blocks[ i ]; i++ ) {
-            block.setDisabled( !enable );
-        }    
+        if ( blocks ) {
+            for ( var i = 0; i < blocks.length; i++ ) {
+                blocks[ i ].setDisabled( !enable );
+            }    
+        }
     }
 
     function nextStep( node ) {
