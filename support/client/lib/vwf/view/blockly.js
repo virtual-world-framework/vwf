@@ -46,6 +46,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                 };
             }
 
+            this.currentProperties = {
+                "blockly_toolbox": undefined,
+                "blockly_autoClose": undefined
+            };
+
             this.options = ( options !== undefined ? options : {} );
 
             this.options.blocklyPath = options.blocklyPath ? options.blocklyPath : './blockly/';
@@ -86,10 +91,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
             if ( childID == this.kernel.application() ) {
                 
+                self.kernel.setProperty( childID, "toolbox", self.options.toolbox );
                 Blockly.inject( document.getElementById( self.options.divName ), { 
                     path: this.options.blocklyPath,
                     toolbox: document.getElementById( self.options.toolbox ) 
                 } ); 
+
 
                 Blockly.addChangeListener( function( event ) {
                     
@@ -152,36 +159,77 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             var node = this.state.nodes[ nodeID ];
 
             //this.logger.infox( "S === satProperty ", nodeID, propertyName, propertyValue );
+            if ( propertyValue === undefined ) {
+                return;
+            }
 
             if ( nodeID == this.kernel.application() ) {
                 
-                if ( propertyName === "blocklyUiNodeID" ) {
-                    
-                    if ( propertyValue !== undefined && this.state.nodes[ propertyValue ] !== undefined ) {
-                        var show = true;
-                        node = this.state.nodes[ propertyValue ];
-                        if ( this.state.blockly.node !== undefined ) {
-                            getBlockXML( this.state.blockly.node );
-                            setBlocklyUIVisibility( this.state.blockly.node, false ); 
-                            show = ( this.state.blockly.node.ID !== propertyValue );
-                            this.state.blockly.node = undefined;                           
-                        } 
-                        if ( show ) {
-                            this.state.blockly.node = node;
-                            setBlockXML( node );
-                            setBlocklyUIVisibility( node, true );
-                        }                        
-                    } else {
-                        if ( this.state.blockly.node !== undefined ) {
-                            getBlockXML( this.state.blockly.node );
-                            setBlocklyUIVisibility( this.state.blockly.node, false );
-                            this.state.blockly.node = undefined;                            
-                        } 
-                    }
+                switch ( propertyName ) {
+                    case "blockly_activeNodeID":
+                        if ( this.state.nodes[ propertyValue ] !== undefined ) {
+                            var show = true;
+                            node = this.state.nodes[ propertyValue ];
+                            if ( this.state.blockly.node !== undefined ) {
+                                getBlockXML( this.state.blockly.node );
+                                setBlocklyUIVisibility( this.state.blockly.node, false ); 
+                                show = ( this.state.blockly.node.ID !== propertyValue );
+                                this.state.blockly.node = undefined;                           
+                            } 
+                            if ( show ) {
+                                this.state.blockly.node = node;
+                                setBlockXML( node );
+                                setBlocklyUIVisibility( node, true );
+                            }                        
+                        } else {
+                            if ( this.state.blockly.node !== undefined ) {
+                                getBlockXML( this.state.blockly.node );
+                                setBlocklyUIVisibility( this.state.blockly.node, false );
+                                this.state.blockly.node = undefined;                            
+                            } 
+                        }
+                        break;
+
+                    case "blockly_toolbox":
+                        // check the 'Changing the Toolbox' section at
+                        // https://code.google.com/p/blockly/wiki/Toolbox 
+                        // for more information on this function call
+                        if ( Blockly && Blockly.mainWorkspace ) {
+                            if ( propertyValue.indexOf( '<xml' ) !== -1 ){
+                                Blockly.updateToolbox( propertyValue );
+                            } else {
+                                var element = document.getElementById( propertyValue );
+                                if ( element ) {
+                                    Blockly.updateToolbox( element );    
+                                } else {
+                                    this.logger.warnx( "Unable to load Blockly toolbox: " + propertyValue );
+                                }
+                            }
+                        } else {
+                            this.currentProperties.blockly_toolbox = propertyValue;
+                            this.logger.warnx( "Blockly not initilized unable to set the toolbox: " + propertyValue );
+                        }
+                        break;
+
+                    case "blockly_defaultXml":
+                        if ( Blockly && Blockly.mainWorkspace ) {
+                            BlocklyApps.loadBlocks( propertyValue );
+                        } else {
+                            this.logger.warnx( "Blockly not initilized unable to load default xml: " + propertyValue );
+                        }
+                        break;
+
+                    case "blockly_autoClose":
+                        if ( Blockly && Blockly.Toolbox && Blockly.Toolbox.flyout_ ){
+                            Blockly.Toolbox.flyout_.autoClose = Boolean( propertyValue );                       
+                        } else {
+                            this.currentProperties.blockly_autoClose = Boolean( propertyValue );
+                        }
+                        break;
+
                 }
 
             } 
-
         
         },
 
@@ -247,6 +295,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
     function setBlocklyUIVisibility( node, show ) {
         var div = document.getElementById( self.options.divParent ); {
             div.style.visibility = show ? 'visible' : 'hidden';
+        }
+        if ( self.currentProperties !== undefined ) {
+            for ( var prop in self.currentProperties ) {
+                if ( self.currentProperties[ prop ] !== undefined ) {
+                    self.satProperty( self.kernel.application(), prop, self.currentProperties[ prop ] );
+                }
+            }
+            self.currentProperties = undefined;
         }
         self.kernel.fireEvent( node.ID, "blocklyVisibleChanged", [ show ] );
     }
