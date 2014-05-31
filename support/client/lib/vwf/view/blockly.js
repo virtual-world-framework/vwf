@@ -46,6 +46,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                 };
             }
 
+            this.currentProperties = {
+                "blockly_toolbox": undefined,
+                "blockly_autoClose": undefined
+            };
+
             this.options = ( options !== undefined ? options : {} );
 
             this.options.blocklyPath = options.blocklyPath ? options.blocklyPath : './blockly/';
@@ -161,7 +166,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             if ( nodeID == this.kernel.application() ) {
                 
                 switch ( propertyName ) {
-                    case "blocklyUiNodeID":
+                    case "blockly_activeNodeID":
                         if ( this.state.nodes[ propertyValue ] !== undefined ) {
                             var show = true;
                             node = this.state.nodes[ propertyValue ];
@@ -185,7 +190,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         }
                         break;
 
-                    case "toolbox":
+                    case "blockly_toolbox":
                         // check the 'Changing the Toolbox' section at
                         // https://code.google.com/p/blockly/wiki/Toolbox 
                         // for more information on this function call
@@ -201,11 +206,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                                 }
                             }
                         } else {
+                            this.currentProperties.blockly_toolbox = propertyValue;
                             this.logger.warnx( "Blockly not initilized unable to set the toolbox: " + propertyValue );
                         }
                         break;
 
-                    case "defaultXml":
+                    case "blockly_defaultXml":
                         if ( Blockly && Blockly.mainWorkspace ) {
                             BlocklyApps.loadBlocks( propertyValue );
                         } else {
@@ -213,9 +219,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         }
                         break;
 
-                    case "autoClose":
-                        if ( Blockly && Blockly.Flyout ){
-                            Blockly.Flyout.autoClose = Boolean( propertyValue );                       
+                    case "blockly_autoClose":
+                        if ( Blockly && Blockly.Toolbox && Blockly.Toolbox.flyout_ ){
+                            Blockly.Toolbox.flyout_.autoClose = Boolean( propertyValue );                       
+                        } else {
+                            this.currentProperties.blockly_autoClose = Boolean( propertyValue );
                         }
                         break;
 
@@ -287,6 +295,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
     function setBlocklyUIVisibility( node, show ) {
         var div = document.getElementById( self.options.divParent ); {
             div.style.visibility = show ? 'visible' : 'hidden';
+        }
+        if ( self.currentProperties !== undefined ) {
+            for ( var prop in self.currentProperties ) {
+                if ( self.currentProperties[ prop ] !== undefined ) {
+                    self.satProperty( self.kernel.application(), prop, self.currentProperties[ prop ] );
+                }
+            }
+            self.currentProperties = undefined;
         }
         self.kernel.fireEvent( node.ID, "blocklyVisibleChanged", [ show ] );
     }
