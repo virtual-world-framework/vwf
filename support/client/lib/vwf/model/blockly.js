@@ -236,11 +236,13 @@ define( [ "module", "vwf/model",
                                 getJavaScript( node );
                                 this.state.executingBlocks[ nodeID ] = node;
                             }
+                            setFlyoutEnable( false );
                         } else {
                             delete this.state.executingBlocks[ nodeID ];
                             var count = Object.keys( this.state.executingBlocks ).length;
                             if ( count === 0 ) {
-                                this.state.executingBlocks = undefined;    
+                                this.state.executingBlocks = undefined;
+                                setFlyoutEnable( true );    
                             }
                         }
                         break;
@@ -414,6 +416,15 @@ define( [ "module", "vwf/model",
             node.blocks = Blockly.Xml.domToText( xml );
         }
         node.code = Blockly.JavaScript.workspaceToCode();
+    }
+
+    function setFlyoutEnable( enable ) {
+        var blocks = Blockly.Toolbox.flyout_.workspace_.getTopBlocks( false );
+        if ( blocks ) {
+            for ( var i = 0; i < blocks.length; i++ ) {
+                blocks[ i ].setDisabled( !enable );
+            }    
+        }
     }
 
     function nextStep( node ) {
