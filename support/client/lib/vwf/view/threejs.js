@@ -390,6 +390,21 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             renderer.render(scene, camera);
         },
     
+        // -- Navigation -------------------------------------------------------------------------------
+
+        navigationKeyMapping: {
+            "w": "forward",
+            "a": "left",
+            "s": "back",
+            "d": "right",
+            "uparrow": "forward",
+            "leftarrow": "left",
+            "downarrow": "back",
+            "rightarrow": "right",
+            "q": "rotateLeft",
+            "e": "rotateRight"
+        }
+
     } );
 
     // private ===============================================================================
@@ -1783,32 +1798,28 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         }
 
         var handleKeyNavigation = function( keyCode, keyIsDown ) {
-            switch ( keyCode ) {
-                case 87:  //w
-                case 38:  //up
+
+            var key = getKeyValue( keyCode ).key;
+            key = key && key.toLowerCase();
+
+            switch ( self.navigationKeyMapping[ key ] ) {
+                case "forward":
                     movingForward = keyIsDown;
                     break;
-                case 83:  //s
-                case 40:  //down
+                case "back":
                     movingBack = keyIsDown;
                     break;
-                case 37: // left              
-                case 65:  //a
+                case "left":
                     movingLeft = keyIsDown;
                     break;
-                case 39: // right              
-                case 68:  //d
+                case "right":
                     movingRight = keyIsDown;
                     break;
-                case 81: // q
+                case "rotateLeft":
                     rotatingLeft = keyIsDown;
                     break;
-                case 69: // e
+                case "rotateRight":
                     rotatingRight = keyIsDown;
-                    break;
-                case 82: // r
-                    break;
-                case 67: // c
                     break;
             }
         }
