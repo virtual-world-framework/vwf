@@ -40,6 +40,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             if ( this.state.nodes === undefined ) {   
                 this.state.nodes = {};
             }
+            if ( this.state.scenes === undefined ) {   
+                this.state.scenes = {};
+            }
             if ( this.state.blockly === undefined ) {
                 this.state.blockly = { 
                     "node": undefined
@@ -48,6 +51,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
             this.currentProperties = {
                 "blockly_toolbox": undefined,
+                "blockly_defaultXml": undefined,
                 "blockly_autoClose": undefined
             };
 
@@ -66,8 +70,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             childSource, childType, childIndex, childName, callback /* ( ready ) */) {
 
             if ( createBlocklyDivs && childID == this.kernel.application() ) {
+
                 this.logger.infox( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
                 
+                this.state.scenes[ childID ] = {
+                    "toolbox": undefined,
+                    "defaultXml": undefined
+                }
+
                 if ( this.options.createButton ) {
                     $( 'body' ).append( 
                         "<div id='"+ self.options.divParent +"'>" +
@@ -96,7 +106,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                     path: this.options.blocklyPath,
                     toolbox: document.getElementById( self.options.toolbox ) 
                 } ); 
-
 
                 Blockly.addChangeListener( function( event ) {
                     
@@ -165,6 +174,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
             if ( nodeID == this.kernel.application() ) {
                 
+                var app = this.state.scenes[ nodeID ];
                 switch ( propertyName ) {
                     case "blockly_activeNodeID":
                         if ( this.state.nodes[ propertyValue ] !== undefined ) {
@@ -177,6 +187,16 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                                 this.state.blockly.node = undefined;                           
                             } 
                             if ( show ) {
+                                if ( node.toolbox !== undefined ) {
+                                    loadToolbox( node.toolbox );    
+                                } else if ( app.toolbox !== undefined ) {
+                                    loadToolbox( app.toolbox );
+                                }
+                                if ( node.defaultXml !== undefined ) {
+                                    loadDefaultXml( node.defaultXml );    
+                                } else if ( app.defaultXml !== undefined ) {
+                                    loadDefaultXml( app.defaultXml ); 
+                                }                               
                                 this.state.blockly.node = node;
                                 setBlockXML( node );
                                 setBlocklyUIVisibility( node, true );
@@ -191,32 +211,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         break;
 
                     case "blockly_toolbox":
-                        // check the 'Changing the Toolbox' section at
-                        // https://code.google.com/p/blockly/wiki/Toolbox 
-                        // for more information on this function call
-                        if ( Blockly && Blockly.mainWorkspace ) {
-                            if ( propertyValue.indexOf( '<xml' ) !== -1 ){
-                                Blockly.updateToolbox( propertyValue );
-                            } else {
-                                var element = document.getElementById( propertyValue );
-                                if ( element ) {
-                                    Blockly.updateToolbox( element );    
-                                } else {
-                                    this.logger.warnx( "Unable to load Blockly toolbox: " + propertyValue );
-                                }
-                            }
-                        } else {
-                            this.currentProperties.blockly_toolbox = propertyValue;
-                            this.logger.warnx( "Blockly not initilized unable to set the toolbox: " + propertyValue );
-                        }
+                        app.toolbox = propertyValue;
+                        loadToolbox( propertyValue );
                         break;
 
                     case "blockly_defaultXml":
-                        if ( Blockly && Blockly.mainWorkspace ) {
-                            BlocklyApps.loadBlocks( propertyValue );
-                        } else {
-                            this.logger.warnx( "Blockly not initilized unable to load default xml: " + propertyValue );
-                        }
+                        app.defaultXml = propertyValue;
+                        loadDefaultXml( propertyValue )
                         break;
 
                     case "blockly_autoClose":
@@ -229,8 +230,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
                 }
 
-            } 
-        
+            }         
         },
 
         // -- gotProperty ------------------------------------------------------------------------------
@@ -307,7 +307,48 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
         self.kernel.fireEvent( node.ID, "blocklyVisibleChanged", [ show ] );
     }
 
+    function loadToolbox( toolboxDef ) {
+        // check the 'Changing the Toolbox' section at
+        // https://code.google.com/p/blockly/wiki/Toolbox 
+        // for more information on this function call        
+        if ( Blockly && Blockly.mainWorkspace ) {
+            var len = toolboxDef.length;
+            if ( toolboxDef.indexOf( '.xml' ) === ( len - 4 ) ) {
+                $.ajax( {
+                    url: toolboxDef,
+                    type: 'GET',
+                    dataType: 'text',
+                    timeout: 1000,
+                    error: function() {
+                        alert( 'Error loading XML document: ' + toolboxDef );
+                    },
+                    success: function( xml ) {
+                        Blockly.updateToolbox( xml );
+                    }
+                } );
+            } else if ( toolboxDef.indexOf( '<xml' ) !== -1 ){
+                Blockly.updateToolbox( toolboxDef );
+            } else {
+                var element = document.getElementById( toolboxDef );
+                if ( element ) {
+                    Blockly.updateToolbox( element );    
+                } else {
+                    self.logger.warnx( "Unable to load Blockly toolbox: " + toolboxDef );
+                }
+            }
+        } else {
+            self.currentProperties.blockly_toolbox = toolboxDef;
+            self.logger.warnx( "Blockly not initilized unable to set the toolbox: " + toolboxDef );
+        }        
+    }
 
-
+    function loadDefaultXml( xml ) {
+        if ( Blockly && Blockly.mainWorkspace ) {
+            BlocklyApps.loadBlocks( xml );
+        } else {
+            self.currentProperties.defaultXml = toolboxDef;
+            self.logger.warnx( "Blockly not initilized unable to load default xml: " + xml );
+        }        
+    }
 
 } );
