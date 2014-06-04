@@ -56,7 +56,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
     var mouseRightDown = false;
     var mouseLeftDown = false;
     var mouseMiddleDown = false;
-    var shiftDown = false;
     var touchGesture = false;
     var prevGesture = undefined;
 
@@ -1586,7 +1585,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             // Set appropriate button / key states
             // Shift+click of any button is treated as the middle button to accomodate mice that
             // don't have a middle button
-            shiftDown = e.shiftKey;
+            var shiftDown = e.shiftKey;
             switch( e.button ) {
                 case 0: // Left button
                     if ( shiftDown ) {
@@ -1632,7 +1631,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         document.onmouseup = function( e ) {
 
             // Set appropriate button / key states
-            shiftDown = e.shiftKey;
             var ctrlDown = e.ctrlKey;
             var atlDown = e.altKey;
             var ctrlAndAltDown = ctrlDown && atlDown;
