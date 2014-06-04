@@ -592,6 +592,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         handleScroll: function ( wheelDelta, distanceToTarget ) {
             
+            if ( navmode !== "fly" ) {
+                return;
+            }
+
             var orbiting = ( navmode == "fly" ) && ( mouseMiddleDown )
 
             if ( orbiting || !pickDirectionVector ) {
@@ -1875,9 +1879,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                         
                     sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
 
-                    if ( navmode == "fly" ) {
-                        self.handleScroll( eventNodeData.wheel.delta, eventNodeData.distance );
-                    }
+                    self.handleScroll( eventNodeData.wheel.delta, eventNodeData.distance );
                 }
             };
         } else if ( canvas.onwheel !== undefined ) {
@@ -1905,9 +1907,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                         
                     sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
 
-                    if ( navmode == "fly" ) {
-                        self.handleScroll( eventNodeData.wheel.delta, eventNodeData.distance );
-                    }
+                    self.handleScroll( eventNodeData.wheel.delta, eventNodeData.distance );
                 }
             };
         } else {
