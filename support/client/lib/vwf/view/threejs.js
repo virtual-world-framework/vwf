@@ -868,7 +868,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             prevGesture = ev.type;
         },
 
-        appRequestsPointerLock: function( event ) {
+        appRequestsPointerLock: function() {
 
             // By default, an app will request pointer lock when:
             //   - the middle mouse button is hit in fly mode (for orbit)
