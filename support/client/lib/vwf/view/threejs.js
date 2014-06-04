@@ -190,11 +190,11 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             // If this is this user's navObject, pay attention to changes in navmode, translationSpeed, and 
             // rotationSpeed
             if ( navObject && ( nodeID == navObject.ID ) ) {
-                if ( propertyName == "navmode" ) { 
-                    if ( ( propertyValue == "none" ) && ( navmode != "none" ) && pointerLockImplemented ) {
+                if ( propertyName == "navmode" ) {
+                    navmode = propertyValue;
+                    if ( pointerLockImplemented && !self.appRequestsPointerLock() ) {
                         document.exitPointerLock();
                     }
-                    navmode = propertyValue;
                 } else if ( propertyName == "translationSpeed" ) {
                     translationSpeed = propertyValue;
                 } else if ( propertyName == "rotationSpeed" ) {
