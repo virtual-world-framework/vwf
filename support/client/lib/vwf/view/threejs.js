@@ -56,6 +56,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
     var mouseRightDown = false;
     var mouseLeftDown = false;
     var mouseMiddleDown = false;
+    var shiftDown = false;
     var touchGesture = false;
     var prevGesture = undefined;
 
@@ -867,6 +868,21 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             // Set previous gesture (only perform drag if the previous is not a pinch gesture - causes jumpiness)
             prevGesture = ev.type;
         },
+
+        appRequestsPointerLock: function( event ) {
+
+            // By default, an app will request pointer lock when:
+            //   - the middle mouse button is hit in fly mode (for orbit)
+            //   - the right mouse button is hit in any mode other than "none" (for look)
+
+            if ( mouseMiddleDown && ( navmode === "fly" ) ) {
+                return true;
+            }
+            if ( mouseRightDown && ( navmode !== "none" ) ) {
+                return true;
+            }
+            return false;
+        }
     } );
 
     // private ===============================================================================
@@ -1566,84 +1582,81 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         $(canvas).hammer({ drag_lock_to_axis: false }).on("pinch pinchin pinchout", self.handleHammer);
 
         canvas.onmousedown = function( e ) {
-            var event = getEventData( e, false );
-            var shiftDown = e.shiftKey;
 
-            if ( shiftDown ) {
-                if ( pointerLockImplemented && ( navmode == "fly" ) ) {
-                    canvas.requestPointerLock();
-                    positionUnderMouseClick = event.eventNodeData[ "" ][ 0 ].globalPosition;
-                }
-                mouseMiddleDown = true;        
-            }
-            else {
-                switch( e.button ) {
-                    case 2:
-                        if ( pointerLockImplemented && ( navmode != "none" ) ) {
-                            canvas.requestPointerLock();
-                        }
-                        mouseRightDown = true;
-                        break;
-                    case 1:
-                        if ( pointerLockImplemented && ( navmode == "fly" ) ) {
-                            canvas.requestPointerLock();
-                            positionUnderMouseClick = event.eventNodeData[ "" ][ 0 ].globalPosition;
-                        }
+            // Set appropriate button / key states
+            // Shift+click of any button is treated as the middle button to accomodate mice that
+            // don't have a middle button
+            shiftDown = e.shiftKey;
+            switch( e.button ) {
+                case 0: // Left button
+                    if ( shiftDown ) {
                         mouseMiddleDown = true;
-                        break;
-                    case 0:
+                    } else {
                         mouseLeftDown = true;
-                        break;
-                };
-                if ( event ) {
-                    pointerDownID = pointerPickID ? pointerPickID : sceneID;
-                    sceneView.kernel.dispatchEvent( pointerDownID, "pointerDown", event.eventData, event.eventNodeData );
-                    
-                    // TODO: Navigation - see main "TODO: Navigation" comment for explanation
-                    startMousePosition = event.eventData[ 0 ].position;
-                    // END TODO
-                }
-                e.preventDefault();
+                    }
+                    break;
+                case 1: // Middle button
+                    mouseMiddleDown = true;
+                    break;
+                case 2: // Right button
+                    if ( shiftDown ) {
+                        mouseMiddleDown = true;
+                    } else {
+                        mouseRightDown = true;
+                    }
+                    break;
+            };
+
+            // Set pointerLock if appropriate
+            var event = getEventData( e, false );
+            if ( pointerLockImplemented && self.appRequestsPointerLock() ) {
+                canvas.requestPointerLock();
+                positionUnderMouseClick = event && event.eventNodeData[ "" ][ 0 ].globalPosition;
             }
+
+            // Process mouse down event
+            if ( event ) {
+                pointerDownID = pointerPickID ? pointerPickID : sceneID;
+                sceneView.kernel.dispatchEvent( pointerDownID, "pointerDown", event.eventData, event.eventNodeData );
+                
+                // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                startMousePosition = event.eventData[ 0 ].position;
+                // END TODO
+            }
+            e.preventDefault();
         }
 
         // Listen for onmouseup from the document (instead of the canvas like all the other mouse events)
         // because it will catch mouseup events that occur outside the window, whereas canvas.onmouseup does
         // not.
         document.onmouseup = function( e ) {
+
+            // Set appropriate button / key states
+            shiftDown = e.shiftKey;
             var ctrlDown = e.ctrlKey;
             var atlDown = e.altKey;
             var ctrlAndAltDown = ctrlDown && atlDown;
             
-            if ( pointerLockImplemented && ( navmode == "fly" ) && mouseMiddleDown ) {
-                document.exitPointerLock();
-            }
+            // Since Shift+click w/ any button is considered a middle click, any button release\
+            // could be the end of a middle mouse button click.  We release it to be safe, and 
+            // the user can reclick the mouse button if necessary.
             mouseMiddleDown = false;
 
             switch( e.button ) {
-                case 2:
-                    if ( pointerLockImplemented && ( navmode != "none" ) ) {
-
-                        // If we're in fly mode and the middle mouse button is down, then we are orbiting, and
-                        // we do not want to release pointer lock.
-                        // But otherwise, release it
-                        if ( !( ( navmode == "fly" ) && ( mouseMiddleDown ) ) ) {
-                            document.exitPointerLock();
-                        }
-                    }
-                    mouseRightDown = false;
-                    break;
-                case 1: 
-                    if ( pointerLockImplemented && ( navmode == "fly" ) && !mouseRightDown ) {
-                        document.exitPointerLock();
-                    }
-                    mouseMiddleDown = false;
-                    break;
-                case 0:
+                case 0: // Left button
                     mouseLeftDown = false;
                     break;
+                case 2: // Right button
+                    mouseRightDown = false;
+                    break;
             };
-           
+
+            // Release pointerLock if appropriate
+            if ( pointerLockImplemented && !self.appRequestsPointerLock() ) {
+                document.exitPointerLock();
+            }
+
+            // Process mouse up event
             var eData = getEventData( e, ctrlAndAltDown );
             if ( eData !== undefined ) {
                 var mouseUpObjectID = pointerPickID;
