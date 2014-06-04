@@ -50,6 +50,8 @@ properties:
         this.allowedBlocksChanged( value );
       }
     value: 20
+  blockly_toolbox:
+  blockly_defaultXml:
 methods:
   getWorldXYVector:
 events:

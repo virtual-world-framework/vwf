@@ -46,6 +46,9 @@ define( [ "module", "vwf/model",
             if ( this.state.nodes === undefined ) {   
                 this.state.nodes = {};
             }
+            if ( this.state.scenes === undefined ) {   
+                this.state.scenes = {};
+            }
             if ( this.state.prototypes === undefined ) {   
                 this.state.prototypes = {};
             }
@@ -130,6 +133,8 @@ define( [ "module", "vwf/model",
                     "type": childType,
                     "name": childName,
                     "blocks": "<xml></xml>",
+                    "toolbox": undefined,
+                    "deafultXml": undefined,
                     "code": undefined,
                     "lastLineExeTime": undefined,
                     "timeBetweenLines": 1,
@@ -236,15 +241,23 @@ define( [ "module", "vwf/model",
                                 getJavaScript( node );
                                 this.state.executingBlocks[ nodeID ] = node;
                             }
-                            setFlyoutEnable( false );
+                            setToolboxBlockEnable( false );
                         } else {
                             delete this.state.executingBlocks[ nodeID ];
                             var count = Object.keys( this.state.executingBlocks ).length;
                             if ( count === 0 ) {
                                 this.state.executingBlocks = undefined;
-                                setFlyoutEnable( true );    
+                                setToolboxBlockEnable( true );    
                             }
                         }
+                        break;
+
+                    case "blockly_toolbox":
+                        node.toolbox = propertyValue;
+                        break;
+
+                    case "blockly_defaultXml":
+                        node.defaultXml = propertyValue;
                         break;
 
                     default:
@@ -419,12 +432,21 @@ define( [ "module", "vwf/model",
         node.code = Blockly.JavaScript.workspaceToCode();
     }
 
-    function setFlyoutEnable( enable ) {
-        var blocks = Blockly.Toolbox.flyout_.workspace_.getTopBlocks( false );
-        if ( blocks ) {
-            for ( var i = 0; i < blocks.length; i++ ) {
-                blocks[ i ].setDisabled( !enable );
-            }    
+    function setToolboxBlockEnable( enable ) {
+        if ( Blockly.Toolbox.flyout_ !== undefined && Blockly.Toolbox.flyout_.workspace_ !== undefined ) { 
+            var blocks = Blockly.Toolbox.flyout_.workspace_.getTopBlocks( false );
+            if ( blocks ) {
+                for ( var i = 0; i < blocks.length; i++ ) {
+                    blocks[ i ].setDisabled( !enable );
+                }    
+            }
+        } else if ( Blockly.mainWorkspace && Blockly.mainWorkspace.flyout_ && Blockly.mainWorkspace.flyout_.workspace_ ){
+            var blocks = Blockly.mainWorkspace.flyout_.workspace_.getTopBlocks( false );
+            if ( blocks ) {
+                for ( var i = 0; i < blocks.length; i++ ) {
+                    blocks[ i ].setDisabled( !enable );
+                }    
+            }
         }
     }
 
