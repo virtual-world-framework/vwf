@@ -56,7 +56,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             // scope, might as well declare them here.
             var soundDefinition, successCallback, failureCallback, exitCallback;
             var soundName, soundNames, soundDatum, soundDefinition, soundInstance;
-            var instanceIDs, i, volume, fadeTime, fadeMethod;
+            var instanceIDs, i, volume, fadeTime, fadeMethod, instanceHandle;
 
             switch( methodName ) {
                 // arguments: soundDefinition, successCallback, failureCallback
@@ -148,9 +148,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 // arguments: instanceHandle
                 case "stopSoundInstance":
-                    soundInstance = getSoundInstance( params[ 0 ] );
+                    instanceHandle = params[ 0 ];
+                    soundInstance = getSoundInstance( instanceHandle );
                     if ( soundInstance ) {
-                        soundInstance.soundDatum.stopInstance( soundInstance.instanceID );
+                        soundInstance.soundDatum.stopInstance( instanceHandle.instanceID );
                     }
                     return;
 
