@@ -305,6 +305,7 @@ define( [ "module", "vwf/model",
                     
                     case "stopAllExecution":
                         for ( var id in this.state.executingBlocks ) {
+                            this.state.executingBlocks[ id ].interpreterStatus = "completed";
                             this.kernel.setProperty( id, 'blockly_executing', false );
                         }
                         break;
