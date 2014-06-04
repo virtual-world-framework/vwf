@@ -1637,17 +1637,27 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var atlDown = e.altKey;
             var ctrlAndAltDown = ctrlDown && atlDown;
             
-            // Since Shift+click w/ any button is considered a middle click, any button release\
-            // could be the end of a middle mouse button click.  We release it to be safe, and 
-            // the user can reclick the mouse button if necessary.
-            mouseMiddleDown = false;
-
+            // Shift+click w/ any button is considered a middle click to accomodate mice w/o a 
+            // middle mouse button.  Therefore, if the left or right mouse button is released, 
+            // but the system did not record that it was down, it must be a Shift+click for the 
+            // middle mouse button that was released
             switch( e.button ) {
                 case 0: // Left button
-                    mouseLeftDown = false;
+                    if ( mouseLeftDown ) {
+                        mouseLeftDown = false;
+                    } else {
+                        mouseMiddleDown = false;
+                    }
+                    break;
+                case 1: // Middle button
+                    mouseMiddleDown = false;
                     break;
                 case 2: // Right button
-                    mouseRightDown = false;
+                    if ( mouseRightDown ) {
+                        mouseRightDown = false;
+                    } else {
+                        mouseMiddleDown = false;
+                    }
                     break;
             };
 
