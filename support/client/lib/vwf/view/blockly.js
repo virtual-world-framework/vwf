@@ -81,12 +81,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                 if ( this.options.createButton ) {
                     $( 'body' ).append( 
                         "<div id='"+ self.options.divParent +"'>" +
+                            "<div id='" + self.options.divParent + "-top'/>" +
                             "<div id='" + self.options.divName + "'/>" + 
                             "<div><button id='runButton' onclick='onRun()'>Run</button></div>" +
                         "</div>" ).children(":last");
                 } else {
                     $( 'body' ).append( 
                         "<div id='"+ self.options.divParent +"'>" +
+                            "<div id='" + self.options.divParent + "-top'/>" +
                             "<div id='" + self.options.divName + "'/>" + 
                         "</div>" ).children(":last");
                 }
