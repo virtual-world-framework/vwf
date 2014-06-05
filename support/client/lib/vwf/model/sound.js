@@ -217,8 +217,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         instanceIDCounter: 0,
 
         initialize: function( soundDefinition, successCallback, failureCallback ) {
-            self.name = soundDefinition.soundName;
-            self.playingInstances = {};
+            this.name = soundDefinition.soundName;
+            this.playingInstances = {};
 
             if ( soundDefinition.isLooping !== undefined ) {
                 self.isLooping = soundDefinition.isLooping;
