@@ -40,26 +40,35 @@ define( [ "module", "vwf/model",
             if ( options === undefined ) { 
                 options = {}; 
             }
-            if ( this.state === undefined ) {   
-                this.state = {};
-            }
-            if ( this.state.nodes === undefined ) {   
-                this.state.nodes = {};
-            }
-            if ( this.state.scenes === undefined ) {   
-                this.state.scenes = {};
-            }
-            if ( this.state.prototypes === undefined ) {   
-                this.state.prototypes = {};
-            }
 
-            if ( this.state.blockly === undefined ) {
-                this.state.blockly = { "node": undefined };
-            }  
-
-            this.state.executingBlocks = undefined;
-
-            this.state.executionHalted = false;
+            this.state = {
+                "nodes": {},
+                "scenes": {},
+                "prototypes": {},
+                "blockly": { "node": undefined },
+                "executingBlocks": {},
+                "executionHalted": false,
+                "createNode": function( nodeID, childID, childExtendsID, childImplementsIDs,
+                                childSource, childType, childIndex, childName, callback ) {
+                    return {
+                        "parentID": nodeID,
+                        "ID": childID,
+                        "extendsID": childExtendsID,
+                        "implementsIDs": childImplementsIDs,
+                        "source": childSource,
+                        "type": childType,
+                        "name": childName,
+                        "blocks": "<xml></xml>",
+                        "toolbox": undefined,
+                        "deafultXml": undefined,
+                        "code": undefined,
+                        "lastLineExeTime": undefined,
+                        "timeBetweenLines": 1,
+                        "interpreter": undefined,
+                        "interpreterStatus": ""
+                    };
+                }
+            };
 
             // turns on logger debugger console messages 
             this.debug = {
@@ -112,6 +121,12 @@ define( [ "module", "vwf/model",
                 return;                
             }
 
+            var node = this.state.nodes[ childID ];
+            if ( node === undefined && isBlockly3Node( childID ) ) {
+                this.state.nodes[ childID ] = node = this.state.createNode( nodeID, childID, childExtendsID, childImplementsIDs,
+                                childSource, childType, childIndex, childName, callback );
+            }
+
 
         },
 
@@ -122,29 +137,7 @@ define( [ "module", "vwf/model",
                 this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             } 
 
-            var node;
-            var createNode = function() {
-                return {
-                    "parentID": nodeID,
-                    "ID": childID,
-                    "extendsID": childExtendsID,
-                    "implementsIDs": childImplementsIDs,
-                    "source": childSource,
-                    "type": childType,
-                    "name": childName,
-                    "blocks": "<xml></xml>",
-                    "toolbox": undefined,
-                    "deafultXml": undefined,
-                    "code": undefined,
-                    "lastLineExeTime": undefined,
-                    "timeBetweenLines": 1,
-                    "interpreter": undefined,
-                    "interpreterStatus": ""
-                };
-            }; 
-            if ( isBlockly3Node( childID ) ) {
-                this.state.nodes[ childID ] = node = createNode();
-            }
+
         },
 
         deletingNode: function( nodeID ) {
@@ -243,11 +236,13 @@ define( [ "module", "vwf/model",
                             }
                             setToolboxBlockEnable( false );
                         } else {
-                            delete this.state.executingBlocks[ nodeID ];
-                            var count = Object.keys( this.state.executingBlocks ).length;
-                            if ( count === 0 ) {
-                                this.state.executingBlocks = undefined;
-                                setToolboxBlockEnable( true );    
+                            if ( this.state.executingBlocks && this.state.executingBlocks[ nodeID ] !== undefined ) {
+                                delete this.state.executingBlocks[ nodeID ];
+                                var count = Object.keys( this.state.executingBlocks ).length;
+                                if ( count === 0 ) {
+                                    this.state.executingBlocks = {};
+                                    setToolboxBlockEnable( true );    
+                                }
                             }
                         }
                         break;
@@ -414,6 +409,16 @@ define( [ "module", "vwf/model",
         return self.kernel.test( nodeID,
             "self::element(*,'http://vwf.example.com/blockly/controller.vwf')",
             nodeID );
+    }
+
+    function isBlocklyNode( implementsIDs ) {
+        var found = false;
+        if ( implementsIDs ) {
+            for ( var i = 0; i < implementsIDs.length && !found; i++ ) {
+                found = ( implementsIDs[i] == "http-vwf-example-com-blockly-controller-vwf" ); 
+            }
+        }
+       return found;
     }
 
     function validPropertyValue( obj ) {
