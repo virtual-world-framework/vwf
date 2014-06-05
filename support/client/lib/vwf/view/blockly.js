@@ -295,9 +295,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
 
     function setBlocklyUIVisibility( node, show ) {
-        var div = document.getElementById( self.options.divParent ); {
-            div.style.visibility = show ? 'visible' : 'hidden';
-        }
+        var div = document.getElementById( self.options.divParent );
+        div.style.visibility = show ? 'visible' : 'hidden';
+        div.style.pointerEvents = show ? 'all' : 'none';
         if ( self.currentProperties !== undefined ) {
             for ( var prop in self.currentProperties ) {
                 if ( self.currentProperties[ prop ] !== undefined ) {
