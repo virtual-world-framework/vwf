@@ -18,6 +18,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     var soundData = {};
     var logger;
 
+    var self = this;
+
     var driver = model.load( module, {
 
         initialize: function() {
@@ -183,6 +185,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         return this;
     }
 
+    LayeredSoundDatum.prototype = {
+        playSound: function ( exitCallBack ) {},
+        startLayer: function ( id ) {},
+        stopLayer: function ( id ) {},
+        startOnLoop: function ( id ) {},
+        setVolume: function( id, volume, duration) {},
+        startingLayers: [ 0 ],
+        randomizeLayers:false,
+        soundData:[]
+    }
+
     SoundDatum.prototype = {
         constructor: SoundDatum,
 
@@ -204,19 +217,19 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         instanceIDCounter: 0,
 
         initialize: function( soundDefinition, successCallback, failureCallback ) {
-            this.name = soundDefinition.soundName;
-            this.playingInstances = {};
+            self.name = soundDefinition.soundName;
+            self.playingInstances = {};
 
             if ( soundDefinition.isLooping !== undefined ) {
-                this.isLooping = soundDefinition.isLooping;
+                self.isLooping = soundDefinition.isLooping;
             }
 
             if ( soundDefinition.allowMultiplay !== undefined ) {
-                this.allowMultiplay = soundDefinition.allowMultiplay;
+                self.allowMultiplay = soundDefinition.allowMultiplay;
             }
 
             if ( soundDefinition.volumeAdjustment !== undefined ) {
-                this.volumeAdjustment = soundDefinition.volumeAdjustment;
+                self.volumeAdjustment = soundDefinition.volumeAdjustment;
             }
 
             // Create & send the request to load the sound asynchronously
