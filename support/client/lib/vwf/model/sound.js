@@ -178,6 +178,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         return this;
     }
 
+    function LayeredSoundDatum( soundDefinition, successCallback, failureCallback ) {
+        this.initialize( soundDefinition, successCallback, failureCallback );
+        return this;
+    }
+
     SoundDatum.prototype = {
         constructor: SoundDatum,
 
