@@ -340,6 +340,7 @@
                 { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
                 { library: "vwf/view/blockly", active: false },
                 { library: "vwf/view/sound", active: false },
+                { library: "vwf/view/touch", active: false },
                 { library: "vwf/view/cesium", active: false },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
@@ -375,6 +376,7 @@
                     { library: "vwf/view/cesium", active: false },
                     { library: "vwf/view/blockly", active: false },
                     { library: "vwf/view/sound", active: false },
+                    { library: "vwf/view/touch", active: false },
                     { library: "vwf/view/webrtc", active: false}
                 ]
             };
