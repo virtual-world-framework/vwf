@@ -241,6 +241,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         },
         playSound: function ( exitCallBack ) {
 
+            if ( exitCallback === undefined ) {
+                logger.errorx( "playSound", "The 'playSound' method requires " +
+                                       "a definition for the sound." );
+                 return undefined;
+            }
+
             for ( var x in this.soundDatums){
                 logger.errorx( "playSound", "playing track:"+x );
                 self.playSound(this.soundDatums[x].name);
@@ -252,11 +258,40 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             //Check if within bounds of available layers
             //Check if already playing
 
+            if ( id === undefined ) {
+                logger.errorx( "startLayer", "The 'startLayer' method requires " +
+                                       "an ID for the layer" );
+                return undefined;
+            }
+            if ( id >= this.layerCount ) {
+                logger.errorx( "startLayer", "The 'startLayer' method must be provided " +
+                                       "a layer ID within bounds of the total layer count" );
+                return undefined;
+            }
+
+            for ( var x in this.soundDatums){
+                logger.errorx( "startingSoundLayer", "playing track:"+x );
+                self.playSound(this.soundDatums[x].name);
+            }
+
+
         },
         stopLayer: function ( id ) {
 
             //Check if within bounds of available layers
             //Check if already stopped
+
+            if ( id === undefined ) {
+                logger.errorx( "stopLayer", "The 'stopLayer' method requires " +
+                                       "an ID for the layer" );
+                return undefined;
+            }
+            if ( id >= this.layerCount ) {
+                logger.errorx( "stopLayer", "The 'stopLayer' method must be provided " +
+                                       "a layer ID within bounds of the total layer count" );
+                return undefined;
+            }
+
 
         },
         startOnLoop: function ( id ) {
@@ -264,7 +299,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             //Is this necessary? If sub-layers are set to loop we may not need this
         },
         setVolumeForLayer: function( id, volume, duration) {
-            
+
             //Set the volume for a particular layer
         },
 
@@ -359,6 +394,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 soundInstance.sourceNode.stop();
             }
         },
+        
     }
 
     function PlayingInstance( soundDatum, id, exitCallback ) {
