@@ -18,7 +18,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     var soundData = {};
     var logger;
 
-    var self = this;
+    //var self = this;
 
     var driver = model.load( module, {
 
@@ -28,7 +28,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.state.soundManager = {};
 
             logger = this.logger;
-
+            
             try {
                 // I quote: "For WebKit- and Blink-based browsers, you 
                 // currently need to use the webkit prefix, i.e. 
@@ -101,12 +101,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     // callbacks.
 
                     if (soundDefinition.isLayered == false) {
-                        soundData[ soundName ] = new SoundDatum( soundDefinition, successCallback, 
+                        soundData[ soundDefinition.soundName ] = new SoundDatum( soundDefinition, successCallback, 
                                                                 failureCallback );
                     }
-                    else
-                    {
-                        soundData[ soundName ] = new LayeredSoundDatum( soundDefinition, successCallback, 
+                    else{
+                        soundData[ soundDefinition.soundName ] = new LayeredSoundDatum( soundDefinition, successCallback, 
                                                                 failureCallback );
                     }
 
@@ -125,7 +124,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 // arguments: soundName 
                 // returns: true if sound is done loading and is playable
                 case "isReady":
-                    soundDatum = getSoundDatum( params[ 0 ] );
+                    soundDatum = getSoundDatum( soundDefinition.soundName );
                     return soundDatum !== undefined ? !!soundDatum.buffer : false;
 
                 // arguments: soundName, exitCallback (which is called when the sound stops) 
@@ -133,15 +132,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 //   { soundName: value, instanceID: value }
                 //   instanceID is -1 on failure  
                 case "playSound":
-                    soundDatum = getSoundDatum( params[ 0 ] );
+
+                    soundDatum = getSoundDatum( params[0].soundName );
                     exitCallback = params[ 1 ];
                     return soundDatum ? soundDatum.playSound( exitCallback ) 
                                       : { soundName: params[ 0 ], instanceID: -1 };
 
+
                 // arguments: soundName
                 // returns: true if sound is currently playing
                 case "isSoundPlaying":
-                    soundDatum = getSoundDatum( params[ 0 ] );
+                    soundDatum = getSoundDatum( soundDefinition.soundName );
                     return soundDatum ? soundDatum.playingInstances.length > 0 : false;
 
                 // arguments: instanceHandle
@@ -151,7 +152,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 // arguments: instanceHandle, volume, fadeTime, fadeMethod
                 case "setVolume":
-                    soundInstance = getSoundInstance( params[ 0 ] );
+                    
+                instanceHandle = params[ 0 ];
+                    soundInstance = getSoundInstance( instanceHandle );
                     if ( soundInstance ) {
                         volume = params[ 1 ];
                         fadeTime = params[ 2 ];
@@ -160,7 +163,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         soundInstance.setVolume( volume, fadeTime, fadeMethod );
                     }
                     return;
-
+                
                 // arguments: instanceHandle
                 case "stopSoundInstance":
                     instanceHandle = params[ 0 ];
@@ -172,6 +175,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 // arguments: soundName
                 case "stopAllSoundInstances":
+                    for (var soundDatum in soundData){
                     soundDatum = getSoundDatum( params[ 0 ] );
                     if ( soundDatum ) {
                         instanceIDs = Object.keys( soundDatum.playingInstances );
@@ -179,7 +183,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             soundDatum.stopInstance( instanceIDs[ i ] );
                         }
                     }
-
+                    }
                     return undefined;
             }
 
@@ -209,21 +213,21 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         loadedCount: 0,
         soundDefinitions:[ 0 ],
         layerCount: 0,
+
         initialize: function ( layeredSoundDefinition, successCallback, failureCallback ){
 
             this.name = layeredSoundDefinition.soundName;
             this.soundDefinitions = layeredSoundDefinition.soundDefinitions;
             this.layerCount = layeredSoundDefinition.soundDefinitions.length;
+            this.soundDatums = [];
+
             for (var i in layeredSoundDefinition.soundDefinitions){
 
                 var loadNext = function() {
                     logger.errorx( "loadNext", "loaded Next!" );
-                        //self.playSound('gameplay');
-                        //successCallback && successCallback()
                 }
                 var doneLoading = function() {
                     logger.errorx( "doneLoading", "done loading!!" );
-                       // self.playSound('gameplay');
                         successCallback && successCallback()
                 }
                 var failureToLoad = function() {
@@ -232,24 +236,26 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 if (i == this.layerCount-1) {
                     var subName = layeredSoundDefinition.soundDefinitions[i].soundName;
-                    this.soundDatums[ subName ] = new SoundDatum( this.soundDefinitions[i], doneLoading, failureToLoad );
+                    this.soundDatums[ subName ] = subName;
+                    soundData[ subName ] = new SoundDatum( layeredSoundDefinition.soundDefinitions[i], doneLoading, failureToLoad );
                 }else{
                     var subName = layeredSoundDefinition.soundDefinitions[i].soundName;
-                    this.soundDatums[ subName ] = new SoundDatum( this.soundDefinitions[i], loadNext, failureToLoad );
+                    this.soundDatums[ subName ] = subName;
+                    soundData[ subName ] = new SoundDatum( layeredSoundDefinition.soundDefinitions[i], loadNext, failureToLoad );
                 }
             }
         },
-        playSound: function ( exitCallBack ) {
+        playSound: function () {
 
-            if ( exitCallback === undefined ) {
-                logger.errorx( "playSound", "The 'playSound' method requires " +
-                                       "a definition for the sound." );
-                 return undefined;
-            }
+            logger.errorx( "playSound", "!" );
 
             for ( var x in this.soundDatums){
+                var played = function() {
+                    logger.errorx( "played", "played" );
+                }
                 logger.errorx( "playSound", "playing track:"+x );
-                self.playSound(this.soundDatums[x].name);
+                soundData[ x ].playSound(played);
+
             }
             
         },
@@ -269,10 +275,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 return undefined;
             }
 
-            for ( var x in this.soundDatums){
-                logger.errorx( "startingSoundLayer", "playing track:"+x );
-                self.playSound(this.soundDatums[x].name);
-            }
+            
+
+        
+            
 
 
         },
@@ -280,6 +286,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             //Check if within bounds of available layers
             //Check if already stopped
+
 
             if ( id === undefined ) {
                 logger.errorx( "stopLayer", "The 'stopLayer' method requires " +
@@ -292,6 +299,21 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 return undefined;
             }
 
+            var soundLayer = this.soundDatums [ id ];
+
+            logger.errorx( "stoppingSoundLayer", "stopping track:"+id );
+               // self.(this.soundDatums[x].name);
+
+            var soundInstances = this.playingInstances;
+
+            for (var x in soundInstances){
+
+                if ( soundInstance ) {
+
+                soundInstance.sourceNode.stop();
+                }
+
+            }
 
         },
         startOnLoop: function ( id ) {
@@ -327,18 +349,20 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         initialize: function( soundDefinition, successCallback, failureCallback ) {
             this.name = soundDefinition.soundName;
+            this.allowMultiplay = soundDefinition.allowMultiplay;
+            this.volumeAdjustment = soundDefinition.volumeAdjustment;
             this.playingInstances = {};
 
             if ( soundDefinition.isLooping !== undefined ) {
-                self.isLooping = soundDefinition.isLooping;
+                this.isLooping = soundDefinition.isLooping;
             }
 
             if ( soundDefinition.allowMultiplay !== undefined ) {
-                self.allowMultiplay = soundDefinition.allowMultiplay;
+                this.allowMultiplay = soundDefinition.allowMultiplay;
             }
 
             if ( soundDefinition.volumeAdjustment !== undefined ) {
-                self.volumeAdjustment = soundDefinition.volumeAdjustment;
+                this.volumeAdjustment = soundDefinition.volumeAdjustment;
             }
 
             // Create & send the request to load the sound asynchronously
