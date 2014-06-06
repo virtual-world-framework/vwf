@@ -67,7 +67,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                             "<div id='"+ self.options.divParent +"'>" +
                                 "<div id='" + self.options.divParent + "-top'/>" +
                                 "<div id='" + self.options.divName + "'/>" + 
-                                "<div><button id='runButton' onclick='onRun()'>Run</button></div>" +
+                                "<div id='runButton' onclick='onRun()'>Run</div>" +
                             "</div>" ).children(":last");
                     } else {
                         $( 'body' ).append( 
