@@ -223,6 +223,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             for (var k in layeredSoundDefinition.soundDefinitions){
 
+                //TODO MONDAY: Explore generators/promises here to track completion of all loading
+
                 var loadNext = function() {
                     logger.errorx( "loadNext", "loaded Next!" );
                 }
