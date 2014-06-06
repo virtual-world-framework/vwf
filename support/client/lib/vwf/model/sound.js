@@ -90,12 +90,25 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         return undefined;
                     }
 
+                    if (soundDefinition.isLayered === undefined) {
+                        logger.errorx( "loadSound", "The sound definition for '" + soundName +
+                                       "' must specify isLayered" );
+                        return undefined;
+                    }
                     // Create the sound.
                     // NOTE: the sound file is loaded into a buffer asynchronously, so the
                     // sound will not be ready to play immediately.  That's why we have the
                     // callbacks.
-                    soundData[ soundName ] = new SoundDatum( soundDefinition, successCallback, 
-                                                             failureCallback );
+
+                    if (soundDefinition.isLayered == false) {
+                        soundData[ soundName ] = new SoundDatum( soundDefinition, successCallback, 
+                                                                failureCallback );
+                    }
+                    else
+                    {
+                        soundData[ soundName ] = new LayeredSoundDatum( soundDefinition, successCallback, 
+                                                                failureCallback );
+                    }
 
                     return;
 
@@ -180,20 +193,81 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         return this;
     }
 
-    function LayeredSoundDatum( soundDefinition, successCallback, failureCallback ) {
-        this.initialize( soundDefinition, successCallback, failureCallback );
+    function LayeredSoundDatum( layeredSoundDefinition, successCallback, failureCallback ) {
+        this.initialize( layeredSoundDefinition, successCallback, failureCallback );
         return this;
     }
 
     LayeredSoundDatum.prototype = {
-        playSound: function ( exitCallBack ) {},
-        startLayer: function ( id ) {},
-        stopLayer: function ( id ) {},
-        startOnLoop: function ( id ) {},
-        setVolume: function( id, volume, duration) {},
+        constructor: LayeredSoundDatum,
+
+        name:"",
+        instanceIDCounter: 0,
         startingLayers: [ 0 ],
         randomizeLayers:false,
-        soundData:[]
+        soundDatums:[ 0 ],
+        loadedCount: 0,
+        soundDefinitions:[ 0 ],
+        layerCount: 0,
+        initialize: function ( layeredSoundDefinition, successCallback, failureCallback ){
+
+            this.name = layeredSoundDefinition.soundName;
+            this.soundDefinitions = layeredSoundDefinition.soundDefinitions;
+            this.layerCount = layeredSoundDefinition.soundDefinitions.length;
+            for (var i in layeredSoundDefinition.soundDefinitions){
+
+                var loadNext = function() {
+                    logger.errorx( "loadNext", "loaded Next!" );
+                        //self.playSound('gameplay');
+                        //successCallback && successCallback()
+                }
+                var doneLoading = function() {
+                    logger.errorx( "doneLoading", "done loading!!" );
+                       // self.playSound('gameplay');
+                        successCallback && successCallback()
+                }
+                var failureToLoad = function() {
+                    failureCallback && failureCallback();
+                }
+
+                if (i == this.layerCount-1) {
+                    var subName = layeredSoundDefinition.soundDefinitions[i].soundName;
+                    this.soundDatums[ subName ] = new SoundDatum( this.soundDefinitions[i], doneLoading, failureToLoad );
+                }else{
+                    var subName = layeredSoundDefinition.soundDefinitions[i].soundName;
+                    this.soundDatums[ subName ] = new SoundDatum( this.soundDefinitions[i], loadNext, failureToLoad );
+                }
+            }
+        },
+        playSound: function ( exitCallBack ) {
+
+            for ( var x in this.soundDatums){
+                logger.errorx( "playSound", "playing track:"+x );
+                self.playSound(this.soundDatums[x].name);
+            }
+            
+        },
+        startLayer: function ( id ) {
+
+            //Check if within bounds of available layers
+            //Check if already playing
+
+        },
+        stopLayer: function ( id ) {
+
+            //Check if within bounds of available layers
+            //Check if already stopped
+
+        },
+        startOnLoop: function ( id ) {
+
+            //Is this necessary? If sub-layers are set to loop we may not need this
+        },
+        setVolumeForLayer: function( id, volume, duration) {
+            
+            //Set the volume for a particular layer
+        },
+
     }
 
     SoundDatum.prototype = {
