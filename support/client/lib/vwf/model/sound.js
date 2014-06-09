@@ -28,7 +28,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.state.soundManager = {};
 
             logger = this.logger;
-            
+
             try {
                 // I quote: "For WebKit- and Blink-based browsers, you 
                 // currently need to use the webkit prefix, i.e. 
@@ -221,7 +221,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.layerCount = layeredSoundDefinition.soundDefinitions.length;
             this.soundDatums = [];
 
-            for (var i in layeredSoundDefinition.soundDefinitions){
+            for (var k in layeredSoundDefinition.soundDefinitions){
 
                 var loadNext = function() {
                     logger.errorx( "loadNext", "loaded Next!" );
@@ -234,15 +234,16 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     failureCallback && failureCallback();
                 }
 
-                if (i == this.layerCount-1) {
-                    var subName = layeredSoundDefinition.soundDefinitions[i].soundName;
+               // if (i == this.layerCount-1) {
+               //     var subName = layeredSoundDefinition.soundDefinitions[i].soundName;
+                //    this.soundDatums[ subName ] = subName;
+                //    soundData[ subName ] = new SoundDatum( layeredSoundDefinition.soundDefinitions[i], doneLoading, failureToLoad );
+                //}else{
+                    var subName = layeredSoundDefinition.soundDefinitions[k].soundName;
                     this.soundDatums[ subName ] = subName;
-                    soundData[ subName ] = new SoundDatum( layeredSoundDefinition.soundDefinitions[i], doneLoading, failureToLoad );
-                }else{
-                    var subName = layeredSoundDefinition.soundDefinitions[i].soundName;
-                    this.soundDatums[ subName ] = subName;
-                    soundData[ subName ] = new SoundDatum( layeredSoundDefinition.soundDefinitions[i], loadNext, failureToLoad );
-                }
+                    soundData[ subName ] = new SoundDatum( layeredSoundDefinition.soundDefinitions[k], loadNext, failureToLoad );
+                  // this.loadSound(layeredSoundDefinition.soundDefinitions[k], loadNext, failureToLoad );
+                //}
             }
         },
         playSound: function () {
@@ -330,6 +331,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     SoundDatum.prototype = {
         constructor: SoundDatum,
 
+        self: this,
+
         // the name
         name: "",
 
@@ -343,7 +346,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         isLooping: false,
         allowMultiplay: false,
         volumeAdjustment: 1.0,
-
+        soundDefinition: null,
         // a counter for creating instance IDs
         instanceIDCounter: 0,
 
@@ -352,16 +355,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.allowMultiplay = soundDefinition.allowMultiplay;
             this.volumeAdjustment = soundDefinition.volumeAdjustment;
             this.playingInstances = {};
+            this.soundDefinition = soundDefinition;
 
-            if ( soundDefinition.isLooping !== undefined ) {
+            if ( this.soundDefinition.isLooping !== undefined ) {
                 this.isLooping = soundDefinition.isLooping;
             }
 
-            if ( soundDefinition.allowMultiplay !== undefined ) {
+            if ( this.soundDefinition.allowMultiplay !== undefined ) {
                 this.allowMultiplay = soundDefinition.allowMultiplay;
             }
 
-            if ( soundDefinition.volumeAdjustment !== undefined ) {
+            if ( this.soundDefinition.volumeAdjustment !== undefined ) {
                 this.volumeAdjustment = soundDefinition.volumeAdjustment;
             }
 
@@ -369,8 +373,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var request = new XMLHttpRequest();
             request.open( 'GET', soundDefinition.soundURL, true );
             request.responseType = 'arraybuffer';
-            self = this;
-            request.onload = function() {
+
+           request.onload = function() {
                 context.decodeAudioData(
                     request.response, 
                     function( buffer ) {
