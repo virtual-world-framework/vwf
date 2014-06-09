@@ -18,8 +18,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     var soundData = {};
     var logger;
 
-    //var self = this;
-
     var driver = model.load( module, {
 
         initialize: function() {
@@ -79,28 +77,30 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         return undefined;
                     }
 
-                    if ( soundData[ soundName ] != undefined ) {
+                    if ( soundData[ soundName ] !== undefined ) {
                         logger.errorx( "loadSound", "Duplicate sound named '" + soundName + "'." );
                         return undefined;
                     }
 
-                    if ( soundDefinition.soundURL === undefined ) {
+                    if ( !soundDefinition.isLayered && 
+                         ( soundDefinition.soundURL === undefined ) ) {
                         logger.errorx( "loadSound", "The sound definition for '" + soundName +
                                        "' must contain soundURL." );
                         return undefined;
                     }
 
-                    if (soundDefinition.isLayered === undefined) {
-                        logger.errorx( "loadSound", "The sound definition for '" + soundName +
-                                       "' must specify isLayered" );
-                        return undefined;
-                    }
+                    // if (soundDefinition.isLayered === undefined) {
+                    //     logger.errorx( "loadSound", "The sound definition for '" + soundName +
+                    //                    "' must specify isLayered" );
+                    //     return undefined;
+                    // }
+
                     // Create the sound.
                     // NOTE: the sound file is loaded into a buffer asynchronously, so the
                     // sound will not be ready to play immediately.  That's why we have the
                     // callbacks.
 
-                    if (soundDefinition.isLayered == false) {
+                    if (soundDefinition.isLayered === false) {
                         soundData[ soundDefinition.soundName ] = new SoundDatum( soundDefinition, successCallback, 
                                                                 failureCallback );
                     }
@@ -132,12 +132,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 //   { soundName: value, instanceID: value }
                 //   instanceID is -1 on failure  
                 case "playSound":
-
-                    soundDatum = getSoundDatum( params[0].soundName );
+                    soundName = params[ 0 ];
+                    soundDatum = getSoundDatum( soundName );
                     exitCallback = params[ 1 ];
                     return soundDatum ? soundDatum.playSound( exitCallback ) 
-                                      : { soundName: params[ 0 ], instanceID: -1 };
-
+                                      : { soundName: soundName, instanceID: -1 };
 
                 // arguments: soundName
                 // returns: true if sound is currently playing
@@ -305,7 +304,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var soundLayer = this.soundDatums [ id ];
 
             logger.errorx( "stoppingSoundLayer", "stopping track:"+id );
-               // self.(this.soundDatums[x].name);
 
             var soundInstances = this.playingInstances;
 
@@ -332,8 +330,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     SoundDatum.prototype = {
         constructor: SoundDatum,
-
-        self: this,
 
         // the name
         name: "",
@@ -376,11 +372,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             request.open( 'GET', soundDefinition.soundURL, true );
             request.responseType = 'arraybuffer';
 
-           request.onload = function() {
+            var thisSoundDatum = this;
+            request.onload = function() {
                 context.decodeAudioData(
                     request.response, 
                     function( buffer ) {
-                        self.buffer = buffer;
+                        thisSoundDatum.buffer = buffer;
 
                         successCallback && successCallback();
                     }, 
@@ -388,7 +385,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         logger.warnx( "initialize", "Failed to load sound: '" + 
                                       name + "." );
 
-                        delete soundData[ self.name ];
+                        delete soundData[ thisSoundDatum.name ];
 
                         failureCallback && failureCallback();
                     }
