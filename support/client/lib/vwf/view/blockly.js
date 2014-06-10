@@ -129,8 +129,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
  
         // -- deletedNode ------------------------------------------------------------------------------
 
-        deletedNode: function( childID ) {
-            delete this.nodes[ childID ];
+        deletedNode: function( nodeID ) {
+            
+            if ( this.state.nodes[ nodeID ] !== undefined ) {
+                delete this.state.nodes[ nodeID ];
+            }
+            
         },
 
         // -- addedChild -------------------------------------------------------------------------------

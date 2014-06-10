@@ -141,9 +141,15 @@ define( [ "module", "vwf/model",
         },
 
         deletingNode: function( nodeID ) {
+            
             if ( this.debug.deleting ) {
                 this.logger.infox( "deletingNode", nodeID );
             }
+
+            if ( this.state.nodes[ nodeID ] !== undefined ) {
+                delete this.state.nodes[ nodeID ];
+            }
+            
         },
 
         addingChild: function( nodeID, childID, childName ) {
