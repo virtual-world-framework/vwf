@@ -17,7 +17,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     var context;
     var soundData = {};
     var logger;
-
+    var context;
     var driver = model.load( module, {
 
         initialize: function() {
@@ -56,7 +56,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             // scope, might as well declare them here.
             var soundDefinition, successCallback, failureCallback, exitCallback;
             var soundName, soundNames, soundDatum, soundDefinition, soundInstance;
-            var instanceIDs, i, volume, fadeTime, fadeMethod, instanceHandle;
+            var instanceIDs, instanceID, i, volume, fadeTime, fadeMethod, instanceHandle;
 
             switch( methodName ) {
                 // arguments: soundDefinition, successCallback, failureCallback
@@ -88,13 +88,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                        "' must contain soundURL." );
                         return undefined;
                     }
-
-                    // if (soundDefinition.isLayered === undefined) {
-                    //     logger.errorx( "loadSound", "The sound definition for '" + soundName +
-                    //                    "' must specify isLayered" );
-                    //     return undefined;
-                    // }
-
+                    if ( soundDefinition.initialVolume && 
+                         ( soundDefinition.initialVolume === 0 ) ) {
+                        logger.warnx( "loadSound", "Your initial volume for '" + soundName +
+                                       "' is 0." );
+                        return undefined;
+                    }
                     // Create the sound.
                     // NOTE: the sound file is loaded into a buffer asynchronously, so the
                     // sound will not be ready to play immediately.  That's why we have the
@@ -112,19 +111,19 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     return;
 
                 // arguments: <none>
-                case "clearAllSounds":
-                    soundNames = Object.keys( soundData );
-                    for ( i = 0; i < soundNames.length; ++i ) {
-                        soundName = soundNames[ i ];
-                        this.state.soundManager.stopAllSoundInstances( soundName );
-                        delete soundData[ soundName ];
-                    }
-                    return;
+                // case "clearAllSounds":
+                //     soundNames = Object.keys( soundData );
+                //     for ( i = 0; i < soundNames.length; ++i ) {
+                //         soundName = soundNames[ i ];
+                //         this.state.soundManager.stopAllSoundInstances( soundName );
+                //         delete soundData[ soundName ];
+                //     }
+                //     return;
 
                 // arguments: soundName 
                 // returns: true if sound is done loading and is playable
                 case "isReady":
-                    soundDatum = getSoundDatum( soundDefinition.soundName );
+                    soundDatum = getSoundDatum( params [0] );
                     return soundDatum !== undefined ? !!soundDatum.buffer : false;
 
                 // arguments: soundName, exitCallback (which is called when the sound stops) 
@@ -149,33 +148,51 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 case "isInstancePlaying":
                     return getSoundInstance( params[ 0 ] ) !== undefined;
 
-                // arguments: instanceHandle, volume, fadeTime, fadeMethod
+                // // arguments: instanceHandle, volume, fadeTime, fadeMethod
                 case "setVolume":
-                    
-                instanceHandle = params[ 0 ];
-                    soundInstance = getSoundInstance( instanceHandle );
-                    if ( soundInstance ) {
-                        volume = params[ 1 ];
-                        fadeTime = params[ 2 ];
-                        fadeMethod = params[ 3 ];
+                    instanceHandle = params [ 0 ];
+                    soundDatum = getSoundDatum( instanceHandle.soundName );
 
-                        soundInstance.setVolume( volume, fadeTime, fadeMethod );
+                    if ( soundDatum ){
+                        soundDatum.setVolume (params [ 0 ], params [ 1 ], params [ 2 ], params [ 3 ]);
                     }
-                    return;
                 
                 // arguments: instanceHandle
                 case "stopSoundInstance":
-                    instanceHandle = params[ 0 ];
-                    soundInstance = getSoundInstance( instanceHandle );
-                    if ( soundInstance ) {
-                        soundInstance.soundDatum.stopInstance( instanceHandle.instanceID );
+
+                    if (params[1] === 'layered'){
+                        instanceHandle = params [ 0 ];
+                        soundDatum = getSoundDatum( instanceHandle.soundName );
+
+                        if ( soundDatum ){
+                            soundDatum.stopInstance();
+                        }
+                
+
+                    }else{
+                        instanceHandle = params[ 0 ];
+                        soundInstance = getSoundInstance( instanceHandle );
+
+                        if ( soundInstance ) {
+                            soundInstance.soundDatum.stopInstance( instanceHandle.instanceID );
+                        }
+
+                        return;
+                    }
+                    
+
+                // arguments: instanceHandle
+                case "stopLayeredSoundInstance":
+                    soundName = params[ 0 ];
+                    soundDatum = getSoundDatum( soundName );
+                    if ( soundDatum ) {
+                        soundDatum.stopInstance();
                     }
                     return;
-
                 // arguments: soundName
                 case "stopAllSoundInstances":
                     for (var soundDatum in soundData){
-                    soundDatum = getSoundDatum( params[ 0 ] );
+                    //soundDatum = getSoundDatum( params[ 0 ] );
                     if ( soundDatum ) {
                         instanceIDs = Object.keys( soundDatum.playingInstances );
                         for ( i = 0; i < instanceIDs.length; ++i ) {
@@ -206,27 +223,25 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         name:"",
         instanceIDCounter: 0,
+        playingInstances: null,
         startingLayers: [ 0 ],
         randomizeLayers:false,
         soundDatums:[ 0 ],
         loadedCount: 0,
         soundDefinitions:[ 0 ],
         layerCount: 0,
-
+        instanceHandles: null,
         initialize: function ( layeredSoundDefinition, successCallback, failureCallback ){
 
             this.name = layeredSoundDefinition.soundName;
             this.soundDefinitions = layeredSoundDefinition.soundDefinitions;
             this.layerCount = layeredSoundDefinition.soundDefinitions.length;
             this.soundDatums = [];
+            this.playingInstances = {};
+            this.instanceHandles = {};
 
             for (var k in layeredSoundDefinition.soundDefinitions){
 
-                //TODO MONDAY: Explore generators/promises here to track completion of all loading
-
-                var loadNext = function() {
-                    logger.errorx( "loadNext", "loaded Next!" );
-                }
                 var doneLoading = function() {
                     logger.errorx( "doneLoading", "done loading!!" );
                         successCallback && successCallback()
@@ -234,89 +249,93 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 var failureToLoad = function() {
                     failureCallback && failureCallback();
                 }
-
-               // if (i == this.layerCount-1) {
-               //     var subName = layeredSoundDefinition.soundDefinitions[i].soundName;
-                //    this.soundDatums[ subName ] = subName;
-                //    soundData[ subName ] = new SoundDatum( layeredSoundDefinition.soundDefinitions[i], doneLoading, failureToLoad );
-                //}else{
                     var subName = layeredSoundDefinition.soundDefinitions[k].soundName;
                     this.soundDatums[ subName ] = subName;
-                    soundData[ subName ] = new SoundDatum( layeredSoundDefinition.soundDefinitions[k], loadNext, failureToLoad );
-                  // this.loadSound(layeredSoundDefinition.soundDefinitions[k], loadNext, failureToLoad );
-                //}
+                    soundData[ subName ] = new SoundDatum( layeredSoundDefinition.soundDefinitions[k], doneLoading, failureToLoad );
             }
         },
-        playSound: function () {
-
-            logger.errorx( "playSound", "!" );
+        playSound: function ( exitCallback ) {
 
             for ( var x in this.soundDatums){
                 var played = function() {
-                    logger.errorx( "played", "played" );
+                   
                 }
-                logger.errorx( "playSound", "playing track:"+x );
-                soundData[ x ].playSound(played);
+
+                this.startLayer(x);
+                //this.instanceHandles[ x ] = soundData[ x ].playSound(played);
+
+            }
+
+            var id = this.instanceIDCounter;
+            ++this.instanceIDCounter;
+
+            //this.playingInstances[ id ] = new PlayingInstance( this, id, exitCallback );
+
+            return { soundName: this.name, instanceID: id };
+            
+        },
+        stopInstance: function () {
+
+            for ( var x in this.soundDatums){
+                
+                soundData[ x ].stopInstance(this.instanceHandles[x].instanceID);
+
 
             }
             
         },
         startLayer: function ( id ) {
 
-            //Check if within bounds of available layers
-            //Check if already playing
-
             if ( id === undefined ) {
                 logger.errorx( "startLayer", "The 'startLayer' method requires " +
                                        "an ID for the layer" );
                 return undefined;
             }
-            if ( id >= this.layerCount ) {
-                logger.errorx( "startLayer", "The 'startLayer' method must be provided " +
-                                       "a layer ID within bounds of the total layer count" );
+
+            if (this.instanceHandles [ id ] !== undefined) {
+                logger.errorx( "startLayer", "The 'startLayer' indicates that layer " + id +
+                                       "is already playing" );
                 return undefined;
             }
 
-            
+            var played = function() {
+                    
+            }
 
-        
-            
-
+            this.instanceHandles[ id ] = soundData[ id ].playSound(played);
 
         },
         stopLayer: function ( id ) {
-
-            //Check if within bounds of available layers
-            //Check if already stopped
-
 
             if ( id === undefined ) {
                 logger.errorx( "stopLayer", "The 'stopLayer' method requires " +
                                        "an ID for the layer" );
                 return undefined;
             }
-            if ( id >= this.layerCount ) {
-                logger.errorx( "stopLayer", "The 'stopLayer' method must be provided " +
-                                       "a layer ID within bounds of the total layer count" );
+
+            if (this.instanceHandles [ id ] === undefined) {
+                logger.errorx( "startLayer", "The 'startLayer' indicates that layer " + id +
+                                       "is already stopped" );
                 return undefined;
             }
 
-            var soundLayer = this.soundDatums [ id ];
-
-            logger.errorx( "stoppingSoundLayer", "stopping track:"+id );
-
-            var soundInstances = this.playingInstances;
-
-            for (var x in soundInstances){
-
-                if ( soundInstance ) {
-
-                soundInstance.sourceNode.stop();
-                }
-
+            var stopped = function() {
+                    
             }
 
+            soundData[ id ].stopInstance(this.instanceHandles[id].instanceID, stopped);
+
         },
+
+        setVolume: function( id, volume, duration, type) {
+
+            for ( var x in this.soundDatums){
+                
+                soundData[ x ].setVolume(this.instanceHandles[ x ],volume,duration,type);
+
+            }
+        },
+
         startOnLoop: function ( id ) {
 
             //Is this necessary? If sub-layers are set to loop we may not need this
@@ -341,6 +360,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         playingInstances: null,
 
         // control parameters
+        initialVolume: 1.0,
         isLooping: false,
         allowMultiplay: false,
         volumeAdjustment: 1.0,
@@ -350,8 +370,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         initialize: function( soundDefinition, successCallback, failureCallback ) {
             this.name = soundDefinition.soundName;
-            this.allowMultiplay = soundDefinition.allowMultiplay;
-            this.volumeAdjustment = soundDefinition.volumeAdjustment;
             this.playingInstances = {};
             this.soundDefinition = soundDefinition;
 
@@ -367,6 +385,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 this.volumeAdjustment = soundDefinition.volumeAdjustment;
             }
 
+            if (this.soundDefinition.initialVolume !== undefined ) {
+                this.initialVolume = soundDefinition.initialVolume;
+            }
             // Create & send the request to load the sound asynchronously
             var request = new XMLHttpRequest();
             request.open( 'GET', soundDefinition.soundURL, true );
@@ -410,7 +431,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var id = this.instanceIDCounter;
             ++this.instanceIDCounter;
 
-            this.playingInstances[ id ] = new PlayingInstance( this, id, exitCallback );
+            this.playingInstances[ id ] = new PlayingInstance( this, id, exitCallback);
 
             return { soundName: this.name, instanceID: id };
         },
@@ -421,6 +442,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 soundInstance.sourceNode.stop();
             }
         },
+
+        setVolume: function ( instanceHandle, volume, fadeTime, fadeMethod ) {
+           // arguments: instanceHandle, volume, fadeTime, fadeMethod
+                
+            var soundInstance = getSoundInstance( instanceHandle );
+
+            if ( soundInstance ) {
+                soundInstance.setVolume( volume, fadeTime, fadeMethod );
+            }
+   
+        }
         
     }
 
@@ -439,6 +471,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         sourceNode: undefined,
         gainNode: undefined,
 
+
         initialize: function( soundDatum, id, exitCallback ) {
             // NOTE: from http://www.html5rocks.com/en/tutorials/webaudio/intro/:
             //
@@ -455,14 +488,19 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.sourceNode = context.createBufferSource();
             this.sourceNode.buffer = this.soundDatum.buffer;
             this.sourceNode.loop = this.soundDatum.isLooping;
+           // this.sourceNode.gain.value = this.soundDatum.
 
             this.gainNode = context.createGain();
-            this.gainNode.gain.value = this.soundDatum.volumeAdjustment;
-
+            //this.gainNode.gain.value = this.soundDatum.volumeAdjustment;
+            this.gainNode.gain.value = this.soundDatum.initialVolume;
+            //this.sourceNode.gain.value = this.soundDatum.initialVolume;
             this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );
+            
 
             this.sourceNode.start( 0 );
+
+          
 
             var soundDatum = this.soundDatum;
             this.sourceNode.onended = function() {
@@ -478,26 +516,32 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 return;
             }
 
-            targetVolume = volume * this.soundDatum.volumeAdjustment;
-            fadeTime = fadeTime ? fadeTime : 0;
-            fadeMethod = fadeMethod ? fadeMethod : "linear";
+            logger.errorx( "setVolume", "In set volume" );
+
+            var thisPlayingInstance = this;
+
+            var targetVolume = volume;
+             fadeTime = fadeTime ? fadeTime : 0;
+             fadeMethod = fadeMethod ? fadeMethod : "linear";
 
             if ( fadeTime <= 0 ) {
-                gainNode.gain.value = targetVolume;
+                this.sourceNode.gain.value = targetVolume;
             } else {
                 var endTime = context.currentTime + fadeTime;
+                var now = context.currentTime;
+                this.gainNode.gain.cancelScheduledValues( now );
 
                 switch( fadeMethod ) {
                     case "linear":
-                        gainNode.gain.linearRampToValueAtTime( targetVolume, endTime );
+                        this.gainNode.gain.setTargetValueAtTime(1.0, now, endTime);
                         break;
                     case "exponential":
-                        gainNode.gain.exponentialRampToValueAtTime( targetVolume, endTime );
+                        this.gainNode.gain.setTargetValueAtTime(1.0, now, 1.7);
                         break;
                     default:
                         logger.errorx( "setVolume", "Unknonwn fade method: '" +
                                        fadeMethod + "'.  Using a linear fade.");
-                        gainNode.gain.linearRampToValueAtTime( targetVolume, endTime );
+                        this.sourceNode.gain.linearRampToValueAtTime( volume, endTime );
                 }
             }
         },
@@ -534,6 +578,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         }
 
         var soundDatum = getSoundDatum( instanceHandle.soundName );
+
         return soundDatum ? soundDatum.playingInstances[ instanceHandle.instanceID ] : undefined;
     }
 
