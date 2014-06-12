@@ -7,7 +7,7 @@ properties:
       //this.logger_logs = ( this.logger_logs === undefined ) ? value : this.logger_logs;
       this.logger_logs = value;
     value: []
-  logger_maxLength: 10
+  logger_maxLogs: 10
   logger_lifeTime:
     set: |
       if ( this.logger_lifeTime !== value ) {
@@ -35,7 +35,7 @@ scripts:
 
     this.addLog = function( msg ){
       var logCopy = this.logger_logs.slice( 0 );
-      while ( logCopy.length >= this.logger_maxLength ) {
+      while ( logCopy.length >= this.logger_maxLogs ) {
         logCopy.shift();
         this.logRemoved( 0 );
       }
