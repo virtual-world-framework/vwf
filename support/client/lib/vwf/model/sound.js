@@ -183,23 +183,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     instanceHandle = params[ 0 ];
                     isLayered = params[ 1 ];
 
-                    if (isLayered === true) {
-                        instanceHandle = params [ 0 ];
-                        soundDatum = getSoundDatum( instanceHandle.soundName );
+                    instanceHandle = params [ 0 ];
+                    soundDatum = getSoundDatum( instanceHandle.soundName );
 
-                        if ( soundDatum ){
-                            soundDatum.stopInstance();
-                        }
-
-                    }else{
-
-                        soundInstance = getSoundInstance( instanceHandle );
-
-                        if ( soundInstance ) {
-                            soundInstance.soundDatum.stopInstance( instanceHandle.instanceID );
-                        }
-
+                    if ( soundDatum ){
+                        soundDatum.stopInstance( instanceHandle );
                     }
+
                     return;
                 
                 // arguments: soundName
@@ -292,7 +282,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         },
         stopInstance: function () {
             for ( var x in this.soundDatums ){
-                soundData[ x ].stopInstance( this.instanceHandles[x].instanceID );
+                soundData[ x ].stopInstance( this.instanceHandles[x] );
                 this.instanceHandles[ x ] = undefined;
             }
             
@@ -444,8 +434,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             return { soundName: this.name, instanceID: id };
         },
 
-        stopInstance: function( instanceID ) {
-            var soundInstance = this.playingInstances[ instanceID ];
+        stopInstance: function( instanceHandle ) {
+            var soundInstance = this.playingInstances[ instanceHandle.instanceID ];
             if ( soundInstance ) {
                 soundInstance.sourceNode.stop();
             }
