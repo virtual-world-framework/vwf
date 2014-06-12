@@ -142,19 +142,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 case "playSequence":
                     var soundNames = params;
-                     soundDatum = getSoundDatum( soundNames[ 0 ] );
+                    soundDatum = getSoundDatum( soundNames[ 0 ] );
 
-                    var done = function ( soundNames, current ){
+                    var playNext = function ( soundNames, current ){
 
-                        if ( soundNames.length !== current){
-
-                            soundData[ soundNames[ current+1 ] ].playSound( done ( soundNames, current+1 ) );
-
+                        if (current !== soundNames.length){
+                        soundDatum = getSoundDatum( soundNames[ current ] );
+                        soundDatum.playSound( playNext ( soundNames, current+1 ) );
                         }
 
                     }
-
-                    return soundDatum ? soundDatum.playSound( done ( soundNames, 0 ) ) 
+                    return soundDatum ? soundDatum.playSound( playNext ( soundNames, 0 ) ) 
                                       : { soundName: soundName, instanceID: -1 };
 
                 // arguments: soundName
@@ -429,7 +427,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         thisSoundDatum.buffer = buffer;
                         
                         if (thisSoundDatum.playOnLoad === true){
-                            thisSoundDatum.playSound();
+                            thisSoundDatum.playSound(null, true);
                         }
 
                         successCallback && successCallback();
@@ -463,8 +461,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var id = this.instanceIDCounter;
             ++this.instanceIDCounter;
 
-            this.playingInstances[ id ] = new PlayingInstance( this, id, exitCallback);
-
+            this.playingInstances[ id ] = new PlayingInstance( this, id, exitCallback );
+            
             return { soundName: this.name, instanceID: id };
         },
 
@@ -488,8 +486,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         
     }
 
-    function PlayingInstance( soundDatum, id, exitCallback ) {
-        this.initialize( soundDatum, id, exitCallback );
+    function PlayingInstance( soundDatum, id, exitCallback, successCallback ) {
+        this.initialize( soundDatum, id, exitCallback, successCallback );
         return this;
     }
 
@@ -504,7 +502,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         gainNode: undefined,
 
 
-        initialize: function( soundDatum, id, exitCallback ) {
+        initialize: function( soundDatum, id, exitCallback, successCallback ) {
             // NOTE: from http://www.html5rocks.com/en/tutorials/webaudio/intro/:
             //
             // An important point to note is that on iOS, Apple currently mutes all sound 
@@ -532,10 +530,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             this.sourceNode.start( 0 );
 
-          
+            //successCallback && successCallback();
 
             var soundDatum = this.soundDatum;
-            this.sourceNode.onended = function() {
+            this.sourceNode.onEnded = function() {
                 delete soundDatum.playingInstances[ id ];
                 exitCallback && exitCallback();
             }
