@@ -4,10 +4,8 @@ extends:
 properties:
   logger_logs:
     set: |
-      # read only behavior
-      this.logger_logs = this.logger_logs;
-    get : |
-      return this.logger_logs;
+      //this.logger_logs = ( this.logger_logs === undefined ) ? value : this.logger_logs;
+      this.logger_logs = value;
     value: []
   logger_maxLength: 10
   logger_lifeTime:
@@ -25,6 +23,7 @@ events:
   logAdded:
 methods:
   addLog:
+  removeLog:
   updateLogs:
 scripts:
 - |
@@ -33,15 +32,17 @@ scripts:
         this.future( 0 ).updateLogs();
       }
     }
+
     this.addLog = function( msg ){
-      var logCopy = this.logger_logs.slice(0);
+      var logCopy = this.logger_logs.slice( 0 );
       while ( logCopy.length >= this.logger_maxLength ) {
         logCopy.shift();
         this.logRemoved( 0 );
       }
-      this.push( { "log": msg, "time": this.time } );
-      this.logger_logs = logCpoy;
-      this.logAdded( msg );
+      var newMsg = { "log": msg, "time": this.time };
+      logCopy.push( newMsg );
+      this.logger_logs = logCopy;
+      this.logAdded( newMsg );
     }
 
     this.updateLogs = function() {
