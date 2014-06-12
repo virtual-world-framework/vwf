@@ -4,6 +4,7 @@ extends:
 properties:
   logger_logs:
     set: |
+      # read only behavior
       this.logger_logs = this.logger_logs;
     get : |
       return this.logger_logs;
@@ -11,11 +12,11 @@ properties:
   logger_maxLength: 10
   logger_lifeTime:
     set: |
-      if ( logger_lifeTime !== value ) {
+      if ( this.logger_lifeTime !== value ) {
         if ( value !== -1 ) {
-          this.future( this.logger_frequency ).updateLogs();
+          this.future( 0 ).updateLogs();
         }
-        logger_lifeTime = value;
+        this.logger_lifeTime = value;
       }
     value: -1
   logger_frequency: 1  
@@ -27,6 +28,11 @@ methods:
   updateLogs:
 scripts:
 - |
+    this.initialize = function() {
+      if ( this.logger_lifeTime !== -1 ) {
+        this.future( 0 ).updateLogs();
+      }
+    }
     this.addLog = function( msg ){
       var logCopy = this.logger_logs.slice(0);
       while ( logCopy.length >= this.logger_maxLength ) {
@@ -37,6 +43,7 @@ scripts:
       this.logger_logs = logCpoy;
       this.logAdded( msg );
     }
+
     this.updateLogs = function() {
 
       if ( this.logger_lifeTime !== -1 ) {
@@ -63,6 +70,5 @@ scripts:
       }
 
     }
-
     //@ sourceURL=logger.vwf
 
