@@ -518,21 +518,21 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.sourceNode = context.createBufferSource();
             this.sourceNode.buffer = this.soundDatum.buffer;
             this.sourceNode.loop = this.soundDatum.isLooping;
-           // this.sourceNode.gain.value = this.soundDatum.
 
             this.gainNode = context.createGain();
-            //this.gainNode.gain.value = this.soundDatum.volumeAdjustment;
+
             this.gainNode.gain.value = this.soundDatum.initialVolume;
-            //this.sourceNode.gain.value = this.soundDatum.initialVolume;
+
             this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );
             
 
             this.sourceNode.start( 0 );
 
-            //successCallback && successCallback();
-
             var soundDatum = this.soundDatum;
+
+            //Browsers will handle onEnded differently depending on audio filetype - needs support.
+
             this.sourceNode.onEnded = function() {
                 delete soundDatum.playingInstances[ id ];
                 exitCallback && exitCallback();
