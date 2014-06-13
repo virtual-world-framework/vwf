@@ -8,6 +8,7 @@ properties:
   yAxisVisible: undefined
   zAxisVisible: undefined
   gridVisible: undefined
+  renderTop: undefined
 methods:
   graphFunction:
     parameters:
@@ -17,6 +18,7 @@ methods:
       - pointCount
       - color
       - lineThickness
+      - renderTop
       - lineName
     body: |
       var lineDef = {
@@ -27,7 +29,8 @@ methods:
           "endValue": endValue,
           "pointCount": pointCount,
           "color": color,
-          "lineThickness": lineThickness
+          "lineThickness": lineThickness,
+          "renderTop": renderTop
         }
       }
       lineName = lineName || "line" + this.lineCount++;
