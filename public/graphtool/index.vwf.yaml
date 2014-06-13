@@ -13,6 +13,7 @@ children:
       yAxisVisible: true
       zAxisVisible: true
       gridVisible: true
+      renderTop: false
     children:
       parabola:
         extends: http://vwf.example.com/graphline.vwf
@@ -23,6 +24,7 @@ children:
           pointCount: 100
           color: [ 0, 255, 255 ]
           lineThickness: 0.25
+          renderTop: false
       tangent:
         extends: http://vwf.example.com/graphline.vwf
         properties:
@@ -32,6 +34,7 @@ children:
           pointCount: 250
           color: [ 255, 0, 255 ]
           lineThickness: 0.25
+          renderTop: false
       helix:
         extends: http://vwf.example.com/graphline.vwf
         properties:
@@ -41,6 +44,7 @@ children:
           pointCount: 250
           color: [ 255, 255, 0 ]
           lineThickness: 0.25
+          renderTop: false
 scripts: |
   this.initialize = function() {
     this.camera.transform = [-0.6877578496932983,0.7259325385093689,2.705990027607186e-7,0,-0.6843284964561462,-0.6483430862426758,-0.3336801826953888,0,-0.24222907423973083,-0.2294914275407791,0.9426885843276978,0,100,100.00012969970703,50.0000114440918,1];
