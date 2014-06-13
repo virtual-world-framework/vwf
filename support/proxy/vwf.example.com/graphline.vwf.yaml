@@ -7,3 +7,4 @@ properties:
   pointCount: undefined
   color: undefined
   lineThickness: undefined
+  renderTop: undefined
