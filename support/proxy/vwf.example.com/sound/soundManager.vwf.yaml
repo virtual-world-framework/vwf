@@ -5,6 +5,7 @@ methods:
   clearAllSounds:
   isReady:
   playSound:
+  stopSound:
   playSequence:
   isSoundPlaying:
   isInstancePlaying:

@@ -88,11 +88,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                        "' must contain soundURL." );
                         return undefined;
                     }
-                    if ( soundDefinition.initialVolume && 
-                         ( soundDefinition.initialVolume === 0 ) ) {
-                        logger.warnx( "loadSound", "Your initial volume for '" + soundName +
-                                      "' is 0." );
-                    }
+                    // if ( soundDefinition.initialVolume && 
+                    //      ( soundDefinition.initialVolume === 0 ) ) {
+                    //     logger.warnx( "loadSound", "Your initial volume for '" + soundName +
+                    //                   "' is 0." );
+                    // }
                     // Create the sound.
                     // NOTE: the sound file is loaded into a buffer asynchronously, so the
                     // sound will not be ready to play immediately.  That's why we have the
@@ -159,7 +159,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 // arguments: soundName
                 // returns: true if sound is currently playing
                 case "isSoundPlaying":
-                    soundDatum = getSoundDatum( soundDefinition.soundName );
+                    soundDatum = getSoundDatum( params[ 0 ] );
                     return soundDatum ? soundDatum.playingInstances.length > 0 : false;
 
                 // arguments: instanceHandle
@@ -179,9 +179,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 // arguments: instanceHandle
                 case "stopSoundInstance":
 
-                    instanceHandle = params[ 0 ];
-                    isLayered = params[ 1 ];
-
                     instanceHandle = params [ 0 ];
                     soundDatum = getSoundDatum( instanceHandle.soundName );
 
@@ -190,11 +187,23 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     }
 
                     return;
-                
-                // arguments: soundName
+
+                // arguments: none
                 case "stopAllSoundInstances":
-                    for (var soundDatum in soundData){
+                    for ( var soundDatum in soundData ){
                         if ( soundDatum ) {
+                            instanceIDs = Object.keys( soundDatum.playingInstances );
+                            for ( i = 0; i < instanceIDs.length; ++i ) {
+                                soundDatum.stopInstance( instanceIDs[ i ] );
+                            }
+                        }
+                    }
+                    return undefined;
+
+                // arguments: soundName
+                case "stopSound":
+                    for ( var soundDatum in soundData ){
+                        if ( soundDatum.name == params[ 0 ] ) {
                             instanceIDs = Object.keys( soundDatum.playingInstances );
                             for ( i = 0; i < instanceIDs.length; ++i ) {
                                 soundDatum.stopInstance( instanceIDs[ i ] );
@@ -249,8 +258,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.playingInstances = {};
             this.instanceHandles = {};
 
-            for ( var k in layeredSoundDefinition.soundDefinitions ) {
-                var doneLoading = function( thisLayeredSoundDatum ) {
+            // for ( var k in layeredSoundDefinition.soundDefinitions ) {
+
+            var soundDefinitionObjects = Object.keys( layeredSoundDefinition.soundDefinitions );
+
+            for ( var k = 0; k < soundDefinitionObjects.length; ++k ) {
+
+                var doneLoading = function() {
                     successCallback && successCallback();
                 }
                 var failureToLoad = function() {
@@ -276,6 +290,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             var id = this.instanceIDCounter;
             ++this.instanceIDCounter;
+
+            this.playingInstances[ id ] = id;
 
             return { soundName: this.name, instanceID: id };
         },
