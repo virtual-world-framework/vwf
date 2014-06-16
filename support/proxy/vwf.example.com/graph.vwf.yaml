@@ -11,6 +11,9 @@ properties:
   gridVisible: undefined
   renderTop: undefined
 methods:
+  setGraphVisibility:
+    parameters:
+      - visible
   graphFunction:
     parameters:
       - lineFunction

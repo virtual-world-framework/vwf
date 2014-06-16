@@ -217,6 +217,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // -- callingMethod ------------------------------------------------------------------------
 
         callingMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+            if ( this.state.graphs[ nodeID ] ) {
+                
+                var node = this.state.graphs[ nodeID ];
+                
+                if ( methodName === "setGraphVisibility" ) {
+                    var visible = methodParameters[0];
+                    setGraphVisibility( node, visible );
+                }
+
+            }
         },
 
         // -- creatingEvent ------------------------------------------------------------------------
@@ -305,80 +315,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 props.renderTop
             );
 
-        graph.visible = node.threeObject.visible;
         node.threeObject.add( graph );
 
-    }
-
-    function makeGraph( gridScale, gridInterval, gridLineInterval, gridLength, xAxisVisible, 
-                        yAxisVisible, zAxisVisible, gridVisible, renderTop ) {
-
-        // Scale grid
-        gridInterval *= gridScale;
-        gridLineInterval *= gridScale;
-        gridLength *= gridScale;
-
-        var xAxis, yAxis, zAxis, grid;
-        var opacity = 1;
-        var graph = new THREE.Object3D();
-        graph.name = "grid";
-        graph.renderDepth = renderTop ? Infinity : null;
-
-        xAxis = new THREE.Geometry();
-        xAxis.vertices.push( new THREE.Vector3( gridLength, 0, 0 ) );
-        xAxis.vertices.push( new THREE.Vector3( -gridLength, 0, 0 ) );
-        graph.add( new THREE.Line( xAxis, new THREE.LineBasicMaterial( 
-                { "color": 0xFF0000, "visible": xAxisVisible, "depthTest": !renderTop } 
-            ) ) );
-
-        yAxis = new THREE.Geometry();
-        yAxis.vertices.push( new THREE.Vector3( 0, gridLength, 0 ) );
-        yAxis.vertices.push( new THREE.Vector3( 0, -gridLength, 0 ) );
-        graph.add( new THREE.Line( yAxis, new THREE.LineBasicMaterial( 
-                { "color": 0x0000FF, "visible": yAxisVisible, "depthTest": !renderTop } 
-            ) ) );
-
-        zAxis = new THREE.Geometry();
-        zAxis.vertices.push( new THREE.Vector3( 0, 0, gridLength ) );
-        zAxis.vertices.push( new THREE.Vector3( 0, 0, -gridLength ) );
-        graph.add( new THREE.Line( zAxis, new THREE.LineBasicMaterial( 
-                { "color": 0x00FF00, "visible": zAxisVisible, "depthTest": !renderTop } 
-            ) ) );
-
-        for ( var i = -gridLength; i <= gridLength; i += gridInterval ) {
-            if ( i === 0 ) {
-                continue;
-            } else if ( i % gridLineInterval === 0 ) {
-                opacity = 0.2;
-            } else {
-                opacity = 0.1;
-            }
-
-            grid = new THREE.Geometry();
-            grid.vertices.push( new THREE.Vector3( gridLength, i, 0 ) );
-            grid.vertices.push( new THREE.Vector3( -gridLength, i, 0 ) );
-            graph.add( new THREE.Line( grid, new THREE.LineBasicMaterial( 
-                {   "color": 0xFFFFFF, 
-                    "transparent": true, 
-                    "opacity": opacity, 
-                    "visible": gridVisible, 
-                    "depthTest": !renderTop 
-                } ) ) );
-
-            grid = new THREE.Geometry();
-            grid.vertices.push( new THREE.Vector3( i, gridLength, 0 ) );
-            grid.vertices.push( new THREE.Vector3( i, -gridLength, 0 ) );
-            graph.add( new THREE.Line( grid, new THREE.LineBasicMaterial( 
-                {   "color": 0xFFFFFF, 
-                    "transparent": true, 
-                    "opacity": opacity, 
-                    "visible": gridVisible, 
-                    "depthTest": !renderTop 
-                } ) ) );
-
-        }
-
-        return graph;
     }
 
     function createLine( node ) {
@@ -399,6 +337,117 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         line.visible = node.threeObject.visible;
         node.threeObject.add( line );
 
+    }
+
+    function setGraphVisibility( node, value ) {
+        
+        var graph, xAxis, yAxis, zAxis, gridLines;
+        graph = node.threeObject.getObjectByName( "graph" );
+
+        if ( graph ) {
+            xAxis = graph.getObjectByName( "xAxis" );
+            yAxis = graph.getObjectByName( "yAxis" );
+            zAxis = graph.getObjectByName( "zAxis" );
+            gridLines = graph.getObjectByName( "gridLines" );
+
+            if ( value ) {
+                xAxis.visible = node.graphProperties.xAxisVisible;
+                yAxis.visible = node.graphProperties.yAxisVisible;
+                zAxis.visible = node.graphProperties.zAxisVisible;
+                gridLines.visible = node.graphProperties.gridVisible;
+                for ( var line in gridLines.children ) {
+                    gridLines.children[ line ].visible = gridLines.visible;
+                }
+            } else {
+                xAxis.visible = value;
+                yAxis.visible = value;
+                zAxis.visible = value;
+                gridLines.visible = value;
+                for ( var line in gridLines.children ) {
+                    gridLines.children[ line ].visible = gridLines.visible;
+                }
+            }
+        }
+    }
+
+    function makeGraph( gridScale, gridInterval, gridLineInterval, gridLength, xAxisVisible, 
+                        yAxisVisible, zAxisVisible, gridVisible, renderTop ) {
+
+        // Scale grid
+        gridInterval *= gridScale;
+        gridLineInterval *= gridScale;
+        gridLength *= gridScale;
+
+        var xAxis, yAxis, zAxis, grid, axisLine;
+        var opacity = 1;
+        var graph = new THREE.Object3D();
+        var gridLines = new THREE.Object3D();
+        graph.name = "graph";
+        graph.renderDepth = renderTop ? Infinity : null;
+        gridLines.name = "gridLines";
+
+        xAxis = new THREE.Geometry();
+        xAxis.vertices.push( new THREE.Vector3( gridLength, 0, 0 ) );
+        xAxis.vertices.push( new THREE.Vector3( -gridLength, 0, 0 ) );
+        axisLine = new THREE.Line( xAxis, new THREE.LineBasicMaterial( 
+                { "color": 0xFF0000, "visible": xAxisVisible, "depthTest": !renderTop } 
+            ) );
+        axisLine.name = "xAxis";
+        graph.add( axisLine );
+
+        yAxis = new THREE.Geometry();
+        yAxis.vertices.push( new THREE.Vector3( 0, gridLength, 0 ) );
+        yAxis.vertices.push( new THREE.Vector3( 0, -gridLength, 0 ) );
+        axisLine = new THREE.Line( yAxis, new THREE.LineBasicMaterial( 
+                { "color": 0x0000FF, "visible": yAxisVisible, "depthTest": !renderTop } 
+            ) );
+        axisLine.name = "yAxis";
+        graph.add( axisLine );
+
+        zAxis = new THREE.Geometry();
+        zAxis.vertices.push( new THREE.Vector3( 0, 0, gridLength ) );
+        zAxis.vertices.push( new THREE.Vector3( 0, 0, -gridLength ) );
+        axisLine = new THREE.Line( zAxis, new THREE.LineBasicMaterial( 
+                { "color": 0x00FF00, "visible": zAxisVisible, "depthTest": !renderTop } 
+            ) );
+        axisLine.name = "zAxis";
+        graph.add( axisLine );
+
+        for ( var i = -gridLength; i <= gridLength; i += gridInterval ) {
+            if ( i === 0 ) {
+                continue;
+            } else if ( i % gridLineInterval === 0 ) {
+                opacity = 0.2;
+            } else {
+                opacity = 0.1;
+            }
+
+            grid = new THREE.Geometry();
+            grid.vertices.push( new THREE.Vector3( gridLength, i, 0 ) );
+            grid.vertices.push( new THREE.Vector3( -gridLength, i, 0 ) );
+            gridLines.add( new THREE.Line( grid, new THREE.LineBasicMaterial( 
+                {   "color": 0xFFFFFF, 
+                    "transparent": true, 
+                    "opacity": opacity, 
+                    "depthTest": !renderTop 
+                } ) ) );
+
+            grid = new THREE.Geometry();
+            grid.vertices.push( new THREE.Vector3( i, gridLength, 0 ) );
+            grid.vertices.push( new THREE.Vector3( i, -gridLength, 0 ) );
+            gridLines.add( new THREE.Line( grid, new THREE.LineBasicMaterial( 
+                {   "color": 0xFFFFFF, 
+                    "transparent": true, 
+                    "opacity": opacity, 
+                    "depthTest": !renderTop 
+                } ) ) );
+
+        }
+
+        gridLines.visible = gridVisible;
+        graph.add( gridLines );
+
+        return graph;
     }
 
     function graphFunction( gridScale, functionString, startValue, endValue, 
