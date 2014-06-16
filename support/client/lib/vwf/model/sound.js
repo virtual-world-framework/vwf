@@ -98,14 +98,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     // sound will not be ready to play immediately.  That's why we have the
                     // callbacks.
 
-                    if (soundDefinition.isLayered === false) {
+                    if ( !soundDefinition.isLayered ) {
 
                         soundData[ soundName ] = new SoundDatum( soundDefinition, 
                                                                  successCallback, 
                                                                  failureCallback );
 
-                    }
-                    else{
+                    } else {
 
                         soundData[ soundName ] = new LayeredSoundDatum( soundDefinition, 
                                                                         successCallback, 
