@@ -199,18 +199,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         }
                     }
                     return undefined;
-
-                // arguments: soundName
-                case "stopSound":
-                    for ( var soundDatum in soundData ){
-                        if ( soundDatum.name == params[ 0 ] ) {
-                            instanceIDs = Object.keys( soundDatum.playingInstances );
-                            for ( i = 0; i < instanceIDs.length; ++i ) {
-                                soundDatum.stopInstance( instanceIDs[ i ] );
-                            }
-                        }
-                    }
-                    return undefined;
+                    
             }
 
             return undefined;
@@ -297,7 +286,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         },
         stopInstance: function () {
             for ( var x in this.soundLayers ){
-                soundData[ x ].stopInstance( this.instanceHandles[x] );
+                soundData[ x ].stopInstance( this.instanceHandles[ x ] );
                 this.instanceHandles[ x ] = undefined;
             }
             
