@@ -19,6 +19,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
     var self;
 
     var createBlocklyDivs = true;
+    var blocksInWorkspace = {};
+    var handleChangedEvents = true;
 
     return view.load( module, {
 
@@ -103,9 +105,43 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
                 Blockly.addChangeListener( function( event ) {
                     
-                    if ( self.state.blockly.node !== undefined ) {
-                        var blockCount = Blockly.mainWorkspace.getAllBlocks().length;
+                    if ( handleChangedEvents && self.state.blockly.node !== undefined ) {
+                        var i, block;
+                        var previousBlockIds = Object.keys( blocksInWorkspace );
+                        var previousBlockCount = previousBlockIds.length;
+                        var blocks = Blockly.mainWorkspace.getAllBlocks();
+                        var blockCount = blocks.length;
                         var topBlockCount = Blockly.mainWorkspace.topBlocks_.length;
+                        
+                        if ( blockCount > previousBlockCount ) {
+                            
+                            for ( i = 0; i < blocks.length; i++ ) {
+                                block = blocks[ i ];
+                                if ( blocksInWorkspace[ block.id ] === undefined ) {
+                                    blocksInWorkspace[ block.id ] = { "id": block.id, "type": block.type }; 
+                                    self.kernel.fireEvent( self.state.blockly.node.ID, "blocklyBlockAdded", [ block.id, block.type ] );   
+                                }
+                            } 
+
+                        } else if ( blockCount < previousBlockCount ) {
+
+                            var activeBlocks = {};
+                            for ( i = 0; i < blocks.length; i++ ) {
+                                activeBlocks[ blocks[ i ].id ] = blocks[ i ];    
+                            }
+                            var blockIDsRemoved = [];
+                            for ( var id in blocksInWorkspace ) {
+                                if ( activeBlocks[ id ] === undefined ) {
+                                    blockIDsRemoved.push( id );    
+                                }
+                            }
+                            for ( i = 0; i < blockIDsRemoved.length; i++ ) {
+                                block = blocksInWorkspace[ blockIDsRemoved[ i ] ];
+                                self.kernel.fireEvent( self.state.blockly.node.ID, "blocklyBlockRemoved", [ block.id, block.type ] );
+                                delete blocksInWorkspace[ blockIDsRemoved[ i ] ];   
+                            }
+
+                        }
                         
                         self.kernel.fireEvent( self.kernel.application(), "blocklyContentChanged", [ true ] );
                         self.kernel.setProperty( self.state.blockly.node.ID, "blockly_blockCount", blockCount );
@@ -275,6 +311,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
     }
 
     function setBlockXML( node ) {
+
+        handleChangedEvents = false;
+
         var xmlText = node.blocks;
         var xmlDom = null;
         try {
@@ -289,11 +328,19 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             Blockly.mainWorkspace.clear();
             Blockly.Xml.domToWorkspace( Blockly.mainWorkspace, xmlDom );
         } 
-        var blockCount = Blockly.mainWorkspace.getAllBlocks().length;
+        var blocks = Blockly.mainWorkspace.getAllBlocks();
+        var blockCount = blocks.length;
         var topBlockCount = Blockly.mainWorkspace.topBlocks_.length;
         
+        blocksInWorkspace = {};
+        for ( var i = 0; i < blocks.length; i++ ) {
+            blocksInWorkspace[ blocks[ i ].id ] = { "id": blocks[ i ].id, "type": blocks[ i ].type };
+        }
+
         self.kernel.setProperty( node.ID, "blockly_blockCount", blockCount );
-        self.kernel.setProperty( node.ID, "blockly_topBlockCount", topBlockCount );      
+        self.kernel.setProperty( node.ID, "blockly_topBlockCount", topBlockCount );   
+
+        handleChangedEvents = true;   
     }
 
     function getBlockXML( node ) {
