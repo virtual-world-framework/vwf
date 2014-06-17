@@ -391,6 +391,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         var xAxis, yAxis, zAxis, grid, axisLine;
         var thickness = 0.1;
+        var opacity = 0.5;
         var graph = new THREE.Object3D();
         var gridLines = new THREE.Object3D();
         graph.name = "graph";
@@ -427,11 +428,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             grid = draw3DLine( [ 1, 0, 0 ], gridScale, gridLength, [ 255, 255, 255 ], thickness, renderTop );
             grid.position.set( 0, i, 0 );
             grid.visible = gridVisible;
+            grid.material.transparent = true;
+            grid.material.opacity = opacity;
             gridLines.add( grid );
 
             grid = draw3DLine( [ 0, 1, 0 ], gridScale, gridLength, [ 255, 255, 255 ], thickness, renderTop );
             grid.position.set( i, 0, 0 );
             grid.visible = gridVisible;
+            grid.material.transparent = true;
+            grid.material.opacity = opacity;
             gridLines.add( grid );
 
         }
