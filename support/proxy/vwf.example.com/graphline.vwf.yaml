@@ -8,3 +8,18 @@ properties:
   color: undefined
   lineThickness: undefined
   renderTop: undefined
+methods:
+  evaluateLineAtPoint:
+    parameters:
+      - point
+    body: |
+      var fn =  "var x = " + point[0] + 
+                ", y = " + point[1] + 
+                ", z = " + point[2] + ";\n" + 
+                this.lineFunction + ";\n" + 
+                "[ x, y, z ];";
+      point = eval( fn );
+      point[ 0 ] = point[ 0 ] || 0;
+      point[ 1 ] = point[ 1 ] || 0;
+      point[ 2 ] = point[ 2 ] || 0;
+      return point;
