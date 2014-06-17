@@ -18,6 +18,7 @@ properties:
       }
     value: -1
   logger_frequency: 1  
+  logger_logFormat: undefined
 events:
   logRemoved:
   logAdded:
@@ -40,6 +41,13 @@ scripts:
         this.logRemoved( 0 );
       }
       var newMsg = { "log": msg, "time": this.time };
+      if ( this.logger_logFormat ) {
+        var index = this.logger_logFormat.indexOf( '%s' );
+        if ( index !== -1 ) {
+          var str = this.logger_logFormat;
+          newMsg.log = str.substr( 0, index ) + newMsg.log + str.substr( index + 2 );
+        }
+      }
       logCopy.push( newMsg );
       this.logger_logs = logCopy;
       this.logAdded( newMsg );
