@@ -88,11 +88,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                        "' must contain soundURL." );
                         return undefined;
                     }
-                    if ( soundDefinition.initialVolume && 
-                         ( soundDefinition.initialVolume === 0 ) ) {
-                        logger.warnx( "loadSound", "Your initial volume for '" + soundName +
-                                      "' is 0." );
-                    }
+                    // if ( soundDefinition.initialVolume && 
+                    //      ( soundDefinition.initialVolume === 0 ) ) {
+                    //     logger.warnx( "loadSound", "Your initial volume for '" + soundName +
+                    //                   "' is 0." );
+                    // }
                     // Create the sound.
                     // NOTE: the sound file is loaded into a buffer asynchronously, so the
                     // sound will not be ready to play immediately.  That's why we have the
@@ -159,7 +159,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 // arguments: soundName
                 // returns: true if sound is currently playing
                 case "isSoundPlaying":
-                    soundDatum = getSoundDatum( soundDefinition.soundName );
+                    soundDatum = getSoundDatum( params[ 0 ] );
                     return soundDatum ? soundDatum.playingInstances.length > 0 : false;
 
                 // arguments: instanceHandle
@@ -179,29 +179,33 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 // arguments: instanceHandle
                 case "stopSoundInstance":
 
-                    instanceHandle = params[ 0 ];
-                    isLayered = params[ 1 ];
-
                     instanceHandle = params [ 0 ];
-                    soundDatum = getSoundDatum( instanceHandle.soundName );
 
-                    if ( soundDatum ){
-                        soundDatum.stopInstance( instanceHandle );
+                    //If a user chooses to pass just a soundName, stop all instances with that name.
+                    if ( !instanceHandle.soundName ){
+                        soundName = params [ 0 ];
+                        soundDatum = getSoundDatum( soundName );
+                        if ( soundDatum ){
+                            soundDatum.stopAllSoundInstances();
+                        }
+                    } else {
+                    //Otherwise stop the specific instance.
+                        soundDatum = getSoundDatum( instanceHandle.soundName );
+                        if ( soundDatum ){
+                            soundDatum.stopInstance( instanceHandle );
+                        }
                     }
-
                     return;
-                
-                // arguments: soundName
+
+                // arguments: none
                 case "stopAllSoundInstances":
-                    for (var soundDatum in soundData){
+                    for ( var soundDatum in soundData ){
                         if ( soundDatum ) {
-                            instanceIDs = Object.keys( soundDatum.playingInstances );
-                            for ( i = 0; i < instanceIDs.length; ++i ) {
-                                soundDatum.stopInstance( instanceIDs[ i ] );
-                            }
+                            soundDatum.stopAllSoundInstances();
                         }
                     }
                     return undefined;
+                    
             }
 
             return undefined;
@@ -232,7 +236,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         randomizeLayers:false,
         playOnLoad:false,
 
-        soundDatums:[ 0 ],
+        layers:[ 0 ],
         loadedCount: 0,
         layerCount: 0,
 
@@ -242,15 +246,20 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             this.name = layeredSoundDefinition.soundName;
             this.soundDefinitions = layeredSoundDefinition.soundDefinitions;
-            this.soundDatums = [];
+            this.layers = [];
             this.loadedCount = 0;
             this.playOnLoad = layeredSoundDefinition.playOnLoad;
             this.layerCount = layeredSoundDefinition.soundDefinitions.length;
             this.playingInstances = {};
             this.instanceHandles = {};
 
-            for ( var k in layeredSoundDefinition.soundDefinitions ) {
-                var doneLoading = function( thisLayeredSoundDatum ) {
+            // for ( var k in layeredSoundDefinition.soundDefinitions ) {
+
+            var soundDefinitionObjects = Object.keys( layeredSoundDefinition.soundDefinitions );
+
+            for ( var k = 0; k < soundDefinitionObjects.length; ++k ) {
+
+                var doneLoading = function() {
                     successCallback && successCallback();
                 }
                 var failureToLoad = function() {
@@ -262,7 +271,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     }
 
                     var subName = layeredSoundDefinition.soundDefinitions[k].soundName;
-                    this.soundDatums[ subName ] = subName;
+                    this.layers[ subName ] = subName;
                     soundData[ subName ] = new SoundDatum( layeredSoundDefinition.soundDefinitions[k], doneLoading , failureToLoad );
             }
 
@@ -270,21 +279,30 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         },
         playSound: function ( exitCallback ) {
-            for ( var x in this.soundDatums ) {
+            for ( var x in this.layers ) {
                 this.startLayer( x );
             }
 
             var id = this.instanceIDCounter;
             ++this.instanceIDCounter;
 
+            this.playingInstances[ id ] = id;
+
             return { soundName: this.name, instanceID: id };
         },
         stopInstance: function () {
-            for ( var x in this.soundDatums ){
-                soundData[ x ].stopInstance( this.instanceHandles[x] );
+            for ( var x in this.layers ){
+                soundData[ x ].stopInstance( this.instanceHandles[ x ] );
                 this.instanceHandles[ x ] = undefined;
             }
             
+        },
+        stopAllSoundInstances: function (){
+            var instanceIDs = Object.keys( this.playingInstances );
+            for ( var i = 0; i < instanceIDs.length; ++i ) {
+                var handle = { soundName: this.name, instanceID: instanceIDs[ i ]};
+                this.stopInstance( handle );
+            }
         },
         startLayer: function ( id ) {
 
@@ -300,7 +318,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 return undefined;
             }
 
-            this.soundDatums[ id ] = id;
+            this.layers[ id ] = id;
             this.instanceHandles[ id ] = soundData[ id ].playSound();
 
 
@@ -319,7 +337,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 return undefined;
             }
 
-            this.soundDatums[ id ] = undefined;
+            this.layers[ id ] = undefined;
             this.instanceHandles[ id ] = undefined;
 
             soundData[ id ].stopInstance( this.instanceHandles[id].instanceID );
@@ -327,7 +345,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         setVolume: function( id, volume, duration, type ) {
 
-            for ( var x in this.soundDatums ) {
+            for ( var x in this.layers ) {
                 soundData[ x ].setVolume( this.instanceHandles[ x ] , volume , duration ,type);
             }
         }
@@ -440,6 +458,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
         },
 
+        stopAllSoundInstances: function (){
+            var instanceIDs = Object.keys( this.playingInstances );
+            for ( var i = 0; i < instanceIDs.length; ++i ) {
+                var handle = { soundName: this.name, instanceID: instanceIDs[ i ]};
+                this.stopInstance( handle );
+            }
+        },
+
         setVolume: function ( instanceHandle, volume, fadeTime, fadeMethod ) {
            // arguments: instanceHandle, volume, fadeTime, fadeMethod
                 
@@ -489,7 +515,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.gainNode = context.createGain();
 
             this.gainNode.gain.value = this.soundDatum.initialVolume;
-
             this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );
             
