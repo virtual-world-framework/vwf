@@ -180,12 +180,25 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 case "stopSoundInstance":
 
                     instanceHandle = params [ 0 ];
-                    soundDatum = getSoundDatum( instanceHandle.soundName );
 
-                    if ( soundDatum ){
-                        soundDatum.stopInstance( instanceHandle );
+                    //If a user chooses to pass just a soundName, stop all instances with that name.
+                    if ( !instanceHandle.soundName ){
+                        soundName = params [ 0 ];
+                        soundDatum = getSoundDatum( soundName );
+                        if ( soundDatum ){
+                            instanceIDs = Object.keys( soundDatum.playingInstances );
+                            for ( i = 0; i < instanceIDs.length; ++i ) {
+                                var handle = { soundName: soundName, instanceID: instanceIDs[ i ]};
+                                soundDatum.stopInstance( handle );
+                            }
+                        }
+                    } else {
+                    //Otherwise stop the specific instance.
+                        soundDatum = getSoundDatum( instanceHandle.soundName );
+                        if ( soundDatum ){
+                            soundDatum.stopInstance( instanceHandle );
+                        }
                     }
-
                     return;
 
                 // arguments: none
@@ -194,7 +207,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         if ( soundDatum ) {
                             instanceIDs = Object.keys( soundDatum.playingInstances );
                             for ( i = 0; i < instanceIDs.length; ++i ) {
-                                soundDatum.stopInstance( instanceIDs[ i ] );
+                                var handle = { soundName: soundName, instanceID: instanceIDs[ i ]};
+                                soundDatum.stopInstance( handle );
                             }
                         }
                     }
