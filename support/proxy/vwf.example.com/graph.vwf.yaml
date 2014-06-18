@@ -1,6 +1,7 @@
 ---
 extends: http://vwf.example.com/node3.vwf
 properties:
+  graphScale: undefined
   gridInterval: undefined
   gridLineInterval: undefined
   gridLength: undefined
@@ -9,7 +10,15 @@ properties:
   zAxisVisible: undefined
   gridVisible: undefined
   renderTop: undefined
+  graphIsVisible$: true
 methods:
+  setGraphVisibility:
+    parameters:
+      - visible
+    body: |
+      this.graphIsVisible$ = visible;
+  toggleGraphVisibility: |
+    this.setGraphVisibility( !this.graphIsVisible$ );
   graphFunction:
     parameters:
       - lineFunction

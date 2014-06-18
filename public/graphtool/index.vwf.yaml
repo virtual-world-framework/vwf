@@ -6,6 +6,7 @@ children:
   graph:
     extends: http://vwf.example.com/graph.vwf
     properties:
+      graphScale: 1
       gridInterval: 1
       gridLineInterval: 10
       gridLength: 100
