@@ -165,7 +165,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                 break;
                             case "graphScale":
                                 redrawGraph( node );
-                                redrawLines( this.state.lines );
+                                redrawLines( node.ID, this.state.lines );
                                 break;
                             default:
                                 redrawGraph( node );
@@ -341,10 +341,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         createGraph( graph );
     }
 
-    function redrawLines( lines ) {
+    function redrawLines( graphID, lines ) {
         for ( var lineID in lines ) {
             var line = lines[ lineID ];
-            if ( line.parentID === nodeID && line.initialized ) {
+            if ( line.parentID === graphID && line.initialized ) {
                 redrawLine( line );
             }
         }
@@ -416,9 +416,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // Scale grid
         gridInterval *= graphScale;
         gridLineInterval *= graphScale;
-        gridLength *= graphScale;
 
-        for ( var i = -gridLength; i <= gridLength; i += gridInterval ) {
+        for ( var i = -gridLength * graphScale; i <= gridLength * graphScale; i += gridInterval ) {
             if ( i % gridLineInterval === 0 ) {
                 thickness = 0.05;
             } else {
