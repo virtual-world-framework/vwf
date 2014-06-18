@@ -16,14 +16,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     // TODO: should these be stored in this.state so that the view can access them?
     var context;
     var soundData = {};
+    var soundGroups = {};
     var logger;
+    var soundManager;
     var driver = model.load( module, {
 
         initialize: function() {
             // In case somebody tries to reference it before we get a chance to create it.
             // (it's created in the view)
             this.state.soundManager = {};
-
+            soundManager = this.state.soundManager;
+            //soundGroups = {};
             logger = this.logger;
 
             try {
@@ -205,6 +208,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         }
                     }
                     return undefined;
+
+                // arguments: soundName
+                case "getSoundDefinition":
+                    soundDatum = getSoundDatum( params[ 0 ] );
+                    return soundDatum ? soundDatum.soundDefinition : undefined;
+
                     
             }
 
@@ -212,11 +221,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         }
 
     } );
-
-    function SoundDatum( soundDefinition, successCallback, failureCallback ) {
-        this.initialize( soundDefinition, successCallback, failureCallback );
-        return this;
-    }
 
     function LayeredSoundDatum( layeredSoundDefinition, successCallback, failureCallback ) {
         this.initialize( layeredSoundDefinition, successCallback, failureCallback );
@@ -351,6 +355,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         }
     }
 
+    function SoundDatum( soundDefinition, successCallback, failureCallback ) {
+        this.initialize( soundDefinition, successCallback, failureCallback );
+        return this;
+    }
+
     SoundDatum.prototype = {
         constructor: SoundDatum,
 
@@ -370,6 +379,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         volumeAdjustment: 1.0,
         soundDefinition: null,
         playOnLoad: false,
+
+        subtitle: undefined,
+
+        soundGroup: undefined,
+        replacementMethod: undefined,
+
         // a counter for creating instance IDs
         instanceIDCounter: 0,
 
@@ -397,6 +412,26 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             if ( this.soundDefinition.playOnLoad !== undefined ) {
                 this.playOnLoad = soundDefinition.playOnLoad;
+            }
+
+            this.subtitle = this.soundDefinition.subtitle;
+
+            this.soundGroup = this.soundDefinition.soundGroup;
+            if ( this.soundGroup ) {
+                if ( !soundGroups[ this.soundGroup ] ) {
+                    soundGroups[ this.soundGroup ] = { soundData: [] };
+                }
+
+                soundGroups[ this.soundGroup ].soundData[ this.soundName ] = this;
+            }
+
+            this.replacementMethod = this.soundDefinition.replacementMethod;
+
+            if ( !!this.replacementMethod && !this.soundGroup ) {
+                logger.warnx( "soundDatum.initialize", 
+                              "You defined a replacement method but not a sound " +
+                              "group.  Replacement is only done when you replace " +
+                              "another sound in the same group!" );
             }
 
             // Create & send the request to load the sound asynchronously
@@ -517,17 +552,62 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.gainNode.gain.value = this.soundDatum.initialVolume;
             this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );
-            
-
-            this.sourceNode.start( 0 );
-
-            var soundDatum = this.soundDatum;
 
             //Browsers will handle onEnded differently depending on audio filetype - needs support.
 
-            this.sourceNode.onEnded = function() {
+            //TODO: The trouble is here... onEnded not getting called.
+            this.sourceNode.onEnded =  function() {
+                logger.errorx( "onEnded", "Ended!" );
+
+               // var sd = soundDatum;
+
+                soundManager.soundFinished( { soundName: soundDatum.soundName, 
+                                              instanceID: id } );
+
+                // If the sound was part of a soundGroup and had a replacement method of 'queue'
+                // then we should keep playing more queue sounds!
+                
+                if ( soundDatum.soundGroup && soundDatum.replacementMethod === "queue" ) {
+
+                    var currentPlayingInstance = soundGroups[ soundDatum.soundGroup ].queue.pop();
+                    var nextPlayingInstance = soundGroups[ soundDatum.soundGroup ].queue.pop();
+
+                    //If there's anything left in the queue, play it!
+                    if ( nextPlayingInstance !== undefined ){
+                        nextPlayingInstance.sourceNode.start( 0 );
+                    }
+                    
+                }
+
                 delete soundDatum.playingInstances[ id ];
                 exitCallback && exitCallback();
+            }
+
+            // Check if we're part of a sound group, and if we are then 
+            // handle replacement methods.
+            if ( !!soundDatum.soundGroup ) {
+                switch ( soundDatum.replacementMethod ) {
+                    //Sounds will start playing 
+                    case "queue":
+                        if ( !soundGroups[ soundDatum.soundGroup ].queue ) {
+                            soundGroups[ soundDatum.soundGroup ].queue = [];
+                        }
+                        //If there are no waiting sounds, start this one.
+                        if ( soundGroups[ soundDatum.soundGroup ].queue.length === 0 ){
+                            soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
+                            this.sourceNode.start( 0 );
+                        } else {
+                            soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
+                        }
+                        
+                }
+            } else {
+                this.sourceNode.start( 0 );
+            }
+
+            //If the soundDatum has subtitles, notify with an event.
+            if ( !!this.soundDatum.subtitle ) {
+                soundManager.playSubtitle( soundDatum.soundName );
             }
         },
 

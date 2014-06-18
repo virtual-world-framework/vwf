@@ -11,4 +11,7 @@ methods:
   setVolume:
   stopSoundInstance:
   stopAllSoundInstances:
+events:
+  soundFinished:
+  playSubtitle:
 
