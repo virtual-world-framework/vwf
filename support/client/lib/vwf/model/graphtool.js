@@ -2,6 +2,11 @@
 
 define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
 
+    // Set up render order constants
+    var DEPTH_GRID = Number.MAX_SAFE_INTEGER - 3;
+    var DEPTH_AXES = Number.MAX_SAFE_INTEGER - 2;
+    var DEPTH_LINES = Number.MAX_SAFE_INTEGER - 1;
+
     return model.load( module, {
 
         // == Module Definition ====================================================================
@@ -389,28 +394,32 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     function makeGraph( graphScale, gridInterval, gridLineInterval, gridLength, xAxisVisible, 
                         yAxisVisible, zAxisVisible, gridVisible, renderTop ) {
 
-        var xAxis, yAxis, zAxis, grid, axisLine;
+        var xAxis, yAxis, zAxis, gridX, gridY, axisLine;
         var thickness = 0.1;
         var opacity = 0.5;
         var graph = new THREE.Object3D();
         var gridLines = new THREE.Object3D();
         graph.name = "graph";
-        graph.renderDepth = renderTop ? Infinity : null;
         gridLines.name = "gridLines";
 
         xAxis = draw3DLine( [ 1, 0, 0 ], graphScale, gridLength, [ 255, 0, 0 ], thickness, renderTop );
         xAxis.name = "xAxis";
         xAxis.visible = xAxisVisible;
-        graph.add( xAxis );
 
         yAxis = draw3DLine( [ 0, 1, 0 ], graphScale, gridLength, [ 0, 0, 255 ], thickness, renderTop );
         yAxis.name = "yAxis";
         yAxis.visible = yAxisVisible;
-        graph.add( yAxis );
 
         zAxis = draw3DLine( [ 0, 0, 1 ], graphScale, gridLength, [ 0, 255, 0 ], thickness, renderTop );
         zAxis.name = "zAxis";
         zAxis.visible = zAxisVisible;
+
+        if ( renderTop ) {
+            xAxis.renderDepth = yAxis.renderDepth = zAxis.renderDepth = DEPTH_AXES;
+        }
+        
+        graph.add( xAxis );
+        graph.add( yAxis );
         graph.add( zAxis );
 
         // Scale grid
@@ -424,19 +433,20 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 thickness = 0.025;
             }
 
-            grid = draw3DLine( [ 1, 0, 0 ], graphScale, gridLength, [ 255, 255, 255 ], thickness, renderTop );
-            grid.position.set( 0, i, 0 );
-            grid.visible = gridVisible;
-            grid.material.transparent = true;
-            grid.material.opacity = opacity;
-            gridLines.add( grid );
+            gridX = draw3DLine( [ 1, 0, 0 ], graphScale, gridLength, [ 255, 255, 255 ], thickness, renderTop );
+            gridX.position.set( 0, i, 0 );
+            gridX.visible = gridVisible;
 
-            grid = draw3DLine( [ 0, 1, 0 ], graphScale, gridLength, [ 255, 255, 255 ], thickness, renderTop );
-            grid.position.set( i, 0, 0 );
-            grid.visible = gridVisible;
-            grid.material.transparent = true;
-            grid.material.opacity = opacity;
-            gridLines.add( grid );
+            gridY = draw3DLine( [ 0, 1, 0 ], graphScale, gridLength, [ 255, 255, 255 ], thickness, renderTop );
+            gridY.position.set( i, 0, 0 );
+            gridY.visible = gridVisible;
+
+            if ( renderTop ) {
+                gridX.renderDepth = gridY.renderDepth = DEPTH_GRID;
+            }
+
+            gridLines.add( gridX );
+            gridLines.add( gridY );
 
         }
 
@@ -504,7 +514,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 { "color": color, "depthTest": !renderTop } 
             );
         var mesh = new THREE.Mesh( graphGeometry, meshMaterial );
-        mesh.renderDepth = renderTop ? Infinity : null;
+        mesh.renderDepth = renderTop ? DEPTH_LINES : null;
 
         return mesh;
 
@@ -563,7 +573,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 { "color": color, "depthTest": !renderTop } 
             );
         var mesh = new THREE.Mesh( graphGeometry, meshMaterial );
-        mesh.renderDepth = renderTop ? Infinity : null;
 
         return mesh;
 
