@@ -30,7 +30,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 node = this.state.graphs[ childID ] = getThreeJSModel().state.nodes[ childID ];
 
                 node.graphProperties = {
-                    "gridScale": undefined,
+                    "graphScale": undefined,
                     "gridInterval": undefined,
                     "gridLineInterval": undefined,
                     "gridLength": undefined,
@@ -163,7 +163,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             case "gridVisible":
                                 setGraphVisibility( node, true );
                                 break;
-                            case "gridScale":
+                            case "graphScale":
                                 redrawGraph( node );
                                 redrawLines( this.state.lines );
                                 break;
@@ -301,7 +301,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         var props = node.graphProperties;
         var graph = makeGraph( 
-                props.gridScale,
+                props.graphScale,
                 props.gridInterval,
                 props.gridLineInterval,
                 props.gridLength,
@@ -318,10 +318,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     function createLine( node ) {
 
-        var gridScale = node.parentGraph.graphProperties.gridScale;
+        var graphScale = node.parentGraph.graphProperties.graphScale;
         var props = node.lineProperties;
         var line = graphFunction(
-                gridScale,
+                graphScale,
                 props.lineFunction,
                 props.startValue,
                 props.endValue,
@@ -386,7 +386,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
     }
 
-    function makeGraph( gridScale, gridInterval, gridLineInterval, gridLength, xAxisVisible, 
+    function makeGraph( graphScale, gridInterval, gridLineInterval, gridLength, xAxisVisible, 
                         yAxisVisible, zAxisVisible, gridVisible, renderTop ) {
 
         var xAxis, yAxis, zAxis, grid, axisLine;
@@ -398,25 +398,25 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         graph.renderDepth = renderTop ? Infinity : null;
         gridLines.name = "gridLines";
 
-        xAxis = draw3DLine( [ 1, 0, 0 ], gridScale, gridLength, [ 255, 0, 0 ], thickness, renderTop );
+        xAxis = draw3DLine( [ 1, 0, 0 ], graphScale, gridLength, [ 255, 0, 0 ], thickness, renderTop );
         xAxis.name = "xAxis";
         xAxis.visible = xAxisVisible;
         graph.add( xAxis );
 
-        yAxis = draw3DLine( [ 0, 1, 0 ], gridScale, gridLength, [ 0, 0, 255 ], thickness, renderTop );
+        yAxis = draw3DLine( [ 0, 1, 0 ], graphScale, gridLength, [ 0, 0, 255 ], thickness, renderTop );
         yAxis.name = "yAxis";
         yAxis.visible = yAxisVisible;
         graph.add( yAxis );
 
-        zAxis = draw3DLine( [ 0, 0, 1 ], gridScale, gridLength, [ 0, 255, 0 ], thickness, renderTop );
+        zAxis = draw3DLine( [ 0, 0, 1 ], graphScale, gridLength, [ 0, 255, 0 ], thickness, renderTop );
         zAxis.name = "zAxis";
         zAxis.visible = zAxisVisible;
         graph.add( zAxis );
 
         // Scale grid
-        gridInterval *= gridScale;
-        gridLineInterval *= gridScale;
-        gridLength *= gridScale;
+        gridInterval *= graphScale;
+        gridLineInterval *= graphScale;
+        gridLength *= graphScale;
 
         for ( var i = -gridLength; i <= gridLength; i += gridInterval ) {
             if ( i % gridLineInterval === 0 ) {
@@ -425,14 +425,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 thickness = 0.025;
             }
 
-            grid = draw3DLine( [ 1, 0, 0 ], gridScale, gridLength, [ 255, 255, 255 ], thickness, renderTop );
+            grid = draw3DLine( [ 1, 0, 0 ], graphScale, gridLength, [ 255, 255, 255 ], thickness, renderTop );
             grid.position.set( 0, i, 0 );
             grid.visible = gridVisible;
             grid.material.transparent = true;
             grid.material.opacity = opacity;
             gridLines.add( grid );
 
-            grid = draw3DLine( [ 0, 1, 0 ], gridScale, gridLength, [ 255, 255, 255 ], thickness, renderTop );
+            grid = draw3DLine( [ 0, 1, 0 ], graphScale, gridLength, [ 255, 255, 255 ], thickness, renderTop );
             grid.position.set( i, 0, 0 );
             grid.visible = gridVisible;
             grid.material.transparent = true;
@@ -446,7 +446,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         return graph;
     }
 
-    function graphFunction( gridScale, functionString, startValue, endValue, 
+    function graphFunction( graphScale, functionString, startValue, endValue, 
                             pointCount, color, thickness, renderTop ) {
 
         var graphGeometry = new THREE.Geometry();
@@ -459,9 +459,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     + functionString + ";\n" 
                     + "[ x, y, z ];";
             var ar = eval( fn );
-            x = ar[0] * gridScale;
-            y = ar[1] * gridScale;
-            z = ar[2] * gridScale;
+            x = ar[0] * graphScale;
+            y = ar[1] * graphScale;
+            z = ar[2] * graphScale;
             return new THREE.Vector3( x || 0, y || 0, z || 0 );
         }
 
@@ -511,10 +511,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     }
 
-    function draw3DLine( axis, gridScale, gridLength, color, thickness, renderTop ) {
+    function draw3DLine( axis, graphScale, gridLength, color, thickness, renderTop ) {
 
         var graphGeometry = new THREE.Geometry();
-        var axisLength = gridScale * gridLength;
+        var axisLength = graphScale * gridLength;
         var startPoint, endPoint, direction;
         var points = new Array();
         var planePoints, i;

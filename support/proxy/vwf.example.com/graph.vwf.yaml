@@ -1,7 +1,7 @@
 ---
 extends: http://vwf.example.com/node3.vwf
 properties:
-  gridScale: undefined
+  graphScale: undefined
   gridInterval: undefined
   gridLineInterval: undefined
   gridLength: undefined
