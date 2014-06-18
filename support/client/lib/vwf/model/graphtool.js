@@ -396,7 +396,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         var xAxis, yAxis, zAxis, gridX, gridY, axisLine;
         var thickness = 0.1;
-        var opacity = 0.5;
         var graph = new THREE.Object3D();
         var gridLines = new THREE.Object3D();
         graph.name = "graph";
@@ -428,7 +427,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         for ( var i = -gridLength * graphScale; i <= gridLength * graphScale; i += gridInterval ) {
             if ( i % gridLineInterval === 0 ) {
-                thickness = 0.05;
+                thickness = 0.075;
             } else {
                 thickness = 0.025;
             }
