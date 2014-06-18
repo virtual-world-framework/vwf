@@ -10,10 +10,15 @@ properties:
   zAxisVisible: undefined
   gridVisible: undefined
   renderTop: undefined
+  graphIsVisible$: true
 methods:
   setGraphVisibility:
     parameters:
       - visible
+    body: |
+      this.graphIsVisible$ = visible;
+  toggleGraphVisibility: |
+    this.setGraphVisibility( !this.graphIsVisible$ );
   graphFunction:
     parameters:
       - lineFunction
