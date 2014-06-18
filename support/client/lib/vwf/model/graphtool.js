@@ -380,10 +380,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     gridLines.children[ line ].visible = gridLines.visible;
                 }
             } else {
-                xAxis.visible = value;
-                yAxis.visible = value;
-                zAxis.visible = value;
-                gridLines.visible = value;
+                xAxis.visible = false;
+                yAxis.visible = false;
+                zAxis.visible = false;
+                gridLines.visible = false;
                 for ( var line in gridLines.children ) {
                     gridLines.children[ line ].visible = gridLines.visible;
                 }
@@ -473,9 +473,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             return new THREE.Vector3( x || 0, y || 0, z || 0 );
         }
 
-        endValue = endValue;
-        startValue = startValue;
-        pointCount = pointCount;
         increment = Math.abs( endValue - startValue ) / pointCount;
 
         // Check for endvalue + ( increment / 2 ) to account for approximation errors
