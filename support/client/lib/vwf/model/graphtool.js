@@ -385,7 +385,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 zAxis.visible = false;
                 gridLines.visible = false;
                 for ( var line in gridLines.children ) {
-                    gridLines.children[ line ].visible = gridLines.visible;
+                    gridLines.children[ line ].visible = false;
                 }
             }
         }
