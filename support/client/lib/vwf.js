@@ -331,6 +331,7 @@
                 { library: "vwf/model/sound", active: false },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
+                { library: "vwf/model/mil-sym", linkedLibraries: [ "vwf/model/mil-sym/sm-bc.min" ],  active: false },
                 { library: "vwf/kernel/view", active: true },
                 { library: "vwf/view/document", active: true },
             	{ library: "vwf/view/editor", active: false },
@@ -342,6 +343,7 @@
                 { library: "vwf/view/sound", active: false },
                 { library: "vwf/view/touch", active: false },
                 { library: "vwf/view/cesium", active: false },
+                { library: "vwf/view/mil-sym", active: false },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
                 { library: "vwf/model/threejs/three", active: false },
@@ -351,6 +353,7 @@
                 { library: "vwf/view/google-earth", active: false },
                 { library: "vwf/model/cesium/Cesium", active: false },
                 { library: "vwf/model/blockly/JS-Interpreter/interpreter.js", active: false },
+                { library: "vwf/model/mil-sym/sm-bc.min", active: false },                
                 { library: "vwf/admin", active: true }
             ];
 
@@ -364,6 +367,7 @@
                     { library: "vwf/model/blockly", active: false },
                     { library: "vwf/model/graphtool", active: false },
                     { library: "vwf/model/sound", active: false },
+                    { library: "vwf/model/mil-sym", active: false },
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [
@@ -377,6 +381,7 @@
                     { library: "vwf/view/blockly", active: false },
                     { library: "vwf/view/sound", active: false },
                     { library: "vwf/view/touch", active: false },
+                    { library: "vwf/view/mil-sym", active: false },
                     { library: "vwf/view/webrtc", active: false}
                 ]
             };
