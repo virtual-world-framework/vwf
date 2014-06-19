@@ -49,6 +49,17 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
     var rotatingLeft = false;
     var rotatingRight = false;
     var startMousePosition;
+
+    // HACK: This is to deal with an issue with webkitMovementX in Chrome:
+    // https://code.google.com/p/chromium/issues/detail?id=386791&thanks=386791&ts=1403213097
+    // where the two values after pointerLock are inaccurate.
+    // This is used to ignore those values.
+    // Please check frequently to see if this can be removed.
+    // Last checked status of issue on 6/19/14.
+    var nextMouseMoveIsErroneous = false;
+    var nextTwoMouseMovesAreErroneous = false;
+    // END HACK
+
     // End Navigation
 
     var lastXPos = -1;
@@ -1609,6 +1620,12 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             // Set pointerLock if appropriate
             var event = getEventData( e, false );
             if ( pointerLockImplemented && self.appRequestsPointerLock() ) {
+
+                // HACK: This is to deal with an issue with webkitMovementX in Chrome:
+                nextMouseMoveIsErroneous = true;
+                nextTwoMouseMovesAreErroneous = true;
+                // END HACK
+
                 canvas.requestPointerLock();
                 positionUnderMouseClick = event && event.eventNodeData[ "" ][ 0 ].globalPosition;
             }
@@ -1733,6 +1750,18 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         }
 
         canvas.onmousemove = function( e ) {
+
+            // HACK: This is to deal with an issue with webkitMovementX in Chrome:
+            if ( nextMouseMoveIsErroneous ) {
+                if ( nextTwoMouseMovesAreErroneous ) {
+                    nextTwoMouseMovesAreErroneous = false;
+                } else {
+                    nextMouseMoveIsErroneous = false;
+                }
+                return;
+            }
+            // END HACK
+
             var eData = getEventData( e, false );
             
             if ( eData ) {
