@@ -16,13 +16,16 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     // TODO: should these be stored in this.state so that the view can access them?
     var context;
     var soundData = {};
+    var soundGroups = {};
     var logger;
+    var soundDriver;
     var driver = model.load( module, {
 
         initialize: function() {
             // In case somebody tries to reference it before we get a chance to create it.
             // (it's created in the view)
             this.state.soundManager = {};
+            soundDriver = this;
 
             logger = this.logger;
 
@@ -205,6 +208,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         }
                     }
                     return undefined;
+
+                // arguments: soundName
+                case "getSoundDefinition":
+                    soundDatum = getSoundDatum( params[ 0 ] );
+                    return soundDatum ? soundDatum.soundDefinition : undefined;
                     
             }
 
@@ -212,11 +220,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         }
 
     } );
-
-    function SoundDatum( soundDefinition, successCallback, failureCallback ) {
-        this.initialize( soundDefinition, successCallback, failureCallback );
-        return this;
-    }
 
     function LayeredSoundDatum( layeredSoundDefinition, successCallback, failureCallback ) {
         this.initialize( layeredSoundDefinition, successCallback, failureCallback );
@@ -252,8 +255,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.layerCount = layeredSoundDefinition.soundDefinitions.length;
             this.playingInstances = {};
             this.instanceHandles = {};
-
-            // for ( var k in layeredSoundDefinition.soundDefinitions ) {
 
             var soundDefinitionObjects = Object.keys( layeredSoundDefinition.soundDefinitions );
 
@@ -351,6 +352,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         }
     }
 
+    function SoundDatum( soundDefinition, successCallback, failureCallback ) {
+        this.initialize( soundDefinition, successCallback, failureCallback );
+        return this;
+    }
+
     SoundDatum.prototype = {
         constructor: SoundDatum,
 
@@ -370,6 +376,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         volumeAdjustment: 1.0,
         soundDefinition: null,
         playOnLoad: false,
+
+        subtitle: undefined,
+
+        soundGroup: undefined,
+        groupReplacementMethod: undefined,
+
         // a counter for creating instance IDs
         instanceIDCounter: 0,
 
@@ -397,6 +409,26 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             if ( this.soundDefinition.playOnLoad !== undefined ) {
                 this.playOnLoad = soundDefinition.playOnLoad;
+            }
+
+            this.subtitle = this.soundDefinition.subtitle;
+
+            this.soundGroup = this.soundDefinition.soundGroup;
+            if ( this.soundGroup ) {
+                if ( !soundGroups[ this.soundGroup ] ) {
+                    soundGroups[ this.soundGroup ] = { soundData: [] };
+                }
+
+                soundGroups[ this.soundGroup ].soundData[ this.soundName ] = this;
+            }
+
+            this.groupReplacementMethod = this.soundDefinition.groupReplacementMethod;
+
+            if ( !!this.groupReplacementMethod && !this.soundGroup ) {
+                logger.warnx( "soundDatum.initialize", 
+                              "You defined a replacement method but not a sound " +
+                              "group.  Replacement is only done when you replace " +
+                              "another sound in the same group!" );
             }
 
             // Create & send the request to load the sound asynchronously
@@ -432,13 +464,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         playSound: function( exitCallback ) {
             if ( !this.buffer ) {
-                logger.errorx( "playSound", "Sound '" + name + "' hasn't finished " +
+                logger.errorx( "playSound", "Sound '" + this.name + "' hasn't finished " +
                                "loading, or loaded improperly." );
                 return { soundName: this.name, instanceID: -1 };
             }
 
             if ( !this.allowMultiplay && ( this.playingInstances.length > 0 ) ) {
-                logger.warnx( "playSound", "Sound '" + name + "'is already " +
+                logger.warnx( "playSound", "Sound '" + this.name + "'is already " +
                               "playing, and doesn't allow multiplay." );
                 return { soundName: this.name, instanceID: -1 };
             }
@@ -517,17 +549,62 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.gainNode.gain.value = this.soundDatum.initialVolume;
             this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );
-            
 
-            this.sourceNode.start( 0 );
+            //Browsers will handle onended differently depending on audio filetype - needs support.
 
-            var soundDatum = this.soundDatum;
+            this.sourceNode.onended =  function() {
 
-            //Browsers will handle onEnded differently depending on audio filetype - needs support.
+                vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
+                                       "soundFinished",
+                                       [{ soundName: soundDatum.soundName, 
+                                              instanceID: id }] );
+                
+                if ( soundDatum.soundGroup && soundDatum.groupReplacementMethod === "queue" ) {
 
-            this.sourceNode.onEnded = function() {
+                    var currentPlayingInstance = soundGroups[ soundDatum.soundGroup ].queue.pop();
+                    var nextPlayingInstance = soundGroups[ soundDatum.soundGroup ].queue.pop();
+
+                    //If there's anything left in the queue, play it!
+                    if ( nextPlayingInstance !== undefined ){
+                        nextPlayingInstance.sourceNode.start( 0 );
+                    }
+                    
+                }
+
+                if ( soundDatum.soundGroup && soundDatum.groupReplacementMethod === "duck" ) {
+
+                    //TODO: raise volume of all other instances in this soundGroup
+                    
+                }
+
                 delete soundDatum.playingInstances[ id ];
                 exitCallback && exitCallback();
+            }
+
+            if ( !!soundDatum.soundGroup ) {
+                switch ( soundDatum.groupReplacementMethod ) {
+                    case "queue":
+                        if ( !soundGroups[ soundDatum.soundGroup ].queue ) {
+                            soundGroups[ soundDatum.soundGroup ].queue = [];
+                        }
+                        if ( soundGroups[ soundDatum.soundGroup ].queue.length === 0 ){
+                            soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
+                            this.sourceNode.start( 0 );
+                        } else {
+                            soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
+                        }
+                    case "duck":
+                        //TODO: lower volume of all other instances in this soundGroup
+                        
+                }
+            } else {
+                this.sourceNode.start( 0 );
+            }
+
+            if ( !!this.soundDatum.subtitle ) {
+                vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
+                                       "playSubtitle",
+                                       [soundDatum.soundName] );
             }
         },
 
