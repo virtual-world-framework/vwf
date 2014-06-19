@@ -26,8 +26,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             // (it's created in the view)
             this.state.soundManager = {};
             soundDriver = this;
-            //soundManager = this.state.soundManager;
-            //soundGroups = {};
+
             logger = this.logger;
 
             try {
@@ -257,8 +256,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.playingInstances = {};
             this.instanceHandles = {};
 
-            // for ( var k in layeredSoundDefinition.soundDefinitions ) {
-
             var soundDefinitionObjects = Object.keys( layeredSoundDefinition.soundDefinitions );
 
             for ( var k = 0; k < soundDefinitionObjects.length; ++k ) {
@@ -383,7 +380,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         subtitle: undefined,
 
         soundGroup: undefined,
-        replacementMethod: undefined,
+        groupReplacementMethod: undefined,
 
         // a counter for creating instance IDs
         instanceIDCounter: 0,
@@ -425,9 +422,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 soundGroups[ this.soundGroup ].soundData[ this.soundName ] = this;
             }
 
-            this.replacementMethod = this.soundDefinition.replacementMethod;
+            this.groupReplacementMethod = this.soundDefinition.groupReplacementMethod;
 
-            if ( !!this.replacementMethod && !this.soundGroup ) {
+            if ( !!this.groupReplacementMethod && !this.soundGroup ) {
                 logger.warnx( "soundDatum.initialize", 
                               "You defined a replacement method but not a sound " +
                               "group.  Replacement is only done when you replace " +
@@ -553,21 +550,16 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );
 
-            //Browsers will handle onEnded differently depending on audio filetype - needs support.
+            //Browsers will handle onended differently depending on audio filetype - needs support.
 
-            //TODO: The trouble is here... onEnded not getting called.
             this.sourceNode.onended =  function() {
 
-                //Firing soundFinished event
                 vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
                                        "soundFinished",
                                        [{ soundName: soundDatum.soundName, 
                                               instanceID: id }] );
-
-                // If the sound was part of a soundGroup and had a replacement method of 'queue'
-                // then we should keep playing more queue sounds!
                 
-                if ( soundDatum.soundGroup && soundDatum.replacementMethod === "queue" ) {
+                if ( soundDatum.soundGroup && soundDatum.groupReplacementMethod === "queue" ) {
 
                     var currentPlayingInstance = soundGroups[ soundDatum.soundGroup ].queue.pop();
                     var nextPlayingInstance = soundGroups[ soundDatum.soundGroup ].queue.pop();
@@ -579,9 +571,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     
                 }
 
-                //If we ducked the rest of our group, return the volumes to their old parameters!
-
-                if ( soundDatum.soundGroup && soundDatum.replacementMethod === "duck" ) {
+                if ( soundDatum.soundGroup && soundDatum.groupReplacementMethod === "duck" ) {
 
                     //TODO: raise volume of all other instances in this soundGroup
                     
@@ -591,16 +581,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 exitCallback && exitCallback();
             }
 
-            // Check if we're part of a sound group, and if we are then 
-            // handle replacement methods.
             if ( !!soundDatum.soundGroup ) {
-                switch ( soundDatum.replacementMethod ) {
-                    //Sounds will start playing 
+                switch ( soundDatum.groupReplacementMethod ) {
                     case "queue":
                         if ( !soundGroups[ soundDatum.soundGroup ].queue ) {
                             soundGroups[ soundDatum.soundGroup ].queue = [];
                         }
-                        //If there are no waiting sounds, start this one. (this is the PlayingInstance)
                         if ( soundGroups[ soundDatum.soundGroup ].queue.length === 0 ){
                             soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
                             this.sourceNode.start( 0 );
@@ -615,9 +601,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 this.sourceNode.start( 0 );
             }
 
-            //If the soundDatum has subtitles, notify with an event.
             if ( !!this.soundDatum.subtitle ) {
-                soundManager.playSubtitle( soundDatum.soundName );
+                vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
+                                       "playSubtitle",
+                                       [soundDatum.soundName] );
             }
         },
 
