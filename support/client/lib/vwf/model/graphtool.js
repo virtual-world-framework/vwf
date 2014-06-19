@@ -658,6 +658,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         normal = new THREE.Vector3( normal[ 0 ], normal[ 1 ], normal[ 2 ] );
         origin = new THREE.Vector3( origin[ 0 ], origin[ 1 ], origin[ 2 ] );
         var points;
+        size *= graphScale;
+        origin.multiplyScalar( graphScale );
 
         points = generatePlaneVertices( normal, origin, size );
         geometry.vertices = points;
