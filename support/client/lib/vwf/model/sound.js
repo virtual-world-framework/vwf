@@ -18,14 +18,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     var soundData = {};
     var soundGroups = {};
     var logger;
-    var soundManager;
+    var soundDriver;
     var driver = model.load( module, {
 
         initialize: function() {
             // In case somebody tries to reference it before we get a chance to create it.
             // (it's created in the view)
             this.state.soundManager = {};
-            soundManager = this.state.soundManager;
+            soundDriver = this;
+            //soundManager = this.state.soundManager;
             //soundGroups = {};
             logger = this.logger;
 
@@ -213,7 +214,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 case "getSoundDefinition":
                     soundDatum = getSoundDatum( params[ 0 ] );
                     return soundDatum ? soundDatum.soundDefinition : undefined;
-
                     
             }
 
@@ -467,13 +467,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         playSound: function( exitCallback ) {
             if ( !this.buffer ) {
-                logger.errorx( "playSound", "Sound '" + name + "' hasn't finished " +
+                logger.errorx( "playSound", "Sound '" + this.name + "' hasn't finished " +
                                "loading, or loaded improperly." );
                 return { soundName: this.name, instanceID: -1 };
             }
 
             if ( !this.allowMultiplay && ( this.playingInstances.length > 0 ) ) {
-                logger.warnx( "playSound", "Sound '" + name + "'is already " +
+                logger.warnx( "playSound", "Sound '" + this.name + "'is already " +
                               "playing, and doesn't allow multiplay." );
                 return { soundName: this.name, instanceID: -1 };
             }
@@ -556,13 +556,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             //Browsers will handle onEnded differently depending on audio filetype - needs support.
 
             //TODO: The trouble is here... onEnded not getting called.
-            this.sourceNode.onEnded =  function() {
-                logger.errorx( "onEnded", "Ended!" );
+            this.sourceNode.onended =  function() {
 
-               // var sd = soundDatum;
-
-                soundManager.soundFinished( { soundName: soundDatum.soundName, 
-                                              instanceID: id } );
+                //Firing soundFinished event
+                vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
+                                       "soundFinished",
+                                       [{ soundName: soundDatum.soundName, 
+                                              instanceID: id }] );
 
                 // If the sound was part of a soundGroup and had a replacement method of 'queue'
                 // then we should keep playing more queue sounds!
@@ -579,6 +579,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     
                 }
 
+                //If we ducked the rest of our group, return the volumes to their old parameters!
+
+                if ( soundDatum.soundGroup && soundDatum.replacementMethod === "duck" ) {
+
+                    //TODO: raise volume of all other instances in this soundGroup
+                    
+                }
+
                 delete soundDatum.playingInstances[ id ];
                 exitCallback && exitCallback();
             }
@@ -592,13 +600,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         if ( !soundGroups[ soundDatum.soundGroup ].queue ) {
                             soundGroups[ soundDatum.soundGroup ].queue = [];
                         }
-                        //If there are no waiting sounds, start this one.
+                        //If there are no waiting sounds, start this one. (this is the PlayingInstance)
                         if ( soundGroups[ soundDatum.soundGroup ].queue.length === 0 ){
                             soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
                             this.sourceNode.start( 0 );
                         } else {
                             soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
                         }
+                    case "duck":
+                        //TODO: lower volume of all other instances in this soundGroup
                         
                 }
             } else {
