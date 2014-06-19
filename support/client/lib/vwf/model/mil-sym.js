@@ -28,7 +28,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
         initialize: function( options ) {
             
-        	self = this;
+            self = this;
 
             this.arguments = Array.prototype.slice.call( arguments );
 
