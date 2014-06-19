@@ -189,7 +189,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 this.logger.infox( "    S === settingProperty ", nodeID, propertyName, propertyValue );
             }
 
-            var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
+            var node = this.state.nodes[ nodeID ]; 
             var value = undefined;
 
 
