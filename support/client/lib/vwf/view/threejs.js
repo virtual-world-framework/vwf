@@ -21,7 +21,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
     // Navigation: Private global variables for navigation
     var navObjectRequested;
     var navObjectName;
-    var navmode;
     var touchmode;
     var ownerlessNavObjects = [];
     var numNavCandidates;
@@ -202,7 +201,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             // rotationSpeed
             if ( navObject && ( nodeID == navObject.ID ) ) {
                 if ( propertyName == "navmode" ) {
-                    navmode = propertyValue;
+                    this.navmode = propertyValue;
                     if ( pointerLockImplemented && !self.appRequestsPointerLock() ) {
                         document.exitPointerLock();
                     }
@@ -338,7 +337,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                     // These were requested in controlNavObject
 
                     if ( propertyName == "navmode" ) {
-                        navmode = propertyValue;
+                        this.navmode = propertyValue;
                     } else if ( propertyName == "touchmode" ) {
                         touchmode = propertyValue;
                     } else if ( propertyName == "translationSpeed" ) {
@@ -419,6 +418,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
     
         // -- Navigation -------------------------------------------------------------------------------
 
+        navmode: null,
+
         navigationKeyMapping: {
             "w": "forward",
             "a": "left",
@@ -450,7 +451,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 var pitchQuat = new THREE.Quaternion();
                 var rotationSpeedRadians = degreesToRadians * rotationSpeed;
 
-                var orbiting = mouseMiddleDown && ( navmode == "fly" );
+                var orbiting = mouseMiddleDown && ( this.navmode == "fly" );
 
                 if ( orbiting ) {
                     var pitchRadians = deltaY * rotationSpeedRadians;
@@ -472,8 +473,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                         var pitchDeltaMatrix = new THREE.Matrix4();
                         pitchDeltaMatrix.makeRotationFromQuaternion( pitchQuat );
 
-                        if ( ( navmode == "fly" )  ||
-                             ( ( navmode == "walk" ) && ( cameraNode == navObject ) ) ) {
+                        if ( ( this.navmode == "fly" )  ||
+                             ( ( this.navmode == "walk" ) && ( cameraNode == navObject ) ) ) {
                             pitchMatrix.multiplyMatrices( pitchDeltaMatrix, pitchMatrix );
 
                             // Constrain the camera's pitch to +/- 90 degrees
@@ -506,7 +507,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                                 pitchMatrixElements[ 9 ] = zAxis[ 1 ];
                                 pitchMatrixElements[ 10 ] = zAxis[ 2 ];
                             }
-                        } else if ( navmode == "walk" ) {
+                        } else if ( this.navmode == "walk" ) {
 
                             // Perform pitch on camera - right-multiply to keep pitch separate from yaw
                             var camera = this.state.cameraInUse;
@@ -603,11 +604,11 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         handleScroll: function ( wheelDelta, distanceToTarget ) {
             
-            if ( navmode !== "fly" ) {
+            if ( this.navmode !== "fly" ) {
                 return;
             }
 
-            var orbiting = ( navmode == "fly" ) && ( mouseMiddleDown )
+            var orbiting = ( this.navmode == "fly" ) && ( mouseMiddleDown )
 
             if ( orbiting || !pickDirectionVector ) {
                 return;
@@ -885,10 +886,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             //   - the middle mouse button is hit in fly mode (for orbit)
             //   - the right mouse button is hit in any mode other than "none" (for look)
 
-            if ( mouseMiddleDown && ( navmode === "fly" ) ) {
+            if ( mouseMiddleDown && ( this.navmode === "fly" ) ) {
                 return true;
             }
-            if ( mouseRightDown && ( navmode !== "none" ) ) {
+            if ( mouseRightDown && ( this.navmode !== "none" ) ) {
                 return true;
             }
             return false;
@@ -1051,7 +1052,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             if(last && now && !matCmp(last,now,.0001) ) {             
                 var interp = matrixLerp(last, now, step || 0);
                 
-                var objectIsControlledByUser = ( ( navmode !== "none" ) &&
+                var objectIsControlledByUser = ( ( self.navmode !== "none" ) &&
                                                  ( ( navObject && ( nodeID === navObject.ID ) ) || 
                                                    ( cameraNode && ( nodeID === cameraNode.ID ) ) ) );
                 if ( !objectIsControlledByUser ) {             
@@ -1136,7 +1137,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                         pss[i].update(timepassed);
                 }
 
-                if ( navmode != "none" && !self.disableInputs ) {
+                if ( self.navmode != "none" && !self.disableInputs ) {
 
                     // Move the user's camera according to their input
                     self.moveNavObject( timepassed );
@@ -1768,7 +1769,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 if ( mouseLeftDown || mouseRightDown || mouseMiddleDown ) {
                 
                     // TODO: Navigation - see main "TODO: Navigation" comment for explanation
-                    if ( navmode != "none" ) {
+                    if ( self.navmode != "none" ) {
                         if ( cameraNode ) {
                             if ( !cameraNode.lookatval ) {
                                 self.handleMouseNavigation( eData.eventData );
@@ -1890,7 +1891,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 };
 
         window.oncontextmenu = function() {
-            if ( navmode == "none" )
+            if ( self.navmode == "none" )
                 return true;
             else
                 return false;
@@ -2013,7 +2014,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var camera = this.state.cameraInUse;
             var cameraWorldTransformArray = camera.matrixWorld.elements;
 
-            var orbiting = ( navmode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
+            var orbiting = ( this.navmode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
 
             if ( orbiting ) {
                 if ( y ) {
@@ -2059,7 +2060,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }
             
             // If user is walking, constrain movement to the horizontal plane
-            if ( navmode == "walk") {
+            if ( this.navmode == "walk") {
                 dir[ 2 ] = 0;
             }
 
@@ -2144,7 +2145,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var theta = direction * ( rotationSpeed * degreesToRadians ) * 
                         Math.min( msSinceLastFrame * 0.001, 0.5 );
 
-            var orbiting = ( navmode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
+            var orbiting = ( this.navmode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
 
             if ( orbiting ) {
                 var pitchRadians = 0;
