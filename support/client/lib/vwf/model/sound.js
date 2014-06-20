@@ -604,7 +604,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             if ( !!this.soundDatum.subtitle ) {
                 vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
                                        "playSubtitle",
-                                       [soundDatum.soundName] );
+                                       [soundDatum.subtitle] );
             }
         },
 
