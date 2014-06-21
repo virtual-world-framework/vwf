@@ -321,12 +321,14 @@ define( [ "module", "vwf/model",
                         for ( var id in this.state.executingBlocks ) {
                             this.state.executingBlocks[ id ].interpreterStatus = "completed";
                             this.kernel.setProperty( id, 'blockly_executing', false );
+                            this.kernel.fireEvent( id, "blocklyStopped", [ true ] );
                         }
                         break;
 
                     case "startAllExecution":
                         for ( var id in this.state.nodes ) {
                             this.kernel.setProperty( id, 'blockly_executing', true );
+                            this.kernel.fireEvent( id, "blocklyStarted", [ true ] );
                         }  
                         break;
 
