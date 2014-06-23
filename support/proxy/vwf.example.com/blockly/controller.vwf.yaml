@@ -54,6 +54,7 @@ properties:
   blockly_defaultXml:
 methods:
   getWorldXYVector:
+  blocklyClear:
 events:
   blocklyStarted:
   blocklyExecuted:
