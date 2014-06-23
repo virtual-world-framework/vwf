@@ -337,12 +337,8 @@ define( [ "module", "vwf/model",
                     case "blocklyClear":
                         if ( Blockly.mainWorkspace ) {
                             
-                            // does this fire the changed event?
                             Blockly.mainWorkspace.clear();
-
                             this.kernel.setProperty( nodeID, "blockly_xml", '<xml></xml>' );
-                            this.kernel.setProperty( nodeID, "blockly_blockCount", 0 );
-                            this.kernel.setProperty( nodeID, "blockly_topBlockCount", 0 );   
                         }
                         break;
                 }
