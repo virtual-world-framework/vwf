@@ -566,6 +566,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                     //If there's anything left in the queue, play it!
                     if ( nextPlayingInstance !== undefined ){
+                        soundGroups[ soundDatum.soundGroup ].queue.push( nextPlayingInstance );
                         nextPlayingInstance.sourceNode.start( 0 );
                     }
                     
