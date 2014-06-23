@@ -334,7 +334,17 @@ define( [ "module", "vwf/model",
 
 
                 }
-            } 
+            } else if ( node !== undefined ) {
+                switch ( methodName ) {
+                    case "blocklyClear":
+                        if ( Blockly.mainWorkspace ) {
+                            
+                            Blockly.mainWorkspace.clear();
+                            this.kernel.setProperty( nodeID, "blockly_xml", '<xml></xml>' );
+                        }
+                        break;
+                }
+            }
         },
 
 
