@@ -9,6 +9,8 @@ properties:
   yAxisVisible: undefined
   zAxisVisible: undefined
   gridVisible: undefined
+  axisOpacity: undefined
+  gridOpacity: undefined
   renderTop: undefined
   graphIsVisible$: true
 methods:
@@ -25,6 +27,7 @@ methods:
       - startValue
       - endValue
       - color
+      - opacity
       - lineThickness
       - renderTop
       - name
@@ -36,6 +39,7 @@ methods:
           "startValue": startValue,
           "endValue": endValue,
           "color": color,
+          "opacity": opacity,
           "lineThickness": lineThickness,
           "renderTop": renderTop
         }
@@ -49,6 +53,7 @@ methods:
       - endValue
       - pointCount
       - color
+      - opacity
       - lineThickness
       - renderTop
       - name
@@ -61,6 +66,7 @@ methods:
           "endValue": endValue,
           "pointCount": pointCount,
           "color": color,
+          "opacity": opacity,
           "lineThickness": lineThickness,
           "renderTop": renderTop
         }
@@ -74,17 +80,19 @@ methods:
       - rotationAngle
       - size
       - color
+      - opacity
       - renderTop
       - name
     body: |
       var planeDef = {
-        "extends": "http://vwf.example.com/graphtool/graphline.vwf",
+        "extends": "http://vwf.example.com/graphtool/graphplane.vwf",
         "properties": {
           "origin": origin,
           "normal": normal,
           "rotationAngle": rotationAngle,
           "size": size,
           "color": color,
+          "opacity": opacity,
           "renderTop": renderTop
         }
       }

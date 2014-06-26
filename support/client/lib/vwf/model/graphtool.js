@@ -2,10 +2,11 @@
 
 define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
 
-    // Set up render order constants
-    var DEPTH_GRID = Number.MAX_SAFE_INTEGER - 3;
-    var DEPTH_AXES = Number.MAX_SAFE_INTEGER - 2;
-    var DEPTH_OBJECTS = Number.MAX_SAFE_INTEGER - 1;
+    // Set up render order constants for use with renderTop
+    // Transparent objects render back to front, so use small numbers
+    var DEPTH_GRID = Number.MIN_SAFE_INTEGER + 3;
+    var DEPTH_AXES = Number.MIN_SAFE_INTEGER + 2;
+    var DEPTH_OBJECTS = Number.MIN_SAFE_INTEGER + 1;
 
     return model.load( module, {
 
@@ -43,6 +44,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     "yAxisVisible": undefined,
                     "zAxisVisible": undefined,
                     "gridVisible": undefined,
+                    "axisOpacity": undefined,
+                    "gridOpacity": undefined,
                     "renderTop": undefined
                 };
 
@@ -62,6 +65,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             "startValue": undefined,
                             "endValue": undefined,
                             "color": undefined,
+                            "opacity": undefined,
                             "lineThickness": undefined,
                             "renderTop": undefined
                         };
@@ -73,6 +77,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             "endValue": undefined,
                             "pointCount": undefined,
                             "color": undefined,
+                            "opacity": undefined,
                             "lineThickness": undefined,
                             "renderTop": undefined
                         };
@@ -84,6 +89,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             "rotationAngle": undefined,
                             "size": undefined,
                             "color": undefined,
+                            "opacity": undefined,
                             "renderTop": undefined
                         };
                         break;
@@ -360,6 +366,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 props.yAxisVisible,
                 props.zAxisVisible,
                 props.gridVisible,
+                props.axisOpacity,
+                props.gridOpacity,
                 props.renderTop
             );
 
@@ -382,6 +390,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     props.startValue,
                     props.endValue,
                     props.color,
+                    props.opacity,
                     props.lineThickness,
                     props.renderTop
                 );
@@ -395,6 +404,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     props.endValue,
                     props.pointCount,
                     props.color,
+                    props.opacity,
                     props.lineThickness,
                     props.renderTop
                 );
@@ -408,6 +418,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     props.rotationAngle,
                     props.size,
                     props.color,
+                    props.opacity,
                     props.renderTop
                 );
                 break;
@@ -469,7 +480,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }
 
     function generateGraph( graphScale, gridInterval, gridLineInterval, gridLength, xAxisVisible, 
-                        yAxisVisible, zAxisVisible, gridVisible, renderTop ) {
+                        yAxisVisible, zAxisVisible, gridVisible, axisOpacity, gridOpacity, renderTop ) {
 
         var xAxis, yAxis, zAxis, gridX, gridY, axisLine;
         var thickness = 0.1;
@@ -478,15 +489,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         graph.name = "graph";
         gridLines.name = "gridLines";
 
-        xAxis = generateLine( graphScale, [ 1, 0, 0 ], -gridLength, gridLength, [ 255, 0, 0 ], thickness, renderTop );
+        xAxis = generateLine( graphScale, [ 1, 0, 0 ], -gridLength, gridLength, [ 255, 0, 0 ], axisOpacity, thickness, renderTop );
         xAxis.name = "xAxis";
         xAxis.visible = xAxisVisible;
 
-        yAxis = generateLine( graphScale, [ 0, 1, 0 ], -gridLength, gridLength, [ 0, 0, 255 ], thickness, renderTop );
+        yAxis = generateLine( graphScale, [ 0, 1, 0 ], -gridLength, gridLength, [ 0, 0, 255 ], axisOpacity, thickness, renderTop );
         yAxis.name = "yAxis";
         yAxis.visible = yAxisVisible;
 
-        zAxis = generateLine( graphScale, [ 0, 0, 1 ], -gridLength, gridLength, [ 0, 255, 0 ], thickness, renderTop );
+        zAxis = generateLine( graphScale, [ 0, 0, 1 ], -gridLength, gridLength, [ 0, 255, 0 ], axisOpacity, thickness, renderTop );
         zAxis.name = "zAxis";
         zAxis.visible = zAxisVisible;
 
@@ -509,11 +520,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 thickness = 0.025;
             }
 
-            gridX = generateLine( graphScale, [ 1, 0, 0 ], -gridLength, gridLength, [ 255, 255, 255 ], thickness, renderTop );
+            gridX = generateLine( graphScale, [ 1, 0, 0 ], -gridLength, gridLength, [ 255, 255, 255 ], gridOpacity, thickness, renderTop );
             gridX.position.set( 0, i, 0 );
             gridX.visible = gridVisible;
 
-            gridY = generateLine( graphScale, [ 0, 1, 0 ], -gridLength, gridLength, [ 255, 255, 255 ], thickness, renderTop );
+            gridY = generateLine( graphScale, [ 0, 1, 0 ], -gridLength, gridLength, [ 255, 255, 255 ], gridOpacity, thickness, renderTop );
             gridY.position.set( i, 0, 0 );
             gridY.visible = gridVisible;
 
@@ -532,7 +543,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }
 
     function generateLineFuction( graphScale, functionString, startValue, endValue, 
-                            pointCount, color, thickness, renderTop ) {
+                            pointCount, color, opacity, thickness, renderTop ) {
 
         var geometry = new THREE.Geometry();
         var point, direction;
@@ -581,10 +592,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         geometry.faces.push( new THREE.Face3( last, last - 1, last - 3 ) );
         geometry.faces.push( new THREE.Face3( last - 1, last - 2, last - 3 ) );
 
+        var transparent = renderTop || opacity < 1;
         var vwfColor = new utility.color( color );
         color = vwfColor.getHex();
         var meshMaterial = new THREE.MeshBasicMaterial( 
-                { "color": color, "depthTest": !renderTop } 
+                { "color": color, "transparent": transparent, "opacity": opacity, "depthTest": !renderTop } 
             );
         var mesh = new THREE.Mesh( geometry, meshMaterial );
         mesh.renderDepth = renderTop ? DEPTH_OBJECTS : null;
@@ -593,7 +605,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     }
 
-    function generateLine( graphScale, axis, startValue, endValue, color, thickness, renderTop ) {
+    function generateLine( graphScale, axis, startValue, endValue, color, opacity, thickness, renderTop ) {
 
         var geometry = new THREE.Geometry();
         startValue *= graphScale;
@@ -641,18 +653,20 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         geometry.faces.push( new THREE.Face3( last, last - 1, last - 3 ) );
         geometry.faces.push( new THREE.Face3( last - 1, last - 2, last - 3 ) );
 
+        var transparent = renderTop || opacity < 1;
         var vwfColor = new utility.color( color );
         color = vwfColor.getHex();
         var meshMaterial = new THREE.MeshBasicMaterial( 
-                { "color": color, "depthTest": !renderTop } 
+                { "color": color, "transparent": transparent, "opacity": opacity, "depthTest": !renderTop } 
             );
         var mesh = new THREE.Mesh( geometry, meshMaterial );
+        mesh.renderDepth = renderTop ? DEPTH_OBJECTS : null;
 
         return mesh;
 
     }
 
-    function generatePlane( graphScale, origin, normal, rotationAngle, size, color, renderTop ) {
+    function generatePlane( graphScale, origin, normal, rotationAngle, size, color, opacity, renderTop ) {
 
         var geometry = new THREE.Geometry();
         normal = new THREE.Vector3( normal[ 0 ], normal[ 1 ], normal[ 2 ] );
@@ -667,12 +681,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
         geometry.faces.push( new THREE.Face3( 0, 2, 3 ) );
 
+        var transparent = renderTop || opacity < 1;
         var vwfColor = new utility.color( color );
         color = vwfColor.getHex();
         var meshMaterial = new THREE.MeshBasicMaterial( 
-                { "color": color, "side": THREE.DoubleSide, "depthTest": !renderTop } 
+                { "color": color, "transparent": transparent, "opacity": opacity, "side": THREE.DoubleSide, "depthTest": !renderTop } 
             );
         var mesh = new THREE.Mesh( geometry, meshMaterial );
+        mesh.renderDepth = renderTop ? DEPTH_OBJECTS : null;
 
         return mesh;
 

@@ -6,4 +6,5 @@ properties:
   rotationAngle: undefined
   size: undefined
   color: undefined
+  opacity: undefined
   renderTop: undefined

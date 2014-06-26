@@ -14,6 +14,8 @@ children:
       yAxisVisible: true
       zAxisVisible: true
       gridVisible: true
+      axisOpacity: 1
+      gridOpacity: 0.5
       renderTop: false
     children:
       parabola:
@@ -24,6 +26,7 @@ children:
           endValue: 10
           pointCount: 100
           color: [ 0, 255, 255 ]
+          opacity: 1
           lineThickness: 0.25
           renderTop: false
       tangent:
@@ -34,6 +37,7 @@ children:
           endValue: 25
           pointCount: 250
           color: [ 255, 0, 255 ]
+          opacity: 1
           lineThickness: 0.25
           renderTop: false
       helix:
@@ -44,6 +48,7 @@ children:
           endValue: 25
           pointCount: 250
           color: [ 255, 255, 0 ]
+          opacity: 1
           lineThickness: 0.25
           renderTop: false
       plane:
@@ -54,6 +59,7 @@ children:
           rotationAngle: 90
           size: 10
           color: [ 50, 100, 200 ]
+          opacity: 1
           renderTop: false
 scripts: |
   this.initialize = function() {

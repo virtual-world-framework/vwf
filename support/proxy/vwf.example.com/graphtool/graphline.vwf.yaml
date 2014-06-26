@@ -5,5 +5,6 @@ properties:
   startValue: undefined
   endValue: undefined
   color: undefined
+  opacity: undefined
   lineThickness: undefined
   renderTop: undefined

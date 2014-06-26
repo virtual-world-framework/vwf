@@ -6,6 +6,7 @@ properties:
   endValue: undefined
   pointCount: undefined
   color: undefined
+  opacity: undefined
   lineThickness: undefined
   renderTop: undefined
 methods:
