@@ -556,8 +556,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
                                        "soundFinished",
-                                       [{ soundName: soundDatum.soundName, 
-                                              instanceID: id }] );
+                                       [ soundDatum.soundDefinition, id ] );
                 
                 if ( soundDatum.soundGroup && soundDatum.groupReplacementMethod === "queue" ) {
 
