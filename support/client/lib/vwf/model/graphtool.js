@@ -93,6 +93,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             "renderTop": undefined
                         };
                         break;
+                    case "group":
+                        node.objectProperties = {
+                            "groupVisible": undefined,
+                            "graphObjects": undefined
+                        };
+                        break;
                 }
 
                 node.parentGraph = this.state.graphs[ node.parentID ];
@@ -330,7 +336,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             for ( var i = 0; i < prototypes.length && !foundObject; i++ ) {
                 foundObject = ( prototypes[i] == "http-vwf-example-com-graphtool-graphline-vwf" ) ||
                     ( prototypes[i] == "http-vwf-example-com-graphtool-graphlinefunction-vwf" ) ||
-                    ( prototypes[i] == "http-vwf-example-com-graphtool-graphplane-vwf" );
+                    ( prototypes[i] == "http-vwf-example-com-graphtool-graphplane-vwf" ) ||
+                    ( prototypes[i] == "http-vwf-example-com-graphtool-graphgroup-vwf" );
             }
         }
 
@@ -347,6 +354,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     return "function";
                 } else if ( prototypes[i] == "http-vwf-example-com-graphtool-graphplane-vwf" ) {
                     return "plane";
+                } else if ( prototypes[i] == "http-vwf-example-com-graphtool-graphgroup-vwf" ) {
+                    return "group";
                 }
             }
         }
@@ -422,6 +431,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     props.renderTop
                 );
                 break;
+            case "group":
+                obj = generateGroup(
+                    graphScale,
+                    props.groupVisible,
+                    props.graphObjects
+                );
+                break;
         }
 
         obj.visible = node.threeObject.visible;
@@ -438,7 +454,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         for ( var objID in objects ) {
             var obj = objects[ objID ];
             if ( obj.parentID === graphID && obj.initialized ) {
-                redrawObject( obj );
+            redrawObject( obj );
             }
         }
     }
@@ -692,6 +708,71 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         return mesh;
 
+    }
+
+    function generateGroup( graphScale, groupVisible, graphObjects ) {
+
+        var groupObject = new THREE.Object3D();
+
+        for ( var i = 0; i < graphObjects.length; i++ ) {
+            var type = Object.keys( graphObjects[ i ] )[ 0 ];
+            var props = graphObjects[ i ][ type ];
+            var obj;
+            switch( type ) {
+
+                case "line":
+                    obj = generateLine(
+                        graphScale,
+                        props.axis,
+                        props.startValue,
+                        props.endValue,
+                        props.color,
+                        props.opacity,
+                        props.lineThickness,
+                        props.renderTop
+                    );
+                    break;
+
+                case "function":
+                    obj = generateLineFuction(
+                        graphScale,
+                        props.lineFunction,
+                        props.startValue,
+                        props.endValue,
+                        props.pointCount,
+                        props.color,
+                        props.opacity,
+                        props.lineThickness,
+                        props.renderTop
+                    );
+                    break;
+
+                case "plane":
+                    obj = generatePlane(
+                        graphScale,
+                        props.origin,
+                        props.normal,
+                        props.rotationAngle,
+                        props.size,
+                        props.color,
+                        props.opacity,
+                        props.renderTop
+                    );
+                    break;
+                case "group":
+                    obj = generateGroup(
+                        graphScale,
+                        props.groupVisible,
+                        props.graphObjects
+                    );
+                    break;
+            }
+
+            obj.visible = groupVisible;
+            groupObject.add( obj );
+        }
+
+        return groupObject;
     }
 
     function generateLineVertices( normal, origin, distance ) {

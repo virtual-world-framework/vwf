@@ -116,7 +116,29 @@ methods:
       }
       name = name || "plane" + this.planecount++;
       this.children.create( name, planeDef );
+  graphGroup:
+    parameters:
+      - groupVisible
+      - graphObjects
+      - name
+      - optionalProperties
+    body: |
+      var groupDef = {
+        "extends": "http://vwf.example.com/graphtool/graphgroup.vwf",
+        "properties": {
+          "groupVisible": groupVisible,
+          "graphObjects": graphObjects
+        }
+      }
+      if ( optionalProperties ) {
+        for ( var key in optionalProperties ) {
+          groupDef.properties[ key ] = optionalProperties[ key ];
+        }
+      }
+      name = name || "group" + this.groupcount++;
+      this.children.create( name, groupDef );
 scripts: |
   this.lineCount = 0;
   this.functioncount = 0;
   this.planecount = 0;
+  this.groupcount = 0;
