@@ -16,7 +16,13 @@
 /// @module vwf/model/test
 /// @requires vwf/model
 
-define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ], function( module, model, utility, Color, $ ) {
+define( [ "module", 
+          "vwf/model", 
+          "vwf/utility", 
+          "vwf/utility/color",
+          "vwf/utility/cws", 
+          "jquery" ], 
+    function( module, model, utility, Color, cws, $ ) {
 
     var self;
 

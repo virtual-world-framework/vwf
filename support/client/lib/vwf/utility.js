@@ -20,11 +20,13 @@
 define( [ "module",
     "vwf/utility/xpath",
     "vwf/utility/color",
-    "vwf/utility/coordinates"
+    "vwf/utility/coordinates",
+    "vwf/utility/cws"
 ], function( module,
     xpath,
     color,
-    coordinates
+    coordinates,
+    cws
 ) {
 
     var exports = {
@@ -290,6 +292,12 @@ define( [ "module",
         /// DOM element coordinate conversion functions.
 
         coordinates: coordinates,
+
+        // -- cws --------------------------------------------------------------------------
+
+        /// MIL-STD-2525B COMMON WARFIGHTING SYMBOLOGY
+
+        cws: cws,        
 
     };
 
