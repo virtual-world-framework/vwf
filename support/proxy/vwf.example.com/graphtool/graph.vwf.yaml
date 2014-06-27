@@ -31,6 +31,7 @@ methods:
       - lineThickness
       - renderTop
       - name
+      - optionalProperties
     body: |
       var lineDef = {
         "extends": "http://vwf.example.com/graphtool/graphline.vwf",
@@ -42,6 +43,11 @@ methods:
           "opacity": opacity,
           "lineThickness": lineThickness,
           "renderTop": renderTop
+        }
+      }
+      if ( optionalProperties ) {
+        for ( var key in optionalProperties ) {
+          lineDef.properties[ key ] = optionalProperties[ key ];
         }
       }
       name = name || "line" + this.lineCount++;
@@ -57,6 +63,7 @@ methods:
       - lineThickness
       - renderTop
       - name
+      - optionalProperties
     body: |
       var functionDef = {
         "extends": "http://vwf.example.com/graphtool/graphlinefunction.vwf",
@@ -71,6 +78,11 @@ methods:
           "renderTop": renderTop
         }
       }
+      if ( optionalProperties ) {
+        for ( var key in optionalProperties ) {
+          functionDef.properties[ key ] = optionalProperties[ key ];
+        }
+      }
       name = name || "function" + this.functioncount++;
       this.children.create( name, functionDef );
   graphPlane:
@@ -83,6 +95,7 @@ methods:
       - opacity
       - renderTop
       - name
+      - optionalProperties
     body: |
       var planeDef = {
         "extends": "http://vwf.example.com/graphtool/graphplane.vwf",
@@ -94,6 +107,11 @@ methods:
           "color": color,
           "opacity": opacity,
           "renderTop": renderTop
+        }
+      }
+      if ( optionalProperties ) {
+        for ( var key in optionalProperties ) {
+          planeDef.properties[ key ] = optionalProperties[ key ];
         }
       }
       name = name || "plane" + this.planecount++;
