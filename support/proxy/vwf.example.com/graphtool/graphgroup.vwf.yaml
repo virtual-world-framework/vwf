@@ -1,0 +1,18 @@
+---
+extends: http://vwf.example.com/node3.vwf
+properties:
+  groupVisible: undefined
+
+  # graphObjects is an array of objects in the format:
+  ## graphObjectType: {
+  ##   propertyName: propertyValue,
+  ##   propertyName: propertyValue,
+  ##   ...
+  ## }
+  #
+  # Where:
+  # graphObjectType = line, function, plane, group
+  # propertyName = properties of the specified type
+  # propertyValue = the value to set the property to
+
+  graphObjects: []

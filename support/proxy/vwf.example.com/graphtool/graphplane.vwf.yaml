@@ -1,0 +1,10 @@
+---
+extends: http://vwf.example.com/node3.vwf
+properties:
+  origin: undefined
+  normal: undefined
+  rotationAngle: undefined
+  size: undefined
+  color: undefined
+  opacity: undefined
+  renderTop: undefined
