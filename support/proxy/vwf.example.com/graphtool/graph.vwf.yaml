@@ -1,0 +1,144 @@
+---
+extends: http://vwf.example.com/node3.vwf
+properties:
+  graphScale: undefined
+  gridInterval: undefined
+  gridLineInterval: undefined
+  gridLength: undefined
+  xAxisVisible: undefined
+  yAxisVisible: undefined
+  zAxisVisible: undefined
+  gridVisible: undefined
+  axisOpacity: undefined
+  gridOpacity: undefined
+  renderTop: undefined
+  graphIsVisible$: true
+methods:
+  setGraphVisibility:
+    parameters:
+      - visible
+    body: |
+      this.graphIsVisible$ = visible;
+  toggleGraphVisibility: |
+    this.setGraphVisibility( !this.graphIsVisible$ );
+  graphLine:
+    parameters:
+      - axis
+      - startValue
+      - endValue
+      - color
+      - opacity
+      - lineThickness
+      - renderTop
+      - name
+      - optionalProperties
+    body: |
+      var lineDef = {
+        "extends": "http://vwf.example.com/graphtool/graphline.vwf",
+        "properties": {
+          "axis": axis,
+          "startValue": startValue,
+          "endValue": endValue,
+          "color": color,
+          "opacity": opacity,
+          "lineThickness": lineThickness,
+          "renderTop": renderTop
+        }
+      }
+      if ( optionalProperties ) {
+        for ( var key in optionalProperties ) {
+          lineDef.properties[ key ] = optionalProperties[ key ];
+        }
+      }
+      name = name || "line" + this.lineCount++;
+      this.children.create( name, lineDef );
+  graphFunction:
+    parameters:
+      - lineFunction
+      - startValue
+      - endValue
+      - pointCount
+      - color
+      - opacity
+      - lineThickness
+      - renderTop
+      - name
+      - optionalProperties
+    body: |
+      var functionDef = {
+        "extends": "http://vwf.example.com/graphtool/graphlinefunction.vwf",
+        "properties": {
+          "lineFunction": lineFunction,
+          "startValue": startValue,
+          "endValue": endValue,
+          "pointCount": pointCount,
+          "color": color,
+          "opacity": opacity,
+          "lineThickness": lineThickness,
+          "renderTop": renderTop
+        }
+      }
+      if ( optionalProperties ) {
+        for ( var key in optionalProperties ) {
+          functionDef.properties[ key ] = optionalProperties[ key ];
+        }
+      }
+      name = name || "function" + this.functioncount++;
+      this.children.create( name, functionDef );
+  graphPlane:
+    parameters:
+      - origin
+      - normal
+      - rotationAngle
+      - size
+      - color
+      - opacity
+      - renderTop
+      - name
+      - optionalProperties
+    body: |
+      var planeDef = {
+        "extends": "http://vwf.example.com/graphtool/graphplane.vwf",
+        "properties": {
+          "origin": origin,
+          "normal": normal,
+          "rotationAngle": rotationAngle,
+          "size": size,
+          "color": color,
+          "opacity": opacity,
+          "renderTop": renderTop
+        }
+      }
+      if ( optionalProperties ) {
+        for ( var key in optionalProperties ) {
+          planeDef.properties[ key ] = optionalProperties[ key ];
+        }
+      }
+      name = name || "plane" + this.planecount++;
+      this.children.create( name, planeDef );
+  graphGroup:
+    parameters:
+      - groupVisible
+      - graphObjects
+      - name
+      - optionalProperties
+    body: |
+      var groupDef = {
+        "extends": "http://vwf.example.com/graphtool/graphgroup.vwf",
+        "properties": {
+          "groupVisible": groupVisible,
+          "graphObjects": graphObjects
+        }
+      }
+      if ( optionalProperties ) {
+        for ( var key in optionalProperties ) {
+          groupDef.properties[ key ] = optionalProperties[ key ];
+        }
+      }
+      name = name || "group" + this.groupcount++;
+      this.children.create( name, groupDef );
+scripts: |
+  this.lineCount = 0;
+  this.functioncount = 0;
+  this.planecount = 0;
+  this.groupcount = 0;
