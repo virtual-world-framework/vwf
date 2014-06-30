@@ -32,13 +32,13 @@ set str2=VWF_Master_%datetimef%-source-code
 REM CREATE VWF FULL PACKAGE AND MOVE TO DOWNLOADS WEBSITE
 
 7za a -mx9 -tzip %str%.zip vwf
-ncftpput -u ftp -p YIRY4PeD download.virtualworldframework.com .\archive c:\%str%.zip
+ncftpput -f C:\login.txt .\archive c:\%str%.zip
 del c:\%str%.zip
 
 REM CREATE VWF SOURCE PACKAGE AND MOVE TO DOWNLOADS WEBSITE
 
 7za a -mx9 -tzip %str2%.zip vwfsource
-ncftpput -u ftp -p YIRY4PeD download.virtualworldframework.com .\archive c:\%str2%.zip
+ncftpput -f C:\login.txt .\archive c:\%str2%.zip
 del c:\%str2%.zip
 
 
