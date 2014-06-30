@@ -578,7 +578,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
                                        "soundFinished",
-                                       [{ soundName: soundDatum.soundName, 
+                                       [{ soundName: soundDatum.name, 
                                               instanceID: id }] );
                 
                 if ( soundDatum.soundGroup && soundDatum.groupReplacementMethod === "queue" ) {
@@ -593,7 +593,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         if ( !!nextPlayingInstance.soundDatum.subtitle ) {
                             vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
                                                    "soundStarted",
-                                                   [{ soundName: nextPlayingInstance.soundDatum.soundName, 
+                                                   [{ soundName: nextPlayingInstance.soundDatum.name, 
                                               instanceID: id }] );
                         }
                     }
@@ -622,7 +622,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             if ( !!this.soundDatum.subtitle ) {
                                 vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
                                                    "soundStarted",
-                                                   [{ soundName: nextPlayingInstance.soundDatum.soundName, 
+                                                   [{ soundName: soundDatum.name, 
                                               instanceID: id }] );
                             }
                         } else {
@@ -634,11 +634,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
             } else {
                 this.sourceNode.start( 0 ); 
-
                 vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
                                                    "soundStarted",
-                                                   [{ soundName: soundDatum.soundName, 
-                                              instanceID: id }] );               
+                                                   [{ soundName: soundDatum.name, 
+                                              instanceID: id }] );
             }
         },
 
