@@ -579,9 +579,35 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 if ( soundDatum.soundGroup && soundDatum.groupReplacementMethod === "duck" ) {
 
-                    //TODO: raise volume of all other instances in this soundGroup
+                    var currentPlayingInstance = soundGroups[ soundDatum.soundGroup ].queue.shift();
+
+                    for ( var x in soundGroups[ soundDatum.soundGroup ].queue ) {
+                            soundGroups[ soundDatum.soundGroup ].queue[ x ].gainNode.gain.value 
+                                = soundGroups[ soundDatum.soundGroup ].queue[ x ].gainNode.gain.value*4;
+                    }
                     
                 }
+
+                if ( soundDatum.soundGroup && soundDatum.groupReplacementMethod === "cut" ) {
+                    var currentPlayingInstance = soundGroups[ soundDatum.soundGroup ].queue.shift();
+
+                    for ( var x in soundGroups[ soundDatum.soundGroup ].queue ) {
+                            soundGroups[ soundDatum.soundGroup ].queue[ x ].gainNode.gain.value 
+                                = soundGroups[ soundDatum.soundGroup ].queue[ x ].gainNode.gain.value = soundDatum.initialVolume;
+                    }
+                }
+
+                if ( soundDatum.soundGroup ){
+                    for ( var x in soundGroups[ soundDatum.soundGroup ].queue ) {
+                        var toBeRemoved = soundGroups[ soundDatum.soundGroup ].queue[ x ];
+                            if ( toBeRemoved !== undefined && toBeRemoved.soundDatum === soundDatum ){
+                                soundGroups[ soundDatum.soundGroup ].queue.splice( x, 1 );
+                            }
+                            
+                    }
+                }
+                
+                
 
                 delete soundDatum.playingInstances[ id ];
                 exitCallback && exitCallback();
@@ -593,7 +619,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         if ( !soundGroups[ soundDatum.soundGroup ].queue ) {
                             soundGroups[ soundDatum.soundGroup ].queue = [];
                         }
-                        if ( soundGroups[ soundDatum.soundGroup ].queue.length === 0 ){
+                        if ( soundGroups[ soundDatum.soundGroup ].queue.length === 0 ) {
                             soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
                             this.sourceNode.start( 0 );
                             if ( !!this.soundDatum.subtitle ) {
@@ -604,8 +630,43 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         } else {
                             soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
                         }
+
+                        break;
+
                     case "duck":
-                        //TODO: lower volume of all other instances in this soundGroup
+                        if ( !soundGroups[ soundDatum.soundGroup ].queue ) {
+                            soundGroups[ soundDatum.soundGroup ].queue = [];
+                        }
+                        for ( var x in soundGroups[ soundDatum.soundGroup ].queue) {
+                            soundGroups[ soundDatum.soundGroup ].queue[ x ].gainNode.gain.value 
+                                = soundGroups[ soundDatum.soundGroup ].queue[ x ].gainNode.gain.value/4;
+                        }
+                        soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
+                        this.sourceNode.start( 0 );
+
+                        break;
+
+                    case "cut":
+                        if ( !soundGroups[ soundDatum.soundGroup ].queue ) {
+                            soundGroups[ soundDatum.soundGroup ].queue = [];
+                        }
+                        for ( var x in soundGroups[ soundDatum.soundGroup ].queue ) {
+                            if ( soundGroups[ soundDatum.soundGroup ].queue[ x ] !== undefined ){
+                                soundGroups[ soundDatum.soundGroup ].queue[ x ].gainNode.gain.value=0;
+                            }
+                            
+                        }
+                        soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
+                        this.sourceNode.start ( 0 );
+
+                        break;
+
+                    default:
+                        if ( !soundGroups[ soundDatum.soundGroup ].queue ) {
+                            soundGroups[ soundDatum.soundGroup ].queue = [];
+                        }
+                        soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
+                        this.sourceNode.start ( 0 );
                         
                 }
             } else {
@@ -627,7 +688,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
              fadeMethod = fadeMethod ? fadeMethod : "linear";
 
             if ( fadeTime <= 0 ) {
-                this.sourceNode.gain.value = targetVolume;
+                this.gainNode.gain.value = targetVolume;
             } else {
                 var endTime = context.currentTime + fadeTime;
                 var now = context.currentTime;
