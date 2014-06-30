@@ -179,6 +179,28 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         soundDatum.setVolume ( params [ 0 ], params [ 1 ], params [ 2 ], params [ 3 ] );
                     }
                 
+                // // arguments: instanceHandle
+                case "hasSubtitle":
+                    instanceHandle = params [ 0 ];
+                    soundDatum = getSoundDatum( instanceHandle.soundName );
+
+                    if ( soundDatum && !!soundDatum.subtitle ){
+                        return true;
+                    } else {
+                        return false;
+                    }
+
+                // // arguments: instanceHandle
+                case "getSubtitle":
+                    instanceHandle = params [ 0 ];
+                    soundDatum = getSoundDatum( instanceHandle.soundName );
+
+                    if ( soundDatum && !!soundDatum.subtitle ){
+                        return soundDatum.subtitle;
+                    } else {
+                        return undefined;
+                    }
+
                 // arguments: instanceHandle
                 case "stopSoundInstance":
 
@@ -570,8 +592,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         nextPlayingInstance.sourceNode.start( 0 );
                         if ( !!nextPlayingInstance.soundDatum.subtitle ) {
                             vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
-                                                   "playSubtitle",
-                                                   [ nextPlayingInstance.soundDatum.subtitle ] );
+                                                   "soundStarted",
+                                                   [{ soundName: nextPlayingInstance.soundDatum.soundName, 
+                                              instanceID: id }] );
                         }
                     }
                     
@@ -598,8 +621,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             this.sourceNode.start( 0 );
                             if ( !!this.soundDatum.subtitle ) {
                                 vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
-                                                       "playSubtitle",
-                                                       [ soundDatum.subtitle ] );
+                                                   "soundStarted",
+                                                   [{ soundName: nextPlayingInstance.soundDatum.soundName, 
+                                              instanceID: id }] );
                             }
                         } else {
                             soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
@@ -609,7 +633,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         
                 }
             } else {
-                this.sourceNode.start( 0 );                
+                this.sourceNode.start( 0 ); 
+
+                vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
+                                                   "soundStarted",
+                                                   [{ soundName: soundDatum.soundName, 
+                                              instanceID: id }] );               
             }
         },
 

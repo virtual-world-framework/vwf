@@ -9,9 +9,12 @@ methods:
   isSoundPlaying:
   isInstancePlaying:
   setVolume:
+  hasSubtitle:
+  getSubtitle:
   stopSoundInstance:
   stopAllSoundInstances:
 events:
   soundFinished:
+  soundStarted:
   playSubtitle:
 
