@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Id="*" Language="1033" Manufacturer="Virtual World Framework" Name="VWF" UpgradeCode="{C55F07F7-E283-4F1A-996E-01AC5A3D77EF}" Version="0.6.22">
+        <Package Compressed="yes" InstallerVersion="200" />
+        <Directory Id="TARGETDIR" Name="SourceDir" />
+        <Feature Id="ProductFeature" Level="1" Title="VWF" />
+        <Media Id="1" />
+    </Product>
+    <Environment Id="PATH" Name="PATH" Value="[INSTALLDIR]" Permanent="no" Part="last" Action="set" System="yes" />
+    <Environment Id="VWF_DIR" Name="VWF_DIR" Value="[INSTALLDIR]" Permanent="no" Action="set" System="yes" />
+</Wix>
