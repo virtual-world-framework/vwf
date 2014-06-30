@@ -16,5 +16,3 @@ methods:
 events:
   soundFinished:
   soundStarted:
-  playSubtitle:
-
