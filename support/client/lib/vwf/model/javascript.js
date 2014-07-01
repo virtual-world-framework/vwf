@@ -593,10 +593,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
             if ( body ) {
                 try {
-                    var parametersJS = ! ( methodParameters && methodParameters.length ) ? methodParameters :
-                        Array.prototype.slice.call( methodParameters ).map( function( value ) {  // ... best for [], arguments, Array ...
-                            return valueJSFromKernel.call( this, value );
-                        }, this );
+                    var parametersJS = parametersJSFromKernel.call( this, methodParameters );
                     var resultJS = body.apply( node, parametersJS );
                     return valueKernelFromJS.call( this, resultJS );
                 } catch ( e ) {
@@ -684,10 +681,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             var node = this.nodes[nodeID];
             var listeners = findListeners( node, eventName );
 
-            var parametersJS = ! ( eventParameters && eventParameters.length ) ? eventParameters :
-                Array.prototype.slice.call( eventParameters ).map( function( value ) {  // ... best for [], arguments, Array ...
-                    return valueJSFromKernel.call( this, value );
-                }, this );
+            var parametersJS = parametersJSFromKernel.call( this, eventParameters );
 
             var self = this;
 
@@ -1013,10 +1007,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             get: function() {  // `this` is the container
                 var node = this.node || this;  // the node via node.methods.node, or just node
                 return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
-                    var argumentsKernel = ! arguments.length ? arguments :
-                        Array.prototype.slice.call( arguments ).map( function( value ) {
-                            return valueKernelFromJS.call( self, value );
-                        } );
+                    var argumentsKernel = parametersKernelFromJS.call( self, arguments );
                     var resultKernel = self.kernel.callMethod( node.id, methodName, argumentsKernel,
                         node.private.when, node.private.callback );
                     return valueJSFromKernel.call( self, resultKernel );
@@ -1059,10 +1050,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             get: function() {  // `this` is the container
                 var node = this.node || this;  // the node via node.events.node, or just node
                 return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
-                    var argumentsKernel = ! arguments.length ? arguments :
-                        Array.prototype.slice.call( arguments ).map( function( value ) {
-                            return valueKernelFromJS.call( self, value );
-                        } );
+                    var argumentsKernel = parametersKernelFromJS.call( self, arguments );
                     var resultKernel = self.kernel.fireEvent( node.id, eventName, argumentsKernel,
                         node.private.when, node.private.callback );
                     return valueJSFromKernel.call( self, resultKernel );
@@ -1176,6 +1164,48 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     }
 
+    /// Convert a parameter array of values using `valueKernelFromJS`.
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `parametersKernelFromJS.call( driver, parameters )`.
+    /// 
+    /// @param {Object[]} parameters
+    /// 
+    /// @returns {Object}
+
+    function parametersKernelFromJS( parameters ) {
+
+        if ( parameters && parameters.length ) {
+            return Array.prototype.slice.call( parameters ).map( function( value ) {
+                return valueKernelFromJS.call( this, value );
+            }, this );
+        } else {
+            return parameters;
+        }
+
+    }
+
+    /// Convert a parameter array of values using `valueJSFromKernel`.
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `parametersJSFromKernel.call( driver, parameters )`.
+    /// 
+    /// @param {Object[]} parameters
+    /// 
+    /// @returns {Object}
+
+    function parametersJSFromKernel( parameters ) {
+
+        if ( parameters && parameters.length ) {
+            return Array.prototype.slice.call( parameters ).map( function( value ) {
+                return valueJSFromKernel.call( this, value );
+            }, this );
+        } else {
+            return parameters;
+        }
+
+    }
+
     /// Convert node references into special values that can pass through the kernel. These values
     /// are wrapped in such a way that they won't be confused with any other application value, and
     /// they will be replicated correctly by the kernel.
@@ -1202,9 +1232,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             }
 
         } else {
-
             return value;
-
         }
 
     }
@@ -1230,9 +1258,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             }
 
         } else {
-
             return value;
-
         }
 
     }
