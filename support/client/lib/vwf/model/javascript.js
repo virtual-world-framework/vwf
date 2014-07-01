@@ -971,15 +971,21 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
         return future;
     }
 
-    /// Define ...
+    /// Define a (JavaScript) accessor property on a node or a node's `properties` collection that
+    /// will manipulate a (VWF) property on the node.
+    /// 
+    /// Reading `node.properties.name` invokes the `get` accessor, which calls `kernel.getProperty`
+    /// to return the value for the property on the node. Writing `node.properties.name` invokes
+    /// the `set` accessor, which calls `kernel.setProperty` to assign a new value to the property
+    /// on its node.
     /// 
     /// This function must run as a method of the driver. Invoke it as:
     ///   `createPropertyAccessor.call( driver, container, propertyName )`.
     /// 
     /// @param {Object} container
-    ///   The ...
+    ///   A `node` or `node.properties` object to receive the property.
     /// @param {String} propertyName
-    ///   The ...
+    ///   The name of the property to create on `container`.
 
     function createPropertyAccessor( container, propertyName ) {
 
@@ -987,12 +993,16 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
         Object.defineProperty( container, propertyName, {
 
+            // On read, call `kernel.getProperty` and return the result.
+
             get: function() {  // `this` is the container
                 var node = this.node || this;  // the node via node.properties.node, or just node
                 var resultKernel = self.kernel.getProperty( node.id, propertyName,
                     node.private.when, node.private.callback );
                 return valueJSFromKernel.call( self, resultKernel );
             },
+
+            // On write, pass the assigned value to `kernel.setProperty`.
 
             set: function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.properties.node, or just node
@@ -1007,23 +1017,31 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     }
 
-    /// Define ...
+    /// Define an accessor property on a node or a node's `methods` collection that manipulates a
+    /// method on the node.
+    /// 
+    /// Reading `node.methods.name` returns a function that when called calls `kernel.callMethod` to
+    /// invoke the method on the node. Writing a function object to `node.methods.name` will set the
+    /// method body to the assigned function.
     /// 
     /// This function must run as a method of the driver. Invoke it as:
     ///   `createMethodAccessor.call( driver, container, methodName )`.
     /// 
     /// @param {Object} container
-    ///   The ...
+    ///   A `node` or `node.methods` object to receive the property.
     /// @param {String} methodName
-    ///   The ...
+    ///   The name of the property to create on `container`.
     /// @param {Boolean} [unsettable]
-    ///   The ...
+    ///   When truthy, don't create the `set` accessor. An unsettable method property doesn't allow
+    ///   the method body to be changed.
 
     function createMethodAccessor( container, methodName, unsettable ) {
 
         var self = this;
 
         Object.defineProperty( container, methodName, {
+
+            // On read, return a function that calls `kernel.callMethod` when invoked.
 
             get: function() {  // `this` is the container
                 var node = this.node || this;  // the node via node.methods.node, or just node
@@ -1034,6 +1052,8 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
                     return valueJSFromKernel.call( self, resultKernel );
                 };
             },
+
+            // On write, update the method body. `unsettable` methods don't accept writes.
 
             set: unsettable ? undefined : function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.methods.node, or just node
@@ -1048,25 +1068,40 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     }
 
-    /// Define ...
+    /// Define an accessor property on a node or a node's `events` collection that manipulates an
+    /// event on the node. `createEventAccessor` is also used to define accessor properties at other
+    /// locations on the node to expose the node's meta events.
+    /// 
+    /// Reading `node.events.name` returns a function that when called calls `kernel.fireEvent` to
+    /// fire the event from the node. Writing a function object to `node.events.name` will add the
+    /// assigned function as a new listener using default parameters. To add a listener with
+    /// specified paramters, call the `node.events.add` helper function and assign the result to
+    /// `node.events.name`. Remove a listener by calling the `node.events.remove` helper and
+    /// assigning the result. Flush a set of listeners with the `node.events.flush` helper.
     /// 
     /// This function must run as a method of the driver. Invoke it as:
     ///   `createEventAccessor.call( driver, container, eventName [, eventNamespace ] [, unsettable ] )`.
     /// 
     /// @param {Object} container
-    ///   The ...
+    ///   A `node` or `node.events` object to receive the property. Meta events will attach to
+    ///   `node.properties`, `node.methods`, `node.events`, and `node.children` as well.
     /// @param {String} eventName
-    ///   The ...
+    ///   The name of the property to create on `container`.
     /// @param {String} [eventNamespace]
-    ///   The ...
+    ///   For meta events, the namespace associated with the event.
     /// @param {Boolean} [unsettable]
-    ///   The ...
+    ///   When truthy, don't create the `set` accessor. An unsettable event property can't add or
+    ///   remove listeners.
 
     function createEventAccessor( container, eventName, eventNamespace, unsettable ) {
 
         var self = this;
 
         Object.defineProperty( container, eventName, {
+
+            // On read, return a function that calls `kernel.fireEvent` when invoked. Namespaced
+            // events (which are meta events and controlled by the kernel) are ungettable and can't
+            // be fired by the application.
 
             get: eventNamespace ? undefined : function() {  // `this` is the container
                 var node = this.node || this;  // the node via node.*collection*.node, or just node
@@ -1077,6 +1112,8 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
                     return valueJSFromKernel.call( self, resultKernel );
                 };
             },
+
+            // On write, update the listeners. `unsettable` events don't accept writes.
 
             set: unsettable ? undefined : function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.*collection*.node, or just node
@@ -1100,6 +1137,10 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
                         value.context && value.context.id );
                 }
             },
+
+            // Meta events--including the `properties`, `methods`, and `events` `created` and
+            // `deleted` events, and the `children` `added` and `removed` events--are not
+            // enumerable.
 
             enumerable: ! eventNamespace,
 

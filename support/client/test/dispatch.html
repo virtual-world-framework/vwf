@@ -481,6 +481,9 @@
 
                   }, undefined, function( bottomID ) {
 
+                    // Call the test's callback to let it run its assertions. Then clean up after it
+                    // finishes and calls us back.
+
                     callback( topID, middleID, bottomID, baseID, function() {
                       vwf.deleteNode( bottomID );
                       vwf.deleteNode( middleID );
