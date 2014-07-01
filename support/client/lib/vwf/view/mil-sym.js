@@ -14,7 +14,7 @@
 /// @module vwf/view/test
 /// @requires vwf/view
 
-define( [ "module", "vwf/view" ], function( module, view ) {
+define( [ "module", "vwf/view", "tdg/cws" ], function( module, view, cws ) {
 
     var self;
 
@@ -45,7 +45,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             
         },
 
-        initializedNode: function( nodeID, childID ) {
+        initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName  ) {
 
         },
  
@@ -78,7 +78,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
         // -- satProperty ------------------------------------------------------------------------------
 
-        satProperty: function ( nodeID, propertyName, propertyValue ) {         
+        satProperty: function ( nodeID, propertyName, propertyValue ) { 
+            if ( nodeID === this.kernel.application() ) {
+                switch ( propertyName ) {
+                    case "insertableUnits":
+                        addInsertableUnits( propertyValue );
+                        break;
+                }
+            }        
         },
 
         // -- gotProperty ------------------------------------------------------------------------------
@@ -107,5 +114,51 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         },
 
     } );
+
+    function addInsertableUnits( units ) {
+        var foundUnits = undefined;
+        var unit = undefined;
+        var fullName = undefined;
+        var unitsToAdd = undefined;
+        var image = undefined;
+        var appID = self.kernel.application();
+        var description = undefined;
+
+        if ( cws ) {
+            for ( var location in units ) {
+                unitsToAdd = units[ location ];
+                if ( ! ( unitsToAdd instanceof Array ) ) {
+                    unitsToAdd = [ unitsToAdd ];
+                }                
+
+                for ( var i = 0; i < unitsToAdd.length; i++ ) {
+                    foundUnits = cws.findAll( location, unitsToAdd[ i ] );
+                    if ( foundUnits ) {
+                        for ( fullName in foundUnits ) {
+                            unit = foundUnits[ fullName ];
+                            image = getUnitImage( unit.symbolID );
+                            description = cws.description( fullName, unit.tag );
+                            self.kernel.callMethod( appID, "insertableUnitAdded", [ fullName, description, unit.tag, unit.symbolID, image ] );
+                        }
+                    } else {
+                        self.logger.warnx( "Unable to find: " + unitsToAdd[ i ] + " in " + location );
+                    }
+                }
+            }
+        }    
+    }
+
+    function getUnitImage( symbolID ) {
+        var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
+        var modifiers = {};
+        modifiers[ msa.PixelSize ] = 32;
+        var img = armyc2.c2sd.renderer.MilStdIconRenderer.Render( symbolID, modifiers );
+        if ( img ) {
+            img.toDataUrl();
+        } else {
+            return "";
+        }
+    }
+
 
 } );
