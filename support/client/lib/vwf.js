@@ -3201,22 +3201,20 @@ if ( ! childComponent.source ) {
 
             // Encode any namespacing into the name. (Namespaced names were added in 0.6.21.)
 
-            if ( typeof eventName === "object" && eventName instanceof Array ) {
-                eventName = namespaceEncodedName( eventName );
-            }
+            var encodedEventName = namespaceEncodedName( eventName );
 
             // Call creatingEvent() on each model. The event is considered created after all models
             // have run.
 
             this.models.forEach( function( model ) {
-                model.creatingEvent && model.creatingEvent( nodeID, eventName, eventParameters );
+                model.creatingEvent && model.creatingEvent( nodeID, encodedEventName, eventParameters );
             } );
 
             // Call createdEvent() on each view. The view is being notified that a event has been
             // created.
 
             this.views.forEach( function( view ) {
-                view.createdEvent && view.createdEvent( nodeID, eventName, eventParameters );
+                view.createdEvent && view.createdEvent( nodeID, encodedEventName, eventParameters );
             } );
 
             this.logger.debugu();
@@ -3237,21 +3235,19 @@ if ( ! childComponent.source ) {
 
             // Encode any namespacing into the name.
 
-            if ( typeof eventName === "object" && eventName instanceof Array ) {
-                eventName = namespaceEncodedName( eventName );
-            }
+            var encodedEventName = namespaceEncodedName( eventName );
 
             // Call addingEventListener() on each model.
 
             this.models.forEach( function( model ) {
-                model.addingEventListener && model.addingEventListener( nodeID, eventName, eventHandler,
+                model.addingEventListener && model.addingEventListener( nodeID, encodedEventName, eventHandler,
                     eventContextID, eventPhases );
             } );
 
             // Call addedEventListener() on each view.
 
             this.views.forEach( function( view ) {
-                view.addedEventListener && view.addedEventListener( nodeID, eventName, eventHandler,
+                view.addedEventListener && view.addedEventListener( nodeID, encodedEventName, eventHandler,
                     eventContextID, eventPhases );
             } );
 
@@ -3272,20 +3268,18 @@ if ( ! childComponent.source ) {
 
             // Encode any namespacing into the name.
 
-            if ( typeof eventName === "object" && eventName instanceof Array ) {
-                eventName = namespaceEncodedName( eventName );
-            }
+            var encodedEventName = namespaceEncodedName( eventName );
 
             // Call removingEventListener() on each model.
 
             this.models.forEach( function( model ) {
-                model.removingEventListener && model.removingEventListener( nodeID, eventName, eventHandler );
+                model.removingEventListener && model.removingEventListener( nodeID, encodedEventName, eventHandler );
             } );
 
             // Call removedEventListener() on each view.
 
             this.views.forEach( function( view ) {
-                view.removedEventListener && view.removedEventListener( nodeID, eventName, eventHandler );
+                view.removedEventListener && view.removedEventListener( nodeID, encodedEventName, eventHandler );
             } );
 
             this.logger.debugu();
@@ -3303,20 +3297,18 @@ if ( ! childComponent.source ) {
 
             // Encode any namespacing into the name.
 
-            if ( typeof eventName === "object" && eventName instanceof Array ) {
-                eventName = namespaceEncodedName( eventName );
-            }
+            var encodedEventName = namespaceEncodedName( eventName );
 
             // Call flushingEventListeners() on each model.
 
             this.models.forEach( function( model ) {
-                model.flushingEventListeners && model.flushingEventListeners( nodeID, eventName, eventContextID );
+                model.flushingEventListeners && model.flushingEventListeners( nodeID, encodedEventName, eventContextID );
             } );
 
             // Call flushedEventListeners() on each view.
 
             this.views.forEach( function( view ) {
-                view.flushedEventListeners && view.flushedEventListeners( nodeID, eventName, eventContextID );
+                view.flushedEventListeners && view.flushedEventListeners( nodeID, encodedEventName, eventContextID );
             } );
 
             this.logger.debugu();
@@ -3336,20 +3328,18 @@ if ( ! childComponent.source ) {
 
             // Encode any namespacing into the name. (Namespaced names were added in 0.6.21.)
 
-            if ( typeof eventName === "object" && eventName instanceof Array ) {
-                eventName = namespaceEncodedName( eventName );
-            }
+            var encodedEventName = namespaceEncodedName( eventName );
 
             // Call firingEvent() on each model.
 
             var handled = this.models.reduce( function( handled, model ) {
-                return model.firingEvent && model.firingEvent( nodeID, eventName, eventParameters ) || handled;
+                return model.firingEvent && model.firingEvent( nodeID, encodedEventName, eventParameters ) || handled;
             }, false );
 
             // Call firedEvent() on each view.
 
             this.views.forEach( function( view ) {
-                view.firedEvent && view.firedEvent( nodeID, eventName, eventParameters );
+                view.firedEvent && view.firedEvent( nodeID, encodedEventName, eventParameters );
             } );
 
             this.logger.debugu();
@@ -4234,13 +4224,17 @@ if ( ! childComponent.source ) {
             return hasType; 
         };
 
-        /// Convert a namespaced member name such as `[ "ns", "name" ]` or
-        /// `[ "outer", "inner", "name" ]` into a string such that the result will be distinct from
-        /// an encoded name in any other namespace, or from any simple name not having a namespace.
+        /// Convert a potentially-namespaced member name into a string such that a namespaced name
+        /// will be distinct from an encoded name in any other namespace, or from any simple name
+        /// not having a namespace.
+        /// 
+        /// Simple names are strings such as `"name"`. Namespaced names are arrays of strings, such
+        /// as `[ "ns", "name" ]` or `[ "outer", "inner", "name" ]`. An array containing a single
+        /// string, such as `[ "name" ]`, is not namespaced and is the same name as `"name"`.
         /// 
         /// Each of the following encodes into a distinct value:
         /// 
-        ///   `[ "name" ]`
+        ///   `"name"` or `[ "name" ]`
         ///   `[ "a", "name" ]`
         ///   `[ "b", "name" ]`
         ///   `[ "a", "a", "name" ]`
@@ -4248,18 +4242,23 @@ if ( ! childComponent.source ) {
         ///   `[ "b", "b", "name" ]`
         ///   *etc.*
         /// 
-        /// Additionally, each is distinct from the unencoded string `"name"`.
-        /// 
         /// @name module:vwf~namespaceEncodedName
         /// 
-        /// @param {String[]} namespacedName
-        ///   Any array containing a name preceded by any number of namespace names. Each element
-        ///   defines a unique space for the member name and for any intermediate namespaces.
+        /// @param {String|String[]} memberName
+        ///   A string, or an array of strings containing a name preceded by any number of namespace
+        ///   names. In an array, each element defines a unique space for the member name and for
+        ///   any intermediate namespaces.
         /// 
         /// @returns {String}
 
-        var namespaceEncodedName = function( namespacedName ) {
-            return "vwf$" + namespacedName.join( "$" );
+        var namespaceEncodedName = function( memberName ) {
+
+            if ( typeof memberName === "object" && memberName instanceof Array ) {
+                return memberName.length ? "vwf$" + memberName.join( "$" ) : memberName[0];
+            } else {
+                return memberName;
+            }
+
         };
 
         /// Convert a (potentially-abbreviated) component specification to a descriptor parsable by
