@@ -56,7 +56,7 @@ RMDir c:\vwf_temp /s /q
 
 echo d | xcopy vwf vwf_temp /e /f /s /d /y /EXCLUDE:Exclusion_List.txt
 makensis c:\vwf\support\build\Scripts\build_windows_installer.nsi
-ncftpput -u ftp -p YIRY4PeD download.virtualworldframework.com . c:\VWF_Windows_Install.exe
+ncftpput -f C:\login.txt . c:\VWF_Windows_Install.exe
 
 REM CLOSE SERVER WHEN COMPLETE
 REM SHUTDOWN /s /t 60 /c "Shutdown in progress, leave the vicinity immediately"
