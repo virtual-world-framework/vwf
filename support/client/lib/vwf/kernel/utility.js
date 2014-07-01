@@ -27,18 +27,18 @@ define( [ "module" ], function( module ) {
 
         globalRootID: 0,
 
-        /// The URI of the VWF proto-prototype node `node.vwf`. `nodeTypeDescriptor` contains the
+        /// The URI of the VWF proto-prototype node `node.vwf`. `protoNodeDescriptor` contains the
         /// descriptor associated with this URI.
         /// 
         /// @field
 
-        nodeTypeURI: "http://vwf.example.com/node.vwf",
+        protoNodeURI: "http://vwf.example.com/node.vwf",
 
         /// The component descriptor of the VWF proto-prototype node `node.vwf`.
         /// 
         /// @field
 
-        nodeTypeDescriptor: { extends: null },  // TODO: detect nodeTypeDescriptor in createChild() a different way and remove this explicit null prototype
+        protoNodeDescriptor: { extends: null },  // TODO: detect protoNodeDescriptor in createChild() a different way and remove this explicit null prototype
 
         /// Wrap `nodeID` in an object in such a way that it can stand in for a node reference
         /// without being confused with any other application value. The returned object will

@@ -1223,9 +1223,9 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
         if ( typeof value === "object" && value !== null ) {
 
-            var nodeNode = this.nodes[ kutility.nodeTypeURI ];  // our proxy for the node.vwf prototype
+            var protoNodeNode = this.nodes[ kutility.protoNodeURI ];  // our proxy for the node.vwf prototype
 
-            if ( nodeNode && ( nodeNode.isPrototypeOf( value ) || value === nodeNode ) ) {
+            if ( protoNodeNode && ( protoNodeNode.isPrototypeOf( value ) || value === protoNodeNode ) ) {
                 return kutility.nodeReference( value.id );
             } else {
                 return value;

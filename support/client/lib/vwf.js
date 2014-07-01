@@ -1803,7 +1803,7 @@
 
                 if ( prototypeID === undefined ) {
                     nodeComponent.extends = null;
-                } else if ( prototypeID !== this.kutility.nodeTypeURI ) {
+                } else if ( prototypeID !== this.kutility.protoNodeURI ) {
                     nodeComponent.extends = this.getNode( prototypeID );  // TODO: move to vwf/model/object and get from intrinsics
                 }
 
@@ -2067,7 +2067,7 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                 childIndex = childURI;
             } else {  // descendant: parent id + next from parent's sequence
 if ( useLegacyID ) {  // TODO: fix static ID references and remove
-    childID = ( childComponent.extends || this.kutility.nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
+    childID = ( childComponent.extends || this.kutility.protoNodeURI ) + "." + childName;  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
     childIndex = this.children( nodeID ).length;
 } else {    
@@ -2165,7 +2165,7 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                             // Create or find the prototype and save the ID in childPrototypeID.
 
                             if ( childComponent.extends !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
-                                vwf.createNode( childComponent.extends || vwf.kutility.nodeTypeURI, function( prototypeID ) /* async */ {
+                                vwf.createNode( childComponent.extends || vwf.kutility.protoNodeURI, function( prototypeID ) /* async */ {
                                     childPrototypeID = prototypeID;
 
 // TODO: the GLGE driver doesn't handle source/type or properties in prototypes properly; as a work-around pull those up into the component when not already defined
@@ -3145,7 +3145,7 @@ if ( ! childComponent.source ) {
 
                         if ( prototypeIndex < prototypeArray.length - 1 ) {
                             propertyValue = this.getProperty( prototypeID, propertyName, true ); // behavior node only, not its prototypes
-                        } else if ( prototypeID !== this.kutility.nodeTypeURI ) {
+                        } else if ( prototypeID !== this.kutility.protoNodeURI ) {
                             propertyValue = this.getProperty( prototypeID, propertyName ); // prototype node, recursively
                         }
 
@@ -3919,9 +3919,9 @@ if ( ! childComponent.source ) {
 
         var loadComponent = function( nodeURI, callback_async /* ( nodeDescriptor ) */ ) {  // TODO: turn this into a generic xhr loader exposed as a kernel function?
 
-            if ( nodeURI == vwf.kutility.nodeTypeURI ) {
+            if ( nodeURI == vwf.kutility.protoNodeURI ) {
 
-                callback_async( vwf.kutility.nodeTypeDescriptor );
+                callback_async( vwf.kutility.protoNodeDescriptor );
 
             } else if ( nodeURI.match( RegExp( "^data:application/json;base64," ) ) ) {
 
