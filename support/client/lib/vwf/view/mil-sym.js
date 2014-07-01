@@ -154,7 +154,7 @@ define( [ "module", "vwf/view", "tdg/cws" ], function( module, view, cws ) {
         modifiers[ msa.PixelSize ] = 32;
         var img = armyc2.c2sd.renderer.MilStdIconRenderer.Render( symbolID, modifiers );
         if ( img ) {
-            img.toDataUrl();
+            return img.toDataUrl();
         } else {
             return "";
         }
