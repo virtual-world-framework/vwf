@@ -610,8 +610,6 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             createEventAccessor.call( this, node, eventName );
 
-            initializeListeners( node, eventName );
-
             // Invalidate the "future" cache.
 
             node.private.change++;
@@ -625,7 +623,11 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             var node = this.nodes[nodeID];
             var eventContext = this.nodes[eventContextID];
 
-            var listeners = initializeListeners( node, eventName );
+            var listeners = node.private.listeners[eventName];
+
+            if ( ! listeners ) {
+                listeners = node.private.listeners[eventName] = [];
+            }
 
             listeners.push( { handler: eventHandler, context: eventContext, phases: eventPhases } );
 
@@ -637,11 +639,13 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             var node = this.nodes[nodeID];
 
-            var listeners = initializeListeners( node, eventName );
+            var listeners = node.private.listeners[eventName];
 
-            node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                return listener.handler !== eventHandler;
-            } );
+            if ( listeners ) {
+                node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                    return listener.handler !== eventHandler;
+                } );
+            }
 
         },
 
@@ -652,11 +656,13 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             var node = this.nodes[nodeID];
             var eventContext = this.nodes[eventContextID];
 
-            var listeners = initializeListeners( node, eventName );
+            var listeners = node.private.listeners[eventName];
 
-            node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                return listener.context !== eventContext;
-            } );
+            if ( listeners ) {
+                node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                    return listener.context !== eventContext;
+                } );
+            }
 
         },
 
@@ -1093,14 +1099,6 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             var bodyString = body.length ? " " + body + " " : "";
             return prefix + bodyString + suffix;
         }
-    }
-
-    // -- initializeListeners ----------------------------------------------------------------------
-
-    // Array of { handler: function, context: node, phases: [ "phase", ... ] }.
-
-    function initializeListeners( node, eventName ) {
-        return node.private.listeners[eventName] || ( node.private.listeners[eventName] = [] );
     }
 
     // -- findListeners ----------------------------------------------------------------------------
