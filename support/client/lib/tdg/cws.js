@@ -4277,7 +4277,7 @@ define( function(){
             }
             return units;
         },
-        "fullName": function( name, unit ){
+        "description": function( name, unit ){
             var foundTag = false;
             var parts = name.split( '.' );
             var retStr = "";
@@ -4296,7 +4296,19 @@ define( function(){
             }
 
             return retStr;
-        } 
+        }, 
+        "unknown": function( symbolID ) {
+            return symbolID.substr( 0, 1 ) + "U" + symbolID.substr( 2 );
+        },
+        "friend": function( symbolID ) {
+            return symbolID.substr( 0, 1 ) + "F" + symbolID.substr( 2 );
+        },
+        "neutral": function( symbolID ) {
+            return symbolID.substr( 0, 1 ) + "N" + symbolID.substr( 2 );
+        },
+        "hostal": function( symbolID ) {
+            return symbolID.substr( 0, 1 ) + "H" + symbolID.substr( 2 );
+        }  
 
     };
 
