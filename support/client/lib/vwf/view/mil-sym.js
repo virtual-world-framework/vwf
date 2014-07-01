@@ -52,9 +52,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
  
         // -- deletedNode ------------------------------------------------------------------------------
 
-        deletedNode: function( childID ) {
-            delete this.state.nodes[ childID ];
-        },
+        // deletedNode: function( childID ) { },
 
         // -- addedChild -------------------------------------------------------------------------------
 
