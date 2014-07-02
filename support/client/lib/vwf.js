@@ -5383,11 +5383,17 @@ if ( ! childComponent.source ) {
                         return self.proxy( prototypeNode, self.existing[behaviorID] );
                     }, this.existing[prototypeID] );
 
+                    // Look up the parent.
+
                     var parentNode = this.existing[parentID];
+
+                    // If this is the global root of a new tree, add it to the `globals` set.
 
                     if ( ! parentNode ) {
                         this.globals[nodeID] = undefined;
                     }
+
+                    // Add the node to the registry.
 
                     return this.existing[nodeID] = {
 
