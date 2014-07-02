@@ -3779,16 +3779,21 @@ if ( ! childComponent.source ) {
 
             var globals = this.globals( initializedOnly );
 
+            // Look for a global node whose URI matches `globalReference`. If there is no match by
+            // URI, then search again by name.
+
             return matches( "uri" ) || matches( "name" );
 
+            // Look for a global node where the field named by `field` matches `globalReference`.
 
             function matches( field ) {
 
                 var matchingID;
 
                 Object.keys( globals ).some( function( globalID ) {
-                    if ( nodes.existing[globalID][field] === globalReference ) {
-                        return matchingID = /* assignment! */ globalID;
+                    if ( nodes.existing[ globalID ][ field ] === globalReference ) {
+                        matchingID = globalID;
+                        return true;
                     }
                 } );
 
