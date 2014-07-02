@@ -425,7 +425,8 @@ define( function() {
 
         moniker: [],
 
-        /// Return the application root node.
+        /// Return the application root node. `kernel.application( initializedOnly )` is equivalent
+        /// to `kernel.global( "application", initializedOnly )`.
         /// 
         /// @function
         /// 
@@ -520,6 +521,64 @@ define( function() {
 
         behaviors: [ /* nodeID */ ],
 
+        /// Return the set of global root nodes. Each global node is the root of a tree.
+        /// 
+        /// @function
+        /// 
+        /// @param {Boolean} [initializedOnly]
+        ///   If set, only return root nodes that have completed initialization. Drivers that manage
+        ///   application code should set `initializedOnly` and should also only provide the
+        ///   `kernel.globals` result (even with `initializedOnly` set) to the application if the
+        ///   application itself has completed initialization. Applications should never have access
+        ///   to uninitialized parts of the simulation.
+        /// 
+        /// @returns {Object}
+        ///   An object whose keys are the IDs of the global root nodes. `Object.keys` may be used
+        ///   on the result to get an array of IDs. The global trees are not ordered, and the order
+        ///   of the IDs is not significant.
+
+        globals: [ /* initializedOnly */ ],
+
+        /// Return a global root node selected by its URI or annotation.
+        /// 
+        /// @function
+        /// 
+        /// @param {String} globalReference
+        ///   A selector that identifies the root to return. `globalReference` may specify either a
+        ///   URI or annotation. The root nodes are searched first by URI, then by annotation if no
+        ///   match is found.
+        /// @param {Boolean} [initializedOnly]
+        ///   If set, only return a root node if it has completed initialization. Drivers that
+        ///   manage application code should set `initializedOnly` and should also only provide the
+        ///   result of `kernel.global` (even with `initializedOnly` set) to the application if the
+        ///   application itself has completed initialization. Applications should never have access
+        ///   to uninitialized parts of the simulation.
+        /// 
+        /// @returns {ID}
+        ///   The ID of the root node of the selected tree, or `undefined` if `globalReference`
+        ///   doesn't match any root or if `initializedOnly` is set and the selected tree has not
+        ///   completed initialization.
+
+        global: [ /* globalReference, initializedOnly */ ],
+
+        /// Return the node at the root of the tree containing a node.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {Boolean} [initializedOnly]
+        ///   If set, only return the root node if the node and its ancestors have completed
+        ///   initialization. Drivers that manage application code should set `initializedOnly`
+        ///   since applications should never have access to uninitialized parts of the application
+        ///   graph.
+        /// 
+        /// @returns {ID}
+        ///   The ID of the node at the root of the tree containing the node, or `undefined` if
+        ///   `initializedOnly` is set and the node or one of its ancestors has not completed
+        ///   initialization.
+
+        root: [ /* nodeID, initializedOnly */ ],
+
         /// Return a node's parent, grandparent, its parent, etc.
         /// 
         /// @function
@@ -560,24 +619,59 @@ define( function() {
         /// @function
         /// 
         /// @param {ID} nodeID
+        /// @param {Boolean} [initializedOnly]
+        ///   If set, only return children that have completed initialization. Uninitialized
+        ///   children will appear in the result as `undefined`. Drivers that manage application
+        ///   code should set `initializedOnly` since applications should never have access to
+        ///   uninitialized parts of the application graph.
         /// 
         /// @returns {ID[]}
         ///   An array of IDs of the node's children. An empty array is returned if the node
-        ///   doesn't have any children.
+        ///   doesn't have any children. The result always contains one element for each child,
+        ///   regardless of their initialization state and whether `initializedOnly` is set.
+        ///   However, `initializedOnly` will cause uninitialized children to appear as `undefined`.
 
-        children: [ /* nodeID */ ],
+        children: [ /* nodeID, initializedOnly */ ],
+
+        /// Return a node's child selected by index or name.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} childReference
+        ///   A selector indicating the child to return. If `childReference` is a number, the child
+        ///   at that index location is returned. Otherwise, a child with the name matching
+        ///   `childReference` (if any) is returned.
+        /// @param {Boolean} [initializedOnly]
+        ///   If set, only return a child if it has completed initialization. Drivers that manage
+        ///   application code should set `initializedOnly` since applications should never have
+        ///   access to uninitialized parts of the application graph.
+        /// 
+        /// @returns {ID}
+        ///   The ID of the selected child, or `undefined` if `childReference` doesn't match a child
+        ///   or if `initializedOnly` is set and the selected child has not completed
+        ///   initialization.
+
+        child: [ /* nodeID, childReference, initializedOnly */ ],
 
         /// Return a node's children, grandchildren, their children, etc.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
+        /// @param {Boolean} [initializedOnly]
+        ///   If set, only return descendants that have completed initialization. Uninitialized
+        ///   descendants will appear in the result as `undefined`. Descendants of uninitialized
+        ///   descendants will not appear. Drivers that manage application code should set
+        ///   `initializedOnly` since applications should never have access to uninitialized parts
+        ///   of the application graph.
         /// 
         /// @returns {ID[]}
         ///   An array of IDs of the node's descendants. An empty array is returned if the node
-        ///   doesn't have any children.
+        ///   doesn't have any descendants. The result may contain `undefined` elements when
+        ///   `initializedOnly` is set and some descendants have not completed initialization.
 
-        descendants: [ /* nodeID */ ],
+        descendants: [ /* nodeID, initializedOnly */ ],
 
         /// Locate nodes matching a search pattern. matchPattern supports an XPath subset consisting of
         /// the following:

@@ -3753,6 +3753,8 @@ if ( ! childComponent.source ) {
         // -- globals ------------------------------------------------------------------------------
 
         /// @name module:vwf.globals
+        /// 
+        /// @see {@link module:vwf/api/kernel.globals}
 
         this.globals = function( initializedOnly ) {
 
@@ -3770,6 +3772,8 @@ if ( ! childComponent.source ) {
         // -- global -------------------------------------------------------------------------------
 
         /// @name module:vwf.global
+        /// 
+        /// @see {@link module:vwf/api/kernel.global}
 
         this.global = function( globalReference, initializedOnly ) {
 
@@ -3796,6 +3800,8 @@ if ( ! childComponent.source ) {
         // -- root ---------------------------------------------------------------------------------
 
         /// @name module:vwf.root
+        /// 
+        /// @see {@link module:vwf/api/kernel.root}
 
         this.root = function( nodeID, initializedOnly ) {
 
@@ -3860,6 +3866,8 @@ if ( ! childComponent.source ) {
         // -- child --------------------------------------------------------------------------------
 
         /// @name module:vwf.child
+        /// 
+        /// @see {@link module:vwf/api/kernel.child}
 
         this.child = function( nodeID, childReference, initializedOnly ) {
 
