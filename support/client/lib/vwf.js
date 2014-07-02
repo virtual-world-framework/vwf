@@ -2061,7 +2061,7 @@ var useLegacyID = nodeID === 0 && childURI &&
     childURI != "http://vwf.example.com/node.vwf";
     
 useLegacyID = useLegacyID ||
-    childName == "camera" && nodeID == this.application(); // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
+    childName === "camera" && nodeID === this.application(); // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 childID = childComponent.id;
@@ -3660,8 +3660,8 @@ if ( ! childComponent.source ) {
             var applicationID;
 
             Object.keys( nodes.globals ).forEach( function( globalID ) {
-                var global = nodes.existing[globalID];
-                if ( ( ! initializedOnly || global.initialized ) && global.name == "application" ) {
+                var global = nodes.existing[ globalID ];
+                if ( ( ! initializedOnly || global.initialized ) && global.name === "application" ) {
                     applicationID = globalID;
                 }
             }, this );
@@ -3761,8 +3761,8 @@ if ( ! childComponent.source ) {
             var globals = {};
 
             Object.keys( nodes.globals ).forEach( function( globalID ) {
-                if ( ! initializedOnly || nodes.existing[globalID].initialized ) {
-                    globals[globalID] = undefined;
+                if ( ! initializedOnly || nodes.existing[ globalID ].initialized ) {
+                    globals[ globalID ] = undefined;
                 }
             }, this );
 
@@ -3871,12 +3871,12 @@ if ( ! childComponent.source ) {
 
             var children = this.children( nodeID, initializedOnly );
 
-            if ( typeof childReference == "number" || childReference instanceof Number ) {
-                return children[childReference];
+            if ( typeof childReference === "number" || childReference instanceof Number ) {
+                return children[ childReference ];
             } else {
                 return children.filter( function( childID ) {
                     return childID && this.name( childID ) === childReference;
-                }, this )[0];
+                }, this )[ 0 ];
             }
 
         };
