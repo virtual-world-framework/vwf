@@ -1,0 +1,24 @@
+---
+extends: http://vwf.example.com/node3.vwf
+properties:
+  lineFunction: undefined
+  startValue: undefined
+  endValue: undefined
+  pointCount: undefined
+  color: undefined
+  opacity: undefined
+  lineThickness: undefined
+  renderTop: undefined
+methods:
+  evaluateLineAtPoint:
+    parameters:
+      - point
+    body: |
+      var x = point[0];
+      var y = point[1]; 
+      var z = point[2];
+      eval( this.lineFunction );
+      point[ 0 ] = x || 0;
+      point[ 1 ] = y || 0;
+      point[ 2 ] = z || 0;
+      return point;

@@ -1,0 +1,10 @@
+---
+extends: http://vwf.example.com/node3.vwf
+properties:
+  axis: undefined
+  startValue: undefined
+  endValue: undefined
+  color: undefined
+  opacity: undefined
+  lineThickness: undefined
+  renderTop: undefined
