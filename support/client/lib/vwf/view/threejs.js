@@ -437,8 +437,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var deltaY = 0;
 
             if ( pointerLocked ) {
-                deltaX = mouseEventData.movementX / this.width;
-                deltaY = mouseEventData.movementY / this.height;
+                deltaX = mouseEventData.movementX / self.width;
+                deltaY = mouseEventData.movementY / self.height;
             } else if ( startMousePosition ) {
                 var currentMousePosition = mouseEventData[ 0 ].position;
                 deltaX = currentMousePosition[ 0 ] - startMousePosition [ 0 ];
@@ -458,139 +458,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                     orbit( pitchRadians, yawRadians );
                 } else if ( mouseRightDown ) {
                     if ( navObject ) {
-
-                        var navThreeObject = navObject.threeObject;
-                        var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
-
-                        // --------------------
-                        // Calculate new pitch
-                        // --------------------
-
-                        // deltaY is negated because a positive change (downward) generates a negative rotation 
-                        // around the horizontal x axis (clockwise as viewed from the right)
-                        pitchQuat.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), -deltaY * rotationSpeedRadians );
-                        var pitchDeltaMatrix = new THREE.Matrix4();
-                        pitchDeltaMatrix.makeRotationFromQuaternion( pitchQuat );
-
-                        if ( ( navmode == "fly" )  ||
-                             ( ( navmode == "walk" ) && ( cameraNode == navObject ) ) ) {
-                            pitchMatrix.multiplyMatrices( pitchDeltaMatrix, pitchMatrix );
-
-                            // Constrain the camera's pitch to +/- 90 degrees
-                            // We need to do something if zAxis.z is < 0
-                            var pitchMatrixElements = pitchMatrix.elements;
-                            if ( pitchMatrixElements[ 10 ] < 0 ) {
-
-                                var xAxis = goog.vec.Vec3.create();
-                                xAxis = goog.vec.Vec3.setFromArray( xAxis, [ pitchMatrixElements[ 0 ], 
-                                                                             pitchMatrixElements[ 1 ], 
-                                                                             pitchMatrixElements[ 2 ] ] );
-
-                                var yAxis = goog.vec.Vec3.create();
-
-                                // If forward vector is tipped up
-                                if ( pitchMatrixElements[ 6 ] > 0 ) {
-                                    yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
-                                } else {
-                                    yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
-                                }
-
-                                // Calculate the zAxis as a crossProduct of x and y
-                                var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
-
-                                // Put these values back in the camera matrix
-                                pitchMatrixElements[ 4 ] = yAxis[ 0 ];
-                                pitchMatrixElements[ 5 ] = yAxis[ 1 ];
-                                pitchMatrixElements[ 6 ] = yAxis[ 2 ];
-                                pitchMatrixElements[ 8 ] = zAxis[ 0 ];
-                                pitchMatrixElements[ 9 ] = zAxis[ 1 ];
-                                pitchMatrixElements[ 10 ] = zAxis[ 2 ];
-                            }
-                        } else if ( navmode == "walk" ) {
-
-                            // Perform pitch on camera - right-multiply to keep pitch separate from yaw
-                            var camera = this.state.cameraInUse;
-                            if ( camera ) {
-                                var cameraMatrix = camera.matrix;
-                                var originalCameraTransform = goog.vec.Mat4.clone( cameraMatrix.elements );
-                                var cameraPos = new THREE.Vector3();
-                                cameraPos.setFromMatrixPosition( cameraMatrix );
-                                cameraMatrix.multiply( pitchDeltaMatrix );
-
-                                // Constrain the camera's pitch to +/- 90 degrees
-                                var camWorldMatrix = camera.matrixWorld;
-                                var camWorldMatrixElements = camWorldMatrix.elements;
-
-                                // We need to do something if zAxis.z is < 0
-                                // This can get a little weird because this matrix is in three.js coordinates, 
-                                // but we care about VWF coordinates:
-                                // -the VWF y-axis is the three.js -z axis 
-                                // -the VWF z-axis is the three.js y axis
-                                if ( camWorldMatrixElements[ 6 ] < 0 ) {
-
-                                    var xAxis = goog.vec.Vec3.create();
-                                    xAxis = goog.vec.Vec3.setFromArray( xAxis, [ camWorldMatrixElements[ 0 ], 
-                                                                                 camWorldMatrixElements[ 1 ], 
-                                                                                 camWorldMatrixElements[ 2 ] ] );
-
-                                    var yAxis = goog.vec.Vec3.create();
-
-                                    // If forward vector is tipped up
-                                    if ( camWorldMatrixElements[ 10 ] > 0 ) {
-                                        yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
-                                    } else {
-                                        yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
-                                    }
-
-                                    // Calculate the zAxis as a crossProduct of x and y
-                                    var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
-
-                                    // Put these values back in the camera matrix
-                                    camWorldMatrixElements[ 4 ] = zAxis[ 0 ];
-                                    camWorldMatrixElements[ 5 ] = zAxis[ 1 ];
-                                    camWorldMatrixElements[ 6 ] = zAxis[ 2 ];
-                                    camWorldMatrixElements[ 8 ] = -yAxis[ 0 ];
-                                    camWorldMatrixElements[ 9 ] = -yAxis[ 1 ];
-                                    camWorldMatrixElements[ 10 ] = -yAxis[ 2 ];
-
-                                    setTransformFromWorldTransform( camera );
-                                }
-
-                                // Restore camera position so rotation is done around camera center
-                                cameraMatrix.setPosition( cameraPos );
-                                
-                                updateRenderObjectTransform( camera );
-                                callModelTransformBy( cameraNode, originalCameraTransform, 
-                                                      cameraMatrix.elements );
-                            } else {
-                                self.logger.warnx( "There is no camera to move" );
-                            }
-                        }
-
-                        // ------------------
-                        // Calculate new yaw
-                        // ------------------
-
-                        // deltaX is negated because a positive change (to the right) generates a negative rotation 
-                        // around the vertical z axis (clockwise as viewed from above)
-                        yawQuat.setFromAxisAngle( new THREE.Vector3( 0, 0, 1 ), -deltaX * rotationSpeedRadians );
-                        var yawDeltaMatrix = new THREE.Matrix4();
-                        yawDeltaMatrix.makeRotationFromQuaternion( yawQuat );
-                        yawMatrix.multiplyMatrices( yawDeltaMatrix, yawMatrix );
-
-                        // -------------------------------------------------
-                        // Put all components together and set the new pose
-                        // -------------------------------------------------
-                                            
-                        var navObjectWorldMatrix = navThreeObject.matrixWorld;
-                        navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
-                        navObjectWorldMatrix.multiplyMatrices( translationMatrix, navObjectWorldMatrix );
-                        if ( navThreeObject instanceof THREE.Camera ) {
-                            var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
-                            navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
-                        }
+                        var originalTransform = goog.vec.Mat4.clone( navObject.threeObject.matrix.elements );                        
+                        this.handleMouseHelper( deltaX, deltaY, navmode, navObject );
                         setTransformFromWorldTransform( navObject.threeObject );
-                        callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+                        callModelTransformBy( navObject, originalTransform, navObject.threeObject.matrix.elements );
                     } else {
                         self.logger.warnx( "handleMouseNavigation: There is no navigation object to move" );
                     }
@@ -599,6 +470,140 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
                 startMousePosition = currentMousePosition;
             } 
+        },        
+
+        handleMouseHelper: function( deltaX, deltaY, navMode, navObj ) {
+                var yawQuat = new THREE.Quaternion();
+                var pitchQuat = new THREE.Quaternion();
+                var rotationSpeedRadians = degreesToRadians * rotationSpeed;            
+
+                // --------------------
+                // Calculate new pitch
+                // --------------------
+
+                // deltaY is negated because a positive change (downward) generates a negative rotation 
+                // around the horizontal x axis (clockwise as viewed from the right)
+                pitchQuat.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), -deltaY * rotationSpeedRadians );
+                var pitchDeltaMatrix = new THREE.Matrix4();
+                pitchDeltaMatrix.makeRotationFromQuaternion( pitchQuat );
+
+                if ( ( navMode == "fly" )  ||
+                     ( ( navMode == "walk" ) && ( cameraNode == navObj ) ) ) {
+                    pitchMatrix.multiplyMatrices( pitchDeltaMatrix, pitchMatrix );
+
+                    // Constrain the camera's pitch to +/- 90 degrees
+                    // We need to do something if zAxis.z is < 0
+                    var pitchMatrixElements = pitchMatrix.elements;
+                    if ( pitchMatrixElements[ 10 ] < 0 ) {
+
+                        var xAxis = goog.vec.Vec3.create();
+                        xAxis = goog.vec.Vec3.setFromArray( xAxis, [ pitchMatrixElements[ 0 ], 
+                                                                     pitchMatrixElements[ 1 ], 
+                                                                     pitchMatrixElements[ 2 ] ] );
+
+                        var yAxis = goog.vec.Vec3.create();
+
+                        // If forward vector is tipped up
+                        if ( pitchMatrixElements[ 6 ] > 0 ) {
+                            yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
+                        } else {
+                            yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
+                        }
+
+                        // Calculate the zAxis as a crossProduct of x and y
+                        var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
+
+                        // Put these values back in the camera matrix
+                        pitchMatrixElements[ 4 ] = yAxis[ 0 ];
+                        pitchMatrixElements[ 5 ] = yAxis[ 1 ];
+                        pitchMatrixElements[ 6 ] = yAxis[ 2 ];
+                        pitchMatrixElements[ 8 ] = zAxis[ 0 ];
+                        pitchMatrixElements[ 9 ] = zAxis[ 1 ];
+                        pitchMatrixElements[ 10 ] = zAxis[ 2 ];
+                    }
+                } else if ( navMode == "walk" ) {
+
+                    // Perform pitch on camera - right-multiply to keep pitch separate from yaw
+                    var camera = self.state.cameraInUse;
+                    if ( camera ) {
+                        var cameraMatrix = camera.matrix;
+                        var originalCameraTransform = goog.vec.Mat4.clone( cameraMatrix.elements );
+                        var cameraPos = new THREE.Vector3();
+                        cameraPos.setFromMatrixPosition( cameraMatrix );
+                        cameraMatrix.multiply( pitchDeltaMatrix );
+
+                        // Constrain the camera's pitch to +/- 90 degrees
+                        var camWorldMatrix = camera.matrixWorld;
+                        var camWorldMatrixElements = camWorldMatrix.elements;
+
+                        // We need to do something if zAxis.z is < 0
+                        // This can get a little weird because this matrix is in three.js coordinates, 
+                        // but we care about VWF coordinates:
+                        // -the VWF y-axis is the three.js -z axis 
+                        // -the VWF z-axis is the three.js y axis
+                        if ( camWorldMatrixElements[ 6 ] < 0 ) {
+
+                            var xAxis = goog.vec.Vec3.create();
+                            xAxis = goog.vec.Vec3.setFromArray( xAxis, [ camWorldMatrixElements[ 0 ], 
+                                                                         camWorldMatrixElements[ 1 ], 
+                                                                         camWorldMatrixElements[ 2 ] ] );
+
+                            var yAxis = goog.vec.Vec3.create();
+
+                            // If forward vector is tipped up
+                            if ( camWorldMatrixElements[ 10 ] > 0 ) {
+                                yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
+                            } else {
+                                yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
+                            }
+
+                            // Calculate the zAxis as a crossProduct of x and y
+                            var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
+
+                            // Put these values back in the camera matrix
+                            camWorldMatrixElements[ 4 ] = zAxis[ 0 ];
+                            camWorldMatrixElements[ 5 ] = zAxis[ 1 ];
+                            camWorldMatrixElements[ 6 ] = zAxis[ 2 ];
+                            camWorldMatrixElements[ 8 ] = -yAxis[ 0 ];
+                            camWorldMatrixElements[ 9 ] = -yAxis[ 1 ];
+                            camWorldMatrixElements[ 10 ] = -yAxis[ 2 ];
+
+                            setTransformFromWorldTransform( camera );
+                        }
+
+                        // Restore camera position so rotation is done around camera center
+                        cameraMatrix.setPosition( cameraPos );
+                        
+                        updateRenderObjectTransform( camera );
+                        callModelTransformBy( cameraNode, originalCameraTransform, 
+                                              cameraMatrix.elements );
+                    } else {
+                        self.logger.warnx( "There is no camera to move" );
+                    }
+                }
+
+                // ------------------
+                // Calculate new yaw
+                // ------------------
+
+                // deltaX is negated because a positive change (to the right) generates a negative rotation 
+                // around the vertical z axis (clockwise as viewed from above)
+                yawQuat.setFromAxisAngle( new THREE.Vector3( 0, 0, 1 ), -deltaX * rotationSpeedRadians );
+                var yawDeltaMatrix = new THREE.Matrix4();
+                yawDeltaMatrix.makeRotationFromQuaternion( yawQuat );
+                yawMatrix.multiplyMatrices( yawDeltaMatrix, yawMatrix );
+
+                // -------------------------------------------------
+                // Put all components together and set the new pose
+                // -------------------------------------------------
+                                    
+                var navObjectWorldMatrix = navObject.threeObject.matrixWorld;
+                navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
+                navObjectWorldMatrix.multiplyMatrices( translationMatrix, navObjectWorldMatrix );
+                if ( navObject.threeObject instanceof THREE.Camera ) {
+                    var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
+                    navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
+                }
         },
 
         handleScroll: function ( wheelDelta, distanceToTarget ) {
@@ -1984,7 +1989,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         document.addEventListener( "webkitpointerlockchange", onPointerLockChange, false);
 
         this.moveNavObject = function( msSinceLastFrame ) {
-
             var x = 0;
             var y = 0;
 
@@ -2002,7 +2006,19 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             if ( ! ( x || y ) )
                 return;
 
-            var navThreeObject = navObject.threeObject;
+            var originalTransform = goog.vec.Mat4.clone( navObject.threeObject.matrix.elements );
+
+            this.moveNavObjectHelper( x, y, navmode, navObject, msSinceLastFrame );
+
+            // Update the navigation object's local transform from its new world transform
+            setTransformFromWorldTransform( navObject.threeObject );
+
+            callModelTransformBy( navObject, originalTransform, navObject.threeObject.matrix.elements );            
+        }
+
+        this.moveNavObjectHelper = function( x, y, navMode, navObj, msSinceLastFrame ) {
+
+            var navThreeObject = navObj.threeObject;
             var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
             // Compute the distance traveled in the elapsed time
@@ -2013,7 +2029,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var camera = this.state.cameraInUse;
             var cameraWorldTransformArray = camera.matrixWorld.elements;
 
-            var orbiting = ( navmode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
+            var orbiting = ( navMode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
 
             if ( orbiting ) {
                 if ( y ) {
@@ -2059,7 +2075,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }
             
             // If user is walking, constrain movement to the horizontal plane
-            if ( navmode == "walk") {
+            if ( navMode == "walk") {
                 dir[ 2 ] = 0;
             }
 
@@ -2115,11 +2131,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 navObjectWorldTransformMatrixArray[ 13 ] = navObjectWorldPos [ 1 ];
                 navObjectWorldTransformMatrixArray[ 14 ] = navObjectWorldPos [ 2 ];
             }
-
-            // Update the navigation object's local transform from its new world transform
-            setTransformFromWorldTransform( navThreeObject );
-
-            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
         }
 
         this.rotateNavObjectByKey = function( msSinceLastFrame ) {
