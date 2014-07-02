@@ -3952,17 +3952,11 @@ if ( ! childComponent.source ) {
                 initializedOnly = undefined;
             }
 
-            // Evaluate the expression using the provided node as the reference. Take the root node
-            // to be the root of the reference node's tree. If a reference node is not provided, use
-            // the application as the root.
+            // Run the query.
 
-            var rootID = nodeID ? this.root( nodeID, initializedOnly ) :
-                this.application( initializedOnly );
+            var matchIDs = find.call( this, nodeID, matchPattern, initializedOnly );
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, rootID, nodeID,
-                resolverWithInitializedOnly, this );
-
-            // Return the result, either by invoking the callback when provided, or returning the
+            // Return the result. Invoke the callback if one was provided. Otherwise, return the
             // array directly.
 
             if ( callback ) {
@@ -3974,12 +3968,6 @@ if ( ! childComponent.source ) {
             } else {  // TODO: future iterator proxy
 
                 return matchIDs;
-            }
-
-            // Wrap `xpathResolver` to pass `initializedOnly` through.
-
-            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
-                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
             }
 
         };
@@ -4042,27 +4030,15 @@ if ( ! childComponent.source ) {
 
         this.test = function( nodeID, matchPattern, testID, initializedOnly ) {
 
-            // Evaluate the expression using the provided node as the reference. Take the root node
-            // to be the root of the reference node's tree. If a reference node is not provided, use
-            // the application as the root.
+            // Run the query.
 
-            var rootID = nodeID ? this.root( nodeID, initializedOnly ) :
-                this.application( initializedOnly );
-
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, rootID, nodeID,
-                resolverWithInitializedOnly, this );
+            var matchIDs = find.call( this, nodeID, matchPattern, initializedOnly );
 
             // Search for the test node in the result.
 
             return matchIDs.some( function( matchID ) {
                 return matchID == testID;
             } );
-
-            // Wrap `xpathResolver` to pass `initializedOnly` through.
-
-            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
-                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
-            }
 
         };
 
@@ -4863,6 +4839,51 @@ if ( ! childComponent.source ) {
 
             return object;
         };
+
+        /// Locate nodes matching a search pattern. {@link module:vwf/api/kernel.find} describes the
+        /// supported patterns.
+        /// 
+        /// This is the internal implementation used by {@link module:vwf.find} and
+        /// {@link module:vwf.test}.
+        /// 
+        /// This function must run as a method of the kernel. Invoke it as:
+        ///   `find.call( kernel, nodeID, matchPattern, initializedOnly )`.
+        /// 
+        /// @name module:vwf~find
+        /// 
+        /// @param {ID} nodeID
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
+        /// @param {String} matchPattern
+        ///   The search pattern.
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
+        /// 
+        /// @returns {ID[]|undefined}
+        ///   An array of the node ids of the result.
+
+        var find = function( nodeID, matchPattern, initializedOnly ) {
+
+            // Evaluate the expression using the provided node as the reference. Take the root node
+            // to be the root of the reference node's tree. If a reference node is not provided, use
+            // the application as the root.
+
+            var rootID = nodeID ? this.root( nodeID, initializedOnly ) :
+                this.application( initializedOnly );
+
+            return require( "vwf/utility" ).xpath.resolve( matchPattern, rootID, nodeID,
+                resolverWithInitializedOnly, this );
+
+
+            // Wrap `xpathResolver` to pass `initializedOnly` through.
+
+            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
+                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
+            }
+
+        }
 
         // -- xpathResolver ------------------------------------------------------------------------
 
