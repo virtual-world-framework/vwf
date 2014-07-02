@@ -4009,6 +4009,10 @@ if ( ! childComponent.source ) {
 
         this.findClients = function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
 
+            this.logger.warn( "`kernel.findClients` is deprecated. Use " +
+                "`kernel.find( nodeID, \"doc('http://vwf.example.com/clients.vwf')/pattern\" )`" +
+                " instead." );
+
             var clientsMatchPattern = "doc('http://vwf.example.com/clients.vwf')" +
                 ( matchPattern[0] === "/" ? "" : "/" ) + matchPattern;
 
