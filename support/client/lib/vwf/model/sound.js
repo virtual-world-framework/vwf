@@ -533,13 +533,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     PlayingInstance.prototype = {
         constructor: PlayingInstance,
 
+        // our id, for future reference
+        id: undefined,
+
         // a reference back to the soundDatum
         soundDatum: null,
 
         // the control nodes for the flowgraph
         sourceNode: undefined,
         gainNode: undefined,
-
 
         initialize: function( soundDatum, id, exitCallback, successCallback ) {
             // NOTE: from http://www.html5rocks.com/en/tutorials/webaudio/intro/:
@@ -551,7 +553,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             // this - in order to avoid problems like this, just play a sound (it can even
             // be muted by connecting to a Gain Node with zero gain) inside an early UI
             // event - e.g. "touch here to play".
-
+            this.id = id;
             this.soundDatum = soundDatum;
 
             this.sourceNode = context.createBufferSource();
@@ -559,77 +561,59 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.sourceNode.loop = this.soundDatum.isLooping;
 
             this.gainNode = context.createGain();
-
             this.gainNode.gain.value = this.soundDatum.initialVolume;
+
             this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );
 
             //Browsers will handle onended differently depending on audio filetype - needs support.
 
             this.sourceNode.onended =  function() {
-
-                vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
-                                       "soundFinished",
-                                       [ { soundName: soundDatum.name, 
-                                              instanceID: id } ] );
+                vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID, 
+                                           "soundFinished",
+                                           [ { soundName: soundDatum.name, 
+                                               instanceID: id } ] );
                 
-                if ( soundDatum.soundGroup && soundDatum.groupReplacementMethod === "queue" ) {
+                if ( soundDatum.soundGroup && 
+                     (soundDatum.groupReplacementMethod === "queue") ) {
 
-                    var currentPlayingInstance = soundGroups[ soundDatum.soundGroup ].queue.pop();
-                    var nextPlayingInstance = soundGroups[ soundDatum.soundGroup ].queue.pop();
+                    // TODO: does this handle complex cases with a mix of 
+                    //   replacement methods?
+
+                    var queue = soundGroups[ soundDatum.soundGroup ].queue;
+                    if ( !queue || !queue.length ) {
+                        logger.errorx( "PlayingInstance.onended", "How can " +
+                                       "the queue be empty?!  We store what " +
+                                       "we're playing on there!!");
+                    }
+                    queue.pop();
+                    var nextInstance = queue[ queue.length - 1 ];
 
                     //If there's anything left in the queue, play it!
-                    if ( nextPlayingInstance !== undefined ){
-                        soundGroups[ soundDatum.soundGroup ].queue.push( nextPlayingInstance );
-                        nextPlayingInstance.sourceNode.start( 0 );
-                        if ( !!nextPlayingInstance.soundDatum.subtitle ) {
-                            vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
-                                                   "soundStarted",
-                                                   [ { soundName: nextPlayingInstance.soundDatum.name, 
-                                              instanceID: id } ] );
-                        }
-                    }
-                    
-                }
-
-                if ( soundDatum.soundGroup && soundDatum.groupReplacementMethod === "duck" ) {
-
-                    //TODO: raise volume of all other instances in this soundGroup
-                    
+                    nextInstance && startSoundInstance( nextInstance );
                 }
 
                 delete soundDatum.playingInstances[ id ];
                 exitCallback && exitCallback();
             }
 
-            if ( !!soundDatum.soundGroup ) {
+            if ( soundDatum.soundGroup ) {
                 switch ( soundDatum.groupReplacementMethod ) {
                     case "queue":
                         if ( !soundGroups[ soundDatum.soundGroup ].queue ) {
                             soundGroups[ soundDatum.soundGroup ].queue = [];
                         }
-                        if ( soundGroups[ soundDatum.soundGroup ].queue.length === 0 ){
-                            soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
-                            this.sourceNode.start( 0 );
-                            if ( !!this.soundDatum.subtitle ) {
-                                vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
-                                                   "soundStarted",
-                                                   [ { soundName: soundDatum.name, 
-                                              instanceID: id } ] );
-                            }
-                        } else {
-                            soundGroups[ soundDatum.soundGroup ].queue.unshift( this );
+
+                        var queue = soundGroups[ soundDatum.soundGroup ].queue;
+                        queue.unshift( this );
+                        if ( queue.length === 1 ) {
+                            startSoundInstance( this );
                         }
-                    case "duck":
-                        //TODO: lower volume of all other instances in this soundGroup
-                        
+
+                        break;
                 }
             } else {
-                this.sourceNode.start( 0 ); 
-                vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID,
-                                                   "soundStarted",
-                                                   [ { soundName: soundDatum.name, 
-                                              instanceID: id } ] );
+                startSoundInstance( this );
             }
         },
 
@@ -707,6 +691,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             return soundDatum ? soundDatum.playingInstances[ instanceHandle.instanceID ] 
                               : undefined;
         }
+    }
+
+    function startSoundInstance( instance ) {
+        instance.sourceNode.start( 0 ); 
+        vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID, 
+                                   "soundStarted",
+                                   [ { soundName: instance.soundDatum.name, 
+                                       instanceID: instance.id } ] );
     }
 
     return driver;
