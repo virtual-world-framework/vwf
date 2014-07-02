@@ -383,8 +383,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                     type: 'GET',
                     dataType: 'text',
                     timeout: 1000,
-                    error: function() {
-                        alert( 'Error loading XML document: ' + toolboxDef );
+                    async: false,
+                    error: function( jqXHR, textStatus, errorThrown ) {
+                        self.logger.errorx( "loadToolbox", 
+                            "Error loading XML document (" + textStatus + "): " + toolboxDef );
                     },
                     success: function( xml ) {
                         Blockly.updateToolbox( xml );
