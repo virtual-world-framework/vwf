@@ -163,7 +163,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 // returns: true if sound is currently playing
                 case "isSoundPlaying":
                     soundDatum = getSoundDatum( params[ 0 ] );
-                    return soundDatum ? soundDatum.playingInstances.length > 0 : false;
+                    return soundDatum ? soundDatum.isPlaying() : false;
 
                 // arguments: instanceHandle
                 // returns: true if sound is currently playing
@@ -216,7 +216,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 // arguments: none
                 case "stopAllSoundInstances":
-                    for ( var soundDatum in soundData ){
+                    for ( var soundName in soundData ){
+                        var soundDatum = soundData[ soundName ];
                         if ( soundDatum ) {
                             soundDatum.stopAllSoundInstances();
                         }
@@ -243,19 +244,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     LayeredSoundDatum.prototype = {
         constructor: LayeredSoundDatum,
 
-        name:"",
-        soundDefinitions:[ 0 ],
+        name: undefined,
+        soundDefinitions: null,
 
-        instanceIDCounter: 0,
-        playingInstances: null,
+        playOnLoad: false,
 
-        startingLayers: [ 0 ],
-        randomizeLayers:false,
-        playOnLoad:false,
-
-        layers:[ 0 ],
-        loadedCount: 0,
-        layerCount: 0,
+        layerNames: null,
 
         instanceHandles: null,
 
@@ -263,12 +257,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             this.name = layeredSoundDefinition.soundName;
             this.soundDefinitions = layeredSoundDefinition.soundDefinitions;
-            this.layers = [];
-            this.loadedCount = 0;
             this.playOnLoad = layeredSoundDefinition.playOnLoad;
-            this.layerCount = layeredSoundDefinition.soundDefinitions.length;
-            this.playingInstances = {};
-            this.instanceHandles = {};
+            this.layerNames = [];
+            this.instanceHandles = [];
 
             var soundDefinitionObjects = Object.keys( layeredSoundDefinition.soundDefinitions );
 
@@ -277,93 +268,113 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 var doneLoading = function() {
                     successCallback && successCallback();
                 }
+
                 var failureToLoad = function() {
                     failureCallback && failureCallback();
                 }
-                    // If parent LayeredSoundDatum is set to playOnLoad, play children on load.
-                    if ( this.playOnLoad === true ) {
-                        layeredSoundDefinition.soundDefinitions[k].playOnLoad = true;
-                    }
 
-                    var subName = layeredSoundDefinition.soundDefinitions[k].soundName;
-                    this.layers[ subName ] = subName;
-                    soundData[ subName ] = new SoundDatum( layeredSoundDefinition.soundDefinitions[k], doneLoading , failureToLoad );
+                // TODO: I doubt this will work because they won't all load at
+                //   the same time, but we need to synchronize them.
+                if ( this.playOnLoad === true ) {
+                    layeredSoundDefinition.soundDefinitions[k].playOnLoad = true;
+                }
+
+                var layerName = layeredSoundDefinition.soundDefinitions[k].soundName;
+                this.layerNames.push( layerName );
+                this.instanceHandles.push( undefined );
+
+                if ( soundData[ layerName ] ) {
+                    logger.warnx( "LayeredSoundDatum.initialize", 
+                                  "Duplicate sound name for layer '" +
+                                  layerName + "'." );
+                } else {
+                    // Again... we're going to call doneLoading for each layer, 
+                    //   which doesn't seem right...
+                    soundData[ layerName ] = new SoundDatum( layeredSoundDefinition.soundDefinitions[k], doneLoading , failureToLoad );
+                }
             }
 
+            // TODO: We haven't really succeeded until every sound has loaded -and
+            //   at this point, none of them have!!
             successCallback && successCallback();
-
         },
+
         playSound: function ( exitCallback ) {
-            for ( var x in this.layers ) {
-                this.startLayer( x );
+            if ( this.isPlaying() ) {
+                logger.warnx( "LayeredSoundDatum.playSound", "Sound '" + 
+                              this.name + "'is already playing, and layered " +
+                              "sounds don't allow multiplay." );
+                return { soundName: this.name, instanceID: -1 };
             }
 
-            var id = this.instanceIDCounter;
-            ++this.instanceIDCounter;
+            if ( this.layerNames.length !== this.instanceHandles.length ) {
+                logger.errorx( "LayeredSoundDatum.playSound", "layerNames " +
+                               "and instanceHandles are out of synch!!" );
+            }
 
-            this.playingInstances[ id ] = id;
+            for ( var i = 0; i < this.layerNames.length; ++i ) {
+                var layerDatum = soundData[ this.layerNames[ i ] ];
+                if ( !layerDatum ) {
+                    logger.errorx( "LayeredSoundDatum.playSound", "Missing " +
+                                   "sound datum: '" + this.layerNames[ i ] +
+                                   "'." );
+                }
 
-            return { soundName: this.name, instanceID: id };
+                var handle = layerDatum.playSound();
+                this.instanceHandles[ i ] = handle;
+            }
+
+            if ( this.layerNames.length !== this.instanceHandles.length ) {
+                logger.errorx( "LayeredSoundDatum.playSound", "layerNames " +
+                               "and instanceHandles are out of synch!!" );
+            }
+
+            return { soundName: this.name, instanceID: 0 };
         },
+
         stopInstance: function () {
-            for ( var x in this.layers ){
-                soundData[ x ].stopInstance( this.instanceHandles[ x ] );
-                this.instanceHandles[ x ] = undefined;
+            if ( this.layerNames.length !== this.instanceHandles.length ) {
+                logger.errorx( "LayeredSoundDatum.stopInstance", "layerNames " +
+                               "and instanceHandles are out of synch!!" );
             }
-            
-        },
-        stopAllSoundInstances: function (){
-            var instanceIDs = Object.keys( this.playingInstances );
-            for ( var i = 0; i < instanceIDs.length; ++i ) {
-                var handle = { soundName: this.name, instanceID: instanceIDs[ i ]};
-                this.stopInstance( handle );
+
+            for ( var i = 0; i < this.layerNames.length; ++i ) {
+                var layerDatum = soundData[ this.layerNames[ i ] ];
+                layerDatum.stopInstance( this.instanceHandles[ i ] );
+                this.instanceHandles[ i ] = undefined;
             }
         },
-        startLayer: function ( id ) {
 
-            if ( id === undefined ) {
-                logger.errorx( "startLayer", "The 'startLayer' method requires " +
-                                       "an ID for the layer" );
-                return undefined;
-            }
-
-            if ( this.instanceHandles [ id ] !== undefined ) {
-                logger.errorx( "startLayer", "The 'startLayer' indicates that layer " + id +
-                                       " is already playing" );
-                return undefined;
-            }
-
-            this.layers[ id ] = id;
-            this.instanceHandles[ id ] = soundData[ id ].playSound();
-
-
-        },
-        stopLayer: function ( id ) {
-
-            if ( id === undefined ) {
-                logger.errorx( "stopLayer", "The 'stopLayer' method requires " +
-                                       "an ID for the layer" );
-                return undefined;
-            }
-
-            if (this.instanceHandles [ id ] === undefined) {
-                logger.errorx( "startLayer", "The 'startLayer' indicates that layer " + id +
-                                       "is already stopped" );
-                return undefined;
-            }
-
-            this.layers[ id ] = undefined;
-            this.instanceHandles[ id ] = undefined;
-
-            soundData[ id ].stopInstance( this.instanceHandles[id].instanceID );
+        stopAllSoundInstances: function () {
+            // There is never more than one instance of a layered sound.
+            this.stopInstance();
         },
 
         setVolume: function( id, volume, duration, type ) {
-
-            for ( var x in this.layers ) {
-                soundData[ x ].setVolume( this.instanceHandles[ x ] , volume , duration ,type);
+            if ( this.layerNames.length !== this.instanceHandles.length ) {
+                logger.errorx( "LayeredSoundDatum.stopInstance", "layerNames " +
+                               "and instanceHandles are out of synch!!" );
             }
-        }
+
+            for ( var i = 0; i < this.layerNames.length; ++i ) {
+                var layerDatum = soundData[ this.layerNames[ i ] ];
+                layerDatum.setVolume( this.instanceHandles[ i ], volume, 
+                                      duration, type);
+            }
+        },
+
+        isPlaying: function() {
+            for ( var x in this.layers ) {
+                if ( this.instanceHandles[ x ] ) {
+                    return true;
+                }
+            }
+            return false;
+         },
+
+         // TODO: right now there is no way to play individual layers.  We might
+         //   want to work on that, since that's the whole point of having
+         //   layered sounds. :)
     }
 
     function SoundDatum( soundDefinition, successCallback, failureCallback ) {
@@ -430,15 +441,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.soundGroup = this.soundDefinition.soundGroup;
             if ( this.soundGroup ) {
                 if ( !soundGroups[ this.soundGroup ] ) {
-                    soundGroups[ this.soundGroup ] = { soundData: [] };
+                    soundGroups[ this.soundGroup ] = { soundData: {}, queue: [] };
                 }
 
-                soundGroups[ this.soundGroup ].soundData[ this.soundName ] = this;
+                soundGroups[ this.soundGroup ].soundData[ this.name ] = this;
             }
 
             this.groupReplacementMethod = this.soundDefinition.groupReplacementMethod;
 
-            if ( !!this.groupReplacementMethod && !this.soundGroup ) {
+            if ( this.groupReplacementMethod && !this.soundGroup ) {
                 logger.warnx( "soundDatum.initialize", 
                               "You defined a replacement method but not a sound " +
                               "group.  Replacement is only done when you replace " +
@@ -484,7 +495,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 return { soundName: this.name, instanceID: -1 };
             }
 
-            if ( !this.allowMultiplay && ( this.playingInstances.length > 0 ) ) {
+            if ( !this.allowMultiplay && this.isPlaying() ) {
                 logger.warnx( "playSound", "Sound '" + this.name + "'is already " +
                               "playing, and doesn't allow multiplay." );
                 return { soundName: this.name, instanceID: -1 };
@@ -499,30 +510,26 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         stopInstance: function( instanceHandle ) {
             var soundInstance = this.playingInstances[ instanceHandle.instanceID ];
-            if ( soundInstance ) {
-                soundInstance.sourceNode.stop();
-            }
+            soundInstance && soundInstance.sourceNode.stop();
         },
 
-        stopAllSoundInstances: function (){
-            var instanceIDs = Object.keys( this.playingInstances );
-            for ( var i = 0; i < instanceIDs.length; ++i ) {
-                var handle = { soundName: this.name, instanceID: instanceIDs[ i ]};
-                this.stopInstance( handle );
+        stopAllSoundInstances: function () {
+            for ( var instanceID in this.playingInstances ) {
+                var soundInstance = this.playingInstances[ instanceID ];
+                soundInstance && soundInstance.sourceNode.stop();
             }
         },
 
         setVolume: function ( instanceHandle, volume, fadeTime, fadeMethod ) {
            // arguments: instanceHandle, volume, fadeTime, fadeMethod
-                
             var soundInstance = getSoundInstance( instanceHandle );
+            soundInstance && soundInstance.setVolume( volume, fadeTime, fadeMethod );
+        },
 
-            if ( soundInstance ) {
-                soundInstance.setVolume( volume, fadeTime, fadeMethod );
-            }
-   
-        }
-        
+        isPlaying: function() {
+            var instanceIDs = Object.keys( this.playingInstances );
+            return instanceIDs.length > 0;
+        },
     }
 
     function PlayingInstance( soundDatum, id, exitCallback, successCallback ) {
@@ -566,30 +573,16 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );
 
-            //Browsers will handle onended differently depending on audio filetype - needs support.
+            var group = soundGroups[ soundDatum.soundGroup ];
 
+            // Browsers will handle onended differently depending on audio 
+            //   filetype - needs support.
+            var thisInstance = this;
             this.sourceNode.onended =  function() {
-                vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID, 
-                                           "soundFinished",
-                                           [ { soundName: soundDatum.name, 
-                                               instanceID: id } ] );
+                fireSoundEvent( "soundFinished", thisInstance );
                 
-                if ( soundDatum.soundGroup && 
-                     (soundDatum.groupReplacementMethod === "queue") ) {
-
-                    // TODO: does this handle complex cases with a mix of 
-                    //   replacement methods?
-
-                    var queue = soundGroups[ soundDatum.soundGroup ].queue;
-                    if ( !queue || !queue.length ) {
-                        logger.errorx( "PlayingInstance.onended", "How can " +
-                                       "the queue be empty?!  We store what " +
-                                       "we're playing on there!!");
-                    }
-                    queue.pop();
-                    var nextInstance = queue[ queue.length - 1 ];
-
-                    //If there's anything left in the queue, play it!
+                if ( group && ( group.queue.length > 0 ) ) {
+                    var nextInstance = group.queue.pop();
                     nextInstance && startSoundInstance( nextInstance );
                 }
 
@@ -597,20 +590,32 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 exitCallback && exitCallback();
             }
 
-            if ( soundDatum.soundGroup ) {
+            if ( group ) {
                 switch ( soundDatum.groupReplacementMethod ) {
                     case "queue":
-                        if ( !soundGroups[ soundDatum.soundGroup ].queue ) {
-                            soundGroups[ soundDatum.soundGroup ].queue = [];
-                        }
-
-                        var queue = soundGroups[ soundDatum.soundGroup ].queue;
-                        queue.unshift( this );
-                        if ( queue.length === 1 ) {
+                        // We're only going to play the sound if there isn't 
+                        //   already a sound from this group playing.  
+                        //   Otherwise, add it to a queue to play later.
+                        if ( isGroupPlaying( group ) ) {
+                            group.queue.unshift( this );
+                        } else {
                             startSoundInstance( this );
                         }
 
                         break;
+
+                    case "replace":
+                        stopSoundGroup( group );
+                        startSoundInstance( this );
+                        break;
+
+                    default:
+                        logger.errorx( "PlayingInstance.initialize",
+                                       "This sound is in a group, but doesn't " +
+                                       "have a valid replacement method!" );
+
+                        stopSoundGroup( group );
+                        startSoundInstance( this );
                 }
             } else {
                 startSoundInstance( this );
@@ -645,7 +650,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         this.gainNode.gain.setTargetValueAtTime( volume, now, fadeTime );
                         break;
                     default:
-                        logger.errorx( "setVolume", "Unknonwn fade method: '" +
+                        logger.errorx( "setVolume", "Unknown fade method: '" +
                                        fadeMethod + "'.  Using a linear fade." );
                         this.sourceNode.gain.linearRampToValueAtTime( volume, endTime );
                 }
@@ -679,7 +684,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         if ( ( instanceHandle.soundName === undefined ) || 
              ( instanceHandle.instanceID === undefined ) ) {
             logger.errorx( "getSoundInstance", "The instance handle must contain " +
-                           "soundName and the instanceID values");
+                           "soundName and instanceID values");
             return undefined;
         }
 
@@ -695,10 +700,36 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function startSoundInstance( instance ) {
         instance.sourceNode.start( 0 ); 
+        fireSoundEvent( "soundStarted", instance );
+    }
+
+    function fireSoundEvent( eventString, instance ) {
         vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID, 
-                                   "soundStarted",
+                                   eventString,
                                    [ { soundName: instance.soundDatum.name, 
                                        instanceID: instance.id } ] );
+    }
+
+    function isGroupPlaying( group ) {
+        for ( var soundName in group.soundData ) {
+            var sound = group.soundData[ soundName ];
+
+            if ( sound && sound.isPlaying() ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function stopSoundGroup( group ) {
+        for ( var soundName in group.soundData ) {
+            var sound = group.soundData[ soundName ];
+            sound && sound.stopAllSoundInstances();
+        }
+
+        while ( group.queue.length > 0 ) {
+            group.queue.pop();
+        }
     }
 
     return driver;
