@@ -3805,14 +3805,12 @@ if ( ! childComponent.source ) {
 
         this.root = function( nodeID, initializedOnly ) {
 
-            var rootID = nodeID;
+            var rootID;
 
-            nodeID = this.parent( nodeID, initializedOnly );
-
-            while ( nodeID ) {
+            do {
                 rootID = nodeID;
                 nodeID = this.parent( nodeID, initializedOnly );
-            }
+            } while ( nodeID );
 
             return nodeID === undefined ? undefined : rootID;
         };
