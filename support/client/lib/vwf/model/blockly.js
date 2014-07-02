@@ -533,8 +533,8 @@ define( [ "module", "vwf/model",
                                 if ( arguments[ j ].type === 'object' ) {
                                     var temp = [];
                                     if ( arguments[ j ].properties !== undefined ) {
-                                        for ( var k = 0; k < arguments[ j ].properties.length; k++ ) {
-                                            temp.push( arguments[ j ].properties[ k ].toString() )
+                                        for ( var k in arguments[ j ].properties ) {
+                                            temp.push( arguments[ j ].properties[ k ].data );
                                         }
                                     }
                                     parms.push( temp );
