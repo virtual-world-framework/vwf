@@ -249,8 +249,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         playOnLoad: false,
 
+        // NOTE: these two arrays should be synchronized - for any given index,
+        //   the layer name should be the name of the instance handle's sound.
         layerNames: null,
-
         instanceHandles: null,
 
         initialize: function ( layeredSoundDefinition, successCallback, failureCallback ) {
@@ -307,11 +308,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 return { soundName: this.name, instanceID: -1 };
             }
 
-            if ( this.layerNames.length !== this.instanceHandles.length ) {
-                logger.errorx( "LayeredSoundDatum.playSound", "layerNames " +
-                               "and instanceHandles are out of synch!!" );
-            }
-
             for ( var i = 0; i < this.layerNames.length; ++i ) {
                 var layerDatum = soundData[ this.layerNames[ i ] ];
                 if ( !layerDatum ) {
@@ -324,20 +320,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 this.instanceHandles[ i ] = handle;
             }
 
-            if ( this.layerNames.length !== this.instanceHandles.length ) {
-                logger.errorx( "LayeredSoundDatum.playSound", "layerNames " +
-                               "and instanceHandles are out of synch!!" );
-            }
-
             return { soundName: this.name, instanceID: 0 };
         },
 
         stopInstance: function () {
-            if ( this.layerNames.length !== this.instanceHandles.length ) {
-                logger.errorx( "LayeredSoundDatum.stopInstance", "layerNames " +
-                               "and instanceHandles are out of synch!!" );
-            }
-
             for ( var i = 0; i < this.layerNames.length; ++i ) {
                 var layerDatum = soundData[ this.layerNames[ i ] ];
                 layerDatum.stopInstance( this.instanceHandles[ i ] );
@@ -351,11 +337,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         },
 
         setVolume: function( id, volume, duration, type ) {
-            if ( this.layerNames.length !== this.instanceHandles.length ) {
-                logger.errorx( "LayeredSoundDatum.stopInstance", "layerNames " +
-                               "and instanceHandles are out of synch!!" );
-            }
-
             for ( var i = 0; i < this.layerNames.length; ++i ) {
                 var layerDatum = soundData[ this.layerNames[ i ] ];
                 layerDatum.setVolume( this.instanceHandles[ i ], volume, 
