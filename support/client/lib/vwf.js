@@ -588,6 +588,11 @@
 
             this.logger = require( "logger" ).for( "vwf", this );  // TODO: for( "vwf", ... ), and update existing calls
 
+            // Get the jQuery reference. This also happens in `loadConfiguration`, but the tests
+            // initialize using `initialize` and don't call `loadConfiguration` first.
+
+            jQuery = require("jquery");
+
             // Parse the function parameters. If the first parameter is not an array, then treat it
             // as the application specification. Otherwise, fall back to the "application" parameter
             // in the query string.
