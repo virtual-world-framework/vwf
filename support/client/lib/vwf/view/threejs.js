@@ -437,8 +437,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var deltaY = 0;
 
             if ( pointerLocked ) {
-                deltaX = mouseEventData.movementX / self.width;
-                deltaY = mouseEventData.movementY / self.height;
+                deltaX = mouseEventData.movementX / this.width;
+                deltaY = mouseEventData.movementY / this.height;
             } else if ( startMousePosition ) {
                 var currentMousePosition = mouseEventData[ 0 ].position;
                 deltaX = currentMousePosition[ 0 ] - startMousePosition [ 0 ];
@@ -2026,7 +2026,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             // one key press doesn't send them off in space
             var dist = translationSpeed * Math.min( msSinceLastFrame * 0.001, 0.5 );
             var dir = [ 0, 0, 0 ];
-            var camera = this.state.cameraInUse;
+            var camera = self.state.cameraInUse;
             var cameraWorldTransformArray = camera.matrixWorld.elements;
 
             var orbiting = ( navMode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
@@ -2148,6 +2148,18 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
             var navThreeObject = navObject.threeObject;
             var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
+            this.rotateNavObjectByKeyHelper( direction, navmode, navObject, msSinceLastFrame );
+
+            // Force the navObject's world transform to update from its local transform
+            setTransformFromWorldTransform( navThreeObject );
+
+            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+        }
+
+        this.rotateNavObjectByKeyHelper = function( direction, navMode, navObj, msSinceLastFrame ) {
+
+            var navThreeObject = navObj.threeObject;
+            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
             // Compute the distance rotated in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
@@ -2155,7 +2167,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var theta = direction * ( rotationSpeed * degreesToRadians ) * 
                         Math.min( msSinceLastFrame * 0.001, 0.5 );
 
-            var orbiting = ( navmode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
+            var orbiting = ( navMode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
 
             if ( orbiting ) {
                 var pitchRadians = 0;
@@ -2186,11 +2198,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                     navObjectWorldTransform.elements = convertCameraTransformFromVWFtoThreejs( navObjectWorldTransformArray );
                 }
             }
-
-            // Force the navObject's world transform to update from its local transform
-            setTransformFromWorldTransform( navThreeObject );
-
-            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
         }
 
         var handleKeyNavigation = function( keyCode, keyIsDown ) {
