@@ -3812,10 +3812,18 @@ if ( ! childComponent.source ) {
 
             var rootID;
 
+            // Walk the ancestors to the top of the tree. Stop when we reach the pseudo-node at the
+            // global root, which unlike all other nodes has a falsy ID, or `undefined` if we could
+            // not reach the top because `initializedOnly` is set and we attempted to cross between
+            // nodes that have and have not completed initialization.
+
             do {
                 rootID = nodeID;
                 nodeID = this.parent( nodeID, initializedOnly );
             } while ( nodeID );
+
+            // Return the root ID, or `undefined` when `initializedOnly` is set and the node can't
+            // see the root.
 
             return nodeID === undefined ? undefined : rootID;
         };
