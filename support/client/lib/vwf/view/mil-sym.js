@@ -151,7 +151,7 @@ define( [ "module", "vwf/view", "tdg/cws" ], function( module, view, cws ) {
     function getUnitImage( symbolID ) {
         var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
         var modifiers = {};
-        modifiers[ msa.PixelSize ] = 32;
+        modifiers[ msa.PixelSize ] = 60;
         var img = armyc2.c2sd.renderer.MilStdIconRenderer.Render( symbolID, modifiers );
         if ( img ) {
             return img.toDataUrl();
