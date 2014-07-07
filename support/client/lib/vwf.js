@@ -4254,7 +4254,7 @@ if ( ! childComponent.source ) {
         var namespaceEncodedName = function( memberName ) {
 
             if ( typeof memberName === "object" && memberName instanceof Array ) {
-                return memberName.length ? "vwf$" + memberName.join( "$" ) : memberName[0];
+                return ( memberName.length !== 1 ) ? "vwf$" + memberName.join( "$" ) : memberName[0];
             } else {
                 return memberName;
             }
