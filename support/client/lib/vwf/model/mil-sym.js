@@ -118,7 +118,7 @@ define( [ "module",
                     // additional members for the unit components
                     node.symbolID = undefined;
                     node.modifiers = {};
-                    node.icon = undefined;
+                    node.image = undefined;
                     node.description = undefined;
                     node.tagName = undefined;
                     node.fullName = undefined;
@@ -201,6 +201,8 @@ define( [ "module",
             var node = this.state.nodes[ nodeID ]; 
             var value = undefined;
 
+            var renderImage = false;
+            var unitNode = node;
 
             if ( node !== undefined && ( validPropertyValue( propertyValue ) ) ) {
                 if ( node.nodeType === "unit" ) {
@@ -209,10 +211,11 @@ define( [ "module",
 
                         case "symbolID":
                             value = node.symbolID = propertyValue;
+                            renderImage = true;
                             break;
 
-                        case "icon":
-                            value = node.icon = propertyValue;
+                        case "image":
+                            value = node.image = propertyValue;
                             break;
 
                         case "description":
@@ -238,6 +241,9 @@ define( [ "module",
                     if ( unit === undefined ) {
                         return undefined;
                     }
+
+                    unitNode = unit;
+                    renderImage = true;
 
                     switch ( propertyName ) {
 
@@ -336,12 +342,17 @@ define( [ "module",
                         case "speed":
                             unit.modifiers[ mu.Z_SPEED ] = propertyValue;
                             break;
+
+                        default:
+                            renderImage = false;
+                            break;
                     }                    
                 }
-
             }
 
-
+            if ( unitNode && renderImage ) {
+                renderImage( unitNode );
+            }
 
             return value;
         },
@@ -368,8 +379,8 @@ define( [ "module",
                         value = node.symbolID;
                         break;
 
-                    case "icon":
-                        value = node.icon;
+                    case "image":
+                        value = node.image;
                         break;
 
                     case "description":
@@ -508,12 +519,10 @@ define( [ "module",
             var node = this.state.nodes[ nodeID ]; 
             var value = undefined;
 
-            if ( node !== undefined && node.nodeType === "unit" && node.symbolID !== undefined ) {
-                var iconRender = armyc2.c2sd.renderer.MilStdIconRenderer;
-                if ( methodName === "render" ) {
-                    var img = iconRender.Render( node.symbolID, node.modifiers );
-                    value = node.icon = img.toDataUrl();
-                }
+            switch( methodName ) {
+                case "render":
+                    value = renderImage( node );
+                    break;
             }
 
             return value;
@@ -588,6 +597,19 @@ define( [ "module",
     function validPropertyValue( obj ) {
         var objType = ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
         return ( objType != 'null' && objType != 'undefined' );
+    }
+
+    function renderImage( node ) {
+        var value = undefined;
+        
+        if ( node !== undefined && node.nodeType === "unit" && node.symbolID !== undefined ) {
+            var iconRender = armyc2.c2sd.renderer.MilStdIconRenderer;
+            var img = iconRender.Render( node.symbolID, node.modifiers );
+            value = node.image = img.toDataUrl();
+            this.kernel.fireEvent( node.ID, "imageChanged", [ node.image ] );
+        } 
+
+        return value;       
     }
 
 } );
