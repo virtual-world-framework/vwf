@@ -1655,7 +1655,8 @@
 
             // delegates to the models and views as above.
 
-            nodeComponent.properties && jQuery.each( nodeComponent.properties, function( propertyName, propertyValue ) {  // TODO: setProperties should be adapted like this to be used here
+            nodeComponent.properties && Object.keys( nodeComponent.properties ).forEach( function( propertyName ) {  // TODO: setProperties should be adapted like this to be used here
+                var propertyValue = nodeComponent.properties[ propertyName ];
 
                 // Is the property specification directing us to create a new property, or
                 // initialize a property already defined on a prototype?
@@ -2330,7 +2331,8 @@ if ( ! childComponent.source ) {
                     // createProperty(), createMethod(), or createEvent() to create the field. Each
                     // delegates to the models and views as above.
 
-                    childComponent.properties && jQuery.each( childComponent.properties, function( propertyName, propertyValue ) {
+                    childComponent.properties && Object.keys( childComponent.properties ).forEach( function( propertyName ) {
+                        var propertyValue = childComponent.properties[ propertyName ];
 
                         var value = propertyValue, get, set, create;
 
@@ -2375,7 +2377,8 @@ if ( ! childComponent.source ) {
 
                     } );
 
-                    childComponent.methods && jQuery.each( childComponent.methods, function( methodName, methodValue ) {
+                    childComponent.methods && Object.keys( childComponent.methods ).forEach( function( methodName ) {
+                        var methodValue = childComponent.methods[ methodName ];
 
                         if ( valueHasBody( methodValue ) ) {
                             vwf.createMethod( childID, methodName, methodValue.parameters, methodValue.body );
@@ -2385,7 +2388,8 @@ if ( ! childComponent.source ) {
 
                     } );
 
-                    childComponent.events && jQuery.each( childComponent.events, function( eventName, eventValue ) {
+                    childComponent.events && Object.keys( childComponent.events ).forEach( function( eventName ) {
+                        var eventValue = childComponent.events[ eventName ];
 
                         if ( valueHasBody( eventValue ) ) {
                             vwf.createEvent( childID, eventName, eventValue.parameters );
