@@ -100,7 +100,7 @@ define( [ "module", "vwf/view", "tdg/cws" ], function( module, view, cws ) {
 
         // -- firedEvent -----------------------------------------------------------------------------
 
-        firedEvent: function( nodeID, eventName ) {
+        firedEvent: function( nodeID, eventName, eventParameters ) {
         },
 
         // -- ticked -----------------------------------------------------------------------------------
