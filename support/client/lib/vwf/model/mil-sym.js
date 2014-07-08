@@ -118,7 +118,10 @@ define( [ "module",
                     // additional members for the unit components
                     node.symbolID = undefined;
                     node.modifiers = {};
-                    node.dataUrl = undefined;
+                    node.icon = undefined;
+                    node.description = undefined;
+                    node.tagName = undefined;
+                    node.fullName = undefined;
 
                 } else if ( isModifierNode( protos ) ) {
 
@@ -205,11 +208,23 @@ define( [ "module",
                     switch ( propertyName ) {
 
                         case "symbolID":
-                            node.symbolID = propertyValue;
+                            value = node.symbolID = propertyValue;
                             break;
 
-                        case "dataUrl":
-                            node.dataUrl = propertyValue;
+                        case "icon":
+                            value = node.icon = propertyValue;
+                            break;
+
+                        case "description":
+                            value = node.description = propertyValue;
+                            break;
+
+                        case "tagName":
+                            value = node.tagName = propertyValue;
+                            break;
+
+                        case "fullName":
+                            value = node.fullName = propertyValue;
                             break;
 
                     }
@@ -353,8 +368,20 @@ define( [ "module",
                         value = node.symbolID;
                         break;
 
-                    case "dataUrl":
-                        value = node.dataUrl;
+                    case "icon":
+                        value = node.icon;
+                        break;
+
+                    case "description":
+                        value = node.description;
+                        break;
+
+                    case "fullName":
+                        value = node.fullName;
+                        break;
+
+                    case "tagName":
+                        value = node.tagName;
                         break;
 
                 }
@@ -485,7 +512,7 @@ define( [ "module",
                 var iconRender = armyc2.c2sd.renderer.MilStdIconRenderer;
                 if ( methodName === "render" ) {
                     var img = iconRender.Render( node.symbolID, node.modifiers );
-                    value = node.dataUrl = img.toDataUrl();
+                    value = node.icon = img.toDataUrl();
                 }
             }
 
