@@ -4289,9 +4289,9 @@ define( function(){
                     foundTag = true;
                 }
                 if ( this.def[ parts[ i ] ] ) {
-                    retStr = retStr + prefix + this.def[ parts[ i ] ] + "/n";
+                    retStr = retStr + prefix + this.def[ parts[ i ] ] + "\n";
                 } else {
-                    retStr = retStr + prefix + parts[ i ] + "/n";
+                    retStr = retStr + prefix + parts[ i ] + "\n";
                 }
             }
 
