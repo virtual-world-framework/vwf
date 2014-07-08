@@ -100,7 +100,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                 self.kernel.setProperty( childID, "toolbox", self.options.toolbox );
                 Blockly.inject( document.getElementById( self.options.divName ), { 
                     path: this.options.blocklyPath,
-                    toolbox: document.getElementById( self.options.toolbox ) 
+                    toolbox: document.getElementById( self.options.toolbox ),
+                    trashcan: true,
                 } ); 
 
                 Blockly.addChangeListener( function( event ) {
