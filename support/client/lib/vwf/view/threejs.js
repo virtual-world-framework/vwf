@@ -434,7 +434,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             "e": "rotateRight"
         },      
 
-        handleMouseNavigation: function( deltaX, deltaY, navObj, navMode, rotationSpeed, translationSpeed, mouseDowns ) {
+        handleMouseNavigation: function( deltaX, deltaY, navObj, navMode, rotationSpeed, translationSpeed, mouseDown, mouseEventData ) {
             var yawQuat = new THREE.Quaternion();
             var pitchQuat = new THREE.Quaternion();
             var rotationSpeedRadians = degreesToRadians * rotationSpeed;
@@ -3001,15 +3001,16 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         if ( deltaX || deltaY ) {
             if ( navObject ) {
-            var navThreeObject = navObject.threeObject;
-            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
+                var navThreeObject = navObject.threeObject;
+                var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
-            self.handleMouseNavigation( deltaX, deltaY, navObject, navmode, rotationSpeed, translationSpeed, mouseDown );
+                self.handleMouseNavigation( deltaX, deltaY, navObject, navmode, 
+                    rotationSpeed, translationSpeed, mouseDown, mouseEventData );
 
-            setTransformFromWorldTransform( navThreeObject );
-            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+                setTransformFromWorldTransform( navThreeObject );
+                callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
             } else {
-                self.logger.warnx( "handleMouseNavigation: There is no navigation object to move" );                    
+                self.logger.warnx( "handleMouseNavigation: There is no navigation object to move" );
             }
 
             startMousePosition = currentMousePosition;
@@ -3017,7 +3018,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
     }
 
     function inputHandleScroll( wheelDelta, distanceToTarget ) {
-
         var navThreeObject = navObject.threeObject;
         var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
         self.handleScroll( wheelDelta, navObject, navmode, rotationSpeed, translationSpeed, distanceToTarget );
@@ -3074,7 +3074,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var navThreeObject = navObject.threeObject;
             var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
-            self.rotateNavObjectByKey( direction, navObject, navmode, rotationSpeed, translationSpeed, msSinceLastFrame );
+            self.rotateNavObjectByKey( direction, navObject, navmode, 
+                rotationSpeed, translationSpeed, msSinceLastFrame );
 
             // Force the navObject's world transform to update from its local transform
             setTransformFromWorldTransform( navThreeObject );
