@@ -64,9 +64,11 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
     var lastXPos = -1;
     var lastYPos = -1;
-    var mouseRightDown = false;
-    var mouseLeftDown = false;
-    var mouseMiddleDown = false;
+    var mouseDown = {
+        left: false,
+        right: false,
+        middle: false
+    };
     var touchGesture = false;
     var prevGesture = undefined;
 
@@ -203,7 +205,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             if ( navObject && ( nodeID == navObject.ID ) ) {
                 if ( propertyName == "navmode" ) {
                     navmode = propertyValue;
-                    if ( pointerLockImplemented && !self.appRequestsPointerLock() ) {
+                    if ( pointerLockImplemented && !self.appRequestsPointerLock( navmode, mouseDown ) ) {
                         document.exitPointerLock();
                     }
                 } else if ( propertyName == "translationSpeed" ) {
@@ -413,8 +415,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         // -- render -----------------------------------------------------------------------------------
 
-        render: function(renderer, scene, camera) {
-            renderer.render(scene, camera);
+        render: function( renderer, scene, camera ) {
+            renderer.render( scene, camera );
         },
     
         // -- Navigation -------------------------------------------------------------------------------
@@ -437,13 +439,13 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var pitchQuat = new THREE.Quaternion();
             var rotationSpeedRadians = degreesToRadians * rotationSpeed;
 
-            var orbiting = mouseMiddleDown && ( navmode == "fly" );
+            var orbiting = mouseDown.middle && ( navmode == "fly" );
 
             if ( orbiting ) {
                 var pitchRadians = deltaY * rotationSpeedRadians;
                 var yawRadians = deltaX * rotationSpeedRadians;
                 orbit( pitchRadians, yawRadians );
-            } else if ( mouseRightDown ) {
+            } else if ( mouseDown.right ) {
                 var navThreeObject = navObj.threeObject;
                 var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );          
 
@@ -583,7 +585,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 return;
             }
 
-            var orbiting = ( navMode == "fly" ) && ( mouseMiddleDown )
+            var orbiting = ( navMode == "fly" ) && ( mouseDown.middle )
 
             if ( orbiting || !pickDirectionVector ) {
                 return;
@@ -855,16 +857,16 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             prevGesture = ev.type;
         },
 
-        appRequestsPointerLock: function() {
+        appRequestsPointerLock: function( navmode, mouseDown ) {
 
             // By default, an app will request pointer lock when:
             //   - the middle mouse button is hit in fly mode (for orbit)
             //   - the right mouse button is hit in any mode other than "none" (for look)
 
-            if ( mouseMiddleDown && ( navmode === "fly" ) ) {
+            if ( mouseDown.middle && ( navmode === "fly" ) ) {
                 return true;
             }
-            if ( mouseRightDown && ( navmode !== "none" ) ) {
+            if ( mouseDown.right && ( navmode !== "none" ) ) {
                 return true;
             }
             return false;
@@ -1383,9 +1385,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 button: mouseButton,
                 clicks: 1,
                 buttons: {
-                        left: mouseLeftDown,
-                        middle: mouseMiddleDown,
-                        right: mouseRightDown,
+                        left: mouseDown.left,
+                        middle: mouseDown.middle,
+                        right: mouseDown.right,
                     },
                 gestures: touchGesture,
                 modifiers: {
@@ -1576,26 +1578,26 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             switch( e.button ) {
                 case 0: // Left button
                     if ( shiftDown ) {
-                        mouseMiddleDown = true;
+                        mouseDown.middle = true;
                     } else {
-                        mouseLeftDown = true;
+                        mouseDown.left = true;
                     }
                     break;
                 case 1: // Middle button
-                    mouseMiddleDown = true;
+                    mouseDown.middle = true;
                     break;
                 case 2: // Right button
                     if ( shiftDown ) {
-                        mouseMiddleDown = true;
+                        mouseDown.middle = true;
                     } else {
-                        mouseRightDown = true;
+                        mouseDown.right = true;
                     }
                     break;
             };
 
             // Set pointerLock if appropriate
-            var event = getEventData( e, false );
-            if ( pointerLockImplemented && self.appRequestsPointerLock() ) {
+            var event = getEventData( e, false );           
+            if ( pointerLockImplemented && self.appRequestsPointerLock( navmode, mouseDown ) ) {
 
                 // HACK: This is to deal with an issue with webkitMovementX in Chrome:
                 nextMouseMoveIsErroneous = true;
@@ -1634,26 +1636,26 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             // middle mouse button that was released
             switch( e.button ) {
                 case 0: // Left button
-                    if ( mouseLeftDown ) {
-                        mouseLeftDown = false;
+                    if ( mouseDown.left ) {
+                        mouseDown.left = false;
                     } else {
-                        mouseMiddleDown = false;
+                        mouseDown.middle = false;
                     }
                     break;
                 case 1: // Middle button
-                    mouseMiddleDown = false;
+                    mouseDown.middle = false;
                     break;
                 case 2: // Right button
-                    if ( mouseRightDown ) {
-                        mouseRightDown = false;
+                    if ( mouseDown.right ) {
+                        mouseDown.right = false;
                     } else {
-                        mouseMiddleDown = false;
+                        mouseDown.middle = false;
                     }
                     break;
-            };
+            };       
 
             // Release pointerLock if appropriate
-            if ( pointerLockImplemented && !self.appRequestsPointerLock() ) {
+            if ( pointerLockImplemented && !self.appRequestsPointerLock( navmode, mouseDown ) ) {
                 document.exitPointerLock();
             }
 
@@ -1704,7 +1706,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 }
             }
 
-            if ( !( mouseLeftDown || mouseRightDown || mouseMiddleDown ) ) {
+            if ( !( mouseDown.left || mouseDown.right || mouseDown.middle ) ) {
                 pointerDownID = undefined;
 
                 // TODO: Navigation - see main "TODO: Navigation" comment for explanation
@@ -1741,7 +1743,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var eData = getEventData( e, false );
             
             if ( eData ) {
-                if ( mouseLeftDown || mouseRightDown || mouseMiddleDown ) {
+                if ( mouseDown.left || mouseDown.right || mouseDown.middle ) {
                 
                     // TODO: Navigation - see main "TODO: Navigation" comment for explanation
                     if ( navmode != "none" ) {
@@ -1898,7 +1900,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                         deltaY: e.wheelDeltaY / -40,
                     };
                     var id = sceneID;
-                    if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
+                    if ( pointerDownID && mouseDown.right || mouseDown.left || mouseDown.middle )
                         id = pointerDownID;
                     else if ( pointerOverID )
                         id = pointerOverID; 
@@ -1926,7 +1928,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                         deltaY: e.deltaY,
                     };
                     var id = sceneID;
-                    if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
+                    if ( pointerDownID && mouseDown.right || mouseDown.left || mouseDown.middle )
                         id = pointerDownID;
                     else if ( pointerOverID )
                         id = pointerOverID; 
@@ -1972,7 +1974,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var camera = self.state.cameraInUse;
             var cameraWorldTransformArray = camera.matrixWorld.elements;
 
-            var orbiting = ( navMode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
+            var orbiting = ( navMode == "fly" ) && mouseDown.middle && positionUnderMouseClick;
 
             if ( orbiting ) {
                 if ( y ) {
@@ -2087,7 +2089,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var theta = direction * ( rotationSpeed * degreesToRadians ) * 
                         Math.min( msSinceLastFrame * 0.001, 0.5 );
 
-            var orbiting = ( navMode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
+            var orbiting = ( navMode == "fly" ) && mouseDown.middle && positionUnderMouseClick;
 
             if ( orbiting ) {
                 var pitchRadians = 0;
@@ -3002,11 +3004,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var navThreeObject = navObject.threeObject;
             var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
-            var mouseDown = {
-                left: mouseLeftDown,
-                right: mouseRightDown,
-                middle: mouseMiddleDown
-            };
             self.handleMouseNavigation( deltaX, deltaY, navObject, navmode, rotationSpeed, translationSpeed, mouseDown );
 
             setTransformFromWorldTransform( navThreeObject );
