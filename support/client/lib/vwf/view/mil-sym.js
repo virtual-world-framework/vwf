@@ -128,15 +128,33 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
         var description = undefined;
 
         if ( cws ) {
+
+            // units must be an object with location members that are defined in cws
+            // ex. ground, sea, air, subsurface, space
+            
             for ( var location in units ) {
+                
                 unitsToAdd = units[ location ];
                 if ( ! ( unitsToAdd instanceof Array ) ) {
                     unitsToAdd = [ unitsToAdd ];
-                }                
+                }
+                // unitsToAdd is now an array of acronyms from cws.defs
+                // a series of acronyms make up the 'fullNames' of the units separated by '.'
+                // those fullNames also kind of describe the hierarchy of the objects definition               
 
                 for ( var i = 0; i < unitsToAdd.length; i++ ) {
+
+                    // unitsToAdd[ i ] is a single acronym
+                    // findAll will search through all of the fullNames 
+                    // for this 'location' and return an array of those units
+
                     foundUnits = cws.findAll( location, unitsToAdd[ i ] );
                     if ( foundUnits ) {
+
+                        // loop through the array and send out an event 
+                        // so the application can present the user
+                        // with options to add these units to the application instance
+
                         for ( fullName in foundUnits ) {
                             unit = foundUnits[ fullName ];
                             image = getUnitImage( unit.symbolID );
