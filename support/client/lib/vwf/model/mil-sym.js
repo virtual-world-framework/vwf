@@ -353,7 +353,9 @@ define( [ "module",
             }
 
             if ( node !== undefined ) {
-                var unitNode = node.nodeType === "unit" ? node : this.state.nodes[ node.parentID ]; 
+                // if node is defined then it is either a unit or a modifier
+                // if nodeType is a modifier, then the parent is the unit
+                var unitNode = node.nodeType === "modifier" ? this.state.nodes[ node.parentID ] : node; 
                 if ( unitNode && renderImage ) {
                     render( unitNode );
                 }
