@@ -8,6 +8,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     var DEPTH_AXES = Number.MIN_SAFE_INTEGER + 2;
     var DEPTH_OBJECTS = Number.MIN_SAFE_INTEGER + 1;
 
+    var self;
+
     return model.load( module, {
 
         // == Module Definition ====================================================================
@@ -15,6 +17,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function() {
+            self = this;
             this.state.graphs = {};
             this.state.objects = {};
             this.state.kernel = this.kernel.kernel.kernel;
@@ -561,6 +564,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     function generateLineFuction( graphScale, functionString, startValue, endValue, 
                             pointCount, color, opacity, thickness, renderTop ) {
 
+        if ( !isValidFunction( functionString ) ) {
+            return new THREE.Mesh();
+        }
+
         var geometry = new THREE.Geometry();
         var point, direction;
         var points = new Array();
@@ -928,6 +935,21 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         return mat;
 
+    }
+
+    function isValidFunction( functionString ) {
+        return ( function( x, y, z ) {
+            var fn = "var x = " + x + ", y = " + y + ", z = " + z + ";\n" 
+                    + functionString + ";\n" 
+                    + "[ x, y, z ];";
+            try {
+                var ar = eval( fn );
+            } catch ( error ) {
+                self.logger.errorx( "generateLineFuction", error.stack );
+                return false;
+            }
+            return true;
+        } )();
     }
 
 } );
