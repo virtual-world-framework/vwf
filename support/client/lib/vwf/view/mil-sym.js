@@ -71,29 +71,22 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
 
         // -- createdProperty --------------------------------------------------------------------------
 
-        createdProperty: function (nodeID, propertyName, propertyValue) {
-			this.satProperty(nodeID, propertyName, propertyValue);
-        },
+   //      createdProperty: function (nodeID, propertyName, propertyValue) {
+            // this.satProperty(nodeID, propertyName, propertyValue);
+   //      },
 
         // -- initializedProperty ----------------------------------------------------------------------
 
-        initializedProperty: function ( nodeID, propertyName, propertyValue ) { 
-            this.satProperty(nodeID, propertyName, propertyValue);
-        },
+        // initializedProperty: function ( nodeID, propertyName, propertyValue ) { 
+        //     this.satProperty(nodeID, propertyName, propertyValue);
+        // },
 
         // TODO: deletedProperty
 
         // -- satProperty ------------------------------------------------------------------------------
 
-        satProperty: function ( nodeID, propertyName, propertyValue ) { 
-            if ( nodeID === this.kernel.application() ) {
-                switch ( propertyName ) {
-                    case "insertableUnits":
-                        addInsertableUnits( propertyValue );
-                        break;
-                }
-            }        
-        },
+        // satProperty: function ( nodeID, propertyName, propertyValue ) { 
+        // },
 
         // -- gotProperty ------------------------------------------------------------------------------
 
@@ -102,8 +95,15 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
 
         // -- calledMethod -----------------------------------------------------------------------------
 
-        // calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
-        // },
+        calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+            if ( nodeID === this.kernel.application() ) {
+                switch ( methodName ) {
+                    case "insertUnits":
+                        addInsertableUnits( methodParameters[ 0 ] );
+                        break;
+                }
+            } 
+        },
 
         // -- firedEvent -----------------------------------------------------------------------------
 
@@ -152,16 +152,17 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
     }
 
     function getUnitImage( symbolID ) {
-        var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
-        var rs = armyc2.c2sd.renderer.utilities.RendererSettings;
+        var renderer = armyc2.c2sd.renderer;
+        var msa = renderer.utilities.MilStdAttributes;
+        var rs = renderer.utilities.RendererSettings;
         var modifiers = {};
 
         modifiers[ msa.PixelSize ] = 32;
         modifiers[ msa.Icon ] = true;
         modifiers[ msa.SymbologyStandard ] = rs.Symbology_2525Bch2_USAS_13_14;
         
-        console.info( "Render( "+symbolID+", "+JSON.stringify( modifiers )+" )" )
-        var img = armyc2.c2sd.renderer.MilStdIconRenderer.Render( symbolID, modifiers );
+        //console.info( "Render( "+symbolID+", "+JSON.stringify( modifiers )+" )" )
+        var img = renderer.MilStdIconRenderer.Render( symbolID, modifiers );
         if ( img ) {
             return img.toDataUrl();
         } else {

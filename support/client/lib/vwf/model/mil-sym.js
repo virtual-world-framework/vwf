@@ -202,7 +202,6 @@ define( [ "module",
             var value = undefined;
 
             var renderImage = false;
-            var unitNode = node;
 
             if ( node !== undefined && ( validPropertyValue( propertyValue ) ) ) {
                 if ( node.nodeType === "unit" ) {
@@ -242,7 +241,6 @@ define( [ "module",
                         return undefined;
                     }
 
-                    unitNode = unit;
                     renderImage = true;
 
                     switch ( propertyName ) {
@@ -354,8 +352,11 @@ define( [ "module",
                 }
             }
 
-            if ( unitNode && renderImage ) {
-                renderIcon( unitNode );
+            if ( node !== undefined ) {
+                var unitNode = node.nodeType === "unit" ? node : this.state.nodes[ node.parentID ]; 
+                if ( unitNode && renderImage ) {
+                    render( unitNode );
+                }
             }
 
             return value;
@@ -529,7 +530,7 @@ define( [ "module",
 
             switch( methodName ) {
                 case "render":
-                    value = renderIcon( node );
+                    value = render( node );
                     break;
             }
 
@@ -607,7 +608,7 @@ define( [ "module",
         return ( objType != 'null' && objType != 'undefined' );
     }
 
-    function renderIcon( node ) {
+    function render( node ) {
         var value = undefined;
         
         if ( node !== undefined && node.nodeType === "unit" && node.symbolID !== undefined ) {
