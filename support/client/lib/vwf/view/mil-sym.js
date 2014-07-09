@@ -71,9 +71,9 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
 
         // -- createdProperty --------------------------------------------------------------------------
 
-   //      createdProperty: function (nodeID, propertyName, propertyValue) {
-            // this.satProperty(nodeID, propertyName, propertyValue);
-   //      },
+        // createdProperty: function (nodeID, propertyName, propertyValue) {
+        //     this.satProperty(nodeID, propertyName, propertyValue);
+        // },
 
         // -- initializedProperty ----------------------------------------------------------------------
 
@@ -131,7 +131,7 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
 
             // units must be an object with location members that are defined in cws
             // ex. ground, sea, air, subsurface, space
-            
+
             for ( var location in units ) {
                 
                 unitsToAdd = units[ location ];
