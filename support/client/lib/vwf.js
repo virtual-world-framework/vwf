@@ -3296,9 +3296,9 @@ if ( ! childComponent.source ) {
 
             var methodValue = undefined;
 
-            this.models.forEach( function( model ) {
-                var value = model.callingMethod && model.callingMethod( nodeID, methodName, methodParameters, methodValue );
-                methodValue = value !== undefined ? value : methodValue;
+            this.models.some( function( model ) {
+                methodValue = model.callingMethod && model.callingMethod( nodeID, methodName, methodParameters, methodValue );  // TODO: probably don't need `methodValue`
+                return methodValue !== undefined;
             } );
 
             // Call calledMethod() on each view.
