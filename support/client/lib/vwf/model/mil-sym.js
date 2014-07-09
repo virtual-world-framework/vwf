@@ -20,7 +20,7 @@ define( [ "module",
           "vwf/model", 
           "vwf/utility", 
           "vwf/utility/color",
-          "tdg/cws", 
+          "mil-sym/cws", 
           "jquery" ], 
     function( module, model, utility, Color, cws, $ ) {
 

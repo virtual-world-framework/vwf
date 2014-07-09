@@ -14,7 +14,7 @@
 /// @module vwf/view/test
 /// @requires vwf/view
 
-define( [ "module", "vwf/view", "tdg/cws" ], function( module, view, cws ) {
+define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
 
     var self;
 
