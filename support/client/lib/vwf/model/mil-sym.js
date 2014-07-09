@@ -251,6 +251,10 @@ define( [ "module",
                             unit.modifiers[ msa.PixelSize ] = Number( propertyValue );
                             break;
 
+                        case "icon":
+                            unit.modifiers[ msa.Icon ] = Boolean( propertyValue );
+                            break;
+
                         case "keepUnitRatio":
                             unit.modifiers[ msa.KeepUnitRatio ] = Boolean( propertyValue );
                             break;  
@@ -411,6 +415,10 @@ define( [ "module",
 
                     case "pixelSize":
                         value = unit.modifiers[ msa.PixelSize ];
+                        break;
+
+                    case "icon":
+                        value = unit.modifiers[ msa.Icon ];
                         break;
 
                     case "keepUnitRatio":

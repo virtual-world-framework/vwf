@@ -38,6 +38,13 @@ define( [ "module", "vwf/view", "tdg/cws" ], function( module, view, cws ) {
             if ( this.state.nodes === undefined ) {   
                 this.state.nodes = {};
             }
+
+            var rs = armyc2.c2sd.renderer.utilities.RendererSettings;
+
+            //rs.setSymbologyStandard( rs.Symbology_2525Bch2_USAS_13_14 );  
+            rs.setSymbologyStandard( rs.Symbology_2525C ); 
+            rs.setTextOutlineWidth( 1 );
+
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -150,8 +157,14 @@ define( [ "module", "vwf/view", "tdg/cws" ], function( module, view, cws ) {
 
     function getUnitImage( symbolID ) {
         var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
+        var rs = armyc2.c2sd.renderer.utilities.RendererSettings;
         var modifiers = {};
-        modifiers[ msa.PixelSize ] = 60;
+
+        modifiers[ msa.PixelSize ] = 32;
+        modifiers[ msa.Icon ] = true;
+        modifiers[ msa.SymbologyStandard ] = rs.Symbology_2525C;
+        
+        console.info( "Render( "+symbolID+", "+JSON.stringify( modifiers )+" )" )
         var img = armyc2.c2sd.renderer.MilStdIconRenderer.Render( symbolID, modifiers );
         if ( img ) {
             return img.toDataUrl();
