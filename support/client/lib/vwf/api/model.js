@@ -202,11 +202,10 @@ define( function() {
         /// @param {ID} nodeID
         /// @param {String} methodName
         /// @param {String[]} methodParameters
-        /// @param {Value} methodValue
         /// 
         /// @returns {}
 
-        callingMethod: [ /* nodeID, methodName, methodParameters, methodValue */ ],
+        callingMethod: [ /* nodeID, methodName, methodParameters */ ],
 
         /// Description.
         /// 
