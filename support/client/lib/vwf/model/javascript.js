@@ -582,7 +582,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
         // -- callingMethod ------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+        callingMethod: function( nodeID, methodName, methodParameters ) {
 
             var node = this.nodes[nodeID];
             var body = node.private.bodies && node.private.bodies[methodName];
@@ -591,7 +591,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                 try {
                     return body.apply( node, methodParameters );
                 } catch ( e ) {
-                    this.logger.warnx( "callingMethod", nodeID, methodName, methodParameters, methodValue, // TODO: limit methodParameters for log
+                    this.logger.warnx( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
                         "exception:", utility.exceptionMessage( e ) );
                 }
             }
