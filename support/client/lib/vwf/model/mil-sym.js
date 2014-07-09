@@ -16,7 +16,13 @@
 /// @module vwf/model/test
 /// @requires vwf/model
 
-define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ], function( module, model, utility, Color, $ ) {
+define( [ "module", 
+          "vwf/model", 
+          "vwf/utility", 
+          "vwf/utility/color",
+          "mil-sym/cws", 
+          "jquery" ], 
+    function( module, model, utility, Color, cws, $ ) {
 
     var self;
 
@@ -112,7 +118,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     // additional members for the unit components
                     node.symbolID = undefined;
                     node.modifiers = {};
-                    node.dataUrl = undefined;
+                    node.image = undefined;
+                    node.description = undefined;
+                    node.tagName = undefined;
+                    node.fullName = undefined;
 
                 } else if ( isModifierNode( protos ) ) {
 
@@ -192,6 +201,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             var node = this.state.nodes[ nodeID ]; 
             var value = undefined;
 
+            var renderImage = false;
 
             if ( node !== undefined && ( validPropertyValue( propertyValue ) ) ) {
                 if ( node.nodeType === "unit" ) {
@@ -199,11 +209,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     switch ( propertyName ) {
 
                         case "symbolID":
-                            node.symbolID = propertyValue;
+                            value = node.symbolID = propertyValue;
+                            renderImage = true;
                             break;
 
-                        case "dataUrl":
-                            node.dataUrl = propertyValue;
+                        case "image":
+                            value = node.image = propertyValue;
+                            break;
+
+                        case "description":
+                            value = node.description = propertyValue;
+                            break;
+
+                        case "tagName":
+                            value = node.tagName = propertyValue;
+                            break;
+
+                        case "fullName":
+                            value = node.fullName = propertyValue;
                             break;
 
                     }
@@ -218,10 +241,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         return undefined;
                     }
 
+                    renderImage = true;
+
                     switch ( propertyName ) {
 
                         case "pixelSize":
                             unit.modifiers[ msa.PixelSize ] = Number( propertyValue );
+                            break;
+
+                        case "icon":
+                            unit.modifiers[ msa.Icon ] = Boolean( propertyValue );
                             break;
 
                         case "keepUnitRatio":
@@ -315,12 +344,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         case "speed":
                             unit.modifiers[ mu.Z_SPEED ] = propertyValue;
                             break;
+
+                        default:
+                            renderImage = false;
+                            break;
                     }                    
                 }
-
             }
 
-
+            if ( node !== undefined ) {
+                // if node is defined then it is either a unit or a modifier
+                // if nodeType is a modifier, then the parent is the unit
+                var unitNode = node.nodeType === "modifier" ? this.state.nodes[ node.parentID ] : node; 
+                if ( unitNode && renderImage ) {
+                    render( unitNode );
+                }
+            }
 
             return value;
         },
@@ -347,8 +386,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         value = node.symbolID;
                         break;
 
-                    case "dataUrl":
-                        value = node.dataUrl;
+                    case "image":
+                        value = node.image;
+                        break;
+
+                    case "description":
+                        value = node.description;
+                        break;
+
+                    case "fullName":
+                        value = node.fullName;
+                        break;
+
+                    case "tagName":
+                        value = node.tagName;
                         break;
 
                 }
@@ -367,6 +418,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
                     case "pixelSize":
                         value = unit.modifiers[ msa.PixelSize ];
+                        break;
+
+                    case "icon":
+                        value = unit.modifiers[ msa.Icon ];
                         break;
 
                     case "keepUnitRatio":
@@ -475,12 +530,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             var node = this.state.nodes[ nodeID ]; 
             var value = undefined;
 
-            if ( node !== undefined && node.nodeType === "unit" && node.symbolID !== undefined ) {
-                var iconRender = armyc2.c2sd.renderer.MilStdIconRenderer;
-                if ( methodName === "render" ) {
-                    var img = iconRender.Render( node.symbolID, node.modifiers );
-                    value = node.dataUrl = img.toDataUrl();
-                }
+            switch( methodName ) {
+                case "render":
+                    value = render( node );
+                    break;
             }
 
             return value;
@@ -555,6 +608,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
     function validPropertyValue( obj ) {
         var objType = ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
         return ( objType != 'null' && objType != 'undefined' );
+    }
+
+    function render( node ) {
+        var value = undefined;
+        
+        if ( node !== undefined && node.nodeType === "unit" && node.symbolID !== undefined ) {
+            var iconRender = armyc2.c2sd.renderer.MilStdIconRenderer;
+            var img = iconRender.Render( node.symbolID, node.modifiers );
+            value = node.image = img.toDataUrl();
+            self.kernel.fireEvent( node.ID, "imageChanged", [ node.image ] );
+        } 
+
+        return value;       
     }
 
 } );
