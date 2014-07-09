@@ -41,20 +41,20 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
 
             var rs = armyc2.c2sd.renderer.utilities.RendererSettings;
 
-            //rs.setSymbologyStandard( rs.Symbology_2525Bch2_USAS_13_14 );  
-            rs.setSymbologyStandard( rs.Symbology_2525C ); 
+            rs.setSymbologyStandard( rs.Symbology_2525Bch2_USAS_13_14 );  
+            //rs.setSymbologyStandard( rs.Symbology_2525C ); 
             rs.setTextOutlineWidth( 1 );
 
         },
 
-        createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childIndex, childName, callback /* ( ready ) */) {
+        // createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+        //     childSource, childType, childIndex, childName, callback /* ( ready ) */) {
             
-        },
+        // },
 
-        initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName  ) {
+        // initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName  ) {
 
-        },
+        // },
  
  
         // -- deletedNode ------------------------------------------------------------------------------
@@ -97,28 +97,24 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
 
         // -- gotProperty ------------------------------------------------------------------------------
 
-        gotProperty: function ( nodeID, propertyName, propertyValue ) { 
-        },
+        // gotProperty: function ( nodeID, propertyName, propertyValue ) { 
+        // },
 
         // -- calledMethod -----------------------------------------------------------------------------
 
-        calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
-        },
+        // calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+        // },
 
         // -- firedEvent -----------------------------------------------------------------------------
 
-        firedEvent: function( nodeID, eventName, eventParameters ) {
-        },
+        // firedEvent: function( nodeID, eventName, eventParameters ) {
+        // },
 
         // -- ticked -----------------------------------------------------------------------------------
 
-        ticked: function() {
-        },
+        // ticked: function() {
+        // },
 
-        // -- render -----------------------------------------------------------------------------------
-
-        render: function(renderer, scene, camera) {
-        },
 
     } );
 
@@ -162,7 +158,7 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
 
         modifiers[ msa.PixelSize ] = 32;
         modifiers[ msa.Icon ] = true;
-        modifiers[ msa.SymbologyStandard ] = rs.Symbology_2525C;
+        modifiers[ msa.SymbologyStandard ] = rs.Symbology_2525Bch2_USAS_13_14;
         
         console.info( "Render( "+symbolID+", "+JSON.stringify( modifiers )+" )" )
         var img = armyc2.c2sd.renderer.MilStdIconRenderer.Render( symbolID, modifiers );

@@ -355,7 +355,7 @@ define( [ "module",
             }
 
             if ( unitNode && renderImage ) {
-                renderImage( unitNode );
+                renderIcon( unitNode );
             }
 
             return value;
@@ -529,7 +529,7 @@ define( [ "module",
 
             switch( methodName ) {
                 case "render":
-                    value = renderImage( node );
+                    value = renderIcon( node );
                     break;
             }
 
@@ -607,14 +607,14 @@ define( [ "module",
         return ( objType != 'null' && objType != 'undefined' );
     }
 
-    function renderImage( node ) {
+    function renderIcon( node ) {
         var value = undefined;
         
         if ( node !== undefined && node.nodeType === "unit" && node.symbolID !== undefined ) {
             var iconRender = armyc2.c2sd.renderer.MilStdIconRenderer;
             var img = iconRender.Render( node.symbolID, node.modifiers );
             value = node.image = img.toDataUrl();
-            this.kernel.fireEvent( node.ID, "imageChanged", [ node.image ] );
+            self.kernel.fireEvent( node.ID, "imageChanged", [ node.image ] );
         } 
 
         return value;       
