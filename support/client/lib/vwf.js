@@ -3297,7 +3297,7 @@ if ( ! childComponent.source ) {
             var methodValue = undefined;
 
             this.models.some( function( model ) {
-                methodValue = model.callingMethod && model.callingMethod( nodeID, methodName, methodParameters, methodValue );  // TODO: probably don't need `methodValue`
+                methodValue = model.callingMethod && model.callingMethod( nodeID, methodName, methodParameters );
                 return methodValue !== undefined;
             } );
 
