@@ -180,7 +180,7 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
                                 "image": image    
                             };
 
-                            self.kernel.callMethod( appID, "insertableUnitAdded", [ unitDef ] );
+                            self.kernel.fireEvent( appID, "insertableUnitAdded", [ unitDef ] );
                         }
                     } else {
                         self.logger.warnx( "Unable to find: " + unitsToAdd[ i ] + " in " + location );
