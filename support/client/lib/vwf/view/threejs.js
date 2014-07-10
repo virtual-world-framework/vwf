@@ -1208,16 +1208,21 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                     console.log("image-only fallback. no webgl.");
                     canvas.remove();
                     return false;
-                }
-
-            
-        
-        
+                }   
         }
+
         function getURLParameter(name) {
             return decodeURI(
                 (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
             );
+        }
+
+        function fitCanvasToWindow( canvas ) {
+            canvas.height = self.height;
+            canvas.width = self.width;
+            if ( sceneNode.renderer ) {
+                sceneNode.renderer.setViewport( 0, 0, self.width, self.height );
+            }
         }
         
         if ( mycanvas ) {
@@ -1232,17 +1237,14 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 if ( window && window.innerWidth ) self.width = window.innerWidth;
 
                 if ( ( origWidth != self.width ) || ( origHeight != self.height ) ) {
-                    mycanvas.height = self.height;
-                    mycanvas.width = self.width;
-                    if ( sceneNode.renderer ) {
-                        sceneNode.renderer.setViewport( 0, 0, self.width, self.height );
-                    }
-                    
-                    var viewCam = view.state.cameraInUse;
-                    if ( viewCam ) {
-                        viewCam.aspect =  mycanvas.width / mycanvas.height;
-                        viewCam.updateProjectionMatrix();
-                    }
+                    fitCanvasToWindow( mycanvas );
+                }
+
+                var viewCam = view.state.cameraInUse;
+                var aspect = mycanvas.width / mycanvas.height;
+                if ( viewCam && viewCam.aspect !== aspect ) {
+                    viewCam.aspect = aspect;
+                    viewCam.updateProjectionMatrix();
                 }
             }
 
