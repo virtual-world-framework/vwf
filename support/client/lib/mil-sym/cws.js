@@ -4277,6 +4277,13 @@ define( function(){
             }
             return units;
         },
+        "decode": function( name ){
+            var parts = name.split( '.' );
+            for ( var i = 0; i < parts.length; i++ ) {
+                parts[ i ] = ( this.def[ parts[ i ] ] !== undefined ) ? this.def[ parts[ i ] ] : parts[ i ];    
+            }
+            return parts.join( '.' );   
+        },
         "description": function( name, unit ){
             var foundTag = false;
             var parts = name.split( '.' );
@@ -4296,7 +4303,24 @@ define( function(){
             }
 
             return retStr;
-        }, 
+        },
+        "preTag": function( name, tag ) {
+            var retStr = "";
+            var index = name.indexOf( tag );
+            if ( index !== -1 ) {
+                retStr = name.substr( 0, index - 1 );
+            } 
+            return retStr;
+        },
+        "postTag": function( name, tag ) {
+            var tagLen = tag.length;
+            var retStr = "";
+            var index = name.indexOf( tag );
+            if ( index !== -1 ) {
+                retStr = name.substr( index + tagLen + 1 );
+            } 
+            return retStr;            
+        },         
         "unknown": function( symbolID ) {
             return symbolID.substr( 0, 1 ) + "U" + symbolID.substr( 2 );
         },
