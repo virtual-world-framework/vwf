@@ -180,8 +180,6 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
                                 "image": image    
                             };
 
-                            console.info( JSON.stringify( unitDef ) );
-
                             self.kernel.callMethod( appID, "insertableUnitAdded", [ unitDef ] );
                         }
                     } else {
