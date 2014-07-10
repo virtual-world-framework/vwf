@@ -122,10 +122,14 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
         var foundUnits = undefined;
         var unit = undefined;
         var fullName = undefined;
+        var actualName = undefined;
+        var searchAcronym = undefined;
+        var searchName = undefined;
         var unitsToAdd = undefined;
         var image = undefined;
         var appID = self.kernel.application();
         var description = undefined;
+        var unitDef;
 
         if ( cws ) {
 
@@ -144,11 +148,14 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
 
                 for ( var i = 0; i < unitsToAdd.length; i++ ) {
 
-                    // unitsToAdd[ i ] is a single acronym
+                    searchAcronym = unitsToAdd[ i ];
+                    searchName = cws.decode( searchAcronym );
+
+                    // searchAcronym is a single acronym defined in CWS
                     // findAll will search through all of the fullNames 
                     // for this 'location' and return an array of those units
 
-                    foundUnits = cws.findAll( location, unitsToAdd[ i ] );
+                    foundUnits = cws.findAll( location, searchAcronym );
                     if ( foundUnits ) {
 
                         // loop through the array and send out an event 
@@ -156,10 +163,26 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
                         // with options to add these units to the application instance
 
                         for ( fullName in foundUnits ) {
+                            
                             unit = foundUnits[ fullName ];
                             image = getUnitImage( unit.symbolID );
                             description = cws.description( fullName, unit.tag );
-                            self.kernel.callMethod( appID, "insertableUnitAdded", [ fullName, description, unit.tag, unit.symbolID, image ] );
+                            actualName = cws.decode( cws.postTag( fullName, unit.tag ) ).replace( ".", " " );
+
+                            unitDef = {
+                                "fullName": fullName,
+                                "actualName": actualName,
+                                "searchAcronym": searchAcronym,
+                                "searchName": searchName,
+                                "description": description,
+                                "tag": unit.tag,
+                                "symbolID": unit.symbolID,
+                                "image": image    
+                            };
+
+                            console.info( JSON.stringify( unitDef ) );
+
+                            self.kernel.callMethod( appID, "insertableUnitAdded", [ unitDef ] );
                         }
                     } else {
                         self.logger.warnx( "Unable to find: " + unitsToAdd[ i ] + " in " + location );
