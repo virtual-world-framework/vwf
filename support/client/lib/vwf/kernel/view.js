@@ -147,6 +147,20 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             // TODO: deleteMethod
 
+            case "setMethod":
+
+                return function( nodeID, methodName, methodHandler, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, methodName,
+                        [ methodHandler ], when || 0, callback /* result */ );
+                };
+
+            case "getMethod":
+
+                return function( nodeID, methodName, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, methodName,
+                        undefined, when || 0, callback /* result */ );
+                };
+
             case "callMethod":
 
                 return function( nodeID, methodName, methodParameters, when, callback ) {

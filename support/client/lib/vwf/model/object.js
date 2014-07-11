@@ -67,6 +67,7 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
                     name: childName,
 
                     properties: {},
+                    methods: {},
 
                     parent: undefined,
                     children: [],
@@ -241,6 +242,25 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
             return this.objects[nodeID].properties[propertyName];
+        },
+
+        // -- creatingMethod -----------------------------------------------------------------------
+
+        creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
+            return this.settingMethod( nodeID, methodName,
+                { parameters: methodParameters, body: methodBody } );
+        },
+
+        // -- settingMethod ------------------------------------------------------------------------
+
+        settingMethod: function( nodeID, methodName, methodHandler ) {
+            return this.objects[nodeID].methods[methodName] = methodHandler;
+        },
+
+        // -- gettingMethod ------------------------------------------------------------------------
+
+        gettingMethod: function( nodeID, methodName ) {
+            return this.objects[nodeID].methods[methodName];
         },
 
         // == Special Model API ====================================================================

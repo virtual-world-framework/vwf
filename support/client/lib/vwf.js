@@ -3250,7 +3250,7 @@ if ( ! childComponent.source ) {
 
             node.methods.create( methodName );
 
-            // Call creatingMethod() on each model. The method is considered created after all
+            // Call `creatingMethod` on each model. The method is considered created after all
             // models have run.
 
             this.models.forEach( function( model ) {
@@ -3264,7 +3264,7 @@ if ( ! childComponent.source ) {
                 node.methods.change( methodName );
             }
 
-            // Call createdMethod() on each view. The view is being notified that a method has been
+            // Call `createdMethod` on each view. The view is being notified that a method has been
             // created.
 
             this.views.forEach( function( view ) {
@@ -3277,6 +3277,119 @@ if ( ! childComponent.source ) {
             this.fireEvent( nodeID, [ "methods", "created" ], [ methodName ] );
 
             this.logger.debugu();
+        };
+
+        // -- setMethod ----------------------------------------------------------------------------
+
+        /// @name module:vwf.setMethod
+        /// 
+        /// @see {@link module:vwf/api/kernel.setMethod}
+
+        this.setMethod = function( nodeID, methodName, methodHandler ) {
+
+            this.logger.debuggx( "setMethod", function() {
+                return [ nodeID, methodName ];  // TODO loggable methodHandler
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            methodHandler = normalizedHandler( methodHandler );
+
+            if ( ! node.methods.hasOwn( methodName ) ) {
+
+                // If the method doesn't exist on this node, delegate to `kernel.createMethod` to
+                // create and assign the method.
+
+                this.createMethod( nodeID, methodName, methodHandler.parameters, methodHandler.body );  // TODO: result
+
+            } else {
+
+                // Call `settingMethod` on each model. The first model to return a non-undefined
+                // value dictates the return value.
+
+                this.models.some( function( model ) {
+
+                    // Call the driver.
+
+                    var handler = model.settingMethod && model.settingMethod( nodeID, methodName, methodHandler );
+
+                    // Update the value to the value assigned if the driver handled it.
+
+                    if ( handler !== undefined ) {
+                        methodHandler = handler;
+                    }
+
+                    // Exit the iterator once a driver has handled the assignment.
+
+                    return handler !== undefined;
+
+                } );
+
+                // Record the change.
+
+                if ( node.initialized && node.patchable ) {
+                    node.methods.change( methodName );
+                }
+
+                // Call `satMethod` on each view.
+
+                this.views.forEach( function( view ) {
+                    view.satMethod && view.satMethod( nodeID, methodName, methodHandler );
+                } );
+
+            }
+
+            this.logger.debugu();
+
+            return methodHandler;
+        };
+
+        // -- getMethod ----------------------------------------------------------------------------
+
+        /// @name module:vwf.getMethod
+        /// 
+        /// @see {@link module:vwf/api/kernel.getMethod}
+
+        this.getMethod = function( nodeID, methodName ) {
+
+            this.logger.debuggx( "getMethod", function() {
+                return [ nodeID, methodName ];
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            // Call `gettingMethod` on each model. The first model to return a non-undefined value
+            // dictates the return value.
+
+            var methodHandler = {};
+
+            this.models.some( function( model ) {
+
+                // Call the driver.
+
+                var handler = model.gettingMethod && model.gettingMethod( nodeID, methodName );
+
+                // Update the value to the value assigned if the driver handled it.
+
+                if ( handler !== undefined ) {
+                    methodHandler = handler;
+                }
+
+                // Exit the iterator once a driver has handled the retrieval.
+
+                return handler !== undefined;
+
+            } );
+
+            // Call `gotMethod` on each view.
+
+            this.views.forEach( function( view ) {
+                view.gotMethod && view.gotMethod( nodeID, methodName, methodHandler );
+            } );
+
+            this.logger.debugu();
+
+            return methodHandler;
         };
 
         // -- callMethod ---------------------------------------------------------------------------
@@ -4555,6 +4668,35 @@ if ( ! childComponent.source ) {
             }
 
             return component;
+        };
+
+        /// Convert a `Handler` specification into the standard form of an object containing
+        /// `parameters`, `body` and `type` fields.
+        /// 
+        /// @name module:vwf~normalizedHandler
+        /// 
+        /// @param {Handler|string}
+        /// 
+        /// @returns {Handler}
+
+        var normalizedHandler = function( handler ) {
+
+            // Convert abbreviated forms to the explict `Handler` form.
+
+            if ( typeof handler !== "object" || handler instanceof Array ) {
+                handler = { body: handler };
+            }
+
+            // Fill in a default media type if `type` is not provided. A `body` of type `string` is
+            // taken to be `application/javascript`.
+
+            if ( handler.type === undefined ) {
+                if ( typeof handler.body === "string" || handler.body instanceof String ) {
+                    handler.type = "application/javascript";
+                }
+            }
+
+            return handler;
         };
 
         /// Convert a `fields` object as passed between the client and reflector and stored in the
