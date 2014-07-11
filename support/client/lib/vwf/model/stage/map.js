@@ -361,6 +361,20 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // TODO: deletingMethod
 
+        // -- settingMethod ------------------------------------------------------------------------
+
+        settingMethod: function( nodeID, methodName, methodHandler ) {
+            return this.model.settingMethod && this.model.settingMethod( this.kernel_to_model[nodeID] || nodeID,
+                methodName, methodHandler );
+        },
+
+        // -- gettingMethod ------------------------------------------------------------------------
+
+        gettingMethod: function( nodeID, methodName ) {
+            return this.model.gettingMethod && this.model.gettingMethod( this.kernel_to_model[nodeID] || nodeID,
+                methodName );
+        },
+
         // -- callingMethod ------------------------------------------------------------------------
 
         callingMethod: function( nodeID, methodName, methodParameters ) {
