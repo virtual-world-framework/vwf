@@ -1396,7 +1396,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                         shift: e.shiftKey,
                         meta: e.metaKey,
                     },
-                position: [ mousePos.x / sceneView.width, mousePos.y / sceneView.height ],
+                position: [ mousePos.x / canvas.clientWidth, mousePos.y / canvas.clientHeight ],
                 screenPosition: [ mousePos.x, mousePos.y ]
             } ];
 
