@@ -226,11 +226,34 @@ define( function() {
         /// @param {String[]} methodParameters
         /// @param {String} methodBody
         /// 
-        /// @returns {}
+        /// @returns {Handler} methodHandler
 
         createMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
 
         // TODO: deleteMethod
+
+        /// xxx
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} methodName
+        /// @param {Handler} methodHandler
+        /// 
+        /// @returns {Handler} methodHandler
+
+        setMethod: [ /* nodeID, methodName, methodHandler */ ],
+
+        /// xxx
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} methodName
+        /// 
+        /// @returns {Handler} methodHandler
+
+        getMethod: [ /* nodeID, methodName */ ],
 
         /// It will call callingMethod() on each model. The first model to return a non-undefined value
         /// dictates the return value.  It will also call calledMethod() on each view.
@@ -291,7 +314,7 @@ define( function() {
         /// @param {String} eventName
         ///   The name of an event on the `nodeID` node. When the event is fired, all of its
         ///   listeners will be called.
-        /// @param {Script} eventHandler
+        /// @param {Handler} eventHandler
         ///   A script to be evaluated as a function body and added as a handler for the event.
         ///   Strings will be interpreted as JavaScript; other script types may be supported in
         ///   future releases. The `eventParameters` that were provided to the `createEvent` call
@@ -321,7 +344,7 @@ define( function() {
         ///   The ID of a node containing an event `eventName`.
         /// @param {String} eventName
         ///   The name of an event on the `nodeID` node.
-        /// @param {Script} eventHandler
+        /// @param {Handler} eventHandler
         ///   A script previously provided to `kernel.addEventListener` for this `nodeID` and
         ///   `eventName`.
         /// 
@@ -804,6 +827,32 @@ define( function() {
         /// @callback module:vwf/api/kernel~valueCallback
         /// 
         /// @param {Value} returnValue
+
+        /// A `Handler` describes a function that may be attached to a property as a setter or
+        /// getter, to a method, or to an event as a listener.
+        /// 
+        /// A `Handler` is an object containing the following properties. Alternately, a `Handler`
+        /// may be provided as a `string` or `function` representing just the `body` field.
+        /// 
+        /// @typedef {Object} Handler
+        /// 
+        /// @property {string[]} [parameters]
+        ///   An ordered list of names of the function's positional parameters. The function body
+        ///   uses these names to refer to the caller's arguments. `parameters` may be omitted if
+        ///   the function doesn't declare any parameters, or if `body` is a JavaScript `function`,
+        ///   in which case the parameters are taken from the JavaScript function itself.
+        /// @property {string|function} body
+        ///   A representation of the statements making up the function body. For handlers of `type`
+        ///   `application/javascript`, `body` should be a string containing JavaScript text that is
+        ///   correct for the span between the opening and closing braces of a JavaScript function
+        ///   definition: `function(...) {` |<= this is the body text =>| `}`. `body` may also be
+        ///   provided as a JavaScript `function` value, in which case the handler's `body` and
+        ///   `arguments` will be taken from the function.
+        /// @property {string} [type]
+        ///   The {@link https://www.iana.org/assignments/media-types Media Type} of the `body`
+        ///   text. When `body` is a `string`, the default type is `"application/javascript"`, and
+        ///   `type` may be omitted. `type` should be omitted if `body` is a JavaScript `function`
+        ///   value since the type is implicit in that case.
 
     };
 
