@@ -4570,7 +4570,7 @@ if ( ! childComponent.source ) {
                     break;
 
                 case "child":
-                    Array.prototype.push.apply( resultIDs, this.children( contextID ) );
+                    Array.prototype.push.apply( resultIDs, this.children( contextID, initializedOnly ).filter( function( childID ) { return childID !== undefined } ) );
                     break;
 
                 case "descendant":
