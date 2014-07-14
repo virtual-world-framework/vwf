@@ -55,6 +55,10 @@ define( [ "module",
                         "type": childType,
                         "name": childName 
                     };
+                },
+                "validPropertyValue": function( obj ) {
+                    var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
+                    return ( objType != 'null' && objType != 'undefined' );
                 }
             };
 
@@ -122,6 +126,8 @@ define( [ "module",
                     node.description = undefined;
                     node.tagName = undefined;
                     node.fullName = undefined;
+                    node.echelon = undefined;
+                    node.affliliation = undefined;
 
                 } else if ( isModifierNode( protos ) ) {
 
@@ -203,7 +209,7 @@ define( [ "module",
 
             var renderImage = false;
 
-            if ( node !== undefined && ( validPropertyValue( propertyValue ) ) ) {
+            if ( node !== undefined && ( this.state.validPropertyValue( propertyValue ) ) ) {
                 if ( node.nodeType === "unit" ) {
                     
                     switch ( propertyName ) {
@@ -227,6 +233,56 @@ define( [ "module",
 
                         case "fullName":
                             value = node.fullName = propertyValue;
+                            break;
+
+                        case "echelon":
+                            if ( node.echelon !== propertyValue ) {
+                                switch( propertyValue ) {
+                                    
+                                    case "team":
+                                    case "crew":
+                                    case "squad":
+                                    case "section":
+                                    case "platoon":
+                                    case "detachment":
+                                    case "company":
+                                    case "battery":
+                                    case "troop":
+                                    case "battalion":
+                                    case "squadron":
+                                    case "regiment":
+                                    case "group":
+                                    case "brigade":
+                                    case "division":
+                                    case "corps":
+                                    case "mef":
+                                    case "army":
+                                    case "army group":
+                                    case "front":
+                                    case "region":
+                                    case "null":
+                                        node.symbolID = cws.echelon( node.symbolID, propertyValue );
+                                        node.echelon = propertyValue;
+                                        renderImage = true;
+                                        break;
+
+                                }
+                            }
+                            break;
+
+                        case "affliliation":
+                            if ( node.affliliation !== propertyValue ) {
+                                switch( propertyValue ) {
+                                    case "unknown":
+                                    case "neutral":
+                                    case "hostile":
+                                    case "friendly":
+                                        node.symbolID = cws.affliliation( node.symbolID, propertyValue  );
+                                        node.affliliation = propertyValue;
+                                        renderImage = true;
+                                        break;
+                                }
+                            }
                             break;
 
                     }
@@ -605,10 +661,7 @@ define( [ "module",
        return found;
     } 
 
-    function validPropertyValue( obj ) {
-        var objType = ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
-        return ( objType != 'null' && objType != 'undefined' );
-    }
+
 
     function render( node ) {
         var value = undefined;
