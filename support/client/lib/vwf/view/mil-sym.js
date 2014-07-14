@@ -133,12 +133,12 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
 
         if ( cws ) {
 
-            // units must be an object with location members that are defined in cws
+            // units must be an object with battleDivision members that are defined in cws
             // ex. ground, sea, air, subsurface, space
 
-            for ( var location in units ) {
+            for ( var battleDivision in units ) {
                 
-                unitsToAdd = units[ location ];
+                unitsToAdd = units[ battleDivision ];
                 if ( ! ( unitsToAdd instanceof Array ) ) {
                     unitsToAdd = [ unitsToAdd ];
                 }
@@ -153,9 +153,9 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
 
                     // searchAcronym is a single acronym defined in CWS
                     // findAll will search through all of the fullNames 
-                    // for this 'location' and return an array of those units
+                    // for this 'battleDivision' and return an array of those units
 
-                    foundUnits = cws.findAll( location, searchAcronym );
+                    foundUnits = cws.findAll( battleDivision, searchAcronym );
                     if ( foundUnits ) {
 
                         // loop through the array and send out an event 
@@ -165,7 +165,16 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
                         for ( fullName in foundUnits ) {
                             
                             unit = foundUnits[ fullName ];
-                            image = getUnitImage( unit.symbolID );
+
+                            // render all of the affiliations, so that the UI doesn't
+                            // have to request them on an as needed basis
+                            image = {
+                                "unknown": getUnitImage( cws.unknown( unit.symbolID ) ),
+                                "friendly": getUnitImage( cws.friendly( unit.symbolID ) ),
+                                "neutral": getUnitImage( cws.neutral( unit.symbolID ) ),
+                                "hostile": getUnitImage( cws.hostile( unit.symbolID ) )
+                            };
+
                             description = cws.description( fullName, unit.tag );
                             actualName = cws.decode( cws.postTag( fullName, unit.tag ) ).replace( ".", " " );
 
@@ -183,7 +192,7 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
                             self.kernel.fireEvent( appID, "insertableUnitAdded", [ unitDef ] );
                         }
                     } else {
-                        self.logger.warnx( "Unable to find: " + unitsToAdd[ i ] + " in " + location );
+                        self.logger.warnx( "Unable to find: " + unitsToAdd[ i ] + " in " + battleDivision );
                     }
                 }
             }
