@@ -1,26 +1,28 @@
 /*global define*/
 define([
         '../../Core/binarySearch',
-        '../../Core/ClockStep',
         '../../Core/ClockRange',
+        '../../Core/ClockStep',
         '../../Core/defined',
         '../../Core/defineProperties',
         '../../Core/DeveloperError',
-        '../createCommand',
-        '../ToggleButtonViewModel',
+        '../../Core/JulianDate',
+        '../../ThirdParty/knockout',
         '../../ThirdParty/sprintf',
-        '../../ThirdParty/knockout'
+        '../createCommand',
+        '../ToggleButtonViewModel'
     ], function(
         binarySearch,
-        ClockStep,
         ClockRange,
+        ClockStep,
         defined,
         defineProperties,
         DeveloperError,
-        createCommand,
-        ToggleButtonViewModel,
+        JulianDate,
+        knockout,
         sprintf,
-        knockout) {
+        createCommand,
+        ToggleButtonViewModel) {
     "use strict";
 
     var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -101,23 +103,20 @@ define([
      * @alias AnimationViewModel
      * @constructor
      *
-     * @param {ClockViewModel} [clockViewModel] The ClockViewModel instance to use.
-     *
-     * @exception {DeveloperError} clockViewModel is required.
+     * @param {ClockViewModel} clockViewModel The ClockViewModel instance to use.
      *
      * @see Animation
      */
     var AnimationViewModel = function(clockViewModel) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(clockViewModel)) {
             throw new DeveloperError('clockViewModel is required.');
         }
+        //>>includeEnd('debug');
 
         var that = this;
-
         this._clockViewModel = clockViewModel;
-
         this._allShuttleRingTicks = [];
-
         this._dateFormatter = AnimationViewModel.defaultDateFormatter;
         this._timeFormatter = AnimationViewModel.defaultTimeFormatter;
 
@@ -146,7 +145,6 @@ define([
         /**
          * Gets the string representation of the current time.  This property is observable.
          * @type {String}
-         * @default undefined
          */
         this.timeLabel = undefined;
         knockout.defineProperty(this, 'timeLabel', function() {
@@ -156,7 +154,6 @@ define([
         /**
          * Gets the string representation of the current date.  This property is observable.
          * @type {String}
-         * @default undefined
          */
         this.dateLabel = undefined;
         knockout.defineProperty(this, 'dateLabel', function() {
@@ -166,7 +163,6 @@ define([
         /**
          * Gets the string representation of the current multiplier.  This property is observable.
          * @type {String}
-         * @default undefined
          */
         this.multiplierLabel = undefined;
         knockout.defineProperty(this, 'multiplierLabel', function() {
@@ -189,7 +185,6 @@ define([
         /**
          * Gets or sets the current shuttle ring angle.  This property is observable.
          * @type {Number}
-         * @default undefined
          */
         this.shuttleRingAngle = undefined;
         knockout.defineProperty(this, 'shuttleRingAngle', {
@@ -248,10 +243,10 @@ define([
 
             var result = false;
             if (clockRange === ClockRange.LOOP_STOP) {
-                result = currentTime.greaterThan(startTime) || (currentTime.equals(startTime) && multiplier > 0);
+                result = JulianDate.greaterThan(currentTime, startTime) || (currentTime.equals(startTime) && multiplier > 0);
             } else {
                 var stopTime = clockViewModel.stopTime;
-                result = (currentTime.greaterThan(startTime) && currentTime.lessThan(stopTime)) || //
+                result = (JulianDate.greaterThan(currentTime, startTime) && JulianDate.lessThan(currentTime, stopTime)) || //
                 (currentTime.equals(startTime) && multiplier > 0) || //
                 (currentTime.equals(stopTime) && multiplier < 0);
             }
@@ -271,7 +266,7 @@ define([
             }
 
             var systemTime = clockViewModel.systemTime;
-            return systemTime.greaterThanOrEquals(clockViewModel.startTime) && systemTime.lessThanOrEquals(clockViewModel.stopTime);
+            return JulianDate.greaterThanOrEquals(systemTime, clockViewModel.startTime) && JulianDate.lessThanOrEquals(systemTime, clockViewModel.stopTime);
         });
 
         this._isAnimating = undefined;
@@ -371,20 +366,18 @@ define([
 
     /**
      * The default date formatter used by new instances.
-     * @memberof AnimationViewModel
      *
      * @param {JulianDate} date The date to be formatted
      * @param {AnimationViewModel} viewModel The AnimationViewModel instance requesting formatting.
      * @returns {String} The string representation of the calendar date portion of the provided date.
      */
     AnimationViewModel.defaultDateFormatter = function(date, viewModel) {
-        var gregorianDate = date.toGregorianDate();
+        var gregorianDate = JulianDate.toGregorianDate(date);
         return monthNames[gregorianDate.month - 1] + ' ' + gregorianDate.day + ' ' + gregorianDate.year;
     };
 
     /**
      * Gets or sets the default array of known clock multipliers associated with new instances of the shuttle ring.
-     * @memberof AnimationViewModel
      */
     AnimationViewModel.defaultTicks = [//
     0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 5.0, 10.0,//
@@ -393,14 +386,13 @@ define([
 
     /**
      * The default time formatter used by new instances.
-     * @memberof AnimationViewModel
      *
      * @param {JulianDate} date The date to be formatted
      * @param {AnimationViewModel} viewModel The AnimationViewModel instance requesting formatting.
      * @returns {String} The string representation of the time portion of the provided date.
      */
     AnimationViewModel.defaultTimeFormatter = function(date, viewModel) {
-        var gregorianDate = date.toGregorianDate();
+        var gregorianDate = JulianDate.toGregorianDate(date);
         var millisecond = Math.round(gregorianDate.millisecond);
         if (Math.abs(viewModel._clockViewModel.multiplier) < 1) {
             return sprintf("%02d:%02d:%02d.%03d", gregorianDate.hour, gregorianDate.minute, gregorianDate.second, millisecond);
@@ -411,7 +403,6 @@ define([
     /**
      * Gets a copy of the array of positive known clock multipliers to associate with the shuttle ring.
      *
-     * @memberof AnimationViewModel
      * @returns The array of known clock multipliers associated with the shuttle ring.
      */
     AnimationViewModel.prototype.getShuttleRingTicks = function() {
@@ -424,16 +415,15 @@ define([
      * and maximum range of values for the shuttle ring as well as the values that are snapped
      * to when a single click is made.  The values need not be in order, as they will be sorted
      * automatically, and duplicate values will be removed.
-     * @memberof AnimationViewModel
      *
-     * @param positiveTicks The list of known positive clock multipliers to associate with the shuttle ring.
-     *
-     * @exception {DeveloperError} positiveTicks is required.
+     * @param {Number[]} positiveTicks The list of known positive clock multipliers to associate with the shuttle ring.
      */
     AnimationViewModel.prototype.setShuttleRingTicks = function(positiveTicks) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(positiveTicks)) {
             throw new DeveloperError('positiveTicks is required.');
         }
+        //>>includeEnd('debug');
 
         var i;
         var len;
@@ -561,9 +551,12 @@ define([
                 return this._dateFormatter;
             },
             set : function(dateFormatter) {
+                //>>includeStart('debug', pragmas.debug);
                 if (typeof dateFormatter !== 'function') {
                     throw new DeveloperError('dateFormatter must be a function');
                 }
+                //>>includeEnd('debug');
+
                 this._dateFormatter = dateFormatter;
             }
         },
@@ -582,9 +575,12 @@ define([
                 return this._timeFormatter;
             },
             set : function(timeFormatter) {
+                //>>includeStart('debug', pragmas.debug);
                 if (typeof timeFormatter !== 'function') {
                     throw new DeveloperError('timeFormatter must be a function');
                 }
+                //>>includeEnd('debug');
+
                 this._timeFormatter = timeFormatter;
             }
         }

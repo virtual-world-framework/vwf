@@ -1,14 +1,13 @@
 /*global define*/
 define([
+        './CubicRealPolynomial',
         './DeveloperError',
         './Math',
-        './CubicRealPolynomial',
         './QuadraticRealPolynomial'
-    ],
-    function(
+    ], function(
+        CubicRealPolynomial,
         DeveloperError,
         CesiumMath,
-        CubicRealPolynomial,
         QuadraticRealPolynomial) {
     "use strict";
 
@@ -21,7 +20,6 @@ define([
 
     /**
      * Provides the discriminant of the quartic equation from the supplied coefficients.
-     * @memberof QuarticRealPolynomial
      *
      * @param {Number} a The coefficient of the 4th order monomial.
      * @param {Number} b The coefficient of the 3rd order monomial.
@@ -29,14 +27,9 @@ define([
      * @param {Number} d The coefficient of the 1st order monomial.
      * @param {Number} e The coefficient of the 0th order monomial.
      * @returns {Number} The value of the discriminant.
-     *
-     * @exception {DeveloperError} a is a required number.
-     * @exception {DeveloperError} b is a required number.
-     * @exception {DeveloperError} c is a required number.
-     * @exception {DeveloperError} d is a required number.
-     * @exception {DeveloperError} e is a required number.
      */
     QuarticRealPolynomial.discriminant = function(a, b, c, d, e) {
+        //>>includeStart('debug', pragmas.debug);
         if (typeof a !== 'number') {
             throw new DeveloperError('a is a required number.');
         }
@@ -52,6 +45,7 @@ define([
         if (typeof e !== 'number') {
             throw new DeveloperError('e is a required number.');
         }
+        //>>includeEnd('debug');
 
         var a2 = a * a;
         var a3 = a2 * a;
@@ -252,22 +246,16 @@ define([
 
     /**
      * Provides the real valued roots of the quartic polynomial with the provided coefficients.
-     * @memberof QuarticRealPolynomial
      *
      * @param {Number} a The coefficient of the 4th order monomial.
      * @param {Number} b The coefficient of the 3rd order monomial.
      * @param {Number} c The coefficient of the 2nd order monomial.
      * @param {Number} d The coefficient of the 1st order monomial.
      * @param {Number} e The coefficient of the 0th order monomial.
-     * @returns {Array} The real valued roots.
-     *
-     * @exception {DeveloperError} a is a required number.
-     * @exception {DeveloperError} b is a required number.
-     * @exception {DeveloperError} c is a required number.
-     * @exception {DeveloperError} d is a required number.
-     * @exception {DeveloperError} e is a required number.
+     * @returns {Number[]} The real valued roots.
      */
     QuarticRealPolynomial.realRoots = function(a, b, c, d, e) {
+        //>>includeStart('debug', pragmas.debug);
         if (typeof a !== 'number') {
             throw new DeveloperError('a is a required number.');
         }
@@ -283,6 +271,7 @@ define([
         if (typeof e !== 'number') {
             throw new DeveloperError('e is a required number.');
         }
+        //>>includeEnd('debug');
 
         if (Math.abs(a) < CesiumMath.EPSILON15) {
             return CubicRealPolynomial.realRoots(b, c, d, e);

@@ -1,11 +1,11 @@
 /*global define*/
 define([
-        './defaultValue',
         './Cartesian3',
+        './defaultValue',
         './EllipsoidOutlineGeometry'
     ], function(
-        defaultValue,
         Cartesian3,
+        defaultValue,
         EllipsoidOutlineGeometry) {
     "use strict";
 
@@ -15,6 +15,7 @@ define([
      * @alias SphereOutlineGeometry
      * @constructor
      *
+     * @param {Object} [options] Object with the following properties:
      * @param {Number} [options.radius=1.0] The radius of the sphere.
      * @param {Number} [options.stackPartitions=10] The count of stacks for the sphere (1 greater than the number of parallel lines).
      * @param {Number} [options.slicePartitions=8] The count of slices for the sphere (Equal to the number of radial lines).
@@ -25,12 +26,12 @@ define([
      * @exception {DeveloperError} options.subdivisions must be greater than or equal to zero.
      *
      * @example
-     * var sphere = new SphereOutlineGeometry({
+     * var sphere = new Cesium.SphereOutlineGeometry({
      *   radius : 100.0,
      *   stackPartitions : 6,
      *   slicePartitions: 5
      * });
-     * var geometry = SphereOutlineGeometry.createGeometry(sphere);
+     * var geometry = Cesium.SphereOutlineGeometry.createGeometry(sphere);
      */
     var SphereOutlineGeometry = function(options) {
         var radius = defaultValue(options.radius, 1.0);

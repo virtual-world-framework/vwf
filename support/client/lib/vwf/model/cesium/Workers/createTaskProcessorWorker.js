@@ -1,10 +1,12 @@
 /*global define*/
 define([
         '../Core/defaultValue',
-        '../Core/defined'
+        '../Core/defined',
+        '../Core/formatError'
     ], function(
         defaultValue,
-        defined) {
+        defined,
+        formatError) {
     "use strict";
 
     /**
@@ -19,18 +21,18 @@ define([
      * @returns {Function} An adapter function that handles the interaction with TaskProcessor,
      * specifically, task ID management and posting a response message containing the result.
      *
+     * @see TaskProcessor
+     * @see {@link http://www.w3.org/TR/workers/|Web Workers}
+     * @see {@link http://www.w3.org/TR/html5/common-dom-interfaces.html#transferable-objects|Transferable objects}
+     *
      * @example
      * function doCalculation(parameters, transferableObjects) {
      *   // calculate some result using the inputs in parameters
      *   return result;
      * }
      *
-     * return createTaskProcessorWorker(doCalculation);
+     * return Cesium.createTaskProcessorWorker(doCalculation);
      * // the resulting function is compatible with TaskProcessor
-     *
-     * @see TaskProcessor
-     * @see <a href='http://www.w3.org/TR/workers/'>Web Workers</a>
-     * @see <a href='http://www.w3.org/TR/html5/common-dom-interfaces.html#transferable-objects'>Transferable objects</a>
      */
     var createTaskProcessorWorker = function(workerFunction) {
         var postMessage;
@@ -53,11 +55,24 @@ define([
             try {
                 responseMessage.result = workerFunction(data.parameters, transferableObjects);
             } catch (e) {
-                responseMessage.error = e;
+                if (e instanceof Error) {
+                    // Errors can't be posted in a message, copy the properties
+                    responseMessage.error = {
+                        name : e.name,
+                        message : e.message,
+                        stack : e.stack
+                    };
+                } else {
+                    responseMessage.error = e;
+                }
             }
 
             if (!defined(postMessage)) {
                 postMessage = defaultValue(self.webkitPostMessage, self.postMessage);
+            }
+
+            if (!data.canTransferArrayBuffer) {
+                transferableObjects.length = 0;
             }
 
             try {
@@ -66,7 +81,7 @@ define([
                 // something went wrong trying to post the message, post a simpler
                 // error that we can be sure will be cloneable
                 responseMessage.result = undefined;
-                responseMessage.error = 'postMessage failed with error: ' + e + '\n  with responseMessage: ' + JSON.stringify(responseMessage);
+                responseMessage.error = 'postMessage failed with error: ' + formatError(e) + '\n  with responseMessage: ' + JSON.stringify(responseMessage);
                 postMessage(responseMessage);
             }
         };
