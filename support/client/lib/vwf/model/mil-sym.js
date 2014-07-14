@@ -55,10 +55,6 @@ define( [ "module",
                         "type": childType,
                         "name": childName 
                     };
-                },
-                "validPropertyValue": function( obj ) {
-                    var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
-                    return ( objType != 'null' && objType != 'undefined' );
                 }
             };
 
@@ -209,7 +205,7 @@ define( [ "module",
 
             var renderImage = false;
 
-            if ( node !== undefined && ( this.state.validPropertyValue( propertyValue ) ) ) {
+            if ( node !== undefined && ( utility.validPropertyValue( propertyValue ) ) ) {
                 if ( node.nodeType === "unit" ) {
                     
                     switch ( propertyName ) {
