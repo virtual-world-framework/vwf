@@ -266,6 +266,9 @@ define( [ "module",
                                         renderImage = true;
                                         break;
 
+                                    default:
+                                        this.logger.warnx( "incorrect echelon property value: " + propertyValue );
+                                        break;
                                 }
                             }
                             break;
@@ -280,6 +283,10 @@ define( [ "module",
                                         node.symbolID = cws.affliliation( node.symbolID, propertyValue  );
                                         node.affliliation = propertyValue;
                                         renderImage = true;
+                                        break;
+
+                                    default:
+                                        this.logger.warnx( "incorrect affiliation property value: " + propertyValue );
                                         break;
                                 }
                             }
