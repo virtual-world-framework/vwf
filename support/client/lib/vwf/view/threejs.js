@@ -1221,6 +1221,37 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
             );
         }
+
+        function setCanvasSize( canvas ) {
+            var origWidth = self.width;
+            var origHeight = self.height;
+            var viewWidth = canvas.width;
+            var viewHeight = canvas.height;
+
+            if ( window && window.innerHeight ) self.height = window.innerHeight;
+            if ( window && window.innerWidth ) self.width = window.innerWidth;
+
+            if ( ( origWidth != self.width || origHeight != self.height ) ) {
+                // If canvas changed size, use canvas dimentions instead
+                if ( viewWidth != canvas.clientWidth || viewHeight != canvas.clientHeight ) {
+                    canvas.width = self.width = canvas.clientWidth;
+                    canvas.height = self.height = canvas.clientHeight;
+                } else {
+                    canvas.width = self.width;
+                    canvas.height = self.height;
+                }
+
+                if ( sceneNode.renderer ) {
+                    sceneNode.renderer.setViewport( 0, 0, canvas.width, canvas.height );
+                }
+            }
+
+            var viewCam = view.state.cameraInUse;
+            if ( viewCam ) {
+                viewCam.aspect = canvas.width / canvas.height;
+                viewCam.updateProjectionMatrix();
+            }
+        }
         
         if ( mycanvas ) {
             var oldMouseX = 0;
@@ -1228,24 +1259,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var hovering = false;
             var view = this;
             window.onresize = function () {
-                var origWidth = self.width;
-                var origHeight = self.height;
-                if ( window && window.innerHeight ) self.height = window.innerHeight;
-                if ( window && window.innerWidth ) self.width = window.innerWidth;
-
-                if ( ( origWidth != self.width ) || ( origHeight != self.height ) ) {
-                    mycanvas.height = self.height;
-                    mycanvas.width = self.width;
-                    if ( sceneNode.renderer ) {
-                        sceneNode.renderer.setViewport( 0, 0, self.width, self.height );
-                    }
-                    
-                    var viewCam = view.state.cameraInUse;
-                    if ( viewCam ) {
-                        viewCam.aspect =  mycanvas.width / mycanvas.height;
-                        viewCam.updateProjectionMatrix();
-                    }
-                }
+                setCanvasSize( mycanvas );
             }
 
             if(detectWebGL() && getURLParameter('disableWebGL') == 'null')
@@ -1256,6 +1270,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 sceneNode.renderer = new THREE.CanvasRenderer({canvas:mycanvas,antialias:true});
                 sceneNode.renderer.setSize(window.innerWidth,window.innerHeight);
             }
+
+            setCanvasSize( mycanvas );
 
             // backgroundColor, enableShadows, shadowMapCullFace and shadowMapType are dependent on the renderer object, but if they are set in a prototype,
             // the renderer is not available yet, so set them now.
