@@ -4320,17 +4320,67 @@ define( function(){
                 retStr = name.substr( index + tagLen + 1 );
             } 
             return retStr;            
-        },         
+        },
+        "echelon": function( symbolID, value ) {
+            var retStr = symbolID;
+            switch( propertyValue ) {
+                
+                case "team":
+                case "crew":
+                case "squad":
+                case "section":
+                case "platoon":
+                case "detachment":
+                case "company":
+                case "battery":
+                case "troop":
+                case "battalion":
+                case "squadron":
+                case "regiment":
+                case "group":
+                case "brigade":
+                case "division":
+                case "corps":
+                case "mef":
+                case "army":
+                case "army group":
+                case "front":
+                case "region":
+                case "null":
+                    //node.symbolID = cws.echelon( node.symbolID, propertyValue );
+                    //node.echelon = propertyValue;
+                    break;
+
+            }            
+        },
+        "affiliation": function( symbolID, value ) {
+            var retStr = symbolID;
+            switch ( value ) {
+                case "unknown":
+                    retStr = this.unknown( symbolID );
+                    break;
+                case "friendly":
+                    retStr = this.friendly( symbolID );
+                    break;
+                case "neutral":
+                    retStr = this.unknown( symbolID );
+                    break;
+                case "hostile":
+                    retStr = this.friendly( symbolID );
+                    break;
+            }
+            return retStr;
+        },    
         "unknown": function( symbolID ) {
             return symbolID.substr( 0, 1 ) + "U" + symbolID.substr( 2 );
         },
-        "friend": function( symbolID ) {
+        "friendly": function( symbolID ) {
             return symbolID.substr( 0, 1 ) + "F" + symbolID.substr( 2 );
         },
         "neutral": function( symbolID ) {
             return symbolID.substr( 0, 1 ) + "N" + symbolID.substr( 2 );
         },
-        "hostal": function( symbolID ) {
+        "hostile": function( symbolID ) {
             return symbolID.substr( 0, 1 ) + "H" + symbolID.substr( 2 );
         }  
 
