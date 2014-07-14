@@ -261,7 +261,7 @@ define( [ "module",
                                     case "front":
                                     case "region":
                                     case "null":
-                                        node.symbolID = cws.echelon( node.symbolID, propertyValue );
+                                        node.symbolID = cws.addEchelonToSymbolId( node.symbolID, propertyValue );
                                         node.echelon = propertyValue;
                                         renderImage = true;
                                         break;
@@ -280,7 +280,7 @@ define( [ "module",
                                     case "neutral":
                                     case "hostile":
                                     case "friendly":
-                                        node.symbolID = cws.affliliation( node.symbolID, propertyValue  );
+                                        node.symbolID = cws.addAffiliationToSymbolId( node.symbolID, propertyValue  );
                                         node.affliliation = propertyValue;
                                         renderImage = true;
                                         break;

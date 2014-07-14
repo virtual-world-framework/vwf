@@ -4321,7 +4321,7 @@ define( function(){
             } 
             return retStr;            
         },
-        "echelon": function( symbolID, value ) {
+        "addEchelonToSymbolId": function( symbolID, value ) {
             var retStr = symbolID;
             switch( propertyValue ) {
                 
@@ -4353,7 +4353,7 @@ define( function(){
 
             }            
         },
-        "affiliation": function( symbolID, value ) {
+        "addAffiliationToSymbolId": function( symbolID, value ) {
             var retStr = symbolID;
             switch ( value ) {
                 case "unknown":
