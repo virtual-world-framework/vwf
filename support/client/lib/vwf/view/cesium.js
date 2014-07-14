@@ -136,14 +136,14 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
 
                     case 'widget':
                         node.cesiumWidget = new Cesium.CesiumWidget( this.container.divName, this.canvasOptions );
-                        node.centralBody = node.cesiumWidget.centralBody;
+                        node.globe = node.cesiumWidget._globe;
                         node.scene = scene = node.cesiumWidget.scene;
                         break;
 
                     case 'viewer':
                         node.cesiumViewer = new Cesium.Viewer( this.container.divName, this.canvasOptions );
                         node.cesiumWidget = node.cesiumViewer.cesiumWidget;
-                        node.centralBody = node.cesiumViewer.centralBody;
+                        node.globe = node.cesiumViewer._globe;
                         node.scene = scene = node.cesiumViewer.scene;
                         break;
                     
@@ -170,23 +170,23 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
                         var primitives = scene.getPrimitives();
 
                         var ellipsoid = Cesium.Ellipsoid.WGS84;
-                        node.centralBody = new Cesium.CentralBody( ellipsoid );
+                        node.globe = new Cesium.Globe( ellipsoid );
 
-                        node.centralBody.getImageryLayers().addImageryProvider( bing );
+                        node.globe.getImageryLayers().addImageryProvider( bing );
 
-                        primitives.setCentralBody( node.centralBody );
+                        primitives.setGlobe( node.globe );
 
                         node.transitioner = new Cesium.SceneTransitioner( scene, ellipsoid );
                         break;
                 }
 
                 node.imageryProvider = 'bingAerial';
-                node.canvas = scene.getCanvas();
+                node.canvas = scene._canvas;
                 scene.vwfID = childID;
                 
                 initializeMouseEvents.call( this, scene, node );
 
-                var camera = scene.getCamera();
+                var camera = scene._camera;
 
                 ( function tick() {
 
@@ -473,7 +473,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
         var overID = undefined;
         var downID = undefined;
         var lastOverID = undefined;
-        var sceneCanvas = scene.getCanvas();
+        var sceneCanvas = scene._canvas;
         var rootID = this.kernel.find( "", "/" )[0];
 
         this.state.mouse.handler = new Cesium.ScreenSpaceEventHandler( sceneCanvas );
@@ -498,12 +498,12 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
             var pick = function( button, clickCount, event, position ) {
                 
                 var pos = getMousePosition( position ); 
-                var height = scene.getCanvas().height;
-                var width = scene.getCanvas().width;
+                var height = scene._canvas.height;
+                var width = scene._canvas.width;
                 var eventObj = self.state.mouse.scene.pick( pos );
-                var ellipsoid = node.centralBody.getEllipsoid();
-                var globePoint = scene.getCamera().controller.pickEllipsoid( pos, ellipsoid );
-                var camPos = scene.getCamera().position;
+                var ellipsoid = node.globe._ellipsoid;
+                var globePoint = scene._camera.pickEllipsoid( pos, ellipsoid );
+                var camPos = scene._camera.position;
                 var eventID;
                 
                 if ( eventObj ) {
@@ -586,10 +586,10 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
                     while ( id && id != rootID ) {
                         eData.eventNodeData[ id ] = [ {
                             "distance": undefined,
-                            "origin": scene.getCamera().position,
+                            "origin": scene._camera.position,
                             "globalPosition": globePoint ? [ globePoint.x, globePoint.y, globePoint.z ] : undefined,
                             "globalNormal": undefined,
-                            "globalSource": scene.getCamera().position,            
+                            "globalSource": scene._camera.position,            
                         } ];
 
                         //id = undefined;
