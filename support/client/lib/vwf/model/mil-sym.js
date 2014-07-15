@@ -211,7 +211,6 @@ define( [ "module",
                     switch ( propertyName ) {
 
                         case "symbolID":
-                            debugger;
                             value = node.symbolID = propertyValue;
                             if ( node.echelon !== undefined ) {
                                 node.symbolID = cws.addEchelonToSymbolId( node.symbolID, node.echelon );
