@@ -448,38 +448,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
     }
 
     function setChildBlockIDs( block, xml ) {
-        var childBlock, childXml;
+        var childBlock, childXml, j = 0;
         block.id = xml.id;
-        for ( var i = 0; i < block.childBlocks_.length; i++ ) {
+        xml = xml.getElementsByTagName( "block" );
+        for ( var i = 0; i < block.childBlocks_.length; i++, j++ ) {
             childBlock = block.childBlocks_[ i ];
-            childXml = getNextXmlBlock( xml, i );
+            childXml = xml[ j ];
             setChildBlockIDs( childBlock, childXml );
         }
-    }
-
-    function getNextXmlBlock( xml, index ) {
-        var childXml;
-
-        for ( var i = 0; i < xml.childNodes.length; i++ ) {
-            if ( xml.childNodes[ i ].nodeName === "next" ) {
-                xml = xml.childNodes[ i ];
-                break;
-            }
-        }
-
-        if ( xml.childNodes[ index ] ) {
-            xml = xml.childNodes[ index ];
-            if ( xml.nodeName === "block" ) {
-                childXml = xml;
-            } else if ( xml.childNodes[ 0 ] && xml.childNodes[ 0 ].nodeName === "block" ) {
-                childXml = xml.childNodes[ 0 ];
-            } else {
-                console.log( "getNextXmlBlock: Could not find child block!" );
-            }
-        } else {
-            console.log( "getNextXmlBlock: Could not find child block!" );
-        }
-        return childXml;
     }
 
 } );
