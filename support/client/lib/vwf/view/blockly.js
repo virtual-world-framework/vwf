@@ -448,12 +448,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
     }
 
     function setChildBlockIDs( block, xml ) {
-        var childBlock, childXml, j = 0;
+        var childBlock, childXml;
         block.id = xml.id;
         xml = xml.getElementsByTagName( "block" );
-        for ( var i = 0; i < block.childBlocks_.length; i++, j++ ) {
+        for ( var i = 0; i < block.childBlocks_.length; i++) {
             childBlock = block.childBlocks_[ i ];
-            childXml = xml[ j ];
+            childXml = xml[ i ];
             setChildBlockIDs( childBlock, childXml );
         }
     }
