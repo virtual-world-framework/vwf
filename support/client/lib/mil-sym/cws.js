@@ -4432,10 +4432,10 @@ define( function(){
                     retStr = this.friendly( symbolID );
                     break;
                 case "neutral":
-                    retStr = this.unknown( symbolID );
+                    retStr = this.neutral( symbolID );
                     break;
                 case "hostile":
-                    retStr = this.friendly( symbolID );
+                    retStr = this.hostile( symbolID );
                     break;
             }
             return retStr;
