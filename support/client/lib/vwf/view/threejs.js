@@ -1221,37 +1221,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
             );
         }
-
-        function setCanvasSize( canvas ) {
-            var origWidth = self.width;
-            var origHeight = self.height;
-            var viewWidth = canvas.width;
-            var viewHeight = canvas.height;
-
-            if ( window && window.innerHeight ) self.height = window.innerHeight;
-            if ( window && window.innerWidth ) self.width = window.innerWidth;
-
-            if ( ( origWidth != self.width || origHeight != self.height ) ) {
-                // If canvas changed size, use canvas dimentions instead
-                if ( viewWidth != canvas.clientWidth || viewHeight != canvas.clientHeight ) {
-                    canvas.width = self.width = canvas.clientWidth;
-                    canvas.height = self.height = canvas.clientHeight;
-                } else {
-                    canvas.width = self.width;
-                    canvas.height = self.height;
-                }
-
-                if ( sceneNode.renderer ) {
-                    sceneNode.renderer.setViewport( 0, 0, canvas.width, canvas.height );
-                }
-            }
-
-            var viewCam = view.state.cameraInUse;
-            if ( viewCam ) {
-                viewCam.aspect = canvas.width / canvas.height;
-                viewCam.updateProjectionMatrix();
-            }
-        }
         
         if ( mycanvas ) {
             var oldMouseX = 0;
@@ -1259,7 +1228,34 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var hovering = false;
             var view = this;
             window.onresize = function () {
-                setCanvasSize( mycanvas );
+                var origWidth = self.width;
+                var origHeight = self.height;
+                var viewWidth = mycanvas.width;
+                var viewHeight = mycanvas.height;
+
+                if ( window && window.innerHeight ) self.height = window.innerHeight;
+                if ( window && window.innerWidth ) self.width = window.innerWidth;
+
+                if ( ( origWidth != self.width || origHeight != self.height ) ) {
+                    // If canvas changed size, use canvas dimentions instead
+                    if ( viewWidth != mycanvas.clientWidth || viewHeight != mycanvas.clientHeight ) {
+                        mycanvas.width = self.width = mycanvas.clientWidth;
+                        mycanvas.height = self.height = mycanvas.clientHeight;
+                    } else {
+                        mycanvas.width = self.width;
+                        mycanvas.height = self.height;
+                    }
+
+                    if ( sceneNode.renderer ) {
+                        sceneNode.renderer.setViewport( 0, 0, mycanvas.width, mycanvas.height );
+                    }
+                }
+
+                var viewCam = view.state.cameraInUse;
+                if ( viewCam ) {
+                    viewCam.aspect = mycanvas.width / mycanvas.height;
+                    viewCam.updateProjectionMatrix();
+                }
             }
 
             if(detectWebGL() && getURLParameter('disableWebGL') == 'null')
