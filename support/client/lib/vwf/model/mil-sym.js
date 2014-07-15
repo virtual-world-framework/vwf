@@ -123,7 +123,7 @@ define( [ "module",
                     node.tagName = undefined;
                     node.fullName = undefined;
                     node.echelon = undefined;
-                    node.affliliation = undefined;
+                    node.affiliation = undefined;
 
                 } else if ( isModifierNode( protos ) ) {
 
@@ -211,7 +211,14 @@ define( [ "module",
                     switch ( propertyName ) {
 
                         case "symbolID":
+                            debugger;
                             value = node.symbolID = propertyValue;
+                            if ( node.echelon !== undefined ) {
+                                node.symbolID = cws.addEchelonToSymbolId( node.symbolID, node.echelon );
+                            }
+                            if ( node.affiliation !== undefined ) {
+                                node.symbolID = cws.addAffiliationToSymbolId( node.symbolID, node.affiliation );
+                            }
                             renderImage = true;
                             break;
 
@@ -257,7 +264,9 @@ define( [ "module",
                                     case "front":
                                     case "region":
                                     case "null":
-                                        node.symbolID = cws.addEchelonToSymbolId( node.symbolID, propertyValue );
+                                        if ( node.symbolID !== undefined ) {
+                                            node.symbolID = cws.addEchelonToSymbolId( node.symbolID, propertyValue );
+                                        }
                                         node.echelon = propertyValue;
                                         renderImage = true;
                                         break;
@@ -269,15 +278,17 @@ define( [ "module",
                             }
                             break;
 
-                        case "affliliation":
-                            if ( node.affliliation !== propertyValue ) {
+                        case "affiliation":
+                            if ( node.affiliation !== propertyValue ) {
                                 switch( propertyValue ) {
                                     case "unknown":
                                     case "neutral":
                                     case "hostile":
                                     case "friendly":
-                                        node.symbolID = cws.addAffiliationToSymbolId( node.symbolID, propertyValue  );
-                                        node.affliliation = propertyValue;
+                                        if ( node.symbolID !== undefined ) {
+                                            node.symbolID = cws.addAffiliationToSymbolId( node.symbolID, propertyValue  );
+                                        }
+                                        node.affiliation = propertyValue;
                                         renderImage = true;
                                         break;
 
@@ -648,7 +659,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "unit-vwf" ); 
+                found = ( prototypes[i] == "unit-vwf" || prototypes[i] == "unit.vwf" ); 
             }
         }
        return found;
@@ -658,7 +669,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "modifier-vwf" ); 
+                found = ( prototypes[i] == "modifier-vwf" || prototypes[i] == "modifier.vwf" ); 
             }
         }
        return found;

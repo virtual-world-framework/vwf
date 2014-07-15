@@ -4327,31 +4327,100 @@ define( function(){
                 
                 case "team":
                 case "crew":
+                    retStr = this.team_crew( symbolID );
+                    break;
                 case "squad":
+                    retStr = this.squad( symbolID );
+                    break;
                 case "section":
+                    retStr = this.section( symbolID );
+                    break;                
                 case "platoon":
                 case "detachment":
+                    retStr = this.platoon_detachment( symbolID );
+                    break;
                 case "company":
                 case "battery":
                 case "troop":
+                    retStr = this.company_battery_troop( symbolID );
+                    break;                
                 case "battalion":
                 case "squadron":
+                    retStr = this.battalion_squadron( symbolID );
+                    break;                
                 case "regiment":
                 case "group":
+                    retStr = this.regiment_group( symbolID );
+                    break;  
                 case "brigade":
+                    retStr = this.brigade( symbolID );
+                    break;  
                 case "division":
+                    retStr = this.division( symbolID );
+                    break;  
                 case "corps":
                 case "mef":
+                    retStr = this.corps_mef( symbolID );
+                    break;                  
                 case "army":
+                    retStr = this.army( symbolID );
+                    break; 
+                case "armyGroup":
                 case "army group":
                 case "front":
+                    retStr = this.armyGroup_front( symbolID );
+                    break; 
                 case "region":
+                    retStr = this.region( symbolID );
+                    break; 
                 case "null":
-                    //node.symbolID = cws.echelon( node.symbolID, propertyValue );
-                    //node.echelon = propertyValue;
-                    break;
+                    retStr = this._null( symbolID );
+                    break; 
 
-            }            
+            }  
+            return retStr;          
+        },
+        "team_crew": function( symbolID ) {
+            return symbolID.substr( 0, 9 ) + "-A" + symbolID.substr( 12 );
+        }, 
+        "squad": function( symbolID ) {
+            return symbolID.substr( 0, 9 ) + "-B" + symbolID.substr( 12 );
+        }, 
+        "section": function( symbolID ) {
+            return symbolID.substr( 0, 9 ) + "-C" + symbolID.substr( 12 );
+        }, 
+        "platoon_detachment": function( symbolID ) {
+            return symbolID.substr( 0, 9 ) + "-D" + symbolID.substr( 12 );
+        }, 
+        "company_battery_troop": function( symbolID ) {
+            return symbolID.substr( 0, 9 ) + "-E" + symbolID.substr( 12 );
+        }, 
+        "battalion_squadron": function( symbolID ) {
+            return symbolID.substr( 0, 9 ) + "-F" + symbolID.substr( 12 );
+        }, 
+        "regiment_group": function( symbolID ) {
+            return symbolID.substr( 0, 9 ) + "-G" + symbolID.substr( 12 );
+        }, 
+        "brigade": function( symbolID ) {
+            return symbolID.substr( 0, 9 ) + "-H" + symbolID.substr( 12 );
+        }, 
+        "division": function( symbolID ) {
+            return symbolID.substr( 0, 9 ) + "-I" + symbolID.substr( 12 );
+        }, 
+        "corps_mef": function( symbolID ) {
+            return symbolID.substr( 0, 9 ) + "-J" + symbolID.substr( 12 );
+        },
+        "army": function( symbolID ) {
+            return symbolID.substr( 0, 9 ) + "-K" + symbolID.substr( 12 );
+        },
+        "armyGroup_front": function( symbolID ) {
+            return symbolID.substr( 0, 9 ) + "-L" + symbolID.substr( 12 );
+        },
+        "region": function( symbolID ) {
+            return symbolID.substr( 0, 9 ) + "-M" + symbolID.substr( 12 );
+        },
+        "_null": function( symbolID ) {
+            return symbolID.substr( 0, 9 ) + "--" + symbolID.substr( 12 );
         },
         "addAffiliationToSymbolId": function( symbolID, value ) {
             var retStr = symbolID;
