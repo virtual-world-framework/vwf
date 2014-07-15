@@ -3532,6 +3532,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 cameraNode = this.state.nodes[cameraID];
                 this.state.cameraInUse = cameraNode.threeObject;
             }
+
+            var canvas = this.canvasQuery[0];
+            this.state.cameraInUse.aspect = canvas.clientWidth / canvas.clientHeight;
         }
     }
 });
