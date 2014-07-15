@@ -1271,8 +1271,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 sceneNode.renderer.setSize(window.innerWidth,window.innerHeight);
             }
 
-            setCanvasSize( mycanvas );
-
             // backgroundColor, enableShadows, shadowMapCullFace and shadowMapType are dependent on the renderer object, but if they are set in a prototype,
             // the renderer is not available yet, so set them now.
             for(var key in sceneNode.rendererProperties) {
