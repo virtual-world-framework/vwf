@@ -15,7 +15,10 @@
 
   
     
-define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/cesium/Cesium" ], function( module, model, utility, Color, Cesium ) {
+define( [ "module", "vwf/model", "vwf/utility", 
+          "vwf/utility/color", "vwf/model/cesium/Cesium" ], 
+
+    function( module, model, utility, Color, Cesium ) {
 
 
     return model.load( module, {
@@ -532,7 +535,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
                 this.logger.infox( "C === creatingProperty ", nodeID, propertyName, propertyValue );
             }
 
-            if ( validPropertyValue.call( this, propertyValue ) ) {
+            if ( utility.validPropertyValue.call( this, propertyValue ) ) {
                 var node = this.state.nodes[ nodeID ];
                 if ( node === undefined ) node = this.state.scenes[ nodeID ];
                 if ( node !== undefined ) {
@@ -557,7 +560,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
                 this.logger.infox( "  I === initializingProperty ", nodeID, propertyName, propertyValue );
             }
 
-            if ( validPropertyValue.call( this, propertyValue ) ) {
+            if ( utility.validPropertyValue.call( this, propertyValue ) ) {
                 var node = this.state.nodes[ nodeID ];
                 if ( node === undefined ) node = this.state.scenes[ nodeID ];
                 if ( node !== undefined ) {
@@ -586,7 +589,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
 
             if ( node ) {
 
-                if ( node.cesiumObj !== undefined && validPropertyValue.call( this, propertyValue ) ) {
+                if ( node.cesiumObj !== undefined && utility.validPropertyValue.call( this, propertyValue ) ) {
 
                     switch ( propertyName ) {
 
@@ -1107,7 +1110,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
                 node = this.state.scenes[ nodeID ]; 
                 var scene = node.scene;
 
-                if ( ( node.cesiumWidget !== undefined || node.centralBody !== undefined ) && validPropertyValue.call( this, propertyValue ) ) {
+                if ( ( node.cesiumWidget !== undefined || node.centralBody !== undefined ) && utility.validPropertyValue.call( this, propertyValue ) ) {
 
                     switch ( propertyName ) {
 
@@ -2199,11 +2202,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/
 
     function arrayToMatrix( arry ) {
         return Cesium.Matrix4.fromRowMajorArray( arry );
-    }
-
-    function validPropertyValue( obj ) {
-      var objType = ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
-      return ( objType != 'null' && objType != 'undefined' );
     }
 
 });

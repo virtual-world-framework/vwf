@@ -16,12 +16,12 @@
 /// @module vwf/model/blockly
 /// @requires vwf/model ... and others
 
-define( [ "module", "vwf/model", 
+define( [ "module", "vwf/model", "vwf/utility",
           "vwf/model/blockly/JS-Interpreter/acorn", 
           "vwf/model/blockly/blockly_compressed", "vwf/model/blockly/blocks_compressed", 
           "vwf/model/blockly/javascript_compressed", "vwf/model/blockly/msg/js/en"
         ], 
-        function( module, model, acorn, Blockly ) {
+        function( module, model, utility, acorn, Blockly ) {
 
     var self;
 
@@ -218,7 +218,7 @@ define( [ "module", "vwf/model",
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
-            if ( ( node !== undefined ) && ( validPropertyValue( propertyValue ) ) ) {
+            if ( ( node !== undefined ) && ( utility.validPropertyValue( propertyValue ) ) ) {
 
                 switch ( propertyName ) {
                     
@@ -437,11 +437,6 @@ define( [ "module", "vwf/model",
             }
         }
        return found;
-    }
-
-    function validPropertyValue( obj ) {
-        var objType = ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
-        return ( objType != 'null' && objType != 'undefined' );
     }
 
     function getJavaScript( node ) {

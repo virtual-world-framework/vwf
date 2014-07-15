@@ -122,6 +122,8 @@ define( [ "module",
                     node.description = undefined;
                     node.tagName = undefined;
                     node.fullName = undefined;
+                    node.echelon = undefined;
+                    node.affiliation = undefined;
 
                 } else if ( isModifierNode( protos ) ) {
 
@@ -203,13 +205,19 @@ define( [ "module",
 
             var renderImage = false;
 
-            if ( node !== undefined && ( validPropertyValue( propertyValue ) ) ) {
+            if ( node !== undefined && ( utility.validPropertyValue( propertyValue ) ) ) {
                 if ( node.nodeType === "unit" ) {
                     
                     switch ( propertyName ) {
 
                         case "symbolID":
                             value = node.symbolID = propertyValue;
+                            if ( node.echelon !== undefined ) {
+                                node.symbolID = cws.addEchelonToSymbolId( node.symbolID, node.echelon );
+                            }
+                            if ( node.affiliation !== undefined ) {
+                                node.symbolID = cws.addAffiliationToSymbolId( node.symbolID, node.affiliation );
+                            }
                             renderImage = true;
                             break;
 
@@ -227,6 +235,67 @@ define( [ "module",
 
                         case "fullName":
                             value = node.fullName = propertyValue;
+                            break;
+
+                        case "echelon":
+                            if ( node.echelon !== propertyValue ) {
+                                switch( propertyValue ) {
+                                    
+                                    case "team":
+                                    case "crew":
+                                    case "squad":
+                                    case "section":
+                                    case "platoon":
+                                    case "detachment":
+                                    case "company":
+                                    case "battery":
+                                    case "troop":
+                                    case "battalion":
+                                    case "squadron":
+                                    case "regiment":
+                                    case "group":
+                                    case "brigade":
+                                    case "division":
+                                    case "corps":
+                                    case "mef":
+                                    case "army":
+                                    case "army group":
+                                    case "front":
+                                    case "region":
+                                    case "null":
+                                        if ( node.symbolID !== undefined ) {
+                                            node.symbolID = cws.addEchelonToSymbolId( node.symbolID, propertyValue );
+                                        }
+                                        node.echelon = propertyValue;
+                                        renderImage = true;
+                                        break;
+
+                                    default:
+                                        this.logger.warnx( "incorrect echelon property value: " + propertyValue );
+                                        break;
+                                }
+                            }
+                            break;
+
+                        case "affiliation":
+                            if ( node.affiliation !== propertyValue ) {
+                                switch( propertyValue ) {
+                                    case "unknown":
+                                    case "neutral":
+                                    case "hostile":
+                                    case "friendly":
+                                        if ( node.symbolID !== undefined ) {
+                                            node.symbolID = cws.addAffiliationToSymbolId( node.symbolID, propertyValue  );
+                                        }
+                                        node.affiliation = propertyValue;
+                                        renderImage = true;
+                                        break;
+
+                                    default:
+                                        this.logger.warnx( "incorrect affiliation property value: " + propertyValue );
+                                        break;
+                                }
+                            }
                             break;
 
                     }
@@ -589,7 +658,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "unit-vwf" ); 
+                found = ( prototypes[i] == "unit-vwf" || prototypes[i] == "unit.vwf" ); 
             }
         }
        return found;
@@ -599,16 +668,13 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "modifier-vwf" ); 
+                found = ( prototypes[i] == "modifier-vwf" || prototypes[i] == "modifier.vwf" ); 
             }
         }
        return found;
     } 
 
-    function validPropertyValue( obj ) {
-        var objType = ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
-        return ( objType != 'null' && objType != 'undefined' );
-    }
+
 
     function render( node ) {
         var value = undefined;
