@@ -196,6 +196,8 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
                     }
                 }
             }
+
+            self.kernel.fireEvent( appID, "unitLoadingComplete", [ true ] );
         }    
     }
 
