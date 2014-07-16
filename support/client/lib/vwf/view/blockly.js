@@ -327,7 +327,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
         }
         if ( xmlDom ) {
             Blockly.mainWorkspace.clear();
-            Blockly.Xml.domToWorkspace( Blockly.mainWorkspace, xmlDom );
+            domCopyToWorkspace( Blockly.mainWorkspace, xmlDom );
         } 
         var blocks = Blockly.mainWorkspace.getAllBlocks();
         var blockCount = blocks.length;
@@ -390,15 +390,15 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                             "Error loading XML document (" + textStatus + "): " + toolboxDef );
                     },
                     success: function( xml ) {
-                        Blockly.updateToolbox( xml );
+                        cleanUpdateToolbox( xml );
                     }
                 } );
             } else if ( toolboxDef.indexOf( '<xml' ) !== -1 ){
-                Blockly.updateToolbox( toolboxDef );
+                cleanUpdateToolbox( toolboxDef );
             } else {
                 var element = document.getElementById( toolboxDef );
                 if ( element ) {
-                    Blockly.updateToolbox( element );    
+                    cleanUpdateToolbox( element );    
                 } else {
                     self.logger.warnx( "Unable to load Blockly toolbox: " + toolboxDef );
                 }
@@ -416,6 +416,46 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             self.delayedProperties.defaultXml = toolboxDef;
             self.logger.warnx( "Blockly not initilized unable to load default xml: " + xml );
         }        
+    }
+
+    // cleanUpdateToolbox properly updates the blockly toolbox by setting the 
+    // flyout and workspace bounds according to the new flyout width.
+    function cleanUpdateToolbox( xml ) {
+        // negateOverlap is being use to negate some of the effect of the MARGIN variable
+        // in Blockly.createDom_ when deleting blocks over the flyout
+        var negateOverlap = 35;
+        Blockly.updateToolbox( xml );
+        Blockly.mainWorkspace.scrollX = Blockly.mainWorkspace.flyout_.width_ + negateOverlap;
+        var translation = 'translate(' + Blockly.mainWorkspace.scrollX + ', 0)';
+        Blockly.mainWorkspace.getCanvas().setAttribute('transform', translation);
+    }
+
+    // domCopyToWorkspace copies the saved blocks to the workspace exactly
+    // This preserves the stored block IDs
+    function domCopyToWorkspace( workspace, xml ) {
+    var width = Blockly.svgSize().width;
+        for (var x = 0, xmlChild; xmlChild = xml.childNodes[x]; x++) {
+            if (xmlChild.nodeName.toLowerCase() == 'block') {
+                var block = Blockly.Xml.domToBlock( workspace, xmlChild );
+                setChildBlockIDs( block, xmlChild );
+                var blockX = parseInt(xmlChild.getAttribute('x'), 10);
+                var blockY = parseInt(xmlChild.getAttribute('y'), 10);
+                if (!isNaN(blockX) && !isNaN(blockY)) {
+                    block.moveBy(Blockly.RTL ? width - blockX : blockX, blockY);
+                }
+            }
+        }
+    }
+
+    function setChildBlockIDs( block, xml ) {
+        var childBlock, childXml;
+        block.id = xml.id;
+        xml = xml.getElementsByTagName( "block" );
+        for ( var i = 0; i < block.childBlocks_.length; i++) {
+            childBlock = block.childBlocks_[ i ];
+            childXml = xml[ i ];
+            setChildBlockIDs( childBlock, childXml );
+        }
     }
 
 } );

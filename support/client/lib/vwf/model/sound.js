@@ -387,6 +387,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         soundGroup: undefined,
         groupReplacementMethod: undefined,
+        queueDelayTime: 0.8,  // in seconds
 
         // a counter for creating instance IDs
         instanceIDCounter: 0,
@@ -429,6 +430,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
 
             this.groupReplacementMethod = this.soundDefinition.groupReplacementMethod;
+
+            if ( this.soundDefinition.queueDelayTime !== undefined ) {
+                this.queueDelayTime = this.soundDefinition.queueDelayTime;
+            }
 
             if ( this.groupReplacementMethod && !this.soundGroup ) {
                 logger.warnx( "soundDatum.initialize", 
@@ -564,7 +569,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 
                 if ( group && ( group.queue.length > 0 ) ) {
                     var nextInstance = group.queue.pop();
-                    nextInstance && startSoundInstance( nextInstance );
+                    if ( !!nextInstance ) {
+                        setTimeout( function() {
+                            startSoundInstance( nextInstance );
+                        }, nextInstance.soundDatum.queueDelayTime * 1000 );
+                    }
                 }
 
                 delete soundDatum.playingInstances[ id ];
@@ -592,7 +601,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                     default:
                         logger.errorx( "PlayingInstance.initialize",
-                                       "This sound is in a group, but doesn't " +
+                                       "This sound ('" + thisInstance.soundDatum.name + 
+                                       "') is in a group, but doesn't " +
                                        "have a valid replacement method!" );
 
                         stopSoundGroup( group );

@@ -245,9 +245,11 @@ define( function() {
 
         callMethod: [ /* nodeID, methodName, methodParameters */ ],
 
-        /// It will call creatingEvent() on each model. The event is considered created after each model
-        /// has run.  It will also call createdEvent() on each view. The view is being notified that a
-        /// event has been created.
+        /// Create an event on a node.
+        /// 
+        /// Events are outgoing function calls that a node makes to announce changes to the node, or
+        /// to announce changes within a set of nodes that the node manages. Other nodes may attach
+        /// listener functions to the event which will be called when the event fires.
         /// 
         /// @function
         /// 
@@ -260,6 +262,84 @@ define( function() {
         createEvent: [ /* nodeID, eventName, eventParameters */ ],
 
         // TODO: deleteEvent
+
+        /// Add a function to a node's event to be called when the event fires.
+        /// 
+        /// By default, the handler will be invoked in the context of the sender. For JavaScript
+        /// handlers, this means that `this` will refer to the node with ID `nodeID`. To invoke the
+        /// handler on a different node, provide an `eventContextID` when adding the listener.
+        /// 
+        /// For dispatched events (invoked with `kernel.dispatchEvent`), events are fired from a
+        /// series of nodes until the event is handled. Starting at the application root, the event
+        /// is fired on the target's ancestors, downward, in a "capture" phase, fired on the target
+        /// node, then again fired on the target's ancestors, upward, in a "bubbling" phase.
+        /// 
+        /// For dispatched events, after firing the event at a particular node, if any of the
+        /// handlers returned a truthy value, the event is considered _handled_ and the dispatch
+        /// process stops at that node. An event that is handled during the capture phase prevents
+        /// lower nodes or the target node from receiving the event. Events handled during the
+        /// bubbling phase are catching events not handled by lower nodes or by the target node.
+        /// 
+        /// By default, a listener will only be invoked if it is attached to the event target or
+        /// during the bubbling phase if it attached to a node above the target. To also invoke a
+        /// listener during the capture phase, pass `eventPhases` as the array `[ "capture" ]`.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        ///   The ID of a node containing an event `eventName`.
+        /// @param {String} eventName
+        ///   The name of an event on the `nodeID` node. When the event is fired, all of its
+        ///   listeners will be called.
+        /// @param {Script} eventHandler
+        ///   A script to be evaluated as a function body and added as a handler for the event.
+        ///   Strings will be interpreted as JavaScript; other script types may be supported in
+        ///   future releases. The `eventParameters` that were provided to the `createEvent` call
+        //    will be available to the handler body as function parameters.
+        /// @param {ID} [eventContextID]
+        ///   The ID of the node that the handler is _invoked on_. For JavaScript handlers, `this`
+        ///   will refer to the `eventContextID` node. If `eventContextID` is not provided, the
+        ///   context will be the `nodeID` node.
+        /// @param {String[]} [eventPhases]
+        ///   An array of strings indicating the event dispatch phases that this handler should
+        ///   respond to. Handlers will be invoked at the target and during the bubbling phase
+        ///   regardless of its `eventPhases`. To also invoke a handler during the capture phase,
+        ///   include `"capture"` in the `eventPhases` array.` `eventPhases` only applies to the
+        ///   propagation performed by `kernel.dispatchEvent`. Once `kernel.fireEvent` is called, it
+        ///   always invokes all of the event's handlers.
+        /// 
+        /// @returns {}
+
+        addEventListener: [ /* nodeID, eventName, eventHandler, eventContextID, eventPhases */ ],
+
+        /// Remove a function from a node's event. The handler will no longer be called when the
+        /// event fires.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        ///   The ID of a node containing an event `eventName`.
+        /// @param {String} eventName
+        ///   The name of an event on the `nodeID` node.
+        /// @param {Script} eventHandler
+        ///   A script previously provided to `kernel.addEventListener` for this `nodeID` and
+        ///   `eventName`.
+        /// 
+        /// @returns {}
+
+        removeEventListener: [ /* nodeID, eventName, eventHandler */ ],
+
+        /// flushEventListeners.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ID} eventContextID
+        /// 
+        /// @returns {}
+
+        flushEventListeners: [ /* nodeID, eventName, eventContextID */ ],
 
         /// It will call firingEvent() on each model and firedEvent() on each view.
         /// 

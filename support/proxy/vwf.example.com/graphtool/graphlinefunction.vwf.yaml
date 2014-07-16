@@ -17,7 +17,12 @@ methods:
       var x = point[0];
       var y = point[1]; 
       var z = point[2];
-      eval( this.lineFunction );
+      try {
+        eval( this.lineFunction );
+      } catch ( error ) {
+        this.logger.errorx( "evaluateLineAtPoint", error.stack );
+        return [ 0, 0, 0 ];
+      }
       point[ 0 ] = x || 0;
       point[ 1 ] = y || 0;
       point[ 2 ] = z || 0;
