@@ -564,7 +564,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 
                 if ( group && ( group.queue.length > 0 ) ) {
                     var nextInstance = group.queue.pop();
-                    nextInstance && startSoundInstance( nextInstance );
+                    if ( !!nextInstance ) {
+                        setTimeout( function() {
+                            startSoundInstance( nextInstance );
+                        }, 400 );
+                    }
                 }
 
                 delete soundDatum.playingInstances[ id ];
