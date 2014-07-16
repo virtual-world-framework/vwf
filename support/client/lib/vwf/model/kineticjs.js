@@ -391,7 +391,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "fillPatternOffsetY":
-                            kineticObj.fillPatternOffsetX( Number( propertyValue ) );
+                            kineticObj.fillPatternOffsetY( Number( propertyValue ) );
                             break;
 
                         case "fillPatternScale":
@@ -625,7 +625,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         case "shadowOffset":
                             if ( propertyValue instanceof Array ) { 
-                                kineticObj.shadowOffset( { { "x": Number( propertyValue[ 0 ] ), "y": Number( propertyValue[ 1 ] ) });
+                                kineticObj.shadowOffset( { "x": Number( propertyValue[ 0 ] ), "y": Number( propertyValue[ 1 ] ) });
                             } else {
                                 kineticObj.shadowOffset( { "x": Number( propertyValue.x ), "y":  Number( propertyValue.y ) });
                             } 
@@ -647,11 +647,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;                        
                         
                         case "dash":
-                            kineticObj.shadowEnabled( propertyValue );
+                            kineticObj.dash( propertyValue );
                             break;  
 
                         case "dashEnabled": 
-                            kineticObj.shadowEnabled( Boolean( propertyValue ) );
+                            kineticObj.dashEnabled( Boolean( propertyValue ) );
                             break; 
 
                         default:
@@ -690,7 +690,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "clockwise":
-                            kineticObj.shadowEnabled( Boolean( propertyValue ) );
+                            kineticObj.clockwise( Boolean( propertyValue ) );
                             break;
                         
                         default:
@@ -764,7 +764,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         case "radius":
                             if ( propertyValue instanceof Array ) { 
-                                kineticObj.radius( { { "x": Number( propertyValue[ 0 ] ), "y": Number( propertyValue[ 1 ] ) });
+                                kineticObj.radius( { "x": Number( propertyValue[ 0 ] ), "y": Number( propertyValue[ 1 ] ) });
                             } else {
                                 kineticObj.radius( { "x": Number( propertyValue.x ), "y":  Number( propertyValue.y ) });
                             } 
@@ -950,7 +950,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "innerRadius":
-                            kineticObj.innerRadius( Number( propertyValue ) ) );
+                            kineticObj.innerRadius( Number( propertyValue ) );
                             break;
 
                         case "outerRadius":
@@ -1155,45 +1155,657 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             var node = this.state.nodes[nodeID];
             var value = undefined;
-            if ( node ) {
+            if ( node && node.kineticObj ) {
                 var kineticObj = node.kineticObj;
-                if ( kineticObj !== undefined ) {
-                                    
+
+
+                if ( kineticObj instanceof Kinetic.Node ) {
+
                     switch ( propertyName ) {
-                        case "image":
-                            if ( kineticObj.image ) {
-                                value = kineticObj.image.src;
-                            }
-                            break;
-                        case "size":
-                            value = [ kineticObj.width, kineticObj.height ];
-                            break;
-                        case "position":
-                            value = [ kineticObj.x, kineticObj.y ];
-                            break;
-                        case "width":
-                            value = kineticObj.width;
-                            break;
-                        case "height":
-                            value = kineticObj.height;
-                            break;
+
+                        // need to think this over
+                        // case "image":
+                        //     imageObj = new Image();
+                        //     imageObj.onload = function() {
+                        //         kineticObj.image = imageObj;
+                        //     }
+                        //     imageObj.src = propertyValue;
+                        //     break;
                         case "x":
-                            value = kineticObj.x;
+                            value = kineticObj.x();
                             break;
+
                         case "y":
-                            value = kineticObj.y;
+                            value = kineticObj.y();
                             break;
-                        case "canvasDefinition":
-                            value = "cd";
+
+                        case "width":
+                            value = kineticObj.width();
                             break;
+
+                        case "height":
+                            value = kineticObj.height();
+                            break;
+
+                        case "visible":
+                            value = kineticObj.visible();
+                            break;
+
+                        case "listening":
+                            value = kineticObj.listening();
+                            break;
+                        
+                        case "opacity":
+                            value = kineticObj.opacity();
+                            break;
+
+                        case "scale":
+                            value = kineticObj.scale();
+                            break;
+
+                        case "scaleX":
+                            value = kineticObj.scaleX();
+                            break;
+
+                        case "scaleY":
+                            value = kineticObj.scaleY();
+                            break;
+
+                        case "rotation":
+                            value = kineticObj.rotation();
+                            break;
+
+                        // check code, not in docs
+                        case "offset":
+                            value = kineticObj.offset();
+                            break;
+
+                        // check code, not in docs
+                        case "offsetX":
+                            value = kineticObj.offsetX();
+                            break;
+
+                        case "offsetY":
+                            value = kineticObj.offsetY();
+                            break;
+
+                        case "draggable":
+                            value = kineticObj.draggable();    
+                            break;
+
+                        // check code, not in docs
+                        case "dragDistance":
+                            value = kineticObj.dragDistance();    
+                            break;
+
+                        case "dragBoundFunc":
+                            break;
+                    }
+                }
+
+                if ( value === undefined && kineticObj instanceof Kinetic.Shape ) {
+
+                    switch ( propertyName ) {
+
+                        case "fill":
+                            value = kineticObj.fill();
+                            break;
+
+                        case "fillRed":
+                            value = kineticObj.fillRed();
+                            break;
+
+                        case "fillGreen":
+                            value = kineticObj.fillGreen();
+                            break;
+ 
+                        case "fillGreen":
+                            value = kineticObj.fillGreen();
+                            break;
+ 
+                        case "fillAlpha":
+                            value = kineticObj.fillAlpha();
+                            break;
+
+                        case "fillPatternImage":
+                            value = kineticObj.fillPatternImage();
+                            break;
+
+                        case "fillPatternX":
+                            value = kineticObj.fillPatternX();
+                            break;
+
+                        case "fillPatternY":
+                            value = kineticObj.fillPatternY();
+                            break;
+  
+                        case "fillPatternOffset":
+                            value = kineticObj.fillPatternOffset();
+                            break;
+
+                        case "fillPatternOffsetX":
+                            value = kineticObj.fillPatternOffsetX();
+                            break;
+
+                        case "fillPatternOffsetY":
+                            value = kineticObj.fillPatternOffsetY();
+                            break;
+
+                        case "fillPatternScale":
+                            value = kineticObj.fillPatternScale();
+                            break;
+
+                        case "fillPatternScaleX":
+                            value = kineticObj.fillPatternScaleX();
+                            break;
+
+                        case "fillPatternScaleY":
+                            value = kineticObj.fillPatternScaleY();
+                            break;
+
+                        case "fillPatternRotation":
+                            value = kineticObj.fillPatternRotation();
+                            break;
+
+                        case "fillPatternRepeat":
+                            value = kineticObj.fillPatternRepeat();
+                            break;
+
+
+                        case "fillLinearGradientStartPoint":
+                            value = kineticObj.fillLinearGradientStartPoint();
+                            break;
+
+                        case "fillLinearGradientStartPointX":
+                            value = kineticObj.fillLinearGradientStartPointX();
+                            break;
+
+                        case "fillLinearGradientStartPointY":
+                            value = kineticObj.fillLinearGradientStartPointY();
+                            break;
+
+                        case "fillLinearGradientEndPoint":
+                            value = kineticObj.fillLinearGradientEndPoint();
+                            break;
+
+                        case "fillLinearGradientEndPointX":
+                            value = kineticObj.fillLinearGradientEndPointX();
+                            break;
+
+                        case "fillLinearGradientEndPointY":
+                            value = kineticObj.fillLinearGradientEndPointY();
+                            break;
+
+                        case "fillLinearGradientColorStops":
+                            value = kineticObj.fillLinearGradientColorStops();
+                            break;
+
+                        case "fillRadialGradientStartPoint":
+                            value = kineticObj.fillRadialGradientStartPoint();
+                            break;
+
+                        case "fillRadialGradientStartPointX":
+                            value = kineticObj.fillRadialGradientStartPointX();
+                            break;
+
+                        case "fillRadialGradientStartPointY":
+                            value = kineticObj.fillRadialGradientStartPointX();
+                            break;
+
+                        case "fillRadialGradientEndPoint":
+                            value = kineticObj.fillRadialGradientEndPoint();
+                            break;
+
+                        case "fillRadialGradientEndPointX":
+                            value = kineticObj.fillRadialGradientEndPointX();
+                            break;
+
+                        case "fillRadialGradientEndPointY":
+                            value = kineticObj.fillRadialGradientEndPointY();
+                            break;
+
+                        case "fillRadialGradientStartRadius":
+                            value = kineticObj.fillRadialGradientStartRadius();
+                            break;
+
+                        case "fillRadialGradientEndRadius":
+                            value = kineticObj.fillRadialGradientEndRadius();
+                            break;
+
+                        case "fillRadialGradientColorStops":
+                            value = kineticObj.fillRadialGradientColorStops();
+                            break;
+
+                        case "fillEnabled":
+                            value = kineticObj.fillEnabled();
+                            break;
+
+                        case "fillPriority":
+                            value = kineticObj.fillPriority();
+                            break;
+
+                        case "stroke":
+                            value = kineticObj.stroke();
+                            break;
+
+                        case "strokeRed":
+                            value = kineticObj.strokeRed();
+                            break;
+
+                        case "strokeGreen":
+                            value = kineticObj.strokeGreen();
+                            break;
+
+                        case "strokeBlue":
+                            value = kineticObj.strokeBlue();
+                            break;
+
+                        case "strokeAlpha":
+                            value = kineticObj.strokeAlpha();
+                            break; 
+
+                        case "strokeWidth":
+                            value = kineticObj.strokeWidth();
+                            break;
+
+                        case "strokeScaleEnabled":
+                            value = kineticObj.strokeScaleEnabled();
+                            break;
+
+                        case "strokeEnabled":
+                            value = kineticObj.strokeEnabled();
+                            break;
+
+                        case "lineJoin":
+                            value = kineticObj.lineJoin();
+                            break;
+
+                        case "lineCap":
+                            value = kineticObj.lineCap();
+                            break;
+
+                        case "shadowColor":
+                            value = kineticObj.shadowColor();
+
+                            break;
+
+                        case "shadowRed":
+                            value = kineticObj.shadowRed();
+                            break;
+
+                        case "shadowGreen":
+                            value = kineticObj.shadowGreen();
+                            break;
+
+                        case "shadowBlue":
+                            value = kineticObj.shadowBlue();
+                            break;
+
+                        case "shadowBlue":
+                            value = kineticObj.shadowBlue();
+                            break;
+
+                        case "shadowBlur":
+                            value = kineticObj.shadowBlur();
+                            break;
+
+                        case "shadowOffset":
+                            value = kineticObj.shadowOffset();
+                            break;                        
+                        
+                        case "shadowOffsetX":
+                            value = kineticObj.shadowOffsetX();
+                            break;  
+
+                        case "shadowOffsetY":
+                            value = kineticObj.shadowOffsetY();
+                            break;
+                        
+                        case "shadowOpacity":
+                            value = kineticObj.shadowOpacity();
+                            break;
+
+                        case "shadowEnabled":
+                            value = kineticObj.shadowEnabled();
+                            break;                        
+                        
+                        case "dash":
+                            value = kineticObj.dash();
+                            break;  
+
+                        case "dashEnabled": 
+                            value = kineticObj.dashEnabled();
+                            break; 
+
                         default:
                             value = undefined;
                             break;
                     }
                 }
+
+                if ( value === undefined && kineticObj instanceof Kinetic.Container ) {
+                    
+                    switch ( propertyName ) {
+                        
+                        case "clipFunc":
+                            break;
+                    }
+                }
+
+                if ( value === undefined && kineticObj instanceof Kinetic.Arc ) {
+                    
+                    switch ( propertyName ) {
+                        
+                        case "angle":
+                            value = kineticObj.angle();
+                            break;
+
+                        case "innerRadius":
+                            value = kineticObj.innerRadius();
+                            break;
+
+                        case "outerRadius":
+                            value = kineticObj.outerRadius();
+                            break;
+
+                        case "clockwise":
+                            value = kineticObj.clockwise();
+                            break;
+                    }
+                }
+
+                if ( value === undefined && 
+                    ( kineticObj instanceof Kinetic.BaseLayer || 
+                      kineticObj instanceof Kinetic.FastLayer ||
+                      kineticObj instanceof Kinetic.Layer
+                    ) ) {
+                   
+                    switch ( propertyName ) {
+
+                        case "clearBeforeDraw":
+                            value = kineticObj.clearBeforeDraw();
+                            break;
+                    }                    
+                }
+
+                if ( value === undefined && kineticObj instanceof Kinetic.Canvas ) {
+                    
+                    switch ( propertyName ) {
+
+                        case width:
+                            value = kineticObj.getWidth();
+                            break;
+
+                        case height:
+                            value = kineticObj.getHeight();
+                            break;
+
+                        case pixelRatio:
+                            value = kineticObj.getPixelRatio();
+                            break;
+                    }  
+                }                
+
+                if ( value === undefined && kineticObj instanceof Kinetic.Circle ) {
+                    
+                    switch ( propertyName ) {
+
+                        case "radius":
+                            value = kineticObj.radius();
+                            break;
+
+                    }                    
+                }
+
+
+                if ( value === undefined && kineticObj instanceof Kinetic.Ellipse ) {
+                    
+                    switch ( propertyName ) {
+
+                        case "radius":
+                            value = kineticObj.radius();
+                            break;
+                    }                    
+                }
+
+                if ( value === undefined && kineticObj instanceof Kinetic.Image ) {
+                    
+                    switch ( propertyName ) {
+
+                        // need to think this over
+                        // case "image":
+                        //     imageObj = new Image();
+                        //     imageObj.onload = function() {
+                        //         kineticObj.image = imageObj;
+                        //     }
+                        //     imageObj.src = propertyValue;
+                        //     break;
+
+                        case "crop":
+                            value = kineticObj.crop();
+                            break;
+                        
+                    }                    
+                }
+
+                if ( value === undefined && kineticObj instanceof Kinetic.Line )
+                    
+                    switch ( propertyName ) {
+                        
+                        case "points":
+                            value = kineticObj.points();
+                            break;
+
+                        case "tension":
+                            value = kineticObj.tension();
+                            break;
+
+                        case "closed":
+                            value = kineticObj.closed();
+                            break;
+                    }
+                }
+
+                if ( value === undefined && kineticObj instanceof Kinetic.Path )
+                    
+                    switch ( propertyName ) {
+                        
+                        case "data":
+                            value = kineticObj.data();
+                            break;
+
+                    }
+                }
+
+                if ( value === undefined && kineticObj instanceof Kinetic.Rect )
+                    
+                    switch ( propertyName ) {
+                        
+                        case "cornerRadius":
+                            value = kineticObj.cornerRadius();
+                            break;
+                    }
+                }
+
+                if ( value === undefined && kineticObj instanceof Kinetic.RegularPolygon )
+                    
+                    switch ( propertyName ) {
+                        
+                        case "sides":
+                            value = kineticObj.sides();
+                            break;
+
+                        case "radius":
+                            value = kineticObj.radius();
+                            break;
+                    }
+                }
+            
+                if ( value === undefined && kineticObj instanceof Kinetic.Ring )
+                    
+                    switch ( propertyName ) {
+                        
+                        case "innerRadius":
+                            value = kineticObj.innerRadius();
+                            break;
+
+                        case "outerRadius":
+                            value = kineticObj.outerRadius();
+                            break;
+
+                        case "clockwise":
+                            value = kineticObj.clockwise();
+                            break;
+                    }
+                }
+                
+                if ( value === undefined && kineticObj instanceof Kinetic.Sprite )
+                    
+                    switch ( propertyName ) {
+                        
+                        case "animation":
+                            value = kineticObj.animation();
+                            break;
+
+                        case "animations":
+                            value = JSON.stringify( kineticObj.animations() );
+                            break;
+
+                        case "frameIndex":
+                            value = kineticObj.frameIndex();
+                            break;
+
+                        // need to think this over
+                        // case "image":
+                        //     imageObj = new Image();
+                        //     imageObj.onload = function() {
+                        //         kineticObj.image = imageObj;
+                        //     }
+                        //     imageObj.src = propertyValue;
+                        //     break;
+                    }
+                }
+
+                if ( value === undefined && kineticObj instanceof Kinetic.Star )
+                    
+                    switch ( propertyName ) {
+                        
+                        case "numPoints":
+                            value = kineticObj.animation();
+                            break;
+
+                        case "innerRadius":
+                            value = kineticObj.innerRadius();
+                            break;
+
+                        case "outerRadius":
+                            value = kineticObj.outerRadius();
+                            break;
+                    }
+                }
+
+
+                if ( value === undefined && kineticObj instanceof Kinetic.Text )
+                    
+                    switch ( propertyName ) {
+                        
+                        case "fontFamily":
+                            value = kineticObj.fontFamily();
+                            break;
+
+                        case "fontSize":
+                            value = kineticObj.fontSize();
+                            break;
+
+                        case "fontStyle":
+                            value = kineticObj.fontStyle();
+                            break;
+
+                        case "fontVariant":
+                            value = kineticObj.fontVariant();
+                            break;
+
+                        case "text":
+                            value = kineticObj.text();
+                            break;
+
+                        case "align":
+                            value = kineticObj.align();
+                            break;
+
+                        case "padding":
+                            value = kineticObj.padding();
+                            break;
+
+                        case "width":
+                            value = kineticObj.width();
+                            break;
+
+                        case "height":
+                            value = kineticObj.height();
+                            break; 
+
+                        case "lineHeight":
+                            value = kineticObj.lineHeight();
+                            break;
+
+                        case "wrap":
+                            value = kineticObj.wrap();
+                            break;
+                    }
+                }
+
+                if ( value === undefined && kineticObj instanceof Kinetic.TextPath )
+                    
+                    switch ( propertyName ) {
+                        
+                        case "fontFamily":
+                            value = kineticObj.fontFamily();
+                            break;
+
+                        case "fontSize":
+                            value = kineticObj.fontSize();
+                            break;
+
+                        case "fontStyle":
+                            value = kineticObj.fontStyle();
+                            break;
+
+                        case "fontVariant":
+                            value = kineticObj.fontVariant();
+                            break;
+
+                        case "text":
+                            value = kineticObj.text();
+                            break;
+
+                        case "data":
+                            value = kineticObj.data();
+                            break;
+                    }
+                }
+
+                if ( value === undefined && kineticObj instanceof Kinetic.Wedge )
+                    
+                    switch ( propertyName ) {
+                        
+                        case "angle":
+                            value = kineticObj.angle();
+                            break;
+
+                        case "radius":
+                            value = kineticObj.radius();
+                            break;
+
+                        case "clockwise":
+                            kineticObj.clockwise();
+                            break;
+                    }
+                }
+
             }
             if ( value !== undefined ) {
-            propertyValue = value;
+                propertyValue = value;
             }
             //console.log(["kinetic get returns: ",value]);
             return value;
