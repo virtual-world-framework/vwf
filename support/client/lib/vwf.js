@@ -214,12 +214,6 @@
 
         this.private = {}; // for debugging
 
-        /// The application root ID.
-        /// 
-        /// @name module:vwf~applicationID
-
-        var applicationID = undefined;
-
         /// Components describe the objects that make up the simulation. They may also serve as
         /// prototype objects for further derived components. External components are identified by
         /// URIs. Once loaded, we save a mapping here from its URI to the node ID of its prototype so
@@ -1287,7 +1281,7 @@
 
                 nodes: [  // TODO: all global objects
                     this.getNode( "http-vwf-example-com-clients-vwf", full ),
-                    this.getNode( applicationID, full ),
+                    this.getNode( this.application(), full ),
                 ],
 
                 // `createNode` annotations, keyed by `nodes` indexes.
@@ -1405,17 +1399,18 @@
                 nodeComponent = nodeComponent.patches;  // TODO: possible sync errors if the patched node is a URI component and the kernel state (time, random) is different from when the node was created on the originating client
             }
 
-            // nodeComponent may be a URI, a descriptor, or an ID, and while being created will
+            // nodeComponent may be a URI, a descriptor, or an ID. While being created, it will
             // transform from a URI to a descriptor to an ID (depending on its starting state).
-            // nodeURI, nodeDescriptor, and nodeID capture the applicable intermediate states.
+            // nodeURI, nodeDescriptor, and nodeID capture the intermediate states.
 
             var nodeURI, nodeDescriptor, nodeID;
 
             async.series( [
 
-                // If nodeComponent is a URI, load the descriptor.
+                // If `nodeComponent` is a URI, load the descriptor. `nodeComponent` may be a URI, a
+                // descriptor or an ID here.
 
-                function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is a URI, a descriptor, or an ID
+                function( series_callback_async /* ( err, results ) */ ) {
 
                     if ( componentIsURI( nodeComponent ) ) { // URI  // TODO: allow non-vwf URIs (models, images, etc.) to pass through to stage 2 and pass directly to createChild()
 
@@ -1492,9 +1487,10 @@
 
                 },
 
-                // If nodeComponent is a descriptor, construct and get the ID.
+                // If `nodeComponent` is a descriptor, construct and get the ID. `nodeComponent` may
+                // be a descriptor or an ID here.
 
-                function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is a descriptor or an ID
+                function( series_callback_async /* ( err, results ) */ ) {
 
                     if ( componentIsDescriptor( nodeComponent ) ) { // descriptor  // TODO: allow non-vwf URIs (models, images, etc.) to pass through to stage 2 and pass directly to createChild()
 
@@ -1513,9 +1509,9 @@
 
                 },
 
-                // nodeComponent is the ID.
+                // nodeComponent is an ID here.
 
-                function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is an ID
+                function( series_callback_async /* ( err, results ) */ ) {
 
                     if ( componentIsID( nodeComponent ) ) {  // ID
 
@@ -1610,12 +1606,6 @@
             // Unregister the node.
 
             nodes.delete( nodeID );
-
-            // Clear the root ID if the application root node is deleted.
-
-            if ( nodeID === applicationID ) {
-                applicationID = undefined;
-            }
 
             // Call deletedNode() on each view. The view is being notified that a node has been
             // deleted.
@@ -2071,7 +2061,7 @@ var useLegacyID = nodeID === 0 && childURI &&
     childURI != "http://vwf.example.com/node.vwf";
     
 useLegacyID = useLegacyID ||
-    nodeID == applicationID && childName == "camera"; // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
+    childName === "camera" && nodeID === this.application(); // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 childID = childComponent.id;
@@ -2094,13 +2084,6 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                     ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
                 childIndex = this.children( nodeID ).length;
 }
-            }
-
-            // Record the application root ID. The application is the first global node annotated as
-            // "application".
-
-            if ( nodeID === 0 && childName == "application" && ! applicationID ) {
-                applicationID = childID;
             }
 
             // Register the node.
@@ -3673,8 +3656,17 @@ if ( ! childComponent.source ) {
         /// @see {@link module:vwf/api/kernel.application}
 
         this.application = function( initializedOnly ) {
-            return applicationID && ( ! initializedOnly || this.models.object.initialized( applicationID ) ) ?
-                applicationID : undefined;
+
+            var applicationID;
+
+            Object.keys( nodes.globals ).forEach( function( globalID ) {
+                var global = nodes.existing[ globalID ];
+                if ( ( ! initializedOnly || global.initialized ) && global.name === "application" ) {
+                    applicationID = globalID;
+                }
+            }, this );
+
+            return applicationID;
         };
 
         // -- intrinsics ---------------------------------------------------------------------------
@@ -3758,6 +3750,84 @@ if ( ! childComponent.source ) {
             return this.models.object.behaviors( nodeID );
         };
 
+        // -- globals ------------------------------------------------------------------------------
+
+        /// @name module:vwf.globals
+        /// 
+        /// @see {@link module:vwf/api/kernel.globals}
+
+        this.globals = function( initializedOnly ) {
+
+            var globals = {};
+
+            Object.keys( nodes.globals ).forEach( function( globalID ) {
+                if ( ! initializedOnly || nodes.existing[ globalID ].initialized ) {
+                    globals[ globalID ] = undefined;
+                }
+            }, this );
+
+            return globals;
+        };
+
+        // -- global -------------------------------------------------------------------------------
+
+        /// @name module:vwf.global
+        /// 
+        /// @see {@link module:vwf/api/kernel.global}
+
+        this.global = function( globalReference, initializedOnly ) {
+
+            var globals = this.globals( initializedOnly );
+
+            // Look for a global node whose URI matches `globalReference`. If there is no match by
+            // URI, then search again by name.
+
+            return matches( "uri" ) || matches( "name" );
+
+            // Look for a global node where the field named by `field` matches `globalReference`.
+
+            function matches( field ) {
+
+                var matchingID;
+
+                Object.keys( globals ).some( function( globalID ) {
+                    if ( nodes.existing[ globalID ][ field ] === globalReference ) {
+                        matchingID = globalID;
+                        return true;
+                    }
+                } );
+
+                return matchingID;
+            }
+
+        };
+
+        // -- root ---------------------------------------------------------------------------------
+
+        /// @name module:vwf.root
+        /// 
+        /// @see {@link module:vwf/api/kernel.root}
+
+        this.root = function( nodeID, initializedOnly ) {
+
+            var rootID;
+
+            // Walk the ancestors to the top of the tree. Stop when we reach the pseudo-node at the
+            // global root, which unlike all other nodes has a falsy ID, or `undefined` if we could
+            // not reach the top because `initializedOnly` is set and we attempted to cross between
+            // nodes that have and have not completed initialization.
+
+            do {
+                rootID = nodeID;
+                nodeID = this.parent( nodeID, initializedOnly );
+            } while ( nodeID );
+
+            // Return the root ID, or `undefined` when `initializedOnly` is set and the node can't
+            // see the root.
+
+            return nodeID === undefined ? undefined : rootID;
+        };
+
         // -- ancestors ----------------------------------------------------------------------------
 
         /// @name module:vwf.ancestors
@@ -3770,7 +3840,7 @@ if ( ! childComponent.source ) {
 
             nodeID = this.parent( nodeID, initializedOnly );
 
-            while ( nodeID && nodeID !== 0 ) {
+            while ( nodeID ) {
                 ancestors.push( nodeID );
                 nodeID = this.parent( nodeID, initializedOnly );
             }
@@ -3794,14 +3864,34 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.children}
 
-        this.children = function( nodeID ) {
+        this.children = function( nodeID, initializedOnly ) {
 
             if ( nodeID === undefined ) {
                 this.logger.errorx( "children", "cannot retrieve children of nonexistent node" );
                 return;
             }
 
-            return this.models.object.children( nodeID );
+            return this.models.object.children( nodeID, initializedOnly );
+        };
+
+        // -- child --------------------------------------------------------------------------------
+
+        /// @name module:vwf.child
+        /// 
+        /// @see {@link module:vwf/api/kernel.child}
+
+        this.child = function( nodeID, childReference, initializedOnly ) {
+
+            var children = this.children( nodeID, initializedOnly );
+
+            if ( typeof childReference === "number" || childReference instanceof Number ) {
+                return children[ childReference ];
+            } else {
+                return children.filter( function( childID ) {
+                    return childID && this.name( childID ) === childReference;
+                }, this )[ 0 ];
+            }
+
         };
 
         // -- descendants --------------------------------------------------------------------------
@@ -3810,7 +3900,7 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.descendants}
 
-        this.descendants = function( nodeID ) {
+        this.descendants = function( nodeID, initializedOnly ) {
 
             if ( nodeID === undefined ) {
                 this.logger.errorx( "descendants", "cannot retrieve children of nonexistent node" );
@@ -3819,10 +3909,10 @@ if ( ! childComponent.source ) {
 
             var descendants = [];
 
-            this.children( nodeID ).forEach( function( childID ) {
+            this.children( nodeID, initializedOnly ).forEach( function( childID ) {
                 descendants.push( childID );
-                Array.prototype.push.apply( descendants, this.descendants( childID ) );
-            }, this );             
+                childID && Array.prototype.push.apply( descendants, this.descendants( childID, initializedOnly ) );
+            }, this );
 
             return descendants;
         };
@@ -3870,13 +3960,11 @@ if ( ! childComponent.source ) {
                 initializedOnly = undefined;
             }
 
-            // Evaluate the expression, using the application as the root and the provided node as
-            // the reference.
+            // Run the query.
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
-                this.application( initializedOnly ), nodeID, resolverWithInitializedOnly, this );
+            var matchIDs = find.call( this, nodeID, matchPattern, initializedOnly );
 
-            // Return the result, either by invoking the callback when provided, or returning the
+            // Return the result. Invoke the callback if one was provided. Otherwise, return the
             // array directly.
 
             if ( callback ) {
@@ -3888,12 +3976,6 @@ if ( ! childComponent.source ) {
             } else {  // TODO: future iterator proxy
 
                 return matchIDs;
-            }
-
-            // Wrap `xpathResolver` to pass `initializedOnly` through.
-
-            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
-                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
             }
 
         };
@@ -3916,24 +3998,21 @@ if ( ! childComponent.source ) {
         /// @returns {ID[]|undefined}
         ///   If callback is provided, undefined; otherwise an array of the node ids of the result.
         /// 
-        /// @see {@link module:vwf/api/kernel.clients}
+        /// @deprecated in version 0.6.21. Instead of `kernel.findClients( reference, "/pattern" )`,
+        ///   use `kernel.find( reference, "doc('http://vwf.example.com/clients.vwf')/pattern" )`.
+        /// 
+        /// @see {@link module:vwf/api/kernel.findClients}
 
         this.findClients = function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
-                "http-vwf-example-com-clients-vwf", nodeID, xpathResolver, this );
+            this.logger.warn( "`kernel.findClients` is deprecated. Use " +
+                "`kernel.find( nodeID, \"doc('http://vwf.example.com/clients.vwf')/pattern\" )`" +
+                " instead." );
 
-            if ( callback ) {
+            var clientsMatchPattern = "doc('http://vwf.example.com/clients.vwf')" +
+                ( matchPattern[0] === "/" ? "" : "/" ) + matchPattern;
 
-                matchIDs.forEach( function( matchID ) {
-                    callback( matchID );
-                } );
-
-            } else { 
-
-                return matchIDs;
-            }
-
+            return this.find( nodeID || this.application(), clientsMatchPattern, callback );
         };
 
         /// Test a node against a search pattern. See vwf.api.kernel#test for details.
@@ -3959,23 +4038,15 @@ if ( ! childComponent.source ) {
 
         this.test = function( nodeID, matchPattern, testID, initializedOnly ) {
 
-            // Evaluate the expression, using the application as the root and the provided node as
-            // the reference.
+            // Run the query.
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
-                this.application( initializedOnly ), nodeID, resolverWithInitializedOnly, this );
+            var matchIDs = find.call( this, nodeID, matchPattern, initializedOnly );
 
             // Search for the test node in the result.
 
             return matchIDs.some( function( matchID ) {
                 return matchID == testID;
             } );
-
-            // Wrap `xpathResolver` to pass `initializedOnly` through.
-
-            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
-                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
-            }
 
         };
 
@@ -4777,6 +4848,51 @@ if ( ! childComponent.source ) {
             return object;
         };
 
+        /// Locate nodes matching a search pattern. {@link module:vwf/api/kernel.find} describes the
+        /// supported patterns.
+        /// 
+        /// This is the internal implementation used by {@link module:vwf.find} and
+        /// {@link module:vwf.test}.
+        /// 
+        /// This function must run as a method of the kernel. Invoke it as:
+        ///   `find.call( kernel, nodeID, matchPattern, initializedOnly )`.
+        /// 
+        /// @name module:vwf~find
+        /// 
+        /// @param {ID} nodeID
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
+        /// @param {String} matchPattern
+        ///   The search pattern.
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
+        /// 
+        /// @returns {ID[]|undefined}
+        ///   An array of the node ids of the result.
+
+        var find = function( nodeID, matchPattern, initializedOnly ) {
+
+            // Evaluate the expression using the provided node as the reference. Take the root node
+            // to be the root of the reference node's tree. If a reference node is not provided, use
+            // the application as the root.
+
+            var rootID = nodeID ? this.root( nodeID, initializedOnly ) :
+                this.application( initializedOnly );
+
+            return require( "vwf/utility" ).xpath.resolve( matchPattern, rootID, nodeID,
+                resolverWithInitializedOnly, this );
+
+
+            // Wrap `xpathResolver` to pass `initializedOnly` through.
+
+            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
+                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
+            }
+
+        }
+
         // -- xpathResolver ------------------------------------------------------------------------
 
         /// Interpret the steps of an XPath expression being resolved. Use with
@@ -4822,16 +4938,28 @@ if ( ! childComponent.source ) {
                     break;
 
                 case "child":
-                    Array.prototype.push.apply( resultIDs, this.children( contextID ) );
+                    Array.prototype.push.apply( resultIDs,
+                        this.children( contextID, initializedOnly ).filter( function( childID ) {
+                            return childID;
+                        }, this )
+                    );
                     break;
 
                 case "descendant":
-                    Array.prototype.push.apply( resultIDs, this.descendants( contextID ) );
+                    Array.prototype.push.apply( resultIDs,
+                        this.descendants( contextID, initializedOnly ).filter( function( descendantID ) {
+                            return descendantID;
+                        }, this )
+                    );
                     break;
 
                 case "descendant-or-self":
                     resultIDs.push( contextID );
-                    Array.prototype.push.apply( resultIDs, this.descendants( contextID ) );
+                    Array.prototype.push.apply( resultIDs,
+                        this.descendants( contextID, initializedOnly ).filter( function( descendantID ) {
+                            return descendantID;
+                        }, this )
+                    );
                     break;
 
                 // case "following-sibling":  // TODO
@@ -4881,11 +5009,27 @@ if ( ! childComponent.source ) {
 
                     break;
 
+                // Attribute test.
+
                 case "attribute":
 
                     resultIDs = resultIDs.filter( function( resultID ) {
                         return resultID[0] == "@" && xpathPropertyMatchesStep.call( this, resultID.slice( 1 ), step.name );  // TODO: @?
                     }, this );
+
+                    break;
+
+                // The `doc()` function for referencing globals outside the current tree.
+                // http://www.w3.org/TR/xpath-functions/#func-doc.
+
+                case "doc":
+
+                    if ( this.root( contextID, initializedOnly ) ) {
+                        var globalID = this.global( step.name, initializedOnly );
+                        resultIDs = globalID ? [ globalID ] : [];
+                    } else {
+                        resultIDs = [];
+                    }
 
                     break;
 
@@ -5247,7 +5391,17 @@ if ( ! childComponent.source ) {
                         return self.proxy( prototypeNode, self.existing[behaviorID] );
                     }, this.existing[prototypeID] );
 
+                    // Look up the parent.
+
                     var parentNode = this.existing[parentID];
+
+                    // If this is the global root of a new tree, add it to the `globals` set.
+
+                    if ( ! parentNode ) {
+                        this.globals[nodeID] = undefined;
+                    }
+
+                    // Add the node to the registry.
 
                     return this.existing[nodeID] = {
 
@@ -5264,8 +5418,7 @@ if ( ! childComponent.source ) {
                         // type: ...,
 
                         uri: nodeURI,
-
-                        // name: ...,
+                        name: nodeName,
 
                         // Internal state. The change flags are omitted until needed. -- not implemented here yet; still using vwf/model/object
 
@@ -5421,6 +5574,7 @@ if ( ! childComponent.source ) {
                 if ( this.existing[nodeID] ) {
 
                     delete this.existing[nodeID];
+                    delete this.globals[nodeID];
 
                     return true;
 
@@ -5501,6 +5655,15 @@ if ( ! childComponent.source ) {
                 //     ...
                 // }
 
+            },
+
+            /// Global root nodes. Each of these is the root of a tree.
+            /// 
+            /// The `globals` object is a set: the keys are the data, and only existence on the
+            /// object is significant.
+
+            globals: {
+                // id: undefined,
             },
 
         };
