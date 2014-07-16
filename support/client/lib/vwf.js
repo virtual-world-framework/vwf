@@ -1572,6 +1572,24 @@
 
             this.logger.debuggx( "deleteNode", nodeID );
 
+            // Send the meta event into the application. We send it before deleting the child so
+            // that the child will still be available for review.
+
+            var parentID = this.parent( nodeID );
+
+            if ( parentID !== 0 ) {
+
+                var nodeIndex = this.children( parentID ).indexOf( nodeID );
+
+                if ( nodeIndex < 0 ) {
+                    nodeIndex = undefined;
+                }
+
+                this.fireEvent( parentID, [ "children", "removed" ],
+                    [ nodeIndex, this.kutility.nodeReference( nodeID ) ] );
+
+            }
+
             // Remove the entry in the components list if this was the root of a component loaded
             // from a URI.
 
@@ -2223,6 +2241,21 @@ if ( ! childComponent.source ) {
 
                     child = nodes.create( childID, childPrototypeID, childBehaviorIDs, childURI, childName, nodeID );
 
+                    // For the proto-prototype node `node.vwf`, register the meta events.
+
+                    if ( childID === vwf.kutility.nodeTypeURI ) {
+                        // TODO: uncomment when the node registry starts tracking events
+                        // child.events.create( namespaceEncodedName( [ "properties", "created" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "properties", "initialized" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "properties", "deleted" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "methods", "created" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "methods", "deleted" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "events", "created" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "events", "deleted" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "children", "added" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "children", "removed" ] ) );
+                    }
+
                     // Re-register the node in vwf/model/object now that we have the prototypes and
                     // behaviors. vwf/model/object knows that we call it more than once and only
                     // updates the new information.
@@ -2520,6 +2553,22 @@ if ( ! childComponent.source ) {
 
                                 // Mark the node as initialized.
                                 nodes.initialize( childID );
+
+                                // Suppress kernel reentry so that meta event handlers don't make
+                                // any changes during replication.
+
+                                replicating && vwf.models.kernel.disable();
+
+                                // Send the meta event into the application.
+
+                                if ( nodeID !== 0 ) {
+                                    vwf.fireEvent( nodeID, [ "children", "added" ],
+                                        [ childIndex, vwf.kutility.nodeReference( childID ) ] );
+                                }
+
+                                // Restore kernel reentry.
+
+                                replicating && vwf.models.kernel.enable();
 
                                 series_callback_async( err, undefined );
                             } );
@@ -2829,6 +2878,10 @@ if ( ! childComponent.source ) {
                     propertyGet, propertySet );
             } );
 
+            // Send the meta event into the application.
+
+            this.fireEvent( nodeID, [ "properties", "created" ], [ propertyName ] );
+
             this.logger.debugu();
 
             return propertyValue;
@@ -2987,19 +3040,30 @@ if ( ! childComponent.source ) {
                 } );
             }
 
-            // For a reentrant call, restore the previous state, move the index forward to cover
-            // the models we called.
-
             if ( reentered ) {
+
+                // For a reentrant call, restore the previous state and move the index forward to
+                // cover the models we called.
+
                 entrants[nodeID+'-'+propertyName] = entry;
                 entry.completed = true;
-            }
 
-            // Delete the call record if this is the first, non-reentrant call here (the normal
-            // case).
+            } else {
 
-            else {
+                // Delete the call record if this is the first, non-reentrant call here (the normal
+                // case).
+
                 delete entrants[nodeID+'-'+propertyName];
+
+                // If the property was created or initialized, send the corresponding meta event
+                // into the application.
+
+                if ( settingPropertyEtc === "creatingProperty" ) {
+                    this.fireEvent( nodeID, [ "properties", "created" ], [ propertyName ] );
+                } else if ( settingPropertyEtc === "initializingProperty" ) {
+                    this.fireEvent( nodeID, [ "properties", "initialized" ], [ propertyName ] );
+                }
+
             }
 
             // Clear the assignment counter when the outermost `setProperty` completes.
@@ -3204,6 +3268,10 @@ if ( ! childComponent.source ) {
                     methodBody );
             } );
 
+            // Send the meta event into the application.
+
+            this.fireEvent( nodeID, [ "methods", "created" ], [ methodName ] );
+
             this.logger.debugu();
         };
 
@@ -3267,6 +3335,10 @@ if ( ! childComponent.source ) {
             this.views.forEach( function( view ) {
                 view.createdEvent && view.createdEvent( nodeID, encodedEventName, eventParameters );
             } );
+
+            // Send the meta event into the application.
+
+            this.fireEvent( nodeID, [ "events", "created" ], [ eventName ] );
 
             this.logger.debugu();
         };
