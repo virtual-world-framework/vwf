@@ -525,16 +525,8 @@ define( [ "module", "vwf/model", "vwf/utility",
                         var parms = [];
                         for ( var j = 0; j < arguments.length; j++) {
                             if ( j >= 2 ) {
-                                if ( arguments[ j ].type === 'object' ) {
-                                    var temp = [];
-                                    if ( arguments[ j ].properties !== undefined ) {
-                                        for ( var k in arguments[ j ].properties ) {
-                                            temp.push( arguments[ j ].properties[ k ].data );
-                                        }
-                                    }
-                                    parms.push( temp );
-                                } else {
-                                    parms.push( arguments[ j ].toString() );
+                                if ( arguments[ j ].type === "object" ) {
+                                    parms.push( setArgsFromObj( arguments[ j ] ) );
                                 }
                             } else {
                                 parms.push( arguments[ j ].toString() );
@@ -549,6 +541,18 @@ define( [ "module", "vwf/model", "vwf/utility",
 
         };
         return new Interpreter( acorn, code, initFunc );
+    }
+
+    function setArgsFromObj( object ) {
+        var args = [];
+        for ( var i in object.properties ) {
+            if ( object.properties[ i ].type === "object" ) {
+                args.push( setArgsFromObj( object.properties[ i ] ) );
+            } else {
+                args.push( object.properties[ i ].data );
+            }
+        }
+        return args;
     }
 
 

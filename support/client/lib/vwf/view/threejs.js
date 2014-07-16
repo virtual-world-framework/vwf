@@ -1230,21 +1230,31 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             window.onresize = function () {
                 var origWidth = self.width;
                 var origHeight = self.height;
+                var viewWidth = mycanvas.width;
+                var viewHeight = mycanvas.height;
+
                 if ( window && window.innerHeight ) self.height = window.innerHeight;
                 if ( window && window.innerWidth ) self.width = window.innerWidth;
 
-                if ( ( origWidth != self.width ) || ( origHeight != self.height ) ) {
-                    mycanvas.height = self.height;
-                    mycanvas.width = self.width;
+                if ( ( origWidth != self.width || origHeight != self.height ) ) {
+                    // If canvas changed size, use canvas dimentions instead
+                    if ( viewWidth != mycanvas.clientWidth || viewHeight != mycanvas.clientHeight ) {
+                        mycanvas.width = self.width = mycanvas.clientWidth;
+                        mycanvas.height = self.height = mycanvas.clientHeight;
+                    } else {
+                        mycanvas.width = self.width;
+                        mycanvas.height = self.height;
+                    }
+
                     if ( sceneNode.renderer ) {
-                        sceneNode.renderer.setViewport( 0, 0, self.width, self.height );
+                        sceneNode.renderer.setViewport( 0, 0, mycanvas.width, mycanvas.height );
                     }
-                    
-                    var viewCam = view.state.cameraInUse;
-                    if ( viewCam ) {
-                        viewCam.aspect =  mycanvas.width / mycanvas.height;
-                        viewCam.updateProjectionMatrix();
-                    }
+                }
+
+                var viewCam = view.state.cameraInUse;
+                if ( viewCam ) {
+                    viewCam.aspect = mycanvas.width / mycanvas.height;
+                    viewCam.updateProjectionMatrix();
                 }
             }
 
@@ -1396,7 +1406,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                         shift: e.shiftKey,
                         meta: e.metaKey,
                     },
-                position: [ mousePos.x / sceneView.width, mousePos.y / sceneView.height ],
+                position: [ mousePos.x / canvas.clientWidth, mousePos.y / canvas.clientHeight ],
                 screenPosition: [ mousePos.x, mousePos.y ]
             } ];
 
@@ -3512,15 +3522,16 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         }
     }
 
-    function setActiveCamera(cameraID) {
+    function setActiveCamera( cameraID ) {
         var sceneRootID = this.state.sceneRootID;
         var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
-        if( modelCameraInfo.threeJScameras[cameraID] )
-        {
+        if( modelCameraInfo.threeJScameras[ cameraID ] ) {
             // If the view is currently using the model's activeCamera, update it to the new activeCamera
             if ( usersShareView ) {
                 cameraNode = this.state.nodes[cameraID];
                 this.state.cameraInUse = cameraNode.threeObject;
+                var canvas = this.canvasQuery[ 0 ];
+                this.state.cameraInUse.aspect = canvas.clientWidth / canvas.clientHeight;
             }
         }
     }
