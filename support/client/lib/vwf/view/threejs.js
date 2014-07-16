@@ -3522,19 +3522,17 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         }
     }
 
-    function setActiveCamera(cameraID) {
+    function setActiveCamera( cameraID ) {
         var sceneRootID = this.state.sceneRootID;
         var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
-        if( modelCameraInfo.threeJScameras[cameraID] )
-        {
+        if( modelCameraInfo.threeJScameras[ cameraID ] ) {
             // If the view is currently using the model's activeCamera, update it to the new activeCamera
             if ( usersShareView ) {
                 cameraNode = this.state.nodes[cameraID];
                 this.state.cameraInUse = cameraNode.threeObject;
+                var canvas = this.canvasQuery[ 0 ];
+                this.state.cameraInUse.aspect = canvas.clientWidth / canvas.clientHeight;
             }
-
-            var canvas = this.canvasQuery[0];
-            this.state.cameraInUse.aspect = canvas.clientWidth / canvas.clientHeight;
         }
     }
 });
