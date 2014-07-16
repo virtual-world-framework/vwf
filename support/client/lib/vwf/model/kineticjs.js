@@ -1880,49 +1880,49 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         if ( isKineticClass( protos, "kinetic-arc-vwf" ) || isKineticClass( protos, "kinetic.arc.vwf" ) ) {
             kineticObj = new Kinetic.Arc( config || {} );
-        } else if ( isKineticClass( protos, "baselayer-arc-vwf" ) || isKineticClass( protos, "baselayer.arc.vwf" ) ) {
-            kineticObj = new Kinetic.Arc( config || {} );
-        } else if ( isKineticClass( protos, "canvas-arc-vwf" ) || isKineticClass( protos, "canvas.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-baselayer-vwf" ) || isKineticClass( protos, "kinetic.baselayer.vwf" ) ) {
+            kineticObj = new Kinetic.BaseLayer( config || {} );
+        } else if ( isKineticClass( protos, "kinetic-canvas-vwf" ) || isKineticClass( protos, "kinetic.canvas.vwf" ) ) {
             kineticObj = new Kinetic.Canvas( config || {} );
-        } else if ( isKineticClass( protos, "circle-arc-vwf" ) || isKineticClass( protos, "circle.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-circle-vwf" ) || isKineticClass( protos, "kinetic.circle.vwf" ) ) {
             kineticObj = new Kinetic.Circle( config || {} );
-        } else if ( isKineticClass( protos, "ellipse-arc-vwf" ) || isKineticClass( protos, "ellipse.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-ellipse-vwf" ) || isKineticClass( protos, "kinetic.ellipse.vwf" ) ) {
             kineticObj = new Kinetic.Ellipse( config || {} );
-        } else if ( isKineticClass( protos, "fastlayer-arc-vwf" ) || isKineticClass( protos, "fastlayer.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-fastlayer-vwf" ) || isKineticClass( protos, "kinetic.fastlayer.vwf" ) ) {
             kineticObj = new Kinetic.FastLayer( config || {} );
-        } else if ( isKineticClass( protos, "group-arc-vwf" ) || isKineticClass( protos, "group.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-group-vwf" ) || isKineticClass( protos, "kinetic.group.vwf" ) ) {
             kineticObj = new Kinetic.Group( config || {} );
-        } else if ( isKineticClass( protos, "image-arc-vwf" ) || isKineticClass( protos, "image.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-image-vwf" ) || isKineticClass( protos, "kinetic.image.vwf" ) ) {
             kineticObj = new Kinetic.Image( config || {} );
-        } else if ( isKineticClass( protos, "layer-arc-vwf" ) || isKineticClass( protos, "layer.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-layer-vwf" ) || isKineticClass( protos, "kinetic.layer.vwf" ) ) {
             kineticObj = new Kinetic.Layer( config || {} );
-        } else if ( isKineticClass( protos, "line-arc-vwf" ) || isKineticClass( protos, "line.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-line-vwf" ) || isKineticClass( protos, "kinetic.line.vwf" ) ) {
             kineticObj = new Kinetic.Line( config || {} );
-        } else if ( isKineticClass( protos, "path-arc-vwf" ) || isKineticClass( protos, "path.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-path-vwf" ) || isKineticClass( protos, "kinetic.path.vwf" ) ) {
             kineticObj = new Kinetic.Path( config || {} );
-        } else if ( isKineticClass( protos, "rect-arc-vwf" ) || isKineticClass( protos, "rect.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-rect-vwf" ) || isKineticClass( protos, "kinetic.rect.vwf" ) ) {
             kineticObj = new Kinetic.Rect( config || {} );
-        } else if ( isKineticClass( protos, "regularpolygon-arc-vwf" ) || isKineticClass( protos, "regularpolygon.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-regularpolygon-vwf" ) || isKineticClass( protos, "kinetic.regularpolygon.vwf" ) ) {
             kineticObj = new Kinetic.RegularPolygon( config || {} );
-        } else if ( isKineticClass( protos, "ring-arc-vwf" ) || isKineticClass( protos, "ring.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-ring-vwf" ) || isKineticClass( protos, "kinetic.ring.vwf" ) ) {
             kineticObj = new Kinetic.Ring( config || {} );
-        } else if ( isKineticClass( protos, "sprite-arc-vwf" ) || isKineticClass( protos, "sprite.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-sprite-vwf" ) || isKineticClass( protos, "kinetic.sprite.vwf" ) ) {
             kineticObj = new Kinetic.Sprite( config || {} );
-        } else if ( isKineticClass( protos, "stage-arc-vwf" ) || isKineticClass( protos, "stage.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-stage-vwf" ) || isKineticClass( protos, "kinetic.stage.vwf" ) ) {
             kineticObj = new Kinetic.Stage( config || {} );
-        } else if ( isKineticClass( protos, "star-arc-vwf" ) || isKineticClass( protos, "star.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-star-vwf" ) || isKineticClass( protos, "kinetic.star.vwf" ) ) {
             kineticObj = new Kinetic.Star( config || {} );
-        } else if ( isKineticClass( protos, "text-arc-vwf" ) || isKineticClass( protos, "text.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-text-vwf" ) || isKineticClass( protos, "kinetic.text.vwf" ) ) {
             kineticObj = new Kinetic.Text( config || {} );
-        } else if ( isKineticClass( protos, "textpath-arc-vwf" ) || isKineticClass( protos, "textpath.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-textpath-vwf" ) || isKineticClass( protos, "kinetic.textpath.vwf" ) ) {
             kineticObj = new Kinetic.TextPath( config || {} );
-        } else if ( isKineticClass( protos, "wedge-arc-vwf" ) || isKineticClass( protos, "wedge.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-wedge-vwf" ) || isKineticClass( protos, "kinetic.wedge.vwf" ) ) {
             kineticObj = new Kinetic.Wedge( config || {} );
-        } else if ( isKineticClass( protos, "shape-arc-vwf" ) || isKineticClass( protos, "shape.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-shape-vwf" ) || isKineticClass( protos, "kinetic.shape.vwf" ) ) {
             kineticObj = new Kinetic.Shape( config || {} );
-        } else if ( isKineticClass( protos, "container-arc-vwf" ) || isKineticClass( protos, "container.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-container-vwf" ) || isKineticClass( protos, "kinetic.container.vwf" ) ) {
             kineticObj = new Kinetic.Container( config || {} );
-        } else if ( isKineticClass( protos, "node-arc-vwf" ) || isKineticClass( protos, "node.arc.vwf" ) ) {
+        } else if ( isKineticClass( protos, "kinetic-node-vwf" ) || isKineticClass( protos, "kinetic.node.vwf" ) ) {
             kineticObj = new Kinetic.Node( config || {} );
         }
 
