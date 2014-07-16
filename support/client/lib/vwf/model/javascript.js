@@ -610,11 +610,59 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             createEventAccessor.call( this, node, eventName );
 
-            node.private.listeners[eventName] = [];
-
             // Invalidate the "future" cache.
 
             node.private.change++;
+
+        },
+
+        // -- addingEventListener ------------------------------------------------------------------
+
+        addingEventListener: function( nodeID, eventName, eventHandler, eventContextID, eventPhases ) {
+
+            var node = this.nodes[nodeID];
+            var eventContext = this.nodes[eventContextID];
+
+            var listeners = node.private.listeners[eventName];
+
+            if ( ! listeners ) {
+                listeners = node.private.listeners[eventName] = [];
+            }
+
+            listeners.push( { handler: eventHandler, context: eventContext, phases: eventPhases } );
+
+        },
+
+        // -- removingEventListener ----------------------------------------------------------------
+
+        removingEventListener: function( nodeID, eventName, eventHandler ) {
+
+            var node = this.nodes[nodeID];
+
+            var listeners = node.private.listeners[eventName];
+
+            if ( listeners ) {
+                node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                    return listener.handler !== eventHandler;
+                } );
+            }
+
+        },
+
+        // -- flushingEventListeners ---------------------------------------------------------------
+
+        flushingEventListeners: function( nodeID, eventName, eventContextID ) {
+
+            var node = this.nodes[nodeID];
+            var eventContext = this.nodes[eventContextID];
+
+            var listeners = node.private.listeners[eventName];
+
+            if ( listeners ) {
+                node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                    return listener.context !== eventContext;
+                } );
+            }
 
         },
 
@@ -995,24 +1043,23 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
             set: unsettable ? undefined : function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.events.node, or just node
-                var listeners = node.private.listeners[eventName] ||
-                    ( node.private.listeners[eventName] = [] );  // array of { handler: function, context: node, phases: [ "phase", ... ] }
                 if ( typeof value == "function" || value instanceof Function ) {
-                    listeners.push( { handler: value, context: node } );  // for container.*event* = function() { ... }, context is the target node
+                    self.kernel.addEventListener.call( self, node.id, eventName,
+                        value, node.id );  // for container.*event* = function() { ... }, context is the target node
                 } else if ( value.add ) {
                     if ( ! value.phases || value.phases instanceof Array ) {
-                        listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
+                        self.kernel.addEventListener.call( self, node.id, eventName,
+                            value.handler, value.context && value.context.id, value.phases );
                     } else {
-                        listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
+                        self.kernel.addEventListener.call( self, node.id, eventName,
+                            value.handler, value.context && value.context.id, [ value.phases ] );
                     }
                 } else if ( value.remove ) {
-                    node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                        return listener.handler !== value.handler;
-                    } );
+                    self.kernel.removeEventListener.call( self, node.id, eventName,
+                        value.handler );
                 } else if ( value.flush ) {
-                    node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                        return listener.context !== value.context;
-                    } );
+                    self.kernel.flushEventListeners.call( self, node.id, eventName,
+                        value.context && value.context.id );
                 }
             },
 

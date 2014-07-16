@@ -214,6 +214,44 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
+        /// @param {Script} eventHandler
+        /// @param {ID} eventContextID
+        /// @param {String[]} eventPhases
+        /// 
+        /// @returns {}
+
+        addingEventListener: [ /* nodeID, eventName, eventHandler, eventContextID, eventPhases */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {Script} eventHandler
+        /// 
+        /// @returns {}
+
+        removingEventListener: [ /* nodeID, eventName, eventHandler */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ID} eventContextID
+        /// 
+        /// @returns {}
+
+        flushingEventListeners: [ /* nodeID, eventName, eventContextID */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
         /// @param {String[]} eventParameters
         /// 
         /// @returns {}
