@@ -273,6 +273,23 @@ define( [ "module",
             return a.href;
         },
 
+        // -- merge --------------------------------------------------------------------------------
+
+        /// Merge fields from the `source` objects into `target`.
+
+        merge: function( target /* [, source1 [, source2 ... ] ] */ ) {
+
+            for ( var index = 1; index < arguments.length; index++ ) {
+                var source = arguments[index];
+
+                Object.keys( source ).forEach( function( key ) {
+                    target[key] = source[key];
+                } );
+            }
+
+            return target;
+        },
+
         // -- xpath --------------------------------------------------------------------------------
 
         /// XPath resolution functions.

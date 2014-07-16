@@ -189,7 +189,7 @@ define( function() {
         /// @param {String[]} methodParameters
         /// @param {String} methodBody
         /// 
-        /// @returns {}
+        /// @returns {Handler} methodHandler
 
         creatingMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
 
@@ -201,12 +201,34 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} methodName
+        /// @param {Handler} methodHandler
+        /// 
+        /// @returns {Handler} methodHandler
+
+        settingMethod: [ /* nodeID, methodName, methodHandler */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} methodName
+        /// 
+        /// @returns {Handler} methodHandler
+
+        gettingMethod: [ /* nodeID, methodName */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} methodName
         /// @param {String[]} methodParameters
-        /// @param {Value} methodValue
         /// 
         /// @returns {}
 
-        callingMethod: [ /* nodeID, methodName, methodParameters, methodValue */ ],
+        callingMethod: [ /* nodeID, methodName, methodParameters */ ],
 
         /// Description.
         /// 
@@ -214,7 +236,7 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
-        /// @param {Script} eventHandler
+        /// @param {Handler} eventHandler
         /// @param {ID} eventContextID
         /// @param {String[]} eventPhases
         /// 
@@ -228,7 +250,7 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
-        /// @param {Script} eventHandler
+        /// @param {Handler} eventHandler
         /// 
         /// @returns {}
 
