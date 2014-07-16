@@ -1062,7 +1062,7 @@
             // Note that the message should be validated before looking up and invoking an arbitrary
             // handler.
 
-            var args = [];
+            var args = [], result;
 
             if ( nodeID || nodeID === 0 ) args.push( nodeID );
             if ( memberName ) args.push( memberName );
@@ -1070,7 +1070,12 @@
 
             // Invoke the action.
 
-            var result = this[actionName] && this[actionName].apply( this, args );
+            if ( origin !== "reflector" || ! nodeID || nodes.existing[ nodeID ] ) {
+                result = this[ actionName ] && this[ actionName ].apply( this, args );
+            } else {
+                this.logger.debugx( "receive", "ignoring reflector action on non-existent node", nodeID );
+                result = undefined;
+            }
 
             // Return the result.
 
@@ -4652,7 +4657,7 @@ if ( ! childComponent.source ) {
                 // reinserted.
 
                 return object.filter( function( fields ) {
-                    return ! fields.respond && fields.action;  // TODO: fields.action is here to filter out tick messages  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
+                    return ! ( fields.origin === "reflector" && fields.sequence > vwf.sequence_ ) && fields.action;  // TODO: fields.action is here to filter out tick messages  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
                 } ).sort( function( fieldsA, fieldsB ) {
                     return fieldsA.sequence - fieldsB.sequence;
                 } );

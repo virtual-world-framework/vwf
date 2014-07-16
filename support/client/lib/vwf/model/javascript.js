@@ -232,7 +232,25 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function
             } );
 
             Object.defineProperty( node.children, "create", {
+
                 value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
+
+                    // Interpret `node.children.create( name, callback )` as
+                    // `node.children.create( name, undefined, callback )`.
+
+                    if ( typeof component === "function" || component instanceof Function ) {
+                        callback = component;
+                        component = undefined;
+                    }
+
+                    // Accept `node.children.create( name )` and treat it as
+                    // `node.children.create( name, {} )`.
+
+                    component = component || {};
+
+                    // Make the call. If a callback is provided, wrap it and translate the ID to a
+                    // node reference.
+
                     if ( callback ) {
                         self.kernel.createChild( this.node.id, name, componentKernelFromJS.call( self, component ), undefined, undefined, function( childID ) {
                             callback.call( node, self.nodes[childID] );
@@ -240,11 +258,16 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function
                     } else { 
                         return self.kernel.createChild( this.node.id, name, componentKernelFromJS.call( self, component ) );
                     }
+
                 }
+
             } );
 
             Object.defineProperty( node.children, "delete", {
                 value: function( child ) {
+                    if ( typeof child === "string" ) {
+                        child = this.node.children[ child ];
+                    }
                     return self.kernel.deleteNode( child.id );
                 }
             } );
