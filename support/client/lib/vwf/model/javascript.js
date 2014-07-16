@@ -23,7 +23,7 @@
 
 define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function( module, model, kutility, utility ) {
 
-    return model.load( module, {
+    var exports = model.load( module, {
 
         // This is a placeholder for providing a natural integration between simulation and the
         // browser's JavaScript environment.
@@ -514,7 +514,8 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
             if ( propertyGet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
-                    node.private.getters[propertyName] = eval( getterScript( propertyGet ) );
+                    node.private.getters[propertyName] =
+                        functionFromHandler( { body: propertyGet } );
                 } catch ( e ) {
                     this.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating getter:", utility.exceptionMessage( e ) );
@@ -525,7 +526,8 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
         
             if ( propertySet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
-                    node.private.setters[propertyName] = eval( setterScript( propertySet ) );
+                    node.private.setters[propertyName] =
+                        functionFromHandler( { parameters: [ "value" ], body: propertySet } );
                 } catch ( e ) {
                     this.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating setter:", utility.exceptionMessage( e ) );
@@ -614,12 +616,13 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             createMethodAccessor.call( this, node, methodName );
 
             try {
-                node.private.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
+                node.private.bodies[methodName] =
+                    functionFromHandler( { parameters: methodParameters, body: methodBody } );
             } catch ( e ) {
                 this.logger.warnx( "creatingMethod", nodeID, methodName, methodParameters,
                     "exception evaluating body:", utility.exceptionMessage( e ) );
             }
-        
+
             // Invalidate the "future" cache.
 
             node.private.change++;
@@ -1171,37 +1174,82 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     }
 
-    // -- getterScript -----------------------------------------------------------------------------
+    /// Convert a `Handler` to a JavaScript `function`.
+    /// 
+    /// @param {Handler} handler
+    /// 
+    /// @returns {function}
 
-    function getterScript( body ) {
-        return accessorScript( "( function() {", body, "} )" );
-    }
+    function functionFromHandler( handler ) {
 
-    // -- setterScript -----------------------------------------------------------------------------
+        var name = handler.name, parameters = handler.parameters, body = handler.body;
 
-    function setterScript( body ) {
-        return accessorScript( "( function( value ) {", body, "} )" );
-    }
+        var parameterString = parameters && parameters.length ?
+            " " + parameters.join( ", " ) + " " :
+            "";
 
-    // -- bodyScript -------------------------------------------------------------------------------
+        var prefix = "function(" + parameterString + ") {";
+        var suffix = "}";
 
-    function bodyScript( parameters, body ) {
-        var parameterString = ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  );
-        return accessorScript( "( function(" + parameterString + ") {", body, "} )" );
-        // return accessorScript( "( function(" + ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  ) + ") {", body, "} )" );
-    }
-
-    // -- accessorScript ---------------------------------------------------------------------------
-
-    function accessorScript( prefix, body, suffix ) {  // TODO: sanitize script, limit access
-        if ( body.length && body.charAt( body.length-1 ) == "\n" ) {
-            var bodyString = body.replace( /^./gm, "  $&" );
-            return prefix + "\n" + bodyString + suffix + "\n";
+        if ( body && body.length ) {
+            if ( body.charAt( body.length-1 ) == "\n" ) {
+                var functionString = prefix + "\n" + body.replace( /^./gm, "    $&" ) + suffix + "\n";
+            } else {
+                var functionString = prefix + " " + body + " " + suffix;
+            }
         } else {
-            var bodyString = body.length ? " " + body + " " : "";
-            return prefix + bodyString + suffix;
+            var functionString = prefix + suffix;
         }
+
+        return eval( "( " + functionString + ")" );
     }
+
+    /// Convert a JavaScript `function` to a `Handler`.
+    /// 
+    /// @param {function} funcshun
+    /// 
+    /// @returns {Handler}
+
+    function handlerFromFunction( funcshun ) {
+
+        var name, parameters, body;
+
+        var match = functionRegex.exec( funcshun.toString() );
+
+        if ( match ) {
+
+            name = match[1];
+
+            // Trim the parameter string. Also remove the `/**/` that Chrome adds to the parameter
+            // list for functions created using `Function( parameter, ..., body )`. See
+            // `NewFunctionString` in http://code.google.com/p/v8/source/browse/trunk/src/v8natives.js.
+
+            var parameterString = match[2].replace( /\/\*.*\*\//, "" ).trim();
+
+            parameters = parameterString.length ? parameterString.split( "," ).map( function( parameter ) {
+                return parameter.trim();
+            } ) : undefined;
+
+            body = match[3].trim();
+
+        }
+
+        return { name: name, parameters: parameters, body: body };
+    }
+
+    /// Regex to crack a `Function.toString()` result.
+    /// 
+    /// @field
+
+    var functionRegex = new RegExp(
+        "function" +                    // `function`
+        "\\s*" +
+        "([a-zA-Z_$][0-9a-zA-Z_$]*)?" + // optional name; capture #1
+        "\\s*" +
+        "\\(([^)]*)\\)" +               // `(...)`; capture #2 inside `()`
+        "\\s*" +
+        "\\{([^]*)\\}"                  // `{...}`; capture #3 inside `{}`
+    );
 
     // -- findListeners ----------------------------------------------------------------------------
 
@@ -1348,5 +1396,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
         }
 
     }
+
+    return exports;
 
 } );
