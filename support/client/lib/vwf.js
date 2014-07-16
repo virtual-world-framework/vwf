@@ -40,6 +40,14 @@
 
         this.configuration = undefined; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference  // TODO: assign here after converting vwf.js to a RequireJS module and listing "vwf/configuration" as a dependency
 
+        /// Kernel utility functions and objects.
+        /// 
+        /// @name module:vwf.utility
+        /// 
+        /// @private
+
+        this.kutility = undefined; // require( "vwf/kernel/utility" );  // TODO: assign here after converting vwf.js to a RequireJS module and listing "vwf/kernel/utility" as a dependency
+
         /// The kernel logger.
         /// 
         /// @name module:vwf.logger
@@ -222,19 +230,6 @@
 
         var components = this.private.components = {}; // maps component node ID => component specification
 
-        /// The proto-prototype of all nodes is "node", identified by this URI. This type is
-        /// intrinsic to the system and nothing is loaded from the URI.
-        /// 
-        /// @name module:vwf~nodeTypeURI
-
-        var nodeTypeURI = "http://vwf.example.com/node.vwf";
-
-        /// The "node" component descriptor.
-        /// 
-        /// @name module:vwf~nodeTypeDescriptor
-
-        var nodeTypeDescriptor = { extends: null };  // TODO: detect nodeTypeDescriptor in createChild() a different way and remove this explicit null prototype
-
         /// This is the connection to the reflector. In this sample implementation, "socket" is a
         /// socket.io client that communicates over a channel provided by the server hosting the
         /// client documents.
@@ -344,6 +339,7 @@
                 { library: "vwf/view/touch", active: false },
                 { library: "vwf/view/cesium", active: false },
                 { library: "vwf/view/mil-sym", active: false },
+                { library: "vwf/kernel/utility", active: true },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
                 { library: "vwf/model/threejs/three", active: false },
@@ -543,6 +539,10 @@
             // provide additional settings when we connect.
 
             this.configuration = require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference
+
+            // Load the kernel utilities.
+
+            this.kutility = require( "vwf/kernel/utility" );
 
             // Create the logger.
 
@@ -1796,7 +1796,7 @@
 
                 if ( prototypeID === undefined ) {
                     nodeComponent.extends = null;
-                } else if ( prototypeID !== nodeTypeURI ) {
+                } else if ( prototypeID !== this.kutility.nodeTypeURI ) {
                     nodeComponent.extends = this.getNode( prototypeID );  // TODO: move to vwf/model/object and get from intrinsics
                 }
 
@@ -2046,7 +2046,7 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                 childIndex = childURI;
             } else {  // descendant: parent id + next from parent's sequence
 if ( useLegacyID ) {  // TODO: fix static ID references and remove
-    childID = ( childComponent.extends || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
+    childID = ( childComponent.extends || this.kutility.nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
     childIndex = this.children( nodeID ).length;
 } else {    
@@ -2144,7 +2144,7 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                             // Create or find the prototype and save the ID in childPrototypeID.
 
                             if ( childComponent.extends !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
-                                vwf.createNode( childComponent.extends || nodeTypeURI, function( prototypeID ) /* async */ {
+                                vwf.createNode( childComponent.extends || vwf.kutility.nodeTypeURI, function( prototypeID ) /* async */ {
                                     childPrototypeID = prototypeID;
 
 // TODO: the GLGE driver doesn't handle source/type or properties in prototypes properly; as a work-around pull those up into the component when not already defined
@@ -3124,7 +3124,7 @@ if ( ! childComponent.source ) {
 
                         if ( prototypeIndex < prototypeArray.length - 1 ) {
                             propertyValue = this.getProperty( prototypeID, propertyName, true ); // behavior node only, not its prototypes
-                        } else if ( prototypeID !== nodeTypeURI ) {
+                        } else if ( prototypeID !== this.kutility.nodeTypeURI ) {
                             propertyValue = this.getProperty( prototypeID, propertyName ); // prototype node, recursively
                         }
 
@@ -3898,9 +3898,9 @@ if ( ! childComponent.source ) {
 
         var loadComponent = function( nodeURI, callback_async /* ( nodeDescriptor ) */ ) {  // TODO: turn this into a generic xhr loader exposed as a kernel function?
 
-            if ( nodeURI == nodeTypeURI ) {
+            if ( nodeURI == vwf.kutility.nodeTypeURI ) {
 
-                callback_async( nodeTypeDescriptor );
+                callback_async( vwf.kutility.nodeTypeDescriptor );
 
             } else if ( nodeURI.match( RegExp( "^data:application/json;base64," ) ) ) {
 
