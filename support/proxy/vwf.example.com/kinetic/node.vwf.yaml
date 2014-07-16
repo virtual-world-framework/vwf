@@ -1,0 +1,24 @@
+# http://kineticjs.com/docs/Kinetic.Node.html
+
+--- 
+extends: http://vwf.example.com/node.vwf
+properties:
+  x:
+  y:
+  width:
+  height:
+  visible:
+  listening:
+  id:
+  name:
+  opacity:
+  scale:
+  scaleX:
+  scaleY:
+  rotation:
+  offset:
+  offsetX:
+  offsetY:
+  draggable:
+  dragDistance:
+  dragBoundFunc:

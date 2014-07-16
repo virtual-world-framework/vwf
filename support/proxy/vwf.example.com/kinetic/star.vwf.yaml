@@ -1,0 +1,8 @@
+# http://kineticjs.com/docs/Kinetic.Star.html
+
+--- 
+extends: http://vwf.example.com/kinetic/shape.vwf
+properties:
+  numPoints:
+  innerRadius:
+  outerRadius:

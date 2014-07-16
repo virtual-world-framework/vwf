@@ -1,0 +1,8 @@
+# http://kineticjs.com/docs/Kinetic.Ring.html
+
+--- 
+extends: http://vwf.example.com/kinetic/shape.vwf
+properties:
+  innerRadius:
+  outerRadius:
+  clockwise:

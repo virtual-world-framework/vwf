@@ -1,0 +1,7 @@
+# http://kineticjs.com/docs/Kinetic.Container.html
+
+--- 
+extends: http://vwf.example.com/kinetic/node.vwf
+properties: 
+  clipFunc:
+
