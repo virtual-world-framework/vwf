@@ -13,24 +13,88 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( module, view, utility, color ) {
+define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ], 
+    function( module, view, $, utility, color ) {
+
+    var self;
+    var stage;
+    var stageContainer;
+    var stageWidth = 800;
+    var stageHeight = 600;
 
     return view.load( module, {
 
-        initialize: function( rootSelector ) {
+        initialize: function( options ) {
            
-            this.rootSelector = rootSelector;
-            this.height = 600;
-            this.width = 800;
-            this.query = null;
-            if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
-            if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
+            self = this;
+
+            this.arguments = Array.prototype.slice.call( arguments );
+
+            if ( options === undefined ) { 
+                this.options = {}; 
+            } else {
+                this.options = options;
+            }
+
+            if ( window && window.innerWidth ) {
+                stageWidth = window.innerWidth - 20;
+            }            
+            if ( window && window.innerHeight ) {
+                stageHeight = window.innerHeight - 20;
+            }
+
+            stageContainer = this.options.container ? this.options.container : 'vwf-root';
+            stageWidth = this.options.width ? this.options.width : stageWidth;
+            stageHeight = this.options.height ? this.options.height : stageHeight;
+
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childURI, childName, callback /* ( ready ) */) {
-            
-            
+               childSource, childType, childIndex, childName, callback ) {
+           
+            if ( childID === this.kernel.application() ) {
+                
+                if ( this.state.nodes[ childID ] === undefined ) {
+
+                    var node = this.state.nodes[ childID ] = this.state.createNode( nodeID, childID, childExtendsID, childImplementsIDs,
+                                childSource, childType, childIndex, childName, callback );
+
+                    var stageDef = { 
+                        "container": stageContainer, 
+                        "width": stageWidth, 
+                        "height": stageHeight 
+                    };
+
+                    stage = node.kineticObj = new Kinetic.Stage( stageDef );  
+
+                    // bind stage handlers
+                    stage.on('mousedown', function(evt) {
+                        var shape = evt.targetNode;
+                        //shape.moveTo(dragLayer);
+                        //stage.draw()
+                        // restart drag and drop in the new layer
+                        //shape.startDrag();
+                    });
+
+                    stage.on('mouseup', function(evt) {
+                        var shape = evt.targetNode;
+                        //shape.moveTo(layer);
+                        //stage.draw();
+                    });
+
+                    stage.on('dragstart', function(evt) {
+                        var shape = evt.targetNode;
+                    });
+
+                    stage.on('dragend', function(evt) {
+                        var shape = evt.targetNode;
+
+                    });
+
+
+                }
+            }    
+               
         },
  
  
@@ -66,6 +130,10 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color" ], function( 
 
         gotProperty: function ( nodeID, propertyName, propertyValue ) { 
         },
+
+        // ticked: function( vwfTime ) {
+        //     stage.draw();
+        // }
     
     
     } );

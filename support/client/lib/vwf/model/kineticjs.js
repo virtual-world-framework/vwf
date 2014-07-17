@@ -25,19 +25,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         // -- initialize ---------------------------------------------------------------------------
 
-        initialize: function() {
+        initialize: function( options ) {
             
             self = this;
 
             this.arguments = Array.prototype.slice.call( arguments );
 
-            if ( options === undefined ) { 
-                options = {}; 
-            }
+            this.options = ( options !== undefined ) ? options : {}; 
 
             this.state = {
                 "nodes": {},
-                "stages": {},
                 "prototypes": {},
                 "createNode": function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback ) {
@@ -76,14 +73,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- creatingNode ------------------------------------------------------------------------
         
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-                                childSource, childType, childURI, childName, callback ) {
+                                childSource, childType, childIndex, childName, callback ) {
 
             // If the parent nodeID is 0, this node is attached directly to the root and is therefore either 
             // the scene or a prototype.  In either of those cases, save the uri of the new node
             var childURI = ( nodeID === 0 ? childIndex : undefined );
 
             if ( this.debug.creation ) {
-                this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+                this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName );
             }
 
             // If the node being created is a prototype, construct it and add it to the array of prototypes,
@@ -111,10 +108,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var protos = getPrototypes.call( this, childExtendsID );
 
             var node;
-            if ( isKineticComponent( protos ) ) {
+            if ( childID === this.kernel.application() ) {
+                //if ( this.state.stages[ childID ] === undefined ) {
+                    // this should occur in the view
+                //}    
+            } else if ( isKineticComponent( protos ) ) {
                 
-                node = this.state.createNode( nodeID, childID, childExtendsID, childImplementsIDs,
+                if ( this.state.nodes[ childID ] === undefined ){
+                    this.state.nodes[ childID ] = this.state.createNode( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback );
+                }
+
+                node = this.state.nodes[ childID ];
                 
                 node.prototypes = protos;
                
@@ -230,6 +235,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var imageObj;
             var value = undefined;
             if ( node && node.kineticObj && utility.validPropertyValue( propertyValue ) ) {
+                
+                var kineticObj = node.kineticObj;
                 
                 if ( kineticObj instanceof Kinetic.Node ) {
 
@@ -813,7 +820,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }                    
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Line )
+                if ( value === undefined && kineticObj instanceof Kinetic.Line ) {
                     value = propertyValue;
                     
                     switch ( propertyName ) {
@@ -836,7 +843,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Path )
+                if ( value === undefined && kineticObj instanceof Kinetic.Path ) {
                     value = propertyValue;
                     
                     switch ( propertyName ) {
@@ -851,7 +858,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Rect )
+                if ( value === undefined && kineticObj instanceof Kinetic.Rect ) {
                     value = propertyValue;
                     
                     switch ( propertyName ) {
@@ -866,7 +873,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.RegularPolygon )
+                if ( value === undefined && kineticObj instanceof Kinetic.RegularPolygon ) {
                     value = propertyValue;
                     
                     switch ( propertyName ) {
@@ -885,7 +892,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
             
-                if ( value === undefined && kineticObj instanceof Kinetic.Ring )
+                if ( value === undefined && kineticObj instanceof Kinetic.Ring ) {
                     value = propertyValue;
                     
                     switch ( propertyName ) {
@@ -908,7 +915,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
                 
-                if ( value === undefined && kineticObj instanceof Kinetic.Sprite )
+                if ( value === undefined && kineticObj instanceof Kinetic.Sprite ) {
                     value = propertyValue;
                     
                     switch ( propertyName ) {
@@ -918,7 +925,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "animations":
-                            kineticObj.animations( JSON.eval( propertyValue ) ) );
+                            kineticObj.animations( JSON.eval( propertyValue ) );
                             break;
 
                         case "frameIndex":
@@ -940,7 +947,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Star )
+                if ( value === undefined && kineticObj instanceof Kinetic.Star ) {
                     value = propertyValue;
                     
                     switch ( propertyName ) {
@@ -964,7 +971,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
 
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Text )
+                if ( value === undefined && kineticObj instanceof Kinetic.Text ) {
                     value = propertyValue;
                     
                     switch ( propertyName ) {
@@ -1062,7 +1069,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.TextPath )
+                if ( value === undefined && kineticObj instanceof Kinetic.TextPath ) {
                     value = propertyValue;
                     
                     switch ( propertyName ) {
@@ -1118,7 +1125,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Wedge )
+                if ( value === undefined && kineticObj instanceof Kinetic.Wedge ) {
                     value = propertyValue;
                     
                     switch ( propertyName ) {
@@ -1588,7 +1595,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }                    
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Line )
+                if ( value === undefined && kineticObj instanceof Kinetic.Line ) {
                     
                     switch ( propertyName ) {
                         
@@ -1606,7 +1613,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Path )
+                if ( value === undefined && kineticObj instanceof Kinetic.Path ) {
                     
                     switch ( propertyName ) {
                         
@@ -1617,7 +1624,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Rect )
+                if ( value === undefined && kineticObj instanceof Kinetic.Rect ) {
                     
                     switch ( propertyName ) {
                         
@@ -1627,7 +1634,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.RegularPolygon )
+                if ( value === undefined && kineticObj instanceof Kinetic.RegularPolygon ) {
                     
                     switch ( propertyName ) {
                         
@@ -1641,7 +1648,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
             
-                if ( value === undefined && kineticObj instanceof Kinetic.Ring )
+                if ( value === undefined && kineticObj instanceof Kinetic.Ring ) {
                     
                     switch ( propertyName ) {
                         
@@ -1659,7 +1666,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
                 
-                if ( value === undefined && kineticObj instanceof Kinetic.Sprite )
+                if ( value === undefined && kineticObj instanceof Kinetic.Sprite ) {
                     
                     switch ( propertyName ) {
                         
@@ -1686,7 +1693,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Star )
+                if ( value === undefined && kineticObj instanceof Kinetic.Star ) {
                     
                     switch ( propertyName ) {
                         
@@ -1705,7 +1712,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
 
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Text )
+                if ( value === undefined && kineticObj instanceof Kinetic.Text ) {
                     
                     switch ( propertyName ) {
                         
@@ -1755,7 +1762,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.TextPath )
+                if ( value === undefined && kineticObj instanceof Kinetic.TextPath ) {
                     
                     switch ( propertyName ) {
                         
@@ -1785,7 +1792,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Wedge )
+                if ( value === undefined && kineticObj instanceof Kinetic.Wedge ) {
                     
                     switch ( propertyName ) {
                         
