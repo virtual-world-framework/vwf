@@ -1235,14 +1235,17 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
         var prefix = "function(" + parameterString + ") {";
         var suffix = "}";
 
+        var functionString, indentedBody;
+
         if ( body && body.length ) {
-            if ( body.charAt( body.length-1 ) == "\n" ) {
-                var functionString = prefix + "\n" + body.replace( /^./gm, "    $&" ) + suffix + "\n";
+            if ( body.charAt( body.length-1 ) === "\n" ) {
+                indentedBody = body.match( /^[^\S\n]/ ) ? body : body.replace( /^./gm, "    $&" );
+                functionString = prefix + "\n" + indentedBody + suffix + "\n";
             } else {
-                var functionString = prefix + " " + body + " " + suffix;
+                functionString = prefix + " " + body + " " + suffix;
             }
         } else {
-            var functionString = prefix + suffix;
+            functionString = prefix + suffix;
         }
 
         return eval( "( " + functionString + ")" );
@@ -1258,9 +1261,9 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
         var name, parameters, body;
 
-        var match = functionRegex.exec( funcshun.toString() );
+        var match, leadingMatch, trailingMatch, indention = "";
 
-        if ( match ) {
+        if ( match = /* assignment! */ functionRegex.exec( funcshun.toString() ) ) {
 
             name = match[1];
 
@@ -1274,11 +1277,55 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
                 return parameter.trim();
             } ) : undefined;
 
-            body = match[3].trim();
+            // Trim the body string. Recognize block vs. inline formatting where possible and retain
+            // the existing spacing.
+
+            body = match[3];
+
+            leadingMatch =  // leading spacing, if the leading brace is on its own line
+                body.match( /^([^\S\n]*\n)([^\S\n]*)/ );
+
+            trailingMatch = // trailing spacing, if the trailing brace is on own line
+                body.match( /\n([^\S\n]*)$/ );
+
+            // Trim the leading spaces. If the leading brace was on its own line, delete the empty
+            // first line and take the body indention to be the next line's spacing. Otherwise, just
+            // trim the beginning of the body.
+
+            if ( leadingMatch ) {
+                body = body.substr( leadingMatch[1].length );
+                indention = leadingMatch[2];
+            } else {
+                body = body.replace( /^\s*/, "" );
+            }
+
+            // Trim the trailing spaces. If the trailing brace was on its own line, delete its
+            // indention and take that as the body indention. The trailing brace indention takes
+            // priority over indention taken from the leading line. If the trailing brace was not on
+            // its own line, just trim the end of the body.
+
+            if ( trailingMatch ) {
+                body = body.substr( -trailingMatch[1] );
+                indention = trailingMatch[1];
+            } else {
+                body = body.replace( /\s*$/, "" );
+            }
+
+            // If we recognized the body as an block (not inline with the braces), unindent it and
+            // ensure that the last line ends with a newline.
+
+            if ( leadingMatch || trailingMatch ) {
+                body = body.replace( new RegExp( "^" + indention, "gm" ), "" );
+                body = body.replace( /\n?$/, "\n" );
+            }
 
         }
 
-        return { name: name, parameters: parameters, body: body };
+        return {
+            name: name,
+            parameters: parameters,
+            body: body
+        };
     }
 
     /// The `application/javascript` media type for scripts that this driver recognizes.
