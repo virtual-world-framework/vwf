@@ -1652,7 +1652,6 @@
 
             // Create the properties, methods, and events. For each item in each set, invoke
             // createProperty(), createMethod(), or createEvent() to create the field. Each
-
             // delegates to the models and views as above.
 
             nodeComponent.properties && Object.keys( nodeComponent.properties ).forEach( function( propertyName ) {  // TODO: setProperties should be adapted like this to be used here
@@ -1683,7 +1682,22 @@
 
             } );
 
-            // TODO: methods, events
+            nodeComponent.methods && Object.keys( nodeComponent.methods ).forEach( function( methodName ) {
+                var methodHandler = nodeComponent.methods[ methodName ];
+
+                var creating = ! node.methods.has( methodName );  // not defined on node or prototype
+
+                // Create or initialize the method.
+
+                if ( creating ) {
+                    vwf.createMethod( nodeID, methodName, methodHandler.parameters, methodHandler.body );
+                } else {
+                    vwf.setMethod( nodeID, methodName, methodHandler );
+                }  // TODO: delete when methodHandler === null in patch
+
+            } );
+
+            // TODO: events
 
             // Restore kernel reentry.
 
@@ -1898,20 +1912,15 @@
 
             // Methods.
 
-            // Because methods are much more data than properties, we only send them when patching
-            if ( patches && patches.methods ) {
-                var self = this;
-                nodeComponent.methods = {};
-                patches.methods.forEach( function( methodName ) {
-                    var method = self.models.javascript.nodes[ nodeID ].methods.node.private.bodies[ methodName ];
-                    if ( method )
-                        nodeComponent.methods[ methodName ] = method.toString();
-                } );
+            var methods = full || ! node.patchable ?
+                node.methods.existing : node.methods.changed;
 
-                if ( Object.keys( nodeComponent.methods ).length == 0 )
-                    delete nodeComponent.methods;
-                else
+            if ( methods ) {
+                Object.keys( methods ).forEach( function( methodName ) {
+                    nodeComponent.methods = nodeComponent.methods || {};
+                    nodeComponent.methods[ methodName ] = this.getMethod( nodeID, methodName );
                     patched = true;
+                }, this );
             }
 
             // Events.
