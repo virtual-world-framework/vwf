@@ -16,7 +16,7 @@ REM the License.
 REM ---------------------------
 
 REM Remove the old vwf-build folder if it exists
-rmdir /Q /S vwf-windows-build
+rmdir /Q /S VWF
 
 REM Copy the files and folders that we want
 REM /i - If it makes sense that destination is a directory, assume so without asking
@@ -25,26 +25,26 @@ REM /k - Retain read-only attribute on copied files
 REM /r - Copy read-only files
 REM /o - Copy file ownership and discretionary access control list (DACL) information
 REM /y - Overwrite existing destination files w/o asking
-xcopy /i /s /k /r /o /y /exclude:vwf\support\build\Scripts\exclude.txt vwf\lib vwf-windows-build\lib
-xcopy /i /s /k /r /o /y /exclude:vwf\support\build\Scripts\exclude.txt vwf\node vwf-windows-build\node
-xcopy /i /s /k /r /o /y /exclude:vwf\support\build\Scripts\exclude.txt vwf\support\cli vwf-windows-build\support\cli
-xcopy /i /s /k /r /o /y /exclude:vwf\support\build\Scripts\exclude.txt vwf\support\client vwf-windows-build\support\client
-xcopy /i /s /k /r /o /y /exclude:vwf\support\build\Scripts\exclude.txt vwf\support\proxy vwf-windows-build\support\proxy
-xcopy /i /s /k /r /o /y /exclude:vwf\support\build\Scripts\exclude.txt vwf\support\server vwf-windows-build\support\server
-copy /y vwf\CHANGELOG.md vwf-windows-build
-copy /y vwf\LICENSE vwf-windows-build
-copy /y vwf\node_vwf.js vwf-windows-build
-copy /y vwf\node-server.js vwf-windows-build
-copy /y vwf\npm-shrinkwrap.json vwf-windows-build
-copy /y vwf\package.json vwf-windows-build
-copy /y vwf\README.md vwf-windows-build
-copy /y vwf\vwf.bat vwf-windows-build
+xcopy /i /s /k /r /o /y /exclude:vwf-master\support\build\Scripts\exclude.txt vwf-master\lib VWF\lib
+xcopy /i /s /k /r /o /y /exclude:vwf-master\support\build\Scripts\exclude.txt vwf-master\node VWF\node
+xcopy /i /s /k /r /o /y /exclude:vwf-master\support\build\Scripts\exclude.txt vwf-master\support\cli VWF\support\cli
+xcopy /i /s /k /r /o /y /exclude:vwf-master\support\build\Scripts\exclude.txt vwf-master\support\client VWF\support\client
+xcopy /i /s /k /r /o /y /exclude:vwf-master\support\build\Scripts\exclude.txt vwf-master\support\proxy VWF\support\proxy
+xcopy /i /s /k /r /o /y /exclude:vwf-master\support\build\Scripts\exclude.txt vwf-master\support\server VWF\support\server
+copy /y vwf-master\CHANGELOG.md VWF
+copy /y vwf-master\LICENSE VWF
+copy /y vwf-master\node_vwf.js VWF
+copy /y vwf-master\node-server.js VWF
+copy /y vwf-master\npm-shrinkwrap.json VWF
+copy /y vwf-master\package.json VWF
+copy /y vwf-master\README.md VWF
+copy /y vwf-master\vwf.bat VWF
 
 REM Run heat to create .wxs file
-"%WIX%bin\heat" dir ".\vwf-windows-build" -ag -out vwf-files.wxs
+"%WIX%bin\heat" dir ".\VWF" -ag -cg vwfFiles -dr ProgramFilesFolder -out vwf-files.wxs
 
 REM Run candle to create .wixobj files
-"%WIX%bin\candle" vwf\support\build\Scripts\product.wxs vwf-files.wxs
+"%WIX%bin\candle" vwf-master\support\build\Scripts\product.wxs vwf-files.wxs
 
 REM Run light to create .msi
-"%WIX%bin\light" product.wixobj vwf-files.wixobj -out vwf.msi
+"%WIX%bin\light" product.wixobj vwf-files.wixobj -b VWF -out vwf.msi
