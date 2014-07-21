@@ -1189,21 +1189,21 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
                 var node = this.node || this;  // the node via node.*collection*.node, or just node
                 var namespacedName = eventNamespace ? [ eventNamespace, eventName ] : eventName;
                 if ( typeof value == "function" || value instanceof Function ) {
-                    self.kernel.addEventListener.call( self, node.id, namespacedName,
+                    self.kernel.addEventListener( node.id, namespacedName,
                         value, node.id );  // for container.*event* = function() { ... }, context is the target node
                 } else if ( value.add ) {
                     if ( ! value.phases || value.phases instanceof Array ) {
-                        self.kernel.addEventListener.call( self, node.id, namespacedName,
+                        self.kernel.addEventListener( node.id, namespacedName,
                             value.handler, value.context && value.context.id, value.phases );
                     } else {
-                        self.kernel.addEventListener.call( self, node.id, namespacedName,
+                        self.kernel.addEventListener( node.id, namespacedName,
                             value.handler, value.context && value.context.id, [ value.phases ] );
                     }
                 } else if ( value.remove ) {
-                    self.kernel.removeEventListener.call( self, node.id, namespacedName,
+                    self.kernel.removeEventListener( node.id, namespacedName,
                         value.handler );
                 } else if ( value.flush ) {
-                    self.kernel.flushEventListeners.call( self, node.id, namespacedName,
+                    self.kernel.flushEventListeners( node.id, namespacedName,
                         value.context && value.context.id );
                 }
             },
