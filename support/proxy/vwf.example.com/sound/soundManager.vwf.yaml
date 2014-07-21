@@ -11,6 +11,7 @@ methods:
   setVolume:
   hasSubtitle:
   getSubtitle:
+  getDuration:
   stopSoundInstance:
   stopAllSoundInstances:
 events:
