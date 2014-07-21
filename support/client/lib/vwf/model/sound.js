@@ -194,6 +194,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     return soundDatum ? soundDatum.subtitle : undefined;
 
                 // arguments: instanceHandle
+                // returns: the duration of the sound
+                case "getDuration":
+                    instanceHandle = params[ 0 ];
+                    soundDatum = getSoundDatum( instanceHandle.soundName );
+
+                    return soundDatum && soundDatum.buffer ? soundDatum.buffer.duration : undefined;
+
+                // arguments: instanceHandle
                 case "stopSoundInstance":
 
                     instanceHandle = params [ 0 ];
