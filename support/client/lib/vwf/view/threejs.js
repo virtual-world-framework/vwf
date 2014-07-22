@@ -447,7 +447,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 orbit( pitchRadians, yawRadians );
             } else if ( mouseDown.right ) {
                 var navThreeObject = navObj.threeObject;
-                var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );          
 
                 // --------------------
                 // Calculate new pitch
@@ -640,9 +639,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             worldTransformArray[ 12 ] = translationArray[ 12 ];
             worldTransformArray[ 13 ] = translationArray[ 13 ];
             worldTransformArray[ 14 ] = translationArray[ 14 ];
-
-            setTransformFromWorldTransform( navThreeObject );
-            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
         },
 
         handleTouchNavigation: function ( touchEventData ) {
@@ -1974,7 +1970,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         this.moveNavObject = function( x, y, navObj, navMode, rotationSpeed, translationSpeed, msSinceLastFrame ) {
 
             var navThreeObject = navObj.threeObject;
-            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
             // Compute the distance traveled in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
@@ -2091,7 +2086,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         this.rotateNavObjectByKey = function( direction, navObj, navMode, rotationSpeed, translationSpeed, msSinceLastFrame ) {
 
             var navThreeObject = navObj.threeObject;
-            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
             // Compute the distance rotated in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
