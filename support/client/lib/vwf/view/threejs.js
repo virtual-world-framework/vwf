@@ -591,8 +591,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }
 
             var navThreeObject = navObj.threeObject;
-            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
-
+            
             // wheelDelta has a value of 3 for every click
             var numClicks = Math.abs( wheelDelta / 3 );
 
