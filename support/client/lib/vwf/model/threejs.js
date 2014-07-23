@@ -1468,13 +1468,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     }
                     else if ( propertyName == "target" ) {
                         if ( propertyValue instanceof Array ) {
-                            value = new THREE.Vector3( propertyValue[ 0 ],
-                                                       propertyValue[ 1 ],
-                                                       propertyValue[ 2 ] );
-                            threeObject.target.position = value;
+                            value = propertyValue;
+                            threeObject.target.position.set( value[ 0 ], value[ 1 ], value[ 2 ] );
                         } else if ( this.state.nodes[ propertyValue ] ) {
-                            value = this.state.nodes[ propertyValue ].threeObject;
-                            threeObject.target = value;
+                            value = propertyValue;
+                            threeObject.target = this.state.nodes[ value ].threeObject;
+                        } else {
+                            this.logger.warnx( "settingProperty", "Invalid target: " + propertyValue );
                         }
                     }
 
@@ -1779,6 +1779,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         break;
                     case "shadowBias":
                         value = threeObject.shadowBias;
+                        break;
+                    case "target":
+                        // The camera does not have a vwfID so this part doesn't work properly
+                        if ( threeObject.target.vwfID !== undefined ) {
+                            value = threeObject.target.vwfID;
+                        } else {
+                            var targetPos = [ threeObject.target.position.x,
+                                              threeObject.target.position.y,
+                                              threeObject.target.position.z ];
+                            value = targetPos;
+                        }
                         break;
                 }
             }
