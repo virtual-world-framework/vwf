@@ -1308,6 +1308,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                             "shadowMapHeight": threeObject.shadowMapHeight,
                             "shadowMapWidth": threeObject.shadowMapWidth,
                             "shadowBias": threeObject.shadowBias,
+                            "target": threeObject.target,
                             "clone": function( newObj ) {
                                 newObj.name = this.name;
                                 newObj.distance = this.distance;
@@ -1328,6 +1329,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                                 newObj.shadowMapHeight = this.shadowMapHeight;
                                 newObj.shadowMapWidth = this.shadowMapWidth;
                                 newObj.shadowBias = this.shadowBias;
+                                newObj.target = this.target;
                             }
                         };
 
@@ -1463,6 +1465,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     else if ( propertyName == 'shadowBias' ) {
                         value = Number ( propertyValue );
                         threeObject.shadowBias = value;
+                    }
+                    else if ( propertyName == "target" ) {
+                        if ( propertyValue instanceof Array ) {
+                            value = new THREE.Vector3( propertyValue[ 0 ],
+                                                       propertyValue[ 1 ],
+                                                       propertyValue[ 2 ] );
+                            threeObject.target.position = value;
+                        } else if ( this.state.nodes[ propertyValue ] ) {
+                            value = this.state.nodes[ propertyValue ].threeObject;
+                            threeObject.target = value;
+                        }
                     }
 
                 }
