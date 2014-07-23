@@ -47,4 +47,4 @@ REM Run candle to create .wixobj files
 "%WIX%bin\candle" vwf-master\support\build\Scripts\product.wxs vwf-files.wxs
 
 REM Run light to create .msi
-"%WIX%bin\light" product.wixobj vwf-files.wixobj -b VWF -out vwf.msi
+"%WIX%bin\light" -b VWF -ext WixUIExtension -cultures:en-us product.wixobj vwf-files.wixobj -out vwf.msi
