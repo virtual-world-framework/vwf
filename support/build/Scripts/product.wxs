@@ -11,8 +11,8 @@
             <ComponentGroupRef Id="vwfFiles" />
             <Component Id="EnvVars" Guid="{825D835D-5E76-46AC-B3E4-D84BCB86BD1A}" Directory="ProgramFilesFolder">
                 <CreateFolder/>
-                <Environment Id="PATH" Name="PATH" Value="[INSTALLDIR]" Permanent="no" Part="last" Action="set" System="yes" />
-                <Environment Id="VWF_DIR" Name="VWF_DIR" Value="[INSTALLDIR]" Permanent="no" Action="set" System="yes" />
+                <Environment Id="PATH" Name="PATH" Value="[INSTALLDIR]VWF" Permanent="no" Part="last" Action="set" System="yes" />
+                <Environment Id="VWF_DIR" Name="VWF_DIR" Value="[INSTALLDIR]VWF" Permanent="no" Action="set" System="yes" />
             </Component>
         </Feature>
         <Media Id="1" Cabinet="vwf.cab" EmbedCab="yes" CompressionLevel="high" />

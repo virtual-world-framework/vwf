@@ -41,7 +41,7 @@ copy /y vwf-master\README.md VWF
 copy /y vwf-master\vwf.bat VWF
 
 REM Run heat to create .wxs file
-"%WIX%bin\heat" dir ".\VWF" -ag -cg vwfFiles -dr ProgramFilesFolder -out vwf-files.wxs
+"%WIX%bin\heat" dir ".\VWF" -ag -cg vwfFiles -dr INSTALLDIR -out vwf-files.wxs
 
 REM Run candle to create .wixobj files
 "%WIX%bin\candle" vwf-master\support\build\Scripts\product.wxs vwf-files.wxs
