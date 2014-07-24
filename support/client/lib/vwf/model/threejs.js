@@ -3229,7 +3229,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 			"uniform vec4 colorRange;\n"+
             "void main() {\n"+
 			//randomly offset in time
-            "   float lifetime = fract(random.x+(time))*lifespan*1.33;"+
+            "   float lifetime = mod( random.x * lifespan + time, lifespan );"+
 			//solve for position
             "   vec3 pos2 = position.xyz + velocity*lifetime + (acceleration*lifetime*lifetime)/2.0;"+ // ;
             "   vec4 mvPosition = modelViewMatrix * vec4( pos2.xyz, 1.0 );\n"+
@@ -3515,7 +3515,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 			//when updating in AnalyticShader mode, is very simple, just inform the shader of new time.
             particleSystem.updateAnalyticShader = function(time)
             {   
-                particleSystem.material.uniforms.time.value += time/3333.0;
+                particleSystem.material.uniforms.time.value += time/1000;
             
             }
             
