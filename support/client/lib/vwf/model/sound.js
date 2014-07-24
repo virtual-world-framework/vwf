@@ -470,7 +470,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     }, 
                     function() {
                         logger.warnx( "initialize", "Failed to load sound: '" + 
-                                      name + "." );
+                                      thisSoundDatum.name + "'." );
 
                         delete soundData[ thisSoundDatum.name ];
 
