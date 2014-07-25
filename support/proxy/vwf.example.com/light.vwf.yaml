@@ -145,3 +145,5 @@ properties:
   ## @name light.vwf#shadowBias
   ## @property
   shadowBias: 0
+
+  target: [ 0, 0, 0 ]
