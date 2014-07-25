@@ -1308,6 +1308,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                             "shadowMapHeight": threeObject.shadowMapHeight,
                             "shadowMapWidth": threeObject.shadowMapWidth,
                             "shadowBias": threeObject.shadowBias,
+                            "target": threeObject.target,
                             "clone": function( newObj ) {
                                 newObj.name = this.name;
                                 newObj.distance = this.distance;
@@ -1328,6 +1329,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                                 newObj.shadowMapHeight = this.shadowMapHeight;
                                 newObj.shadowMapWidth = this.shadowMapWidth;
                                 newObj.shadowBias = this.shadowBias;
+                                newObj.target = this.target;
                             }
                         };
 
@@ -1463,6 +1465,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     else if ( propertyName == 'shadowBias' ) {
                         value = Number ( propertyValue );
                         threeObject.shadowBias = value;
+                    }
+                    else if ( propertyName == "target" ) {
+                        if ( propertyValue instanceof Array ) {
+                            value = propertyValue;
+                            threeObject.target.position.set( value[ 0 ], value[ 1 ], value[ 2 ] );
+                        } else if ( this.state.nodes[ propertyValue ] ) {
+                            value = propertyValue;
+                            threeObject.target = this.state.nodes[ value ].threeObject;
+                        } else {
+                            this.logger.warnx( "settingProperty", "Invalid target: " + propertyValue );
+                        }
                     }
 
                 }
@@ -1766,6 +1779,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         break;
                     case "shadowBias":
                         value = threeObject.shadowBias;
+                        break;
+                    case "target":
+                        // TODO: Return target node information if target is a node.
+                        //   The threeObjects of some nodes do not have a vwfID. This
+                        //   will incorrectly return a position in those cases. This
+                        //   needs to be fixed.
+                        if ( threeObject.target.vwfID !== undefined ) {
+                            value = threeObject.target.vwfID;
+                        } else {
+                            var targetPos = [ threeObject.target.position.x,
+                                              threeObject.target.position.y,
+                                              threeObject.target.position.z ];
+                            value = targetPos;
+                        }
                         break;
                 }
             }
