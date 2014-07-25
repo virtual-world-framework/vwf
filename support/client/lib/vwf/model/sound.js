@@ -17,6 +17,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     var context;
     var soundData = {};
     var soundGroups = {};
+    var masterVolume = 1.0;
     var logger;
     var soundDriver;
     var driver = model.load( module, {
@@ -26,7 +27,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             // (it's created in the view)
             this.state.soundManager = {};
             soundDriver = this;
-
+            masterVolume = this.masterVolume;
             logger = this.logger;
 
             try {
@@ -179,6 +180,19 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         soundDatum.setVolume ( params [ 0 ], params [ 1 ], params [ 2 ], params [ 3 ] );
                     }
                 
+                // // arguments: volume (0.0-1.0)
+                case "setMasterVolume":
+                    masterVolume = params [ 0 ];
+
+                    // for ( var soundName in soundData ){
+                    //     var datum = soundData[ soundName ];
+                    //     if ( datum ) {
+                    //         console.log ('hey');
+                    //         datum.setVolume ( datum.initialVolume, 0.0, 'linear' );
+                    //     }
+                    // }
+
+
                 // // arguments: instanceHandle
                 case "hasSubtitle":
                     instanceHandle = params [ 0 ];
@@ -562,7 +576,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.sourceNode.loop = this.soundDatum.isLooping;
 
             this.gainNode = context.createGain();
-            this.gainNode.gain.value = this.soundDatum.initialVolume;
+            this.gainNode.gain.value = this.soundDatum.initialVolume * masterVolume;
 
             this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );

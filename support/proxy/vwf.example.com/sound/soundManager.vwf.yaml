@@ -9,6 +9,7 @@ methods:
   isSoundPlaying:
   isInstancePlaying:
   setVolume:
+  setMasterVolume:
   hasSubtitle:
   getSubtitle:
   getDuration:
