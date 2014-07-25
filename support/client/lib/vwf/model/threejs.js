@@ -1781,7 +1781,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         value = threeObject.shadowBias;
                         break;
                     case "target":
-                        // The camera does not have a vwfID so this part doesn't work properly
+                        // TODO: Return target node information if target is a node.
+                        //   The threeObjects of some nodes do not have a vwfID. This
+                        //   will incorrectly return a position in those cases. This
+                        //   needs to be fixed.
                         if ( threeObject.target.vwfID !== undefined ) {
                             value = threeObject.target.vwfID;
                         } else {
