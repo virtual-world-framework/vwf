@@ -184,14 +184,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 case "setMasterVolume":
                     masterVolume = params [ 0 ];
 
-                    // for ( var soundName in soundData ){
-                    //     var datum = soundData[ soundName ];
-                    //     if ( datum ) {
-                    //         console.log ('hey');
-                    //         datum.setVolume ( datum.initialVolume, 0.0, 'linear' );
-                    //     }
-                    // }
-
+                    for ( var soundName in soundData ){
+                        var soundDatum = soundData[ soundName ];
+                        if ( soundDatum ) {
+                            soundDatum.resetOnMasterVolumeChange();
+                        }
+                    }
 
                 // // arguments: instanceHandle
                 case "hasSubtitle":
@@ -356,6 +354,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         stopAllSoundInstances: function () {
             // There is never more than one instance of a layered sound.
             this.stopInstance();
+        },
+
+        resetOnMasterVolumeChange: function () {
+            for ( var i = 0; i < this.layerNames.length; ++i ) {
+                var layerDatum = soundData[ this.layerNames[ i ] ];
+                layerDatum.resetOnMasterVolumeChange();
+            }
         },
 
         setVolume: function( id, volume, duration, type ) {
@@ -528,6 +533,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
         },
 
+        resetOnMasterVolumeChange: function () {
+            for ( var instanceID in this.playingInstances ) {
+                var soundInstance = this.playingInstances[ instanceID ];
+                if ( !!soundInstance ) {
+                    soundInstance.gainNode.gain.value = this.initialVolume * masterVolume;
+                }
+            }
+        },
+
         setVolume: function ( instanceHandle, volume, fadeTime, fadeMethod ) {
            // arguments: instanceHandle, volume, fadeTime, fadeMethod
             var soundInstance = getSoundInstance( instanceHandle );
@@ -644,7 +658,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             var thisPlayingInstance = this;
 
-            var targetVolume = volume;
+            var targetVolume = volume * masterVolume;
              fadeTime = fadeTime ? fadeTime : 0;
              fadeMethod = fadeMethod ? fadeMethod : "linear";
 
