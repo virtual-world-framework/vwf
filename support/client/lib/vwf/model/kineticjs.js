@@ -49,7 +49,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             // turns on logger debugger console messages 
             this.debug = {
-                "creation": true,
+                "creation": false,
                 "initializing": false,
                 "parenting": false,
                 "deleting": false,
@@ -114,6 +114,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                 if ( this.state.nodes[ nodeID ] !== undefined ) {
                     var parent = this.state.nodes[ nodeID ];
+                    //debugger;
                     if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
                         parent.kineticObj.add( node.kineticObj );    
                     }
@@ -223,7 +224,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 
                 var kineticObj = node.kineticObj;
                 
-                if ( kineticObj instanceof Kinetic.Node ) {
+                if ( isNodeDefinition( node.prototypes ) ) {
 
                     // 'id' will be set to the nodeID
                     value = propertyValue;
@@ -328,7 +329,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Shape ) {
+                if ( value === undefined && isShapeDefinition( node.prototypes ) ) {
 
                     value = propertyValue;
                     
@@ -349,7 +350,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             kineticObj.fillGreen( Number( propertyValue ) );
                             break;
  
-                        case "fillGreen":
+                        case "fillBlue":
                             kineticObj.fillGreen( Number( propertyValue ) );
                             break;
  
@@ -652,7 +653,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Container ) {
+                if ( value === undefined && isContainerDefinition( node.prototypes ) ) {
                     value = propertyValue;
                     
                     switch ( propertyName ) {
@@ -1151,7 +1152,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var kineticObj = node.kineticObj;
 
 
-                if ( kineticObj instanceof Kinetic.Node ) {
+                if ( isNodeDefinition( node.prototypes ) ) {
 
                     switch ( propertyName ) {
 
@@ -1232,10 +1233,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         case "dragBoundFunc":
                             break;
+
+                        case "Id":
+                            value = kineticObj.getAttr( 'id' );
+                            break
+
+                        case "name":
+                            value = kineticObj.getAttr( 'name' );
+                            break;
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Shape ) {
+                if ( value === undefined && isShapeDefinition( node.prototypes ) ) {
 
                     switch ( propertyName ) {
 
@@ -1251,7 +1260,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             value = kineticObj.fillGreen();
                             break;
  
-                        case "fillGreen":
+                        case "fillBlue":
                             value = kineticObj.fillGreen();
                             break;
  
@@ -1302,7 +1311,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         case "fillPatternRepeat":
                             value = kineticObj.fillPatternRepeat();
                             break;
-
 
                         case "fillLinearGradientStartPoint":
                             value = kineticObj.fillLinearGradientStartPoint();
@@ -1475,7 +1483,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Container ) {
+                if ( value === undefined && isContainerDefinition( node.prototypes ) ) {
                     
                     switch ( propertyName ) {
                         
