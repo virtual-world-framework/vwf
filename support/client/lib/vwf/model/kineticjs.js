@@ -20,6 +20,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             this.state = {
                 nodes: {},
+                stages: [],
                 prototypes: {},
                 createLocalNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback ) {
@@ -236,14 +237,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     
                     switch ( propertyName ) {
 
-                        // need to think this over
-                        // case "image":
-                        //     imageObj = new Image();
-                        //     imageObj.onload = function() {
-                        //         kineticObj.image = imageObj;
-                        //     }
-                        //     imageObj.src = propertyValue;
-                        //     break;
                         case "x":
                             kineticObj.x( Number( propertyValue ) );
                             break;
@@ -364,8 +357,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "fillPatternImage":
-                            // TO-DO create image and set the src?
-                            kineticObj.fillPatternImage( propertyValue );
+                            var imageObj = kineticObj.fillPatternImage();
+                            if ( imageObj !== undefined ) {
+                                imageObj.src = propertyValue;
+                            } else {
+                                imageObj = new Image();
+                                imageObj.onload = function() {
+                                    kineticObj.fillPatternImage( imageObj );
+                                };
+                                imageObj.src = propertyValue;                                
+                            }
                             break;
 
                         case "fillPatternX":
@@ -779,14 +780,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     
                     switch ( propertyName ) {
 
-                        // need to think this over
-                        // case "image":
-                        //     imageObj = new Image();
-                        //     imageObj.onload = function() {
-                        //         kineticObj.image = imageObj;
-                        //     }
-                        //     imageObj.src = propertyValue;
-                        //     break;
+                        case "image":
+                            var imageObj = kineticObj.image();
+                            if ( imageObj !== undefined ) {
+                                imageObj.src = propertyValue;
+                            } else {
+                                imageObj = new Image();
+                                imageObj.onload = function() {
+                                    kineticObj.image( imageObj );
+                                };
+                                imageObj.src = propertyValue;                                
+                            }
+                            break;
 
                         case "crop":
                             if ( propertyValue instanceof Array ) { 
@@ -923,14 +928,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             kineticObj.frameIndex( Number( propertyValue ) );
                             break;
 
-                        // need to think this over
-                        // case "image":
-                        //     imageObj = new Image();
-                        //     imageObj.onload = function() {
-                        //         kineticObj.image = imageObj;
-                        //     }
-                        //     imageObj.src = propertyValue;
-                        //     break;
+                        case "image":
+                            var imageObj = kineticObj.image();
+                            if ( imageObj !== undefined ) {
+                                imageObj.src = propertyValue;
+                            } else {
+                                imageObj = new Image();
+                                imageObj.onload = function() {
+                                    kineticObj.image( imageObj );
+                                };
+                                imageObj.src = propertyValue;                                
+                            }
+                            break;
 
                         default:
                             value = undefined;
@@ -1161,14 +1170,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                     switch ( propertyName ) {
 
-                        // need to think this over
-                        // case "image":
-                        //     imageObj = new Image();
-                        //     imageObj.onload = function() {
-                        //         kineticObj.image = imageObj;
-                        //     }
-                        //     imageObj.src = propertyValue;
-                        //     break;
                         case "x":
                             value = kineticObj.x();
                             break;
@@ -1497,15 +1498,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Stage ) {
+
+                // this is causing the editor to cause a infinite loop
+                // need to understand why, but no time now
+
+                // if ( value === undefined && kineticObj instanceof Kinetic.Stage ) {
                     
-                    switch ( propertyName ) {
+                //     switch ( propertyName ) {
                         
-                        case "container":
-                            value = kineticObj.getAttr( 'container' );
-                            break;
-                    }
-                }
+                //         case "container":
+                //             value = kineticObj.getAttr( 'container' );
+                //             break;
+                //     }
+                // }
 
                 if ( value === undefined && kineticObj instanceof Kinetic.Arc ) {
                     
@@ -1587,14 +1592,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     
                     switch ( propertyName ) {
 
-                        // need to think this over
-                        // case "image":
-                        //     imageObj = new Image();
-                        //     imageObj.onload = function() {
-                        //         kineticObj.image = imageObj;
-                        //     }
-                        //     imageObj.src = propertyValue;
-                        //     break;
+                        case "image":
+                            var imageObj = kineticObj.image();
+                            if ( imageObj !== undefined ) {
+                                value = imageObj.src;    
+                            }
+                            break;
 
                         case "crop":
                             value = kineticObj.crop();
@@ -1690,14 +1693,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             value = kineticObj.frameIndex();
                             break;
 
-                        // need to think this over
-                        // case "image":
-                        //     imageObj = new Image();
-                        //     imageObj.onload = function() {
-                        //         kineticObj.image = imageObj;
-                        //     }
-                        //     imageObj.src = propertyValue;
-                        //     break;
+                        case "image":
+                            var imageObj = kineticObj.image();
+                            if ( imageObj !== undefined ) {
+                                value = imageObj.src;    
+                            }
+                            break;
                     }
                 }
 
@@ -1951,6 +1952,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 "height": stageHeight 
             };
             kineticObj = new Kinetic.Stage( stageDef );
+            self.state.stages.push( kineticObj );
         } else if ( self.state.isKineticClass( protos, "kinetic-star-vwf" ) || self.state.isKineticClass( protos, "kinetic.star.vwf" ) ) {
             kineticObj = new Kinetic.Star( config || {} );
         } else if ( self.state.isKineticClass( protos, "kinetic-text-vwf" ) || self.state.isKineticClass( protos, "kinetic.text.vwf" ) ) {
