@@ -49,7 +49,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             // turns on logger debugger console messages 
             this.debug = {
-                "creation": false,
+                "creation": true,
                 "initializing": false,
                 "parenting": false,
                 "deleting": false,
@@ -114,7 +114,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                 if ( this.state.nodes[ nodeID ] !== undefined ) {
                     var parent = this.state.nodes[ nodeID ];
-                    if ( parent.kineticObj && parent.kineticObj instanceof Kinetic.Container ) {
+                    if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
                         parent.kineticObj.add( node.kineticObj );    
                     }
                 }

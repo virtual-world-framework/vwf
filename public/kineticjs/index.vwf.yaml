@@ -1,2 +1,7 @@
 --- 
 extends: http://vwf.example.com/kinetic/stage.vwf
+children:
+  layer1:
+    extends: http://vwf.example.com/kinetic/layer.vwf
+  layer2:
+    extends: http://vwf.example.com/kinetic/layer.vwf
