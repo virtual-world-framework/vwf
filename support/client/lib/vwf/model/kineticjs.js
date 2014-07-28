@@ -101,6 +101,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             if ( isKineticComponent( protos ) ) {
                 
+                // Create the local copy of the node properties
                 if ( this.state.nodes[ childID ] === undefined ){
                     this.state.nodes[ childID ] = this.state.createLocalNode( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback );
@@ -112,14 +113,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                
                 node.kineticObj = createKineticObject( node );
 
-                if ( this.state.nodes[ nodeID ] !== undefined ) {
-                    var parent = this.state.nodes[ nodeID ];
-                    //debugger;
-                    if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
-                        parent.kineticObj.add( node.kineticObj );    
+                // If the kineticObj was created, attach it to the parent kineticObj, if it is a 
+                // kinetic container
+                // (if a kinteticObj is created asynchronously ... like an Image, it will be
+                // undefined here, but will be added to its parent in the appropriate callback)
+                if ( node.kineticObj ) {
+                    if ( this.state.nodes[ nodeID ] !== undefined ) {
+                        var parent = this.state.nodes[ nodeID ];
+                        if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
+                            parent.kineticObj.add( node.kineticObj );    
+                        }
                     }
                 }
-
             }
            
         },
@@ -1893,7 +1898,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         } else if ( self.state.isKineticClass( protos, "kinetic-group-vwf" ) || self.state.isKineticClass( protos, "kinetic.group.vwf" ) ) {
             kineticObj = new Kinetic.Group( config || {} );
         } else if ( self.state.isKineticClass( protos, "kinetic-image-vwf" ) || self.state.isKineticClass( protos, "kinetic.image.vwf" ) ) {
-            kineticObj = new Kinetic.Image( config || {} );
+            var imageObj = new Image();
+            imageObj.onload = function() {
+                node.kineticObj = new Kinetic.Image( {
+                    image: imageObj,
+                } );
+                var parent = self.state.nodes[ node.parentID ];
+                if ( parent && parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
+                    parent.kineticObj.add( node.kineticObj );    
+                }
+            };
+            imageObj.src = node.source;
         } else if ( self.state.isKineticClass( protos, "kinetic-layer-vwf" ) || self.state.isKineticClass( protos, "kinetic.layer.vwf" ) ) {
             kineticObj = new Kinetic.Layer( config || {} );
         } else if ( self.state.isKineticClass( protos, "kinetic-line-vwf" ) || self.state.isKineticClass( protos, "kinetic.line.vwf" ) ) {
