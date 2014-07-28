@@ -88,11 +88,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var protos = getPrototypes( this.kernel, childExtendsID );
 
             var node;
-            if ( childID === this.kernel.application() ) {
-                //if ( this.state.stages[ childID ] === undefined ) {
-                    // this should occur in the view
-                //}    
-            } else if ( isKineticComponent( protos ) ) {
+
+            if ( isKineticComponent( protos ) ) {
                 
                 if ( this.state.nodes[ childID ] === undefined ){
                     this.state.nodes[ childID ] = this.state.createLocalNode( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -104,8 +101,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 node.prototypes = protos;
                
                 node.kineticObj = createKineticObject( node );
-
-                //node.kineticObj = new Kinetic.Stage( { container: "vwf-stage", width:800, height: 600 } );
 
                 if ( this.state.nodes[ nodeID ] !== undefined ) {
                     var parent = this.state.nodes[ nodeID ];
