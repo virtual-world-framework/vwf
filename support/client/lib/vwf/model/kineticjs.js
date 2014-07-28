@@ -1497,6 +1497,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
 
+                if ( value === undefined && kineticObj instanceof Kinetic.Stage ) {
+                    
+                    switch ( propertyName ) {
+                        
+                        case "container":
+                            value = kineticObj.getAttr( 'container' );
+                            break;
+                    }
+                }
+
                 if ( value === undefined && kineticObj instanceof Kinetic.Arc ) {
                     
                     switch ( propertyName ) {
