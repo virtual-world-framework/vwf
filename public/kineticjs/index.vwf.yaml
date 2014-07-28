@@ -1,7 +1,37 @@
 --- 
 extends: http://vwf.example.com/kinetic/stage.vwf
+properties:
+  visible: true
 children:
   layer1:
     extends: http://vwf.example.com/kinetic/layer.vwf
+    properties:
+      clearBeforeDraw: false
+      visible: true
+    children:
+      circle1:
+        extends: http://vwf.example.com/kinetic/circle.vwf 
+        properties:
+          visible: true
+          x: 420
+          y: 20
+          radius: 10
+          fill: red
+          fillEnabled: true 
   layer2:
     extends: http://vwf.example.com/kinetic/layer.vwf
+    properties:
+      clearBeforeDraw: false
+      visible: true
+    children:
+      circle1:
+        extends: http://vwf.example.com/kinetic/rect.vwf 
+        properties:
+          visible: true
+          x: 420
+          y: 120
+          width: 20
+          height: 20
+          radius: 10
+          fill: blue
+          fillEnabled: true 
