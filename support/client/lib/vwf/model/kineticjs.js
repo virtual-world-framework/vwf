@@ -85,7 +85,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 return;                
             }
 
-            var protos = getPrototypes.call( this, childExtendsID );
+            var protos = getPrototypes( this.kernel, childExtendsID );
 
             var node;
             if ( childID === this.kernel.application() ) {
