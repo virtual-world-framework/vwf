@@ -113,15 +113,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
            
         },
 
-        initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childIndex, childName ) {
+        // initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+        //     childSource, childType, childIndex, childName ) {
 
-            if ( this.debug.initializing ) {
-                this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
-            } 
+        //     if ( this.debug.initializing ) {
+        //         this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+        //     } 
 
 
-        },
+        // },
          
         // -- deletingNode -------------------------------------------------------------------------
 
