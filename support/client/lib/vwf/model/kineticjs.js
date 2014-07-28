@@ -19,9 +19,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             this.options = ( options !== undefined ) ? options : {}; 
 
             this.state = {
-                "nodes": {},
-                "prototypes": {},
-                "createLocalNode": function( nodeID, childID, childExtendsID, childImplementsIDs,
+                nodes: {},
+                prototypes: {},
+                createLocalNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback ) {
                     return {
                         "parentID": nodeID,
@@ -34,6 +34,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         "prototypes": undefined,
                         "kineticObj": undefined
                     };
+                },
+                isKineticClass: function( prototypes, classID ) {
+                    if ( prototypes ) {
+                        for ( var i = 0; i < prototypes.length; i++ ) {
+                            if ( prototypes[ i ].indexOf( classID ) !== -1 ) {
+                                return true;
+                            }
+                        }
+                    }
+                    return false;        
                 }
             };
 
@@ -1860,51 +1870,67 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var protos = node.prototypes;
         var kineticObj = undefined;
 
-        if ( isKineticClass( protos, "kinetic-arc-vwf" ) || isKineticClass( protos, "kinetic.arc.vwf" ) ) {
+        if ( self.state.isKineticClass( protos, "kinetic-arc-vwf" ) || self.state.isKineticClass( protos, "kinetic.arc.vwf" ) ) {
             kineticObj = new Kinetic.Arc( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-baselayer-vwf" ) || isKineticClass( protos, "kinetic.baselayer.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-baselayer-vwf" ) || self.state.isKineticClass( protos, "kinetic.baselayer.vwf" ) ) {
             kineticObj = new Kinetic.BaseLayer( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-canvas-vwf" ) || isKineticClass( protos, "kinetic.canvas.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-canvas-vwf" ) || self.state.isKineticClass( protos, "kinetic.canvas.vwf" ) ) {
             kineticObj = new Kinetic.Canvas( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-circle-vwf" ) || isKineticClass( protos, "kinetic.circle.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-circle-vwf" ) || self.state.isKineticClass( protos, "kinetic.circle.vwf" ) ) {
             kineticObj = new Kinetic.Circle( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-ellipse-vwf" ) || isKineticClass( protos, "kinetic.ellipse.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-ellipse-vwf" ) || self.state.isKineticClass( protos, "kinetic.ellipse.vwf" ) ) {
             kineticObj = new Kinetic.Ellipse( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-fastlayer-vwf" ) || isKineticClass( protos, "kinetic.fastlayer.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-fastlayer-vwf" ) || self.state.isKineticClass( protos, "kinetic.fastlayer.vwf" ) ) {
             kineticObj = new Kinetic.FastLayer( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-group-vwf" ) || isKineticClass( protos, "kinetic.group.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-group-vwf" ) || self.state.isKineticClass( protos, "kinetic.group.vwf" ) ) {
             kineticObj = new Kinetic.Group( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-image-vwf" ) || isKineticClass( protos, "kinetic.image.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-image-vwf" ) || self.state.isKineticClass( protos, "kinetic.image.vwf" ) ) {
             kineticObj = new Kinetic.Image( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-layer-vwf" ) || isKineticClass( protos, "kinetic.layer.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-layer-vwf" ) || self.state.isKineticClass( protos, "kinetic.layer.vwf" ) ) {
             kineticObj = new Kinetic.Layer( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-line-vwf" ) || isKineticClass( protos, "kinetic.line.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-line-vwf" ) || self.state.isKineticClass( protos, "kinetic.line.vwf" ) ) {
             kineticObj = new Kinetic.Line( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-path-vwf" ) || isKineticClass( protos, "kinetic.path.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-path-vwf" ) || self.state.isKineticClass( protos, "kinetic.path.vwf" ) ) {
             kineticObj = new Kinetic.Path( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-rect-vwf" ) || isKineticClass( protos, "kinetic.rect.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-rect-vwf" ) || self.state.isKineticClass( protos, "kinetic.rect.vwf" ) ) {
             kineticObj = new Kinetic.Rect( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-regularpolygon-vwf" ) || isKineticClass( protos, "kinetic.regularpolygon.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-regularpolygon-vwf" ) || self.state.isKineticClass( protos, "kinetic.regularpolygon.vwf" ) ) {
             kineticObj = new Kinetic.RegularPolygon( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-ring-vwf" ) || isKineticClass( protos, "kinetic.ring.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-ring-vwf" ) || self.state.isKineticClass( protos, "kinetic.ring.vwf" ) ) {
             kineticObj = new Kinetic.Ring( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-sprite-vwf" ) || isKineticClass( protos, "kinetic.sprite.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-sprite-vwf" ) || self.state.isKineticClass( protos, "kinetic.sprite.vwf" ) ) {
             kineticObj = new Kinetic.Sprite( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-stage-vwf" ) || isKineticClass( protos, "kinetic.stage.vwf" ) ) {
-            kineticObj = new Kinetic.Stage( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-star-vwf" ) || isKineticClass( protos, "kinetic.star.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-stage-vwf" ) || self.state.isKineticClass( protos, "kinetic.stage.vwf" ) ) {
+            var stageWidth = 800;
+            var stageHeight = 600;
+            if ( window && window.innerWidth ) {
+                stageWidth = window.innerWidth - 20;
+            }            
+            if ( window && window.innerHeight ) {
+                stageHeight = window.innerHeight - 20;
+            }
+            var stageContainer = ( config && config.container ) || 'vwf-root';
+            var stageWidth = ( config && config.width ) || stageWidth;
+            var stageHeight = ( config && config.height ) || stageHeight;
+            var stageDef = {
+                "container": stageContainer, 
+                "width": stageWidth, 
+                "height": stageHeight 
+            };
+            kineticObj = new Kinetic.Stage( stageDef );
+        } else if ( self.state.isKineticClass( protos, "kinetic-star-vwf" ) || self.state.isKineticClass( protos, "kinetic.star.vwf" ) ) {
             kineticObj = new Kinetic.Star( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-text-vwf" ) || isKineticClass( protos, "kinetic.text.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-text-vwf" ) || self.state.isKineticClass( protos, "kinetic.text.vwf" ) ) {
             kineticObj = new Kinetic.Text( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-textpath-vwf" ) || isKineticClass( protos, "kinetic.textpath.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-textpath-vwf" ) || self.state.isKineticClass( protos, "kinetic.textpath.vwf" ) ) {
             kineticObj = new Kinetic.TextPath( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-wedge-vwf" ) || isKineticClass( protos, "kinetic.wedge.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-wedge-vwf" ) || self.state.isKineticClass( protos, "kinetic.wedge.vwf" ) ) {
             kineticObj = new Kinetic.Wedge( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-shape-vwf" ) || isKineticClass( protos, "kinetic.shape.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-shape-vwf" ) || self.state.isKineticClass( protos, "kinetic.shape.vwf" ) ) {
             kineticObj = new Kinetic.Shape( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-container-vwf" ) || isKineticClass( protos, "kinetic.container.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-container-vwf" ) || self.state.isKineticClass( protos, "kinetic.container.vwf" ) ) {
             kineticObj = new Kinetic.Container( config || {} );
-        } else if ( isKineticClass( protos, "kinetic-node-vwf" ) || isKineticClass( protos, "kinetic.node.vwf" ) ) {
+        } else if ( self.state.isKineticClass( protos, "kinetic-node-vwf" ) || self.state.isKineticClass( protos, "kinetic.node.vwf" ) ) {
             kineticObj = new Kinetic.Node( config || {} );
         }
 
@@ -1914,17 +1940,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
         return kineticObj;
     }
-
-    function isKineticClass( prototypes, classID ) {
-        var found = false;
-        if ( prototypes ) {
-            for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[ i ].indexOf( classID ) );    
-            }
-        }
-        return found;        
-    }
-
 
     function isStageDefinition( prototypes ) {
         var found = false;

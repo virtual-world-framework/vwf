@@ -35,48 +35,44 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                childSource, childType, childIndex, childName, callback ) {
            
-            if ( childID === this.kernel.application() ) {
+            var node = this.state.nodes[ childID ];
+            
+            // If the "nodes" object does not have this object in it, it must not be one that
+            // this driver cares about
+            if ( !node ) {
+                return;
+            }
+
+            var protos = node.prototypes;
+            if ( self.state.isKineticClass( protos, "kinetic-stage-vwf" ) || self.state.isKineticClass( protos, "kinetic.stage.vwf" ) ) {
                 
-                if ( this.state.nodes[ childID ] === undefined ) {
+                var stage = node.kineticObj;
 
-                    var node = this.state.nodes[ childID ] = this.state.createLocalNode( nodeID, childID, childExtendsID, childImplementsIDs,
-                                childSource, childType, childIndex, childName, callback );
+                // bind stage handlers
+                stage.on('mousedown', function(evt) {
+                    var shape = evt.targetNode;
+                    //shape.moveTo(dragLayer);
+                    //stage.draw()
+                    // restart drag and drop in the new layer
+                    //shape.startDrag();
+                });
 
-                    var stageDef = { 
-                        "container": stageContainer, 
-                        "width": stageWidth, 
-                        "height": stageHeight 
-                    };
+                stage.on('mouseup', function(evt) {
+                    var shape = evt.targetNode;
+                    //shape.moveTo(layer);
+                    //stage.draw();
+                });
 
-                    stage = node.kineticObj = new Kinetic.Stage( stageDef );  
+                stage.on('dragstart', function(evt) {
+                    var shape = evt.targetNode;
+                });
 
-                    // bind stage handlers
-                    stage.on('mousedown', function(evt) {
-                        var shape = evt.targetNode;
-                        //shape.moveTo(dragLayer);
-                        //stage.draw()
-                        // restart drag and drop in the new layer
-                        //shape.startDrag();
-                    });
+                stage.on('dragend', function(evt) {
+                    var shape = evt.targetNode;
 
-                    stage.on('mouseup', function(evt) {
-                        var shape = evt.targetNode;
-                        //shape.moveTo(layer);
-                        //stage.draw();
-                    });
+                });
 
-                    stage.on('dragstart', function(evt) {
-                        var shape = evt.targetNode;
-                    });
-
-                    stage.on('dragend', function(evt) {
-                        var shape = evt.targetNode;
-
-                    });
-
-
-                }
-            }    
+            }
                
         },
  
