@@ -4,7 +4,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     function( module, view, $, utility, color ) {
 
     var self;
-    var stage;
     var stageContainer;
     var stageWidth = 800;
     var stageHeight = 600;
@@ -110,9 +109,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         gotProperty: function ( nodeID, propertyName, propertyValue ) { 
         },
 
-        // ticked: function( vwfTime ) {
-        //     stage.draw();
-        // }
+        ticked: function( vwfTime ) {
+            for ( var i = 0; i < self.state.stages.length; i++ ) {
+                self.state.stages[ i ].draw();    
+            }
+            
+        }
     
     
     } );
