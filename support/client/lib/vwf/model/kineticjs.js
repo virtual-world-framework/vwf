@@ -60,10 +60,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback ) {
 
-            // If the parent nodeID is 0, this node is attached directly to the root and is therefore either 
-            // the scene or a prototype.  In either of those cases, save the uri of the new node
-            var childURI = ( nodeID === 0 ? childIndex : undefined );
-
             if ( this.debug.creation ) {
                 this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName );
             }
@@ -84,7 +80,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     implementsID: childImplementsIDs,
                     source: childSource, 
                     type: childType,
-                    uri: childURI,
                     name: childName
                 };
                 return;                
