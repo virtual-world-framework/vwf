@@ -1,0 +1,7 @@
+---
+info:
+  title: "Kinetic.js Example App"
+model:
+  vwf/model/kineticjs:
+view:
+  vwf/view/kineticjs:
