@@ -3,6 +3,12 @@ extends: http://vwf.example.com/kinetic/stage.vwf
 properties:
   visible: true
 children:
+  background:
+    extends: http://vwf.example.com/kinetic/layer.vwf
+    children:
+      image:
+        extends: http://vwf.example.com/kinetic/image.vwf
+        source: ferns.jpg
   layer1:
     extends: http://vwf.example.com/kinetic/layer.vwf
     properties:
