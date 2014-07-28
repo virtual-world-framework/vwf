@@ -12,7 +12,7 @@ children:
   layer1:
     extends: http://vwf.example.com/kinetic/layer.vwf
     properties:
-      clearBeforeDraw: false
+      clearBeforeDraw: true
       visible: true
     children:
       circle1:
@@ -20,24 +20,46 @@ children:
         properties:
           visible: true
           x: 420
-          y: 20
-          radius: 10
+          y: 40
+          radius: 30
           fill: red
           fillEnabled: true 
+          draggable: true
+      rectImage:
+        extends: http://vwf.example.com/kinetic/rect.vwf 
+        properties:
+          fillPatternImage: x.png
+          visible: true
+          x: 20
+          y: 20
+          width: 32
+          height: 32
+          draggable: true
   layer2:
     extends: http://vwf.example.com/kinetic/layer.vwf
     properties:
-      clearBeforeDraw: false
+      clearBeforeDraw: true
       visible: true
     children:
-      circle1:
+      rect1:
         extends: http://vwf.example.com/kinetic/rect.vwf 
         properties:
           visible: true
           x: 420
-          y: 120
-          width: 20
-          height: 20
+          y: 200
+          width: 50
+          height: 50
           radius: 10
           fill: blue
           fillEnabled: true 
+          draggable: true
+      rectImage:
+        extends: http://vwf.example.com/kinetic/rect.vwf 
+        properties:
+          fillPatternImage: rainbow.png
+          visible: true
+          x: 20
+          y: 80
+          width: 48
+          height: 48
+          draggable: true
