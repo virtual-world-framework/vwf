@@ -26,9 +26,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 stageHeight = window.innerHeight - 20;
             }
 
-            stageContainer = this.options.container ? this.options.container : 'vwf-root';
-            stageWidth = this.options.width ? this.options.width : stageWidth;
-            stageHeight = this.options.height ? this.options.height : stageHeight;
+            stageContainer = this.options.container || 'vwf-root';
+            stageWidth = this.options.width || stageWidth;
+            stageHeight = this.options.height || stageHeight;
 
         },
 
