@@ -43,7 +43,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 
                 if ( this.state.nodes[ childID ] === undefined ) {
 
-                    var node = this.state.nodes[ childID ] = this.state.createNode( nodeID, childID, childExtendsID, childImplementsIDs,
+                    var node = this.state.nodes[ childID ] = this.state.createLocalNode( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback );
 
                     var stageDef = { 

@@ -21,7 +21,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             this.state = {
                 "nodes": {},
                 "prototypes": {},
-                "createNode": function( nodeID, childID, childExtendsID, childImplementsIDs,
+                "createLocalNode": function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback ) {
                     return {
                         "parentID": nodeID,
@@ -100,7 +100,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             } else if ( isKineticComponent( protos ) ) {
                 
                 if ( this.state.nodes[ childID ] === undefined ){
-                    this.state.nodes[ childID ] = this.state.createNode( nodeID, childID, childExtendsID, childImplementsIDs,
+                    this.state.nodes[ childID ] = this.state.createLocalNode( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback );
                 }
 
