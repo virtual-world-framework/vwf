@@ -4,4 +4,5 @@ info:
 model:
   vwf/model/kineticjs:
 view:
+  vwf/view/editor:
   vwf/view/kineticjs:
