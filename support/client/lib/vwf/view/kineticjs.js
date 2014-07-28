@@ -17,11 +17,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             this.arguments = Array.prototype.slice.call( arguments );
 
-            if ( options === undefined ) { 
-                this.options = {}; 
-            } else {
-                this.options = options;
-            }
+            this.options = options || {}; 
 
             if ( window && window.innerWidth ) {
                 stageWidth = window.innerWidth - 20;
