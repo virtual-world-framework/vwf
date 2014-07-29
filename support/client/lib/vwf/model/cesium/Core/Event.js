@@ -1,8 +1,10 @@
 /*global define*/
 define([
+        './defineProperties',
         './DeveloperError'
-       ], function(
-         DeveloperError) {
+    ], function(
+        defineProperties,
+        DeveloperError) {
     "use strict";
 
     /**
@@ -20,7 +22,7 @@ define([
      * }
      *
      * var myObjectInstance = new MyObject();
-     * var evt = new Event();
+     * var evt = new Cesium.Event();
      * evt.addEventListener(MyObject.prototype.myListener, myObjectInstance);
      * evt.raiseEvent('1', '2');
      * evt.removeEventListener(MyObject.prototype.myListener);
@@ -30,38 +32,38 @@ define([
         this._scopes = [];
     };
 
-    /**
-     * Gets the number of listeners currently subscribed to the event.
-     *
-     * @memberof Event
-     *
-     * @returns {Number} The number of subscribed listeners.
-     */
-    Event.prototype.getNumberOfListeners = function() {
-        return this._listeners.length;
-    };
+    defineProperties(Event.prototype, {
+        /**
+         * The number of listeners currently subscribed to the event.
+         * @memberof Event.prototype
+         * @type {Number}
+         */
+        numberOfListeners: {
+            get : function() {
+                return this._listeners.length;
+            }
+        }
+    });
 
     /**
      * Registers a callback function to be executed whenever the event is raised.
      * An optional scope can be provided to serve as the <code>this</code> pointer
      * in which the function will execute.
-     * @memberof Event
      *
      * @param {Function} listener The function to be executed when the event is raised.
      * @param {Object} [scope] An optional object scope to serve as the <code>this</code>
      * pointer in which the listener function will execute.
-     *
      * @returns {Function} A function that will remove this event listener when invoked.
      *
      * @see Event#raiseEvent
      * @see Event#removeEventListener
-     *
-     * @exception {DeveloperError} listener is required and must be a function.
      */
     Event.prototype.addEventListener = function(listener, scope) {
+        //>>includeStart('debug', pragmas.debug);
         if (typeof listener !== 'function') {
             throw new DeveloperError('listener is required and must be a function.');
         }
+        //>>includeEnd('debug');
 
         this._listeners.push(listener);
         this._scopes.push(scope);
@@ -74,44 +76,43 @@ define([
 
     /**
      * Unregisters a previously registered callback.
-     * @memberof Event
      *
      * @param {Function} listener The function to be unregistered.
      * @param {Object} [scope] The scope that was originally passed to addEventListener.
+     * @returns {Boolean} <code>true</code> if the listener was removed; <code>false</code> if the listener and scope are not registered with the event.
      *
      * @see Event#addEventListener
      * @see Event#raiseEvent
-     *
-     * @exception {DeveloperError} listener is required and must be a function.
-     * @exception {DeveloperError} listener is not subscribed.
      */
     Event.prototype.removeEventListener = function(listener, scope) {
+        //>>includeStart('debug', pragmas.debug);
         if (typeof listener !== 'function') {
             throw new DeveloperError('listener is required and must be a function.');
         }
+        //>>includeEnd('debug');
 
         var thisListeners = this._listeners;
         var thisScopes = this._scopes;
 
         var index = -1;
-        for ( var i = 0; i < thisListeners.length; i++) {
+        for (var i = 0; i < thisListeners.length; i++) {
             if (thisListeners[i] === listener && thisScopes[i] === scope) {
                 index = i;
                 break;
             }
         }
 
-        if (index === -1) {
-            throw new DeveloperError('listener is not subscribed.');
+        if (index !== -1) {
+            thisListeners.splice(index, 1);
+            this._scopes.splice(index, 1);
+            return true;
         }
 
-        thisListeners.splice(index, 1);
-        this._scopes.splice(index, 1);
+        return false;
     };
 
     /**
      * Raises the event by calling each registered listener with all supplied arguments.
-     * @memberof Event
      *
      * @param {*} arguments This method takes any number of parameters and passes them through to the listener functions.
      *
@@ -121,7 +122,8 @@ define([
     Event.prototype.raiseEvent = function() {
         var listeners = this._listeners;
         var scopes = this._scopes;
-        for ( var i = listeners.length - 1; i > -1; i--) {
+        var length = listeners.length;
+        for (var i = 0; i < length; i++) {
             listeners[i].apply(scopes[i], arguments);
         }
     };

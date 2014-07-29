@@ -1,52 +1,48 @@
 /*global define,console*/
 define([
         '../../Core/buildModuleUrl',
-        '../../Core/Cartesian2',
         '../../Core/Cartesian3',
         '../../Core/Clock',
-        '../../Core/DefaultProxy',
+        '../../Core/Credit',
         '../../Core/defaultValue',
         '../../Core/defined',
         '../../Core/defineProperties',
         '../../Core/destroyObject',
         '../../Core/DeveloperError',
         '../../Core/Ellipsoid',
-        '../../Core/Event',
-        '../../Core/FeatureDetection',
+        '../../Core/formatError',
+        '../../Core/getTimestamp',
         '../../Core/requestAnimationFrame',
         '../../Core/ScreenSpaceEventHandler',
         '../../Scene/BingMapsImageryProvider',
-        '../../Scene/CentralBody',
-        '../../Scene/Credit',
+        '../../Scene/Globe',
+        '../../Scene/Moon',
         '../../Scene/Scene',
         '../../Scene/SceneMode',
-        '../../Scene/SceneTransitioner',
         '../../Scene/SkyAtmosphere',
         '../../Scene/SkyBox',
         '../../Scene/Sun',
         '../getElement'
     ], function(
         buildModuleUrl,
-        Cartesian2,
         Cartesian3,
         Clock,
-        DefaultProxy,
+        Credit,
         defaultValue,
         defined,
         defineProperties,
         destroyObject,
         DeveloperError,
         Ellipsoid,
-        Event,
-        FeatureDetection,
+        formatError,
+        getTimestamp,
         requestAnimationFrame,
         ScreenSpaceEventHandler,
         BingMapsImageryProvider,
-        CentralBody,
-        Credit,
+        Globe,
+        Moon,
         Scene,
         SceneMode,
-        SceneTransitioner,
         SkyAtmosphere,
         SkyBox,
         Sun,
@@ -59,28 +55,34 @@ define([
 
     function startRenderLoop(widget) {
         widget._renderLoopRunning = true;
+        widget._lastFrameTime = getTimestamp();
 
         function render() {
             if (widget.isDestroyed()) {
                 return;
             }
 
-            try {
-                if (widget._useDefaultRenderLoop) {
+            if (widget._useDefaultRenderLoop) {
+                var targetFrameRate = widget._targetFrameRate;
+                if (!defined(targetFrameRate)) {
                     widget.resize();
                     widget.render();
                     requestAnimationFrame(render);
                 } else {
-                    widget._renderLoopRunning = false;
+                    var lastFrameTime = widget._lastFrameTime;
+                    var interval = 1000.0 / targetFrameRate;
+                    var now = getTimestamp();
+                    var delta = now - lastFrameTime;
+
+                    if (delta > interval) {
+                        widget.resize();
+                        widget.render();
+                        widget._lastFrameTime = now - (delta % interval);
+                    }
+                    requestAnimationFrame(render);
                 }
-            } catch (e) {
-                widget._useDefaultRenderLoop = false;
+            } else {
                 widget._renderLoopRunning = false;
-                widget._onRenderLoopError.raiseEvent(widget, e);
-                if (widget._showRenderLoopErrors) {
-                    widget.showErrorPanel('An error occurred while rendering.  Rendering has stopped.', e);
-                    console.error(e);
-                }
             }
         }
 
@@ -96,21 +98,25 @@ define([
      * @constructor
      *
      * @param {Element|String} container The DOM element or ID that will contain the widget.
-     * @param {Object} [options] Configuration options for the widget.
+     * @param {Object} [options] Object with the following properties:
      * @param {Clock} [options.clock=new Clock()] The clock to use to control current time.
      * @param {ImageryProvider} [options.imageryProvider=new BingMapsImageryProvider()] The imagery provider to serve as the base layer. If set to false, no imagery provider will be added.
      * @param {TerrainProvider} [options.terrainProvider=new EllipsoidTerrainProvider] The terrain provider.
+     * @param {SkyBox} [options.skyBox] The skybox used to render the stars.  When <code>undefined</code>, the default stars are used.
      * @param {SceneMode} [options.sceneMode=SceneMode.SCENE3D] The initial scene mode.
+     * @param {MapProjection} [options.mapProjection=new GeographicProjection()] The map projection to use in 2D and Columbus View modes.
      * @param {Boolean} [options.useDefaultRenderLoop=true] True if this widget should control the render loop, false otherwise.
+     * @param {Number} [options.targetFrameRate] The target frame rate when using the default render loop.
      * @param {Boolean} [options.showRenderLoopErrors=true] If true, this widget will automatically display an HTML panel to the user containing the error, if a render loop error occurs.
-     * @param {Object} [options.contextOptions=undefined] Properties corresponding to <a href='http://www.khronos.org/registry/webgl/specs/latest/#5.2'>WebGLContextAttributes</a> used to create the WebGL context.  This object will be passed to the {@link Scene} constructor.
+     * @param {Object} [options.contextOptions] Context and WebGL creation properties corresponding to <code>options</code> passed to {@link Scene}.
+     * @param {Element|String} [options.creditContainer] The DOM element or ID that will contain the {@link CreditDisplay}.  If not specified, the credits are added
+     *        to the bottom of the widget itself.
      *
-     * @exception {DeveloperError} container is required.
      * @exception {DeveloperError} Element with id "container" does not exist in the document.
      *
      * @example
      * // For each example, include a link to CesiumWidget.css stylesheet in HTML head,
-     * // and in the body, include: &lt;div id="cesiumContainer"&gt;&lt;/div&gt;
+     * // and in the body, include: <div id="cesiumContainer"></div>
      *
      * //Widget with no terrain and default Bing Maps imagery provider.
      * var widget = new Cesium.CesiumWidget('cesiumContainer');
@@ -119,15 +125,31 @@ define([
      * var widget = new Cesium.CesiumWidget('cesiumContainer', {
      *     imageryProvider : new Cesium.OpenStreetMapImageryProvider(),
      *     terrainProvider : new Cesium.CesiumTerrainProvider({
-     *         url : 'http://cesium.agi.com/smallterrain',
+     *         url : '//cesiumjs.org/smallterrain',
      *         credit : 'Terrain data courtesy Analytical Graphics, Inc.'
-     *     })
+     *     }),
+     *     // Use high-res stars downloaded from https://github.com/AnalyticalGraphicsInc/cesium-assets
+     *     skyBox : new Cesium.SkyBox({
+     *         sources : {
+     *           positiveX : 'stars/TychoSkymapII.t3_08192x04096_80_px.jpg',
+     *           negativeX : 'stars/TychoSkymapII.t3_08192x04096_80_mx.jpg',
+     *           positiveY : 'stars/TychoSkymapII.t3_08192x04096_80_py.jpg',
+     *           negativeY : 'stars/TychoSkymapII.t3_08192x04096_80_my.jpg',
+     *           positiveZ : 'stars/TychoSkymapII.t3_08192x04096_80_pz.jpg',
+     *           negativeZ : 'stars/TychoSkymapII.t3_08192x04096_80_mz.jpg'
+     *         }
+     *     }),
+     *     // Show Columbus View map with Web Mercator projection
+     *     sceneMode : Cesium.SceneMode.COLUMBUS_VIEW,
+     *     mapProjection : new Cesium.WebMercatorProjection()
      * });
      */
     var CesiumWidget = function(container, options) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(container)) {
             throw new DeveloperError('container is required.');
         }
+        //>>includeEnd('debug');
 
         container = getElement(container);
 
@@ -152,81 +174,107 @@ define([
 
             var creditContainer = document.createElement('div');
             creditContainer.className = 'cesium-widget-credits';
-            widgetNode.appendChild(creditContainer);
 
-            var scene = new Scene(canvas, options.contextOptions, creditContainer);
-            scene.getCamera().controller.constrainedAxis = Cartesian3.UNIT_Z;
+            var creditContainerContainer = defined(options.creditContainer) ? getElement(options.creditContainer) : widgetNode;
+            creditContainerContainer.appendChild(creditContainer);
+
+            var scene = new Scene({
+                canvas : canvas,
+                contextOptions : options.contextOptions,
+                creditContainer : creditContainer,
+                mapProjection : options.mapProjection
+            });
+            scene.camera.constrainedAxis = Cartesian3.UNIT_Z;
 
             var ellipsoid = Ellipsoid.WGS84;
-            var creditDisplay = scene.getFrameState().creditDisplay;
+            var creditDisplay = scene.frameState.creditDisplay;
 
-            var cesiumCredit = new Credit('Cesium', cesiumLogoData, 'http://cesium.agi.com/');
+            var cesiumCredit = new Credit('Cesium', cesiumLogoData, 'http://cesiumjs.org/');
             creditDisplay.addDefaultCredit(cesiumCredit);
 
-            var centralBody = new CentralBody(ellipsoid);
-            scene.getPrimitives().setCentralBody(centralBody);
+            var globe = new Globe(ellipsoid);
+            scene.globe = globe;
 
-            scene.skyBox = new SkyBox({
-                positiveX : getDefaultSkyBoxUrl('px'),
-                negativeX : getDefaultSkyBoxUrl('mx'),
-                positiveY : getDefaultSkyBoxUrl('py'),
-                negativeY : getDefaultSkyBoxUrl('my'),
-                positiveZ : getDefaultSkyBoxUrl('pz'),
-                negativeZ : getDefaultSkyBoxUrl('mz')
-            });
+            var skyBox = options.skyBox;
+            if (!defined(skyBox)) {
+                skyBox = new SkyBox({
+                    sources : {
+                        positiveX : getDefaultSkyBoxUrl('px'),
+                        negativeX : getDefaultSkyBoxUrl('mx'),
+                        positiveY : getDefaultSkyBoxUrl('py'),
+                        negativeY : getDefaultSkyBoxUrl('my'),
+                        positiveZ : getDefaultSkyBoxUrl('pz'),
+                        negativeZ : getDefaultSkyBoxUrl('mz')
+                    }
+                });
+            }
+
+            scene.skyBox = skyBox;
             scene.skyAtmosphere = new SkyAtmosphere(ellipsoid);
             scene.sun = new Sun();
+            scene.moon = new Moon();
 
             //Set the base imagery layer
             var imageryProvider = options.imageryProvider;
             if (!defined(imageryProvider)) {
                 imageryProvider = new BingMapsImageryProvider({
-                    url : 'http://dev.virtualearth.net',
-                    // Some versions of Safari support WebGL, but don't correctly implement
-                    // cross-origin image loading, so we need to load Bing imagery using a proxy.
-                    proxy : FeatureDetection.supportsCrossOriginImagery() ? undefined : new DefaultProxy('http://cesium.agi.com/proxy/')
+                    url : '//dev.virtualearth.net'
                 });
             }
 
             if (imageryProvider !== false) {
-                centralBody.getImageryLayers().addImageryProvider(imageryProvider);
+                scene.imageryLayers.addImageryProvider(imageryProvider);
             }
 
             //Set the terrain provider if one is provided.
             if (defined(options.terrainProvider)) {
-                centralBody.terrainProvider = options.terrainProvider;
+                scene.terrainProvider = options.terrainProvider;
             }
 
             this._container = container;
             this._canvas = canvas;
-            this._canvasWidth = canvas.width;
-            this._canvasHeight = canvas.height;
+            this._canvasWidth = 0;
+            this._canvasHeight = 0;
             this._scene = scene;
-            this._centralBody = centralBody;
+            this._globe = globe;
             this._clock = defaultValue(options.clock, new Clock());
-            this._transitioner = new SceneTransitioner(scene, ellipsoid);
             this._screenSpaceEventHandler = new ScreenSpaceEventHandler(canvas);
             this._useDefaultRenderLoop = undefined;
             this._renderLoopRunning = false;
             this._creditContainer = creditContainer;
             this._canRender = false;
             this._showRenderLoopErrors = defaultValue(options.showRenderLoopErrors, true);
-            this._onRenderLoopError = new Event();
+            this._resolutionScale = 1.0;
+            this._forceResize = false;
+            this._lastFrameTime = undefined;
+            this._targetFrameRate = undefined;
 
-            if (options.sceneMode) {
+            if (defined(options.sceneMode)) {
                 if (options.sceneMode === SceneMode.SCENE2D) {
-                    this._transitioner.to2D();
+                    this._scene.morphTo2D(0);
                 }
                 if (options.sceneMode === SceneMode.COLUMBUS_VIEW) {
-                    this._transitioner.toColumbusView();
+                    this._scene.morphToColumbusView(0);
                 }
             }
 
             this.useDefaultRenderLoop = defaultValue(options.useDefaultRenderLoop, true);
+            this.targetFrameRate = options.targetFrameRate;
 
+            var that = this;
+            scene.renderError.addEventListener(function(scene, error) {
+                that._useDefaultRenderLoop = false;
+                that._renderLoopRunning = false;
+                if (that._showRenderLoopErrors) {
+                    var title = 'An error occurred while rendering.  Rendering has stopped.';
+                    var message = 'This may indicate an incompatibility with your hardware or web browser, or it may indicate a bug in the application.  Visit <a href="http://get.webgl.org">http://get.webgl.org</a> to verify that your web browser and hardware support WebGL.  Consider trying a different web browser or updating your video drivers.  Detailed error information is below:';
+                    that.showErrorPanel(title, message, error);
+                }
+            });
         } catch (error) {
-            var title = 'Error constructing CesiumWidget.  Check if WebGL is enabled.';
-            this.showErrorPanel(title, error);
+            var title = 'Error constructing CesiumWidget.';
+            var message = 'Visit <a href="http://get.webgl.org">http://get.webgl.org</a> to verify that your web browser and hardware support WebGL.  Consider trying a different web browser or updating your video drivers.  Detailed error information is below:';
+            this.showErrorPanel(title, message, error);
             throw error;
         }
     };
@@ -241,18 +289,6 @@ define([
         container : {
             get : function() {
                 return this._container;
-            }
-        },
-
-        /**
-         * Gets the scene transitioner.
-         * @memberof CesiumWidget.prototype
-         *
-         * @type {SceneTransitioner}
-         */
-        sceneTransitioner : {
-            get : function() {
-                return this._transitioner;
             }
         },
 
@@ -293,18 +329,6 @@ define([
         },
 
         /**
-         * Gets the primary central body.
-         * @memberof CesiumWidget.prototype
-         *
-         * @type {CentralBody}
-         */
-        centralBody : {
-            get : function() {
-                return this._centralBody;
-            }
-        },
-
-        /**
          * Gets the clock.
          * @memberof CesiumWidget.prototype
          *
@@ -329,16 +353,23 @@ define([
         },
 
         /**
-         * Gets the event that will be raised when an error is encountered during the default render loop.
-         * The widget instance and the generated exception are the only two parameters passed to the event handler.
-         * <code>useDefaultRenderLoop</code> will be set to false whenever an exception is generated and must
-         * be set back to true to continue rendering after an exception.
-         * @memberof Viewer.prototype
-         * @type {Event}
+         * Gets or sets the target frame rate of the widget when <code>useDefaultRenderLoop</code>
+         * is true. If undefined, the browser's {@link requestAnimationFrame} implementation
+         * determines the frame rate.  This value must be greater than 0 and a value higher than
+         * the underlying requestAnimationFrame implementatin will have no affect.
+         * @memberof CesiumWidget.prototype
+         *
+         * @type {Number}
          */
-        onRenderLoopError : {
+        targetFrameRate : {
             get : function() {
-                return this._onRenderLoopError;
+                return this._targetFrameRate;
+            },
+            set : function(value) {
+                if (value <= 0) {
+                    throw new DeveloperError('targetFrameRate must be greater than 0.');
+                }
+                this._targetFrameRate = value;
             }
         },
 
@@ -348,7 +379,10 @@ define([
          * perform rendering and resizing of the widget, as well as drive the
          * simulation clock. If set to false, you must manually call the
          * <code>resize</code>, <code>render</code> methods as part of a custom
-         * render loop.
+         * render loop.  If an error occurs during rendering, {@link Scene}'s
+         * <code>renderError</code> event will be raised and this property
+         * will be set to false.  It must be set back to true to continue rendering
+         * after the error.
          * @memberof CesiumWidget.prototype
          *
          * @type {Boolean}
@@ -365,6 +399,31 @@ define([
                     }
                 }
             }
+        },
+
+        /**
+         * Gets or sets a scaling factor for rendering resolution.  Values less than 1.0 can improve
+         * performance on less powerful devices while values greater than 1.0 will render at a higher
+         * resolution and then scale down, resulting in improved visual fidelity.
+         * For example, if the widget is laid out at a size of 640x480, setting this value to 0.5
+         * will cause the scene to be rendered at 320x240 and then scaled up while setting
+         * it to 2.0 will cause the scene to be rendered at 1280x960 and then scaled down.
+         * @memberof CesiumWidget.prototype
+         *
+         * @type {Number}
+         * @default 1.0
+         */
+        resolutionScale : {
+            get : function() {
+                return this._resolutionScale;
+            },
+            set : function(value) {
+                if (value <= 0) {
+                    throw new DeveloperError('resolutionScale must be greater than 0.');
+                }
+                this._resolutionScale = value;
+                this._forceResize = true;
+            }
         }
     });
 
@@ -374,12 +433,11 @@ define([
      * when a render loop error occurs, if showRenderLoopErrors was not false when the
      * widget was constructed.
      *
-     * @memberof CesiumWidget
-     *
-     * @param {String} title The title to be displayed on the error panel.
-     * @param {String} error The error to be displayed on the error panel.  Optional.
+     * @param {String} title The title to be displayed on the error panel.  This string is interpreted as text.
+     * @param {String} message A helpful, user-facing message to display prior to the detailed error information.  This string is interpreted as HTML.
+     * @param {String} [error] The error to be displayed on the error panel.  This string is formatted using {@link formatError} and then displayed as text.
      */
-    CesiumWidget.prototype.showErrorPanel = function(title, error) {
+    CesiumWidget.prototype.showErrorPanel = function(title, message, error) {
         var element = this._element;
         var overlay = document.createElement('div');
         overlay.className = 'cesium-widget-errorPanel';
@@ -390,35 +448,58 @@ define([
 
         var errorHeader = document.createElement('div');
         errorHeader.className = 'cesium-widget-errorPanel-header';
-        errorHeader.textContent = title;
+        errorHeader.appendChild(document.createTextNode(title));
         content.appendChild(errorHeader);
 
-        if (defined(error)) {
-            var errorMessage = document.createElement('div');
-            errorMessage.className = 'cesium-widget-errorPanel-message';
-            errorMessage.textContent = error;
-            content.appendChild(errorMessage);
+        var errorPanelScroller = document.createElement('div');
+        errorPanelScroller.className = 'cesium-widget-errorPanel-scroll';
+        content.appendChild(errorPanelScroller);
+        var resizeCallback = function() {
+            errorPanelScroller.style.maxHeight = Math.max(Math.round(element.clientHeight * 0.9 - 100), 30) + 'px';
+        };
+        resizeCallback();
+        if (defined(window.addEventListener)) {
+            window.addEventListener('resize', resizeCallback, false);
         }
+
+        var errorMessage = document.createElement('div');
+        errorMessage.className = 'cesium-widget-errorPanel-message';
+        errorMessage.innerHTML = '<p>' + message + '</p>';
+        errorPanelScroller.appendChild(errorMessage);
+
+        var errorDetails = '(no error details available)';
+        if (defined(error)) {
+            errorDetails = formatError(error);
+        }
+
+        var errorMessageDetails = document.createElement('div');
+        errorMessageDetails.className = 'cesium-widget-errorPanel-message';
+        errorMessageDetails.appendChild(document.createTextNode(errorDetails));
+        errorPanelScroller.appendChild(errorMessageDetails);
 
         var buttonPanel = document.createElement('div');
         buttonPanel.className = 'cesium-widget-errorPanel-buttonPanel';
         content.appendChild(buttonPanel);
 
-        var okButton = document.createElement('span');
-        okButton.className = 'cesium-widget-button';
-        okButton.textContent = 'OK';
-        okButton.tabIndex = 100;
+        var okButton = document.createElement('button');
+        okButton.setAttribute('type', 'button');
+        okButton.className = 'cesium-button';
+        okButton.appendChild(document.createTextNode('OK'));
         okButton.onclick = function() {
+            if (defined(resizeCallback) && defined(window.removeEventListener)) {
+                window.removeEventListener('resize', resizeCallback, false);
+            }
             element.removeChild(overlay);
         };
 
         buttonPanel.appendChild(okButton);
 
         element.appendChild(overlay);
+
+        console.error(title + '\n' + message + '\n' + errorDetails);
     };
 
     /**
-     * @memberof CesiumWidget
      * @returns {Boolean} true if the object has been destroyed, false otherwise.
      */
     CesiumWidget.prototype.isDestroyed = function() {
@@ -428,9 +509,9 @@ define([
     /**
      * Destroys the widget.  Should be called if permanently
      * removing the widget from layout.
-     * @memberof CesiumWidget
      */
     CesiumWidget.prototype.destroy = function() {
+        this._scene = this._scene && this._scene.destroy();
         this._container.removeChild(this._element);
         destroyObject(this);
     };
@@ -439,24 +520,32 @@ define([
      * Updates the canvas size, camera aspect ratio, and viewport size.
      * This function is called automatically as needed unless
      * <code>useDefaultRenderLoop</code> is set to false.
-     * @memberof CesiumWidget
      */
     CesiumWidget.prototype.resize = function() {
         var canvas = this._canvas;
         var width = canvas.clientWidth;
         var height = canvas.clientHeight;
-        if (this._canvasWidth === width && this._canvasHeight === height) {
+        if (!this._forceResize && this._canvasWidth === width && this._canvasHeight === height) {
             return;
         }
+        this._forceResize = false;
 
-        canvas.width = this._canvasWidth = width;
-        canvas.height = this._canvasHeight = height;
+        var zoomFactor = defaultValue(window.devicePixelRatio, 1.0) * this._resolutionScale;
+
+        this._canvasWidth = width;
+        this._canvasHeight = height;
+
+        width *= zoomFactor;
+        height *= zoomFactor;
+
+        canvas.width = width;
+        canvas.height = height;
 
         var canRender = width !== 0 && height !== 0;
         this._canRender = canRender;
 
         if (canRender) {
-            var frustum = this._scene.getCamera().frustum;
+            var frustum = this._scene.camera.frustum;
             if (defined(frustum.aspectRatio)) {
                 frustum.aspectRatio = width / height;
             } else {
@@ -469,7 +558,6 @@ define([
     /**
      * Renders the scene.  This function is called automatically
      * unless <code>useDefaultRenderLoop</code> is set to false;
-     * @memberof CesiumWidget
      */
     CesiumWidget.prototype.render = function() {
         this._scene.initializeFrame();

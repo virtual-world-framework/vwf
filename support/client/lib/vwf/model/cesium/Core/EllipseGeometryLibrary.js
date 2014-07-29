@@ -1,13 +1,11 @@
 /*global define*/
 define([
         './Cartesian3',
-        './Ellipsoid',
         './Math',
         './Matrix3',
         './Quaternion'
     ], function(
         Cartesian3,
-        Ellipsoid,
         CesiumMath,
         Matrix3,
         Quaternion) {
@@ -65,14 +63,14 @@ define([
 
         var length = positions.length;
         var bottomOffset = (extrude) ? length : 0;
-        for ( var i = 0; i < length; i += 3) {
+        for (var i = 0; i < length; i += 3) {
             var i1 = i + 1;
             var i2 = i + 2;
             var position = Cartesian3.fromArray(positions, i, scratchCartesian1);
             var extrudedPosition;
 
             position = ellipsoid.scaleToGeodeticSurface(position, position);
-            extrudedPosition = position.clone(scratchCartesian2);
+            extrudedPosition = Cartesian3.clone(position, scratchCartesian2);
             normal = ellipsoid.geodeticSurfaceNormal(position, normal);
             var scaledNormal = Cartesian3.multiplyByScalar(normal, height, scratchCartesian3);
             position = Cartesian3.add(position, scaledNormal, position);
@@ -114,7 +112,7 @@ define([
         var bSqr = semiMajorAxis * semiMajorAxis;
         var ab = semiMajorAxis * semiMinorAxis;
 
-        var mag = center.magnitude();
+        var mag = Cartesian3.magnitude(center);
 
         var unitPos = Cartesian3.normalize(center, unitPosScratch);
         var eastVec = Cartesian3.cross(Cartesian3.UNIT_Z, center, eastVecScratch);

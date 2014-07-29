@@ -1,23 +1,23 @@
 /*global define*/
 define([
-        './defined',
-        './Cartographic',
         './Cartesian3',
+        './Cartographic',
+        './defined',
         './DeveloperError',
         './EllipsoidTangentPlane',
+        './Math',
         './PolygonPipeline',
         './PolylinePipeline',
-        './Math',
         './WindingOrder'
     ], function(
-        defined,
-        Cartographic,
         Cartesian3,
+        Cartographic,
+        defined,
         DeveloperError,
         EllipsoidTangentPlane,
+        CesiumMath,
         PolygonPipeline,
         PolylinePipeline,
-        CesiumMath,
         WindingOrder) {
     "use strict";
 
@@ -51,7 +51,7 @@ define([
     }
 
     function latLonEquals(c0, c1) {
-        return ((CesiumMath.equalsEpsilon(c0.latitude, c1.latitude, CesiumMath.EPSILON6)) && (CesiumMath.equalsEpsilon(c0.longitude, c1.longitude, CesiumMath.EPSILON6)));
+        return ((CesiumMath.equalsEpsilon(c0.latitude, c1.latitude, CesiumMath.EPSILON14)) && (CesiumMath.equalsEpsilon(c0.longitude, c1.longitude, CesiumMath.EPSILON14)));
     }
 
     var scratchCartographic1 = new Cartographic();
@@ -65,7 +65,7 @@ define([
 
         var length = positions.length;
         if (length < 2) {
-            return positions.slice(0);
+            return { positions: positions };
         }
 
         var v0 = positions[0];
@@ -78,6 +78,7 @@ define([
         if (hasBottomHeights) {
             cleanedBottomHeights.push(bottomHeights[0]);
         }
+
         for (var i = 1; i < length; ++i) {
             var v1 = positions[i];
             var c1 = ellipsoid.cartesianToCartographic(v1, scratchCartographic2);
@@ -91,10 +92,10 @@ define([
                     cleanedBottomHeights.push(bottomHeights[i]);
                 }
             } else if (c0.height < c1.height) {
-                cleanedTopHeights[i-1] = c1.height;
+                cleanedTopHeights[cleanedTopHeights.length-1] = c1.height;
             }
 
-            c0 = c1.clone(c0);
+            Cartographic.clone(c1, c0);
         }
 
         return {
@@ -114,9 +115,12 @@ define([
         maximumHeights = o.topHeights;
         minimumHeights = o.bottomHeights;
 
+        //>>includeStart('debug', pragmas.debug);
         if (wallPositions.length < 2) {
             throw new DeveloperError('unique positions must be greater than or equal to 2');
         }
+        //>>includeEnd('debug');
+
         var hasMinHeights = (defined(minimumHeights));
 
         if (wallPositions.length >= 3) {

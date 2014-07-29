@@ -1,10 +1,18 @@
 /*global define*/
 define([
         '../Core/defaultValue',
-        '../Core/defined'
+        '../Core/defined',
+        '../Core/defineProperties',
+        '../Core/DeveloperError',
+        '../Core/Event',
+        './createDynamicPropertyDescriptor'
     ], function(
         defaultValue,
-        defined) {
+        defined,
+        defineProperties,
+        DeveloperError,
+        Event,
+        createDynamicPropertyDescriptor) {
     "use strict";
 
     /**
@@ -13,82 +21,117 @@ define([
      * @constructor
      */
     var DynamicPath = function() {
+        this._material = undefined;
+        this._materialSubscription = undefined;
+        this._show = undefined;
+        this._showSubscription = undefined;
+        this._width = undefined;
+        this._widthSubscription = undefined;
+        this._resolution = undefined;
+        this._resolutionSubscription = undefined;
+        this._leadTime = undefined;
+        this._leadTimeSubscription = undefined;
+        this._trailTime = undefined;
+        this._trailTimeSubscription = undefined;
+
+        this._definitionChanged = new Event();
+    };
+
+    defineProperties(DynamicPath.prototype, {
         /**
-         * Gets or sets the {@link Color} {@link Property} specifying the the path's color.
-         * @type {Property}
+         * Gets the event that is raised whenever a new property is assigned.
+         * @memberof DynamicPath.prototype
+         *
+         * @type {Event}
+         * @readonly
          */
-        this.color = undefined;
+        definitionChanged : {
+            get : function() {
+                return this._definitionChanged;
+            }
+        },
+
         /**
-         * Gets or sets the {@link Color} {@link Property} specifying the the path's outline color.
-         * @type {Property}
+         * Gets or sets the {@link MaterialProperty} specifying the appearance of the path.
+         * @memberof DynamicPath.prototype
+         * @type {MaterialProperty}
          */
-        this.outlineColor = undefined;
-        /**
-         * Gets or sets the numeric {@link Property} specifying the the path's outline width.
-         * @type {Property}
-         */
-        this.outlineWidth = undefined;
+        material : createDynamicPropertyDescriptor('material'),
+
         /**
          * Gets or sets the boolean {@link Property} specifying the path's visibility.
+         * @memberof DynamicPath.prototype
          * @type {Property}
          */
-        this.show = undefined;
+        show : createDynamicPropertyDescriptor('show'),
+
         /**
          * Gets or sets the numeric {@link Property} specifying the the path's width.
+         * @memberof DynamicPath.prototype
          * @type {Property}
          */
-        this.width = undefined;
+        width : createDynamicPropertyDescriptor('width'),
+
         /**
          * Gets or sets the numeric {@link Property} specifying the maximum step size, in seconds, to take when sampling the position.
+         * @memberof DynamicPath.prototype
          * @type {Property}
          */
-        this.resolution = undefined;
+        resolution : createDynamicPropertyDescriptor('resolution'),
+
         /**
          * Gets or sets the numeric {@link Property} specifying the number of seconds in front of the object to show.
+         * @memberof DynamicPath.prototype
          * @type {Property}
          */
-        this.leadTime = undefined;
+        leadTime : createDynamicPropertyDescriptor('leadTime'),
+
         /**
          * Gets or sets the numeric {@link Property} specifying the number of seconds behind the object to show.
+         * @memberof DynamicPath.prototype
          * @type {Property}
          */
-        this.trailTime = undefined;
-    };
+        trailTime : createDynamicPropertyDescriptor('trailTime')
+    });
 
     /**
-     * Given two DynamicObjects, takes the path properties from the second
-     * and assigns them to the first, assuming such a property did not already exist.
+     * Duplicates a DynamicPath instance.
      *
-     * @param {DynamicObject} targetObject The DynamicObject which will have properties merged onto it.
-     * @param {DynamicObject} objectToMerge The DynamicObject containing properties to be merged.
+     * @param {DynamicPath} [result] The object onto which to store the result.
+     * @returns {DynamicPath} The modified result parameter or a new instance if one was not provided.
      */
-    DynamicPath.mergeProperties = function(targetObject, objectToMerge) {
-        var pathToMerge = objectToMerge.path;
-        if (defined(pathToMerge)) {
-
-            var targetpath = targetObject.path;
-            if (!defined(targetpath)) {
-                targetObject.path = targetpath = new DynamicPath();
-            }
-
-            targetpath.color = defaultValue(targetpath.color, pathToMerge.color);
-            targetpath.width = defaultValue(targetpath.width, pathToMerge.width);
-            targetpath.resolution = defaultValue(targetpath.resolution, pathToMerge.resolution);
-            targetpath.outlineColor = defaultValue(targetpath.outlineColor, pathToMerge.outlineColor);
-            targetpath.outlineWidth = defaultValue(targetpath.outlineWidth, pathToMerge.outlineWidth);
-            targetpath.show = defaultValue(targetpath.show, pathToMerge.show);
-            targetpath.leadTime = defaultValue(targetpath.leadTime, pathToMerge.leadTime);
-            targetpath.trailTime = defaultValue(targetpath.trailTime, pathToMerge.trailTime);
+    DynamicPath.prototype.clone = function(result) {
+        if (!defined(result)) {
+            result = new DynamicPath();
         }
+        result.material = this.material;
+        result.width = this.width;
+        result.resolution = this.resolution;
+        result.show = this.show;
+        result.leadTime = this.leadTime;
+        result.trailTime = this.trailTime;
+        return result;
     };
 
     /**
-     * Given a DynamicObject, undefines the path associated with it.
+     * Assigns each unassigned property on this object to the value
+     * of the same property on the provided source object.
      *
-     * @param {DynamicObject} dynamicObject The DynamicObject to remove the path from.
+     * @param {DynamicPath} source The object to be merged into this object.
      */
-    DynamicPath.undefineProperties = function(dynamicObject) {
-        dynamicObject.path = undefined;
+    DynamicPath.prototype.merge = function(source) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(source)) {
+            throw new DeveloperError('source is required.');
+        }
+        //>>includeEnd('debug');
+
+        this.material = defaultValue(this.material, source.material);
+        this.width = defaultValue(this.width, source.width);
+        this.resolution = defaultValue(this.resolution, source.resolution);
+        this.show = defaultValue(this.show, source.show);
+        this.leadTime = defaultValue(this.leadTime, source.leadTime);
+        this.trailTime = defaultValue(this.trailTime, source.trailTime);
     };
 
     return DynamicPath;

@@ -1,22 +1,20 @@
 /*global define*/
 define([
-        '../../Core/defaultValue',
+        '../../Core/Color',
         '../../Core/defined',
         '../../Core/defineProperties',
         '../../Core/destroyObject',
         '../../Core/DeveloperError',
-        '../../Core/Color',
         '../getElement',
-        '../../ThirdParty/knockout'
+        '../subscribeAndEvaluate'
     ], function(
-        defaultValue,
+        Color,
         defined,
         defineProperties,
         destroyObject,
         DeveloperError,
-        Color,
         getElement,
-        knockout) {
+        subscribeAndEvaluate) {
     "use strict";
 
     var svgNS = "http://www.w3.org/2000/svg";
@@ -37,11 +35,6 @@ define([
 
     function getElementColor(element) {
         return Color.fromCssColorString(window.getComputedStyle(element).getPropertyValue('color'));
-    }
-
-    function subscribeAndEvaluate(owner, observablePropertyName, callback, target) {
-        callback.call(target, owner[observablePropertyName]);
-        return knockout.getObservable(owner, observablePropertyName).subscribe(callback, target);
     }
 
     //Dynamically builds an SVG element from a JSON object.
@@ -315,16 +308,14 @@ define([
      * @param {Element|String} container The DOM element or ID that will contain the widget.
      * @param {AnimationViewModel} viewModel The view model used by this widget.
      *
-     * @exception {DeveloperError} container is required.
      * @exception {DeveloperError} Element with id "container" does not exist in the document.
-     * @exception {DeveloperError} viewModel is required.
      *
      * @see AnimationViewModel
      * @see Clock
      *
      * @example
      * // In HTML head, include a link to Animation.css stylesheet,
-     * // and in the body, include: &lt;div id="animationContainer"&gt;&lt;/div&gt;
+     * // and in the body, include: <div id="animationContainer"></div>
      *
      * var clock = new Cesium.Clock();
      * var clockViewModel = new Cesium.ClockViewModel(clock);
@@ -338,19 +329,18 @@ define([
      * Cesium.requestAnimationFrame(tick);
      */
     var Animation = function(container, viewModel) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(container)) {
             throw new DeveloperError('container is required.');
         }
-
         if (!defined(viewModel)) {
             throw new DeveloperError('viewModel is required.');
         }
+        //>>includeEnd('debug');
 
         container = getElement(container);
-
         this._viewModel = viewModel;
         this._container = container;
-
         this._centerX = 0;
         this._centerY = 0;
         this._defsElement = undefined;
@@ -604,7 +594,6 @@ define([
     });
 
     /**
-     * @memberof Animation
      * @returns {Boolean} true if the object has been destroyed, false otherwise.
      */
     Animation.prototype.isDestroyed = function() {
@@ -614,7 +603,6 @@ define([
     /**
      * Destroys the animation widget.  Should be called if permanently
      * removing the widget from layout.
-     * @memberof Animation
      */
     Animation.prototype.destroy = function() {
         var mouseCallback = this._mouseCallback;
@@ -649,7 +637,6 @@ define([
     /**
      * Resizes the widget to match the container size.
      * This function should be called whenever the container size is changed.
-     * @memberof Animation
      */
     Animation.prototype.resize = function() {
         var parentWidth = this._container.clientWidth;
@@ -681,7 +668,7 @@ define([
         var scaleX = width / baseWidth;
         var scaleY = height / baseHeight;
 
-        svg.style.cssText = 'width: ' + width + 'px; height: ' + height + 'px; position: absolute; bottom: 0; left: 0;';
+        svg.style.cssText = 'width: ' + width + 'px; height: ' + height + 'px; position: absolute; bottom: 0; left: 0; overflow: hidden;';
         svg.setAttribute('width', width);
         svg.setAttribute('height', height);
         svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
@@ -697,7 +684,6 @@ define([
 
     /**
      * Updates the widget to reflect any modified CSS fules for themeing.
-     * @memberof Animation
      *
      * @example
      * //Switch to the cesium-lighter theme.

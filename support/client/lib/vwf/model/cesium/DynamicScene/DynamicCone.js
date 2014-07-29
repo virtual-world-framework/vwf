@@ -1,10 +1,18 @@
 /*global define*/
 define([
         '../Core/defaultValue',
-        '../Core/defined'
-       ], function(
-         defaultValue,
-         defined) {
+        '../Core/defined',
+        '../Core/defineProperties',
+        '../Core/DeveloperError',
+        '../Core/Event',
+        './createDynamicPropertyDescriptor'
+    ], function(
+        defaultValue,
+        defined,
+        defineProperties,
+        DeveloperError,
+        Event,
+        createDynamicPropertyDescriptor) {
     "use strict";
 
     /**
@@ -14,112 +22,193 @@ define([
      * @constructor
      */
     var DynamicCone = function() {
+        this._minimumClockAngle = undefined;
+        this._minimumClockAngleSubscription = undefined;
+        this._maximumClockAngle = undefined;
+        this._maximumClockAngleSubscription = undefined;
+        this._innerHalfAngle = undefined;
+        this._innerHalfAngleSubscription = undefined;
+        this._outerHalfAngle = undefined;
+        this._outerHalfAngleSubscription = undefined;
+        this._capMaterial = undefined;
+        this._capMaterialSubscription = undefined;
+        this._innerMaterial = undefined;
+        this._innerMaterialSubscription = undefined;
+        this._outerMaterial = undefined;
+        this._outerMaterialSubscription = undefined;
+        this._silhouetteMaterial = undefined;
+        this._silhouetteMaterialSubscription = undefined;
+        this._intersectionColor = undefined;
+        this._intersectionColorSubscription = undefined;
+        this._intersectionWidth = undefined;
+        this._intersectionWidthSubscription = undefined;
+        this._showIntersection = undefined;
+        this._showIntersectionSubscription = undefined;
+        this._radius = undefined;
+        this._radiusSubscription = undefined;
+        this._show = undefined;
+        this._showSubscription = undefined;
+        this._definitionChanged = new Event();
+    };
+
+    defineProperties(DynamicCone.prototype, {
+        /**
+         * Gets the event that is raised whenever a new property is assigned.
+         * @memberof DynamicCone.prototype
+         *
+         * @type {Event}
+         * @readonly
+         */
+        definitionChanged : {
+            get : function() {
+                return this._definitionChanged;
+            }
+        },
+
         /**
          * Gets or sets the numeric {@link Property} specifying the the cone's minimum clock angle.
+         * @memberof DynamicCone.prototype
          * @type {Property}
          */
-        this.minimumClockAngle = undefined;
+        minimumClockAngle : createDynamicPropertyDescriptor('minimumClockAngle'),
+
         /**
          * Gets or sets the numeric {@link Property} specifying the the cone's maximum clock angle.
+         * @memberof DynamicCone.prototype
          * @type {Property}
          */
-        this.maximumClockAngle = undefined;
+        maximumClockAngle : createDynamicPropertyDescriptor('maximumClockAngle'),
+
         /**
          * Gets or sets the numeric {@link Property} specifying the the cone's inner half-angle.
+         * @memberof DynamicCone.prototype
          * @type {Property}
          */
-        this.innerHalfAngle = undefined;
+        innerHalfAngle : createDynamicPropertyDescriptor('innerHalfAngle'),
+
         /**
          * Gets or sets the numeric {@link Property} specifying the the cone's outer half-angle.
+         * @memberof DynamicCone.prototype
          * @type {Property}
          */
-        this.outerHalfAngle = undefined;
+        outerHalfAngle : createDynamicPropertyDescriptor('outerHalfAngle'),
+
         /**
          * Gets or sets the {@link MaterialProperty} specifying the the cone's cap material.
+         * @memberof DynamicCone.prototype
          * @type {MaterialProperty}
          */
-        this.capMaterial = undefined;
+        capMaterial : createDynamicPropertyDescriptor('capMaterial'),
+
         /**
          * Gets or sets the {@link MaterialProperty} specifying the the cone's inner material.
+         * @memberof DynamicCone.prototype
          * @type {MaterialProperty}
          */
-        this.innerMaterial = undefined;
+        innerMaterial : createDynamicPropertyDescriptor('innerMaterial'),
+
         /**
          * Gets or sets the {@link MaterialProperty} specifying the the cone's outer material.
+         * @memberof DynamicCone.prototype
          * @type {MaterialProperty}
          */
-        this.outerMaterial = undefined;
+        outerMaterial : createDynamicPropertyDescriptor('outerMaterial'),
+
         /**
          * Gets or sets the {@link MaterialProperty} specifying the the cone's silhouette material.
+         * @memberof DynamicCone.prototype
          * @type {MaterialProperty}
          */
-        this.silhouetteMaterial = undefined;
+        silhouetteMaterial : createDynamicPropertyDescriptor('silhouetteMaterial'),
+
         /**
          * Gets or sets the {@link Color} {@link Property} specifying the color of the line formed by the intersection of the cone and other central bodies.
+         * @memberof DynamicCone.prototype
          * @type {Property}
          */
-        this.intersectionColor = undefined;
+        intersectionColor : createDynamicPropertyDescriptor('intersectionColor'),
+
         /**
          * Gets or sets the numeric {@link Property} specifying the width of the line formed by the intersection of the cone and other central bodies.
+         * @memberof DynamicCone.prototype
          * @type {Property}
          */
-        this.intersectionWidth = undefined;
+        intersectionWidth : createDynamicPropertyDescriptor('intersectionWidth'),
+
         /**
          * Gets or sets the boolean {@link Property} specifying the visibility of the line formed by the intersection of the cone and other central bodies.
+         * @memberof DynamicCone.prototype
          * @type {Property}
          */
-        this.showIntersection = undefined;
+        showIntersection : createDynamicPropertyDescriptor('showIntersection'),
+
         /**
          * Gets or sets the numeric {@link Property} specifying the radius of the cone's projection.
+         * @memberof DynamicCone.prototype
          * @type {Property}
          */
-        this.radius = undefined;
+        radius : createDynamicPropertyDescriptor('radius'),
+
         /**
          * Gets or sets the boolean {@link Property} specifying the visibility of the cone.
+         * @memberof DynamicCone.prototype
          * @type {Property}
          */
-        this.show = undefined;
-    };
+        show : createDynamicPropertyDescriptor('show')
+    });
 
     /**
-     * Given two DynamicObjects, takes the cone properties from the second
-     * and assigns them to the first, assuming such a property did not already exist.
+     * Duplicates a DynamicCone instance.
      *
-     * @param {DynamicObject} targetObject The DynamicObject which will have properties merged onto it.
-     * @param {DynamicObject} objectToMerge The DynamicObject containing properties to be merged.
+     * @param {DynamicCone} [result] The object onto which to store the result.
+     * @returns {DynamicCone} The modified result parameter or a new instance if one was not provided.
      */
-    DynamicCone.mergeProperties = function(targetObject, objectToMerge) {
-        var coneToMerge = objectToMerge.cone;
-        if (defined(coneToMerge)) {
-
-            var targetCone = targetObject.cone;
-            if (!defined(targetCone)) {
-                targetObject.cone = targetCone = new DynamicCone();
-            }
-
-            targetCone.show = defaultValue(targetCone.show, coneToMerge.show);
-            targetCone.innerHalfAngle = defaultValue(targetCone.innerHalfAngle, coneToMerge.innerHalfAngle);
-            targetCone.outerHalfAngle = defaultValue(targetCone.outerHalfAngle, coneToMerge.outerHalfAngle);
-            targetCone.minimumClockAngle = defaultValue(targetCone.minimumClockAngle, coneToMerge.minimumClockAngle);
-            targetCone.maximumClockAngle = defaultValue(targetCone.maximumClockAngle, coneToMerge.maximumClockAngle);
-            targetCone.radius = defaultValue(targetCone.radius, coneToMerge.radius);
-            targetCone.showIntersection = defaultValue(targetCone.showIntersection, coneToMerge.showIntersection);
-            targetCone.intersectionColor = defaultValue(targetCone.intersectionColor, coneToMerge.intersectionColor);
-            targetCone.intersectionWidth = defaultValue(targetCone.intersectionWidth, coneToMerge.intersectionWidth);
-            targetCone.capMaterial = defaultValue(targetCone.capMaterial, coneToMerge.capMaterial);
-            targetCone.innerMaterial = defaultValue(targetCone.innerMaterial, coneToMerge.innerMaterial);
-            targetCone.outerMaterial = defaultValue(targetCone.outerMaterial, coneToMerge.outerMaterial);
-            targetCone.silhouetteMaterial = defaultValue(targetCone.silhouetteMaterial, coneToMerge.silhouetteMaterial);
+    DynamicCone.prototype.clone = function(result) {
+        if (!defined(result)) {
+            result = new DynamicCone();
         }
+        result.show = this.show;
+        result.innerHalfAngle = this.innerHalfAngle;
+        result.outerHalfAngle = this.outerHalfAngle;
+        result.minimumClockAngle = this.minimumClockAngle;
+        result.maximumClockAngle = this.maximumClockAngle;
+        result.radius = this.radius;
+        result.showIntersection = this.showIntersection;
+        result.intersectionColor = this.intersectionColor;
+        result.intersectionWidth = this.intersectionWidth;
+        result.capMaterial = this.capMaterial;
+        result.innerMaterial = this.innerMaterial;
+        result.outerMaterial = this.outerMaterial;
+        result.silhouetteMaterial = this.silhouetteMaterial;
+        return result;
     };
 
     /**
-     * Given a DynamicObject, undefines the cone associated with it.
+     * Assigns each unassigned property on this object to the value
+     * of the same property on the provided source object.
      *
-     * @param {DynamicObject} dynamicObject The DynamicObject to remove the cone from.
+     * @param {DynamicCone} source The object to be merged into this object.
      */
-    DynamicCone.undefineProperties = function(dynamicObject) {
-        dynamicObject.cone = undefined;
+    DynamicCone.prototype.merge = function(source) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(source)) {
+            throw new DeveloperError('source is required.');
+        }
+        //>>includeEnd('debug');
+
+        this.show = defaultValue(this.show, source.show);
+        this.innerHalfAngle = defaultValue(this.innerHalfAngle, source.innerHalfAngle);
+        this.outerHalfAngle = defaultValue(this.outerHalfAngle, source.outerHalfAngle);
+        this.minimumClockAngle = defaultValue(this.minimumClockAngle, source.minimumClockAngle);
+        this.maximumClockAngle = defaultValue(this.maximumClockAngle, source.maximumClockAngle);
+        this.radius = defaultValue(this.radius, source.radius);
+        this.showIntersection = defaultValue(this.showIntersection, source.showIntersection);
+        this.intersectionColor = defaultValue(this.intersectionColor, source.intersectionColor);
+        this.intersectionWidth = defaultValue(this.intersectionWidth, source.intersectionWidth);
+        this.capMaterial = defaultValue(this.capMaterial, source.capMaterial);
+        this.innerMaterial = defaultValue(this.innerMaterial, source.innerMaterial);
+        this.outerMaterial = defaultValue(this.outerMaterial, source.outerMaterial);
+        this.silhouetteMaterial = defaultValue(this.silhouetteMaterial, source.silhouetteMaterial);
     };
 
     return DynamicCone;

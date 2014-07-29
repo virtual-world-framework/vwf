@@ -2,14 +2,18 @@
 define([
         './clone',
         './defined',
-        './loadText',
-        './DeveloperError'
+        './DeveloperError',
+        './loadText'
     ], function(
         clone,
         defined,
-        loadText,
-        DeveloperError) {
+        DeveloperError,
+        loadText) {
     "use strict";
+
+    var defaultHeaders = {
+        Accept : 'application/json,*/*;q=0.01'
+    };
 
     // note: &#42;&#47;&#42; below is */* but that ends the comment block early
     /**
@@ -28,28 +32,30 @@ define([
      * if not specified.
      * @returns {Promise} a promise that will resolve to the requested data when loaded.
      *
-     * @exception {DeveloperError} url is required.
+     * @see loadText
+     * @see {@link http://www.w3.org/TR/cors/|Cross-Origin Resource Sharing}
+     * @see {@link http://wiki.commonjs.org/wiki/Promises/A|CommonJS Promises/A}
      *
      * @example
-     * loadJson('http://someUrl.com/someJson.txt').then(function(jsonData) {
-     *     //Do something with the JSON object
-     * }, function() {
+     * Cesium.loadJson('http://someUrl.com/someJson.txt').then(function(jsonData) {
+     *     // Do something with the JSON object
+     * }, function(error) {
      *     // an error occurred
      * });
-     *
-     * @see loadText
-     * @see <a href='http://www.w3.org/TR/cors/'>Cross-Origin Resource Sharing</a>
-     * @see <a href='http://wiki.commonjs.org/wiki/Promises/A'>CommonJS Promises/A</a>
      */
     var loadJson = function loadJson(url, headers) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(url)) {
             throw new DeveloperError('url is required.');
         }
+        //>>includeEnd('debug');
 
-        if (defined(headers) && !defined(headers.Accept)) {
+        if (!defined(headers)) {
+            headers = defaultHeaders;
+        } else if (!defined(headers.Accept)) {
             // clone before adding the Accept header
             headers = clone(headers);
-            headers.Accept = 'application/json,*/*;q=0.01';
+            headers.Accept = defaultHeaders.Accept;
         }
 
         return loadText(url, headers).then(function(value) {

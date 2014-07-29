@@ -5,16 +5,16 @@ define([
         '../../Core/destroyObject',
         '../../Core/DeveloperError',
         '../../Core/Fullscreen',
-        '../createCommand',
-        '../../ThirdParty/knockout'
+        '../../ThirdParty/knockout',
+        '../createCommand'
     ], function(
         defaultValue,
         defineProperties,
         destroyObject,
         DeveloperError,
         Fullscreen,
-        createCommand,
-        knockout) {
+        knockout,
+        createCommand) {
     "use strict";
 
     /**
@@ -27,14 +27,13 @@ define([
     var FullscreenButtonViewModel = function(fullscreenElement) {
         var that = this;
 
-        var tmpIsFullscreen = knockout.observable(Fullscreen.isFullscreen());
-        var tmpIsEnabled = knockout.observable(Fullscreen.isFullscreenEnabled());
+        var tmpIsFullscreen = knockout.observable(Fullscreen.fullscreen);
+        var tmpIsEnabled = knockout.observable(Fullscreen.enabled);
 
         /**
          * Gets whether or not fullscreen mode is active.  This property is observable.
          *
          * @type {Boolean}
-         * @default undefined
          */
         this.isFullscreen = undefined;
         knockout.defineProperty(this, 'isFullscreen', {
@@ -47,8 +46,7 @@ define([
          * Gets or sets whether or not fullscreen functionality should be enabled.  This property is observable.
          *
          * @type {Boolean}
-         * @default undefined
-         * @see Fullscreen.isFullscreenEnabled
+         * @see Fullscreen.enabled
          */
         this.isFullscreenEnabled = undefined;
         knockout.defineProperty(this, 'isFullscreenEnabled', {
@@ -56,15 +54,14 @@ define([
                 return tmpIsEnabled();
             },
             set : function(value) {
-                tmpIsEnabled(value && Fullscreen.isFullscreenEnabled());
+                tmpIsEnabled(value && Fullscreen.enabled);
             }
         });
 
         /**
-         * Gets or sets the tooltip.  This property is observable.
+         * Gets the tooltip.  This property is observable.
          *
          * @type {String}
-         * @default undefined
          */
         this.tooltip = undefined;
         knockout.defineProperty(this, 'tooltip', function() {
@@ -75,7 +72,7 @@ define([
         });
 
         this._command = createCommand(function() {
-            if (Fullscreen.isFullscreen()) {
+            if (Fullscreen.fullscreen) {
                 Fullscreen.exitFullscreen();
             } else {
                 Fullscreen.requestFullscreen(that._fullscreenElement);
@@ -85,9 +82,9 @@ define([
         this._fullscreenElement = defaultValue(fullscreenElement, document.body);
 
         this._callback = function() {
-            tmpIsFullscreen(Fullscreen.isFullscreen());
+            tmpIsFullscreen(Fullscreen.fullscreen);
         };
-        document.addEventListener(Fullscreen.getFullscreenChangeEventName(), this._callback);
+        document.addEventListener(Fullscreen.changeEventName, this._callback);
     };
 
     defineProperties(FullscreenButtonViewModel.prototype, {
@@ -104,9 +101,12 @@ define([
                 return this._fullscreenElement;
             },
             set : function(value) {
+                //>>includeStart('debug', pragmas.debug);
                 if (!(value instanceof Element)) {
                     throw new DeveloperError('value must be a valid Element.');
                 }
+                //>>includeEnd('debug');
+
                 this._fullscreenElement = value;
             }
         },
@@ -125,7 +125,6 @@ define([
     });
 
     /**
-     * @memberof FullscreenButtonViewModel
      * @returns {Boolean} true if the object has been destroyed, false otherwise.
      */
     FullscreenButtonViewModel.prototype.isDestroyed = function() {
@@ -135,10 +134,9 @@ define([
     /**
      * Destroys the view model.  Should be called to
      * properly clean up the view model when it is no longer needed.
-     * @memberof FullscreenButtonViewModel
      */
     FullscreenButtonViewModel.prototype.destroy = function() {
-        document.removeEventListener(Fullscreen.getFullscreenChangeEventName(), this._callback);
+        document.removeEventListener(Fullscreen.changeEventName, this._callback);
         destroyObject(this);
     };
 

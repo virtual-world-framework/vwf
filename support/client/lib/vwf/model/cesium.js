@@ -112,12 +112,12 @@ define( [ "module", "vwf/model", "vwf/utility",
                     this.state.scenes[ childID ] = node = createNode();
                 }
 
-            } else if ( isCentralBody.call( this, protos ) ) {
+            } else if ( isGlobe.call( this, protos ) ) {
 
                 this.state.nodes[ childID ] = node = createNode();
                 parentNode = findParent.call( this, nodeID );
-                if ( parentNode && parentNode.centralBody ) {
-                    node.cesiumObj = parentNode.centralBody;
+                if ( parentNode && parentNode.globe ) {
+                    node.cesiumObj = parentNode.globe;
                     node.cesiumObj.vwfID = childID;
                 }                
 
@@ -322,7 +322,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                 var sceneNode = findSceneNode.call( this, node );
 
                 if ( childName == "camera" ) {
-                    node.cesiumObj = sceneNode.scene.getCamera();
+                    node.cesiumObj = sceneNode.scene._camera;
                 } else {
                     var camera = new Cesium.Camera(canvas);
                     camera.position = new Cesium.Cartesian3();
@@ -998,7 +998,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                             break;
 
                         case "northPoleColor":
-                            if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                            if ( node.cesiumObj instanceof Cesium.Globe ) {
                                 if ( propertyValue instanceof String ) {
                                     propertyValue = propertyValue.replace( /\s/g, '' );
                                 }
@@ -1014,7 +1014,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                             break;
 
                         case "southPoleColor":
-                            if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                            if ( node.cesiumObj instanceof Cesium.Globe ) {
                                 if ( propertyValue instanceof String ) {
                                     propertyValue = propertyValue.replace( /\s/g, '' );
                                 }
@@ -1030,31 +1030,31 @@ define( [ "module", "vwf/model", "vwf/utility",
                             break;
                             
                         case "logoOffset":
-                            if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                            if ( node.cesiumObj instanceof Cesium.Globe ) {
                                 node.cesiumObj.logoOffset = new Cesium.Cartesian2( Number( propertyValue[0], propertyValue[1] ) );
                             }
                             break;
 
                         case "tileCacheSize":
-                            if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                            if ( node.cesiumObj instanceof Cesium.Globe ) {
                                 node.cesiumObj.tileCacheSize = Number( propertyValue );
                             }
                             break;  
 
                         case "oceanNormalMapUrl":
-                            if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                            if ( node.cesiumObj instanceof Cesium.Globe ) {
                                 node.cesiumObj.oceanNormalMapUrl =  propertyValue;
                             }
                             break;
 
                         case "depthTestAgainstTerrain":
-                            if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                            if ( node.cesiumObj instanceof Cesium.Globe ) {
                                 node.cesiumObj.depthTestAgainstTerrain = Boolean( propertyValue );
                             }
                             break;
 
                         case "terrainProvider":
-                            if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                            if ( node.cesiumObj instanceof Cesium.Globe ) {
                                 if ( node.terrainProvider && node.terrainProvider == propertyValue ) {
                                     break;
                                 }
@@ -1110,7 +1110,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                 node = this.state.scenes[ nodeID ]; 
                 var scene = node.scene;
 
-                if ( ( node.cesiumWidget !== undefined || node.centralBody !== undefined ) && utility.validPropertyValue.call( this, propertyValue ) ) {
+                if ( ( node.cesiumWidget !== undefined || node.globe !== undefined ) && utility.validPropertyValue.call( this, propertyValue ) ) {
 
                     switch ( propertyName ) {
 
@@ -1120,7 +1120,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                         case "cameraViewData":
                             if ( this.kernel.client() != this.kernel.moniker() ) {
-                                var camera = scene.getCamera();
+                                var camera = scene._camera;
                                 if ( propertyValue.direction ) {
                                     camera.direction = new Cesium.Cartesian3( propertyValue.direction[0], propertyValue.direction[1], propertyValue.direction[2] );
                                 }
@@ -1305,9 +1305,9 @@ define( [ "module", "vwf/model", "vwf/utility",
                             if ( imageProvider !== undefined ) {
                                 if ( node && node.cesiumWidget !== undefined ) {
                                     // how does the widget add an image layer
-                                    node.cesiumWidget.centralBody.getImageryLayers().addImageryProvider( imageProvider );
-                                } else if ( node.centralBody !== undefined ) {
-                                    node.centralBody.getImageryLayers().addImageryProvider( imageProvider );
+                                    node.cesiumWidget._globe.getImageryLayers().addImageryProvider( imageProvider );
+                                } else if ( node.globe !== undefined ) {
+                                    node.globe.getImageryLayers().addImageryProvider( imageProvider );
                                 }
                                 node.imageryProvider = propertyValue;
                             }
@@ -1623,14 +1623,14 @@ define( [ "module", "vwf/model", "vwf/utility",
                     break;
 
                 case "northPoleColor":
-                    if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                    if ( node.cesiumObj instanceof Cesium.Globe ) {
                         var clr = node.cesiumObj.northPoleColor;
                         value = "rgb(" + ( clr.x*255 ) + "," + (clr.y*255) + "," + (clr.z*255) + ")";
                     } 
                     break;
 
                 case "southPoleColor":
-                    if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                    if ( node.cesiumObj instanceof Cesium.Globe ) {
                         var clr = node.cesiumObj.southPoleColor;
                         value = "rgb(" + ( clr.x*255 ) + "," + (clr.y*255) + "," + (clr.z*255) + ")";
                     } 
@@ -1638,26 +1638,26 @@ define( [ "module", "vwf/model", "vwf/utility",
                     break;
                     
                 case "logoOffset":
-                    if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                    if ( node.cesiumObj instanceof Cesium.Globe ) {
                         var pos = node.cesiumObj.logoOffset;
                         value = [ pos.x, pos.y ];
                     }
                     break;
 
                 case "tileCacheSize":
-                    if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                    if ( node.cesiumObj instanceof Cesium.Globe ) {
                         value = node.cesiumObj.tileCacheSize;
                     }
                     break;  
 
                 case "oceanNormalMapUrl":
-                    if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                    if ( node.cesiumObj instanceof Cesium.Globe ) {
                         value = node.cesiumObj.oceanNormalMapUrl;
                     }
                     break;
 
                 case "depthTestAgainstTerrain":
-                    if ( node.cesiumObj instanceof Cesium.CentralBody ) {
+                    if ( node.cesiumObj instanceof Cesium.Globe ) {
                         value = node.cesiumObj.depthTestAgainstTerrain;
                     }
                     break;
@@ -1665,7 +1665,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                 case "cameraViewData":
                     if ( node.scene ) {
-                        var camera = node.scene.getCamera();
+                        var camera = node.scene._camera;
                         var value = {}
                         var vec;
                         if ( camera.direction ) {
@@ -2025,12 +2025,12 @@ define( [ "module", "vwf/model", "vwf/utility",
         return foundCesium;
     }
 
-    function isCentralBody( prototypes ) {
+    function isGlobe( prototypes ) {
         var foundCesium = false;
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-centralBody-vwf" );    
+                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-globe-vwf" );    
             }
         }
 

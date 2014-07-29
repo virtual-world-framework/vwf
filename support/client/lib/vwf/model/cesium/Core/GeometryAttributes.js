@@ -1,17 +1,18 @@
 /*global define*/
-define(['./defaultValue'], function(defaultValue) {
+define([
+        './defaultValue'
+    ], function(
+        defaultValue) {
     "use strict";
 
     /**
      * Attributes, which make up a geometry's vertices.  Each property in this object corresponds to a
      * {@link GeometryAttribute} containing the attribute's data.
      * <p>
-     * Attributes are always stored non-interleaved in a Geometry.  When geometry is prepared for rendering
-     * with {@link Context#createVertexArrayFromGeometry}, attributes are generally written interleaved
-     * into the vertex buffer for better rendering performance.
+     * Attributes are always stored non-interleaved in a Geometry.
      * </p>
      *
-     * @alias VertexFormat
+     * @alias GeometryAttributes
      * @constructor
      */
     var GeometryAttributes = function(options) {
@@ -76,6 +77,18 @@ define(['./defaultValue'], function(defaultValue) {
          * @default undefined
          */
         this.tangent = options.tangent;
+
+        /**
+         * The color attribute.
+         * <p>
+         * 8-bit unsigned integer. 4 components per attribute.
+         * </p>
+         *
+         * @type GeometryAttribute
+         *
+         * @default undefined
+         */
+        this.color = options.color;
     };
 
     return GeometryAttributes;

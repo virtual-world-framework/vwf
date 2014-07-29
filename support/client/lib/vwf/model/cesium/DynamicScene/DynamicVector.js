@@ -1,10 +1,18 @@
 /*global define*/
 define([
         '../Core/defaultValue',
-        '../Core/defined'
+        '../Core/defined',
+        '../Core/defineProperties',
+        '../Core/DeveloperError',
+        '../Core/Event',
+        './createDynamicPropertyDescriptor'
     ], function(
         defaultValue,
-        defined) {
+        defined,
+        defineProperties,
+        DeveloperError,
+        Event,
+        createDynamicPropertyDescriptor) {
     "use strict";
 
     /**
@@ -13,64 +21,105 @@ define([
      * @constructor
      */
     var DynamicVector = function() {
+        this._color = undefined;
+        this._colorSubscription = undefined;
+        this._show = undefined;
+        this._showSubscription = undefined;
+        this._width = undefined;
+        this._widthSubscription = undefined;
+        this._direction = undefined;
+        this._directionSubscription = undefined;
+        this._length = undefined;
+        this._lengthSubscription = undefined;
+        this._definitionChanged = new Event();
+    };
+
+    defineProperties(DynamicVector.prototype, {
+        /**
+         * Gets the event that is raised whenever a new property is assigned.
+         * @memberof DynamicVector.prototype
+         *
+         * @type {Event}
+         * @readonly
+         */
+        definitionChanged : {
+            get : function() {
+                return this._definitionChanged;
+            }
+        },
+
         /**
          * Gets or sets the {@link Color} {@link Property} specifying the the vector's color.
+         * @memberof DynamicVector.prototype
          * @type {Property}
          */
-        this.color = undefined;
+        color : createDynamicPropertyDescriptor('color'),
+
         /**
          * Gets or sets the boolean {@link Property} specifying the vector's visibility.
+         * @memberof DynamicVector.prototype
          * @type {Property}
          */
-        this.show = undefined;
+        show : createDynamicPropertyDescriptor('show'),
+
         /**
          * Gets or sets the numeric {@link Property} specifying the the vector's width.
+         * @memberof DynamicVector.prototype
          * @type {Property}
          */
-        this.width = undefined;
+        width : createDynamicPropertyDescriptor('width'),
+
         /**
          * Gets or sets the {@link Cartesian3} {@link Property} specifying the the vector's direction.
+         * @memberof DynamicVector.prototype
          * @type {Property}
          */
-        this.direction = undefined;
+        direction : createDynamicPropertyDescriptor('direction'),
+
         /**
          * Gets or sets the numeric {@link Property} specifying the the vector's graphical length in meters.
+         * @memberof DynamicVector.prototype
          * @type {Property}
          */
-        this.length = undefined;
-    };
+        length : createDynamicPropertyDescriptor('length')
+    });
 
     /**
-     * Given two DynamicObjects, takes the vector properties from the second
-     * and assigns them to the first, assuming such a property did not already exist.
+     * Duplicates a DynamicVector instance.
      *
-     * @param {DynamicObject} targetObject The DynamicObject which will have properties merged onto it.
-     * @param {DynamicObject} objectToMerge The DynamicObject containing properties to be merged.
+     * @param {DynamicVector} [result] The object onto which to store the result.
+     * @returns {DynamicVector} The modified result parameter or a new instance if one was not provided.
      */
-    DynamicVector.mergeProperties = function(targetObject, objectToMerge) {
-        var vectorToMerge = objectToMerge.vector;
-        if (defined(vectorToMerge)) {
-
-            var targetVector = targetObject.vector;
-            if (!defined(targetVector)) {
-                targetObject.vector = targetVector = new DynamicVector();
-            }
-
-            targetVector.color = defaultValue(targetVector.color, vectorToMerge.color);
-            targetVector.width = defaultValue(targetVector.width, vectorToMerge.width);
-            targetVector.direction = defaultValue(targetVector.direction, vectorToMerge.direction);
-            targetVector.length = defaultValue(targetVector.length, vectorToMerge.length);
-            targetVector.show = defaultValue(targetVector.show, vectorToMerge.show);
+    DynamicVector.prototype.clone = function(result) {
+        if (!defined(result)) {
+            result = new DynamicVector();
         }
+        result.color = this.color;
+        result.width = this.width;
+        result.direction = this.direction;
+        result.length = this.length;
+        result.show = this.show;
+        return result;
     };
 
     /**
-     * Given a DynamicObject, undefines the vector associated with it.
+     * Assigns each unassigned property on this object to the value
+     * of the same property on the provided source object.
      *
-     * @param {DynamicObject} dynamicObject The DynamicObject to remove the vector from.
+     * @param {DynamicVector} source The object to be merged into this object.
      */
-    DynamicVector.undefineProperties = function(dynamicObject) {
-        dynamicObject.vector = undefined;
+    DynamicVector.prototype.merge = function(source) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(source)) {
+            throw new DeveloperError('source is required.');
+        }
+        //>>includeEnd('debug');
+
+        this.color = defaultValue(this.color, source.color);
+        this.width = defaultValue(this.width, source.width);
+        this.direction = defaultValue(this.direction, source.direction);
+        this.length = defaultValue(this.length, source.length);
+        this.show = defaultValue(this.show, source.show);
     };
 
     return DynamicVector;
