@@ -149,6 +149,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
 
             if ( this.state.nodes[ nodeID ] !== undefined ) {
+                
+                var node = this.state.nodes[ nodeID ];
+                if ( node.kineticObj !== undefined ) {
+                    // removes and destroys object
+                    node.kineticObj.destroy();
+                    node.kineticObj = undefined;    
+                }                
+
                 delete this.state.nodes[ nodeID ];
             }
             
@@ -166,9 +174,28 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- movingChild ------------------------------------------------------------------------
         
         movingChild: function( nodeID, childID, childName ) {
+            
             if ( this.debug.parenting ) {
                 this.logger.infox( "movingChild", nodeID, childID, childName );
             }
+
+            if ( this.state.nodes[ childID ] !== undefined ) {
+                
+                if ( this.state.nodes[ nodeID ] !== undefined ) {
+                    var parentNode = this.state.nodes[ nodeID ];
+                    
+                    if ( isContainerDefinition( parentNode.prototypes ) && parentNode.kineticObj ) {
+                        
+                        var node = this.state.nodes[ childID ];
+                        if ( node.kineticObj !== undefined ) {
+                            // removes and destroys object
+                            node.kineticObj.remove();
+                            parentNode.kineticObj.add( node.kineticObj );
+                        } 
+                    }
+                }               
+            }
+
         },
 
 
