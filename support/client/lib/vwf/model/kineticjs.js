@@ -188,7 +188,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         
                         var node = this.state.nodes[ childID ];
                         if ( node.kineticObj !== undefined ) {
-                            // removes and destroys object
+                            // removes object only
                             node.kineticObj.remove();
                             parentNode.kineticObj.add( node.kineticObj );
                         } 
