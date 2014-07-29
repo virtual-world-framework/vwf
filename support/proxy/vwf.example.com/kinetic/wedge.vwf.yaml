@@ -1,0 +1,8 @@
+# http://kineticjs.com/docs/Kinetic.Wedge.html
+
+--- 
+extends: http://vwf.example.com/kinetic/shape.vwf
+properties:
+  angle:
+  radius:
+  clockwise:
