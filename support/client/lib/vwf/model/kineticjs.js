@@ -45,6 +45,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                     }
                     return false;        
+                },
+                isKineticComponent: function( prototypes ) {
+                    var found = false;
+                    if ( prototypes ) {
+                        for ( var i = 0; i < prototypes.length && !found; i++ ) {
+                            found = ( prototypes[ i ].indexOf( "http-vwf-example-com-kinetic-" ) != -1 );    
+                        }
+                    }
+                    return found;
                 }
             };
 
@@ -100,7 +109,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             var node;
 
-            if ( isKineticComponent( protos ) ) {
+            if ( this.state.isKineticComponent( protos ) ) {
                 
                 // Create the local copy of the node properties
                 if ( this.state.nodes[ childID ] === undefined ){
@@ -1905,16 +1914,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
                 
         return prototypes;
-    }
-
-    function isKineticComponent( prototypes ) {
-        var found = false;
-        if ( prototypes ) {
-            for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[ i ].indexOf( "http-vwf-example-com-kinetic-" ) != -1 );    
-            }
-        }
-        return found;
     }
 
     function createKineticObject( node, config ) {
