@@ -2704,8 +2704,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             GetAllLeafMeshes( asset, meshes );
 
             for( var i =0; i < meshes.length; i++ ) {
-                fixMissingUVs( meshes[i] );   
-                meshes[i].geometry.uvsNeedUpdate = true;
+                if ( meshes[i].material.map != null ) {
+                    fixMissingUVs( meshes[i] );
+                }
             }
             
             asset.updateMatrixWorld();
