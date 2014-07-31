@@ -114,7 +114,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     
                     var eData = getEventData( evt );
 
-                    console.info( "dispatchEvent( "+stage.getId()+", 'pointerMove', "+eData.eventData+", "+eData.eventNodeData+" );" )
                     self.kernel.dispatchEvent( stage.getId(), 'pointerMove', eData.eventData, eData.eventNodeData ); 
 
                 });
@@ -130,13 +129,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     self.kernel.dispatchEvent( stage.getId(), 'pointerUp', eData.eventData, eData.eventNodeData );
 
                     mouseDownTime = null;
-                });
-
-                stage.on( 'mouseup', function( evt ) {
-                    var shape = evt.targetNode;
-
-
-                    console.info( 'mouseup' )
                 });
 
                 stage.on( 'dragstart', function( evt ) {
