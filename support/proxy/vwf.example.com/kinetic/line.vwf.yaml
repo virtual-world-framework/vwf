@@ -4,5 +4,7 @@
 extends: http://vwf.example.com/kinetic/shape.vwf
 properties:
   points:
-  tension:
-  closed:
+  tension: 0
+  closed: false
+  stroke: "#000000"
+  strokeWidth:
