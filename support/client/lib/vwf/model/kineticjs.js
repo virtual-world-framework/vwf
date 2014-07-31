@@ -60,6 +60,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             // turns on logger debugger console messages 
             this.debug = {
                 "creation": false,
+                "native": false,
                 "initializing": false,
                 "parenting": false,
                 "deleting": false,
@@ -111,6 +112,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var node;
 
             if ( this.state.isKineticComponent( protos ) ) {
+
+                if ( this.debug.native ) {
+                    this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName );
+                }
                 
                 // Create the local copy of the node properties
                 if ( this.state.nodes[ childID ] === undefined ){
@@ -132,6 +137,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if ( this.state.nodes[ nodeID ] !== undefined ) {
                         var parent = this.state.nodes[ nodeID ];
                         if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
+                            
+                            //console.info( "Adding child: " + childID + " to " + nodeID );
                             parent.kineticObj.add( node.kineticObj );    
                         }
                     }
