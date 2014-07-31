@@ -45,7 +45,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             var protos = node.prototypes;
             if ( self.state.isKineticClass( protos, "kinetic-stage-vwf" ) || self.state.isKineticClass( protos, "kinetic.stage.vwf" ) ) {
                 
-                var stage = node.kineticObj;
+                var stage = this.state.stage = node.kineticObj;
                 var mouseDown = false;
                 var mouseDownTime = null;
                 var timer = new Date();
