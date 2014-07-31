@@ -54,7 +54,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 var getEventData = function( e ) {
                     var returnData = { eventData: undefined, eventNodeData: undefined };
 
-                    returnData.eventData = { 
+                    returnData.eventData = [ { 
                         "button": e.evt.button,
                         "timeStamp": e.evt.timeStamp,
                         "location": [ e.evt.x, e.evt.y ],
@@ -68,7 +68,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         "ctrlKey": e.evt.ctrlKey,                        
                         "altKey": e.evt.altKey, 
                         "metaKey": e.evt.metaKey
-                    };
+                    } ];
 
                     var pointerPickID = e.targetNode ? e.targetNode.getId() : stage.getId();
 
@@ -105,7 +105,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     mouseDownTime = timer.getTime();
                     var eData = getEventData( evt );
 
-                    self.kernel.dispatchEvent( stage.getId(), 'pointerDown', [ eData.eventData, eData.eventNodeData ] );
+                    self.kernel.dispatchEvent( stage.getId(), 'pointerDown', eData.eventData, eData.eventNodeData );
 
                 });
 
@@ -115,7 +115,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     var eData = getEventData( evt );
 
                     console.info( "dispatchEvent( "+stage.getId()+", 'pointerMove', "+eData.eventData+", "+eData.eventNodeData+" );" )
-                    self.kernel.dispatchEvent( stage.getId(), 'pointerMove', [ eData.eventData, eData.eventNodeData ] ); 
+                    self.kernel.dispatchEvent( stage.getId(), 'pointerMove', eData.eventData, eData.eventNodeData ); 
 
                 });
 
@@ -127,7 +127,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     if ( timer.getTime() - mouseDownTime < 700.0 ) {
                         self.kernel.dispatchEvent( stage.getId(), 'pointerClick', eData.eventData, eData.eventNodeData );
                     }
-                    self.kernel.dispatchEvent( stage.getId(), 'pointerUp', [ eData.eventData, eData.eventNodeData ] );
+                    self.kernel.dispatchEvent( stage.getId(), 'pointerUp', eData.eventData, eData.eventNodeData );
 
                     mouseDownTime = null;
                 });
