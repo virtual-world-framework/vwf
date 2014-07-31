@@ -67,6 +67,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 "setting": false,
                 "getting": false,
                 "methods": false,
+                "events": false,
                 "prototypes": false
             };
            
@@ -1868,7 +1869,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         // -- callingMethod --------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        callingMethod: function( nodeID, methodName, methodParameters, methodValue ) { 
             if ( this.debug.methods ) {
                 this.logger.infox( "   M === callingMethod ", nodeID, methodName );
             }
@@ -1876,6 +1877,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
+
+        firingEvent: function( nodeID, eventName, eventParameters  ) { // TODO: parameters
+            if ( this.debug.events ) {
+                this.logger.infox( "   M === callingMethod ", nodeID, eventName );
+            }
+        },
 
         // -- executing ------------------------------------------------------------------------------
 
