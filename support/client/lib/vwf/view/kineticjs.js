@@ -46,27 +46,104 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             if ( self.state.isKineticClass( protos, "kinetic-stage-vwf" ) || self.state.isKineticClass( protos, "kinetic.stage.vwf" ) ) {
                 
                 var stage = node.kineticObj;
+                var mouseDown = false;
+                var mouseDownTime = null;
+                var timer = new Date();
+
+
+                var getEventData = function( e ) {
+                    var returnData = { eventData: undefined, eventNodeData: undefined };
+
+                    returnData.eventData = { 
+                        "button": e.evt.button,
+                        "timeStamp": e.evt.timeStamp,
+                        "location": [ e.evt.x, e.evt.y ],
+                        "client": [ e.evt.clientX, e.evt.clientY ],
+                        "screen": [ e.evt.screenX, e.evt.screenY ],
+                        "layer": [ e.evt.layerX, e.evt.layerY ],
+                        "page": [ e.evt.pageX, e.evt.pageY ],
+                        "offset": [ e.evt.offsetX, e.evt.offsetY ],
+                        "movement": [ e.evt.webkitMovementX, e.evt.webkitMovementY ],
+                        "shiftKey": e.evt.shiftKey,
+                        "ctrlKey": e.evt.ctrlKey,                        
+                        "altKey": e.evt.altKey, 
+                        "metaKey": e.evt.metaKey
+                    };
+
+                    var pointerPickID = e.targetNode ? e.targetNode.getId() : stage.getId();
+
+                    returnData.eventNodeData = { "": [ {
+                        pickID: pointerPickID,
+                    } ] };
+
+                    if ( self && self.state.nodes[ pointerPickID ] ) {
+                        var childID = pointerPickID;
+                        var child = self.state.nodes[ childID ];
+                        var parentID = child.parentID;
+                        var parent = self.state.nodes[ child.parentID ];
+                        while ( child ) {
+
+                            returnData.eventNodeData[ childID ] = [ {
+                                pickID: pointerPickID,
+                            } ];
+
+                            childID = parentID;
+                            child = self.state.nodes[ childID ];
+                            parentID = child ? child.parentID : undefined;
+                            parent = parentID ? self.state.nodes[ child.parentID ] : undefined;
+
+                        }
+                    }
+
+                    return returnData;
+                };
 
                 // bind stage handlers
-                stage.on('mousedown', function(evt) {
-                    var shape = evt.targetNode;
-                    //shape.moveTo(dragLayer);
-                    //stage.draw()
-                    // restart drag and drop in the new layer
-                    //shape.startDrag();
+                stage.on( 'mousedown', function( evt ) {
+                    var node = evt.targetNode;
+                    mouseDown = true;
+                    mouseDownTime = timer.getTime();
+                    var eData = getEventData( evt );
+
+                    self.kernel.dispatchEvent( stage.getId(), 'pointerDown', eData.eventData, eData.eventNodeData );
+
                 });
 
-                stage.on('mouseup', function(evt) {
-                    var shape = evt.targetNode;
-                    //shape.moveTo(layer);
-                    //stage.draw();
+                stage.on( 'mousemove', function( evt ) {
+                    var node = evt.targetNode;
+                    
+                    var eData = getEventData( evt );
+
+                    console.info( "dispatchEvent( "+stage.getId()+", 'pointerMove', "+eData.eventData+", "+eData.eventNodeData+" );" )
+                    self.kernel.dispatchEvent( stage.getId(), 'pointerMove', eData.eventData, eData.eventNodeData ); 
+
                 });
 
-                stage.on('dragstart', function(evt) {
+                stage.on( 'mouseup', function( evt ) {
+                    var node = evt.targetNode;
+                    mouseDown = false;
+
+                    var eData = getEventData( evt );
+                    if ( timer.getTime() - mouseDownTime < 700.0 ) {
+                        self.kernel.dispatchEvent( stage.getId(), 'pointerClick', eData.eventData, eData.eventNodeData );
+                    }
+                    self.kernel.dispatchEvent( stage.getId(), 'pointerUp', eData.eventData, eData.eventNodeData );
+
+                    mouseDownTime = null;
+                });
+
+                stage.on( 'mouseup', function( evt ) {
+                    var shape = evt.targetNode;
+
+
+                    console.info( 'mouseup' )
+                });
+
+                stage.on( 'dragstart', function( evt ) {
                     var shape = evt.targetNode;
                 });
 
-                stage.on('dragend', function(evt) {
+                stage.on( 'dragend', function( evt ) {
                     var shape = evt.targetNode;
 
                 });
