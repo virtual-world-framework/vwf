@@ -1882,19 +1882,13 @@
 
                 }
 
-                if ( Object.keys( nodeComponent.properties ).length == 0 ) { 
-                    delete nodeComponent.properties;
-                } else {
-                    patched = true;
-                }
-
-            } else if ( node.properties.changed ) {
+            } else if ( node.properties.changes ) {
 
                 // The node is patchable and properties have changed.
 
                 nodeComponent.properties = {};
 
-                Object.keys( node.properties.changed ).forEach( function( propertyName ) {
+                Object.keys( node.properties.changes ).forEach( function( propertyName ) {
                     var propertyValue = this.getProperty( nodeID, propertyName );
 
                     if ( this.kutility.valueIsNodeReference( propertyValue ) ) {
@@ -1906,14 +1900,18 @@
 
                 }, this );
 
-                patched = true;
+            }
 
+            if ( Object.keys( nodeComponent.properties ).length == 0 ) {
+                delete nodeComponent.properties;
+            } else {
+                patched = true;
             }
 
             // Methods.
 
             var methods = full || ! node.patchable ?
-                node.methods.existing : node.methods.changed;
+                node.methods.existing : node.methods.changes;
 
             if ( methods ) {
                 Object.keys( methods ).forEach( function( methodName ) {
@@ -2855,7 +2853,7 @@ if ( ! childComponent.source ) {
 
             // Register the property.
 
-            node.properties.create( propertyName );
+            node.properties.create( propertyName, node.initialized && node.patchable );
 
             // Call creatingProperty() on each model. The property is considered created after all
             // models have run.
@@ -2921,12 +2919,12 @@ if ( ! childComponent.source ) {
                 reentry.creating = true;
                 var settingPropertyEtc = "creatingProperty";
                 var satPropertyEtc = "createdProperty";
-                node.properties.create( propertyName );
+                node.properties.create( propertyName, node.initialized && node.patchable );
             } else if ( ! node.properties.hasOwn( propertyName ) || entry.initializing ) {
                 reentry.initializing = true;
                 var settingPropertyEtc = "initializingProperty";
                 var satPropertyEtc = "initializedProperty";
-                node.properties.create( propertyName );
+                node.properties.create( propertyName, node.initialized && node.patchable );
             } else {
                 var settingPropertyEtc = "settingProperty";
                 var satPropertyEtc = "satProperty";
@@ -3257,7 +3255,7 @@ if ( ! childComponent.source ) {
 
             // Register the method.
 
-            node.methods.create( methodName );
+            node.methods.create( methodName, node.initialized && node.patchable );
 
             // Call `creatingMethod` on each model. The method is considered created after all
             // models have run.
@@ -5364,122 +5362,125 @@ if ( ! childComponent.source ) {
 
         // == Private variables ====================================================================
 
-        // Prototype for the `properties`, `methods` and `events` collections in the `nodes`
-        // objects.
+        /// Prototype for name-based, unordered collections in the node registry, including
+        /// `node.properties`, `node.methods`, and `node.events`.
 
-        var nodeCollectionPrototype = {
+        var keyedCollectionPrototype = {
 
             /// Record that a property, method or event has been created.
             /// 
             /// @param {String} name
+            ///   The member name.
+            /// @param {Boolean} changes
+            ///   For patchable nodes, record changes so that `kernel.getNode` may create a patch
+            ///   when retrieving the node.
+            /// @param [value]
+            ///   An optional value to assign to the record. If `value` is omitted, the record will
+            ///   exist in the collection but have the value `undefined`.
             /// 
             /// @returns {Boolean}
             ///   `true` if the member was successfully added. `false` if a member by that name
             ///   already exists.
 
-            create: function( name ) {
+            create: function( name, changes, value ) {
 
                 if ( ! this.hasOwn( name ) ) {
 
-                    // Add the member. We just record its existence. Everything else is managed by
-                    // the drivers.
-                    // 
-                    // `Object.defineProperty` is used instead of `this.existing[name] = ...` since
-                    // the prototype may be a behavior proxy, and the accessor properties would
-                    // prevent normal assignment.
+                    this.haveOwn( "existing" );
+
+                    // Add the member. `Object.defineProperty` is used instead of
+                    // `this.existing[name] = ...` since the prototype may be a behavior proxy, and
+                    // the accessor properties would prevent normal assignment.
 
                     Object.defineProperty( this.existing, name, {
-                        value: undefined,
+                        value: value ? value : undefined,
                         configurable: true,
                         enumerable: true,
                         writable: true,
                     } );
 
+                    if ( changes ) {
+
+                        this.haveOwn( "changes" );
+
+                        // if ( this.changes[ name ] !== "removed" ) {
+                        //     this.changes[ name ] = "added";
+                        // } else {
+                        //     this.changes[ name ] = "changed";  // previously removed, then added
+                        // }
+
+                    }
+
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
-            /// Record that a member has been deleted. Remove it from any change lists that is in.
+            /// Record that a member has been deleted.
             /// 
             /// @param {String} name
+            ///   The member name.
             /// 
             /// @returns {Boolean}
             ///   `true` if the member was successfully removed. `false` if a member by that name
             ///   does not exist.
 
-            delete: function( name ) {
+            delete: function( name, changes ) {
 
                 if ( this.hasOwn( name ) ) {
 
-                    // Remove the member.
+                    delete this.existing[ name ];
 
-                    delete this.existing[name];
+                    if ( changes ) {
 
-                    // Remmove the member from any change lists it's in. Completely remove lists
-                    // that become empty.
+                        this.haveOwn( "changes" );
 
-                    if ( this.added ) {
-                        delete this.added[name];
-                        Object.keys( this.added ).length || delete this.added;
-                    }
+                        // if ( this.changes[ name ] !== "added" ) {
+                        //     this.changes[ name ] = "removed";
+                        // } else {
+                        //     delete this.changes[ name ];  // previously added, then removed
+                        // }
 
-                    if ( this.removed ) {
-                        delete this.removed[name];
-                        Object.keys( this.removed ).length || delete this.removed;
-                    }
-
-                    if ( this.changed ) {
-                        delete this.changed[name];
-                        Object.keys( this.changed ).length || delete this.changed;
                     }
 
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
-            /// Record that a member has changed. Create the change list if it does not exist.
+            /// Record that a member has changed.
             /// 
             /// @param {String} name
+            ///   The member name.
             /// 
             /// @returns {Boolean}
             ///   `true` if the change was successfully recorded. `false` if a member by that name
             ///   does not exist.
 
-            change: function( name ) {
+            change: function( name, value ) {
 
                 if ( this.hasOwn( name ) ) {
 
-                    // Ensure that the change list exists and record the change.
+                    this.haveOwn( "changes" );
 
-                    this.changed = this.changed || {};
-                    this.changed[name] = undefined;
+                    if ( this.changes[ name ] !== "added" ) {
+                        this.changes[ name ] = value ?
+                            value : this.changes[ name ] || "changed";
+                    }
 
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
             /// Determine if a node has a member with the given name, either directly on the node or
             /// inherited from a prototype.
             /// 
             /// @param {String} name
+            ///   The member name.
             /// 
             /// @returns {Boolean}
 
@@ -5491,6 +5492,7 @@ if ( ! childComponent.source ) {
             /// considered.
             /// 
             /// @param {String} name
+            ///   The member name.
             /// 
             /// @returns {Boolean}
 
@@ -5504,6 +5506,277 @@ if ( ! childComponent.source ) {
 
             hasOwn: function( name ) {
                 return Object.prototype.hasOwnProperty.call( this.existing, name );
+            },
+
+            /// Hoist a field from a prototype to the collection in preparation for making local
+            /// changes.
+            /// 
+            /// If the field in the prototype is an object, create a new object with that field as
+            /// its prototype. If the field in the prototype is an array, clone the field since
+            /// arrays can't readily serve as prototypes for other arrays. In other cases, copy the
+            /// field from the prototype. Only objects, arrays and primitive values are supported.
+            /// 
+            /// @param {String} fieldName
+            ///   The name of a field to hoist from the collection's prototype.
+
+            haveOwn: function( fieldName ) {
+
+                if ( ! this.hasOwnProperty( fieldName ) ) {
+
+                    if ( this[ fieldName ] instanceof Array ) {
+                        this[ fieldName ] = this[ fieldName ].slice();  // clone arrays
+                    } else if ( typeof this[ fieldName ] === "object" && this[ fieldName ] !== null ) {
+                        this[ fieldName ] = Object.create( this[ fieldName ] );  // inherit from objects
+                    } else {
+                        this[ fieldName ] = this[ fieldName ];  // copy primitives
+                    }
+
+                }
+
+            },
+
+            /// The property, method, or event members defined in this collection.
+            /// 
+            /// `existing` is an unordered collection of elements and optional values. The keys are
+            /// the primary data. Existence on the object is significant regardless of the value.
+            /// Some collections store data in the element when the kernel owns additional details
+            /// about the member. Values will be `undefined` in other collections.
+            /// 
+            /// For each collection, `existing` is the authoritative list of the node's members. Use
+            /// `collection.hasOwn( memberName )` to determine if the node defines a property,
+            /// method or event by that name.
+            /// 
+            /// The prototype of each `existing` object will be the `existing` object of the node's
+            /// prototype (or a proxy to the top behavior for nodes with behaviors). Use
+            /// `collection.has( memberName )` to determine if a property, method or event is
+            /// defined on the node or its prototypes.
+
+            existing: Object.create( null
+                // name: undefined,
+                // name: { ... } -- details
+                // ...
+            ),
+
+            /// The change list for members in this collection.
+            /// 
+            /// For patchable nodes, `changes` records the members that have been added, removed, or
+            /// changed since the node was first initialized. `changes` is not created in the
+            /// collection until the first change occurs. Only the change is recorded here. The
+            /// state behind the change is retrieved from the drivers when needed.
+
+            changes: {
+                // name: "added"
+                // name: "removed"
+                // name: "changed"
+                // name: { ... } -- changed, with details
+                // ...
+            },
+
+        };
+
+        /// Prototype for index-based, ordered collections in the node registry, including
+        /// `event.listeners`.
+
+        var indexedCollectionPrototype = {
+
+            /// Record that a member has been created.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// @param {Boolean} changes
+            ///   For patchable nodes, record changes so that `kernel.getNode` may create a patch
+            ///   when retrieving the node.
+            /// 
+            /// @returns {Boolean}
+            ///   `true` if the member was successfully added. `false` if a member with that id
+            ///   already exists.
+
+            create: function( id, changes ) {
+
+                if ( ! this.hasOwn( id ) ) {
+
+                    this.haveOwn( "existing" );
+                    this.existing.push( id );
+
+                    if ( changes ) {
+
+                        this.haveOwn( "changes" );
+
+                        var removedIndex = this.changes.removed ?
+                            this.changes.removed.indexOf( id ) : -1;
+
+                        if ( removedIndex < 0 ) {
+                            this.changes.added = this.changes.added || [];
+                            this.changes.added.push( id );
+                        } else {
+                            this.changes.removed.splice( removedIndex, 1 );
+                            this.changes.changed = this.changes.changed || [];
+                            this.changes.changed.push( id );
+                        }
+
+                    }
+
+                    return true;
+                }
+
+                return false;
+            },
+
+            /// Record that a member has been deleted.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// 
+            /// @returns {Boolean}
+            ///   `true` if the member was successfully removed. `false` if a member with that id
+            ///   does not exist.
+
+            delete: function( id, changes ) {
+
+                if ( this.hasOwn( id ) ) {
+
+                    this.existing.splice( this.existing.indexOf( id ), 1 );
+
+                    if ( changes ) {
+
+                        this.haveOwn( "changes" );
+
+                        var addedIndex = this.changes.added ?
+                            this.changes.added.indexOf( id ) : -1;
+
+                        if ( addedIndex < 0 ) {
+                            this.changes.removed = this.changes.removed || [];
+                            this.changes.removed.push( id );
+                        } else {
+                            this.changes.added.splice( addedIndex, 1 );
+                        }
+
+                    }
+
+                    return true;
+                }
+
+                return false;
+            },
+
+            /// Record that a member has changed.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// 
+            /// @returns {Boolean}
+            ///   `true` if the change was successfully recorded. `false` if a member with that id
+            ///   does not exist.
+
+            change: function( id ) {
+
+                if ( this.hasOwn( id ) ) {
+
+                    this.haveOwn( "changes" );
+
+                    var addedIndex = this.changes.added ?
+                        this.changes.added.indexOf( id ) : -1;
+
+                    var changedIndex = this.changes.changed ?
+                        this.changes.changed.indexOf( id ) : -1;
+
+                    if ( addedIndex < 0 && changedIndex < 0 ) {
+                        this.changes.changed = this.changes.changed || [];
+                        this.changes.changed.push( id );
+                    }
+
+                    return true;
+                }
+
+                return false;
+            },
+
+            /// Determine if a node has a member with the given id.
+            /// 
+            /// `has` is the same as `hasOwn` for `indexedCollectionPrototype` since index-based
+            /// collections don't automatically inherit from their prototypes.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// 
+            /// @returns {Boolean}
+
+            has: function( id ) {
+                return this.hasOwn( id );
+            },
+
+            /// Determine if a node has a member with the given id. The node's prototypes are not
+            /// considered.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// 
+            /// @returns {Boolean}
+
+            hasOwn: function( id ) {
+                return this.existing ? this.existing.indexOf( id ) >= 0 : false;
+            },
+
+            /// Hoist a field from a prototype to the collection in preparation for making local
+            /// changes.
+            /// 
+            /// If the field in the prototype is an object, create a new object with that field as
+            /// its prototype. If the field in the prototype is an array, clone the field since
+            /// arrays can't readily serve as prototypes for other arrays. In other cases, copy the
+            /// field from the prototype. Only objects, arrays and primitive values are supported.
+            /// 
+            /// @param {String} fieldName
+            ///   The name of a field to hoist from the collection's prototype.
+
+            haveOwn: function( fieldName ) {
+
+                if ( ! this.hasOwnProperty( fieldName ) ) {
+
+                    if ( this[ fieldName ] instanceof Array ) {
+                        this[ fieldName ] = this[ fieldName ].slice();  // clone arrays
+                    } else if ( typeof this[ fieldName ] === "object" && this[ fieldName ] !== null ) {
+                        this[ fieldName ] = Object.create( this[ fieldName ] );  // inherit from objects
+                    } else {
+                        this[ fieldName ] = this[ fieldName ];  // copy primitives
+                    }
+
+                }
+
+            },
+
+            /// IDs of the members defined in this collection.
+            /// 
+            /// `existing` is an ordered list of IDs, which much be unique within the collection.
+            /// The IDs retain the order in which they were originally added.
+            /// 
+            /// For each collection, `existing` is the authoritative list of the node's members. Use
+            /// `collection.hasOwn( memberID )` to determine if the collection contains a member
+            /// with that id. Unlike `keyedCollectionPrototype` collections,
+            /// `indexedCollectionPrototype` collections aren't connected in parallel with their
+            /// containers' prototype chains.
+
+            existing: [
+                // id,
+                // id,
+                // ...
+            ],
+
+            /// The change list for members in this collection.
+            /// 
+            /// For patchable nodes, `changes` records the members that have been added, removed, or
+            /// changed since the node was first initialized. Changes are recorded in separate
+            /// `added`, `removed`, and `changed` arrays, respectively. The `added` array retains
+            /// the order in which the members were added. Although `removed` and `changed` are also
+            /// arrays, the order of removals and changes is not significant.
+            /// 
+            /// `changes` is not created in the collection until the first change occurs. Only the
+            /// change is recorded here. The state behind the change is retrieved from the drivers
+            /// when needed.
+
+            changes: {
+                // added: [ id, ... ],
+                // removed: [ id, ... ],
+                // changed: [ id, ... ],
             },
 
         };
@@ -5606,95 +5879,22 @@ if ( ! childComponent.source ) {
                         // children: [],
 
                         // Property, Method and Event members defined on the node.
-                        // 
-                        // The `existing`, `added`, `removed` and `changed` objects are sets: the
-                        // keys are the data, and only existence on the object is significant. As an
-                        // exception, the last known value for a delegating property is stored on
-                        // its `existing` entry.
-                        // 
-                        // For each collection, `existing` is the authoritative list the node's
-                        // members. Use `existing.hasOwnProperty( memberName )` to determine if the
-                        // node defines a property, method or event by that name.
-                        // 
-                        // The prototype of each `existing` object is the `existing` object of the
-                        // node's prototype (or a proxy to the top behavior for nodes with
-                        // behaviors). Use `memberName in existing` to determine if a property,
-                        // method or event is defined on the node or its prototypes.
-                        // 
-                        // For patchable nodes, `added`, `removed`, and `changed` record changes
-                        // that occurred after the node was first initialized. They are omitted
-                        // until needed. Only the change is recorded here. Values are retrieved from
-                        // the drivers when needed.
 
-                        properties: Object.create( nodeCollectionPrototype, {
-
-                            existing: {
-                                value: Object.create( prototypeNode ?
-                                    prototypeNode.properties.existing : null ),
-                            },
-
-                            // Created when needed.
-
-                            // added: {
-                            //     name: undefined
-                            // },
-
-                            // removed: {
-                            //     name: undefined
-                            // },
-
-                            // changed: {
-                            //     name: undefined
-                            // },
-
+                        properties: Object.create( keyedCollectionPrototype, {
+                            existing: { value: Object.create( prototypeNode ?
+                                prototypeNode.properties.existing : null ) },
                         } ),
 
-                        methods: Object.create( nodeCollectionPrototype, {
-
-                            existing: {
-                                value: Object.create( prototypeNode ?
-                                    prototypeNode.methods.existing : null ),
-                            },
-
-                            // Created when needed.
-
-                            // added: {
-                            //     name: undefined
-                            // },
-
-                            // removed: {
-                            //     name: undefined
-                            // },
-
-                            // changed: {
-                            //     name: undefined
-                            // },
-
+                        methods: Object.create( keyedCollectionPrototype, {
+                            existing: { value: Object.create( prototypeNode ?
+                                prototypeNode.methods.existing : null ) },
                         } ),
 
                         // TODO: Store nodes' events here in the kernel
 
                         // events: Object.create( nodeCollectionPrototype, {
-
-                        //     existing: {
-                        //         value: Object.create( prototypeNode ?
-                        //             prototypeNode.events.existing : null ),
-                        //     },
-
-                        //     // Created when needed.
-
-                        //     // added: {
-                        //     //     name: undefined
-                        //     // },
-
-                        //     // removed: {
-                        //     //     name: undefined
-                        //     // },
-
-                        //     // changed: {
-                        //     //     name: undefined
-                        //     // },
-
+                        //     existing: { value: Object.create( prototypeNode ?
+                        //         prototypeNode.events.existing : null ) },
                         // } ),
 
                         // END TODO
@@ -5730,13 +5930,9 @@ if ( ! childComponent.source ) {
                     this.existing[nodeID].initialized = true;
 
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
             /// Unregister a node as it is deleted.
@@ -5749,13 +5945,9 @@ if ( ! childComponent.source ) {
                     delete this.globals[nodeID];
 
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
             /// Create a proxy node in the form of the nodes created by `nodes.create` to represent
