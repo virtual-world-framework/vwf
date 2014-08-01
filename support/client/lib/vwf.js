@@ -1886,7 +1886,7 @@
 
                 nodeComponent.properties = this.getProperties( nodeID );
 
-                for ( var propertyName in nodeComponent.properties ) {  // TODO: distinguish add, change, remove
+                for ( var propertyName in nodeComponent.properties ) {
                     var propertyValue = nodeComponent.properties[propertyName];
 
                     if ( propertyValue === undefined ) {
@@ -1905,13 +1905,18 @@
                 nodeComponent.properties = {};
 
                 Object.keys( node.properties.changes ).forEach( function( propertyName ) {
-                    var propertyValue = this.getProperty( nodeID, propertyName );
 
-                    if ( this.kutility.valueIsNodeReference( propertyValue ) ) {
-                        // Translate kernel node references into descriptor node references.
-                        nodeComponent.properties[propertyName] = { node: propertyValue.id };
-                    } else {
-                        nodeComponent.properties[propertyName] = propertyValue;
+                    if ( node.properties.changes[ propertyName ] !== "removed" ) {  // TODO: handle delete
+
+                        var propertyValue = this.getProperty( nodeID, propertyName );
+
+                        if ( this.kutility.valueIsNodeReference( propertyValue ) ) {
+                            // Translate kernel node references into descriptor node references.
+                            nodeComponent.properties[propertyName] = { node: propertyValue.id };
+                        } else {
+                            nodeComponent.properties[propertyName] = propertyValue;
+                        }
+
                     }
 
                 }, this );
@@ -1926,15 +1931,24 @@
 
             // Methods.
 
-            var methods = full || ! node.patchable ?
-                node.methods.existing : node.methods.changes;
+            if ( full || ! node.patchable ) {
 
-            if ( methods ) {
-                Object.keys( methods ).forEach( function( methodName ) {
+                Object.keys( node.methods.existing ).forEach( function( methodName ) {
                     nodeComponent.methods = nodeComponent.methods || {};
                     nodeComponent.methods[ methodName ] = this.getMethod( nodeID, methodName );
                     patched = true;
                 }, this );
+
+            } else if ( node.methods.changes ) {
+
+                Object.keys( node.methods.changes ).forEach( function( methodName ) {
+                    if ( node.methods.changes[ methodName ] !== "removed" ) {  // TODO: handle delete
+                        nodeComponent.methods = nodeComponent.methods || {};
+                        nodeComponent.methods[ methodName ] = this.getMethod( nodeID, methodName );
+                        patched = true;
+                    }
+                }, this );
+
             }
 
             // Events.
@@ -2877,12 +2891,6 @@ if ( ! childComponent.source ) {
                     propertyGet, propertySet );
             } );
 
-            // Record the change.
-
-            if ( node.initialized && node.patchable ) {
-                node.properties.change( propertyName );
-            }
-
             // Call createdProperty() on each view. The view is being notified that a property has
             // been created.
 
@@ -3282,12 +3290,6 @@ if ( ! childComponent.source ) {
                 model.creatingMethod && model.creatingMethod( nodeID, methodName, methodParameters,
                     methodBody );
             } );
-
-            // Record the change.
-
-            if ( node.initialized && node.patchable ) {
-                node.methods.change( methodName );
-            }
 
             // Call `createdMethod` on each view. The view is being notified that a method has been
             // created.
@@ -5426,11 +5428,11 @@ if ( ! childComponent.source ) {
 
                         this.haveOwn( "changes" );
 
-                        // if ( this.changes[ name ] !== "removed" ) {
-                        //     this.changes[ name ] = "added";
-                        // } else {
-                        //     this.changes[ name ] = "changed";  // previously removed, then added
-                        // }
+                        if ( this.changes[ name ] !== "removed" ) {
+                            this.changes[ name ] = "added";
+                        } else {
+                            this.changes[ name ] = "changed";  // previously removed, then added
+                        }
 
                     }
 
@@ -5459,11 +5461,11 @@ if ( ! childComponent.source ) {
 
                         this.haveOwn( "changes" );
 
-                        // if ( this.changes[ name ] !== "added" ) {
-                        //     this.changes[ name ] = "removed";
-                        // } else {
-                        //     delete this.changes[ name ];  // previously added, then removed
-                        // }
+                        if ( this.changes[ name ] !== "added" ) {
+                            this.changes[ name ] = "removed";
+                        } else {
+                            delete this.changes[ name ];  // previously added, then removed
+                        }
 
                     }
 
