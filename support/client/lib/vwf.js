@@ -1523,7 +1523,7 @@
 
                 function( series_callback_async /* ( err, results ) */ ) {
 
-                    if ( componentIsID( nodeComponent ) ) {  // ID
+                    if ( componentIsID( nodeComponent ) || components[ nodeComponent ] instanceof Array ) {  // ID
 
                         nodeID = nodeComponent;
 
@@ -4263,7 +4263,8 @@ if ( ! childComponent.source ) {
         /// @returns {Boolean}
 
         var componentIsID = function( candidate ) {
-            return isPrimitive( candidate ) && vwf.models.object.exists( candidate );
+            return isPrimitive( candidate ) && vwf.models.object.exists( candidate ) &&
+                ! ( components[candidate] instanceof Array );
         };
 
         /// Determine if a value is a JavaScript primitive, or the boxed version of a JavaScript
