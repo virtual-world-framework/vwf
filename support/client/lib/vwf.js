@@ -5461,6 +5461,10 @@ if ( ! childComponent.source ) {
                             this.changes[ name ] = "changed";  // previously removed, then added
                         }
 
+                        if ( this.container && this.containerMember ) {
+                            this.container.change( this.containerMember );
+                        }
+
                     }
 
                     return true;
@@ -5494,6 +5498,10 @@ if ( ! childComponent.source ) {
                             delete this.changes[ name ];  // previously added, then removed
                         }
 
+                        if ( this.container && this.containerMember ) {
+                            this.container.change( this.containerMember );
+                        }
+
                     }
 
                     return true;
@@ -5520,6 +5528,10 @@ if ( ! childComponent.source ) {
                     if ( this.changes[ name ] !== "added" ) {
                         this.changes[ name ] = value ?
                             value : this.changes[ name ] || "changed";
+                    }
+
+                    if ( this.container && this.containerMember ) {
+                        this.container.change( this.containerMember );
                     }
 
                     return true;
@@ -5624,6 +5636,23 @@ if ( ! childComponent.source ) {
                 // ...
             },
 
+            /// The parent collection if this collection is a member of another. Changes applied to
+            /// members of this collection will call `container.change( containerMember )` to also
+            /// set the change flag for the containing member.
+            /// 
+            /// For example, members of the `node.events` collection contain listener collections at
+            /// `node.events.existing[name].listeners`. Each listener collection knows its event
+            /// name and points back to `node.events`. Changing a listener will call
+            /// `node.events.change( name )` to mark the event as changed.
+
+            container: undefined,
+
+            /// This collection's name in the parent if this collection is a member of another
+            /// collection. Changes to members of this collection will mark that member changed in
+            /// the containing collection.
+
+            containerMember: undefined,
+
         };
 
         /// Prototype for index-based, ordered collections in the node registry, including
@@ -5666,6 +5695,10 @@ if ( ! childComponent.source ) {
                             this.changes.changed.push( id );
                         }
 
+                        if ( this.container && this.containerMember ) {
+                            this.container.change( this.containerMember );
+                        }
+
                     }
 
                     return true;
@@ -5703,6 +5736,10 @@ if ( ! childComponent.source ) {
                             this.changes.added.splice( addedIndex, 1 );
                         }
 
+                        if ( this.container && this.containerMember ) {
+                            this.container.change( this.containerMember );
+                        }
+
                     }
 
                     return true;
@@ -5735,6 +5772,10 @@ if ( ! childComponent.source ) {
                     if ( addedIndex < 0 && changedIndex < 0 ) {
                         this.changes.changed = this.changes.changed || [];
                         this.changes.changed.push( id );
+                    }
+
+                    if ( this.container && this.containerMember ) {
+                        this.container.change( this.containerMember );
                     }
 
                     return true;
@@ -5830,6 +5871,23 @@ if ( ! childComponent.source ) {
                 // removed: [ id, ... ],
                 // changed: [ id, ... ],
             },
+
+            /// The parent collection if this collection is a member of another. Changes applied to
+            /// members of this collection will call `container.change( containerMember )` to also
+            /// set the change flag for the containing member.
+            /// 
+            /// For example, members of the `node.events` collection contain listener collections at
+            /// `node.events.existing[name].listeners`. Each listener collection knows its event
+            /// name and points back to `node.events`. Changing a listener will call
+            /// `node.events.change( name )` to mark the event as changed.
+
+            container: undefined,
+
+            /// This collection's name in the parent if this collection is a member of another
+            /// collection. Changes to members of this collection will mark that member changed in
+            /// the containing collection.
+
+            containerMember: undefined,
 
         };
 
