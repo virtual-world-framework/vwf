@@ -236,13 +236,14 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
         /// @param {Handler} eventHandler
         /// @param {ID} eventContextID
         /// @param {String[]} eventPhases
         /// 
-        /// @returns {}
+        /// @returns {ListenerID}
 
-        addingEventListener: [ /* nodeID, eventName, eventHandler, eventContextID, eventPhases */ ],
+        addingEventListener: [ /* nodeID, eventName, eventListenerID, eventHandler, eventContextID, eventPhases */ ],
 
         /// Description.
         /// 
@@ -250,11 +251,11 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
-        /// @param {Handler} eventHandler
+        /// @param {ListenerID} eventListenerID
         /// 
-        /// @returns {}
+        /// @returns {ListenerID}
 
-        removingEventListener: [ /* nodeID, eventName, eventHandler */ ],
+        removingEventListener: [ /* nodeID, eventName, eventListenerID */ ],
 
         /// Description.
         /// 

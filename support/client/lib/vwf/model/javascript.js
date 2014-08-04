@@ -714,7 +714,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
         // -- addingEventListener ------------------------------------------------------------------
 
-        addingEventListener: function( nodeID, eventName, eventHandler, eventContextID, eventPhases ) {
+        addingEventListener: function( nodeID, eventName, eventListenerID, eventHandler, eventContextID, eventPhases ) {
 
             var node = this.nodes[nodeID];
             var eventContext = this.nodes[eventContextID];
@@ -725,24 +725,43 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                 listeners = node.private.listeners[eventName] = [];
             }
 
-            listeners.push( { handler: eventHandler, context: eventContext, phases: eventPhases } );
+            if ( eventHandler.type === scriptMediaType ) {
 
+                try {
+
+                    listeners[ eventListenerID ] = {
+                        handler: functionFromHandler( eventHandler ),
+                        context: eventContext,
+                        phases: eventPhases,
+                    };
+
+                    return eventListenerID;
+
+                } catch ( exception ) {
+
+                    this.logger.warnx( "addingEventListener", nodeID, eventName, eventListenerID,
+                        "exception evaluating listener:", utility.exceptionMessage( exception ) );
+                }
+
+            }
+
+            return undefined;
         },
 
         // -- removingEventListener ----------------------------------------------------------------
 
-        removingEventListener: function( nodeID, eventName, eventHandler ) {
+        removingEventListener: function( nodeID, eventName, eventListenerID ) {
 
             var node = this.nodes[nodeID];
 
             var listeners = node.private.listeners[eventName];
 
-            if ( listeners ) {
-                node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                    return listener.handler !== eventHandler;
-                } );
+            if ( listeners && listeners[ eventListenerID ] ) {
+                delete listeners[ eventListenerID ];
+                return eventListenerID;
             }
 
+            return undefined;
         },
 
         // -- flushingEventListeners ---------------------------------------------------------------
@@ -1188,10 +1207,14 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             set: unsettable ? undefined : function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.*collection*.node, or just node
                 var namespacedName = eventNamespace ? [ eventNamespace, eventName ] : eventName;
-                if ( typeof value == "function" || value instanceof Function ) {
+                if ( typeof value === "function" || value instanceof Function ) {
+                    value = utility.merge( handlerFromFunction( value ), { type: scriptMediaType } );
                     self.kernel.addEventListener( node.id, namespacedName,
                         value, node.id );  // for container.*event* = function() { ... }, context is the target node
                 } else if ( value.add ) {
+                    if ( typeof value.handler === "function" || value.handler instanceof Function ) {
+                        value.handler = utility.merge( handlerFromFunction( value.handler ), { type: scriptMediaType } );
+                    }
                     if ( ! value.phases || value.phases instanceof Array ) {
                         self.kernel.addEventListener( node.id, namespacedName,
                             value.handler, value.context && value.context.id, value.phases );
@@ -1200,6 +1223,9 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
                             value.handler, value.context && value.context.id, [ value.phases ] );
                     }
                 } else if ( value.remove ) {
+                    if ( typeof value.handler === "function" || value.handler instanceof Function ) {
+                        value.handler = utility.merge( handlerFromFunction( value.handler ), { type: scriptMediaType } );
+                    }
                     self.kernel.removeEventListener( node.id, namespacedName,
                         value.handler );
                 } else if ( value.flush ) {
@@ -1326,6 +1352,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             parameters: parameters,
             body: body
         };
+
     }
 
     /// The `application/javascript` media type for scripts that this driver recognizes.
