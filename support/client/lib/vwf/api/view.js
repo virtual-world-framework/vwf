@@ -254,6 +254,32 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
+        /// @param {Listener} eventListener
+        /// 
+        /// @returns {}
+
+        satEventListener: [ /* nodeID, eventName, eventListenerID, eventListener */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
+        /// @param {Listener} eventListener
+        /// 
+        /// @returns {}
+
+        gotEventListener: [ /* nodeID, eventName, eventListenerID, eventListener */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
         /// @param {ID} eventContextID
         /// 
         /// @returns {}

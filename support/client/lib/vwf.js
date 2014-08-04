@@ -3474,6 +3474,111 @@ if ( ! childComponent.source ) {
             this.logger.debugu();
         };
 
+        // -- setEvent -----------------------------------------------------------------------------
+
+        /// @name module:vwf.setEvent
+        /// 
+        /// @see {@link module:vwf/api/kernel.setEvent}
+
+        this.setEvent = function( nodeID, eventName, eventDescriptor ) {
+
+            this.logger.debuggx( "setEvent", function() {
+                return [ nodeID, eventName ];  // TODO: loggable eventDescriptor
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            // eventDescriptor = normalizedHandler( eventDescriptor );  // TODO
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            if ( ! node.events.hasOwn( encodedEventName ) ) {
+
+                // If the event doesn't exist on this node, delegate to `kernel.createEvent` to
+                // create and assign the event.
+
+                this.createEvent( nodeID, eventName, eventDescriptor.parameters );  // TODO: result
+
+                ( eventDescriptor.listeners || [] ).forEach( function( listener ) {
+                    return this.addEventListener( nodeID, eventName, listener, listener.context, listener.phases );
+                }, this );
+
+            } else {
+
+                // Locate the event in the registry.
+
+                var event = node.events.existing[ encodedEventName ];
+
+                // xxx
+
+                eventDescriptor = {
+
+                    parameters: event.parameters ?
+                        event.parameters.slice() : [],  // TODO: note: we're ignoring eventDescriptor.parameters in the set
+
+                    listeners: ( eventDescriptor.listeners || [] ).map( function( listener ) {
+
+                        if ( event.listeners.hasOwn( listener.id ) ) {
+                            return this.setEventListener( nodeID, eventName, listener.id, listener );
+                        } else {
+                            return this.addEventListener( nodeID, eventName, listener, listener.context, listener.phases );
+                        }
+
+                    }, this ),
+
+                };
+
+            }
+
+            this.logger.debugu();
+
+            return eventDescriptor;
+        };
+
+        // -- getEvent -----------------------------------------------------------------------------
+
+        /// @name module:vwf.getEvent
+        /// 
+        /// @see {@link module:vwf/api/kernel.getEvent}
+
+        this.getEvent = function( nodeID, eventName ) {
+
+            this.logger.debuggx( "getEvent", function() {
+                return [ nodeID, eventName ];
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Locate the event in the registry.
+
+            var event = node.events.existing[ encodedEventName ];
+
+            // xxx
+
+            var eventDescriptor = {
+
+                parameters: event.parameters ?
+                    event.parameters.slice() : [],
+
+                listeners: event.listeners.existing.map( function( eventListenerID ) {
+                    var listener = this.getEventListener( nodeID, eventName, eventListenerID );
+                    listener.id = eventListenerID;
+                    return listener;
+                }, this ),
+
+            }
+
+            this.logger.debugu();
+
+            return eventDescriptor;
+        };
+
         // -- addEventListener ---------------------------------------------------------------------
 
         /// @name module:vwf.addEventListener
@@ -3575,6 +3680,128 @@ if ( ! childComponent.source ) {
             this.logger.debugu();
 
             return eventListenerID;
+        };
+
+        // -- setEventListener ---------------------------------------------------------------------
+
+        /// @name module:vwf.setEventListener
+        /// 
+        /// @see {@link module:vwf/api/kernel.setEventListener}
+
+        this.setEventListener = function( nodeID, eventName, eventListenerID, eventListener ) {
+
+            this.logger.debuggx( "setEventListener", function() {
+                return [ nodeID, eventName, eventListenerID ];  // TODO: loggable eventListener
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            eventListener = normalizedHandler( eventListener );
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Locate the event in the registry.
+
+            var event = node.events.existing[ encodedEventName ];
+
+            // Record the change.
+
+            if ( node.initialized && node.patchable ) {
+                event.listeners.change( eventListenerID );
+            }
+
+            // Call `settingEventListener` on each model. The first model to return a non-undefined
+            // value dictates the return value.
+
+            this.models.some( function( model ) {
+
+                // Call the driver.
+
+                var listener = model.settingEventListener &&
+                    model.settingEventListener( nodeID, eventName, eventListenerID, eventListener );
+
+                // Update the value to the value assigned if the driver handled it.
+
+                if ( listener !== undefined ) {
+                    eventListener = listener;
+                }
+
+                // Exit the iterator once a driver has handled the assignment.
+
+                return listener !== undefined;
+
+            } );
+
+            // Call `satEventListener` on each view.
+
+            this.views.forEach( function( view ) {
+                view.satEventListener &&
+                    view.satEventListener( nodeID, eventName, eventListenerID, eventListener );
+            } );
+
+            this.logger.debugu();
+
+            return eventListener;
+        };
+
+        // -- getEventListener ---------------------------------------------------------------------
+
+        /// @name module:vwf.getEventListener
+        /// 
+        /// @see {@link module:vwf/api/kernel.getEventListener}
+
+        this.getEventListener = function( nodeID, eventName, eventListenerID ) {
+
+            this.logger.debuggx( "getEventListener", function() {
+                return [ nodeID, eventName, eventListenerID ];
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Locate the event in the registry.
+
+            var event = node.events.existing[ encodedEventName ];
+
+            // Call `gettingEventListener` on each model. The first model to return a non-undefined
+            // value dictates the return value.
+
+            var eventListener = {};
+
+            this.models.some( function( model ) {
+
+                // Call the driver.
+
+                var listener = model.gettingEventListener &&
+                    model.gettingEventListener( nodeID, eventName, eventListenerID );
+
+                // Update the value to the value assigned if the driver handled it.
+
+                if ( listener !== undefined ) {
+                    eventListener = listener;
+                }
+
+                // Exit the iterator once a driver has handled the assignment.
+
+                return listener !== undefined;
+
+            } );
+
+            // Call `gotEventListener` on each view.
+
+            this.views.forEach( function( view ) {
+                view.gotEventListener &&
+                    view.gotEventListener( nodeID, eventName, eventListenerID, eventListener );
+            } );
+
+            this.logger.debugu();
+
+            return eventListener;
         };
 
         // -- flushEventListeners ------------------------------------------------------------------
