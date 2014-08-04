@@ -47,6 +47,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 
                 var stage = this.state.stage = node.kineticObj;
                 var mouseDown = false;
+                var touch = false;
                 var mouseDownTime = null;
                 var timer = new Date();
 
@@ -99,7 +100,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 };
 
                 // bind stage handlers
-                stage.on( 'mousedown', function( evt ) {
+                stage.on( 'contentMousedown', function( evt ) {
                     var node = evt.targetNode;
                     mouseDown = true;
                     mouseDownTime = timer.getTime();
@@ -109,7 +110,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                 });
 
-                stage.on( 'mousemove', function( evt ) {
+                stage.on( 'contentMousemove', function( evt ) {
                     var node = evt.targetNode;
                     
                     var eData = getEventData( evt );
@@ -118,7 +119,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                 });
 
-                stage.on( 'mouseup', function( evt ) {
+                stage.on( 'contentMouseup', function( evt ) {
                     var node = evt.targetNode;
                     mouseDown = false;
 
@@ -131,14 +132,28 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     mouseDownTime = null;
                 });
 
-                stage.on( 'dragstart', function( evt ) {
+                stage.on( 'contentTouchstart', function( evt ) {
                     var shape = evt.targetNode;
+                    touch = true;
                 });
 
-                stage.on( 'dragend', function( evt ) {
+                stage.on( 'contentTouchmove', function( evt ) {
                     var shape = evt.targetNode;
 
                 });
+
+                stage.on( 'contentTouchend', function( evt ) {
+                    var shape = evt.targetNode;
+
+                    touch = false;
+
+                });
+
+                stage.on( 'contentTap', function( evt ) {
+                    var shape = evt.targetNode;
+
+                });
+
 
             }
                
