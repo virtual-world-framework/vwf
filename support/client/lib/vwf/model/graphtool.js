@@ -261,15 +261,27 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // -- callingMethod ------------------------------------------------------------------------
 
         callingMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+            var node;
+
             if ( this.state.graphs[ nodeID ] ) {
-                
-                var node = this.state.graphs[ nodeID ];
+                node = this.state.graphs[ nodeID ];
                 
                 if ( methodName === "setGraphVisibility" ) {
                     var visible = methodParameters[0];
                     setGraphVisibility( node, visible );
                 }
 
+            } else if ( this.state.objects[ nodeID ] ) {
+                node = this.state.objects[ nodeID ];
+
+                if ( methodName === "setGroupItemProperty" ) {
+                    var itemIndexList = methodParameters[ 0 ];
+                    var itemPropertyName = methodParameters[ 1 ];
+                    var itemPropertyValue = methodParameters[ 2 ];
+                    for ( var i = 0; i < itemIndexList.length; i++ ) {
+                        node.threeObject.children[ 0 ].children[ itemIndexList[ i ] ][ itemPropertyName ] = itemPropertyValue;
+                    }
+                }
             }
         },
 
@@ -708,8 +720,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var vwfColor = new utility.color( color );
         color = vwfColor.getHex();
         var meshMaterial = new THREE.MeshBasicMaterial( 
-                { "color": color, "transparent": transparent, "opacity": opacity, "side": THREE.DoubleSide, "depthTest": !renderTop } 
+                { "color": color, "transparent": transparent, "opacity": opacity, "depthTest": !renderTop } 
             );
+        // TODO: If isTwoSided set meshMaterial.side to THREE.DoubleSide
         var mesh = new THREE.Mesh( geometry, meshMaterial );
         mesh.renderDepth = renderTop ? DEPTH_OBJECTS : null;
 

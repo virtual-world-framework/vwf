@@ -16,3 +16,6 @@ properties:
   # propertyValue = the value to set the property to
 
   graphObjects: []
+methods:
+  setGroupItemProperty:
+  
