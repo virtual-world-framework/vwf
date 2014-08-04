@@ -186,9 +186,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             case "removeEventListener":
 
-                return function( nodeID, eventName, eventHandler, when, callback ) {
+                return function( nodeID, eventName, eventListenerID, when, callback ) {
                     this.kernel.send( nodeID, kernelFunctionName, eventName,
-                        [ eventHandler ], when || 0, callback /* result */ );
+                        [ eventListenerID ], when || 0, callback /* result */ );
                 };
 
             case "flushEventListeners":

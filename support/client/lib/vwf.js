@@ -3487,25 +3487,49 @@ if ( ! childComponent.source ) {
                     eventContextID, eventPhases ];
             } );
 
+            var node = nodes.existing[nodeID];
+
+            eventHandler = normalizedHandler( eventHandler );
+
             // Encode any namespacing into the name.
 
             var encodedEventName = namespaceEncodedName( eventName );
 
+            // Register the event if this is the first listener added to an event on a prototype.
+
+            if ( ! node.events.hasOwn( encodedEventName ) ) {
+                node.events.create( encodedEventName, node.initialized && node.patchable );
+            }
+
+            // Locate the event in the registry.
+
+            var event = node.events.existing[ encodedEventName ];
+
+            // Register the listener.
+
+            var eventListenerID = this.sequence( nodeID );
+
+            event.listeners.create( eventListenerID, node.initialized && node.patchable );
+
             // Call `addingEventListener` on each model.
 
             this.models.forEach( function( model ) {
-                model.addingEventListener && model.addingEventListener( nodeID, encodedEventName, eventHandler,
-                    eventContextID, eventPhases );
+                model.addingEventListener &&
+                    model.addingEventListener( nodeID, encodedEventName, eventListenerID,
+                        eventHandler, eventContextID, eventPhases );
             } );
 
             // Call `addedEventListener` on each view.
 
             this.views.forEach( function( view ) {
-                view.addedEventListener && view.addedEventListener( nodeID, encodedEventName, eventHandler,
-                    eventContextID, eventPhases );
+                view.addedEventListener &&
+                    view.addedEventListener( nodeID, encodedEventName, eventListenerID,
+                        eventHandler, eventContextID, eventPhases );
             } );
 
             this.logger.debugu();
+
+            return eventListenerID;
         };
 
         // -- removeEventListener ------------------------------------------------------------------
@@ -3514,29 +3538,43 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.removeEventListener}
 
-        this.removeEventListener = function( nodeID, eventName, eventHandler ) {
+        this.removeEventListener = function( nodeID, eventName, eventListenerID ) {
 
             this.logger.debuggx( "removeEventListener", function() {
-                return [ nodeID, eventName, loggableScript( eventHandler ) ];
+                return [ nodeID, eventName, loggableScript( eventListenerID ) ];
             } );
+
+            var node = nodes.existing[nodeID];
 
             // Encode any namespacing into the name.
 
             var encodedEventName = namespaceEncodedName( eventName );
 
+            // Locate the event in the registry.
+
+            var event = node.events.existing[ encodedEventName ];
+
+            // Unregister the listener.
+
+            event.listeners.delete( eventListenerID, node.initialized && node.patchable );
+
             // Call `removingEventListener` on each model.
 
             this.models.forEach( function( model ) {
-                model.removingEventListener && model.removingEventListener( nodeID, encodedEventName, eventHandler );
+                model.removingEventListener &&
+                    model.removingEventListener( nodeID, encodedEventName, eventListenerID );
             } );
 
             // Call `removedEventListener` on each view.
 
             this.views.forEach( function( view ) {
-                view.removedEventListener && view.removedEventListener( nodeID, encodedEventName, eventHandler );
+                view.removedEventListener &&
+                    view.removedEventListener( nodeID, encodedEventName, eventListenerID );
             } );
 
             this.logger.debugu();
+
+            return eventListenerID;
         };
 
         // -- flushEventListeners ------------------------------------------------------------------
@@ -3556,13 +3594,15 @@ if ( ! childComponent.source ) {
             // Call `flushingEventListeners` on each model.
 
             this.models.forEach( function( model ) {
-                model.flushingEventListeners && model.flushingEventListeners( nodeID, encodedEventName, eventContextID );
+                model.flushingEventListeners &&
+                    model.flushingEventListeners( nodeID, encodedEventName, eventContextID );
             } );
 
             // Call `flushedEventListeners` on each view.
 
             this.views.forEach( function( view ) {
-                view.flushedEventListeners && view.flushedEventListeners( nodeID, encodedEventName, eventContextID );
+                view.flushedEventListeners &&
+                    view.flushedEventListeners( nodeID, encodedEventName, eventContextID );
             } );
 
             this.logger.debugu();

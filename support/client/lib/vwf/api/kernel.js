@@ -322,7 +322,7 @@ define( function() {
         /// @param {ID} [eventContextID]
         ///   The ID of the node that the handler is _invoked on_. For JavaScript handlers, `this`
         ///   will refer to the `eventContextID` node. If `eventContextID` is not provided, the
-        ///   context will be the `nodeID` node.
+        ///   handler will be invoked in the context of the global root pseudo-node.
         /// @param {String[]} [eventPhases]
         ///   An array of strings indicating the event dispatch phases that this handler should
         ///   respond to. Handlers will be invoked at the target and during the bubbling phase
@@ -331,7 +331,7 @@ define( function() {
         ///   propagation performed by `kernel.dispatchEvent`. Once `kernel.fireEvent` is called, it
         ///   always invokes all of the event's handlers.
         /// 
-        /// @returns {}
+        /// @returns {ListenerID}
 
         addEventListener: [ /* nodeID, eventName, eventHandler, eventContextID, eventPhases */ ],
 
@@ -344,13 +344,14 @@ define( function() {
         ///   The ID of a node containing an event `eventName`.
         /// @param {String} eventName
         ///   The name of an event on the `nodeID` node.
-        /// @param {Handler} eventHandler
-        ///   A script previously provided to `kernel.addEventListener` for this `nodeID` and
-        ///   `eventName`.
+        /// @param {ListenerID} eventListenerID
+        ///   A listener ID previously returned by `kernel.addEventListener` that identifies a
+        ///   listener attached to this `nodeID` and `eventName`.
         /// 
-        /// @returns {}
+        /// @returns {ListenerID}
+        ///   `eventListenerID` if the listener was removed successfully. Otherwise, a falsy value.
 
-        removeEventListener: [ /* nodeID, eventName, eventHandler */ ],
+        removeEventListener: [ /* nodeID, eventName, eventListenerID */ ],
 
         /// flushEventListeners.
         /// 
@@ -854,6 +855,36 @@ define( function() {
         ///   `type` may be omitted. `type` should be omitted if `body` is a JavaScript `function`
         ///   value since the type is implicit in that case.
 
+        /// A `ListenerID` is a JavaScript primitive value that identifies an event listener. Each
+        /// listener is assigned a `ListenerID` when it is created that is unique within the node
+        /// and event.
+        /// 
+        /// @typedef {string|number|boolean|null} ListenerID
+
+        /// A `Listener` is an extended `Handler` with additional fields for event listeners.
+        /// 
+        /// @typedef {Object} Listener
+        /// 
+        /// @property {ListenerID} [id]
+        ///   A unique ID as returned by `kernel.addEventListener` that identifies the listener for
+        ///   a particular `nodeID` and `eventName`.
+        /// @property {string[]} [parameters]
+        ///   @see {@link module:vwf/api/kernel.Handler}
+        /// @property {string|function} body
+        ///   @see {@link module:vwf/api/kernel.Handler}
+        /// @property {string} [type]
+        ///   @see {@link module:vwf/api/kernel.Handler}
+        /// @property {ID} [contextID]
+        ///   The ID of a node that the handler will be _invoked on_. For JavaScript handlers,
+        ///   `this` will refer to the `contextID` node. If `contextID` is not provided, the context
+        ///   will be the global root pseudo-node.
+        /// @property {String[]} [phases]
+        ///   An array of strings indicating the event dispatch phases that this handler should
+        ///   respond to. Listeners will be invoked at the target and during the bubbling phase
+        ///   regardless of its `phases`. To also invoke a handler during the capture phase, include
+        ///   `"capture"` in the `phases` array.` `phases` only applies to the propagation performed
+        ///   by `kernel.dispatchEvent`. Once `kernel.fireEvent` is called, it always invokes all of
+        ///   the event's handlers.
     };
 
     return exports;
