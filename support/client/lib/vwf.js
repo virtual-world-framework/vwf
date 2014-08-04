@@ -5362,6 +5362,60 @@ if ( ! childComponent.source ) {
             return prototypeDescriptor;
         };
 
+        /// Return an {@link external:Object.defineProperty} descriptor for a property that is to be
+        /// enumerable, but not writable or configurable. 
+        /// 
+        /// @param value
+        ///   A value to wrap in a descriptor.
+        /// 
+        /// @returns
+        ///   An {@link external:Object.defineProperty} descriptor.
+
+        var enumerable = function( value ) {
+            return {
+                value: value,
+                enumerable: true,
+                writable: false,
+                configurable: false,
+            };
+        };
+
+        /// Return an {@link external:Object.defineProperty} descriptor for a property that is to be
+        /// enumerable and writable, but not configurable. 
+        /// 
+        /// @param value
+        ///   A value to wrap in a descriptor.
+        /// 
+        /// @returns
+        ///   An {@link external:Object.defineProperty} descriptor.
+
+        var writable = function( value ) {
+            return {
+                value: value,
+                enumerable: true,
+                writable: true,
+                configurable: false,
+            };
+        };
+
+        /// Return an {@link external:Object.defineProperty} descriptor for a property that is to be
+        /// enumerable, writable, and configurable. 
+        /// 
+        /// @param value
+        ///   A value to wrap in a descriptor.
+        /// 
+        /// @returns
+        ///   An {@link external:Object.defineProperty} descriptor.
+
+        var configurable = function( value ) {
+            return {
+                value: value,
+                enumerable: true,
+                writable: true,
+                configurable: true,
+            };
+        };
+
         // == Private variables ====================================================================
 
         /// Prototype for name-based, unordered collections in the node registry, including
@@ -5394,12 +5448,8 @@ if ( ! childComponent.source ) {
                     // `this.existing[name] = ...` since the prototype may be a behavior proxy, and
                     // the accessor properties would prevent normal assignment.
 
-                    Object.defineProperty( this.existing, name, {
-                        value: value ? value : undefined,
-                        configurable: true,
-                        enumerable: true,
-                        writable: true,
-                    } );
+                    Object.defineProperty( this.existing, name,
+                        configurable( value ? value : undefined ) );
 
                     if ( changes ) {
 
@@ -5883,20 +5933,20 @@ if ( ! childComponent.source ) {
                         // Property, Method and Event members defined on the node.
 
                         properties: Object.create( keyedCollectionPrototype, {
-                            existing: { value: Object.create( prototypeNode ?
-                                prototypeNode.properties.existing : null ) },
+                            existing: enumerable( Object.create( prototypeNode ?
+                                prototypeNode.properties.existing : null ) ),
                         } ),
 
                         methods: Object.create( keyedCollectionPrototype, {
-                            existing: { value: Object.create( prototypeNode ?
-                                prototypeNode.methods.existing : null ) },
+                            existing: enumerable( Object.create( prototypeNode ?
+                                prototypeNode.methods.existing : null ) ),
                         } ),
 
                         // TODO: Store nodes' events here in the kernel
 
                         // events: Object.create( nodeCollectionPrototype, {
-                        //     existing: { value: Object.create( prototypeNode ?
-                        //         prototypeNode.events.existing : null ) },
+                        //     existing: enumerable( Object.create( prototypeNode ?
+                        //         prototypeNode.events.existing : null ) ),
                         // } ),
 
                         // END TODO
