@@ -99,7 +99,11 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
             if ( nodeID === this.kernel.application() ) {
                 switch ( methodName ) {
                     case "insertUnits":
-                        addInsertableUnits( methodParameters[ 0 ] );
+                        var clientThatCalledMethod = this.kernel.client();
+                        var me = this.kernel.moniker();
+                        if ( clientThatCalledMethod === me ) {
+                            addInsertableUnits( methodParameters[ 0 ] );
+                        }
                         break;
                 }
             } 
