@@ -1304,6 +1304,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                 if ( value === undefined && isShapeDefinition( node.prototypes ) ) {
 
+                    var img = undefined;
+
                     switch ( propertyName ) {
 
                         case "fill":
@@ -1327,7 +1329,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "fillPatternImage":
-                            value = kineticObj.fillPatternImage();
+                            img = kineticObj.fillPatternImage();
+                            if ( img ){
+                                value = img.src;
+                            }
                             break;
 
                         case "fillPatternX":
@@ -1875,7 +1880,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if ( value !== undefined ) {
                 propertyValue = value;
             }
-            //console.log(["kinetic get returns: ",value]);
+
             return value;
         },
 
