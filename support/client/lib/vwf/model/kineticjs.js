@@ -364,6 +364,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             kineticObj.dragDistance( Number( propertyValue ) );    
                             break;
 
+                        case "zIndex":
+                            kineticObj.setZIndex( Number( propertyValue ) );
+                            break;
+
                         case "dragBoundFunc":
                         default:
                             value = undefined;
@@ -1279,6 +1283,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         // check code, not in docs
                         case "dragDistance":
                             value = kineticObj.dragDistance();    
+                            break;
+
+                        case "zIndex":
+                            value = kineticObj.getZIndex();
                             break;
 
                         case "dragBoundFunc":

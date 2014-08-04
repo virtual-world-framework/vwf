@@ -21,4 +21,5 @@ properties:
   offsetY:
   draggable:
   dragDistance:
+  zIndex:
   dragBoundFunc:
