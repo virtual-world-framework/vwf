@@ -764,6 +764,68 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             return undefined;
         },
 
+        // -- settingEventListener -----------------------------------------------------------------
+
+        settingEventListener: function( nodeID, eventName, eventListenerID, eventListener ) {
+
+            var node = this.nodes[nodeID];
+
+            var listeners = node.private.listeners[eventName];
+
+            if ( ! listeners ) {
+                listeners = node.private.listeners[eventName] = [];
+            }
+
+            if ( eventListener.type === scriptMediaType ) {
+
+                try {
+
+                    var listener = listeners[ eventListenerID ] = {
+                        handler: functionFromHandler( eventListener ),
+                        context: this.nodes[ eventListener.context ],
+                        phases: eventListener.phases,
+                    };
+
+                    return utility.merge( handlerFromFunction( listener.handler ), {
+                        type: scriptMediaType,
+                        context: listener.context && listener.context.id,
+                        phases: listener.phases,
+                    } );
+
+                } catch ( exception ) {
+
+                    this.logger.warnx( "settingEventListener", nodeID, eventName, eventListenerID,
+                        "exception evaluating listener:", utility.exceptionMessage( exception ) );
+                }
+
+            }
+
+            return undefined;
+        },
+
+        // -- gettingEventListener -----------------------------------------------------------------
+
+        gettingEventListener: function( nodeID, eventName, eventListenerID ) {
+
+            var node = this.nodes[nodeID];
+
+            var listeners = node.private.listeners[eventName];
+
+            if ( listeners ) {
+
+                var listener = listeners[ eventListenerID ];
+
+                return utility.merge( handlerFromFunction( listener.handler ), {
+                    type: scriptMediaType,
+                    context: listener.context && listener.context.id,
+                    phases: listener.phases,
+                } );
+
+            }
+
+            return undefined;
+        },
+
         // -- flushingEventListeners ---------------------------------------------------------------
 
         flushingEventListeners: function( nodeID, eventName, eventContextID ) {

@@ -263,6 +263,31 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
+        /// @param {Listener} eventListener
+        /// 
+        /// @returns {Listener}
+
+        settingEventListener: [ /* nodeID, eventName, eventListenerID, eventListener */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
+        /// 
+        /// @returns {Listener}
+
+        gettingEventListener: [ /* nodeID, eventName, eventListenerID */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
         /// @param {ID} eventContextID
         /// 
         /// @returns {}

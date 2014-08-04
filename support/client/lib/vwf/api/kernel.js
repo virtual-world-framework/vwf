@@ -286,6 +286,29 @@ define( function() {
 
         // TODO: deleteEvent
 
+        /// xxx
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {} eventDescriptor
+        /// 
+        /// @returns {}
+
+        setEvent: [ /* nodeID, eventName, eventDescriptor */ ],
+
+        /// xxx
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// 
+        /// @returns {}
+
+        getEvent: [ /* nodeID, eventName */ ],
+
         /// Add a function to a node's event to be called when the event fires.
         /// 
         /// By default, the handler will be invoked in the context of the sender. For JavaScript
@@ -352,6 +375,43 @@ define( function() {
         ///   `eventListenerID` if the listener was removed successfully. Otherwise, a falsy value.
 
         removeEventListener: [ /* nodeID, eventName, eventListenerID */ ],
+
+        /// xxx
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        ///   The ID of a node containing an event `eventName`.
+        /// @param {String} eventName
+        ///   The name of an event on the `nodeID` node.
+        /// @param {ListenerID} eventListenerID
+        ///   A listener ID previously returned by `kernel.addEventListener` that identifies a
+        ///   listener attached to this `nodeID` and `eventName`.
+        /// @param {Listener} eventListener
+        ///   A script to be evaluated as a function body and added as a handler for the event.
+        ///   Strings will be interpreted as JavaScript; other script types may be supported in
+        ///   future releases. The `eventParameters` that were provided to the `createEvent` call
+        //    will be available to the handler body as function parameters.
+        /// 
+        /// @returns {Listener}
+
+        setEventListener: [ /* nodeID, eventName, eventListenerID, eventListener */ ],
+
+        /// xxx
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        ///   The ID of a node containing an event `eventName`.
+        /// @param {String} eventName
+        ///   The name of an event on the `nodeID` node.
+        /// @param {ListenerID} eventListenerID
+        ///   A listener ID previously returned by `kernel.addEventListener` that identifies a
+        ///   listener attached to this `nodeID` and `eventName`.
+        /// 
+        /// @returns {Listener}
+
+        getEventListener: [ /* nodeID, eventName, eventListenerID */ ],
 
         /// flushEventListeners.
         /// 
