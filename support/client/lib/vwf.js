@@ -2253,17 +2253,16 @@ if ( ! childComponent.source ) {
 
                     // For the proto-prototype node `node.vwf`, register the meta events.
 
-                    if ( childID === vwf.kutility.nodeTypeURI ) {
-                        // TODO: uncomment when the node registry starts tracking events
-                        // child.events.create( namespaceEncodedName( [ "properties", "created" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "properties", "initialized" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "properties", "deleted" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "methods", "created" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "methods", "deleted" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "events", "created" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "events", "deleted" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "children", "added" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "children", "removed" ] ) );
+                    if ( childID === vwf.kutility.protoNodeURI ) {
+                        child.events.create( namespaceEncodedName( [ "properties", "created" ] ) );
+                        child.events.create( namespaceEncodedName( [ "properties", "initialized" ] ) );
+                        child.events.create( namespaceEncodedName( [ "properties", "deleted" ] ) );
+                        child.events.create( namespaceEncodedName( [ "methods", "created" ] ) );
+                        child.events.create( namespaceEncodedName( [ "methods", "deleted" ] ) );
+                        child.events.create( namespaceEncodedName( [ "events", "created" ] ) );
+                        child.events.create( namespaceEncodedName( [ "events", "deleted" ] ) );
+                        child.events.create( namespaceEncodedName( [ "children", "added" ] ) );
+                        child.events.create( namespaceEncodedName( [ "children", "removed" ] ) );
                     }
 
                     // Re-register the node in vwf/model/object now that we have the prototypes and
@@ -3444,18 +3443,24 @@ if ( ! childComponent.source ) {
 
             this.logger.debuggx( "createEvent", nodeID, eventName, eventParameters );
 
+            var node = nodes.existing[nodeID];
+
             // Encode any namespacing into the name. (Namespaced names were added in 0.6.21.)
 
             var encodedEventName = namespaceEncodedName( eventName );
 
-            // Call creatingEvent() on each model. The event is considered created after all models
+            // Register the event.
+
+            node.events.create( encodedEventName, node.initialized && node.patchable, eventParameters );
+
+            // Call `creatingEvent` on each model. The event is considered created after all models
             // have run.
 
             this.models.forEach( function( model ) {
                 model.creatingEvent && model.creatingEvent( nodeID, encodedEventName, eventParameters );
             } );
 
-            // Call createdEvent() on each view. The view is being notified that a event has been
+            // Call `createdEvent` on each view. The view is being notified that a event has been
             // created.
 
             this.views.forEach( function( view ) {
@@ -3469,7 +3474,7 @@ if ( ! childComponent.source ) {
             this.logger.debugu();
         };
 
-        // -- addEventListener --------------------------------------------------------------------------
+        // -- addEventListener ---------------------------------------------------------------------
 
         /// @name module:vwf.addEventListener
         /// 
@@ -3486,14 +3491,14 @@ if ( ! childComponent.source ) {
 
             var encodedEventName = namespaceEncodedName( eventName );
 
-            // Call addingEventListener() on each model.
+            // Call `addingEventListener` on each model.
 
             this.models.forEach( function( model ) {
                 model.addingEventListener && model.addingEventListener( nodeID, encodedEventName, eventHandler,
                     eventContextID, eventPhases );
             } );
 
-            // Call addedEventListener() on each view.
+            // Call `addedEventListener` on each view.
 
             this.views.forEach( function( view ) {
                 view.addedEventListener && view.addedEventListener( nodeID, encodedEventName, eventHandler,
@@ -3503,7 +3508,7 @@ if ( ! childComponent.source ) {
             this.logger.debugu();
         };
 
-        // -- removeEventListener --------------------------------------------------------------------------
+        // -- removeEventListener ------------------------------------------------------------------
 
         /// @name module:vwf.removeEventListener
         /// 
@@ -3519,13 +3524,13 @@ if ( ! childComponent.source ) {
 
             var encodedEventName = namespaceEncodedName( eventName );
 
-            // Call removingEventListener() on each model.
+            // Call `removingEventListener` on each model.
 
             this.models.forEach( function( model ) {
                 model.removingEventListener && model.removingEventListener( nodeID, encodedEventName, eventHandler );
             } );
 
-            // Call removedEventListener() on each view.
+            // Call `removedEventListener` on each view.
 
             this.views.forEach( function( view ) {
                 view.removedEventListener && view.removedEventListener( nodeID, encodedEventName, eventHandler );
@@ -3534,7 +3539,7 @@ if ( ! childComponent.source ) {
             this.logger.debugu();
         };
 
-        // -- flushEventListeners --------------------------------------------------------------------------
+        // -- flushEventListeners ------------------------------------------------------------------
 
         /// @name module:vwf.flushEventListeners
         /// 
@@ -3548,13 +3553,13 @@ if ( ! childComponent.source ) {
 
             var encodedEventName = namespaceEncodedName( eventName );
 
-            // Call flushingEventListeners() on each model.
+            // Call `flushingEventListeners` on each model.
 
             this.models.forEach( function( model ) {
                 model.flushingEventListeners && model.flushingEventListeners( nodeID, encodedEventName, eventContextID );
             } );
 
-            // Call flushedEventListeners() on each view.
+            // Call `flushedEventListeners` on each view.
 
             this.views.forEach( function( view ) {
                 view.flushedEventListeners && view.flushedEventListeners( nodeID, encodedEventName, eventContextID );
@@ -3579,13 +3584,13 @@ if ( ! childComponent.source ) {
 
             var encodedEventName = namespaceEncodedName( eventName );
 
-            // Call firingEvent() on each model.
+            // Call `firingEvent` on each model.
 
             var handled = this.models.reduce( function( handled, model ) {
                 return model.firingEvent && model.firingEvent( nodeID, encodedEventName, eventParameters ) || handled;
             }, false );
 
-            // Call firedEvent() on each view.
+            // Call `firedEvent` on each view.
 
             this.views.forEach( function( view ) {
                 view.firedEvent && view.firedEvent( nodeID, encodedEventName, eventParameters );
