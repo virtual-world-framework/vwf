@@ -5891,6 +5891,30 @@ if ( ! childComponent.source ) {
 
         };
 
+        // Prototype for the `events` collection in the `nodes` objects.
+
+        var eventCollectionPrototype = Object.create( keyedCollectionPrototype, {
+
+            create: {
+
+                value: function( name, changes, parameters ) {
+
+                    var value = parameters ? {
+                        parameters: parameters.slice(), // clone
+                    } : {};
+
+                    value.listeners = Object.create( indexedCollectionPrototype, {
+                        container: enumerable( this ),
+                        containerMember: enumerable( name ),
+                    } );
+
+                    return keyedCollectionPrototype.create.call( this, name, changes, value );
+                }
+
+            },
+
+        } );
+
         /// The application's nodes, indexed by ID.
         /// 
         /// The kernel defines an application as:
@@ -6000,14 +6024,10 @@ if ( ! childComponent.source ) {
                                 prototypeNode.methods.existing : null ) ),
                         } ),
 
-                        // TODO: Store nodes' events here in the kernel
-
-                        // events: Object.create( nodeCollectionPrototype, {
-                        //     existing: enumerable( Object.create( prototypeNode ?
-                        //         prototypeNode.events.existing : null ) ),
-                        // } ),
-
-                        // END TODO
+                        events: Object.create( eventCollectionPrototype, {
+                            existing: enumerable( Object.create( prototypeNode ?
+                                prototypeNode.events.existing : null ) ),
+                        } ),
 
                         // Is this node patchable? Nodes are patchable if they were loaded from a
                         // component.
@@ -6084,12 +6104,12 @@ if ( ! childComponent.source ) {
                         ),
                     },
 
-                    // events: {
-                    //     existing: Object.create(
-                    //         prototypeNode ? prototypeNode.events.existing : null,
-                    //         propertyDescriptorsFor( behaviorNode.events.existing )
-                    //     ),
-                    // },
+                    events: {
+                        existing: Object.create(
+                            prototypeNode ? prototypeNode.events.existing : null,
+                            propertyDescriptorsFor( behaviorNode.events.existing )
+                        ),
+                    },
 
                 };
 
