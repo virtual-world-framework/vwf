@@ -86,6 +86,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
             this.pickInterval = 10;
             this.disableInputs = false;
+            this.applicationWantsPointerEvents = false;
 
             // Store parameter options for persistence functionality
             this.parameters = options;
@@ -374,6 +375,24 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                     break;
             }
         },
+
+        // -- addedEventListener -------------------------------------------------------------------
+
+        addedEventListener: function( nodeID, eventName, eventHandler, eventContextID, eventPhases ) {
+            switch( eventName ) {
+                case "pointerClick":
+                case "pointerDown":
+                case "pointerMove":
+                case "pointerUp":
+                case "pointerOver":
+                case "pointerOut":
+                case "pointerWheel":
+                    if ( this.kernel.find( nodeID, "self::element(*,'http://vwf.example.com/node3.vwf')" ).length ) {
+                        this.applicationWantsPointerEvents = true;
+                    }
+                    break;
+            }
+       },
 
         // -- firedEvent -----------------------------------------------------------------------------
 
@@ -1129,9 +1148,15 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             {
                 sceneNode.frameCount = 0;
             
-                var newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
-                
-                var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
+                var newPick, newPickId;
+
+                if ( self.applicationWantsPointerEvents ) {
+                    newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
+                    newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
+                } else {
+                    newPick = undefined;
+                    newPickId = undefined;
+                }
 
                 if ( self.lastPickId != newPickId && self.lastEventData )
                 {
@@ -1140,9 +1165,11 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                                                    self.lastEventData.eventData, 
                                                    self.lastEventData.eventNodeData );
                     }
-                    view.kernel.dispatchEvent( newPickId, "pointerOver",
-                                               self.lastEventData.eventData, 
-                                               self.lastEventData.eventNodeData );
+                    if ( newPickId ) {
+                        view.kernel.dispatchEvent( newPickId, "pointerOver",
+                                                   self.lastEventData.eventData, 
+                                                   self.lastEventData.eventNodeData );
+                    }
                 }
 
                 if ( view.lastEventData && 
