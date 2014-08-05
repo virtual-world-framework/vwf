@@ -1270,6 +1270,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             value = kineticObj.visible();
                             break;
 
+                        case "isVisible":
+                            value = kineticObj.isVisible();
+                            break;
+
                         case "listening":
                             value = kineticObj.listening();
                             break;
