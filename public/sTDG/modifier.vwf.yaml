@@ -1,0 +1,32 @@
+--- 
+extends: http://vwf.example.com/node.vwf
+properties:
+  pixelSize: 35
+  icon: true
+  keepUnitRatio: 
+  symbologyStandard: 
+  quantity:
+  additionalInfo1:
+  additionalInfo2:
+  additionalInfo3:
+  altitudeDepth:
+  combatEffectiveness:
+  directionOfMovement:
+  DTG1:
+  DTG2:
+  evaluationRating:
+  higherFormation:
+  hostile:
+  iffSif:
+  location:
+  reinforcedReduced:
+  signatureEquip:
+  staffComments:
+  equipType:
+  uniqueDesignation1:
+  uniqueDesignation2:
+  speed:
+scripts:
+- |
+  this.initialize = function() {
+  } //@ sourceURL=modifier.vwf

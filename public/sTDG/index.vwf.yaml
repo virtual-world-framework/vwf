@@ -1,0 +1,49 @@
+--- 
+extends: http://vwf.example.com/kinetic/stage.vwf
+properties:
+  userActionStack: []
+  userActionIndex: -1
+  lastSaveIndex: -1
+  unitSize: 32
+methods:
+  createUnit:
+  deleteUnit:
+  createLayer:
+  deleteLayer:
+  recordUserAction:
+  recordSave:
+  clearLines:
+  clearUnits:
+  clearUserActions:
+  insertUnits:
+events:
+  insertableUnitAdded:
+  unitLoadingComplete:
+children:
+  background:
+    extends: http://vwf.example.com/kinetic/layer.vwf
+    properties:
+      clearBeforeDraw: false
+      visible: true
+    children:
+      map:
+        extends: http://vwf.example.com/kinetic/image.vwf
+        source: "maps/BlankCanvas.png"
+        properties:
+          image:
+  instructor:
+    extends: http://vwf.example.com/kinetic/layer.vwf
+    children:
+      baseLayer:
+        extends: tdgLayer.vwf
+        properties:
+          visible: true
+        children:
+          units: 
+            extends: http://vwf.example.com/kinetic/group.vwf
+            properties:
+              visible: 'inherit'
+          lines:
+            extends: canvasLines.vwf
+scripts:
+- source: "index-model.js"

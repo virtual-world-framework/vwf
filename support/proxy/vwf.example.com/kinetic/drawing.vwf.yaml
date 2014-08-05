@@ -1,0 +1,18 @@
+---
+extends:
+  http://vwf.example.com/kinetic/stage.vwf
+properties:
+  drawing_mode: none
+  drawing_visible: inherit
+  drawing_color: red
+  drawing_width: 4
+  drawing_parentPath: //
+  drawing_opacity: 0.4
+events:
+  update:
+  pointerDown:
+  pointerMove:
+  pointerUp:
+  shapeCreated:
+scripts:
+- source: "http://vwf.example.com/kinetic/drawing.js"
