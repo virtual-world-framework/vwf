@@ -15,7 +15,9 @@ properties:
   scale:
   scaleX:
   scaleY:
+  position:
   rotation:
+  transform:  
   offset:
   offsetX:
   offsetY:
@@ -23,3 +25,29 @@ properties:
   dragDistance:
   zIndex:
   dragBoundFunc:
+  absolutePosition:
+  absoluteTransform:
+  absoluteOpacity:
+  absoluteZIndex:
+events:
+  pointerMove:
+  pointerOut:
+  pointerEnter:
+  pointerLeave:
+  pointerDown:
+  pointerUp:
+  pointerClick:
+  pointerDoubleClick:
+  touchStart:
+  touchMove:
+  touchEnd:
+  tap:
+  doubleTap:
+  dragStart:
+  dragMove:
+  dragEnd:
+scripts:
+- source: "http://vwf.example.com/kinetic/node.js"
+
+
+
