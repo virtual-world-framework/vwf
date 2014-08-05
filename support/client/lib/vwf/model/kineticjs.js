@@ -368,6 +368,38 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             kineticObj.setZIndex( Number( propertyValue ) );
                             break;
 
+                        case "position":
+                            if ( propertyValue instanceof Array ) { 
+                                kineticObj.setPosition( { "x": Number( propertyValue[ 0 ] ), "y": Number( propertyValue[ 1 ] ) });
+                            } else {
+                                kineticObj.setPosition( { "x": Number( propertyValue.x ), "y":  Number( propertyValue.y ) });
+                            } 
+                            break;
+
+                        case "transform":
+                            kineticObj.setTransform( propertyValue );
+                            break;
+
+                        case "absolutePosition":
+                            if ( propertyValue instanceof Array ) { 
+                                kineticObj.setAbsolutePosition( { "x": Number( propertyValue[ 0 ] ), "y": Number( propertyValue[ 1 ] ) });
+                            } else {
+                                kineticObj.setAbsolutePosition( { "x": Number( propertyValue.x ), "y":  Number( propertyValue.y ) });
+                            } 
+                            break;
+
+                        case "absoluteTransform":
+                            kineticObj.getAbsoluteTransform( propertyValue );
+                            break;
+
+                        case "absoluteOpacity":
+                            kineticObj.getAbsoluteOpacity( parseFloat( propertyValue ) );
+                            break;
+
+                        case "absoluteZIndex":
+                            kineticObj.getAbsoluteZIndex( Number( propertyValue ) );
+                            break;
+
                         case "dragBoundFunc":
                         default:
                             value = undefined;
@@ -1292,13 +1324,38 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         case "dragBoundFunc":
                             break;
 
-                        case "Id":
-                            value = kineticObj.getAttr( 'id' );
+                        case "id":
+                            value = kineticObj.getId();
                             break
 
                         case "name":
-                            value = kineticObj.getAttr( 'name' );
+                            value = kineticObj.getName();
                             break;
+                        
+                        case "position":
+                            value = kineticObj.getPosition();
+                            break;
+
+                        case "transform":
+                            value = kineticObj.getTransform();
+                            break;
+
+                        case "absolutePosition":
+                            value = kineticObj.getAbsolutePosition();
+                            break;
+
+                        case "absoluteTransform":
+                            value = kineticObj.getAbsoluteTransform();
+                            break;
+
+                        case "absoluteOpacity":
+                            value = kineticObj.getAbsoluteOpacity();
+                            break;
+
+                        case "absoluteZIndex":
+                            value = kineticObj.getAbsoluteZIndex();
+                            break;
+
                     }
                 }
 
