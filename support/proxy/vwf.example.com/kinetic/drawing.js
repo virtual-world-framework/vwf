@@ -25,6 +25,9 @@ this.pointerDown = function( eventData, nodeData ) {
 			compExtends	= "http://vwf.example.com/kinetic/"+this.drawing_mode+".vwf"; 
 			break;
 
+		case "freeDraw":
+			break;
+
 		case 'none':
 		default:
 			break;
@@ -33,7 +36,7 @@ this.pointerDown = function( eventData, nodeData ) {
 
 	if ( compExtends !== undefined ) {
 		this.initialDownPoint = eventData.layer;
-		var parents = this.find( this.drawing_parentPath );
+		var parents = this.find( this.drawing_parentPath + "//shapes" );
 		var parent = parents.length > 0 ? parents[ 0 ] : this;
 		var shapeDef = {
 			"extends": compExtends,
@@ -73,22 +76,25 @@ this.update = function( eventData, nodeData ) {
 		}
 		var diffX = eventData.layer[ 0 ] - this.initialDownPoint[ 0 ];
 		var diffY = eventData.layer[ 1 ] - this.initialDownPoint[ 1 ];
+		var pos = [ eventData.layer[ 0 ], eventData.layer[ 1 ] ];
+		var width = diffX;	
+		var height = diffY;
+
 
 		console.info( "diffX = " + diffX + "     diffY = " + diffY );
 
 		switch ( this.drawing_mode ) {
 			
 			case "arc":
-				break;
-
-			case "circle":
-				this.drawingObject.radius = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
+				var radius = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
+				this.drawingObject.angle = 30;
+				this.drawingObject.innerRadius = radius - this.drawing_width;
+				this.drawingObject.outerRadius = radius;
 				break;
 
 			case "ellipse":
-				break;
-
-			case "image":
+			case "circle":
+				this.drawingObject.radius = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
 				break;
 
 			case "line":
@@ -98,22 +104,34 @@ this.update = function( eventData, nodeData ) {
 			case "regularPolygon":
 				break;
 
+			case "text":
+			case "sprite":
+			case "image":
 			case "rect":
+				if ( diffX < 0 ) {
+					pos[ 0 ] += diffX;	
+					width = Math.abs( diffX );
+				} 
+				if ( diffY < 0 ) {
+					pos[ 1 ] += diffY;	
+					height = Math.abs( diffY );
+				} 
+				this.drawingObject.position = pos;
+				this.drawingObject.width = width;
+				this.drawingObject.height = height;
 				break;
 
 			case "ring":
 				var radius = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
-				this.drawingObject.outerRadius = radius - this.drawing_width;
+				this.drawingObject.innerRadius = radius - this.drawing_width;
 				this.drawingObject.outerRadius = radius;
 				break;
 
-			case "sprite":
-				break;
-
 			case "star":
-				break;
-
-			case "text":
+				var radius = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
+				this.drawingObject.points = 5;
+				this.drawingObject.innerRadius = radius * 60;
+				this.drawingObject.outerRadius = radius;
 				break;
 
 			case "wedge":
