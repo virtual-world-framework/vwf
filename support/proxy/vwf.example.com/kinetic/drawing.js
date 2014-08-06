@@ -32,14 +32,14 @@ this.pointerDown = function( eventData, nodeData ) {
 	}
 
 	if ( compExtends !== undefined ) {
-		this.initialDownPoint = eventData.location;
+		this.initialDownPoint = eventData.layer;
 		var parents = this.find( this.drawing_parentPath );
 		var parent = parents.length > 0 ? parents[ 0 ] : this;
 		var shapeDef = {
 			"extends": compExtends,
 			"properties": {
 				"visible": false,
-				"position": eventData.location,
+				"position": eventData.layer,
 				"fill": this.drawing_color,
 				"opacity": this.drawing_opacity
 			}
@@ -71,8 +71,10 @@ this.update = function( eventData, nodeData ) {
 		if ( this.drawingObject.visible !== this.drawing_visible ) {
 			this.drawingObject.visible = this.drawing_visible;
 		}
-		var diffX = eventData.location[ 0 ] - this.initialDownPoint[ 0 ];
-		var diffY = eventData.location[ 1 ] - this.initialDownPoint[ 1 ];
+		var diffX = eventData.layer[ 0 ] - this.initialDownPoint[ 0 ];
+		var diffY = eventData.layer[ 1 ] - this.initialDownPoint[ 1 ];
+
+		console.info( "diffX = " + diffX + "     diffY = " + diffY );
 
 		switch ( this.drawing_mode ) {
 			
@@ -90,7 +92,7 @@ this.update = function( eventData, nodeData ) {
 				break;
 
 			case "line":
-				this.drawingObject.points = [ this.initialDownPoint[ 0 ], this.initialDownPoint[ 1 ], eventData.location[ 0 ], eventData.location[ 1 ] ];
+				this.drawingObject.points = [ this.initialDownPoint[ 0 ], this.initialDownPoint[ 1 ], eventData.layer[ 0 ], eventData.layer[ 1 ] ];
 				break;
 
 			case "regularPolygon":
