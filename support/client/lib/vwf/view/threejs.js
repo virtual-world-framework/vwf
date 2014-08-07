@@ -387,7 +387,34 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 case "pointerOver":
                 case "pointerOut":
                 case "pointerWheel":
-                    if ( this.kernel.find( nodeID, "self::element(*,'http://vwf.example.com/node3.vwf')" ).length ) {
+                case "touchHold":
+                case "touchTap":
+                case "touchDoubleTap":
+                case "touchDrag":
+                case "touchDragStart":
+                case "touchDragEnd":
+                case "touchDragUp":
+                case "touchDragDown":
+                case "touchDragLeft":
+                case "touchDragRight":
+                case "touchSwipe":
+                case "touchSwipeUp":
+                case "touchSwipeDown":
+                case "touchSwipeLeft":
+                case "touchSwipeRight":
+                case "touchTransform":
+                case "touchTransformStart":
+                case "touchTransformEnd":
+                case "touchRotate":
+                case "touchPinch":
+                case "touchPinchIn":
+                case "touchPinchOut":
+                case "touchStart":
+                case "touchRelease":
+                    if ( this.kernel.find( nodeID, 
+                            "self::element(*,'http://vwf.example.com/node3.vwf')" ).length || 
+                        this.kernel.find( nodeID,
+                            "self::element(*,'http://vwf.example.com/scene.vwf')" ).length ) {
                         this.applicationWantsPointerEvents = true;
                     }
                     break;
