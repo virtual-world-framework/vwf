@@ -40,12 +40,12 @@ define( [ "module", "vwf/model", "vwf/utility",
 
             // turns on logger debugger console messages 
             this.debug = {
-                "creation": true,
-                "initializing": true,
+                "creation": false,
+                "initializing": false,
                 "parenting": false,
                 "deleting": false,
-                "properties": true,
-                "setting": true,
+                "properties": false,
+                "setting": false,
                 "getting": false,
                 "prototypes": false
             };
@@ -190,10 +190,6 @@ define( [ "module", "vwf/model", "vwf/utility",
                     // idea of exactly how we'll be using billboards,
                     // I'm just going to leave this implementation as is
                     var bbCollection = new Cesium.BillboardCollection();
-                    var textureAtlas = sceneNode.scene.getContext().createTextureAtlas( {
-                        image : canvas
-                    } );
-                    bbCollection.setTextureAtlas( textureAtlas );
 
                     var bb = bbCollection.add( {
                         "color" : Cesium.Color.RED,
@@ -201,7 +197,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                         "imageIndex": 0
                     } );
 
-                    sceneNode.scene.getPrimitives().add( bbCollection );
+                    sceneNode.scene.primitives.add( bbCollection );
                     
                     node.bbCollection = bbCollection; 
                     node.cesiumObj = bb;
@@ -226,7 +222,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                         "outlineWidth" : 2,
                         "style" : Cesium.LabelStyle.FILL_AND_OUTLINE
                     } );
-                    sceneNode.scene.getPrimitives().add( labels ); 
+                    sceneNode.scene.primitives.add( labels ); 
 
                     node.labelCollection = labels; 
                     node.cesiumObj = lbl;
@@ -242,7 +238,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                 node.cesiumObj = new Cesium.PolylineCollection();
                 node.scene = sceneNode.scene; 
                 node.cesiumObj.vwfID = childID;  
-                //node.scene.getPrimitives().add( node.cesiumObj );  
+                //node.scene.primitives.add( node.cesiumObj );  
 
             } else if ( isPolyline.call( this, protos ) ) { 
 
@@ -253,7 +249,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                 if ( parentNode && parentNode.cesiumObj instanceof Cesium.DynamicObject ) {
                     node.cesiumObj = parentNode.cesiumObj.polyline;
                 } else { 
-                    var primitives = sceneNode.scene.getPrimitives();               
+                    var primitives = sceneNode.scene.primitives;               
                     if ( parentNode.cesiumObj && parentNode.cesiumObj instanceof Cesium.PolylineCollection ) {
                         node.polylineCollection = parentNode.cesiumObj;
                     }
@@ -297,7 +293,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                 if ( parentNode && parentNode.cesiumObj instanceof Cesium.DynamicObject ) {
                     node.cesiumObj = parentNode.cesiumObj.polygon;
                 } else {  
-                    var primitives = sceneNode.scene.getPrimitives();
+                    var primitives = sceneNode.scene.primitives;
                     node.cesiumObj = new Cesium.Polygon();
                     primitives.add( node.cesiumObj );
                     node.cesiumObj.vwfID = childID;
@@ -498,7 +494,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                         if ( node.bbCollection ) {
                             node.bbCollection.remove( node.cesiumObj );
                             if ( node.bbCollection.getLength() == 0 ) {
-                                sceneNode.scene.getPrimitives().remove( node.bbCollection );
+                                sceneNode.scene.primitives.remove( node.bbCollection );
                             }
                             node.bbCollection = undefined;
                             node.cesiumObj = undefined;
@@ -508,7 +504,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                         if ( node.labelCollection ) {
                             node.labelCollection.remove( node.cesiumObj );
                             if ( node.labelCollection.getLength() == 0 ) {
-                                sceneNode.scene.getPrimitives().remove( node.labelCollection );
+                                sceneNode.scene.primitives.remove( node.labelCollection );
                             }
                             node.labelCollection = undefined;
                             node.cesiumObj = undefined;
@@ -527,7 +523,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                             }
                         }
                     } else if ( node.cesiumObj instanceof Cesium.PolylineCollection ) {
-                        sceneNode.scene.getPrimitives().remove( node.cesiumObj );
+                        sceneNode.scene.primitives.remove( node.cesiumObj );
                         node.cesiumObj = undefined;
                     }
                 }
@@ -2350,7 +2346,7 @@ define( [ "module", "vwf/model", "vwf/utility",
             return;
         }
 
-        var primitives = sceneNode.scene.getPrimitives();
+        var primitives = sceneNode.scene.primitives;
         var ellipsoid = centralBody.getEllipsoid();
 
         var dimensions;
