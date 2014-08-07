@@ -667,39 +667,24 @@ define( [ "module", "vwf/model", "vwf/utility",
                             }
                             break;
 
-                        case "dimensions":
-                            if ( node.cesiumObj === undefined ) {
-                                
-                                if ( node.properties !== undefined ) {
-                                    node.properties[ propertyName ] = propertyValue;
-                                } else {
-                                    // already created need to modify the existing object
-                                }
-
-                            }
-
-                            break;
-
                         case "pixelOffset":
-                            var pos = new Cesium.Cartesian2( propertyValue[0], propertyValue[1] );
-                            node.cesiumObj.setPixelOffset( pos );
+                            node.cesiumObj.pixelOffset = new Cesium.Cartesian2( propertyValue[0], propertyValue[1] );
                             break;
 
                         case "eyeOffset":
-                            var pos = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
-                            node.cesiumObj.setEyeOffset( pos );
+                            node.cesiumObj.eyeOffset = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
                             break;
 
                         case "horizontalOrigin":
                             switch ( propertyValue ) {
                                 case "left":
-                                    node.cesiumObj.setHorizontalOrigin( Cesium.HorizontalOrigin.LEFT );
+                                    node.cesiumObj.horizontalOrigin = Cesium.HorizontalOrigin.LEFT;
                                     break;
                                 case "right":
-                                    node.cesiumObj.setHorizontalOrigin( Cesium.HorizontalOrigin.RIGHT );
+                                    node.cesiumObj.horizontalOrigin = Cesium.HorizontalOrigin.RIGHT;
                                     break;
                                 case "center":
-                                    node.cesiumObj.setHorizontalOrigin( Cesium.HorizontalOrigin.CENTER );
+                                    node.cesiumObj.horizontalOrigin = Cesium.HorizontalOrigin.CENTER;
                                     break;
                             }
                             break;
@@ -707,20 +692,19 @@ define( [ "module", "vwf/model", "vwf/utility",
                         case "verticalOrigin": 
                             switch ( propertyValue ) {
                                 case "top":
-                                    node.cesiumObj.setHorizontalOrigin( Cesium.VerticalOrigin.TOP );
+                                    node.cesiumObj.verticalOrigin = Cesium.VerticalOrigin.TOP;
                                     break;
                                 case "bottom":
-                                    node.cesiumObj.setHorizontalOrigin( Cesium.VerticalOrigin.BOTTOM );
+                                    node.cesiumObj.verticalOrigin = Cesium.VerticalOrigin.BOTTOM;
                                     break;
                                 case "center":
-                                    node.cesiumObj.setHorizontalOrigin( Cesium.VerticalOrigin.CENTER );
+                                    node.cesiumObj.verticalOrigin = Cesium.VerticalOrigin.CENTER;
                                     break;
                             }
                             break;
 
                         case "scale":
-                            var val = parseFloat( propertyValue );
-                            node.cesiumObj.setScale( val );
+                            node.cesiumObj.scale = parseFloat( propertyValue );;
                             break;
 
                         case "imageIndex": 
@@ -736,12 +720,10 @@ define( [ "module", "vwf/model", "vwf/utility",
                             var vwfColor = new utility.color( propertyValue );
                             if ( vwfColor ) {
                                 if ( node.cesiumObj !== undefined ) {                            
-                                    node.cesiumObj.setColor( { 
-                                        red: vwfColor.red() / 255, 
-                                        green: vwfColor.green() / 255, 
-                                        blue: vwfColor.blue() / 255, 
-                                        alpha: vwfColor.alpha() 
-                                    } );
+                                    node.cesiumObj._color.red = vwfColor.red() / 255;
+                                    node.cesiumObj._color.green = vwfColor.green() / 255;
+                                    node.cesiumObj._color.blue = vwfColor.blue() / 255;
+                                    node.cesiumObj._color.alpha = vwfColor.alpha();
                                 } else if ( node.geometryType !== undefined ) {
 
                                     if ( node.properties !== undefined ) {
@@ -763,7 +745,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                         case "font":
                             if ( node.cesiumObj instanceof Cesium.Label ) {
-                                node.cesiumObj.setFont( propertyValue );    
+                                node.cesiumObj.font = propertyValue;    
                             }
                             break;
 
@@ -774,12 +756,10 @@ define( [ "module", "vwf/model", "vwf/utility",
                                 }
                                 var vwfColor = new utility.color( propertyValue );
                                 if ( vwfColor ) {                            
-                                    node.cesiumObj.setFillColor( { 
-                                        red: vwfColor.red() / 255, 
-                                        green: vwfColor.green() / 255, 
-                                        blue: vwfColor.blue() / 255, 
-                                        alpha: vwfColor.alpha() 
-                                    } );
+                                    node.cesiumObj.fillColor.red = vwfColor.red() / 255;
+                                    node.cesiumObj.fillColor.green = vwfColor.green() / 255;
+                                    node.cesiumObj.fillColor.blue = vwfColor.blue() / 255;
+                                    node.cesiumObj.fillColor.alpha = vwfColor.alpha();
                                 }                                
                             }                        
                             break;
@@ -788,13 +768,13 @@ define( [ "module", "vwf/model", "vwf/utility",
                             if ( node.cesiumObj instanceof Cesium.Label ) {
                                 switch ( propertyValue ) {
                                     case "fill":
-                                        node.cesiumObj.setStyle( Cesium.LabelStyle.FILL );
+                                        node.cesiumObj.style = Cesium.LabelStyle.FILL;
                                         break;
                                     case "filloutline":
-                                        node.cesiumObj.setStyle( Cesium.LabelStyle.FILL_AND_OUTLINE );
+                                        node.cesiumObj.style = Cesium.LabelStyle.FILL_AND_OUTLINE;
                                         break;
                                     case "outline":
-                                        node.cesiumObj.setStyle( Cesium.LabelStyle.OUTLINE );
+                                        node.cesiumObj.style = Cesium.LabelStyle.OUTLINE;
                                         break;
                                 }   
                             }    
@@ -806,26 +786,24 @@ define( [ "module", "vwf/model", "vwf/utility",
                                     propertyValue = propertyValue.replace( /\s/g, '' );
                                 }
                                 var vwfColor = new utility.color( propertyValue );
-                                if ( vwfColor ) {                            
-                                    node.cesiumObj.setOutlineColor( { 
-                                        red: vwfColor.red() / 255, 
-                                        green: vwfColor.green() / 255, 
-                                        blue: vwfColor.blue() / 255, 
-                                        alpha: vwfColor.alpha() 
-                                    } );
+                                if ( vwfColor ) {  
+                                    node.cesiumObj.outlineColor.red = vwfColor.red() / 255;
+                                    node.cesiumObj.outlineColor.green = vwfColor.green() / 255;
+                                    node.cesiumObj.outlineColor.blue = vwfColor.blue() / 255;
+                                    node.cesiumObj.outlineColor.alpha = vwfColor.alpha();
                                 }                                
                             }  
                             break;
 
                         case "outlineWidth":
                             if ( node.cesiumObj instanceof Cesium.Label ) {
-                                node.cesiumObj.setOutlineWidth( Number( propertyValue ) );    
+                                node.cesiumObj.outlineWidth = Number( propertyValue );    
                             }    
                             break;
 
                         case "text":
                             if ( node.cesiumObj instanceof Cesium.Label ) {
-                                node.cesiumObj.setText( propertyValue );    
+                                node.cesiumObj.text = propertyValue;    
                             }    
                             break;
 
@@ -995,33 +973,33 @@ define( [ "module", "vwf/model", "vwf/utility",
                                         points.push( new Cesium.Cartesian3( propertyValue[i][0], propertyValue[i][1], propertyValue[i][2] ) );
                                     }
                                 }
-                                node.cesiumObj.setPositions( points );
+                                node.cesiumObj.positions = points;
                             }
                             break;
 
                         case "width":
                             if ( node.cesiumObj instanceof Cesium.Polyline ) {
-                                node.cesiumObj.setWidth( Number( propertyValue ) );
+                                node.cesiumObj.width = Number( propertyValue );
                             }
                             break;
                         
-                        case "extent":
-                            if ( node.cesiumObj instanceof Cesium.Polygon ) {
-                                var pv = propertyValue;
-                                if ( pv instanceof Array ) {
-                                    switch ( pv.length ) {
-                                        case 4:
-                                            node.cesiumObj.configureExtent( new Cesium.Extent( pv[0], pv[1], pv[2], pv[3] ) );
-                                            break;
-                                        case 6:
-                                            node.cesiumObj.configureExtent( new Cesium.Extent( pv[0], pv[1], pv[2], pv[3], pv[4], pv[5] ) );
-                                            break;
+                        // case "extent":
+                        //     if ( node.cesiumObj instanceof Cesium.Polygon ) {
+                        //         var pv = propertyValue;
+                        //         if ( pv instanceof Array ) {
+                        //             switch ( pv.length ) {
+                        //                 case 4:
+                        //                     node.cesiumObj.configureExtent( new Cesium.Extent( pv[0], pv[1], pv[2], pv[3] ) );
+                        //                     break;
+                        //                 case 6:
+                        //                     node.cesiumObj.configureExtent( new Cesium.Extent( pv[0], pv[1], pv[2], pv[3], pv[4], pv[5] ) );
+                        //                     break;
 
-                                    }
-                                }
-                            }
-                            value = undefined;
-                            break;
+                        //             }
+                        //         }
+                        //     }
+                        //     value = undefined;
+                        //     break;
 
                         case "height":
                             if ( node.cesiumObj === undefined ) {
@@ -1371,12 +1349,12 @@ define( [ "module", "vwf/model", "vwf/utility",
                             }
 
                             if ( imageProvider !== undefined ) {
-                                if ( node && node.cesiumWidget !== undefined ) {
-                                    // how does the widget add an image layer
-                                    node.cesiumWidget._globe.getImageryLayers().addImageryProvider( imageProvider );
-                                } else if ( node.globe !== undefined ) {
-                                    node.globe.getImageryLayers().addImageryProvider( imageProvider );
-                                }
+                                // if ( node && node.cesiumWidget !== undefined ) {
+                                //     // how does the widget add an image layer
+                                //     node.cesiumWidget._globe.getImageryLayers().addImageryProvider( imageProvider );
+                                // } else if ( node.globe !== undefined ) {
+                                //     node.globe.getImageryLayers().addImageryProvider( imageProvider );
+                                // }
                                 node.imageryProvider = propertyValue;
                             }
                             value = undefined;
@@ -1546,12 +1524,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                     break;
                 case "position":
                     if ( node.cesiumObj ) {
-                        var pos;
-                        if ( node.cesiumObj instanceof Cesium.Camera ) {
-                            pos = node.cesiumObj.position;
-                        } else if ( node.cesiumObj instanceof Cesium.Billboard || node.cesiumObj instanceof Cesium.Label ) {
-                            pos = node.cesiumObj.getPosition();
-                        }
+                        var pos = node.cesiumObj.position;
                         if ( pos ) {
                             value = [ pos.x, pos.y, pos.z ];
                         }
@@ -1560,20 +1533,19 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                 case "pixelOffset":
                     if ( node.cesiumObj ) {
-                        var pos = node.cesiumObj.getPixelOffset();
+                        var pos = node.cesiumObj.pixelOffset;
                         value = [ pos.x, pos.y ];
                     }
                     break;
 
                 case "eyeOffset":
                     if ( node.cesiumObj ) {
-                        var pos = node.cesiumObj.getEyeOffset();
+                        var pos = node.cesiumObj.eyeOffset;
                         value = [ pos.x, pos.y, pos.z ];
                     }
                 case "horizontalOrigin":
                     if ( node.cesiumObj ) {
-                        var horzOrigin = node.cesiumObj.getHorizontalOrigin();
-                        switch ( horzOrigin ) {
+                        switch ( node.cesiumObj.horizontalOrigin ) {
                             case Cesium.HorizontalOrigin.LEFT:
                                 value = "left";
                                 break;
@@ -1589,8 +1561,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                 case "verticalOrigin": 
                     if ( node.cesiumObj ) {
-                        var vertOrigin = node.cesiumObj.getHorizontalOrigin();
-                        switch ( vertOrigin ) {
+                        switch ( node.cesiumObj.verticalOrigin ) {
                             case Cesium.VerticalOrigin.TOP:
                                 value = "top";
                                 break;
@@ -1606,19 +1577,19 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                 case "scale":
                     if ( node.cesiumObj ) {
-                        value = node.cesiumObj.getScale();
+                        value = node.cesiumObj.scale;
                     }
                     break;
 
                 case "imageIndex": 
                     if ( node.cesiumObj ) {
-                        value = node.cesiumObj.getImageIndex();
+                        value = node.cesiumObj.imageIndex;
                     }
                     break;
 
                 case "color": 
                     if( node.cesiumObj ) {
-                        var clr = node.cesiumObj.getColor();
+                        var clr = node.cesiumObj._color;
                         if ( clr.alpha == 1 ) {
                             value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
                         } else {
@@ -1629,13 +1600,13 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                 case "font":
                     if ( node.cesiumObj instanceof Cesium.Label ) {
-                        node.cesiumObj.setFont( propertyValue );    
+                        value = node.cesiumObj.font;    
                     }
                     break;
 
                 case "fillColor":
                     if( node.cesiumObj ) {
-                        var clr = node.cesiumObj.getFillColor();
+                        var clr = node.cesiumObj.fillColor;
                         if ( clr.alpha == 1 ) {
                             value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
                         } else {
@@ -1646,7 +1617,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                 case "style":
                     if ( node.cesiumObj instanceof Cesium.Label ) {
-                        switch ( node.cesiumObj.getStyle() ) {
+                        switch ( node.cesiumObj.style ) {
                             case Cesium.LabelStyle.FILL:
                                 value = "fill";
                                 break;
@@ -1662,7 +1633,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                 case "outlineColor":
                     if( node.cesiumObj ) {
-                        var clr = node.cesiumObj.getOutLineColor();
+                        var clr = node.cesiumObj.outLineColor;
                         if ( clr.alpha == 1 ) {
                             value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
                         } else {
@@ -1673,13 +1644,13 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                 case "outlineWidth":
                     if ( node.cesiumObj instanceof Cesium.Label ) {
-                        value = node.cesiumObj.getOutlineWidth();    
+                        value = node.cesiumObj.outlineWidth;    
                     }    
                     break;
 
                 case "text":
                     if ( node.cesiumObj instanceof Cesium.Label ) {
-                        value = node.cesiumObj.getText();    
+                        value = node.cesiumObj.text;    
                     }    
                     break;
 
@@ -1885,7 +1856,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                 case "positions":
                     //if ( node.cesiumObj instanceof Cesium.Polyline || node.cesiumObj instanceof Cesium.Polygon ) {
                     if ( node.cesiumObj.getPositions ) {
-                        var cesiumPoints = node.cesiumObj.getPositions();
+                        var cesiumPoints = node.cesiumObj.positions;
                         var len = cesiumPoints.length;
 
                         value = [];
@@ -1897,7 +1868,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                 case "width":
                     if ( node.cesiumObj instanceof Cesium.Polyline ) {
-                        value = node.cesiumObj.getWidth();
+                        value = node.cesiumObj.width;
                     }
                     break;
 
