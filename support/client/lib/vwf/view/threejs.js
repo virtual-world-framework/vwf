@@ -387,7 +387,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 case "pointerOver":
                 case "pointerOut":
                 case "pointerWheel":
-                    if ( this.kernel.find( nodeID, "self::element(*,'http://vwf.example.com/node3.vwf')" ).length ) {
+                    if ( this.kernel.find( nodeID, 
+                            "self::element(*,'http://vwf.example.com/node3.vwf')" ).length || 
+                        this.kernel.find( nodeID,
+                            "self::element(*,'http://vwf.example.com/scene.vwf')" ).length ) {
                         this.applicationWantsPointerEvents = true;
                     }
                     break;
