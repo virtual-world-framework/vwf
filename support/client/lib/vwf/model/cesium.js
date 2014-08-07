@@ -320,7 +320,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                 // set on the parent node 
                 if ( node.cesiumObj === undefined || ( childType && node.cesiumObj.type != childType.type ) ) {
                     if ( childType && childType.context ) {
-                        node.context = sceneNode.scene.getContext();
+                        node.context = sceneNode.scene._context;
                     }
                     node.cesiumObj = Cesium.Material.fromType( node.context, childType.type );
                     if ( parentNode.cesiumObj.setMaterial ) {
