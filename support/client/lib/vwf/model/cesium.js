@@ -1150,29 +1150,38 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                                 var terrainProvider = undefined;
                                 switch ( propertyValue ) {
+                                    
                                     case "cesium":
                                         node.terrainProvider = propertyValue;
                                         terrainProvider = new Cesium.CesiumTerrainProvider({
-                                            url : '//cesium.agi.com/smallterrain',
+                                            url : '//cesiumjs.org/smallterrain',
                                             credit : 'Terrain data courtesy Analytical Graphics, Inc.'
                                         });  
-                                        node.cesiumObj.depthTestAgainstTerrain = true;                                  
                                         break;
+
+                                    case "cesiumMesh":
+                                        node.terrainProvider = propertyValue;
+                                        terrainProvider = new Cesium.CesiumTerrainProvider({
+                                            url : '//cesiumjs.org/stk-terrain/tilesets/world/tiles'
+                                        });  
+                                        break;
+
                                     case "vr":
                                         node.terrainProvider = propertyValue;
                                         terrainProvider = new Cesium.VRTheWorldTerrainProvider({
                                             url : '//www.vr-theworld.com/vr-theworld/tiles1.0.0/73/',
                                             credit : 'Terrain data courtesy VT MÄK'
                                         }); 
-                                        node.cesiumObj.depthTestAgainstTerrain = true;                                   
                                         break;
+
                                     default:
                                         terrainProvider = new Cesium.EllipsoidTerrainProvider();
                                         node.terrainProvider = "ellipsoid";
-                                        node.cesiumObj.depthTestAgainstTerrain = false;
                                         break;
 
                                 }
+
+                                node.cesiumObj.depthTestAgainstTerrain = true;
 
                                 if ( terrainProvider !== undefined ) {
                                     node.cesiumObj.terrainProvider = terrainProvider;
@@ -1238,49 +1247,39 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                             var imageProvider = undefined;
                             var proxy = new Cesium.DefaultProxy('/proxy/');
-                            //While some sites have CORS on, not all browsers implement it properly, so a proxy is needed anyway;
-                            var proxyIfNeeded = Cesium.FeatureDetection.supportsCrossOriginImagery() ? undefined : proxy;                    
+                
                             
                             switch ( propertyValue ) {
                                 case "bingAerial":
                                     imageProvider = new Cesium.BingMapsImageryProvider({
                                         url : '//dev.virtualearth.net',
-                                        mapStyle : Cesium.BingMapsStyle.AERIAL,
-                                        // Some versions of Safari support WebGL, but don't correctly implement
-                                        // cross-origin image loading, so we need to load Bing imagery using a proxy.
-                                        proxy : proxyIfNeeded
+                                        mapStyle : Cesium.BingMapsStyle.AERIAL
                                     });
                                     break;
 
                                 case "bingAerialLabel":
                                     imageProvider = new Cesium.BingMapsImageryProvider({
                                         url : '//dev.virtualearth.net',
-                                        mapStyle : Cesium.BingMapsStyle.AERIAL_WITH_LABELS,
-                                        proxy : proxyIfNeeded
+                                        mapStyle : Cesium.BingMapsStyle.AERIAL_WITH_LABELS
                                     });
                                     break;
 
                                 case "bingRoad":
                                     imageProvider = new Cesium.BingMapsImageryProvider( {
                                         url: '//dev.virtualearth.net',
-                                        mapStyle: Cesium.BingMapsStyle.ROAD,
-                                        // Some versions of Safari support WebGL, but don't correctly implement
-                                        // cross-origin image loading, so we need to load Bing imagery using a proxy.
-                                        proxy: proxyIfNeeded
+                                        mapStyle: Cesium.BingMapsStyle.ROAD
                                     } );                        
                                     break;
 
                                 case "esriWorld":
                                     imageProvider = new Cesium.ArcGisMapServerImageryProvider({
                                         url : '//services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
-                                        proxy : proxy
                                     });                      
                                     break;
 
                                 case "esriStreet":
                                     imageProvider = new Cesium.ArcGisMapServerImageryProvider({
-                                        url : '//server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer',
-                                        proxy: new Cesium.DefaultProxy('/proxy/')
+                                        url : '//server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
                                     } );                       
                                     break;
 
@@ -1292,45 +1291,28 @@ define( [ "module", "vwf/model", "vwf/utility",
                                     break;
 
                                 case "openStreet":
-                                    imageProvider = new Cesium.OpenStreetMapImageryProvider({
-                                        url : '//tile.openstreetmap.org/',
-                                        proxy : proxyIfNeeded
-                                    });
+                                    imageProvider = new Cesium.OpenStreetMapImageryProvider({});
                                     break;
 
                                 case "mapQuestStreet":
                                     imageProvider = new Cesium.OpenStreetMapImageryProvider({
-                                        url: '//otile1.mqcdn.com/tiles/1.0.0/osm/',
-                                        proxy: proxy
+                                        url: '//otile1.mqcdn.com/tiles/1.0.0/osm/'
                                     });
                                     break;
 
                                 case "stamen":
                                     imageProvider = new Cesium.OpenStreetMapImageryProvider({
-                                        url: '//tile.stamen.com/watercolor/',
+                                        url: '//stamen-tiles.a.ssl.fastly.net/watercolor/',
                                         fileExtension: 'jpg',
-                                        proxy: proxy,
                                         credit: 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.'
                                     });
                                     break;
 
-                                case "stamenToner":
-                                    imageProvider = new Cesium.OpenStreetMapImageryProvider({
-                                        url : '//tile.stamen.com/toner/',
-                                        credit : 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.',
-                                        proxy : proxyIfNeeded
-                                    });
-                                    break;
-
-                                case "blackMarble":
+                                case "naturalEarth":
                                     imageProvider = new Cesium.TileMapServiceImageryProvider({
-                                        url : '//cesium.agi.com/blackmarble',
-                                        maximumLevel : 8,
-                                        credit : 'Black Marble imagery courtesy NASA Earth Observatory',
-                                        proxy : proxyIfNeeded
+                                        url : require.toUrl('Assets/Textures/NaturalEarthII')
                                     });
                                     break;
-
 
                                 case "single":
                                     imageProvider = new Cesium.SingleTileImageryProvider({
@@ -1339,7 +1321,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                                     break;
 
                                 case "usInfrared":
-                                    imageProvider =  new Cesium.WebMapServiceImageryProvider({
+                                    imageProvider = new Cesium.WebMapServiceImageryProvider({
                                         url : '//mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_ir.cgi?',
                                         layers : 'goes_conus_ir',
                                         credit : 'Infrared data courtesy Iowa Environmental Mesonet',
@@ -1347,8 +1329,8 @@ define( [ "module", "vwf/model", "vwf/utility",
                                             transparent : 'true',
                                             format : 'image/png'
                                         },
-                                        proxy : proxy
-                                    })
+                                        proxy : new Cesium.DefaultProxy('/proxy/')
+                                    });
                                     break;
 
                                 case "usWeather":
@@ -1360,24 +1342,21 @@ define( [ "module", "vwf/model", "vwf/utility",
                                             transparent : 'true',
                                             format : 'image/png'
                                         },
-                                        proxy : proxy
-                                    })                        
+                                        proxy : new Cesium.DefaultProxy('/proxy/')
+                                    });
+                       
                                     break;
 
                                 case "tms":
                                     imageProvider = new Cesium.TileMapServiceImageryProvider({
-                                            url : '../images/cesium_maptiler/Cesium_Logo_Color'
+                                        url : '../images/cesium_maptiler/Cesium_Logo_Color'
                                     });
                                     break;
 
                                 case "image":
                                     imageProvider = new Cesium.SingleTileImageryProvider({
                                         url : '../images/Cesium_Logo_overlay.png',
-                                        extent : new Cesium.Extent(
-                                                Cesium.Math.toRadians(-115.0),
-                                                Cesium.Math.toRadians(38.0),
-                                                Cesium.Math.toRadians(-107),
-                                                Cesium.Math.toRadians(39.75))
+                                        rectangle : Cesium.Rectangle.fromDegrees(-115.0, 38.0, -107, 39.75)
                                     });
                                     break;
 
