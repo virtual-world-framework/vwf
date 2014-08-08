@@ -755,16 +755,11 @@
                             // "xhr-multipart": { timeout: 90000 },
                             // "xhr-polling": { timeout: 90000 },
                             // "jsonp-polling": { timeout: 90000 },
-                        }
-    
+                        },
+
+                        secure: ( window.location.protocol === "https:" ),
                     };
-                    if ( window.location.protocol === "https:" )
-                    {
-                        options.secure = true;
-                        socket = io.connect("https://"+window.location.host, options);
-                    } else {
-                        socket = io.connect("http://"+window.location.host, options); 
-                    }
+                    socket = io.connect( window.location.origin, options );
  
                 } else {  // Ruby Server
 
