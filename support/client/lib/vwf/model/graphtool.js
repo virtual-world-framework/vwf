@@ -93,6 +93,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             "size": undefined,
                             "color": undefined,
                             "opacity": undefined,
+                            "doubleSided": undefined,
                             "renderTop": undefined
                         };
                         break;
@@ -443,6 +444,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     props.size,
                     props.color,
                     props.opacity,
+                    props.doubleSided,
                     props.renderTop
                 );
                 break;
@@ -701,7 +703,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     }
 
-    function generatePlane( graphScale, origin, normal, rotationAngle, size, color, opacity, renderTop ) {
+    function generatePlane( graphScale, origin, normal, rotationAngle, size, color, opacity, doubleSided, renderTop ) {
 
         var geometry = new THREE.Geometry();
         normal = new THREE.Vector3( normal[ 0 ], normal[ 1 ], normal[ 2 ] );
@@ -722,7 +724,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var meshMaterial = new THREE.MeshBasicMaterial( 
                 { "color": color, "transparent": transparent, "opacity": opacity, "depthTest": !renderTop } 
             );
-        // TODO: If isTwoSided set meshMaterial.side to THREE.DoubleSide
+        if ( doubleSided ) {
+            meshMaterial.side = THREE.DoubleSide;
+        }
         var mesh = new THREE.Mesh( geometry, meshMaterial );
         mesh.renderDepth = renderTop ? DEPTH_OBJECTS : null;
 
@@ -776,6 +780,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         props.size,
                         props.color,
                         props.opacity,
+                        props.doubleSided,
                         props.renderTop
                     );
                     break;

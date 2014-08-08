@@ -93,6 +93,7 @@ methods:
       - size
       - color
       - opacity
+      - doubleSided
       - renderTop
       - name
       - optionalProperties
@@ -106,6 +107,7 @@ methods:
           "size": size,
           "color": color,
           "opacity": opacity,
+          "doubleSided": doubleSided,
           "renderTop": renderTop
         }
       }
