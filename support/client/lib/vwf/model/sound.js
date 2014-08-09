@@ -20,6 +20,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     var masterVolume = 1.0;
     var logger;
     var soundDriver;
+    var startTime = Date.now();
     var driver = model.load( module, {
 
         initialize: function() {
@@ -118,16 +119,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                     return;
 
-                // arguments: <none>
-                // case "clearAllSounds":
-                //     soundNames = Object.keys( soundData );
-                //     for ( i = 0; i < soundNames.length; ++i ) {
-                //         soundName = soundNames[ i ];
-                //         this.state.soundManager.stopAllSoundInstances( soundName );
-                //         delete soundData[ soundName ];
-                //     }
-                //     return;
-
                 // arguments: soundName 
                 // returns: true if sound is done loading and is playable
                 case "isReady":
@@ -223,7 +214,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         soundName = params [ 0 ];
                         soundDatum = getSoundDatum( soundName );
                         if ( soundDatum ){
-                            soundDatum.stopAllSoundInstances();
+                            soundDatum.stopDatumSoundInstances();
                         }
                     } else {
                     //Otherwise stop the specific instance.
@@ -239,7 +230,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     for ( var soundName in soundData ){
                         var soundDatum = soundData[ soundName ];
                         if ( soundDatum ) {
-                            soundDatum.stopAllSoundInstances();
+                            soundDatum.stopDatumSoundInstances();
                         }
                     }
                     return undefined;
@@ -351,7 +342,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
         },
 
-        stopAllSoundInstances: function () {
+        stopDatumSoundInstances: function () {
             // There is never more than one instance of a layered sound.
             this.stopInstance();
         },
@@ -463,7 +454,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
 
             if ( this.groupReplacementMethod && !this.soundGroup ) {
-                logger.warnx( "soundDatum.initialize", 
+                logger.warnx( "SoundDatum.initialize", 
                               "You defined a replacement method but not a sound " +
                               "group.  Replacement is only done when you replace " +
                               "another sound in the same group!" );
@@ -488,7 +479,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         successCallback && successCallback();
                     }, 
                     function() {
-                        logger.warnx( "initialize", "Failed to load sound: '" + 
+                        logger.warnx( "SoundDatum.initialize", "Failed to load sound: '" + 
                                       thisSoundDatum.name + "'." );
 
                         delete soundData[ thisSoundDatum.name ];
@@ -503,15 +494,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         playSound: function( exitCallback ) {
 
             if ( !this.buffer ) {
-                logger.errorx( "playSound", "Sound '" + this.name + "' hasn't finished " +
+                logger.errorx( "SoundDatum.playSound", "Sound '" + this.name + "' hasn't finished " +
                                "loading, or loaded improperly." );
                 return { soundName: this.name, instanceID: -1 };
             }
 
             if ( !this.allowMultiplay && this.isPlaying() ) {
-                logger.warnx( "playSound", "Sound '" + this.name + "'is already " +
-                              "playing, and doesn't allow multiplay." );
-                return { soundName: this.name, instanceID: -1 };
+                return { soundName: this.name, 
+                         instanceID: this.playingInstances[ 0 ] };
             }
 
             var id = this.instanceIDCounter;
@@ -523,14 +513,18 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         stopInstance: function( instanceHandle ) {
             var soundInstance = this.playingInstances[ instanceHandle.instanceID ];
-            soundInstance && soundInstance.sourceNode.stop();
+            soundInstance && soundInstance.stop();
         },
 
-        stopAllSoundInstances: function () {
+        stopDatumSoundInstances: function () {
             for ( var instanceID in this.playingInstances ) {
                 var soundInstance = this.playingInstances[ instanceID ];
-                soundInstance && soundInstance.sourceNode.stop();
+                soundInstance && soundInstance.stop();
             }
+
+            // I have no freaking idea why uncommenting this breaks absolutely 
+            //  everything, but it does!
+            // this.playingInstances = {};
         },
 
         resetOnMasterVolumeChange: function () {
@@ -572,6 +566,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         sourceNode: undefined,
         gainNode: undefined,
 
+        isStarted: false, 
+
         initialize: function( soundDatum, id, exitCallback, successCallback ) {
             // NOTE: from http://www.html5rocks.com/en/tutorials/webaudio/intro/:
             //
@@ -601,14 +597,28 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             //   filetype - needs support.
             var thisInstance = this;
             this.sourceNode.onended =  function() {
+                thisInstance.isStarted = false;
                 fireSoundEvent( "soundFinished", thisInstance );
-                
+
+                // logger.logx( "PlayingInstance.onended",
+                //              "Sound ended: '" + thisInstance.soundDatum.name +
+                //              "', Timestamp: " + timestamp() );
+
                 if ( group && ( group.queue.length > 0 ) ) {
                     var nextInstance = group.queue.pop();
-                    if ( !!nextInstance ) {
-                        setTimeout( function() {
-                            startSoundInstance( nextInstance );
-                        }, nextInstance.soundDatum.queueDelayTime * 1000 );
+                    if ( nextInstance ) {
+                        var delaySeconds = nextInstance.soundDatum.queueDelayTime;
+
+                        // logger.logx( "PlayingInstance.onended", 
+                        //              "Popped from the queue: '" + 
+                        //              nextInstance.soundDatum.name +
+                        //              ", Timeout: " + delaySeconds +
+                        //              ", Timestamp: " + timestamp() );
+
+                        setTimeout( function() { 
+                                        startSoundInstance( nextInstance ); 
+                                    }, 
+                                    delaySeconds * 1000 );
                     }
                 }
 
@@ -683,6 +693,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
             }
         },
+
+        stop: function() {
+            if ( this.isStarted ) {
+                this.sourceNode.stop();
+            } 
+        }
     }
 
     function getSoundDatum( soundName ) {
@@ -727,6 +743,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function startSoundInstance( instance ) {
         instance.sourceNode.start( 0 ); 
+        instance.isStarted = true;
+
+        // logger.logx( "startSoundInstance",
+        //              "Sound started: '" + instance.soundDatum.name + 
+        //              "', Timestamp: " + timestamp() );
+
         fireSoundEvent( "soundStarted", instance );
     }
 
@@ -749,14 +771,20 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     }
 
     function stopSoundGroup( group ) {
+        group.queue = [];
+
         for ( var soundName in group.soundData ) {
             var sound = group.soundData[ soundName ];
-            sound && sound.stopAllSoundInstances();
+            sound && sound.stopDatumSoundInstances();
         }
+    }
 
-        while ( group.queue.length > 0 ) {
-            group.queue.pop();
-        }
+    function timestamp() {
+        var delta = Date.now() - startTime;
+        var minutes = Math.floor( delta / 60000 );
+        var seconds = ( delta % 60000 ) / 1000;
+
+        return "" + minutes + ":" + seconds;
     }
 
     return driver;
