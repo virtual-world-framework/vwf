@@ -101,7 +101,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                 Blockly.inject( document.getElementById( self.options.divName ), { 
                     path: this.options.blocklyPath,
                     toolbox: document.getElementById( self.options.toolbox ),
-                    trashcan: true,
+                    trashcan: false,
                 } ); 
 
                 Blockly.addChangeListener( function( event ) {
