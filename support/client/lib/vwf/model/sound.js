@@ -405,7 +405,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         soundGroup: undefined,
         groupReplacementMethod: undefined,
-        queueDelayTime: 0.8,  // in seconds
+        queueDelayTime: 0,  // in seconds
 
         // a counter for creating instance IDs
         instanceIDCounter: 0,
@@ -615,10 +615,18 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         //              ", Timeout: " + delaySeconds +
                         //              ", Timestamp: " + timestamp() );
 
-                        setTimeout( function() { 
-                                        startSoundInstance( nextInstance ); 
-                                    }, 
-                                    delaySeconds * 1000 );
+                        if ( delaySeconds > 0) {
+                            logger.warnx( "PlayingInstance.onended",
+                                          "Setting a queueDelayTime may result " +
+                                          "in more than one VO playing at the " +
+                                          "same time.");
+                            setTimeout( function() { 
+                                            startSoundInstance( nextInstance ); 
+                                        }, 
+                                        delaySeconds * 1000 );
+                        } else {
+                            startSoundInstance( nextInstance ); 
+                        }
                     }
                 }
 
