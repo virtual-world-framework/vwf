@@ -745,7 +745,8 @@
 
                 if ( isSocketIO07() ) {
 
-                    socket = io.connect( window.location.origin, options );
+                    socket = io.connect( window.location.protocol + "//" + window.location.host,
+                        options );
 
                 } else {  // Ruby Server -- only supports socket.io 0.6
 
