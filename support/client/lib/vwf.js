@@ -727,81 +727,56 @@
 
             // Connect to the reflector. This implementation uses the socket.io library, which
             // communicates using a channel back to the server that provided the client documents.
-            try {
-                if ( isSocketIO07() ) {
-                    var options = {
-    
-                        // The socket is relative to the application path.
-                        resource: window.location.pathname.slice( 1,
-                            window.location.pathname.lastIndexOf("/") ),
-    
-                        // The ruby socket.io server only supports WebSockets. Don't try the others.
-                        transports: [
-                            'websocket',
-                            // 'flashsocket',
-                            // 'htmlfile',
-                            // 'xhr-multipart',
-                            // 'xhr-polling',
-                            // 'jsonp-polling',
-                        ],
-    
-                        // Increase the timeout due to starvation while loading the scene. The server
-                        // timeout must also be increased.
-                        // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
-                        transportOptions: {
-                            "websocket": { timeout: 90000 }
-                            // "flashsocket": { timeout: 90000 },
-                            // "htmlfile": { timeout: 90000 },
-                            // "xhr-multipart": { timeout: 90000 },
-                            // "xhr-polling": { timeout: 90000 },
-                            // "jsonp-polling": { timeout: 90000 },
-                        },
 
-                        secure: ( window.location.protocol === "https:" ),
-                    };
+            try {
+
+                var options = {
+
+                    // The socket is relative to the application path.
+
+                    resource: window.location.pathname.slice( 1,
+                        window.location.pathname.lastIndexOf("/") ),
+
+                    // Use a secure connection when the application comes from https.
+
+                    secure: window.location.protocol === "https:",
+
+                    // The ruby socket.io server only supports WebSockets. Don't try the others.
+
+                    transports: [
+                        'websocket',
+                        // 'flashsocket',
+                        // 'htmlfile',
+                        // 'xhr-multipart',
+                        // 'xhr-polling',
+                        // 'jsonp-polling',
+                    ],
+
+                    // Increase the timeout due to starvation while loading the scene. The server
+                    // timeout must also be increased.
+                    // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
+
+                    transportOptions: {
+                        "websocket": { timeout: 90000 }
+                        // "flashsocket": { timeout: 90000 },
+                        // "htmlfile": { timeout: 90000 },
+                        // "xhr-multipart": { timeout: 90000 },
+                        // "xhr-polling": { timeout: 90000 },
+                        // "jsonp-polling": { timeout: 90000 },
+                    },
+
+                };
+
+                if ( isSocketIO07() ) {
+
                     socket = io.connect( window.location.origin, options );
  
                 } else {  // Ruby Server
 
-                    socket = new io.Socket( undefined, {
+                    options.port = window.location.port ||
+                        ( window.location.protocol === "https:" ? 443 : 80 );
     
-                        // The socket is relative to the application path.
-    
-                        resource: window.location.pathname.slice( 1,
-                            window.location.pathname.lastIndexOf("/") ),
-
-                        // Use a secure connection when the application comes from https.
-
-                        secure: window.location.protocol === "https:",
-
-                        port: window.location.port ||
-                            ( window.location.protocol === "https:" ? 443 : 80 ),
-    
-                        // The ruby socket.io server only supports WebSockets. Don't try the others.
-    
-                        transports: [
-                            'websocket',
-                            // 'flashsocket',
-                            // 'htmlfile',
-                            // 'xhr-multipart',
-                            // 'xhr-polling',
-                            // 'jsonp-polling',
-                        ],
-    
-                        // Increase the timeout due to starvation while loading the scene. The server
-                        // timeout must also be increased.
-                        // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
-    
-                        transportOptions: {
-                            "websocket": { timeout: 90000 }
-                            // "flashsocket": { timeout: 90000 },
-                            // "htmlfile": { timeout: 90000 },
-                            // "xhr-multipart": { timeout: 90000 },
-                            // "xhr-polling": { timeout: 90000 },
-                            // "jsonp-polling": { timeout: 90000 },
-                        }
-    
-                    } );
+                    socket = new io.Socket( undefined, options );
                 }
 
             } catch ( e ) {
