@@ -741,42 +741,38 @@
 
                     secure: window.location.protocol === "https:",
 
-                    // The ruby socket.io server only supports WebSockets. Don't try the others.
-
-                    transports: [
-                        'websocket',
-                        // 'flashsocket',
-                        // 'htmlfile',
-                        // 'xhr-multipart',
-                        // 'xhr-polling',
-                        // 'jsonp-polling',
-                    ],
-
-                    // Increase the timeout due to starvation while loading the scene. The server
-                    // timeout must also be increased.
-                    // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
-
-                    transportOptions: {
-                        "websocket": { timeout: 90000 }
-                        // "flashsocket": { timeout: 90000 },
-                        // "htmlfile": { timeout: 90000 },
-                        // "xhr-multipart": { timeout: 90000 },
-                        // "xhr-polling": { timeout: 90000 },
-                        // "jsonp-polling": { timeout: 90000 },
-                    },
-
                 };
 
                 if ( isSocketIO07() ) {
 
                     socket = io.connect( window.location.origin, options );
- 
-                } else {  // Ruby Server
 
-                    options.port = window.location.port ||
-                        ( window.location.protocol === "https:" ? 443 : 80 );
-    
-                    socket = new io.Socket( undefined, options );
+                } else {  // Ruby Server -- only supports socket.io 0.6
+
+                    socket = new io.Socket( undefined, io.util.merge( options, {
+
+                        // For socket.io 0.6, specify the port since the default isn't correct when
+                        // using https.
+
+                        port: window.location.port ||
+                            ( window.location.protocol === "https:" ? 443 : 80 ),
+
+                        // The ruby socket.io server only supports WebSockets. Don't try the others.
+
+                        transports: [
+                            'websocket',
+                        ],
+
+                        // Increase the timeout because of starvation while loading the scene. The
+                        // server timeout must also be increased. (For socket.io 0.7+, the client
+                        // timeout is controlled by the server.)
+
+                        transportOptions: {
+                            "websocket": { timeout: 90000 },
+                        },
+
+                    } ) );
+
                 }
 
             } catch ( e ) {
