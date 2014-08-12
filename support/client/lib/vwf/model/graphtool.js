@@ -93,6 +93,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             "size": undefined,
                             "color": undefined,
                             "opacity": undefined,
+                            "doubleSided": undefined,
                             "renderTop": undefined
                         };
                         break;
@@ -261,15 +262,27 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // -- callingMethod ------------------------------------------------------------------------
 
         callingMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+            var node;
+
             if ( this.state.graphs[ nodeID ] ) {
-                
-                var node = this.state.graphs[ nodeID ];
+                node = this.state.graphs[ nodeID ];
                 
                 if ( methodName === "setGraphVisibility" ) {
                     var visible = methodParameters[0];
                     setGraphVisibility( node, visible );
                 }
 
+            } else if ( this.state.objects[ nodeID ] ) {
+                node = this.state.objects[ nodeID ];
+
+                if ( methodName === "setGroupItemProperty" ) {
+                    var itemIndexList = methodParameters[ 0 ];
+                    var itemPropertyName = methodParameters[ 1 ];
+                    var itemPropertyValue = methodParameters[ 2 ];
+                    for ( var i = 0; i < itemIndexList.length; i++ ) {
+                        node.threeObject.children[ 0 ].children[ itemIndexList[ i ] ][ itemPropertyName ] = itemPropertyValue;
+                    }
+                }
             }
         },
 
@@ -431,6 +444,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     props.size,
                     props.color,
                     props.opacity,
+                    props.doubleSided,
                     props.renderTop
                 );
                 break;
@@ -689,7 +703,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     }
 
-    function generatePlane( graphScale, origin, normal, rotationAngle, size, color, opacity, renderTop ) {
+    function generatePlane( graphScale, origin, normal, rotationAngle, size, color, opacity, doubleSided, renderTop ) {
 
         var geometry = new THREE.Geometry();
         normal = new THREE.Vector3( normal[ 0 ], normal[ 1 ], normal[ 2 ] );
@@ -708,8 +722,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var vwfColor = new utility.color( color );
         color = vwfColor.getHex();
         var meshMaterial = new THREE.MeshBasicMaterial( 
-                { "color": color, "transparent": transparent, "opacity": opacity, "side": THREE.DoubleSide, "depthTest": !renderTop } 
+                { "color": color, "transparent": transparent, "opacity": opacity, "depthTest": !renderTop } 
             );
+        if ( doubleSided ) {
+            meshMaterial.side = THREE.DoubleSide;
+        }
         var mesh = new THREE.Mesh( geometry, meshMaterial );
         mesh.renderDepth = renderTop ? DEPTH_OBJECTS : null;
 
@@ -763,6 +780,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         props.size,
                         props.color,
                         props.opacity,
+                        props.doubleSided,
                         props.renderTop
                     );
                     break;

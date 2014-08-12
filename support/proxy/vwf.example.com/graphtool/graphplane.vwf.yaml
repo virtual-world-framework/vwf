@@ -7,4 +7,5 @@ properties:
   size: undefined
   color: undefined
   opacity: undefined
+  doubleSided: undefined
   renderTop: undefined
