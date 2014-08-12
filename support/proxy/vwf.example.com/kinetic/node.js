@@ -1,5 +1,6 @@
 this.initialize = function() {
 	this.pointerIsDown = false;
+	this.touching = false;
 	this.previousVisible = undefined;
 }
 
@@ -24,6 +25,13 @@ this.toggleVisibilty = function() {
 
 }
 
+this.update = function( eventData, nodeData ) {
+	if ( this.draggable && ( this.pointerIsDown || this.touching ) ) {
+		if ( this.client === this.moniker ) {
+			vwf_view.kernel.setProperty( this.id, "position", [ this.x, this.y ] );
+		}
+	}
+}
 
 this.pointerDown = function( eventData, nodeData ) {
 	this.pointerIsDown = true;
@@ -31,21 +39,30 @@ this.pointerDown = function( eventData, nodeData ) {
 
 this.pointerMove = function( eventData, nodeData ) {
 
-	if ( this.draggable && this.pointerIsDown ) {
-		if ( this.client === this.moniker ) {
-			vwf_view.kernel.setProperty( this.id, "position", [ this.x, this.y ] );
-		}
+	this.update( eventData, nodeData );
 
-	}
 }
 
 this.pointerUp = function( eventData, nodeData ) {
 
-	if ( this.draggable ) {
-		if ( this.client === this.moniker ) {
-			vwf_view.kernel.setProperty( this.id, "position", [ this.x, this.y ] );
-		}
-	}
+	this.update( eventData, nodeData );
 	
 	this.pointerIsDown = false;
+}  
+
+this.touchStart = function( eventData, nodeData ) {
+	this.touching = true;
+}
+
+this.touchMove = function( eventData, nodeData ) {
+
+	this.update( eventData, nodeData );
+
+}
+
+this.touchEnd = function( eventData, nodeData ) {
+
+	this.update( eventData, nodeData );
+	
+	this.touching = false;
 }  //@ sourceURL=kinetic_node.js
