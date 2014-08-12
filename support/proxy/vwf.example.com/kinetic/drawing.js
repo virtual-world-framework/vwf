@@ -4,20 +4,20 @@ this.initialize = function() {
 };
 
 this.clientWatch = function() {
-	
-	var clients = this.find( "doc('http://vwf.example.com/clients.vwf')" )[0];
+    
+    var clients = this.find( "doc('http://vwf.example.com/clients.vwf')" )[0];
 
-	if ( clients !== undefined ) {
-		
-		clients.children.added = clients.events.add( function( index, child ) {
-			this.clientJoin( this.moniker );
-	    }, this );
+    if ( clients !== undefined ) {
+        
+        clients.children.added = clients.events.add( function( index, child ) {
+            this.clientJoin( this.moniker );
+        }, this );
 
-	    clients.children.removed = clients.events.add( function( index, child ) {
-			this.clientLeave( this.moniker );	
-	    }, this );
+        clients.children.removed = clients.events.add( function( index, child ) {
+            this.clientLeave( this.moniker );   
+        }, this );
 
-	}
+    }
 
 };
 
@@ -27,6 +27,8 @@ this.isValid = function( obj ) {
 }; 
 
 this.clientJoin = function( moniker ) {
+
+	console.info( "clientJoin( "+moniker+" ) =====================" )
 
 	// mirrors the initial state of the toolbar
 	if ( !this.isValid( this.drawing_clients ) ) {
@@ -47,6 +49,16 @@ this.clientJoin = function( moniker ) {
 
 };
 
+this.clientLeave = function( moniker ) {
+	if ( this.drawing_clients[ moniker ] !== undefined ) {
+		delete this.drawing_clients[ moniker ];	
+		this.drawing_clients = this.drawing_clients;
+	}
+	if ( this.drawing_private[ moniker ] !== undefined ) {
+		delete this.drawing_private[ moniker ];	
+	}
+};
+
 this.setUpPrivate = function( moniker ) {
 	
 	if ( this.drawing_private === undefined ) {
@@ -56,20 +68,11 @@ this.setUpPrivate = function( moniker ) {
 		this.drawing_private[ moniker ] = {
 			"drawingObject": null,
 			"initialDownPoint": [ -1, -1 ],
+			"previousPoint": [ -1, -1 ],
 			"mouseDown": false
 		};	
 	}
 
-}
-
-this.clientLeave = function( moniker ) {
-	if ( this.drawing_clients[ moniker ] !== undefined ) {
-		delete this.drawing_clients[ moniker ];	
-		this.drawing_clients = this.drawing_clients;
-	}
-	if ( this.drawing_private[ moniker ] !== undefined ) {
-		delete this.drawing_private[ moniker ];	
-	}
 };
 
 this.setClientUIState = function( stateObj ) {
@@ -94,7 +97,7 @@ this.pointerDown = function( eventData, nodeData ) {
 	if ( !this.isValid( this.drawing_clients ) || !this.isValid( this.drawing_clients[ this.client ] ) ) {
 		this.clientJoin( this.client );
 	} 
-	if ( this.drawing_private === undefined || this.drawing_private[ this.client ] === undefined ) {
+	if ( !this.isValid( this.drawing_private ) || !this.isValid( this.drawing_private[ this.client ] ) ) {
 		this.setUpPrivate( this.client );
 	}
 
@@ -107,6 +110,7 @@ this.pointerDown = function( eventData, nodeData ) {
 	}
 
 	var compExtends = undefined;
+	var section = "//shapes";
 
 	switch ( drawingMode ) {
 		
@@ -114,7 +118,7 @@ this.pointerDown = function( eventData, nodeData ) {
 		case "circle":
 		case "ellipse":
 		case "image":
-		case "line":
+
 		case "regularPolygon":
 		case "rect":
 		case "ring":
@@ -125,7 +129,10 @@ this.pointerDown = function( eventData, nodeData ) {
 			compExtends	= "http://vwf.example.com/kinetic/"+drawingMode+".vwf"; 
 			break;
 
+		case "line":
 		case "freeDraw":
+			section = "//lines";
+			compExtends	= "http://vwf.example.com/kinetic/line.vwf";
 			break;
 
 		case 'none':
@@ -136,7 +143,7 @@ this.pointerDown = function( eventData, nodeData ) {
 
 	if ( compExtends !== undefined ) {
 		privateState.initialDownPoint = eventData.layer;
-		var parents = this.find( userState.drawing_parentPath + "//shapes" );
+		var parents = this.find( userState.drawing_parentPath + section );
 		var parent = parents.length > 0 ? parents[ 0 ] : this;
 		var shapeDef = {
 			"extends": compExtends,
@@ -220,7 +227,20 @@ this.update = function( eventData, nodeData ) {
 				break;
 
 			case "line":
-				drawingObject.points = [ privateState.initialDownPoint[ 0 ], privateState.initialDownPoint[ 1 ], eventData.layer[ 0 ], eventData.layer[ 1 ] ];
+				drawingObject.stroke = userState.drawing_color;
+				drawingObject.strokeWidth = userState.drawing_width;
+				drawingObject.points = [ 0, 0, eventData.layer[ 0 ] - drawingObject.x, eventData.layer[ 1 ] - drawingObject.y ];
+				break;
+
+			case "freeDraw":
+				drawingObject.stroke = userState.drawing_color;
+				drawingObject.strokeWidth = userState.drawing_width;
+				if ( drawingObject.points === undefined || drawingObject.points.length === 0 ) {
+					drawingObject.points = [ 0, 0, eventData.layer[ 0 ] - drawingObject.x, eventData.layer[ 1 ] - drawingObject.y ];
+				} else  {
+					drawingObject.points.push( eventData.layer[ 0 ] - drawingObject.x );
+					drawingObject.points.push( eventData.layer[ 1 ] - drawingObject.y );
+				}
 				break;
 
 			case "regularPolygon":
