@@ -750,7 +750,7 @@
 
                 } else {  // Ruby Server -- only supports socket.io 0.6
 
-                    socket = new io.Socket( undefined, io.util.merge( options, {
+                    io.util.merge( options, {
 
                         // For socket.io 0.6, specify the port since the default isn't correct when
                         // using https.
@@ -772,8 +772,9 @@
                             "websocket": { timeout: 90000 },
                         },
 
-                    } ) );
+                    } );
 
+                    socket = new io.Socket( undefined, options );
                 }
 
             } catch ( e ) {
