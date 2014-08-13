@@ -4,4 +4,9 @@
 extends: http://vwf.example.com/kinetic/container.vwf
 properties:
   container:
+events:
+  pointerDown:
+  pointerMove:
+  pointerClick:
+  pointerUp:
 

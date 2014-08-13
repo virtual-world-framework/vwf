@@ -1,0 +1,20 @@
+---
+extends:
+  http://vwf.example.com/kinetic/stage.vwf
+properties:
+  drawing_clients:
+methods:
+  update:
+  clientWatch:
+  clientJoin:
+  clientLeave:
+  setUpPrivate:
+  setClientUIState:
+  isValid:
+events:
+  pointerDown:
+  pointerMove:
+  pointerUp:
+  shapeCreated:
+scripts:
+- source: "http://vwf.example.com/kinetic/drawing.js"

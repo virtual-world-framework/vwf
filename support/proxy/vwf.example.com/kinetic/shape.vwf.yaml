@@ -60,3 +60,5 @@ properties:
   shadowEnabled:
   dash:
   dashEnabled:
+  x: 0
+  y: 0

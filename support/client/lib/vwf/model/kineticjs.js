@@ -45,12 +45,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                     }
                     return false;        
+                },
+                isKineticComponent: function( prototypes ) {
+                    var found = false;
+                    if ( prototypes ) {
+                        for ( var i = 0; i < prototypes.length && !found; i++ ) {
+                            found = ( prototypes[ i ].indexOf( "http-vwf-example-com-kinetic-" ) != -1 );    
+                        }
+                    }
+                    return found;
                 }
             };
 
             // turns on logger debugger console messages 
             this.debug = {
                 "creation": false,
+                "native": false,
                 "initializing": false,
                 "parenting": false,
                 "deleting": false,
@@ -58,6 +68,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 "setting": false,
                 "getting": false,
                 "methods": false,
+                "events": false,
                 "prototypes": false
             };
            
@@ -100,7 +111,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             var node;
 
-            if ( isKineticComponent( protos ) ) {
+            if ( this.state.isKineticComponent( protos ) ) {
+
+                if ( this.debug.native ) {
+                    this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName );
+                }
                 
                 // Create the local copy of the node properties
                 if ( this.state.nodes[ childID ] === undefined ){
@@ -122,6 +137,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if ( this.state.nodes[ nodeID ] !== undefined ) {
                         var parent = this.state.nodes[ nodeID ];
                         if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
+                            
+                            //console.info( "Adding child: " + childID + " to " + nodeID );
                             parent.kineticObj.add( node.kineticObj );    
                         }
                     }
@@ -345,6 +362,42 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         // check code, not in docs
                         case "dragDistance":
                             kineticObj.dragDistance( Number( propertyValue ) );    
+                            break;
+
+                        case "zIndex":
+                            kineticObj.setZIndex( Number( propertyValue ) );
+                            break;
+
+                        case "position":
+                            if ( propertyValue instanceof Array ) { 
+                                kineticObj.setPosition( { "x": Number( propertyValue[ 0 ] ), "y": Number( propertyValue[ 1 ] ) });
+                            } else {
+                                kineticObj.setPosition( { "x": Number( propertyValue.x ), "y":  Number( propertyValue.y ) });
+                            } 
+                            break;
+
+                        case "transform":
+                            kineticObj.setTransform( propertyValue );
+                            break;
+
+                        case "absolutePosition":
+                            if ( propertyValue instanceof Array ) { 
+                                kineticObj.setAbsolutePosition( { "x": Number( propertyValue[ 0 ] ), "y": Number( propertyValue[ 1 ] ) });
+                            } else {
+                                kineticObj.setAbsolutePosition( { "x": Number( propertyValue.x ), "y":  Number( propertyValue.y ) });
+                            } 
+                            break;
+
+                        case "absoluteTransform":
+                            kineticObj.getAbsoluteTransform( propertyValue );
+                            break;
+
+                        case "absoluteOpacity":
+                            kineticObj.getAbsoluteOpacity( parseFloat( propertyValue ) );
+                            break;
+
+                        case "absoluteZIndex":
+                            kineticObj.getAbsoluteZIndex( Number( propertyValue ) );
                             break;
 
                         case "dragBoundFunc":
@@ -1217,6 +1270,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             value = kineticObj.visible();
                             break;
 
+                        case "isVisible":
+                            value = kineticObj.isVisible();
+                            break;
+
                         case "listening":
                             value = kineticObj.listening();
                             break;
@@ -1264,20 +1321,51 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             value = kineticObj.dragDistance();    
                             break;
 
+                        case "zIndex":
+                            value = kineticObj.getZIndex();
+                            break;
+
                         case "dragBoundFunc":
                             break;
 
-                        case "Id":
-                            value = kineticObj.getAttr( 'id' );
+                        case "id":
+                            value = kineticObj.getId();
                             break
 
                         case "name":
-                            value = kineticObj.getAttr( 'name' );
+                            value = kineticObj.getName();
                             break;
+                        
+                        case "position":
+                            value = kineticObj.getPosition();
+                            break;
+
+                        case "transform":
+                            value = kineticObj.getTransform();
+                            break;
+
+                        case "absolutePosition":
+                            value = kineticObj.getAbsolutePosition();
+                            break;
+
+                        case "absoluteTransform":
+                            value = kineticObj.getAbsoluteTransform();
+                            break;
+
+                        case "absoluteOpacity":
+                            value = kineticObj.getAbsoluteOpacity();
+                            break;
+
+                        case "absoluteZIndex":
+                            value = kineticObj.getAbsoluteZIndex();
+                            break;
+
                     }
                 }
 
                 if ( value === undefined && isShapeDefinition( node.prototypes ) ) {
+
+                    var img = undefined;
 
                     switch ( propertyName ) {
 
@@ -1302,7 +1390,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "fillPatternImage":
-                            value = kineticObj.fillPatternImage();
+                            img = kineticObj.fillPatternImage();
+                            if ( img ){
+                                value = img.src;
+                            }
                             break;
 
                         case "fillPatternX":
@@ -1850,7 +1941,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if ( value !== undefined ) {
                 propertyValue = value;
             }
-            //console.log(["kinetic get returns: ",value]);
+
             return value;
         },
 
@@ -1859,7 +1950,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         // -- callingMethod --------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        callingMethod: function( nodeID, methodName, methodParameters, methodValue ) { 
             if ( this.debug.methods ) {
                 this.logger.infox( "   M === callingMethod ", nodeID, methodName );
             }
@@ -1867,6 +1958,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
+
+        firingEvent: function( nodeID, eventName, eventParameters  ) { // TODO: parameters
+            if ( this.debug.events ) {
+                this.logger.infox( "   M === callingMethod ", nodeID, eventName );
+            }
+        },
 
         // -- executing ------------------------------------------------------------------------------
 
@@ -1905,16 +2002,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
                 
         return prototypes;
-    }
-
-    function isKineticComponent( prototypes ) {
-        var found = false;
-        if ( prototypes ) {
-            for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[ i ].indexOf( "http-vwf-example-com-kinetic-" ) != -1 );    
-            }
-        }
-        return found;
     }
 
     function createKineticObject( node, config ) {

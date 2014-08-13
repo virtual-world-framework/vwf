@@ -4,11 +4,11 @@
 extends: http://vwf.example.com/kinetic/shape.vwf
 properties:
   image:
-	set: |
-    if ( value !== this.image ) {
-      this.image = value;
-      this.imageChanged( value );
-    }  	
+    set: |
+      if ( value !== this.image ) {
+        this.image = value;
+        this.imageChanged( value );
+      }   
   crop:
 events:
   imageChanged:

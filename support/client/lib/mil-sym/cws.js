@@ -4323,7 +4323,7 @@ define( function(){
         },
         "addEchelonToSymbolId": function( symbolID, value ) {
             var retStr = symbolID;
-            switch( propertyValue ) {
+            switch( value ) {
                 
                 case "team":
                 case "crew":
