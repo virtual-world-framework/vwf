@@ -487,6 +487,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
             var orbiting = mouseDown.middle && ( navmode == "fly" );
 
+            // We will soon want to use the yawMatrix and pitchMatrix,
+            // so let's update them
+            extractRotationAndTranslation( navObject.threeObject );
+
             if ( orbiting ) {
                 var pitchRadians = deltaY * rotationSpeedRadians;
                 var yawRadians = deltaX * rotationSpeedRadians;
@@ -656,6 +660,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 amountToMove = dist * ( 1 - Math.pow( 1 / percentDistRemainingEachStep, numClicks ) );
             }
 
+            // We are about to use the translationMatrix, so let's update it
+            extractRotationAndTranslation( navObject.threeObject );
+
             var translationArray = translationMatrix.elements;
             translationArray[ 12 ] += amountToMove * pickDirectionVector.x;
             translationArray[ 13 ] += amountToMove * pickDirectionVector.y;
@@ -696,6 +703,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 deltaX = currentMousePosition[ 0 ] - touchPosition [ 0 ];
                 deltaY = currentMousePosition[ 1 ] - touchPosition [ 1 ];
             }
+
+            // We will soon want to use the yawMatrix and pitchMatrix,
+            // so let's update them
+            extractRotationAndTranslation( navObject.threeObject );
 
             if ( deltaX || deltaY ) {
                 var yawQuat = new THREE.Quaternion();
@@ -2122,6 +2133,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                     }
                 }
                 
+                // We are about to use the translationMatrix, so let's update it
+                extractRotationAndTranslation( navObject.threeObject );
+
                 // Insert the new navObject position into the translation array
                 var translationArray = translationMatrix.elements;
                 translationArray[ 12 ] = navObjectWorldPos [ 0 ];
@@ -2153,6 +2167,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 var yawRadians = -theta;
                 orbit( pitchRadians, yawRadians );
             } else {
+
+                // We will soon want to use the yawMatrix and pitchMatrix,
+                // so let's update them
+                extractRotationAndTranslation( navObject.threeObject );
 
                 var cos = Math.cos( theta );
                 var sin = Math.sin( theta );
@@ -3010,9 +3028,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }
         }
 
-        // Pull the initial pitch, yaw, and translation out of the navObject's transform
-        extractRotationAndTranslation( navObject.threeObject );
-
         // Request properties from the navigation object
         vwf_view.kernel.getProperty( navObject.ID, "navmode" );
         vwf_view.kernel.getProperty( navObject.ID, "touchmode" );
@@ -3188,12 +3203,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         }
 
         threeObject.matrix.elements = transformMatrix;
-        updateRenderObjectTransform( threeObject );
-
-        if ( node == navObject ) {
-            extractRotationAndTranslation( threeObject );
-        }
-        
+        updateRenderObjectTransform( threeObject );   
         nodeLookAt( node );
     }
 
@@ -3429,6 +3439,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
             // We can only orbit around a point if there is a point to orbit around
             if ( positionUnderMouseClick ) {
+
+                // We will soon want to use the yawMatrix and pitchMatrix,
+                // so let's update them
+                extractRotationAndTranslation( navObject.threeObject );
 
                 var navThreeObject = navObject.threeObject;
                 var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
