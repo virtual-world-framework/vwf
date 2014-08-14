@@ -118,7 +118,6 @@ this.pointerDown = function( eventData, nodeData ) {
 		case "circle":
 		case "ellipse":
 		case "image":
-
 		case "regularPolygon":
 		case "rect":
 		case "ring":
@@ -210,20 +209,42 @@ this.update = function( eventData, nodeData ) {
 		var pos = [ privateState.initialDownPoint[ 0 ], privateState.initialDownPoint[ 1 ] ];
 		var width = diffX;	
 		var height = diffY;
-		var radius;
+		var dist = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );;
+
+		switch ( userState.drawing_mode ) {
+
+			case "line":
+			case "freeDraw":
+				break;
+
+			default:
+				if ( diffX < 0 ) {
+					pos[ 0 ] += diffX;	
+					width = Math.abs( diffX );
+				} 
+				if ( diffY < 0 ) {
+					pos[ 1 ] += diffY;	
+					height = Math.abs( diffY );
+				} 
+				drawingObject.position = pos;
+				drawingObject.width = width;
+				drawingObject.height = height;	
+				break;			
+		}
 
 		switch ( userState.drawing_mode ) {
 			
 			case "arc":
-				radius = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
+				radius = dist;
 				drawingObject.angle = 30;
-				drawingObject.innerRadius = radius - this.drawing_width;
-				drawingObject.outerRadius = radius;
+				drawingObject.innerRadius = dist - this.drawing_width;
+				drawingObject.outerRadius = dist;
 				break;
 
-			case "ellipse":
+
+			case "ellipse":			
 			case "circle":
-				drawingObject.radius = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
+				drawingObject.radius = dist;
 				break;
 
 			case "line":
@@ -244,44 +265,34 @@ this.update = function( eventData, nodeData ) {
 				break;
 
 			case "regularPolygon":
+				// needs defining
+				break;
+
+			case "ring":
+				drawingObject.innerRadius = dist - userState.drawing_width;
+				drawingObject.outerRadius = dist;
+				break;
+
+			case "star":
+				radius = dist
+				drawingObject.points = 5;
+				drawingObject.innerRadius = dist * 60;
+				drawingObject.outerRadius = dist;
+				break;
+
+			case "wedge":
+				// needs defining
 				break;
 
 			case "text":
 			case "sprite":
 			case "image":
 			case "rect":
-				if ( diffX < 0 ) {
-					pos[ 0 ] += diffX;	
-					width = Math.abs( diffX );
-				} 
-				if ( diffY < 0 ) {
-					pos[ 1 ] += diffY;	
-					height = Math.abs( diffY );
-				} 
-				drawingObject.position = pos;
-				drawingObject.width = width;
-				drawingObject.height = height;
-				break;
-
-			case "ring":
-				radius = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
-				drawingObject.innerRadius = radius - userState.drawing_width;
-				drawingObject.outerRadius = radius;
-				break;
-
-			case "star":
-				radius = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
-				drawingObject.points = 5;
-				drawingObject.innerRadius = radius * 60;
-				drawingObject.outerRadius = radius;
-				break;
-
-			case "wedge":
-				break;
-
 			default:
 				break;
 
-		}		
+		}
+
+
 	}	
 }; //@ sourceURL=kinetic_drawing.js
