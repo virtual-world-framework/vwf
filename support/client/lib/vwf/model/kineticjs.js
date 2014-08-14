@@ -981,10 +981,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             kineticObj.outerRadius( Number( propertyValue ) );
                             break;
 
-                        case "clockwise":
-                            kineticObj.clockwise( Boolean( propertyValue ) );
-                            break;
-
                         default:
                             value = undefined;
                             break;
@@ -1787,10 +1783,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         case "outerRadius":
                             value = kineticObj.outerRadius();
-                            break;
-
-                        case "clockwise":
-                            value = kineticObj.clockwise();
                             break;
                     }
                 }
