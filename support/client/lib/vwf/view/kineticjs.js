@@ -45,66 +45,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             if ( self.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
                 
                 var stage = this.state.stage = node.kineticObj;
-                var mouseDown = false;
-                var touch = false;
-                var mouseDownTime = null;
-                var mouseDownId = undefined;
-                var touchId = undefined;
-                var timer = new Date();
-
-
-                var processEvent = function( e ) {
-                    var returnData = { eventData: undefined, eventNodeData: undefined };
-
-                    e.evt.stopPropagation();
-
-                    returnData.eventData = [ { 
-                        "button": e.evt.button,
-                        "timeStamp": e.evt.timeStamp,
-                        "location": [ e.evt.x, e.evt.y ],
-                        "client": [ e.evt.clientX, e.evt.clientY ],
-                        "screen": [ e.evt.screenX, e.evt.screenY ],
-                        "layer": [ e.evt.layerX, e.evt.layerY ],
-                        "page": [ e.evt.pageX, e.evt.pageY ],
-                        "offset": [ e.evt.offsetX, e.evt.offsetY ],
-                        "movement": [ e.evt.webkitMovementX, e.evt.webkitMovementY ],
-                        "shiftKey": e.evt.shiftKey,
-                        "ctrlKey": e.evt.ctrlKey,                        
-                        "altKey": e.evt.altKey, 
-                        "metaKey": e.evt.metaKey
-                    } ];
-
-                    var pointerPickID = e.targetNode ? e.targetNode.getId() : stage.getId();
-
-                    returnData.eventNodeData = { "": [ {
-                        pickID: pointerPickID,
-                    } ] };
-
-                    if ( self && self.state.nodes[ pointerPickID ] ) {
-                        var childID = pointerPickID;
-                        var child = self.state.nodes[ childID ];
-                        var parentID = child.parentID;
-                        var parent = self.state.nodes[ child.parentID ];
-                        while ( child ) {
-
-                            returnData.eventNodeData[ childID ] = [ {
-                                pickID: pointerPickID,
-                            } ];
-
-                            childID = parentID;
-                            child = self.state.nodes[ childID ];
-                            parentID = child ? child.parentID : undefined;
-                            parent = parentID ? self.state.nodes[ child.parentID ] : undefined;
-
-                        }
-                    }
-
-                    return returnData;
-                };
-
-
-
-
+ 
             }
                
         },
