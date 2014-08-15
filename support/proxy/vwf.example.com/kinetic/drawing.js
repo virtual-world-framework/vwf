@@ -209,7 +209,7 @@ this.update = function( eventData, nodeData ) {
 		var pos = [ privateState.initialDownPoint[ 0 ], privateState.initialDownPoint[ 1 ] ];
 		var width = diffX;	
 		var height = diffY;
-		var dist = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );;
+		var dist = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
 
 		switch ( userState.drawing_mode ) {
 
