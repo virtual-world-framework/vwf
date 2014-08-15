@@ -53,7 +53,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 var timer = new Date();
 
 
-                var getEventData = function( e ) {
+                var processEvent = function( e ) {
                     var returnData = { eventData: undefined, eventNodeData: undefined };
 
                     e.evt.stopPropagation();
@@ -126,7 +126,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                 //mousemove, mouseout, mouseenter, mouseleave, mousedown, mouseup, click, dblclick, touchstart, touchmove, touchend, tap, dbltap, dragstart, dragmove, and dragend events
 
-                var getEventData = function( e ) {
+                var processEvent = function( e ) {
                     var returnData = { eventData: undefined, eventNodeData: undefined };
 
                     e.evt.stopPropagation();
@@ -152,96 +152,96 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
 
                 node.kineticObj.on( "mousemove", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     //self.kernel.dispatchEvent( node.ID, 'pointerMove', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerMove', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mouseout", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     self.kernel.fireEvent( node.ID, 'pointerOut', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mouseenter", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     //self.kernel.dispatchEvent( node.ID, 'pointerEnter', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerOut', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mouseleave", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     // self.kernel.dispatchEvent( node.ID, 'pointerLeave', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerLeave', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mousedown", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     //self.kernel.dispatchEvent( node.ID, 'pointerDown', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerDown', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mouseup", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     //self.kernel.dispatchEvent( node.ID, 'pointerUp', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerUp', eData.eventData );
                 } );
 
                 node.kineticObj.on( "click", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     //self.kernel.dispatchEvent( node.ID, 'pointerClick', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerClick', eData.eventData );
                 } );
 
                 node.kineticObj.on( "dblclick", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     //self.kernel.dispatchEvent( node.ID, 'pointerDoubleClick', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerDoubleClick', eData.eventData );
                 } );
 
                 node.kineticObj.on( "touchstart", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     //self.kernel.dispatchEvent( node.ID, "touchStart", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'touchStart', eData.eventData );
                 } );
 
                 node.kineticObj.on( "touchmove", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     //self.kernel.dispatchEvent( node.ID, "touchMove", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'touchMove', eData.eventData );
                 } );
 
                 node.kineticObj.on( "touchend", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     //self.kernel.dispatchEvent( node.ID, "touchEnd", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'touchEnd', eData.eventData );
                 } );
 
                 node.kineticObj.on( "tap", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     //self.kernel.dispatchEvent( node.ID, "tap", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'tap', eData.eventData );
                 } );
 
                 node.kineticObj.on( "dbltap", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     //self.kernel.dispatchEvent( node.ID, "dragStart", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'dragStart', eData.eventData );
                 } );
 
                 node.kineticObj.on( "dragstart", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     //self.kernel.dispatchEvent( node.ID, "dragStart", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'dragStart', eData.eventData );
                 } );
 
                 node.kineticObj.on( "dragmove", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     //self.kernel.dispatchEvent( node.ID, "dragMove", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'dragMove', eData.eventData );
                 } );
 
                 node.kineticObj.on( "dragend", function( evt ) {
-                    var eData = getEventData( evt, node );
+                    var eData = processEvent( evt, node );
                     //self.kernel.dispatchEvent( node.ID, "dragEnd", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
                 } );
@@ -293,10 +293,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                         if ( Boolean( propertyValue ) ) {
 
-                            var getEventData = function( e ) {
+                            var processEvent = function( e ) {
                                 var returnData = { eventData: undefined, eventNodeData: undefined };
-
-                                //console.info( "getEventData   STAGE" );
 
                                 e.evt.stopPropagation();
 
@@ -350,7 +348,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                                 mouseDownId = ( node !== undefined ) ? node.getId() : stage.getId();
                                 mouseDown = true;
                                 mouseDownTime = timer.getTime();
-                                var eData = getEventData( evt );
+                                var eData = processEvent( evt );
 
                                 self.kernel.dispatchEvent( mouseDownId, 'pointerDown', eData.eventData, eData.eventNodeData );
                             });
@@ -358,7 +356,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                             stage.on( 'contentMousemove', function( evt ) {
                                 var node = evt.targetNode;
                                 
-                                var eData = getEventData( evt );
+                                var eData = processEvent( evt );
 
                                 self.kernel.dispatchEvent( mouseDownId ? mouseDownId : stage.getId(), 'pointerMove', eData.eventData, eData.eventNodeData ); 
                             });
@@ -367,11 +365,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                                 var node = evt.targetNode;
                                 mouseDown = false;
 
-                                var eData = getEventData( evt );
-                                // if ( timer.getTime() - mouseDownTime < 700.0 ) {
-                                //     console.info( "getEventData   STAGE" );
-                                //     self.kernel.dispatchEvent( mouseDownId, 'pointerClick', eData.eventData, eData.eventNodeData );
-                                // }
+                                var eData = processEvent( evt );
+                                if ( timer.getTime() - mouseDownTime < 700.0 ) {
+                                    self.kernel.dispatchEvent( mouseDownId, 'pointerClick', eData.eventData, eData.eventNodeData );
+                                }
                                 self.kernel.dispatchEvent( mouseDownId ? mouseDownId : stage.getId(), 'pointerUp', eData.eventData, eData.eventNodeData );
 
                                 mouseDownTime = null;
