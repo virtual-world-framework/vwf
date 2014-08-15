@@ -42,7 +42,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             }
 
             var protos = node.prototypes;
-            if ( self.state.isKineticClass( protos, "kinetic-stage-vwf" ) || self.state.isKineticClass( protos, "kinetic.stage.vwf" ) ) {
+            if ( self.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
                 
                 var stage = this.state.stage = node.kineticObj;
                 var mouseDown = false;
@@ -55,8 +55,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                 var getEventData = function( e ) {
                     var returnData = { eventData: undefined, eventNodeData: undefined };
-
-                    //console.info( "getEventData   STAGE" );
 
                     e.evt.stopPropagation();
 
@@ -128,11 +126,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                 //mousemove, mouseout, mouseenter, mouseleave, mousedown, mouseup, click, dblclick, touchstart, touchmove, touchend, tap, dbltap, dragstart, dragmove, and dragend events
 
-                var getEventData = function( e, node ) {
+                var getEventData = function( e ) {
                     var returnData = { eventData: undefined, eventNodeData: undefined };
 
                     e.evt.stopPropagation();
-                    //console.info( "getEventData   NODE" );
 
                     returnData.eventData = [ { 
                         "button": e.evt.button,
@@ -149,34 +146,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         "altKey": e.evt.altKey, 
                         "metaKey": e.evt.metaKey
                     } ];
-
-                    // var pointerPickID = node ? node.ID : stage.getId();
-
-                    // returnData.eventNodeData = { pointerPickID: [ {
-                    //     pickID: pointerPickID,
-                    // } ] };
-
-                    // don't bubble the events, since KinectJS will auto
-                    // propagate these events
-                    
-                    // if ( self && self.state.nodes[ pointerPickID ] ) {
-                    //     var childID = pointerPickID;
-                    //     var child = self.state.nodes[ childID ];
-                    //     var parentID = child.parentID;
-                    //     var parent = self.state.nodes[ child.parentID ];
-                    //     while ( child ) {
-
-                    //         returnData.eventNodeData[ childID ] = [ {
-                    //             pickID: pointerPickID,
-                    //         } ];
-
-                    //         childID = parentID;
-                    //         child = self.state.nodes[ childID ];
-                    //         parentID = child ? child.parentID : undefined;
-                    //         parent = parentID ? self.state.nodes[ child.parentID ] : undefined;
-
-                    //     }
-                    // }
 
                     return returnData;
                 };
@@ -318,8 +287,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     var timer = new Date();
 
                     var protos = node.prototypes;
-                    if ( self.state.isKineticClass( protos, "kinetic-stage-vwf" ) || 
-                         self.state.isKineticClass( protos, "kinetic.stage.vwf" ) ) {
+                    if ( self.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
 
                         var stage = this.state.stage = node.kineticObj;
 
