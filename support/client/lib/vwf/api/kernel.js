@@ -21,9 +21,23 @@ define( function() {
 
     var exports = {
 
-        // TODO: setState
-        // TODO: getState
-        // TODO: hashState
+        /// xxx
+        /// 
+        /// @function
+
+        setState: [ /* applicationState, callback() */ ],
+
+        /// xxx
+        /// 
+        /// @function
+
+        getState: [ /* full, normalize */ ],
+
+        /// xxx
+        /// 
+        /// @function
+
+        hashState: [],
 
         /// Create a node from a component specification. Construction may require loading data from
         /// multiple remote documents. This function returns before construction is complete. A callback
@@ -94,7 +108,11 @@ define( function() {
 
         getNode: [ /* nodeID, full, normalize */ ],
 
-        // TODO: hashNode
+        /// xxx
+        /// 
+        /// @function
+
+        hashNode: [ /* nodeID */ ],
 
         /// @function
         /// 
