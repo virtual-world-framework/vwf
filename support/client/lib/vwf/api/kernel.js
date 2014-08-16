@@ -691,6 +691,12 @@ define( function() {
 
         descendants: [ /* nodeID, initializedOnly */ ],
 
+        /// xxx
+        /// 
+        /// @function
+
+        sequence: [ /* nodeID */ ],
+
         /// Locate nodes matching a search pattern. matchPattern supports an XPath subset consisting of
         /// the following:
         /// 

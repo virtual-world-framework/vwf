@@ -662,10 +662,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             case "prototypes":
             case "behaviors":
 
+            case "globals":
+            case "global":
+            case "root":
+
             case "ancestors":
             case "parent":
             case "children":
+            case "child":
             case "descendants":
+
+            case "sequence":
 
             case "find":
             case "test":

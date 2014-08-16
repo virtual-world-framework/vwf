@@ -264,10 +264,17 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             case "prototypes":
             case "behaviors":
 
+            case "globals":
+            case "global":
+            case "root":
+
             case "ancestors":
             case "parent":
             case "children":
+            case "child":
             case "descendants":
+
+            case "sequence":
 
             case "find":
             case "test":
