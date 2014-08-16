@@ -21,6 +21,18 @@ define( function() {
 
     var exports = {
 
+        /// xxx
+        /// 
+        /// @function
+
+        satState: [ /* applicationState */ ],
+
+        /// xxx
+        /// 
+        /// @function
+
+        gotState: [],
+
         /// Description.
         /// 
         /// @function
@@ -79,6 +91,18 @@ define( function() {
         /// @returns {}
 
         deletedNode: [ /* nodeID */ ],
+
+        /// xxx
+        /// 
+        /// @function
+
+        satNode: [ /* nodeID, nodeComponent */ ],
+
+        /// xxx
+        /// 
+        /// @function
+
+        gotNode: [ /* nodeID */ ],
 
         /// Description.
         /// 
