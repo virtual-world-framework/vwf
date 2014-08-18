@@ -439,15 +439,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "fillPatternImage":
-                            var imageObj = kineticObj.fillPatternImage();
-                            if ( imageObj !== undefined ) {
-                                imageObj.src = propertyValue;
-                            } else {
-                                imageObj = new Image();
-                                imageObj.onload = function() {
-                                    kineticObj.fillPatternImage( imageObj );
-                                };
-                                imageObj.src = propertyValue;                                
+                            if ( utility.validPropertyValue( propertyValue ) ) {
+                                var imageObj = kineticObj.fillPatternImage();
+                                if ( imageObj !== undefined ) {
+                                    imageObj.src = propertyValue;
+                                } else {
+                                    imageObj = new Image();
+                                    imageObj.onload = function() {
+                                        kineticObj.fillPatternImage( imageObj );
+                                    };
+                                    imageObj.src = propertyValue;                                
+                                }
                             }
                             break;
 
@@ -863,15 +865,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     switch ( propertyName ) {
 
                         case "image":
-                            var imageObj = kineticObj.image();
-                            if ( imageObj !== undefined ) {
-                                imageObj.src = propertyValue;
-                            } else {
-                                imageObj = new Image();
-                                imageObj.onload = function() {
-                                    kineticObj.image( imageObj );
-                                };
-                                imageObj.src = propertyValue;                                
+                            if ( utility.validPropertyValue( propertyValue ) ) {
+                                var imageObj = kineticObj.image();
+                                if ( imageObj !== undefined ) {
+                                    imageObj.src = propertyValue;
+                                } else {
+                                    imageObj = new Image();
+                                    imageObj.onload = function() {
+                                        kineticObj.image( imageObj );
+                                    };
+                                    imageObj.src = propertyValue;                                
+                                }
                             }
                             break;
 
@@ -1007,15 +1011,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "image":
-                            var imageObj = kineticObj.image();
-                            if ( imageObj !== undefined ) {
-                                imageObj.src = propertyValue;
-                            } else {
-                                imageObj = new Image();
-                                imageObj.onload = function() {
-                                    kineticObj.image( imageObj );
-                                };
-                                imageObj.src = propertyValue;                                
+                            if ( utility.validPropertyValue( propertyValue ) ) {
+                                var imageObj = kineticObj.image();
+                                if ( imageObj !== undefined ) {
+                                    imageObj.src = propertyValue;
+                                } else {
+                                    imageObj = new Image();
+                                    imageObj.onload = function() {
+                                        kineticObj.image( imageObj );
+                                    };
+                                    imageObj.src = propertyValue;                                
+                                }
                             }
                             break;
 
