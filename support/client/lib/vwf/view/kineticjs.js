@@ -65,8 +65,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             if ( node.kineticObj ) {
 
-                //mousemove, mouseout, mouseenter, mouseleave, mousedown, mouseup, click, dblclick, touchstart, touchmove, touchend, tap, dbltap, dragstart, dragmove, and dragend events
-
+                var mouseDown = false;
                 var processEvent = function( e ) {
                     var returnData = { eventData: undefined, eventNodeData: undefined };
 
@@ -117,12 +116,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                 node.kineticObj.on( "mousedown", function( evt ) {
                     var eData = processEvent( evt, node );
+                    mouseDown = true;
                     //self.kernel.dispatchEvent( node.ID, 'pointerDown', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerDown', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mouseup", function( evt ) {
                     var eData = processEvent( evt, node );
+                    mouseDown = false;
                     //self.kernel.dispatchEvent( node.ID, 'pointerUp', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerUp', eData.eventData );
                 } );
