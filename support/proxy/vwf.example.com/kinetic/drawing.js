@@ -42,7 +42,9 @@ this.clientJoin = function( moniker ) {
             "drawing_width": 4,
             "drawing_parentPath": '//',
             "drawing_opacity": 0.4,
-            "nameIndex": 1
+            "nameIndex": 1,
+            "fontSize": 16,
+            "angle": 30
         };
     }
     this.drawing_clients = this.drawing_clients;
@@ -118,7 +120,7 @@ this.pointerDown = function( eventData, nodeData ) {
         case "circle":
         case "ellipse":
         case "image":
-        case "regularPolygon":
+        //case "regularPolygon":
         case "rect":
         case "ring":
         case "sprite":
@@ -184,6 +186,21 @@ this.pointerUp = function( eventData, nodeData ) {
         var drawingObject = this.drawing_private[ this.client ].drawingObject;
         this.update( eventData, nodeData );
         this.shapeCreated( drawingObject.id );
+
+        if ( this.moniker === this.client ) {
+            var userState = this.drawing_clients[ this.client ]; 
+            switch( userState.drawing_mode ) {
+                case "text":
+                    this.textCreated( drawingObject.id );
+                    break;
+                case "image":
+                    this.imageCreated( drawingObject.id );
+                    break;
+
+            } 
+        }
+
+
         this.drawing_private[ this.client ].drawingObject = null;
     }
 
@@ -235,14 +252,18 @@ this.update = function( eventData, nodeData ) {
         switch ( userState.drawing_mode ) {
             
             case "arc":
-                radius = dist;
-                drawingObject.angle = 30;
-                drawingObject.innerRadius = dist - this.drawing_width;
-                drawingObject.outerRadius = dist;
+                drawingObject.angle = userState.angle ? userState.angle : 30;
+                if ( dist > this.drawing_width ) {
+                    drawingObject.innerRadius = dist - this.drawing_width;
+                    drawingObject.outerRadius = dist;
+                }
                 break;
 
 
             case "ellipse":         
+                drawingObject.radius = { "x": width * 0.5, "y": height * 0.5 };
+                break;
+
             case "circle":
                 drawingObject.radius = dist;
                 break;
@@ -264,17 +285,18 @@ this.update = function( eventData, nodeData ) {
                 }
                 break;
 
-            case "regularPolygon":
-                // needs defining
-                break;
+            // case "regularPolygon":
+            //     // needs defining
+            //     break;
 
             case "ring":
-                drawingObject.innerRadius = dist - userState.drawing_width;
-                drawingObject.outerRadius = dist;
+                if ( dist > userState.drawing_width ) {
+                    drawingObject.innerRadius = dist - userState.drawing_width;
+                    drawingObject.outerRadius = dist;
+                }
                 break;
 
             case "star":
-                radius = dist
                 drawingObject.points = 5;
                 drawingObject.innerRadius = dist * 60;
                 drawingObject.outerRadius = dist;
@@ -282,9 +304,15 @@ this.update = function( eventData, nodeData ) {
 
             case "wedge":
                 // needs defining
+                drawingObject.angle = userState.angle ? userState.angle : 30;
+                drawingObject.radius = dist;
+                drawingObject.clockwise = false;
                 break;
 
             case "text":
+                drawingObject.fontSize = userState.fontSize ? userState.fontSize : 16;
+                break;
+
             case "sprite":
             case "image":
             case "rect":
