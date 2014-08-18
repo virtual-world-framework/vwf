@@ -105,6 +105,9 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
                             addInsertableUnits( methodParameters[ 0 ] );
                         }
                         break;
+                    case "getUnitSymbol":
+                        getUnitSymbol( methodParameters[ 0 ], methodParameters[ 1 ], methodParameters[ 2 ], methodParameters[ 3 ], methodParameters[ 4 ] );
+                        break;
                 }
             } 
         },
@@ -205,6 +208,61 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
         }    
     }
 
+    function getUnitSymbol( symbolID, affiliation, echelonID, modifierList, unit ) {
+        var updatedUnit = {};
+        var appID = self.kernel.application();
+        var renderer = armyc2.c2sd.renderer;
+        var msa = renderer.utilities.MilStdAttributes;
+        var rs = renderer.utilities.RendererSettings;
+        var modifiers = {};
+
+        console.info(" Mil-SymJS  SymbolID before echelon and affiliation: " + symbolID );
+    
+        if ( cws ) {
+            updatedUnit = unit;
+            
+            // Set affiliation in unit symbol id
+            updatedUnit.symbolID = cws.addAffiliationToSymbolId( symbolID, affiliation );
+            
+            // Add echelon
+            if ( echelonID != undefined ) {
+                console.info(" Mil-SymJS Adding Echelon: " + echelonID );            
+                updatedUnit.symbolID = cws.addEchelonToSymbolId( updatedUnit.symbolID, echelonID );
+                console.info(" Mil-SymJS  SymbolID after echelon and affiliation: " + updatedUnit.symbolID );
+            }
+            
+            // Add modifiers
+            modifiers[ msa.PixelSize ] = "60";
+            for ( var prop in modifierList ) {
+                if (modifierList[prop] != undefined) {
+                    switch ( prop ) {
+                        case "pixelSize":
+                        case "PixelSize":
+                            modifiers[ msa.PixelSize ] = modifierList[ prop ];
+                            break;
+                        case "icon":
+                        case "Icon":
+                            modifiers[ msa.Icon ] = modifierList[ prop ];
+                            break;
+                        default:
+                            modifiers[ prop ] = modifierList[ prop ];
+                            break;
+                    }
+                }
+            }
+            
+            // Render the unit image
+            modifiers[ msa.Icon ] = true;
+            modifiers[ msa.SymbologyStandard ] = rs.Symbology_2525Bch2_USAS_13_14;
+            var img = renderer.MilStdIconRenderer.Render( updatedUnit.symbolID, modifiers );
+            if ( img ) {
+                updatedUnit.image["selected"] = img.toDataUrl();
+            }
+        }
+
+        self.kernel.fireEvent( appID, "selectedUnitSymbolRendered", [ updatedUnit ] );
+    }
+    
     function getUnitImage( symbolID ) {
         var renderer = armyc2.c2sd.renderer;
         var msa = renderer.utilities.MilStdAttributes;
@@ -223,6 +281,5 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
             return "";
         }
     }
-
 
 } );

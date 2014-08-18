@@ -4374,6 +4374,7 @@ define( function(){
                     retStr = this.region( symbolID );
                     break; 
                 case "null":
+                default:
                     retStr = this._null( symbolID );
                     break; 
 
@@ -4381,46 +4382,46 @@ define( function(){
             return retStr;          
         },
         "team_crew": function( symbolID ) {
-            return symbolID.substr( 0, 9 ) + "-A" + symbolID.substr( 12 );
+            return symbolID.substr( 0, 10 ) + "-A" + symbolID.substr( 12 );
         }, 
         "squad": function( symbolID ) {
-            return symbolID.substr( 0, 9 ) + "-B" + symbolID.substr( 12 );
+            return symbolID.substr( 0, 10 ) + "-B" + symbolID.substr( 12 );
         }, 
         "section": function( symbolID ) {
-            return symbolID.substr( 0, 9 ) + "-C" + symbolID.substr( 12 );
+            return symbolID.substr( 0, 10 ) + "-C" + symbolID.substr( 12 );
         }, 
         "platoon_detachment": function( symbolID ) {
-            return symbolID.substr( 0, 9 ) + "-D" + symbolID.substr( 12 );
+            return symbolID.substr( 0, 10 ) + "-D" + symbolID.substr( 12 );
         }, 
         "company_battery_troop": function( symbolID ) {
-            return symbolID.substr( 0, 9 ) + "-E" + symbolID.substr( 12 );
+            return symbolID.substr( 0, 10 ) + "-E" + symbolID.substr( 12 );
         }, 
         "battalion_squadron": function( symbolID ) {
-            return symbolID.substr( 0, 9 ) + "-F" + symbolID.substr( 12 );
+            return symbolID.substr( 0, 10 ) + "-F" + symbolID.substr( 12 );
         }, 
         "regiment_group": function( symbolID ) {
-            return symbolID.substr( 0, 9 ) + "-G" + symbolID.substr( 12 );
+            return symbolID.substr( 0, 10 ) + "-G" + symbolID.substr( 12 );
         }, 
         "brigade": function( symbolID ) {
-            return symbolID.substr( 0, 9 ) + "-H" + symbolID.substr( 12 );
+            return symbolID.substr( 0, 10 ) + "-H" + symbolID.substr( 12 );
         }, 
         "division": function( symbolID ) {
-            return symbolID.substr( 0, 9 ) + "-I" + symbolID.substr( 12 );
+            return symbolID.substr( 0, 10 ) + "-I" + symbolID.substr( 12 );
         }, 
         "corps_mef": function( symbolID ) {
-            return symbolID.substr( 0, 9 ) + "-J" + symbolID.substr( 12 );
+            return symbolID.substr( 0, 10 ) + "-J" + symbolID.substr( 12 );
         },
         "army": function( symbolID ) {
-            return symbolID.substr( 0, 9 ) + "-K" + symbolID.substr( 12 );
+            return symbolID.substr( 0, 10 ) + "-K" + symbolID.substr( 12 );
         },
         "armyGroup_front": function( symbolID ) {
-            return symbolID.substr( 0, 9 ) + "-L" + symbolID.substr( 12 );
+            return symbolID.substr( 0, 10 ) + "-L" + symbolID.substr( 12 );
         },
         "region": function( symbolID ) {
-            return symbolID.substr( 0, 9 ) + "-M" + symbolID.substr( 12 );
+            return symbolID.substr( 0, 10 ) + "-M" + symbolID.substr( 12 );
         },
         "_null": function( symbolID ) {
-            return symbolID.substr( 0, 9 ) + "--" + symbolID.substr( 12 );
+            return symbolID.substr( 0, 10 ) + "**" + symbolID.substr( 12 );
         },
         "addAffiliationToSymbolId": function( symbolID, value ) {
             var retStr = symbolID;
