@@ -683,7 +683,8 @@ define( [ "module",
             var iconRender = armyc2.c2sd.renderer.MilStdIconRenderer;
             var img = iconRender.Render( node.symbolID, node.modifiers );
             value = node.image = img.toDataUrl();
-            self.kernel.fireEvent( node.ID, "imageChanged", [ node.image ] );
+            var imgSize = img.getImageBounds();
+            self.kernel.fireEvent( node.ID, "imageChanged", [ node.image, imgSize.width, imgSize.height ] );
         } 
 
         return value;       
