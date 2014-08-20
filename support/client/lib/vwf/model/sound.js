@@ -61,7 +61,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var soundDefinition, successCallback, failureCallback, exitCallback;
             var soundName, soundNames, soundDatum, soundDefinition, soundInstance;
             var instanceIDs, instanceID, i, volume, fadeTime, fadeMethod, instanceHandle;
-            var isLayered;
 
             switch( methodName ) {
                 // arguments: soundDefinition, successCallback, failureCallback
@@ -87,35 +86,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         return undefined;
                     }
 
-                    if ( !soundDefinition.isLayered && 
-                         ( soundDefinition.soundURL === undefined ) ) {
-                        logger.errorx( "loadSound", "The sound definition for '" + soundName +
-                                       "' must contain soundURL." );
-                        return undefined;
-                    }
-                    // if ( soundDefinition.initialVolume && 
-                    //      ( soundDefinition.initialVolume === 0 ) ) {
-                    //     logger.warnx( "loadSound", "Your initial volume for '" + soundName +
-                    //                   "' is 0." );
-                    // }
-                    // Create the sound.
-                    // NOTE: the sound file is loaded into a buffer asynchronously, so the
-                    // sound will not be ready to play immediately.  That's why we have the
-                    // callbacks.
-
-                    if ( !soundDefinition.isLayered ) {
-
-                        soundData[ soundName ] = new SoundDatum( soundDefinition, 
-                                                                 successCallback, 
-                                                                 failureCallback );
-
-                    } else {
-
-                        soundData[ soundName ] = new LayeredSoundDatum( soundDefinition, 
-                                                                        successCallback, 
-                                                                        failureCallback );
-
-                    }
+                    soundData[ soundName ] = new SoundDatum( soundDefinition, 
+                                                             successCallback, 
+                                                             failureCallback );
 
                     return;
 
@@ -247,135 +220,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     } );
 
-    function LayeredSoundDatum( layeredSoundDefinition, successCallback, failureCallback ) {
-        this.initialize( layeredSoundDefinition, successCallback, failureCallback );
-        return this;
-    }
-
-    LayeredSoundDatum.prototype = {
-        constructor: LayeredSoundDatum,
-
-        name: undefined,
-        soundDefinitions: null,
-
-        playOnLoad: false,
-
-        // NOTE: these two arrays should be synchronized - for any given index,
-        //   the layer name should be the name of the instance handle's sound.
-        layerNames: null,
-        instanceHandles: null,
-
-        initialize: function ( layeredSoundDefinition, successCallback, failureCallback ) {
-
-            this.name = layeredSoundDefinition.soundName;
-            this.soundDefinitions = layeredSoundDefinition.soundDefinitions;
-            this.playOnLoad = layeredSoundDefinition.playOnLoad;
-            this.layerNames = [];
-            this.instanceHandles = [];
-
-            var soundDefinitionObjects = Object.keys( layeredSoundDefinition.soundDefinitions );
-
-            for ( var k = 0; k < soundDefinitionObjects.length; ++k ) {
-
-                var doneLoading = function() {
-                    successCallback && successCallback();
-                }
-
-                var failureToLoad = function() {
-                    failureCallback && failureCallback();
-                }
-
-                // TODO: I doubt this will work because they won't all load at
-                //   the same time, but we need to synchronize them.
-                if ( this.playOnLoad === true ) {
-                    layeredSoundDefinition.soundDefinitions[k].playOnLoad = true;
-                }
-
-                var layerName = layeredSoundDefinition.soundDefinitions[k].soundName;
-                this.layerNames.push( layerName );
-                this.instanceHandles.push( undefined );
-
-                if ( soundData[ layerName ] ) {
-                    logger.warnx( "LayeredSoundDatum.initialize", 
-                                  "Duplicate sound name for layer '" +
-                                  layerName + "'." );
-                } else {
-                    // Again... we're going to call doneLoading for each layer, 
-                    //   which doesn't seem right...
-                    soundData[ layerName ] = new SoundDatum( layeredSoundDefinition.soundDefinitions[k], doneLoading , failureToLoad );
-                }
-            }
-
-            // TODO: We haven't really succeeded until every sound has loaded -and
-            //   at this point, none of them have!!
-            successCallback && successCallback();
-        },
-
-        playSound: function ( exitCallback ) {
-            if ( this.isPlaying() ) {
-                logger.warnx( "LayeredSoundDatum.playSound", "Sound '" + 
-                              this.name + "'is already playing, and layered " +
-                              "sounds don't allow multiplay." );
-                return { soundName: this.name, instanceID: -1 };
-            }
-
-            for ( var i = 0; i < this.layerNames.length; ++i ) {
-                var layerDatum = soundData[ this.layerNames[ i ] ];
-                if ( !layerDatum ) {
-                    logger.errorx( "LayeredSoundDatum.playSound", "Missing " +
-                                   "sound datum: '" + this.layerNames[ i ] +
-                                   "'." );
-                }
-
-                var handle = layerDatum.playSound();
-                this.instanceHandles[ i ] = handle;
-            }
-
-            return { soundName: this.name, instanceID: 0 };
-        },
-
-        stopInstance: function () {
-            for ( var i = 0; i < this.layerNames.length; ++i ) {
-                var layerDatum = soundData[ this.layerNames[ i ] ];
-                layerDatum.stopInstance( this.instanceHandles[ i ] );
-                this.instanceHandles[ i ] = undefined;
-            }
-        },
-
-        stopDatumSoundInstances: function () {
-            // There is never more than one instance of a layered sound.
-            this.stopInstance();
-        },
-
-        resetOnMasterVolumeChange: function () {
-            for ( var i = 0; i < this.layerNames.length; ++i ) {
-                var layerDatum = soundData[ this.layerNames[ i ] ];
-                layerDatum.resetOnMasterVolumeChange();
-            }
-        },
-
-        setVolume: function( id, volume, duration, type ) {
-            for ( var i = 0; i < this.layerNames.length; ++i ) {
-                var layerDatum = soundData[ this.layerNames[ i ] ];
-                layerDatum.setVolume( this.instanceHandles[ i ], volume, 
-                                      duration, type);
-            }
-        },
-
-        isPlaying: function() {
-            for ( var x in this.layers ) {
-                if ( this.instanceHandles[ x ] ) {
-                    return true;
-                }
-            }
-            return false;
-         },
-
-         // TODO: right now there is no way to play individual layers.  We might
-         //   want to work on that, since that's the whole point of having
-         //   layered sounds. :)
-    }
-
     function SoundDatum( soundDefinition, successCallback, failureCallback ) {
         this.initialize( soundDefinition, successCallback, failureCallback );
         return this;
@@ -397,7 +241,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         initialVolume: 1.0,
         isLooping: false,
         allowMultiplay: false,
-        volumeAdjustment: 1.0,
         soundDefinition: null,
         playOnLoad: false,
 
@@ -422,10 +265,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             if ( this.soundDefinition.allowMultiplay !== undefined ) {
                 this.allowMultiplay = soundDefinition.allowMultiplay;
-            }
-
-            if ( this.soundDefinition.volumeAdjustment !== undefined ) {
-                this.volumeAdjustment = soundDefinition.volumeAdjustment;
             }
 
             if (this.soundDefinition.initialVolume !== undefined ) {
@@ -530,8 +369,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         resetOnMasterVolumeChange: function () {
             for ( var instanceID in this.playingInstances ) {
                 var soundInstance = this.playingInstances[ instanceID ];
-                if ( !!soundInstance ) {
-                    soundInstance.gainNode.gain.value = this.initialVolume * masterVolume;
+                if ( soundInstance ) {
+                    soundInstance.resetOnMasterVolumeChange();
                 }
             }
         },
@@ -566,6 +405,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         sourceNode: undefined,
         gainNode: undefined,
 
+        // we need to know the volume for this node *before* the master volume
+        //  adjustment is applied.  This is that value.
+        localVolume$: undefined,
+
         isStarted: false, 
 
         initialize: function( soundDatum, id, exitCallback, successCallback ) {
@@ -585,8 +428,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.sourceNode.buffer = this.soundDatum.buffer;
             this.sourceNode.loop = this.soundDatum.isLooping;
 
+            this.localVolume$ = this.soundDatum.initialVolume;
             this.gainNode = context.createGain();
-            this.gainNode.gain.value = this.soundDatum.initialVolume * masterVolume;
+            this.gainNode.gain.value = this.getVolume();
 
             this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );
@@ -667,6 +511,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
         },
 
+        getVolume: function() {
+            return this.localVolume$ * masterVolume;
+        },
+
         setVolume: function( volume, fadeTime, fadeMethod ) {
             if ( !volume ) {
                 logger.errorx( "setVolume", "The 'setVolume' method " +
@@ -674,39 +522,43 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 return;
             }
 
-            var thisPlayingInstance = this;
+            this.localVolume$ = volume;
 
-            var targetVolume = volume * masterVolume;
-             fadeTime = fadeTime ? fadeTime : 0;
-             fadeMethod = fadeMethod ? fadeMethod : "linear";
+            if ( !fadeTime || ( fadeTime <= 0 ) ) {
+                fadeMethod = "immediate";
+            } 
 
-            if ( fadeTime <= 0 ) {
-                this.sourceNode.gain.value = targetVolume;
-            } else {
-                var endTime = context.currentTime + fadeTime;
-                var now = context.currentTime;
-                this.gainNode.gain.cancelScheduledValues( now );
+            var now = context.currentTime;
+            this.gainNode.gain.cancelScheduledValues( now );
 
-                switch( fadeMethod ) {
-                    case "linear":
-                        this.gainNode.gain.linearRampToValueAtTime( volume, endTime );
-                        break;
-                    case "exponential":
-                        this.gainNode.gain.setTargetValueAtTime( volume, now, fadeTime );
-                        break;
-                    default:
-                        logger.errorx( "setVolume", "Unknown fade method: '" +
-                                       fadeMethod + "'.  Using a linear fade." );
-                        this.sourceNode.gain.linearRampToValueAtTime( volume, endTime );
-                }
+            switch( fadeMethod ) {
+                case "linear":
+                    var endTime = now + fadeTime;
+                    this.gainNode.gain.linearRampToValueAtTime( this.getVolume(), endTime );
+                    break;
+                case "exponential":
+                case undefined:
+                    this.gainNode.gain.setTargetValueAtTime( this.getVolume(), now, fadeTime );
+                    break;
+                case "immediate":
+                    this.gainNode.gain.value = this.getVolume();
+                default:
+                    logger.errorx( "setVolume", "Unknown fade method: '" +
+                                   fadeMethod + "'.  Using an exponential " +
+                                   "fade." );
+                    this.gainNode.gain.setTargetValueAtTime( this.getVolume(), now, fadeTime );
             }
+        },
+
+        resetOnMasterVolumeChange: function() {
+            setVolume(this.getVolume);
         },
 
         stop: function() {
             if ( this.isStarted ) {
                 this.sourceNode.stop();
             } 
-        }
+        },
     }
 
     function getSoundDatum( soundName ) {
