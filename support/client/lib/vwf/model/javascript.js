@@ -1207,10 +1207,8 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
             set: unsettable ? undefined : function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.methods.node, or just node
-                if ( typeof value === "function" || value instanceof Function ) {
-                    value = utility.merge( handlerFromFunction( value ), { type: scriptMediaType } );
-                }
-                self.kernel.setMethod( node.id, methodName, value );
+                self.kernel.setMethod( node.id, methodName,
+                    utility.merge( handlerFromFunction( value ), { type: scriptMediaType } ) );
             },
 
             enumerable: true,
@@ -1270,26 +1268,19 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
                 var node = this.node || this;  // the node via node.*collection*.node, or just node
                 var namespacedName = eventNamespace ? [ eventNamespace, eventName ] : eventName;
                 if ( typeof value === "function" || value instanceof Function ) {
-                    value = utility.merge( handlerFromFunction( value ), { type: scriptMediaType } );
                     self.kernel.addEventListener( node.id, namespacedName,
-                        value, node.id );  // for container.*event* = function() { ... }, context is the target node
+                        utility.merge( handlerFromFunction( value ), { type: scriptMediaType } ), node.id );  // for container.*event* = function() { ... }, context is the target node
                 } else if ( value.add ) {
-                    if ( typeof value.handler === "function" || value.handler instanceof Function ) {
-                        value.handler = utility.merge( handlerFromFunction( value.handler ), { type: scriptMediaType } );
-                    }
                     if ( ! value.phases || value.phases instanceof Array ) {
                         self.kernel.addEventListener( node.id, namespacedName,
-                            value.handler, value.context && value.context.id, value.phases );
+                            utility.merge( handlerFromFunction( value.handler ), { type: scriptMediaType } ), value.context && value.context.id, value.phases );
                     } else {
                         self.kernel.addEventListener( node.id, namespacedName,
-                            value.handler, value.context && value.context.id, [ value.phases ] );
+                            utility.merge( handlerFromFunction( value.handler ), { type: scriptMediaType } ), value.context && value.context.id, [ value.phases ] );
                     }
                 } else if ( value.remove ) {
-                    if ( typeof value.handler === "function" || value.handler instanceof Function ) {
-                        value.handler = utility.merge( handlerFromFunction( value.handler ), { type: scriptMediaType } );
-                    }
                     self.kernel.removeEventListener( node.id, namespacedName,
-                        value.handler );
+                        utility.merge( handlerFromFunction( value.handler ), { type: scriptMediaType } ) );
                 } else if ( value.flush ) {
                     self.kernel.flushEventListeners( node.id, namespacedName,
                         value.context && value.context.id );
