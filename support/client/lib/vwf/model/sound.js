@@ -512,7 +512,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         },
 
         getVolume: function() {
-            return this.localVolume$ * masterVolume;
+            return this.localVolume$ * ( masterVolume !== undefined ? masterVolume : 1.0 );
         },
 
         setVolume: function( volume, fadeTime, fadeMethod ) {
