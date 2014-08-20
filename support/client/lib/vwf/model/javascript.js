@@ -655,6 +655,10 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                         "exception evaluating body:", utility.exceptionMessage( e ) );
                 }
 
+            } else {
+
+                delete node.private.bodies[methodName];
+
             }
 
             return undefined;
