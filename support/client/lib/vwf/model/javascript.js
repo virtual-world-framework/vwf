@@ -747,6 +747,10 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                         "exception evaluating listener:", utility.exceptionMessage( exception ) );
                 }
 
+            } else {
+
+                delete listeners[ eventListenerID ];
+
             }
 
             return undefined;
@@ -801,6 +805,10 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                     this.logger.warnx( "settingEventListener", nodeID, eventName, eventListenerID,
                         "exception evaluating listener:", utility.exceptionMessage( exception ) );
                 }
+
+            } else {
+
+                delete listeners[ eventListenerID ];
 
             }
 
