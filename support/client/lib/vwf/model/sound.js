@@ -28,7 +28,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             // (it's created in the view)
             this.state.soundManager = {};
             soundDriver = this;
-            masterVolume = this.masterVolume;
             logger = this.logger;
 
             try {
@@ -370,7 +369,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             for ( var instanceID in this.playingInstances ) {
                 var soundInstance = this.playingInstances[ instanceID ];
                 if ( soundInstance ) {
-                    soundInstance.resetOnMasterVolumeChange();
+                    soundInstance.resetVolume();
                 }
             }
         },
@@ -430,10 +429,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             this.localVolume$ = this.soundDatum.initialVolume;
             this.gainNode = context.createGain();
-            this.gainNode.gain.value = this.getVolume();
-
             this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );
+            this.resetVolume();
 
             var group = soundGroups[ soundDatum.soundGroup ];
 
@@ -542,6 +540,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     break;
                 case "immediate":
                     this.gainNode.gain.value = this.getVolume();
+                    break;
                 default:
                     logger.errorx( "setVolume", "Unknown fade method: '" +
                                    fadeMethod + "'.  Using an exponential " +
@@ -550,7 +549,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
         },
 
-        resetOnMasterVolumeChange: function() {
+        resetVolume: function() {
             this.setVolume(this.localVolume$);
         },
 
@@ -603,6 +602,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function startSoundInstance( instance ) {
         instance.sourceNode.start( 0 ); 
+        instance.resetVolume();
         instance.isStarted = true;
 
         // logger.logx( "startSoundInstance",
