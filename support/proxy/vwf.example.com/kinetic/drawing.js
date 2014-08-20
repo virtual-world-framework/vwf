@@ -112,7 +112,12 @@ this.pointerDown = function( eventData, nodeData ) {
     }
 
     var compExtends = undefined;
+    var groupExtends = undefined;
     var section = "//shapes";
+
+    if ( drawingMode === "freeDraw" ) {
+        section = "//lines";        
+    }
 
     switch ( drawingMode ) {
         
@@ -120,7 +125,7 @@ this.pointerDown = function( eventData, nodeData ) {
         case "circle":
         case "ellipse":
         case "image":
-        //case "regularPolygon":
+        case "regularPolygon":
         case "rect":
         case "ring":
         case "sprite":
@@ -130,9 +135,20 @@ this.pointerDown = function( eventData, nodeData ) {
             compExtends = "http://vwf.example.com/kinetic/"+drawingMode+".vwf"; 
             break;
 
+        case "arrow":
+            groupExtends = "http://vwf.example.com/kinetic/group.vwf";
+            compExtends = { "line": "http://vwf.example.com/kinetic/line.vwf", "head": "http://vwf.example.com/kinetic/regularPolygon.vwf" };
+            //compExtends = "http://vwf.example.com/kinetic/shape.vwf";
+            break;
+
+        case "thickArrow":
+            groupExtends = "http://vwf.example.com/kinetic/group.vwf";
+            compExtends = { "line": "http://vwf.example.com/kinetic/rect.vwf", "head": "http://vwf.example.com/kinetic/regularPolygon.vwf" };
+            break;
+
+        case "borderRect":
         case "line":
         case "freeDraw":
-            section = "//lines";
             compExtends = "http://vwf.example.com/kinetic/line.vwf";
             break;
 
@@ -142,7 +158,42 @@ this.pointerDown = function( eventData, nodeData ) {
 
     }
 
-    if ( compExtends !== undefined ) {
+    if ( groupExtends !== undefined ) {
+
+        privateState.initialDownPoint = eventData.layer;
+        var parents = this.find( userState.drawing_parentPath + section );
+        var parent = parents.length > 0 ? parents[ 0 ] : this;
+        var groupDef = {
+            "extends": compExtends,
+            "properties": {
+                "visible": false,
+                "position": eventData.layer                
+            },
+            "children": {}
+        };
+
+        for ( var def in compExtends ) {
+            groupDef.children[ def ] = {
+                "extends": compExtends[ def ],
+                "properties": {
+                    "visible": 'inherit',
+                    "position": [ 0, 0 ],
+                    "fill": userState.drawing_color,
+                    "opacity": userState.drawing_opacity
+                }
+            }          
+        }
+        var self = this;
+        var selfMoniker = this.client;
+        var name = drawingMode + userState.nameIndex;
+        userState.nameIndex++;
+        parent.children.create( name, groupDef, function( child ) {
+            //console.info( "Child created name: " + child.name + "    " + child.id );
+            self.drawing_private[ selfMoniker ].drawingObject = child;
+        } ); 
+
+    } else if ( compExtends !== undefined ) {
+
         privateState.initialDownPoint = eventData.layer;
         var parents = this.find( userState.drawing_parentPath + section );
         var parent = parents.length > 0 ? parents[ 0 ] : this;
@@ -162,7 +213,8 @@ this.pointerDown = function( eventData, nodeData ) {
         parent.children.create( name, shapeDef, function( child ) {
             //console.info( "Child created name: " + child.name + "    " + child.id );
             self.drawing_private[ selfMoniker ].drawingObject = child;
-        } ); 
+        } );
+
     }
 
 };
@@ -285,9 +337,9 @@ this.update = function( eventData, nodeData ) {
                 }
                 break;
 
-            // case "regularPolygon":
-            //     // needs defining
-            //     break;
+            case "regularPolygon":
+                 // needs defining
+                 break;
 
             case "ring":
                 if ( dist > userState.drawing_width ) {
@@ -312,6 +364,42 @@ this.update = function( eventData, nodeData ) {
             case "text":
                 drawingObject.fontSize = userState.fontSize ? userState.fontSize : 16;
                 break;
+
+            case "borderRect":
+                drawingObject.stroke = userState.drawing_color;
+                drawingObject.strokeWidth = userState.drawing_width;
+                drawingObject.points = [ 0, 0, diffX, 0, diffX, diffY, 0, diffY, 0, 0 ];
+                break;
+
+            case "arrow":
+                drawingObject.line.stroke = userState.drawing_color;
+                drawingObject.line.strokeWidth = userState.drawing_width;
+                drawingObject.head.sides = 3;
+
+                var endPoint = goog.vec.Vec2.createFloat32FromValues( 0, 0 );
+                var dir = goog.vec.Vec2.createFloat32FromValues( eventData.layer[ 0 ] - drawingObject.x, eventData.layer[ 1 ] - drawingObject.y );
+                var len = goog.vec.Vec2.distance( goog.vec.Vec2.createFloat32FromValues( 0, 0 ), dir );
+                goog.vec.Vec2.normalize( dir, dir );
+                goog.vec.Vec2.scale( dir, len * 0.9, endPoint );
+
+                drawingObject.head.radius = len * 0.1;
+                drawingObject.head.position = [ endPoint[0], endPoint[1] ];
+                drawingObject.line.points = [ 0, 0, endPoint[0], endPoint[1] ];
+                break;
+
+// function canvas_arrow(fromx, fromy, tox, toy){
+//     var headlen = 20;   // how long you want the head of the arrow to be, you could calculate this as a fraction of the distance between the points as well.
+//     var angle = Math.atan2(toy-fromy,tox-fromx);
+
+//     line = new Kinetic.Line({
+//         points: [fromx, fromy, tox, toy, tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6),tox, toy, tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6)],
+//         stroke: "red"
+//     });
+// }
+
+            
+            case "thickArrow":
+                break; 
 
             case "sprite":
             case "image":
