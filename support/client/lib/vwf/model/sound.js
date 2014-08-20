@@ -551,7 +551,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         },
 
         resetOnMasterVolumeChange: function() {
-            setVolume(this.getVolume);
+            this.setVolume(this.localVolume$);
         },
 
         stop: function() {
