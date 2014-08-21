@@ -408,7 +408,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         //  adjustment is applied.  This is that value.
         localVolume$: undefined,
 
-        isStarted: false, 
+        // stopped, delayed, playing, stopping, delayCancelled
+        playStatus: undefined, 
 
         initialize: function( soundDatum, id, exitCallback, successCallback ) {
             // NOTE: from http://www.html5rocks.com/en/tutorials/webaudio/intro/:
@@ -422,6 +423,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             // event - e.g. "touch here to play".
             this.id = id;
             this.soundDatum = soundDatum;
+
+            this.playStatus = "stopped";
 
             this.sourceNode = context.createBufferSource();
             this.sourceNode.buffer = this.soundDatum.buffer;
@@ -439,12 +442,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             //   filetype - needs support.
             var thisInstance = this;
             this.sourceNode.onended =  function() {
-                thisInstance.isStarted = false;
+                thisInstance.playStatus = "stopped";
                 fireSoundEvent( "soundFinished", thisInstance );
 
-                logger.logx( "PlayingInstance.onended",
-                             "Sound ended: '" + thisInstance.soundDatum.name +
-                             "', Timestamp: " + timestamp() );
+                // logger.logx( "PlayingInstance.onended",
+                //              "Sound ended: '" + thisInstance.soundDatum.name +
+                //              "', Timestamp: " + timestamp() );
 
                 if ( group ) {
                     group.soundFinished( thisInstance );
@@ -453,11 +456,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( nextInstance ) {
                         var delaySeconds = nextInstance.soundDatum.queueDelayTime;
 
-                        logger.logx( "PlayingInstance.onended", 
-                                     "Popped from the queue: '" + 
-                                     nextInstance.soundDatum.name +
-                                     ", Timeout: " + delaySeconds +
-                                     ", Timestamp: " + timestamp() );
+                        // logger.logx( "PlayingInstance.onended", 
+                        //              "Popped from the queue: '" + 
+                        //              nextInstance.soundDatum.name +
+                        //              ", Timeout: " + delaySeconds +
+                        //              ", Timestamp: " + timestamp() );
 
                         if ( delaySeconds > 0) {
                             nextInstance.startDelayed( delaySeconds );
@@ -553,31 +556,75 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         },
 
         start: function() {
-            var group = this.soundDatum.soundGroup;
-            if ( group ) {
-                var playingSound = group.getPlayingSound();
-                if ( playingSound && ( playingSound !== this ) ) {
-                    // This can happen if a sound was stopped while delayed,
-                    //  but I need to make sure that that's the only time it
-                    //  happens so I'm putting in an error (for now).
-                    logger.errorx( "PlayingInstance.start", "Sound '" +
-                                   this.soundDatum.name + "started while '" +
-                                   playingSound.soundDatum.name + "' was " +
-                                   "still playing!" );
-                    return;
-                }
+            switch ( this.playStatus ) {
+                case "playing":
+                    logger.warnx( "PlayingInstance.start", 
+                                  "Duplicate call to start. Sound: '" +
+                                  this.soundDatum.name + "'." );
+                    break;
 
-                group.setPlayingSound( this );
+                case "stopping":
+                    logger.warnx( "PlayingInstance.start", "Start is being " +
+                                  "called, but we're not done stopping yet. " +
+                                  "Is that bad?" );
+                    // deliberately drop through - we can restart it.
+                case "delayed":
+                case "stopped":
+                    var group = this.soundDatum.soundGroup;
+                    var playingSound = group ? group.getPlayingSound() 
+                                             : undefined;
+                    if ( !group ||
+                         !playingSound ||
+                         ( ( playingSound === this ) &&
+                           ( this.playStatus !== "stopping" ) ) ) {
+
+                        this.playStatus = "playing";
+                        group && group.setPlayingSound( this );
+                        this.sourceNode.start( 0 ); 
+
+                        // logger.logx( "startSoundInstance",
+                        //              "Sound started: '" + this.soundDatum.name + 
+                        //              "', Timestamp: " + timestamp() );
+
+                        fireSoundEvent( "soundStarted", this );
+                    } else {
+                        if ( ( playingSound !== this ) && 
+                             ( playingSound.playStatus != "stopping" ) ) {
+
+                            logger.errorx( "PlayingInstance.start", 
+                                          "We are trying to start a sound " + 
+                                          "('" + this.soundDatum.name + 
+                                          "') that is in a sound group, " + 
+                                          "but the currently playing sound " +
+                                          "in that group ('" + 
+                                          playingSound.soundDatum.name + 
+                                          "') isn't in the process of " +
+                                          "stopping. This is probably bad." );
+                        }
+
+                        // Because the sound API is asynchronous, this happens
+                        //  fairly often. The trick is to just stuff this 
+                        //  sound onto the front of the queue, and let it run
+                        //  whenever whatever is playing right now finishes.
+                        group.jumpQueue( this );
+                    }
+                    break;
+
+                case "delayCancelled":
+                    // don't start - we've been trumped.
+                    // NOTE: it's theoretically possible to re-queue the sound
+                    //  in between when the delay is cancelled and when it 
+                    //  finishes the delay and calls start.  In this case the
+                    //  sound might be delayed more than desired, but should 
+                    //  still eventually play (I think).  If you're restarting
+                    //  sounds alot, consider looking into this.  
+                    this.playStatus = "stopped";
+                    break;
+
+                default:
+                    logger.errorx( "PlayingInstance.stop", "Invalid " +
+                                   "playStatus: '" + this.playStatus + "'!" );
             }
-
-            this.sourceNode.start( 0 ); 
-            this.isStarted = true;
-
-            logger.logx( "startSoundInstance",
-                         "Sound started: '" + this.soundDatum.name + 
-                         "', Timestamp: " + timestamp() );
-
-            fireSoundEvent( "soundStarted", this );
         },
 
         startDelayed: function( delaySeconds ) {
@@ -594,13 +641,34 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 group.setDelayedStart();
             }
 
+            this.playStatus = "delayed";
             setTimeout( this.start, delaySeconds * 1000 );
         },
 
         stop: function() {
-            if ( this.isStarted ) {
-                this.sourceNode.stop();
-            } 
+            switch ( this.playStatus ) {
+                case "playing":
+                    this.playStatus = "stopping";
+                    this.sourceNode.stop();
+                    break;
+                case "delayed":
+                    this.playStatus = "delayCancelled";
+                    var group = this.soundDatum.soundGroup;
+                    if ( group ) {
+                        group.soundFinished( this );
+                    }
+                    break;
+                case "delayCancelled":
+                case "stopping":
+                case "stopped":
+                    logger.warnx( "PlayingInstance.stop", "Duplicate call " +
+                                  "to stop (or it was never started). " +
+                                  "Sound: '" + this.soundDatum.name + "'." );
+                    break;
+                default:
+                    logger.errorx( "PlayingInstance.stop", "Invalid " +
+                                   "playStatus: '" + this.playStatus + "'!" );
+            }
         },
     }
 
@@ -617,13 +685,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         name$: "PROTOTYPE",             // the name of the group, for debugging
         queue$: "PROTOTYPE",            // for storing queued sounds while they wait
         playingSound$: "PROTOTYPE",     // the sound that is currently playing
-        delayedStart$: "PROTOTYPE",     // if true, the sound that is currently playing hasn't actually started yet
 
         initialize: function( groupName ) {
             this.name$ = groupName;
             this.queue$ = [];
             this.playingSound$ = undefined;
-            this.delayedStart$ = false;
         },
 
         getPlayingSound: function() {
@@ -638,13 +704,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                    playingInstance.soundDatum.name +
                                    "', but it is already set to '" +
                                    this.playingSound$.soundDatum.name + "'!");
-                } else if ( !this.delayedStart$ ) {
+                } else if ( !this.playingSound$.playStatus !== "delayed" ) {
                     logger.errorx("SoundGroup.setPlayingSound", 
                                    "How are we re-setting the playing sound " +
-                                   "when we're not in a delay?" );
-                } else {
-                    this.delayedStart$ = false;
-                }
+                                   "when we're not in a delay? Sound: '" +
+                                   this.playingSound$.soundDatum.name + "'." );
+                } 
             } else {
                 this.playingSound$ = playingInstance;
             }
@@ -657,39 +722,25 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                "repored that it is finished, but we thought " +
                                "that '" + this.playingSound$.soundDatum.name + 
                                "' was playing!");
+
+                return;
             }
 
             this.playingSound$ = undefined;
         },
 
         stopPlayingSound: function() {
-            if ( this.playingSound$ ) {
-                if ( this.delayedStart$ ) {
-                    this.playingSound$ = undefined;
-                    this.delayedStart$ = false;
-
-                    if ( this.playingSound$.isPlaying ) {
-                        logger.errorx( "SoundGroup.stopPlayingSound", 
-                                       "How is the sound playing when " +
-                                       "delayedStart$ is still true? " +
-                                       "The sound was '" +
-                                       this.playingSound$.soundDatum.name + 
-                                       "'.");
-
-                        this.playingSound$.stop();
-                    }
-                } else {
-                    this.playingSound$.stop();
-                }
-            }
+            this.playingSound$ && this.playingSound$.stop();
         },
 
-        setDelayedStart: function() {
-            this.delayedStart$ = true;
-        },
-
+        // get in the back of the queue of sounds to play
         queueSound: function( playingInstance ) {
             this.queue$.unshift( playingInstance );
+        },
+
+        // jump to the front of the queue of sounds to play
+        jumpQueue: function( playingInstance ) {
+            this.queue$.push( playingInstance );
         },
 
         unQueueSound: function() {
