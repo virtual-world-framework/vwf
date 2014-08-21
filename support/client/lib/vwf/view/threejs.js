@@ -2349,7 +2349,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         if ( threeCam instanceof THREE.OrthographicCamera ) {
             var ray = this.projector.pickingRay( pickDirectionVector, threeCam );
-            intersects = ray.intersectObjects( sceneNode.threeScene.children );
+            intersects = ray.intersectObjects( sceneNode.threeScene.children, true );
         } else {
             this.projector.unprojectVector(pickDirectionVector, threeCam);
             var pos = new THREE.Vector3();
@@ -2410,7 +2410,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         if ( threeCam instanceof THREE.OrthographicCamera ) {
             var ray = this.projector.pickingRay( pickDirectionVector, threeCam );
-            intersects = ray.intersectObjects( sceneNode.threeScene.children );
+            intersects = ray.intersectObjects( sceneNode.threeScene.children, true );
         } else {
             this.projector.unprojectVector( pickDirectionVector, threeCam );
             var pos = new THREE.Vector3();
