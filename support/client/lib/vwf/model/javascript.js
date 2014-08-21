@@ -520,28 +520,36 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
             var node = this.nodes[nodeID];
 
-            if ( propertyGet ) {  // TODO: assuming javascript here; how to specify script type?
-                try {
-                    node.private.getters[propertyName] =
-                        functionFromHandler( { body: propertyGet } );
-                } catch ( e ) {
-                    this.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
-                        "exception evaluating getter:", utility.exceptionMessage( e ) );
-                }
+            var self = this;
+
+            var getter = propertyGet &&  // TODO: assuming javascript here; how to specify script type?
+                functionFromHandler( { body: propertyGet, type: scriptMediaType },
+                    logGetterException );
+
+            if ( getter ) {
+                node.private.getters[ propertyName ] = getter;
             } else {
-                node.private.getters[propertyName] = true; // set a guard value so that we don't call prototype getters on value properties
+                node.private.getters[ propertyName ] = true; // set a guard value so that we don't call prototype getters on value properties
             }
         
-            if ( propertySet ) {  // TODO: assuming javascript here; how to specify script type?
-                try {
-                    node.private.setters[propertyName] =
-                        functionFromHandler( { parameters: [ "value" ], body: propertySet } );
-                } catch ( e ) {
-                    this.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
-                        "exception evaluating setter:", utility.exceptionMessage( e ) );
-                }
+            var setter = propertySet &&  // TODO: assuming javascript here; how to specify script type?
+                functionFromHandler( { parameters: [ "value" ], body: propertySet, type: scriptMediaType },
+                    logSetterException );
+
+            if ( setter ) {
+                node.private.setters[ propertyName ] = setter;
             } else {
-                node.private.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
+                node.private.setters[ propertyName ] = true; // set a guard value so that we don't call prototype setters on value properties
+            }
+
+            function logGetterException( exception ) {
+                self.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
+                    "exception evaluating getter:", utility.exceptionMessage( exception ) );
+            }
+
+            function logSetterException( exception ) {
+                self.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
+                    "exception evaluating setter:", utility.exceptionMessage( exception ) );
             }
 
             return this.initializingProperty( nodeID, propertyName, propertyValue );
@@ -645,20 +653,20 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
             var node = this.nodes[nodeID];
 
-            if ( methodHandler.type === scriptMediaType ) {
+            var self = this;
 
-                try {
-                    var body = node.private.bodies[methodName] = functionFromHandler( methodHandler );
-                    return utility.merge( handlerFromFunction( body ), { type: scriptMediaType } );  // TODO: shortcut to avoid retrieving this?
-                } catch ( e ) {
-                    this.logger.warnx( "settingMethod", nodeID, methodName, methodHandler.parameters,
-                        "exception evaluating body:", utility.exceptionMessage( e ) );
-                }
+            var body = functionFromHandler( methodHandler, logException );
 
-            } else {
+            if ( body ) {
+                node.private.bodies[ methodName ] = body;
+                return handlerFromFunction( body );  // TODO: shortcut to avoid retrieving this?
+            } else  {
+                delete node.private.bodies[ methodName ];
+            }
 
-                delete node.private.bodies[methodName];
-
+            function logException( exception ) {
+                self.logger.warnx( "settingMethod", nodeID, methodName, methodHandler.parameters,
+                    "exception evaluating body:", utility.exceptionMessage( exception ) );
             }
 
             return undefined;
@@ -672,7 +680,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             var body = node.private.bodies && node.private.bodies[methodName];
 
             if ( body ) {
-                return utility.merge( handlerFromFunction( body ), { type: scriptMediaType } );
+                return handlerFromFunction( body );
             }
 
             return undefined;
@@ -723,34 +731,35 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             var node = this.nodes[nodeID];
             var eventContext = this.nodes[eventContextID];
 
+            var self = this;
+
             var listeners = node.private.listeners[eventName];
 
             if ( ! listeners ) {
                 listeners = node.private.listeners[eventName] = [];
             }
 
-            if ( eventHandler.type === scriptMediaType ) {
+            var handler = functionFromHandler( eventHandler, logException );
 
-                try {
+            if ( handler ) {
 
-                    listeners[ eventListenerID ] = {
-                        handler: functionFromHandler( eventHandler ),
-                        context: eventContext,
-                        phases: eventPhases,
-                    };
+                listeners[ eventListenerID ] = {
+                    handler: handler,
+                    context: eventContext,
+                    phases: eventPhases,
+                };
 
-                    return eventListenerID;
+                return eventListenerID;
 
-                } catch ( exception ) {
-
-                    this.logger.warnx( "addingEventListener", nodeID, eventName, eventListenerID,
-                        "exception evaluating listener:", utility.exceptionMessage( exception ) );
-                }
-
-            } else {
+            } else  {
 
                 delete listeners[ eventListenerID ];
 
+            }
+
+            function logException( exception ) {
+                self.logger.warnx( "addingEventListener", nodeID, eventName, eventListenerID,
+                    "exception evaluating listener:", utility.exceptionMessage( exception ) );
             }
 
             return undefined;
@@ -778,38 +787,39 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             var node = this.nodes[nodeID];
 
+            var self = this;
+
             var listeners = node.private.listeners[eventName];
 
             if ( ! listeners ) {
                 listeners = node.private.listeners[eventName] = [];
             }
 
-            if ( eventListener.type === scriptMediaType ) {
+            var handler = functionFromHandler( eventListener, logException );
 
-                try {
+            if ( handler ) {
 
-                    var listener = listeners[ eventListenerID ] = {
-                        handler: functionFromHandler( eventListener ),
-                        context: this.nodes[ eventListener.context ],
-                        phases: eventListener.phases,
-                    };
+                var listener = listeners[ eventListenerID ] = {
+                    handler: handler,
+                    context: this.nodes[ eventListener.context ],
+                    phases: eventListener.phases,
+                };
 
-                    return utility.merge( handlerFromFunction( listener.handler ), {
-                        type: scriptMediaType,
-                        context: listener.context && listener.context.id,
-                        phases: listener.phases,
-                    } );
 
-                } catch ( exception ) {
+                return utility.merge( handlerFromFunction( listener.handler ), {
+                    context: listener.context && listener.context.id,
+                    phases: listener.phases,
+                } );
 
-                    this.logger.warnx( "settingEventListener", nodeID, eventName, eventListenerID,
-                        "exception evaluating listener:", utility.exceptionMessage( exception ) );
-                }
-
-            } else {
+            } else  {
 
                 delete listeners[ eventListenerID ];
 
+            }
+
+            function logException( exception ) {
+                self.logger.warnx( "settingEventListener", nodeID, eventName, eventListenerID,
+                    "exception evaluating listener:", utility.exceptionMessage( exception ) );
             }
 
             return undefined;
@@ -828,7 +838,6 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                 var listener = listeners[ eventListenerID ];
 
                 return utility.merge( handlerFromFunction( listener.handler ), {
-                    type: scriptMediaType,
                     context: listener.context && listener.context.id,
                     phases: listener.phases,
                 } );
@@ -1220,7 +1229,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             set: unsettable ? undefined : function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.methods.node, or just node
                 self.kernel.setMethod( node.id, methodName,
-                    utility.merge( handlerFromFunction( value ), { type: scriptMediaType } ) );
+                    handlerFromFunction( value ) );
             },
 
             enumerable: true,
@@ -1281,18 +1290,18 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
                 var namespacedName = eventNamespace ? [ eventNamespace, eventName ] : eventName;
                 if ( typeof value === "function" || value instanceof Function ) {
                     self.kernel.addEventListener( node.id, namespacedName,
-                        utility.merge( handlerFromFunction( value ), { type: scriptMediaType } ), node.id );  // for container.*event* = function() { ... }, context is the target node
+                        handlerFromFunction( value ), node.id );  // for container.*event* = function() { ... }, context is the target node
                 } else if ( value.add ) {
                     if ( ! value.phases || value.phases instanceof Array ) {
                         self.kernel.addEventListener( node.id, namespacedName,
-                            utility.merge( handlerFromFunction( value.handler ), { type: scriptMediaType } ), value.context && value.context.id, value.phases );
+                            handlerFromFunction( value.handler ), value.context && value.context.id, value.phases );
                     } else {
                         self.kernel.addEventListener( node.id, namespacedName,
-                            utility.merge( handlerFromFunction( value.handler ), { type: scriptMediaType } ), value.context && value.context.id, [ value.phases ] );
+                            handlerFromFunction( value.handler ), value.context && value.context.id, [ value.phases ] );
                     }
                 } else if ( value.remove ) {
                     self.kernel.removeEventListener( node.id, namespacedName,
-                        utility.merge( handlerFromFunction( value.handler ), { type: scriptMediaType } ) );
+                        handlerFromFunction( value.handler ) );
                 } else if ( value.flush ) {
                     self.kernel.flushEventListeners( node.id, namespacedName,
                         value.context && value.context.id );
@@ -1312,45 +1321,56 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
     /// Convert a `Handler` to a JavaScript `function`.
     /// 
     /// @param {Handler} handler
+    /// @param {function} [errback]
     /// 
-    /// @returns {function}
+    /// @returns {function|undefined}
 
-    function functionFromHandler( handler ) {
+    function functionFromHandler( handler, errback /* exception */ ) {
 
-        var name = handler.name, parameters = handler.parameters, body = handler.body;
+        if ( handler.type === scriptMediaType ) {
 
-        var parameterString = parameters && parameters.length ?
-            " " + parameters.join( ", " ) + " " :
-            "";
+            var name = handler.name, parameters = handler.parameters, body = handler.body;
 
-        var prefix = "function(" + parameterString + ") {";
-        var suffix = "}";
+            var parameterString = parameters && parameters.length ?
+                " " + parameters.join( ", " ) + " " :
+                "";
 
-        var functionString, indentedBody;
+            var prefix = "function(" + parameterString + ") {";
+            var suffix = "}";
 
-        if ( body && body.length ) {
-            if ( body.charAt( body.length-1 ) === "\n" ) {
-                indentedBody = body.match( /^[^\S\n]/ ) ? body : body.replace( /^./gm, "    $&" );
-                functionString = prefix + "\n" + indentedBody + suffix + "\n";
+            var functionString, indentedBody;
+
+            if ( body && body.length ) {
+                if ( body.charAt( body.length-1 ) === "\n" ) {
+                    indentedBody = body.match( /^[^\S\n]/ ) ? body : body.replace( /^./gm, "    $&" );
+                    functionString = prefix + "\n" + indentedBody + suffix + "\n";
+                } else {
+                    functionString = prefix + " " + body + " " + suffix;
+                }
             } else {
-                functionString = prefix + " " + body + " " + suffix;
+                functionString = prefix + suffix;
             }
-        } else {
-            functionString = prefix + suffix;
+
+            try {
+                return eval( "( " + functionString + ")" );
+            } catch( exception ) {
+                errback && errback( exception );
+            }
+
         }
 
-        return eval( "( " + functionString + ")" );
+        return undefined;
     }
 
     /// Convert a JavaScript `function` to a `Handler`.
     /// 
     /// @param {function} funcshun
     /// 
-    /// @returns {Handler}
+    /// @returns {Handler|undefined}
 
     function handlerFromFunction( funcshun ) {
 
-        var name, parameters, body;
+        var name, parameters, body, type = scriptMediaType;
 
         var match, leadingMatch, trailingMatch, indention = "";
 
@@ -1410,14 +1430,17 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
                 body = body.replace( /\n?$/, "\n" );
             }
 
+            return {
+                name: name,
+                parameters: parameters,
+                body: body,
+                type: type,
+            };
+
         }
 
-        return {
-            name: name,
-            parameters: parameters,
-            body: body
-        };
 
+        return undefined;
     }
 
     /// The `application/javascript` media type for scripts that this driver recognizes.
