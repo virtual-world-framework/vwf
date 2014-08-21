@@ -60,6 +60,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var soundDefinition, successCallback, failureCallback, exitCallback;
             var soundName, soundNames, soundDatum, soundDefinition, soundInstance;
             var instanceIDs, instanceID, i, volume, fadeTime, fadeMethod, instanceHandle;
+            var soundGroup, groupName;
 
             switch( methodName ) {
                 // arguments: soundDefinition, successCallback, failureCallback
@@ -109,7 +110,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                       : { soundName: soundName, instanceID: -1 };
 
                 case "playSequence":
-                    var soundNames = params;
+                    soundNames = params;
                     soundDatum = getSoundDatum( soundNames[ 0 ] );
 
                     var playNext = function ( soundNames, current ){
@@ -147,8 +148,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 case "setMasterVolume":
                     masterVolume = params [ 0 ];
 
-                    for ( var soundName in soundData ){
-                        var soundDatum = soundData[ soundName ];
+                    for ( soundName in soundData ){
+                        soundDatum = soundData[ soundName ];
                         if ( soundDatum ) {
                             soundDatum.resetOnMasterVolumeChange();
                         }
@@ -185,25 +186,24 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( !instanceHandle.soundName ){
                         soundName = params [ 0 ];
                         soundDatum = getSoundDatum( soundName );
-                        if ( soundDatum ){
-                            soundDatum.stopDatumSoundInstances();
-                        }
+                        soundDatum && soundDatum.stopDatumSoundInstances();
                     } else {
                     //Otherwise stop the specific instance.
                         soundDatum = getSoundDatum( instanceHandle.soundName );
-                        if ( soundDatum ){
-                            soundDatum.stopInstance( instanceHandle );
-                        }
+                        soundDatum && soundDatum.stopInstance( instanceHandle );
                     }
                     return;
 
                 // arguments: none
                 case "stopAllSoundInstances":
-                    for ( var soundName in soundData ){
-                        var soundDatum = soundData[ soundName ];
-                        if ( soundDatum ) {
-                            soundDatum.stopDatumSoundInstances();
-                        }
+                    for ( groupName in soundGroups ) {
+                        soundGroup = soundGroups[ groupName ];
+                        soundGroup && soundGroup.clearQueue();
+                    }
+
+                    for ( soundName in soundData ) {
+                        soundDatum = soundData[ soundName ];
+                        soundDatum && soundDatum.stopDatumSoundInstances();
                     }
                     return undefined;
 
@@ -489,6 +489,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         break;
 
                     case "replace":
+                        group.clearQueue();
                         group.stopPlayingSound();
                         this.start();
                         break;
@@ -500,6 +501,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                        "') is in a group, but doesn't " +
                                        "have a valid replacement method!" );
 
+                        group.clearQueue();
                         group.stopPlayingSound();
                         this.start();
                 }
@@ -746,6 +748,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         unQueueSound: function() {
             return this.queue$.pop();
         },
+
+        clearQueue: function() {
+            this.queue$ = [];
+        }
 
         hasQueuedSounds: function() {
             return queue$.length > 0;
