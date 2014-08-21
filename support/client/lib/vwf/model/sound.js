@@ -28,7 +28,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             // (it's created in the view)
             this.state.soundManager = {};
             soundDriver = this;
-            masterVolume = this.masterVolume;
             logger = this.logger;
 
             try {
@@ -61,7 +60,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var soundDefinition, successCallback, failureCallback, exitCallback;
             var soundName, soundNames, soundDatum, soundDefinition, soundInstance;
             var instanceIDs, instanceID, i, volume, fadeTime, fadeMethod, instanceHandle;
-            var isLayered;
 
             switch( methodName ) {
                 // arguments: soundDefinition, successCallback, failureCallback
@@ -87,35 +85,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         return undefined;
                     }
 
-                    if ( !soundDefinition.isLayered && 
-                         ( soundDefinition.soundURL === undefined ) ) {
-                        logger.errorx( "loadSound", "The sound definition for '" + soundName +
-                                       "' must contain soundURL." );
-                        return undefined;
-                    }
-                    // if ( soundDefinition.initialVolume && 
-                    //      ( soundDefinition.initialVolume === 0 ) ) {
-                    //     logger.warnx( "loadSound", "Your initial volume for '" + soundName +
-                    //                   "' is 0." );
-                    // }
-                    // Create the sound.
-                    // NOTE: the sound file is loaded into a buffer asynchronously, so the
-                    // sound will not be ready to play immediately.  That's why we have the
-                    // callbacks.
-
-                    if ( !soundDefinition.isLayered ) {
-
-                        soundData[ soundName ] = new SoundDatum( soundDefinition, 
-                                                                 successCallback, 
-                                                                 failureCallback );
-
-                    } else {
-
-                        soundData[ soundName ] = new LayeredSoundDatum( soundDefinition, 
-                                                                        successCallback, 
-                                                                        failureCallback );
-
-                    }
+                    soundData[ soundName ] = new SoundDatum( soundDefinition, 
+                                                             successCallback, 
+                                                             failureCallback );
 
                     return;
 
@@ -247,135 +219,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     } );
 
-    function LayeredSoundDatum( layeredSoundDefinition, successCallback, failureCallback ) {
-        this.initialize( layeredSoundDefinition, successCallback, failureCallback );
-        return this;
-    }
-
-    LayeredSoundDatum.prototype = {
-        constructor: LayeredSoundDatum,
-
-        name: undefined,
-        soundDefinitions: null,
-
-        playOnLoad: false,
-
-        // NOTE: these two arrays should be synchronized - for any given index,
-        //   the layer name should be the name of the instance handle's sound.
-        layerNames: null,
-        instanceHandles: null,
-
-        initialize: function ( layeredSoundDefinition, successCallback, failureCallback ) {
-
-            this.name = layeredSoundDefinition.soundName;
-            this.soundDefinitions = layeredSoundDefinition.soundDefinitions;
-            this.playOnLoad = layeredSoundDefinition.playOnLoad;
-            this.layerNames = [];
-            this.instanceHandles = [];
-
-            var soundDefinitionObjects = Object.keys( layeredSoundDefinition.soundDefinitions );
-
-            for ( var k = 0; k < soundDefinitionObjects.length; ++k ) {
-
-                var doneLoading = function() {
-                    successCallback && successCallback();
-                }
-
-                var failureToLoad = function() {
-                    failureCallback && failureCallback();
-                }
-
-                // TODO: I doubt this will work because they won't all load at
-                //   the same time, but we need to synchronize them.
-                if ( this.playOnLoad === true ) {
-                    layeredSoundDefinition.soundDefinitions[k].playOnLoad = true;
-                }
-
-                var layerName = layeredSoundDefinition.soundDefinitions[k].soundName;
-                this.layerNames.push( layerName );
-                this.instanceHandles.push( undefined );
-
-                if ( soundData[ layerName ] ) {
-                    logger.warnx( "LayeredSoundDatum.initialize", 
-                                  "Duplicate sound name for layer '" +
-                                  layerName + "'." );
-                } else {
-                    // Again... we're going to call doneLoading for each layer, 
-                    //   which doesn't seem right...
-                    soundData[ layerName ] = new SoundDatum( layeredSoundDefinition.soundDefinitions[k], doneLoading , failureToLoad );
-                }
-            }
-
-            // TODO: We haven't really succeeded until every sound has loaded -and
-            //   at this point, none of them have!!
-            successCallback && successCallback();
-        },
-
-        playSound: function ( exitCallback ) {
-            if ( this.isPlaying() ) {
-                logger.warnx( "LayeredSoundDatum.playSound", "Sound '" + 
-                              this.name + "'is already playing, and layered " +
-                              "sounds don't allow multiplay." );
-                return { soundName: this.name, instanceID: -1 };
-            }
-
-            for ( var i = 0; i < this.layerNames.length; ++i ) {
-                var layerDatum = soundData[ this.layerNames[ i ] ];
-                if ( !layerDatum ) {
-                    logger.errorx( "LayeredSoundDatum.playSound", "Missing " +
-                                   "sound datum: '" + this.layerNames[ i ] +
-                                   "'." );
-                }
-
-                var handle = layerDatum.playSound();
-                this.instanceHandles[ i ] = handle;
-            }
-
-            return { soundName: this.name, instanceID: 0 };
-        },
-
-        stopInstance: function () {
-            for ( var i = 0; i < this.layerNames.length; ++i ) {
-                var layerDatum = soundData[ this.layerNames[ i ] ];
-                layerDatum.stopInstance( this.instanceHandles[ i ] );
-                this.instanceHandles[ i ] = undefined;
-            }
-        },
-
-        stopDatumSoundInstances: function () {
-            // There is never more than one instance of a layered sound.
-            this.stopInstance();
-        },
-
-        resetOnMasterVolumeChange: function () {
-            for ( var i = 0; i < this.layerNames.length; ++i ) {
-                var layerDatum = soundData[ this.layerNames[ i ] ];
-                layerDatum.resetOnMasterVolumeChange();
-            }
-        },
-
-        setVolume: function( id, volume, duration, type ) {
-            for ( var i = 0; i < this.layerNames.length; ++i ) {
-                var layerDatum = soundData[ this.layerNames[ i ] ];
-                layerDatum.setVolume( this.instanceHandles[ i ], volume, 
-                                      duration, type);
-            }
-        },
-
-        isPlaying: function() {
-            for ( var x in this.layers ) {
-                if ( this.instanceHandles[ x ] ) {
-                    return true;
-                }
-            }
-            return false;
-         },
-
-         // TODO: right now there is no way to play individual layers.  We might
-         //   want to work on that, since that's the whole point of having
-         //   layered sounds. :)
-    }
-
     function SoundDatum( soundDefinition, successCallback, failureCallback ) {
         this.initialize( soundDefinition, successCallback, failureCallback );
         return this;
@@ -397,7 +240,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         initialVolume: 1.0,
         isLooping: false,
         allowMultiplay: false,
-        volumeAdjustment: 1.0,
         soundDefinition: null,
         playOnLoad: false,
 
@@ -424,10 +266,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 this.allowMultiplay = soundDefinition.allowMultiplay;
             }
 
-            if ( this.soundDefinition.volumeAdjustment !== undefined ) {
-                this.volumeAdjustment = soundDefinition.volumeAdjustment;
-            }
-
             if (this.soundDefinition.initialVolume !== undefined ) {
                 this.initialVolume = soundDefinition.initialVolume;
             }
@@ -438,21 +276,21 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             this.subtitle = this.soundDefinition.subtitle;
 
-            this.soundGroup = this.soundDefinition.soundGroup;
-            if ( this.soundGroup ) {
-                if ( !soundGroups[ this.soundGroup ] ) {
-                    soundGroups[ this.soundGroup ] = { soundData: {}, queue: [] };
+            var soundGroupName = this.soundDefinition.soundGroup;
+            if ( soundGroupName ) {
+                if ( !soundGroups[ soundGroupName ] ) {
+                    soundGroups[ soundGroupName ] = 
+                        new SoundGroup( soundGroupName );
                 }
 
-                soundGroups[ this.soundGroup ].soundData[ this.name ] = this;
+                this.soundGroup = soundGroups[ soundGroupName ];
             }
-
-            this.groupReplacementMethod = this.soundDefinition.groupReplacementMethod;
 
             if ( this.soundDefinition.queueDelayTime !== undefined ) {
                 this.queueDelayTime = this.soundDefinition.queueDelayTime;
             }
 
+            this.groupReplacementMethod = this.soundDefinition.groupReplacementMethod;
             if ( this.groupReplacementMethod && !this.soundGroup ) {
                 logger.warnx( "SoundDatum.initialize", 
                               "You defined a replacement method but not a sound " +
@@ -530,8 +368,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         resetOnMasterVolumeChange: function () {
             for ( var instanceID in this.playingInstances ) {
                 var soundInstance = this.playingInstances[ instanceID ];
-                if ( !!soundInstance ) {
-                    soundInstance.gainNode.gain.value = this.initialVolume * masterVolume;
+                if ( soundInstance ) {
+                    soundInstance.resetVolume();
                 }
             }
         },
@@ -566,7 +404,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         sourceNode: undefined,
         gainNode: undefined,
 
-        isStarted: false, 
+        // we need to know the volume for this node *before* the master volume
+        //  adjustment is applied.  This is that value.
+        localVolume$: undefined,
+
+        // stopped, delayed, playing, stopping, delayCancelled
+        playStatus: undefined, 
 
         initialize: function( soundDatum, id, exitCallback, successCallback ) {
             // NOTE: from http://www.html5rocks.com/en/tutorials/webaudio/intro/:
@@ -581,31 +424,35 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.id = id;
             this.soundDatum = soundDatum;
 
+            this.playStatus = "stopped";
+
             this.sourceNode = context.createBufferSource();
             this.sourceNode.buffer = this.soundDatum.buffer;
             this.sourceNode.loop = this.soundDatum.isLooping;
 
+            this.localVolume$ = this.soundDatum.initialVolume;
             this.gainNode = context.createGain();
-            this.gainNode.gain.value = this.soundDatum.initialVolume * masterVolume;
-
             this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );
+            this.resetVolume();
 
-            var group = soundGroups[ soundDatum.soundGroup ];
+            var group = soundDatum.soundGroup;
 
             // Browsers will handle onended differently depending on audio 
             //   filetype - needs support.
             var thisInstance = this;
             this.sourceNode.onended =  function() {
-                thisInstance.isStarted = false;
+                thisInstance.playStatus = "stopped";
                 fireSoundEvent( "soundFinished", thisInstance );
 
                 // logger.logx( "PlayingInstance.onended",
                 //              "Sound ended: '" + thisInstance.soundDatum.name +
                 //              "', Timestamp: " + timestamp() );
 
-                if ( group && ( group.queue.length > 0 ) ) {
-                    var nextInstance = group.queue.pop();
+                if ( group ) {
+                    group.soundFinished( thisInstance );
+
+                    var nextInstance = group.unQueueSound();
                     if ( nextInstance ) {
                         var delaySeconds = nextInstance.soundDatum.queueDelayTime;
 
@@ -616,16 +463,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         //              ", Timestamp: " + timestamp() );
 
                         if ( delaySeconds > 0) {
-                            logger.warnx( "PlayingInstance.onended",
-                                          "Setting a queueDelayTime may result " +
-                                          "in more than one VO playing at the " +
-                                          "same time.");
-                            setTimeout( function() { 
-                                            startSoundInstance( nextInstance ); 
-                                        }, 
-                                        delaySeconds * 1000 );
+                            nextInstance.startDelayed( delaySeconds );
                         } else {
-                            startSoundInstance( nextInstance ); 
+                            nextInstance.start();
                         }
                     }
                 }
@@ -640,73 +480,276 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         // We're only going to play the sound if there isn't 
                         //   already a sound from this group playing.  
                         //   Otherwise, add it to a queue to play later.
-                        if ( isGroupPlaying( group ) ) {
-                            group.queue.unshift( this );
+                        if ( group.getPlayingSound() )  {
+                            group.queueSound( this );
                         } else {
-                            startSoundInstance( this );
+                            this.start();
                         }
 
                         break;
 
                     case "replace":
-                        stopSoundGroup( group );
-                        startSoundInstance( this );
+                        group.stopPlayingSound();
+                        this.start();
                         break;
 
                     default:
                         logger.errorx( "PlayingInstance.initialize",
-                                       "This sound ('" + thisInstance.soundDatum.name + 
+                                       "This sound ('" + 
+                                       thisInstance.soundDatum.name + 
                                        "') is in a group, but doesn't " +
                                        "have a valid replacement method!" );
 
-                        stopSoundGroup( group );
-                        startSoundInstance( this );
+                        group.stopPlayingSound();
+                        this.start();
                 }
             } else {
-                startSoundInstance( this );
+                this.start();
             }
+        },
+
+        getVolume: function() {
+            return this.localVolume$ * ( masterVolume !== undefined ? masterVolume : 1.0 );
         },
 
         setVolume: function( volume, fadeTime, fadeMethod ) {
             if ( !volume ) {
-                logger.errorx( "setVolume", "The 'setVolume' method " +
-                               "requires a volume." );
+                logger.errorx( "PlayingInstance.setVolume", "The 'setVolume' " +
+                               "method requires a volume." );
                 return;
             }
 
-            var thisPlayingInstance = this;
+            this.localVolume$ = volume;
 
-            var targetVolume = volume * masterVolume;
-             fadeTime = fadeTime ? fadeTime : 0;
-             fadeMethod = fadeMethod ? fadeMethod : "linear";
+            if ( !fadeTime || ( fadeTime <= 0 ) ) {
+                fadeMethod = "immediate";
+            } 
 
-            if ( fadeTime <= 0 ) {
-                this.sourceNode.gain.value = targetVolume;
-            } else {
-                var endTime = context.currentTime + fadeTime;
-                var now = context.currentTime;
-                this.gainNode.gain.cancelScheduledValues( now );
+            var now = context.currentTime;
+            this.gainNode.gain.cancelScheduledValues( now );
 
-                switch( fadeMethod ) {
-                    case "linear":
-                        this.gainNode.gain.linearRampToValueAtTime( volume, endTime );
-                        break;
-                    case "exponential":
-                        this.gainNode.gain.setTargetValueAtTime( volume, now, fadeTime );
-                        break;
-                    default:
-                        logger.errorx( "setVolume", "Unknown fade method: '" +
-                                       fadeMethod + "'.  Using a linear fade." );
-                        this.sourceNode.gain.linearRampToValueAtTime( volume, endTime );
-                }
+            switch( fadeMethod ) {
+                case "linear":
+                    var endTime = now + fadeTime;
+                    this.gainNode.gain.linearRampToValueAtTime( this.getVolume(), 
+                                                                endTime );
+                    break;
+                case "exponential":
+                case undefined:
+                    this.gainNode.gain.setTargetValueAtTime( this.getVolume(), 
+                                                             now, fadeTime );
+                    break;
+                case "immediate":
+                    this.gainNode.gain.value = this.getVolume();
+                    break;
+                default:
+                    logger.errorx( "PlayingInstance.setVolume", "Unknown fade method: '" +
+                                   fadeMethod + "'.  Using an exponential " +
+                                   "fade." );
+                    this.gainNode.gain.setTargetValueAtTime( this.getVolume(), 
+                                                             now, fadeTime );
             }
         },
 
+        resetVolume: function() {
+            this.setVolume(this.localVolume$);
+        },
+
+        start: function() {
+            switch ( this.playStatus ) {
+                case "playing":
+                    logger.warnx( "PlayingInstance.start", 
+                                  "Duplicate call to start. Sound: '" +
+                                  this.soundDatum.name + "'." );
+                    break;
+
+                case "stopping":
+                    logger.warnx( "PlayingInstance.start", "Start is being " +
+                                  "called, but we're not done stopping yet. " +
+                                  "Is that bad?" );
+                    // deliberately drop through - we can restart it.
+                case "delayed":
+                case "stopped":
+                    var group = this.soundDatum.soundGroup;
+                    var playingSound = group ? group.getPlayingSound() 
+                                             : undefined;
+                    if ( !group ||
+                         !playingSound ||
+                         ( ( playingSound === this ) &&
+                           ( this.playStatus !== "stopping" ) ) ) {
+
+                        this.playStatus = "playing";
+                        group && group.setPlayingSound( this );
+                        this.sourceNode.start( 0 ); 
+
+                        // logger.logx( "startSoundInstance",
+                        //              "Sound started: '" + this.soundDatum.name + 
+                        //              "', Timestamp: " + timestamp() );
+
+                        fireSoundEvent( "soundStarted", this );
+                    } else {
+                        if ( ( playingSound !== this ) && 
+                             ( playingSound.playStatus != "stopping" ) ) {
+
+                            logger.errorx( "PlayingInstance.start", 
+                                          "We are trying to start a sound " + 
+                                          "('" + this.soundDatum.name + 
+                                          "') that is in a sound group, " + 
+                                          "but the currently playing sound " +
+                                          "in that group ('" + 
+                                          playingSound.soundDatum.name + 
+                                          "') isn't in the process of " +
+                                          "stopping. This is probably bad." );
+                        }
+
+                        // Because the sound API is asynchronous, this happens
+                        //  fairly often. The trick is to just stuff this 
+                        //  sound onto the front of the queue, and let it run
+                        //  whenever whatever is playing right now finishes.
+                        group.jumpQueue( this );
+                    }
+                    break;
+
+                case "delayCancelled":
+                    // don't start - we've been trumped.
+                    // NOTE: it's theoretically possible to re-queue the sound
+                    //  in between when the delay is cancelled and when it 
+                    //  finishes the delay and calls start.  In this case the
+                    //  sound might be delayed more than desired, but should 
+                    //  still eventually play (I think).  If you're restarting
+                    //  sounds alot, consider looking into this.  
+                    this.playStatus = "stopped";
+                    break;
+
+                default:
+                    logger.errorx( "PlayingInstance.stop", "Invalid " +
+                                   "playStatus: '" + this.playStatus + "'!" );
+            }
+        },
+
+        startDelayed: function( delaySeconds ) {
+            var group = this.soundDatum.soundGroup;
+            if ( group ) {
+                if ( group.getPlayingSound() ) {
+                    logger.errorx( "PlayingInstance.startDelayed", 
+                                   "How is there already a sound playing " +
+                                   "when startDelayed() is called?" );
+                    return;
+                }
+
+                group.setPlayingSound( this );
+                group.setDelayedStart();
+            }
+
+            this.playStatus = "delayed";
+            setTimeout( this.start, delaySeconds * 1000 );
+        },
+
         stop: function() {
-            if ( this.isStarted ) {
-                this.sourceNode.stop();
-            } 
-        }
+            switch ( this.playStatus ) {
+                case "playing":
+                    this.playStatus = "stopping";
+                    this.sourceNode.stop();
+                    break;
+                case "delayed":
+                    this.playStatus = "delayCancelled";
+                    var group = this.soundDatum.soundGroup;
+                    if ( group ) {
+                        group.soundFinished( this );
+                    }
+                    break;
+                case "delayCancelled":
+                case "stopping":
+                case "stopped":
+                    logger.warnx( "PlayingInstance.stop", "Duplicate call " +
+                                  "to stop (or it was never started). " +
+                                  "Sound: '" + this.soundDatum.name + "'." );
+                    break;
+                default:
+                    logger.errorx( "PlayingInstance.stop", "Invalid " +
+                                   "playStatus: '" + this.playStatus + "'!" );
+            }
+        },
+    }
+
+    function SoundGroup( groupName ) {
+        this.initialize( groupName );
+        return this;
+    }
+
+    SoundGroup.prototype = {
+        constructor: SoundGroup,
+
+        // Trying out a new convention - make the values in the prototype be
+        //  something obvious, so I can tell if they don't get reset.
+        name$: "PROTOTYPE",             // the name of the group, for debugging
+        queue$: "PROTOTYPE",            // for storing queued sounds while they wait
+        playingSound$: "PROTOTYPE",     // the sound that is currently playing
+
+        initialize: function( groupName ) {
+            this.name$ = groupName;
+            this.queue$ = [];
+            this.playingSound$ = undefined;
+        },
+
+        getPlayingSound: function() {
+            return this.playingSound$;
+        },
+
+        setPlayingSound: function( playingInstance ) {
+            if ( this.playingSound$ ) {
+                if ( this.playingSound$ !== playingInstance ) {
+                    logger.errorx( "SoundGroup.setPlayingSound", 
+                                   "Trying to set playingSound to '" + 
+                                   playingInstance.soundDatum.name +
+                                   "', but it is already set to '" +
+                                   this.playingSound$.soundDatum.name + "'!");
+                } else if ( !this.playingSound$.playStatus !== "delayed" ) {
+                    logger.errorx("SoundGroup.setPlayingSound", 
+                                   "How are we re-setting the playing sound " +
+                                   "when we're not in a delay? Sound: '" +
+                                   this.playingSound$.soundDatum.name + "'." );
+                } 
+            } else {
+                this.playingSound$ = playingInstance;
+            }
+        },
+
+        soundFinished: function( playingInstance ) {
+            if ( playingInstance !== this.playingSound$ ) {
+                logger.errorx( "SoundGroup.soundFinished", "'" + 
+                               playingInstance.soundDatum.name + "' just " +
+                               "repored that it is finished, but we thought " +
+                               "that '" + this.playingSound$.soundDatum.name + 
+                               "' was playing!");
+
+                return;
+            }
+
+            this.playingSound$ = undefined;
+        },
+
+        stopPlayingSound: function() {
+            this.playingSound$ && this.playingSound$.stop();
+        },
+
+        // get in the back of the queue of sounds to play
+        queueSound: function( playingInstance ) {
+            this.queue$.unshift( playingInstance );
+        },
+
+        // jump to the front of the queue of sounds to play
+        jumpQueue: function( playingInstance ) {
+            this.queue$.push( playingInstance );
+        },
+
+        unQueueSound: function() {
+            return this.queue$.pop();
+        },
+
+        hasQueuedSounds: function() {
+            return queue$.length > 0;
+        },
     }
 
     function getSoundDatum( soundName ) {
@@ -718,7 +761,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         var soundDatum = soundData[ soundName ];
         if ( soundDatum === undefined ) {
-            logger.errorx( "getSoundDatum", "Sound '" + soundName + "' not found." );
+            logger.errorx( "getSoundDatum", "Sound '" + soundName + 
+                           "' not found." );
             return undefined;
         }
 
@@ -727,15 +771,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function getSoundInstance( instanceHandle ) {
         if ( instanceHandle === undefined ) {
-            logger.errorx( "getSoundInstance", "The 'GetSoundInstance' method " +
-                           "requires the instance ID." );
+            logger.errorx( "getSoundInstance", "The 'GetSoundInstance' " +
+                           "method requires the instance ID." );
             return undefined;
         }
 
         if ( ( instanceHandle.soundName === undefined ) || 
              ( instanceHandle.instanceID === undefined ) ) {
-            logger.errorx( "getSoundInstance", "The instance handle must contain " +
-                           "soundName and instanceID values");
+            logger.errorx( "getSoundInstance", "The instance handle must " +
+                           "contain soundName and instanceID values");
             return undefined;
         }
 
@@ -749,42 +793,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         }
     }
 
-    function startSoundInstance( instance ) {
-        instance.sourceNode.start( 0 ); 
-        instance.isStarted = true;
-
-        // logger.logx( "startSoundInstance",
-        //              "Sound started: '" + instance.soundDatum.name + 
-        //              "', Timestamp: " + timestamp() );
-
-        fireSoundEvent( "soundStarted", instance );
-    }
-
     function fireSoundEvent( eventString, instance ) {
         vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID, 
                                    eventString,
                                    [ { soundName: instance.soundDatum.name, 
                                        instanceID: instance.id } ] );
-    }
-
-    function isGroupPlaying( group ) {
-        for ( var soundName in group.soundData ) {
-            var sound = group.soundData[ soundName ];
-
-            if ( sound && sound.isPlaying() ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function stopSoundGroup( group ) {
-        group.queue = [];
-
-        for ( var soundName in group.soundData ) {
-            var sound = group.soundData[ soundName ];
-            sound && sound.stopDatumSoundInstances();
-        }
     }
 
     function timestamp() {
