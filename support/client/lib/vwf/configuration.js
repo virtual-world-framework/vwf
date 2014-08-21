@@ -171,10 +171,11 @@ define( function() {
 
         default: {
             "environment": require.toUrl( "dummy" ).indexOf( "../lib/" ) == 0 ? "testing" : "development",
-            "log-level": "warn",        // logger threshold
-            "random-seed": +new Date,   // pseudorandom number generator seed
-            "randomize-ids": false,     // randomize IDs to discourage assumptions about ID allocation
-            "humanize-ids": false,      // append recognizable strings to node IDs
+            "log-level": "warn",                  // logger threshold
+            "random-seed": +new Date,             // pseudorandom number generator seed
+            "randomize-ids": false,               // randomize IDs to discourage assumptions about ID allocation
+            "humanize-ids": false,                // append recognizable strings to node IDs
+            "preserve-script-closures": false,    // retain method/event closures by not serializing functions (breaks replication, persistence)
         },
 
         /// Changes for production environments.

@@ -5010,6 +5010,8 @@ if ( ! childComponent.source ) {
 
             if ( typeof handler !== "object" || handler instanceof Array ) {
                 handler = { body: handler };
+            } else if ( require( "vwf/configuration" ).active[ "preserve-script-closures" ] && ( typeof handler == "function" || handler instanceof Function ) ) {
+                handler = { body: handler };
             }
 
             // Fill in a default media type if `type` is not provided. A `body` of type `string` is

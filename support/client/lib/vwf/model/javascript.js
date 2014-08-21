@@ -20,8 +20,10 @@
 /// @requires vwf/model
 /// @requires vwf/kernel/utility
 /// @requires vwf/utility
+/// @requires vwf/configuration
 
-define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function( module, model, kutility, utility ) {
+define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility", "vwf/configuration" ],
+        function( module, model, kutility, utility, configuration ) {
 
     var exports = model.load( module, {
 
@@ -655,7 +657,8 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
             var self = this;
 
-            var body = functionFromHandler( methodHandler, logException );
+            var body = functionFromHandler( methodHandler, logException,
+                configuration.active[ "preserve-script-closures" ] );
 
             if ( body ) {
                 node.private.bodies[ methodName ] = body;
@@ -739,7 +742,8 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                 listeners = node.private.listeners[eventName] = [];
             }
 
-            var handler = functionFromHandler( eventHandler, logException );
+            var handler = functionFromHandler( eventHandler, logException,
+                configuration.active[ "preserve-script-closures" ] );
 
             if ( handler ) {
 
@@ -795,7 +799,8 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                 listeners = node.private.listeners[eventName] = [];
             }
 
-            var handler = functionFromHandler( eventListener, logException );
+            var handler = functionFromHandler( eventListener, logException,
+                configuration.active[ "preserve-script-closures" ] );
 
             if ( handler ) {
 
@@ -804,7 +809,6 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                     context: this.nodes[ eventListener.context ],
                     phases: eventListener.phases,
                 };
-
 
                 return utility.merge( handlerFromFunction( listener.handler ), {
                     context: listener.context && listener.context.id,
@@ -1229,7 +1233,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             set: unsettable ? undefined : function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.methods.node, or just node
                 self.kernel.setMethod( node.id, methodName,
-                    handlerFromFunction( value ) );
+                    handlerFromFunction( value, configuration.active[ "preserve-script-closures" ] ) );
             },
 
             enumerable: true,
@@ -1290,18 +1294,18 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
                 var namespacedName = eventNamespace ? [ eventNamespace, eventName ] : eventName;
                 if ( typeof value === "function" || value instanceof Function ) {
                     self.kernel.addEventListener( node.id, namespacedName,
-                        handlerFromFunction( value ), node.id );  // for container.*event* = function() { ... }, context is the target node
+                        handlerFromFunction( value, configuration.active[ "preserve-script-closures" ] ), node.id );  // for container.*event* = function() { ... }, context is the target node
                 } else if ( value.add ) {
                     if ( ! value.phases || value.phases instanceof Array ) {
                         self.kernel.addEventListener( node.id, namespacedName,
-                            handlerFromFunction( value.handler ), value.context && value.context.id, value.phases );
+                            handlerFromFunction( value.handler, configuration.active[ "preserve-script-closures" ] ), value.context && value.context.id, value.phases );
                     } else {
                         self.kernel.addEventListener( node.id, namespacedName,
-                            handlerFromFunction( value.handler ), value.context && value.context.id, [ value.phases ] );
+                            handlerFromFunction( value.handler, configuration.active[ "preserve-script-closures" ] ), value.context && value.context.id, [ value.phases ] );
                     }
                 } else if ( value.remove ) {
                     self.kernel.removeEventListener( node.id, namespacedName,
-                        handlerFromFunction( value.handler ) );
+                        handlerFromFunction( value.handler, configuration.active[ "preserve-script-closures" ] ) );
                 } else if ( value.flush ) {
                     self.kernel.flushEventListeners( node.id, namespacedName,
                         value.context && value.context.id );
@@ -1318,16 +1322,30 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     }
 
-    /// Convert a `Handler` to a JavaScript `function`.
+    /// Convert a `Handler` to a JavaScript function.
     /// 
     /// @param {Handler} handler
+    ///   A `Handler` to convert to a function.
     /// @param {function} [errback]
+    ///   If `errback` is provided, any exception that occurs during the conversion will be passed
+    ///   to `errback` as `errback( exception )`.
+    /// @param {boolean} [bypass]
+    ///   Expect that `handler.body` is a function object instead of the string representation of
+    ///   the function body. Return the function without any conversion. This parameter should only
+    ///   be used in support of the backwards-compatability `preserve-script-closures` configuration
+    ///   option.
     /// 
     /// @returns {function|undefined}
+    ///   The function generated from `handler`, or `undefined` if `handler` does not describe a
+    ///   JavaScript function or if the function could not be converted.
 
-    function functionFromHandler( handler, errback /* exception */ ) {
+    function functionFromHandler( handler, errback /* exception */, bypass ) {
 
-        if ( handler.type === scriptMediaType ) {
+        if ( bypass && ( typeof handler.body === "function" || handler.body instanceof Function ) ) {
+
+            return handler.body;
+
+        } else if ( handler.type === scriptMediaType ) {
 
             var name = handler.name, parameters = handler.parameters, body = handler.body;
 
@@ -1365,16 +1383,30 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
     /// Convert a JavaScript `function` to a `Handler`.
     /// 
     /// @param {function} funcshun
+    ///   A function to convert to a `Handler`.
+    /// @param {boolean} [bypass]
+    ///   Create an object having the form of a `Handler`, but with the `body` field set to the
+    ///   function object instead of the string representation of the function body. The `name`,
+    ///   `parameters`, and `type` fields will not be set. This parameter should only be used in
+    ///   support of the backwards-compatability `preserve-script-closures` configuration option.
     /// 
     /// @returns {Handler|undefined}
+    ///   The `Handler` generated from `funcshun`, or `undefined` if the function's `toString` could
+    ///   not be parsed.
 
-    function handlerFromFunction( funcshun ) {
+    function handlerFromFunction( funcshun, bypass ) {
 
         var name, parameters, body, type = scriptMediaType;
 
         var match, leadingMatch, trailingMatch, indention = "";
 
-        if ( match = /* assignment! */ functionRegex.exec( funcshun.toString() ) ) {
+        if ( bypass ) {
+
+            return {
+                body: funcshun,
+            };
+
+        } else if ( match = /* assignment! */ functionRegex.exec( funcshun.toString() ) ) {
 
             name = match[1];
 
@@ -1438,7 +1470,6 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             };
 
         }
-
 
         return undefined;
     }
