@@ -82,6 +82,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 }
             }
 
+            this.state.executeRecursively = function( threeObject, callback ) {
+                if ( threeObject !== undefined ) {
+                    threeObject.traverse( callback );    
+                }
+            }
+
+
             // turns on logger debugger console messages 
             this.debug = {
                 "creation": false,
@@ -91,6 +98,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 "properties": false,
                 "setting": false,
                 "getting": false,
+                "methods": false,
                 "prototypes": false
             };
         },
@@ -111,6 +119,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             if ( this.debug.creation ) {
                 this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             }
+
+            console.info( childName + ": " + childID );
 
             // If the node being created is a prototype, construct it and add it to the array of prototypes,
             // and then return
@@ -674,7 +684,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     else if ( propertyName == 'visible' )
                     {
                         value = Boolean( propertyValue );
-                        self.state.setMeshPropertyRecursively( threeObject, "visible", value );
+                        if ( threeObject.children.length > 0 ) {
+                            for ( var i = 0; i < threeObject.children.length; i++ ) {
+                                if ( threeObject.children[ i ].vwfID === undefined ) {
+                                    
+                                    // if we use value inside of the function defined below
+                                    // will that work??
+                                    
+                                    if ( value ) {
+                                        this.state.executeRecursively( threeObject.children[ i ], function( obj ) { obj.visible = true; } );
+                                    } else {
+                                        this.state.executeRecursively( threeObject.children[ i ], function( obj ) { obj.visible = false; } );
+                                    }
+                                }
+                            }
+                        }
+                        //self.state.setMeshPropertyRecursively( threeObject, "visible", value );
                     }
                     else if ( propertyName == 'castShadows' )
                     {
@@ -686,6 +711,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         for(var i = 0, il = meshes.length; i < il; i++) {
                             meshes[i].castShadow = value;
                         }
+
+                        // for instance, here's another example
+                        // if ( value ) {
+                        //     this.state.executeRecursively( threeObject, function( obj ) { 
+                        //         if ( obj instanceof THREE.Mesh ) {
+                        //             obj.castShadow = true;                                     
+                        //         }
+                        //     } );
+                        // } else {
+                        //     this.state.executeRecursively( threeObject, function( obj ) { 
+                        //         if ( obj instanceof THREE.Mesh ) {
+                        //             obj.castShadow = false;                                     
+                        //         }
+                        //     } );
+                        // }
+
                     }
                     else if ( propertyName == 'receiveShadows' )
                     {
@@ -1806,6 +1847,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
         callingMethod: function( nodeID, methodName, parameters /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
 
+            if ( this.debug.methods ) {
+                this.logger.infox( "Method: ", nodeID, methodName, Array.prototype.slice.call( parameters ) );
+            }            
+            
+
             if ( methodName === "raycast" ) {
 
                 var origin, direction, near, far, recursive, objectIDs;
@@ -1913,6 +1959,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 var intersects = raycaster.intersectObjects( objects, recursive );
                 return intersects;
 
+            } else if ( methodName === "recursively" ) {
+
+                var threeNode = this.state.nodes[ nodeID ];
+                if ( threeNode && threeNode.threeObject && threeNode.threeObject instanceof THREE.Object3D ) {
+                    if ( parameters.length > 0 && parameters[ 0 ] instanceof Function ) {
+                        this.state.executeRecursively( threeNode.threeObject, parameters[ 0 ] );
+                    }
+                }
+            
             }
 
             return undefined;
