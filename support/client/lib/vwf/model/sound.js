@@ -750,7 +750,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         },
 
         clearQueue: function() {
-            this.queue$ = [];
+            this.queue$.length = 0;
         },
 
         hasQueuedSounds: function() {
