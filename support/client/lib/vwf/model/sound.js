@@ -28,7 +28,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             // (it's created in the view)
             this.state.soundManager = {};
             soundDriver = this;
-            masterVolume = this.masterVolume;
             logger = this.logger;
 
             try {
@@ -277,21 +276,21 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             this.subtitle = this.soundDefinition.subtitle;
 
-            this.soundGroup = this.soundDefinition.soundGroup;
-            if ( this.soundGroup ) {
-                if ( !soundGroups[ this.soundGroup ] ) {
-                    soundGroups[ this.soundGroup ] = { soundData: {}, queue: [] };
+            var soundGroupName = this.soundDefinition.soundGroup;
+            if ( soundGroupName ) {
+                if ( !soundGroups[ soundGroupName ] ) {
+                    soundGroups[ soundGroupName ] = 
+                        new SoundGroup( soundGroupName );
                 }
 
-                soundGroups[ this.soundGroup ].soundData[ this.name ] = this;
+                this.soundGroup = soundGroups[ soundGroupName ];
             }
-
-            this.groupReplacementMethod = this.soundDefinition.groupReplacementMethod;
 
             if ( this.soundDefinition.queueDelayTime !== undefined ) {
                 this.queueDelayTime = this.soundDefinition.queueDelayTime;
             }
 
+            this.groupReplacementMethod = this.soundDefinition.groupReplacementMethod;
             if ( this.groupReplacementMethod && !this.soundGroup ) {
                 logger.warnx( "SoundDatum.initialize", 
                               "You defined a replacement method but not a sound " +
@@ -370,7 +369,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             for ( var instanceID in this.playingInstances ) {
                 var soundInstance = this.playingInstances[ instanceID ];
                 if ( soundInstance ) {
-                    soundInstance.resetOnMasterVolumeChange();
+                    soundInstance.resetVolume();
                 }
             }
         },
@@ -430,12 +429,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             this.localVolume$ = this.soundDatum.initialVolume;
             this.gainNode = context.createGain();
-            this.gainNode.gain.value = this.getVolume();
-
             this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );
+            this.resetVolume();
 
-            var group = soundGroups[ soundDatum.soundGroup ];
+            var group = soundDatum.soundGroup;
 
             // Browsers will handle onended differently depending on audio 
             //   filetype - needs support.
@@ -444,32 +442,27 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 thisInstance.isStarted = false;
                 fireSoundEvent( "soundFinished", thisInstance );
 
-                // logger.logx( "PlayingInstance.onended",
-                //              "Sound ended: '" + thisInstance.soundDatum.name +
-                //              "', Timestamp: " + timestamp() );
+                logger.logx( "PlayingInstance.onended",
+                             "Sound ended: '" + thisInstance.soundDatum.name +
+                             "', Timestamp: " + timestamp() );
 
-                if ( group && ( group.queue.length > 0 ) ) {
-                    var nextInstance = group.queue.pop();
+                if ( group ) {
+                    group.soundFinished( thisInstance );
+
+                    var nextInstance = group.unQueueSound();
                     if ( nextInstance ) {
                         var delaySeconds = nextInstance.soundDatum.queueDelayTime;
 
-                        // logger.logx( "PlayingInstance.onended", 
-                        //              "Popped from the queue: '" + 
-                        //              nextInstance.soundDatum.name +
-                        //              ", Timeout: " + delaySeconds +
-                        //              ", Timestamp: " + timestamp() );
+                        logger.logx( "PlayingInstance.onended", 
+                                     "Popped from the queue: '" + 
+                                     nextInstance.soundDatum.name +
+                                     ", Timeout: " + delaySeconds +
+                                     ", Timestamp: " + timestamp() );
 
                         if ( delaySeconds > 0) {
-                            logger.warnx( "PlayingInstance.onended",
-                                          "Setting a queueDelayTime may result " +
-                                          "in more than one VO playing at the " +
-                                          "same time.");
-                            setTimeout( function() { 
-                                            startSoundInstance( nextInstance ); 
-                                        }, 
-                                        delaySeconds * 1000 );
+                            nextInstance.startDelayed( delaySeconds );
                         } else {
-                            startSoundInstance( nextInstance ); 
+                            nextInstance.start();
                         }
                     }
                 }
@@ -484,30 +477,31 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         // We're only going to play the sound if there isn't 
                         //   already a sound from this group playing.  
                         //   Otherwise, add it to a queue to play later.
-                        if ( isGroupPlaying( group ) ) {
-                            group.queue.unshift( this );
+                        if ( group.getPlayingSound() )  {
+                            group.queueSound( this );
                         } else {
-                            startSoundInstance( this );
+                            this.start();
                         }
 
                         break;
 
                     case "replace":
-                        stopSoundGroup( group );
-                        startSoundInstance( this );
+                        group.stopPlayingSound();
+                        this.start();
                         break;
 
                     default:
                         logger.errorx( "PlayingInstance.initialize",
-                                       "This sound ('" + thisInstance.soundDatum.name + 
+                                       "This sound ('" + 
+                                       thisInstance.soundDatum.name + 
                                        "') is in a group, but doesn't " +
                                        "have a valid replacement method!" );
 
-                        stopSoundGroup( group );
-                        startSoundInstance( this );
+                        group.stopPlayingSound();
+                        this.start();
                 }
             } else {
-                startSoundInstance( this );
+                this.start();
             }
         },
 
@@ -517,8 +511,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         setVolume: function( volume, fadeTime, fadeMethod ) {
             if ( !volume ) {
-                logger.errorx( "setVolume", "The 'setVolume' method " +
-                               "requires a volume." );
+                logger.errorx( "PlayingInstance.setVolume", "The 'setVolume' " +
+                               "method requires a volume." );
                 return;
             }
 
@@ -534,30 +528,176 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             switch( fadeMethod ) {
                 case "linear":
                     var endTime = now + fadeTime;
-                    this.gainNode.gain.linearRampToValueAtTime( this.getVolume(), endTime );
+                    this.gainNode.gain.linearRampToValueAtTime( this.getVolume(), 
+                                                                endTime );
                     break;
                 case "exponential":
                 case undefined:
-                    this.gainNode.gain.setTargetValueAtTime( this.getVolume(), now, fadeTime );
+                    this.gainNode.gain.setTargetValueAtTime( this.getVolume(), 
+                                                             now, fadeTime );
                     break;
                 case "immediate":
                     this.gainNode.gain.value = this.getVolume();
+                    break;
                 default:
-                    logger.errorx( "setVolume", "Unknown fade method: '" +
+                    logger.errorx( "PlayingInstance.setVolume", "Unknown fade method: '" +
                                    fadeMethod + "'.  Using an exponential " +
                                    "fade." );
-                    this.gainNode.gain.setTargetValueAtTime( this.getVolume(), now, fadeTime );
+                    this.gainNode.gain.setTargetValueAtTime( this.getVolume(), 
+                                                             now, fadeTime );
             }
         },
 
-        resetOnMasterVolumeChange: function() {
+        resetVolume: function() {
             this.setVolume(this.localVolume$);
+        },
+
+        start: function() {
+            var group = this.soundDatum.soundGroup;
+            if ( group ) {
+                var playingSound = group.getPlayingSound();
+                if ( playingSound && ( playingSound !== this ) ) {
+                    // This can happen if a sound was stopped while delayed,
+                    //  but I need to make sure that that's the only time it
+                    //  happens so I'm putting in an error (for now).
+                    logger.errorx( "PlayingInstance.start", "Sound '" +
+                                   this.soundDatum.name + "started while '" +
+                                   playingSound.soundDatum.name + "' was " +
+                                   "still playing!" );
+                    return;
+                }
+
+                group.setPlayingSound( this );
+            }
+
+            this.sourceNode.start( 0 ); 
+            this.isStarted = true;
+
+            logger.logx( "startSoundInstance",
+                         "Sound started: '" + this.soundDatum.name + 
+                         "', Timestamp: " + timestamp() );
+
+            fireSoundEvent( "soundStarted", this );
+        },
+
+        startDelayed: function( delaySeconds ) {
+            var group = this.soundDatum.soundGroup;
+            if ( group ) {
+                if ( group.getPlayingSound() ) {
+                    logger.errorx( "PlayingInstance.startDelayed", 
+                                   "How is there already a sound playing " +
+                                   "when startDelayed() is called?" );
+                    return;
+                }
+
+                group.setPlayingSound( this );
+                group.setDelayedStart();
+            }
+
+            setTimeout( this.start, delaySeconds * 1000 );
         },
 
         stop: function() {
             if ( this.isStarted ) {
                 this.sourceNode.stop();
             } 
+        },
+    }
+
+    function SoundGroup( groupName ) {
+        this.initialize( groupName );
+        return this;
+    }
+
+    SoundGroup.prototype = {
+        constructor: SoundGroup,
+
+        // Trying out a new convention - make the values in the prototype be
+        //  something obvious, so I can tell if they don't get reset.
+        name$: "PROTOTYPE",             // the name of the group, for debugging
+        queue$: "PROTOTYPE",            // for storing queued sounds while they wait
+        playingSound$: "PROTOTYPE",     // the sound that is currently playing
+        delayedStart$: "PROTOTYPE",     // if true, the sound that is currently playing hasn't actually started yet
+
+        initialize: function( groupName ) {
+            this.name$ = groupName;
+            this.queue$ = [];
+            this.playingSound$ = undefined;
+            this.delayedStart$ = false;
+        },
+
+        getPlayingSound: function() {
+            return this.playingSound$;
+        },
+
+        setPlayingSound: function( playingInstance ) {
+            if ( this.playingSound$ ) {
+                if ( this.playingSound$ !== playingInstance ) {
+                    logger.errorx( "SoundGroup.setPlayingSound", 
+                                   "Trying to set playingSound to '" + 
+                                   playingInstance.soundDatum.name +
+                                   "', but it is already set to '" +
+                                   this.playingSound$.soundDatum.name + "'!");
+                } else if ( !this.delayedStart$ ) {
+                    logger.errorx("SoundGroup.setPlayingSound", 
+                                   "How are we re-setting the playing sound " +
+                                   "when we're not in a delay?" );
+                } else {
+                    this.delayedStart$ = false;
+                }
+            } else {
+                this.playingSound$ = playingInstance;
+            }
+        },
+
+        soundFinished: function( playingInstance ) {
+            if ( playingInstance !== this.playingSound$ ) {
+                logger.errorx( "SoundGroup.soundFinished", "'" + 
+                               playingInstance.soundDatum.name + "' just " +
+                               "repored that it is finished, but we thought " +
+                               "that '" + this.playingSound$.soundDatum.name + 
+                               "' was playing!");
+            }
+
+            this.playingSound$ = undefined;
+        },
+
+        stopPlayingSound: function() {
+            if ( this.playingSound$ ) {
+                if ( this.delayedStart$ ) {
+                    this.playingSound$ = undefined;
+                    this.delayedStart$ = false;
+
+                    if ( this.playingSound$.isPlaying ) {
+                        logger.errorx( "SoundGroup.stopPlayingSound", 
+                                       "How is the sound playing when " +
+                                       "delayedStart$ is still true? " +
+                                       "The sound was '" +
+                                       this.playingSound$.soundDatum.name + 
+                                       "'.");
+
+                        this.playingSound$.stop();
+                    }
+                } else {
+                    this.playingSound$.stop();
+                }
+            }
+        },
+
+        setDelayedStart: function() {
+            this.delayedStart$ = true;
+        },
+
+        queueSound: function( playingInstance ) {
+            this.queue$.unshift( playingInstance );
+        },
+
+        unQueueSound: function() {
+            return this.queue$.pop();
+        },
+
+        hasQueuedSounds: function() {
+            return queue$.length > 0;
         },
     }
 
@@ -570,7 +710,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         var soundDatum = soundData[ soundName ];
         if ( soundDatum === undefined ) {
-            logger.errorx( "getSoundDatum", "Sound '" + soundName + "' not found." );
+            logger.errorx( "getSoundDatum", "Sound '" + soundName + 
+                           "' not found." );
             return undefined;
         }
 
@@ -579,15 +720,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function getSoundInstance( instanceHandle ) {
         if ( instanceHandle === undefined ) {
-            logger.errorx( "getSoundInstance", "The 'GetSoundInstance' method " +
-                           "requires the instance ID." );
+            logger.errorx( "getSoundInstance", "The 'GetSoundInstance' " +
+                           "method requires the instance ID." );
             return undefined;
         }
 
         if ( ( instanceHandle.soundName === undefined ) || 
              ( instanceHandle.instanceID === undefined ) ) {
-            logger.errorx( "getSoundInstance", "The instance handle must contain " +
-                           "soundName and instanceID values");
+            logger.errorx( "getSoundInstance", "The instance handle must " +
+                           "contain soundName and instanceID values");
             return undefined;
         }
 
@@ -601,42 +742,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         }
     }
 
-    function startSoundInstance( instance ) {
-        instance.sourceNode.start( 0 ); 
-        instance.isStarted = true;
-
-        // logger.logx( "startSoundInstance",
-        //              "Sound started: '" + instance.soundDatum.name + 
-        //              "', Timestamp: " + timestamp() );
-
-        fireSoundEvent( "soundStarted", instance );
-    }
-
     function fireSoundEvent( eventString, instance ) {
         vwf_view.kernel.fireEvent( soundDriver.state.soundManager.nodeID, 
                                    eventString,
                                    [ { soundName: instance.soundDatum.name, 
                                        instanceID: instance.id } ] );
-    }
-
-    function isGroupPlaying( group ) {
-        for ( var soundName in group.soundData ) {
-            var sound = group.soundData[ soundName ];
-
-            if ( sound && sound.isPlaying() ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function stopSoundGroup( group ) {
-        group.queue = [];
-
-        for ( var soundName in group.soundData ) {
-            var sound = group.soundData[ soundName ];
-            sound && sound.stopDatumSoundInstances();
-        }
     }
 
     function timestamp() {
