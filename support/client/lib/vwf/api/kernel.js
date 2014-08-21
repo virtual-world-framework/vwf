@@ -897,6 +897,10 @@ define( function() {
         /// 
         /// @typedef {Object} Handler
         /// 
+        /// @property {string[]} [name]
+        ///   The function's name. VWF doesn't make use of the name, but the field is included so
+        ///   that named JavaScript functions can make a round-trip translation through a `Handler`
+        ///   intact.
         /// @property {string[]} [parameters]
         ///   An ordered list of names of the function's positional parameters. The function body
         ///   uses these names to refer to the caller's arguments. `parameters` may be omitted if
@@ -928,6 +932,8 @@ define( function() {
         /// @property {ListenerID} [id]
         ///   A unique ID as returned by `kernel.addEventListener` that identifies the listener for
         ///   a particular `nodeID` and `eventName`.
+        /// @property {string[]} [name]
+        ///   @see {@link module:vwf/api/kernel.Handler}
         /// @property {string[]} [parameters]
         ///   @see {@link module:vwf/api/kernel.Handler}
         /// @property {string|function} body
