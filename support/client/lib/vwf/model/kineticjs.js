@@ -358,7 +358,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "draggable":
-                            kineticObj.draggable( Boolean( propertyValue ) );    
+                            // Store the model value separately in case the view wants
+                            // to change the value for one user
+                            kineticObj.isDraggable = Boolean( propertyValue );
+
+                            // Set the view value from the model value
+                            kineticObj.draggable( kineticObj.isDraggable );    
                             break;
 
                         // check code, not in docs
@@ -1317,7 +1322,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "draggable":
-                            value = kineticObj.draggable();    
+                            // Return the model value that we have stored separately, 
+                            // not the value that is directly in the kinetic object 
+                            // because a user's view might have changed that for only 
+                            // that user
+                            value = kineticObj.isDraggable;    
                             break;
 
                         // check code, not in docs
