@@ -179,12 +179,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 // arguments: instanceHandle
                 case "stopSoundInstance":
-
-                    instanceHandle = params [ 0 ];
+                    instanceHandle = params[ 0 ];
 
                     //If a user chooses to pass just a soundName, stop all instances with that name.
                     if ( !instanceHandle.soundName ){
-                        soundName = params [ 0 ];
+                        soundName = params[ 0 ];
                         soundDatum = getSoundDatum( soundName );
                         soundDatum && soundDatum.stopDatumSoundInstances();
                     } else {
@@ -192,6 +191,16 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         soundDatum = getSoundDatum( instanceHandle.soundName );
                         soundDatum && soundDatum.stopInstance( instanceHandle );
                     }
+                    return;
+
+                // arguments: groupName
+                case "stopSoundGroup":
+                    groupName = params[ 0 ];
+                    soundGroup = soundGroups[ groupName ];
+
+                    soundGroup && soundGroup.clearQueue();
+                    soundGroup && soundGroup.stopPlayingSound();
+
                     return;
 
                 // arguments: none
