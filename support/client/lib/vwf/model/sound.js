@@ -256,7 +256,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         soundGroup: undefined,
         groupReplacementMethod: undefined,
-        queueDelayTime: 0,  // in seconds
+        queueDelayTime: undefined,  // in seconds
 
         // a counter for creating instance IDs
         instanceIDCounter: 0,
@@ -295,16 +295,25 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 this.soundGroup = soundGroups[ soundGroupName ];
             }
 
-            if ( this.soundDefinition.queueDelayTime !== undefined ) {
-                this.queueDelayTime = this.soundDefinition.queueDelayTime;
-            }
-
             this.groupReplacementMethod = this.soundDefinition.groupReplacementMethod;
             if ( this.groupReplacementMethod && !this.soundGroup ) {
                 logger.warnx( "SoundDatum.initialize", 
                               "You defined a replacement method but not a sound " +
                               "group.  Replacement is only done when you replace " +
                               "another sound in the same group!" );
+            }
+
+            if ( this.soundDefinition.queueDelayTime !== undefined ) {
+                this.queueDelayTime = this.soundDefinition.queueDelayTime;
+                if ( !this.groupReplacementMethod !== "queue" ) {
+                    logger.warnx( "SoundDatum.initialize", 
+                                  "You defined a queue delay time, but " +
+                                  "the replacement method is not 'queue'.");
+                }
+            } else {
+                this.queueDelayTime = 
+                    this.groupReplacementMethod === "queue" ? 0.8 : 0;
+
             }
 
             // Create & send the request to load the sound asynchronously
@@ -471,7 +480,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         //              ", Timeout: " + delaySeconds +
                         //              ", Timestamp: " + timestamp() );
 
-                        if ( delaySeconds > 0) {
+                        if ( delaySeconds > 0 ) {
                             nextInstance.startDelayed( delaySeconds );
                         } else {
                             nextInstance.start();
@@ -633,7 +642,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     break;
 
                 default:
-                    logger.errorx( "PlayingInstance.stop", "Invalid " +
+                    logger.errorx( "PlayingInstance.start", "Invalid " +
                                    "playStatus: '" + this.playStatus + "'!" );
             }
         },
@@ -649,11 +658,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
 
                 group.setPlayingSound( this );
-                group.setDelayedStart();
             }
 
             this.playStatus = "delayed";
-            setTimeout( this.start, delaySeconds * 1000 );
+            setTimeout( this.start.bind(this), delaySeconds * 1000 );
         },
 
         stop: function() {
