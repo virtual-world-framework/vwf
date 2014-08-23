@@ -305,7 +305,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             if ( this.soundDefinition.queueDelayTime !== undefined ) {
                 this.queueDelayTime = this.soundDefinition.queueDelayTime;
-                if ( !this.groupReplacementMethod !== "queue" ) {
+                if ( this.groupReplacementMethod !== "queue" ) {
                     logger.warnx( "SoundDatum.initialize", 
                                   "You defined a queue delay time, but " +
                                   "the replacement method is not 'queue'.");
