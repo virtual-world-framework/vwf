@@ -203,23 +203,44 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility", "vwf/confi
             // Provide helper functions to create the directives for adding, removing and flushing
             // event handlers.
 
-            // Add: node.events.*eventName* = node.events.add( *handler* [, *phases* ] [, *context* ] )
+            // Add: node.events.*eventName* =
+            //   node.events.add( handler [, phases ] [, context ] [, callback( listenerID ) ] )
 
             Object.defineProperty( node.events, "add", {
-                value: function( handler, phases, context ) {
-                    if ( arguments.length != 2 || typeof phases == "string" || phases instanceof String || phases instanceof Array ) {
-                        return { add: true, handler: handler, phases: phases, context: context };
-                    } else { // interpret add( handler, context ) as add( handler, undefined, context )
-                        return { add: true, handler: handler, context: phases };
+
+                value: function( handler, phases, context, callback /* listenerID */ ) {
+
+                    // Interpret `add( handler, phases|context, callback )` as `add( handler, phases|context, undefined, context )`.
+
+                    if ( typeof context === "function" || context instanceof Function ) {
+                        callback = context;
+                        context = undefined;
+                    } else if ( typeof phases === "function" || phases instanceof Function ) {
+                        callback = phases;
+                        context = phases = undefined;
                     }
+
+                    // Interpret `add( handler, context, ... )` as `add( handler, undefined, context, ... )`.
+
+                    if ( valueIsNode.call( self, phases ) ) {
+                        context = phases;
+                        phases = undefined;
+                    }
+
+                    return { add: true, handler: handler, phases: phases, context: context, callback: callback };
                 }
+
             } );
 
-            // Remove: node.events.*eventName* = node.events.remove( *handler* )
+            // Remove: node.events.*eventName* = node.events.remove( listenerID )
 
             Object.defineProperty( node.events, "remove", {
-                value: function( handler ) {
-                    return { remove: true, handler: handler };
+                value: function( listenerID ) {
+                    if ( typeof listenerID === "function" || listenerID instanceof Function ) {
+                        return { remove: true, handler: listenerID };
+                    } else {
+                        return { remove: true, id: listenerID };
+                    }
                 }
             } );
 
@@ -1290,26 +1311,43 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             // On write, update the listeners. `unsettable` events don't accept writes.
 
             set: unsettable ? undefined : function( value ) {  // `this` is the container
+
                 var node = this.node || this;  // the node via node.*collection*.node, or just node
                 var namespacedName = eventNamespace ? [ eventNamespace, eventName ] : eventName;
+                var listenerID;
+
                 if ( typeof value === "function" || value instanceof Function ) {
-                    self.kernel.addEventListener( node.id, namespacedName,
+
+                    listenerID = self.kernel.addEventListener( node.id, namespacedName,
                         handlerFromFunction( value, configuration.active[ "preserve-script-closures" ] ), node.id );  // for container.*event* = function() { ... }, context is the target node
+                    value.listenerID = listenerID;
+
                 } else if ( value.add ) {
+
                     if ( ! value.phases || value.phases instanceof Array ) {
-                        self.kernel.addEventListener( node.id, namespacedName,
+                        listenerID = self.kernel.addEventListener( node.id, namespacedName,
                             handlerFromFunction( value.handler, configuration.active[ "preserve-script-closures" ] ), value.context && value.context.id, value.phases );
+                        value.handler.listenerID = listenerID;
+                        value.callback && value.callback.call( node, listenerID );
                     } else {
-                        self.kernel.addEventListener( node.id, namespacedName,
+                        listenerID = self.kernel.addEventListener( node.id, namespacedName,
                             handlerFromFunction( value.handler, configuration.active[ "preserve-script-closures" ] ), value.context && value.context.id, [ value.phases ] );
+                        value.handler.listenerID = listenerID;
+                        value.callback && value.callback.call( node, listenerID );
                     }
+
                 } else if ( value.remove ) {
+
                     self.kernel.removeEventListener( node.id, namespacedName,
-                        handlerFromFunction( value.handler, configuration.active[ "preserve-script-closures" ] ) );
+                        value.handler ? value.handler.listenerID : value.id );
+
                 } else if ( value.flush ) {
+
                     self.kernel.flushEventListeners( node.id, namespacedName,
                         value.context && value.context.id );
+
                 }
+
             },
 
             // Meta events--including the `properties`, `methods`, and `events` `created` and
