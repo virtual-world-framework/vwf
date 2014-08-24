@@ -1600,9 +1600,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
         if ( typeof value === "object" && value !== null ) {
 
-            var protoNodeNode = this.nodes[ kutility.protoNodeURI ];  // our proxy for the node.vwf prototype
-
-            if ( protoNodeNode && ( protoNodeNode.isPrototypeOf( value ) || value === protoNodeNode ) ) {
+            if ( valueIsNode.call( this, value ) ) {
                 return kutility.nodeReference( value.id );
             } else {
                 return value;
@@ -1626,7 +1624,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     function valueJSFromKernel( value ) {
 
-        if ( typeof value === "object" ) {
+        if ( typeof value === "object" && value !== null ) {
 
             if ( kutility.valueIsNodeReference( value ) ) {
                 return this.nodes[ value.id ];
@@ -1638,6 +1636,23 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             return value;
         }
 
+    }
+
+    /// Determine if a value is a `model/javascript` node.
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `valueIsNode.call( driver, value )`.
+    /// 
+    /// @param {Object} value
+    /// 
+    /// @returns {Boolean}
+
+    function valueIsNode( value ) {
+
+        var protoNodeNode = this.nodes[ kutility.protoNodeURI ];  // our proxy for the node.vwf prototype
+
+        return protoNodeNode &&
+            ( protoNodeNode.isPrototypeOf( value ) || value === protoNodeNode );
     }
 
     return exports;
