@@ -762,42 +762,15 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
         addingEventListener: function( nodeID, eventName, eventListenerID, eventHandler, eventContextID, eventPhases ) {
 
-            var node = this.nodes[nodeID];
-            var eventContext = this.nodes[eventContextID];
+            // Build a `Listener` from the `Handler` and the context and phases.
 
-            var self = this;
+            var eventListener = utility.merge( eventHandler, {
+                context: eventContextID,
+                phases: eventPhases,
+            } );
 
-            var listeners = node.private.listeners[eventName];
-
-            if ( ! listeners ) {
-                listeners = node.private.listeners[eventName] = [];
-            }
-
-            var handler = functionFromHandler( eventHandler, logException,
-                configuration.active[ "preserve-script-closures" ] );
-
-            if ( handler ) {
-
-                listeners[ eventListenerID ] = {
-                    handler: handler,
-                    context: eventContext,
-                    phases: eventPhases,
-                };
-
-                return true;
-
-            } else  {
-
-                delete listeners[ eventListenerID ];
-
-            }
-
-            function logException( exception ) {
-                self.logger.warnx( "addingEventListener", nodeID, eventName, eventListenerID,
-                    "exception evaluating listener:", utility.exceptionMessage( exception ) );
-            }
-
-            return undefined;
+            return this.settingEventListener( nodeID, eventName, eventListenerID, eventListener ) ?
+                true : undefined;
         },
 
         // -- removingEventListener ----------------------------------------------------------------
