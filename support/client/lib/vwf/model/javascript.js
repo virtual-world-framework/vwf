@@ -203,14 +203,15 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility", "vwf/confi
             // Provide helper functions to create the directives for adding, removing and flushing
             // event handlers.
 
-            // Add: node.events.*eventName* =
-            //   node.events.add( handler [, phases ] [, context ] [, callback( listenerID ) ] )
+            // Add: `node.events.*eventName* =
+            //   node.events.add( handler [, phases ] [, context ] [, callback( listenerID ) ] )`
 
             Object.defineProperty( node.events, "add", {
 
                 value: function( handler, phases, context, callback /* listenerID */ ) {
 
-                    // Interpret `add( handler, phases|context, callback )` as `add( handler, phases|context, undefined, context )`.
+                    // Interpret `add( handler [, phases|context ], callback )` as
+                    // `add( handler, phases|context|undefined, undefined, callback )`.
 
                     if ( typeof context === "function" || context instanceof Function ) {
                         callback = context;
@@ -232,19 +233,28 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility", "vwf/confi
 
             } );
 
-            // Remove: node.events.*eventName* = node.events.remove( listenerID )
+            // Remove: `node.events.*eventName* = node.events.remove( listenerID|handler )`
 
             Object.defineProperty( node.events, "remove", {
+
                 value: function( listenerID ) {
+
+                    // For 0.6.23 and earlier, listeners were removed using a direct reference to
+                    // the handler. For 0.6.24 and later a `listenerID` is used. Accept a function
+                    // for compatability with components written for 0.6.23 or earlier. The event
+                    // setter will translate the function to an id.
+
                     if ( typeof listenerID === "function" || listenerID instanceof Function ) {
                         return { remove: true, handler: listenerID };
                     } else {
                         return { remove: true, id: listenerID };
                     }
+
                 }
+
             } );
 
-            // Flush: node.events.*eventName* = node.events.flush( *context* )
+            // Flush: `node.events.*eventName* = node.events.flush( context )`
 
             Object.defineProperty( node.events, "flush", {
                 value: function( context ) {
@@ -1299,13 +1309,19 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             // be fired by the application.
 
             get: eventNamespace ? undefined : function() {  // `this` is the container
+
                 var node = this.node || this;  // the node via node.*collection*.node, or just node
+
                 return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
+
                     var argumentsKernel = parametersKernelFromJS.call( self, arguments );
+
                     var resultKernel = self.kernel.fireEvent( node.id, eventName, argumentsKernel,
                         node.private.when, node.private.callback );
+
                     return valueJSFromKernel.call( self, resultKernel );
                 };
+
             },
 
             // On write, update the listeners. `unsettable` events don't accept writes.
@@ -1314,37 +1330,55 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
                 var node = this.node || this;  // the node via node.*collection*.node, or just node
                 var namespacedName = eventNamespace ? [ eventNamespace, eventName ] : eventName;
-                var listenerID;
 
                 if ( typeof value === "function" || value instanceof Function ) {
 
-                    listenerID = self.kernel.addEventListener( node.id, namespacedName,
-                        handlerFromFunction( value, configuration.active[ "preserve-script-closures" ] ), node.id );  // for container.*event* = function() { ... }, context is the target node
-                    value.listenerID = listenerID;
+                    // `container.*eventName* = handler` (context is the target node).
+
+                    addListener( value, node );
 
                 } else if ( value.add ) {
 
+                    // `container.*eventName* = node.events.add( handler, phases, context, callback /* listenerID */ )`.
+
                     if ( ! value.phases || value.phases instanceof Array ) {
-                        listenerID = self.kernel.addEventListener( node.id, namespacedName,
-                            handlerFromFunction( value.handler, configuration.active[ "preserve-script-closures" ] ), value.context && value.context.id, value.phases );
-                        value.handler.listenerID = listenerID;
-                        value.callback && value.callback.call( node, listenerID );
+                        addListener( value.handler, value.context, value.phases, value.callback );
                     } else {
-                        listenerID = self.kernel.addEventListener( node.id, namespacedName,
-                            handlerFromFunction( value.handler, configuration.active[ "preserve-script-closures" ] ), value.context && value.context.id, [ value.phases ] );
-                        value.handler.listenerID = listenerID;
-                        value.callback && value.callback.call( node, listenerID );
+                        addListener( value.handler, value.context, [ value.phases ], value.callback );
                     }
 
                 } else if ( value.remove ) {
+
+                    // `container.*eventName* = node.events.remove( listenerID|handler )`.
+
+                    // For `node.events.remove( listenerID )`, remove using the direct parameter.
+                    // For `node.events.remove( handler )`, use the id that `addListener` attached
+                    // to the handler.
 
                     self.kernel.removeEventListener( node.id, namespacedName,
                         value.handler ? value.handler.listenerID : value.id );
 
                 } else if ( value.flush ) {
 
+                    // `container.*eventName* = node.events.flush( context )`.
+
                     self.kernel.flushEventListeners( node.id, namespacedName,
                         value.context && value.context.id );
+                }
+
+                function addListener( handler, context, phases, callback ) {
+
+                    var listenerID = self.kernel.addEventListener( node.id, namespacedName,
+                        handlerFromFunction( handler, configuration.active[ "preserve-script-closures" ] ),
+                        context && context.id, phases );
+
+                    // For 0.6.23 and earlier, listeners were removed using a direct reference to
+                    // the handler. For backward compatability, tag the handler with the listener id
+                    // so that we can retrieve the id if the listener is removed by handler.
+
+                    handler.listenerID = listenerID;
+
+                    callback && callback.call( node, listenerID );
 
                 }
 
