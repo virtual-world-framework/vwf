@@ -784,7 +784,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                     phases: eventPhases,
                 };
 
-                return eventListenerID;
+                return true;
 
             } else  {
 
@@ -810,7 +810,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             if ( listeners && listeners[ eventListenerID ] ) {
                 delete listeners[ eventListenerID ];
-                return eventListenerID;
+                return true;
             }
 
             return undefined;
@@ -835,16 +835,27 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             if ( handler ) {
 
-                var listener = listeners[ eventListenerID ] = {
+                listeners[ eventListenerID ] = {
                     handler: handler,
                     context: this.nodes[ eventListener.context ],
                     phases: eventListener.phases,
                 };
 
-                return utility.merge( handlerFromFunction( listener.handler ), {
-                    context: listener.context && listener.context.id,
-                    phases: listener.phases,
-                } );
+                // Kernel actions that set a value allow the driver to modify the value assigned.
+                // The result of the action is the actually-assigned value reported by the driver.
+
+                // Here, we should return a `Listener` derived from the function we just rendered so
+                // that `kernel.setEvent` will return the same result that a following
+                // `kernel.getEvent` would. However, since `Function.toString` is relatively heavy,
+                // we'll just return the incoming value until there is a demonstrated need for the
+                // precise result.
+
+                // return utility.merge( handlerFromFunction( listener.handler ), {
+                //     context: listener.context && listener.context.id,
+                //     phases: listener.phases,
+                // } );
+
+                return eventListener;
 
             } else  {
 

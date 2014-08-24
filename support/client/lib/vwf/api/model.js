@@ -241,7 +241,7 @@ define( function() {
         /// @param {ID} eventContextID
         /// @param {String[]} eventPhases
         /// 
-        /// @returns {ListenerID}
+        /// @returns {Boolean}
 
         addingEventListener: [ /* nodeID, eventName, eventListenerID, eventHandler, eventContextID, eventPhases */ ],
 
@@ -253,7 +253,7 @@ define( function() {
         /// @param {String} eventName
         /// @param {ListenerID} eventListenerID
         /// 
-        /// @returns {ListenerID}
+        /// @returns {Boolean}
 
         removingEventListener: [ /* nodeID, eventName, eventListenerID */ ],
 
