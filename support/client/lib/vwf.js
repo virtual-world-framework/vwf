@@ -3365,7 +3365,7 @@ if ( ! childComponent.source ) {
                     // Update the value to the value assigned if the driver handled it.
 
                     if ( handler !== undefined ) {
-                        methodHandler = handler;
+                        methodHandler = require( "vwf/utility" ).merge( {}, handler );  // omit `undefined` values
                     }
 
                     // Exit the iterator once a driver has handled the assignment.
@@ -3421,7 +3421,7 @@ if ( ! childComponent.source ) {
                 // Update the value to the value assigned if the driver handled it.
 
                 if ( handler !== undefined ) {
-                    methodHandler = handler;
+                    methodHandler = require( "vwf/utility" ).merge( {}, handler );  // omit `undefined` values
                 }
 
                 // Exit the iterator once a driver has handled the retrieval.
