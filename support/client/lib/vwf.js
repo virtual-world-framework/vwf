@@ -3768,7 +3768,7 @@ if ( ! childComponent.source ) {
                 // Update the value to the value assigned if the driver handled it.
 
                 if ( listener !== undefined ) {
-                    eventListener = listener;
+                    eventListener = require( "vwf/utility" ).merge( {}, listener );  // omit `undefined` values
                 }
 
                 // Exit the iterator once a driver has handled the assignment.
@@ -3826,7 +3826,7 @@ if ( ! childComponent.source ) {
                 // Update the value to the value assigned if the driver handled it.
 
                 if ( listener !== undefined ) {
-                    eventListener = listener;
+                    eventListener = require( "vwf/utility" ).merge( {}, listener );  // omit `undefined` values
                 }
 
                 // Exit the iterator once a driver has handled the assignment.
