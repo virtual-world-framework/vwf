@@ -280,6 +280,9 @@ this.update = function( eventData, nodeData ) {
         var height = diffY;
         var dist = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
 
+        console.info( "===========================" );
+        console.info( "== pos: " + pos + "   diffX: " + diffX + "   diffY: " + diffY );
+
         switch ( userState.drawing_mode ) {
 
             case "line":
@@ -300,6 +303,8 @@ this.update = function( eventData, nodeData ) {
                 drawingObject.height = height;  
                 break;          
         }
+
+        console.info( "== pos: " + pos + "   diffX: " + diffX + "   diffY: " + diffY );
 
         switch ( userState.drawing_mode ) {
             
@@ -368,7 +373,7 @@ this.update = function( eventData, nodeData ) {
             case "borderRect":
                 drawingObject.stroke = userState.drawing_color;
                 drawingObject.strokeWidth = userState.drawing_width;
-                drawingObject.points = [ 0, 0, diffX, 0, diffX, diffY, 0, diffY, 0, 0 ];
+                drawingObject.points = [ 0, 0, width, 0, width, height, 0, height, 0, 0 ];
                 break;
 
             case "arrow":
@@ -387,15 +392,15 @@ this.update = function( eventData, nodeData ) {
                 drawingObject.line.points = [ 0, 0, endPoint[0], endPoint[1] ];
                 break;
 
-// function canvas_arrow(fromx, fromy, tox, toy){
-//     var headlen = 20;   // how long you want the head of the arrow to be, you could calculate this as a fraction of the distance between the points as well.
-//     var angle = Math.atan2(toy-fromy,tox-fromx);
+                // function canvas_arrow(fromx, fromy, tox, toy){
+                //     var headlen = 20;   // how long you want the head of the arrow to be, you could calculate this as a fraction of the distance between the points as well.
+                //     var angle = Math.atan2(toy-fromy,tox-fromx);
 
-//     line = new Kinetic.Line({
-//         points: [fromx, fromy, tox, toy, tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6),tox, toy, tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6)],
-//         stroke: "red"
-//     });
-// }
+                //     line = new Kinetic.Line({
+                //         points: [fromx, fromy, tox, toy, tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6),tox, toy, tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6)],
+                //         stroke: "red"
+                //     });
+                // }
 
             
             case "thickArrow":
