@@ -305,6 +305,10 @@ properties:
         return Math.floor(this.animationTime * this.animationFPS);
       }
 
+  ## The animation update rate in ticks per second of simulation time.
+
+  animationTPS: 60
+
 methods:
 
   # Play the animation from the start.
@@ -360,8 +364,8 @@ methods:
       }
       // Schedule the next tick if still playing.
       if ( this.animationPlaying ) {
-        if ( this.animationStop$ - this.time > 1/60 ) {
-          this.in( 1/60 ).animationTick(); // next interval
+        if ( this.animationStop$ - this.time > 1 / this.animationTPS ) {
+          this.in( 1 / this.animationTPS ).animationTick(); // next interval
         } else {
           this.at( this.animationStop$ ).animationTick(); // exactly at end
         }
