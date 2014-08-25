@@ -671,9 +671,12 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             // Delegate to `settingMethod`.
 
             return this.settingMethod( nodeID, methodName, {
+
                 parameters: methodParameters,
                 body: methodBody,
-                type: scriptMediaType,
+
+                type: typeof methodBody === "string" || methodBody instanceof String ?
+                    scriptMediaType : undefined,  // TODO: heuristic duplicated in vwf.js `normalizedHandler`.
             } );
 
         },
