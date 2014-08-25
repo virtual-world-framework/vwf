@@ -20,7 +20,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             this.state = {
                 nodes: {},
-                stages: [],
+                stages: {},
                 prototypes: {},
                 createLocalNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback ) {
@@ -2066,7 +2066,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 "height": stageHeight 
             };
             kineticObj = new Kinetic.Stage( stageDef );
-            self.state.stages.push( kineticObj );
+            self.state.stages[ node.ID ] = kineticObj;
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "star", "vwf" ] ) ) {
             kineticObj = new Kinetic.Star( config || {} );
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "text", "vwf" ] ) ) {
