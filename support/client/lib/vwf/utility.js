@@ -283,7 +283,9 @@ define( [ "module",
                 var source = arguments[index];
 
                 Object.keys( source ).forEach( function( key ) {
-                    target[key] = source[key];
+                    if ( source[key] !== undefined ) {
+                        target[key] = source[key];
+                    }
                 } );
             }
 
