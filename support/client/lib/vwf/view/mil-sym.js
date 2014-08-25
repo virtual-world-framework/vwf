@@ -252,11 +252,19 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
             }
             
             // Render the unit image
-            modifiers[ msa.Icon ] = true;
+            
+            // if icon == true then you'll get no modifiers
+            modifiers[ msa.Icon ] = false;
+            
             modifiers[ msa.SymbologyStandard ] = rs.Symbology_2525Bch2_USAS_13_14;
             var img = renderer.MilStdIconRenderer.Render( updatedUnit.symbolID, modifiers );
             if ( img ) {
-                updatedUnit.image["selected"] = img.toDataUrl();
+                var imgBounds = img.getImageBounds();
+                updatedUnit.image["selected"] = {
+                    "url": img.toDataUrl(),
+                    "width": imgBounds.width,
+                    "height": imgBounds.height
+                }
             }
         }
 

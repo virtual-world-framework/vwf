@@ -16,5 +16,7 @@ events:
   pointerMove:
   pointerUp:
   shapeCreated:
+  textCreated:
+  imageCreated:
 scripts:
 - source: "http://vwf.example.com/kinetic/drawing.js"
