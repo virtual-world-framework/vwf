@@ -280,8 +280,8 @@ this.update = function( eventData, nodeData ) {
         var height = diffY;
         var dist = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
 
-        console.info( "===========================" );
-        console.info( "== pos: " + pos + "   diffX: " + diffX + "   diffY: " + diffY );
+        //console.info( "===========================" );
+        //console.info( "== pos: " + pos + "   diffX: " + diffX + "   diffY: " + diffY );
 
         switch ( userState.drawing_mode ) {
 
@@ -304,7 +304,7 @@ this.update = function( eventData, nodeData ) {
                 break;          
         }
 
-        console.info( "== pos: " + pos + "   diffX: " + diffX + "   diffY: " + diffY );
+        //console.info( "== pos: " + pos + "   diffX: " + diffX + "   diffY: " + diffY );
 
         switch ( userState.drawing_mode ) {
             
