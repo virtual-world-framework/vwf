@@ -166,7 +166,8 @@ this.down = function( eventData, nodeData, touch ) {
 
         case "thickArrow":
             groupExtends = "http://vwf.example.com/kinetic/group.vwf";
-            compExtends = { "line": "http://vwf.example.com/kinetic/rect.vwf", "head": "http://vwf.example.com/kinetic/regularPolygon.vwf" };
+            compExtends = { "line": "http://vwf.example.com/kinetic/line.vwf", "head": "http://vwf.example.com/kinetic/regularPolygon.vwf" };
+            //compExtends = { "line": "http://vwf.example.com/kinetic/rect.vwf", "head": "http://vwf.example.com/kinetic/regularPolygon.vwf" };
             break;
 
         case "borderRect":
@@ -311,6 +312,7 @@ this.update = function( eventData, nodeData, upEvent ) {
 
             case "line":
             case "arrow":
+            case "thickArrow":
             case "freeDraw":
                 break;
 
@@ -428,6 +430,29 @@ this.update = function( eventData, nodeData, upEvent ) {
                 break;
             
             case "thickArrow":
+                drawingObject.x = drawingObject.position[ 0 ];
+                drawingObject.y = drawingObject.position[ 1 ]; 
+
+                drawingObject.line.stroke = userState.drawing_color;
+                drawingObject.line.strokeWidth = userState.drawing_width * 8;
+                drawingObject.line.position = [ 0, 0 ];
+                
+                drawingObject.head.sides = 3;
+                drawingObject.head.radius = userState.drawing_width * 8;
+
+                var endPoint = goog.vec.Vec2.createFloat32FromValues( 0, 0 );
+                var relativeXDiff = eventData.layer[ 0 ] - drawingObject.x;
+                var relativeYDiff = eventData.layer[ 1 ] - drawingObject.y;
+                var headOffset = ( userState.drawing_width * 8 ) * Math.sin( Math.PI / 6 );
+                var dir = goog.vec.Vec2.createFloat32FromValues( relativeXDiff, relativeYDiff );
+                var len = goog.vec.Vec2.distance( goog.vec.Vec2.createFloat32FromValues( 0, 0 ), dir );
+                goog.vec.Vec2.normalize( dir, dir );
+
+                drawingObject.head.rotation = Math.atan2( dir[1], dir[0] ) * ( 180 / Math.PI ) - 30;
+                goog.vec.Vec2.scale( dir, len - ( userState.drawing_width * 8 ), endPoint );
+                drawingObject.head.position = [ endPoint[0], endPoint[1] ];
+                goog.vec.Vec2.scale( dir, len - ( ( userState.drawing_width * 8 ) + headOffset ), endPoint );
+                drawingObject.line.points = [ 0, 0, endPoint[0], endPoint[1] ];
                 break; 
 
             case "sprite":
