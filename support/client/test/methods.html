@@ -302,35 +302,41 @@
 
           } );
 
-          // Method changes in node state
+          // Method changes and node state
+
+          var changesComponentDescriptor = {
+            methods: {
+              method: "return 'original'"
+            }
+          };
+
+          var changesComponentURI =
+            testUtility.dataURIFromDescriptor( changesComponentDescriptor );
+
+          var changesMethodDescriptor = {
+            body: "return 'original'",
+            type: "application/javascript",
+          };
+
+          var changesMethodNewBody = "return 'changed'";
+
+          var changesMethodDescriptorChanged = utility.merge( {}, changesMethodDescriptor, {
+            body: changesMethodNewBody
+          } );
 
           asyncTest( "Method changes in node state", function() {
 
-            var componentDescriptor = {
-              methods: {
-                method: "return 'original'",
-              },
-            };
+            vwf.createNode( changesComponentURI, function( nodeID ) {
 
-            var componentURI =
-              testUtility.dataURIFromDescriptor( componentDescriptor );
+              deepEqual( vwf.getMethod( nodeID, "method" ), changesMethodDescriptor, "Unchanged" );
 
-            var methodDescriptor = {
-              body: "return 'original'",
-              type: "application/javascript",
-            };
-
-            vwf.createNode( componentURI, function( nodeID ) {
-
-              deepEqual( vwf.getMethod( nodeID, "method" ), methodDescriptor, "Unchanged" );
-
-              vwf.setMethod( nodeID, "method", "return 'changed'" );
+              vwf.setMethod( nodeID, "method", changesMethodNewBody );
 
               deepEqual( vwf.getNode( nodeID ), {
                 patches:
-                  componentURI,
+                  changesComponentURI,
                 methods: {
-                  method: utility.merge( methodDescriptor, { body: "return 'changed'" } )
+                  method: changesMethodDescriptorChanged,
                 }
               }, "Method changed" );
 
@@ -341,42 +347,21 @@
 
           } );
 
-          // Method changes to node state
-
           asyncTest( "Method changes to node state", function() {
 
-            var componentDescriptor = {
-              methods: {
-                method: "return 'original'",
-              },
-            };
+            vwf.createNode( changesComponentURI, function( nodeID ) {
 
-            var componentURI =
-              testUtility.dataURIFromDescriptor( componentDescriptor );
-
-            var methodDescriptor = {
-              body: "return 'original'",
-              type: "application/javascript",
-            };
-
-            var methodDescriptorChanged = {
-              body: "return 'changed'",
-              type: "application/javascript",
-            };
-
-            vwf.createNode( componentURI, function( nodeID ) {
-
-              deepEqual( vwf.getMethod( nodeID, "method" ), methodDescriptor, "Unchanged" );
+              deepEqual( vwf.getMethod( nodeID, "method" ), changesMethodDescriptor, "Unchanged" );
 
               vwf.setNode( nodeID, {
                 patches:
-                  componentURI,
+                  changesComponentURI,
                 methods: {
-                  method: methodDescriptorChanged,
+                  method: changesMethodDescriptorChanged,
                 }
               } );
 
-              deepEqual( vwf.getMethod( nodeID, "method" ), methodDescriptorChanged, "Method changed from node state" );
+              deepEqual( vwf.getMethod( nodeID, "method" ).body, changesMethodNewBody, "Method changed from node state" );
 
               vwf.deleteNode( nodeID );
               start();
