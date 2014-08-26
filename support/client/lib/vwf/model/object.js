@@ -19,7 +19,8 @@
 /// @requires vwf/model
 /// @requires vwf/configuration
 
-define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model, configuration ) {
+define( [ "module", "vwf/model", "vwf/utility", "vwf/configuration" ],
+        function( module, model, utility, configuration ) {
 
     return model.load( module, {
 
@@ -68,6 +69,7 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
 
                     properties: {},
                     methods: {},
+                    events: {},
 
                     parent: undefined,
                     children: [],
@@ -261,6 +263,59 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
         gettingMethod: function( nodeID, methodName ) {
             return this.objects[nodeID].methods[methodName];
+        },
+
+        // -- addingEventListener ------------------------------------------------------------------
+
+        addingEventListener: function( nodeID, eventName, eventListenerID, eventHandler, eventContextID, eventPhases ) {
+
+            if ( ! this.objects[ nodeID ].events[ eventName ] ) {
+                this.objects[ nodeID ].events[ eventName ] = {};
+            }
+
+            return this.settingEventListener( nodeID, eventName, eventListenerID,
+                utility.merge( eventHandler, { context: eventContextID, phases: eventPhases } ) ) ?
+                    true : undefined;
+        },
+
+        // -- removingEventListener ----------------------------------------------------------------
+
+        removingEventListener: function( nodeID, eventName, eventListenerID ) {
+
+            var listeners = this.objects[ nodeID ].events[ eventName ];
+
+            if ( listeners && listeners[ eventListenerID ] ) {
+                delete listeners[ eventListenerID ];
+                return true;
+            }
+
+            return undefined;
+        },
+
+        // -- settingEventListener -----------------------------------------------------------------
+
+        settingEventListener: function( nodeID, eventName, eventListenerID, eventListener ) {
+            return this.objects[ nodeID ].events[ eventName ][ eventListenerID ] = eventListener;
+        },
+
+        // -- gettingEventListener -----------------------------------------------------------------
+
+        gettingEventListener: function( nodeID, eventName, eventListenerID ) {
+            return this.objects[ nodeID ].events[ eventName ][ eventListenerID ];
+        },
+
+        // -- flushingEventListeners ---------------------------------------------------------------
+
+        flushingEventListeners: function( nodeID, eventName, eventContextID ) {
+
+            var listeners = this.objects[ nodeID ].events[ eventName ];
+
+            Object.keys( listeners ).forEach( function( eventListenerID ) {
+                if ( listeners[ eventListenerID ].context === eventContextID ) {
+                    delete listeners[ eventListenerID ];
+                }
+            } );
+
         },
 
         // == Special Model API ====================================================================
