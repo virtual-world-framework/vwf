@@ -34,9 +34,9 @@
         "domReady",
         "utility.js",
         "vwf/utility",
+        "vwf/configuration",
 
         "jquery",
-        "vwf/configuration",
         "vwf/kernel/model",
         "vwf/model/javascript",
         "vwf/model/object",
@@ -45,7 +45,7 @@
         "vwf/kernel/utility",
         "logger",
 
-      ], function( ready, testUtility, utility ) {
+      ], function( ready, testUtility, utility, configuration ) {
 
         // Test methods.
 
@@ -251,6 +251,12 @@
 
             createFixture( function( nodeID, cleanup ) {
 
+              // Save the configuration settings.
+
+              var config = configuration.instance;
+
+              // Direct assignment from a function object.
+
               vwf.execute( nodeID,
                 "this.methods.morphable = function() { return 'set as function' }" );
 
@@ -258,6 +264,36 @@
                 body: "return 'set as function'",
                 type: "application/javascript",
               }, "As function" );
+
+              // Assignment of a function with a reference to a variable in the closure.
+
+              var functionClosureScript =
+                "var closureVariable = 'in the closure'; " +
+                "this.methods.morphable = function() { " +
+                  "try { " +
+                    "return 'set as function with a closure reference: ' + closureVariable; " +
+                  "} catch ( exception ) { " +
+                    "return 'set as function with a broken closure reference'; " +
+                  "} " +
+                "}";
+
+              // With the "preserve-script-closures" compatibility option enabled.
+
+              configuration.instance = { "preserve-script-closures": true };
+
+              vwf.execute( nodeID, functionClosureScript );
+              equal( vwf.callMethod( nodeID, "morphable" ), "set as function with a closure reference: in the closure", "..." );
+
+              // With the "preserve-script-closures" compatibility option disabled.
+
+              configuration.instance = { "preserve-script-closures": false };
+
+              vwf.execute( nodeID, functionClosureScript );
+              equal( vwf.callMethod( nodeID, "morphable" ), "set as function with a broken closure reference", "..." );
+
+              // Restore the configuration settings.
+
+              configuration.instance = config;
 
               cleanup();
               start();
