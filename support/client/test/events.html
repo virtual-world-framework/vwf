@@ -33,6 +33,7 @@
 
         "domReady",
         "utility.js",
+        "vwf/utility",
 
         "jquery",
         "vwf/configuration",
@@ -42,10 +43,9 @@
         "vwf/model/stage/log",
         "vwf/kernel/view",
         "vwf/kernel/utility",
-        "vwf/utility",
         "logger",
 
-      ], function( ready, testUtility ) {
+      ], function( ready, testUtility, utility ) {
 
         // Test events.
           
@@ -358,6 +358,84 @@
               vwf.execute( nodeID, "this.empty()" );  // TODO: how to test?
 
               cleanup();
+              start();
+
+            } );
+
+          } );
+
+          // Event changes and node state
+
+          var changesComponentDescriptor = {
+            events: {
+              event: null
+            },
+            scripts: [
+              "this.events.event = this.events.add( function() { return 'original' } )"
+            ]
+          };
+
+          var changesComponentURI =
+            testUtility.dataURIFromDescriptor( changesComponentDescriptor );
+
+          var changesEventDescriptor = {
+            listeners: [ {
+              id: 1,  // from the node's sequence counter when the listener was added
+              body: "return 'original'",
+              type: "application/javascript",
+            } ]
+          };
+
+          var changesEventNewBody = "return 'changed'";
+
+          var changesEventDescriptorChanged = {
+            listeners: [
+              utility.merge( {}, changesEventDescriptor.listeners[0], {
+                body: changesEventNewBody
+              } )
+            ]
+          };
+
+          asyncTest( "Event changes in node state", function() {
+
+            vwf.createNode( changesComponentURI, function( nodeID ) {
+
+              deepEqual( vwf.getEvent( nodeID, "event" ), changesEventDescriptor, "Unchanged" );
+
+              vwf.setEventListener( nodeID, "event", 1, changesEventNewBody );
+
+              deepEqual( vwf.getNode( nodeID ), {
+                patches:
+                  changesComponentURI,
+                events: {
+                  event: changesEventDescriptorChanged,
+                }
+              }, "Event changed" );
+
+              vwf.deleteNode( nodeID );
+              start();
+
+            } );
+
+          } );
+
+          asyncTest( "Event changes to node state", function() {
+
+            vwf.createNode( changesComponentURI, function( nodeID ) {
+
+              deepEqual( vwf.getEvent( nodeID, "event" ), changesEventDescriptor, "Unchanged" );
+
+              vwf.setNode( nodeID, {
+                patches:
+                  changesComponentURI,
+                events: {
+                  event: changesEventDescriptorChanged,
+                }
+              } );
+
+              deepEqual( vwf.getEvent( nodeID, "event" ).listeners[0].body, changesEventNewBody, "Event changed from node state" );
+
+              vwf.deleteNode( nodeID );
               start();
 
             } );
