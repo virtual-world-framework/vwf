@@ -97,16 +97,18 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
 
         calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
             if ( nodeID === this.kernel.application() ) {
+                var clientThatCalledMethod = this.kernel.client();
+                var me = this.kernel.moniker();
                 switch ( methodName ) {
                     case "insertUnits":
-                        var clientThatCalledMethod = this.kernel.client();
-                        var me = this.kernel.moniker();
                         if ( clientThatCalledMethod === me ) {
                             addInsertableUnits( methodParameters[ 0 ] );
                         }
                         break;
                     case "getUnitSymbol":
-                        getUnitSymbol( methodParameters[ 0 ], methodParameters[ 1 ], methodParameters[ 2 ], methodParameters[ 3 ], methodParameters[ 4 ] );
+                        if ( clientThatCalledMethod === me ) {
+                            getUnitSymbol( methodParameters[ 0 ], methodParameters[ 1 ], methodParameters[ 2 ], methodParameters[ 3 ], methodParameters[ 4 ], methodParameters[ 5 ] );
+                        }
                         break;
                 }
             } 
@@ -208,7 +210,7 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
         }    
     }
 
-    function getUnitSymbol( symbolID, affiliation, echelonID, modifierList, unit ) {
+    function getUnitSymbol( symbolID, affiliation, echelonID, modifierList, unit, options ) {
         var updatedUnit = {};
         var appID = self.kernel.application();
         var renderer = armyc2.c2sd.renderer;
@@ -268,7 +270,31 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
             }
         }
 
-        self.kernel.fireEvent( appID, "selectedUnitSymbolRendered", [ updatedUnit ] );
+        var unitEvent = "selectedUnitSymbolRendered";
+        if ( (options.request) && (options.unitID) ) {
+            switch ( options.request ) {
+                case "addQuickUnit":
+                    unitEvent = "quickUnitAdded";
+                    self.kernel.fireEvent( appID, unitEvent, [ options.unitID, updatedUnit ] );
+                    break;
+                case "addFavoriteUnit":
+                    unitEvent = "favoriteUnitAdded";
+                    self.kernel.fireEvent( appID, unitEvent, [ options.unitID, updatedUnit ] );
+                    break;
+                case "addRecentUnit":
+                    var unitEvent = "recentUnitAdded";
+                    self.kernel.fireEvent( appID, unitEvent, [ options.unitID, updatedUnit ] );
+                    break;
+                case "renderSelectedUnit":
+                default:
+                    // If nothing else, make this the selected unit
+                    self.kernel.fireEvent( appID, unitEvent, [ updatedUnit ] );
+                    break;
+            }
+        }
+        else {
+            self.kernel.fireEvent( appID, unitEvent, [ updatedUnit ] );
+        }
     }
     
     function getUnitImage( symbolID ) {
