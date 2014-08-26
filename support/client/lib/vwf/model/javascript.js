@@ -765,12 +765,23 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
         addingEventListener: function( nodeID, eventName, eventListenerID, eventHandler, eventContextID, eventPhases ) {
 
+            var node = this.nodes[nodeID];
+
+            // Create the listeners collection if this is the first listener added for an event on a
+            // prototype.
+
+            if ( ! node.private.listeners[eventName] ) {
+                node.private.listeners[eventName] = [];
+            }
+
             // Build a `Listener` from the `Handler` and the context and phases.
 
             var eventListener = utility.merge( eventHandler, {
                 context: eventContextID,
                 phases: eventPhases,
             } );
+
+            // Delegate to `settingEventListener`.
 
             return this.settingEventListener( nodeID, eventName, eventListenerID, eventListener ) ?
                 true : undefined;
@@ -801,10 +812,6 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             var self = this;
 
             var listeners = node.private.listeners[eventName];
-
-            if ( ! listeners ) {
-                listeners = node.private.listeners[eventName] = [];
-            }
 
             var handler = functionFromHandler( eventListener, logException,
                 configuration.active[ "preserve-script-closures" ] );
