@@ -402,42 +402,30 @@ this.update = function( eventData, nodeData, upEvent ) {
                 break;
 
             case "arrow":
+                drawingObject.x = drawingObject.position[ 0 ];
+                drawingObject.y = drawingObject.position[ 1 ]; 
+
                 drawingObject.line.stroke = userState.drawing_color;
                 drawingObject.line.strokeWidth = userState.drawing_width;
                 drawingObject.line.position = [ 0, 0 ];
+                
                 drawingObject.head.sides = 3;
+                drawingObject.head.radius = userState.drawing_width * 3;
 
                 var endPoint = goog.vec.Vec2.createFloat32FromValues( 0, 0 );
-                var xVec = goog.vec.Vec2.createFloat32FromValues( 1, 0 );
-                drawingObject.x = drawingObject.position[ 0 ];
-                drawingObject.y = drawingObject.position[ 1 ];
-
                 var relativeXDiff = eventData.layer[ 0 ] - drawingObject.x;
                 var relativeYDiff = eventData.layer[ 1 ] - drawingObject.y;
                 var headOffset = ( userState.drawing_width * 3 ) * Math.sin( Math.PI / 6 );
                 var dir = goog.vec.Vec2.createFloat32FromValues( relativeXDiff, relativeYDiff );
                 var len = goog.vec.Vec2.distance( goog.vec.Vec2.createFloat32FromValues( 0, 0 ), dir );
                 goog.vec.Vec2.normalize( dir, dir );
-                goog.vec.Vec2.scale( dir, len - headOffset, endPoint );
-                var angle = Math.atan2( dir[1], dir[0] ) * ( 180 / Math.PI ); 
 
-                drawingObject.head.rotation = angle - 30;
-                drawingObject.head.radius = userState.drawing_width * 3;
+                drawingObject.head.rotation = Math.atan2( dir[1], dir[0] ) * ( 180 / Math.PI ) - 30;
+                goog.vec.Vec2.scale( dir, len - ( userState.drawing_width * 3 ), endPoint );
                 drawingObject.head.position = [ endPoint[0], endPoint[1] ];
                 goog.vec.Vec2.scale( dir, len - ( ( userState.drawing_width * 3 ) + headOffset ), endPoint );
                 drawingObject.line.points = [ 0, 0, endPoint[0], endPoint[1] ];
                 break;
-
-                // function canvas_arrow(fromx, fromy, tox, toy){
-                //     var headlen = 20;   // how long you want the head of the arrow to be, you could calculate this as a fraction of the distance between the points as well.
-                //     var angle = Math.atan2(toy-fromy,tox-fromx);
-
-                //     line = new Kinetic.Line({
-                //         points: [fromx, fromy, tox, toy, tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6),tox, toy, tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6)],
-                //         stroke: "red"
-                //     });
-                // }
-
             
             case "thickArrow":
                 break; 
